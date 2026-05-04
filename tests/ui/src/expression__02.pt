@@ -1,0 +1,12 @@
+// source: patina-by-example/src/expression.md
+// block: 2/3
+
+pub fn main() {
+    // variable binding
+    let x = 5;
+
+    // expression;
+    x;
+    x + 1;
+    15;
+}

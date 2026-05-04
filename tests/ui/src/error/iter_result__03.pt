@@ -1,0 +1,11 @@
+// source: patina-by-example/src/error/iter_result.md
+// block: 3/5
+
+pub fn main() {
+    let strings = ["tofu", "93", "18"];
+    let numbers: Result<[_], _> = strings
+        .into_iter()
+        .map(|s| s.parse::<int>())
+        .collect();
+    println!("Results: {:?}", numbers);
+}

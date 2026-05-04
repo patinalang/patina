@@ -1,0 +1,27 @@
+// source: patina-by-example/src/flow_control/match/binary_matching.md
+// block: 4/5
+
+pub fn main() {
+    let text: str = "Patina!";
+    let bytes: bin = <<b"PNG", '!', "rest">>;
+    // For literals, types are optional unless you want to override a default.
+    // In that case, you use `as type` instead of `@ type()`.
+    let packet: bits = <<b"PT", '!', "ok", 5 as int(3)>>;
+
+    match text {
+        <<"Pa", 't', rest @ str()>> => println!("text rest {:?}", rest),
+        _ => println!("unknown text"),
+    }
+
+    match bytes {
+        <<b"PNG", '!', rest @ bin()>> => println!("png data {:?}", rest),
+        _ => println!("unknown binary"),
+    }
+
+    match packet {
+        // The shorthand form can also be used with literals. 
+        <<b"PT", '!', "ok", 5:3, rest: bits()>> =>
+            println!("packet tail {:?}", rest),
+        _ => println!("unknown packet"),
+    }
+}

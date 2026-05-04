@@ -1,0 +1,42 @@
+// source: patina-by-example/src/flow_control/try_catch_after.md
+// block: 1/1
+
+fn open_resource() -> atom {
+    a"ok"
+}
+
+pub fn main() {
+    try {
+        open_resource()
+    } catch {
+        Panic(message) =>
+            println!("panic! {}", message),
+
+        ArgumentError(message) =>
+            println("badarg! {}", message),
+
+        ElixirError(a"Elixir.ArithmeticError") =>
+            println!("Elixir ArithmeticError"),
+
+        // reason is a #{atom => term} map
+        ElixirError(a"Elixir.ArgumentError", reason) =>
+            println!("Elixir ArgumentError {:?}", reason),
+
+        Error(reason) =>
+            println!("other error: {:?}", reason),
+
+        // the 2nd tuple element (3rd for ElixirError) holds a stacktrace
+        Error(reason, stacktrace) =>
+            println!("other error: {:?} from {:?}", reason, stacktrace),
+
+        Throw(value) =>
+            println!("thrown: {:?} from {:?}", value, st),
+
+        Exit(reason) =>
+            println!("exit: {:?}", reason),
+
+        _ => a"unknown",
+    } after {
+        println!("cleaning up");
+    };
+}

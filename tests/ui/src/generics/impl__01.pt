@@ -1,0 +1,12 @@
+// source: patina-by-example/src/generics/impl.md
+// block: 1/2
+
+struct S; // Concrete type `S`
+struct GenericVal<T>(T); // Generic type `GenericVal`
+
+// impl of GenericVal where we explicitly specify type parameters:
+impl GenericVal<float> {} // Specify `float`
+impl GenericVal<S> {} // Specify `S` as defined above
+
+// `<T>` Must precede the type to remain generic
+impl<T> GenericVal<T> {}

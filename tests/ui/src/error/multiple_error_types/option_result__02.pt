@@ -1,0 +1,22 @@
+// source: patina-by-example/src/error/multiple_error_types/option_result.md
+// block: 2/2
+
+use Std::Num::ParseIntError;
+
+fn double_first(list: [str]) -> Result<Option<int>, ParseIntError> {
+    let opt = list.first().map(|first| {
+        first.parse::<int>().map(|n| 2 * n)
+    });
+
+    opt.transpose()
+}
+
+pub fn main() {
+    let numbers = ["42", "93", "18"];
+    let empty = [];
+    let strings = ["tofu", "93", "18"];
+
+    println!("The first doubled is {:?}", double_first(numbers));
+    println!("The first doubled is {:?}", double_first(empty));
+    println!("The first doubled is {:?}", double_first(strings));
+}

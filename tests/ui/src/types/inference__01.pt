@@ -1,0 +1,20 @@
+// source: patina-by-example/src/types/inference.md
+// block: 1/1
+
+pub fn main() {
+    // The compiler knows that `elem` has type `int`.
+    let elem = 1;
+
+    // Create an empty list.
+    let mut lst = [];
+    // At this point the compiler doesn't know the exact type of `lst`, it
+    // just knows that it's a list of something (`[_]`).
+
+    // Prepend `elem` to the list.
+    lst = [elem, ..lst]
+    // Aha! Now the compiler knows that `lst` is a list of `int`s (`[int]`)
+    println!("{:?}", lst);
+
+    // Error! `str` does not fit in `[int]`
+    lst = ["hi", ..lst]
+}

@@ -1,0 +1,12 @@
+// source: patina-by-example/src/primitives/term.md
+// block: 1/2
+
+let v = a"nil" as term;
+
+unsafe {
+    match v {
+        Option::<str>::None(v) => "no integer"
+        Option::<int>::None(v) => "no string"
+        _ => "invalid value"
+    }
+}

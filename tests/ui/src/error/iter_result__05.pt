@@ -1,0 +1,14 @@
+// source: patina-by-example/src/error/iter_result.md
+// block: 5/5
+
+pub fn main() {
+    let strings = ["tofu", "93", "18"];
+    let (numbers, errors): ([_], [_]) = strings
+        .into_iter()
+        .map(|s| s.parse::<int>())
+        .partition(Result::is_ok);
+    let numbers: [_] = numbers.into_iter().map(Result::unwrap).collect();
+    let errors: [_] = errors.into_iter().map(Result::unwrap_err).collect();
+    println!("Numbers: {:?}", numbers);
+    println!("Errors: {:?}", errors);
+}

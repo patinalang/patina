@@ -1,0 +1,13 @@
+// source: patina-by-example/src/flow_control/match/binary_matching.md
+// block: 2/5
+
+// For matched variables, the type is assumed to be `int`.
+// This line is equivalent to `<<x @ int(16)>>`.
+if let <<x:16>> = data {
+    println!("data is a two-byte integer {}", x);
+}
+
+// The shorthand syntax comes in handy to match data with standard layout.
+if let <<unix_ts_ms:48, ver:4, rand_a:12, var:2, rand_b:62>> = uuidv7_id {
+    println!("{} {} {} {} {}", unix_ts_ms, ver, rand_a, var, rand_b);
+}

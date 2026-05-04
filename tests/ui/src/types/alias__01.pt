@@ -1,0 +1,20 @@
+// source: patina-by-example/src/types/alias.md
+// block: 1/1
+
+// `NanoSecond`, `Inch`, and `Int` are new names for `int`.
+type NanoSecond = int;
+type Inch = int;
+type Int = int;
+
+pub fn main() {
+    // `NanoSecond` = `Inch` = `Int` = `int`.
+    let nanoseconds: NanoSecond = 5 as int;
+    let inches: Inch = 2 as Int;
+
+    // Note that type aliases *don't* provide any extra type safety, because
+    // aliases are *not* new types
+    println!("{} nanoseconds + {} inches = {} unit?",
+             nanoseconds,
+             inches,
+             nanoseconds + inches);
+}

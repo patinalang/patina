@@ -1,0 +1,27 @@
+// source: patina-by-example/src/flow_control/match/unsafe_match.md
+// block: 1/1
+
+pub fn main() {
+    let v = Option::<int>::None as term;
+
+    let safe_destription = match v {
+        a"nil" => "the atom nil",
+        (a"some", val) => "some value (tagged?)",
+        int(_) => "some integer value (untagged?)",
+        val => "some value (untagged?)",
+        // Option<str>::None => "string option (none)",
+        // ^ERROR - can't safely match by runtime representation!
+    };
+
+    let unsafe_description = unsafe {
+        match v {
+            Option::<str>::None => "an empty string option",
+            Option::<int>::None => "an empty integer option",
+            a"nil" => "the atom nil",
+            _ => "something else",
+        }
+    };
+
+    println!("{}, {}", safe_description, unsafe_description);
+    // "the atom nil, an empty string option"
+}

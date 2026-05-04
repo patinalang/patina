@@ -1,0 +1,5 @@
+// source: patina-by-example/src/conversion/from_into.md
+// block: 1/4
+
+let my_str = "hello";
+let my_bin = bin::from(my_str);

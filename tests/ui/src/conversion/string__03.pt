@@ -1,0 +1,26 @@
+// source: patina-by-example/src/conversion/string.md
+// block: 3/3
+
+use Std::Num::ParseIntError;
+use str::FromStr;
+
+#[derive(Debug)]
+struct Circle {
+    radius: int,
+}
+
+impl FromStr for Circle {
+    type Err = ParseIntError;
+    fn from_str(s: str) -> Result<Self, Self::Err> {
+        match s.trim().parse() {
+            Ok(num) => Ok(Circle{ radius: num }),
+            Err(e) => Err(e),
+        }
+    }
+}
+
+pub fn main() {
+    let radius = "    3 ";
+    let circle: Circle = radius.parse().unwrap();
+    println!("{:?}", circle);
+}

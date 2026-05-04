@@ -1,0 +1,6 @@
+// source: patina-by-example/src/error/result.md
+// block: 2/3
+
+pub fn main() {
+    println!("Hello World!");
+}

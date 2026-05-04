@@ -1,0 +1,44 @@
+// source: patina-by-example/src/fn/parameters.md
+// block: 2/2
+
+fn lazy_add(fx: fn() -> int, fy: fn() -> int) -> fn() -> int {
+    || fx() + fy();
+}
+
+fn add(x: int, y: int) -> int {
+    x + y
+}
+
+fn mul(x: int, y: int) -> int {
+    x * y
+}
+
+enum MathOp {
+    Add,
+    Mul,
+}
+
+fn choose_op(op: MathOp) -> fnref(int, int) -> int {
+    match op {
+        MathOp::Add => add,
+        MathOp::Mul => mul,
+    }
+}
+
+pub fn main() {
+    let fx = || {
+        println!("fx evaluated!");
+        3
+    };
+
+    let fy = || {
+        println!("fy evaluated!");
+        5
+    };
+
+    // won't print anything
+    let lazy_result = lazy_add(fx, fy);
+
+    let op = choose_op(MathOp::Add);
+    println!("{} op {} = {}", 3, 5, op(3, 5))
+}

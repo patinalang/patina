@@ -1,0 +1,13 @@
+// source: patina-by-example/src/flow_control/if_let.md
+// block: 1/4
+
+// Make `optional` of type `Option<int>`
+let optional = Some(7);
+
+match optional {
+    Some(i) => println!("This is a really long string and `{:?}`", i),
+    _ => {},
+    // ^ Required because `match` is exhaustive. Doesn't it seem
+    // like wasted space?
+};
+

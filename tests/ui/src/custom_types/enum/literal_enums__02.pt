@@ -1,0 +1,13 @@
+// source: patina-by-example/src/custom_types/enum/literal_enums.md
+// block: 2/2
+
+enum AllUnits {
+    Foo,
+    Bar,
+    Baz,
+}
+
+pub fn main() {
+    println!("{:?}", AllUnits::Foo as atom)
+    // a"Elixir.Patina.ByExample.AllUnits.Foo"
+}

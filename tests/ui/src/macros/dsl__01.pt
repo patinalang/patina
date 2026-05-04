@@ -1,0 +1,21 @@
+// source: patina-by-example/src/macros/dsl.md
+// block: 1/1
+
+macro_rules! calculate {
+    (eval $e:expr) => {
+        {
+            let val: int = $e; // Force types to integers
+            println!("{} = {}", stringify!{$e}, val);
+        }
+    };
+}
+
+pub fn main() {
+    calculate! {
+        eval 1 + 2 // hehehe `eval` is _not_ a Patina keyword!
+    }
+
+    calculate! {
+        eval (1 + 2) * (3 / 4)
+    }
+}

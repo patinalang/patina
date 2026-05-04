@@ -1,0 +1,16 @@
+// source: patina-by-example/src/custom_types/enum.md
+// block: 3/3
+
+enum VeryVerboseEnumOfThingsToDoWithNumbers {
+    Add,
+    Subtract,
+}
+
+impl VeryVerboseEnumOfThingsToDoWithNumbers {
+    fn run(self, x: int, y: int) -> int {
+        match self {
+            Self::Add => x + y,
+            Self::Subtract => x - y,
+        }
+    }
+}

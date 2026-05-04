@@ -1,0 +1,16 @@
+// source: patina-by-example/src/flow_control/receive/unsafe_receive.md
+// block: 1/1
+
+pub fn main() {
+    unsafe {
+        receive {
+            int(n) => println!("got integer {:?}", n),
+            atom(a) => println!("got atom {:?}", a),
+            Option::<str>::None => println!("got an empty string option"),
+            Option::<int>::None => println!("got an empty integer option"),
+            _ => println!("got something else"),
+        } timeout Duration::from_seconds(5) {
+            println!("timeout")
+        }
+    }
+}
