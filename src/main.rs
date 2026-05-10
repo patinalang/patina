@@ -1,6 +1,7 @@
 #![feature(rustc_private)]
 
 mod compile;
+mod erlang;
 
 use std::process::ExitCode;
 
