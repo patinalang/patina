@@ -1,123 +1,155 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/primitives/tuples__01.pt:47:5
-   |
-LL |     println!("{:?}", matrix);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/primitives/tuples__01.pt:44:5
-   |
-LL |     println!("{:?}, {:?}, {:?}, {:?}", a, b, c, d);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/primitives/tuples__01.pt:38:5
-   |
-LL |     println!("Just an integer: {:?}", (5));
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/primitives/tuples__01.pt:37:5
-   |
-LL |     println!("One element tuple: {:?}", (5,));
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/primitives/tuples__01.pt:33:5
-   |
-LL |     println!("The reversed pair is {:?}", reverse(pair));
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/primitives/tuples__01.pt:31:5
-   |
-LL |     println!("Pair is {:?}", pair);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/primitives/tuples__01.pt:28:5
-   |
-LL |     println!("tuple of tuples: {:?}", tuple_of_tuples);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/primitives/tuples__01.pt:22:5
-   |
-LL |     println!("Long tuple second value: {}", long_tuple.1);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/primitives/tuples__01.pt:21:5
+error: no rules expected `,`
+  --> tests/ui/src/primitives/tuples__01.pt:21:42
    |
 LL |     println!("Long tuple first value: {}", long_tuple.0);
-   |     ^^^^^^^
-
-error: cannot find attribute `derive` in this scope
-  --> tests/ui/src/primitives/tuples__01.pt:13:3
+   |                                          ^ no rules expected this token in macro call
    |
-LL | #[derive(Debug)]
-   |   ^^^^^^
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/primitives/tuples__01.pt:5:19
+  ::: <patina-prelude>:23:1
    |
-LL | fn reverse(pair: (int, bool)) -> (bool, int) {
-   |                   ^^^
-   |                   |
-   |                   not found in this scope
-   |                   help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/primitives/tuples__01.pt:5:41
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL | fn reverse(pair: (int, bool)) -> (bool, int) {
-   |                                         ^^^
-   |                                         |
-   |                                         not found in this scope
-   |                                         help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/primitives/tuples__01.pt:14:15
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL | struct Matrix(float, float, float, float);
-   |               ^^^^^
-   |               |
-   |               not found in this scope
-   |               help: perhaps you intended to use this type: `f32`
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/primitives/tuples__01.pt:14:22
+error: no rules expected `,`
+  --> tests/ui/src/primitives/tuples__01.pt:22:43
    |
-LL | struct Matrix(float, float, float, float);
-   |                      ^^^^^
-   |                      |
-   |                      not found in this scope
-   |                      help: perhaps you intended to use this type: `f32`
-
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/primitives/tuples__01.pt:14:29
+LL |     println!("Long tuple second value: {}", long_tuple.1);
+   |                                           ^ no rules expected this token in macro call
    |
-LL | struct Matrix(float, float, float, float);
-   |                             ^^^^^
-   |                             |
-   |                             not found in this scope
-   |                             help: perhaps you intended to use this type: `f32`
-
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/primitives/tuples__01.pt:14:36
+  ::: <patina-prelude>:23:1
    |
-LL | struct Matrix(float, float, float, float);
-   |                                    ^^^^^
-   |                                    |
-   |                                    not found in this scope
-   |                                    help: perhaps you intended to use this type: `f32`
-
-error: requires `sized` lang_item
-  --> tests/ui/src/primitives/tuples__01.pt:5:18
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL | fn reverse(pair: (int, bool)) -> (bool, int) {
-   |                  ^^^^^^^^^^^
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 17 previous errors
+error: no rules expected `,`
+  --> tests/ui/src/primitives/tuples__01.pt:28:37
+   |
+LL |     println!("tuple of tuples: {:?}", tuple_of_tuples);
+   |                                     ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-For more information about this error, try `rustc --explain E0425`.
+error: no rules expected `,`
+  --> tests/ui/src/primitives/tuples__01.pt:31:28
+   |
+LL |     println!("Pair is {:?}", pair);
+   |                            ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/primitives/tuples__01.pt:33:41
+   |
+LL |     println!("The reversed pair is {:?}", reverse(pair));
+   |                                         ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/primitives/tuples__01.pt:37:39
+   |
+LL |     println!("One element tuple: {:?}", (5,));
+   |                                       ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/primitives/tuples__01.pt:38:37
+   |
+LL |     println!("Just an integer: {:?}", (5));
+   |                                     ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/primitives/tuples__01.pt:44:38
+   |
+LL |     println!("{:?}, {:?}, {:?}, {:?}", a, b, c, d);
+   |                                      ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/primitives/tuples__01.pt:47:20
+   |
+LL |     println!("{:?}", matrix);
+   |                    ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: aborting due to 9 previous errors
+

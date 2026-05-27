@@ -1,0 +1,77 @@
+#![allow(internal_features)]
+
+
+
+
+
+
+
+// source: patina-by-example/src/custom_types/enum/enum_use.md
+// block: 1/1
+
+// An attribute to hide warnings for unused code.
+#![allow(dead_code)]
+#![attr = Feature([no_core#0, lang_items#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+#[attr = Lang(PointeeSized)]
+trait PointeeSized { }
+#[attr = Lang(MetaSized)]
+trait MetaSized: PointeeSized { }
+#[attr = Lang(Sized)]
+trait Sized: MetaSized { }
+#[attr = Lang(Copy)]
+trait Copy { }
+#[allow(unused)]
+extern mod io;
+#[attr = MacroExport {local_inner_macros: false}]
+macro_rules! println { ($s:literal) => { io::format("~s~n", [$s]) }; }
+
+enum Stage { Beginner, Advanced, }
+
+enum Role { Student, Teacher, }
+
+fn main() ({
+    // Explicitly `use` each name so they are available without
+    // manual scoping.
+    use ::{};
+    use Stage::Beginner;
+    use Stage::Advanced;
+    // Automatically `use` each name inside `Role`.
+    use Role::*;
+
+    // Equivalent to `Stage::Beginner`.
+    let stage = (Beginner as Stage);
+    // Equivalent to `Role::Student`.
+    let role = (Student as Role);
+
+    (match (stage as Stage) {
+
+            // Note the lack of scoping because of the explicit `use` above.
+            Beginner =>
+            ((io::format as
+                    fn(&str, [&str; 1]))(("~s~n" as &str),
+                ([("Beginners are starting their learning journey!" as &str)]
+                    as [&str; 1])) as ()),
+        Advanced =>
+            ((io::format as
+                    fn(&str, [&str; 1]))(("~s~n" as &str),
+                ([("Advanced learners are mastering their subjects..." as
+                            &str)] as [&str; 1])) as ()),
+    } as ())
+
+    (match (role as Role) {
+
+            // Note again the lack of scoping.
+            Student =>
+            ((io::format as
+                    fn(&str, [&str; 1]))(("~s~n" as &str),
+                ([("Students are acquiring knowledge!" as &str)] as
+                    [&str; 1])) as ()),
+        Teacher =>
+            ((io::format as
+                    fn(&str, [&str; 1]))(("~s~n" as &str),
+                ([("Teachers are spreading knowledge!" as &str)] as
+                    [&str; 1])) as ()),
+    } as ())
+} as ())

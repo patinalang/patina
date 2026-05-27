@@ -1,48 +1,70 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/binding__01.pt:27:26
-   |
-LL |         n             => println!("I'm an old person of age {:?}", n),
-   |                          ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/binding__01.pt:25:34
-   |
-LL |         n @ (1 | 7 | 15 | 13) => println!("I'm a teen of age {:?}", n),
-   |                                  ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/binding__01.pt:23:26
-   |
-LL |         n @ 13 ..= 19 => println!("I'm a teen of age {:?}", n),
-   |                          ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/binding__01.pt:22:26
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/binding__01.pt:22:60
    |
 LL |         n @ 1  ..= 12 => println!("I'm a child of age {:?}", n),
-   |                          ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/binding__01.pt:13:26
+   |                                                            ^ no rules expected this token in macro call
    |
-LL |         0             => println!("I haven't celebrated my first birthday yet"),
-   |                          ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/binding__01.pt:10:5
+  ::: <patina-prelude>:23:1
    |
-LL |     println!("Tell me what type of person you are");
-   |     ^^^^^^^
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/flow_control/match/binding__01.pt:5:13
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL | fn age() -> int {
-   |             ^^^
-   |             |
-   |             not found in this scope
-   |             help: perhaps you intended to use this type: `i32`
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 7 previous errors
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/binding__01.pt:23:59
+   |
+LL |         n @ 13 ..= 19 => println!("I'm a teen of age {:?}", n),
+   |                                                           ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-For more information about this error, try `rustc --explain E0425`.
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/binding__01.pt:25:67
+   |
+LL |         n @ (1 | 7 | 15 | 13) => println!("I'm a teen of age {:?}", n),
+   |                                                                   ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/binding__01.pt:27:66
+   |
+LL |         n             => println!("I'm an old person of age {:?}", n),
+   |                                                                  ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: aborting due to 4 previous errors
+

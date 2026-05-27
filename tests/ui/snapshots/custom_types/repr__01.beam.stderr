@@ -1,0 +1,70 @@
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__01.pt:28:20
+   |
+LL |     println!("{:?}", Unit as term);
+   |                    ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__01.pt:31:20
+   |
+LL |     println!("{:?}", CustomNameUnit as term);
+   |                    ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__01.pt:34:20
+   |
+LL |     println!("{:?}", NotJustUnits::VariantA as term);
+   |                    ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__01.pt:37:20
+   |
+LL |     println!("{:?}", NotJustUnits::VariantB as term);
+   |                    ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: aborting due to 4 previous errors
+

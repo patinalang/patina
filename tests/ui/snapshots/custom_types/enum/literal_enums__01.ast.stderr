@@ -1,3 +1,27 @@
+error: prefix `a` is unknown
+  --> tests/ui/src/custom_types/enum/literal_enums__01.pt:5:11
+   |
+LL |     Foo = a"hello_foo",
+   |           ^ unknown prefix
+   |
+   = note: prefixed identifiers and literals are reserved since Rust 2021
+help: consider inserting whitespace here
+   |
+LL |     Foo = a "hello_foo",
+   |            +
+
+error: prefix `a` is unknown
+  --> tests/ui/src/custom_types/enum/literal_enums__01.pt:6:11
+   |
+LL |     Bar = a"hello_bar",
+   |           ^ unknown prefix
+   |
+   = note: prefixed identifiers and literals are reserved since Rust 2021
+help: consider inserting whitespace here
+   |
+LL |     Bar = a "hello_bar",
+   |            +
+
 error: expected one of `!`, `,`, `.`, `::`, `?`, `{`, `}`, or an operator, found `"hello_foo"`
   --> tests/ui/src/custom_types/enum/literal_enums__01.pt:5:12
    |
@@ -14,5 +38,5 @@ LL |     Foo = a"hello_foo",
    |
    = note: for a full list of items that can appear in modules, see <https://doc.rust-lang.org/reference/items.html>
 
-error: aborting due to 2 previous errors
+error: aborting due to 4 previous errors
 

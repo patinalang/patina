@@ -2,12 +2,7 @@ error[E0432]: unresolved import `str`
   --> tests/ui/src/flow_control/let_else__01.pt:4:5
    |
 LL | use str::FromStr;
-   |     ^^^ use of unresolved module or unlinked crate `str`
-   |
-help: you might be missing a crate named `str`, add it to your project and import it in your code
-   |
-LL + extern crate str;
-   |
+   |     ^^^ `str` is a builtin type, not a module
 
 error: cannot find macro `assert_eq` in this scope
   --> tests/ui/src/flow_control/let_else__01.pt:21:5
@@ -54,11 +49,42 @@ error[E0531]: cannot find tuple struct or tuple variant `Ok` in this scope
 LL |     let Ok(count) = int::from_str(count_str) else {
    |         ^^ not found in this scope
 
-error: requires `sized` lang_item
+error[E0599]: no method named `split` found for type `str` in the current scope
+  --> tests/ui/src/flow_control/let_else__01.pt:7:16
+   |
+LL |     let it = s.split(' ');
+   |                ^^^^^ method not found in `str`
+
+error[E0277]: the trait bound `str: Sized` is not satisfied
   --> tests/ui/src/flow_control/let_else__01.pt:6:22
    |
 LL | fn get_count_item(s: str) -> (int, str) {
-   |                      ^^^
+   |                      ^^^ the trait `Sized` is not implemented for `str`
+   |
+help: this trait has no implementations, consider adding one
+  --> <patina-prelude>:14:1
+   |
+LL | pub trait Sized: MetaSized {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: unsized fn params are gated as an unstable feature
+help: function arguments must have a statically known size, borrowed types always have a known size
+   |
+LL | fn get_count_item(s: &str) -> (int, str) {
+   |                      +
+
+error[E0308]: `else` clause of `let...else` does not diverge
+  --> tests/ui/src/flow_control/let_else__01.pt:11:62
+   |
+LL |       let (Some(count_str), Some(item)) = (first, second) else {
+   |  ______________________________________________________________^
+LL | |         panic!("Can't segment count item pair: '{s}'");
+LL | |     };
+   | |_____^ expected `!`, found `()`
+   |
+   = note:   expected type `!`
+           found unit type `()`
+   = help: try adding a diverging expression, such as `return` or `panic!(..)`
+   = help: ...or use `match` instead of `let...else`
 
 error[E0433]: cannot find module or crate `int` in this scope
   --> tests/ui/src/flow_control/let_else__01.pt:14:21
@@ -71,7 +97,21 @@ LL |     let Ok(count) = int::from_str(count_str) else {
    |
    = help: you might be missing a crate named `int`
 
-error: aborting due to 10 previous errors
+error[E0308]: `else` clause of `let...else` does not diverge
+  --> tests/ui/src/flow_control/let_else__01.pt:14:51
+   |
+LL |       let Ok(count) = int::from_str(count_str) else {
+   |  ___________________________________________________^
+LL | |         panic!("Can't parse integer: '{count_str}'");
+LL | |     };
+   | |_____^ expected `!`, found `()`
+   |
+   = note:   expected type `!`
+           found unit type `()`
+   = help: try adding a diverging expression, such as `return` or `panic!(..)`
+   = help: ...or use `match` instead of `let...else`
 
-Some errors have detailed explanations: E0425, E0432, E0433, E0531.
-For more information about an error, try `rustc --explain E0425`.
+error: aborting due to 13 previous errors
+
+Some errors have detailed explanations: E0277, E0308, E0425, E0432, E0433, E0531, E0599.
+For more information about an error, try `rustc --explain E0277`.

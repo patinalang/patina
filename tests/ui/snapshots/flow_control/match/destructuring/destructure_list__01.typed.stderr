@@ -1,32 +1,70 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_list__01.pt:11:13
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/destructuring/destructure_list__01.pt:11:63
    |
 LL |             println!("list[0] = 0, list[1] = {}, list[2] = {}", second, third),
-   |             ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_list__01.pt:14:26
+   |                                                               ^ no rules expected this token in macro call
    |
-LL |         [1, _, third] => println!(
-   |                          ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_list__01.pt:20:29
+  ::: <patina-prelude>:23:1
    |
-LL |         [-1, second, ..] => println!(
-   |                             ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_list__01.pt:29:35
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL |         [3, second, tail @ ..] => println!(
-   |                                   ^^^^^^^
-
-error: requires `sized` lang_item
-  --> tests/ui/src/flow_control/match/destructuring/destructure_list__01.pt:6:9
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL |     let list = [1, -2, 6];
-   |         ^^^^
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 5 previous errors
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/destructuring/destructure_list__01.pt:15:64
+   |
+LL |             "list[0] = 1, list[2] = {} and list[1] was ignored",
+   |                                                                ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/destructuring/destructure_list__01.pt:21:77
+   |
+LL |             "list[0] = -1, list[1] = {} and all the other ones were ignored",
+   |                                                                             ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/destructuring/destructure_list__01.pt:30:73
+   |
+LL |             "list[0] = 3, list[1] = {} and the other elements were {:?}",
+   |                                                                         ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: aborting due to 4 previous errors
 

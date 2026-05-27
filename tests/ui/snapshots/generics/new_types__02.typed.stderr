@@ -16,12 +16,6 @@ LL |     let years_as_primitive_1: int = years.0; // Tuple
    |                               not found in this scope
    |                               help: perhaps you intended to use this type: `i32`
 
-error: requires `sized` lang_item
-  --> tests/ui/src/generics/new_types__02.pt:7:9
-   |
-LL |     let years = Years(42);
-   |         ^^^^^
-
-error: aborting due to 3 previous errors
+error: aborting due to 2 previous errors
 
 For more information about this error, try `rustc --explain E0425`.

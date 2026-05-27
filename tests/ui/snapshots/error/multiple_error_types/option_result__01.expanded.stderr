@@ -1,77 +1,53 @@
-error[E0433]: cannot find module or crate `Std` in the crate root
-  --> tests/ui/src/error/multiple_error_types/option_result__01.pt:4:5
-   |
-LL | use Std::Num::ParseIntError;
-   |     ^^^ use of unresolved module or unlinked crate `Std`
-   |
-help: you might be missing a crate named `Std`, add it to your project and import it in your code
-   |
-LL + extern crate Std;
-   |
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/error/multiple_error_types/option_result__01.pt:22:5
-   |
-LL |     println!("The first doubled is {:?}", double_first(strings));
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/error/multiple_error_types/option_result__01.pt:19:5
-   |
-LL |     println!("The first doubled is {:?}", double_first(empty));
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/error/multiple_error_types/option_result__01.pt:17:5
+error: no rules expected `,`
+  --> tests/ui/src/error/multiple_error_types/option_result__01.pt:17:41
    |
 LL |     println!("The first doubled is {:?}", double_first(numbers));
-   |     ^^^^^^^
+   |                                         ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `Option` in this scope
-  --> tests/ui/src/error/multiple_error_types/option_result__01.pt:6:33
+error: no rules expected `,`
+  --> tests/ui/src/error/multiple_error_types/option_result__01.pt:19:41
    |
-LL | fn double_first(list: [str]) -> Option<Result<int, ParseIntError>> {
-   |                                 ^^^^^^ not found in this scope
+LL |     println!("The first doubled is {:?}", double_first(empty));
+   |                                         ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `Result` in this scope
-  --> tests/ui/src/error/multiple_error_types/option_result__01.pt:6:40
+error: no rules expected `,`
+  --> tests/ui/src/error/multiple_error_types/option_result__01.pt:22:41
    |
-LL | fn double_first(list: [str]) -> Option<Result<int, ParseIntError>> {
-   |                                        ^^^^^^ not found in this scope
+LL |     println!("The first doubled is {:?}", double_first(strings));
+   |                                         ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/error/multiple_error_types/option_result__01.pt:6:47
-   |
-LL | fn double_first(list: [str]) -> Option<Result<int, ParseIntError>> {
-   |                                               ^^^ not found in this scope
-   |
-help: perhaps you intended to use this type
-   |
-LL - fn double_first(list: [str]) -> Option<Result<int, ParseIntError>> {
-LL + fn double_first(list: [str]) -> Option<Result<i32, ParseIntError>> {
-   |
-help: you might be missing a type parameter
-   |
-LL | fn double_first<int>(list: [str]) -> Option<Result<int, ParseIntError>> {
-   |                +++++
+error: aborting due to 3 previous errors
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/error/multiple_error_types/option_result__01.pt:8:23
-   |
-LL |         first.parse::<int>().map(|n| 2 * n)
-   |                       ^^^ not found in this scope
-   |
-help: perhaps you intended to use this type
-   |
-LL -         first.parse::<int>().map(|n| 2 * n)
-LL +         first.parse::<i32>().map(|n| 2 * n)
-   |
-help: you might be missing a type parameter
-   |
-LL | fn double_first<int>(list: [str]) -> Option<Result<int, ParseIntError>> {
-   |                +++++
-
-error: aborting due to 8 previous errors
-
-Some errors have detailed explanations: E0425, E0433.
-For more information about an error, try `rustc --explain E0425`.

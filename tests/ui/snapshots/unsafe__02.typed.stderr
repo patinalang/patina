@@ -1,3 +1,39 @@
+error: prefix `a` is unknown
+  --> tests/ui/src/unsafe__02.pt:8:9
+   |
+LL |         a"nil" => "the atom nil",
+   |         ^ unknown prefix
+   |
+   = note: prefixed identifiers and literals are reserved since Rust 2021
+help: consider inserting whitespace here
+   |
+LL |         a "nil" => "the atom nil",
+   |          +
+
+error: prefix `a` is unknown
+  --> tests/ui/src/unsafe__02.pt:9:10
+   |
+LL |         (a"some", val) => "some value (tagged?)",
+   |          ^ unknown prefix
+   |
+   = note: prefixed identifiers and literals are reserved since Rust 2021
+help: consider inserting whitespace here
+   |
+LL |         (a "some", val) => "some value (tagged?)",
+   |           +
+
+error: prefix `a` is unknown
+  --> tests/ui/src/unsafe__02.pt:19:13
+   |
+LL |             a"nil" => "the atom nil",
+   |             ^ unknown prefix
+   |
+   = note: prefixed identifiers and literals are reserved since Rust 2021
+help: consider inserting whitespace here
+   |
+LL |             a "nil" => "the atom nil",
+   |              +
+
 error: expected one of `=>`, `@`, `if`, or `|`, found `"nil"`
   --> tests/ui/src/unsafe__02.pt:8:10
    |
@@ -10,61 +46,22 @@ error: expected one of `=>`, `@`, `if`, or `|`, found `"nil"`
 LL |             a"nil" => "the atom nil",
    |              ^^^^^ expected one of `=>`, `@`, `if`, or `|`
 
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/unsafe__02.pt:24:5
+error: no rules expected `,`
+  --> tests/ui/src/unsafe__02.pt:24:22
    |
 LL |     println!("{}, {}", safe_description, unsafe_description);
-   |     ^^^^^^^
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/unsafe__02.pt:5:22
+   |                      ^ no rules expected this token in macro call
    |
-LL |     let v = Option::<int>::None as term;
-   |                      ^^^
-   |                      |
-   |                      not found in this scope
-   |                      help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `term` in this scope
-  --> tests/ui/src/unsafe__02.pt:5:36
+  ::: <patina-prelude>:23:1
    |
-LL |     let v = Option::<int>::None as term;
-   |                                    ^^^^ not found in this scope
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/unsafe__02.pt:18:22
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL |             Option::<int>::None => "an empty integer option",
-   |                      ^^^
-   |                      |
-   |                      not found in this scope
-   |                      help: perhaps you intended to use this type: `i32`
-
-error: requires `sized` lang_item
-  --> tests/ui/src/unsafe__02.pt:5:9
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL |     let v = Option::<int>::None as term;
-   |         ^
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0433]: cannot find type `Option` in this scope
-  --> tests/ui/src/unsafe__02.pt:5:13
-   |
-LL |     let v = Option::<int>::None as term;
-   |             ^^^^^^ use of undeclared type `Option`
+error: aborting due to 6 previous errors
 
-error[E0433]: cannot find type `Option` in this scope
-  --> tests/ui/src/unsafe__02.pt:17:13
-   |
-LL |             Option::<str>::None => "an empty string option",
-   |             ^^^^^^ use of undeclared type `Option`
-
-error[E0433]: cannot find type `Option` in this scope
-  --> tests/ui/src/unsafe__02.pt:18:13
-   |
-LL |             Option::<int>::None => "an empty integer option",
-   |             ^^^^^^ use of undeclared type `Option`
-
-error: aborting due to 10 previous errors
-
-Some errors have detailed explanations: E0425, E0433.
-For more information about an error, try `rustc --explain E0425`.

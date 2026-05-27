@@ -1,43 +1,36 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/error/iter_result__05.pt:13:5
-   |
-LL |     println!("Errors: {:?}", errors);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/error/iter_result__05.pt:12:5
+error: no rules expected `,`
+  --> tests/ui/src/error/iter_result__05.pt:12:29
    |
 LL |     println!("Numbers: {:?}", numbers);
-   |     ^^^^^^^
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/error/iter_result__05.pt:8:28
+   |                             ^ no rules expected this token in macro call
    |
-LL |         .map(|s| s.parse::<int>())
-   |                            ^^^
-   |                            |
-   |                            not found in this scope
-   |                            help: perhaps you intended to use this type: `i32`
-
-error[E0433]: cannot find type `Result` in this scope
-  --> tests/ui/src/error/iter_result__05.pt:9:20
+  ::: <patina-prelude>:23:1
    |
-LL |         .partition(Result::is_ok);
-   |                    ^^^^^^ use of undeclared type `Result`
-
-error[E0433]: cannot find type `Result` in this scope
-  --> tests/ui/src/error/iter_result__05.pt:10:48
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL |     let numbers: [_] = numbers.into_iter().map(Result::unwrap).collect();
-   |                                                ^^^^^^ use of undeclared type `Result`
-
-error[E0433]: cannot find type `Result` in this scope
-  --> tests/ui/src/error/iter_result__05.pt:11:46
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL |     let errors: [_] = errors.into_iter().map(Result::unwrap_err).collect();
-   |                                              ^^^^^^ use of undeclared type `Result`
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 6 previous errors
+error: no rules expected `,`
+  --> tests/ui/src/error/iter_result__05.pt:13:28
+   |
+LL |     println!("Errors: {:?}", errors);
+   |                            ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-Some errors have detailed explanations: E0425, E0433.
-For more information about an error, try `rustc --explain E0425`.
+error: aborting due to 2 previous errors
+

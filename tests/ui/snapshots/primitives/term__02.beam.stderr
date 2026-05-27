@@ -1,0 +1,77 @@
+error: expected item, found `;`
+  --> tests/ui/src/primitives/term__02.pt:9:2
+   |
+LL | };
+   |  ^
+   |
+   = help: enum declarations are not followed by a semicolon
+help: remove this semicolon
+   |
+LL - };
+LL + }
+   |
+
+error: comparison operators cannot be chained
+  --> tests/ui/src/primitives/term__02.pt:17:82
+   |
+LL |     let next_event_res: Result<UserEvent, DecodeError> = next_event.try_cast_into<UserEvent>();
+   |                                                                                  ^         ^
+   |
+help: use `::<...>` instead of `<...>` to specify lifetime, type, or const arguments
+   |
+LL |     let next_event_res: Result<UserEvent, DecodeError> = next_event.try_cast_into::<UserEvent>();
+   |                                                                                  ++
+
+error: comparison operators cannot be chained
+  --> tests/ui/src/primitives/term__02.pt:24:88
+   |
+LL |     let next_event: UserEvent = Events.get_next_event(seqnum, prev_event).try_cast_into<UserEvent>()?;
+   |                                                                                        ^         ^
+   |
+help: use `::<...>` instead of `<...>` to specify lifetime, type, or const arguments
+   |
+LL |     let next_event: UserEvent = Events.get_next_event(seqnum, prev_event).try_cast_into::<UserEvent>()?;
+   |                                                                                        ++
+
+error: expected one of `;` or `else`, found `?`
+  --> tests/ui/src/primitives/term__02.pt:24:101
+   |
+LL |     let next_event: UserEvent = Events.get_next_event(seqnum, prev_event).try_cast_into<UserEvent>()?;
+   |                                                                                                     ^ expected one of `;` or `else`
+
+error: no rules expected `,`
+  --> tests/ui/src/primitives/term__02.pt:31:56
+   |
+LL |         Ok(Click(x, y)) => println!("Clicked x={} y={}", x, y),
+   |                                                        ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/primitives/term__02.pt:33:67
+   |
+LL |         Err(err) => println!("Failed to decode Elixir result {:?}", err),
+   |                                                                   ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: aborting due to 6 previous errors
+

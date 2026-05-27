@@ -541,6 +541,22 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     ) -> Ty<'tcx> {
         let tcx = self.tcx;
 
+        if let Some((_, arg_exprs)) = call_expr_and_args
+            && let Some((path_segments, _)) = expr.call_segments()
+            && path_segments.len() == 1
+            && let Res::Def(DefKind::ExternMod, def_id) = path_segments[0].res
+        {
+            self.write_resolution(expr.hir_id, Ok((DefKind::ExternMod, def_id)));
+
+            return Ty::new_fn_ptr(
+                tcx,
+                ty::Binder::dummy(tcx.mk_fn_sig_safe_rust_abi(
+                    arg_exprs.iter().map(|arg| self.next_ty_var(arg.span)),
+                    tcx.types.unit,
+                )),
+            );
+        }
+
         if let Some((_, [arg])) = call_expr_and_args
             && let QPath::Resolved(_, path) = qpath
             && let Res::Def(_, def_id) = path.res

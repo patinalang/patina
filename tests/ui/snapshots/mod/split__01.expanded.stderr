@@ -7,12 +7,6 @@ LL | mod MyMod;
    = help: to create the module `MyMod`, create file "tests/ui/src/mod/MyMod.rs" or "tests/ui/src/mod/MyMod/mod.rs"
    = note: if there is a `mod MyMod` elsewhere in the crate already, import it with `use crate::...` instead
 
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/mod/split__01.pt:9:5
-   |
-LL |     println!("called `function()`");
-   |     ^^^^^^^
-
-error: aborting due to 2 previous errors
+error: aborting due to 1 previous error
 
 For more information about this error, try `rustc --explain E0583`.

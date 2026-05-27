@@ -1,0 +1,58 @@
+error: cannot find macro `format` in this scope
+  --> tests/ui/src/error/option_unwrap/question_mark__01.pt:9:10
+   |
+LL |     Some(format!("Next year I will be {}", next_age))
+   |          ^^^^^^
+
+error[E0425]: cannot find type `Option` in this scope
+  --> tests/ui/src/error/option_unwrap/question_mark__01.pt:4:31
+   |
+LL | fn next_birthday(current_age: Option<int>) -> Option<str> {
+   |                               ^^^^^^ not found in this scope
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/error/option_unwrap/question_mark__01.pt:4:38
+   |
+LL | fn next_birthday(current_age: Option<int>) -> Option<str> {
+   |                                      ^^^ not found in this scope
+   |
+help: perhaps you intended to use this type
+   |
+LL - fn next_birthday(current_age: Option<int>) -> Option<str> {
+LL + fn next_birthday(current_age: Option<i32>) -> Option<str> {
+   |
+help: you might be missing a type parameter
+   |
+LL | fn next_birthday<int>(current_age: Option<int>) -> Option<str> {
+   |                 +++++
+
+error[E0425]: cannot find type `Option` in this scope
+  --> tests/ui/src/error/option_unwrap/question_mark__01.pt:4:47
+   |
+LL | fn next_birthday(current_age: Option<int>) -> Option<str> {
+   |                                               ^^^^^^ not found in this scope
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/error/option_unwrap/question_mark__01.pt:8:19
+   |
+LL |     let next_age: int = current_age? + 1;
+   |                   ^^^
+   |                   |
+   |                   not found in this scope
+   |                   help: perhaps you intended to use this type: `i32`
+
+error: requires `branch` lang_item
+  --> tests/ui/src/error/option_unwrap/question_mark__01.pt:8:25
+   |
+LL |     let next_age: int = current_age? + 1;
+   |                         ^^^^^^^^^^^^
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
+  --> tests/ui/src/error/option_unwrap/question_mark__01.pt:9:5
+   |
+LL |     Some(format!("Next year I will be {}", next_age))
+   |     ^^^^ not found in this scope
+
+error: aborting due to 7 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

@@ -1,0 +1,13 @@
+error: expected item, found keyword `let`
+  --> tests/ui/src/conversion/from_into__01.pt:4:1
+   |
+LL | let my_str = "hello";
+   | ^^^
+   | |
+   | `let` cannot be used for global variables
+   | help: consider using `static` or `const` instead of `let`
+   |
+   = note: for a full list of items that can appear in modules, see <https://doc.rust-lang.org/reference/items.html>
+
+error: aborting due to 1 previous error
+

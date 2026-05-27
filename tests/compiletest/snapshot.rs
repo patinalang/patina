@@ -10,28 +10,38 @@ pub fn check_pair(
     stderr: &str,
     bless: bool,
 ) -> Result<(), Failed> {
+    check_required(stdout_path, stdout, bless)?;
+    check_optional(stderr_path, stderr, bless)
+}
+
+pub fn check_required(path: &Path, actual: &str, bless: bool) -> Result<(), Failed> {
     if bless {
-        write_snapshot(stdout_path, stdout);
-        if stderr.is_empty() {
-            remove_snapshot(stderr_path);
+        write_snapshot(path, actual);
+        return Ok(());
+    }
+    check(path, actual)
+}
+
+pub fn check_optional(path: &Path, actual: &str, bless: bool) -> Result<(), Failed> {
+    if bless {
+        if actual.is_empty() {
+            remove_snapshot(path);
         } else {
-            write_snapshot(stderr_path, stderr);
+            write_snapshot(path, actual);
         }
         return Ok(());
     }
 
-    check(stdout_path, stdout)?;
-
-    if stderr.is_empty() && stderr_path.exists() {
+    if actual.is_empty() && path.exists() {
         Err(Failed::from(format!(
             "unexpected stderr snapshot: {}\n\
                  compiler produced no stderr; delete the file or re-bless",
-            stderr_path.display(),
+            path.display(),
         )))
-    } else if stderr.is_empty() {
+    } else if actual.is_empty() {
         Ok(())
     } else {
-        check(stderr_path, stderr)
+        check(path, actual)
     }
 }
 
@@ -45,12 +55,10 @@ fn remove_snapshot(path: &Path) {
 
 fn write_snapshot(snapshot_path: &Path, actual: &str) {
     if let Some(parent) = snapshot_path.parent() {
-        std::fs::create_dir_all(parent)
-            .unwrap_or_else(|e| panic!("create dir {}: {e}", parent.display()));
+        std::fs::create_dir_all(parent).expect(&format!("create dir {}", parent.display()));
     }
 
-    std::fs::write(snapshot_path, actual)
-        .unwrap_or_else(|e| panic!("write {}: {e}", snapshot_path.display()));
+    std::fs::write(snapshot_path, actual).expect(&format!("write {}", snapshot_path.display()));
 }
 
 fn check(snapshot_path: &Path, actual: &str) -> Result<(), Failed> {
@@ -63,7 +71,7 @@ fn check(snapshot_path: &Path, actual: &str) -> Result<(), Failed> {
                 snapshot_path.display(),
             )));
         }
-        Err(e) => panic!("read {}: {e}", snapshot_path.display()),
+        other => other.expect(&format!("read {}", snapshot_path.display())),
     };
 
     if expected == actual {

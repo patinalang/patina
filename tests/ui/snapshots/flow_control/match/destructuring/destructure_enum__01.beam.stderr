@@ -1,0 +1,87 @@
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:31:57
+   |
+LL |             println!("Red: {}, green: {}, and blue: {}!", r, g, b),
+   |                                                         ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:33:59
+   |
+LL |             println!("Hue: {}, saturation: {}, value: {}!", h, s, v),
+   |                                                           ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:35:63
+   |
+LL |             println!("Hue: {}, saturation: {}, lightness: {}!", h, s, l),
+   |                                                               ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:37:58
+   |
+LL |             println!("Cyan: {}, magenta: {}, yellow: {}!", c, m, y),
+   |                                                          ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:39:75
+   |
+LL |             println!("Cyan: {}, magenta: {}, yellow: {}, key (black): {}!",
+   |                                                                           ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: aborting due to 5 previous errors
+

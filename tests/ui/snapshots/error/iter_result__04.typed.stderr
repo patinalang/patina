@@ -1,37 +1,36 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/error/iter_result__04.pt:11:5
-   |
-LL |     println!("Errors: {:?}", errors);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/error/iter_result__04.pt:10:5
+error: no rules expected `,`
+  --> tests/ui/src/error/iter_result__04.pt:10:29
    |
 LL |     println!("Numbers: {:?}", numbers);
-   |     ^^^^^^^
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/error/iter_result__04.pt:8:28
+   |                             ^ no rules expected this token in macro call
    |
-LL |         .map(|s| s.parse::<int>())
-   |                            ^^^
-   |                            |
-   |                            not found in this scope
-   |                            help: perhaps you intended to use this type: `i32`
-
-error: requires `sized` lang_item
-  --> tests/ui/src/error/iter_result__04.pt:5:9
+  ::: <patina-prelude>:23:1
    |
-LL |     let strings = ["tofu", "93", "18"];
-   |         ^^^^^^^
-
-error[E0433]: cannot find type `Result` in this scope
-  --> tests/ui/src/error/iter_result__04.pt:9:20
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL |         .partition(Result::is_ok);
-   |                    ^^^^^^ use of undeclared type `Result`
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 5 previous errors
+error: no rules expected `,`
+  --> tests/ui/src/error/iter_result__04.pt:11:28
+   |
+LL |     println!("Errors: {:?}", errors);
+   |                            ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-Some errors have detailed explanations: E0425, E0433.
-For more information about an error, try `rustc --explain E0425`.
+error: aborting due to 2 previous errors
+

@@ -22,24 +22,6 @@ error: cannot find macro `print` in this scope
 LL |     print!("called `MyMod::indirect_access()`, that\n> ");
    |     ^^^^^
 
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/mod/split__02.pt:15:5
-   |
-LL |     println!("called `MyMod::private_function()`");
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/mod/split__02.pt:11:5
-   |
-LL |     println!("called `MyMod::function()`");
-   |     ^^^^^^^
-
-error: requires `sized` lang_item
-  --> tests/ui/src/mod/split__02.pt:21:5
-   |
-LL |     private_function();
-   |     ^^^^^^^^^^^^^^^^^^
-
-error: aborting due to 6 previous errors
+error: aborting due to 3 previous errors
 
 For more information about this error, try `rustc --explain E0583`.

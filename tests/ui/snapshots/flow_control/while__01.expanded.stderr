@@ -1,26 +1,19 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/while__01.pt:17:13
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/while__01.pt:17:26
    |
 LL |             println!("{}", n);
-   |             ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/while__01.pt:15:13
+   |                          ^ no rules expected this token in macro call
    |
-LL |             println!("buzz");
-   |             ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/while__01.pt:13:13
+  ::: <patina-prelude>:23:1
    |
-LL |             println!("fizz");
-   |             ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/while__01.pt:11:13
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL |             println!("fizzbuzz");
-   |             ^^^^^^^
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 4 previous errors
+error: aborting due to 1 previous error
 

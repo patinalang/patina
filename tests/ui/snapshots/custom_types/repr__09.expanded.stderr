@@ -1,27 +1,19 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/custom_types/repr__09.pt:11:5
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__09.pt:11:20
    |
 LL |     println!("{:?}", Point{x: 1, y: 2} as term);
-   |     ^^^^^^^
-
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/custom_types/repr__09.pt:6:8
+   |                    ^ no rules expected this token in macro call
    |
-LL |     x: float,
-   |        ^^^^^
-   |        |
-   |        not found in this scope
-   |        help: perhaps you intended to use this type: `f32`
-
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/custom_types/repr__09.pt:7:8
+  ::: <patina-prelude>:23:1
    |
-LL |     y: float,
-   |        ^^^^^
-   |        |
-   |        not found in this scope
-   |        help: perhaps you intended to use this type: `f32`
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 3 previous errors
+error: aborting due to 1 previous error
 
-For more information about this error, try `rustc --explain E0425`.

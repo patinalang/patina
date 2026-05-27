@@ -1,0 +1,9 @@
+-file("tests/ui/src/mod/split__03.pt", 4).
+-module('Elixir.Split03').
+-compile([no_auto_import]).
+-export([function/0]).
+function() ->
+    io:format(<<"~s~n">>, [<<"called `MyMod::Nested::function()`">>]).
+private_function() ->
+    io:format(<<"~s~n">>,
+              [<<"called `MyMod::Nested::private_function()`">>]).

@@ -1,8 +1,8 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/macros/variadics__01.pt:9:13
+error: no rules expected `,`
+  --> tests/ui/src/macros/variadics__01.pt:9:31
    |
 LL |               println!("{} = {}", stringify!{$e}, val);
-   |               ^^^^^^^
+   |                                 ^ no rules expected this token in macro call
 ...
 LL | /     calculate! { // Look ma! Variadic `calculate!`!
 LL | |         eval 1 + 2,
@@ -11,13 +11,23 @@ LL | |         eval (2 * 3) + 1
 LL | |     }
    | |_____- in this macro invocation
    |
+  ::: <patina-prelude>:23:1
+   |
+LL |   macro_rules! println {
+   |   -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
    = note: this error originates in the macro `calculate` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/macros/variadics__01.pt:9:13
+error: no rules expected `,`
+  --> tests/ui/src/macros/variadics__01.pt:9:31
    |
 LL |               println!("{} = {}", stringify!{$e}, val);
-   |               ^^^^^^^
+   |                                 ^ no rules expected this token in macro call
 ...
 LL | /     calculate! { // Look ma! Variadic `calculate!`!
 LL | |         eval 1 + 2,
@@ -26,13 +36,23 @@ LL | |         eval (2 * 3) + 1
 LL | |     }
    | |_____- in this macro invocation
    |
+  ::: <patina-prelude>:23:1
+   |
+LL |   macro_rules! println {
+   |   -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
    = note: this error originates in the macro `calculate` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/macros/variadics__01.pt:9:13
+error: no rules expected `,`
+  --> tests/ui/src/macros/variadics__01.pt:9:31
    |
 LL |               println!("{} = {}", stringify!{$e}, val);
-   |               ^^^^^^^
+   |                                 ^ no rules expected this token in macro call
 ...
 LL | /     calculate! { // Look ma! Variadic `calculate!`!
 LL | |         eval 1 + 2,
@@ -41,62 +61,17 @@ LL | |         eval (2 * 3) + 1
 LL | |     }
    | |_____- in this macro invocation
    |
+  ::: <patina-prelude>:23:1
+   |
+LL |   macro_rules! println {
+   |   -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
    = note: this error originates in the macro `calculate` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/macros/variadics__01.pt:8:22
-   |
-LL |               let val: int = $e; // Force types to be integers
-   |                        ^^^
-   |                        |
-   |                        not found in this scope
-   |                        help: perhaps you intended to use this type: `i32`
-...
-LL | /     calculate! { // Look ma! Variadic `calculate!`!
-LL | |         eval 1 + 2,
-LL | |         eval 3 + 4,
-LL | |         eval (2 * 3) + 1
-LL | |     }
-   | |_____- in this macro invocation
-   |
-   = note: this error originates in the macro `calculate` (in Nightly builds, run with -Z macro-backtrace for more info)
+error: aborting due to 3 previous errors
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/macros/variadics__01.pt:8:22
-   |
-LL |               let val: int = $e; // Force types to be integers
-   |                        ^^^
-   |                        |
-   |                        not found in this scope
-   |                        help: perhaps you intended to use this type: `i32`
-...
-LL | /     calculate! { // Look ma! Variadic `calculate!`!
-LL | |         eval 1 + 2,
-LL | |         eval 3 + 4,
-LL | |         eval (2 * 3) + 1
-LL | |     }
-   | |_____- in this macro invocation
-   |
-   = note: this error originates in the macro `calculate` (in Nightly builds, run with -Z macro-backtrace for more info)
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/macros/variadics__01.pt:8:22
-   |
-LL |               let val: int = $e; // Force types to be integers
-   |                        ^^^
-   |                        |
-   |                        not found in this scope
-   |                        help: perhaps you intended to use this type: `i32`
-...
-LL | /     calculate! { // Look ma! Variadic `calculate!`!
-LL | |         eval 1 + 2,
-LL | |         eval 3 + 4,
-LL | |         eval (2 * 3) + 1
-LL | |     }
-   | |_____- in this macro invocation
-   |
-   = note: this error originates in the macro `calculate` (in Nightly builds, run with -Z macro-backtrace for more info)
-
-error: aborting due to 6 previous errors
-
-For more information about this error, try `rustc --explain E0425`.

@@ -1,135 +1,19 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/fn/parameters__02.pt:43:5
+error: no rules expected `,`
+  --> tests/ui/src/fn/parameters__02.pt:43:29
    |
 LL |     println!("{} op {} = {}", 3, 5, op(3, 5))
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/fn/parameters__02.pt:30:9
+   |                             ^ no rules expected this token in macro call
    |
-LL |         println!("fx evaluated!");
-   |         ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/fn/parameters__02.pt:35:9
+  ::: <patina-prelude>:23:1
    |
-LL |         println!("fy evaluated!");
-   |         ^^^^^^^
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/fn/parameters__02.pt:4:25
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL | fn lazy_add(fx: fn() -> int, fy: fn() -> int) -> fn() -> int {
-   |                         ^^^
-   |                         |
-   |                         not found in this scope
-   |                         help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/fn/parameters__02.pt:4:42
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL | fn lazy_add(fx: fn() -> int, fy: fn() -> int) -> fn() -> int {
-   |                                          ^^^
-   |                                          |
-   |                                          not found in this scope
-   |                                          help: perhaps you intended to use this type: `i32`
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/fn/parameters__02.pt:4:58
-   |
-LL | fn lazy_add(fx: fn() -> int, fy: fn() -> int) -> fn() -> int {
-   |                                                          ^^^
-   |                                                          |
-   |                                                          not found in this scope
-   |                                                          help: perhaps you intended to use this type: `i32`
+error: aborting due to 1 previous error
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/fn/parameters__02.pt:8:11
-   |
-LL | fn add(x: int, y: int) -> int {
-   |           ^^^
-   |           |
-   |           not found in this scope
-   |           help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/fn/parameters__02.pt:8:19
-   |
-LL | fn add(x: int, y: int) -> int {
-   |                   ^^^
-   |                   |
-   |                   not found in this scope
-   |                   help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/fn/parameters__02.pt:8:27
-   |
-LL | fn add(x: int, y: int) -> int {
-   |                           ^^^
-   |                           |
-   |                           not found in this scope
-   |                           help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/fn/parameters__02.pt:12:11
-   |
-LL | fn mul(x: int, y: int) -> int {
-   |           ^^^
-   |           |
-   |           not found in this scope
-   |           help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/fn/parameters__02.pt:12:19
-   |
-LL | fn mul(x: int, y: int) -> int {
-   |                   ^^^
-   |                   |
-   |                   not found in this scope
-   |                   help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/fn/parameters__02.pt:12:27
-   |
-LL | fn mul(x: int, y: int) -> int {
-   |                           ^^^
-   |                           |
-   |                           not found in this scope
-   |                           help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `fnref` in this scope
-  --> tests/ui/src/fn/parameters__02.pt:21:29
-   |
-LL | fn choose_op(op: MathOp) -> fnref(int, int) -> int {
-   |                             ^^^^^ not found in this scope
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/fn/parameters__02.pt:21:35
-   |
-LL | fn choose_op(op: MathOp) -> fnref(int, int) -> int {
-   |                                   ^^^
-   |                                   |
-   |                                   not found in this scope
-   |                                   help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/fn/parameters__02.pt:21:40
-   |
-LL | fn choose_op(op: MathOp) -> fnref(int, int) -> int {
-   |                                        ^^^
-   |                                        |
-   |                                        not found in this scope
-   |                                        help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/fn/parameters__02.pt:21:48
-   |
-LL | fn choose_op(op: MathOp) -> fnref(int, int) -> int {
-   |                                                ^^^
-   |                                                |
-   |                                                not found in this scope
-   |                                                help: perhaps you intended to use this type: `i32`
-
-error: aborting due to 16 previous errors
-
-For more information about this error, try `rustc --explain E0425`.

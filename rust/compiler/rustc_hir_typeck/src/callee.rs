@@ -61,25 +61,6 @@ enum CallStep<'tcx> {
     Overloaded(MethodCallee<'tcx>),
 }
 
-fn is_extern_mod_call_callee(calee_expr: &hir::Expr<'_>) -> bool {
-    matches!(
-        calee_expr,
-        hir::Expr {
-            kind: hir::ExprKind::Path(hir::QPath::TypeRelative(
-                hir::Ty {
-                    kind: hir::TyKind::Path(hir::QPath::Resolved(
-                        _,
-                        hir::Path { res: Res::Def(def::DefKind::ExternMod, _), .. },
-                    )),
-                    ..
-                },
-                _,
-            )),
-            ..
-        }
-    )
-}
-
 impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     pub(crate) fn check_expr_call(
         &self,
@@ -88,20 +69,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         arg_exprs: &'tcx [hir::Expr<'tcx>],
         expected: Expectation<'tcx>,
     ) -> Ty<'tcx> {
-        if is_extern_mod_call_callee(callee_expr) {
-            // Once we add `term` type, we'll check here that the arguments are `term`s.
-            for arg in arg_exprs {
-                self.check_expr(arg);
-            }
-            // Register a dummy type for the callee path expression so the node type
-            // table is populated. Extern mod symbols have no real type; we use a unit type.
-            // Once we add `term` type, extern mod will accept and return `term`s.
-            self.write_ty(callee_expr.hir_id, self.tcx.types.unit);
-            let ret_ty = self.next_ty_var(call_expr.span);
-            self.demand_suptype(call_expr.span, self.tcx.types.unit, ret_ty);
-            return ret_ty;
-        }
-
         let original_callee_ty = match &callee_expr.kind {
             hir::ExprKind::Path(hir::QPath::Resolved(..) | hir::QPath::TypeRelative(..)) => self
                 .check_expr_with_expectation_and_args(

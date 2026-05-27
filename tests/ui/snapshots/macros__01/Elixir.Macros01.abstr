@@ -1,0 +1,6 @@
+-file("tests/ui/src/macros__01.pt", 5).
+-module('Elixir.Macros01').
+-compile([no_auto_import]).
+-export([main/0]).
+main() ->
+    io:format(<<"~s~n">>, [<<"Hello!">>]).

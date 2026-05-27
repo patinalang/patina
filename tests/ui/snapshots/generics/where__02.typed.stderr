@@ -1,33 +1,19 @@
-error[E0433]: cannot find module or crate `Std` in the crate root
-  --> tests/ui/src/generics/where__02.pt:4:5
-   |
-LL | use Std::Fmt::Debug;
-   |     ^^^ use of unresolved module or unlinked crate `Std`
-   |
-help: you might be missing a crate named `Std`, add it to your project and import it in your code
-   |
-LL + extern crate Std;
-   |
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/generics/where__02.pt:17:9
+error: no rules expected `,`
+  --> tests/ui/src/generics/where__02.pt:17:24
    |
 LL |         println!("{:?}", Some(self));
-   |         ^^^^^^^
-
-error[E0425]: cannot find type `Option` in this scope
-  --> tests/ui/src/generics/where__02.pt:13:5
+   |                        ^ no rules expected this token in macro call
    |
-LL |     Option<T>: Debug {
-   |     ^^^^^^ not found in this scope
-
-error: requires `meta_sized` lang_item
-  --> tests/ui/src/generics/where__02.pt:12:6
+  ::: <patina-prelude>:23:1
    |
-LL | impl<T> PrintInOption for T where
-   |      ^
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 4 previous errors
+error: aborting due to 1 previous error
 
-Some errors have detailed explanations: E0425, E0433.
-For more information about an error, try `rustc --explain E0425`.

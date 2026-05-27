@@ -17,12 +17,6 @@ LL -     let s = S((1));
 LL +     let s = S(1);
    |
 
-error: requires `sized` lang_item
-  --> tests/ui/src/generics/bounds__02.pt:9:9
-   |
-LL |     let s = S((1));
-   |         ^
-
-error: aborting due to 2 previous errors; 1 warning emitted
+error: aborting due to 1 previous error; 1 warning emitted
 
 For more information about this error, try `rustc --explain E0405`.

@@ -1,35 +1,36 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/custom_types/repr__04.pt:14:5
-   |
-LL |     println!("{:?}", SnakeCaseEnum::StructHTTPStyle{code: 200, body: "hi"} as term);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/custom_types/repr__04.pt:11:5
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__04.pt:11:20
    |
 LL |     println!("{:?}", SnakeCaseEnum::UnitVariant as term);
-   |     ^^^^^^^
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/custom_types/repr__04.pt:7:27
+   |                    ^ no rules expected this token in macro call
    |
-LL |     StructHTTPStyle{code: int, body: str},
-   |                           ^^^
-   |                           |
-   |                           not found in this scope
-   |                           help: perhaps you intended to use this type: `i32`
-
-error: expected a literal (`1u8`, `1.0f32`, `"string"`, etc.) here, found expression
-  --> tests/ui/src/custom_types/repr__04.pt:4:24
+  ::: <patina-prelude>:23:1
    |
-LL | #[repr(tagged, style = snake_case)]
-   |                        ^^^^^^^^^^ expressions are not allowed here
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-help: surround the identifier with quotation marks to make it into a string literal
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL | #[repr(tagged, style = "snake_case")]
-   |                        +          +
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 4 previous errors
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__04.pt:14:20
+   |
+LL |     println!("{:?}", SnakeCaseEnum::StructHTTPStyle{code: 200, body: "hi"} as term);
+   |                    ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-For more information about this error, try `rustc --explain E0425`.
+error: aborting due to 2 previous errors
+

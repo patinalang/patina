@@ -1,50 +1,65 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/custom_types/repr__11.pt:24:5
+error: prefix `a` is unknown
+  --> tests/ui/src/custom_types/repr__11.pt:20:30
+   |
+LL |         Option::<atom>::Some(a"hi"), Option::<atom>::None);
+   |                              ^ unknown prefix
+   |
+   = note: prefixed identifiers and literals are reserved since Rust 2021
+help: consider inserting whitespace here
+   |
+LL |         Option::<atom>::Some(a "hi"), Option::<atom>::None);
+   |                               +
+
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__11.pt:14:28
+   |
+LL |     println!("{:?}    {:?}",
+   |                            ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__11.pt:19:28
+   |
+LL |     println!("{:?}    {:?}",
+   |                            ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__11.pt:24:36
    |
 LL |     println!("{:?}    {:?}    {:?}",
-   |     ^^^^^^^
+   |                                    ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/custom_types/repr__11.pt:19:5
-   |
-LL |     println!("{:?}    {:?}",
-   |     ^^^^^^^
+error: aborting due to 4 previous errors
 
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/custom_types/repr__11.pt:14:5
-   |
-LL |     println!("{:?}    {:?}",
-   |     ^^^^^^^
-
-error: expected a literal (`1u8`, `1.0f32`, `"string"`, etc.) here, found expression
-  --> tests/ui/src/custom_types/repr__11.pt:4:32
-   |
-LL | #[repr(transparent, fallback = tagged)]
-   |                                ^^^^^^ expressions are not allowed here
-   |
-help: surround the identifier with quotation marks to make it into a string literal
-   |
-LL | #[repr(transparent, fallback = "tagged")]
-   |                                +      +
-
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__11.pt:6:12
-   |
-LL |     #[repr(name = "some")]
-   |            ^^^^^^^^^^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, `simd`, `i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `i64`, `u64`, `i128`, `u128`, `isize`, `usize`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
-
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__11.pt:9:12
-   |
-LL |     #[repr(name = "nil")]
-   |            ^^^^^^^^^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, `simd`, `i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `i64`, `u64`, `i128`, `u128`, `isize`, `usize`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
-
-error: aborting due to 6 previous errors
-
-For more information about this error, try `rustc --explain E0552`.

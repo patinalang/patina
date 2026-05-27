@@ -58,12 +58,26 @@ LL | fn function(x: int) -> int {
    |                        not found in this scope
    |                        help: perhaps you intended to use this type: `i32`
 
-error: requires `sized` lang_item
-  --> tests/ui/src/fn/parameters__01.pt:4:19
+error[E0061]: this function takes 1 argument but 0 arguments were supplied
+  --> tests/ui/src/fn/parameters__01.pt:9:5
    |
-LL | fn call_me_ref(f: fnref(int) -> int) {
-   |                   ^^^^^^^^^^^^^^^^^
+LL |     f();
+   |     ^-- argument #1 is missing
+   |
+help: provide the argument
+   |
+LL |     f(/* value */);
+   |       +++++++++++
 
-error: aborting due to 8 previous errors
+error[E0369]: cannot add `{integer}` to `_`
+  --> tests/ui/src/fn/parameters__01.pt:17:25
+   |
+LL |     let closure = |x| x + 42;
+   |                       - ^ -- {integer}
+   |                       |
+   |                       _
 
-For more information about this error, try `rustc --explain E0425`.
+error: aborting due to 9 previous errors
+
+Some errors have detailed explanations: E0061, E0369, E0425.
+For more information about an error, try `rustc --explain E0061`.

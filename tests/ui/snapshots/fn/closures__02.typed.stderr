@@ -7,48 +7,56 @@ LL |     // Error! Cannot assign a new value to a variable defined outside closu
 LL | }
    | - unexpected token
 
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/fn/closures__02.pt:29:5
-   |
-LL |     println!("closure returning one: {}", one());
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/fn/closures__02.pt:21:5
-   |
-LL |     println!("closure_inferred: {}", closure_inferred(1));
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/fn/closures__02.pt:20:5
+error: no rules expected `,`
+  --> tests/ui/src/fn/closures__02.pt:20:37
    |
 LL |     println!("closure_annotated: {}", closure_annotated(1));
-   |     ^^^^^^^
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/fn/closures__02.pt:16:33
+   |                                     ^ no rules expected this token in macro call
    |
-LL |     let closure_annotated = |i: int| -> int { i + outer_var };
-   |                                 ^^^
-   |                                 |
-   |                                 not found in this scope
-   |                                 help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/fn/closures__02.pt:16:41
+  ::: <patina-prelude>:23:1
    |
-LL |     let closure_annotated = |i: int| -> int { i + outer_var };
-   |                                         ^^^
-   |                                         |
-   |                                         not found in this scope
-   |                                         help: perhaps you intended to use this type: `i32`
-
-error: requires `sized` lang_item
-  --> tests/ui/src/fn/closures__02.pt:5:9
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL |     let outer_var = 42;
-   |         ^^^^^^^^^
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 7 previous errors
+error: no rules expected `,`
+  --> tests/ui/src/fn/closures__02.pt:21:36
+   |
+LL |     println!("closure_inferred: {}", closure_inferred(1));
+   |                                    ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-For more information about this error, try `rustc --explain E0425`.
+error: no rules expected `,`
+  --> tests/ui/src/fn/closures__02.pt:29:41
+   |
+LL |     println!("closure returning one: {}", one());
+   |                                         ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: aborting due to 4 previous errors
+

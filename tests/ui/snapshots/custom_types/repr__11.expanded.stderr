@@ -1,20 +1,65 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/custom_types/repr__11.pt:24:5
+error: prefix `a` is unknown
+  --> tests/ui/src/custom_types/repr__11.pt:20:30
+   |
+LL |         Option::<atom>::Some(a"hi"), Option::<atom>::None);
+   |                              ^ unknown prefix
+   |
+   = note: prefixed identifiers and literals are reserved since Rust 2021
+help: consider inserting whitespace here
+   |
+LL |         Option::<atom>::Some(a "hi"), Option::<atom>::None);
+   |                               +
+
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__11.pt:14:28
+   |
+LL |     println!("{:?}    {:?}",
+   |                            ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__11.pt:19:28
+   |
+LL |     println!("{:?}    {:?}",
+   |                            ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__11.pt:24:36
    |
 LL |     println!("{:?}    {:?}    {:?}",
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/custom_types/repr__11.pt:19:5
+   |                                    ^ no rules expected this token in macro call
    |
-LL |     println!("{:?}    {:?}",
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/custom_types/repr__11.pt:14:5
+  ::: <patina-prelude>:23:1
    |
-LL |     println!("{:?}    {:?}",
-   |     ^^^^^^^
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 3 previous errors
+error: aborting due to 4 previous errors
 

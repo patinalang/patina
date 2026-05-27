@@ -1,0 +1,41 @@
+#![allow(internal_features)]
+#![feature(no_core, lang_items)]
+#![no_std]
+#![no_core]
+
+#[lang = "pointee_sized"]
+pub trait PointeeSized { }
+
+#[lang = "meta_sized"]
+pub trait MetaSized: PointeeSized { }
+
+#[lang = "sized"]
+pub trait Sized: MetaSized { }
+
+#[lang = "copy"]
+pub trait Copy { }
+
+#[allow(unused)]
+extern mod io;
+
+#[macro_export]
+macro_rules! println { ($s:literal) => { io::format("~s~n", [$s]) }; }
+
+// source: patina-by-example/src/flow_control/if_let.md
+// block: 4/4
+
+// This enum purposely neither implements nor derives PartialEq.
+// That is why comparing Foo::Bar == a fails below.
+enum Foo { Bar, }
+
+pub fn main() {
+    let a = Foo::Bar;
+
+    // Variable a matches Foo::Bar
+    if Foo::Bar == a {
+        io::format("~s~n",
+            [
+                    // ^-- this causes a compile-time error. Use `if let` instead.
+                    "a is foobar"]);
+    }
+}

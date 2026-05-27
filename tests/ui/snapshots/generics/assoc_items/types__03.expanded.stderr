@@ -1,126 +1,70 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/generics/assoc_items/types__03.pt:52:5
-   |
-LL |     println!("The difference is: {}", difference(container));
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/generics/assoc_items/types__03.pt:50:5
-   |
-LL |     println!("Last number: {}", container.last());
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/generics/assoc_items/types__03.pt:49:5
-   |
-LL |     println!("First number: {}", container.first());
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/generics/assoc_items/types__03.pt:46:5
+error: no rules expected `,`
+  --> tests/ui/src/generics/assoc_items/types__03.pt:46:52
    |
 LL |     println!("Does container contain {} and {}: {}",
-   |     ^^^^^^^
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/assoc_items/types__03.pt:4:18
+   |                                                    ^ no rules expected this token in macro call
    |
-LL | struct Container(int, int);
-   |                  ^^^
-   |                  |
-   |                  not found in this scope
-   |                  help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/assoc_items/types__03.pt:4:23
+  ::: <patina-prelude>:23:1
    |
-LL | struct Container(int, int);
-   |                       ^^^
-   |                       |
-   |                       not found in this scope
-   |                       help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/assoc_items/types__03.pt:14:23
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL |     fn first(self) -> int;
-   |                       ^^^
-   |                       |
-   |                       not found in this scope
-   |                       help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/assoc_items/types__03.pt:15:22
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL |     fn last(self) -> int;
-   |                      ^^^
-   |                      |
-   |                      not found in this scope
-   |                      help: perhaps you intended to use this type: `i32`
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/assoc_items/types__03.pt:22:14
+error: no rules expected `,`
+  --> tests/ui/src/generics/assoc_items/types__03.pt:49:32
    |
-LL |     type A = int;
-   |              ^^^
-   |              |
-   |              not found in this scope
-   |              help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/assoc_items/types__03.pt:23:14
+LL |     println!("First number: {}", container.first());
+   |                                ^ no rules expected this token in macro call
    |
-LL |     type B = int;
-   |              ^^^
-   |              |
-   |              not found in this scope
-   |              help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/assoc_items/types__03.pt:26:33
+  ::: <patina-prelude>:23:1
    |
-LL |     fn contains(self, number_1: int, number_2: int) -> bool {
-   |                                 ^^^
-   |                                 |
-   |                                 not found in this scope
-   |                                 help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/assoc_items/types__03.pt:26:48
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL |     fn contains(self, number_1: int, number_2: int) -> bool {
-   |                                                ^^^
-   |                                                |
-   |                                                not found in this scope
-   |                                                help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/assoc_items/types__03.pt:30:23
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL |     fn first(self) -> int { self.0 }
-   |                       ^^^
-   |                       |
-   |                       not found in this scope
-   |                       help: perhaps you intended to use this type: `i32`
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/assoc_items/types__03.pt:33:22
+error: no rules expected `,`
+  --> tests/ui/src/generics/assoc_items/types__03.pt:50:31
    |
-LL |     fn last(self) -> int { self.1 }
-   |                      ^^^
-   |                      |
-   |                      not found in this scope
-   |                      help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/assoc_items/types__03.pt:36:45
+LL |     println!("Last number: {}", container.last());
+   |                               ^ no rules expected this token in macro call
    |
-LL | fn difference<C: Contains>(container: C) -> int {
-   |                                             ^^^
-   |                                             |
-   |                                             not found in this scope
-   |                                             help: perhaps you intended to use this type: `i32`
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 15 previous errors
+error: no rules expected `,`
+  --> tests/ui/src/generics/assoc_items/types__03.pt:52:37
+   |
+LL |     println!("The difference is: {}", difference(container));
+   |                                     ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-For more information about this error, try `rustc --explain E0425`.
+error: aborting due to 4 previous errors
+

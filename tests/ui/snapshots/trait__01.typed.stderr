@@ -1,36 +1,70 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/trait__01.pt:59:9
-   |
-LL |         println!("{} pauses briefly... {}", self.name, self.noise());
-   |         ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/trait__01.pt:31:13
-   |
-LL |             println!("{} gets a haircut!", self.name);
-   |             ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/trait__01.pt:28:13
-   |
-LL |             println!("{} is already naked...", self.name());
-   |             ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/trait__01.pt:16:9
+error: no rules expected `,`
+  --> tests/ui/src/trait__01.pt:16:30
    |
 LL |         println!("{} says {}", self.name(), self.noise());
-   |         ^^^^^^^
-
-error: requires `meta_sized` lang_item
-  --> tests/ui/src/trait__01.pt:6:1
+   |                              ^ no rules expected this token in macro call
    |
-LL | / trait Animal {
-LL | |     // Associated function signature; `Self` refers to the implementor type.
-LL | |     fn new(name: str) -> Self;
-...  |
-LL | | }
-   | |_^
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 5 previous errors
+error: no rules expected `,`
+  --> tests/ui/src/trait__01.pt:28:46
+   |
+LL |             println!("{} is already naked...", self.name());
+   |                                              ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/trait__01.pt:31:42
+   |
+LL |             println!("{} gets a haircut!", self.name);
+   |                                          ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/trait__01.pt:59:43
+   |
+LL |         println!("{} pauses briefly... {}", self.name, self.noise());
+   |                                           ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: aborting due to 4 previous errors
 

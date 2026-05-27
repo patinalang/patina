@@ -1,44 +1,36 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_tuple__01.pt:17:19
-   |
-LL |         _      => println!("It doesn't matter what they are"),
-   |                   ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_tuple__01.pt:15:24
-   |
-LL |         (3, .., 4)  => println!("First is `3`, last is `4`, and the rest doesn't matter"),
-   |                        ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_tuple__01.pt:14:21
-   |
-LL |         (.., 2)  => println!("last is `2` and the rest doesn't matter"),
-   |                     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_tuple__01.pt:13:21
-   |
-LL |         (1, ..)  => println!("First is `1` and the rest doesn't matter"),
-   |                     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_tuple__01.pt:12:22
-   |
-LL |         (0, y, z) => println!("First is `0`, `y` is {:?}, and `z` is {:?}", y, z),
-   |                      ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_tuple__01.pt:8:5
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/destructuring/destructure_tuple__01.pt:8:34
    |
 LL |     println!("Tell me about {:?}", triple);
-   |     ^^^^^^^
-
-error: requires `sized` lang_item
-  --> tests/ui/src/flow_control/match/destructuring/destructure_tuple__01.pt:5:9
+   |                                  ^ no rules expected this token in macro call
    |
-LL |     let triple = (0, -2, 3);
-   |         ^^^^^^
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 7 previous errors
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/destructuring/destructure_tuple__01.pt:12:75
+   |
+LL |         (0, y, z) => println!("First is `0`, `y` is {:?}, and `z` is {:?}", y, z),
+   |                                                                           ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: aborting due to 2 previous errors
 

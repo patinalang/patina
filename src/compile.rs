@@ -1,3 +1,5 @@
+mod translate;
+
 use std::cell::Cell;
 use std::path::Path;
 use std::sync::atomic::AtomicBool;
@@ -23,9 +25,30 @@ use crate::{DumpStage, Stage};
 static INTERNAL_FEATURES: AtomicBool = AtomicBool::new(false);
 
 const PRELUDE: &str = r#"
-#![feature(no_core)]
+#![allow(internal_features)]
+#![feature(no_core, lang_items)]
 #![no_std]
 #![no_core]
+
+#[lang = "pointee_sized"]
+pub trait PointeeSized {}
+
+#[lang = "meta_sized"]
+pub trait MetaSized: PointeeSized {}
+
+#[lang = "sized"]
+pub trait Sized: MetaSized {}
+
+#[lang = "copy"]
+pub trait Copy {}
+
+#[allow(unused)]
+extern mod io;
+
+#[macro_export]
+macro_rules! println {
+    ($s:literal) => { io::format("~s~n", [$s]) };
+}
 "#;
 
 struct NoAnn;
@@ -72,7 +95,7 @@ impl pprust_hir::PpAnn for TypedAnn<'_> {
     }
 }
 
-pub fn compile(stage: Stage, filename: &Path, src: &str, _out_dir: &Path) {
+pub(crate) fn compile(stage: Stage, filename: &Path, src: &str, out_dir: &Path) {
     let filename =
         FileName::Real(FilePathMapping::empty().to_real_filename(&RealFileName::empty(), filename));
 
@@ -109,7 +132,7 @@ pub fn compile(stage: Stage, filename: &Path, src: &str, _out_dir: &Path) {
         }
         Stage::Dump(DumpStage::Typed) => {
             with_compiler_global_ctxt(config, PRELUDE, |_compiler, tcx| {
-                tcx.hir_body_owners().for_each(|def_id| tcx.ensure_ok().typeck(def_id));
+                run_body_checks(tcx);
 
                 Some(pprust_hir::print_crate(
                     tcx.sess.source_map(),
@@ -121,6 +144,15 @@ pub fn compile(stage: Stage, filename: &Path, src: &str, _out_dir: &Path) {
                 ))
             })
         }
+        Stage::Emit(emit_stage) => with_compiler_global_ctxt(config, PRELUDE, |_compiler, tcx| {
+            run_body_checks(tcx);
+            if let Some(guar) = tcx.sess.dcx().has_errors_or_delayed_bugs() {
+                guar.raise_fatal();
+            }
+
+            translate::translate(tcx, emit_stage, out_dir);
+            None
+        }),
     };
 
     if let Some(render) = maybe_render {
@@ -216,4 +248,14 @@ where
     with_compiler(config, prelude, |compiler, krate| {
         passes::create_and_enter_global_ctxt(compiler, krate, |tcx| f(compiler, tcx))
     })
+}
+
+fn run_body_checks(tcx: TyCtxt<'_>) {
+    tcx.hir_body_owners().for_each(|def_id| {
+        tcx.ensure_ok().typeck(def_id);
+        if !tcx.is_typeck_child(def_id.to_def_id()) {
+            tcx.ensure_ok().check_unsafety(def_id);
+            tcx.ensure_ok().check_transmutes(def_id);
+        }
+    });
 }

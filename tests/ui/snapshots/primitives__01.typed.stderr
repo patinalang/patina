@@ -60,12 +60,22 @@ LL | fn add_floats(a: float, b: float) -> float {
    |                                      not found in this scope
    |                                      help: perhaps you intended to use this type: `f32`
 
-error: requires `sized` lang_item
-  --> tests/ui/src/primitives__01.pt:6:9
+error[E0308]: mismatched types
+  --> tests/ui/src/primitives__01.pt:18:15
    |
-LL |     let logical: bool  = true;
-   |         ^^^^^^^
+LL |     let mut mutable = 12; // Mutable `int`
+   |                       -- expected due to this value
+...
+LL |     mutable = true;
+   |               ^^^^ expected integer, found `bool`
 
-error: aborting due to 8 previous errors
+error[E0600]: cannot apply unary operator `-` to type `{float}`
+  --> tests/ui/src/primitives__01.pt:30:30
+   |
+LL |     let my_tuple = (5, true, -5.04);
+   |                              ^^^^^ cannot apply unary operator `-`
 
-For more information about this error, try `rustc --explain E0425`.
+error: aborting due to 9 previous errors
+
+Some errors have detailed explanations: E0308, E0425, E0600.
+For more information about an error, try `rustc --explain E0308`.

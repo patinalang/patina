@@ -1,93 +1,36 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/fn/methods__01.pt:73:5
-   |
-LL |     println!("Rectangle area: {}", rectangle.area());
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/fn/methods__01.pt:72:5
+error: no rules expected `,`
+  --> tests/ui/src/fn/methods__01.pt:72:39
    |
 LL |     println!("Rectangle perimeter: {}", rectangle.perimeter());
-   |     ^^^^^^^
-
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/fn/methods__01.pt:5:8
+   |                                       ^ no rules expected this token in macro call
    |
-LL |     x: float,
-   |        ^^^^^
-   |        |
-   |        not found in this scope
-   |        help: perhaps you intended to use this type: `f32`
-
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/fn/methods__01.pt:6:8
+  ::: <patina-prelude>:23:1
    |
-LL |     y: float,
-   |        ^^^^^
-   |        |
-   |        not found in this scope
-   |        help: perhaps you intended to use this type: `f32`
-
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/fn/methods__01.pt:21:15
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL |     fn new(x: float, y: float) -> Point {
-   |               ^^^^^
-   |               |
-   |               not found in this scope
-   |               help: perhaps you intended to use this type: `f32`
-
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/fn/methods__01.pt:21:25
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL |     fn new(x: float, y: float) -> Point {
-   |                         ^^^^^
-   |                         |
-   |                         not found in this scope
-   |                         help: perhaps you intended to use this type: `f32`
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/fn/methods__01.pt:35:22
+error: no rules expected `,`
+  --> tests/ui/src/fn/methods__01.pt:73:34
    |
-LL |     fn area(self) -> float {
-   |                      ^^^^^
-   |                      |
-   |                      not found in this scope
-   |                      help: perhaps you intended to use this type: `f32`
-
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/fn/methods__01.pt:45:27
+LL |     println!("Rectangle area: {}", rectangle.area());
+   |                                  ^ no rules expected this token in macro call
    |
-LL |     fn perimeter(self) -> float {
-   |                           ^^^^^
-   |                           |
-   |                           not found in this scope
-   |                           help: perhaps you intended to use this type: `f32`
-
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/fn/methods__01.pt:54:27
+  ::: <patina-prelude>:23:1
    |
-LL |     fn translate(self, x: float, y: float) -> Self {
-   |                           ^^^^^
-   |                           |
-   |                           not found in this scope
-   |                           help: perhaps you intended to use this type: `f32`
-
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/fn/methods__01.pt:54:37
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL |     fn translate(self, x: float, y: float) -> Self {
-   |                                     ^^^^^
-   |                                     |
-   |                                     not found in this scope
-   |                                     help: perhaps you intended to use this type: `f32`
-
-error: requires `sized` lang_item
-  --> tests/ui/src/fn/methods__01.pt:17:9
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL |         Point { x: 0.0, y: 0.0 }
-   |         ^^^^^^^^^^^^^^^^^^^^^^^^
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 11 previous errors
+error: aborting due to 2 previous errors
 
-For more information about this error, try `rustc --explain E0425`.

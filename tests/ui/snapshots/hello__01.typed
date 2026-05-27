@@ -1,0 +1,46 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, lang_items#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[attr = Lang(PointeeSized)]
+trait PointeeSized { }
+
+#[attr = Lang(MetaSized)]
+trait MetaSized: PointeeSized { }
+
+#[attr = Lang(Sized)]
+trait Sized: MetaSized { }
+
+#[attr = Lang(Copy)]
+trait Copy { }
+
+#[allow(unused)]
+extern mod io;
+
+#[attr = MacroExport {local_inner_macros: false}]
+macro_rules! println { ($s:literal) => { io::format("~s~n", [$s]) }; }
+
+// source: patina-by-example/src/hello.md
+// block: 1/1
+
+// hello.pt
+
+// This is a comment, and is ignored by the compiler.
+// You can test this code by clicking the "Run" button over there ->
+// or if you prefer to use your keyboard, you can use the "Ctrl + Enter"
+// shortcut.
+
+// This code is editable, feel free to hack it!
+// You can always return to the original code by clicking the "Reset" button ->
+
+// This is the main function.
+fn main() ({
+    ((io::format as
+            fn(&str, [&str; 1]))(("~s~n" as &str),
+        ([
+                // Statements here are executed when the compiled binary is called.
+
+                // Print text to the console.
+                ("Hello World!" as &str)] as [&str; 1])) as ());
+} as ())

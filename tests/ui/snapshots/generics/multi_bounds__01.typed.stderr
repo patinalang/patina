@@ -1,44 +1,70 @@
-error[E0433]: cannot find module or crate `Std` in the crate root
-  --> tests/ui/src/generics/multi_bounds__01.pt:4:5
-   |
-LL | use Std::Fmt::{Debug, Display};
-   |     ^^^ use of unresolved module or unlinked crate `Std`
-   |
-help: you might be missing a crate named `Std`, add it to your project and import it in your code
-   |
-LL + extern crate Std;
-   |
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/generics/multi_bounds__01.pt:13:5
-   |
-LL |     println!("u: `{:?}`", u);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/generics/multi_bounds__01.pt:12:5
-   |
-LL |     println!("t: `{:?}`", t);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/generics/multi_bounds__01.pt:8:5
-   |
-LL |     println!("Display: `{}`", t);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/generics/multi_bounds__01.pt:7:5
+error: no rules expected `,`
+  --> tests/ui/src/generics/multi_bounds__01.pt:7:29
    |
 LL |     println!("Debug: `{:?}`", t);
-   |     ^^^^^^^
-
-error: requires `meta_sized` lang_item
-  --> tests/ui/src/generics/multi_bounds__01.pt:6:19
+   |                             ^ no rules expected this token in macro call
    |
-LL | fn compare_prints<T: Debug + Display>(t: T) {
-   |                   ^
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 6 previous errors
+error: no rules expected `,`
+  --> tests/ui/src/generics/multi_bounds__01.pt:8:29
+   |
+LL |     println!("Display: `{}`", t);
+   |                             ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-For more information about this error, try `rustc --explain E0433`.
+error: no rules expected `,`
+  --> tests/ui/src/generics/multi_bounds__01.pt:12:25
+   |
+LL |     println!("t: `{:?}`", t);
+   |                         ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/generics/multi_bounds__01.pt:13:25
+   |
+LL |     println!("u: `{:?}`", u);
+   |                         ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: aborting due to 4 previous errors
+

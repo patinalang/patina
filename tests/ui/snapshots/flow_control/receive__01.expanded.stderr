@@ -1,3 +1,15 @@
+error: prefix `a` is unknown
+  --> tests/ui/src/flow_control/receive__01.pt:8:9
+   |
+LL |         a"ping" => println!("received ping"),
+   |         ^ unknown prefix
+   |
+   = note: prefixed identifiers and literals are reserved since Rust 2021
+help: consider inserting whitespace here
+   |
+LL |         a "ping" => println!("received ping"),
+   |          +
+
 error: expected one of `,`, `:`, or `}`, found `(`
   --> tests/ui/src/flow_control/receive__01.pt:6:12
    |
@@ -63,5 +75,5 @@ error: expected one of `.`, `;`, `?`, `}`, or an operator, found `timeout`
 LL |     } timeout Duration::from_seconds(5) {
    |       ^^^^^^^ expected one of `.`, `;`, `?`, `}`, or an operator
 
-error: aborting due to 6 previous errors
+error: aborting due to 7 previous errors
 

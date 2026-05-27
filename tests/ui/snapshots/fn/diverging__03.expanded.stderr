@@ -1,14 +1,8 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/fn/diverging__03.pt:12:5
-   |
-LL |     println!("You will never see this line!");
-   |     ^^^^^^^
-
 error: cannot find macro `panic` in this scope
   --> tests/ui/src/fn/diverging__03.pt:7:5
    |
 LL |     panic!("This call never returns.");
    |     ^^^^^
 
-error: aborting due to 2 previous errors
+error: aborting due to 1 previous error
 

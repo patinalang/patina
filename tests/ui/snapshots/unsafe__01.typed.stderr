@@ -22,12 +22,6 @@ error[E0425]: cannot find type `term` in this scope
 LL |     let degrees_term = Celcius(10) as term;
    |                                       ^^^^ not found in this scope
 
-error: requires `sized` lang_item
-  --> tests/ui/src/unsafe__01.pt:8:9
-   |
-LL |     let degrees_term = Celcius(10) as term;
-   |         ^^^^^^^^^^^^
-
-error: aborting due to 4 previous errors
+error: aborting due to 3 previous errors
 
 For more information about this error, try `rustc --explain E0425`.

@@ -1,0 +1,34 @@
+#![allow(internal_features)]
+#![feature(no_core, lang_items)]
+#![no_std]
+#![no_core]
+
+#[lang = "pointee_sized"]
+pub trait PointeeSized { }
+
+#[lang = "meta_sized"]
+pub trait MetaSized: PointeeSized { }
+
+#[lang = "sized"]
+pub trait Sized: MetaSized { }
+
+#[lang = "copy"]
+pub trait Copy { }
+
+#[allow(unused)]
+extern mod io;
+
+#[macro_export]
+macro_rules! println { ($s:literal) => { io::format("~s~n", [$s]) }; }
+
+// source: patina-by-example/src/mod/split.md
+// block: 3/4
+
+pub fn function() {
+    io::format("~s~n", ["called `MyMod::Nested::function()`"]);
+}
+
+#[allow(dead_code)]
+fn private_function() {
+    io::format("~s~n", ["called `MyMod::Nested::private_function()`"]);
+}

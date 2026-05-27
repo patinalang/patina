@@ -1,56 +1,36 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/error/result__01.pt:16:5
-   |
-LL |     println!("double is {}", tt);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/error/result__01.pt:13:5
+error: no rules expected `,`
+  --> tests/ui/src/error/result__01.pt:13:28
    |
 LL |     println!("double is {}", twenty);
-   |     ^^^^^^^
+   |                            ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/error/result__01.pt:4:63
+error: no rules expected `,`
+  --> tests/ui/src/error/result__01.pt:16:28
    |
-LL | fn multiply(first_number_str: str, second_number_str: str) -> int {
-   |                                                               ^^^
-   |                                                               |
-   |                                                               not found in this scope
-   |                                                               help: perhaps you intended to use this type: `i32`
+LL |     println!("double is {}", tt);
+   |                            ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/error/result__01.pt:6:49
-   |
-LL |     let first_number = first_number_str.parse::<int>().unwrap();
-   |                                                 ^^^ not found in this scope
-   |
-help: perhaps you intended to use this type
-   |
-LL -     let first_number = first_number_str.parse::<int>().unwrap();
-LL +     let first_number = first_number_str.parse::<i32>().unwrap();
-   |
-help: you might be missing a type parameter
-   |
-LL | fn multiply<int>(first_number_str: str, second_number_str: str) -> int {
-   |            +++++
+error: aborting due to 2 previous errors
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/error/result__01.pt:7:51
-   |
-LL |     let second_number = second_number_str.parse::<int>().unwrap();
-   |                                                   ^^^ not found in this scope
-   |
-help: perhaps you intended to use this type
-   |
-LL -     let second_number = second_number_str.parse::<int>().unwrap();
-LL +     let second_number = second_number_str.parse::<i32>().unwrap();
-   |
-help: you might be missing a type parameter
-   |
-LL | fn multiply<int>(first_number_str: str, second_number_str: str) -> int {
-   |            +++++
-
-error: aborting due to 5 previous errors
-
-For more information about this error, try `rustc --explain E0425`.

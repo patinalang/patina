@@ -1,26 +1,53 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/expression__03.pt:22:5
-   |
-LL |     println!("z is {:?}", z);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/expression__03.pt:21:5
-   |
-LL |     println!("y is {:?}", y);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/expression__03.pt:20:5
+error: no rules expected `,`
+  --> tests/ui/src/expression__03.pt:20:25
    |
 LL |     println!("x is {:?}", x);
-   |     ^^^^^^^
-
-error: requires `sized` lang_item
-  --> tests/ui/src/expression__03.pt:5:9
+   |                         ^ no rules expected this token in macro call
    |
-LL |     let x = 5;
-   |         ^
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 4 previous errors
+error: no rules expected `,`
+  --> tests/ui/src/expression__03.pt:21:25
+   |
+LL |     println!("y is {:?}", y);
+   |                         ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/expression__03.pt:22:25
+   |
+LL |     println!("z is {:?}", z);
+   |                         ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: aborting due to 3 previous errors
 

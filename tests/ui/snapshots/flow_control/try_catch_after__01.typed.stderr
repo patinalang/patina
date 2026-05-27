@@ -1,29 +1,64 @@
+error: prefix `a` is unknown
+  --> tests/ui/src/flow_control/try_catch_after__01.pt:5:5
+   |
+LL |     a"ok"
+   |     ^ unknown prefix
+   |
+   = note: prefixed identifiers and literals are reserved since Rust 2021
+help: consider inserting whitespace here
+   |
+LL |     a "ok"
+   |      +
+
+error: prefix `a` is unknown
+  --> tests/ui/src/flow_control/try_catch_after__01.pt:18:21
+   |
+LL |         ElixirError(a"Elixir.ArithmeticError") =>
+   |                     ^ unknown prefix
+   |
+   = note: prefixed identifiers and literals are reserved since Rust 2021
+help: consider inserting whitespace here
+   |
+LL |         ElixirError(a "Elixir.ArithmeticError") =>
+   |                      +
+
+error: prefix `a` is unknown
+  --> tests/ui/src/flow_control/try_catch_after__01.pt:22:21
+   |
+LL |         ElixirError(a"Elixir.ArgumentError", reason) =>
+   |                     ^ unknown prefix
+   |
+   = note: prefixed identifiers and literals are reserved since Rust 2021
+help: consider inserting whitespace here
+   |
+LL |         ElixirError(a "Elixir.ArgumentError", reason) =>
+   |                      +
+
+error: prefix `a` is unknown
+  --> tests/ui/src/flow_control/try_catch_after__01.pt:38:14
+   |
+LL |         _ => a"unknown",
+   |              ^ unknown prefix
+   |
+   = note: prefixed identifiers and literals are reserved since Rust 2021
+help: consider inserting whitespace here
+   |
+LL |         _ => a "unknown",
+   |               +
+
 error: expected one of `!`, `.`, `::`, `;`, `?`, `{`, `}`, or an operator, found `"ok"`
   --> tests/ui/src/flow_control/try_catch_after__01.pt:5:6
    |
 LL |     a"ok"
    |      ^^^^ expected one of 8 possible tokens
 
-error: expected one of `,`, `:`, or `}`, found `(`
-  --> tests/ui/src/flow_control/try_catch_after__01.pt:10:22
-   |
-LL |     try {
-   |     --- while parsing this struct
-LL |         open_resource()
-   |         -------------^ expected one of `,`, `:`, or `}`
-   |         |
-   |         while parsing this struct field
-   |
-help: try naming a field
-   |
-LL |         open_resource: open_resource()
-   |         ++++++++++++++
-
-error: expected one of `.`, `;`, `?`, `}`, or an operator, found `catch`
+error: keyword `catch` cannot follow a `try` block
   --> tests/ui/src/flow_control/try_catch_after__01.pt:11:7
    |
 LL |     } catch {
-   |       ^^^^^ expected one of `.`, `;`, `?`, `}`, or an operator
+   |       ^^^^^
+   |
+   = help: try using `match` on the result of the `try` block instead
 
 error[E0425]: cannot find type `atom` in this scope
   --> tests/ui/src/flow_control/try_catch_after__01.pt:4:23
@@ -31,6 +66,6 @@ error[E0425]: cannot find type `atom` in this scope
 LL | fn open_resource() -> atom {
    |                       ^^^^ not found in this scope
 
-error: aborting due to 4 previous errors
+error: aborting due to 7 previous errors
 
 For more information about this error, try `rustc --explain E0425`.

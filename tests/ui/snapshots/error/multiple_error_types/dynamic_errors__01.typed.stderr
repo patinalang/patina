@@ -1,116 +1,36 @@
-error[E0432]: unresolved import `Std`
-  --> tests/ui/src/error/multiple_error_types/dynamic_errors__01.pt:4:5
-   |
-LL | use Std::Error;
-   |     ^^^ use of unresolved module or unlinked crate `Std`
-   |
-help: you might be missing a crate named `Std`, add it to your project and import it in your code
-   |
-LL + extern crate Std;
-   |
-
-error[E0432]: unresolved import `Std`
-  --> tests/ui/src/error/multiple_error_types/dynamic_errors__01.pt:5:5
-   |
-LL | use Std::Fmt;
-   |     ^^^ use of unresolved module or unlinked crate `Std`
-   |
-help: you might be missing a crate named `Std`, add it to your project and import it in your code
-   |
-LL + extern crate Std;
-   |
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/error/multiple_error_types/dynamic_errors__01.pt:33:19
-   |
-LL |         Err(e) => println!("Error: {}", e),
-   |                   ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/error/multiple_error_types/dynamic_errors__01.pt:32:18
+error: no rules expected `,`
+  --> tests/ui/src/error/multiple_error_types/dynamic_errors__01.pt:32:52
    |
 LL |         Ok(n) => println!("The first doubled is {}", n),
-   |                  ^^^^^^^
+   |                                                    ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: cannot find macro `write` in this scope
-  --> tests/ui/src/error/multiple_error_types/dynamic_errors__01.pt:15:9
-   |
-LL |         write!(f, "invalid first item to double")
-   |         ^^^^^
-
-error: cannot find attribute `derive` in this scope
-  --> tests/ui/src/error/multiple_error_types/dynamic_errors__01.pt:10:3
-   |
-LL | #[derive(Debug)]
-   |   ^^^^^^
-
-error[E0433]: cannot find type `Std` in this scope
-  --> tests/ui/src/error/multiple_error_types/dynamic_errors__01.pt:8:18
-   |
-LL | type Result<T> = Std::Result::Result<T, dyn Error::Error>;
-   |                  ^^^ use of undeclared type `Std`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/error/multiple_error_types/dynamic_errors__01.pt:21:40
-   |
-LL | fn double_first(list: [str]) -> Result<int> {
-   |                                        ^^^ not found in this scope
-   |
-help: perhaps you intended to use this type
-   |
-LL - fn double_first(list: [str]) -> Result<int> {
-LL + fn double_first(list: [str]) -> Result<i32> {
-   |
-help: you might be missing a type parameter
-   |
-LL | fn double_first<int>(list: [str]) -> Result<int> {
-   |                +++++
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/error/multiple_error_types/dynamic_errors__01.pt:25:23
-   |
-LL |             s.parse::<int>()
-   |                       ^^^ not found in this scope
-   |
-help: perhaps you intended to use this type
-   |
-LL -             s.parse::<int>()
-LL +             s.parse::<i32>()
-   |
-help: you might be missing a type parameter
-   |
-LL | fn double_first<int>(list: [str]) -> Result<int> {
-   |                +++++
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/error/multiple_error_types/dynamic_errors__01.pt:30:25
-   |
-LL | fn print(result: Result<int>) {
-   |                         ^^^ not found in this scope
-   |
-help: perhaps you intended to use this type
-   |
-LL - fn print(result: Result<int>) {
-LL + fn print(result: Result<i32>) {
-   |
-help: you might be missing a type parameter
-   |
-LL | fn print<int>(result: Result<int>) {
-   |         +++++
-
-error[E0531]: cannot find tuple struct or tuple variant `Ok` in this scope
-  --> tests/ui/src/error/multiple_error_types/dynamic_errors__01.pt:32:9
-   |
-LL |         Ok(n) => println!("The first doubled is {}", n),
-   |         ^^ not found in this scope
-
-error[E0531]: cannot find tuple struct or tuple variant `Err` in this scope
-  --> tests/ui/src/error/multiple_error_types/dynamic_errors__01.pt:33:9
+error: no rules expected `,`
+  --> tests/ui/src/error/multiple_error_types/dynamic_errors__01.pt:33:39
    |
 LL |         Err(e) => println!("Error: {}", e),
-   |         ^^^ not found in this scope
+   |                                       ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 12 previous errors
+error: aborting due to 2 previous errors
 
-Some errors have detailed explanations: E0425, E0432, E0433, E0531.
-For more information about an error, try `rustc --explain E0425`.

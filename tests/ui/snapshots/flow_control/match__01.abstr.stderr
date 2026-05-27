@@ -1,0 +1,42 @@
+error: expected pattern, found `^`
+  --> tests/ui/src/flow_control/match__01.pt:36:9
+   |
+LL |         ^expected_value => println!("found expected value")
+   |         ^ expected pattern
+
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match__01.pt:8:32
+   |
+LL |     println!("Tell me about {}", number);
+   |                                ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match__01.pt:31:24
+   |
+LL |     println!("{} -> {}", boolean, binary);
+   |                        ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: aborting due to 3 previous errors
+

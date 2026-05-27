@@ -1,20 +1,53 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/macros/repeat__01.pt:18:5
-   |
-LL |     println!("{}", find_min!(5, 2 * 3, 4));
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/macros/repeat__01.pt:17:5
-   |
-LL |     println!("{}", find_min!(1 + 2, 2));
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/macros/repeat__01.pt:16:5
+error: no rules expected `,`
+  --> tests/ui/src/macros/repeat__01.pt:16:18
    |
 LL |     println!("{}", find_min!(1));
-   |     ^^^^^^^
+   |                  ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/macros/repeat__01.pt:17:18
+   |
+LL |     println!("{}", find_min!(1 + 2, 2));
+   |                  ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/macros/repeat__01.pt:18:18
+   |
+LL |     println!("{}", find_min!(5, 2 * 3, 4));
+   |                  ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
 error: aborting due to 3 previous errors
 

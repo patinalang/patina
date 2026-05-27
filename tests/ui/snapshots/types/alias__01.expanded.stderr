@@ -1,77 +1,19 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/types/alias__01.pt:16:5
+error: no rules expected `,`
+  --> tests/ui/src/types/alias__01.pt:16:53
    |
 LL |     println!("{} nanoseconds + {} inches = {} unit?",
-   |     ^^^^^^^
+   |                                                     ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/types/alias__01.pt:5:19
-   |
-LL | type NanoSecond = int;
-   |                   ^^^
-LL | type Inch = int;
-LL | type Int = int;
-   | --------------- similarly named type alias `Int` defined here
-   |
-help: a type alias with a similar name exists (notice the capitalization)
-   |
-LL - type NanoSecond = int;
-LL + type NanoSecond = Int;
-   |
-help: perhaps you intended to use this type
-   |
-LL - type NanoSecond = int;
-LL + type NanoSecond = i32;
-   |
+error: aborting due to 1 previous error
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/types/alias__01.pt:6:13
-   |
-LL | type Inch = int;
-   |             ^^^
-LL | type Int = int;
-   | --------------- similarly named type alias `Int` defined here
-   |
-help: a type alias with a similar name exists (notice the capitalization)
-   |
-LL - type Inch = int;
-LL + type Inch = Int;
-   |
-help: perhaps you intended to use this type
-   |
-LL - type Inch = int;
-LL + type Inch = i32;
-   |
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/types/alias__01.pt:7:12
-   |
-LL | type Int = int;
-   |            ^^^
-   |            |
-   |            not found in this scope
-   |            help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/types/alias__01.pt:11:40
-   |
-LL | type Int = int;
-   | --------------- similarly named type alias `Int` defined here
-...
-LL |     let nanoseconds: NanoSecond = 5 as int;
-   |                                        ^^^
-   |
-help: a type alias with a similar name exists (notice the capitalization)
-   |
-LL -     let nanoseconds: NanoSecond = 5 as int;
-LL +     let nanoseconds: NanoSecond = 5 as Int;
-   |
-help: perhaps you intended to use this type
-   |
-LL -     let nanoseconds: NanoSecond = 5 as int;
-LL +     let nanoseconds: NanoSecond = 5 as i32;
-   |
-
-error: aborting due to 5 previous errors
-
-For more information about this error, try `rustc --explain E0425`.

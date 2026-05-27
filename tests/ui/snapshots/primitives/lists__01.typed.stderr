@@ -1,91 +1,121 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/primitives/lists__01.pt:34:5
+error: no rules expected `,`
+  --> tests/ui/src/primitives/lists__01.pt:12:44
    |
-LL |     println!("...and the rest: {:?}", rest);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/primitives/lists__01.pt:33:5
+LL |         Some(xval) => println!("elem 0: {}", {}),
+   |                                            ^ no rules expected this token in macro call
    |
-LL |     println!("Sum of first three elements is {}", first + second + third);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/primitives/lists__01.pt:29:5
+  ::: <patina-prelude>:23:1
    |
-LL |     println!("more_xs tail is equal to xs: {}", more_xs.tail == xs);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/primitives/lists__01.pt:23:5
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL |     println!("Rest of the list: {:?}", xs.tail);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/primitives/lists__01.pt:22:5
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL |     println!("First element of the list: {}", xs.head);
-   |     ^^^^^^^
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/primitives/lists__01.pt:18:5
+error: no rules expected `,`
+  --> tests/ui/src/primitives/lists__01.pt:18:47
    |
 LL |     println!("Number of elements in array: {}", xs.len());
-   |     ^^^^^^^
+   |                                               ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/primitives/lists__01.pt:13:17
+error: no rules expected `,`
+  --> tests/ui/src/primitives/lists__01.pt:22:45
    |
-LL |         None => println!("the list is empty!"),
-   |                 ^^^^^^^
+LL |     println!("First element of the list: {}", xs.head);
+   |                                             ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/primitives/lists__01.pt:12:23
+error: no rules expected `,`
+  --> tests/ui/src/primitives/lists__01.pt:23:38
    |
-LL |         Some(xval) => println!("elem 0: {}", {}),
-   |                       ^^^^^^^
+LL |     println!("Rest of the list: {:?}", xs.tail);
+   |                                      ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/primitives/lists__01.pt:6:14
+error: no rules expected `,`
+  --> tests/ui/src/primitives/lists__01.pt:29:47
    |
-LL |     let xs: [int] = [1, 2, 3, 4, 5];
-   |              ^^^
-   |              |
-   |              not found in this scope
-   |              help: perhaps you intended to use this type: `i32`
+LL |     println!("more_xs tail is equal to xs: {}", more_xs.tail == xs);
+   |                                               ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0531]: cannot find tuple struct or tuple variant `Some` in this scope
-  --> tests/ui/src/primitives/lists__01.pt:12:9
+error: no rules expected `,`
+  --> tests/ui/src/primitives/lists__01.pt:33:49
    |
-LL |         Some(xval) => println!("elem 0: {}", {}),
-   |         ^^^^ not found in this scope
+LL |     println!("Sum of first three elements is {}", first + second + third);
+   |                                                 ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find value `rest` in this scope
-  --> tests/ui/src/primitives/lists__01.pt:32:34
+error: no rules expected `,`
+  --> tests/ui/src/primitives/lists__01.pt:34:37
    |
-LL |     let [first, second, third, ..rest] = more_xs;
-   |                                  ^^^^ not found in this scope
+LL |     println!("...and the rest: {:?}", rest);
+   |                                     ^ no rules expected this token in macro call
    |
-   = note: range patterns match against the start and end of a range; to bind the components, use a struct pattern
-help: if you meant to collect the rest of the slice in `rest`, use the at operator
+  ::: <patina-prelude>:23:1
    |
-LL -     let [first, second, third, ..rest] = more_xs;
-LL +     let [first, second, third, rest @ ..] = more_xs;
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-help: if you meant to destructure a range use a struct pattern
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL -     let [first, second, third, ..rest] = more_xs;
-LL +     let [first, second, third, std::ops::RangeTo { end: rest }] = more_xs;
-   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: requires `RangeTo` lang_item
-  --> tests/ui/src/primitives/lists__01.pt:26:27
-   |
-LL |     let more_xs = [-1, 0, ..xs];
-   |                           ^^^^
+error: aborting due to 7 previous errors
 
-error: aborting due to 12 previous errors
-
-Some errors have detailed explanations: E0425, E0531.
-For more information about an error, try `rustc --explain E0425`.

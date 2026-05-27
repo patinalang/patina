@@ -1,8 +1,0 @@
-error: requires `sized` lang_item
-  --> tests/ui/src/custom_types/enum__02.pt:15:9
-   |
-LL |     let x = Operations::Add;
-   |         ^
-
-error: aborting due to 1 previous error
-

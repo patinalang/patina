@@ -1,0 +1,36 @@
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/binding__02.pt:19:51
+   |
+LL |         Some(n @ 42) => println!("The Answer: {}!", n),
+   |                                                   ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/binding__02.pt:21:57
+   |
+LL |         Some(n)      => println!("Not interesting... {}", n),
+   |                                                         ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: aborting due to 2 previous errors
+

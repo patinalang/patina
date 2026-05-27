@@ -1,0 +1,19 @@
+error[E0425]: cannot find type `float` in this scope
+  --> tests/ui/src/generics/impl__01.pt:8:17
+   |
+LL | impl GenericVal<float> {} // Specify `float`
+   |                 ^^^^^ not found in this scope
+   |
+help: perhaps you intended to use this type
+   |
+LL - impl GenericVal<float> {} // Specify `float`
+LL + impl GenericVal<f32> {} // Specify `float`
+   |
+help: you might be missing a type parameter
+   |
+LL | impl<float> GenericVal<float> {} // Specify `float`
+   |     +++++++
+
+error: aborting due to 1 previous error
+
+For more information about this error, try `rustc --explain E0425`.

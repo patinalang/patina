@@ -1,44 +1,19 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/if_else__01.pt:30:5
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/if_else__01.pt:30:24
    |
 LL |     println!("{} -> {}", n, big_n);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/if_else__01.pt:22:13
+   |                        ^ no rules expected this token in macro call
    |
-LL |             println!(", and is a big number, halve the number");
-   |             ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/if_else__01.pt:17:13
+  ::: <patina-prelude>:23:1
    |
-LL |             println!(", and is a small number, increase ten-fold");
-   |             ^^^^^^^
-
-error: cannot find macro `print` in this scope
-  --> tests/ui/src/flow_control/if_else__01.pt:12:9
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL |         print!("{} is zero", n);
-   |         ^^^^^
-
-error: cannot find macro `print` in this scope
-  --> tests/ui/src/flow_control/if_else__01.pt:10:9
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL |         print!("{} is positive", n);
-   |         ^^^^^
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: cannot find macro `print` in this scope
-  --> tests/ui/src/flow_control/if_else__01.pt:8:9
-   |
-LL |         print!("{} is negative", n);
-   |         ^^^^^
-
-error: requires `sized` lang_item
-  --> tests/ui/src/flow_control/if_else__01.pt:5:9
-   |
-LL |     let n = 5;
-   |         ^
-
-error: aborting due to 7 previous errors
+error: aborting due to 1 previous error
 

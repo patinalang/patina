@@ -1,140 +1,70 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:46:5
-   |
-LL |     println!("The difference is: {}", difference(container));
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:44:5
-   |
-LL |     println!("Last number: {}", container.last());
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:43:5
-   |
-LL |     println!("First number: {}", container.first());
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:40:5
+error: no rules expected `,`
+  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:40:52
    |
 LL |     println!("Does container contain {} and {}: {}",
-   |     ^^^^^^^
+   |                                                    ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:4:18
+error: no rules expected `,`
+  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:43:32
    |
-LL | struct Container(int, int);
-   |                  ^^^
-   |                  |
-   |                  not found in this scope
-   |                  help: perhaps you intended to use this type: `i32`
+LL |     println!("First number: {}", container.first());
+   |                                ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:4:23
+error: no rules expected `,`
+  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:44:31
    |
-LL | struct Container(int, int);
-   |                       ^^^
-   |                       |
-   |                       not found in this scope
-   |                       help: perhaps you intended to use this type: `i32`
+LL |     println!("Last number: {}", container.last());
+   |                               ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:10:23
+error: no rules expected `,`
+  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:46:37
    |
-LL |     fn first(self) -> int; // Doesn't explicitly require `A` or `B`.
-   |                       ^^^
-   |                       |
-   |                       not found in this scope
-   |                       help: perhaps you intended to use this type: `i32`
+LL |     println!("The difference is: {}", difference(container));
+   |                                     ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:11:22
-   |
-LL |     fn last(self) -> int;  // Doesn't explicitly require `A` or `B`.
-   |                      ^^^
-   |                      |
-   |                      not found in this scope
-   |                      help: perhaps you intended to use this type: `i32`
+error: aborting due to 4 previous errors
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:14:15
-   |
-LL | impl Contains<int, int> for Container {
-   |               ^^^ not found in this scope
-   |
-help: perhaps you intended to use this type
-   |
-LL - impl Contains<int, int> for Container {
-LL + impl Contains<i32, int> for Container {
-   |
-help: you might be missing a type parameter
-   |
-LL | impl<int> Contains<int, int> for Container {
-   |     +++++
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:14:20
-   |
-LL | impl Contains<int, int> for Container {
-   |                    ^^^ not found in this scope
-   |
-help: perhaps you intended to use this type
-   |
-LL - impl Contains<int, int> for Container {
-LL + impl Contains<int, i32> for Container {
-   |
-help: you might be missing a type parameter
-   |
-LL | impl<int> Contains<int, int> for Container {
-   |     +++++
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:16:33
-   |
-LL |     fn contains(self, number_1: int, number_2: int) -> bool {
-   |                                 ^^^
-   |                                 |
-   |                                 not found in this scope
-   |                                 help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:16:48
-   |
-LL |     fn contains(self, number_1: int, number_2: int) -> bool {
-   |                                                ^^^
-   |                                                |
-   |                                                not found in this scope
-   |                                                help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:21:23
-   |
-LL |     fn first(self) -> int { self.0 }
-   |                       ^^^
-   |                       |
-   |                       not found in this scope
-   |                       help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:24:22
-   |
-LL |     fn last(self) -> int { self.1 }
-   |                      ^^^
-   |                      |
-   |                      not found in this scope
-   |                      help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:29:41
-   |
-LL | fn difference<A, B, C>(container: C) -> int where
-   |                                         ^^^
-   |                                         |
-   |                                         not found in this scope
-   |                                         help: perhaps you intended to use this type: `i32`
-
-error: aborting due to 15 previous errors
-
-For more information about this error, try `rustc --explain E0425`.

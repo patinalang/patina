@@ -1,0 +1,10 @@
+warning: unused import: `unused`
+  --> tests/ui/src/mod/extern_mod_unused__01.pt:2:12
+   |
+LL | extern mod unused;
+   |            ^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: 1 warning emitted
+

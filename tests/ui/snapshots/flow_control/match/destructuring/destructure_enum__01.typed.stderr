@@ -1,207 +1,87 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:39:13
-   |
-LL |             println!("Cyan: {}, magenta: {}, yellow: {}, key (black): {}!",
-   |             ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:37:13
-   |
-LL |             println!("Cyan: {}, magenta: {}, yellow: {}!", c, m, y),
-   |             ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:35:13
-   |
-LL |             println!("Hue: {}, saturation: {}, lightness: {}!", h, s, l),
-   |             ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:33:13
-   |
-LL |             println!("Hue: {}, saturation: {}, value: {}!", h, s, v),
-   |             ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:31:13
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:31:57
    |
 LL |             println!("Red: {}, green: {}, and blue: {}!", r, g, b),
-   |             ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:29:25
+   |                                                         ^ no rules expected this token in macro call
    |
-LL |         Color::Green => println!("The color is Green!"),
-   |                         ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:28:25
+  ::: <patina-prelude>:23:1
    |
-LL |         Color::Blue  => println!("The color is Blue!"),
-   |                         ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:27:25
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL |         Color::Red   => println!("The color is Red!"),
-   |                         ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:24:5
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL |     println!("What color is it?");
-   |     ^^^^^^^
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:13:9
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:33:59
    |
-LL |     RGB(int, int, int),
-   |         ^^^
-   |         |
-   |         not found in this scope
-   |         help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:13:14
+LL |             println!("Hue: {}, saturation: {}, value: {}!", h, s, v),
+   |                                                           ^ no rules expected this token in macro call
    |
-LL |     RGB(int, int, int),
-   |              ^^^
-   |              |
-   |              not found in this scope
-   |              help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:13:19
+  ::: <patina-prelude>:23:1
    |
-LL |     RGB(int, int, int),
-   |                   ^^^
-   |                   |
-   |                   not found in this scope
-   |                   help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:14:9
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL |     HSV(int, int, int),
-   |         ^^^
-   |         |
-   |         not found in this scope
-   |         help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:14:14
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL |     HSV(int, int, int),
-   |              ^^^
-   |              |
-   |              not found in this scope
-   |              help: perhaps you intended to use this type: `i32`
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:14:19
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:35:63
    |
-LL |     HSV(int, int, int),
-   |                   ^^^
-   |                   |
-   |                   not found in this scope
-   |                   help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:15:9
+LL |             println!("Hue: {}, saturation: {}, lightness: {}!", h, s, l),
+   |                                                               ^ no rules expected this token in macro call
    |
-LL |     HSL(int, int, int),
-   |         ^^^
-   |         |
-   |         not found in this scope
-   |         help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:15:14
+  ::: <patina-prelude>:23:1
    |
-LL |     HSL(int, int, int),
-   |              ^^^
-   |              |
-   |              not found in this scope
-   |              help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:15:19
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL |     HSL(int, int, int),
-   |                   ^^^
-   |                   |
-   |                   not found in this scope
-   |                   help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:16:9
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL |     CMY(int, int, int),
-   |         ^^^
-   |         |
-   |         not found in this scope
-   |         help: perhaps you intended to use this type: `i32`
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:16:14
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:37:58
    |
-LL |     CMY(int, int, int),
-   |              ^^^
-   |              |
-   |              not found in this scope
-   |              help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:16:19
+LL |             println!("Cyan: {}, magenta: {}, yellow: {}!", c, m, y),
+   |                                                          ^ no rules expected this token in macro call
    |
-LL |     CMY(int, int, int),
-   |                   ^^^
-   |                   |
-   |                   not found in this scope
-   |                   help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:17:10
+  ::: <patina-prelude>:23:1
    |
-LL |     CMYK(int, int, int, int),
-   |          ^^^
-   |          |
-   |          not found in this scope
-   |          help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:17:15
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL |     CMYK(int, int, int, int),
-   |               ^^^
-   |               |
-   |               not found in this scope
-   |               help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:17:20
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL |     CMYK(int, int, int, int),
-   |                    ^^^
-   |                    |
-   |                    not found in this scope
-   |                    help: perhaps you intended to use this type: `i32`
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:17:25
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:39:75
    |
-LL |     CMYK(int, int, int, int),
-   |                         ^^^
-   |                         |
-   |                         not found in this scope
-   |                         help: perhaps you intended to use this type: `i32`
-
-error: requires `sized` lang_item
-  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:21:9
+LL |             println!("Cyan: {}, magenta: {}, yellow: {}, key (black): {}!",
+   |                                                                           ^ no rules expected this token in macro call
    |
-LL |     let color = Color::RGB(122, 17, 40);
-   |         ^^^^^
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 26 previous errors
+error: aborting due to 5 previous errors
 
-For more information about this error, try `rustc --explain E0425`.

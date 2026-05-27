@@ -1,8 +1,0 @@
-error: requires `sized` lang_item
-  --> tests/ui/src/generics__02.pt:19:9
-   |
-LL |     let _s = Single(A);
-   |         ^^
-
-error: aborting due to 1 previous error
-

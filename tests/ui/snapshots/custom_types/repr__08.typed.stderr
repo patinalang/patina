@@ -1,126 +1,36 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/custom_types/repr__08.pt:29:5
-   |
-LL |     println!("{:?}", records::get_field_names(rect));
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/custom_types/repr__08.pt:25:5
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__08.pt:25:20
    |
 LL |     println!("{:?}", records::get_field_names(point));
-   |     ^^^^^^^
+   |                    ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/custom_types/repr__08.pt:6:11
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__08.pt:29:20
    |
-LL |     Point(int, int),
-   |           ^^^
-   |           |
-   |           not found in this scope
-   |           help: perhaps you intended to use this type: `i32`
+LL |     println!("{:?}", records::get_field_names(rect));
+   |                    ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/custom_types/repr__08.pt:6:16
-   |
-LL |     Point(int, int),
-   |                ^^^
-   |                |
-   |                not found in this scope
-   |                help: perhaps you intended to use this type: `i32`
+error: aborting due to 2 previous errors
 
-error[E0425]: cannot find type `Point` in this scope
-  --> tests/ui/src/custom_types/repr__08.pt:7:28
-   |
-LL |     Rectangle{ upper_left: Point, lower_right: Point },
-   |                            ^^^^^ not found in this scope
-   |
-help: there is an enum variant `NativeRecordEnum::Point`; try using the variant's enum
-   |
-LL -     Rectangle{ upper_left: Point, lower_right: Point },
-LL +     Rectangle{ upper_left: NativeRecordEnum, lower_right: Point },
-   |
-
-error[E0425]: cannot find type `Point` in this scope
-  --> tests/ui/src/custom_types/repr__08.pt:7:48
-   |
-LL |     Rectangle{ upper_left: Point, lower_right: Point },
-   |                                                ^^^^^ not found in this scope
-   |
-help: there is an enum variant `NativeRecordEnum::Point`; try using the variant's enum
-   |
-LL -     Rectangle{ upper_left: Point, lower_right: Point },
-LL +     Rectangle{ upper_left: Point, lower_right: NativeRecordEnum },
-   |
-
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/custom_types/repr__08.pt:10:20
-   |
-LL |     WithCustomName(float),
-   |                    ^^^^^
-   |                    |
-   |                    not found in this scope
-   |                    help: perhaps you intended to use this type: `f32`
-
-warning: unused import: `records`
-  --> tests/ui/src/custom_types/repr__08.pt:20:12
-   |
-LL | extern mod records;
-   |            ^^^^^^^
-   |
-   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
-
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__08.pt:4:8
-   |
-LL | #[repr(native_record)]
-   |        ^^^^^^^^^^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, `simd`, `i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `i64`, `u64`, `i128`, `u128`, `isize`, `usize`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
-
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__08.pt:9:12
-   |
-LL |     #[repr(name = "custom_name")]
-   |            ^^^^^^^^^^^^^^^^^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, `simd`, `i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `i64`, `u64`, `i128`, `u128`, `isize`, `usize`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
-
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__08.pt:15:8
-   |
-LL | #[repr(native_record, module = "external_module", name = "custom_name")]
-   |        ^^^^^^^^^^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, `simd`, `i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `i64`, `u64`, `i128`, `u128`, `isize`, `usize`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
-
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__08.pt:15:23
-   |
-LL | #[repr(native_record, module = "external_module", name = "custom_name")]
-   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, `simd`, `i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `i64`, `u64`, `i128`, `u128`, `isize`, `usize`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
-
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__08.pt:15:51
-   |
-LL | #[repr(native_record, module = "external_module", name = "custom_name")]
-   |                                                   ^^^^^^^^^^^^^^^^^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, `simd`, `i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `i64`, `u64`, `i128`, `u128`, `isize`, `usize`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
-
-error: requires `sized` lang_item
-  --> tests/ui/src/custom_types/repr__08.pt:23:9
-   |
-LL |     let point = NativeRecordEnum::Point(1, 2);
-   |         ^^^^^
-
-error: aborting due to 13 previous errors; 1 warning emitted
-
-Some errors have detailed explanations: E0425, E0552.
-For more information about an error, try `rustc --explain E0425`.

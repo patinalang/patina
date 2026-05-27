@@ -1,52 +1,53 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/error/multiple_error_types__01.pt:19:5
-   |
-LL |     println!("The first doubled is {}", double_first(strings));
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/error/multiple_error_types__01.pt:16:5
-   |
-LL |     println!("The first doubled is {}", double_first(empty));
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/error/multiple_error_types__01.pt:14:5
+error: no rules expected `,`
+  --> tests/ui/src/error/multiple_error_types__01.pt:14:39
    |
 LL |     println!("The first doubled is {}", double_first(numbers));
-   |     ^^^^^^^
+   |                                       ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/error/multiple_error_types__01.pt:4:33
+error: no rules expected `,`
+  --> tests/ui/src/error/multiple_error_types__01.pt:16:39
    |
-LL | fn double_first(list: [str]) -> int {
-   |                                 ^^^
-   |                                 |
-   |                                 not found in this scope
-   |                                 help: perhaps you intended to use this type: `i32`
+LL |     println!("The first doubled is {}", double_first(empty));
+   |                                       ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/error/multiple_error_types__01.pt:6:23
+error: no rules expected `,`
+  --> tests/ui/src/error/multiple_error_types__01.pt:19:39
    |
-LL |     2 * first.parse::<int>().unwrap() // Generate error 2
-   |                       ^^^ not found in this scope
+LL |     println!("The first doubled is {}", double_first(strings));
+   |                                       ^ no rules expected this token in macro call
    |
-help: perhaps you intended to use this type
+  ::: <patina-prelude>:23:1
    |
-LL -     2 * first.parse::<int>().unwrap() // Generate error 2
-LL +     2 * first.parse::<i32>().unwrap() // Generate error 2
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-help: you might be missing a type parameter
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL | fn double_first<int>(list: [str]) -> int {
-   |                +++++
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: requires `sized` lang_item
-  --> tests/ui/src/error/multiple_error_types__01.pt:4:23
-   |
-LL | fn double_first(list: [str]) -> int {
-   |                       ^^^^^
+error: aborting due to 3 previous errors
 
-error: aborting due to 6 previous errors
-
-For more information about this error, try `rustc --explain E0425`.

@@ -1,0 +1,32 @@
+#![allow(internal_features)]
+#![feature(no_core, lang_items)]
+#![no_std]
+#![no_core]
+
+#[lang = "pointee_sized"]
+pub trait PointeeSized { }
+
+#[lang = "meta_sized"]
+pub trait MetaSized: PointeeSized { }
+
+#[lang = "sized"]
+pub trait Sized: MetaSized { }
+
+#[lang = "copy"]
+pub trait Copy { }
+
+#[allow(unused)]
+extern mod io;
+
+#[macro_export]
+macro_rules! println { ($s:literal) => { io::format("~s~n", [$s]) }; }
+
+// source: patina-by-example/src/fn/diverging.md
+// block: 2/4
+
+fn some_fn() { () }
+
+pub fn main() {
+    let _a: () = some_fn();
+    io::format("~s~n", ["This function returns and you can see this line."]);
+}

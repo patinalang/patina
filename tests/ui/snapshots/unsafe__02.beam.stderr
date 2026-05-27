@@ -1,0 +1,67 @@
+error: prefix `a` is unknown
+  --> tests/ui/src/unsafe__02.pt:8:9
+   |
+LL |         a"nil" => "the atom nil",
+   |         ^ unknown prefix
+   |
+   = note: prefixed identifiers and literals are reserved since Rust 2021
+help: consider inserting whitespace here
+   |
+LL |         a "nil" => "the atom nil",
+   |          +
+
+error: prefix `a` is unknown
+  --> tests/ui/src/unsafe__02.pt:9:10
+   |
+LL |         (a"some", val) => "some value (tagged?)",
+   |          ^ unknown prefix
+   |
+   = note: prefixed identifiers and literals are reserved since Rust 2021
+help: consider inserting whitespace here
+   |
+LL |         (a "some", val) => "some value (tagged?)",
+   |           +
+
+error: prefix `a` is unknown
+  --> tests/ui/src/unsafe__02.pt:19:13
+   |
+LL |             a"nil" => "the atom nil",
+   |             ^ unknown prefix
+   |
+   = note: prefixed identifiers and literals are reserved since Rust 2021
+help: consider inserting whitespace here
+   |
+LL |             a "nil" => "the atom nil",
+   |              +
+
+error: expected one of `=>`, `@`, `if`, or `|`, found `"nil"`
+  --> tests/ui/src/unsafe__02.pt:8:10
+   |
+LL |         a"nil" => "the atom nil",
+   |          ^^^^^ expected one of `=>`, `@`, `if`, or `|`
+
+error: expected one of `=>`, `@`, `if`, or `|`, found `"nil"`
+  --> tests/ui/src/unsafe__02.pt:19:14
+   |
+LL |             a"nil" => "the atom nil",
+   |              ^^^^^ expected one of `=>`, `@`, `if`, or `|`
+
+error: no rules expected `,`
+  --> tests/ui/src/unsafe__02.pt:24:22
+   |
+LL |     println!("{}, {}", safe_description, unsafe_description);
+   |                      ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: aborting due to 6 previous errors
+

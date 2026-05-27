@@ -1,0 +1,63 @@
+error: expected one of `,`, `=`, or `}`, found `#`
+  --> tests/ui/src/custom_types/repr__07.pt:18:5
+   |
+LL |     MaybeUntagged(T)
+   |                     -
+   |                     |
+   |                     expected one of `,`, `=`, or `}`
+   |                     help: missing `,`
+...
+LL |     #[repr(tagged, name = "mytag")]
+   |     ^ unexpected token
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/custom_types/repr__07.pt:19:12
+   |
+LL |     Tagged(int),
+   |            ^^^
+   |            |
+   |            not found in this scope
+   |            help: perhaps you intended to use this type: `i32`
+
+error: expected a literal (`1u8`, `1.0f32`, `"string"`, etc.) here, found expression
+  --> tests/ui/src/custom_types/repr__07.pt:7:32
+   |
+LL | #[repr(transparent, fallback = tagged)]
+   |                                ^^^^^^ expressions are not allowed here
+   |
+help: surround the identifier with quotation marks to make it into a string literal
+   |
+LL | #[repr(transparent, fallback = "tagged")]
+   |                                +      +
+
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__07.pt:13:12
+   |
+LL |     #[repr(name = "othertag")]
+   |            ^^^^^^^^^^^^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, `simd`, `i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `i64`, `u64`, `i128`, `u128`, `isize`, `usize`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__07.pt:18:12
+   |
+LL |     #[repr(tagged, name = "mytag")]
+   |            ^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, `simd`, `i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `i64`, `u64`, `i128`, `u128`, `isize`, `usize`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__07.pt:18:20
+   |
+LL |     #[repr(tagged, name = "mytag")]
+   |                    ^^^^^^^^^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, `simd`, `i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `i64`, `u64`, `i128`, `u128`, `isize`, `usize`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+
+error: aborting due to 6 previous errors
+
+Some errors have detailed explanations: E0425, E0552.
+For more information about an error, try `rustc --explain E0425`.

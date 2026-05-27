@@ -1,0 +1,30 @@
+error[E0433]: cannot find module or crate `pkg` in this scope
+  --> tests/ui/src/mod/use__02.pt:27:13
+   |
+LL |         use pkg::Deeply::Nested::function;
+   |             ^^^ use of unresolved module or unlinked crate `pkg`
+   |
+   = help: you might be missing a crate named `pkg`
+
+error[E0433]: cannot find module or crate `io` in this scope
+  --> <patina-prelude>:24:23
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |                       ^^ use of unresolved module or unlinked crate `io`
+   |
+  ::: tests/ui/src/mod/use__02.pt:14:13
+   |
+LL |             println!("called `Deeply::Nested::function()`");
+   |             ----------------------------------------------- in this macro invocation
+   |
+   = help: you might be missing a crate named `io`
+   = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: a builtin type with a similar name exists
+   |
+LL -     ($s:literal) => { io::format("~s~n", [$s]) };
+LL +     ($s:literal) => { i8::format("~s~n", [$s]) };
+   |
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0433`.

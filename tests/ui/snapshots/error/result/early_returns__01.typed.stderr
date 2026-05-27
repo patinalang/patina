@@ -1,163 +1,36 @@
-error[E0433]: cannot find module or crate `Std` in the crate root
-  --> tests/ui/src/error/result/early_returns__01.pt:4:5
-   |
-LL | use Std::Num::ParseIntError;
-   |     ^^^ use of unresolved module or unlinked crate `Std`
-   |
-help: you might be missing a crate named `Std`, add it to your project and import it in your code
-   |
-LL + extern crate Std;
-   |
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/error/result/early_returns__01.pt:22:19
+error: no rules expected `,`
+  --> tests/ui/src/error/result/early_returns__01.pt:22:37
    |
 LL |         Ok(n)  => println!("n is {}", n),
-   |                   ^^^^^^^
+   |                                     ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/error/result/early_returns__01.pt:23:19
+error: no rules expected `,`
+  --> tests/ui/src/error/result/early_returns__01.pt:23:39
    |
 LL |         Err(e) => println!("Error: {}", e),
-   |                   ^^^^^^^
+   |                                       ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `Result` in this scope
-  --> tests/ui/src/error/result/early_returns__01.pt:6:63
-   |
-LL | fn multiply(first_number_str: str, second_number_str: str) -> Result<int, ParseIntError> {
-   |                                                               ^^^^^^ not found in this scope
+error: aborting due to 2 previous errors
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/error/result/early_returns__01.pt:6:70
-   |
-LL | fn multiply(first_number_str: str, second_number_str: str) -> Result<int, ParseIntError> {
-   |                                                                      ^^^ not found in this scope
-   |
-help: perhaps you intended to use this type
-   |
-LL - fn multiply(first_number_str: str, second_number_str: str) -> Result<int, ParseIntError> {
-LL + fn multiply(first_number_str: str, second_number_str: str) -> Result<i32, ParseIntError> {
-   |
-help: you might be missing a type parameter
-   |
-LL | fn multiply<int>(first_number_str: str, second_number_str: str) -> Result<int, ParseIntError> {
-   |            +++++
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/error/result/early_returns__01.pt:7:55
-   |
-LL |     let first_number = match first_number_str.parse::<int>() {
-   |                                                       ^^^ not found in this scope
-   |
-help: perhaps you intended to use this type
-   |
-LL -     let first_number = match first_number_str.parse::<int>() {
-LL +     let first_number = match first_number_str.parse::<i32>() {
-   |
-help: you might be missing a type parameter
-   |
-LL | fn multiply<int>(first_number_str: str, second_number_str: str) -> Result<int, ParseIntError> {
-   |            +++++
-
-error[E0531]: cannot find tuple struct or tuple variant `Ok` in this scope
-  --> tests/ui/src/error/result/early_returns__01.pt:8:9
-   |
-LL |         Ok(first_number)  => first_number,
-   |         ^^ not found in this scope
-
-error[E0531]: cannot find tuple struct or tuple variant `Err` in this scope
-  --> tests/ui/src/error/result/early_returns__01.pt:9:9
-   |
-LL |         Err(e) => return Err(e),
-   |         ^^^ not found in this scope
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/error/result/early_returns__01.pt:12:57
-   |
-LL |     let second_number = match second_number_str.parse::<int>() {
-   |                                                         ^^^ not found in this scope
-   |
-help: perhaps you intended to use this type
-   |
-LL -     let second_number = match second_number_str.parse::<int>() {
-LL +     let second_number = match second_number_str.parse::<i32>() {
-   |
-help: you might be missing a type parameter
-   |
-LL | fn multiply<int>(first_number_str: str, second_number_str: str) -> Result<int, ParseIntError> {
-   |            +++++
-
-error[E0531]: cannot find tuple struct or tuple variant `Ok` in this scope
-  --> tests/ui/src/error/result/early_returns__01.pt:13:9
-   |
-LL |         Ok(second_number)  => second_number,
-   |         ^^ not found in this scope
-
-error[E0531]: cannot find tuple struct or tuple variant `Err` in this scope
-  --> tests/ui/src/error/result/early_returns__01.pt:14:9
-   |
-LL |         Err(e) => return Err(e),
-   |         ^^^ not found in this scope
-
-error[E0425]: cannot find type `Result` in this scope
-  --> tests/ui/src/error/result/early_returns__01.pt:20:18
-   |
-LL | fn print(result: Result<int, ParseIntError>) {
-   |                  ^^^^^^ not found in this scope
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/error/result/early_returns__01.pt:20:25
-   |
-LL | fn print(result: Result<int, ParseIntError>) {
-   |                         ^^^ not found in this scope
-   |
-help: perhaps you intended to use this type
-   |
-LL - fn print(result: Result<int, ParseIntError>) {
-LL + fn print(result: Result<i32, ParseIntError>) {
-   |
-help: you might be missing a type parameter
-   |
-LL | fn print<int>(result: Result<int, ParseIntError>) {
-   |         +++++
-
-error[E0531]: cannot find tuple struct or tuple variant `Ok` in this scope
-  --> tests/ui/src/error/result/early_returns__01.pt:22:9
-   |
-LL |         Ok(n)  => println!("n is {}", n),
-   |         ^^ not found in this scope
-
-error[E0531]: cannot find tuple struct or tuple variant `Err` in this scope
-  --> tests/ui/src/error/result/early_returns__01.pt:23:9
-   |
-LL |         Err(e) => println!("Error: {}", e),
-   |         ^^^ not found in this scope
-
-error: requires `sized` lang_item
-  --> tests/ui/src/error/result/early_returns__01.pt:6:31
-   |
-LL | fn multiply(first_number_str: str, second_number_str: str) -> Result<int, ParseIntError> {
-   |                               ^^^
-
-error[E0425]: cannot find function, tuple struct or tuple variant `Err` in this scope
-  --> tests/ui/src/error/result/early_returns__01.pt:9:26
-   |
-LL |         Err(e) => return Err(e),
-   |                          ^^^ not found in this scope
-
-error[E0425]: cannot find function, tuple struct or tuple variant `Err` in this scope
-  --> tests/ui/src/error/result/early_returns__01.pt:14:26
-   |
-LL |         Err(e) => return Err(e),
-   |                          ^^^ not found in this scope
-
-error[E0425]: cannot find function, tuple struct or tuple variant `Ok` in this scope
-  --> tests/ui/src/error/result/early_returns__01.pt:17:5
-   |
-LL |     Ok(first_number * second_number)
-   |     ^^ not found in this scope
-
-error: aborting due to 19 previous errors
-
-Some errors have detailed explanations: E0425, E0433, E0531.
-For more information about an error, try `rustc --explain E0425`.

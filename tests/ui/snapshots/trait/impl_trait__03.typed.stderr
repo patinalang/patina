@@ -15,12 +15,7 @@ error[E0432]: unresolved import `Std`
   --> tests/ui/src/trait/impl_trait__03.pt:4:5
    |
 LL | use Std::Iter;
-   |     ^^^ use of unresolved module or unlinked crate `Std`
-   |
-help: you might be missing a crate named `Std`, add it to your project and import it in your code
-   |
-LL + extern crate Std;
-   |
+   |     ^^^ use of undeclared type `Std`
 
 error[E0432]: unresolved import `list`
   --> tests/ui/src/trait/impl_trait__03.pt:5:5
@@ -28,33 +23,12 @@ error[E0432]: unresolved import `list`
 LL | use list::IntoIter;
    |     ^^^^ use of unresolved module or unlinked crate `list`
    |
-help: you might be missing a crate named `list`, add it to your project and import it in your code
-   |
-LL + extern crate list;
-   |
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/trait/impl_trait__03.pt:39:5
-   |
-LL |     println!("all done");
-   |     ^^^^^^^
+   = help: you might be missing a crate named `list`
 
 error: cannot find macro `assert_eq` in this scope
-  --> tests/ui/src/trait/impl_trait__03.pt:38:5
+  --> tests/ui/src/trait/impl_trait__03.pt:30:5
    |
-LL |     assert_eq!(Some(5), item);
-   |     ^^^^^^^^^
-
-error: cannot find macro `assert_eq` in this scope
-  --> tests/ui/src/trait/impl_trait__03.pt:36:5
-   |
-LL |     assert_eq!(Some(4), item);
-   |     ^^^^^^^^^
-
-error: cannot find macro `assert_eq` in this scope
-  --> tests/ui/src/trait/impl_trait__03.pt:34:5
-   |
-LL |     assert_eq!(Some(3), item);
+LL |     assert_eq!(Some(1), item);
    |     ^^^^^^^^^
 
 error: cannot find macro `assert_eq` in this scope
@@ -64,9 +38,21 @@ LL |     assert_eq!(Some(2), item);
    |     ^^^^^^^^^
 
 error: cannot find macro `assert_eq` in this scope
-  --> tests/ui/src/trait/impl_trait__03.pt:30:5
+  --> tests/ui/src/trait/impl_trait__03.pt:34:5
    |
-LL |     assert_eq!(Some(1), item);
+LL |     assert_eq!(Some(3), item);
+   |     ^^^^^^^^^
+
+error: cannot find macro `assert_eq` in this scope
+  --> tests/ui/src/trait/impl_trait__03.pt:36:5
+   |
+LL |     assert_eq!(Some(4), item);
+   |     ^^^^^^^^^
+
+error: cannot find macro `assert_eq` in this scope
+  --> tests/ui/src/trait/impl_trait__03.pt:38:5
+   |
+LL |     assert_eq!(Some(5), item);
    |     ^^^^^^^^^
 
 error[E0425]: cannot find type `int` in this scope
@@ -152,13 +138,7 @@ LL | ) -> impl Iterator<Item=int> {
    |                         not found in this scope
    |                         help: perhaps you intended to use this type: `i32`
 
-error: requires `sized` lang_item
-  --> tests/ui/src/trait/impl_trait__03.pt:10:8
-   |
-LL |     v: [int],
-   |        ^^^^^
-
-error: aborting due to 18 previous errors
+error: aborting due to 16 previous errors
 
 Some errors have detailed explanations: E0405, E0425, E0432.
 For more information about an error, try `rustc --explain E0405`.

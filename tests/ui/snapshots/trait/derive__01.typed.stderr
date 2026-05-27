@@ -1,69 +1,36 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/trait/derive__01.pt:47:5
-   |
-LL |     println!("One foot is {} than one meter.", cmp);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/trait/derive__01.pt:36:5
+error: no rules expected `,`
+  --> tests/ui/src/trait/derive__01.pt:36:36
    |
 LL |     println!("One foot equals {:?}", foot);
-   |     ^^^^^^^
-
-error: cannot find attribute `derive` in this scope
-  --> tests/ui/src/trait/derive__01.pt:9:3
+   |                                    ^ no rules expected this token in macro call
    |
-LL | #[derive(Debug)]
-   |   ^^^^^^
-
-error: cannot find attribute `derive` in this scope
-  --> tests/ui/src/trait/derive__01.pt:5:3
+  ::: <patina-prelude>:23:1
    |
-LL | #[derive(PartialEq, PartialOrd)]
-   |   ^^^^^^
-
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/trait/derive__01.pt:6:20
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL | struct Centimeters(float);
-   |                    ^^^^^
-   |                    |
-   |                    not found in this scope
-   |                    help: perhaps you intended to use this type: `f32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/trait/derive__01.pt:10:15
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL | struct Inches(int);
-   |               ^^^
-   |               |
-   |               not found in this scope
-   |               help: perhaps you intended to use this type: `i32`
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/trait/derive__01.pt:16:31
+error: no rules expected `,`
+  --> tests/ui/src/trait/derive__01.pt:47:46
    |
-LL |         Centimeters(inches as float * 2.54)
-   |                               ^^^^^
-   |                               |
-   |                               not found in this scope
-   |                               help: perhaps you intended to use this type: `f32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/trait/derive__01.pt:21:16
+LL |     println!("One foot is {} than one meter.", cmp);
+   |                                              ^ no rules expected this token in macro call
    |
-LL | struct Seconds(int);
-   |                ^^^
-   |                |
-   |                not found in this scope
-   |                help: perhaps you intended to use this type: `i32`
-
-error: requires `sized` lang_item
-  --> tests/ui/src/trait/derive__01.pt:13:23
+  ::: <patina-prelude>:23:1
    |
-LL |     fn to_centimeters(self) -> Centimeters {
-   |                       ^^^^
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 9 previous errors
+error: aborting due to 2 previous errors
 
-For more information about this error, try `rustc --explain E0425`.

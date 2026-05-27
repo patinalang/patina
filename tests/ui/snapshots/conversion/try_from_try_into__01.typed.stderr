@@ -1,24 +1,14 @@
-error[E0433]: cannot find module or crate `Std` in the crate root
+error[E0433]: cannot find type `Std` in this scope
   --> tests/ui/src/conversion/try_from_try_into__01.pt:4:5
    |
 LL | use Std::Convert::TryFrom;
-   |     ^^^ use of unresolved module or unlinked crate `Std`
-   |
-help: you might be missing a crate named `Std`, add it to your project and import it in your code
-   |
-LL + extern crate Std;
-   |
+   |     ^^^ use of undeclared type `Std`
 
-error[E0433]: cannot find module or crate `Std` in the crate root
+error[E0433]: cannot find type `Std` in this scope
   --> tests/ui/src/conversion/try_from_try_into__01.pt:5:5
    |
 LL | use Std::Convert::TryInto;
-   |     ^^^ use of unresolved module or unlinked crate `Std`
-   |
-help: you might be missing a crate named `Std`, add it to your project and import it in your code
-   |
-LL + extern crate Std;
-   |
+   |     ^^^ use of undeclared type `Std`
 
 error: cannot find macro `assert_eq` in this scope
   --> tests/ui/src/conversion/try_from_try_into__01.pt:33:5

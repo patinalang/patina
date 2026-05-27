@@ -1,0 +1,19 @@
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/generics/gen_fn__01.pt:20:26
+   |
+LL | fn gen_spec_int(_s: SGen<int>) {}
+   |                          ^^^ not found in this scope
+   |
+help: perhaps you intended to use this type
+   |
+LL - fn gen_spec_int(_s: SGen<int>) {}
+LL + fn gen_spec_int(_s: SGen<i32>) {}
+   |
+help: you might be missing a type parameter
+   |
+LL | fn gen_spec_int<int>(_s: SGen<int>) {}
+   |                +++++
+
+error: aborting due to 1 previous error
+
+For more information about this error, try `rustc --explain E0425`.

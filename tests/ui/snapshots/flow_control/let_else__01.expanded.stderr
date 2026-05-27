@@ -2,12 +2,7 @@ error[E0432]: unresolved import `str`
   --> tests/ui/src/flow_control/let_else__01.pt:4:5
    |
 LL | use str::FromStr;
-   |     ^^^ use of unresolved module or unlinked crate `str`
-   |
-help: you might be missing a crate named `str`, add it to your project and import it in your code
-   |
-LL + extern crate str;
-   |
+   |     ^^^ `str` is a builtin type, not a module
 
 error: cannot find macro `assert_eq` in this scope
   --> tests/ui/src/flow_control/let_else__01.pt:21:5

@@ -1,31 +1,36 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/for__03.pt:14:5
-   |
-LL |     println!("names: {:?}", names);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/for__03.pt:10:18
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/for__03.pt:10:37
    |
 LL |             _ => println!("Hello {}", name),
-   |                  ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/for__03.pt:9:25
+   |                                     ^ no rules expected this token in macro call
    |
-LL |             "Ferris" => println!("There is a rustacean among us!"),
-   |                         ^^^^^^^
-
-error: requires `None` lang_item
-  --> tests/ui/src/flow_control/for__03.pt:7:5
+  ::: <patina-prelude>:23:1
    |
-LL | /     for name in names.iter() {
-LL | |         match name {
-LL | |             "Ferris" => println!("There is a rustacean among us!"),
-LL | |             _ => println!("Hello {}", name),
-LL | |         }
-LL | |     }
-   | |_____^
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 4 previous errors
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/for__03.pt:14:27
+   |
+LL |     println!("names: {:?}", names);
+   |                           ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: aborting due to 2 previous errors
 

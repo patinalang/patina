@@ -1,33 +1,36 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/generics/new_types__01.pt:29:5
-   |
-LL |     println!("Is an adult? {}", is_adult(age_days.to_years()));
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/generics/new_types__01.pt:28:5
+error: no rules expected `,`
+  --> tests/ui/src/generics/new_types__01.pt:28:31
    |
 LL |     println!("Is an adult? {}", is_adult(age));
-   |     ^^^^^^^
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/new_types__01.pt:4:14
+   |                               ^ no rules expected this token in macro call
    |
-LL | struct Years(int);
-   |              ^^^
-   |              |
-   |              not found in this scope
-   |              help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/new_types__01.pt:6:13
+  ::: <patina-prelude>:23:1
    |
-LL | struct Days(int);
-   |             ^^^
-   |             |
-   |             not found in this scope
-   |             help: perhaps you intended to use this type: `i32`
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 4 previous errors
+error: no rules expected `,`
+  --> tests/ui/src/generics/new_types__01.pt:29:31
+   |
+LL |     println!("Is an adult? {}", is_adult(age_days.to_years()));
+   |                               ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-For more information about this error, try `rustc --explain E0425`.
+error: aborting due to 2 previous errors
+

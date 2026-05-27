@@ -1,45 +1,19 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/error/option_unwrap/defaults__01.pt:13:5
+error: no rules expected `,`
+  --> tests/ui/src/error/option_unwrap/defaults__01.pt:13:43
    |
 LL |     println!("first_available_fruit: {:?}", first_available_fruit);
-   |     ^^^^^^^
-
-error: cannot find attribute `derive` in this scope
-  --> tests/ui/src/error/option_unwrap/defaults__01.pt:4:3
+   |                                           ^ no rules expected this token in macro call
    |
-LL | #[derive(Debug)]
-   |   ^^^^^^
-
-error[E0425]: cannot find type `Option` in this scope
-  --> tests/ui/src/error/option_unwrap/defaults__01.pt:10:19
+  ::: <patina-prelude>:23:1
    |
-LL |     let no_fruit: Option<Fruit> = None;
-   |                   ^^^^^^ not found in this scope
-
-error[E0425]: cannot find value `None` in this scope
-  --> tests/ui/src/error/option_unwrap/defaults__01.pt:10:35
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL |     let no_fruit: Option<Fruit> = None;
-   |                                   ^^^^ not found in this scope
-
-error: requires `sized` lang_item
-  --> tests/ui/src/error/option_unwrap/defaults__01.pt:8:9
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL |     let apple = Some(Fruit::Apple);
-   |         ^^^^^
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
-  --> tests/ui/src/error/option_unwrap/defaults__01.pt:8:17
-   |
-LL |     let apple = Some(Fruit::Apple);
-   |                 ^^^^ not found in this scope
+error: aborting due to 1 previous error
 
-error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
-  --> tests/ui/src/error/option_unwrap/defaults__01.pt:9:18
-   |
-LL |     let orange = Some(Fruit::Orange);
-   |                  ^^^^ not found in this scope
-
-error: aborting due to 7 previous errors
-
-For more information about this error, try `rustc --explain E0425`.

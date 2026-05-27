@@ -28,29 +28,11 @@ help: make this visible only to module `pkg` with `in`
 LL |         pub(in pkg) fn restricted_function() {
    |             ++
 
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/mod/visibility__01.pt:94:5
-   |
-LL |     println!("called `function()`");
-   |     ^^^^^^^
-
 error: cannot find attribute `beam_module` in this scope
   --> tests/ui/src/mod/visibility__01.pt:11:8
    |
 LL |     #![beam_module("Elixir.MyMod")]
    |        ^^^^^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/mod/visibility__01.pt:17:9
-   |
-LL |         println!("called `MyMod::private_function()`");
-   |         ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/mod/visibility__01.pt:22:9
-   |
-LL |         println!("called `MyMod::function()`");
-   |         ^^^^^^^
 
 error: cannot find macro `print` in this scope
   --> tests/ui/src/mod/visibility__01.pt:28:9
@@ -58,35 +40,11 @@ error: cannot find macro `print` in this scope
 LL |         print!("called `MyMod::indirect_access()`, that\n> ");
    |         ^^^^^
 
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/mod/visibility__01.pt:35:13
-   |
-LL |             println!("called `MyMod::Nested::function()`");
-   |             ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/mod/visibility__01.pt:40:13
-   |
-LL |             println!("called `MyMod::Nested::private_function()`");
-   |             ^^^^^^^
-
 error: cannot find macro `print` in this scope
   --> tests/ui/src/mod/visibility__01.pt:46:13
    |
 LL |             print!("called `MyMod::Nested::public_function_in_my_mod()`, that\n> ");
    |             ^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/mod/visibility__01.pt:54:13
-   |
-LL |             println!("called `MyMod::Nested::public_function_in_nested()`");
-   |             ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/mod/visibility__01.pt:61:13
-   |
-LL |             println!("called `MyMod::Nested::public_function_in_super_mod()`");
-   |             ^^^^^^^
 
 error: cannot find macro `print` in this scope
   --> tests/ui/src/mod/visibility__01.pt:66:9
@@ -100,42 +58,186 @@ error: cannot find macro `print` in this scope
 LL |         print!("> ");
    |         ^^^^^
 
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/mod/visibility__01.pt:74:9
-   |
-LL |         println!("called `MyMod::public_function_in_pkg()`");
-   |         ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/mod/visibility__01.pt:81:13
-   |
-LL |             println!("called `MyMod::private_Nested::function()`");
-   |             ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/mod/visibility__01.pt:88:13
-   |
-LL |             println!("called `MyMod::private_Nested::restricted_function()`");
-   |             ^^^^^^^
-
-error[E0433]: cannot find module or crate `pkg` in the crate root
+error: relative paths are not supported in visibilities in 2018 edition or later
   --> tests/ui/src/mod/visibility__01.pt:45:16
    |
 LL |         pub(in pkg::MyMod) fn public_function_in_my_mod() {
-   |                ^^^ use of unresolved module or unlinked crate `pkg`
+   |                ^^^-------
+   |                |
+   |                help: try: `crate::pkg::MyMod`
+
+error[E0433]: cannot find module or crate `io` in this scope
+  --> <patina-prelude>:24:23
    |
-help: you might be missing a crate named `pkg`, add it to your project and import it in your code
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |                       ^^ use of unresolved module or unlinked crate `io`
    |
-LL + extern crate pkg;
+  ::: tests/ui/src/mod/visibility__01.pt:17:9
+   |
+LL |         println!("called `MyMod::private_function()`");
+   |         ---------------------------------------------- in this macro invocation
+   |
+   = help: you might be missing a crate named `io`
+   = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: a builtin type with a similar name exists
+   |
+LL -     ($s:literal) => { io::format("~s~n", [$s]) };
+LL +     ($s:literal) => { i8::format("~s~n", [$s]) };
    |
 
-error: requires `sized` lang_item
-  --> tests/ui/src/mod/visibility__01.pt:29:9
+error[E0433]: cannot find module or crate `io` in this scope
+  --> <patina-prelude>:24:23
    |
-LL |         private_function();
-   |         ^^^^^^^^^^^^^^^^^^
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |                       ^^ use of unresolved module or unlinked crate `io`
+   |
+  ::: tests/ui/src/mod/visibility__01.pt:22:9
+   |
+LL |         println!("called `MyMod::function()`");
+   |         -------------------------------------- in this macro invocation
+   |
+   = help: you might be missing a crate named `io`
+   = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: a builtin type with a similar name exists
+   |
+LL -     ($s:literal) => { io::format("~s~n", [$s]) };
+LL +     ($s:literal) => { i8::format("~s~n", [$s]) };
+   |
 
-error: aborting due to 19 previous errors
+error[E0433]: cannot find module or crate `io` in this scope
+  --> <patina-prelude>:24:23
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |                       ^^ use of unresolved module or unlinked crate `io`
+   |
+  ::: tests/ui/src/mod/visibility__01.pt:35:13
+   |
+LL |             println!("called `MyMod::Nested::function()`");
+   |             ---------------------------------------------- in this macro invocation
+   |
+   = help: you might be missing a crate named `io`
+   = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: a builtin type with a similar name exists
+   |
+LL -     ($s:literal) => { io::format("~s~n", [$s]) };
+LL +     ($s:literal) => { i8::format("~s~n", [$s]) };
+   |
+
+error[E0433]: cannot find module or crate `io` in this scope
+  --> <patina-prelude>:24:23
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |                       ^^ use of unresolved module or unlinked crate `io`
+   |
+  ::: tests/ui/src/mod/visibility__01.pt:40:13
+   |
+LL |             println!("called `MyMod::Nested::private_function()`");
+   |             ------------------------------------------------------ in this macro invocation
+   |
+   = help: you might be missing a crate named `io`
+   = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: a builtin type with a similar name exists
+   |
+LL -     ($s:literal) => { io::format("~s~n", [$s]) };
+LL +     ($s:literal) => { i8::format("~s~n", [$s]) };
+   |
+
+error[E0433]: cannot find module or crate `io` in this scope
+  --> <patina-prelude>:24:23
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |                       ^^ use of unresolved module or unlinked crate `io`
+   |
+  ::: tests/ui/src/mod/visibility__01.pt:54:13
+   |
+LL |             println!("called `MyMod::Nested::public_function_in_nested()`");
+   |             --------------------------------------------------------------- in this macro invocation
+   |
+   = help: you might be missing a crate named `io`
+   = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: a builtin type with a similar name exists
+   |
+LL -     ($s:literal) => { io::format("~s~n", [$s]) };
+LL +     ($s:literal) => { i8::format("~s~n", [$s]) };
+   |
+
+error[E0433]: cannot find module or crate `io` in this scope
+  --> <patina-prelude>:24:23
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |                       ^^ use of unresolved module or unlinked crate `io`
+   |
+  ::: tests/ui/src/mod/visibility__01.pt:61:13
+   |
+LL |             println!("called `MyMod::Nested::public_function_in_super_mod()`");
+   |             ------------------------------------------------------------------ in this macro invocation
+   |
+   = help: you might be missing a crate named `io`
+   = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: a builtin type with a similar name exists
+   |
+LL -     ($s:literal) => { io::format("~s~n", [$s]) };
+LL +     ($s:literal) => { i8::format("~s~n", [$s]) };
+   |
+
+error[E0433]: cannot find module or crate `io` in this scope
+  --> <patina-prelude>:24:23
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |                       ^^ use of unresolved module or unlinked crate `io`
+   |
+  ::: tests/ui/src/mod/visibility__01.pt:74:9
+   |
+LL |         println!("called `MyMod::public_function_in_pkg()`");
+   |         ---------------------------------------------------- in this macro invocation
+   |
+   = help: you might be missing a crate named `io`
+   = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: a builtin type with a similar name exists
+   |
+LL -     ($s:literal) => { io::format("~s~n", [$s]) };
+LL +     ($s:literal) => { i8::format("~s~n", [$s]) };
+   |
+
+error[E0433]: cannot find module or crate `io` in this scope
+  --> <patina-prelude>:24:23
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |                       ^^ use of unresolved module or unlinked crate `io`
+   |
+  ::: tests/ui/src/mod/visibility__01.pt:81:13
+   |
+LL |             println!("called `MyMod::private_Nested::function()`");
+   |             ------------------------------------------------------ in this macro invocation
+   |
+   = help: you might be missing a crate named `io`
+   = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: a builtin type with a similar name exists
+   |
+LL -     ($s:literal) => { io::format("~s~n", [$s]) };
+LL +     ($s:literal) => { i8::format("~s~n", [$s]) };
+   |
+
+error[E0433]: cannot find module or crate `io` in this scope
+  --> <patina-prelude>:24:23
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |                       ^^ use of unresolved module or unlinked crate `io`
+   |
+  ::: tests/ui/src/mod/visibility__01.pt:88:13
+   |
+LL |             println!("called `MyMod::private_Nested::restricted_function()`");
+   |             ----------------------------------------------------------------- in this macro invocation
+   |
+   = help: you might be missing a crate named `io`
+   = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: a builtin type with a similar name exists
+   |
+LL -     ($s:literal) => { io::format("~s~n", [$s]) };
+LL +     ($s:literal) => { i8::format("~s~n", [$s]) };
+   |
+
+error: aborting due to 17 previous errors
 
 Some errors have detailed explanations: E0433, E0704.
 For more information about an error, try `rustc --explain E0433`.

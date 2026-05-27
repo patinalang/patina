@@ -1,102 +1,36 @@
-error[E0433]: cannot find module or crate `Std` in the crate root
-  --> tests/ui/src/generics/bounds__03.pt:5:5
-   |
-LL | use Std::Fmt::Debug;
-   |     ^^^ use of unresolved module or unlinked crate `Std`
-   |
-help: you might be missing a crate named `Std`, add it to your project and import it in your code
-   |
-LL + extern crate Std;
-   |
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/generics/bounds__03.pt:35:5
-   |
-LL |     println!("Area: {}", area(rectangle));
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/generics/bounds__03.pt:23:5
+error: no rules expected `,`
+  --> tests/ui/src/generics/bounds__03.pt:23:20
    |
 LL |     println!("{:?}", t);
-   |     ^^^^^^^
-
-error: cannot find attribute `derive` in this scope
-  --> tests/ui/src/generics/bounds__03.pt:15:3
+   |                    ^ no rules expected this token in macro call
    |
-LL | #[derive(Debug)]
-   |   ^^^^^^
-
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/generics/bounds__03.pt:8:22
+  ::: <patina-prelude>:23:1
    |
-LL |     fn area(self) -> float;
-   |                      ^^^^^
-   |                      |
-   |                      not found in this scope
-   |                      help: perhaps you intended to use this type: `f32`
-
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/generics/bounds__03.pt:12:22
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL |     fn area(self) -> float { self.length * self.height }
-   |                      ^^^^^
-   |                      |
-   |                      not found in this scope
-   |                      help: perhaps you intended to use this type: `f32`
-
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/generics/bounds__03.pt:16:28
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL | struct Rectangle { length: float, height: float }
-   |                            ^^^^^
-   |                            |
-   |                            not found in this scope
-   |                            help: perhaps you intended to use this type: `f32`
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/generics/bounds__03.pt:16:43
+error: no rules expected `,`
+  --> tests/ui/src/generics/bounds__03.pt:35:24
    |
-LL | struct Rectangle { length: float, height: float }
-   |                                           ^^^^^
-   |                                           |
-   |                                           not found in this scope
-   |                                           help: perhaps you intended to use this type: `f32`
-
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/generics/bounds__03.pt:18:28
+LL |     println!("Area: {}", area(rectangle));
+   |                        ^ no rules expected this token in macro call
    |
-LL | struct Triangle  { length: float, height: float }
-   |                            ^^^^^
-   |                            |
-   |                            not found in this scope
-   |                            help: perhaps you intended to use this type: `f32`
-
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/generics/bounds__03.pt:18:43
+  ::: <patina-prelude>:23:1
    |
-LL | struct Triangle  { length: float, height: float }
-   |                                           ^^^^^
-   |                                           |
-   |                                           not found in this scope
-   |                                           help: perhaps you intended to use this type: `f32`
-
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/generics/bounds__03.pt:28:30
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL | fn area<T: HasArea>(t: T) -> float { t.area() }
-   |                              ^^^^^
-   |                              |
-   |                              not found in this scope
-   |                              help: perhaps you intended to use this type: `f32`
-
-error: requires `sized` lang_item
-  --> tests/ui/src/generics/bounds__03.pt:12:13
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL |     fn area(self) -> float { self.length * self.height }
-   |             ^^^^
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 12 previous errors
+error: aborting due to 2 previous errors
 
-Some errors have detailed explanations: E0425, E0433.
-For more information about an error, try `rustc --explain E0425`.

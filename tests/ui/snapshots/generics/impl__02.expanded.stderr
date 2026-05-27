@@ -1,27 +1,19 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/generics/impl__02.pt:30:5
+error: no rules expected `,`
+  --> tests/ui/src/generics/impl__02.pt:30:22
    |
 LL |     println!("{}, {}", x.value(), y.value());
-   |     ^^^^^^^
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/impl__02.pt:5:10
+   |                      ^ no rules expected this token in macro call
    |
-LL |     val: int,
-   |          ^^^
-   |          |
-   |          not found in this scope
-   |          help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/impl__02.pt:14:23
+  ::: <patina-prelude>:23:1
    |
-LL |     fn value(self) -> int {
-   |                       ^^^
-   |                       |
-   |                       not found in this scope
-   |                       help: perhaps you intended to use this type: `i32`
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 3 previous errors
+error: aborting due to 1 previous error
 
-For more information about this error, try `rustc --explain E0425`.

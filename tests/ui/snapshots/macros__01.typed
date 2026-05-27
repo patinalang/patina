@@ -1,0 +1,42 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, lang_items#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[attr = Lang(PointeeSized)]
+trait PointeeSized { }
+
+#[attr = Lang(MetaSized)]
+trait MetaSized: PointeeSized { }
+
+#[attr = Lang(Sized)]
+trait Sized: MetaSized { }
+
+#[attr = Lang(Copy)]
+trait Copy { }
+
+#[allow(unused)]
+extern mod io;
+
+#[attr = MacroExport {local_inner_macros: false}]
+macro_rules! println { ($s:literal) => { io::format("~s~n", [$s]) }; }
+
+// source: patina-by-example/src/macros.md
+// block: 1/1
+
+// This is a simple macro named `say_hello`.
+macro_rules! say_hello {
+    () =>
+    {
+        println!("Hello!")
+        // `()` indicates that the macro takes no argument.
+        // The macro will expand into the contents of this block.
+    };
+}
+
+fn main() ({
+    ((io::format as
+            fn(&str, [&str; 1]))(("~s~n" as &str),
+        ([("Hello!" as &str)] as [&str; 1])) as ())
+    // This call will expand into `println!("Hello!")`
+} as ())

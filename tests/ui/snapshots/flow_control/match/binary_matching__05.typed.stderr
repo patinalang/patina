@@ -12,11 +12,5 @@ LL |     match <<119>> {
    |     |
    |     while parsing this `match` expression
 
-error: requires `sized` lang_item
-  --> tests/ui/src/flow_control/match/binary_matching__05.pt:5:9
-   |
-LL |     let png_prefix = "PNG";
-   |         ^^^^^^^^^^
-
-error: aborting due to 3 previous errors
+error: aborting due to 2 previous errors
 

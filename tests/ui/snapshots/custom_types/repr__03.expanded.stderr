@@ -1,75 +1,104 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/custom_types/repr__03.pt:40:5
-   |
-LL |     println!("{:?}", TaggedEnum::WithCustomTag(42) as term);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/custom_types/repr__03.pt:36:5
-   |
-LL |     println!("{:?}", TaggedEnum::WithOneUnitElem(()) as term);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/custom_types/repr__03.pt:33:5
-   |
-LL |     println!("{:?}", TaggedEnum::WithUnitElem((), 42) as term);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/custom_types/repr__03.pt:27:5
-   |
-LL |     println!("{:?}", TaggedEnum::StructStyle{x: 1, y: 2} as term);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/custom_types/repr__03.pt:24:5
-   |
-LL |     println!("{:?}", TaggedEnum::TupleStyle("hello") as term);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/custom_types/repr__03.pt:20:5
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__03.pt:20:20
    |
 LL |     println!("{:?}", TaggedEnum::Unit as term);
-   |     ^^^^^^^
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/custom_types/repr__03.pt:8:20
+   |                    ^ no rules expected this token in macro call
    |
-LL |     StructStyle{x: int, y: int},
-   |                    ^^^
-   |                    |
-   |                    not found in this scope
-   |                    help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/custom_types/repr__03.pt:8:28
+  ::: <patina-prelude>:23:1
    |
-LL |     StructStyle{x: int, y: int},
-   |                            ^^^
-   |                            |
-   |                            not found in this scope
-   |                            help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/custom_types/repr__03.pt:10:22
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL |     WithUnitElem((), int),
-   |                      ^^^
-   |                      |
-   |                      not found in this scope
-   |                      help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/custom_types/repr__03.pt:14:19
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL |     WithCustomTag(int),
-   |                   ^^^
-   |                   |
-   |                   not found in this scope
-   |                   help: perhaps you intended to use this type: `i32`
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 10 previous errors
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__03.pt:24:20
+   |
+LL |     println!("{:?}", TaggedEnum::TupleStyle("hello") as term);
+   |                    ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-For more information about this error, try `rustc --explain E0425`.
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__03.pt:27:20
+   |
+LL |     println!("{:?}", TaggedEnum::StructStyle{x: 1, y: 2} as term);
+   |                    ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__03.pt:33:20
+   |
+LL |     println!("{:?}", TaggedEnum::WithUnitElem((), 42) as term);
+   |                    ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__03.pt:36:20
+   |
+LL |     println!("{:?}", TaggedEnum::WithOneUnitElem(()) as term);
+   |                    ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__03.pt:40:20
+   |
+LL |     println!("{:?}", TaggedEnum::WithCustomTag(42) as term);
+   |                    ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: aborting due to 6 previous errors
+

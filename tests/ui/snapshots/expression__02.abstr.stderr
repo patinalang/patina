@@ -1,0 +1,11 @@
+error[E0369]: cannot add `{integer}` to `{integer}`
+  --> tests/ui/src/expression__02.pt:10:7
+   |
+LL |     x + 1;
+   |     - ^ - {integer}
+   |     |
+   |     {integer}
+
+error: aborting due to 1 previous error
+
+For more information about this error, try `rustc --explain E0369`.

@@ -1108,6 +1108,7 @@ impl<'tcx> ThirBuildCx<'tcx> {
             Res::Def(DefKind::Fn, _)
             | Res::Def(DefKind::AssocFn, _)
             | Res::Def(DefKind::Ctor(_, CtorKind::Fn), _)
+            | Res::Def(DefKind::ExternMod, _)
             | Res::Def(DefKind::Const { .. }, _)
             | Res::Def(DefKind::AssocConst { .. }, _) => {
                 self.typeck_results.user_provided_types().get(hir_id).copied().map(Box::new)
@@ -1244,6 +1245,11 @@ impl<'tcx> ThirBuildCx<'tcx> {
                         kind,
                     }),
                 }
+            }
+
+            Res::Def(DefKind::ExternMod, _) => {
+                let user_ty = self.user_args_applied_to_res(expr.hir_id, res);
+                ExprKind::ZstLiteral { user_ty }
             }
 
             Res::Local(var_hir_id) => self.convert_var(var_hir_id),

@@ -4,11 +4,31 @@ error: cannot find macro `assert_eq` in this scope
 LL |     assert_eq!(result, 20);
    |     ^^^^^^^^^
 
-error: requires `sized` lang_item
-  --> tests/ui/src/flow_control/loop/return__01.pt:5:9
+error[E0368]: binary assignment operation `+=` cannot be applied to type `{integer}`
+  --> tests/ui/src/flow_control/loop/return__01.pt:8:9
    |
-LL |     let mut counter = 0;
-   |         ^^^^^^^^^^^
+LL |         counter += 1;
+   |         -------^^^^^
+   |         |
+   |         cannot use `+=` on type `{integer}`
 
-error: aborting due to 2 previous errors
+error[E0369]: binary operation `==` cannot be applied to type `{integer}`
+  --> tests/ui/src/flow_control/loop/return__01.pt:10:20
+   |
+LL |         if counter == 10 {
+   |            ------- ^^ -- {integer}
+   |            |
+   |            {integer}
 
+error[E0369]: cannot multiply `{integer}` by `{integer}`
+  --> tests/ui/src/flow_control/loop/return__01.pt:11:27
+   |
+LL |             break counter * 2;
+   |                   ------- ^ - {integer}
+   |                   |
+   |                   {integer}
+
+error: aborting due to 4 previous errors
+
+Some errors have detailed explanations: E0368, E0369.
+For more information about an error, try `rustc --explain E0368`.

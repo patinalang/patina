@@ -1,0 +1,19 @@
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/while_let__02.pt:15:49
+   |
+LL |             println!("`i` is `{:?}`. Try again.", i);
+   |                                                 ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: aborting due to 1 previous error
+

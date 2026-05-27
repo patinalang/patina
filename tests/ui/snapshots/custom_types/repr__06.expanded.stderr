@@ -1,54 +1,53 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/custom_types/repr__06.pt:36:5
-   |
-LL |     println!("{:?}", TransparentEnum::StructStyle{point: Point{x: 1, y: 2}} as term);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/custom_types/repr__06.pt:33:5
-   |
-LL |     println!("{:?}", TransparentEnum::TupleStyle(200, "hello") as term);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/custom_types/repr__06.pt:30:5
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__06.pt:30:20
    |
 LL |     println!("{:?}", TransparentEnum::Unit as term);
-   |     ^^^^^^^
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/custom_types/repr__06.pt:6:8
+   |                    ^ no rules expected this token in macro call
    |
-LL |     x: int,
-   |        ^^^
-   |        |
-   |        not found in this scope
-   |        help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/custom_types/repr__06.pt:7:8
+  ::: <patina-prelude>:23:1
    |
-LL |     y: int,
-   |        ^^^
-   |        |
-   |        not found in this scope
-   |        help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/custom_types/repr__06.pt:13:16
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL |     TupleStyle(int, str),
-   |                ^^^
-   |                |
-   |                not found in this scope
-   |                help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `atom` in this scope
-  --> tests/ui/src/custom_types/repr__06.pt:26:12
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL |     OrAtom(atom)
-   |            ^^^^ not found in this scope
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 7 previous errors
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__06.pt:33:20
+   |
+LL |     println!("{:?}", TransparentEnum::TupleStyle(200, "hello") as term);
+   |                    ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-For more information about this error, try `rustc --explain E0425`.
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__06.pt:36:20
+   |
+LL |     println!("{:?}", TransparentEnum::StructStyle{point: Point{x: 1, y: 2}} as term);
+   |                    ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: aborting due to 3 previous errors
+

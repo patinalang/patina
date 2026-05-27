@@ -1,51 +1,36 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/custom_types/repr__02.pt:15:5
-   |
-LL |     println!("{:?}", Bar(x: 1, y: 2, z: ()) as term);
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/custom_types/repr__02.pt:11:5
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__02.pt:11:20
    |
 LL |     println!("{:?}", Pair(42, 3.14) as term);
-   |     ^^^^^^^
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/custom_types/repr__02.pt:5:13
+   |                    ^ no rules expected this token in macro call
    |
-LL | struct Pair(int, float);
-   |             ^^^
-   |             |
-   |             not found in this scope
-   |             help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/custom_types/repr__02.pt:5:18
+  ::: <patina-prelude>:23:1
    |
-LL | struct Pair(int, float);
-   |                  ^^^^^
-   |                  |
-   |                  not found in this scope
-   |                  help: perhaps you intended to use this type: `f32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/custom_types/repr__02.pt:8:16
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL | struct Bar{ x: int, y: int, z: () }
-   |                ^^^
-   |                |
-   |                not found in this scope
-   |                help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/custom_types/repr__02.pt:8:24
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL | struct Bar{ x: int, y: int, z: () }
-   |                        ^^^
-   |                        |
-   |                        not found in this scope
-   |                        help: perhaps you intended to use this type: `i32`
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 6 previous errors
+error: no rules expected `,`
+  --> tests/ui/src/custom_types/repr__02.pt:15:20
+   |
+LL |     println!("{:?}", Bar(x: 1, y: 2, z: ()) as term);
+   |                    ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-For more information about this error, try `rustc --explain E0425`.
+error: aborting due to 2 previous errors
+

@@ -1,51 +1,70 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/guard__01.pt:15:46
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/guard__01.pt:15:80
    |
 LL |         Temperature::Celsius(t) if t > 30 => println!("{}C is above 30 Celsius", t),
-   |                                              ^^^^^^^
+   |                                                                                ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/guard__01.pt:17:36
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/guard__01.pt:17:82
    |
 LL |         Temperature::Celsius(t) => println!("{}C is equal to or below 30 Celsius", t),
-   |                                    ^^^^^^^
+   |                                                                                  ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/guard__01.pt:19:49
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/guard__01.pt:19:86
    |
 LL |         Temperature::Fahrenheit(t) if t > 86 => println!("{}F is above 86 Fahrenheit", t),
-   |                                                 ^^^^^^^
+   |                                                                                      ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/guard__01.pt:20:39
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/guard__01.pt:20:88
    |
 LL |         Temperature::Fahrenheit(t) => println!("{}F is equal to or below 86 Fahrenheit", t),
-   |                                       ^^^^^^^
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/flow_control/match/guard__01.pt:6:13
+   |                                                                                        ^ no rules expected this token in macro call
    |
-LL |     Celsius(int),
-   |             ^^^
-   |             |
-   |             not found in this scope
-   |             help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/flow_control/match/guard__01.pt:7:16
+  ::: <patina-prelude>:23:1
    |
-LL |     Fahrenheit(int),
-   |                ^^^
-   |                |
-   |                not found in this scope
-   |                help: perhaps you intended to use this type: `i32`
-
-error: requires `sized` lang_item
-  --> tests/ui/src/flow_control/match/guard__01.pt:11:9
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL |     let temperature = Temperature::Celsius(35);
-   |         ^^^^^^^^^^^
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 7 previous errors
+error: aborting due to 4 previous errors
 
-For more information about this error, try `rustc --explain E0425`.

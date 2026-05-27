@@ -1,20 +1,19 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/error/panic__01.pt:8:5
+error: no rules expected `,`
+  --> tests/ui/src/error/panic__01.pt:8:49
    |
 LL |     println!("Some refreshing {} is all I need.", beverage);
-   |     ^^^^^^^
-
-error: cannot find macro `panic` in this scope
-  --> tests/ui/src/error/panic__01.pt:6:33
+   |                                                 ^ no rules expected this token in macro call
    |
-LL |     if beverage == "lemonade" { panic!("AAAaaaaa!!!!"); }
-   |                                 ^^^^^
-
-error: requires `sized` lang_item
-  --> tests/ui/src/error/panic__01.pt:4:20
+  ::: <patina-prelude>:23:1
    |
-LL | fn drink(beverage: str) {
-   |                    ^^^
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 3 previous errors
+error: aborting due to 1 previous error
 

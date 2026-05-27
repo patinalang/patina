@@ -1,1 +1,4 @@
 /target
+tests/ui/snapshots/**/*.beam
+tests/ui/snapshots/**/*.eaf
+erl_crash.dump

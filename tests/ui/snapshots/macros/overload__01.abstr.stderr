@@ -1,0 +1,44 @@
+error: no rules expected `,`
+  --> tests/ui/src/macros/overload__01.pt:10:41
+   |
+LL |         println!("{:?} and {:?} is {:?}",
+   |                                         ^ no rules expected this token in macro call
+...
+LL |     test!(1 + 1 == 2; and 2 * 2 == 4);
+   |     --------------------------------- in this macro invocation
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+   = note: this error originates in the macro `test` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: no rules expected `,`
+  --> tests/ui/src/macros/overload__01.pt:17:40
+   |
+LL |         println!("{:?} or {:?} is {:?}",
+   |                                        ^ no rules expected this token in macro call
+...
+LL |     test!(true; or false);
+   |     --------------------- in this macro invocation
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+   = note: this error originates in the macro `test` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: aborting due to 2 previous errors
+

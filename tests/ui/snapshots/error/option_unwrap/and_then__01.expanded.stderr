@@ -1,94 +1,36 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/error/option_unwrap/and_then__01.pt:48:23
+error: no rules expected `,`
+  --> tests/ui/src/error/option_unwrap/and_then__01.pt:47:66
+   |
+LL |         Some(food) => println!("Yay! On {:?} we get to eat {:?}.", day, food),
+   |                                                                  ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: no rules expected `,`
+  --> tests/ui/src/error/option_unwrap/and_then__01.pt:48:69
    |
 LL |         None       => println!("Oh no. We don't get to eat on {:?}?", day),
-   |                       ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/error/option_unwrap/and_then__01.pt:47:23
+   |                                                                     ^ no rules expected this token in macro call
    |
-LL |         Some(food) => println!("Yay! On {:?} we get to eat {:?}.", day, food),
-   |                       ^^^^^^^
-
-error: cannot find attribute `derive` in this scope
-  --> tests/ui/src/error/option_unwrap/and_then__01.pt:7:3
+  ::: <patina-prelude>:23:1
    |
-LL | #[derive(Debug)] enum Day { Monday, Tuesday, Wednesday }
-   |   ^^^^^^
-
-error: cannot find attribute `derive` in this scope
-  --> tests/ui/src/error/option_unwrap/and_then__01.pt:6:3
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL | #[derive(Debug)] enum Food { CordonBleu, Steak, Sushi }
-   |   ^^^^^^
-
-error[E0425]: cannot find type `Option` in this scope
-  --> tests/ui/src/error/option_unwrap/and_then__01.pt:10:36
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
    |
-LL | fn have_ingredients(food: Food) -> Option<Food> {
-   |                                    ^^^^^^ not found in this scope
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error[E0425]: cannot find value `None` in this scope
-  --> tests/ui/src/error/option_unwrap/and_then__01.pt:12:24
-   |
-LL |         Food::Sushi => None,
-   |                        ^^^^ not found in this scope
+error: aborting due to 2 previous errors
 
-error[E0425]: cannot find type `Option` in this scope
-  --> tests/ui/src/error/option_unwrap/and_then__01.pt:18:31
-   |
-LL | fn have_recipe(food: Food) -> Option<Food> {
-   |                               ^^^^^^ not found in this scope
-
-error[E0425]: cannot find value `None` in this scope
-  --> tests/ui/src/error/option_unwrap/and_then__01.pt:20:29
-   |
-LL |         Food::CordonBleu => None,
-   |                             ^^^^ not found in this scope
-
-error[E0425]: cannot find type `Option` in this scope
-  --> tests/ui/src/error/option_unwrap/and_then__01.pt:27:31
-   |
-LL | fn cookable_v1(food: Food) -> Option<Food> {
-   |                               ^^^^^^ not found in this scope
-
-error[E0531]: cannot find tuple struct or tuple variant `Some` in this scope
-  --> tests/ui/src/error/option_unwrap/and_then__01.pt:30:9
-   |
-LL |         Some(food) => have_ingredients(food),
-   |         ^^^^ not found in this scope
-
-error[E0425]: cannot find type `Option` in this scope
-  --> tests/ui/src/error/option_unwrap/and_then__01.pt:35:31
-   |
-LL | fn cookable_v3(food: Food) -> Option<Food> {
-   |                               ^^^^^^ not found in this scope
-
-error[E0425]: cannot find type `Option` in this scope
-  --> tests/ui/src/error/option_unwrap/and_then__01.pt:41:31
-   |
-LL | fn cookable_v2(food: Food) -> Option<Food> {
-   |                               ^^^^^^ not found in this scope
-
-error[E0531]: cannot find tuple struct or tuple variant `Some` in this scope
-  --> tests/ui/src/error/option_unwrap/and_then__01.pt:47:9
-   |
-LL |         Some(food) => println!("Yay! On {:?} we get to eat {:?}.", day, food),
-   |         ^^^^ not found in this scope
-
-error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
-  --> tests/ui/src/error/option_unwrap/and_then__01.pt:13:24
-   |
-LL |         _           => Some(food),
-   |                        ^^^^ not found in this scope
-
-error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
-  --> tests/ui/src/error/option_unwrap/and_then__01.pt:21:29
-   |
-LL |         _                => Some(food),
-   |                             ^^^^ not found in this scope
-
-error: aborting due to 15 previous errors
-
-Some errors have detailed explanations: E0425, E0531.
-For more information about an error, try `rustc --explain E0425`.

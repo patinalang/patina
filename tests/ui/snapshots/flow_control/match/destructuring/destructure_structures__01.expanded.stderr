@@ -1,60 +1,53 @@
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_structures__01.pt:39:5
-   |
-LL |     println!("Nested: nested_x = {nested_x:?}, nested_y = {nested_y:?}");
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_structures__01.pt:30:5
-   |
-LL |     println!("Outside: x0 = {x0:?}, y0 = {y0}");
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_structures__01.pt:21:26
-   |
-LL |         Foo { y, .. } => println!("y = {}, we don't care about x", y),
-   |                          ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_structures__01.pt:18:31
-   |
-LL |         Foo { y: 2, x: i } => println!("y is 2, i = {:?}", i),
-   |                               ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_structures__01.pt:14:33
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/destructuring/destructure_structures__01.pt:14:77
    |
 LL |         Foo { x: (1, b), y } => println!("First of x is 1, b = {},  y = {} ", b, y),
-   |                                 ^^^^^^^
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_structures__01.pt:6:13
+   |                                                                             ^ no rules expected this token in macro call
    |
-LL |         x: (int, int),
-   |             ^^^
-   |             |
-   |             not found in this scope
-   |             help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_structures__01.pt:6:18
+  ::: <patina-prelude>:23:1
    |
-LL |         x: (int, int),
-   |                  ^^^
-   |                  |
-   |                  not found in this scope
-   |                  help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/flow_control/match/destructuring/destructure_structures__01.pt:7:12
+LL | macro_rules! println {
+   | -------------------- when calling this macro
    |
-LL |         y: int,
-   |            ^^^
-   |            |
-   |            not found in this scope
-   |            help: perhaps you intended to use this type: `i32`
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-error: aborting due to 8 previous errors
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/destructuring/destructure_structures__01.pt:18:58
+   |
+LL |         Foo { y: 2, x: i } => println!("y is 2, i = {:?}", i),
+   |                                                          ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
 
-For more information about this error, try `rustc --explain E0425`.
+error: no rules expected `,`
+  --> tests/ui/src/flow_control/match/destructuring/destructure_structures__01.pt:21:66
+   |
+LL |         Foo { y, .. } => println!("y = {}, we don't care about x", y),
+   |                                                                  ^ no rules expected this token in macro call
+   |
+  ::: <patina-prelude>:23:1
+   |
+LL | macro_rules! println {
+   | -------------------- when calling this macro
+   |
+note: while trying to match meta-variable `$s:literal`
+  --> <patina-prelude>:24:6
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |      ^^^^^^^^^^
+
+error: aborting due to 3 previous errors
+

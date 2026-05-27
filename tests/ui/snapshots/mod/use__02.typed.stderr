@@ -1,44 +1,30 @@
-error[E0433]: cannot find module or crate `pkg` in the crate root
+error[E0433]: cannot find module or crate `pkg` in this scope
   --> tests/ui/src/mod/use__02.pt:27:13
    |
 LL |         use pkg::Deeply::Nested::function;
    |             ^^^ use of unresolved module or unlinked crate `pkg`
    |
-help: you might be missing a crate named `pkg`, add it to your project and import it in your code
-   |
-LL + extern crate pkg;
-   |
+   = help: you might be missing a crate named `pkg`
 
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/mod/use__02.pt:33:9
+error[E0433]: cannot find module or crate `io` in this scope
+  --> <patina-prelude>:24:23
    |
-LL |         println!("Leaving block");
-   |         ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/mod/use__02.pt:23:5
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |                       ^^ use of unresolved module or unlinked crate `io`
    |
-LL |     println!("Entering block");
-   |     ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/mod/use__02.pt:14:13
+  ::: tests/ui/src/mod/use__02.pt:14:13
    |
 LL |             println!("called `Deeply::Nested::function()`");
-   |             ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/mod/use__02.pt:8:5
+   |             ----------------------------------------------- in this macro invocation
    |
-LL |     println!("called `function()`");
-   |     ^^^^^^^
-
-error: requires `sized` lang_item
-  --> tests/ui/src/mod/use__02.pt:21:5
+   = help: you might be missing a crate named `io`
+   = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: a builtin type with a similar name exists
    |
-LL |     other_function();
-   |     ^^^^^^^^^^^^^^^^
+LL -     ($s:literal) => { io::format("~s~n", [$s]) };
+LL +     ($s:literal) => { i8::format("~s~n", [$s]) };
+   |
 
-error: aborting due to 6 previous errors
+error: aborting due to 2 previous errors
 
 For more information about this error, try `rustc --explain E0433`.

@@ -28,12 +28,6 @@ LL - fn foo<T>(arg: T) { ... }
 LL + fn foo<T>(arg: T) { .. }
    |
 
-error: requires `meta_sized` lang_item
-  --> tests/ui/src/generics__01.pt:4:8
-   |
-LL | fn foo<T>(arg: T) { ... }
-   |        ^
-
-error: aborting due to 3 previous errors
+error: aborting due to 2 previous errors
 
 For more information about this error, try `rustc --explain E0586`.

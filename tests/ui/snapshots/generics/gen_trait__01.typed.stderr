@@ -38,13 +38,7 @@ help: you might be missing a type parameter
 LL | impl<T, U, int> SeededHash<T> for U {
    |          +++++
 
-error: requires `meta_sized` lang_item
-  --> tests/ui/src/generics/gen_trait__01.pt:18:6
-   |
-LL | impl<T, U> SeededHash<T> for U {
-   |      ^
-
-error: aborting due to 5 previous errors
+error: aborting due to 4 previous errors
 
 Some errors have detailed explanations: E0423, E0425.
 For more information about an error, try `rustc --explain E0423`.

@@ -17,7 +17,11 @@ pub(crate) enum DumpStage {
 }
 
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]
-pub(crate) enum EmitStage {}
+pub(crate) enum EmitStage {
+    Eaf,
+    Abstr,
+    Beam,
+}
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum Stage {
@@ -51,7 +55,7 @@ fn main() -> ExitCode {
         .dump
         .map(Stage::Dump)
         .or_else(|| args.emit.map(Stage::Emit))
-        .unwrap_or(Stage::Dump(DumpStage::Typed));
+        .unwrap_or(Stage::Emit(EmitStage::Beam));
 
     let src = match std::fs::read_to_string(&args.file) {
         Ok(src) => src,

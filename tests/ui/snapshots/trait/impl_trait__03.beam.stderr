@@ -1,0 +1,144 @@
+error: `mut` must be attached to each individual binding
+  --> tests/ui/src/trait/impl_trait__03.pt:29:9
+   |
+LL |     let mut (iter, item) = combine_lists(v1, v2).next();
+   |         ^^^^^^^^^^^^^^^^
+   |
+   = note: `mut` may be followed by `variable` and `variable @ pattern`
+help: add `mut` to each binding
+   |
+LL -     let mut (iter, item) = combine_lists(v1, v2).next();
+LL +     let (mut iter, mut item) = combine_lists(v1, v2).next();
+   |
+
+error[E0432]: unresolved import `Std`
+  --> tests/ui/src/trait/impl_trait__03.pt:4:5
+   |
+LL | use Std::Iter;
+   |     ^^^ use of undeclared type `Std`
+
+error[E0432]: unresolved import `list`
+  --> tests/ui/src/trait/impl_trait__03.pt:5:5
+   |
+LL | use list::IntoIter;
+   |     ^^^^ use of unresolved module or unlinked crate `list`
+   |
+   = help: you might be missing a crate named `list`
+
+error: cannot find macro `assert_eq` in this scope
+  --> tests/ui/src/trait/impl_trait__03.pt:30:5
+   |
+LL |     assert_eq!(Some(1), item);
+   |     ^^^^^^^^^
+
+error: cannot find macro `assert_eq` in this scope
+  --> tests/ui/src/trait/impl_trait__03.pt:32:5
+   |
+LL |     assert_eq!(Some(2), item);
+   |     ^^^^^^^^^
+
+error: cannot find macro `assert_eq` in this scope
+  --> tests/ui/src/trait/impl_trait__03.pt:34:5
+   |
+LL |     assert_eq!(Some(3), item);
+   |     ^^^^^^^^^
+
+error: cannot find macro `assert_eq` in this scope
+  --> tests/ui/src/trait/impl_trait__03.pt:36:5
+   |
+LL |     assert_eq!(Some(4), item);
+   |     ^^^^^^^^^
+
+error: cannot find macro `assert_eq` in this scope
+  --> tests/ui/src/trait/impl_trait__03.pt:38:5
+   |
+LL |     assert_eq!(Some(5), item);
+   |     ^^^^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/trait/impl_trait__03.pt:10:9
+   |
+LL |     v: [int],
+   |         ^^^
+   |         |
+   |         not found in this scope
+   |         help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/trait/impl_trait__03.pt:11:9
+   |
+LL |     u: [int],
+   |         ^^^
+   |         |
+   |         not found in this scope
+   |         help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/trait/impl_trait__03.pt:12:39
+   |
+LL | ) -> Iter::Cycle<Iter::Chain<IntoIter<int>, IntoIter<int>>> {
+   |                                       ^^^ not found in this scope
+   |
+help: perhaps you intended to use this type
+   |
+LL - ) -> Iter::Cycle<Iter::Chain<IntoIter<int>, IntoIter<int>>> {
+LL + ) -> Iter::Cycle<Iter::Chain<IntoIter<i32>, IntoIter<int>>> {
+   |
+help: you might be missing a type parameter
+   |
+LL | fn combine_lists_explicit_return_type<int>(
+   |                                      +++++
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/trait/impl_trait__03.pt:12:54
+   |
+LL | ) -> Iter::Cycle<Iter::Chain<IntoIter<int>, IntoIter<int>>> {
+   |                                                      ^^^ not found in this scope
+   |
+help: perhaps you intended to use this type
+   |
+LL - ) -> Iter::Cycle<Iter::Chain<IntoIter<int>, IntoIter<int>>> {
+LL + ) -> Iter::Cycle<Iter::Chain<IntoIter<int>, IntoIter<i32>>> {
+   |
+help: you might be missing a type parameter
+   |
+LL | fn combine_lists_explicit_return_type<int>(
+   |                                      +++++
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/trait/impl_trait__03.pt:19:9
+   |
+LL |     v: [int],
+   |         ^^^
+   |         |
+   |         not found in this scope
+   |         help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/trait/impl_trait__03.pt:20:9
+   |
+LL |     u: [int],
+   |         ^^^
+   |         |
+   |         not found in this scope
+   |         help: perhaps you intended to use this type: `i32`
+
+error[E0405]: cannot find trait `Iterator` in this scope
+  --> tests/ui/src/trait/impl_trait__03.pt:21:11
+   |
+LL | ) -> impl Iterator<Item=int> {
+   |           ^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/trait/impl_trait__03.pt:21:25
+   |
+LL | ) -> impl Iterator<Item=int> {
+   |                         ^^^
+   |                         |
+   |                         not found in this scope
+   |                         help: perhaps you intended to use this type: `i32`
+
+error: aborting due to 16 previous errors
+
+Some errors have detailed explanations: E0405, E0425, E0432.
+For more information about an error, try `rustc --explain E0405`.

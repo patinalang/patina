@@ -1,13 +1,10 @@
-error[E0433]: cannot find module or crate `pkg` in the crate root
+error[E0433]: cannot find module or crate `pkg` in this scope
   --> tests/ui/src/mod/super__01.pt:44:17
    |
 LL |             use pkg::Cool::function as root_function;
    |                 ^^^ use of unresolved module or unlinked crate `pkg`
    |
-help: you might be missing a crate named `pkg`, add it to your project and import it in your code
-   |
-LL + extern crate pkg;
-   |
+   = help: you might be missing a crate named `pkg`
 
 error: cannot find macro `print` in this scope
   --> tests/ui/src/mod/super__01.pt:27:9
@@ -15,36 +12,63 @@ error: cannot find macro `print` in this scope
 LL |         print!("called `My::indirect_call()`, that\n> ");
    |         ^^^^^
 
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/mod/super__01.pt:21:13
+error[E0433]: cannot find module or crate `io` in this scope
+  --> <patina-prelude>:24:23
    |
-LL |             println!("called `My::Cool::function()`");
-   |             ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/mod/super__01.pt:16:9
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |                       ^^ use of unresolved module or unlinked crate `io`
    |
-LL |         println!("called `My::function()`");
-   |         ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/mod/super__01.pt:10:9
+  ::: tests/ui/src/mod/super__01.pt:10:9
    |
 LL |         println!("called `Cool::function()`");
-   |         ^^^^^^^
-
-error: cannot find macro `println` in this scope
-  --> tests/ui/src/mod/super__01.pt:5:5
+   |         ------------------------------------- in this macro invocation
    |
-LL |     println!("called `function()`");
-   |     ^^^^^^^
-
-error: requires `sized` lang_item
-  --> tests/ui/src/mod/super__01.pt:32:9
+   = help: you might be missing a crate named `io`
+   = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: a builtin type with a similar name exists
    |
-LL |         self::function();
-   |         ^^^^^^^^^^^^^^^^
+LL -     ($s:literal) => { io::format("~s~n", [$s]) };
+LL +     ($s:literal) => { i8::format("~s~n", [$s]) };
+   |
 
-error: aborting due to 7 previous errors
+error[E0433]: cannot find module or crate `io` in this scope
+  --> <patina-prelude>:24:23
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |                       ^^ use of unresolved module or unlinked crate `io`
+   |
+  ::: tests/ui/src/mod/super__01.pt:16:9
+   |
+LL |         println!("called `My::function()`");
+   |         ----------------------------------- in this macro invocation
+   |
+   = help: you might be missing a crate named `io`
+   = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: a builtin type with a similar name exists
+   |
+LL -     ($s:literal) => { io::format("~s~n", [$s]) };
+LL +     ($s:literal) => { i8::format("~s~n", [$s]) };
+   |
+
+error[E0433]: cannot find module or crate `io` in this scope
+  --> <patina-prelude>:24:23
+   |
+LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+   |                       ^^ use of unresolved module or unlinked crate `io`
+   |
+  ::: tests/ui/src/mod/super__01.pt:21:13
+   |
+LL |             println!("called `My::Cool::function()`");
+   |             ----------------------------------------- in this macro invocation
+   |
+   = help: you might be missing a crate named `io`
+   = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: a builtin type with a similar name exists
+   |
+LL -     ($s:literal) => { io::format("~s~n", [$s]) };
+LL +     ($s:literal) => { i8::format("~s~n", [$s]) };
+   |
+
+error: aborting due to 5 previous errors
 
 For more information about this error, try `rustc --explain E0433`.
