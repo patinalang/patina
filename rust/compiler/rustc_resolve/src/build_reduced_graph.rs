@@ -407,6 +407,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         match res {
             Res::Def(
                 DefKind::Mod
+                | DefKind::ExternMod
                 | DefKind::Enum
                 | DefKind::Trait
                 | DefKind::Struct
@@ -853,6 +854,18 @@ impl<'a, 'ra, 'tcx> DefCollector<'a, 'ra, 'tcx> {
                     item.span,
                     parent.no_implicit_prelude
                         || ast::attr::contains_name(&item.attrs, sym::no_implicit_prelude),
+                );
+                self.parent_scope.module = module.to_module();
+            }
+
+            ItemKind::ExternMod(ident) => {
+                self.r.define_local(parent, ident, TypeNS, res, vis, sp, expansion);
+                let module = self.r.new_local_module(
+                    Some(parent),
+                    ModuleKind::Def(def_kind, def_id, Some(ident.name)),
+                    expansion.to_expn_id(),
+                    item.span,
+                    parent.no_implicit_prelude,
                 );
                 self.parent_scope.module = module.to_module();
             }

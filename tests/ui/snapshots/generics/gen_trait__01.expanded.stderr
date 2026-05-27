@@ -1,8 +1,44 @@
-error: expected one of `crate` or `{`, found keyword `mod`
-  --> tests/ui/src/generics/gen_trait__01.pt:4:8
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/generics/gen_trait__01.pt:13:38
    |
-LL | extern mod erlang;
-   |        ^^^ expected one of `crate` or `{`
+LL |     fn seeded_hash(self, seed: T) -> int;
+   |                                      ^^^
+   |                                      |
+   |                                      not found in this scope
+   |                                      help: perhaps you intended to use this type: `i32`
 
-error: aborting due to 1 previous error
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/generics/gen_trait__01.pt:19:38
+   |
+LL |     fn seeded_hash(self, seed: T) -> int {
+   |                                      ^^^
+   |                                      |
+   |                                      not found in this scope
+   |                                      help: perhaps you intended to use this type: `i32`
 
+error[E0423]: expected value, found extern module `erlang`
+  --> tests/ui/src/generics/gen_trait__01.pt:20:9
+   |
+LL |         erlang.phash2((seed, self)).unsafe_cast::<int>()
+   |         ^^^^^^ not a value
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/generics/gen_trait__01.pt:20:51
+   |
+LL |         erlang.phash2((seed, self)).unsafe_cast::<int>()
+   |                                                   ^^^ not found in this scope
+   |
+help: perhaps you intended to use this type
+   |
+LL -         erlang.phash2((seed, self)).unsafe_cast::<int>()
+LL +         erlang.phash2((seed, self)).unsafe_cast::<i32>()
+   |
+help: you might be missing a type parameter
+   |
+LL | impl<T, U, int> SeededHash<T> for U {
+   |          +++++
+
+error: aborting due to 4 previous errors
+
+Some errors have detailed explanations: E0423, E0425.
+For more information about an error, try `rustc --explain E0423`.

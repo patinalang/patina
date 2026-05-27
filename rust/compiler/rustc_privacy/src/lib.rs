@@ -655,6 +655,7 @@ impl<'tcx> EmbargoVisitor<'tcx> {
             | DefKind::ExternCrate
             | DefKind::Use
             | DefKind::ForeignMod
+            | DefKind::ExternMod
             | DefKind::AnonConst
             | DefKind::InlineConst
             | DefKind::Field
@@ -686,7 +687,7 @@ impl<'tcx> EmbargoVisitor<'tcx> {
         let item_ev = self.get(owner_id.def_id);
         match self.tcx.def_kind(owner_id) {
             // The interface is empty, and no nested items.
-            DefKind::Use | DefKind::ExternCrate | DefKind::GlobalAsm => {}
+            DefKind::Use | DefKind::ExternCrate | DefKind::GlobalAsm | DefKind::ExternMod => {}
             // The interface is empty, and all nested items are processed by `check_def_id`.
             DefKind::Mod => {}
             DefKind::Macro { .. } => {

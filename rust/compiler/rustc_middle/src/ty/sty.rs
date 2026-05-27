@@ -654,6 +654,7 @@ impl<'tcx> Ty<'tcx> {
                 | DefKind::ExternCrate
                 | DefKind::Use
                 | DefKind::ForeignMod
+                | DefKind::ExternMod
                 | DefKind::AnonConst
                 | DefKind::InlineConst
                 | DefKind::OpaqueTy

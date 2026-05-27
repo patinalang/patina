@@ -1,0 +1,31 @@
+// source: patina-by-example/src/generics/gen_trait.md
+// block: 1/1
+
+extern mod erlang;
+
+struct Empty;
+struct StaticSeed;
+
+// A trait generic over `T`.
+trait SeededHash<T> {
+    // Define a method on the caller type which takes an
+    // additional single parameter `T`.
+    fn seeded_hash(self, seed: T)
+    -> int;
+}
+
+// Implement `SeededHash<T>` for any generic parameter `T` and
+// caller `U`.
+impl<T, U> SeededHash<T> for U {
+    fn seeded_hash(self, seed: T) -> int {
+        erlang.phash2((seed, self)).unsafe_cast::<int>()
+    }
+}
+
+pub fn main() {
+    let empty = Empty;
+    let seed = StaticSeed;
+
+    // hash `empty` with static seed
+    empty.seeded_hash(seed);
+}

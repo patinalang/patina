@@ -637,6 +637,7 @@ impl<'a, 'tcx> Visitor<'tcx> for BoundVarContext<'a, 'tcx> {
             | hir::ItemKind::Macro(..)
             | hir::ItemKind::Mod(..)
             | hir::ItemKind::ForeignMod { .. }
+            | hir::ItemKind::ExternMod(..)
             | hir::ItemKind::Static(..)
             | hir::ItemKind::GlobalAsm { .. } => {
                 // These sorts of items have no lifetime parameters at all.

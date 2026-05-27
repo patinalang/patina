@@ -892,6 +892,7 @@ fn analyze_attr(attr: &hir::Attribute, state: &mut AnalyzeAttrState) -> bool {
 fn should_encode_span(def_kind: DefKind) -> bool {
     match def_kind {
         DefKind::Mod
+        | DefKind::ExternMod
         | DefKind::Struct
         | DefKind::Union
         | DefKind::Enum
@@ -959,6 +960,7 @@ fn should_encode_attrs(def_kind: DefKind) -> bool {
         | DefKind::Ctor(..)
         | DefKind::ExternCrate
         | DefKind::ForeignMod
+        | DefKind::ExternMod
         | DefKind::AnonConst
         | DefKind::InlineConst
         | DefKind::OpaqueTy
@@ -993,6 +995,7 @@ fn should_encode_expn_that_defined(def_kind: DefKind) -> bool {
         | DefKind::ExternCrate
         | DefKind::Use
         | DefKind::ForeignMod
+        | DefKind::ExternMod
         | DefKind::AnonConst
         | DefKind::InlineConst
         | DefKind::OpaqueTy
@@ -1026,6 +1029,7 @@ fn should_encode_visibility(def_kind: DefKind) -> bool {
         | DefKind::Field => true,
         DefKind::Use
         | DefKind::ForeignMod
+        | DefKind::ExternMod
         | DefKind::TyParam
         | DefKind::ConstParam
         | DefKind::LifetimeParam
@@ -1073,6 +1077,7 @@ fn should_encode_stability(def_kind: DefKind) -> bool {
         | DefKind::GlobalAsm
         | DefKind::Closure
         | DefKind::ExternCrate
+        | DefKind::ExternMod
         | DefKind::SyntheticCoroutineBody => false,
     }
 }
@@ -1151,6 +1156,7 @@ fn should_encode_variances<'tcx>(tcx: TyCtxt<'tcx>, def_id: DefId, def_kind: Def
         | DefKind::Static { .. }
         | DefKind::Const { .. }
         | DefKind::ForeignMod
+        | DefKind::ExternMod
         | DefKind::Impl { .. }
         | DefKind::Trait
         | DefKind::TraitAlias
@@ -1195,6 +1201,7 @@ fn should_encode_generics(def_kind: DefKind) -> bool {
         | DefKind::SyntheticCoroutineBody => true,
         DefKind::Mod
         | DefKind::ForeignMod
+        | DefKind::ExternMod
         | DefKind::ConstParam
         | DefKind::Macro(..)
         | DefKind::Use
@@ -1256,6 +1263,7 @@ fn should_encode_type(tcx: TyCtxt<'_>, def_id: LocalDefId, def_kind: DefKind) ->
         | DefKind::TraitAlias
         | DefKind::Mod
         | DefKind::ForeignMod
+        | DefKind::ExternMod
         | DefKind::Macro(..)
         | DefKind::Static { nested: true, .. }
         | DefKind::Use
@@ -1292,6 +1300,7 @@ fn should_encode_fn_sig(def_kind: DefKind) -> bool {
         | DefKind::TraitAlias
         | DefKind::Mod
         | DefKind::ForeignMod
+        | DefKind::ExternMod
         | DefKind::Macro(..)
         | DefKind::Use
         | DefKind::LifetimeParam
@@ -1329,6 +1338,7 @@ fn should_encode_constness(def_kind: DefKind) -> bool {
         | DefKind::TraitAlias
         | DefKind::Mod
         | DefKind::ForeignMod
+        | DefKind::ExternMod
         | DefKind::Macro(..)
         | DefKind::Use
         | DefKind::LifetimeParam
@@ -1369,6 +1379,7 @@ fn should_encode_const(def_kind: DefKind) -> bool {
         | DefKind::TraitAlias
         | DefKind::Mod
         | DefKind::ForeignMod
+        | DefKind::ExternMod
         | DefKind::Macro(..)
         | DefKind::Use
         | DefKind::LifetimeParam

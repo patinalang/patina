@@ -1,8 +1,0 @@
-error: expected one of `crate` or `{`, found keyword `mod`
-  --> tests/ui/src/generics/gen_trait__01.pt:4:8
-   |
-LL | extern mod erlang;
-   |        ^^^ expected one of `crate` or `{`
-
-error: aborting due to 1 previous error
-

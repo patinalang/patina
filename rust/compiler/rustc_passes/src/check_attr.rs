@@ -839,6 +839,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             | Target::Statement
             | Target::Arm
             | Target::ForeignMod
+            | Target::ExternMod
             | Target::Closure
             | Target::Impl { .. }
             | Target::WherePredicate => Some(target.name()),

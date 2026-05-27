@@ -279,6 +279,7 @@ impl<'ast, 'tcx> visit::Visitor<'ast> for LanguageItemCollector<'ast, 'tcx> {
             ast::ItemKind::Fn(_) | ast::ItemKind::Delegation(..) => Target::Fn,
             ast::ItemKind::Mod(..) => Target::Mod,
             ast::ItemKind::ForeignMod(_) => Target::ForeignFn,
+            ast::ItemKind::ExternMod(..) => Target::ExternMod,
             ast::ItemKind::GlobalAsm(_) => Target::GlobalAsm,
             ast::ItemKind::TyAlias(_) => Target::TyAlias,
             ast::ItemKind::Enum(..) => Target::Enum,

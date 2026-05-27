@@ -355,6 +355,7 @@ fn opaque_types_defined_by<'tcx>(
         | DefKind::ExternCrate
         | DefKind::Use
         | DefKind::ForeignMod
+        | DefKind::ExternMod
         | DefKind::Field
         | DefKind::LifetimeParam
         | DefKind::Impl { .. } => {

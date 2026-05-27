@@ -2940,6 +2940,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 | DefKind::LifetimeParam
                 | DefKind::Use
                 | DefKind::ForeignMod
+                | DefKind::ExternMod
                 | DefKind::AnonConst
                 | DefKind::InlineConst
                 | DefKind::Field

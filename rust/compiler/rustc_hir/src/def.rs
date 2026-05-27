@@ -161,6 +161,8 @@ pub enum DefKind {
     Use,
     /// An `extern` block.
     ForeignMod,
+    /// An `extern mod` declaration.
+    ExternMod,
     /// Anonymous constant, e.g. the `1 + 2` in `[u8; 1 + 2]`.
     ///
     /// Not all anon-consts are actually still relevant in the HIR. We lower
@@ -234,6 +236,7 @@ impl DefKind {
             DefKind::LifetimeParam => "lifetime parameter",
             DefKind::Use => "import",
             DefKind::ForeignMod => "foreign module",
+            DefKind::ExternMod => "extern module",
             DefKind::AnonConst => "constant expression",
             DefKind::InlineConst => "inline constant",
             DefKind::Field => "field",
@@ -259,6 +262,7 @@ impl DefKind {
             | DefKind::OpaqueTy
             | DefKind::Impl { .. }
             | DefKind::Use
+            | DefKind::ExternMod
             | DefKind::InlineConst
             | DefKind::ExternCrate => "an",
             DefKind::Macro(kinds) => kinds.article(),
@@ -299,6 +303,7 @@ impl DefKind {
             | DefKind::Closure
             | DefKind::Use
             | DefKind::ForeignMod
+            | DefKind::ExternMod
             | DefKind::GlobalAsm
             | DefKind::Impl { .. }
             | DefKind::OpaqueTy
@@ -315,6 +320,7 @@ impl DefKind {
             | DefKind::Union
             | DefKind::Enum
             | DefKind::Variant
+            | DefKind::ExternMod
             | DefKind::Trait
             | DefKind::TyAlias
             | DefKind::ForeignTy
@@ -355,7 +361,7 @@ impl DefKind {
     /// This is a "module" in name resolution sense.
     #[inline]
     pub fn is_module_like(self) -> bool {
-        matches!(self, DefKind::Mod | DefKind::Enum | DefKind::Trait)
+        matches!(self, DefKind::Mod | DefKind::ExternMod | DefKind::Enum | DefKind::Trait)
     }
 
     #[inline]
@@ -399,6 +405,7 @@ impl DefKind {
             DefKind::ConstParam
             | DefKind::ExternCrate
             | DefKind::ForeignMod
+            | DefKind::ExternMod
             | DefKind::GlobalAsm
             | DefKind::LifetimeParam
             | DefKind::Macro(_)
@@ -432,6 +439,7 @@ impl DefKind {
             | DefKind::Macro(..)
             | DefKind::Use
             | DefKind::ForeignMod
+            | DefKind::ExternMod
             | DefKind::OpaqueTy
             | DefKind::Impl { .. }
             | DefKind::Field
@@ -473,6 +481,7 @@ impl DefKind {
             | DefKind::ExternCrate
             | DefKind::Use
             | DefKind::ForeignMod
+            | DefKind::ExternMod
             | DefKind::AnonConst
             | DefKind::OpaqueTy
             | DefKind::Field

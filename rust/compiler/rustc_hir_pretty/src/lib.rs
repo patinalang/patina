@@ -672,6 +672,15 @@ impl<'a> State<'a> {
                 }
                 self.bclose(item.span, cb);
             }
+            hir::ItemKind::ExternMod(ident) => {
+                let (cb, ib) = self.head("");
+                self.word_nbsp("extern");
+                self.word_nbsp("mod");
+                self.print_ident(ident);
+                self.word(";");
+                self.end(ib);
+                self.end(cb);
+            }
             hir::ItemKind::GlobalAsm { asm, .. } => {
                 let (cb, ib) = self.head("global_asm!");
                 self.print_inline_asm(asm);

@@ -288,6 +288,12 @@ impl<'a> State<'a> {
                 let empty = item.attrs.is_empty() && nmod.items.is_empty();
                 self.bclose(item.span, empty, cb);
             }
+            ast::ItemKind::ExternMod(ident) => {
+                self.word_nbsp("extern");
+                self.word_nbsp("mod");
+                self.print_ident(*ident);
+                self.word(";");
+            }
             ast::ItemKind::GlobalAsm(asm) => {
                 // FIXME: Print `builtin # global_asm` once macro `global_asm` uses `builtin_syntax`.
                 let (cb, ib) = self.head(visibility_qualified(&item.vis, "global_asm!"));

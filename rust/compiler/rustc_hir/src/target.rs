@@ -39,6 +39,7 @@ pub enum Target {
     Closure,
     Mod,
     ForeignMod,
+    ExternMod,
     GlobalAsm,
     TyAlias,
     Enum,
@@ -89,6 +90,7 @@ impl Target {
             | Target::Closure
             | Target::Mod
             | Target::ForeignMod
+            | Target::ExternMod
             | Target::GlobalAsm
             | Target::TyAlias
             | Target::Enum
@@ -127,6 +129,7 @@ impl Target {
             ItemKind::Macro(..) => Target::MacroDef,
             ItemKind::Mod(..) => Target::Mod,
             ItemKind::ForeignMod { .. } => Target::ForeignMod,
+            ItemKind::ExternMod(..) => Target::ExternMod,
             ItemKind::GlobalAsm { .. } => Target::GlobalAsm,
             ItemKind::TyAlias(..) => Target::TyAlias,
             ItemKind::Enum(..) => Target::Enum,
@@ -149,6 +152,7 @@ impl Target {
             DefKind::Macro(..) => Target::MacroDef,
             DefKind::Mod => Target::Mod,
             DefKind::ForeignMod => Target::ForeignMod,
+            DefKind::ExternMod => Target::ExternMod,
             DefKind::GlobalAsm => Target::GlobalAsm,
             DefKind::TyAlias => Target::TyAlias,
             DefKind::Enum => Target::Enum,
@@ -171,6 +175,7 @@ impl Target {
             ast::ItemKind::Fn { .. } => Target::Fn,
             ast::ItemKind::Mod(..) => Target::Mod,
             ast::ItemKind::ForeignMod { .. } => Target::ForeignMod,
+            ast::ItemKind::ExternMod(..) => Target::ExternMod,
             ast::ItemKind::GlobalAsm { .. } => Target::GlobalAsm,
             ast::ItemKind::TyAlias(..) => Target::TyAlias,
             ast::ItemKind::Enum(..) => Target::Enum,
@@ -270,6 +275,7 @@ impl Target {
             Target::Closure => "closure",
             Target::Mod => "module",
             Target::ForeignMod => "foreign module",
+            Target::ExternMod => "extern module",
             Target::GlobalAsm => "global asm",
             Target::TyAlias => "type alias",
             Target::Enum => "enum",
@@ -320,6 +326,7 @@ impl Target {
             Target::Closure => "closures",
             Target::Mod => "modules",
             Target::ForeignMod => "foreign modules",
+            Target::ExternMod => "extern modules",
             Target::GlobalAsm => "global asms",
             Target::TyAlias => "type aliases",
             Target::Enum => "enums",

@@ -1148,6 +1148,7 @@ impl<'tcx> LateLintPass<'tcx> for ImproperCTypesLint {
             | hir::ItemKind::Trait { .. }
             | hir::ItemKind::GlobalAsm { .. }
             | hir::ItemKind::ForeignMod { .. }
+            | hir::ItemKind::ExternMod(..)
             | hir::ItemKind::Mod(..)
             | hir::ItemKind::Macro(..)
             | hir::ItemKind::Use(..)

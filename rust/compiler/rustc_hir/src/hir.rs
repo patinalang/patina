@@ -4641,6 +4641,8 @@ pub enum ItemKind<'hir> {
     Mod(Ident, &'hir Mod<'hir>),
     /// An external module, e.g. `extern { .. }`.
     ForeignMod { abi: ExternAbi, items: &'hir [ForeignItemId] },
+    /// An external module declaration, e.g. `extern mod io;`.
+    ExternMod(Ident),
     /// Module-level inline assembly (from `global_asm!`).
     GlobalAsm {
         asm: &'hir InlineAsm<'hir>,
@@ -4711,6 +4713,7 @@ impl ItemKind<'_> {
             | ItemKind::Fn { ident, .. }
             | ItemKind::Macro(ident, ..)
             | ItemKind::Mod(ident, ..)
+            | ItemKind::ExternMod(ident)
             | ItemKind::TyAlias(ident, ..)
             | ItemKind::Enum(ident, ..)
             | ItemKind::Struct(ident, ..)

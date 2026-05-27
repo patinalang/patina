@@ -3042,6 +3042,8 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                 visit::walk_item(self, item);
             }
 
+            ItemKind::ExternMod(..) => {}
+
             ItemKind::Delegation(delegation) => {
                 let span = delegation.path.segments.last().unwrap().ident.span;
                 self.with_generic_param_rib(
@@ -5614,7 +5616,8 @@ impl<'ast> Visitor<'ast> for ItemInfoCollector<'_, '_, '_> {
             | ItemKind::MacroDef(..)
             | ItemKind::GlobalAsm(..)
             | ItemKind::MacCall(..)
-            | ItemKind::DelegationMac(..) => {}
+            | ItemKind::DelegationMac(..)
+            | ItemKind::ExternMod(..) => {}
             ItemKind::Delegation(..) => {
                 // Delegated functions have lifetimes, their count is not necessarily zero.
                 // But skipping the delegation items here doesn't mean that the count will be considered zero,

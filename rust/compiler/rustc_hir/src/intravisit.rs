@@ -575,6 +575,9 @@ pub fn walk_item<'v, V: Visitor<'v>>(visitor: &mut V, item: &'v Item<'v>) -> V::
         ItemKind::ForeignMod { abi: _, items } => {
             walk_list!(visitor, visit_foreign_item_ref, items);
         }
+        ItemKind::ExternMod(ident) => {
+            try_visit!(visitor.visit_ident(ident));
+        }
         ItemKind::GlobalAsm { asm: _, fake_body } => {
             // Visit the fake body, which contains the asm statement.
             // Therefore we should not visit the asm statement again

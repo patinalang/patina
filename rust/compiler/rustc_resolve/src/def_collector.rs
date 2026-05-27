@@ -121,6 +121,7 @@ impl<'a, 'ra, 'tcx> visit::Visitor<'a> for DefCollector<'a, 'ra, 'tcx> {
         let def_kind = match &i.kind {
             ItemKind::Impl(i) => DefKind::Impl { of_trait: i.of_trait.is_some() },
             ItemKind::ForeignMod(..) => DefKind::ForeignMod,
+            ItemKind::ExternMod(..) => DefKind::ExternMod,
             ItemKind::Mod(..) => DefKind::Mod,
             ItemKind::Trait(..) => DefKind::Trait,
             ItemKind::TraitAlias(..) => DefKind::TraitAlias,

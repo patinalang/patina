@@ -174,6 +174,7 @@ fixed_size_enum! {
         ( ExternCrate                              )
         ( Use                                      )
         ( ForeignMod                               )
+        ( ExternMod                                )
         ( AnonConst                                )
         ( InlineConst                              )
         ( OpaqueTy                                 )

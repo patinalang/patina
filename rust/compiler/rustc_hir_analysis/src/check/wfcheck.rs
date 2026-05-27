@@ -2496,6 +2496,7 @@ fn lint_redundant_lifetimes<'tcx>(
         | DefKind::ExternCrate
         | DefKind::Use
         | DefKind::ForeignMod
+        | DefKind::ExternMod
         | DefKind::AnonConst
         | DefKind::InlineConst
         | DefKind::OpaqueTy

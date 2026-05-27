@@ -49,6 +49,14 @@ impl<'a> Parser<'a> {
         Ok(ItemKind::Mod(safety, ident, mod_kind))
     }
 
+    /// Parses `extern mod IDENT ;`.
+    fn parse_extern_mod(&mut self) -> PResult<'a, Option<ItemKind>> {
+        self.expect_keyword(exp!(Mod))?;
+        let ident = self.parse_ident()?;
+        self.expect_semi()?;
+        Ok(Some(ItemKind::ExternMod(ident)))
+    }
+
     /// Parses the contents of a module (inner attributes followed by module items).
     /// We exit once we hit `term` which can be either
     /// - EOF (for files)
@@ -289,6 +297,9 @@ impl<'a> Parser<'a> {
             if self.eat_keyword_case(exp!(Crate), case) {
                 // EXTERN CRATE
                 self.parse_item_extern_crate()?
+            } else if self.check_keyword_case(exp!(Mod), case) {
+                // EXTERN MOD
+                return self.parse_extern_mod();
             } else {
                 // EXTERN BLOCK
                 self.parse_item_foreign_mod(attrs, Safety::Default)?

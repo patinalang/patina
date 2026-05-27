@@ -119,6 +119,7 @@ pub fn walk_types<'tcx, V: SpannedTypeVisitor<'tcx>>(
         // These don't have any types, but are visited during privacy checking.
         | DefKind::ExternCrate
         | DefKind::ForeignMod
+        | DefKind::ExternMod
         | DefKind::ForeignTy
         | DefKind::Macro(_)
         | DefKind::GlobalAsm

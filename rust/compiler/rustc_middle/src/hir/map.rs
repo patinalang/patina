@@ -690,6 +690,7 @@ impl<'tcx> TyCtxt<'tcx> {
                     ItemKind::Macro(..) => "macro",
                     ItemKind::Mod(..) => "mod",
                     ItemKind::ForeignMod { .. } => "foreign mod",
+                    ItemKind::ExternMod(..) => "extern mod",
                     ItemKind::GlobalAsm { .. } => "global asm",
                     ItemKind::TyAlias(..) => "ty",
                     ItemKind::Enum(..) => "enum",

@@ -2152,6 +2152,7 @@ impl<'tcx> TyCtxt<'tcx> {
             | DefKind::ExternCrate
             | DefKind::Use
             | DefKind::ForeignMod
+            | DefKind::ExternMod
             | DefKind::AnonConst
             | DefKind::InlineConst
             | DefKind::Field

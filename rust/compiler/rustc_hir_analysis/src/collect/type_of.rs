@@ -176,6 +176,7 @@ pub(super) fn type_of(tcx: TyCtxt<'_>, def_id: LocalDefId) -> ty::EarlyBinder<'_
             | ItemKind::Macro(..)
             | ItemKind::Mod(..)
             | ItemKind::ForeignMod { .. }
+            | ItemKind::ExternMod(..)
             | ItemKind::ExternCrate(..)
             | ItemKind::Use(..) => {
                 span_bug!(item.span, "compute_type_of_item: unexpected item type: {:?}", item.kind);

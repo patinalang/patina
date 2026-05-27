@@ -264,6 +264,7 @@ impl<'a, 'ra, 'tcx> Visitor<'a> for EffectiveVisibilitiesVisitor<'a, 'ra, 'tcx> 
             | ast::ItemKind::TraitAlias(..)
             | ast::ItemKind::MacroDef(..)
             | ast::ItemKind::ForeignMod(..)
+            | ast::ItemKind::ExternMod(..)
             | ast::ItemKind::Fn(..)
             | ast::ItemKind::Delegation(..) => return,
         }

@@ -3681,6 +3681,7 @@ impl Item {
             | ItemKind::Use(_)
             | ItemKind::Mod(..)
             | ItemKind::ForeignMod(_)
+            | ItemKind::ExternMod(_)
             | ItemKind::GlobalAsm(_)
             | ItemKind::MacCall(_)
             | ItemKind::Delegation(_)
@@ -4038,6 +4039,10 @@ pub enum ItemKind {
     ///
     /// E.g., `extern {}` or `extern "C" {}`.
     ForeignMod(ForeignMod),
+    /// An external BEAM module (`extern mod`).
+    ///
+    /// E.g., `extern mod foo;`.
+    ExternMod(Ident),
     /// Module-level inline assembly (from `global_asm!()`).
     GlobalAsm(Box<InlineAsm>),
     /// A type alias (`type`).
@@ -4091,6 +4096,7 @@ impl ItemKind {
             | ItemKind::Const(box ConstItem { ident, .. })
             | ItemKind::Fn(box Fn { ident, .. })
             | ItemKind::Mod(_, ident, _)
+            | ItemKind::ExternMod(ident)
             | ItemKind::TyAlias(box TyAlias { ident, .. })
             | ItemKind::Enum(ident, ..)
             | ItemKind::Struct(ident, ..)
@@ -4118,7 +4124,12 @@ impl ItemKind {
             Use(..) | Static(..) | Const(..) | ConstBlock(..) | Fn(..) | Mod(..)
             | GlobalAsm(..) | TyAlias(..) | Struct(..) | Union(..) | Trait(..) | TraitAlias(..)
             | MacroDef(..) | Delegation(..) | DelegationMac(..) => "a",
-            ExternCrate(..) | ForeignMod(..) | MacCall(..) | Enum(..) | Impl { .. } => "an",
+            ExternCrate(..)
+            | ForeignMod(..)
+            | ExternMod(..)
+            | MacCall(..)
+            | Enum(..)
+            | Impl { .. } => "an",
         }
     }
 
@@ -4132,6 +4143,7 @@ impl ItemKind {
             ItemKind::Fn(..) => "function",
             ItemKind::Mod(..) => "module",
             ItemKind::ForeignMod(..) => "extern block",
+            ItemKind::ExternMod(..) => "extern module",
             ItemKind::GlobalAsm(..) => "global asm item",
             ItemKind::TyAlias(..) => "type alias",
             ItemKind::Enum(..) => "enum",
@@ -4165,6 +4177,7 @@ impl ItemKind {
             | Self::ConstBlock(..)
             | Self::Mod(..)
             | Self::ForeignMod(..)
+            | Self::ExternMod(..)
             | Self::GlobalAsm(..)
             | Self::MacCall(..)
             | Self::MacroDef(..)

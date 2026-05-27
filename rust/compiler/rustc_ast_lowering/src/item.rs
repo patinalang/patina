@@ -234,6 +234,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
             | ItemKind::ConstBlock(..)
             | ItemKind::Mod(..)
             | ItemKind::ForeignMod(..)
+            | ItemKind::ExternMod(..)
             | ItemKind::GlobalAsm(..)
             | ItemKind::TyAlias(..)
             | ItemKind::Enum(..)
@@ -413,6 +414,10 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     .arena
                     .alloc_from_iter(fm.items.iter().map(|x| self.lower_foreign_item_ref(x))),
             },
+            ItemKind::ExternMod(ident) => {
+                let ident = self.lower_ident(*ident);
+                hir::ItemKind::ExternMod(ident)
+            }
             ItemKind::GlobalAsm(asm) => {
                 let asm = self.lower_inline_asm(span, asm);
                 let fake_body =

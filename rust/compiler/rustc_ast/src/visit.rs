@@ -838,6 +838,8 @@ macro_rules! common_visitor_and_walkers {
                         visit_visitable!($($mut)? vis, safety, ident, mod_kind),
                     ItemKind::ForeignMod(nm) =>
                         visit_visitable!($($mut)? vis, nm),
+                    ItemKind::ExternMod(ident) =>
+                        visit_visitable!($($mut)? vis, ident),
                     ItemKind::GlobalAsm(asm) =>
                         visit_visitable!($($mut)? vis, asm),
                     ItemKind::TyAlias(ty_alias) =>
