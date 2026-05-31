@@ -2367,11 +2367,10 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 match prim_ty {
                     hir::PrimTy::Bool => tcx.types.bool,
                     hir::PrimTy::Char => tcx.types.char,
-                    hir::PrimTy::Int(it) => Ty::new_int(tcx, it),
-                    hir::PrimTy::Uint(uit) => Ty::new_uint(tcx, uit),
-                    hir::PrimTy::Float(ft) => Ty::new_float(tcx, ft),
+                    hir::PrimTy::Float => Ty::new_float(tcx),
                     hir::PrimTy::Str => tcx.types.str_,
                     hir::PrimTy::Term => tcx.types.term,
+                    hir::PrimTy::Int => tcx.types.int,
                 }
             }
             Res::Err => {
@@ -2655,7 +2654,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
 
         let opt_discr_const = if adt_def.is_enum() {
             let valtree = ty::ValTree::from_scalar_int(tcx, variant_idx.into());
-            Some(ty::Const::new_value(tcx, valtree, tcx.types.u32))
+            Some(ty::Const::new_value(tcx, valtree, tcx.types.int))
         } else {
             None
         };
@@ -2789,7 +2788,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
 
         let opt_discr_const = if adt_def.is_enum() {
             let valtree = ty::ValTree::from_scalar_int(tcx, variant_idx.into());
-            Some(ty::Const::new_value(tcx, valtree, tcx.types.u32))
+            Some(ty::Const::new_value(tcx, valtree, tcx.types.int))
         } else {
             None
         };
@@ -3321,7 +3320,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 .unwrap_or_else(|guar| Ty::new_error(tcx, guar))
             }
             hir::TyKind::Array(ty, length) => {
-                let length = self.lower_const_arg(length, tcx.types.usize);
+                let length = self.lower_const_arg(length, tcx.types.int);
                 Ty::new_array_with_const_len(tcx, self.lower_ty(ty), length)
             }
             hir::TyKind::Infer(()) => {
@@ -3368,7 +3367,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 match ty.kind() {
                     // Keep this list of types in sync with the list of types that
                     // the `RangePattern` trait is implemented for.
-                    ty::Int(_) | ty::Uint(_) | ty::Char => {
+                    ty::Int | ty::Char => {
                         let start = self.lower_const_arg(start, ty);
                         let end = self.lower_const_arg(end, ty);
                         Ok(ty::PatternKind::Range { start, end })
@@ -3508,9 +3507,8 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             ty::Error(err) => Ty::new_error(tcx, *err),
             ty::Bool
             | ty::Char
-            | ty::Int(_)
-            | ty::Uint(_)
-            | ty::Float(_)
+            | ty::Int
+            | ty::Float
             | ty::Foreign(_)
             | ty::Str
             | ty::Term
@@ -3794,7 +3792,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
 
         let valtree = if adt_def.is_enum() {
             let discr = ty::ValTree::from_scalar_int(tcx, variant_idx.as_u32().into());
-            ty::ValTree::from_branches(tcx, [ty::Const::new_value(tcx, discr, tcx.types.u32)])
+            ty::ValTree::from_branches(tcx, [ty::Const::new_value(tcx, discr, tcx.types.int)])
         } else {
             ty::ValTree::zst(tcx)
         };

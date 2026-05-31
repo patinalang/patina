@@ -2,7 +2,7 @@
 
 use std::{fmt, iter};
 
-use rustc_abi::{Float, Integer, IntegerType, Size};
+use rustc_abi::{IntegerType, Size};
 use rustc_apfloat::Float as _;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_data_structures::stable_hasher::{StableHash, StableHasher};
@@ -25,7 +25,7 @@ use crate::middle::codegen_fn_attrs::CodegenFnAttrFlags;
 use crate::mir;
 use crate::query::Providers;
 use crate::traits::ObligationCause;
-use crate::ty::layout::{FloatExt, IntegerExt};
+use crate::ty::layout::IntegerExt;
 use crate::ty::{
     self, Asyncness, FallibleTypeFolder, GenericArgKind, GenericArgsRef, Ty, TyCtxt, TypeFoldable,
     TypeFolder, TypeSuperFoldable, TypeVisitableExt, Unnormalized, Upcast,
@@ -61,13 +61,7 @@ pub enum NotUniqueParam<'tcx> {
 impl<'tcx> fmt::Display for Discr<'tcx> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self.ty.kind() {
-            ty::Int(ity) => {
-                let size = ty::tls::with(|tcx| Integer::from_int_ty(&tcx, ity).size());
-                let x = self.val;
-                // sign extend the raw representation to be an i128
-                let x = size.sign_extend(x) as i128;
-                write!(fmt, "{x}")
-            }
+            ty::Int => write!(fmt, "{}", self.val),
             _ => write!(fmt, "{}", self.val),
         }
     }
@@ -107,8 +101,8 @@ impl<'tcx> Discr<'tcx> {
 impl IntegerType {
     fn to_ty<'tcx>(&self, tcx: TyCtxt<'tcx>) -> Ty<'tcx> {
         match self {
-            IntegerType::Pointer(true) => tcx.types.isize,
-            IntegerType::Pointer(false) => tcx.types.usize,
+            IntegerType::Pointer(true) => tcx.types.int,
+            IntegerType::Pointer(false) => tcx.types.int,
             IntegerType::Fixed(i, s) => i.to_ty(tcx, *s),
         }
     }
@@ -1086,21 +1080,19 @@ impl<'tcx> TypeFolder<TyCtxt<'tcx>> for FreeAliasTypeExpander<'tcx> {
 
 impl<'tcx> Ty<'tcx> {
     /// Returns the `Size` for primitive types (bool, uint, int, char, float).
-    pub fn primitive_size(self, tcx: TyCtxt<'tcx>) -> Size {
+    pub fn primitive_size(self, _tcx: TyCtxt<'tcx>) -> Size {
         match *self.kind() {
             ty::Bool => Size::from_bytes(1),
             ty::Char => Size::from_bytes(4),
-            ty::Int(ity) => Integer::from_int_ty(&tcx, ity).size(),
-            ty::Uint(uty) => Integer::from_uint_ty(&tcx, uty).size(),
-            ty::Float(fty) => Float::from_float_ty(fty).size(),
+            ty::Int => Size::from_bytes(16),
+            ty::Float => Size::from_bytes(8),
             _ => bug!("non primitive type"),
         }
     }
 
-    pub fn int_size_and_signed(self, tcx: TyCtxt<'tcx>) -> (Size, bool) {
+    pub fn int_size_and_signed(self, _tcx: TyCtxt<'tcx>) -> (Size, bool) {
         match *self.kind() {
-            ty::Int(ity) => (Integer::from_int_ty(&tcx, ity).size(), true),
-            ty::Uint(uty) => (Integer::from_uint_ty(&tcx, uty).size(), false),
+            ty::Int => (Size::from_bytes(16), true),
             _ => bug!("non integer discriminant"),
         }
     }
@@ -1108,9 +1100,9 @@ impl<'tcx> Ty<'tcx> {
     /// Returns the minimum and maximum values for the given numeric type (including `char`s) or
     /// returns `None` if the type is not numeric.
     pub fn numeric_min_and_max_as_bits(self, tcx: TyCtxt<'tcx>) -> Option<(u128, u128)> {
-        use rustc_apfloat::ieee::{Double, Half, Quad, Single};
+        use rustc_apfloat::ieee::Double;
         Some(match self.kind() {
-            ty::Int(_) | ty::Uint(_) => {
+            ty::Int => {
                 let (size, signed) = self.int_size_and_signed(tcx);
                 let min = if signed { size.truncate(size.signed_int_min() as u128) } else { 0 };
                 let max =
@@ -1118,14 +1110,7 @@ impl<'tcx> Ty<'tcx> {
                 (min, max)
             }
             ty::Char => (0, std::char::MAX as u128),
-            ty::Float(ty::FloatTy::F16) => ((-Half::INFINITY).to_bits(), Half::INFINITY.to_bits()),
-            ty::Float(ty::FloatTy::F32) => {
-                ((-Single::INFINITY).to_bits(), Single::INFINITY.to_bits())
-            }
-            ty::Float(ty::FloatTy::F64) => {
-                ((-Double::INFINITY).to_bits(), Double::INFINITY.to_bits())
-            }
-            ty::Float(ty::FloatTy::F128) => ((-Quad::INFINITY).to_bits(), Quad::INFINITY.to_bits()),
+            ty::Float => ((-Double::INFINITY).to_bits(), Double::INFINITY.to_bits()),
             _ => return None,
         })
     }
@@ -1174,9 +1159,8 @@ impl<'tcx> Ty<'tcx> {
     /// `false` means nothing -- could be `Freeze`, might not be.
     pub fn is_trivially_freeze(self) -> bool {
         match self.kind() {
-            ty::Int(_)
-            | ty::Uint(_)
-            | ty::Float(_)
+            ty::Int
+            | ty::Float
             | ty::Bool
             | ty::Char
             | ty::Str
@@ -1225,9 +1209,8 @@ impl<'tcx> Ty<'tcx> {
     /// `false` means nothing -- could be `Unpin`, might not be.
     fn is_trivially_unpin(self) -> bool {
         match self.kind() {
-            ty::Int(_)
-            | ty::Uint(_)
-            | ty::Float(_)
+            ty::Int
+            | ty::Float
             | ty::Bool
             | ty::Char
             | ty::Str
@@ -1277,9 +1260,8 @@ impl<'tcx> Ty<'tcx> {
     /// `false` means nothing -- could be `AsyncDrop`, might not be.
     fn is_trivially_not_async_drop(self) -> bool {
         match self.kind() {
-            ty::Int(_)
-            | ty::Uint(_)
-            | ty::Float(_)
+            ty::Int
+            | ty::Float
             | ty::Bool
             | ty::Char
             | ty::Str
@@ -1445,7 +1427,7 @@ impl<'tcx> Ty<'tcx> {
             ty::Adt(..) => tcx.has_structural_eq_impl(self),
 
             // Primitive types that satisfy `Eq`.
-            ty::Bool | ty::Char | ty::Int(_) | ty::Uint(_) | ty::Str | ty::Term | ty::Never => true,
+            ty::Bool | ty::Char | ty::Int | ty::Str | ty::Term | ty::Never => true,
 
             // Composite types that satisfy `Eq` when all of their fields do.
             //
@@ -1457,7 +1439,7 @@ impl<'tcx> Ty<'tcx> {
             ty::RawPtr(_, _) | ty::FnPtr(..) => true,
 
             // Floating point numbers are not `Eq`.
-            ty::Float(_) => false,
+            ty::Float => false,
 
             // Conservatively return `false` for all others...
 
@@ -1522,16 +1504,13 @@ pub fn needs_drop_components_with_async<'tcx>(
     asyncness: Asyncness,
 ) -> Result<SmallVec<[Ty<'tcx>; 2]>, AlwaysRequiresDrop> {
     match *ty.kind() {
-        ty::Infer(ty::FreshIntTy(_))
-        | ty::Infer(ty::FreshFloatTy(_))
-        | ty::Bool
-        | ty::Int(_)
-        | ty::Uint(_)
-        | ty::Float(_)
+        ty::Bool
+        | ty::Float
         | ty::Never
         | ty::FnDef(..)
         | ty::FnPtr(..)
         | ty::Char
+        | ty::Int
         | ty::RawPtr(_, _)
         | ty::Ref(..)
         | ty::Term

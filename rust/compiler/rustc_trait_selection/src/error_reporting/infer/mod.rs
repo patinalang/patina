@@ -1850,7 +1850,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 // If a byte was expected and the found expression is a char literal
                 // containing a single ASCII character, perhaps the user meant to write `b'c'` to
                 // specify a byte literal
-                (ty::Uint(ty::UintTy::U8), ty::Char) => {
+                (ty::Int, ty::Char) => {
                     if let Ok(code) = self.tcx.sess.source_map().span_to_snippet(span)
                         && let Some(code) = code.strip_circumfix('\'', '\'')
                         // forbid all Unicode escapes
@@ -2146,9 +2146,8 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
     /// Structurally compares two types, modulo any inference variables.
     ///
     /// Returns `true` if two types are equal, or if one type is an inference variable compatible
-    /// with the other type. A TyVar inference type is compatible with any type, and an IntVar or
-    /// FloatVar inference type are compatible with themselves or their concrete types (Int and
-    /// Float types, respectively). When comparing two ADTs, these rules apply recursively.
+    /// with the other type. A TyVar inference type is compatible with any type.
+    /// When comparing two ADTs, these rules apply recursively.
     pub fn same_type_modulo_infer<T: relate::Relate<TyCtxt<'tcx>>>(&self, a: T, b: T) -> bool {
         let (a, b) = self.resolve_vars_if_possible((a, b));
         SameTypeModuloInfer(self).relate(a, b).is_ok()
@@ -2187,18 +2186,7 @@ impl<'tcx> TypeRelation<TyCtxt<'tcx>> for SameTypeModuloInfer<'_, 'tcx> {
 
     fn tys(&mut self, a: Ty<'tcx>, b: Ty<'tcx>) -> RelateResult<'tcx, Ty<'tcx>> {
         match (a.kind(), b.kind()) {
-            (ty::Int(_) | ty::Uint(_), ty::Infer(ty::InferTy::IntVar(_)))
-            | (
-                ty::Infer(ty::InferTy::IntVar(_)),
-                ty::Int(_) | ty::Uint(_) | ty::Infer(ty::InferTy::IntVar(_)),
-            )
-            | (ty::Float(_), ty::Infer(ty::InferTy::FloatVar(_)))
-            | (
-                ty::Infer(ty::InferTy::FloatVar(_)),
-                ty::Float(_) | ty::Infer(ty::InferTy::FloatVar(_)),
-            )
-            | (ty::Infer(ty::InferTy::TyVar(_)), _)
-            | (_, ty::Infer(ty::InferTy::TyVar(_))) => Ok(a),
+            (ty::Infer(ty::InferTy::TyVar(_)), _) | (_, ty::Infer(ty::InferTy::TyVar(_))) => Ok(a),
             (ty::Infer(_), _) | (_, ty::Infer(_)) => Err(TypeError::Mismatch),
             _ => relate::structurally_relate_tys(self, a, b),
         }

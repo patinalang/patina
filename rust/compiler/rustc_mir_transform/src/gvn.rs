@@ -1312,7 +1312,7 @@ impl<'body, 'a, 'tcx> VnState<'body, 'a, 'tcx> {
                         && let Some(to) = self.ty(arg_index).builtin_deref(true)
                         && let ty::Slice(..) = to.kind() =>
                     {
-                        return Some(self.insert_constant(Const::Ty(self.tcx.types.usize, *len)));
+                        return Some(self.insert_constant(Const::Ty(self.tcx.types.int, *len)));
                     }
 
                     // `&mut *p`, `&raw *p`, etc don't change metadata.
@@ -1352,7 +1352,7 @@ impl<'body, 'a, 'tcx> VnState<'body, 'a, 'tcx> {
             ) if let ty::Slice(..) = arg_ty.builtin_deref(true).unwrap().kind()
                 && let ty::Array(_, len) = self.ty(inner).builtin_deref(true).unwrap().kind() =>
             {
-                return Some(self.insert_constant(Const::Ty(self.tcx.types.usize, *len)));
+                return Some(self.insert_constant(Const::Ty(self.tcx.types.int, *len)));
             }
             _ => Value::UnaryOp(op, arg_index),
         };

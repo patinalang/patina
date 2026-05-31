@@ -386,7 +386,7 @@ impl<'a, 'tcx> ConstAnalysis<'a, 'tcx> {
                     && let operand_ty = operand.ty(self.local_decls, self.tcx)
                     && let Some(operand_ty) = operand_ty.builtin_deref(true)
                     && let ty::Array(_, len) = operand_ty.kind()
-                    && let Some(len) = Const::Ty(self.tcx.types.usize, *len)
+                    && let Some(len) = Const::Ty(self.tcx.types.int, *len)
                         .try_eval_scalar_int(self.tcx, self.typing_env)
                 {
                     state.insert_value_idx(target_len, FlatSet::Elem(len.into()), &self.map);
@@ -612,7 +612,7 @@ impl<'a, 'tcx> ConstAnalysis<'a, 'tcx> {
                     let len_usize = op.len(&self.ecx.borrow()).discard_err()?;
                     let layout = self
                         .tcx
-                        .layout_of(self.typing_env.as_query_input(self.tcx.types.usize))
+                        .layout_of(self.typing_env.as_query_input(self.tcx.types.int))
                         .unwrap();
                     Some(ImmTy::from_uint(len_usize, layout).into())
                 }
@@ -871,7 +871,7 @@ fn try_write_constant<'tcx>(
         ty::FnDef(..) => {}
 
         // Those are scalars, must be handled above.
-        ty::Bool | ty::Int(_) | ty::Uint(_) | ty::Float(_) | ty::Char | ty::Term =>
+        ty::Bool | ty::Float | ty::Char | ty::Int | ty::Term =>
             throw_machine_stop_str!("primitive type with provenance"),
 
         ty::Tuple(elem_tys) => {

@@ -817,7 +817,7 @@ impl<'tcx> ty::TypeVisitor<TyCtxt<'tcx>> for HasNumericInferVisitor {
     type Result = ControlFlow<()>;
 
     fn visit_ty(&mut self, ty: Ty<'tcx>) -> Self::Result {
-        if matches!(ty.kind(), ty::Infer(ty::FloatVar(_) | ty::IntVar(_))) {
+        if ty.is_integral() || ty.is_floating_point() {
             ControlFlow::Break(())
         } else {
             ControlFlow::Continue(())

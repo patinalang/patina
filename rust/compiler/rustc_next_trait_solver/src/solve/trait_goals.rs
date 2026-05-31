@@ -742,11 +742,9 @@ where
                 ty::FnDef(..)
                 | ty::FnPtr(..)
                 | ty::Error(_)
-                | ty::Uint(_)
-                | ty::Int(_)
-                | ty::Infer(ty::IntVar(_) | ty::FloatVar(_))
+                | ty::Int
                 | ty::Bool
-                | ty::Float(_)
+                | ty::Float
                 | ty::Char
                 | ty::RawPtr(..)
                 | ty::Never
@@ -778,10 +776,7 @@ where
                     );
                 }
 
-                ty::Bound(..)
-                | ty::Infer(
-                    ty::TyVar(_) | ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_),
-                ) => {
+                ty::Bound(..) | ty::Infer(ty::TyVar(_) | ty::FreshTy(_)) => {
                     panic!("unexpected type `{ty:?}`")
                 }
             }
@@ -1245,15 +1240,6 @@ where
         };
 
         match self_ty.kind() {
-            // Stall int and float vars until they are resolved to a concrete
-            // numerical type. That's because the check for impls below treats
-            // int vars as matching any impl. Even if we filtered such impls,
-            // we probably don't want to treat an `impl !AutoTrait for i32` as
-            // disqualifying the built-in auto impl for `i64: AutoTrait` either.
-            ty::Infer(ty::IntVar(_) | ty::FloatVar(_)) => {
-                Some(self.forced_ambiguity(MaybeInfo::AMBIGUOUS))
-            }
-
             // Backward compatibility for default auto traits.
             // Test: ui/traits/default_auto_traits/extern-types.rs
             ty::Foreign(..) if self.cx().is_default_trait(goal.predicate.def_id()) => check_impls(),
@@ -1303,9 +1289,8 @@ where
             // in unsoundness, see #84857.
             ty::Bool
             | ty::Char
-            | ty::Int(_)
-            | ty::Uint(_)
-            | ty::Float(_)
+            | ty::Int
+            | ty::Float
             | ty::Str
             | ty::Term
             | ty::Array(_, _)

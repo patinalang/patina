@@ -810,7 +810,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                 }
 
                 let index_ty = self.body.local_decls[index].ty;
-                if index_ty != self.tcx.types.usize {
+                if index_ty != self.tcx.types.int {
                     self.fail(location, format!("bad index ({index_ty} != usize)"))
                 }
             }
@@ -1131,7 +1131,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
 
                         // FIXME: Check metadata more generally
                         if pointee_ty.is_slice() {
-                            if !self.mir_assign_valid_types(metadata_ty, self.tcx.types.usize) {
+                            if !self.mir_assign_valid_types(metadata_ty, self.tcx.types.int) {
                                 self.fail(location, "slice metadata must be usize");
                             }
                         } else if pointee_ty.is_sized(self.tcx, self.typing_env) {
@@ -1177,7 +1177,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                 match op {
                     Offset => {
                         check_kinds!(a, "Cannot offset non-pointer type {:?}", ty::RawPtr(..));
-                        if b != self.tcx.types.isize && b != self.tcx.types.usize {
+                        if b != self.tcx.types.int && b != self.tcx.types.int {
                             self.fail(location, format!("Cannot offset by non-isize type {b}"));
                         }
                     }
@@ -1188,9 +1188,8 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                                 "Cannot {op:?} compare type {:?}",
                                 ty::Bool
                                     | ty::Char
-                                    | ty::Int(..)
-                                    | ty::Uint(..)
-                                    | ty::Float(..)
+                                    | ty::Int
+            | ty::Float
                                     | ty::RawPtr(..)
                                     | ty::FnPtr(..)
                             )
@@ -1201,7 +1200,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                             check_kinds!(
                                 x,
                                 "Cannot three-way compare non-integer type {:?}",
-                                ty::Char | ty::Uint(..) | ty::Int(..)
+                                ty::Char | ty::Int
                             )
                         }
                     }
@@ -1211,7 +1210,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                             check_kinds!(
                                 x,
                                 "Cannot {op:?} non-integer type {:?}",
-                                ty::Uint(..) | ty::Int(..)
+                                ty::Int
                             )
                         }
                     }
@@ -1220,7 +1219,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                             check_kinds!(
                                 x,
                                 "Cannot perform bitwise op {op:?} on type {:?}",
-                                ty::Uint(..) | ty::Int(..) | ty::Bool
+                                ty::Int | ty::Bool
                             )
                         }
                     }
@@ -1229,7 +1228,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                             check_kinds!(
                                 x,
                                 "Cannot perform arithmetic {op:?} on type {:?}",
-                                ty::Uint(..) | ty::Int(..) | ty::Float(..)
+                                ty::Int | ty::Float
                             )
                         }
                     }
@@ -1239,13 +1238,13 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                 let a = operand.ty(&self.body.local_decls, self.tcx);
                 match op {
                     UnOp::Neg => {
-                        check_kinds!(a, "Cannot negate type {:?}", ty::Int(..) | ty::Float(..))
+                        check_kinds!(a, "Cannot negate type {:?}", ty::Int | ty::Float)
                     }
                     UnOp::Not => {
                         check_kinds!(
                             a,
                             "Cannot binary not type {:?}",
-                            ty::Int(..) | ty::Uint(..) | ty::Bool
+                            ty::Int | ty::Bool
                         );
                     }
                     UnOp::PtrMetadata => {
@@ -1541,7 +1540,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                 }
 
                 let op_cnt_ty = count.ty(&self.body.local_decls, self.tcx);
-                if op_cnt_ty != self.tcx.types.usize {
+                if op_cnt_ty != self.tcx.types.int {
                     self.fail(location, format!("bad arg ({op_cnt_ty} != usize)"))
                 }
             }
@@ -1581,11 +1580,10 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
             TerminatorKind::SwitchInt { targets, discr } => {
                 let switch_ty = discr.ty(&self.body.local_decls, self.tcx);
 
-                let target_width = self.tcx.sess.target.pointer_width;
+                let _target_width = self.tcx.sess.target.pointer_width;
 
                 let size = Size::from_bits(match switch_ty.kind() {
-                    ty::Uint(uint) => uint.normalize(target_width).bit_width().unwrap(),
-                    ty::Int(int) => int.normalize(target_width).bit_width().unwrap(),
+                    ty::Int => self.tcx.data_layout.pointer_size().bits(),
                     ty::Char => 32,
                     ty::Bool => 1,
                     other => bug!("unhandled type: {:?}", other),

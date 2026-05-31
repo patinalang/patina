@@ -55,90 +55,59 @@ error: cannot find macro `assert_eq` in this scope
 LL |     assert_eq!(Some(5), item);
    |     ^^^^^^^^^
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/trait/impl_trait__03.pt:10:9
-   |
-LL |     v: [int],
-   |         ^^^
-   |         |
-   |         not found in this scope
-   |         help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/trait/impl_trait__03.pt:11:9
-   |
-LL |     u: [int],
-   |         ^^^
-   |         |
-   |         not found in this scope
-   |         help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/trait/impl_trait__03.pt:12:39
-   |
-LL | ) -> Iter::Cycle<Iter::Chain<IntoIter<int>, IntoIter<int>>> {
-   |                                       ^^^ not found in this scope
-   |
-help: perhaps you intended to use this type
-   |
-LL - ) -> Iter::Cycle<Iter::Chain<IntoIter<int>, IntoIter<int>>> {
-LL + ) -> Iter::Cycle<Iter::Chain<IntoIter<i32>, IntoIter<int>>> {
-   |
-help: you might be missing a type parameter
-   |
-LL | fn combine_lists_explicit_return_type<int>(
-   |                                      +++++
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/trait/impl_trait__03.pt:12:54
-   |
-LL | ) -> Iter::Cycle<Iter::Chain<IntoIter<int>, IntoIter<int>>> {
-   |                                                      ^^^ not found in this scope
-   |
-help: perhaps you intended to use this type
-   |
-LL - ) -> Iter::Cycle<Iter::Chain<IntoIter<int>, IntoIter<int>>> {
-LL + ) -> Iter::Cycle<Iter::Chain<IntoIter<int>, IntoIter<i32>>> {
-   |
-help: you might be missing a type parameter
-   |
-LL | fn combine_lists_explicit_return_type<int>(
-   |                                      +++++
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/trait/impl_trait__03.pt:19:9
-   |
-LL |     v: [int],
-   |         ^^^
-   |         |
-   |         not found in this scope
-   |         help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/trait/impl_trait__03.pt:20:9
-   |
-LL |     u: [int],
-   |         ^^^
-   |         |
-   |         not found in this scope
-   |         help: perhaps you intended to use this type: `i32`
-
 error[E0405]: cannot find trait `Iterator` in this scope
   --> tests/ui/src/trait/impl_trait__03.pt:21:11
    |
 LL | ) -> impl Iterator<Item=int> {
    |           ^^^^^^^^ not found in this scope
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/trait/impl_trait__03.pt:21:25
+error[E0599]: no method named `iter` found for slice `[int]` in the current scope
+  --> tests/ui/src/trait/impl_trait__03.pt:13:7
    |
-LL | ) -> impl Iterator<Item=int> {
-   |                         ^^^
-   |                         |
-   |                         not found in this scope
-   |                         help: perhaps you intended to use this type: `i32`
+LL |     v.iter().chain(u.iter()).cycle()
+   |       ^^^^ method not found in `[int]`
 
-error: aborting due to 16 previous errors
+error[E0277]: the trait bound `[int]: Sized` is not satisfied
+  --> tests/ui/src/trait/impl_trait__03.pt:10:8
+   |
+LL |     v: [int],
+   |        ^^^^^ the trait `Sized` is not implemented for `[int]`
+   |
+help: this trait has no implementations, consider adding one
+  --> <patina-prelude>:14:1
+   |
+LL | pub trait Sized: MetaSized {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: unsized fn params are gated as an unstable feature
+help: function arguments must have a statically known size, borrowed slices always have a known size
+   |
+LL |     v: &[int],
+   |        +
 
-Some errors have detailed explanations: E0405, E0425, E0432.
-For more information about an error, try `rustc --explain E0405`.
+error[E0277]: the trait bound `[int]: Sized` is not satisfied
+  --> tests/ui/src/trait/impl_trait__03.pt:11:8
+   |
+LL |     u: [int],
+   |        ^^^^^ the trait `Sized` is not implemented for `[int]`
+   |
+help: this trait has no implementations, consider adding one
+  --> <patina-prelude>:14:1
+   |
+LL | pub trait Sized: MetaSized {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: unsized fn params are gated as an unstable feature
+help: function arguments must have a statically known size, borrowed slices always have a known size
+   |
+LL |     u: &[int],
+   |        +
+
+error[E0599]: no method named `iter` found for slice `[int]` in the current scope
+  --> tests/ui/src/trait/impl_trait__03.pt:13:22
+   |
+LL |     v.iter().chain(u.iter()).cycle()
+   |                      ^^^^ method not found in `[int]`
+
+error: aborting due to 13 previous errors
+
+Some errors have detailed explanations: E0277, E0405, E0432, E0599.
+For more information about an error, try `rustc --explain E0277`.

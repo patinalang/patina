@@ -170,10 +170,7 @@ fn is_valid_cmse_output_layout<'tcx>(cx: LayoutCx<'tcx>, layout: TyAndLayout<'tc
     }
 
     // Accept (transparently wrapped) scalar 64-bit primitives.
-    matches!(
-        layout.peel_transparent_wrappers(&cx).ty.kind(),
-        ty::Int(ty::IntTy::I64) | ty::Uint(ty::UintTy::U64) | ty::Float(ty::FloatTy::F64)
-    )
+    matches!(layout.peel_transparent_wrappers(&cx).ty.kind(), ty::Int | ty::Float)
 }
 
 fn should_emit_layout_error<'tcx>(abi: ExternAbi, layout_err: &'tcx LayoutError<'tcx>) -> bool {

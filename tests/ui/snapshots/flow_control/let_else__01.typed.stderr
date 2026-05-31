@@ -22,15 +22,6 @@ error: cannot find macro `panic` in this scope
 LL |         panic!("Can't segment count item pair: '{s}'");
    |         ^^^^^
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/flow_control/let_else__01.pt:6:31
-   |
-LL | fn get_count_item(s: str) -> (int, str) {
-   |                               ^^^
-   |                               |
-   |                               not found in this scope
-   |                               help: perhaps you intended to use this type: `i32`
-
 error[E0531]: cannot find tuple struct or tuple variant `Some` in this scope
   --> tests/ui/src/flow_control/let_else__01.pt:11:10
    |
@@ -86,16 +77,11 @@ LL | |     };
    = help: try adding a diverging expression, such as `return` or `panic!(..)`
    = help: ...or use `match` instead of `let...else`
 
-error[E0433]: cannot find module or crate `int` in this scope
-  --> tests/ui/src/flow_control/let_else__01.pt:14:21
+error[E0599]: no associated function or constant named `from_str` found for type `int` in the current scope
+  --> tests/ui/src/flow_control/let_else__01.pt:14:26
    |
 LL |     let Ok(count) = int::from_str(count_str) else {
-   |                     ^^^----------
-   |                     |
-   |                     use of unresolved module or unlinked crate `int`
-   |                     help: perhaps you intended to use this type: `i32`
-   |
-   = help: you might be missing a crate named `int`
+   |                          ^^^^^^^^ associated function or constant not found in `int`
 
 error[E0308]: `else` clause of `let...else` does not diverge
   --> tests/ui/src/flow_control/let_else__01.pt:14:51
@@ -111,7 +97,21 @@ LL | |     };
    = help: try adding a diverging expression, such as `return` or `panic!(..)`
    = help: ...or use `match` instead of `let...else`
 
+error[E0277]: the trait bound `str: Sized` is not satisfied in `(int, str)`
+  --> tests/ui/src/flow_control/let_else__01.pt:17:5
+   |
+LL |     (count, item)
+   |     ^^^^^^^^^^^^^ within `(int, str)`, the trait `Sized` is not implemented for `str`
+   |
+help: this trait has no implementations, consider adding one
+  --> <patina-prelude>:14:1
+   |
+LL | pub trait Sized: MetaSized {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required because it appears within the type `(int, str)`
+   = note: tuples must have a statically known size to be initialized
+
 error: aborting due to 13 previous errors
 
-Some errors have detailed explanations: E0277, E0308, E0425, E0432, E0433, E0531, E0599.
+Some errors have detailed explanations: E0277, E0308, E0432, E0531, E0599.
 For more information about an error, try `rustc --explain E0277`.

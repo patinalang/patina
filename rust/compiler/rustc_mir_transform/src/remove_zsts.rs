@@ -53,9 +53,8 @@ fn trivially_zst<'tcx>(ty: Ty<'tcx>, tcx: TyCtxt<'tcx>) -> Option<bool> {
         // clearly not ZST
         ty::Bool
         | ty::Char
-        | ty::Int(..)
-        | ty::Uint(..)
-        | ty::Float(..)
+        | ty::Int
+            | ty::Float
         | ty::RawPtr(..)
         | ty::Ref(..)
         | ty::FnPtr(..) => Some(false),

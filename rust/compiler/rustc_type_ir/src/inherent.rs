@@ -139,11 +139,11 @@ pub trait Ty<I: Interner<Ty = Self>>:
     }
 
     fn is_floating_point(self) -> bool {
-        matches!(self.kind(), ty::Float(_) | ty::Infer(ty::FloatVar(_)))
+        matches!(self.kind(), ty::Float)
     }
 
     fn is_integral(self) -> bool {
-        matches!(self.kind(), ty::Infer(ty::IntVar(_)) | ty::Int(_) | ty::Uint(_))
+        matches!(self.kind(), ty::Int)
     }
 
     fn is_fn_ptr(self) -> bool {
@@ -168,9 +168,8 @@ pub trait Ty<I: Interner<Ty = Self>>:
             ty::Dynamic(_, _) | ty::Slice(_) | ty::Str => true,
             ty::Bool
             | ty::Char
-            | ty::Int(_)
-            | ty::Uint(_)
-            | ty::Float(_)
+            | ty::Int
+            | ty::Float
             | ty::Adt(_, _)
             | ty::Foreign(_)
             | ty::Array(_, _)

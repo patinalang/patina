@@ -155,18 +155,16 @@ fn lit_to_mir_constant<'tcx>(tcx: TyCtxt<'tcx>, lit_input: LitToConstInput<'tcx>
             let allocation = tcx.allocate_bytes_dedup(data, CTFE_ALLOC_SALT);
             ConstValue::Slice { alloc_id: allocation, meta: len.try_into().unwrap() }
         }
-        (ast::LitKind::Byte(n), ty::Uint(ty::UintTy::U8)) => {
+        (ast::LitKind::Byte(n), ty::Int) => {
             ConstValue::Scalar(Scalar::from_uint(n, Size::from_bytes(1)))
         }
-        (ast::LitKind::Int(n, _), ty::Uint(_)) if !neg => trunc(n.get()),
-        (ast::LitKind::Int(n, _), ty::Int(_)) => {
+        (ast::LitKind::Int(n), ty::Int) if !neg => trunc(n.get()),
+        (ast::LitKind::Int(n), ty::Int) => {
             // Unsigned "negation" has the same bitwise effect as signed negation,
             // which gets the result we want without additional casts.
             trunc(if neg { u128::wrapping_neg(n.get()) } else { n.get() })
         }
-        (ast::LitKind::Float(n, _), ty::Float(fty)) => {
-            parse_float_into_constval(n, *fty, neg).unwrap()
-        }
+        (ast::LitKind::Float(n, _), ty::Float) => parse_float_into_constval(n, neg).unwrap(),
         (ast::LitKind::Bool(b), ty::Bool) => ConstValue::Scalar(Scalar::from_bool(b)),
         (ast::LitKind::Char(c), ty::Char) => ConstValue::Scalar(Scalar::from_char(c)),
         (ast::LitKind::Err(guar), _) => {

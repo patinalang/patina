@@ -63,7 +63,7 @@ fn cross_crate_inlinable(tcx: TyCtxt<'_>, def_id: LocalDefId) -> bool {
     {
         // FIXME(f16_f128): in order to avoid crashes building `core`, always inline to skip
         // codegen if the function is not used.
-        if ty == &tcx.types.f16 || ty == &tcx.types.f128 {
+        if ty == &tcx.types.float {
             return true;
         }
     }

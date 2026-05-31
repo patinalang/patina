@@ -77,7 +77,7 @@ pub use pattern::*;
 pub use predicate::*;
 pub use predicate_kind::*;
 pub use region_kind::*;
-pub use rustc_ast_ir::{FloatTy, IntTy, Movability, Mutability, Pinnedness, UintTy};
+pub use rustc_ast_ir::{Movability, Mutability, Pinnedness};
 use rustc_type_ir_macros::GenericTypeVisitable;
 pub use ty_info::*;
 pub use ty_kind::*;

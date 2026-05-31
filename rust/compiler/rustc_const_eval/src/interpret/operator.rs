@@ -3,7 +3,7 @@ use rustc_abi::Size;
 use rustc_apfloat::{Float, FloatConvert};
 use rustc_middle::mir::interpret::{InterpResult, PointerArithmetic, Scalar};
 use rustc_middle::ty::layout::TyAndLayout;
-use rustc_middle::ty::{self, FloatTy, ScalarInt};
+use rustc_middle::ty::{self, ScalarInt};
 use rustc_middle::{bug, mir, span_bug};
 use rustc_span::sym;
 use tracing::trace;
@@ -375,25 +375,12 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                 let right = right.to_scalar();
                 interp_ok(self.binary_bool_op(bin_op, left.to_bool()?, right.to_bool()?))
             }
-            ty::Float(fty) => {
+            ty::Float => {
                 assert_eq!(left.layout.ty, right.layout.ty);
                 let layout = left.layout;
                 let left = left.to_scalar();
                 let right = right.to_scalar();
-                interp_ok(match fty {
-                    FloatTy::F16 => {
-                        self.binary_float_op(bin_op, layout, left.to_f16()?, right.to_f16()?)
-                    }
-                    FloatTy::F32 => {
-                        self.binary_float_op(bin_op, layout, left.to_f32()?, right.to_f32()?)
-                    }
-                    FloatTy::F64 => {
-                        self.binary_float_op(bin_op, layout, left.to_f64()?, right.to_f64()?)
-                    }
-                    FloatTy::F128 => {
-                        self.binary_float_op(bin_op, layout, left.to_f128()?, right.to_f128()?)
-                    }
-                })
+                interp_ok(self.binary_float_op(bin_op, layout, left.to_f64()?, right.to_f64()?))
             }
             _ if left.layout.ty.is_integral() => {
                 // the RHS type can be different, e.g. for shifts -- but it has to be integral, too
@@ -450,22 +437,17 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                 };
                 interp_ok(ImmTy::from_bool(res, *self.tcx))
             }
-            ty::Float(fty) => {
+            ty::Float => {
                 let val = val.to_scalar();
                 if un_op != Neg {
                     span_bug!(self.cur_span(), "Invalid float op {:?}", un_op);
                 }
 
                 // No NaN adjustment here, `-` is a bitwise operation!
-                let res = match fty {
-                    FloatTy::F16 => Scalar::from_f16(-val.to_f16()?),
-                    FloatTy::F32 => Scalar::from_f32(-val.to_f32()?),
-                    FloatTy::F64 => Scalar::from_f64(-val.to_f64()?),
-                    FloatTy::F128 => Scalar::from_f128(-val.to_f128()?),
-                };
+                let res = Scalar::from_f64(-val.to_f64()?);
                 interp_ok(ImmTy::from_scalar(res, layout))
             }
-            ty::Int(..) => {
+            ty::Int => {
                 let val = val.to_scalar().to_int(layout.size)?;
                 let res = match un_op {
                     Not => !val,
@@ -473,15 +455,6 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                     _ => span_bug!(self.cur_span(), "Invalid integer op {:?}", un_op),
                 };
                 let res = ScalarInt::truncate_from_int(res, layout.size).0;
-                interp_ok(ImmTy::from_scalar(res.into(), layout))
-            }
-            ty::Uint(..) => {
-                let val = val.to_scalar().to_uint(layout.size)?;
-                let res = match un_op {
-                    Not => !val,
-                    _ => span_bug!(self.cur_span(), "Invalid unsigned integer op {:?}", un_op),
-                };
-                let res = ScalarInt::truncate_from_uint(res, layout.size).0;
                 interp_ok(ImmTy::from_scalar(res.into(), layout))
             }
             ty::RawPtr(..) | ty::Ref(..) => {

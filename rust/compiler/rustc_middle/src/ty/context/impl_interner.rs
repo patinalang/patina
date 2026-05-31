@@ -516,9 +516,8 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
         match self_ty.kind() {
             ty::Bool
             | ty::Char
-            | ty::Int(_)
-            | ty::Uint(_)
-            | ty::Float(_)
+            | ty::Int
+            | ty::Float
             | ty::Adt(_, _)
             | ty::Foreign(_)
             | ty::Str
@@ -546,50 +545,6 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
                 }
             }
 
-            // HACK: For integer and float variables we have to manually look at all impls
-            // which have some integer or float as a self type.
-            ty::Infer(ty::IntVar(_)) => {
-                use ty::IntTy::*;
-                use ty::UintTy::*;
-                // This causes a compiler error if any new integer kinds are added.
-                let (I8 | I16 | I32 | I64 | I128 | Isize): ty::IntTy;
-                let (U8 | U16 | U32 | U64 | U128 | Usize): ty::UintTy;
-                let possible_integers = [
-                    // signed integers
-                    ty::SimplifiedType::Int(I8),
-                    ty::SimplifiedType::Int(I16),
-                    ty::SimplifiedType::Int(I32),
-                    ty::SimplifiedType::Int(I64),
-                    ty::SimplifiedType::Int(I128),
-                    ty::SimplifiedType::Int(Isize),
-                    // unsigned integers
-                    ty::SimplifiedType::Uint(U8),
-                    ty::SimplifiedType::Uint(U16),
-                    ty::SimplifiedType::Uint(U32),
-                    ty::SimplifiedType::Uint(U64),
-                    ty::SimplifiedType::Uint(U128),
-                    ty::SimplifiedType::Uint(Usize),
-                ];
-                for simp in possible_integers {
-                    consider_impls_for_simplified_type(simp);
-                }
-            }
-
-            ty::Infer(ty::FloatVar(_)) => {
-                // This causes a compiler error if any new float kinds are added.
-                let (ty::FloatTy::F16 | ty::FloatTy::F32 | ty::FloatTy::F64 | ty::FloatTy::F128);
-                let possible_floats = [
-                    ty::SimplifiedType::Float(ty::FloatTy::F16),
-                    ty::SimplifiedType::Float(ty::FloatTy::F32),
-                    ty::SimplifiedType::Float(ty::FloatTy::F64),
-                    ty::SimplifiedType::Float(ty::FloatTy::F128),
-                ];
-
-                for simp in possible_floats {
-                    consider_impls_for_simplified_type(simp);
-                }
-            }
-
             // The only traits applying to aliases and placeholders are blanket impls.
             //
             // Impls which apply to an alias after normalization are handled by
@@ -602,9 +557,9 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
             ty::CoroutineWitness(..) => (),
 
             // These variants should not exist as a self type.
-            ty::Infer(ty::TyVar(_) | ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_))
-            | ty::Param(_)
-            | ty::Bound(_, _) => bug!("unexpected self type: {self_ty}"),
+            ty::Infer(ty::TyVar(_) | ty::FreshTy(_)) | ty::Param(_) | ty::Bound(_, _) => {
+                bug!("unexpected self type: {self_ty}")
+            }
         }
 
         #[allow(rustc::usage_of_type_ir_traits)]

@@ -1,0 +1,40 @@
+#![allow(internal_features)]
+#![feature(no_core, lang_items)]
+#![no_std]
+#![no_core]
+
+#[lang = "pointee_sized"]
+pub trait PointeeSized { }
+
+#[lang = "meta_sized"]
+pub trait MetaSized: PointeeSized { }
+
+#[lang = "sized"]
+pub trait Sized: MetaSized { }
+
+#[lang = "copy"]
+pub trait Copy { }
+
+#[allow(unused)]
+extern mod io;
+
+#[macro_export]
+macro_rules! println { ($s:literal) => {{ io::format("~s~n", [$s]); }}; }
+
+// source: patina-by-example/src/unsafe.md
+// block: 1/2
+
+struct Celcius(int);
+struct Fahrenheit(int);
+
+pub fn main() {
+    let degrees_term = Celcius(10) as term;
+
+    unsafe {
+        // Celcius(10) and Fahrenheit(10) have the same runtime representation,
+        // so `try_cast_into` will succeed.
+        // But `degrees_term` wasn't Fahrenheit! Even with some guardrails,
+        // this circumvents the type system - which is why it's unsafe.
+        let fahrenheit = degrees_term.try_cast_into::<Fahrenheit>().unwrap();
+    }
+}

@@ -18,7 +18,7 @@ impl<'tcx> crate::MirPass<'tcx> for CheckAlignment {
 
     fn run_pass(&self, tcx: TyCtxt<'tcx>, body: &mut Body<'tcx>) {
         // Skip trivially aligned place types.
-        let excluded_pointees = [tcx.types.bool, tcx.types.i8, tcx.types.u8];
+        let excluded_pointees = [tcx.types.bool, tcx.types.int, tcx.types.int];
 
         // When checking the alignment of references to field projections (`&(*ptr).a`),
         // we need to make sure that the reference is aligned according to the field type
@@ -55,8 +55,8 @@ fn insert_alignment_check<'tcx>(
     stmts.push(Statement::new(source_info, StatementKind::Assign(Box::new((thin_ptr, rvalue)))));
 
     // Transmute the pointer to a usize (equivalent to `ptr.addr()`).
-    let rvalue = Rvalue::Cast(CastKind::Transmute, Operand::Copy(thin_ptr), tcx.types.usize);
-    let addr = local_decls.push(LocalDecl::with_source_info(tcx.types.usize, source_info)).into();
+    let rvalue = Rvalue::Cast(CastKind::Transmute, Operand::Copy(thin_ptr), tcx.types.int);
+    let addr = local_decls.push(LocalDecl::with_source_info(tcx.types.int, source_info)).into();
     stmts.push(Statement::new(source_info, StatementKind::Assign(Box::new((addr, rvalue)))));
 
     // Get the alignment of the pointee
@@ -66,11 +66,11 @@ fn insert_alignment_check<'tcx>(
 
     // Subtract 1 from the alignment to get the alignment mask
     let alignment_mask =
-        local_decls.push(LocalDecl::with_source_info(tcx.types.usize, source_info)).into();
+        local_decls.push(LocalDecl::with_source_info(tcx.types.int, source_info)).into();
     let one = Operand::Constant(Box::new(ConstOperand {
         span: source_info.span,
         user_ty: None,
-        const_: Const::Val(ConstValue::Scalar(Scalar::from_target_usize(1, &tcx)), tcx.types.usize),
+        const_: Const::Val(ConstValue::Scalar(Scalar::from_target_usize(1, &tcx)), tcx.types.int),
     }));
     stmts.push(Statement::new(
         source_info,
@@ -91,7 +91,7 @@ fn insert_alignment_check<'tcx>(
             user_ty: None,
             const_: Const::Val(
                 ConstValue::Scalar(Scalar::from_target_usize(max_mask, &tcx)),
-                tcx.types.usize,
+                tcx.types.int,
             ),
         }));
         stmts.push(Statement::new(
@@ -108,7 +108,7 @@ fn insert_alignment_check<'tcx>(
 
     // BitAnd the alignment mask with the pointer
     let alignment_bits =
-        local_decls.push(LocalDecl::with_source_info(tcx.types.usize, source_info)).into();
+        local_decls.push(LocalDecl::with_source_info(tcx.types.int, source_info)).into();
     stmts.push(Statement::new(
         source_info,
         StatementKind::Assign(Box::new((
@@ -125,7 +125,7 @@ fn insert_alignment_check<'tcx>(
     let zero = Operand::Constant(Box::new(ConstOperand {
         span: source_info.span,
         user_ty: None,
-        const_: Const::Val(ConstValue::Scalar(Scalar::from_target_usize(0, &tcx)), tcx.types.usize),
+        const_: Const::Val(ConstValue::Scalar(Scalar::from_target_usize(0, &tcx)), tcx.types.int),
     }));
     stmts.push(Statement::new(
         source_info,

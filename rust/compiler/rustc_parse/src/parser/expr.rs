@@ -2157,7 +2157,7 @@ impl<'a> Parser<'a> {
                 // not check for that.
                 if let token::Literal(token::Lit { kind: token::Integer, symbol, suffix }) =
                     next_token.kind
-                    && suffix.is_none_or(|s| s == sym::f32 || s == sym::f64)
+                    && suffix.is_none_or(|s| s == sym::f)
                     && symbol.as_str().chars().all(|c| c.is_numeric() || c == '_')
                     && self.token.span.hi() == next_token.span.lo()
                 {

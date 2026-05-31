@@ -69,7 +69,7 @@ impl<'tcx> crate::MirPass<'tcx> for EnumSizeOpt {
 
                 let span = st.source_info.span;
 
-                let tmp_ty = Ty::new_array(tcx, tcx.types.usize, num_variants as u64);
+                let tmp_ty = Ty::new_array(tcx, tcx.types.int, num_variants as u64);
                 let size_array_local = patch.new_temp(tmp_ty, span);
 
                 let store_live = StatementKind::StorageLive(size_array_local);
@@ -91,13 +91,13 @@ impl<'tcx> crate::MirPass<'tcx> for EnumSizeOpt {
                 let store_discr =
                     StatementKind::Assign(Box::new((discr_place, Rvalue::Discriminant(*rhs))));
 
-                let discr_cast_place = Place::from(patch.new_temp(tcx.types.usize, span));
+                let discr_cast_place = Place::from(patch.new_temp(tcx.types.int, span));
                 let cast_discr = StatementKind::Assign(Box::new((
                     discr_cast_place,
-                    Rvalue::Cast(CastKind::IntToInt, Operand::Copy(discr_place), tcx.types.usize),
+                    Rvalue::Cast(CastKind::IntToInt, Operand::Copy(discr_place), tcx.types.int),
                 )));
 
-                let size_place = Place::from(patch.new_temp(tcx.types.usize, span));
+                let size_place = Place::from(patch.new_temp(tcx.types.int, span));
                 let store_size = StatementKind::Assign(Box::new((
                     size_place,
                     Rvalue::Use(
@@ -114,7 +114,7 @@ impl<'tcx> crate::MirPass<'tcx> for EnumSizeOpt {
                 let dst_ptr =
                     StatementKind::Assign(Box::new((dst, Rvalue::RawPtr(RawPtrKind::Mut, *lhs))));
 
-                let dst_cast_ty = Ty::new_mut_ptr(tcx, tcx.types.u8);
+                let dst_cast_ty = Ty::new_mut_ptr(tcx, tcx.types.int);
                 let dst_cast_place = Place::from(patch.new_temp(dst_cast_ty, span));
                 let dst_cast = StatementKind::Assign(Box::new((
                     dst_cast_place,
@@ -125,7 +125,7 @@ impl<'tcx> crate::MirPass<'tcx> for EnumSizeOpt {
                 let src_ptr =
                     StatementKind::Assign(Box::new((src, Rvalue::RawPtr(RawPtrKind::Const, *rhs))));
 
-                let src_cast_ty = Ty::new_imm_ptr(tcx, tcx.types.u8);
+                let src_cast_ty = Ty::new_imm_ptr(tcx, tcx.types.int);
                 let src_cast_place = Place::from(patch.new_temp(src_cast_ty, span));
                 let src_cast = StatementKind::Assign(Box::new((
                     src_cast_place,

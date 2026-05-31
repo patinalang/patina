@@ -1,9 +1,9 @@
 use either::Either;
 use rustc_abi::{BackendRepr, Endian};
-use rustc_apfloat::ieee::{Double, Half, Quad, Single};
+use rustc_apfloat::ieee::Double;
 use rustc_apfloat::{Float, Round};
 use rustc_middle::mir::interpret::{InterpErrorKind, Pointer, UndefinedBehaviorInfo};
-use rustc_middle::ty::{FloatTy, ScalarInt, SimdAlign};
+use rustc_middle::ty::{ScalarInt, SimdAlign};
 use rustc_middle::{bug, err_ub_format, mir, span_bug, throw_unsup_format, ty};
 use rustc_span::{Symbol, sym};
 use tracing::trace;
@@ -119,7 +119,7 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                         }
                         Op::Abs => {
                             // Works for f32 and f64.
-                            let ty::Float(float_ty) = op.layout.ty.kind() else {
+                            let ty::Float = op.layout.ty.kind() else {
                                 span_bug!(
                                     self.cur_span(),
                                     "{} operand is not a float",
@@ -128,15 +128,10 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                             };
                             let op = op.to_scalar();
                             // "Bitwise" operation, no NaN adjustments
-                            match float_ty {
-                                FloatTy::F16 => Scalar::from_f16(op.to_f16()?.abs()),
-                                FloatTy::F32 => Scalar::from_f32(op.to_f32()?.abs()),
-                                FloatTy::F64 => Scalar::from_f64(op.to_f64()?.abs()),
-                                FloatTy::F128 => Scalar::from_f128(op.to_f128()?.abs()),
-                            }
+                            Scalar::from_f64(op.to_f64()?.abs())
                         }
                         Op::Round(rounding) => {
-                            let ty::Float(float_ty) = op.layout.ty.kind() else {
+                            let ty::Float = op.layout.ty.kind() else {
                                 span_bug!(
                                     self.cur_span(),
                                     "{} operand is not a float",
@@ -144,12 +139,7 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                                 )
                             };
                             let op = op.to_scalar();
-                            match float_ty {
-                                FloatTy::F16 => self.float_round::<Half>(op, rounding)?,
-                                FloatTy::F32 => self.float_round::<Single>(op, rounding)?,
-                                FloatTy::F64 => self.float_round::<Double>(op, rounding)?,
-                                FloatTy::F128 => self.float_round::<Quad>(op, rounding)?,
-                            }
+                            self.float_round::<Double>(op, rounding)?
                         }
                         Op::Numeric(name) => {
                             self.numeric_intrinsic(name, op.to_scalar(), op.layout, op.layout)?
@@ -324,7 +314,7 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                             self.binary_op(mir_op, &res, &op)?
                         }
                         Op::MinMax(mmop) => {
-                            if matches!(res.layout.ty.kind(), ty::Float(_)) {
+                            if matches!(res.layout.ty.kind(), ty::Float) {
                                 ImmTy::from_scalar(self.fminmax_op(mmop, &res, &op)?, res.layout)
                             } else {
                                 // Just boring integers, no NaNs to worry about.
@@ -400,12 +390,12 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
 
                 // Read the mask, either as an integer or as an array.
                 let mask: u64 = match mask.layout.ty.kind() {
-                    ty::Uint(_) => {
+                    ty::Int => {
                         // Any larger integer type is fine.
                         assert!(mask.layout.size.bits() >= bitmask_len);
                         self.read_scalar(mask)?.to_bits(mask.layout.size)?.try_into().unwrap()
                     }
-                    ty::Array(elem, _len) if elem == &self.tcx.types.u8 => {
+                    ty::Array(elem, _len) if elem == &self.tcx.types.int => {
                         // The array must have exactly the right size.
                         assert_eq!(mask.layout.size.bits(), bitmask_len);
                         // Read the raw bytes.
@@ -467,12 +457,12 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                 // Write the result, depending on the `dest` type.
                 // Returns either an unsigned integer or array of `u8`.
                 match dest.layout.ty.kind() {
-                    ty::Uint(_) => {
+                    ty::Int => {
                         // Any larger integer type is fine, it will be zero-extended.
                         assert!(dest.layout.size.bits() >= bitmask_len);
                         self.write_scalar(Scalar::from_uint(res, dest.layout.size), &dest)?;
                     }
-                    ty::Array(elem, _len) if elem == &self.tcx.types.u8 => {
+                    ty::Array(elem, _len) if elem == &self.tcx.types.int => {
                         // The array must have exactly the right size.
                         assert_eq!(dest.layout.size.bits(), bitmask_len);
                         // We have to write the result byte-for-byte.
@@ -513,17 +503,17 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
 
                     let val = match (op.layout.ty.kind(), dest.layout.ty.kind()) {
                         // Int-to-(int|float): always safe
-                        (ty::Int(_) | ty::Uint(_), ty::Int(_) | ty::Uint(_) | ty::Float(_))
+                        (ty::Int, ty::Int | ty::Float)
                             if safe_cast || unsafe_cast =>
                             self.int_to_int_or_float(&op, dest.layout)?,
                         // Float-to-float: always safe
-                        (ty::Float(_), ty::Float(_)) if safe_cast || unsafe_cast =>
+                        (ty::Float, ty::Float) if safe_cast || unsafe_cast =>
                             self.float_to_float_or_int(&op, dest.layout)?,
                         // Float-to-int in safe mode
-                        (ty::Float(_), ty::Int(_) | ty::Uint(_)) if safe_cast =>
+                        (ty::Float, ty::Int) if safe_cast =>
                             self.float_to_float_or_int(&op, dest.layout)?,
                         // Float-to-int in unchecked mode
-                        (ty::Float(_), ty::Int(_) | ty::Uint(_)) if unsafe_cast => {
+                        (ty::Float, ty::Int) if unsafe_cast => {
                             self.float_to_int_checked(&op, dest.layout, Round::TowardZero)?
                                 .ok_or_else(|| {
                                     err_ub_format!(
@@ -536,7 +526,7 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                         (ty::RawPtr(..), ty::RawPtr(..)) if ptr_cast =>
                             self.ptr_to_ptr(&op, dest.layout)?,
                         // Int->Ptr casts
-                        (ty::Int(_) | ty::Uint(_), ty::RawPtr(..)) if from_exposed_cast =>
+                        (ty::Int, ty::RawPtr(..)) if from_exposed_cast =>
                             self.pointer_with_exposed_provenance_cast(&op, dest.layout)?,
                         // Error otherwise
                         _ =>
@@ -736,16 +726,11 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                     let c = self.read_scalar(&self.project_index(&c, i)?)?;
                     let dest = self.project_index(&dest, i)?;
 
-                    let ty::Float(float_ty) = dest.layout.ty.kind() else {
+                    let ty::Float = dest.layout.ty.kind() else {
                         span_bug!(self.cur_span(), "{} operand is not a float", intrinsic_name)
                     };
 
-                    let val = match float_ty {
-                        FloatTy::F16 => self.float_muladd::<Half>(a, b, c, typ)?,
-                        FloatTy::F32 => self.float_muladd::<Single>(a, b, c, typ)?,
-                        FloatTy::F64 => self.float_muladd::<Double>(a, b, c, typ)?,
-                        FloatTy::F128 => self.float_muladd::<Quad>(a, b, c, typ)?,
-                    };
+                    let val = self.float_muladd::<Double>(a, b, c, typ)?;
                     self.write_scalar(val, &dest)?;
                 }
             }
@@ -818,17 +803,10 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
         right: &ImmTy<'tcx, M::Provenance>,
     ) -> InterpResult<'tcx, Scalar<M::Provenance>> {
         assert_eq!(left.layout.ty, right.layout.ty);
-        let ty::Float(float_ty) = left.layout.ty.kind() else {
-            bug!("fmax operand is not a float")
-        };
+        let ty::Float = left.layout.ty.kind() else { bug!("fmax operand is not a float") };
         let left = left.to_scalar();
         let right = right.to_scalar();
-        interp_ok(match float_ty {
-            FloatTy::F16 => self.float_minmax::<Half>(left, right, op)?,
-            FloatTy::F32 => self.float_minmax::<Single>(left, right, op)?,
-            FloatTy::F64 => self.float_minmax::<Double>(left, right, op)?,
-            FloatTy::F128 => self.float_minmax::<Quad>(left, right, op)?,
-        })
+        interp_ok(self.float_minmax::<Double>(left, right, op)?)
     }
 
     fn check_simd_ptr_alignment(
@@ -888,7 +866,7 @@ fn bool_to_simd_element<Prov: Provenance>(b: bool, size: Size) -> Scalar<Prov> {
 
 fn simd_element_to_bool<Prov: Provenance>(elem: ImmTy<'_, Prov>) -> InterpResult<'_, bool> {
     assert!(
-        matches!(elem.layout.ty.kind(), ty::Int(_) | ty::Uint(_)),
+        matches!(elem.layout.ty.kind(), ty::Int),
         "SIMD mask element type must be an integer, but this is `{}`",
         elem.layout.ty
     );

@@ -302,9 +302,7 @@ pub(crate) enum IncorrectReprFormatGenericCause {
 impl IncorrectReprFormatGenericCause {
     pub(crate) fn from_lit_kind(span: Span, kind: &ast::LitKind, name: Symbol) -> Option<Self> {
         match *kind {
-            ast::LitKind::Int(value, ast::LitIntType::Unsuffixed) => {
-                Some(Self::Int { span, name, value: value.get() })
-            }
+            ast::LitKind::Int(value) => Some(Self::Int { span, name, value: value.get() }),
             ast::LitKind::Str(value, _) => Some(Self::Symbol { span, name, value }),
             _ => None,
         }
@@ -487,9 +485,7 @@ pub(crate) struct ReprIdent {
 
 #[derive(Diagnostic)]
 #[diag("unrecognized representation hint", code = E0552)]
-#[help(
-    "valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, `simd`, `i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `i64`, `u64`, `i128`, `u128`, `isize`, `usize`"
-)]
+#[help("valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`")]
 #[note(
     "for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>"
 )]
@@ -947,7 +943,7 @@ pub(crate) struct InvalidMetaItemRemoveNegSugg {
 #[derive(Diagnostic)]
 #[diag("suffixed literals are not allowed in attributes")]
 #[help(
-    "instead of using a suffixed literal (`1u8`, `1.0f32`, etc.), use an unsuffixed version (`1`, `1.0`, etc.)"
+    "instead of using a suffixed literal (`1f`, `1.0f`, etc.), use an unsuffixed version (`1.0`, etc.)"
 )]
 pub(crate) struct SuffixedLiteralInAttribute {
     #[primary_span]

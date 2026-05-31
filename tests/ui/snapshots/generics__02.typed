@@ -55,8 +55,8 @@ fn main() ({
             SingleGen<A>); // Uses `A` defined at the top.
     let _int =
         ((SingleGen as
-                fn(i32) -> SingleGen<i32> {SingleGen::<i32>})((6 as i32)) as
-            SingleGen<i32>); // Uses `int`.
+                fn(int) -> SingleGen<int> {SingleGen::<int>})((6 as int)) as
+            SingleGen<int>); // Uses `int`.
     let _char =
         ((SingleGen as
                 fn(char) -> SingleGen<char> {SingleGen::<char>})(('a' as

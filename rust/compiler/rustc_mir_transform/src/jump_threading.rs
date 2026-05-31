@@ -448,7 +448,7 @@ impl<'a, 'tcx> TOFinder<'a, 'tcx> {
                 TrackElem::DerefLen => {
                     let op: OpTy<'_> = self.ecx.deref_pointer(op).discard_err()?.into();
                     let len_usize = op.len(&self.ecx).discard_err()?;
-                    let layout = self.ecx.layout_of(self.tcx.types.usize).unwrap();
+                    let layout = self.ecx.layout_of(self.tcx.types.int).unwrap();
                     Some(ImmTy::from_uint(len_usize, layout).into())
                 }
             },

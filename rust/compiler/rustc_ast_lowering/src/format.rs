@@ -32,47 +32,10 @@ impl<'hir> LoweringContext<'_, 'hir> {
     fn try_inline_lit(&self, lit: token::Lit) -> Option<Symbol> {
         match LitKind::from_token_lit(lit) {
             Ok(LitKind::Str(s, _)) => Some(s),
-            Ok(LitKind::Int(n, ty)) => {
-                match ty {
-                    // unsuffixed integer literals are assumed to be i32's
-                    LitIntType::Unsuffixed => {
-                        (n <= i32::MAX as u128).then_some(Symbol::intern(&n.to_string()))
-                    }
-                    LitIntType::Signed(int_ty) => {
-                        let max_literal = self.int_ty_max(int_ty);
-                        (n <= max_literal).then_some(Symbol::intern(&n.to_string()))
-                    }
-                    LitIntType::Unsigned(uint_ty) => {
-                        let max_literal = self.uint_ty_max(uint_ty);
-                        (n <= max_literal).then_some(Symbol::intern(&n.to_string()))
-                    }
-                }
+            Ok(LitKind::Int(n)) => {
+                (n <= i128::MAX as u128).then_some(Symbol::intern(&n.to_string()))
             }
             _ => None,
-        }
-    }
-
-    /// Get the maximum value of int_ty. It is platform-dependent due to the byte size of isize
-    fn int_ty_max(&self, int_ty: IntTy) -> u128 {
-        match int_ty {
-            IntTy::Isize => self.tcx.data_layout.pointer_size().signed_int_max() as u128,
-            IntTy::I8 => i8::MAX as u128,
-            IntTy::I16 => i16::MAX as u128,
-            IntTy::I32 => i32::MAX as u128,
-            IntTy::I64 => i64::MAX as u128,
-            IntTy::I128 => i128::MAX as u128,
-        }
-    }
-
-    /// Get the maximum value of uint_ty. It is platform-dependent due to the byte size of usize
-    fn uint_ty_max(&self, uint_ty: UintTy) -> u128 {
-        match uint_ty {
-            UintTy::Usize => self.tcx.data_layout.pointer_size().unsigned_int_max(),
-            UintTy::U8 => u8::MAX as u128,
-            UintTy::U16 => u16::MAX as u128,
-            UintTy::U32 => u32::MAX as u128,
-            UintTy::U64 => u64::MAX as u128,
-            UintTy::U128 => u128::MAX as u128,
         }
     }
 

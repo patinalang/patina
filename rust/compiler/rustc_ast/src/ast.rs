@@ -23,7 +23,7 @@ use std::{cmp, fmt};
 
 pub use GenericArgs::*;
 pub use UnsafeSource::*;
-pub use rustc_ast_ir::{FloatTy, IntTy, Movability, Mutability, Pinnedness, UintTy};
+pub use rustc_ast_ir::{Movability, Mutability, Pinnedness};
 use rustc_data_structures::packed::Pu128;
 use rustc_data_structures::stable_hasher::{StableHash, StableHashCtxt, StableHasher};
 use rustc_data_structures::stack::ensure_sufficient_stack;
@@ -2221,24 +2221,12 @@ impl StrLit {
     }
 }
 
-/// Type of the integer literal based on provided suffix.
-#[derive(Clone, Copy, Encodable, Decodable, Debug, Hash, Eq, PartialEq)]
-#[derive(StableHash)]
-pub enum LitIntType {
-    /// e.g. `42_i32`.
-    Signed(IntTy),
-    /// e.g. `42_u32`.
-    Unsigned(UintTy),
-    /// e.g. `42`.
-    Unsuffixed,
-}
-
 /// Type of the float literal based on provided suffix.
 #[derive(Clone, Copy, Encodable, Decodable, Debug, Hash, Eq, PartialEq)]
 #[derive(StableHash)]
 pub enum LitFloatType {
-    /// A float literal with a suffix (`1f32` or `1E10f32`).
-    Suffixed(FloatTy),
+    /// A float literal with a suffix (`1f` or `1E10f`).
+    Suffixed,
     /// A float literal without a suffix (`1.0 or 1.0E10`).
     Unsuffixed,
 }
@@ -2246,7 +2234,7 @@ pub enum LitFloatType {
 /// This type is used within both `ast::MetaItemLit` and `hir::Lit`.
 ///
 /// Note that the entire literal (including the suffix) is considered when
-/// deciding the `LitKind`. This means that float literals like `1f32` are
+/// deciding the `LitKind`. This means that float literals like `1f` are
 /// classified by this type as `Float`. This is different to `token::LitKind`
 /// which does *not* consider the suffix.
 #[derive(Clone, Copy, Encodable, Decodable, Debug, Hash, Eq, PartialEq, StableHash)]
@@ -2266,8 +2254,8 @@ pub enum LitKind {
     /// A character literal (`'a'`).
     Char(char),
     /// An integer literal (`1`).
-    Int(Pu128, LitIntType),
-    /// A float literal (`1.0`, `1f64` or `1E10f64`). The pre-suffix part is
+    Int(Pu128),
+    /// A float literal (`1.0`, `1f` or `1E10f`). The pre-suffix part is
     /// stored as a symbol rather than `f64` so that `LitKind` can impl `Eq`
     /// and `Hash`.
     Float(Symbol, LitFloatType),
@@ -2310,15 +2298,14 @@ impl LitKind {
     pub fn is_suffixed(&self) -> bool {
         match *self {
             // suffixed variants
-            LitKind::Int(_, LitIntType::Signed(..) | LitIntType::Unsigned(..))
-            | LitKind::Float(_, LitFloatType::Suffixed(..)) => true,
+            LitKind::Float(_, LitFloatType::Suffixed) => true,
             // unsuffixed variants
             LitKind::Str(..)
             | LitKind::ByteStr(..)
             | LitKind::CStr(..)
             | LitKind::Byte(..)
             | LitKind::Char(..)
-            | LitKind::Int(_, LitIntType::Unsuffixed)
+            | LitKind::Int(_)
             | LitKind::Float(_, LitFloatType::Unsuffixed)
             | LitKind::Bool(..)
             | LitKind::Err(_) => false,
@@ -2592,36 +2579,18 @@ impl TyKind {
     }
 
     /// Returns `true` if this type is considered a scalar primitive (e.g.,
-    /// `i32`, `u8`, `bool`, etc).
+    /// `int`, `float`, `bool`, etc).
     ///
     /// This check is based on **symbol equality** and does **not** remove any
     /// path prefixes or references. If a type alias or shadowing is present
-    /// (e.g., `type i32 = CustomType;`), this method will still return `true`
-    /// for `i32`, even though it may not refer to the primitive type.
+    /// (e.g., `type int = CustomType;`), this method will still return `true`
+    /// for `int`, even though it may not refer to the primitive type.
     pub fn maybe_scalar(&self) -> bool {
         let Some(ty_sym) = self.is_simple_path() else {
             // unit type
             return self.is_unit();
         };
-        matches!(
-            ty_sym,
-            sym::i8
-                | sym::i16
-                | sym::i32
-                | sym::i64
-                | sym::i128
-                | sym::u8
-                | sym::u16
-                | sym::u32
-                | sym::u64
-                | sym::u128
-                | sym::f16
-                | sym::f32
-                | sym::f64
-                | sym::f128
-                | sym::char
-                | sym::bool
-        )
+        matches!(ty_sym, sym::int | sym::float | sym::char | sym::bool)
     }
 }
 

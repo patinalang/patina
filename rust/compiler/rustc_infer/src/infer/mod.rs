@@ -17,8 +17,7 @@ use rustc_data_structures::undo_log::{Rollback, UndoLogs};
 use rustc_data_structures::unify as ut;
 use rustc_errors::{DiagCtxtHandle, ErrorGuaranteed};
 use rustc_hir::def_id::{DefId, LocalDefId};
-use rustc_hir::{self as hir, HirId};
-use rustc_index::IndexVec;
+use rustc_hir::{self as hir};
 use rustc_macros::extension;
 pub use rustc_macros::{TypeFoldable, TypeVisitable};
 use rustc_middle::bug;
@@ -28,10 +27,10 @@ use rustc_middle::traits::select;
 use rustc_middle::traits::solve::Goal;
 use rustc_middle::ty::error::{ExpectedFound, TypeError};
 use rustc_middle::ty::{
-    self, BoundVarReplacerDelegate, ConstVid, FloatVid, GenericArg, GenericArgKind, GenericArgs,
-    GenericArgsRef, GenericParamDefKind, InferConst, IntVid, OpaqueTypeKey, ProvisionalHiddenType,
-    PseudoCanonicalInput, Term, TermKind, Ty, TyCtxt, TyVid, TypeFoldable, TypeFolder,
-    TypeSuperFoldable, TypeVisitable, TypeVisitableExt, TypingEnv, TypingMode, fold_regions,
+    self, BoundVarReplacerDelegate, ConstVid, GenericArg, GenericArgKind, GenericArgs,
+    GenericArgsRef, GenericParamDefKind, InferConst, OpaqueTypeKey, ProvisionalHiddenType,
+    PseudoCanonicalInput, Term, TermKind, Ty, TyCtxt, TyVid, TypeFoldable, TypeVisitable,
+    TypeVisitableExt, TypingEnv, TypingMode, fold_regions,
 };
 use rustc_span::{DUMMY_SP, Span, Symbol};
 use snapshot::undo_log::InferCtxtUndoLogs;
@@ -39,7 +38,6 @@ use tracing::{debug, instrument};
 use type_variable::TypeVariableOrigin;
 
 use crate::infer::snapshot::undo_log::UndoLog;
-use crate::infer::type_variable::FloatVariableOrigin;
 use crate::infer::unify_key::{ConstVariableOrigin, ConstVariableValue, ConstVidKey};
 use crate::traits::{
     self, ObligationCause, ObligationInspector, PredicateObligation, PredicateObligations,
@@ -104,17 +102,6 @@ pub struct InferCtxtInner<'tcx> {
     /// Map from const parameter variable to the kind of const it represents.
     const_unification_storage: ut::UnificationTableStorage<ConstVidKey<'tcx>>,
 
-    /// Map from integral variable to the kind of integer it represents.
-    int_unification_storage: ut::UnificationTableStorage<ty::IntVid>,
-
-    /// Map from floating variable to the kind of float it represents.
-    float_unification_storage: ut::UnificationTableStorage<ty::FloatVid>,
-
-    /// Map from floating variable to the origin span it came from, and the HirId that should be
-    /// used to lint at that location. This is only used for the FCW for the fallback to `f32`,
-    /// so can be removed once the `f32` fallback is removed.
-    float_origin_origin_storage: IndexVec<FloatVid, FloatVariableOrigin>,
-
     /// Tracks the set of region variables and the constraints between them.
     ///
     /// This is initially `Some(_)` but when
@@ -166,9 +153,6 @@ impl<'tcx> InferCtxtInner<'tcx> {
             projection_cache: Default::default(),
             type_variable_storage: Default::default(),
             const_unification_storage: Default::default(),
-            int_unification_storage: Default::default(),
-            float_unification_storage: Default::default(),
-            float_origin_origin_storage: Default::default(),
             region_constraint_storage: Some(Default::default()),
             region_obligations: Default::default(),
             region_assumptions: Default::default(),
@@ -210,16 +194,6 @@ impl<'tcx> InferCtxtInner<'tcx> {
     #[inline]
     pub fn opaque_types(&mut self) -> opaque_types::OpaqueTypeTable<'_, 'tcx> {
         self.opaque_type_storage.with_log(&mut self.undo_log)
-    }
-
-    #[inline]
-    fn int_unification_table(&mut self) -> UnificationTable<'_, 'tcx, ty::IntVid> {
-        self.int_unification_storage.with_log(&mut self.undo_log)
-    }
-
-    #[inline]
-    fn float_unification_table(&mut self) -> UnificationTable<'_, 'tcx, ty::FloatVid> {
-        self.float_unification_storage.with_log(&mut self.undo_log)
     }
 
     #[inline]
@@ -488,16 +462,6 @@ pub struct FixupError {
 impl fmt::Display for FixupError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.unresolved {
-            TyOrConstInferVar::TyInt(_) => write!(
-                f,
-                "cannot determine the type of this integer; \
-                 add a suffix to specify the type explicitly"
-            ),
-            TyOrConstInferVar::TyFloat(_) => write!(
-                f,
-                "cannot determine the type of this number; \
-                 add a suffix to specify the type explicitly"
-            ),
             TyOrConstInferVar::Ty(_) => write!(f, "unconstrained type"),
             TyOrConstInferVar::Const(_) => write!(f, "unconstrained const value"),
         }
@@ -652,13 +616,6 @@ impl<'tcx> InferCtxt<'tcx> {
         self.inner.borrow_mut().type_variables().var_origin(vid)
     }
 
-    /// Returns the origin of the float type variable identified by `vid`.
-    ///
-    /// No attempt is made to resolve `vid` to its root variable.
-    pub fn float_var_origin(&self, vid: FloatVid) -> FloatVariableOrigin {
-        self.inner.borrow_mut().float_origin_origin_storage[vid]
-    }
-
     /// Returns the origin of the const variable identified by `vid`
     // FIXME: We should store origins separately from the unification table
     // so this doesn't need to be optional.
@@ -671,25 +628,12 @@ impl<'tcx> InferCtxt<'tcx> {
 
     pub fn unresolved_variables(&self) -> Vec<Ty<'tcx>> {
         let mut inner = self.inner.borrow_mut();
-        let mut vars: Vec<Ty<'_>> = inner
+        inner
             .type_variables()
             .unresolved_variables()
             .into_iter()
             .map(|t| Ty::new_var(self.tcx, t))
-            .collect();
-        vars.extend(
-            (0..inner.int_unification_table().len())
-                .map(|i| ty::IntVid::from_usize(i))
-                .filter(|&vid| inner.int_unification_table().probe_value(vid).is_unknown())
-                .map(|v| Ty::new_int_var(self.tcx, v)),
-        );
-        vars.extend(
-            (0..inner.float_unification_table().len())
-                .map(|i| ty::FloatVid::from_usize(i))
-                .filter(|&vid| inner.float_unification_table().probe_value(vid).is_unknown())
-                .map(|v| Ty::new_float_var(self.tcx, v)),
-        );
-        vars
+            .collect()
     }
 
     #[instrument(skip(self), level = "debug")]
@@ -840,21 +784,6 @@ impl<'tcx> InferCtxt<'tcx> {
             .new_key(ConstVariableValue::Unknown { origin, universe })
             .vid;
         ty::Const::new_var(self.tcx, vid)
-    }
-
-    pub fn next_int_var(&self) -> Ty<'tcx> {
-        let next_int_var_id =
-            self.inner.borrow_mut().int_unification_table().new_key(ty::IntVarValue::Unknown);
-        Ty::new_int_var(self.tcx, next_int_var_id)
-    }
-
-    pub fn next_float_var(&self, span: Span, lint_id: Option<HirId>) -> Ty<'tcx> {
-        let mut inner = self.inner.borrow_mut();
-        let next_float_var_id = inner.float_unification_table().new_key(ty::FloatVarValue::Unknown);
-        let origin = FloatVariableOrigin { span, lint_id };
-        let span_index = inner.float_origin_origin_storage.push(origin);
-        debug_assert_eq!(next_float_var_id, span_index);
-        Ty::new_float_var(self.tcx, next_float_var_id)
     }
 
     /// Creates a fresh region variable with the next available index.
@@ -1118,8 +1047,7 @@ impl<'tcx> InferCtxt<'tcx> {
             match v {
                 ty::TyVar(v) => {
                     // Not entirely obvious: if `typ` is a type variable,
-                    // it can be resolved to an int/float variable, which
-                    // can then be recursively resolved, hence the
+                    // it can be recursively resolved, hence the
                     // recursion. Note though that we prevent type
                     // variables from unifying to other type variables
                     // directly (though they may be embedded
@@ -1133,22 +1061,7 @@ impl<'tcx> InferCtxt<'tcx> {
                     known.map_or(ty, |t| self.shallow_resolve(t))
                 }
 
-                ty::IntVar(v) => {
-                    match self.inner.borrow_mut().int_unification_table().probe_value(v) {
-                        ty::IntVarValue::IntType(ty) => Ty::new_int(self.tcx, ty),
-                        ty::IntVarValue::UintType(ty) => Ty::new_uint(self.tcx, ty),
-                        ty::IntVarValue::Unknown => ty,
-                    }
-                }
-
-                ty::FloatVar(v) => {
-                    match self.inner.borrow_mut().float_unification_table().probe_value(v) {
-                        ty::FloatVarValue::Known(ty) => Ty::new_float(self.tcx, ty),
-                        ty::FloatVarValue::Unknown => ty,
-                    }
-                }
-
-                ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_) => ty,
+                ty::FreshTy(_) => ty,
             }
         } else {
             ty
@@ -1196,39 +1109,8 @@ impl<'tcx> InferCtxt<'tcx> {
         self.inner.borrow_mut().type_variables().sub_unification_table_root_var(var)
     }
 
-    pub fn root_float_var(&self, var: ty::FloatVid) -> ty::FloatVid {
-        self.inner.borrow_mut().float_unification_table().find(var)
-    }
-
     pub fn root_const_var(&self, var: ty::ConstVid) -> ty::ConstVid {
         self.inner.borrow_mut().const_unification_table().find(var).vid
-    }
-
-    /// Resolves an int var to a rigid int type, if it was constrained to one,
-    /// or else the root int var in the unification table.
-    pub fn opportunistic_resolve_int_var(&self, vid: ty::IntVid) -> Ty<'tcx> {
-        let mut inner = self.inner.borrow_mut();
-        let value = inner.int_unification_table().probe_value(vid);
-        match value {
-            ty::IntVarValue::IntType(ty) => Ty::new_int(self.tcx, ty),
-            ty::IntVarValue::UintType(ty) => Ty::new_uint(self.tcx, ty),
-            ty::IntVarValue::Unknown => {
-                Ty::new_int_var(self.tcx, inner.int_unification_table().find(vid))
-            }
-        }
-    }
-
-    /// Resolves a float var to a rigid int type, if it was constrained to one,
-    /// or else the root float var in the unification table.
-    pub fn opportunistic_resolve_float_var(&self, vid: ty::FloatVid) -> Ty<'tcx> {
-        let mut inner = self.inner.borrow_mut();
-        let value = inner.float_unification_table().probe_value(vid);
-        match value {
-            ty::FloatVarValue::Known(ty) => Ty::new_float(self.tcx, ty),
-            ty::FloatVarValue::Unknown => {
-                Ty::new_float_var(self.tcx, inner.float_unification_table().find(vid))
-            }
-        }
     }
 
     /// Where possible, replaces type/const variables in
@@ -1255,11 +1137,7 @@ impl<'tcx> InferCtxt<'tcx> {
     where
         T: TypeFoldable<TyCtxt<'tcx>>,
     {
-        if !value.has_infer() {
-            return value; // Avoid duplicated type-folding.
-        }
-        let mut r = InferenceLiteralEraser { tcx: self.tcx };
-        value.fold_with(&mut r)
+        value
     }
 
     pub fn try_resolve_const_var(
@@ -1474,21 +1352,6 @@ impl<'tcx> InferCtxt<'tcx> {
                 }
             }
 
-            TyOrConstInferVar::TyInt(v) => {
-                // If `inlined_probe_value` returns a value it's always a
-                // `ty::Int(_)` or `ty::UInt(_)`, which never matches a
-                // `ty::Infer(_)`.
-                self.inner.borrow_mut().int_unification_table().inlined_probe_value(v).is_known()
-            }
-
-            TyOrConstInferVar::TyFloat(v) => {
-                // If `probe_value` returns a value it's always a
-                // `ty::Float(_)`, which never matches a `ty::Infer(_)`.
-                //
-                // Not `inlined_probe_value(v)` because this call site is colder.
-                self.inner.borrow_mut().float_unification_table().probe_value(v).is_known()
-            }
-
             TyOrConstInferVar::Const(v) => {
                 // If `probe_value` returns a `Known` value, it never equals
                 // `ty::ConstKind::Infer(ty::InferConst::Var(v))`.
@@ -1518,10 +1381,6 @@ impl<'tcx> InferCtxt<'tcx> {
 pub enum TyOrConstInferVar {
     /// Equivalent to `ty::Infer(ty::TyVar(_))`.
     Ty(TyVid),
-    /// Equivalent to `ty::Infer(ty::IntVar(_))`.
-    TyInt(IntVid),
-    /// Equivalent to `ty::Infer(ty::FloatVar(_))`.
-    TyFloat(FloatVid),
 
     /// Equivalent to `ty::ConstKind::Infer(ty::InferConst::Var(_))`.
     Const(ConstVid),
@@ -1554,8 +1413,6 @@ impl<'tcx> TyOrConstInferVar {
     fn maybe_from_ty(ty: Ty<'tcx>) -> Option<Self> {
         match *ty.kind() {
             ty::Infer(ty::TyVar(v)) => Some(TyOrConstInferVar::Ty(v)),
-            ty::Infer(ty::IntVar(v)) => Some(TyOrConstInferVar::TyInt(v)),
-            ty::Infer(ty::FloatVar(v)) => Some(TyOrConstInferVar::TyFloat(v)),
             _ => None,
         }
     }
@@ -1566,26 +1423,6 @@ impl<'tcx> TyOrConstInferVar {
         match ct.kind() {
             ty::ConstKind::Infer(InferConst::Var(v)) => Some(TyOrConstInferVar::Const(v)),
             _ => None,
-        }
-    }
-}
-
-/// Replace `{integer}` with `i32` and `{float}` with `f64`.
-/// Used only for diagnostics.
-struct InferenceLiteralEraser<'tcx> {
-    tcx: TyCtxt<'tcx>,
-}
-
-impl<'tcx> TypeFolder<TyCtxt<'tcx>> for InferenceLiteralEraser<'tcx> {
-    fn cx(&self) -> TyCtxt<'tcx> {
-        self.tcx
-    }
-
-    fn fold_ty(&mut self, ty: Ty<'tcx>) -> Ty<'tcx> {
-        match ty.kind() {
-            ty::Infer(ty::IntVar(_) | ty::FreshIntTy(_)) => self.tcx.types.i32,
-            ty::Infer(ty::FloatVar(_) | ty::FreshFloatTy(_)) => self.tcx.types.f64,
-            _ => ty.super_fold_with(self),
         }
     }
 }

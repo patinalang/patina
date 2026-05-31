@@ -1020,9 +1020,8 @@ fn assemble_candidates_from_impls<'cx, 'tcx>(
                     Some(LangItem::DiscriminantKind) => match self_ty.kind() {
                         ty::Bool
                         | ty::Char
-                        | ty::Int(_)
-                        | ty::Uint(_)
-                        | ty::Float(_)
+                        | ty::Int
+                        | ty::Float
                         | ty::Adt(..)
                         | ty::Foreign(_)
                         | ty::Str
@@ -1040,9 +1039,7 @@ fn assemble_candidates_from_impls<'cx, 'tcx>(
                         | ty::Coroutine(..)
                         | ty::CoroutineWitness(..)
                         | ty::Never
-                        | ty::Tuple(..)
-                        // Integers and floats always have `u8` as their discriminant.
-                        | ty::Infer(ty::InferTy::IntVar(_) | ty::InferTy::FloatVar(..)) => true,
+                        | ty::Tuple(..) => true,
 
                         ty::UnsafeBinder(_) => todo!("FIXME(unsafe_binder)"),
 
@@ -1078,9 +1075,8 @@ fn assemble_candidates_from_impls<'cx, 'tcx>(
                         match tail.kind() {
                             ty::Bool
                             | ty::Char
-                            | ty::Int(_)
-                            | ty::Uint(_)
-                            | ty::Float(_)
+                            | ty::Int
+                            | ty::Float
                             | ty::Str
                             | ty::Term
                             | ty::Array(..)
@@ -1103,8 +1099,6 @@ fn assemble_candidates_from_impls<'cx, 'tcx>(
                             | ty::Adt(..)
                             // If returned by `struct_tail` this is the empty tuple.
                             | ty::Tuple(..)
-                            // Integers and floats are always Sized, and so have unit type metadata.
-                            | ty::Infer(ty::InferTy::IntVar(_) | ty::InferTy::FloatVar(..))
                             // This happens if we reach the recursion limit when finding the struct tail.
                             | ty::Error(..) => true,
 

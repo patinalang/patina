@@ -53,7 +53,7 @@ impl<'tcx> TypeErrCtxt<'_, 'tcx> {
                         // Issue #63167
                         diag.note("distinct uses of `impl Trait` result in different opaque types");
                     }
-                    (ty::Float(_), ty::Infer(ty::IntVar(_)))
+                    (ty::Float, ty::Int)
                         if let Ok(
                             // Issue #53280
                             snippet,

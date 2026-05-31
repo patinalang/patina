@@ -13,7 +13,7 @@ use std::fmt;
 use std::ops::Index;
 use std::sync::Arc;
 
-use rustc_abi::{FieldIdx, Integer, Size, VariantIdx};
+use rustc_abi::{FieldIdx, Size, VariantIdx};
 use rustc_ast::{AsmMacro, InlineAsmOptions, InlineAsmTemplatePiece, Mutability};
 use rustc_hir as hir;
 use rustc_hir::def_id::DefId;
@@ -30,7 +30,6 @@ use crate::mir::interpret::AllocId;
 use crate::mir::{self, AssignOp, BinOp, BorrowKind, FakeReadCause, UnOp};
 use crate::thir::visit::for_each_immediate_subpat;
 use crate::ty::adjustment::PointerCoercion;
-use crate::ty::layout::IntegerExt;
 use crate::ty::{
     self, AdtDef, CanonicalUserType, CanonicalUserTypeAnnotation, FnSig, GenericArgsRef, Ty,
     TyCtxt, UpvarArgs,
@@ -903,20 +902,10 @@ pub struct PatRange<'tcx> {
 impl<'tcx> PatRange<'tcx> {
     /// Whether this range covers the full extent of possible values (best-effort, we ignore floats).
     #[inline]
-    pub fn is_full_range(&self, tcx: TyCtxt<'tcx>) -> Option<bool> {
+    pub fn is_full_range(&self, _tcx: TyCtxt<'tcx>) -> Option<bool> {
         let (min, max, size, bias) = match *self.ty.kind() {
             ty::Char => (0, std::char::MAX as u128, Size::from_bits(32), 0),
-            ty::Int(ity) => {
-                let size = Integer::from_int_ty(&tcx, ity).size();
-                let max = size.truncate(u128::MAX);
-                let bias = 1u128 << (size.bits() - 1);
-                (0, max, size, bias)
-            }
-            ty::Uint(uty) => {
-                let size = Integer::from_uint_ty(&tcx, uty).size();
-                let max = size.unsigned_int_max();
-                (0, max, size, 0)
-            }
+            ty::Int => return None,
             _ => return None,
         };
 
@@ -1058,12 +1047,12 @@ impl<'tcx> PatRangeBoundary<'tcx> {
             // we can do scalar comparisons. E.g. `unicode-normalization` has
             // many ranges such as '\u{037A}'..='\u{037F}', and chars can be compared
             // in this way.
-            (Finite(a), Finite(b)) if matches!(ty.kind(), ty::Int(_) | ty::Uint(_) | ty::Char) => {
+            (Finite(a), Finite(b)) if matches!(ty.kind(), ty::Int | ty::Char) => {
                 if let (Some(a), Some(b)) = (a.try_to_leaf(), b.try_to_leaf()) {
                     let sz = ty.primitive_size(tcx);
                     let cmp = match ty.kind() {
-                        ty::Uint(_) | ty::Char => a.to_uint(sz).cmp(&b.to_uint(sz)),
-                        ty::Int(_) => a.to_int(sz).cmp(&b.to_int(sz)),
+                        ty::Int => a.to_int(sz).cmp(&b.to_int(sz)),
+                        ty::Char => a.to_uint(sz).cmp(&b.to_uint(sz)),
                         _ => unreachable!(),
                     };
                     return Some(cmp);
@@ -1076,37 +1065,13 @@ impl<'tcx> PatRangeBoundary<'tcx> {
         let b = other.to_bits(ty, tcx);
 
         match ty.kind() {
-            ty::Float(ty::FloatTy::F16) => {
-                use rustc_apfloat::Float;
-                let a = rustc_apfloat::ieee::Half::from_bits(a);
-                let b = rustc_apfloat::ieee::Half::from_bits(b);
-                a.partial_cmp(&b)
-            }
-            ty::Float(ty::FloatTy::F32) => {
-                use rustc_apfloat::Float;
-                let a = rustc_apfloat::ieee::Single::from_bits(a);
-                let b = rustc_apfloat::ieee::Single::from_bits(b);
-                a.partial_cmp(&b)
-            }
-            ty::Float(ty::FloatTy::F64) => {
+            ty::Float => {
                 use rustc_apfloat::Float;
                 let a = rustc_apfloat::ieee::Double::from_bits(a);
                 let b = rustc_apfloat::ieee::Double::from_bits(b);
                 a.partial_cmp(&b)
             }
-            ty::Float(ty::FloatTy::F128) => {
-                use rustc_apfloat::Float;
-                let a = rustc_apfloat::ieee::Quad::from_bits(a);
-                let b = rustc_apfloat::ieee::Quad::from_bits(b);
-                a.partial_cmp(&b)
-            }
-            ty::Int(ity) => {
-                let size = rustc_abi::Integer::from_int_ty(&tcx, *ity).size();
-                let a = size.sign_extend(a) as i128;
-                let b = size.sign_extend(b) as i128;
-                Some(a.cmp(&b))
-            }
-            ty::Uint(_) | ty::Char => Some(a.cmp(&b)),
+            ty::Int | ty::Char => Some(a.cmp(&b)),
             _ => bug!(),
         }
     }

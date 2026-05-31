@@ -255,9 +255,10 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             }
 
             ExprKind::Lit(lit) => match lit.node {
-                LitKind::Int(val, _suffix) => eaf::Expr::AtomicLiteral(
-                    eaf::AtomicLiteral::Integer(self.anno(lit.span), val.get().into()),
-                ),
+                LitKind::Int(val) => eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::Integer(
+                    self.anno(lit.span),
+                    val.get().into(),
+                )),
                 LitKind::Str(symbol, _style) => {
                     let s = symbol.as_str();
 

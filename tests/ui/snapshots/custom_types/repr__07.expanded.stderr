@@ -10,15 +10,5 @@ LL |     MaybeUntagged(T)
 LL |     #[repr(tagged, name = "mytag")]
    |     ^ unexpected token
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/custom_types/repr__07.pt:19:12
-   |
-LL |     Tagged(int),
-   |            ^^^
-   |            |
-   |            not found in this scope
-   |            help: perhaps you intended to use this type: `i32`
+error: aborting due to 1 previous error
 
-error: aborting due to 2 previous errors
-
-For more information about this error, try `rustc --explain E0425`.

@@ -233,11 +233,11 @@ fn check_lang_start_fn<'tcx>(tcx: TyCtxt<'tcx>, fn_sig: ty::FnSig<'tcx>, def_id:
     let expected_sig = ty::Binder::dummy(tcx.mk_fn_sig_rust_abi(
         [
             main_fn_ty,
-            tcx.types.isize,
-            Ty::new_imm_ptr(tcx, Ty::new_imm_ptr(tcx, tcx.types.u8)),
-            tcx.types.u8,
+            tcx.types.int,
+            Ty::new_imm_ptr(tcx, Ty::new_imm_ptr(tcx, tcx.types.int)),
+            tcx.types.int,
         ],
-        tcx.types.isize,
+        tcx.types.int,
         fn_sig.safety(),
     ));
 

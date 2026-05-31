@@ -290,12 +290,12 @@ pub(crate) fn check_intrinsic_type(
         sym::amdgpu_dispatch_ptr => (0, 0, vec![], Ty::new_imm_ptr(tcx, tcx.types.unit)),
         sym::unreachable => (0, 0, vec![], tcx.types.never),
         sym::breakpoint => (0, 0, vec![], tcx.types.unit),
-        sym::size_of | sym::align_of | sym::variant_count => (1, 0, vec![], tcx.types.usize),
+        sym::size_of | sym::align_of | sym::variant_count => (1, 0, vec![], tcx.types.int),
         sym::size_of_val | sym::align_of_val => {
-            (1, 0, vec![Ty::new_imm_ptr(tcx, param(0))], tcx.types.usize)
+            (1, 0, vec![Ty::new_imm_ptr(tcx, param(0))], tcx.types.int)
         }
-        sym::offset_of => (1, 0, vec![tcx.types.u32, tcx.types.u32], tcx.types.usize),
-        sym::field_offset => (1, 0, vec![], tcx.types.usize),
+        sym::offset_of => (1, 0, vec![tcx.types.int, tcx.types.int], tcx.types.int),
+        sym::field_offset => (1, 0, vec![], tcx.types.int),
         sym::rustc_peek => (1, 0, vec![param(0)], param(0)),
         sym::caller_location => (0, 0, vec![], tcx.caller_location_ty()),
         sym::gpu_launch_sized_workgroup_mem => (1, 0, vec![], Ty::new_mut_ptr(tcx, param(0))),
@@ -353,8 +353,8 @@ pub(crate) fn check_intrinsic_type(
             0,
             vec![
                 param(0),
-                Ty::new_array_with_const_len(tcx, tcx.types.u32, Const::from_target_usize(tcx, 3)),
-                Ty::new_array_with_const_len(tcx, tcx.types.u32, Const::from_target_usize(tcx, 3)),
+                Ty::new_array_with_const_len(tcx, tcx.types.int, Const::from_target_usize(tcx, 3)),
+                Ty::new_array_with_const_len(tcx, tcx.types.int, Const::from_target_usize(tcx, 3)),
                 param(1),
             ],
             param(2),
@@ -363,159 +363,83 @@ pub(crate) fn check_intrinsic_type(
         sym::arith_offset => (
             1,
             0,
-            vec![Ty::new_imm_ptr(tcx, param(0)), tcx.types.isize],
+            vec![Ty::new_imm_ptr(tcx, param(0)), tcx.types.int],
             Ty::new_imm_ptr(tcx, param(0)),
         ),
-        sym::slice_get_unchecked => (3, 0, vec![param(1), tcx.types.usize], param(0)),
+        sym::slice_get_unchecked => (3, 0, vec![param(1), tcx.types.int], param(0)),
         sym::ptr_mask => (
             1,
             0,
-            vec![Ty::new_imm_ptr(tcx, param(0)), tcx.types.usize],
+            vec![Ty::new_imm_ptr(tcx, param(0)), tcx.types.int],
             Ty::new_imm_ptr(tcx, param(0)),
         ),
 
         sym::copy | sym::copy_nonoverlapping => (
             1,
             0,
-            vec![Ty::new_imm_ptr(tcx, param(0)), Ty::new_mut_ptr(tcx, param(0)), tcx.types.usize],
+            vec![Ty::new_imm_ptr(tcx, param(0)), Ty::new_mut_ptr(tcx, param(0)), tcx.types.int],
             tcx.types.unit,
         ),
         sym::volatile_copy_memory | sym::volatile_copy_nonoverlapping_memory => (
             1,
             0,
-            vec![Ty::new_mut_ptr(tcx, param(0)), Ty::new_imm_ptr(tcx, param(0)), tcx.types.usize],
+            vec![Ty::new_mut_ptr(tcx, param(0)), Ty::new_imm_ptr(tcx, param(0)), tcx.types.int],
             tcx.types.unit,
         ),
         sym::compare_bytes => {
-            let byte_ptr = Ty::new_imm_ptr(tcx, tcx.types.u8);
-            (0, 0, vec![byte_ptr, byte_ptr, tcx.types.usize], tcx.types.i32)
+            let byte_ptr = Ty::new_imm_ptr(tcx, tcx.types.int);
+            (0, 0, vec![byte_ptr, byte_ptr, tcx.types.int], tcx.types.int)
         }
         sym::write_bytes | sym::volatile_set_memory => (
             1,
             0,
-            vec![Ty::new_mut_ptr(tcx, param(0)), tcx.types.u8, tcx.types.usize],
+            vec![Ty::new_mut_ptr(tcx, param(0)), tcx.types.int, tcx.types.int],
             tcx.types.unit,
         ),
 
-        sym::sqrtf16 => (0, 0, vec![tcx.types.f16], tcx.types.f16),
-        sym::sqrtf32 => (0, 0, vec![tcx.types.f32], tcx.types.f32),
-        sym::sqrtf64 => (0, 0, vec![tcx.types.f64], tcx.types.f64),
-        sym::sqrtf128 => (0, 0, vec![tcx.types.f128], tcx.types.f128),
+        sym::sqrt => (0, 0, vec![tcx.types.float], tcx.types.float),
 
-        sym::powif16 => (0, 0, vec![tcx.types.f16, tcx.types.i32], tcx.types.f16),
-        sym::powif32 => (0, 0, vec![tcx.types.f32, tcx.types.i32], tcx.types.f32),
-        sym::powif64 => (0, 0, vec![tcx.types.f64, tcx.types.i32], tcx.types.f64),
-        sym::powif128 => (0, 0, vec![tcx.types.f128, tcx.types.i32], tcx.types.f128),
+        sym::powi => (0, 0, vec![tcx.types.float, tcx.types.int], tcx.types.float),
 
-        sym::sinf16 => (0, 0, vec![tcx.types.f16], tcx.types.f16),
-        sym::sinf32 => (0, 0, vec![tcx.types.f32], tcx.types.f32),
-        sym::sinf64 => (0, 0, vec![tcx.types.f64], tcx.types.f64),
-        sym::sinf128 => (0, 0, vec![tcx.types.f128], tcx.types.f128),
+        sym::sin => (0, 0, vec![tcx.types.float], tcx.types.float),
 
-        sym::cosf16 => (0, 0, vec![tcx.types.f16], tcx.types.f16),
-        sym::cosf32 => (0, 0, vec![tcx.types.f32], tcx.types.f32),
-        sym::cosf64 => (0, 0, vec![tcx.types.f64], tcx.types.f64),
-        sym::cosf128 => (0, 0, vec![tcx.types.f128], tcx.types.f128),
+        sym::cos => (0, 0, vec![tcx.types.float], tcx.types.float),
 
-        sym::powf16 => (0, 0, vec![tcx.types.f16, tcx.types.f16], tcx.types.f16),
-        sym::powf32 => (0, 0, vec![tcx.types.f32, tcx.types.f32], tcx.types.f32),
-        sym::powf64 => (0, 0, vec![tcx.types.f64, tcx.types.f64], tcx.types.f64),
-        sym::powf128 => (0, 0, vec![tcx.types.f128, tcx.types.f128], tcx.types.f128),
+        sym::pow => (0, 0, vec![tcx.types.float, tcx.types.float], tcx.types.float),
 
-        sym::expf16 => (0, 0, vec![tcx.types.f16], tcx.types.f16),
-        sym::expf32 => (0, 0, vec![tcx.types.f32], tcx.types.f32),
-        sym::expf64 => (0, 0, vec![tcx.types.f64], tcx.types.f64),
-        sym::expf128 => (0, 0, vec![tcx.types.f128], tcx.types.f128),
+        sym::exp2 => (0, 0, vec![tcx.types.float], tcx.types.float),
 
-        sym::exp2f16 => (0, 0, vec![tcx.types.f16], tcx.types.f16),
-        sym::exp2f32 => (0, 0, vec![tcx.types.f32], tcx.types.f32),
-        sym::exp2f64 => (0, 0, vec![tcx.types.f64], tcx.types.f64),
-        sym::exp2f128 => (0, 0, vec![tcx.types.f128], tcx.types.f128),
+        sym::log10 => (0, 0, vec![tcx.types.float], tcx.types.float),
 
-        sym::logf16 => (0, 0, vec![tcx.types.f16], tcx.types.f16),
-        sym::logf32 => (0, 0, vec![tcx.types.f32], tcx.types.f32),
-        sym::logf64 => (0, 0, vec![tcx.types.f64], tcx.types.f64),
-        sym::logf128 => (0, 0, vec![tcx.types.f128], tcx.types.f128),
-
-        sym::log10f16 => (0, 0, vec![tcx.types.f16], tcx.types.f16),
-        sym::log10f32 => (0, 0, vec![tcx.types.f32], tcx.types.f32),
-        sym::log10f64 => (0, 0, vec![tcx.types.f64], tcx.types.f64),
-        sym::log10f128 => (0, 0, vec![tcx.types.f128], tcx.types.f128),
-
-        sym::log2f16 => (0, 0, vec![tcx.types.f16], tcx.types.f16),
-        sym::log2f32 => (0, 0, vec![tcx.types.f32], tcx.types.f32),
-        sym::log2f64 => (0, 0, vec![tcx.types.f64], tcx.types.f64),
-        sym::log2f128 => (0, 0, vec![tcx.types.f128], tcx.types.f128),
-
-        sym::fmaf16 => (0, 0, vec![tcx.types.f16, tcx.types.f16, tcx.types.f16], tcx.types.f16),
-        sym::fmaf32 => (0, 0, vec![tcx.types.f32, tcx.types.f32, tcx.types.f32], tcx.types.f32),
-        sym::fmaf64 => (0, 0, vec![tcx.types.f64, tcx.types.f64, tcx.types.f64], tcx.types.f64),
-        sym::fmaf128 => {
-            (0, 0, vec![tcx.types.f128, tcx.types.f128, tcx.types.f128], tcx.types.f128)
+        sym::fma => {
+            (0, 0, vec![tcx.types.float, tcx.types.float, tcx.types.float], tcx.types.float)
         }
 
-        sym::fmuladdf16 => (0, 0, vec![tcx.types.f16, tcx.types.f16, tcx.types.f16], tcx.types.f16),
-        sym::fmuladdf32 => (0, 0, vec![tcx.types.f32, tcx.types.f32, tcx.types.f32], tcx.types.f32),
-        sym::fmuladdf64 => (0, 0, vec![tcx.types.f64, tcx.types.f64, tcx.types.f64], tcx.types.f64),
-        sym::fmuladdf128 => {
-            (0, 0, vec![tcx.types.f128, tcx.types.f128, tcx.types.f128], tcx.types.f128)
+        sym::fmuladd => {
+            (0, 0, vec![tcx.types.float, tcx.types.float, tcx.types.float], tcx.types.float)
         }
 
         sym::fabs => (1, 0, vec![param(0)], param(0)),
 
-        sym::minimum_number_nsz_f16 => (0, 0, vec![tcx.types.f16, tcx.types.f16], tcx.types.f16),
-        sym::minimum_number_nsz_f32 => (0, 0, vec![tcx.types.f32, tcx.types.f32], tcx.types.f32),
-        sym::minimum_number_nsz_f64 => (0, 0, vec![tcx.types.f64, tcx.types.f64], tcx.types.f64),
-        sym::minimum_number_nsz_f128 => {
-            (0, 0, vec![tcx.types.f128, tcx.types.f128], tcx.types.f128)
-        }
+        sym::minimum_number_nsz => (0, 0, vec![tcx.types.float, tcx.types.float], tcx.types.float),
 
-        sym::minimumf16 => (0, 0, vec![tcx.types.f16, tcx.types.f16], tcx.types.f16),
-        sym::minimumf32 => (0, 0, vec![tcx.types.f32, tcx.types.f32], tcx.types.f32),
-        sym::minimumf64 => (0, 0, vec![tcx.types.f64, tcx.types.f64], tcx.types.f64),
-        sym::minimumf128 => (0, 0, vec![tcx.types.f128, tcx.types.f128], tcx.types.f128),
+        sym::minimum => (0, 0, vec![tcx.types.float, tcx.types.float], tcx.types.float),
 
-        sym::maximum_number_nsz_f16 => (0, 0, vec![tcx.types.f16, tcx.types.f16], tcx.types.f16),
-        sym::maximum_number_nsz_f32 => (0, 0, vec![tcx.types.f32, tcx.types.f32], tcx.types.f32),
-        sym::maximum_number_nsz_f64 => (0, 0, vec![tcx.types.f64, tcx.types.f64], tcx.types.f64),
-        sym::maximum_number_nsz_f128 => {
-            (0, 0, vec![tcx.types.f128, tcx.types.f128], tcx.types.f128)
-        }
+        sym::maximum_number_nsz => (0, 0, vec![tcx.types.float, tcx.types.float], tcx.types.float),
 
-        sym::maximumf16 => (0, 0, vec![tcx.types.f16, tcx.types.f16], tcx.types.f16),
-        sym::maximumf32 => (0, 0, vec![tcx.types.f32, tcx.types.f32], tcx.types.f32),
-        sym::maximumf64 => (0, 0, vec![tcx.types.f64, tcx.types.f64], tcx.types.f64),
-        sym::maximumf128 => (0, 0, vec![tcx.types.f128, tcx.types.f128], tcx.types.f128),
+        sym::maximum => (0, 0, vec![tcx.types.float, tcx.types.float], tcx.types.float),
 
-        sym::copysignf16 => (0, 0, vec![tcx.types.f16, tcx.types.f16], tcx.types.f16),
-        sym::copysignf32 => (0, 0, vec![tcx.types.f32, tcx.types.f32], tcx.types.f32),
-        sym::copysignf64 => (0, 0, vec![tcx.types.f64, tcx.types.f64], tcx.types.f64),
-        sym::copysignf128 => (0, 0, vec![tcx.types.f128, tcx.types.f128], tcx.types.f128),
+        sym::copysign => (0, 0, vec![tcx.types.float, tcx.types.float], tcx.types.float),
 
-        sym::floorf16 => (0, 0, vec![tcx.types.f16], tcx.types.f16),
-        sym::floorf32 => (0, 0, vec![tcx.types.f32], tcx.types.f32),
-        sym::floorf64 => (0, 0, vec![tcx.types.f64], tcx.types.f64),
-        sym::floorf128 => (0, 0, vec![tcx.types.f128], tcx.types.f128),
+        sym::floor => (0, 0, vec![tcx.types.float], tcx.types.float),
 
-        sym::ceilf16 => (0, 0, vec![tcx.types.f16], tcx.types.f16),
-        sym::ceilf32 => (0, 0, vec![tcx.types.f32], tcx.types.f32),
-        sym::ceilf64 => (0, 0, vec![tcx.types.f64], tcx.types.f64),
-        sym::ceilf128 => (0, 0, vec![tcx.types.f128], tcx.types.f128),
+        sym::ceil => (0, 0, vec![tcx.types.float], tcx.types.float),
 
-        sym::truncf16 => (0, 0, vec![tcx.types.f16], tcx.types.f16),
-        sym::truncf32 => (0, 0, vec![tcx.types.f32], tcx.types.f32),
-        sym::truncf64 => (0, 0, vec![tcx.types.f64], tcx.types.f64),
-        sym::truncf128 => (0, 0, vec![tcx.types.f128], tcx.types.f128),
+        sym::trunc => (0, 0, vec![tcx.types.float], tcx.types.float),
 
-        sym::round_ties_even_f16 => (0, 0, vec![tcx.types.f16], tcx.types.f16),
-        sym::round_ties_even_f32 => (0, 0, vec![tcx.types.f32], tcx.types.f32),
-        sym::round_ties_even_f64 => (0, 0, vec![tcx.types.f64], tcx.types.f64),
-        sym::round_ties_even_f128 => (0, 0, vec![tcx.types.f128], tcx.types.f128),
+        sym::round_ties_even => (0, 0, vec![tcx.types.float], tcx.types.float),
 
-        sym::roundf16 => (0, 0, vec![tcx.types.f16], tcx.types.f16),
-        sym::roundf32 => (0, 0, vec![tcx.types.f32], tcx.types.f32),
-        sym::roundf64 => (0, 0, vec![tcx.types.f64], tcx.types.f64),
-        sym::roundf128 => (0, 0, vec![tcx.types.f128], tcx.types.f128),
+        sym::round => (0, 0, vec![tcx.types.float], tcx.types.float),
 
         sym::volatile_load | sym::unaligned_volatile_load => {
             (1, 0, vec![Ty::new_imm_ptr(tcx, param(0))], param(0))
@@ -525,7 +449,7 @@ pub(crate) fn check_intrinsic_type(
         }
 
         sym::ctpop | sym::ctlz | sym::ctlz_nonzero | sym::cttz | sym::cttz_nonzero => {
-            (1, 0, vec![param(0)], tcx.types.u32)
+            (1, 0, vec![param(0)], tcx.types.int)
         }
 
         sym::bswap | sym::bitreverse => (1, 0, vec![param(0)], param(0)),
@@ -542,41 +466,41 @@ pub(crate) fn check_intrinsic_type(
             1,
             0,
             vec![Ty::new_imm_ptr(tcx, param(0)), Ty::new_imm_ptr(tcx, param(0))],
-            tcx.types.u8,
+            tcx.types.int,
         ),
 
         sym::const_allocate => {
-            (0, 0, vec![tcx.types.usize, tcx.types.usize], Ty::new_mut_ptr(tcx, tcx.types.u8))
+            (0, 0, vec![tcx.types.int, tcx.types.int], Ty::new_mut_ptr(tcx, tcx.types.int))
         }
         sym::const_deallocate => (
             0,
             0,
-            vec![Ty::new_mut_ptr(tcx, tcx.types.u8), tcx.types.usize, tcx.types.usize],
+            vec![Ty::new_mut_ptr(tcx, tcx.types.int), tcx.types.int, tcx.types.int],
             tcx.types.unit,
         ),
         sym::const_make_global => {
-            (0, 0, vec![Ty::new_mut_ptr(tcx, tcx.types.u8)], Ty::new_imm_ptr(tcx, tcx.types.u8))
+            (0, 0, vec![Ty::new_mut_ptr(tcx, tcx.types.int)], Ty::new_imm_ptr(tcx, tcx.types.int))
         }
 
         sym::ptr_offset_from => (
             1,
             0,
             vec![Ty::new_imm_ptr(tcx, param(0)), Ty::new_imm_ptr(tcx, param(0))],
-            tcx.types.isize,
+            tcx.types.int,
         ),
         sym::ptr_offset_from_unsigned => (
             1,
             0,
             vec![Ty::new_imm_ptr(tcx, param(0)), Ty::new_imm_ptr(tcx, param(0))],
-            tcx.types.usize,
+            tcx.types.int,
         ),
         sym::unchecked_div | sym::unchecked_rem | sym::exact_div | sym::disjoint_bitor => {
             (1, 0, vec![param(0), param(0)], param(0))
         }
         sym::unchecked_shl | sym::unchecked_shr => (2, 0, vec![param(0), param(1)], param(0)),
-        sym::rotate_left | sym::rotate_right => (1, 0, vec![param(0), tcx.types.u32], param(0)),
+        sym::rotate_left | sym::rotate_right => (1, 0, vec![param(0), tcx.types.int], param(0)),
         sym::unchecked_funnel_shl | sym::unchecked_funnel_shr => {
-            (1, 0, vec![param(0), param(0), tcx.types.u32], param(0))
+            (1, 0, vec![param(0), param(0), tcx.types.int], param(0))
         }
         sym::unchecked_add | sym::unchecked_sub | sym::unchecked_mul => {
             (1, 0, vec![param(0), param(0)], param(0))
@@ -636,7 +560,7 @@ pub(crate) fn check_intrinsic_type(
         }
 
         sym::catch_unwind => {
-            let mut_u8 = Ty::new_mut_ptr(tcx, tcx.types.u8);
+            let mut_u8 = Ty::new_mut_ptr(tcx, tcx.types.int);
             let try_fn_ty =
                 ty::Binder::dummy(tcx.mk_fn_sig_safe_rust_abi([mut_u8], tcx.types.unit));
             let catch_fn_ty =
@@ -645,7 +569,7 @@ pub(crate) fn check_intrinsic_type(
                 0,
                 0,
                 vec![Ty::new_fn_ptr(tcx, try_fn_ty), mut_u8, Ty::new_fn_ptr(tcx, catch_fn_ty)],
-                tcx.types.i32,
+                tcx.types.int,
             )
         }
 
@@ -682,7 +606,7 @@ pub(crate) fn check_intrinsic_type(
         sym::const_eval_select => (4, 0, vec![param(0), param(1), param(2)], param(3)),
 
         sym::vtable_size | sym::vtable_align => {
-            (0, 0, vec![Ty::new_imm_ptr(tcx, tcx.types.unit)], tcx.types.usize)
+            (0, 0, vec![Ty::new_imm_ptr(tcx, tcx.types.unit)], tcx.types.int)
         }
 
         // This type check is not particularly useful, but the `where` bounds
@@ -745,10 +669,10 @@ pub(crate) fn check_intrinsic_type(
         sym::simd_masked_store => (3, 1, vec![param(0), param(1), param(2)], tcx.types.unit),
         sym::simd_scatter => (3, 0, vec![param(0), param(1), param(2)], tcx.types.unit),
         sym::simd_insert | sym::simd_insert_dyn => {
-            (2, 0, vec![param(0), tcx.types.u32, param(1)], param(0))
+            (2, 0, vec![param(0), tcx.types.int, param(1)], param(0))
         }
         sym::simd_extract | sym::simd_extract_dyn => {
-            (2, 0, vec![param(0), tcx.types.u32], param(1))
+            (2, 0, vec![param(0), tcx.types.int], param(1))
         }
         sym::simd_splat => (2, 0, vec![param(1)], param(0)),
         sym::simd_cast

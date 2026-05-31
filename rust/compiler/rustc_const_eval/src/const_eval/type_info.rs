@@ -131,31 +131,17 @@ impl<'tcx> InterpCx<'tcx, CompileTimeMachine<'tcx>> {
                                 self.downcast(&field_dest, sym::Char)?;
                             variant
                         }
-                        ty::Int(int_ty) => {
-                            let (variant, variant_place) = self.downcast(&field_dest, sym::Int)?;
+                        ty::Int => {
+                            let (variant, variant_place) = self.downcast(&field_dest, sym::int)?;
                             let place = self.project_field(&variant_place, FieldIdx::ZERO)?;
-                            self.write_int_type_info(
-                                place,
-                                int_ty.bit_width().unwrap_or_else(/* isize */ ptr_bit_width),
-                                true,
-                            )?;
+                            self.write_int_type_info(place, ptr_bit_width(), true)?;
                             variant
                         }
-                        ty::Uint(uint_ty) => {
-                            let (variant, variant_place) = self.downcast(&field_dest, sym::Int)?;
-                            let place = self.project_field(&variant_place, FieldIdx::ZERO)?;
-                            self.write_int_type_info(
-                                place,
-                                uint_ty.bit_width().unwrap_or_else(/* usize */ ptr_bit_width),
-                                false,
-                            )?;
-                            variant
-                        }
-                        ty::Float(float_ty) => {
+                        ty::Float => {
                             let (variant, variant_place) =
                                 self.downcast(&field_dest, sym::Float)?;
                             let place = self.project_field(&variant_place, FieldIdx::ZERO)?;
-                            self.write_float_type_info(place, float_ty.bit_width())?;
+                            self.write_float_type_info(place, 64)?;
                             variant
                         }
                         ty::Str => {

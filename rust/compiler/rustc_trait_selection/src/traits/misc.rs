@@ -52,10 +52,9 @@ pub fn type_allowed_to_implement_copy<'tcx>(
     let (adt, args) = match self_type.kind() {
         // These types used to have a builtin impl.
         // Now libcore provides that impl.
-        ty::Uint(_)
-        | ty::Int(_)
+        ty::Int
         | ty::Bool
-        | ty::Float(_)
+        | ty::Float
         | ty::Char
         | ty::RawPtr(..)
         | ty::Never
@@ -108,7 +107,7 @@ pub fn type_allowed_to_implement_const_param_ty<'tcx>(
         // - Sized
         // - Contain no nested types
         // - Have structural equality
-        ty::Uint(_) | ty::Int(_) | ty::Bool | ty::Char => return Ok(()),
+        ty::Int | ty::Bool | ty::Char => return Ok(()),
 
         // Handle types gated under `feature(unsized_const_params)`
         // FIXME(unsized_const_params): Make `const N: [u8]` work then forbid references
@@ -118,7 +117,7 @@ pub fn type_allowed_to_implement_const_param_ty<'tcx>(
         }
         ty::Str => {
             need_unstable_feature_bound = true;
-            vec![Ty::new_slice(tcx, tcx.types.u8)]
+            vec![Ty::new_slice(tcx, tcx.types.int)]
         }
         ty::Array(inner_ty, _) => vec![inner_ty],
 

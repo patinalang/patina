@@ -23,9 +23,8 @@ use crate::{self as ty, Interner};
 pub enum SimplifiedType<DefId> {
     Bool,
     Char,
-    Int(ty::IntTy),
-    Uint(ty::UintTy),
-    Float(ty::FloatTy),
+    Int,
+    Float,
     Adt(DefId),
     Foreign(DefId),
     Str,
@@ -118,9 +117,8 @@ pub fn simplify_type<I: Interner>(
     match ty.kind() {
         ty::Bool => Some(SimplifiedType::Bool),
         ty::Char => Some(SimplifiedType::Char),
-        ty::Int(int_type) => Some(SimplifiedType::Int(int_type)),
-        ty::Uint(uint_type) => Some(SimplifiedType::Uint(uint_type)),
-        ty::Float(float_type) => Some(SimplifiedType::Float(float_type)),
+        ty::Int => Some(SimplifiedType::Int),
+        ty::Float => Some(SimplifiedType::Float),
         ty::Adt(def, _) => Some(SimplifiedType::Adt(def.def_id().into())),
         ty::Str => Some(SimplifiedType::Str),
         ty::Term => Some(SimplifiedType::Term),
@@ -288,9 +286,8 @@ impl<I: Interner, const INSTANTIATE_LHS_WITH_INFER: bool, const INSTANTIATE_RHS_
             // variant.
             ty::Bool
             | ty::Char
-            | ty::Int(_)
-            | ty::Uint(_)
-            | ty::Float(_)
+            | ty::Int
+            | ty::Float
             | ty::Adt(..)
             | ty::Str
             | ty::Term
@@ -366,9 +363,8 @@ impl<I: Interner, const INSTANTIATE_LHS_WITH_INFER: bool, const INSTANTIATE_RHS_
             // Looking forward to lazy normalization this is the safer strategy anyways.
             ty::Alias(..) => true,
 
-            ty::Int(_)
-            | ty::Uint(_)
-            | ty::Float(_)
+            ty::Int
+            | ty::Float
             | ty::Str
             | ty::Term
             | ty::Bool
@@ -529,15 +525,7 @@ impl<I: Interner, const INSTANTIATE_LHS_WITH_INFER: bool, const INSTANTIATE_RHS_
         }
     }
 
-    fn var_and_ty_may_unify(self, var: ty::InferTy, ty: I::Ty) -> bool {
-        if !ty.is_known_rigid() {
-            return true;
-        }
-
-        match var {
-            ty::IntVar(_) => ty.is_integral(),
-            ty::FloatVar(_) => ty.is_floating_point(),
-            _ => true,
-        }
+    fn var_and_ty_may_unify(self, _var: ty::InferTy, _ty: I::Ty) -> bool {
+        true
     }
 }

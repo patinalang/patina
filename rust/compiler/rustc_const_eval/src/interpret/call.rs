@@ -8,7 +8,7 @@ use either::{Left, Right};
 use rustc_abi::{self as abi, ExternAbi, FieldIdx, Integer, VariantIdx};
 use rustc_hir::def_id::DefId;
 use rustc_hir::{LangItem, find_attr};
-use rustc_middle::ty::layout::{IntegerExt, TyAndLayout};
+use rustc_middle::ty::layout::TyAndLayout;
 use rustc_middle::ty::{self, AdtDef, Instance, Ty, Unnormalized, VariantDef};
 use rustc_middle::{bug, mir, span_bug};
 use rustc_target::callconv::{ArgAbi, FnAbi};
@@ -230,8 +230,7 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
         // `char` counts as `u32.`
         let int_ty = |ty: Ty<'tcx>| {
             Some(match ty.kind() {
-                ty::Int(ity) => (Integer::from_int_ty(&self.tcx, *ity), /* signed */ true),
-                ty::Uint(uty) => (Integer::from_uint_ty(&self.tcx, *uty), /* signed */ false),
+                ty::Int => (self.tcx.data_layout.ptr_sized_integer(), true),
                 ty::Char => (Integer::I32, /* signed */ false),
                 _ => return None,
             })

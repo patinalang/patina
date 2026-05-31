@@ -40,40 +40,6 @@ error: cannot find attribute `derive` in this scope
 LL | #[derive(Debug, PartialEq)]
    |   ^^^^^^
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/conversion/try_from_try_into__01.pt:8:19
-   |
-LL | struct EvenNumber(int);
-   |                   ^^^
-   |                   |
-   |                   not found in this scope
-   |                   help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/conversion/try_from_try_into__01.pt:10:14
-   |
-LL | impl TryFrom<int> for EvenNumber {
-   |              ^^^ not found in this scope
-   |
-help: perhaps you intended to use this type
-   |
-LL - impl TryFrom<int> for EvenNumber {
-LL + impl TryFrom<i32> for EvenNumber {
-   |
-help: you might be missing a type parameter
-   |
-LL | impl<int> TryFrom<int> for EvenNumber {
-   |     +++++
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/conversion/try_from_try_into__01.pt:13:24
-   |
-LL |     fn try_from(value: int) -> Result<Self, Self::Error> {
-   |                        ^^^
-   |                        |
-   |                        not found in this scope
-   |                        help: perhaps you intended to use this type: `i32`
-
 error[E0425]: cannot find type `Result` in this scope
   --> tests/ui/src/conversion/try_from_try_into__01.pt:13:32
    |
@@ -104,7 +70,7 @@ error[E0425]: cannot find function, tuple struct or tuple variant `Err` in this 
 LL |             Err(())
    |             ^^^ not found in this scope
 
-error: aborting due to 15 previous errors
+error: aborting due to 12 previous errors
 
 Some errors have detailed explanations: E0425, E0433.
 For more information about an error, try `rustc --explain E0425`.

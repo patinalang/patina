@@ -486,18 +486,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                 let (rhs_size, _) = rhs_ty.int_size_and_signed(self.tcx);
 
                 let (unsigned_rhs, unsigned_ty) = match rhs_ty.kind() {
-                    ty::Uint(_) => (rhs.to_copy(), rhs_ty),
-                    ty::Int(int_width) => {
-                        let uint_ty = Ty::new_uint(self.tcx, int_width.to_unsigned());
-                        let rhs_temp = self.temp(uint_ty, span);
-                        self.cfg.push_assign(
-                            block,
-                            source_info,
-                            rhs_temp,
-                            Rvalue::Cast(CastKind::IntToInt, rhs.to_copy(), uint_ty),
-                        );
-                        (Operand::Move(rhs_temp), uint_ty)
-                    }
+                    ty::Int => (rhs.to_copy(), rhs_ty),
                     _ => unreachable!("only integers are shiftable"),
                 };
 

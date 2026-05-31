@@ -571,10 +571,8 @@ impl<'f, 'tcx> Coerce<'f, 'tcx> {
         match target.kind() {
             ty::Bool
             | ty::Char
-            | ty::Int(_)
-            | ty::Uint(_)
-            | ty::Float(_)
-            | ty::Infer(ty::IntVar(_) | ty::FloatVar(_))
+            | ty::Int
+            | ty::Float
             | ty::Str
             | ty::Array(_, _)
             | ty::Slice(_)

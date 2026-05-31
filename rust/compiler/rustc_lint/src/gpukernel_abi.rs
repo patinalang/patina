@@ -106,7 +106,7 @@ impl<'tcx> TypeFolder<TyCtxt<'tcx>> for CheckGpuKernelTypes<'tcx> {
 
     fn fold_ty(&mut self, ty: Ty<'tcx>) -> Ty<'tcx> {
         match ty.kind() {
-            ty::Bool | ty::Char | ty::Int(_) | ty::Uint(_) | ty::Float(_) => {}
+            ty::Bool | ty::Char | ty::Int | ty::Float => {}
             // Thin pointers are allowed but fat pointers with metadata are not
             ty::RawPtr(_, _) => {
                 if !ty.pointee_metadata_ty_or_projection(self.tcx).is_unit() {

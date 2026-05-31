@@ -299,13 +299,6 @@ pub(crate) struct ConcatBytesOob {
 }
 
 #[derive(Diagnostic)]
-#[diag("numeric literal is not a `u8`")]
-pub(crate) struct ConcatBytesNonU8 {
-    #[primary_span]
-    pub(crate) span: Span,
-}
-
-#[derive(Diagnostic)]
 #[diag("expected a byte literal")]
 #[note(
     "only byte literals (like `b\"foo\"`, `b's'` and `[3, 4, 5]`) can be passed to `concat_bytes!()`"

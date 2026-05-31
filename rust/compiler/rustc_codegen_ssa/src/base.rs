@@ -88,13 +88,12 @@ pub fn compare_simd_types<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>>(
     op: BinOp,
 ) -> Bx::Value {
     let signed = match t.kind() {
-        ty::Float(_) => {
+        ty::Float => {
             let cmp = bin_op_to_fcmp_predicate(op);
             let cmp = bx.fcmp(cmp, lhs, rhs);
             return bx.sext(cmp, ret_ty);
         }
-        ty::Uint(_) => false,
-        ty::Int(_) => true,
+        ty::Int => true,
         _ => bug!("compare_simd_types: invalid SIMD type"),
     };
 

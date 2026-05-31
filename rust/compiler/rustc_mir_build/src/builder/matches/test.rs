@@ -273,7 +273,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
             }
 
             TestKind::SliceLen { len, op } => {
-                let usize_ty = self.tcx.types.usize;
+                let usize_ty = self.tcx.types.int;
                 let actual = self.temp(usize_ty, test.span);
 
                 // actual = len(place)

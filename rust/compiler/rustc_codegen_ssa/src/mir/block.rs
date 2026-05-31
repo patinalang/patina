@@ -1849,7 +1849,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
         } else {
             let layout = cx.layout_of(Ty::new_tup(
                 cx.tcx(),
-                &[Ty::new_mut_ptr(cx.tcx(), cx.tcx().types.u8), cx.tcx().types.i32],
+                &[Ty::new_mut_ptr(cx.tcx(), cx.tcx().types.int), cx.tcx().types.int],
             ));
             let slot = PlaceRef::alloca(bx, layout);
             self.personality_slot = Some(slot);

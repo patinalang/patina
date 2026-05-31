@@ -908,12 +908,12 @@ impl<'rt, 'tcx, M: Machine<'tcx>> ValidityVisitor<'rt, 'tcx, M> {
                 }
                 interp_ok(true)
             }
-            ty::Float(_) | ty::Int(_) | ty::Uint(_) => {
+            ty::Float | ty::Int => {
                 // NOTE: Keep this in sync with the array optimization for int/float
                 // types below!
                 self.read_scalar(
                     value,
-                    if matches!(ty.kind(), ty::Float(..)) {
+                    if matches!(ty.kind(), ty::Float) {
                         ExpectedKind::Float
                     } else {
                         ExpectedKind::Int
@@ -1404,7 +1404,7 @@ impl<'rt, 'tcx, M: Machine<'tcx>> ValueVisitor<'tcx, M> for ValidityVisitor<'rt,
                 // integer and floating point types).
                 // FIXME(wesleywiser) This logic could be extended further to arbitrary structs or
                 // tuples made up of integer/floating point types or inhabited ZSTs with no padding.
-                if matches!(tys.kind(), ty::Int(..) | ty::Uint(..) | ty::Float(..))
+                if matches!(tys.kind(), ty::Int | ty::Float)
                 =>
             {
                 let expected = if tys.is_integral() { ExpectedKind::Int } else { ExpectedKind::Float };

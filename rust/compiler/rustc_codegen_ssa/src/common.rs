@@ -147,7 +147,7 @@ pub(crate) fn shift_mask_val<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>>(
 }
 
 pub fn asm_const_to_str<'tcx>(
-    tcx: TyCtxt<'tcx>,
+    _tcx: TyCtxt<'tcx>,
     sp: Span,
     const_value: mir::ConstValue,
     ty_and_layout: TyAndLayout<'tcx>,
@@ -157,15 +157,7 @@ pub fn asm_const_to_str<'tcx>(
     };
     let value = scalar.assert_scalar_int().to_bits(ty_and_layout.size);
     match ty_and_layout.ty.kind() {
-        ty::Uint(_) => value.to_string(),
-        ty::Int(int_ty) => match int_ty.normalize(tcx.sess.target.pointer_width) {
-            ty::IntTy::I8 => (value as i8).to_string(),
-            ty::IntTy::I16 => (value as i16).to_string(),
-            ty::IntTy::I32 => (value as i32).to_string(),
-            ty::IntTy::I64 => (value as i64).to_string(),
-            ty::IntTy::I128 => (value as i128).to_string(),
-            ty::IntTy::Isize => unreachable!(),
-        },
+        ty::Int => value.to_string(),
         _ => span_bug!(sp, "asm const has bad type {}", ty_and_layout.ty),
     }
 }

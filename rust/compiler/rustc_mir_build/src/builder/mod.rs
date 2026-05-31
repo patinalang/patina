@@ -23,7 +23,7 @@
 use itertools::Itertools;
 use rustc_abi::{ExternAbi, FieldIdx};
 use rustc_apfloat::Float;
-use rustc_apfloat::ieee::{Double, Half, Quad, Single};
+use rustc_apfloat::ieee::Double;
 use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::sorted_map::SortedIndexMultiMap;
 use rustc_errors::ErrorGuaranteed;
@@ -1187,80 +1187,33 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
     }
 }
 
-fn parse_float_into_constval(num: Symbol, float_ty: ty::FloatTy, neg: bool) -> Option<ConstValue> {
-    parse_float_into_scalar(num, float_ty, neg).map(|s| ConstValue::Scalar(s.into()))
+fn parse_float_into_constval(num: Symbol, neg: bool) -> Option<ConstValue> {
+    parse_float_into_scalar(num, neg).map(|s| ConstValue::Scalar(s.into()))
 }
 
-pub(crate) fn parse_float_into_scalar(
-    num: Symbol,
-    float_ty: ty::FloatTy,
-    neg: bool,
-) -> Option<ScalarInt> {
+pub(crate) fn parse_float_into_scalar(num: Symbol, neg: bool) -> Option<ScalarInt> {
     let num = num.as_str();
-    match float_ty {
-        // FIXME(f16_f128): When available, compare to the library parser as with `f32` and `f64`
-        ty::FloatTy::F16 => {
-            let mut f = num.parse::<Half>().ok()?;
-            if neg {
-                f = -f;
-            }
-            Some(ScalarInt::from(f))
-        }
-        ty::FloatTy::F32 => {
-            let Ok(rust_f) = num.parse::<f32>() else { return None };
-            let mut f = num
-                .parse::<Single>()
-                .unwrap_or_else(|e| panic!("apfloat::ieee::Single failed to parse `{num}`: {e:?}"));
+    let Ok(rust_f) = num.parse::<f64>() else { return None };
+    let mut f = num
+        .parse::<Double>()
+        .unwrap_or_else(|e| panic!("apfloat::ieee::Double failed to parse `{num}`: {e:?}"));
 
-            assert!(
-                u128::from(rust_f.to_bits()) == f.to_bits(),
-                "apfloat::ieee::Single gave different result for `{}`: \
-                 {}({:#x}) vs Rust's {}({:#x})",
-                rust_f,
-                f,
-                f.to_bits(),
-                Single::from_bits(rust_f.to_bits().into()),
-                rust_f.to_bits()
-            );
+    assert!(
+        u128::from(rust_f.to_bits()) == f.to_bits(),
+        "apfloat::ieee::Double gave different result for `{}`: \
+         {}({:#x}) vs Rust's {}({:#x})",
+        rust_f,
+        f,
+        f.to_bits(),
+        Double::from_bits(rust_f.to_bits().into()),
+        rust_f.to_bits()
+    );
 
-            if neg {
-                f = -f;
-            }
-
-            Some(ScalarInt::from(f))
-        }
-        ty::FloatTy::F64 => {
-            let Ok(rust_f) = num.parse::<f64>() else { return None };
-            let mut f = num
-                .parse::<Double>()
-                .unwrap_or_else(|e| panic!("apfloat::ieee::Double failed to parse `{num}`: {e:?}"));
-
-            assert!(
-                u128::from(rust_f.to_bits()) == f.to_bits(),
-                "apfloat::ieee::Double gave different result for `{}`: \
-                 {}({:#x}) vs Rust's {}({:#x})",
-                rust_f,
-                f,
-                f.to_bits(),
-                Double::from_bits(rust_f.to_bits().into()),
-                rust_f.to_bits()
-            );
-
-            if neg {
-                f = -f;
-            }
-
-            Some(ScalarInt::from(f))
-        }
-        // FIXME(f16_f128): When available, compare to the library parser as with `f32` and `f64`
-        ty::FloatTy::F128 => {
-            let mut f = num.parse::<Quad>().ok()?;
-            if neg {
-                f = -f;
-            }
-            Some(ScalarInt::from(f))
-        }
+    if neg {
+        f = -f;
     }
+
+    Some(ScalarInt::from(f))
 }
 
 ///////////////////////////////////////////////////////////////////////////

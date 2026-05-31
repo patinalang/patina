@@ -192,7 +192,7 @@ fn insert_required_predicates_to_be_wf<'tcx>(
                     // predicates in `check_explicit_predicates` we
                     // need to ignore checking the explicit_map for
                     // Self type.
-                    let args = ex_trait_ref.with_self_ty(tcx, tcx.types.usize).skip_binder().args;
+                    let args = ex_trait_ref.with_self_ty(tcx, tcx.types.int).skip_binder().args;
                     check_explicit_predicates(
                         tcx,
                         ex_trait_ref.skip_binder().def_id,

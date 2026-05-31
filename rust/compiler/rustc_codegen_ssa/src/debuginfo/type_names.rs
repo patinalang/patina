@@ -13,7 +13,6 @@
 
 use std::fmt::Write;
 
-use rustc_abi::Integer;
 use rustc_data_structures::fx::FxHashSet;
 use rustc_data_structures::stable_hasher::{StableHash, StableHasher};
 use rustc_hashes::Hash64;
@@ -21,7 +20,7 @@ use rustc_hir::def_id::DefId;
 use rustc_hir::definitions::{DefPathData, DefPathDataName, DisambiguatedDefPathData};
 use rustc_hir::{CoroutineDesugaring, CoroutineKind, CoroutineSource, Mutability};
 use rustc_middle::bug;
-use rustc_middle::ty::layout::{IntegerExt, TyAndLayout};
+use rustc_middle::ty::layout::TyAndLayout;
 use rustc_middle::ty::{
     self, ExistentialProjection, GenericArgKind, GenericArgsRef, Ty, TyCtxt, Unnormalized,
 };
@@ -62,6 +61,7 @@ fn push_debuginfo_type_name<'tcx>(
     match *t.kind() {
         ty::Bool => output.push_str("bool"),
         ty::Char => output.push_str("char"),
+        ty::Int => output.push_str("int"),
         ty::Str => {
             if cpp_like_debuginfo {
                 output.push_str("str$")
@@ -77,9 +77,7 @@ fn push_debuginfo_type_name<'tcx>(
                 output.push('!');
             }
         }
-        ty::Int(int_ty) => output.push_str(int_ty.name_str()),
-        ty::Uint(uint_ty) => output.push_str(uint_ty.name_str()),
-        ty::Float(float_ty) => output.push_str(float_ty.name_str()),
+        ty::Float => output.push_str("float"),
         ty::Foreign(def_id) => push_item_name(tcx, def_id, qualified, output),
         ty::Adt(def, args) => {
             // `layout_for_cpp_like_fallback` will be `Some` if we want to use the fallback encoding.
@@ -709,17 +707,11 @@ fn push_debuginfo_const_name<'tcx>(tcx: TyCtxt<'tcx>, ct: ty::Const<'tcx>, outpu
         }
         ty::ConstKind::Value(cv) => {
             match cv.ty.kind() {
-                ty::Int(ity) => {
+                ty::Int => {
                     let bits = cv
                         .try_to_bits(tcx, ty::TypingEnv::fully_monomorphized())
                         .expect("expected monomorphic const in codegen");
-                    let val = Integer::from_int_ty(&tcx, *ity).size().sign_extend(bits) as i128;
-                    write!(output, "{val}")
-                }
-                ty::Uint(_) => {
-                    let val = cv
-                        .try_to_bits(tcx, ty::TypingEnv::fully_monomorphized())
-                        .expect("expected monomorphic const in codegen");
+                    let val = tcx.data_layout.pointer_size().sign_extend(bits) as i128;
                     write!(output, "{val}")
                 }
                 ty::Bool => {

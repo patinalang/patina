@@ -728,9 +728,8 @@ impl<'a, 'tcx> TypeVisitor<TyCtxt<'tcx>> for WfPredicates<'a, 'tcx> {
         match *t.kind() {
             ty::Bool
             | ty::Char
-            | ty::Int(..)
-            | ty::Uint(..)
-            | ty::Float(..)
+            | ty::Int
+            | ty::Float
             | ty::Error(_)
             | ty::Str
             | ty::Term
@@ -743,12 +742,7 @@ impl<'a, 'tcx> TypeVisitor<TyCtxt<'tcx>> for WfPredicates<'a, 'tcx> {
                 // WfScalar, WfParameter, etc
             }
 
-            // Can only infer to `ty::Int(_) | ty::Uint(_)`.
-            ty::Infer(ty::IntVar(_)) => {}
-
-            // Can only infer to `ty::Float(_)`.
-            ty::Infer(ty::FloatVar(_)) => {}
-
+            // Can only infer to `ty::Int`.
             ty::Slice(subty) => {
                 self.require_sized(subty, ObligationCauseCode::SliceOrArrayElem);
             }
@@ -765,7 +759,7 @@ impl<'a, 'tcx> TypeVisitor<TyCtxt<'tcx>> for WfPredicates<'a, 'tcx> {
                     self.param_env,
                     ty::Binder::dummy(ty::PredicateKind::Clause(ty::ClauseKind::ConstArgHasType(
                         len,
-                        tcx.types.usize,
+                        tcx.types.int,
                     ))),
                 ));
             }

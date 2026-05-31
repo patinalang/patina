@@ -28,43 +28,8 @@ use crate::ty::{self, CoroutineArgsExt, Ty, TyCtxt, TypeVisitableExt, Unnormaliz
 #[extension(pub trait IntegerExt)]
 impl abi::Integer {
     #[inline]
-    fn to_ty<'tcx>(&self, tcx: TyCtxt<'tcx>, signed: bool) -> Ty<'tcx> {
-        use abi::Integer::{I8, I16, I32, I64, I128};
-        match (*self, signed) {
-            (I8, false) => tcx.types.u8,
-            (I16, false) => tcx.types.u16,
-            (I32, false) => tcx.types.u32,
-            (I64, false) => tcx.types.u64,
-            (I128, false) => tcx.types.u128,
-            (I8, true) => tcx.types.i8,
-            (I16, true) => tcx.types.i16,
-            (I32, true) => tcx.types.i32,
-            (I64, true) => tcx.types.i64,
-            (I128, true) => tcx.types.i128,
-        }
-    }
-
-    fn from_int_ty<C: HasDataLayout>(cx: &C, ity: ty::IntTy) -> abi::Integer {
-        use abi::Integer::{I8, I16, I32, I64, I128};
-        match ity {
-            ty::IntTy::I8 => I8,
-            ty::IntTy::I16 => I16,
-            ty::IntTy::I32 => I32,
-            ty::IntTy::I64 => I64,
-            ty::IntTy::I128 => I128,
-            ty::IntTy::Isize => cx.data_layout().ptr_sized_integer(),
-        }
-    }
-    fn from_uint_ty<C: HasDataLayout>(cx: &C, ity: ty::UintTy) -> abi::Integer {
-        use abi::Integer::{I8, I16, I32, I64, I128};
-        match ity {
-            ty::UintTy::U8 => I8,
-            ty::UintTy::U16 => I16,
-            ty::UintTy::U32 => I32,
-            ty::UintTy::U64 => I64,
-            ty::UintTy::U128 => I128,
-            ty::UintTy::Usize => cx.data_layout().ptr_sized_integer(),
-        }
+    fn to_ty<'tcx>(&self, tcx: TyCtxt<'tcx>, _signed: bool) -> Ty<'tcx> {
+        return tcx.types.int;
     }
 
     /// Finds the appropriate Integer type and signedness for the given
@@ -124,23 +89,7 @@ impl abi::Integer {
 impl abi::Float {
     #[inline]
     fn to_ty<'tcx>(&self, tcx: TyCtxt<'tcx>) -> Ty<'tcx> {
-        use abi::Float::*;
-        match *self {
-            F16 => tcx.types.f16,
-            F32 => tcx.types.f32,
-            F64 => tcx.types.f64,
-            F128 => tcx.types.f128,
-        }
-    }
-
-    fn from_float_ty(fty: ty::FloatTy) -> Self {
-        use abi::Float::*;
-        match fty {
-            ty::FloatTy::F16 => F16,
-            ty::FloatTy::F32 => F32,
-            ty::FloatTy::F64 => F64,
-            ty::FloatTy::F128 => F128,
-        }
+        tcx.types.float
     }
 }
 
@@ -786,9 +735,8 @@ where
             match *this.ty.kind() {
                 ty::Bool
                 | ty::Char
-                | ty::Int(_)
-                | ty::Uint(_)
-                | ty::Float(_)
+                | ty::Int
+                | ty::Float
                 | ty::FnPtr(..)
                 | ty::Never
                 | ty::FnDef(..)
@@ -846,7 +794,7 @@ where
                             tcx,
                             tcx.lifetimes.re_static,
                             // FIXME: properly type (e.g. usize and fn pointers) the fields.
-                            Ty::new_array(tcx, tcx.types.usize, min_count.try_into().unwrap()),
+                            Ty::new_array(tcx, tcx.types.int, min_count.try_into().unwrap()),
                         )
                     };
 
@@ -874,7 +822,7 @@ where
                         }
                     } else {
                         match tcx.struct_tail_for_codegen(pointee, cx.typing_env()).kind() {
-                            ty::Slice(_) | ty::Str => tcx.types.usize,
+                            ty::Slice(_) | ty::Str => tcx.types.int,
                             ty::Dynamic(data, _) => mk_dyn_vtable(data.principal()),
                             _ => bug!("TyAndLayout::field({:?}): not applicable", this),
                         }
@@ -885,7 +833,7 @@ where
 
                 // Arrays and slices.
                 ty::Array(element, _) | ty::Slice(element) => TyMaybeWithLayout::Ty(element),
-                ty::Str => TyMaybeWithLayout::Ty(tcx.types.u8),
+                ty::Str => TyMaybeWithLayout::Ty(tcx.types.int),
 
                 // Tuples, coroutines and closures.
                 ty::Closure(_, args) => field_ty_or_layout(

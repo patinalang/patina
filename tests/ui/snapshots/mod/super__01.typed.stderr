@@ -25,11 +25,6 @@ LL |         println!("called `Cool::function()`");
    |
    = help: you might be missing a crate named `io`
    = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
-help: a builtin type with a similar name exists
-   |
-LL -     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-LL +     ($s:literal) => {{ i8::format("~s~n", [$s]); }};
-   |
 
 error[E0433]: cannot find module or crate `io` in this scope
   --> <patina-prelude>:24:24
@@ -44,11 +39,6 @@ LL |         println!("called `My::function()`");
    |
    = help: you might be missing a crate named `io`
    = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
-help: a builtin type with a similar name exists
-   |
-LL -     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-LL +     ($s:literal) => {{ i8::format("~s~n", [$s]); }};
-   |
 
 error[E0433]: cannot find module or crate `io` in this scope
   --> <patina-prelude>:24:24
@@ -63,11 +53,6 @@ LL |             println!("called `My::Cool::function()`");
    |
    = help: you might be missing a crate named `io`
    = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
-help: a builtin type with a similar name exists
-   |
-LL -     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-LL +     ($s:literal) => {{ i8::format("~s~n", [$s]); }};
-   |
 
 error: aborting due to 5 previous errors
 

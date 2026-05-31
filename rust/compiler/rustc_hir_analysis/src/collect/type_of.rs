@@ -381,7 +381,7 @@ fn const_arg_anon_type_of<'tcx>(icx: &ItemCtxt<'tcx>, arg_hir_id: HirId, span: S
         | Node::Expr(&Expr { kind: ExprKind::Repeat(_, ref constant), .. })
             if constant.hir_id == arg_hir_id =>
         {
-            tcx.types.usize
+            tcx.types.int
         }
 
         Node::TyPat(pat) => {

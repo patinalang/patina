@@ -76,12 +76,7 @@ impl<'tcx> TypeRelation<TyCtxt<'tcx>> for MatchAgainstFreshVars<'tcx> {
         }
 
         match (a.kind(), b.kind()) {
-            (
-                _,
-                &ty::Infer(ty::FreshTy(_))
-                | &ty::Infer(ty::FreshIntTy(_))
-                | &ty::Infer(ty::FreshFloatTy(_)),
-            ) => Ok(a),
+            (_, &ty::Infer(ty::FreshTy(_))) => Ok(a),
 
             (&ty::Infer(_), _) | (_, &ty::Infer(_)) => {
                 Err(TypeError::Sorts(ExpectedFound::new(a, b)))

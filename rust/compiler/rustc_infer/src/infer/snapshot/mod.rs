@@ -20,8 +20,6 @@ pub struct CombinedSnapshot<'tcx> {
 struct VariableLengths {
     region_constraints_len: usize,
     type_var_len: usize,
-    int_var_len: usize,
-    float_var_len: usize,
     const_var_len: usize,
 }
 
@@ -31,8 +29,6 @@ impl<'tcx> InferCtxt<'tcx> {
         VariableLengths {
             region_constraints_len: inner.unwrap_region_constraints().num_region_vars(),
             type_var_len: inner.type_variables().num_vars(),
-            int_var_len: inner.int_unification_table().len(),
-            float_var_len: inner.float_unification_table().len(),
             const_var_len: inner.const_unification_table().len(),
         }
     }

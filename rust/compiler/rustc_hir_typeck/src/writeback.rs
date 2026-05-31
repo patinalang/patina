@@ -206,7 +206,7 @@ impl<'cx, 'tcx> WritebackCx<'cx, 'tcx> {
         if let Some(elem_ty) = base_ty.builtin_index()
             && let Some(exp_ty) = self.typeck_results.expr_ty_opt(e)
         {
-            elem_ty == exp_ty && index_ty == self.fcx.tcx.types.usize
+            elem_ty == exp_ty && index_ty == self.fcx.tcx.types.int
         } else {
             false
         }

@@ -1272,11 +1272,9 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             ty::FnDef(..)
             | ty::FnPtr(..)
             | ty::Error(_)
-            | ty::Uint(_)
-            | ty::Int(_)
-            | ty::Infer(ty::IntVar(_) | ty::FloatVar(_))
+            | ty::Int
             | ty::Bool
-            | ty::Float(_)
+            | ty::Float
             | ty::Char
             | ty::RawPtr(..)
             | ty::Never
@@ -1308,7 +1306,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 ));
             }
 
-            ty::Infer(ty::TyVar(_) | ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) => {
+            ty::Infer(ty::TyVar(_) | ty::FreshTy(_)) => {
                 panic!("unexpected type `{self_ty:?}`")
             }
         }

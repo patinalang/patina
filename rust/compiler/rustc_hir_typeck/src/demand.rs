@@ -341,9 +341,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 if let ty::Infer(infer) = ty.kind() {
                     match infer {
                         ty::TyVar(_) => self.next_ty_var(DUMMY_SP),
-                        ty::IntVar(_) => self.next_int_var(),
-                        ty::FloatVar(_) => self.next_float_var(DUMMY_SP, None),
-                        ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_) => {
+                        ty::FreshTy(_) => {
                             bug!("unexpected fresh ty outside of the trait solver")
                         }
                     }

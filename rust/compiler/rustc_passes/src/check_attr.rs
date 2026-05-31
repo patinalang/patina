@@ -1289,7 +1289,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                         }
                     }
                 }
-                ReprAttr::ReprInt(_) => {
+                ReprAttr::ReprInt => {
                     int_reprs += 1;
                     if target != Target::Enum {
                         self.dcx().emit_err(errors::AttrApplication::Enum {

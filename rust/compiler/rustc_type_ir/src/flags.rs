@@ -127,7 +127,7 @@ bitflags::bitflags! {
                                           | TypeFlags::HAS_CT_PLACEHOLDER.bits()
                                           | TypeFlags::HAS_CT_INFER.bits();
 
-        /// Does this value have `InferTy::FreshTy/FreshIntTy/FreshFloatTy`?
+        /// Does this value have `InferTy::FreshTy`?
         const HAS_TY_FRESH                = 1 << 22;
 
         /// Does this value have `InferConst::Fresh`?
@@ -238,9 +238,8 @@ impl<I: Interner> FlagComputation<I> {
         match *kind {
             ty::Bool
             | ty::Char
-            | ty::Int(_)
-            | ty::Float(_)
-            | ty::Uint(_)
+            | ty::Int
+            | ty::Float
             | ty::Never
             | ty::Str
             | ty::Term
@@ -278,13 +277,9 @@ impl<I: Interner> FlagComputation<I> {
             }
 
             ty::Infer(infer) => match infer {
-                ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_) => {
-                    self.add_flags(TypeFlags::HAS_TY_FRESH)
-                }
+                ty::FreshTy(_) => self.add_flags(TypeFlags::HAS_TY_FRESH),
 
-                ty::TyVar(_) | ty::IntVar(_) | ty::FloatVar(_) => {
-                    self.add_flags(TypeFlags::HAS_TY_INFER)
-                }
+                ty::TyVar(_) => self.add_flags(TypeFlags::HAS_TY_INFER),
             },
 
             ty::Adt(_, args) => {

@@ -9,7 +9,6 @@ use rustc_ast_ir::Mutability;
 use rustc_data_structures::stable_hasher::{StableHash, StableHashCtxt, StableHasher};
 #[cfg(feature = "nightly")]
 use rustc_macros::{Decodable_NoContext, Encodable_NoContext, StableHash_NoContext};
-use rustc_type_ir::data_structures::{NoError, UnifyKey, UnifyValue};
 use rustc_type_ir_macros::{
     GenericTypeVisitable, Lift_Generic, TypeFoldable_Generic, TypeVisitable_Generic,
 };
@@ -19,7 +18,7 @@ pub use self::closure::*;
 use crate::inherent::*;
 #[cfg(feature = "nightly")]
 use crate::visit::TypeVisitable;
-use crate::{self as ty, BoundVarIndexKind, FloatTy, IntTy, Interner, UintTy};
+use crate::{self as ty, BoundVarIndexKind, Interner};
 
 mod closure;
 
@@ -107,14 +106,11 @@ pub enum TyKind<I: Interner> {
     /// (a non-surrogate code point). Written as `char`.
     Char,
 
-    /// A primitive signed integer type. For example, `i32`.
-    Int(IntTy),
+    /// A primitive integer type. Written as `int`.
+    Int,
 
-    /// A primitive unsigned integer type. For example, `u32`.
-    Uint(UintTy),
-
-    /// A primitive floating-point type. For example, `f64`.
-    Float(FloatTy),
+    /// A primitive floating-point type. Written as `float`.
+    Float,
 
     /// Algebraic data types (ADT). For example: structures, enumerations and unions.
     ///
@@ -335,9 +331,8 @@ impl<I: Interner> TyKind<I> {
         match self {
             ty::Bool
             | ty::Char
-            | ty::Int(_)
-            | ty::Uint(_)
-            | ty::Float(_)
+            | ty::Int
+            | ty::Float
             | ty::Adt(_, _)
             | ty::Foreign(_)
             | ty::Str
@@ -374,9 +369,8 @@ impl<I: Interner> fmt::Debug for TyKind<I> {
         match self {
             Bool => write!(f, "bool"),
             Char => write!(f, "char"),
-            Int(i) => write!(f, "{i:?}"),
-            Uint(u) => write!(f, "{u:?}"),
-            Float(float) => write!(f, "{float:?}"),
+            Int => write!(f, "int"),
+            Float => write!(f, "float"),
             Adt(d, s) => {
                 write!(f, "{d:?}")?;
                 let mut s = s.iter();
@@ -541,45 +535,6 @@ impl<I: Interner> AliasTy<I> {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum IntVarValue {
-    Unknown,
-    IntType(IntTy),
-    UintType(UintTy),
-}
-
-impl IntVarValue {
-    pub fn is_known(self) -> bool {
-        match self {
-            IntVarValue::IntType(_) | IntVarValue::UintType(_) => true,
-            IntVarValue::Unknown => false,
-        }
-    }
-
-    pub fn is_unknown(self) -> bool {
-        !self.is_known()
-    }
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum FloatVarValue {
-    Unknown,
-    Known(FloatTy),
-}
-
-impl FloatVarValue {
-    pub fn is_known(self) -> bool {
-        match self {
-            FloatVarValue::Known(_) => true,
-            FloatVarValue::Unknown => false,
-        }
-    }
-
-    pub fn is_unknown(self) -> bool {
-        !self.is_known()
-    }
-}
-
 rustc_index::newtype_index! {
     /// A **ty**pe **v**ariable **ID**.
     #[encodable]
@@ -587,24 +542,6 @@ rustc_index::newtype_index! {
     #[debug_format = "?{}t"]
     #[gate_rustc_only]
     pub struct TyVid {}
-}
-
-rustc_index::newtype_index! {
-    /// An **int**egral (`u32`, `i32`, `usize`, etc.) type **v**ariable **ID**.
-    #[encodable]
-    #[orderable]
-    #[debug_format = "?{}i"]
-    #[gate_rustc_only]
-    pub struct IntVid {}
-}
-
-rustc_index::newtype_index! {
-    /// A **float**ing-point (`f32` or `f64`) type **v**ariable **ID**.
-    #[encodable]
-    #[orderable]
-    #[debug_format = "?{}f"]
-    #[gate_rustc_only]
-    pub struct FloatVid {}
 }
 
 /// A placeholder for a type that hasn't been inferred yet.
@@ -617,20 +554,6 @@ rustc_index::newtype_index! {
 pub enum InferTy {
     /// A type variable.
     TyVar(TyVid),
-    /// An integral type variable (`{integer}`).
-    ///
-    /// These are created when the compiler sees an integer literal like
-    /// `1` that could be several different types (`u8`, `i32`, `u32`, etc.).
-    /// We don't know until it's used what type it's supposed to be, so
-    /// we create a fresh type variable.
-    IntVar(IntVid),
-    /// A floating-point type variable (`{float}`).
-    ///
-    /// These are created when the compiler sees an float literal like
-    /// `1.0` that could be either an `f32` or an `f64`.
-    /// We don't know until it's used what type it's supposed to be, so
-    /// we create a fresh type variable.
-    FloatVar(FloatVid),
 
     /// A [`FreshTy`][Self::FreshTy] is one that is generated as a replacement
     /// for an unbound type variable.
@@ -639,76 +562,6 @@ pub enum InferTy {
     ///
     /// Compare with [`TyVar`][Self::TyVar].
     FreshTy(u32),
-    /// Like [`FreshTy`][Self::FreshTy], but as a replacement for [`IntVar`][Self::IntVar].
-    FreshIntTy(u32),
-    /// Like [`FreshTy`][Self::FreshTy], but as a replacement for [`FloatVar`][Self::FloatVar].
-    FreshFloatTy(u32),
-}
-
-impl UnifyValue for IntVarValue {
-    type Error = NoError;
-
-    fn unify_values(value1: &Self, value2: &Self) -> Result<Self, Self::Error> {
-        match (*value1, *value2) {
-            (IntVarValue::Unknown, IntVarValue::Unknown) => Ok(IntVarValue::Unknown),
-            (
-                IntVarValue::Unknown,
-                known @ (IntVarValue::UintType(_) | IntVarValue::IntType(_)),
-            )
-            | (
-                known @ (IntVarValue::UintType(_) | IntVarValue::IntType(_)),
-                IntVarValue::Unknown,
-            ) => Ok(known),
-            _ => panic!("differing ints should have been resolved first"),
-        }
-    }
-}
-
-impl UnifyKey for IntVid {
-    type Value = IntVarValue;
-    #[inline] // make this function eligible for inlining - it is quite hot.
-    fn index(&self) -> u32 {
-        self.as_u32()
-    }
-    #[inline]
-    fn from_index(i: u32) -> IntVid {
-        IntVid::from_u32(i)
-    }
-    fn tag() -> &'static str {
-        "IntVid"
-    }
-}
-
-impl UnifyValue for FloatVarValue {
-    type Error = NoError;
-
-    fn unify_values(value1: &Self, value2: &Self) -> Result<Self, Self::Error> {
-        match (*value1, *value2) {
-            (FloatVarValue::Unknown, FloatVarValue::Unknown) => Ok(FloatVarValue::Unknown),
-            (FloatVarValue::Unknown, FloatVarValue::Known(known))
-            | (FloatVarValue::Known(known), FloatVarValue::Unknown) => {
-                Ok(FloatVarValue::Known(known))
-            }
-            (FloatVarValue::Known(_), FloatVarValue::Known(_)) => {
-                panic!("differing floats should have been resolved first")
-            }
-        }
-    }
-}
-
-impl UnifyKey for FloatVid {
-    type Value = FloatVarValue;
-    #[inline]
-    fn index(&self) -> u32 {
-        self.as_u32()
-    }
-    #[inline]
-    fn from_index(i: u32) -> FloatVid {
-        FloatVid::from_u32(i)
-    }
-    fn tag() -> &'static str {
-        "FloatVid"
-    }
 }
 
 #[cfg(feature = "nightly")]
@@ -717,10 +570,10 @@ impl StableHash for InferTy {
         use InferTy::*;
         std::mem::discriminant(self).stable_hash(hcx, hasher);
         match self {
-            TyVar(_) | IntVar(_) | FloatVar(_) => {
+            TyVar(_) => {
                 panic!("type variables should not be hashed: {self:?}")
             }
-            FreshTy(v) | FreshIntTy(v) | FreshFloatTy(v) => v.stable_hash(hcx, hasher),
+            FreshTy(v) => v.stable_hash(hcx, hasher),
         }
     }
 }
@@ -730,11 +583,7 @@ impl fmt::Display for InferTy {
         use InferTy::*;
         match *self {
             TyVar(_) => write!(f, "_"),
-            IntVar(_) => write!(f, "{}", "{integer}"),
-            FloatVar(_) => write!(f, "{}", "{float}"),
             FreshTy(v) => write!(f, "FreshTy({v})"),
-            FreshIntTy(v) => write!(f, "FreshIntTy({v})"),
-            FreshFloatTy(v) => write!(f, "FreshFloatTy({v})"),
         }
     }
 }
@@ -744,11 +593,7 @@ impl fmt::Debug for InferTy {
         use InferTy::*;
         match *self {
             TyVar(ref v) => v.fmt(f),
-            IntVar(ref v) => v.fmt(f),
-            FloatVar(ref v) => v.fmt(f),
             FreshTy(v) => write!(f, "FreshTy({v:?})"),
-            FreshIntTy(v) => write!(f, "FreshIntTy({v:?})"),
-            FreshFloatTy(v) => write!(f, "FreshFloatTy({v:?})"),
         }
     }
 }

@@ -293,9 +293,8 @@ where
             // with def-ids that should be visited recursively).
             ty::Bool
             | ty::Char
-            | ty::Int(..)
-            | ty::Uint(..)
-            | ty::Float(..)
+            | ty::Int
+            | ty::Float
             | ty::Str
             | ty::Term
             | ty::Never

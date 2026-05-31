@@ -27,7 +27,7 @@ use crate::traits::ObligationCause;
 use crate::ty::InferTy::*;
 use crate::ty::{
     self, AdtDef, Const, Discr, GenericArg, GenericArgs, GenericArgsRef, List, ParamEnv, Region,
-    Ty, TyCtxt, TypeSuperVisitable, TypeVisitable, TypeVisitor, UintTy, ValTree,
+    Ty, TyCtxt, TypeSuperVisitable, TypeVisitable, TypeVisitor, ValTree,
 };
 
 // Re-export and re-parameterize some `I = TyCtxt<'tcx>` types here
@@ -62,7 +62,7 @@ impl<'tcx> Article for TyKind<'tcx> {
     /// Get the article ("a" or "an") to use with this type.
     fn article(&self) -> &'static str {
         match self {
-            Int(_) | Float(_) | Array(_, _) => "an",
+            Int | Float | Array(_, _) => "an",
             Adt(def, _) if def.is_enum() => "an",
             // This should never happen, but ICEing and causing the user's code
             // to not compile felt too harsh.
@@ -138,7 +138,7 @@ impl<'tcx> ty::CoroutineArgs<TyCtxt<'tcx>> {
     /// The type of the state discriminant used in the coroutine type.
     #[inline]
     fn discr_ty(&self, tcx: TyCtxt<'tcx>) -> Ty<'tcx> {
-        tcx.types.u32
+        tcx.types.int
     }
 
     /// This returns the types of the MIR locals which had to be stored across suspension points.
@@ -391,16 +391,6 @@ impl<'tcx> Ty<'tcx> {
     }
 
     #[inline]
-    pub fn new_int_var(tcx: TyCtxt<'tcx>, v: ty::IntVid) -> Ty<'tcx> {
-        Ty::new_infer(tcx, IntVar(v))
-    }
-
-    #[inline]
-    pub fn new_float_var(tcx: TyCtxt<'tcx>, v: ty::FloatVid) -> Ty<'tcx> {
-        Ty::new_infer(tcx, FloatVar(v))
-    }
-
-    #[inline]
     pub fn new_fresh(tcx: TyCtxt<'tcx>, n: u32) -> Ty<'tcx> {
         // Use a pre-interned one when possible.
         tcx.types
@@ -408,26 +398,6 @@ impl<'tcx> Ty<'tcx> {
             .get(n as usize)
             .copied()
             .unwrap_or_else(|| Ty::new_infer(tcx, ty::FreshTy(n)))
-    }
-
-    #[inline]
-    pub fn new_fresh_int(tcx: TyCtxt<'tcx>, n: u32) -> Ty<'tcx> {
-        // Use a pre-interned one when possible.
-        tcx.types
-            .fresh_int_tys
-            .get(n as usize)
-            .copied()
-            .unwrap_or_else(|| Ty::new_infer(tcx, ty::FreshIntTy(n)))
-    }
-
-    #[inline]
-    pub fn new_fresh_float(tcx: TyCtxt<'tcx>, n: u32) -> Ty<'tcx> {
-        // Use a pre-interned one when possible.
-        tcx.types
-            .fresh_float_tys
-            .get(n as usize)
-            .copied()
-            .unwrap_or_else(|| Ty::new_infer(tcx, ty::FreshFloatTy(n)))
     }
 
     #[inline]
@@ -505,13 +475,13 @@ impl<'tcx> Ty<'tcx> {
             Const::new_value(
                 tcx,
                 ValTree::from_scalar_int(tcx, variant.as_u32().into()),
-                tcx.types.u32,
+                tcx.types.int,
             )
             .into(),
             Const::new_value(
                 tcx,
                 ValTree::from_scalar_int(tcx, field.as_u32().into()),
-                tcx.types.u32,
+                tcx.types.int,
             )
             .into(),
         ]);
@@ -548,40 +518,13 @@ impl<'tcx> Ty<'tcx> {
     }
 
     #[inline]
-    pub fn new_int(tcx: TyCtxt<'tcx>, i: ty::IntTy) -> Ty<'tcx> {
-        use ty::IntTy::*;
-        match i {
-            Isize => tcx.types.isize,
-            I8 => tcx.types.i8,
-            I16 => tcx.types.i16,
-            I32 => tcx.types.i32,
-            I64 => tcx.types.i64,
-            I128 => tcx.types.i128,
-        }
+    pub fn new_int(tcx: TyCtxt<'tcx>) -> Ty<'tcx> {
+        tcx.types.int
     }
 
     #[inline]
-    pub fn new_uint(tcx: TyCtxt<'tcx>, ui: ty::UintTy) -> Ty<'tcx> {
-        use ty::UintTy::*;
-        match ui {
-            Usize => tcx.types.usize,
-            U8 => tcx.types.u8,
-            U16 => tcx.types.u16,
-            U32 => tcx.types.u32,
-            U64 => tcx.types.u64,
-            U128 => tcx.types.u128,
-        }
-    }
-
-    #[inline]
-    pub fn new_float(tcx: TyCtxt<'tcx>, f: ty::FloatTy) -> Ty<'tcx> {
-        use ty::FloatTy::*;
-        match f {
-            F16 => tcx.types.f16,
-            F32 => tcx.types.f32,
-            F64 => tcx.types.f64,
-            F128 => tcx.types.f128,
-        }
+    pub fn new_float(tcx: TyCtxt<'tcx>) -> Ty<'tcx> {
+        tcx.types.float
     }
 
     #[inline]
@@ -931,7 +874,7 @@ impl<'tcx> rustc_type_ir::inherent::Ty<TyCtxt<'tcx>> for Ty<'tcx> {
     }
 
     fn new_u8(tcx: TyCtxt<'tcx>) -> Self {
-        tcx.types.u8
+        tcx.types.int
     }
 
     fn new_infer(tcx: TyCtxt<'tcx>, infer: ty::InferTy) -> Self {
@@ -1103,7 +1046,7 @@ impl<'tcx> rustc_type_ir::inherent::Ty<TyCtxt<'tcx>> for Ty<'tcx> {
     }
 
     fn new_usize(interner: TyCtxt<'tcx>) -> Self {
-        interner.types.usize
+        interner.types.int
     }
 
     fn discriminant_ty(self, interner: TyCtxt<'tcx>) -> Ty<'tcx> {
@@ -1137,13 +1080,13 @@ impl<'tcx> Ty<'tcx> {
     /// Check if type is an `usize`.
     #[inline]
     pub fn is_usize(self) -> bool {
-        matches!(self.kind(), Uint(UintTy::Usize))
+        matches!(self.kind(), Int)
     }
 
-    /// Check if type is an `usize` or an integral type variable.
+    /// Check if type is an `int`.
     #[inline]
     pub fn is_usize_like(self) -> bool {
-        matches!(self.kind(), Uint(UintTy::Usize) | Infer(IntVar(_)))
+        matches!(self.kind(), Int)
     }
 
     #[inline]
@@ -1153,7 +1096,7 @@ impl<'tcx> Ty<'tcx> {
 
     #[inline]
     pub fn is_primitive(self) -> bool {
-        matches!(self.kind(), Bool | Char | Int(_) | Uint(_) | Float(_))
+        matches!(self.kind(), Bool | Char | Int | Float)
     }
 
     #[inline]
@@ -1175,14 +1118,6 @@ impl<'tcx> Ty<'tcx> {
     pub fn ty_vid(self) -> Option<ty::TyVid> {
         match self.kind() {
             &Infer(TyVar(vid)) => Some(vid),
-            _ => None,
-        }
-    }
-
-    #[inline]
-    pub fn float_vid(self) -> Option<ty::FloatVid> {
-        match self.kind() {
-            &Infer(FloatVar(vid)) => Some(vid),
             _ => None,
         }
     }
@@ -1260,7 +1195,8 @@ impl<'tcx> Ty<'tcx> {
     pub fn sequence_element_type(self, tcx: TyCtxt<'tcx>) -> Ty<'tcx> {
         match self.kind() {
             Array(ty, _) | Slice(ty) => *ty,
-            Str => tcx.types.u8,
+            Str => tcx.types.int,
+            Term => tcx.types.int,
             _ => bug!("`sequence_element_type` called on non-sequence value: {}", self),
         }
     }
@@ -1413,23 +1349,13 @@ impl<'tcx> Ty<'tcx> {
     /// contents are abstract to rustc.)
     #[inline]
     pub fn is_scalar(self) -> bool {
-        matches!(
-            self.kind(),
-            Bool | Char
-                | Int(_)
-                | Float(_)
-                | Uint(_)
-                | FnDef(..)
-                | FnPtr(..)
-                | RawPtr(_, _)
-                | Infer(IntVar(_) | FloatVar(_))
-        )
+        matches!(self.kind(), Bool | Char | Int | Float | FnDef(..) | FnPtr(..) | RawPtr(_, _))
     }
 
     /// Returns `true` if this type is a floating point type.
     #[inline]
     pub fn is_floating_point(self) -> bool {
-        matches!(self.kind(), Float(_) | Infer(FloatVar(_)))
+        matches!(self.kind(), Float)
     }
 
     #[inline]
@@ -1464,7 +1390,7 @@ impl<'tcx> Ty<'tcx> {
 
     #[inline]
     pub fn is_integral(self) -> bool {
-        matches!(self.kind(), Infer(IntVar(_)) | Int(_) | Uint(_))
+        matches!(self.kind(), Int)
     }
 
     #[inline]
@@ -1474,7 +1400,7 @@ impl<'tcx> Ty<'tcx> {
 
     #[inline]
     pub fn is_fresh(self) -> bool {
-        matches!(self.kind(), Infer(FreshTy(_) | FreshIntTy(_) | FreshFloatTy(_)))
+        matches!(self.kind(), Infer(FreshTy(_)))
     }
 
     #[inline]
@@ -1489,12 +1415,12 @@ impl<'tcx> Ty<'tcx> {
 
     #[inline]
     pub fn is_signed(self) -> bool {
-        matches!(self.kind(), Int(_))
+        matches!(self.kind(), Int)
     }
 
     #[inline]
     pub fn is_ptr_sized_integral(self) -> bool {
-        matches!(self.kind(), Int(ty::IntTy::Isize) | Uint(ty::UintTy::Usize))
+        matches!(self.kind(), Int)
     }
 
     #[inline]
@@ -1695,9 +1621,8 @@ impl<'tcx> Ty<'tcx> {
 
             ty::Bool
             | ty::Char
-            | ty::Int(_)
-            | ty::Uint(_)
-            | ty::Float(_)
+            | ty::Int
+            | ty::Float
             | ty::Adt(..)
             | ty::Foreign(_)
             | ty::Str
@@ -1714,12 +1639,9 @@ impl<'tcx> Ty<'tcx> {
             | ty::CoroutineWitness(..)
             | ty::Never
             | ty::Tuple(_)
-            | ty::Error(_)
-            | ty::Infer(IntVar(_) | FloatVar(_)) => tcx.types.u8,
+            | ty::Error(_) => tcx.types.int,
 
-            ty::Bound(..)
-            | ty::Placeholder(_)
-            | ty::Infer(FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) => {
+            ty::Bound(..) | ty::Placeholder(_) | ty::Infer(FreshTy(_)) => {
                 bug!("`discriminant_ty` applied to unexpected type: {:?}", self)
             }
         }
@@ -1735,11 +1657,9 @@ impl<'tcx> Ty<'tcx> {
         let tail = tcx.struct_tail_raw(self, &ObligationCause::dummy(), normalize, || {});
         match tail.kind() {
             // Sized types
-            ty::Infer(ty::IntVar(_) | ty::FloatVar(_))
-            | ty::Uint(_)
-            | ty::Int(_)
+            ty::Int
             | ty::Bool
-            | ty::Float(_)
+            | ty::Float
             | ty::FnDef(..)
             | ty::FnPtr(..)
             | ty::RawPtr(..)
@@ -1762,8 +1682,7 @@ impl<'tcx> Ty<'tcx> {
             // a.k.a. unit type, which is Sized
             | ty::Tuple(..) => Ok(tcx.types.unit),
 
-            ty::Str | ty::Slice(_) => Ok(tcx.types.usize),
-
+            ty::Str | ty::Slice(_) => Ok(tcx.types.int),
             ty::Dynamic(_, _) => {
                 let dyn_metadata = tcx.require_lang_item(LangItem::DynMetadata, DUMMY_SP);
                 Ok(tcx.type_of(dyn_metadata).instantiate(tcx, &[tail.into()]).skip_norm_wip())
@@ -1779,7 +1698,7 @@ impl<'tcx> Ty<'tcx> {
             | ty::Pat(..)
             | ty::Bound(..)
             | ty::Placeholder(..)
-            | ty::Infer(ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) => bug!(
+            | ty::Infer(ty::FreshTy(_)) => bug!(
                 "`ptr_metadata_ty_or_tail` applied to unexpected type: {self:?} (tail = {tail:?})"
             ),
         }
@@ -1867,12 +1786,7 @@ impl<'tcx> Ty<'tcx> {
     /// ```
     pub fn to_opt_closure_kind(self) -> Option<ty::ClosureKind> {
         match self.kind() {
-            Int(int_ty) => match int_ty {
-                ty::IntTy::I8 => Some(ty::ClosureKind::Fn),
-                ty::IntTy::I16 => Some(ty::ClosureKind::FnMut),
-                ty::IntTy::I32 => Some(ty::ClosureKind::FnOnce),
-                _ => bug!("cannot convert type `{:?}` to a closure kind", self),
-            },
+            ty::Int => Some(ty::ClosureKind::FnOnce),
 
             // "Bound" types appear in canonical queries when the
             // closure type is not yet known, and `Placeholder` and `Param`
@@ -1889,9 +1803,9 @@ impl<'tcx> Ty<'tcx> {
     /// for explanation of the relationship between `Ty` and [`ty::ClosureKind`].
     pub fn from_closure_kind(tcx: TyCtxt<'tcx>, kind: ty::ClosureKind) -> Ty<'tcx> {
         match kind {
-            ty::ClosureKind::Fn => tcx.types.i8,
-            ty::ClosureKind::FnMut => tcx.types.i16,
-            ty::ClosureKind::FnOnce => tcx.types.i32,
+            ty::ClosureKind::Fn => tcx.types.int,
+            ty::ClosureKind::FnMut => tcx.types.int,
+            ty::ClosureKind::FnOnce => tcx.types.int,
         }
     }
 
@@ -1909,8 +1823,8 @@ impl<'tcx> Ty<'tcx> {
     /// directly from the `CoroutineClosure`'s `kind`.
     pub fn from_coroutine_closure_kind(tcx: TyCtxt<'tcx>, kind: ty::ClosureKind) -> Ty<'tcx> {
         match kind {
-            ty::ClosureKind::Fn | ty::ClosureKind::FnMut => tcx.types.i16,
-            ty::ClosureKind::FnOnce => tcx.types.i32,
+            ty::ClosureKind::Fn | ty::ClosureKind::FnMut => tcx.types.int,
+            ty::ClosureKind::FnOnce => tcx.types.int,
         }
     }
 
@@ -1926,11 +1840,9 @@ impl<'tcx> Ty<'tcx> {
     #[instrument(skip(tcx), level = "debug")]
     pub fn has_trivial_sizedness(self, tcx: TyCtxt<'tcx>, sizedness: SizedTraitKind) -> bool {
         match self.kind() {
-            ty::Infer(ty::IntVar(_) | ty::FloatVar(_))
-            | ty::Uint(_)
-            | ty::Int(_)
+            ty::Int
             | ty::Bool
-            | ty::Float(_)
+            | ty::Float
             | ty::FnDef(..)
             | ty::FnPtr(..)
             | ty::UnsafeBinder(_)
@@ -1966,7 +1878,7 @@ impl<'tcx> Ty<'tcx> {
 
             ty::Infer(ty::TyVar(_)) => false,
 
-            ty::Infer(ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) => {
+            ty::Infer(ty::FreshTy(_)) => {
                 bug!("`has_trivial_sizedness` applied to unexpected type: {:?}", self)
             }
         }
@@ -1982,15 +1894,11 @@ impl<'tcx> Ty<'tcx> {
     /// on which we can replace cloning with dereferencing.
     pub fn is_trivially_pure_clone_copy(self) -> bool {
         match self.kind() {
-            ty::Bool | ty::Char | ty::Term | ty::Never => true,
-
+            ty::Bool | ty::Char | ty::Int | ty::Never | ty::Term => true,
             // These aren't even `Clone`
             ty::Str | ty::Slice(..) | ty::Foreign(..) | ty::Dynamic(..) => false,
 
-            ty::Infer(ty::InferTy::FloatVar(_) | ty::InferTy::IntVar(_))
-            | ty::Int(..)
-            | ty::Uint(..)
-            | ty::Float(..) => true,
+            ty::Float => true,
 
             // ZST which can't be named are fine.
             ty::FnDef(..) => true,
@@ -2035,9 +1943,8 @@ impl<'tcx> Ty<'tcx> {
         match *self.kind() {
             ty::Bool
             | ty::Char
-            | ty::Int(_)
-            | ty::Uint(_)
-            | ty::Float(_)
+            | ty::Int
+            | ty::Float
             | ty::Str
             | ty::Term
             | ty::Never
@@ -2057,8 +1964,7 @@ impl<'tcx> Ty<'tcx> {
 
             ty::Infer(infer) => match infer {
                 ty::TyVar(_) => false,
-                ty::IntVar(_) | ty::FloatVar(_) => true,
-                ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_) => true,
+                ty::FreshTy(_) => true,
             },
 
             ty::Adt(_, _)
@@ -2083,28 +1989,8 @@ impl<'tcx> Ty<'tcx> {
         match self.kind() {
             ty::Bool => Some(sym::bool),
             ty::Char => Some(sym::char),
-            ty::Float(f) => match f {
-                ty::FloatTy::F16 => Some(sym::f16),
-                ty::FloatTy::F32 => Some(sym::f32),
-                ty::FloatTy::F64 => Some(sym::f64),
-                ty::FloatTy::F128 => Some(sym::f128),
-            },
-            ty::Int(f) => match f {
-                ty::IntTy::Isize => Some(sym::isize),
-                ty::IntTy::I8 => Some(sym::i8),
-                ty::IntTy::I16 => Some(sym::i16),
-                ty::IntTy::I32 => Some(sym::i32),
-                ty::IntTy::I64 => Some(sym::i64),
-                ty::IntTy::I128 => Some(sym::i128),
-            },
-            ty::Uint(f) => match f {
-                ty::UintTy::Usize => Some(sym::usize),
-                ty::UintTy::U8 => Some(sym::u8),
-                ty::UintTy::U16 => Some(sym::u16),
-                ty::UintTy::U32 => Some(sym::u32),
-                ty::UintTy::U64 => Some(sym::u64),
-                ty::UintTy::U128 => Some(sym::u128),
-            },
+            ty::Int => Some(sym::int),
+            ty::Float => Some(sym::float),
             ty::Str => Some(sym::str),
             ty::Term => Some(sym::term),
             _ => None,

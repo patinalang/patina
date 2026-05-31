@@ -185,7 +185,7 @@ impl Delimiter {
 }
 
 // Note that the suffix is *not* considered when deciding the `LitKind` in this
-// type. This means that float literals like `1f32` are classified by this type
+// type. This means that float literals like `1f` are classified by this type
 // as `Int`. Only upon conversion to `ast::LitKind` will such a literal be
 // given the `Float` kind.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Encodable, Decodable, Debug, StableHash)]
@@ -193,8 +193,8 @@ pub enum LitKind {
     Bool, // AST only, must never appear in a `Token`
     Byte,
     Char,
-    Integer, // e.g. `1`, `1u8`, `1f32`
-    Float,   // e.g. `1.`, `1.0`, `1e3f32`
+    Integer, // e.g. `1`
+    Float,   // e.g. `1.`, `1.0`, `1e3`
     Str,
     StrRaw(u8), // raw string delimited by `n` hash symbols
     ByteStr,
@@ -218,12 +218,12 @@ impl Lit {
     }
 
     /// Returns `true` if this is semantically a float literal. This includes
-    /// ones like `1f32` that have an `Integer` kind but a float suffix.
+    /// ones like `1f` that have an `Integer` kind but a float suffix.
     pub fn is_semantic_float(&self) -> bool {
         match self.kind {
             LitKind::Float => true,
             LitKind::Integer => match self.suffix {
-                Some(sym) => sym == sym::f32 || sym == sym::f64,
+                Some(sym) => sym == sym::f,
                 None => false,
             },
             _ => false,

@@ -28,16 +28,13 @@ pub fn trivial_dropck_outlives<'tcx>(tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) -> bool {
         // None of these types have a destructor and hence they do not
         // require anything in particular to outlive the dtor's
         // execution.
-        ty::Infer(ty::FreshIntTy(_))
-        | ty::Infer(ty::FreshFloatTy(_))
-        | ty::Bool
-        | ty::Int(_)
-        | ty::Uint(_)
-        | ty::Float(_)
+        ty::Bool
+        | ty::Float
         | ty::Never
         | ty::FnDef(..)
         | ty::FnPtr(..)
         | ty::Char
+        | ty::Int
         | ty::CoroutineWitness(..)
         | ty::RawPtr(_, _)
         | ty::Ref(..)
@@ -271,9 +268,8 @@ pub fn dtorck_constraint_for_ty_inner<'tcx>(
     match *ty.kind() {
         ty::Bool
         | ty::Char
-        | ty::Int(_)
-        | ty::Uint(_)
-        | ty::Float(_)
+        | ty::Int
+        | ty::Float
         | ty::Str
         | ty::Term
         | ty::Never

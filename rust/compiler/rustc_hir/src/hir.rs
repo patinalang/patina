@@ -8,8 +8,8 @@ use rustc_ast::attr::AttributeExt;
 use rustc_ast::token::DocFragmentKind;
 use rustc_ast::util::parser::ExprPrecedence;
 use rustc_ast::{
-    self as ast, FloatTy, InlineAsmOptions, InlineAsmTemplatePiece, IntTy, Label, LitIntType,
-    LitKind, TraitObjectSyntax, UintTy, UnsafeBinderCastKind, join_path_idents,
+    self as ast, InlineAsmOptions, InlineAsmTemplatePiece, Label, LitKind, TraitObjectSyntax,
+    UnsafeBinderCastKind, join_path_idents,
 };
 pub use rustc_ast::{
     AssignOp, AssignOpKind, AttrId, AttrStyle, BinOp, BinOpKind, BindingMode, BorrowKind,
@@ -2585,13 +2585,7 @@ impl Expr<'_> {
     /// Check if expression is an integer literal that can be used
     /// where `usize` is expected.
     pub fn is_size_lit(&self) -> bool {
-        matches!(
-            self.kind,
-            ExprKind::Lit(Lit {
-                node: LitKind::Int(_, LitIntType::Unsuffixed | LitIntType::Unsigned(UintTy::Usize)),
-                ..
-            })
-        )
+        matches!(self.kind, ExprKind::Lit(Lit { node: LitKind::Int(_), .. }))
     }
 
     /// If `Self.kind` is `ExprKind::DropTemps(expr)`, drill down until we get a non-`DropTemps`
@@ -3581,39 +3575,24 @@ impl<'hir> Ty<'hir> {
 /// Not represented directly in the AST; referred to by name through a `ty_path`.
 #[derive(Copy, Clone, PartialEq, Eq, Encodable, Decodable, Hash, Debug, StableHash)]
 pub enum PrimTy {
-    Int(IntTy),
-    Uint(UintTy),
-    Float(FloatTy),
+    Float,
     Str,
     Bool,
     Char,
     Term,
+    Int,
 }
 
 impl PrimTy {
     /// All of the primitive types
-    pub const ALL: [Self; 20] = [
+    pub const ALL: [Self; 6] = [
         // any changes here should also be reflected in `PrimTy::from_name`
-        Self::Int(IntTy::I8),
-        Self::Int(IntTy::I16),
-        Self::Int(IntTy::I32),
-        Self::Int(IntTy::I64),
-        Self::Int(IntTy::I128),
-        Self::Int(IntTy::Isize),
-        Self::Uint(UintTy::U8),
-        Self::Uint(UintTy::U16),
-        Self::Uint(UintTy::U32),
-        Self::Uint(UintTy::U64),
-        Self::Uint(UintTy::U128),
-        Self::Uint(UintTy::Usize),
-        Self::Float(FloatTy::F16),
-        Self::Float(FloatTy::F32),
-        Self::Float(FloatTy::F64),
-        Self::Float(FloatTy::F128),
+        Self::Float,
         Self::Bool,
         Self::Char,
         Self::Str,
         Self::Term,
+        Self::Int,
     ];
 
     /// Like [`PrimTy::name`], but returns a &str instead of a symbol.
@@ -3621,53 +3600,37 @@ impl PrimTy {
     /// Used by clippy.
     pub fn name_str(self) -> &'static str {
         match self {
-            PrimTy::Int(i) => i.name_str(),
-            PrimTy::Uint(u) => u.name_str(),
-            PrimTy::Float(f) => f.name_str(),
+            PrimTy::Float => "float",
             PrimTy::Str => "str",
             PrimTy::Bool => "bool",
             PrimTy::Char => "char",
             PrimTy::Term => "term",
+            PrimTy::Int => "int",
         }
     }
 
     pub fn name(self) -> Symbol {
         match self {
-            PrimTy::Int(i) => i.name(),
-            PrimTy::Uint(u) => u.name(),
-            PrimTy::Float(f) => f.name(),
+            PrimTy::Float => sym::float,
             PrimTy::Str => sym::str,
             PrimTy::Bool => sym::bool,
             PrimTy::Char => sym::char,
             PrimTy::Term => sym::term,
+            PrimTy::Int => sym::int,
         }
     }
 
-    /// Returns the matching `PrimTy` for a `Symbol` such as "str" or "i32".
+    /// Returns the matching `PrimTy` for a `Symbol` such as "str" or "int".
     /// Returns `None` if no matching type is found.
     pub fn from_name(name: Symbol) -> Option<Self> {
         let ty = match name {
             // any changes here should also be reflected in `PrimTy::ALL`
-            sym::i8 => Self::Int(IntTy::I8),
-            sym::i16 => Self::Int(IntTy::I16),
-            sym::i32 => Self::Int(IntTy::I32),
-            sym::i64 => Self::Int(IntTy::I64),
-            sym::i128 => Self::Int(IntTy::I128),
-            sym::isize => Self::Int(IntTy::Isize),
-            sym::u8 => Self::Uint(UintTy::U8),
-            sym::u16 => Self::Uint(UintTy::U16),
-            sym::u32 => Self::Uint(UintTy::U32),
-            sym::u64 => Self::Uint(UintTy::U64),
-            sym::u128 => Self::Uint(UintTy::U128),
-            sym::usize => Self::Uint(UintTy::Usize),
-            sym::f16 => Self::Float(FloatTy::F16),
-            sym::f32 => Self::Float(FloatTy::F32),
-            sym::f64 => Self::Float(FloatTy::F64),
-            sym::f128 => Self::Float(FloatTy::F128),
+            sym::float => Self::Float,
             sym::bool => Self::Bool,
             sym::char => Self::Char,
             sym::str => Self::Str,
             sym::term => Self::Term,
+            sym::int => Self::Int,
             _ => return None,
         };
         Some(ty)

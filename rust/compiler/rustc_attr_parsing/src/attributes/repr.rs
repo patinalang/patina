@@ -1,6 +1,6 @@
 use rustc_abi::{Align, Size};
-use rustc_ast::{IntTy, LitIntType, LitKind, UintTy};
-use rustc_hir::attrs::{IntType, ReprAttr};
+use rustc_ast::LitKind;
+use rustc_hir::attrs::ReprAttr;
 
 use super::prelude::*;
 use crate::session_diagnostics::{self, IncorrectReprFormatGenericCause};
@@ -63,39 +63,8 @@ impl CombineAttributeParser for ReprParser {
 
 macro_rules! int_pat {
     () => {
-        sym::i8
-            | sym::u8
-            | sym::i16
-            | sym::u16
-            | sym::i32
-            | sym::u32
-            | sym::i64
-            | sym::u64
-            | sym::i128
-            | sym::u128
-            | sym::isize
-            | sym::usize
+        sym::int
     };
-}
-
-fn int_type_of_word(s: Symbol) -> Option<IntType> {
-    use IntType::*;
-
-    match s {
-        sym::i8 => Some(SignedInt(IntTy::I8)),
-        sym::u8 => Some(UnsignedInt(UintTy::U8)),
-        sym::i16 => Some(SignedInt(IntTy::I16)),
-        sym::u16 => Some(UnsignedInt(UintTy::U16)),
-        sym::i32 => Some(SignedInt(IntTy::I32)),
-        sym::u32 => Some(UnsignedInt(UintTy::U32)),
-        sym::i64 => Some(SignedInt(IntTy::I64)),
-        sym::u64 => Some(UnsignedInt(UintTy::U64)),
-        sym::i128 => Some(SignedInt(IntTy::I128)),
-        sym::u128 => Some(UnsignedInt(UintTy::U128)),
-        sym::isize => Some(SignedInt(IntTy::Isize)),
-        sym::usize => Some(UnsignedInt(UintTy::Usize)),
-        _ => None,
-    }
 }
 
 fn parse_repr(cx: &AcceptContext<'_, '_>, param: &MetaItemParser) -> Option<ReprAttr> {
@@ -143,9 +112,9 @@ fn parse_repr(cx: &AcceptContext<'_, '_>, param: &MetaItemParser) -> Option<Repr
         (Some(sym::C), ArgParser::NoArgs) => Some(ReprC),
         (Some(sym::simd), ArgParser::NoArgs) => Some(ReprSimd),
         (Some(sym::transparent), ArgParser::NoArgs) => Some(ReprTransparent),
-        (Some(name @ int_pat!()), ArgParser::NoArgs) => {
+        (Some(int_pat!()), ArgParser::NoArgs) => {
             // int_pat!() should make sure it always parses
-            Some(ReprInt(int_type_of_word(name).unwrap()))
+            Some(ReprInt)
         }
 
         (
@@ -249,8 +218,8 @@ fn parse_repr_align(
 }
 
 fn parse_alignment(node: &LitKind, cx: &AcceptContext<'_, '_>) -> Result<Align, String> {
-    let LitKind::Int(literal, LitIntType::Unsuffixed) = node else {
-        return Err("not an unsuffixed integer".to_string());
+    let LitKind::Int(literal) = node else {
+        return Err("expected integer literal".to_string());
     };
 
     // `Align::from_bytes` accepts 0 as a valid input,

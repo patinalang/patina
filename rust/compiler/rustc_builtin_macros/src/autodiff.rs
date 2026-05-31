@@ -47,7 +47,7 @@ mod llvm_enzyme {
     fn first_ident(x: &MetaItemInner) -> rustc_span::Ident {
         if let Some(l) = x.lit() {
             match l.kind {
-                ast::LitKind::Int(val, _) => {
+                ast::LitKind::Int(val) => {
                     // get an Ident from a lit
                     return rustc_span::Ident::from_str(val.get().to_string().as_str());
                 }
@@ -67,7 +67,7 @@ mod llvm_enzyme {
     fn width(x: &MetaItemInner) -> Option<u128> {
         let lit = x.lit()?;
         match lit.kind {
-            ast::LitKind::Int(x, _) => Some(x.get()),
+            ast::LitKind::Int(x) => Some(x.get()),
             _ => return None,
         }
     }

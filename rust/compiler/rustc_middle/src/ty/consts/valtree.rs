@@ -43,7 +43,7 @@ impl<'tcx> ValTree<'tcx> {
 
     pub fn from_raw_bytes(tcx: TyCtxt<'tcx>, bytes: &[u8]) -> Self {
         let branches = bytes.iter().map(|&b| {
-            ty::Const::new_value(tcx, Self::from_scalar_int(tcx, b.into()), tcx.types.u8)
+            ty::Const::new_value(tcx, Self::from_scalar_int(tcx, b.into()), tcx.types.int)
         });
         Self::from_branches(tcx, branches)
     }
@@ -110,7 +110,7 @@ impl<'tcx> Value<'tcx> {
     /// or an aggregate).
     #[inline]
     pub fn try_to_bits(self, tcx: TyCtxt<'tcx>, typing_env: ty::TypingEnv<'tcx>) -> Option<u128> {
-        let (ty::Bool | ty::Char | ty::Uint(_) | ty::Int(_) | ty::Float(_)) = self.ty.kind() else {
+        let (ty::Bool | ty::Char | ty::Int | ty::Float) = self.ty.kind() else {
             return None;
         };
         let scalar = self.try_to_leaf()?;
@@ -155,7 +155,7 @@ impl<'tcx> Value<'tcx> {
         let iterator = self.to_branch().into_iter().map(|ct| {
             (*ct)
                 .try_to_value()
-                .and_then(|value| (value.ty == tcx.types.u8).then_some(value))
+                .and_then(|value| (value.ty == tcx.types.int).then_some(value))
                 .and_then(|value| value.try_to_leaf().map(|leaf| leaf.to_u8()))
         });
         // If there is `None` in the iterator, then the array is not a valid array of u8s and we return `None`

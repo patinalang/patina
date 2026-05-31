@@ -15,7 +15,7 @@ use rustc_middle::bug;
 use rustc_middle::query::Providers;
 use rustc_middle::traits::ObligationCause;
 use rustc_middle::ty::layout::{
-    FloatExt, HasTyCtxt, IntegerExt, LayoutCx, LayoutError, LayoutOf, SimdLayoutError, TyAndLayout,
+    HasTyCtxt, IntegerExt, LayoutCx, LayoutError, LayoutOf, SimdLayoutError, TyAndLayout,
 };
 use rustc_middle::ty::print::with_no_trimmed_paths;
 use rustc_middle::ty::{
@@ -395,9 +395,8 @@ fn layout_of_uncached<'tcx>(
                 valid_range: WrappingRange { start: 0, end: 0x10FFFF },
             },
         )),
-        ty::Int(ity) => scalar(Int(abi::Integer::from_int_ty(dl, ity), true)),
-        ty::Uint(ity) => scalar(Int(abi::Integer::from_uint_ty(dl, ity), false)),
-        ty::Float(fty) => scalar(Float(abi::Float::from_float_ty(fty))),
+        ty::Int => scalar(Int(dl.ptr_sized_integer(), true)),
+        ty::Float => scalar(Float(abi::Float::F64)),
         // this doesn't matter
         ty::Term => scalar(Int(I8, false)),
         ty::FnPtr(..) => {
@@ -718,7 +717,7 @@ fn layout_of_uncached<'tcx>(
                 && def.non_enum_variant().tail().ty(tcx, args).is_sized(tcx, cx.typing_env)
             {
                 let mut variants = variants;
-                let tail_replacement = cx.layout_of(Ty::new_slice(tcx, tcx.types.u8)).unwrap();
+                let tail_replacement = cx.layout_of(Ty::new_slice(tcx, tcx.types.int)).unwrap();
                 *variants[FIRST_VARIANT].raw.last_mut().unwrap() = tail_replacement;
 
                 let Ok(unsized_layout) = cx.calc.layout_of_struct_or_enum(

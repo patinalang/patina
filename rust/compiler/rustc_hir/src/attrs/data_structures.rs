@@ -8,7 +8,7 @@ pub use rustc_ast::attr::data_structures::*;
 use rustc_ast::expand::autodiff_attrs::{DiffActivity, DiffMode};
 use rustc_ast::expand::typetree::TypeTree;
 use rustc_ast::token::DocFragmentKind;
-use rustc_ast::{AttrStyle, Path, ast};
+use rustc_ast::{AttrStyle, Path};
 use rustc_data_structures::fx::FxIndexMap;
 use rustc_error_messages::{DiagArgValue, IntoDiagArg};
 use rustc_hir::LangItem;
@@ -157,7 +157,7 @@ impl OptimizeAttr {
 
 #[derive(PartialEq, Debug, Encodable, Decodable, Copy, Clone, StableHash, PrintAttribute)]
 pub enum ReprAttr {
-    ReprInt(IntType),
+    ReprInt,
     ReprRust,
     ReprC,
     ReprPacked(Align),
@@ -169,13 +169,6 @@ pub enum ReprAttr {
 pub enum TransparencyError {
     UnknownTransparency(Symbol, Span),
     MultipleTransparencyAttrs(Span, Span),
-}
-
-#[derive(Eq, PartialEq, Debug, Copy, Clone)]
-#[derive(Encodable, Decodable, StableHash, PrintAttribute)]
-pub enum IntType {
-    SignedInt(ast::IntTy),
-    UnsignedInt(ast::UintTy),
 }
 
 #[derive(Copy, Debug, Encodable, Decodable, Clone, StableHash, PrintAttribute)]

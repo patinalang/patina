@@ -301,18 +301,10 @@ pub(crate) mod rustc {
             match ty.kind() {
                 ty::Bool => Ok(Self::bool()),
 
-                ty::Float(nty) => {
-                    let width = nty.bit_width() / 8;
-                    Ok(Self::number(width.try_into().unwrap()))
-                }
+                ty::Float => Ok(Self::number(8)),
 
-                ty::Int(nty) => {
-                    let width = nty.normalize(pointer_size.bits() as _).bit_width().unwrap() / 8;
-                    Ok(Self::number(width.try_into().unwrap()))
-                }
-
-                ty::Uint(nty) => {
-                    let width = nty.normalize(pointer_size.bits() as _).bit_width().unwrap() / 8;
+                ty::Int => {
+                    let width = pointer_size.bits() / 8;
                     Ok(Self::number(width.try_into().unwrap()))
                 }
 

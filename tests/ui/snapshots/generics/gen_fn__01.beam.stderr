@@ -1,19 +1,8 @@
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/gen_fn__01.pt:20:26
+error: non-extern-mod function calls not yet implemented: Expr { hir_id: HirId(DefId(0:21 ~ rust_out[2361]::main).3), kind: Path(Resolved(None, Path { span: tests/ui/src/generics/gen_fn__01.pt:28:5: 28:11 (#0), res: Def(Fn, DefId(0:16 ~ rust_out[2361]::reg_fn)), segments: [PathSegment { ident: reg_fn#0, hir_id: HirId(DefId(0:21 ~ rust_out[2361]::main).4), res: Def(Fn, DefId(0:16 ~ rust_out[2361]::reg_fn)), args: None, infer_args: true }] })), span: tests/ui/src/generics/gen_fn__01.pt:28:5: 28:11 (#0) }
+  --> tests/ui/src/generics/gen_fn__01.pt:28:5
    |
-LL | fn gen_spec_int(_s: SGen<int>) {}
-   |                          ^^^ not found in this scope
-   |
-help: perhaps you intended to use this type
-   |
-LL - fn gen_spec_int(_s: SGen<int>) {}
-LL + fn gen_spec_int(_s: SGen<i32>) {}
-   |
-help: you might be missing a type parameter
-   |
-LL | fn gen_spec_int<int>(_s: SGen<int>) {}
-   |                +++++
+LL |     reg_fn(S(A));          // Concrete type.
+   |     ^^^^^^^^^^^^
 
 error: aborting due to 1 previous error
 
-For more information about this error, try `rustc --explain E0425`.

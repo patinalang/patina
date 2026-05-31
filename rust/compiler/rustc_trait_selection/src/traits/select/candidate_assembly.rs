@@ -690,9 +690,8 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 // and not `FnPtr`
                 ty::Bool
                 | ty::Char
-                | ty::Int(_)
-                | ty::Uint(_)
-                | ty::Float(_)
+                | ty::Int
+                | ty::Float
                 | ty::Adt(_, _)
                 | ty::Foreign(_)
                 | ty::Str
@@ -805,7 +804,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                     // for an example of a test case that exercises
                     // this path.
                 }
-                ty::Infer(ty::TyVar(_) | ty::IntVar(_) | ty::FloatVar(_)) => {
+                ty::Infer(ty::TyVar(_)) => {
                     // The auto impl might apply; we don't know.
                     candidates.ambiguous = true;
                 }
@@ -832,7 +831,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                     }
                 }
 
-                ty::Infer(ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) => {
+                ty::Infer(ty::FreshTy(_)) => {
                     bug!(
                         "asked to assemble auto trait candidates of unexpected type: {:?}",
                         self_ty
@@ -870,9 +869,8 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
 
                 ty::Bool
                 | ty::Char
-                | ty::Int(_)
-                | ty::Uint(_)
-                | ty::Float(_)
+                | ty::Int
+                | ty::Float
                 | ty::Str
                 | ty::Term
                 | ty::Array(_, _)
@@ -1151,11 +1149,9 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             }
 
             // Implementations provided in libcore.
-            ty::Uint(_)
-            | ty::Int(_)
-            | ty::Infer(ty::IntVar(_) | ty::FloatVar(_))
+            ty::Int
             | ty::Bool
-            | ty::Float(_)
+            | ty::Float
             | ty::Char
             | ty::RawPtr(..)
             | ty::Term
@@ -1232,7 +1228,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             // Only appears when assembling higher-ranked `for<T> T: Clone`.
             ty::Bound(..) => {}
 
-            ty::Infer(ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) => {
+            ty::Infer(ty::FreshTy(_)) => {
                 bug!("asked to assemble builtin bounds of unexpected type: {:?}", self_ty);
             }
         }
@@ -1248,11 +1244,9 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
     ) {
         match *self_ty.kind() {
             // Always sized.
-            ty::Infer(ty::IntVar(_) | ty::FloatVar(_))
-            | ty::Uint(_)
-            | ty::Int(_)
+            ty::Int
             | ty::Bool
-            | ty::Float(_)
+            | ty::Float
             | ty::FnDef(..)
             | ty::FnPtr(..)
             | ty::RawPtr(..)
@@ -1304,7 +1298,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             // Only appears when assembling higher-ranked `for<T> T: Sized`.
             ty::Bound(..) => {}
 
-            ty::Infer(ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) => {
+            ty::Infer(ty::FreshTy(_)) => {
                 bug!("asked to assemble builtin bounds of unexpected type: {:?}", self_ty);
             }
         }
@@ -1333,9 +1327,8 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             }
             ty::Bool
             | ty::Char
-            | ty::Int(_)
-            | ty::Uint(_)
-            | ty::Float(_)
+            | ty::Int
+            | ty::Float
             | ty::Adt(_, _)
             | ty::Foreign(_)
             | ty::Str
@@ -1374,9 +1367,8 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             ty::FnPtr(..) => candidates.vec.push(BuiltinCandidate),
             ty::Bool
             | ty::Char
-            | ty::Int(_)
-            | ty::Uint(_)
-            | ty::Float(_)
+            | ty::Int
+            | ty::Float
             | ty::Adt(..)
             | ty::Foreign(..)
             | ty::Str
@@ -1399,13 +1391,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::Alias(..)
             | ty::Param(..)
             | ty::Bound(..)
-            | ty::Error(_)
-            | ty::Infer(
-                ty::InferTy::IntVar(_)
-                | ty::InferTy::FloatVar(_)
-                | ty::InferTy::FreshIntTy(_)
-                | ty::InferTy::FreshFloatTy(_),
-            ) => {}
+            | ty::Error(_) => {}
             ty::Infer(ty::InferTy::TyVar(_) | ty::InferTy::FreshTy(_)) => {
                 candidates.ambiguous = true;
             }
@@ -1425,11 +1411,9 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::FnDef(..)
             | ty::FnPtr(..)
             | ty::Error(_)
-            | ty::Uint(_)
-            | ty::Int(_)
-            | ty::Infer(ty::IntVar(_) | ty::FloatVar(_))
+            | ty::Int
             | ty::Bool
-            | ty::Float(_)
+            | ty::Float
             | ty::Char
             | ty::RawPtr(..)
             | ty::Never
@@ -1451,7 +1435,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 candidates.vec.push(BikeshedGuaranteedNoDropCandidate);
             }
 
-            ty::Infer(ty::TyVar(_) | ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) => {
+            ty::Infer(ty::TyVar(_) | ty::FreshTy(_)) => {
                 candidates.ambiguous = true;
             }
         }

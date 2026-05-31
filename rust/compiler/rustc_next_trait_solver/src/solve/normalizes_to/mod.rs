@@ -633,9 +633,8 @@ where
         let metadata_ty = match goal.predicate.self_ty().kind() {
             ty::Bool
             | ty::Char
-            | ty::Int(..)
-            | ty::Uint(..)
-            | ty::Float(..)
+            | ty::Int
+            | ty::Float
             | ty::Array(..)
             | ty::Pat(..)
             | ty::RawPtr(..)
@@ -644,7 +643,6 @@ where
             | ty::FnPtr(..)
             | ty::Closure(..)
             | ty::CoroutineClosure(..)
-            | ty::Infer(ty::IntVar(..) | ty::FloatVar(..))
             | ty::Coroutine(..)
             | ty::CoroutineWitness(..)
             | ty::Term
@@ -711,8 +709,7 @@ where
                 todo!()
             }
 
-            ty::Infer(ty::TyVar(_) | ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_))
-            | ty::Bound(..) => panic!(
+            ty::Infer(ty::TyVar(_) | ty::FreshTy(_)) | ty::Bound(..) => panic!(
                 "unexpected self ty `{:?}` when normalizing `<T as Pointee>::Metadata`",
                 goal.predicate.self_ty()
             ),
@@ -898,9 +895,8 @@ where
         let discriminant_ty = match self_ty.kind() {
             ty::Bool
             | ty::Char
-            | ty::Int(..)
-            | ty::Uint(..)
-            | ty::Float(..)
+            | ty::Int
+            | ty::Float
             | ty::Array(..)
             | ty::Pat(..)
             | ty::RawPtr(..)
@@ -909,7 +905,6 @@ where
             | ty::FnPtr(..)
             | ty::Closure(..)
             | ty::CoroutineClosure(..)
-            | ty::Infer(ty::IntVar(..) | ty::FloatVar(..))
             | ty::Coroutine(..)
             | ty::CoroutineWitness(..)
             | ty::Never
@@ -937,8 +932,7 @@ where
                 });
             }
 
-            ty::Infer(ty::TyVar(_) | ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_))
-            | ty::Bound(..) => panic!(
+            ty::Infer(ty::TyVar(_) | ty::FreshTy(_)) | ty::Bound(..) => panic!(
                 "unexpected self ty `{:?}` when normalizing `<T as DiscriminantKind>::Discriminant`",
                 goal.predicate.self_ty()
             ),

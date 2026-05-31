@@ -9,7 +9,7 @@ use crate::ty::{self, Ty};
 /// Types that are represented as ints.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum IntTy {
-    U(ty::UintTy),
+    U,
     I,
     CEnum,
     Bool,
@@ -62,11 +62,8 @@ impl<'tcx> CastTy<'tcx> {
         match *t.kind() {
             ty::Bool => Some(CastTy::Int(IntTy::Bool)),
             ty::Char => Some(CastTy::Int(IntTy::Char)),
-            ty::Int(_) => Some(CastTy::Int(IntTy::I)),
-            ty::Infer(ty::InferTy::IntVar(_)) => Some(CastTy::Int(IntTy::I)),
-            ty::Infer(ty::InferTy::FloatVar(_)) => Some(CastTy::Float),
-            ty::Uint(u) => Some(CastTy::Int(IntTy::U(u))),
-            ty::Float(_) => Some(CastTy::Float),
+            ty::Int => Some(CastTy::Int(IntTy::I)),
+            ty::Float => Some(CastTy::Float),
             ty::Adt(d, _) if d.is_enum() && d.is_payloadfree() => Some(CastTy::Int(IntTy::CEnum)),
             ty::RawPtr(ty, mutbl) => Some(CastTy::Ptr(ty::TypeAndMut { ty, mutbl })),
             ty::FnPtr(..) => Some(CastTy::FnPtr),

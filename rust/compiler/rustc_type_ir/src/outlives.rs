@@ -181,9 +181,8 @@ impl<I: Interner> TypeVisitor<I> for OutlivesCollector<'_, I> {
             // contained within.
             ty::Bool
             | ty::Char
-            | ty::Int(_)
-            | ty::Uint(_)
-            | ty::Float(_)
+            | ty::Int
+            | ty::Float
             | ty::Str
             | ty::Term
             | ty::Never

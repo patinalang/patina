@@ -352,9 +352,8 @@ pub fn structurally_relate_tys<I: Interner, R: TypeRelation<I>>(
         (ty::Never, _)
         | (ty::Char, _)
         | (ty::Bool, _)
-        | (ty::Int(_), _)
-        | (ty::Uint(_), _)
-        | (ty::Float(_), _)
+        | (ty::Int, _)
+        | (ty::Float, _)
         | (ty::Str, _)
         | (ty::Term, _)
             if a == b =>

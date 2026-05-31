@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use rustc_ast::{LitIntType, LitKind, MetaItemLit};
+use rustc_ast::{LitKind, MetaItemLit};
 use rustc_hir::LangItem;
 use rustc_hir::attrs::{
     BorrowckGraphvizFormatKind, CguFields, CguKind, DivergingBlockBehavior,
@@ -106,10 +106,8 @@ impl SingleAttributeParser for RustcLegacyConstGenericsParser {
         let mut errored = false;
 
         for possible_index in meta_items.mixed() {
-            if let MetaItemOrLitParser::Lit(MetaItemLit {
-                kind: LitKind::Int(index, LitIntType::Unsuffixed),
-                ..
-            }) = possible_index
+            if let MetaItemOrLitParser::Lit(MetaItemLit { kind: LitKind::Int(index), .. }) =
+                possible_index
             {
                 parsed_indexes.push((index.0 as usize, possible_index.span()));
             } else {

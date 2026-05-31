@@ -44,38 +44,14 @@ into_diag_arg_using_display! {
 impl<'tcx> Ty<'tcx> {
     /// Similar to `Ty::is_primitive`, but also considers inferred numeric values to be primitive.
     pub fn is_primitive_ty(self) -> bool {
-        matches!(
-            self.kind(),
-            Bool | Char
-                | Str
-                | Int(_)
-                | Uint(_)
-                | Float(_)
-                | Infer(
-                    InferTy::IntVar(_)
-                        | InferTy::FloatVar(_)
-                        | InferTy::FreshIntTy(_)
-                        | InferTy::FreshFloatTy(_)
-                )
-        )
+        matches!(self.kind(), Bool | Char | Str | Int | Float)
     }
 
     /// Whether the type is succinctly representable as a type instead of just referred to with a
     /// description in error messages. This is used in the main error message.
     pub fn is_simple_ty(self) -> bool {
         match self.kind() {
-            Bool
-            | Char
-            | Str
-            | Int(_)
-            | Uint(_)
-            | Float(_)
-            | Infer(
-                InferTy::IntVar(_)
-                | InferTy::FloatVar(_)
-                | InferTy::FreshIntTy(_)
-                | InferTy::FreshFloatTy(_),
-            ) => true,
+            Bool | Char | Str | Int | Float => true,
             Ref(_, x, _) | Array(x, _) | Slice(x) => x.peel_refs().is_simple_ty(),
             Tuple(tys) if tys.is_empty() => true,
             _ => false,

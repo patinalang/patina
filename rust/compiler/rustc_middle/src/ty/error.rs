@@ -141,13 +141,9 @@ impl<'tcx> Ty<'tcx> {
             }
             ty::CoroutineWitness(..) => "coroutine witness".into(),
             ty::Infer(ty::TyVar(_)) => "inferred type".into(),
-            ty::Infer(ty::IntVar(_)) => "integer".into(),
-            ty::Infer(ty::FloatVar(_)) => "floating-point number".into(),
             ty::Placeholder(..) => "placeholder type".into(),
             ty::Bound(..) => "bound type".into(),
             ty::Infer(ty::FreshTy(_)) => "fresh type".into(),
-            ty::Infer(ty::FreshIntTy(_)) => "fresh integral type".into(),
-            ty::Infer(ty::FreshFloatTy(_)) => "fresh floating-point type".into(),
             ty::Alias(ty::AliasTy {
                 kind: ty::Projection { .. } | ty::Inherent { .. }, ..
             }) => "associated type".into(),
@@ -174,9 +170,8 @@ impl<'tcx> Ty<'tcx> {
             | ty::Error(_)
             | ty::Bool
             | ty::Char
-            | ty::Int(_)
-            | ty::Uint(_)
-            | ty::Float(_)
+            | ty::Int
+            | ty::Float
             | ty::Str
             | ty::Term
             | ty::Never => "type".into(),

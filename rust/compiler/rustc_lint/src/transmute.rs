@@ -145,14 +145,14 @@ fn check_int_to_ptr_transmute<'tcx>(
     src: Ty<'tcx>,
     dst: Ty<'tcx>,
 ) {
-    if !matches!(src.kind(), ty::Uint(_) | ty::Int(_)) {
+    if !matches!(src.kind(), ty::Int) {
         return;
     }
     let (ty::Ref(_, inner_ty, mutbl) | ty::RawPtr(inner_ty, mutbl)) = dst.kind() else {
         return;
     };
     // bail-out if the argument is literal 0 as we have other lints for those cases
-    if let hir::ExprKind::Lit(hir::Lit { node: LitKind::Int(v, _), .. }) = arg.kind
+    if let hir::ExprKind::Lit(hir::Lit { node: LitKind::Int(v), .. }) = arg.kind
         && v == 0
     {
         return;
@@ -237,7 +237,7 @@ fn check_unnecessary_transmute<'tcx>(
     cx: &LateContext<'tcx>,
     expr: &'tcx hir::Expr<'tcx>,
     callee: &'tcx hir::Expr<'tcx>,
-    arg: &'tcx hir::Expr<'tcx>,
+    _arg: &'tcx hir::Expr<'tcx>,
     const_context: Option<hir::ConstContext>,
     src: Ty<'tcx>,
     dst: Ty<'tcx>,
@@ -246,104 +246,34 @@ fn check_unnecessary_transmute<'tcx>(
     let (sugg, help) = match (src.kind(), dst.kind()) {
         // dont check the length; transmute does that for us.
         // [u8; _] => primitive
-        (ty::Array(t, _), ty::Uint(_) | ty::Float(_) | ty::Int(_))
-            if *t.kind() == ty::Uint(ty::UintTy::U8) =>
-        {
-            (
-                Some(vec![(callee_span, format!("{dst}::from_ne_bytes"))]),
-                Some(
-                    "there's also `from_le_bytes` and `from_be_bytes` if you expect a particular byte order",
-                ),
-            )
-        }
-        // primitive => [u8; _]
-        (ty::Uint(_) | ty::Float(_) | ty::Int(_), ty::Array(t, _))
-            if *t.kind() == ty::Uint(ty::UintTy::U8) =>
-        {
-            (
-                Some(vec![(callee_span, format!("{src}::to_ne_bytes"))]),
-                Some(
-                    "there's also `to_le_bytes` and `to_be_bytes` if you expect a particular byte order",
-                ),
-            )
-        }
-        // char → u32
-        (ty::Char, ty::Uint(ty::UintTy::U32)) => {
-            (Some(vec![(callee_span, "u32::from".to_string())]), None)
-        }
-        // char (→ u32) → i32
-        (ty::Char, ty::Int(ty::IntTy::I32)) => (
-            Some(vec![
-                (callee_span, "u32::from".to_string()),
-                (expr.span.shrink_to_hi(), ".cast_signed()".to_string()),
-            ]),
-            None,
+        (ty::Array(t, _), ty::Int | ty::Float) if *t.kind() == ty::Int => (
+            Some(vec![(callee_span, format!("{dst}::from_ne_bytes"))]),
+            Some(
+                "there's also `from_le_bytes` and `from_be_bytes` if you expect a particular byte order",
+            ),
         ),
-        // u32 → char
-        (ty::Uint(ty::UintTy::U32), ty::Char) => (
+        // primitive => [u8; _]
+        (ty::Int | ty::Float, ty::Array(t, _)) if *t.kind() == ty::Int => (
+            Some(vec![(callee_span, format!("{src}::to_ne_bytes"))]),
+            Some(
+                "there's also `to_le_bytes` and `to_be_bytes` if you expect a particular byte order",
+            ),
+        ),
+        // char → int
+        (ty::Char, ty::Int) => (Some(vec![(callee_span, "u32::from".to_string())]), None),
+        // int → char
+        (ty::Int, ty::Char) => (
             Some(vec![(callee_span, "char::from_u32_unchecked".to_string())]),
             Some("consider using `char::from_u32(…).unwrap()`"),
         ),
-        // i32 → char
-        (ty::Int(ty::IntTy::I32), ty::Char) => (
-            Some(vec![
-                (callee_span, "char::from_u32_unchecked(i32::cast_unsigned".to_string()),
-                (expr.span.shrink_to_hi(), ")".to_string()),
-            ]),
-            Some("consider using `char::from_u32(i32::cast_unsigned(…)).unwrap()`"),
-        ),
-        // uNN → iNN
-        (ty::Uint(_), ty::Int(_)) => {
-            (Some(vec![(callee_span, format!("{src}::cast_signed"))]), None)
-        }
-        // iNN → uNN
-        (ty::Int(_), ty::Uint(_)) => {
-            (Some(vec![(callee_span, format!("{src}::cast_unsigned"))]), None)
-        }
-        // fNN → usize, isize
-        (ty::Float(_), ty::Uint(ty::UintTy::Usize) | ty::Int(ty::IntTy::Isize)) => (
-            Some(vec![
-                (callee_span, format!("{src}::to_bits")),
-                (expr.span.shrink_to_hi(), format!(" as {dst}")),
-            ]),
-            None,
-        ),
-        // fNN (→ uNN) → iNN
-        (ty::Float(_), ty::Int(..)) => (
-            Some(vec![
-                (callee_span, format!("{src}::to_bits")),
-                (expr.span.shrink_to_hi(), ".cast_signed()".to_string()),
-            ]),
-            None,
-        ),
-        // fNN → uNN
-        (ty::Float(_), ty::Uint(..)) => {
-            (Some(vec![(callee_span, format!("{src}::to_bits"))]), None)
-        }
-        // xsize → fNN
-        (ty::Uint(ty::UintTy::Usize) | ty::Int(ty::IntTy::Isize), ty::Float(_)) => (
-            Some(vec![
-                (callee_span, format!("{dst}::from_bits")),
-                (arg.span.shrink_to_hi(), " as _".to_string()),
-            ]),
-            None,
-        ),
-        // iNN (→ uNN) → fNN
-        (ty::Int(_), ty::Float(_)) => (
-            Some(vec![
-                (callee_span, format!("{dst}::from_bits({src}::cast_unsigned")),
-                (expr.span.shrink_to_hi(), ")".to_string()),
-            ]),
-            None,
-        ),
-        // uNN → fNN
-        (ty::Uint(_), ty::Float(_)) => {
-            (Some(vec![(callee_span, format!("{dst}::from_bits"))]), None)
-        }
+        // fNN → int
+        (ty::Float, ty::Int) => (Some(vec![(callee_span, format!("{src}::to_bits"))]), None),
+        // int → fNN
+        (ty::Int, ty::Float) => (Some(vec![(callee_span, format!("{dst}::from_bits"))]), None),
         // bool → x8 in const context since `From::from` is not const yet
         // FIXME: Consider arg expr's precedence to avoid parentheses.
         // FIXME(const_traits): Remove this when `From::from` is constified.
-        (ty::Bool, ty::Int(..) | ty::Uint(..)) if const_context.is_some() => (
+        (ty::Bool, ty::Int) if const_context.is_some() => (
             Some(vec![
                 (callee_span, "".to_string()),
                 (expr.span.shrink_to_hi(), format!(" as {dst}")),
@@ -351,9 +281,7 @@ fn check_unnecessary_transmute<'tcx>(
             None,
         ),
         // bool → x8 using `x8::from`
-        (ty::Bool, ty::Int(..) | ty::Uint(..)) => {
-            (Some(vec![(callee_span, format!("{dst}::from"))]), None)
-        }
+        (ty::Bool, ty::Int) => (Some(vec![(callee_span, format!("{dst}::from"))]), None),
         _ => return,
     };
 

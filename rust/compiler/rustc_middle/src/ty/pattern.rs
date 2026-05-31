@@ -73,11 +73,8 @@ impl<'tcx> IrPrint<PatternKind<'tcx>> for TyCtxt<'tcx> {
                     let end = c.to_leaf();
                     let size = end.size();
                     let max = match c.ty.kind() {
-                        ty::Int(_) => {
+                        ty::Int => {
                             Some(ty::ScalarInt::truncate_from_int(size.signed_int_max(), size))
-                        }
-                        ty::Uint(_) => {
-                            Some(ty::ScalarInt::truncate_from_uint(size.unsigned_int_max(), size))
                         }
                         ty::Char => Some(ty::ScalarInt::truncate_from_uint(char::MAX, size)),
                         _ => None,

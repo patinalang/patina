@@ -436,7 +436,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                 };
 
                 let ty = fn_args.type_at(0);
-                if matches!(ty.kind(), ty::Int(_)) {
+                if matches!(ty.kind(), ty::Int) {
                     let ordering = fn_args.const_at(1).to_value();
                     let ptr = args[0].immediate();
                     let val = args[1].immediate();
@@ -460,7 +460,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                 };
 
                 let ty = fn_args.type_at(0);
-                if matches!(ty.kind(), ty::Uint(_)) {
+                if matches!(ty.kind(), ty::Int) {
                     let ordering = fn_args.const_at(1).to_value();
                     let ptr = args[0].immediate();
                     let val = args[1].immediate();
@@ -520,7 +520,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                 // We require either both arguments to have the same integer type, or the first to
                 // be a pointer and the second to be `usize`.
                 if (int_type_width_signed(ty_mem, bx.tcx()).is_some() && ty_op == ty_mem)
-                    || (ty_mem.is_raw_ptr() && ty_op == bx.tcx().types.usize)
+                    || (ty_mem.is_raw_ptr() && ty_op == bx.tcx().types.int)
                 {
                     let ptr = args[0].immediate(); // of type "pointer to `ty_mem`"
                     let val = args[1].immediate(); // of type `ty_op`
@@ -608,12 +608,7 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
 // stuffs.
 fn int_type_width_signed(ty: Ty<'_>, tcx: TyCtxt<'_>) -> Option<(u64, bool)> {
     match ty.kind() {
-        ty::Int(t) => {
-            Some((t.bit_width().unwrap_or(u64::from(tcx.sess.target.pointer_width)), true))
-        }
-        ty::Uint(t) => {
-            Some((t.bit_width().unwrap_or(u64::from(tcx.sess.target.pointer_width)), false))
-        }
+        ty::Int => Some((u64::from(tcx.sess.target.pointer_width), true)),
         _ => None,
     }
 }
@@ -622,7 +617,7 @@ fn int_type_width_signed(ty: Ty<'_>, tcx: TyCtxt<'_>) -> Option<(u64, bool)> {
 // Returns None if the type is not a float
 fn float_type_width(ty: Ty<'_>) -> Option<u64> {
     match ty.kind() {
-        ty::Float(t) => Some(t.bit_width()),
+        ty::Float => Some(64),
         _ => None,
     }
 }

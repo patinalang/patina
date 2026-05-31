@@ -968,7 +968,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     pat_ty = Ty::new_imm_ref(
                         tcx,
                         tcx.lifetimes.re_static,
-                        Ty::new_slice(tcx, tcx.types.u8),
+                        Ty::new_slice(tcx, tcx.types.int),
                     );
                 }
                 // Allow `b"...": [u8; 3]` for `deref_patterns`
@@ -980,7 +980,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 }
                 // Allow `b"...": [u8]` for `deref_patterns`
                 ty::Slice(..) if tcx.features().deref_patterns() => {
-                    pat_ty = Ty::new_slice(tcx, tcx.types.u8);
+                    pat_ty = Ty::new_slice(tcx, tcx.types.int);
                 }
                 // Otherwise, `b"...": &[u8; 3]`
                 _ => {}

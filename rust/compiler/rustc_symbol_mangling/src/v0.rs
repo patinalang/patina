@@ -3,7 +3,7 @@ use std::hash::Hasher;
 use std::iter;
 use std::ops::Range;
 
-use rustc_abi::{ExternAbi, Integer};
+use rustc_abi::ExternAbi;
 use rustc_data_structures::base_n::ToBaseN;
 use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::intern::Interned;
@@ -14,11 +14,10 @@ use rustc_hir::def::CtorKind;
 use rustc_hir::def_id::{CrateNum, DefId};
 use rustc_hir::definitions::{DefPathData, DisambiguatedDefPathData};
 use rustc_middle::bug;
-use rustc_middle::ty::layout::IntegerExt;
 use rustc_middle::ty::print::{Print, PrintError, Printer};
 use rustc_middle::ty::{
-    self, FloatTy, GenericArg, GenericArgKind, Instance, IntTy, ReifyReason, Ty, TyCtxt,
-    TypeVisitable, TypeVisitableExt, UintTy, Unnormalized,
+    self, GenericArg, GenericArgKind, Instance, ReifyReason, Ty, TyCtxt, TypeVisitable,
+    TypeVisitableExt, Unnormalized,
 };
 use rustc_span::sym;
 
@@ -448,23 +447,9 @@ impl<'tcx> Printer<'tcx> for V0SymbolMangler<'tcx> {
             ty::Bool => "b",
             ty::Char => "c",
             ty::Str => "e",
-            ty::Term => "g",
-            ty::Int(IntTy::I8) => "a",
-            ty::Int(IntTy::I16) => "s",
-            ty::Int(IntTy::I32) => "l",
-            ty::Int(IntTy::I64) => "x",
-            ty::Int(IntTy::I128) => "n",
-            ty::Int(IntTy::Isize) => "i",
-            ty::Uint(UintTy::U8) => "h",
-            ty::Uint(UintTy::U16) => "t",
-            ty::Uint(UintTy::U32) => "m",
-            ty::Uint(UintTy::U64) => "y",
-            ty::Uint(UintTy::U128) => "o",
-            ty::Uint(UintTy::Usize) => "j",
-            ty::Float(FloatTy::F16) => "C3f16",
-            ty::Float(FloatTy::F32) => "f",
-            ty::Float(FloatTy::F64) => "d",
-            ty::Float(FloatTy::F128) => "C4f128",
+            ty::Term => "t",
+            ty::Int => "g",
+            ty::Float => "f",
             ty::Never => "z",
 
             ty::Tuple(_) if ty.is_unit() => "u",
@@ -487,14 +472,7 @@ impl<'tcx> Printer<'tcx> for V0SymbolMangler<'tcx> {
 
         match *ty.kind() {
             // Basic types, handled above.
-            ty::Bool
-            | ty::Char
-            | ty::Str
-            | ty::Term
-            | ty::Int(_)
-            | ty::Uint(_)
-            | ty::Float(_)
-            | ty::Never => {
+            ty::Bool | ty::Char | ty::Int | ty::Str | ty::Term | ty::Float | ty::Never => {
                 unreachable!()
             }
             ty::Tuple(_) if ty.is_unit() => unreachable!(),
@@ -718,7 +696,7 @@ impl<'tcx> Printer<'tcx> for V0SymbolMangler<'tcx> {
         let start = self.out.len();
 
         match ct_ty.kind() {
-            ty::Uint(_) | ty::Int(_) | ty::Bool | ty::Char => {
+            ty::Int | ty::Bool | ty::Char => {
                 ct_ty.print(self)?;
 
                 let mut bits = cv
@@ -726,9 +704,8 @@ impl<'tcx> Printer<'tcx> for V0SymbolMangler<'tcx> {
                     .expect("expected const to be monomorphic");
 
                 // Negative integer values are mangled using `n` as a "sign prefix".
-                if let ty::Int(ity) = ct_ty.kind() {
-                    let val =
-                        Integer::from_int_ty(&self.tcx, *ity).size().sign_extend(bits) as i128;
+                if let ty::Int = ct_ty.kind() {
+                    let val = self.tcx.data_layout.pointer_size().sign_extend(bits) as i128;
                     if val < 0 {
                         self.push("n");
                     }

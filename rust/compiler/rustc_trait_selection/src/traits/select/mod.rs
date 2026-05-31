@@ -2161,11 +2161,9 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
         sizedness: SizedTraitKind,
     ) -> ty::Binder<'tcx, Vec<Ty<'tcx>>> {
         match self_ty.kind() {
-            ty::Infer(ty::IntVar(_) | ty::FloatVar(_))
-            | ty::Uint(_)
-            | ty::Int(_)
+            ty::Int
             | ty::Bool
-            | ty::Float(_)
+            | ty::Float
             | ty::FnDef(..)
             | ty::FnPtr(..)
             | ty::RawPtr(..)
@@ -2206,7 +2204,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
             ty::Alias(..)
             | ty::Param(_)
             | ty::Placeholder(..)
-            | ty::Infer(ty::TyVar(_) | ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_))
+            | ty::Infer(ty::TyVar(_) | ty::FreshTy(_))
             | ty::Bound(..) => {
                 bug!("asked to assemble `Sized` of unexpected type: {:?}", self_ty);
             }
@@ -2217,11 +2215,9 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
         match *self_ty.kind() {
             ty::FnDef(..) | ty::FnPtr(..) | ty::Error(_) => ty::Binder::dummy(vec![]),
 
-            ty::Uint(_)
-            | ty::Int(_)
-            | ty::Infer(ty::IntVar(_) | ty::FloatVar(_))
+            ty::Int
             | ty::Bool
-            | ty::Float(_)
+            | ty::Float
             | ty::Char
             | ty::RawPtr(..)
             | ty::Never
@@ -2287,7 +2283,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
             | ty::Placeholder(..)
             | ty::Bound(..)
             | ty::Ref(_, _, ty::Mutability::Mut)
-            | ty::Infer(ty::TyVar(_) | ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) => {
+            | ty::Infer(ty::TyVar(_) | ty::FreshTy(_)) => {
                 bug!("asked to assemble builtin bounds of unexpected type: {:?}", self_ty);
             }
         }
@@ -2315,14 +2311,12 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
         t: Ty<'tcx>,
     ) -> Result<ty::Binder<'tcx, AutoImplConstituents<'tcx>>, SelectionError<'tcx>> {
         Ok(match *t.kind() {
-            ty::Uint(_)
-            | ty::Int(_)
+            ty::Int
             | ty::Bool
-            | ty::Float(_)
+            | ty::Float
             | ty::FnDef(..)
             | ty::FnPtr(..)
             | ty::Error(_)
-            | ty::Infer(ty::IntVar(_) | ty::FloatVar(_))
             | ty::Term
             | ty::Never
             | ty::Char => {
@@ -2342,7 +2336,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
 
             // Treat this like `struct str([u8]);`
             ty::Str => ty::Binder::dummy(AutoImplConstituents {
-                types: vec![Ty::new_slice(self.tcx(), self.tcx().types.u8)],
+                types: vec![Ty::new_slice(self.tcx(), self.tcx().types.int)],
                 assumptions: vec![],
             }),
 
@@ -2354,7 +2348,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
                 ..
             })
             | ty::Bound(..)
-            | ty::Infer(ty::TyVar(_) | ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) => {
+            | ty::Infer(ty::TyVar(_) | ty::FreshTy(_)) => {
                 bug!("asked to assemble constituent types of unexpected type: {:?}", t);
             }
 

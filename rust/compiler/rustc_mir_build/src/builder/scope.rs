@@ -910,7 +910,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                                         self.tcx,
                                         variant_index.as_u32().into(),
                                     ),
-                                    self.tcx.types.u32,
+                                    self.tcx.types.int,
                                 )],
                             ),
                             self.thir[value].ty,
@@ -956,7 +956,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
             ty::Adt(adt_def, _) if adt_def.is_enum() => {
                 (state_ty.discriminant_ty(self.tcx), Rvalue::Discriminant(scope.state_place))
             }
-            ty::Uint(_) | ty::Int(_) | ty::Float(_) | ty::Bool | ty::Char => {
+            ty::Int | ty::Float | ty::Bool | ty::Char => {
                 (state_ty, Rvalue::Use(Operand::Copy(scope.state_place), WithRetag::Yes))
             }
             _ => span_bug!(state_decl.source_info.span, "unsupported #[loop_match] state"),

@@ -2,14 +2,13 @@ use std::cell::Cell;
 use std::fmt;
 use std::iter::once;
 
-use rustc_abi::{FIRST_VARIANT, FieldIdx, Integer, VariantIdx};
+use rustc_abi::{FIRST_VARIANT, FieldIdx, VariantIdx};
 use rustc_arena::DroplessArena;
 use rustc_hir::HirId;
 use rustc_hir::def_id::DefId;
 use rustc_index::{Idx, IndexVec};
 use rustc_middle::middle::stability::EvalResult;
 use rustc_middle::thir::{self, Pat, PatKind, PatRange, PatRangeBoundary};
-use rustc_middle::ty::layout::IntegerExt;
 use rustc_middle::ty::{
     self, FieldDef, OpaqueTypeKey, ScalarInt, Ty, TyCtxt, TypeVisitableExt, Unnormalized,
     VariantDef,
@@ -329,32 +328,10 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
                     range_2: Some(make_uint_range('\u{E000}' as u128, '\u{10FFFF}' as u128)),
                 }
             }
-            &ty::Int(ity) => {
-                let range = if ty.is_ptr_sized_integral() {
-                    // The min/max values of `isize` are not allowed to be observed.
-                    IntRange {
-                        lo: MaybeInfiniteInt::NegInfinity,
-                        hi: MaybeInfiniteInt::PosInfinity,
-                    }
-                } else {
-                    let size = Integer::from_int_ty(&cx.tcx, ity).size().bits();
-                    let min = 1u128 << (size - 1);
-                    let max = min - 1;
-                    let min = MaybeInfiniteInt::new_finite_int(min, size);
-                    let max = MaybeInfiniteInt::new_finite_int(max, size);
-                    IntRange::from_range(min, max, RangeEnd::Included)
-                };
-                ConstructorSet::Integers { range_1: range, range_2: None }
-            }
-            &ty::Uint(uty) => {
-                let range = if ty.is_ptr_sized_integral() {
-                    // The max value of `usize` is not allowed to be observed.
-                    let lo = MaybeInfiniteInt::new_finite_uint(0);
-                    IntRange { lo, hi: MaybeInfiniteInt::PosInfinity }
-                } else {
-                    let size = Integer::from_uint_ty(&cx.tcx, uty).size();
-                    let max = size.truncate(u128::MAX);
-                    make_uint_range(0, max)
+            ty::Int => {
+                let range = IntRange {
+                    lo: MaybeInfiniteInt::NegInfinity,
+                    hi: MaybeInfiniteInt::PosInfinity,
                 };
                 ConstructorSet::Integers { range_1: range, range_2: None }
             }
@@ -415,7 +392,7 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
             ty::Never => ConstructorSet::NoConstructors,
             // This type is one for which we cannot list constructors, like `str` or `f64`.
             // FIXME(Nadrieril): which of these are actually allowed?
-            ty::Float(_)
+            ty::Float
             | ty::Str
             | ty::Term
             | ty::Foreign(_)
@@ -447,8 +424,8 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
             PatRangeBoundary::Finite(value) => {
                 let bits = value.to_leaf().to_bits_unchecked();
                 match *ty.kind() {
-                    ty::Int(ity) => {
-                        let size = Integer::from_int_ty(&self.tcx, ity).size().bits();
+                    ty::Int => {
+                        let size = self.tcx.data_layout.pointer_size().bits();
                         MaybeInfiniteInt::new_finite_int(bits, size)
                     }
                     _ => MaybeInfiniteInt::new_finite_uint(bits),
@@ -542,12 +519,12 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
                         fields = vec![];
                         arity = 0;
                     }
-                    ty::Char | ty::Int(_) | ty::Uint(_) => {
+                    ty::Char | ty::Int => {
                         ctor = {
                             let bits = value.to_leaf().to_bits_unchecked();
                             let x = match *ty.kind() {
-                                ty::Int(ity) => {
-                                    let size = Integer::from_int_ty(&cx.tcx, ity).size().bits();
+                                ty::Int => {
+                                    let size = cx.tcx.data_layout.pointer_size().bits();
                                     MaybeInfiniteInt::new_finite_int(bits, size)
                                 }
                                 _ => MaybeInfiniteInt::new_finite_uint(bits),
@@ -557,35 +534,11 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
                         fields = vec![];
                         arity = 0;
                     }
-                    ty::Float(ty::FloatTy::F16) => {
-                        use rustc_apfloat::Float;
-                        let bits = value.to_leaf().to_u16();
-                        let value = rustc_apfloat::ieee::Half::from_bits(bits.into());
-                        ctor = F16Range(value, value, RangeEnd::Included);
-                        fields = vec![];
-                        arity = 0;
-                    }
-                    ty::Float(ty::FloatTy::F32) => {
-                        use rustc_apfloat::Float;
-                        let bits = value.to_leaf().to_u32();
-                        let value = rustc_apfloat::ieee::Single::from_bits(bits.into());
-                        ctor = F32Range(value, value, RangeEnd::Included);
-                        fields = vec![];
-                        arity = 0;
-                    }
-                    ty::Float(ty::FloatTy::F64) => {
+                    ty::Float => {
                         use rustc_apfloat::Float;
                         let bits = value.to_leaf().to_u64();
                         let value = rustc_apfloat::ieee::Double::from_bits(bits.into());
                         ctor = F64Range(value, value, RangeEnd::Included);
-                        fields = vec![];
-                        arity = 0;
-                    }
-                    ty::Float(ty::FloatTy::F128) => {
-                        use rustc_apfloat::Float;
-                        let bits = value.to_leaf().to_u128();
-                        let value = rustc_apfloat::ieee::Quad::from_bits(bits);
-                        ctor = F128Range(value, value, RangeEnd::Included);
                         fields = vec![];
                         arity = 0;
                     }
@@ -614,41 +567,19 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
                     rustc_hir::RangeEnd::Excluded => RangeEnd::Excluded,
                 };
                 ctor = match ty.kind() {
-                    ty::Char | ty::Int(_) | ty::Uint(_) => {
+                    ty::Char | ty::Int => {
                         let lo = cx.lower_pat_range_bdy(*lo, ty);
                         let hi = cx.lower_pat_range_bdy(*hi, ty);
                         IntRange(IntRange::from_range(lo, hi, end))
                     }
-                    ty::Float(fty) => {
+                    ty::Float => {
                         use rustc_apfloat::Float;
                         let lo = lo.as_finite().map(|c| c.to_leaf().to_bits_unchecked());
                         let hi = hi.as_finite().map(|c| c.to_leaf().to_bits_unchecked());
-                        match fty {
-                            ty::FloatTy::F16 => {
-                                use rustc_apfloat::ieee::Half;
-                                let lo = lo.map(Half::from_bits).unwrap_or(-Half::INFINITY);
-                                let hi = hi.map(Half::from_bits).unwrap_or(Half::INFINITY);
-                                F16Range(lo, hi, end)
-                            }
-                            ty::FloatTy::F32 => {
-                                use rustc_apfloat::ieee::Single;
-                                let lo = lo.map(Single::from_bits).unwrap_or(-Single::INFINITY);
-                                let hi = hi.map(Single::from_bits).unwrap_or(Single::INFINITY);
-                                F32Range(lo, hi, end)
-                            }
-                            ty::FloatTy::F64 => {
-                                use rustc_apfloat::ieee::Double;
-                                let lo = lo.map(Double::from_bits).unwrap_or(-Double::INFINITY);
-                                let hi = hi.map(Double::from_bits).unwrap_or(Double::INFINITY);
-                                F64Range(lo, hi, end)
-                            }
-                            ty::FloatTy::F128 => {
-                                use rustc_apfloat::ieee::Quad;
-                                let lo = lo.map(Quad::from_bits).unwrap_or(-Quad::INFINITY);
-                                let hi = hi.map(Quad::from_bits).unwrap_or(Quad::INFINITY);
-                                F128Range(lo, hi, end)
-                            }
-                        }
+                        use rustc_apfloat::ieee::Double;
+                        let lo = lo.map(Double::from_bits).unwrap_or(-Double::INFINITY);
+                        let hi = hi.map(Double::from_bits).unwrap_or(Double::INFINITY);
+                        F64Range(lo, hi, end)
                     }
                     _ => span_bug!(pat.span, "invalid type for range pattern: {}", ty.inner()),
                 };
@@ -725,7 +656,7 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
             Finite(_) => {
                 let size = ty.primitive_size(tcx);
                 let bits = match *ty.kind() {
-                    ty::Int(_) => miint.as_finite_int(size.bits()).unwrap(),
+                    ty::Int => miint.as_finite_int(size.bits()).unwrap(),
                     _ => miint.as_finite_uint().unwrap(),
                 };
                 match ScalarInt::try_from_uint(bits, size) {

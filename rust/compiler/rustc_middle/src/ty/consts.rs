@@ -238,7 +238,7 @@ impl<'tcx> Const<'tcx> {
     #[inline]
     /// Creates an interned usize constant.
     pub fn from_target_usize(tcx: TyCtxt<'tcx>, n: u64) -> Self {
-        Self::from_bits(tcx, n as u128, ty::TypingEnv::fully_monomorphized(), tcx.types.usize)
+        Self::from_bits(tcx, n as u128, ty::TypingEnv::fully_monomorphized(), tcx.types.int)
     }
 
     /// Panics if `self.kind != ty::ConstKind::Value`.

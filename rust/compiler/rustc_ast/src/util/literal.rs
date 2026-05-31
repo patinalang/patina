@@ -187,18 +187,13 @@ impl fmt::Display for LitKind {
                 let symbol = str::from_utf8(bytes.as_byte_str()).unwrap();
                 write!(f, "cr{delim}\"{symbol}\"{delim}", delim = "#".repeat(n as usize),)?;
             }
-            LitKind::Int(n, ty) => {
+            LitKind::Int(n) => {
                 write!(f, "{n}")?;
-                match ty {
-                    ast::LitIntType::Unsigned(ty) => write!(f, "{}", ty.name_str())?,
-                    ast::LitIntType::Signed(ty) => write!(f, "{}", ty.name_str())?,
-                    ast::LitIntType::Unsuffixed => {}
-                }
             }
             LitKind::Float(symbol, ty) => {
                 write!(f, "{symbol}")?;
                 match ty {
-                    ast::LitFloatType::Suffixed(ty) => write!(f, "{}", ty.name_str())?,
+                    ast::LitFloatType::Suffixed => write!(f, "f")?,
                     ast::LitFloatType::Unsuffixed => {}
                 }
             }
@@ -275,13 +270,10 @@ fn filtered_float_lit(
     Ok(match suffix {
         Some(suffix) => LitKind::Float(
             symbol,
-            ast::LitFloatType::Suffixed(match suffix {
-                sym::f16 => ast::FloatTy::F16,
-                sym::f32 => ast::FloatTy::F32,
-                sym::f64 => ast::FloatTy::F64,
-                sym::f128 => ast::FloatTy::F128,
+            match suffix {
+                sym::f => ast::LitFloatType::Suffixed,
                 _ => return Err(LitError::InvalidFloatSuffix(suffix)),
-            }),
+            },
         ),
         None => LitKind::Float(symbol, ast::LitFloatType::Unsuffixed),
     })
@@ -304,30 +296,15 @@ fn integer_lit(symbol: Symbol, suffix: Option<Symbol>) -> Result<LitKind, LitErr
         _ => 10,
     };
 
-    let ty = match suffix {
-        Some(suf) => match suf {
-            sym::isize => ast::LitIntType::Signed(ast::IntTy::Isize),
-            sym::i8 => ast::LitIntType::Signed(ast::IntTy::I8),
-            sym::i16 => ast::LitIntType::Signed(ast::IntTy::I16),
-            sym::i32 => ast::LitIntType::Signed(ast::IntTy::I32),
-            sym::i64 => ast::LitIntType::Signed(ast::IntTy::I64),
-            sym::i128 => ast::LitIntType::Signed(ast::IntTy::I128),
-            sym::usize => ast::LitIntType::Unsigned(ast::UintTy::Usize),
-            sym::u8 => ast::LitIntType::Unsigned(ast::UintTy::U8),
-            sym::u16 => ast::LitIntType::Unsigned(ast::UintTy::U16),
-            sym::u32 => ast::LitIntType::Unsigned(ast::UintTy::U32),
-            sym::u64 => ast::LitIntType::Unsigned(ast::UintTy::U64),
-            sym::u128 => ast::LitIntType::Unsigned(ast::UintTy::U128),
-            // `1f64` and `2f32` etc. are valid float literals, and
-            // `fxxx` looks more like an invalid float literal than invalid integer literal.
-            _ if suf.as_str().starts_with('f') => return filtered_float_lit(symbol, suffix, base),
-            _ => return Err(LitError::InvalidIntSuffix(suf)),
-        },
-        _ => ast::LitIntType::Unsuffixed,
+    match suffix {
+        // `1f` and `2f` etc. are valid float literals
+        Some(sym::f) => return filtered_float_lit(symbol, suffix, base),
+        Some(suffix) => return Err(LitError::InvalidIntSuffix(suffix)),
+        None => (),
     };
 
     let s = &s[if base != 10 { 2 } else { 0 }..];
     u128::from_str_radix(s, base)
-        .map(|i| LitKind::Int(i.into(), ty))
+        .map(|i| LitKind::Int(i.into()))
         .map_err(|_| LitError::IntTooLarge(base))
 }

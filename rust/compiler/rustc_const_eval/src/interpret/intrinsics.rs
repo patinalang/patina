@@ -8,11 +8,10 @@ use std::assert_matches;
 
 use rustc_abi::{FieldIdx, HasDataLayout, Size, VariantIdx};
 use rustc_apfloat::ieee::{Double, Half, Quad, Single};
-use rustc_ast::{IntTy, UintTy};
 use rustc_middle::mir::interpret::{CTFE_ALLOC_SALT, read_target_uint, write_target_uint};
 use rustc_middle::mir::{self, BinOp, ConstValue, NonDivergingIntrinsic};
 use rustc_middle::ty::layout::TyAndLayout;
-use rustc_middle::ty::{FloatTy, Ty, TyCtxt, TypeVisitableExt};
+use rustc_middle::ty::{Ty, TyCtxt, TypeVisitableExt};
 use rustc_middle::{bug, span_bug, ty};
 use rustc_span::{Symbol, sym};
 use tracing::trace;
@@ -69,8 +68,6 @@ enum VarArgCompatible {
     Compatible,
     /// `T` and `U` are definitely not compatible.
     Incompatible,
-    /// `T` and `U` are corresponding signed and unsigned integer types.
-    CastIntTo { source_is_signed: bool },
 }
 
 /// Directly returns an `Allocation` containing an absolute path representation of the given type.
@@ -96,7 +93,7 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
         let type_id_hash = tcx.type_id_hash(ty).as_u128();
         let op = self.const_val_to_op(
             ConstValue::Scalar(Scalar::from_u128(type_id_hash)),
-            tcx.types.u128,
+            tcx.types.int,
             None,
         )?;
         self.copy_op_allow_transmute(&op, dest)?;
@@ -262,9 +259,8 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                     ty::Bound(_, _) => bug!("bound ty during ctfe"),
                     ty::Bool
                     | ty::Char
-                    | ty::Int(_)
-                    | ty::Uint(_)
-                    | ty::Float(_)
+                    | ty::Int
+                    | ty::Float
                     | ty::Foreign(_)
                     | ty::Term
                     | ty::Str
@@ -396,8 +392,8 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                 let a = self.read_pointer(&args[0])?;
                 let b = self.read_pointer(&args[1])?;
 
-                let usize_layout = self.layout_of(self.tcx.types.usize)?;
-                let isize_layout = self.layout_of(self.tcx.types.isize)?;
+                let usize_layout = self.layout_of(self.tcx.types.int)?;
+                let isize_layout = self.layout_of(self.tcx.types.int)?;
 
                 // Get offsets for both that are at least relative to the same base.
                 // With `OFFSET_IS_ADDR` this is trivial; without it we need either
@@ -595,19 +591,14 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
 
             sym::fabs => {
                 let arg = self.read_immediate(&args[0])?;
-                let ty::Float(float_ty) = arg.layout.ty.kind() else {
+                let ty::Float = arg.layout.ty.kind() else {
                     span_bug!(
                         self.cur_span(),
                         "non-float type for float intrinsic: {}",
                         arg.layout.ty,
                     );
                 };
-                let out_val = match float_ty {
-                    FloatTy::F16 => self.unop_float_intrinsic::<Half>(intrinsic_name, arg)?,
-                    FloatTy::F32 => self.unop_float_intrinsic::<Single>(intrinsic_name, arg)?,
-                    FloatTy::F64 => self.unop_float_intrinsic::<Double>(intrinsic_name, arg)?,
-                    FloatTy::F128 => self.unop_float_intrinsic::<Quad>(intrinsic_name, arg)?,
-                };
+                let out_val = self.unop_float_intrinsic::<Double>(intrinsic_name, arg)?;
                 self.write_scalar(out_val, dest)?;
             }
 
@@ -815,23 +806,6 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                 callee_ty,
                 caller_ty,
             ),
-            VarArgCompatible::CastIntTo { source_is_signed } => {
-                // Check that the value can be represented in the target type.
-                let size = arg_mplace.layout.size;
-                let scalar = self.read_scalar(arg_mplace)?;
-                if scalar.to_int(size)? < 0 {
-                    throw_ub_format!(
-                        "va_arg value mismatch: value `{value}_{caller_ty}` cannot be represented by type `{callee_ty}`",
-                        value = if source_is_signed {
-                            scalar.to_int(size)?.to_string()
-                        } else {
-                            scalar.to_uint(size)?.to_string()
-                        }
-                    )
-                }
-
-                interp_ok(())
-            }
         }
     }
 
@@ -860,7 +834,7 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
 
         // Any character type (`char`, `unsigned char` and `signed char`) is compatible with
         // `void*`, so the signedness of `c_char` is irrelevant here.
-        let is_c_char = |ty: Ty<'_>| matches!(ty.kind(), ty::Uint(UintTy::U8) | ty::Int(IntTy::I8));
+        let is_c_char = |ty: Ty<'_>| matches!(ty.kind(), ty::Int);
 
         match (caller_type.kind(), callee_type.kind()) {
             (ty::RawPtr(caller_target_ty, _), ty::RawPtr(callee_target_ty, _)) => {
@@ -883,22 +857,9 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                 {
                     VarArgCompatible::Incompatible => interp_ok(VarArgCompatible::Incompatible),
                     VarArgCompatible::Compatible => interp_ok(VarArgCompatible::Compatible),
-                    VarArgCompatible::CastIntTo { source_is_signed: _ } => {
-                        // The integer cast check is not needed when the value is behind a pointer.
-                        interp_ok(VarArgCompatible::Compatible)
-                    }
                 }
             }
-            (ty::Int(_), ty::Uint(_)) => {
-                interp_ok(VarArgCompatible::CastIntTo { source_is_signed: true })
-            }
-            (ty::Uint(_), ty::Int(_)) => {
-                interp_ok(VarArgCompatible::CastIntTo { source_is_signed: false })
-            }
-            (ty::Int(_), ty::Int(_)) | (ty::Uint(_), ty::Uint(_)) => {
-                // E.g. cast between `usize` and `u64` on a 64-bit platform.
-                interp_ok(VarArgCompatible::Compatible)
-            }
+            (ty::Int, ty::Int) => interp_ok(VarArgCompatible::Compatible),
             _ => interp_ok(VarArgCompatible::Incompatible),
         }
     }
@@ -966,7 +927,7 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
         dest: &PlaceTy<'tcx, M::Provenance>,
     ) -> InterpResult<'tcx> {
         assert_eq!(a.layout.ty, b.layout.ty);
-        assert_matches!(a.layout.ty.kind(), ty::Int(..) | ty::Uint(..));
+        assert_matches!(a.layout.ty.kind(), ty::Int);
 
         // Performs an exact division, resulting in undefined behavior where
         // `x % y != 0` or `y == 0` or `x == T::MIN && y == -1`.
@@ -988,7 +949,7 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
         r: &ImmTy<'tcx, M::Provenance>,
     ) -> InterpResult<'tcx, Scalar<M::Provenance>> {
         assert_eq!(l.layout.ty, r.layout.ty);
-        assert_matches!(l.layout.ty.kind(), ty::Int(..) | ty::Uint(..));
+        assert_matches!(l.layout.ty.kind(), ty::Int);
         assert_matches!(mir_op, BinOp::Add | BinOp::Sub);
 
         let (val, overflowed) =
@@ -1328,13 +1289,7 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
         ) -> (Scalar<M::Provenance>, rustc_apfloat::Status) {
             let int_size = cast_to.layout.size;
             match cast_to.ty.kind() {
-                // Unsigned
-                ty::Uint(_) => {
-                    let res = src.to_u128_r(int_size.bits_usize(), round, &mut false);
-                    (Scalar::from_uint(res.value, int_size), res.status)
-                }
-                // Signed
-                ty::Int(_) => {
+                ty::Int => {
                     let res = src.to_i128_r(int_size.bits_usize(), round, &mut false);
                     (Scalar::from_int(res.value, int_size), res.status)
                 }
@@ -1347,16 +1302,11 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
             }
         }
 
-        let ty::Float(fty) = src.layout.ty.kind() else {
+        let ty::Float = src.layout.ty.kind() else {
             bug!("float_to_int_checked: non-float input type {}", src.layout.ty)
         };
 
-        let (val, status) = match fty {
-            FloatTy::F16 => float_to_int_inner(self, src.to_scalar().to_f16()?, cast_to, round),
-            FloatTy::F32 => float_to_int_inner(self, src.to_scalar().to_f32()?, cast_to, round),
-            FloatTy::F64 => float_to_int_inner(self, src.to_scalar().to_f64()?, cast_to, round),
-            FloatTy::F128 => float_to_int_inner(self, src.to_scalar().to_f128()?, cast_to, round),
-        };
+        let (val, status) = float_to_int_inner(self, src.to_scalar().to_f64()?, cast_to, round);
 
         if status.intersects(
             rustc_apfloat::Status::INVALID_OP

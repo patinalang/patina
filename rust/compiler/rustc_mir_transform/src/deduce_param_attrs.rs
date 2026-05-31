@@ -153,14 +153,7 @@ impl<'tcx> Visitor<'tcx> for DeduceParamAttrs {
 fn type_will_always_be_passed_directly(ty: Ty<'_>) -> bool {
     matches!(
         ty.kind(),
-        ty::Bool
-            | ty::Char
-            | ty::Float(..)
-            | ty::Int(..)
-            | ty::RawPtr(..)
-            | ty::Ref(..)
-            | ty::Slice(..)
-            | ty::Uint(..)
+        ty::Bool | ty::Char | ty::Int | ty::Float | ty::RawPtr(..) | ty::Ref(..) | ty::Slice(..)
     )
 }
 

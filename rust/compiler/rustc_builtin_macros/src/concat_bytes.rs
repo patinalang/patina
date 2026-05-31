@@ -1,5 +1,5 @@
 use rustc_ast::tokenstream::TokenStream;
-use rustc_ast::{ExprKind, LitIntType, LitKind, StrStyle, UintTy, token};
+use rustc_ast::{ExprKind, LitKind, StrStyle, token};
 use rustc_expand::base::{DummyResult, ExpandResult, ExtCtxt, MacEager, MacroExpanderResult};
 use rustc_session::errors::report_lit_error;
 use rustc_span::{ErrorGuaranteed, Span};
@@ -14,9 +14,7 @@ fn invalid_type_err(
     span: Span,
     is_nested: bool,
 ) -> ErrorGuaranteed {
-    use errors::{
-        ConcatBytesInvalid, ConcatBytesInvalidSuggestion, ConcatBytesNonU8, ConcatBytesOob,
-    };
+    use errors::{ConcatBytesInvalid, ConcatBytesInvalidSuggestion, ConcatBytesOob};
     let snippet = cx.sess.source_map().span_to_snippet(span).ok();
     let dcx = cx.dcx();
     match LitKind::from_token_lit(token_lit) {
@@ -65,16 +63,15 @@ fn invalid_type_err(
             sugg: None,
             cs_note: None,
         }),
-        Ok(LitKind::Int(_, _)) if !is_nested => {
+        Ok(LitKind::Int(_)) if !is_nested => {
             let sugg =
                 snippet.map(|snippet| ConcatBytesInvalidSuggestion::IntLit { span, snippet });
             dcx.emit_err(ConcatBytesInvalid { span, lit_kind: "numeric", sugg, cs_note: None })
         }
-        Ok(LitKind::Int(val, LitIntType::Unsuffixed | LitIntType::Unsigned(UintTy::U8))) => {
+        Ok(LitKind::Int(val)) => {
             assert!(val.get() > u8::MAX.into()); // must be an error
             dcx.emit_err(ConcatBytesOob { span })
         }
-        Ok(LitKind::Int(_, _)) => dcx.emit_err(ConcatBytesNonU8 { span }),
         Ok(LitKind::ByteStr(..) | LitKind::Byte(_)) => unreachable!(),
         Ok(LitKind::Err(guar)) => guar,
         Err(err) => report_lit_error(&cx.sess.psess, err, token_lit, span),
@@ -96,10 +93,7 @@ fn handle_array_element(
     match expr.kind {
         ExprKind::Lit(token_lit) => {
             match LitKind::from_token_lit(token_lit) {
-                Ok(LitKind::Int(
-                    val,
-                    LitIntType::Unsuffixed | LitIntType::Unsigned(UintTy::U8),
-                )) if let Ok(val) = u8::try_from(val.get()) => {
+                Ok(LitKind::Int(val)) if let Ok(val) = u8::try_from(val.get()) => {
                     return Some(val);
                 }
                 Ok(LitKind::Byte(val)) => return Some(val),
@@ -157,7 +151,7 @@ pub(crate) fn expand_concat_bytes(
             }
             ExprKind::Repeat(expr, count) => {
                 if let ExprKind::Lit(token_lit) = count.value.kind
-                    && let Ok(LitKind::Int(count_val, _)) = LitKind::from_token_lit(token_lit)
+                    && let Ok(LitKind::Int(count_val)) = LitKind::from_token_lit(token_lit)
                 {
                     if let Some(elem) =
                         handle_array_element(cx, &mut guar, &mut missing_literals, expr)

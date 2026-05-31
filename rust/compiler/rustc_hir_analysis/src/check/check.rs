@@ -1013,7 +1013,7 @@ pub(crate) fn check_item_type(tcx: TyCtxt<'_>, def_id: LocalDefId) -> Result<(),
                 let own_counts = generics.own_counts();
                 if generics.own_params.len() - own_counts.lifetimes != 0 {
                     let (kinds, kinds_pl, egs) = match (own_counts.types, own_counts.consts) {
-                        (_, 0) => ("type", "types", Some("u32")),
+                        (_, 0) => ("type", "types", Some("int")),
                         // We don't specify an example value, because we can't generate
                         // a valid value for any type.
                         (0, _) => ("const", "consts", None),
@@ -1476,7 +1476,7 @@ fn check_simd(tcx: TyCtxt<'_>, sp: Span, def_id: LocalDefId) {
         // No: char, "wide" pointers, compound types
         match element_ty.kind() {
             ty::Param(_) => (), // pass struct<T>([T; 4]) through, let monomorphization catch errors
-            ty::Int(_) | ty::Uint(_) | ty::Float(_) | ty::RawPtr(_, _) => (), // struct([u8; 4]) is ok
+            ty::Int | ty::Float | ty::RawPtr(_, _) => (), // struct([u8; 4]) is ok
             _ => {
                 struct_span_code_err!(
                     tcx.dcx(),
@@ -1541,7 +1541,7 @@ fn check_scalable_vector(tcx: TyCtxt<'_>, span: Span, def_id: LocalDefId, scalab
             // register: scalar types which directly match a "machine" type - integers, floats and
             // bools
             match element_ty.kind() {
-                ty::Int(_) | ty::Uint(_) | ty::Float(_) | ty::Bool => (),
+                ty::Int | ty::Float | ty::Bool => (),
                 _ => {
                     let mut err = tcx.dcx().struct_span_err(
                         span,
@@ -1925,7 +1925,7 @@ fn detect_discriminant_duplicate<'tcx>(tcx: TyCtxt<'tcx>, adt: ty::AdtDef<'tcx>)
                 if let hir::Node::AnonConst(expr) =
                     tcx.hir_node_by_def_id(discr_def_id.expect_local())
                     && let hir::ExprKind::Lit(lit) = &tcx.hir_body(expr.body).value.kind
-                    && let rustc_ast::LitKind::Int(lit_value, _int_kind) = &lit.node
+                    && let rustc_ast::LitKind::Int(lit_value) = &lit.node
                     && *lit_value != dis.val
                 {
                     (tcx.def_span(discr_def_id), format!("`{dis}` (overflowed from `{lit_value}`)"))

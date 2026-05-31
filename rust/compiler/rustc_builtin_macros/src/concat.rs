@@ -31,7 +31,7 @@ pub(crate) fn expand_concat(
                 Ok(LitKind::Char(c)) => {
                     accumulator.push(c);
                 }
-                Ok(LitKind::Int(i, _)) => {
+                Ok(LitKind::Int(i)) => {
                     accumulator.push_str(&i.to_string());
                 }
                 Ok(LitKind::Bool(b)) => {
@@ -53,7 +53,7 @@ pub(crate) fn expand_concat(
             // We also want to allow negative numeric literals.
             ExprKind::Unary(UnOp::Neg, ref expr) if let ExprKind::Lit(token_lit) = expr.kind => {
                 match LitKind::from_token_lit(token_lit) {
-                    Ok(LitKind::Int(i, _)) => accumulator.push_str(&format!("-{i}")),
+                    Ok(LitKind::Int(i)) => accumulator.push_str(&format!("-{i}")),
                     Ok(LitKind::Float(f, _)) => accumulator.push_str(&format!("-{f}")),
                     Err(err) => {
                         guar = Some(report_lit_error(&cx.sess.psess, err, token_lit, e.span));

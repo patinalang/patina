@@ -29,16 +29,15 @@ where
 {
     let cx = ecx.cx();
     match ty.kind() {
-        ty::Uint(_)
-        | ty::Int(_)
-        | ty::Bool
-        | ty::Float(_)
+        ty::Bool
+        | ty::Float
         | ty::FnDef(..)
         | ty::FnPtr(..)
         | ty::Error(_)
         | ty::Term
         | ty::Never
-        | ty::Char => Ok(ty::Binder::dummy(vec![])),
+        | ty::Char
+        | ty::Int => Ok(ty::Binder::dummy(vec![])),
 
         // This branch is only for `experimental_default_bounds`.
         // Other foreign types were rejected earlier in
@@ -126,11 +125,9 @@ where
         // impl {Meta,}Sized for u*, i*, bool, f*, FnDef, FnPtr, *(const/mut) T, char
         // impl {Meta,}Sized for &mut? T, [T; N], dyn* Trait, !, Coroutine, CoroutineWitness
         // impl {Meta,}Sized for Closure, CoroutineClosure
-        ty::Infer(ty::IntVar(_) | ty::FloatVar(_))
-        | ty::Uint(_)
-        | ty::Int(_)
+        ty::Int
         | ty::Bool
-        | ty::Float(_)
+        | ty::Float
         | ty::FnDef(..)
         | ty::FnPtr(..)
         | ty::RawPtr(..)
@@ -157,8 +154,7 @@ where
 
         ty::Alias(..) | ty::Param(_) | ty::Placeholder(..) => Err(NoSolution),
 
-        ty::Bound(..)
-        | ty::Infer(ty::TyVar(_) | ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) => {
+        ty::Bound(..) | ty::Infer(ty::TyVar(_) | ty::FreshTy(_)) => {
             panic!("unexpected type `{ty:?}`")
         }
 
@@ -206,11 +202,9 @@ where
         ty::FnDef(..) | ty::FnPtr(..) | ty::Error(_) => Ok(ty::Binder::dummy(vec![])),
 
         // Implementations are provided in core
-        ty::Uint(_)
-        | ty::Int(_)
-        | ty::Infer(ty::IntVar(_) | ty::FloatVar(_))
+        ty::Int
         | ty::Bool
-        | ty::Float(_)
+        | ty::Float
         | ty::Char
         | ty::RawPtr(..)
         | ty::Term
@@ -232,8 +226,7 @@ where
         | ty::Param(_)
         | ty::Placeholder(..) => Err(NoSolution),
 
-        ty::Bound(..)
-        | ty::Infer(ty::TyVar(_) | ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) => {
+        ty::Bound(..) | ty::Infer(ty::TyVar(_) | ty::FreshTy(_)) => {
             panic!("unexpected type `{ty:?}`")
         }
 
@@ -385,9 +378,8 @@ pub(in crate::solve) fn extract_tupled_inputs_and_output_from_callable<I: Intern
 
         ty::Bool
         | ty::Char
-        | ty::Int(_)
-        | ty::Uint(_)
-        | ty::Float(_)
+        | ty::Int
+        | ty::Float
         | ty::Adt(_, _)
         | ty::Foreign(_)
         | ty::Str
@@ -406,11 +398,9 @@ pub(in crate::solve) fn extract_tupled_inputs_and_output_from_callable<I: Intern
         | ty::Alias(_)
         | ty::Param(_)
         | ty::Placeholder(..)
-        | ty::Infer(ty::IntVar(_) | ty::FloatVar(_))
         | ty::Error(_) => Err(NoSolution),
 
-        ty::Bound(..)
-        | ty::Infer(ty::TyVar(_) | ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) => {
+        ty::Bound(..) | ty::Infer(ty::TyVar(_) | ty::FreshTy(_)) => {
             panic!("unexpected type `{self_ty:?}`")
         }
     }
@@ -559,9 +549,8 @@ pub(in crate::solve) fn extract_tupled_inputs_and_output_from_async_callable<I: 
 
         ty::Bool
         | ty::Char
-        | ty::Int(_)
-        | ty::Uint(_)
-        | ty::Float(_)
+        | ty::Int
+        | ty::Float
         | ty::Adt(_, _)
         | ty::Foreign(_)
         | ty::Str
@@ -580,11 +569,9 @@ pub(in crate::solve) fn extract_tupled_inputs_and_output_from_async_callable<I: 
         | ty::Alias(_)
         | ty::Param(_)
         | ty::Placeholder(..)
-        | ty::Infer(ty::IntVar(_) | ty::FloatVar(_))
         | ty::Error(_) => Err(NoSolution),
 
-        ty::Bound(..)
-        | ty::Infer(ty::TyVar(_) | ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) => {
+        ty::Bound(..) | ty::Infer(ty::TyVar(_) | ty::FreshTy(_)) => {
             panic!("unexpected type `{self_ty:?}`")
         }
     }
@@ -723,9 +710,8 @@ pub(in crate::solve) fn extract_fn_def_from_const_callable<I: Interner>(
 
         ty::Bool
         | ty::Char
-        | ty::Int(_)
-        | ty::Uint(_)
-        | ty::Float(_)
+        | ty::Int
+        | ty::Float
         | ty::Adt(_, _)
         | ty::Foreign(_)
         | ty::Str
@@ -743,12 +729,10 @@ pub(in crate::solve) fn extract_fn_def_from_const_callable<I: Interner>(
         | ty::Alias(_)
         | ty::Param(_)
         | ty::Placeholder(..)
-        | ty::Infer(ty::IntVar(_) | ty::FloatVar(_))
         | ty::Error(_)
         | ty::UnsafeBinder(_) => return Err(NoSolution),
 
-        ty::Bound(..)
-        | ty::Infer(ty::TyVar(_) | ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) => {
+        ty::Bound(..) | ty::Infer(ty::TyVar(_) | ty::FreshTy(_)) => {
             panic!("unexpected type `{self_ty:?}`")
         }
     }
@@ -802,9 +786,8 @@ pub(in crate::solve) fn const_conditions_for_destruct<I: Interner>(
         // Trivially implement `[const] Destruct`
         ty::Bool
         | ty::Char
-        | ty::Int(..)
-        | ty::Uint(..)
-        | ty::Float(..)
+        | ty::Int
+        | ty::Float
         | ty::Str
         | ty::Term
         | ty::RawPtr(..)
@@ -812,7 +795,6 @@ pub(in crate::solve) fn const_conditions_for_destruct<I: Interner>(
         | ty::FnDef(..)
         | ty::FnPtr(..)
         | ty::Never
-        | ty::Infer(ty::InferTy::FloatVar(_) | ty::InferTy::IntVar(_))
         | ty::Error(_) => Ok(vec![]),
 
         // Closures are [const] Destruct when all of their upvars (captures) are [const] Destruct.
@@ -834,8 +816,7 @@ pub(in crate::solve) fn const_conditions_for_destruct<I: Interner>(
             Err(NoSolution)
         }
 
-        ty::Bound(..)
-        | ty::Infer(ty::TyVar(_) | ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) => {
+        ty::Bound(..) | ty::Infer(ty::TyVar(_) | ty::FreshTy(_)) => {
             panic!("unexpected type `{self_ty:?}`")
         }
     }

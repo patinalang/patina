@@ -1,0 +1,33 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, lang_items#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[attr = Lang(PointeeSized)]
+trait PointeeSized { }
+
+#[attr = Lang(MetaSized)]
+trait MetaSized: PointeeSized { }
+
+#[attr = Lang(Sized)]
+trait Sized: MetaSized { }
+
+#[attr = Lang(Copy)]
+trait Copy { }
+
+#[allow(unused)]
+extern mod io;
+
+#[attr = MacroExport {local_inner_macros: false}]
+macro_rules! println { ($s:literal) => {{ io::format("~s~n", [$s]); }}; }
+
+// source: patina-by-example/src/generics/new_types.md
+// block: 2/2
+
+struct Years(int);
+
+fn main() ({
+    let years = ((Years as fn(int) -> Years {Years})((42 as int)) as Years);
+    let years_as_primitive_1: int = ((years as Years).0 as int); // Tuple
+    let Years(years_as_primitive_2) = (years as Years); // Destructuring
+} as ())

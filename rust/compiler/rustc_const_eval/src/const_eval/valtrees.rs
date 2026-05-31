@@ -39,7 +39,7 @@ fn branches<'tcx>(
         branches.push(ty::Const::new_value(
             *ecx.tcx,
             ty::ValTree::from_scalar_int(*ecx.tcx, variant.as_u32().into()),
-            ecx.tcx.types.u32,
+            ecx.tcx.types.int,
         ));
     }
 
@@ -94,7 +94,7 @@ fn const_to_valtree_inner<'tcx>(
             *num_nodes += 1;
             Ok(ty::ValTree::zst(tcx))
         }
-        ty::Bool | ty::Int(_) | ty::Uint(_) | ty::Float(_) | ty::Char => {
+        ty::Bool | ty::Float | ty::Char | ty::Int => {
             let val = ecx.read_immediate(place).report_err()?;
             let val = val.to_scalar_int().unwrap();
             *num_nodes += 1;
@@ -170,8 +170,7 @@ fn const_to_valtree_inner<'tcx>(
         | ty::Error(_)
         | ty::Foreign(..)
         | ty::Term
-        | ty::Infer(ty::FreshIntTy(_))
-        | ty::Infer(ty::FreshFloatTy(_))
+        | ty::Infer(ty::FreshTy(_))
         // FIXME(oli-obk): we could look behind opaque types
         | ty::Alias(..)
         | ty::Param(_)
@@ -288,7 +287,7 @@ pub fn valtree_to_const_value<'tcx>(
             assert!(cv.valtree.is_zst());
             mir::ConstValue::ZeroSized
         }
-        ty::Bool | ty::Int(_) | ty::Uint(_) | ty::Float(_) | ty::Char | ty::RawPtr(_, _) => {
+        ty::Bool | ty::Float | ty::Char | ty::Int | ty::RawPtr(_, _) => {
             mir::ConstValue::Scalar(Scalar::Int(cv.to_leaf()))
         }
         ty::Pat(ty, _) => {
@@ -345,8 +344,7 @@ pub fn valtree_to_const_value<'tcx>(
         | ty::Error(_)
         | ty::Foreign(..)
         | ty::Term
-        | ty::Infer(ty::FreshIntTy(_))
-        | ty::Infer(ty::FreshFloatTy(_))
+        | ty::Infer(ty::FreshTy(_))
         | ty::Alias(..)
         | ty::Param(_)
         | ty::Bound(..)
@@ -397,7 +395,7 @@ fn valtree_into_mplace<'tcx>(
         ty::FnDef(_, _) => {
             // Zero-sized type, nothing to do.
         }
-        ty::Bool | ty::Int(_) | ty::Uint(_) | ty::Float(_) | ty::Char | ty::RawPtr(..) => {
+        ty::Bool | ty::Float | ty::Char | ty::Int | ty::RawPtr(..) => {
             let scalar_int = valtree.to_leaf();
             debug!("writing trivial valtree {:?} to place {:?}", scalar_int, place);
             ecx.write_immediate(Immediate::Scalar(scalar_int.into()), place).unwrap();

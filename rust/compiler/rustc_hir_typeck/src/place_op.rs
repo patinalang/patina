@@ -145,7 +145,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         self.tcx,
                         self.cause(base_expr.span, ObligationCauseCode::ArrayLen(adjusted_ty)),
                         self.param_env,
-                        ty::ClauseKind::ConstArgHasType(ct, self.tcx.types.usize),
+                        ty::ClauseKind::ConstArgHasType(ct, self.tcx.types.int),
                     ));
                     self_ty = Ty::new_slice(self.tcx, element_ty);
                 } else {

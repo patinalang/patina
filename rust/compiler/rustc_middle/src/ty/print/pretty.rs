@@ -5,7 +5,7 @@ use std::ops::{Deref, DerefMut};
 
 use rustc_abi::{ExternAbi, Size};
 use rustc_apfloat::Float;
-use rustc_apfloat::ieee::{Double, Half, Quad, Single};
+use rustc_apfloat::ieee::Double;
 use rustc_data_structures::fx::{FxIndexMap, IndexEntry};
 use rustc_data_structures::unord::UnordMap;
 use rustc_hir as hir;
@@ -668,11 +668,10 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
                 | ty::Foreign(_)
                 | ty::Bool
                 | ty::Char
+                | ty::Int
                 | ty::Str
                 | ty::Term
-                | ty::Int(_)
-                | ty::Uint(_)
-                | ty::Float(_) => {
+                | ty::Float => {
                     return self_ty.print(self);
                 }
 
@@ -714,9 +713,8 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
         match *ty.kind() {
             ty::Bool => write!(self, "bool")?,
             ty::Char => write!(self, "char")?,
-            ty::Int(t) => write!(self, "{}", t.name_str())?,
-            ty::Uint(t) => write!(self, "{}", t.name_str())?,
-            ty::Float(t) => write!(self, "{}", t.name_str())?,
+            ty::Int => write!(self, "int")?,
+            ty::Float => write!(self, "float")?,
             ty::Pat(ty, pat) => {
                 write!(self, "(")?;
                 ty.print(self)?;
@@ -1750,7 +1748,7 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
             // Byte strings (&[u8; N])
             ty::Ref(_, inner, _) => {
                 if let ty::Array(elem, ct_len) = inner.kind()
-                    && let ty::Uint(ty::UintTy::U8) = elem.kind()
+                    && let ty::Int = elem.kind()
                     && let Some(len) = ct_len.try_to_target_usize(self.tcx())
                 {
                     match self.tcx().try_get_global_alloc(prov.alloc_id()) {
@@ -1808,28 +1806,14 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
             ty::Bool if int == ScalarInt::FALSE => write!(self, "false")?,
             ty::Bool if int == ScalarInt::TRUE => write!(self, "true")?,
             // Float
-            ty::Float(fty) => match fty {
-                ty::FloatTy::F16 => {
-                    let val = Half::try_from(int).unwrap();
-                    write!(self, "{}{}f16", val, if val.is_finite() { "" } else { "_" })?;
-                }
-                ty::FloatTy::F32 => {
-                    let val = Single::try_from(int).unwrap();
-                    write!(self, "{}{}f32", val, if val.is_finite() { "" } else { "_" })?;
-                }
-                ty::FloatTy::F64 => {
-                    let val = Double::try_from(int).unwrap();
-                    write!(self, "{}{}f64", val, if val.is_finite() { "" } else { "_" })?;
-                }
-                ty::FloatTy::F128 => {
-                    let val = Quad::try_from(int).unwrap();
-                    write!(self, "{}{}f128", val, if val.is_finite() { "" } else { "_" })?;
-                }
-            },
+            ty::Float => {
+                let val = Double::try_from(int).unwrap();
+                write!(self, "{}{}", val, if val.is_finite() { "" } else { "_" })?;
+            }
             // Int
-            ty::Uint(_) | ty::Int(_) => {
+            ty::Int => {
                 let int =
-                    ConstInt::new(int, matches!(ty.kind(), ty::Int(_)), ty.is_ptr_sized_integral());
+                    ConstInt::new(int, matches!(ty.kind(), ty::Int), ty.is_ptr_sized_integral());
                 if print_ty { write!(self, "{int:#?}")? } else { write!(self, "{int:?}")? }
             }
             // Char
@@ -1906,7 +1890,7 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
             return Ok(());
         }
 
-        let u8_type = self.tcx().types.u8;
+        let u8_type = self.tcx().types.int;
         match (*cv.valtree, *cv.ty.kind()) {
             (ty::ValTreeKind::Branch(_), ty::Ref(_, inner_ty, _)) => match inner_ty.kind() {
                 ty::Slice(t) if *t == u8_type => {

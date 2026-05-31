@@ -121,7 +121,7 @@ fn is_null_ptr<'tcx>(cx: &LateContext<'tcx>, expr: &'tcx Expr<'_>) -> Option<Spa
     {
         (diag_item == sym::ptr_null || diag_item == sym::ptr_null_mut).then_some(expr.span)
     } else if let ExprKind::Lit(spanned) = expr.kind
-        && let LitKind::Int(v, _) = spanned.node
+        && let LitKind::Int(v) = spanned.node
     {
         (v == 0).then_some(expr.span)
     } else {
@@ -231,7 +231,7 @@ impl<'tcx> LateLintPass<'tcx> for PtrNullChecks {
                     // (fn_ptr as *<const/mut> <ty>) == (0 as <ty>)
                     ExprKind::Cast(cast_expr, _)
                         if let ExprKind::Lit(spanned) = cast_expr.kind
-                            && let LitKind::Int(v, _) = spanned.node
+                            && let LitKind::Int(v) = spanned.node
                             && v == 0 =>
                     {
                         cx.emit_span_lint(USELESS_PTR_NULL_CHECKS, expr.span, diag)

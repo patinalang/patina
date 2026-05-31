@@ -22,52 +22,11 @@ error[E0425]: cannot find type `Option` in this scope
 LL |     area_code: Option<int>,
    |                ^^^^^^ not found in this scope
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/error/option_unwrap/question_mark__02.pt:14:23
-   |
-LL |     area_code: Option<int>,
-   |                       ^^^ not found in this scope
-   |
-help: perhaps you intended to use this type
-   |
-LL -     area_code: Option<int>,
-LL +     area_code: Option<i32>,
-   |
-help: you might be missing a type parameter
-   |
-LL | struct PhoneNumber<int> {
-   |                   +++++
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/error/option_unwrap/question_mark__02.pt:15:13
-   |
-LL |     number: int,
-   |             ^^^
-   |             |
-   |             not found in this scope
-   |             help: perhaps you intended to use this type: `i32`
-
 error[E0425]: cannot find type `Option` in this scope
   --> tests/ui/src/error/option_unwrap/question_mark__02.pt:20:38
    |
 LL |     fn work_phone_area_code(self) -> Option<int> {
    |                                      ^^^^^^ not found in this scope
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/error/option_unwrap/question_mark__02.pt:20:45
-   |
-LL |     fn work_phone_area_code(self) -> Option<int> {
-   |                                             ^^^ not found in this scope
-   |
-help: perhaps you intended to use this type
-   |
-LL -     fn work_phone_area_code(self) -> Option<int> {
-LL +     fn work_phone_area_code(self) -> Option<i32> {
-   |
-help: you might be missing a type parameter
-   |
-LL | impl<int> Person {
-   |     +++++
 
 error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
   --> tests/ui/src/error/option_unwrap/question_mark__02.pt:30:14
@@ -87,6 +46,6 @@ error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this
 LL |                 area_code: Some(61),
    |                            ^^^^ not found in this scope
 
-error: aborting due to 11 previous errors
+error: aborting due to 8 previous errors
 
 For more information about this error, try `rustc --explain E0425`.

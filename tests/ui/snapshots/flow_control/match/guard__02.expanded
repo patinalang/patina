@@ -1,0 +1,36 @@
+#![allow(internal_features)]
+#![feature(no_core, lang_items)]
+#![no_std]
+#![no_core]
+
+#[lang = "pointee_sized"]
+pub trait PointeeSized { }
+
+#[lang = "meta_sized"]
+pub trait MetaSized: PointeeSized { }
+
+#[lang = "sized"]
+pub trait Sized: MetaSized { }
+
+#[lang = "copy"]
+pub trait Copy { }
+
+#[allow(unused)]
+extern mod io;
+
+#[macro_export]
+macro_rules! println { ($s:literal) => {{ io::format("~s~n", [$s]); }}; }
+
+// source: patina-by-example/src/flow_control/match/guard.md
+// block: 2/2
+
+pub fn main() {
+    let number: int = 4;
+
+    match number {
+        i if i == 0 => { io::format("~s~n", ["Zero"]); }
+        i if i > 0 => { io::format("~s~n", ["Greater than zero"]); }
+    }
+    // _ => unreachable!("Should never happen."),
+    // TODO ^ uncomment to fix compilation
+}

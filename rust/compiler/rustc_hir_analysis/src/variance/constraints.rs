@@ -227,9 +227,8 @@ impl<'a, 'tcx> ConstraintContext<'a, 'tcx> {
         match *ty.kind() {
             ty::Bool
             | ty::Char
-            | ty::Int(_)
-            | ty::Uint(_)
-            | ty::Float(_)
+            | ty::Int
+            | ty::Float
             | ty::Str
             | ty::Term
             | ty::Never

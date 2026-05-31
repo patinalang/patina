@@ -626,7 +626,7 @@ impl<'tcx> Map<'tcx> {
             let ty = match tail {
                 TrackElem::Discriminant => ty.ty.discriminant_ty(tcx),
                 TrackElem::Variant(..) | TrackElem::Field(..) => todo!(),
-                TrackElem::DerefLen => tcx.types.usize,
+                TrackElem::DerefLen => tcx.types.int,
             };
             place_index = self.register_place_index(ty, place_index, tail);
         }
@@ -647,7 +647,7 @@ impl<'tcx> Map<'tcx> {
         if let ty::Ref(_, ref_ty, _) | ty::RawPtr(ref_ty, _) = ty.kind()
             && let ty::Slice(..) = ref_ty.kind()
         {
-            self.register_place_index(tcx.types.usize, place, TrackElem::DerefLen);
+            self.register_place_index(tcx.types.int, place, TrackElem::DerefLen);
         } else if ty.is_enum() {
             let discriminant_ty = ty.discriminant_ty(tcx);
             self.register_place_index(discriminant_ty, place, TrackElem::Discriminant);

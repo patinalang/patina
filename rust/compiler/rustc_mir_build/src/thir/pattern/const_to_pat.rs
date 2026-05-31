@@ -386,14 +386,9 @@ impl<'tcx> ConstToPat<'tcx> {
                     );
                 }
             }
-            ty::Float(flt) => {
+            ty::Float => {
                 let v = valtree.to_leaf();
-                let is_nan = match flt {
-                    ty::FloatTy::F16 => v.to_f16().is_nan(),
-                    ty::FloatTy::F32 => v.to_f32().is_nan(),
-                    ty::FloatTy::F64 => v.to_f64().is_nan(),
-                    ty::FloatTy::F128 => v.to_f128().is_nan(),
-                };
+                let is_nan = v.to_f64().is_nan();
                 if is_nan {
                     // NaNs are not ever equal to anything so they make no sense as patterns.
                     // Also see <https://github.com/rust-lang/rfcs/pull/3535>.
@@ -402,7 +397,7 @@ impl<'tcx> ConstToPat<'tcx> {
                     PatKind::Constant { value }
                 }
             }
-            ty::Pat(..) | ty::Bool | ty::Char | ty::Int(_) | ty::Uint(_) | ty::RawPtr(..) => {
+            ty::Pat(..) | ty::Bool | ty::Char | ty::Int | ty::RawPtr(..) => {
                 // The raw pointers we see here have been "vetted" by valtree construction to be
                 // just integers, so we simply allow them.
                 PatKind::Constant { value }

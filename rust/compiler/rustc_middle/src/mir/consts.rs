@@ -444,7 +444,7 @@ impl<'tcx> Const<'tcx> {
     }
 
     pub fn from_usize(tcx: TyCtxt<'tcx>, n: u64) -> Self {
-        let ty = tcx.types.usize;
+        let ty = tcx.types.int;
         let typing_env = ty::TypingEnv::fully_monomorphized();
         Self::from_bits(tcx, n as u128, typing_env, ty)
     }

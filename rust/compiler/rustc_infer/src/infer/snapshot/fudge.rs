@@ -3,18 +3,16 @@ use std::ops::Range;
 
 use rustc_data_structures::{snapshot_vec as sv, unify as ut};
 use rustc_middle::ty::{
-    self, ConstVid, FloatVid, IntVid, RegionVid, Ty, TyCtxt, TyVid, TypeFoldable, TypeFolder,
-    TypeSuperFoldable, TypeVisitableExt,
+    self, ConstVid, RegionVid, Ty, TyCtxt, TyVid, TypeFoldable, TypeFolder, TypeSuperFoldable,
+    TypeVisitableExt,
 };
 use tracing::instrument;
 use ut::UnifyKey;
 
 use super::VariableLengths;
-use crate::infer::type_variable::{FloatVariableOrigin, TypeVariableOrigin};
+use crate::infer::type_variable::TypeVariableOrigin;
 use crate::infer::unify_key::{ConstVariableValue, ConstVidKey};
-use crate::infer::{
-    ConstVariableOrigin, InferCtxt, InferCtxtInner, RegionVariableOrigin, UnificationTable,
-};
+use crate::infer::{ConstVariableOrigin, InferCtxt, RegionVariableOrigin, UnificationTable};
 
 fn vars_since_snapshot<'tcx, T>(
     table: &UnificationTable<'_, 'tcx, T>,
@@ -25,14 +23,6 @@ where
     super::UndoLog<'tcx>: From<sv::UndoLog<ut::Delegate<T>>>,
 {
     T::from_index(snapshot_var_len as u32)..T::from_index(table.len() as u32)
-}
-
-fn float_vars_since_snapshot(
-    inner: &mut InferCtxtInner<'_>,
-    snapshot_var_len: usize,
-) -> (Range<FloatVid>, Vec<FloatVariableOrigin>) {
-    let range = vars_since_snapshot(&inner.float_unification_table(), snapshot_var_len);
-    (range.clone(), range.map(|index| inner.float_origin_origin_storage[index]).collect())
 }
 
 fn const_vars_since_snapshot<'tcx>(
@@ -139,8 +129,6 @@ impl<'tcx> InferCtxt<'tcx> {
 struct SnapshotVarData<'tcx> {
     region_vars: (Range<RegionVid>, Vec<RegionVariableOrigin<'tcx>>),
     type_vars: (Range<TyVid>, Vec<TypeVariableOrigin>),
-    int_vars: Range<IntVid>,
-    float_vars: (Range<FloatVid>, Vec<FloatVariableOrigin>),
     const_vars: (Range<ConstVid>, Vec<ConstVariableOrigin>),
 }
 
@@ -151,24 +139,17 @@ impl<'tcx> SnapshotVarData<'tcx> {
             .unwrap_region_constraints()
             .vars_since_snapshot(vars_pre_snapshot.region_constraints_len);
         let type_vars = inner.type_variables().vars_since_snapshot(vars_pre_snapshot.type_var_len);
-        let int_vars =
-            vars_since_snapshot(&inner.int_unification_table(), vars_pre_snapshot.int_var_len);
-        let float_vars = float_vars_since_snapshot(&mut inner, vars_pre_snapshot.float_var_len);
 
         let const_vars = const_vars_since_snapshot(
             &mut inner.const_unification_table(),
             vars_pre_snapshot.const_var_len,
         );
-        SnapshotVarData { region_vars, type_vars, int_vars, float_vars, const_vars }
+        SnapshotVarData { region_vars, type_vars, const_vars }
     }
 
     fn is_empty(&self) -> bool {
-        let SnapshotVarData { region_vars, type_vars, int_vars, float_vars, const_vars } = self;
-        region_vars.0.is_empty()
-            && type_vars.0.is_empty()
-            && int_vars.is_empty()
-            && float_vars.0.is_empty()
-            && const_vars.0.is_empty()
+        let SnapshotVarData { region_vars, type_vars, const_vars } = self;
+        region_vars.0.is_empty() && type_vars.0.is_empty() && const_vars.0.is_empty()
     }
 }
 
@@ -204,24 +185,7 @@ impl<'a, 'tcx> TypeFolder<TyCtxt<'tcx>> for InferenceFudger<'a, 'tcx> {
                         ty
                     }
                 }
-                ty::IntVar(vid) => {
-                    if self.snapshot_vars.int_vars.contains(&vid) {
-                        self.infcx.next_int_var()
-                    } else {
-                        ty
-                    }
-                }
-                ty::FloatVar(vid) => {
-                    if self.snapshot_vars.float_vars.0.contains(&vid) {
-                        let idx = vid.as_usize() - self.snapshot_vars.float_vars.0.start.as_usize();
-                        let FloatVariableOrigin { span, lint_id } =
-                            self.snapshot_vars.float_vars.1[idx];
-                        self.infcx.next_float_var(span, lint_id)
-                    } else {
-                        ty
-                    }
-                }
-                ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_) => {
+                ty::FreshTy(_) => {
                     unreachable!("unexpected fresh infcx var")
                 }
             }

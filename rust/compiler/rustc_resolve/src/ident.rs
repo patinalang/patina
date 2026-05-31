@@ -6,7 +6,6 @@ use rustc_ast::{self as ast, NodeId};
 use rustc_errors::ErrorGuaranteed;
 use rustc_hir::def::{DefKind, MacroKinds, Namespace, NonMacroAttrKind, PartialRes, PerNS};
 use rustc_middle::{bug, span_bug};
-use rustc_session::errors::feature_err;
 use rustc_session::lint::builtin::PROC_MACRO_DERIVE_RESOLUTION_FALLBACK;
 use rustc_span::edition::Edition;
 use rustc_span::hygiene::{ExpnId, ExpnKind, LocalExpnId, MacroKind, SyntaxContext};
@@ -749,35 +748,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 result
             }
             Scope::BuiltinTypes => match self.builtin_type_decls.get(&ident.name) {
-                Some(decl) => {
-                    if matches!(ident.name, sym::f16)
-                        && !self.tcx.features().f16()
-                        && !orig_ident_span.allows_unstable(sym::f16)
-                        && finalize.is_some()
-                    {
-                        feature_err(
-                            self.tcx.sess,
-                            sym::f16,
-                            orig_ident_span,
-                            "the type `f16` is unstable",
-                        )
-                        .emit();
-                    }
-                    if matches!(ident.name, sym::f128)
-                        && !self.tcx.features().f128()
-                        && !orig_ident_span.allows_unstable(sym::f128)
-                        && finalize.is_some()
-                    {
-                        feature_err(
-                            self.tcx.sess,
-                            sym::f128,
-                            orig_ident_span,
-                            "the type `f128` is unstable",
-                        )
-                        .emit();
-                    }
-                    Ok(*decl)
-                }
+                Some(decl) => Ok(*decl),
                 None => Err(Determinacy::Determined),
             },
         };

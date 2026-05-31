@@ -15,51 +15,5 @@ LL |     let my_map: #{float => str} = #{3.14 => "pi", 0 => "zero"};
    |               |
    |               while parsing the type for `my_map`
 
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/primitives__01.pt:7:18
-   |
-LL |     let a_float: float = 1.0;
-   |                  ^^^^^
-   |                  |
-   |                  not found in this scope
-   |                  help: perhaps you intended to use this type: `f32`
+error: aborting due to 2 previous errors
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/primitives__01.pt:26:19
-   |
-LL |     let my_list: [int] = [1, 2, 3, 4, 5];
-   |                   ^^^
-   |                   |
-   |                   not found in this scope
-   |                   help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/primitives__01.pt:42:18
-   |
-LL | fn add_floats(a: float, b: float) -> float {
-   |                  ^^^^^
-   |                  |
-   |                  not found in this scope
-   |                  help: perhaps you intended to use this type: `f32`
-
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/primitives__01.pt:42:28
-   |
-LL | fn add_floats(a: float, b: float) -> float {
-   |                            ^^^^^
-   |                            |
-   |                            not found in this scope
-   |                            help: perhaps you intended to use this type: `f32`
-
-error[E0425]: cannot find type `float` in this scope
-  --> tests/ui/src/primitives__01.pt:42:38
-   |
-LL | fn add_floats(a: float, b: float) -> float {
-   |                                      ^^^^^
-   |                                      |
-   |                                      not found in this scope
-   |                                      help: perhaps you intended to use this type: `f32`
-
-error: aborting due to 7 previous errors
-
-For more information about this error, try `rustc --explain E0425`.

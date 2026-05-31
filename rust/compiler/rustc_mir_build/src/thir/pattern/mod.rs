@@ -8,8 +8,7 @@ use std::assert_matches;
 use std::cmp::Ordering;
 use std::sync::Arc;
 
-use rustc_abi::{FieldIdx, Integer};
-use rustc_ast::LitKind;
+use rustc_abi::FieldIdx;
 use rustc_errors::codes::*;
 use rustc_hir::def::{CtorOf, DefKind, Res};
 use rustc_hir::pat_util::EnumerateAndAdjustIterator;
@@ -19,7 +18,6 @@ use rustc_middle::thir::{
     Ascription, DerefPatBorrowMode, FieldPat, LocalVarId, Pat, PatKind, PatRange, PatRangeBoundary,
 };
 use rustc_middle::ty::adjustment::{PatAdjust, PatAdjustment};
-use rustc_middle::ty::layout::IntegerExt;
 use rustc_middle::ty::{
     self, CanonicalUserTypeAnnotation, LitToConstInput, Ty, TyCtxt, const_lit_matches_ty,
 };
@@ -200,41 +198,9 @@ impl<'tcx, 'ptcx> PatCtxt<'tcx, 'ptcx> {
     /// This is only called when the range is already known to be malformed.
     fn error_on_literal_overflow(
         &self,
-        expr: Option<&'tcx hir::PatExpr<'tcx>>,
-        ty: Ty<'tcx>,
+        _expr: Option<&'tcx hir::PatExpr<'tcx>>,
+        _ty: Ty<'tcx>,
     ) -> Result<(), ErrorGuaranteed> {
-        let Some(expr) = expr else {
-            return Ok(());
-        };
-        let span = expr.span;
-
-        // We need to inspect the original expression, because if we only inspect the output of
-        // `eval_bits`, an overflowed value has already been wrapped around.
-        // We mostly copy the logic from the `rustc_lint::OVERFLOWING_LITERALS` lint.
-        let hir::PatExprKind::Lit { lit, negated } = expr.kind else {
-            return Ok(());
-        };
-        let LitKind::Int(lit_val, _) = lit.node else {
-            return Ok(());
-        };
-        let (min, max): (i128, u128) = match ty.kind() {
-            ty::Int(ity) => {
-                let size = Integer::from_int_ty(&self.tcx, *ity).size();
-                (size.signed_int_min(), size.signed_int_max() as u128)
-            }
-            ty::Uint(uty) => {
-                let size = Integer::from_uint_ty(&self.tcx, *uty).size();
-                (0, size.unsigned_int_max())
-            }
-            _ => {
-                return Ok(());
-            }
-        };
-        // Detect literal value out of range `[min, max]` inclusive, avoiding use of `-min` to
-        // prevent overflow/panic.
-        if (negated && lit_val > max + 1) || (!negated && lit_val > max) {
-            return Err(self.tcx.dcx().emit_err(LiteralOutOfRange { span, ty, min, max }));
-        }
         Ok(())
     }
 

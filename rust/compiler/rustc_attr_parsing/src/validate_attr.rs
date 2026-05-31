@@ -91,8 +91,8 @@ pub fn parse_meta<'a>(psess: &'a ParseSess, attr: &Attribute) -> PResult<'a, Met
                                     "suffixed literals are not allowed in attributes",
                                 );
                                 err.help(
-                                    "instead of using a suffixed literal (`1u8`, `1.0f32`, etc.), \
-                                    use an unsuffixed version (`1`, `1.0`, etc.)",
+                                    "instead of using a suffixed literal (`1f`, `1.0f`, etc.), \
+                                    use an unsuffixed version (`1.0`, etc.)",
                                 );
                                 return Err(err);
                             } else {

@@ -29,9 +29,8 @@ impl<'tcx> Printer<'tcx> for TypeNamePrinter<'tcx> {
             // Types without identity.
             ty::Bool
             | ty::Char
-            | ty::Int(_)
-            | ty::Uint(_)
-            | ty::Float(_)
+            | ty::Int
+            | ty::Float
             | ty::Str
             | ty::Term
             | ty::Pat(_, _)

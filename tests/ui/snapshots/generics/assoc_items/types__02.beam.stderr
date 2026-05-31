@@ -76,31 +76,13 @@ error[E0405]: cannot find trait `Contains` in this scope
 LL |     C: Contains<A, B> { ... }
    |        ^^^^^^^^ not found in this scope
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/assoc_items/types__02.pt:5:41
-   |
-LL | fn difference<A, B, C>(container: C) -> int where
-   |                                         ^^^
-   |                                         |
-   |                                         not found in this scope
-   |                                         help: perhaps you intended to use this type: `i32`
-
 error[E0405]: cannot find trait `Contains` in this scope
   --> tests/ui/src/generics/assoc_items/types__02.pt:9:18
    |
 LL | fn difference<C: Contains>(container: C) -> int { ... }
    |                  ^^^^^^^^ not found in this scope
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/generics/assoc_items/types__02.pt:9:45
-   |
-LL | fn difference<C: Contains>(container: C) -> int { ... }
-   |                                             ^^^
-   |                                             |
-   |                                             not found in this scope
-   |                                             help: perhaps you intended to use this type: `i32`
+error: aborting due to 7 previous errors
 
-error: aborting due to 9 previous errors
-
-Some errors have detailed explanations: E0405, E0425, E0428, E0586.
+Some errors have detailed explanations: E0405, E0428, E0586.
 For more information about an error, try `rustc --explain E0405`.

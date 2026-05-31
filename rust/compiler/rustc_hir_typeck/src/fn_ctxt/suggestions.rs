@@ -1763,10 +1763,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 }
                 true
             }
-            ExprKind::Lit(Spanned {
-                node: rustc_ast::LitKind::Int(lit, rustc_ast::LitIntType::Unsuffixed),
-                span,
-            }) => {
+            ExprKind::Lit(Spanned { node: rustc_ast::LitKind::Int(lit), span }) => {
                 let Ok(snippet) = self.tcx.sess.source_map().span_to_snippet(span) else {
                     return false;
                 };
@@ -1809,7 +1806,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         };
 
         // Provided expression needs to be a literal `0`.
-        let ExprKind::Lit(Spanned { node: rustc_ast::LitKind::Int(Pu128(0), _), span }) = expr.kind
+        let ExprKind::Lit(Spanned { node: rustc_ast::LitKind::Int(Pu128(0)), span }) = expr.kind
         else {
             return false;
         };
@@ -2853,7 +2850,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
         match (&expr.kind, expected.kind(), checked_ty.kind()) {
             (_, &ty::Ref(_, exp, _), &ty::Ref(_, check, _)) => match (exp.kind(), check.kind()) {
-                (&ty::Str, &ty::Array(arr, _) | &ty::Slice(arr)) if arr == self.tcx.types.u8 => {
+                (&ty::Str, &ty::Array(arr, _) | &ty::Slice(arr)) if arr == self.tcx.types.int => {
                     if let hir::ExprKind::Lit(_) = expr.kind
                         && let Ok(src) = sm.span_to_snippet(sp)
                         && replace_prefix(&src, "b\"", "\"").is_some()
@@ -2868,7 +2865,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         ));
                     }
                 }
-                (&ty::Array(arr, _) | &ty::Slice(arr), &ty::Str) if arr == self.tcx.types.u8 => {
+                (&ty::Array(arr, _) | &ty::Slice(arr), &ty::Str) if arr == self.tcx.types.int => {
                     if let hir::ExprKind::Lit(_) = expr.kind
                         && let Ok(src) = sm.span_to_snippet(sp)
                         && replace_prefix(&src, "\"", "b\"").is_some()
@@ -3267,17 +3264,12 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         expr: &hir::Expr<'_>,
         checked_ty: Ty<'tcx>,
         expected_ty: Ty<'tcx>,
-        expected_ty_expr: Option<&'tcx hir::Expr<'tcx>>,
+        _expected_ty_expr: Option<&'tcx hir::Expr<'tcx>>,
     ) -> bool {
         if self.tcx.sess.source_map().is_imported(expr.span) {
             // Ignore if span is from within a macro.
             return false;
         }
-
-        let span = if let hir::ExprKind::Lit(lit) = &expr.kind { lit.span } else { expr.span };
-        let Ok(src) = self.tcx.sess.source_map().span_to_snippet(span) else {
-            return false;
-        };
 
         // If casting this expression to a given numeric type would be appropriate in case of a type
         // mismatch.
@@ -3310,24 +3302,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 (&base_ty.kind, path_segment.ident.name)
         {
             if let Some(ident) = &base_ty_path.segments.iter().map(|s| s.ident).next() {
-                match ident.name {
-                    sym::i128
-                    | sym::i64
-                    | sym::i32
-                    | sym::i16
-                    | sym::i8
-                    | sym::u128
-                    | sym::u64
-                    | sym::u32
-                    | sym::u16
-                    | sym::u8
-                    | sym::isize
-                    | sym::usize
-                        if base_ty_path.segments.len() == 1 =>
-                    {
-                        return false;
-                    }
-                    _ => {}
+                if ident.name == sym::int && base_ty_path.segments.len() == 1 {
+                    return false;
                 }
             }
         }
@@ -3346,9 +3322,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             expected_ty.kind().article(),
             expected_ty,
         );
-        let lit_msg = format!(
-            "change the type of the numeric literal from `{checked_ty}` to `{expected_ty}`",
-        );
 
         let close_paren = if self.precedence(expr) < ExprPrecedence::Unambiguous {
             sugg.push((expr.span.shrink_to_lo(), "(".to_string()));
@@ -3359,171 +3332,12 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
         let mut cast_suggestion = sugg.clone();
         cast_suggestion.push((expr.span.shrink_to_hi(), format!("{close_paren} as {expected_ty}")));
-        let mut into_suggestion = sugg.clone();
-        into_suggestion.push((expr.span.shrink_to_hi(), format!("{close_paren}.into()")));
-        let mut suffix_suggestion = sugg.clone();
-        suffix_suggestion.push((
-            if matches!(
-                (expected_ty.kind(), checked_ty.kind()),
-                (ty::Int(_) | ty::Uint(_), ty::Float(_))
-            ) {
-                // Remove fractional part from literal, for example `42.0f32` into `42`
-                let src = src.trim_end_matches(&checked_ty.to_string());
-                let len = src.split('.').next().unwrap().len();
-                span.with_lo(span.lo() + BytePos(len as u32))
-            } else {
-                let len = src.trim_end_matches(&checked_ty.to_string()).len();
-                span.with_lo(span.lo() + BytePos(len as u32))
-            },
-            if self.precedence(expr) < ExprPrecedence::Unambiguous {
-                // Readd `)`
-                format!("{expected_ty})")
-            } else {
-                expected_ty.to_string()
-            },
-        ));
-        let literal_is_ty_suffixed = |expr: &hir::Expr<'_>| {
-            if let hir::ExprKind::Lit(lit) = &expr.kind { lit.node.is_suffixed() } else { false }
-        };
-        let is_negative_int =
-            |expr: &hir::Expr<'_>| matches!(expr.kind, hir::ExprKind::Unary(hir::UnOp::Neg, ..));
-        let is_uint = |ty: Ty<'_>| matches!(ty.kind(), ty::Uint(..));
-
-        let in_const_context = self.tcx.hir_is_inside_const_context(expr.hir_id);
-
-        let suggest_fallible_into_or_lhs_from =
-            |err: &mut Diag<'_>, exp_to_found_is_fallible: bool| {
-                // If we know the expression the expected type is derived from, we might be able
-                // to suggest a widening conversion rather than a narrowing one (which may
-                // panic). For example, given x: u8 and y: u32, if we know the span of "x",
-                //   x > y
-                // can be given the suggestion "u32::from(x) > y" rather than
-                // "x > y.try_into().unwrap()".
-                let lhs_expr_and_src = expected_ty_expr.and_then(|expr| {
-                    self.tcx
-                        .sess
-                        .source_map()
-                        .span_to_snippet(expr.span)
-                        .ok()
-                        .map(|src| (expr, src))
-                });
-                let (msg, suggestion) = if let (Some((lhs_expr, lhs_src)), false) =
-                    (lhs_expr_and_src, exp_to_found_is_fallible)
-                {
-                    let msg = format!(
-                        "you can convert `{lhs_src}` from `{expected_ty}` to `{checked_ty}`, matching the type of `{src}`",
-                    );
-                    let suggestion = vec![
-                        (lhs_expr.span.shrink_to_lo(), format!("{checked_ty}::from(")),
-                        (lhs_expr.span.shrink_to_hi(), ")".to_string()),
-                    ];
-                    (msg, suggestion)
-                } else {
-                    let msg =
-                        format!("{} and panic if the converted value doesn't fit", msg.clone());
-                    let mut suggestion = sugg.clone();
-                    suggestion.push((
-                        expr.span.shrink_to_hi(),
-                        format!("{close_paren}.try_into().unwrap()"),
-                    ));
-                    (msg, suggestion)
-                };
-                err.multipart_suggestion(msg, suggestion, Applicability::MachineApplicable);
-            };
-
-        let suggest_to_change_suffix_or_into =
-            |err: &mut Diag<'_>, found_to_exp_is_fallible: bool, exp_to_found_is_fallible: bool| {
-                let exp_is_lhs = expected_ty_expr.is_some_and(|e| self.tcx.hir_is_lhs(e.hir_id));
-
-                if exp_is_lhs {
-                    return;
-                }
-
-                let always_fallible = found_to_exp_is_fallible
-                    && (exp_to_found_is_fallible || expected_ty_expr.is_none());
-                let msg = if literal_is_ty_suffixed(expr) {
-                    lit_msg.clone()
-                } else if always_fallible && (is_negative_int(expr) && is_uint(expected_ty)) {
-                    // We now know that converting either the lhs or rhs is fallible. Before we
-                    // suggest a fallible conversion, check if the value can never fit in the
-                    // expected type.
-                    let msg = format!("`{src}` cannot fit into type `{expected_ty}`");
-                    err.note(msg);
-                    return;
-                } else if in_const_context {
-                    // Do not recommend `into` or `try_into` in const contexts.
-                    return;
-                } else if found_to_exp_is_fallible {
-                    return suggest_fallible_into_or_lhs_from(err, exp_to_found_is_fallible);
-                } else {
-                    msg.clone()
-                };
-                let suggestion = if literal_is_ty_suffixed(expr) {
-                    suffix_suggestion.clone()
-                } else {
-                    into_suggestion.clone()
-                };
-                err.multipart_suggestion(msg, suggestion, Applicability::MachineApplicable);
-            };
 
         match (expected_ty.kind(), checked_ty.kind()) {
-            (ty::Int(exp), ty::Int(found)) => {
-                let (f2e_is_fallible, e2f_is_fallible) = match (exp.bit_width(), found.bit_width())
-                {
-                    (Some(exp), Some(found)) if exp < found => (true, false),
-                    (Some(exp), Some(found)) if exp > found => (false, true),
-                    (None, Some(8 | 16)) => (false, true),
-                    (Some(8 | 16), None) => (true, false),
-                    (None, _) | (_, None) => (true, true),
-                    _ => (false, false),
-                };
-                suggest_to_change_suffix_or_into(err, f2e_is_fallible, e2f_is_fallible);
-                true
-            }
-            (ty::Uint(exp), ty::Uint(found)) => {
-                let (f2e_is_fallible, e2f_is_fallible) = match (exp.bit_width(), found.bit_width())
-                {
-                    (Some(exp), Some(found)) if exp < found => (true, false),
-                    (Some(exp), Some(found)) if exp > found => (false, true),
-                    (None, Some(8 | 16)) => (false, true),
-                    (Some(8 | 16), None) => (true, false),
-                    (None, _) | (_, None) => (true, true),
-                    _ => (false, false),
-                };
-                suggest_to_change_suffix_or_into(err, f2e_is_fallible, e2f_is_fallible);
-                true
-            }
-            (&ty::Int(exp), &ty::Uint(found)) => {
-                let (f2e_is_fallible, e2f_is_fallible) = match (exp.bit_width(), found.bit_width())
-                {
-                    (Some(exp), Some(found)) if found < exp => (false, true),
-                    (None, Some(8)) => (false, true),
-                    _ => (true, true),
-                };
-                suggest_to_change_suffix_or_into(err, f2e_is_fallible, e2f_is_fallible);
-                true
-            }
-            (&ty::Uint(exp), &ty::Int(found)) => {
-                let (f2e_is_fallible, e2f_is_fallible) = match (exp.bit_width(), found.bit_width())
-                {
-                    (Some(exp), Some(found)) if found > exp => (true, false),
-                    (Some(8), None) => (true, false),
-                    _ => (true, true),
-                };
-                suggest_to_change_suffix_or_into(err, f2e_is_fallible, e2f_is_fallible);
-                true
-            }
-            (ty::Float(exp), ty::Float(found)) => {
-                if found.bit_width() < exp.bit_width() {
-                    suggest_to_change_suffix_or_into(err, false, true);
-                } else if literal_is_ty_suffixed(expr) {
-                    err.multipart_suggestion(
-                        lit_msg,
-                        suffix_suggestion,
-                        Applicability::MachineApplicable,
-                    );
-                } else if can_cast {
-                    // Missing try_into implementation for `f64` to `f32`
+            (ty::Int, ty::Int) => false,
+            (ty::Float, ty::Float) => {
+                if can_cast {
+                    // Missing try_into implementation between float types
                     err.multipart_suggestion(
                         format!("{cast_msg}, producing the closest possible value"),
                         cast_suggestion,
@@ -3532,14 +3346,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 }
                 true
             }
-            (&ty::Uint(_) | &ty::Int(_), &ty::Float(_)) => {
-                if literal_is_ty_suffixed(expr) {
-                    err.multipart_suggestion(
-                        lit_msg,
-                        suffix_suggestion,
-                        Applicability::MachineApplicable,
-                    );
-                } else if can_cast {
+            (&ty::Int, &ty::Float) => {
+                if can_cast {
                     // Missing try_into implementation for `{float}` to `{integer}`
                     err.multipart_suggestion(
                         format!("{msg}, rounding the float towards zero"),
@@ -3549,71 +3357,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 }
                 true
             }
-            (ty::Float(exp), ty::Uint(found)) => {
-                // if `found` is `None` (meaning found is `usize`), don't suggest `.into()`
-                if exp.bit_width() > found.bit_width().unwrap_or(256) {
-                    err.multipart_suggestion(
-                        format!(
-                            "{msg}, producing the floating point representation of the integer",
-                        ),
-                        into_suggestion,
-                        Applicability::MachineApplicable,
-                    );
-                } else if literal_is_ty_suffixed(expr) {
-                    err.multipart_suggestion(
-                        lit_msg,
-                        suffix_suggestion,
-                        Applicability::MachineApplicable,
-                    );
-                } else {
-                    // Missing try_into implementation for `{integer}` to `{float}`
-                    err.multipart_suggestion(
-                        format!(
-                            "{cast_msg}, producing the floating point representation of the integer, \
-                                 rounded if necessary",
-                        ),
-                        cast_suggestion,
-                        Applicability::MaybeIncorrect, // lossy conversion
-                    );
-                }
-                true
-            }
-            (ty::Float(exp), ty::Int(found)) => {
-                // if `found` is `None` (meaning found is `isize`), don't suggest `.into()`
-                if exp.bit_width() > found.bit_width().unwrap_or(256) {
-                    err.multipart_suggestion(
-                        format!(
-                            "{}, producing the floating point representation of the integer",
-                            msg.clone(),
-                        ),
-                        into_suggestion,
-                        Applicability::MachineApplicable,
-                    );
-                } else if literal_is_ty_suffixed(expr) {
-                    err.multipart_suggestion(
-                        lit_msg,
-                        suffix_suggestion,
-                        Applicability::MachineApplicable,
-                    );
-                } else {
-                    // Missing try_into implementation for `{integer}` to `{float}`
-                    err.multipart_suggestion(
-                        format!(
-                            "{}, producing the floating point representation of the integer, \
-                                rounded if necessary",
-                            &msg,
-                        ),
-                        cast_suggestion,
-                        Applicability::MaybeIncorrect, // lossy conversion
-                    );
-                }
-                true
-            }
-            (
-                &ty::Uint(ty::UintTy::U32 | ty::UintTy::U64 | ty::UintTy::U128)
-                | &ty::Int(ty::IntTy::I32 | ty::IntTy::I64 | ty::IntTy::I128),
-                &ty::Char,
-            ) => {
+            (ty::Float, ty::Int) => false,
+            (&ty::Int, &ty::Char) => {
                 err.multipart_suggestion(
                     format!("{cast_msg}, since a `char` always occupies 4 bytes"),
                     cast_suggestion,

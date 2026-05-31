@@ -8,7 +8,7 @@ use rustc_ast::attr::data_structures::CfgEntry;
 use rustc_ast::attr::version::RustcVersion;
 use rustc_ast::expand::autodiff_attrs::{DiffActivity, DiffMode};
 use rustc_ast::token::{CommentKind, DocFragmentKind};
-use rustc_ast::{AttrId, AttrStyle, IntTy, UintTy};
+use rustc_ast::{AttrId, AttrStyle};
 use rustc_ast_pretty::pp::Printer;
 use rustc_data_structures::fx::FxIndexMap;
 use rustc_span::def_id::DefId;
@@ -196,8 +196,6 @@ print_disp!(u8, u16, u32, u128, usize, bool, NonZero<u32>, Limit);
 print_debug!(
     Symbol,
     Ident,
-    UintTy,
-    IntTy,
     Align,
     AttrStyle,
     CommentKind,

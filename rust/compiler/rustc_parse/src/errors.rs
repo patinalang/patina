@@ -1372,16 +1372,6 @@ pub(crate) struct CompoundAssignmentExpressionInLet {
 }
 
 #[derive(Diagnostic)]
-#[diag("suffixed literals are not allowed in attributes")]
-#[help(
-    "instead of using a suffixed literal (`1u8`, `1.0f32`, etc.), use an unsuffixed version (`1`, `1.0`, etc.)"
-)]
-pub(crate) struct SuffixedLiteralInAttribute {
-    #[primary_span]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
 #[diag("expected unsuffixed literal, found {$descr}")]
 pub(crate) struct InvalidMetaItem {
     #[primary_span]

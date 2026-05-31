@@ -1259,8 +1259,8 @@ where
     fn drop_loop_trio_for_slice(&mut self, ety: Ty<'tcx>) -> BasicBlock {
         debug!("drop_loop_trio_for_slice({:?})", ety);
         let tcx = self.tcx();
-        let len = self.new_temp(tcx.types.usize);
-        let cur = self.new_temp(tcx.types.usize);
+        let len = self.new_temp(tcx.types.int);
+        let cur = self.new_temp(tcx.types.int);
 
         let unwind = self
             .unwind

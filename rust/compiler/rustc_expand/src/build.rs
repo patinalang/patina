@@ -434,14 +434,12 @@ impl<'a> ExtCtxt<'a> {
     }
 
     pub fn expr_usize(&self, span: Span, n: usize) -> Box<ast::Expr> {
-        let suffix = Some(ast::UintTy::Usize.name());
-        let lit = token::Lit::new(token::Integer, sym::integer(n), suffix);
+        let lit = token::Lit::new(token::Integer, sym::integer(n), None);
         self.expr(span, ast::ExprKind::Lit(lit))
     }
 
     pub fn expr_u32(&self, span: Span, n: u32) -> Box<ast::Expr> {
-        let suffix = Some(ast::UintTy::U32.name());
-        let lit = token::Lit::new(token::Integer, sym::integer(n), suffix);
+        let lit = token::Lit::new(token::Integer, sym::integer(n), None);
         self.expr(span, ast::ExprKind::Lit(lit))
     }
 

@@ -809,17 +809,6 @@ pub(crate) struct LowerRangeBoundMustBeLessThanOrEqualToUpper {
 }
 
 #[derive(Diagnostic)]
-#[diag("literal out of range for `{$ty}`")]
-pub(crate) struct LiteralOutOfRange<'tcx> {
-    #[primary_span]
-    #[label("this value does not fit into the type `{$ty}` whose range is `{$min}..={$max}`")]
-    pub(crate) span: Span,
-    pub(crate) ty: Ty<'tcx>,
-    pub(crate) min: i128,
-    pub(crate) max: u128,
-}
-
-#[derive(Diagnostic)]
 #[diag("lower bound for range pattern must be less than upper bound", code = E0579)]
 pub(crate) struct LowerRangeBoundMustBeLessThanUpper {
     #[primary_span]

@@ -122,9 +122,8 @@ pub fn ty_dtor_span<'tcx>(tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) -> Option<Span> {
     match *ty.kind() {
         ty::Bool
         | ty::Char
-        | ty::Int(_)
-        | ty::Uint(_)
-        | ty::Float(_)
+        | ty::Int
+        | ty::Float
         | ty::Error(_)
         | ty::Str
         | ty::Term

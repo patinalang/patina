@@ -4,8 +4,7 @@ use std::borrow::Cow;
 use std::collections::hash_set;
 use std::path::PathBuf;
 
-use rustc_ast::ast::LitKind;
-use rustc_ast::{LitIntType, TraitObjectSyntax};
+use rustc_ast::TraitObjectSyntax;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_data_structures::unord::UnordSet;
 use rustc_errors::codes::*;
@@ -314,12 +313,6 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                         if is_try_conversion || is_question_mark {
                             (suggested, noted_missing_impl) = self.try_conversion_context(&obligation, main_trait_predicate, &mut err);
                         }
-
-                        suggested |= self.detect_negative_literal(
-                            &obligation,
-                            main_trait_predicate,
-                            &mut err,
-                        );
 
                         if let Some(ret_span) = self.return_type_span(&obligation) {
                             if is_try_conversion {
@@ -1024,38 +1017,6 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         Ok(())
     }
 
-    fn detect_negative_literal(
-        &self,
-        obligation: &PredicateObligation<'tcx>,
-        trait_pred: ty::PolyTraitPredicate<'tcx>,
-        err: &mut Diag<'_>,
-    ) -> bool {
-        if let ObligationCauseCode::UnOp { hir_id, .. } = obligation.cause.code()
-            && let hir::Node::Expr(expr) = self.tcx.hir_node(*hir_id)
-            && let hir::ExprKind::Unary(hir::UnOp::Neg, inner) = expr.kind
-            && let hir::ExprKind::Lit(lit) = inner.kind
-            && let LitKind::Int(_, LitIntType::Unsuffixed) = lit.node
-        {
-            err.span_suggestion_verbose(
-                lit.span.shrink_to_hi(),
-                "consider specifying an integer type that can be negative",
-                match trait_pred.skip_binder().self_ty().kind() {
-                    ty::Uint(ty::UintTy::Usize) => "isize",
-                    ty::Uint(ty::UintTy::U8) => "i8",
-                    ty::Uint(ty::UintTy::U16) => "i16",
-                    ty::Uint(ty::UintTy::U32) => "i32",
-                    ty::Uint(ty::UintTy::U64) => "i64",
-                    ty::Uint(ty::UintTy::U128) => "i128",
-                    _ => "i64",
-                }
-                .to_string(),
-                Applicability::MaybeIncorrect,
-            );
-            return true;
-        }
-        false
-    }
-
     /// When the `E` of the resulting `Result<T, E>` in an expression `foo().bar().baz()?`,
     /// identify those method chain sub-expressions that could or could not have been annotated
     /// with `?`.
@@ -1327,7 +1288,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
         let mut file = None;
         let ty_str = self.tcx.short_string(ty, &mut file);
         let mut diag = match ty.kind() {
-            ty::Float(_) => {
+            ty::Float => {
                 struct_span_code_err!(
                     self.dcx(),
                     span,
@@ -1836,13 +1797,11 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             match t.kind() {
                 ty::Bool => Some(0),
                 ty::Char => Some(1),
+                ty::Int => Some(1),
                 ty::Str => Some(2),
                 ty::Term => Some(3),
                 ty::Adt(def, _) if tcx.is_lang_item(def.did(), LangItem::String) => Some(2),
-                ty::Int(..)
-                | ty::Uint(..)
-                | ty::Float(..)
-                | ty::Infer(ty::IntVar(..) | ty::FloatVar(..)) => Some(4),
+                ty::Float => Some(4),
                 ty::Ref(..) | ty::RawPtr(..) => Some(5),
                 ty::Array(..) | ty::Slice(..) => Some(6),
                 ty::FnDef(..) | ty::FnPtr(..) => Some(7),
@@ -3690,7 +3649,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
 
                     let const_ty =
                         self.tcx.type_of(uv.def).instantiate(self.tcx, uv.args).skip_norm_wip();
-                    let cast = if const_ty != self.tcx.types.usize { " as usize" } else { "" };
+                    let cast = if const_ty != self.tcx.types.int { " as usize" } else { "" };
                     let msg = "try adding a `where` bound";
                     match self.tcx.sess.source_map().span_to_snippet(const_span) {
                         Ok(snippet) => {

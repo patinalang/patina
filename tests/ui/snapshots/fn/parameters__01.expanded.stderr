@@ -4,60 +4,6 @@ error[E0425]: cannot find type `fnref` in this scope
 LL | fn call_me_ref(f: fnref(int) -> int) {
    |                   ^^^^^ not found in this scope
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/fn/parameters__01.pt:4:25
-   |
-LL | fn call_me_ref(f: fnref(int) -> int) {
-   |                         ^^^
-   |                         |
-   |                         not found in this scope
-   |                         help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/fn/parameters__01.pt:4:33
-   |
-LL | fn call_me_ref(f: fnref(int) -> int) {
-   |                                 ^^^
-   |                                 |
-   |                                 not found in this scope
-   |                                 help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/fn/parameters__01.pt:8:18
-   |
-LL | fn call_me(f: fn(int) -> int) {
-   |                  ^^^
-   |                  |
-   |                  not found in this scope
-   |                  help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/fn/parameters__01.pt:8:26
-   |
-LL | fn call_me(f: fn(int) -> int) {
-   |                          ^^^
-   |                          |
-   |                          not found in this scope
-   |                          help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/fn/parameters__01.pt:12:16
-   |
-LL | fn function(x: int) -> int {
-   |                ^^^
-   |                |
-   |                not found in this scope
-   |                help: perhaps you intended to use this type: `i32`
-
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/fn/parameters__01.pt:12:24
-   |
-LL | fn function(x: int) -> int {
-   |                        ^^^
-   |                        |
-   |                        not found in this scope
-   |                        help: perhaps you intended to use this type: `i32`
-
-error: aborting due to 7 previous errors
+error: aborting due to 1 previous error
 
 For more information about this error, try `rustc --explain E0425`.

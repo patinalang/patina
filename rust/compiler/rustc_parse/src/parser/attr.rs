@@ -388,11 +388,7 @@ impl<'a> Parser<'a> {
     // Note: must be unsuffixed.
     pub(crate) fn parse_unsuffixed_meta_item_lit(&mut self) -> PResult<'a, ast::MetaItemLit> {
         let lit = self.parse_meta_item_lit()?;
-        debug!("checking if {:?} is unsuffixed", lit);
-
-        if !lit.kind.is_unsuffixed() {
-            self.dcx().emit_err(errors::SuffixedLiteralInAttribute { span: lit.span });
-        }
+        debug!("checking meta item lit {:?}", lit);
 
         Ok(lit)
     }

@@ -4,7 +4,6 @@ use std::ops::Range;
 
 use rustc_data_structures::undo_log::Rollback;
 use rustc_data_structures::{snapshot_vec as sv, unify as ut};
-use rustc_hir::HirId;
 use rustc_hir::def_id::DefId;
 use rustc_index::IndexVec;
 use rustc_middle::bug;
@@ -98,16 +97,6 @@ pub struct TypeVariableOrigin {
     ///
     /// This should only be used for diagnostics.
     pub param_def_id: Option<DefId>,
-}
-
-#[derive(Copy, Clone, Debug)]
-pub struct FloatVariableOrigin {
-    pub span: Span,
-
-    /// `HirId` to lint at for this float variable, if any.
-    ///
-    /// This should only be used for diagnostics.
-    pub lint_id: Option<HirId>,
 }
 
 #[derive(Clone)]

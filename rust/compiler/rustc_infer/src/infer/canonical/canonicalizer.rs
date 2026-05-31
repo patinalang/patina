@@ -361,24 +361,7 @@ impl<'cx, 'tcx> TypeFolder<TyCtxt<'tcx>> for Canonicalizer<'cx, 'tcx> {
                 }
             }
 
-            ty::Infer(ty::IntVar(vid)) => {
-                let nt = self.infcx.unwrap().opportunistic_resolve_int_var(vid);
-                if nt != t {
-                    return self.fold_ty(nt);
-                } else {
-                    self.canonicalize_ty_var(CanonicalVarKind::Int, t)
-                }
-            }
-            ty::Infer(ty::FloatVar(vid)) => {
-                let nt = self.infcx.unwrap().opportunistic_resolve_float_var(vid);
-                if nt != t {
-                    return self.fold_ty(nt);
-                } else {
-                    self.canonicalize_ty_var(CanonicalVarKind::Float, t)
-                }
-            }
-
-            ty::Infer(ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) => {
+            ty::Infer(ty::FreshTy(_)) => {
                 bug!("encountered a fresh type during canonicalization")
             }
 
@@ -401,9 +384,8 @@ impl<'cx, 'tcx> TypeFolder<TyCtxt<'tcx>> for Canonicalizer<'cx, 'tcx> {
             | ty::CoroutineWitness(..)
             | ty::Bool
             | ty::Char
-            | ty::Int(..)
-            | ty::Uint(..)
-            | ty::Float(..)
+            | ty::Int
+            | ty::Float
             | ty::Adt(..)
             | ty::Str
             | ty::Term

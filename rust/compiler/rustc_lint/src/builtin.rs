@@ -2421,7 +2421,7 @@ impl<'tcx> LateLintPass<'tcx> for InvalidValue {
             use rustc_ast::LitKind::*;
             match &expr.kind {
                 Lit(lit) => {
-                    if let Int(i, _) = lit.node {
+                    if let Int(i) = lit.node {
                         i == 0
                     } else {
                         false
@@ -2551,12 +2551,8 @@ impl<'tcx> LateLintPass<'tcx> for InvalidValue {
                 ty::Char if init == InitKind::Uninit => {
                     Some("characters must be a valid Unicode codepoint".into())
                 }
-                ty::Int(_) | ty::Uint(_) if init == InitKind::Uninit => {
-                    Some("integers must be initialized".into())
-                }
-                ty::Float(_) if init == InitKind::Uninit => {
-                    Some("floats must be initialized".into())
-                }
+                ty::Int if init == InitKind::Uninit => Some("integers must be initialized".into()),
+                ty::Float if init == InitKind::Uninit => Some("floats must be initialized".into()),
                 ty::RawPtr(_, _) if init == InitKind::Uninit => {
                     Some("raw pointers must be initialized".into())
                 }
@@ -2747,7 +2743,7 @@ impl<'tcx> LateLintPass<'tcx> for DerefNullPtr {
         fn is_zero(expr: &hir::Expr<'_>) -> bool {
             match &expr.kind {
                 hir::ExprKind::Lit(lit) => {
-                    if let LitKind::Int(a, _) = lit.node {
+                    if let LitKind::Int(a) = lit.node {
                         return a == 0;
                     }
                 }

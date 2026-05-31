@@ -336,23 +336,7 @@ impl<'a, D: SolverDelegate<Interner = I>, I: Interner> Canonicalizer<'a, D, I> {
                     };
                     CanonicalVarKind::Ty { ui, sub_root }
                 }
-                ty::IntVar(vid) => {
-                    debug_assert_eq!(
-                        self.delegate.opportunistic_resolve_int_var(vid),
-                        t,
-                        "ty vid should have been resolved fully before canonicalization"
-                    );
-                    CanonicalVarKind::Int
-                }
-                ty::FloatVar(vid) => {
-                    debug_assert_eq!(
-                        self.delegate.opportunistic_resolve_float_var(vid),
-                        t,
-                        "ty vid should have been resolved fully before canonicalization"
-                    );
-                    CanonicalVarKind::Float
-                }
-                ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_) => {
+                ty::FreshTy(_) => {
                     panic!("fresh vars not expected in canonicalization")
                 }
             },
@@ -370,9 +354,8 @@ impl<'a, D: SolverDelegate<Interner = I>, I: Interner> Canonicalizer<'a, D, I> {
             },
             ty::Bool
             | ty::Char
-            | ty::Int(_)
-            | ty::Uint(_)
-            | ty::Float(_)
+            | ty::Int
+            | ty::Float
             | ty::Adt(_, _)
             | ty::Foreign(_)
             | ty::Str

@@ -4,29 +4,29 @@ error: cannot find macro `assert_eq` in this scope
 LL |     assert_eq!(result, 20);
    |     ^^^^^^^^^
 
-error[E0368]: binary assignment operation `+=` cannot be applied to type `{integer}`
+error[E0368]: binary assignment operation `+=` cannot be applied to type `int`
   --> tests/ui/src/flow_control/loop/return__01.pt:8:9
    |
 LL |         counter += 1;
    |         -------^^^^^
    |         |
-   |         cannot use `+=` on type `{integer}`
+   |         cannot use `+=` on type `int`
 
-error[E0369]: binary operation `==` cannot be applied to type `{integer}`
+error[E0369]: binary operation `==` cannot be applied to type `int`
   --> tests/ui/src/flow_control/loop/return__01.pt:10:20
    |
 LL |         if counter == 10 {
-   |            ------- ^^ -- {integer}
+   |            ------- ^^ -- int
    |            |
-   |            {integer}
+   |            int
 
-error[E0369]: cannot multiply `{integer}` by `{integer}`
+error[E0369]: cannot multiply `int` by `int`
   --> tests/ui/src/flow_control/loop/return__01.pt:11:27
    |
 LL |             break counter * 2;
-   |                   ------- ^ - {integer}
+   |                   ------- ^ - int
    |                   |
-   |                   {integer}
+   |                   int
 
 error: aborting due to 4 previous errors
 

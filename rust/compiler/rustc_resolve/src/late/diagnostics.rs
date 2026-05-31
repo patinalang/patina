@@ -1769,7 +1769,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
 
         // We don't include `DefKind::Str` and `DefKind::AssocTy` as they can't be reached here anyway.
         let applicability = match res {
-            Some(Res::PrimTy(PrimTy::Int(_) | PrimTy::Uint(_) | PrimTy::Bool | PrimTy::Char)) => {
+            Some(Res::PrimTy(PrimTy::Bool | PrimTy::Char | PrimTy::Int)) => {
                 Applicability::MachineApplicable
             }
             // FIXME(const_generics): Add `DefKind::TyParam` and `SelfTyParam` once we support generic
@@ -2950,15 +2950,15 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
         let name = path[path.len() - 1].ident.as_str();
         // Common Java types
         Some(match name {
-            "byte" => sym::u8, // In Java, bytes are signed, but in practice one almost always wants unsigned bytes.
-            "short" => sym::i16,
+            "byte" => sym::int,
+            "short" => sym::int,
             "Bool" => sym::bool,
             "Boolean" => sym::bool,
             "boolean" => sym::bool,
-            "int" => sym::i32,
-            "long" => sym::i64,
-            "float" => sym::f32,
-            "double" => sym::f64,
+            "int" => sym::int,
+            "long" => sym::int,
+            "float" => sym::float,
+            "double" => sym::float,
             _ => return None,
         })
     }

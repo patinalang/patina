@@ -1,12 +1,19 @@
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/flow_control/match/guard__02.pt:5:17
+error[E0369]: binary operation `==` cannot be applied to type `int`
+  --> tests/ui/src/flow_control/match/guard__02.pt:8:16
    |
-LL |     let number: int = 4;
-   |                 ^^^
-   |                 |
-   |                 not found in this scope
-   |                 help: perhaps you intended to use this type: `i32`
+LL |         i if i == 0 => println!("Zero"),
+   |              - ^^ - int
+   |              |
+   |              int
 
-error: aborting due to 1 previous error
+error[E0369]: binary operation `>` cannot be applied to type `int`
+  --> tests/ui/src/flow_control/match/guard__02.pt:9:16
+   |
+LL |         i if i > 0 => println!("Greater than zero"),
+   |              - ^ - int
+   |              |
+   |              int
 
-For more information about this error, try `rustc --explain E0425`.
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0369`.

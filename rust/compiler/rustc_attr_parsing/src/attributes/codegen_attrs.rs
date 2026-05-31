@@ -737,7 +737,7 @@ impl SingleAttributeParser for PatchableFunctionEntryParser {
                 }
             };
 
-            let rustc_ast::LitKind::Int(val, _) = value.value_as_lit().kind else {
+            let rustc_ast::LitKind::Int(val) = value.value_as_lit().kind else {
                 errored = true;
                 cx.adcx().expected_integer_literal(value.value_span);
                 continue;

@@ -491,14 +491,11 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 }
 
                 match arg_ty.kind() {
-                    ty::Float(ty::FloatTy::F32) => {
+                    ty::Float => {
                         variadic_error(tcx.sess, arg.span, arg_ty, "c_double");
                     }
-                    ty::Int(ty::IntTy::I8 | ty::IntTy::I16) | ty::Bool => {
+                    ty::Bool | ty::Int => {
                         variadic_error(tcx.sess, arg.span, arg_ty, "c_int");
-                    }
-                    ty::Uint(ty::UintTy::U8 | ty::UintTy::U16) => {
-                        variadic_error(tcx.sess, arg.span, arg_ty, "c_uint");
                     }
                     ty::FnDef(..) => {
                         let fn_ptr = Ty::new_fn_ptr(self.tcx, arg_ty.fn_sig(self.tcx));
@@ -713,7 +710,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     pub(in super::super) fn check_expr_lit(
         &self,
         lit: &hir::Lit,
-        lint_id: HirId,
+        _lint_id: HirId,
         expected: Expectation<'tcx>,
     ) -> Ty<'tcx> {
         let tcx = self.tcx;
@@ -723,21 +720,19 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             ast::LitKind::ByteStr(ref v, _) => Ty::new_imm_ref(
                 tcx,
                 tcx.lifetimes.re_static,
-                Ty::new_array(tcx, tcx.types.u8, v.as_byte_str().len() as u64),
+                Ty::new_array(tcx, tcx.types.int, v.as_byte_str().len() as u64),
             ),
-            ast::LitKind::Byte(_) => tcx.types.u8,
+            ast::LitKind::Byte(_) => tcx.types.int,
             ast::LitKind::Char(_) => tcx.types.char,
-            ast::LitKind::Int(_, ast::LitIntType::Signed(t)) => Ty::new_int(tcx, t),
-            ast::LitKind::Int(_, ast::LitIntType::Unsigned(t)) => Ty::new_uint(tcx, t),
-            ast::LitKind::Int(i, ast::LitIntType::Unsuffixed) => {
+            ast::LitKind::Int(i) => {
                 let opt_ty = expected.to_option(self).and_then(|ty| match ty.kind() {
-                    ty::Int(_) | ty::Uint(_) => Some(ty),
+                    ty::Int => Some(tcx.types.int),
                     // These exist to direct casts like `0x61 as char` to use
                     // the right integer type to cast from, instead of falling back to
-                    // i32 due to no further constraints.
-                    ty::Char => Some(tcx.types.u8),
-                    ty::RawPtr(..) => Some(tcx.types.usize),
-                    ty::FnDef(..) | ty::FnPtr(..) => Some(tcx.types.usize),
+                    // a default due to no further constraints.
+                    ty::Char => Some(tcx.types.int),
+                    ty::RawPtr(..) => Some(tcx.types.int),
+                    ty::FnDef(..) | ty::FnPtr(..) => Some(tcx.types.int),
                     &ty::Pat(base, _) if base.is_integral() => {
                         let layout = tcx
                             .layout_of(self.typing_env(self.param_env).as_query_input(ty))
@@ -753,15 +748,14 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     }
                     _ => None,
                 });
-                opt_ty.unwrap_or_else(|| self.next_int_var())
+                opt_ty.unwrap_or(tcx.types.int)
             }
-            ast::LitKind::Float(_, ast::LitFloatType::Suffixed(t)) => Ty::new_float(tcx, t),
-            ast::LitKind::Float(_, ast::LitFloatType::Unsuffixed) => {
+            ast::LitKind::Float(_, _) => {
                 let opt_ty = expected.to_option(self).and_then(|ty| match ty.kind() {
-                    ty::Float(_) => Some(ty),
+                    ty::Float => Some(ty),
                     _ => None,
                 });
-                opt_ty.unwrap_or_else(|| self.next_float_var(lit.span, Some(lint_id)))
+                opt_ty.unwrap_or(tcx.types.float)
             }
             ast::LitKind::Bool(_) => tcx.types.bool,
             ast::LitKind::CStr(_, _) => Ty::new_imm_ref(

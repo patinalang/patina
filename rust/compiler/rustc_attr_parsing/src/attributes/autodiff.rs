@@ -65,7 +65,7 @@ impl SingleAttributeParser for RustcAutodiffParser {
         // Parse width
         let width = if let Some(width) = items.peek()
             && let MetaItemOrLitParser::Lit(width) = width
-            && let LitKind::Int(width, _) = width.kind
+            && let LitKind::Int(width) = width.kind
             && let Ok(width) = width.0.try_into()
         {
             _ = items.next();

@@ -55,8 +55,6 @@ impl<D: SolverDelegate<Interner = I>, I: Interner> TypeFolder<I> for EagerResolv
                     resolved
                 }
             }
-            ty::Infer(ty::IntVar(vid)) => self.delegate.opportunistic_resolve_int_var(vid),
-            ty::Infer(ty::FloatVar(vid)) => self.delegate.opportunistic_resolve_float_var(vid),
             _ => {
                 if t.has_infer() {
                     if let Some(&ty) = self.cache.get(&t) {

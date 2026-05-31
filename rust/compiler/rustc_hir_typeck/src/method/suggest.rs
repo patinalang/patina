@@ -2969,19 +2969,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 })
                 .is_some()
         };
-        let found_candidate = found_candidate
-            || found_assoc(tcx.types.i8)
-            || found_assoc(tcx.types.i16)
-            || found_assoc(tcx.types.i32)
-            || found_assoc(tcx.types.i64)
-            || found_assoc(tcx.types.i128)
-            || found_assoc(tcx.types.u8)
-            || found_assoc(tcx.types.u16)
-            || found_assoc(tcx.types.u32)
-            || found_assoc(tcx.types.u64)
-            || found_assoc(tcx.types.u128)
-            || found_assoc(tcx.types.f32)
-            || found_assoc(tcx.types.f64);
+        let found_candidate =
+            found_candidate || found_assoc(tcx.types.int) || found_assoc(tcx.types.float);
         if found_candidate
             && actual.is_numeric()
             && !actual.has_concrete_skeleton()
@@ -2995,27 +2984,15 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 "can't call {item_kind} `{item_name}` on ambiguous numeric type `{ty_str}`"
             );
             *err.long_ty_path() = long_ty_path.take();
-            let concrete_type = if actual.is_integral() { "i32" } else { "f32" };
+            let concrete_type = if actual.is_integral() { "int" } else { "float" };
             match expr.kind {
                 ExprKind::Lit(lit) => {
-                    // numeric literal
-                    let snippet = tcx
-                        .sess
-                        .source_map()
-                        .span_to_snippet(lit.span)
-                        .unwrap_or_else(|_| "<numeric literal>".to_owned());
-
-                    // If this is a floating point literal that ends with '.',
-                    // get rid of it to stop this from becoming a member access.
-                    let snippet = snippet.trim_suffix('.');
-                    err.span_suggestion(
+                    err.span_label(
                         lit.span,
                         format!(
-                            "you must specify a concrete type for this numeric value, \
-                                         like `{concrete_type}`"
+                            "you must specify a type annotation for this numeric value, \
+                             like `: {concrete_type}`"
                         ),
-                        format!("{snippet}_{concrete_type}"),
-                        Applicability::MaybeIncorrect,
                     );
                 }
                 ExprKind::Path(QPath::Resolved(_, path)) => {
@@ -3053,7 +3030,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                                 );
                             }
                             // For closure parameters with reference patterns (e.g., |&v|), suggest the type annotation
-                            // on the pattern itself, e.g., |&v: &i32|
+                            // on the pattern itself, e.g., |&v: &int|
                             (FileName::Real(_), Node::Pat(pat))
                                 if let Node::Pat(binding_pat) = self.tcx.hir_node(hir_id)
                                     && let hir::PatKind::Binding(..) = binding_pat.kind
@@ -3722,9 +3699,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     let suggested_path = match deref_ty.kind() {
                         ty::Bool
                         | ty::Char
-                        | ty::Int(_)
-                        | ty::Uint(_)
-                        | ty::Float(_)
+                        | ty::Int
+                        | ty::Float
                         | ty::Adt(_, _)
                         | ty::Str
                         | ty::Alias(ty::AliasTy {

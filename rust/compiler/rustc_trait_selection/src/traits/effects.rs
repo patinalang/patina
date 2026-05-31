@@ -356,14 +356,12 @@ fn evaluate_host_effect_for_copy_clone_goal<'tcx>(
         ty::FnDef(..) | ty::FnPtr(..) | ty::Error(_) => Ok(ty::Binder::dummy(vec![])),
 
         // Implementations are provided in core
-        ty::Uint(_)
-        | ty::Int(_)
-        | ty::Infer(ty::IntVar(_) | ty::FloatVar(_))
+        ty::Int
         | ty::Bool
-        | ty::Float(_)
+        | ty::Float
         | ty::Char
-        | ty::RawPtr(..)
         | ty::Term
+        | ty::RawPtr(..)
         | ty::Never
         | ty::Ref(_, _, ty::Mutability::Not)
         | ty::Array(..) => Err(EvaluationFailure::NoSolution),
@@ -382,8 +380,7 @@ fn evaluate_host_effect_for_copy_clone_goal<'tcx>(
         | ty::Param(_)
         | ty::Placeholder(..) => Err(EvaluationFailure::NoSolution),
 
-        ty::Bound(..)
-        | ty::Infer(ty::TyVar(_) | ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) => {
+        ty::Bound(..) | ty::Infer(ty::TyVar(_) | ty::FreshTy(_)) => {
             panic!("unexpected type `{self_ty:?}`")
         }
 
@@ -487,9 +484,8 @@ fn evaluate_host_effect_for_destruct_goal<'tcx>(
         // Trivially implement `[const] Destruct`
         ty::Bool
         | ty::Char
-        | ty::Int(..)
-        | ty::Uint(..)
-        | ty::Float(..)
+        | ty::Int
+        | ty::Float
         | ty::Str
         | ty::Term
         | ty::RawPtr(..)
@@ -497,7 +493,6 @@ fn evaluate_host_effect_for_destruct_goal<'tcx>(
         | ty::FnDef(..)
         | ty::FnPtr(..)
         | ty::Never
-        | ty::Infer(ty::InferTy::FloatVar(_) | ty::InferTy::IntVar(_))
         | ty::Error(_) => thin_vec![],
 
         // Closures are [const] Destruct when all of their upvars (captures) are [const] Destruct.
@@ -520,8 +515,7 @@ fn evaluate_host_effect_for_destruct_goal<'tcx>(
             return Err(EvaluationFailure::NoSolution);
         }
 
-        ty::Bound(..)
-        | ty::Infer(ty::TyVar(_) | ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) => {
+        ty::Bound(..) | ty::Infer(ty::TyVar(_) | ty::FreshTy(_)) => {
             panic!("unexpected type `{self_ty:?}`")
         }
     };

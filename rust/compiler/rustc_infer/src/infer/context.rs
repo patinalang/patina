@@ -74,14 +74,6 @@ impl<'tcx> rustc_type_ir::InferCtxtLike for InferCtxt<'tcx> {
         }
     }
 
-    fn opportunistic_resolve_int_var(&self, vid: ty::IntVid) -> Ty<'tcx> {
-        self.opportunistic_resolve_int_var(vid)
-    }
-
-    fn opportunistic_resolve_float_var(&self, vid: ty::FloatVid) -> Ty<'tcx> {
-        self.opportunistic_resolve_float_var(vid)
-    }
-
     fn opportunistic_resolve_ct_var(&self, vid: ty::ConstVid) -> ty::Const<'tcx> {
         match self.try_resolve_const_var(vid) {
             Ok(ct) => ct,
@@ -105,25 +97,7 @@ impl<'tcx> rustc_type_ir::InferCtxtLike for InferCtxt<'tcx> {
                         ty::InferTy::TyVar(vid) => {
                             !self.try_resolve_ty_var(vid).is_err_and(|_| self.root_var(vid) == vid)
                         }
-                        ty::InferTy::IntVar(vid) => {
-                            let mut inner = self.inner.borrow_mut();
-                            !matches!(
-                                inner.int_unification_table().probe_value(vid),
-                                ty::IntVarValue::Unknown
-                                    if inner.int_unification_table().find(vid) == vid
-                            )
-                        }
-                        ty::InferTy::FloatVar(vid) => {
-                            let mut inner = self.inner.borrow_mut();
-                            !matches!(
-                                inner.float_unification_table().probe_value(vid),
-                                ty::FloatVarValue::Unknown
-                                    if inner.float_unification_table().find(vid) == vid
-                            )
-                        }
-                        ty::InferTy::FreshTy(_)
-                        | ty::InferTy::FreshIntTy(_)
-                        | ty::InferTy::FreshFloatTy(_) => true,
+                        ty::InferTy::FreshTy(_) => true,
                     }
                 } else {
                     true
@@ -187,14 +161,6 @@ impl<'tcx> rustc_type_ir::InferCtxtLike for InferCtxt<'tcx> {
         self.sub_unify_ty_vids_raw(a, b);
     }
 
-    fn equate_int_vids_raw(&self, a: ty::IntVid, b: ty::IntVid) {
-        self.inner.borrow_mut().int_unification_table().union(a, b);
-    }
-
-    fn equate_float_vids_raw(&self, a: ty::FloatVid, b: ty::FloatVid) {
-        self.inner.borrow_mut().float_unification_table().union(a, b);
-    }
-
     fn equate_const_vids_raw(&self, a: ty::ConstVid, b: ty::ConstVid) {
         self.inner.borrow_mut().const_unification_table().union(a, b);
     }
@@ -214,14 +180,6 @@ impl<'tcx> rustc_type_ir::InferCtxtLike for InferCtxt<'tcx> {
             instantiation_variance,
             source_ty,
         )
-    }
-
-    fn instantiate_int_var_raw(&self, vid: ty::IntVid, value: ty::IntVarValue) {
-        self.inner.borrow_mut().int_unification_table().union_value(vid, value);
-    }
-
-    fn instantiate_float_var_raw(&self, vid: ty::FloatVid, value: ty::FloatVarValue) {
-        self.inner.borrow_mut().float_unification_table().union_value(vid, value);
     }
 
     fn instantiate_const_var_raw<R: PredicateEmittingRelation<Self>>(

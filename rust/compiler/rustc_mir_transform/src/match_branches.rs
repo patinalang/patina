@@ -1,7 +1,6 @@
-use rustc_abi::Integer;
 use rustc_const_eval::const_eval::mk_eval_cx_for_const_val;
 use rustc_middle::mir::*;
-use rustc_middle::ty::layout::{IntegerExt, TyAndLayout};
+use rustc_middle::ty::layout::TyAndLayout;
 use rustc_middle::ty::util::Discr;
 use rustc_middle::ty::{self, ScalarInt, Ty, TyCtxt};
 
@@ -457,15 +456,13 @@ fn can_cast(
 ) -> bool {
     let from_scalar = ScalarInt::try_from_uint(src_val.into(), src_layout.size).unwrap();
     let v = match src_layout.ty.kind() {
-        ty::Uint(_) => from_scalar.to_uint(src_layout.size),
-        ty::Int(_) => from_scalar.to_int(src_layout.size) as u128,
+        ty::Int => from_scalar.to_int(src_layout.size) as u128,
         // We can also transform the values of other integer representations (such as char),
         // although this may not be practical in real-world scenarios.
         _ => return false,
     };
     let size = match *cast_ty.kind() {
-        ty::Int(t) => Integer::from_int_ty(&tcx, t).size(),
-        ty::Uint(t) => Integer::from_uint_ty(&tcx, t).size(),
+        ty::Int => tcx.data_layout.pointer_size(),
         _ => return false,
     };
     let v = size.truncate(v);

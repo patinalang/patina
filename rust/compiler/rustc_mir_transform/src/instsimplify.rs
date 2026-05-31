@@ -189,9 +189,8 @@ impl<'tcx> InstSimplifyContext<'_, 'tcx> {
             *rvalue = Rvalue::Use(operand.clone(), WithRetag::Yes);
         } else if *kind == CastKind::Transmute
             // Transmuting an integer to another integer is just a signedness cast
-            && let (ty::Int(int), ty::Uint(uint)) | (ty::Uint(uint), ty::Int(int)) =
-                (operand_ty.kind(), cast_ty.kind())
-            && int.bit_width() == uint.bit_width()
+            && matches!(operand_ty.kind(), ty::Int)
+            && matches!(cast_ty.kind(), ty::Int)
         {
             // The width check isn't strictly necessary, as different widths
             // are UB and thus we'd be allowed to turn it into a cast anyway.

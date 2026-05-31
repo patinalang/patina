@@ -549,7 +549,7 @@ impl<'tcx> TypeRelation<TyCtxt<'tcx>> for Generalizer<'_, 'tcx> {
         // subtyping. This is basically our "occurs check", preventing
         // us from creating infinitely sized types.
         let g = match *t.kind() {
-            ty::Infer(ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) => {
+            ty::Infer(ty::FreshTy(_)) => {
                 bug!("unexpected infer type: {t}")
             }
 
@@ -615,13 +615,6 @@ impl<'tcx> TypeRelation<TyCtxt<'tcx>> for Generalizer<'_, 'tcx> {
                         }
                     }
                 }
-            }
-
-            ty::Infer(ty::IntVar(_) | ty::FloatVar(_)) => {
-                // No matter what mode we are in,
-                // integer/floating-point types must be equal to be
-                // relatable.
-                Ok(t)
             }
 
             ty::Placeholder(placeholder) => {

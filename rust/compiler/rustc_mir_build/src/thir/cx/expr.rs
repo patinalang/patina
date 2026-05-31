@@ -804,9 +804,9 @@ impl<'tcx> ThirBuildCx<'tcx> {
                             .exprs
                             .push(mk_expr(ExprKind::ZstLiteral { user_ty: None }, fun_ty));
                         let variant =
-                            thir.exprs.push(mk_expr(mk_u32_kind(variant.as_u32()), tcx.types.u32));
+                            thir.exprs.push(mk_expr(mk_u32_kind(variant.as_u32()), tcx.types.int));
                         let field =
-                            thir.exprs.push(mk_expr(mk_u32_kind(field.as_u32()), tcx.types.u32));
+                            thir.exprs.push(mk_expr(mk_u32_kind(field.as_u32()), tcx.types.int));
                         let args = Box::new([variant, field]);
                         ExprKind::Call {
                             ty: fun_ty,
@@ -825,8 +825,8 @@ impl<'tcx> ThirBuildCx<'tcx> {
                     expr = Some(match expr.take() {
                         None => next,
                         Some(last) => {
-                            let last = self.thir.exprs.push(mk_expr(last, tcx.types.usize));
-                            let next = self.thir.exprs.push(mk_expr(next, tcx.types.usize));
+                            let last = self.thir.exprs.push(mk_expr(last, tcx.types.int));
+                            let next = self.thir.exprs.push(mk_expr(next, tcx.types.int));
                             ExprKind::Binary { op: BinOp::Add, lhs: last, rhs: next }
                         }
                     });

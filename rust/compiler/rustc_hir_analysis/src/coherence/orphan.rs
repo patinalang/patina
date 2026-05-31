@@ -210,9 +210,8 @@ pub(crate) fn orphan_check_impl(
             ty::Bool
             | ty::Pat(..)
             | ty::Char
-            | ty::Int(..)
-            | ty::Uint(..)
-            | ty::Float(..)
+            | ty::Int
+            | ty::Float
             | ty::Str
             | ty::Term
             | ty::Array(..)

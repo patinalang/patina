@@ -26,9 +26,8 @@ fn sizedness_constraint_for_ty<'tcx>(
         // Always `Sized` or `MetaSized`
         ty::Bool
         | ty::Char
-        | ty::Int(..)
-        | ty::Uint(..)
-        | ty::Float(..)
+        | ty::Int
+        | ty::Float
         | ty::RawPtr(..)
         | ty::Ref(..)
         | ty::FnDef(..)
@@ -373,9 +372,8 @@ fn impl_self_is_guaranteed_unsized<'tcx>(tcx: TyCtxt<'tcx>, impl_def_id: DefId) 
         ty::Dynamic(_, _) | ty::Slice(_) | ty::Str => true,
         ty::Bool
         | ty::Char
-        | ty::Int(_)
-        | ty::Uint(_)
-        | ty::Float(_)
+        | ty::Int
+        | ty::Float
         | ty::Adt(_, _)
         | ty::Foreign(_)
         | ty::Array(_, _)

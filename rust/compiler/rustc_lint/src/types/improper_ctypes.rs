@@ -713,9 +713,13 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
 
             // types which likely have a stable representation, if the target architecture defines those
             // note: before rust 1.77, 128-bit ints were not FFI-safe on x86_64
-            ty::Int(..) | ty::Uint(..) | ty::Float(..) => FfiResult::FfiSafe,
+            ty::Float => FfiResult::FfiSafe,
 
             ty::Bool => FfiResult::FfiSafe,
+
+            ty::Int => {
+                FfiUnsafe { ty, reason: msg!("erlang integers have no C equivalent"), help: None }
+            }
 
             ty::Char => FfiResult::FfiUnsafe {
                 ty,

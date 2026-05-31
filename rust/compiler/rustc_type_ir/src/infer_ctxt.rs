@@ -244,11 +244,6 @@ pub trait InferCtxtLike: Sized {
     fn root_const_var(&self, var: ty::ConstVid) -> ty::ConstVid;
 
     fn opportunistic_resolve_ty_var(&self, vid: ty::TyVid) -> <Self::Interner as Interner>::Ty;
-    fn opportunistic_resolve_int_var(&self, vid: ty::IntVid) -> <Self::Interner as Interner>::Ty;
-    fn opportunistic_resolve_float_var(
-        &self,
-        vid: ty::FloatVid,
-    ) -> <Self::Interner as Interner>::Ty;
     fn opportunistic_resolve_ct_var(
         &self,
         vid: ty::ConstVid,
@@ -281,8 +276,6 @@ pub trait InferCtxtLike: Sized {
 
     fn equate_ty_vids_raw(&self, a: ty::TyVid, b: ty::TyVid);
     fn sub_unify_ty_vids_raw(&self, a: ty::TyVid, b: ty::TyVid);
-    fn equate_int_vids_raw(&self, a: ty::IntVid, b: ty::IntVid);
-    fn equate_float_vids_raw(&self, a: ty::FloatVid, b: ty::FloatVid);
     fn equate_const_vids_raw(&self, a: ty::ConstVid, b: ty::ConstVid);
 
     fn instantiate_ty_var_raw<R: PredicateEmittingRelation<Self>>(
@@ -293,8 +286,6 @@ pub trait InferCtxtLike: Sized {
         instantiation_variance: ty::Variance,
         source_ty: <Self::Interner as Interner>::Ty,
     ) -> RelateResult<Self::Interner, ()>;
-    fn instantiate_int_var_raw(&self, vid: ty::IntVid, value: ty::IntVarValue);
-    fn instantiate_float_var_raw(&self, vid: ty::FloatVid, value: ty::FloatVarValue);
     fn instantiate_const_var_raw<R: PredicateEmittingRelation<Self>>(
         &self,
         relation: &mut R,

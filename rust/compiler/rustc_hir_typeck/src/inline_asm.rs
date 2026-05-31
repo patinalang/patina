@@ -5,9 +5,7 @@ use rustc_errors::{Diag, DiagCtxtHandle, Diagnostic, Level};
 use rustc_hir::def_id::DefId;
 use rustc_hir::{self as hir, LangItem};
 use rustc_middle::bug;
-use rustc_middle::ty::{
-    self, Article, FloatTy, IntTy, Ty, TyCtxt, TypeVisitableExt, UintTy, Unnormalized,
-};
+use rustc_middle::ty::{self, Article, Ty, TyCtxt, TypeVisitableExt, Unnormalized};
 use rustc_session::lint;
 use rustc_span::def_id::LocalDefId;
 use rustc_span::{ErrorGuaranteed, Span, Symbol, sym};
@@ -78,16 +76,8 @@ impl<'a, 'tcx> InlineAsmCtxt<'a, 'tcx> {
         };
 
         match *ty.kind() {
-            ty::Int(IntTy::I8) | ty::Uint(UintTy::U8) => Ok(InlineAsmType::I8),
-            ty::Int(IntTy::I16) | ty::Uint(UintTy::U16) => Ok(InlineAsmType::I16),
-            ty::Int(IntTy::I32) | ty::Uint(UintTy::U32) => Ok(InlineAsmType::I32),
-            ty::Int(IntTy::I64) | ty::Uint(UintTy::U64) => Ok(InlineAsmType::I64),
-            ty::Int(IntTy::I128) | ty::Uint(UintTy::U128) => Ok(InlineAsmType::I128),
-            ty::Int(IntTy::Isize) | ty::Uint(UintTy::Usize) => Ok(asm_ty_isize),
-            ty::Float(FloatTy::F16) => Ok(InlineAsmType::F16),
-            ty::Float(FloatTy::F32) => Ok(InlineAsmType::F32),
-            ty::Float(FloatTy::F64) => Ok(InlineAsmType::F64),
-            ty::Float(FloatTy::F128) => Ok(InlineAsmType::F128),
+            ty::Int => Ok(asm_ty_isize),
+            ty::Float => Ok(InlineAsmType::F64),
             ty::FnPtr(..) => Ok(asm_ty_isize),
             ty::RawPtr(elem_ty, _) => {
                 if self.is_thin_ptr_ty(elem_ty) {
@@ -135,25 +125,13 @@ impl<'a, 'tcx> InlineAsmCtxt<'a, 'tcx> {
                 };
 
                 match ty.kind() {
-                    ty::Int(IntTy::I8) | ty::Uint(UintTy::U8) => Ok(InlineAsmType::VecI8(size)),
-                    ty::Int(IntTy::I16) | ty::Uint(UintTy::U16) => Ok(InlineAsmType::VecI16(size)),
-                    ty::Int(IntTy::I32) | ty::Uint(UintTy::U32) => Ok(InlineAsmType::VecI32(size)),
-                    ty::Int(IntTy::I64) | ty::Uint(UintTy::U64) => Ok(InlineAsmType::VecI64(size)),
-                    ty::Int(IntTy::I128) | ty::Uint(UintTy::U128) => {
-                        Ok(InlineAsmType::VecI128(size))
-                    }
-                    ty::Int(IntTy::Isize) | ty::Uint(UintTy::Usize) => {
-                        Ok(match self.tcx().sess.target.pointer_width {
-                            16 => InlineAsmType::VecI16(size),
-                            32 => InlineAsmType::VecI32(size),
-                            64 => InlineAsmType::VecI64(size),
-                            width => bug!("unsupported pointer width: {width}"),
-                        })
-                    }
-                    ty::Float(FloatTy::F16) => Ok(InlineAsmType::VecF16(size)),
-                    ty::Float(FloatTy::F32) => Ok(InlineAsmType::VecF32(size)),
-                    ty::Float(FloatTy::F64) => Ok(InlineAsmType::VecF64(size)),
-                    ty::Float(FloatTy::F128) => Ok(InlineAsmType::VecF128(size)),
+                    ty::Int => Ok(match self.tcx().sess.target.pointer_width {
+                        16 => InlineAsmType::VecI16(size),
+                        32 => InlineAsmType::VecI32(size),
+                        64 => InlineAsmType::VecI64(size),
+                        width => bug!("unsupported pointer width: {width}"),
+                    }),
+                    ty::Float => Ok(InlineAsmType::VecF64(size)),
                     _ => Err(NonAsmTypeReason::InvalidElement(field.did, ty)),
                 }
             }

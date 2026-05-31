@@ -1018,7 +1018,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         err.subdiagnostic(ExprParenthesesNeeded::surrounding(*sp));
                     } else {
                         match actual.kind() {
-                            ty::Uint(_) if op == hir::UnOp::Neg => {
+                            ty::Int if op == hir::UnOp::Neg => {
                                 err.note("unsigned values cannot be negated");
 
                                 if let ExprKind::Unary(
@@ -1026,7 +1026,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                                     Expr {
                                         kind:
                                             ExprKind::Lit(Spanned {
-                                                node: ast::LitKind::Int(Pu128(1), _),
+                                                node: ast::LitKind::Int(Pu128(1)),
                                                 ..
                                             }),
                                         ..
@@ -1052,7 +1052,12 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                                     );
                                 }
                             }
-                            ty::Str | ty::Never | ty::Char | ty::Tuple(_) | ty::Array(_, _) => {}
+                            ty::Str
+                            | ty::Never
+                            | ty::Char
+                            | ty::Int
+                            | ty::Tuple(_)
+                            | ty::Array(_, _) => {}
                             ty::Ref(_, lty, _) if *lty.kind() == ty::Str => {}
                             _ => {
                                 self.note_unmet_impls_on_type(&mut err, &errors, true);

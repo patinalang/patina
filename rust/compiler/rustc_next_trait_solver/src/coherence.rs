@@ -332,9 +332,8 @@ where
         let result = match ty.kind() {
             ty::Bool
             | ty::Char
-            | ty::Int(..)
-            | ty::Uint(..)
-            | ty::Float(..)
+            | ty::Int
+            | ty::Float
             | ty::Str
             | ty::Term
             | ty::Pat(..)

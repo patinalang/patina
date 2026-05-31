@@ -58,9 +58,8 @@ impl<'tcx> AbiHashStable<'tcx> for Ty<'tcx> {
         match self.kind() {
             ty::Bool => sym::bool.abi_hash(tcx, hasher),
             ty::Char => sym::char.abi_hash(tcx, hasher),
-            ty::Int(int_ty) => int_ty.name_str().abi_hash(tcx, hasher),
-            ty::Uint(uint_ty) => uint_ty.name_str().abi_hash(tcx, hasher),
-            ty::Float(float_ty) => float_ty.name_str().abi_hash(tcx, hasher),
+            ty::Int => sym::int.abi_hash(tcx, hasher),
+            ty::Float => sym::float.abi_hash(tcx, hasher),
 
             ty::Adt(adt_def, args) => {
                 adt_def.is_struct().abi_hash(tcx, hasher);

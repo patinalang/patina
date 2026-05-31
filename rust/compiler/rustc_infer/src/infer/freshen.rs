@@ -184,32 +184,7 @@ impl<'a, 'tcx> TypeFreshener<'a, 'tcx> {
                 }
             }
 
-            ty::IntVar(v) => {
-                let mut inner = self.infcx.inner.borrow_mut();
-                let value = inner.int_unification_table().probe_value(v);
-                match value {
-                    ty::IntVarValue::IntType(ty) => Ty::new_int(self.infcx.tcx, ty),
-                    ty::IntVarValue::UintType(ty) => Ty::new_uint(self.infcx.tcx, ty),
-                    ty::IntVarValue::Unknown => {
-                        let input = ty::IntVar(inner.int_unification_table().find(v));
-                        self.freshen_ty(input, |n| Ty::new_fresh_int(self.infcx.tcx, n))
-                    }
-                }
-            }
-
-            ty::FloatVar(v) => {
-                let mut inner = self.infcx.inner.borrow_mut();
-                let value = inner.float_unification_table().probe_value(v);
-                match value {
-                    ty::FloatVarValue::Known(ty) => Ty::new_float(self.infcx.tcx, ty),
-                    ty::FloatVarValue::Unknown => {
-                        let input = ty::FloatVar(inner.float_unification_table().find(v));
-                        self.freshen_ty(input, |n| Ty::new_fresh_float(self.infcx.tcx, n))
-                    }
-                }
-            }
-
-            ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_) => {
+            ty::FreshTy(_) => {
                 bug!("trying to freshen already-freshened type {ty:?}");
             }
         }

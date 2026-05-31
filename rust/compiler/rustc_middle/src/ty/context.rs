@@ -276,8 +276,6 @@ impl<'tcx> CtxtInterners<'tcx> {
 
 const NUM_PREINTERNED_TY_VARS: u32 = 100;
 const NUM_PREINTERNED_FRESH_TYS: u32 = 20;
-const NUM_PREINTERNED_FRESH_INT_TYS: u32 = 3;
-const NUM_PREINTERNED_FRESH_FLOAT_TYS: u32 = 3;
 const NUM_PREINTERNED_ANON_BOUND_TYS_I: u32 = 3;
 
 // From general profiling of the *max vars during canonicalization* of a value:
@@ -300,24 +298,10 @@ pub struct CommonTypes<'tcx> {
     pub unit: Ty<'tcx>,
     pub bool: Ty<'tcx>,
     pub char: Ty<'tcx>,
-    pub isize: Ty<'tcx>,
-    pub i8: Ty<'tcx>,
-    pub i16: Ty<'tcx>,
-    pub i32: Ty<'tcx>,
-    pub i64: Ty<'tcx>,
-    pub i128: Ty<'tcx>,
-    pub usize: Ty<'tcx>,
-    pub u8: Ty<'tcx>,
-    pub u16: Ty<'tcx>,
-    pub u32: Ty<'tcx>,
-    pub u64: Ty<'tcx>,
-    pub u128: Ty<'tcx>,
-    pub f16: Ty<'tcx>,
-    pub f32: Ty<'tcx>,
-    pub f64: Ty<'tcx>,
-    pub f128: Ty<'tcx>,
+    pub float: Ty<'tcx>,
     pub str_: Ty<'tcx>,
     pub term: Ty<'tcx>,
+    pub int: Ty<'tcx>,
     pub never: Ty<'tcx>,
     pub self_param: Ty<'tcx>,
 
@@ -332,12 +316,6 @@ pub struct CommonTypes<'tcx> {
 
     /// Pre-interned `Infer(ty::FreshTy(n))` for small values of `n`.
     pub fresh_tys: Vec<Ty<'tcx>>,
-
-    /// Pre-interned `Infer(ty::FreshIntTy(n))` for small values of `n`.
-    pub fresh_int_tys: Vec<Ty<'tcx>>,
-
-    /// Pre-interned `Infer(ty::FreshFloatTy(n))` for small values of `n`.
-    pub fresh_float_tys: Vec<Ty<'tcx>>,
 
     /// Pre-interned values of the form:
     /// `Bound(BoundVarIndexKind::Bound(DebruijnIndex(i)), BoundTy { var: v, kind:
@@ -387,10 +365,6 @@ impl<'tcx> CommonTypes<'tcx> {
             (0..NUM_PREINTERNED_TY_VARS).map(|n| mk(Infer(ty::TyVar(TyVid::from(n))))).collect();
         let fresh_tys: Vec<_> =
             (0..NUM_PREINTERNED_FRESH_TYS).map(|n| mk(Infer(ty::FreshTy(n)))).collect();
-        let fresh_int_tys: Vec<_> =
-            (0..NUM_PREINTERNED_FRESH_INT_TYS).map(|n| mk(Infer(ty::FreshIntTy(n)))).collect();
-        let fresh_float_tys: Vec<_> =
-            (0..NUM_PREINTERNED_FRESH_FLOAT_TYS).map(|n| mk(Infer(ty::FreshFloatTy(n)))).collect();
 
         let anon_bound_tys = (0..NUM_PREINTERNED_ANON_BOUND_TYS_I)
             .map(|i| {
@@ -419,32 +393,16 @@ impl<'tcx> CommonTypes<'tcx> {
             bool: mk(Bool),
             char: mk(Char),
             never: mk(Never),
-            isize: mk(Int(ty::IntTy::Isize)),
-            i8: mk(Int(ty::IntTy::I8)),
-            i16: mk(Int(ty::IntTy::I16)),
-            i32: mk(Int(ty::IntTy::I32)),
-            i64: mk(Int(ty::IntTy::I64)),
-            i128: mk(Int(ty::IntTy::I128)),
-            usize: mk(Uint(ty::UintTy::Usize)),
-            u8: mk(Uint(ty::UintTy::U8)),
-            u16: mk(Uint(ty::UintTy::U16)),
-            u32: mk(Uint(ty::UintTy::U32)),
-            u64: mk(Uint(ty::UintTy::U64)),
-            u128: mk(Uint(ty::UintTy::U128)),
-            f16: mk(Float(ty::FloatTy::F16)),
-            f32: mk(Float(ty::FloatTy::F32)),
-            f64: mk(Float(ty::FloatTy::F64)),
-            f128: mk(Float(ty::FloatTy::F128)),
+            float: mk(Float),
             str_: mk(Str),
             term: mk(Term),
+            int: mk(Int),
             self_param: mk(ty::Param(ty::ParamTy { index: 0, name: kw::SelfUpper })),
 
             trait_object_dummy_self: fresh_tys[0],
 
             ty_vars,
             fresh_tys,
-            fresh_int_tys,
-            fresh_float_tys,
             anon_bound_tys,
             anon_canonical_bound_tys,
         }
@@ -1748,8 +1706,8 @@ macro_rules! sty_debug_print {
                     let types = shard.iter();
                     for &(InternedInSet(t), ()) in types {
                         let variant = match t.internee {
-                            ty::Bool | ty::Char | ty::Int(..) | ty::Uint(..) |
-                                ty::Float(..) | ty::Str | ty::Term | ty::Never => continue,
+                            ty::Bool | ty::Char | ty::Int |
+                                ty::Float | ty::Str | ty::Term | ty::Never => continue,
                             ty::Error(_) => /* unimportant */ continue,
                             $(ty::$variant(..) => &mut $variant,)*
                         };

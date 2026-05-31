@@ -45,7 +45,7 @@ pub(crate) fn parse_single_integer(
         cx.adcx().expected_integer_literal(single.span());
         return None;
     };
-    let LitKind::Int(num, _ty) = lit.kind else {
+    let LitKind::Int(num) = lit.kind else {
         cx.adcx().expected_integer_literal(single.span());
         return None;
     };

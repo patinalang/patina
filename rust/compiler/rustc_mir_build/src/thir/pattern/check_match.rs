@@ -1286,12 +1286,12 @@ fn report_non_exhaustive_match<'p, 'tcx>(
 
         for ty in special_tys {
             if ty.is_ptr_sized_integral() {
-                if ty.inner() == cx.tcx.types.usize {
+                if ty.inner() == cx.tcx.types.int {
                     err.note(format!(
                         "`{ty}::MAX` is not treated as exhaustive, \
                         so half-open ranges are necessary to match exhaustively",
                     ));
-                } else if ty.inner() == cx.tcx.types.isize {
+                } else if ty.inner() == cx.tcx.types.int {
                     err.note(format!(
                         "`{ty}::MIN` and `{ty}::MAX` are not treated as exhaustive, \
                         so half-open ranges are necessary to match exhaustively",

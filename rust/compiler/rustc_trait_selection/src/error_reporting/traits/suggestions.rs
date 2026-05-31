@@ -33,7 +33,7 @@ use rustc_middle::ty::print::{
     with_types_for_suggestion,
 };
 use rustc_middle::ty::{
-    self, AdtKind, GenericArgs, InferTy, IsSuggestable, Ty, TyCtxt, TypeFoldable, TypeFolder,
+    self, AdtKind, GenericArgs, IsSuggestable, Ty, TyCtxt, TypeFoldable, TypeFolder,
     TypeSuperFoldable, TypeSuperVisitable, TypeVisitableExt, TypeVisitor, TypeckResults,
     Unnormalized, Upcast, suggest_arbitrary_trait_bound, suggest_constraining_type_param,
 };
@@ -4598,9 +4598,8 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             ObligationCauseCode::BinOp { rhs_span, rhs_is_lit, .. } if *rhs_is_lit => rhs_span,
             _ => return,
         };
-        if let ty::Float(_) = trait_pred.skip_binder().self_ty().kind()
-            && let ty::Infer(InferTy::IntVar(_)) =
-                trait_pred.skip_binder().trait_ref.args.type_at(1).kind()
+        if trait_pred.skip_binder().self_ty().is_floating_point()
+            && trait_pred.skip_binder().trait_ref.args.type_at(1).is_integral()
         {
             err.span_suggestion_verbose(
                 rhs_span.shrink_to_hi(),
@@ -4703,7 +4702,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 .is_diagnostic_item(sym::SliceIndex, trait_pred.skip_binder().trait_ref.def_id)
             && let ty::Slice(_) = trait_pred.skip_binder().trait_ref.args.type_at(1).kind()
             && let ty::Ref(_, inner_ty, _) = trait_pred.skip_binder().self_ty().kind()
-            && let ty::Uint(ty::UintTy::Usize) = inner_ty.kind()
+            && let ty::Int = inner_ty.kind()
         {
             err.span_suggestion_verbose(
                 obligation.cause.span.shrink_to_lo(),
@@ -5759,8 +5758,8 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             ty::Never | ty::Error(_) => return None,
             ty::Bool => "false".to_string(),
             ty::Char => "\'x\'".to_string(),
-            ty::Int(_) | ty::Uint(_) => "42".into(),
-            ty::Float(_) => "3.14159".into(),
+            ty::Int => "42".into(),
+            ty::Float => "3.14159".into(),
             ty::Slice(_) => "[]".to_string(),
             ty::Adt(def, _) if Some(def.did()) == tcx.get_diagnostic_item(sym::Vec) => {
                 "vec![]".to_string()

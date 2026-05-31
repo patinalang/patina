@@ -677,7 +677,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                 // though. FIXME: Do we really *need* to count this as a use?
                 // Could partial array tracking work off something else instead?
                 self.cfg.push_fake_read(block, source_info, FakeReadCause::ForIndex, place);
-                let const_ = Const::Ty(self.tcx.types.usize, *len_const);
+                let const_ = Const::Ty(self.tcx.types.int, *len_const);
                 Operand::Constant(Box::new(ConstOperand { span, user_ty: None, const_ }))
             }
             ty::Slice(_elem_ty) => {
@@ -703,7 +703,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                     Operand::Move(slice_ptr)
                 };
 
-                let len = self.temp(self.tcx.types.usize, span);
+                let len = self.temp(self.tcx.types.int, span);
                 self.cfg.push_assign(
                     block,
                     source_info,

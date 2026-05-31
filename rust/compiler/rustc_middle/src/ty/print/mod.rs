@@ -331,8 +331,7 @@ fn characteristic_def_id_of_type_cached<'a>(
 
         ty::Bool
         | ty::Char
-        | ty::Int(_)
-        | ty::Uint(_)
+        | ty::Int
         | ty::Str
         | ty::Term
         | ty::FnPtr(..)
@@ -344,7 +343,7 @@ fn characteristic_def_id_of_type_cached<'a>(
         | ty::Bound(..)
         | ty::Error(_)
         | ty::Never
-        | ty::Float(_) => None,
+        | ty::Float => None,
     }
 }
 pub fn characteristic_def_id_of_type(ty: Ty<'_>) -> Option<DefId> {

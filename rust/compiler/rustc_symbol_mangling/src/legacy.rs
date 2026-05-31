@@ -299,7 +299,7 @@ impl<'tcx> Printer<'tcx> for LegacySymbolMangler<'tcx> {
                 // The `pretty_print_const` formatting depends on -Zverbose-internals
                 // flag, so we cannot reuse it here.
                 let scalar = cv.to_leaf();
-                let signed = matches!(cv.ty.kind(), ty::Int(_));
+                let signed = matches!(cv.ty.kind(), ty::Int);
                 write!(
                     self,
                     "{:#?}",

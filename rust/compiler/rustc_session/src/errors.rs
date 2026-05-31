@@ -471,7 +471,7 @@ struct InvalidLiteralSuffix<'a> {
 
 #[derive(Diagnostic)]
 #[diag("invalid width `{$width}` for integer literal")]
-#[help("valid widths are 8, 16, 32, 64 and 128")]
+#[help("integer literals must be unsuffixed")]
 struct InvalidIntLiteralWidth {
     #[primary_span]
     span: Span,
@@ -504,7 +504,7 @@ struct InvalidNumLiteralSuffix {
 
 #[derive(Diagnostic)]
 #[diag("invalid width `{$width}` for float literal")]
-#[help("valid widths are 32 and 64")]
+#[help("float literals must be unsuffixed or suffixed with `f`")]
 struct InvalidFloatLiteralWidth {
     #[primary_span]
     span: Span,

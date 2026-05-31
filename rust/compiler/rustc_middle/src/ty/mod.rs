@@ -1503,25 +1503,8 @@ impl<'tcx> TyCtxt<'tcx> {
                     }
                     attr::ReprTransparent => ReprFlags::IS_TRANSPARENT,
                     attr::ReprSimd => ReprFlags::IS_SIMD,
-                    attr::ReprInt(i) => {
-                        size = Some(match i {
-                            attr::IntType::SignedInt(x) => match x {
-                                ast::IntTy::Isize => IntegerType::Pointer(true),
-                                ast::IntTy::I8 => IntegerType::Fixed(Integer::I8, true),
-                                ast::IntTy::I16 => IntegerType::Fixed(Integer::I16, true),
-                                ast::IntTy::I32 => IntegerType::Fixed(Integer::I32, true),
-                                ast::IntTy::I64 => IntegerType::Fixed(Integer::I64, true),
-                                ast::IntTy::I128 => IntegerType::Fixed(Integer::I128, true),
-                            },
-                            attr::IntType::UnsignedInt(x) => match x {
-                                ast::UintTy::Usize => IntegerType::Pointer(false),
-                                ast::UintTy::U8 => IntegerType::Fixed(Integer::I8, false),
-                                ast::UintTy::U16 => IntegerType::Fixed(Integer::I16, false),
-                                ast::UintTy::U32 => IntegerType::Fixed(Integer::I32, false),
-                                ast::UintTy::U64 => IntegerType::Fixed(Integer::I64, false),
-                                ast::UintTy::U128 => IntegerType::Fixed(Integer::I128, false),
-                            },
-                        });
+                    attr::ReprInt => {
+                        size = Some(IntegerType::Fixed(Integer::I128, true));
                         ReprFlags::empty()
                     }
                     attr::ReprAlign(align) => {
@@ -2389,10 +2372,7 @@ fn typetree_from_ty_impl_inner<'tcx>(
             (Kind::Integer, ty.primitive_size(tcx).bytes_usize())
         } else if ty.is_floating_point() {
             match ty {
-                x if x == tcx.types.f16 => (Kind::Half, 2),
-                x if x == tcx.types.f32 => (Kind::Float, 4),
-                x if x == tcx.types.f64 => (Kind::Double, 8),
-                x if x == tcx.types.f128 => (Kind::F128, 16),
+                x if x == tcx.types.float => (Kind::Double, 4),
                 _ => (Kind::Integer, 0),
             }
         } else {

@@ -131,9 +131,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
             ty::Bool
             | ty::Char
-            | ty::Int(..)
-            | ty::Uint(..)
-            | ty::Float(_)
+            | ty::Int
+            | ty::Float
             | ty::Array(..)
             | ty::CoroutineWitness(..)
             | ty::RawPtr(_, _)
@@ -381,7 +380,7 @@ impl<'a, 'tcx> CastCheck<'tcx> {
                 );
                 err.span_label(self.span, "invalid cast");
                 if self.expr_ty.is_numeric() {
-                    if self.expr_ty == fcx.tcx.types.u32 {
+                    if self.expr_ty == fcx.tcx.types.int {
                         err.multipart_suggestion(
                             "consider using `char::from_u32` instead",
                             vec![
@@ -390,7 +389,7 @@ impl<'a, 'tcx> CastCheck<'tcx> {
                             ],
                             Applicability::MachineApplicable,
                         );
-                    } else if self.expr_ty == fcx.tcx.types.i8 {
+                    } else if self.expr_ty == fcx.tcx.types.int {
                         err.span_help(self.span, "consider casting from `u8` instead");
                     } else {
                         err.span_help(
@@ -784,12 +783,7 @@ impl<'a, 'tcx> CastCheck<'tcx> {
                     ty::Ref(_, inner_ty, mutbl) => {
                         return match t_cast {
                             Int(_) | Float => match *inner_ty.kind() {
-                                ty::Int(_)
-                                | ty::Uint(_)
-                                | ty::Float(_)
-                                | ty::Infer(ty::InferTy::IntVar(_) | ty::InferTy::FloatVar(_)) => {
-                                    Err(CastError::NeedDeref)
-                                }
+                                ty::Int | ty::Float => Err(CastError::NeedDeref),
                                 _ => Err(CastError::NeedViaPtr),
                             },
                             // array-ptr-cast
@@ -824,7 +818,7 @@ impl<'a, 'tcx> CastCheck<'tcx> {
             (_, Int(Bool)) => Err(CastError::CastToBool),
 
             // * -> Char
-            (Int(U(ty::UintTy::U8)), Int(Char)) => Ok(CastKind::U8CharCast), // u8-char-cast
+            (Int(U), Int(Char)) => Ok(CastKind::U8CharCast), // u8-char-cast
             (_, Int(Char)) => Err(CastError::CastToChar),
 
             // prim -> float,ptr
@@ -1115,7 +1109,7 @@ impl<'a, 'tcx> CastCheck<'tcx> {
         let expr_prec = fcx.precedence(self.expr);
         let needs_parens = expr_prec < ExprPrecedence::Unambiguous;
 
-        let needs_cast = !matches!(t_c, ty::cast::IntTy::U(ty::UintTy::Usize));
+        let needs_cast = !matches!(t_c, ty::cast::IntTy::U);
         let cast_span = self.expr_span.shrink_to_hi().to(self.cast_span);
         let expr_ty = fcx.resolve_vars_if_possible(self.expr_ty);
         let cast_ty = fcx.resolve_vars_if_possible(self.cast_ty);

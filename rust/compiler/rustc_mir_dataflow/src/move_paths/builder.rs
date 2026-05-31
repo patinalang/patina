@@ -147,9 +147,8 @@ impl<'a, 'tcx, F: Fn(Ty<'tcx>) -> bool> MoveDataBuilder<'a, 'tcx, F> {
                             }
                             ty::Bool
                             | ty::Char
-                            | ty::Int(_)
-                            | ty::Uint(_)
-                            | ty::Float(_)
+                            | ty::Int
+                            | ty::Float
                             | ty::Foreign(_)
                             | ty::Str
                             | ty::Term
@@ -190,9 +189,8 @@ impl<'a, 'tcx, F: Fn(Ty<'tcx>) -> bool> MoveDataBuilder<'a, 'tcx, F> {
                             | ty::Tuple(_) => (),
                             ty::Bool
                             | ty::Char
-                            | ty::Int(_)
-                            | ty::Uint(_)
-                            | ty::Float(_)
+                            | ty::Int
+                            | ty::Float
                             | ty::Foreign(_)
                             | ty::Str
                             | ty::Term

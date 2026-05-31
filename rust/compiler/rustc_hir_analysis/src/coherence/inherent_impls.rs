@@ -183,9 +183,8 @@ impl<'tcx> InherentCollect<'tcx> {
             ty::Pat(_, _) => unreachable!(),
             ty::Bool
             | ty::Char
-            | ty::Int(_)
-            | ty::Uint(_)
-            | ty::Float(_)
+            | ty::Int
+            | ty::Float
             | ty::Str
             | ty::Term
             | ty::Array(..)

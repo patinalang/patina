@@ -1,13 +1,13 @@
 use std::assert_matches;
 
-use rustc_abi::{FieldIdx, Integer};
+use rustc_abi::FieldIdx;
 use rustc_apfloat::ieee::{Double, Half, Quad, Single};
 use rustc_apfloat::{Float, FloatConvert};
 use rustc_middle::mir::CastKind;
 use rustc_middle::mir::interpret::{InterpResult, PointerArithmetic, Scalar};
 use rustc_middle::ty::adjustment::PointerCoercion;
-use rustc_middle::ty::layout::{IntegerExt, TyAndLayout};
-use rustc_middle::ty::{self, FloatTy, Ty};
+use rustc_middle::ty::layout::TyAndLayout;
+use rustc_middle::ty::{self, Ty};
 use rustc_middle::{bug, span_bug};
 use tracing::trace;
 
@@ -179,15 +179,10 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
         src: &ImmTy<'tcx, M::Provenance>,
         cast_to: TyAndLayout<'tcx>,
     ) -> InterpResult<'tcx, ImmTy<'tcx, M::Provenance>> {
-        let ty::Float(fty) = src.layout.ty.kind() else {
+        let ty::Float = src.layout.ty.kind() else {
             bug!("FloatToFloat/FloatToInt cast: source type {} is not a float type", src.layout.ty)
         };
-        let val = match fty {
-            FloatTy::F16 => self.cast_from_float(src.to_scalar().to_f16()?, cast_to.ty),
-            FloatTy::F32 => self.cast_from_float(src.to_scalar().to_f32()?, cast_to.ty),
-            FloatTy::F64 => self.cast_from_float(src.to_scalar().to_f64()?, cast_to.ty),
-            FloatTy::F128 => self.cast_from_float(src.to_scalar().to_f128()?, cast_to.ty),
-        };
+        let val = self.cast_from_float(src.to_scalar().to_f64()?, cast_to.ty);
         interp_ok(ImmTy::from_scalar(val, cast_to))
     }
 
@@ -252,7 +247,7 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
 
         // First cast to usize.
         let scalar = src.to_scalar();
-        let addr = self.cast_from_int_like(scalar, src.layout, self.tcx.types.usize)?;
+        let addr = self.cast_from_int_like(scalar, src.layout, self.tcx.types.int)?;
         let addr = addr.to_target_usize(self)?;
 
         // Then turn address into pointer.
@@ -272,8 +267,8 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
         let signed = src_layout.backend_repr.is_signed(); // Also asserts that abi is `Scalar`.
 
         let v = match src_layout.ty.kind() {
-            ty::Uint(_) | ty::RawPtr(..) | ty::FnPtr(..) => scalar.to_uint(src_layout.size)?,
-            ty::Int(_) => scalar.to_int(src_layout.size)? as u128, // we will cast back to `i128` below if the sign matters
+            ty::RawPtr(..) | ty::FnPtr(..) => scalar.to_uint(src_layout.size)?,
+            ty::Int => scalar.to_int(src_layout.size)? as u128, // we will cast back to `i128` below if the sign matters
             ty::Bool => scalar.to_bool()?.into(),
             ty::Char => scalar.to_char()?.into(),
             _ => span_bug!(self.cur_span(), "invalid int-like cast from {}", src_layout.ty),
@@ -281,33 +276,19 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
 
         interp_ok(match *cast_ty.kind() {
             // int -> int
-            ty::Int(_) | ty::Uint(_) => {
-                let size = match *cast_ty.kind() {
-                    ty::Int(t) => Integer::from_int_ty(self, t).size(),
-                    ty::Uint(t) => Integer::from_uint_ty(self, t).size(),
-                    _ => bug!(),
-                };
+            ty::Int => {
+                let size = self.pointer_size();
                 let v = size.truncate(v);
                 Scalar::from_uint(v, size)
             }
 
             // signed int -> float
-            ty::Float(fty) if signed => {
+            ty::Float if signed => {
                 let v = v as i128;
-                match fty {
-                    FloatTy::F16 => Scalar::from_f16(Half::from_i128(v).value),
-                    FloatTy::F32 => Scalar::from_f32(Single::from_i128(v).value),
-                    FloatTy::F64 => Scalar::from_f64(Double::from_i128(v).value),
-                    FloatTy::F128 => Scalar::from_f128(Quad::from_i128(v).value),
-                }
+                Scalar::from_f64(Double::from_i128(v).value)
             }
             // unsigned int -> float
-            ty::Float(fty) => match fty {
-                FloatTy::F16 => Scalar::from_f16(Half::from_u128(v).value),
-                FloatTy::F32 => Scalar::from_f32(Single::from_u128(v).value),
-                FloatTy::F64 => Scalar::from_f64(Double::from_u128(v).value),
-                FloatTy::F128 => Scalar::from_f128(Quad::from_u128(v).value),
-            },
+            ty::Float => Scalar::from_f64(Double::from_u128(v).value),
 
             // u8 -> char
             ty::Char => Scalar::from_u32(u8::try_from(v).unwrap().into()),
@@ -328,38 +309,13 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
             + FloatConvert<Quad>,
     {
         match *dest_ty.kind() {
-            // float -> uint
-            ty::Uint(t) => {
-                let size = Integer::from_uint_ty(self, t).size();
-                // `to_u128` is a saturating cast, which is what we need
-                // (https://doc.rust-lang.org/nightly/nightly-rustc/rustc_apfloat/trait.Float.html#method.to_i128_r).
-                let v = f.to_u128(size.bits_usize()).value;
-                // This should already fit the bit width
-                Scalar::from_uint(v, size)
-            }
-            // float -> int
-            ty::Int(t) => {
-                let size = Integer::from_int_ty(self, t).size();
-                // `to_i128` is a saturating cast, which is what we need
-                // (https://doc.rust-lang.org/nightly/nightly-rustc/rustc_apfloat/trait.Float.html#method.to_i128_r).
+            ty::Int => {
+                let size = self.pointer_size();
                 let v = f.to_i128(size.bits_usize()).value;
                 Scalar::from_int(v, size)
             }
             // float -> float
-            ty::Float(fty) => match fty {
-                FloatTy::F16 => {
-                    Scalar::from_f16(self.adjust_nan(f.convert(&mut false).value, &[f]))
-                }
-                FloatTy::F32 => {
-                    Scalar::from_f32(self.adjust_nan(f.convert(&mut false).value, &[f]))
-                }
-                FloatTy::F64 => {
-                    Scalar::from_f64(self.adjust_nan(f.convert(&mut false).value, &[f]))
-                }
-                FloatTy::F128 => {
-                    Scalar::from_f128(self.adjust_nan(f.convert(&mut false).value, &[f]))
-                }
-            },
+            ty::Float => Scalar::from_f64(self.adjust_nan(f.convert(&mut false).value, &[f])),
             // That's it.
             _ => span_bug!(self.cur_span(), "invalid float to {} cast", dest_ty),
         }

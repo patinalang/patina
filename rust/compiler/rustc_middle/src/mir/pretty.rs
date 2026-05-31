@@ -1393,7 +1393,7 @@ impl<'tcx> ExtraComments<'tcx> {
 
 fn use_verbose(ty: Ty<'_>, fn_def: bool) -> bool {
     match *ty.kind() {
-        ty::Int(_) | ty::Uint(_) | ty::Bool | ty::Char | ty::Float(_) => false,
+        ty::Int | ty::Bool | ty::Char | ty::Float => false,
         // Unit type
         ty::Tuple(g_args) if g_args.is_empty() => false,
         ty::Tuple(g_args) => g_args.iter().any(|g_arg| use_verbose(g_arg, fn_def)),
@@ -1866,7 +1866,7 @@ fn pretty_print_const_value_tcx<'tcx>(
         return Ok(());
     }
 
-    let u8_type = tcx.types.u8;
+    let u8_type = tcx.types.int;
     match (ct, ty.kind()) {
         // Byte/string slices, printed as (byte) string literals.
         (_, ty::Ref(_, inner_ty, _)) if let ty::Str = inner_ty.kind() => {

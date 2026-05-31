@@ -1,30 +1,19 @@
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/custom_types/enum__03.pt:10:21
+error[E0369]: cannot add `int` to `int`
+  --> tests/ui/src/custom_types/enum__03.pt:12:28
    |
-LL |     fn run(self, x: int, y: int) -> int {
-   |                     ^^^
-   |                     |
-   |                     not found in this scope
-   |                     help: perhaps you intended to use this type: `i32`
+LL |             Self::Add => x + y,
+   |                          - ^ - int
+   |                          |
+   |                          int
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/custom_types/enum__03.pt:10:29
+error[E0369]: cannot subtract `int` from `int`
+  --> tests/ui/src/custom_types/enum__03.pt:13:33
    |
-LL |     fn run(self, x: int, y: int) -> int {
-   |                             ^^^
-   |                             |
-   |                             not found in this scope
-   |                             help: perhaps you intended to use this type: `i32`
+LL |             Self::Subtract => x - y,
+   |                               - ^ - int
+   |                               |
+   |                               int
 
-error[E0425]: cannot find type `int` in this scope
-  --> tests/ui/src/custom_types/enum__03.pt:10:37
-   |
-LL |     fn run(self, x: int, y: int) -> int {
-   |                                     ^^^
-   |                                     |
-   |                                     not found in this scope
-   |                                     help: perhaps you intended to use this type: `i32`
+error: aborting due to 2 previous errors
 
-error: aborting due to 3 previous errors
-
-For more information about this error, try `rustc --explain E0425`.
+For more information about this error, try `rustc --explain E0369`.

@@ -26,7 +26,7 @@ use crate::lints::{
 use crate::{LateContext, LateLintPass, LintContext};
 
 mod literal;
-use literal::{int_ty_range, lint_literal, uint_ty_range};
+use literal::lint_literal;
 
 declare_lint! {
     /// The `unused_comparisons` lint detects comparisons made useless by
@@ -624,30 +624,15 @@ impl<'tcx> LateLintPass<'tcx> for TypeLimits {
             // the comparison
             let norm_binop = if swap { rev_binop(binop) } else { binop };
             match *cx.typeck_results().node_type(expr.hir_id).kind() {
-                ty::Int(int_ty) => {
-                    let (min, max) = int_ty_range(int_ty);
+                ty::Int => {
                     let lit_val: i128 = match lit.kind {
                         hir::ExprKind::Lit(li) => match li.node {
-                            ast::LitKind::Int(
-                                v,
-                                ast::LitIntType::Signed(_) | ast::LitIntType::Unsuffixed,
-                            ) => v.get() as i128,
+                            ast::LitKind::Int(v) => v.get() as i128,
                             _ => return true,
                         },
                         _ => bug!(),
                     };
-                    is_valid(norm_binop, lit_val, min, max)
-                }
-                ty::Uint(uint_ty) => {
-                    let (min, max): (u128, u128) = uint_ty_range(uint_ty);
-                    let lit_val: u128 = match lit.kind {
-                        hir::ExprKind::Lit(li) => match li.node {
-                            ast::LitKind::Int(v, _) => v.get(),
-                            _ => return true,
-                        },
-                        _ => bug!(),
-                    };
-                    is_valid(norm_binop, lit_val, min, max)
+                    is_valid(norm_binop, lit_val, i128::MIN, i128::MAX)
                 }
                 _ => true,
             }
@@ -793,7 +778,7 @@ fn get_nullable_type<'tcx>(
             return get_nullable_type(tcx, typing_env, inner_field_ty);
         }
         ty::Pat(base, ..) => return get_nullable_type(tcx, typing_env, base),
-        ty::Int(_) | ty::Uint(_) | ty::RawPtr(..) => ty,
+        ty::Int | ty::RawPtr(..) => ty,
         // As these types are always non-null, the nullable equivalent of
         // `Option<T>` of these types are their raw pointer counterparts.
         ty::Ref(_region, ty, mutbl) => Ty::new_ptr(tcx, ty, mutbl),

@@ -711,9 +711,8 @@ where
         let alias_ty = match self_ty.kind() {
             ty::Bool
             | ty::Char
-            | ty::Int(_)
-            | ty::Uint(_)
-            | ty::Float(_)
+            | ty::Int
+            | ty::Float
             | ty::Adt(_, _)
             | ty::Foreign(_)
             | ty::Str
@@ -735,9 +734,8 @@ where
             | ty::Tuple(_)
             | ty::Param(_)
             | ty::Placeholder(..)
-            | ty::Infer(ty::IntVar(_) | ty::FloatVar(_))
             | ty::Error(_) => return,
-            ty::Infer(ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_)) | ty::Bound(..) => {
+            ty::Infer(ty::FreshTy(_)) | ty::Bound(..) => {
                 panic!("unexpected self type for `{goal:?}`")
             }
 
@@ -836,9 +834,8 @@ where
         let bounds = match self_ty.kind() {
             ty::Bool
             | ty::Char
-            | ty::Int(_)
-            | ty::Uint(_)
-            | ty::Float(_)
+            | ty::Int
+            | ty::Float
             | ty::Adt(_, _)
             | ty::Foreign(_)
             | ty::Str
@@ -860,10 +857,10 @@ where
             | ty::Tuple(_)
             | ty::Param(_)
             | ty::Placeholder(..)
-            | ty::Infer(ty::IntVar(_) | ty::FloatVar(_))
             | ty::Error(_) => return,
-            ty::Infer(ty::TyVar(_) | ty::FreshTy(_) | ty::FreshIntTy(_) | ty::FreshFloatTy(_))
-            | ty::Bound(..) => panic!("unexpected self type for `{goal:?}`"),
+            ty::Infer(ty::TyVar(_) | ty::FreshTy(_)) | ty::Bound(..) => {
+                panic!("unexpected self type for `{goal:?}`")
+            }
             ty::Dynamic(bounds, ..) => bounds,
         };
 

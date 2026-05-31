@@ -1742,7 +1742,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             count_span,
             self.normalize(
                 count_span,
-                Unnormalized::new_wip(self.lower_const_arg(count, tcx.types.usize)),
+                Unnormalized::new_wip(self.lower_const_arg(count, tcx.types.int)),
             ),
         );
 
@@ -2858,9 +2858,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 "`{base_ty}` is a primitive type and therefore doesn't have fields",
             );
             let is_valid_suffix = |field: &str| {
-                if field == "f32" || field == "f64" {
-                    return true;
-                }
                 let mut chars = field.chars().peekable();
                 match chars.peek() {
                     Some('e') | Some('E') => {
@@ -2881,42 +2878,19 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     }
                     _ => (),
                 }
-                let suffix = chars.collect::<String>();
-                suffix.is_empty() || suffix == "f32" || suffix == "f64"
+                chars.collect::<String>().is_empty()
             };
-            let maybe_partial_suffix = |field: &str| -> Option<&str> {
-                let first_chars = ['f', 'l'];
-                if field.len() >= 1
-                    && field.to_lowercase().starts_with(first_chars)
-                    && field[1..].chars().all(|c| c.is_ascii_digit())
-                {
-                    if field.to_lowercase().starts_with(['f']) { Some("f32") } else { Some("f64") }
-                } else {
-                    None
-                }
-            };
-            if let ty::Infer(ty::IntVar(_)) = base_ty.kind()
-                && let ExprKind::Lit(Spanned {
-                    node: ast::LitKind::Int(_, ast::LitIntType::Unsuffixed),
-                    ..
-                }) = base.kind
+            if base_ty.is_integral()
+                && let ExprKind::Lit(Spanned { node: ast::LitKind::Int(_), .. }) = base.kind
                 && !base.span.from_expansion()
+                && is_valid_suffix(&field_name)
             {
-                if is_valid_suffix(&field_name) {
-                    err.span_suggestion_verbose(
-                        field.span.shrink_to_lo(),
-                        "if intended to be a floating point literal, consider adding a `0` after the period",
-                        '0',
-                        Applicability::MaybeIncorrect,
-                    );
-                } else if let Some(correct_suffix) = maybe_partial_suffix(&field_name) {
-                    err.span_suggestion_verbose(
-                        field.span,
-                        format!("if intended to be a floating point literal, consider adding a `0` after the period and a `{correct_suffix}` suffix"),
-                        format!("0{correct_suffix}"),
-                        Applicability::MaybeIncorrect,
-                    );
-                }
+                err.span_suggestion_verbose(
+                    field.span.shrink_to_lo(),
+                    "if intended to be a floating point literal, consider adding a `0` after the period",
+                    '0',
+                    Applicability::MaybeIncorrect,
+                );
             }
             err.emit()
         };
@@ -3494,7 +3468,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         );
                         // If index is an unsuffixed integer, show the fixed expression:
                         if let ExprKind::Lit(lit) = idx.kind
-                            && let ast::LitKind::Int(i, ast::LitIntType::Unsuffixed) = lit.node
+                            && let ast::LitKind::Int(i) = lit.node
                             && i.get() < types.len().try_into().expect("tuple length fits in u128")
                         {
                             err.span_suggestion(
@@ -3930,6 +3904,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
         self.typeck_results.borrow_mut().offset_of_data_mut().insert(expr.hir_id, field_indices);
 
-        self.tcx.types.usize
+        self.tcx.types.int
     }
 }
