@@ -1,0 +1,9 @@
+[env]
+CFG_COMPILER_HOST_TRIPLE = "aarch64-unknown-linux-gnu"
+CFG_RELEASE_CHANNEL = "nightly"
+CFG_RELEASE = "1.97.0-nightly"
+CFG_VER_DATE = "2026-05-04"
+CFG_VER_HASH = "cb40c25f6"
+CFG_VERSION = "1.97.0-nightly (cb40c25f6 2026-05-04)"
+RUSTC_BOOTSTRAP = "1"
+RUSTC_INSTALL_BINDIR = "bin"

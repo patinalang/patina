@@ -345,8 +345,6 @@ pub fn get_codegen_backend(
                 load_backend_from_dylib(early_dcx, filename.as_ref())
             }
             "dummy" => || Box::new(DummyCodegenBackend { target_config_override: None }),
-            #[cfg(feature = "llvm")]
-            "llvm" => rustc_codegen_llvm::LlvmCodegenBackend::new,
             backend_name => get_codegen_sysroot(early_dcx, sysroot, backend_name),
         }
     });

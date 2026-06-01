@@ -1,0 +1,25 @@
+[package]
+name = "patina"
+version = "0.0.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+rustc_lexer = { path = "rust/compiler/rustc_lexer" }
+rustc_parse = { path = "rust/compiler/rustc_parse" }
+rustc_expand = { path = "rust/compiler/rustc_expand" }
+rustc_resolve = { path = "rust/compiler/rustc_resolve" }
+rustc_span = { path = "rust/compiler/rustc_span" }
+rustc_session = { path = "rust/compiler/rustc_session" }
+rustc_arena = { path = "rust/compiler/rustc_arena" }
+rustc_ast = { path = "rust/compiler/rustc_ast" }
+rustc_ast_pretty = { path = "rust/compiler/rustc_ast_pretty" }
+rustc_errors = { path = "rust/compiler/rustc_errors" }
+rustc_data_structures = { path = "rust/compiler/rustc_data_structures" }
+rustc_feature = { path = "rust/compiler/rustc_feature" }
+rustc_hir = { path = "rust/compiler/rustc_hir" }
+rustc_middle = { path = "rust/compiler/rustc_middle" }
+rustc_query_impl = { path = "rust/compiler/rustc_query_impl" }
+rustc_target = { path = "rust/compiler/rustc_target" }
+rustc_interface = { path = "rust/compiler/rustc_interface" }
+rustc_hir_pretty = { path = "rust/compiler/rustc_hir_pretty" }
