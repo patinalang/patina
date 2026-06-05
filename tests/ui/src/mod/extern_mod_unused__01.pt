@@ -1,0 +1,6 @@
+extern mod used;
+extern mod unused;
+
+pub fn main() {
+    used::ping();
+}

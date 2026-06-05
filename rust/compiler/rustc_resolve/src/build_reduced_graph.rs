@@ -801,7 +801,7 @@ impl<'a, 'ra, 'tcx> DefCollector<'a, 'ra, 'tcx> {
 
     /// Constructs the reduced graph for one item.
     fn build_reduced_graph_for_item(&mut self, item: &'a Item, feed: TyCtxtFeed<'tcx, LocalDefId>) {
-        let parent_scope = &self.parent_scope;
+        let parent_scope = self.parent_scope;
         let parent = parent_scope.module.expect_local();
         let expansion = parent_scope.expansion;
         let sp = item.span;
@@ -859,13 +859,47 @@ impl<'a, 'ra, 'tcx> DefCollector<'a, 'ra, 'tcx> {
             }
 
             ItemKind::ExternMod(ident) => {
-                self.r.define_local(parent, ident, TypeNS, res, vis, sp, expansion);
                 let module = self.r.new_local_module(
                     Some(parent),
                     ModuleKind::Def(def_kind, def_id, Some(ident.name)),
                     expansion.to_expn_id(),
                     item.span,
                     parent.no_implicit_prelude,
+                );
+
+                let import = self.r.arenas.alloc_import(ImportData {
+                    kind: ImportKind::ExternMod { target: ident, id: item.id },
+                    root_id: item.id,
+                    parent_scope,
+                    imported_module: CmCell::new(Some(ModuleOrUniformRoot::Module(
+                        module.to_module(),
+                    ))),
+                    has_attributes: !item.attrs.is_empty(),
+                    use_span_with_attributes: item.span_with_attributes(),
+                    use_span: item.span,
+                    root_span: item.span,
+                    span: item.span,
+                    module_path: Vec::new(),
+                    vis,
+                    vis_span: item.vis.span,
+                    on_unknown_attr: OnUnknownData::from_attrs(self.r.tcx, item),
+                });
+                self.r.potentially_unused_imports.push(import);
+
+                let decl = self.r.arenas.new_def_decl(
+                    res,
+                    vis.to_def_id(),
+                    sp,
+                    expansion,
+                    Some(parent.to_module()),
+                );
+                let import_decl = self.r.new_import_decl(decl, import);
+
+                self.r.plant_decl_into_local_module(
+                    IdentKey::new(ident),
+                    ident.span,
+                    TypeNS,
+                    import_decl,
                 );
                 self.parent_scope.module = module.to_module();
             }

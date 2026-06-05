@@ -1,0 +1,8 @@
+#![feature(no_core)]
+#![no_std]
+#![no_core]
+
+extern mod used;
+extern mod unused;
+
+pub fn main() { used::ping(); }

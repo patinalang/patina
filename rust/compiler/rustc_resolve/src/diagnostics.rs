@@ -2421,7 +2421,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     ImportKind::Glob { .. }
                     | ImportKind::MacroUse { .. }
                     | ImportKind::MacroExport => Some(source_decl),
-                    ImportKind::ExternCrate { .. } => None,
+                    ImportKind::ExternCrate { .. } | ImportKind::ExternMod { .. } => None,
                 },
                 _ => None,
             };

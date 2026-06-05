@@ -1,0 +1,8 @@
+#![attr = Feature([no_core#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+extern mod used;
+extern mod unused;
+
+fn main() ({ ((used::ping as ())() as ()); } as ())

@@ -99,6 +99,10 @@ pub(crate) enum ImportKind<'ra> {
         target: Ident,
         id: NodeId,
     },
+    ExternMod {
+        target: Ident,
+        id: NodeId,
+    },
     MacroUse {
         /// A field has been added indicating whether it should be reported as a lint,
         /// addressing issue#119301.
@@ -134,6 +138,9 @@ impl<'ra> std::fmt::Debug for ImportKind<'ra> {
                 .field("target", target)
                 .field("id", id)
                 .finish(),
+            ExternMod { target, id } => {
+                f.debug_struct("ExternMod").field("target", target).field("id", id).finish()
+            }
             MacroUse { warn_private } => {
                 f.debug_struct("MacroUse").field("warn_private", warn_private).finish()
             }
@@ -252,6 +259,7 @@ impl<'ra> ImportData<'ra> {
         match self.kind {
             ImportKind::Single { id, .. }
             | ImportKind::Glob { id, .. }
+            | ImportKind::ExternMod { id, .. }
             | ImportKind::ExternCrate { id, .. } => Some(id),
             ImportKind::MacroUse { .. } | ImportKind::MacroExport => None,
         }
@@ -263,6 +271,7 @@ impl<'ra> ImportData<'ra> {
             ImportKind::Single { id, .. } => Reexport::Single(to_def_id(id)),
             ImportKind::Glob { id, .. } => Reexport::Glob(to_def_id(id)),
             ImportKind::ExternCrate { id, .. } => Reexport::ExternCrate(to_def_id(id)),
+            ImportKind::ExternMod { id, .. } => Reexport::ExternMod(to_def_id(id)),
             ImportKind::MacroUse { .. } => Reexport::MacroUse,
             ImportKind::MacroExport => Reexport::MacroExport,
         }
@@ -1843,6 +1852,7 @@ fn import_kind_to_string(import_kind: &ImportKind<'_>) -> String {
         ImportKind::Single { source, .. } => source.to_string(),
         ImportKind::Glob { .. } => "*".to_string(),
         ImportKind::ExternCrate { .. } => "<extern crate>".to_string(),
+        ImportKind::ExternMod { .. } => "<extern mod>".to_string(),
         ImportKind::MacroUse { .. } => "#[macro_use]".to_string(),
         ImportKind::MacroExport => "#[macro_export]".to_string(),
     }

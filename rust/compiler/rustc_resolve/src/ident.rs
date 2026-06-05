@@ -1986,6 +1986,11 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                         }
                         module = Some(ModuleOrUniformRoot::Module(self.expect_module(def_id)));
                         record_segment_res(self.reborrow(), finalize, res, id);
+                        if let Some(finalize) = finalize
+                            && matches!(res, Res::Def(DefKind::ExternMod, _))
+                        {
+                            self.get_mut().record_use(ident, binding, finalize.used);
+                        }
                     } else if res == Res::ToolMod && !is_last && opt_ns.is_some() {
                         if binding.is_import() {
                             self.dcx().emit_err(errors::ToolModuleImported {

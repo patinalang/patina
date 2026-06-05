@@ -154,6 +154,25 @@ impl<'a, 'ra, 'tcx> UnusedImportCheckVisitor<'a, 'ra, 'tcx> {
         }
     }
 
+    fn check_extern_mod(&mut self, item: &'a ast::Item, ident: Ident) {
+        if item.span.is_dummy()
+            || self.r.effective_visibilities.is_exported(self.r.local_def_id(item.id))
+            || self.r.used_imports.contains(&item.id)
+        {
+            return;
+        }
+
+        self.unused_imports.entry(item.id).or_insert_with(|| UnusedImport {
+            use_tree: ast::UseTree {
+                prefix: ast::Path::from_ident(ident),
+                kind: ast::UseTreeKind::Simple(None),
+            },
+            use_tree_id: item.id,
+            item_span: item.span_with_attributes(),
+            unused: [item.id].into_iter().collect(),
+        });
+    }
+
     fn report_unused_extern_crate_items(
         &mut self,
         maybe_unused_extern_crates: FxHashMap<ast::NodeId, Span>,
@@ -269,6 +288,9 @@ impl<'a, 'ra, 'tcx> Visitor<'a> for UnusedImportCheckVisitor<'a, 'ra, 'tcx> {
                     ident,
                     renames: orig_name.is_some(),
                 });
+            }
+            &ast::ItemKind::ExternMod(ident) => {
+                self.check_extern_mod(item, ident);
             }
             _ => {}
         }

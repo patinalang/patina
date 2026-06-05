@@ -50,6 +50,14 @@ help: consider importing this tuple variant
 LL + use TermToBinaryOpts::MinorVersion;
    |
 
+warning: unused import: `erlang`
+  --> tests/ui/src/custom_types/repr__12.pt:4:12
+   |
+LL | extern mod erlang;
+   |            ^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
 error: expected a literal (`1u8`, `1.0f32`, `"string"`, etc.) here, found expression
   --> tests/ui/src/custom_types/repr__12.pt:6:24
    |
@@ -67,6 +75,6 @@ error: requires `sized` lang_item
 LL |     let opts: [TermToBinaryOpts] = [Deterministic, MinorVersion(2)];
    |         ^^^^
 
-error: aborting due to 8 previous errors
+error: aborting due to 8 previous errors; 1 warning emitted
 
 For more information about this error, try `rustc --explain E0425`.

@@ -61,6 +61,14 @@ LL |     WithCustomName(float),
    |                    not found in this scope
    |                    help: perhaps you intended to use this type: `f32`
 
+warning: unused import: `records`
+  --> tests/ui/src/custom_types/repr__08.pt:20:12
+   |
+LL | extern mod records;
+   |            ^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
 error[E0552]: unrecognized representation hint
   --> tests/ui/src/custom_types/repr__08.pt:4:8
    |
@@ -112,7 +120,7 @@ error: requires `sized` lang_item
 LL |     let point = NativeRecordEnum::Point(1, 2);
    |         ^^^^^
 
-error: aborting due to 13 previous errors
+error: aborting due to 13 previous errors; 1 warning emitted
 
 Some errors have detailed explanations: E0425, E0552.
 For more information about an error, try `rustc --explain E0425`.

@@ -13,6 +13,7 @@ pub enum Reexport {
     Single(DefId),
     Glob(DefId),
     ExternCrate(DefId),
+    ExternMod(DefId),
     MacroUse,
     MacroExport,
 }
@@ -20,7 +21,10 @@ pub enum Reexport {
 impl Reexport {
     pub fn id(self) -> Option<DefId> {
         match self {
-            Reexport::Single(id) | Reexport::Glob(id) | Reexport::ExternCrate(id) => Some(id),
+            Reexport::Single(id)
+            | Reexport::Glob(id)
+            | Reexport::ExternCrate(id)
+            | Reexport::ExternMod(id) => Some(id),
             Reexport::MacroUse | Reexport::MacroExport => None,
         }
     }
