@@ -4,6 +4,11 @@ version = "0.0.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 
+[[test]]
+name = "compiletest"
+path = "tests/compiletest/main.rs"
+harness = false
+
 [dependencies]
 rustc_lexer = { path = "rust/compiler/rustc_lexer" }
 rustc_parse = { path = "rust/compiler/rustc_parse" }
@@ -23,3 +28,10 @@ rustc_query_impl = { path = "rust/compiler/rustc_query_impl" }
 rustc_target = { path = "rust/compiler/rustc_target" }
 rustc_interface = { path = "rust/compiler/rustc_interface" }
 rustc_hir_pretty = { path = "rust/compiler/rustc_hir_pretty" }
+clap = { version = "4.6.1", features = ["derive", "unicode"] }
+
+[dev-dependencies]
+anyhow = "1.0.102"
+libtest-mimic = "0.8.2"
+similar = "3.1.1"
+walkdir = "2.5.0"
