@@ -1,0 +1,22 @@
+error: expected type, found `^`
+  --> tests/ui/src/flow_control/match/binary_matching__05.pt:9:11
+   |
+LL |         <<^png_prefix, rest @ str()>> => println!("png data {:?}", rest),
+   |           ^ expected type
+
+error: expected type, found `119`
+  --> tests/ui/src/flow_control/match/binary_matching__05.pt:16:13
+   |
+LL |     match <<119>> {
+   |     -----   ^^^ expected type
+   |     |
+   |     while parsing this `match` expression
+
+error: requires `sized` lang_item
+  --> tests/ui/src/flow_control/match/binary_matching__05.pt:5:9
+   |
+LL |     let png_prefix = "PNG";
+   |         ^^^^^^^^^^
+
+error: aborting due to 3 previous errors
+

@@ -1,0 +1,32 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/for__02.pt:14:13
+   |
+LL |             println!("{}", n);
+   |             ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/for__02.pt:12:13
+   |
+LL |             println!("buzz");
+   |             ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/for__02.pt:10:13
+   |
+LL |             println!("fizz");
+   |             ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/for__02.pt:8:13
+   |
+LL |             println!("fizzbuzz");
+   |             ^^^^^^^
+
+error: requires `range_inclusive_new` lang_item
+  --> tests/ui/src/flow_control/for__02.pt:6:14
+   |
+LL |     for n in 1..=100 {
+   |              ^^^^^^^
+
+error: aborting due to 5 previous errors
+

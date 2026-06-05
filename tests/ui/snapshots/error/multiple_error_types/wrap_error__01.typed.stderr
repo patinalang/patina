@@ -1,0 +1,192 @@
+error[E0433]: cannot find module or crate `Std` in the crate root
+  --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:5:5
+   |
+LL | use Std::Error::Error;
+   |     ^^^ use of unresolved module or unlinked crate `Std`
+   |
+help: you might be missing a crate named `Std`, add it to your project and import it in your code
+   |
+LL + extern crate Std;
+   |
+
+error[E0433]: cannot find module or crate `Std` in the crate root
+  --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:6:5
+   |
+LL | use Std::Num::ParseIntError;
+   |     ^^^ use of unresolved module or unlinked crate `Std`
+   |
+help: you might be missing a crate named `Std`, add it to your project and import it in your code
+   |
+LL + extern crate Std;
+   |
+
+error[E0432]: unresolved import `Std`
+  --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:4:5
+   |
+LL | use Std::Error;
+   |     ^^^ use of unresolved module or unlinked crate `Std`
+   |
+help: you might be missing a crate named `Std`, add it to your project and import it in your code
+   |
+LL + extern crate Std;
+   |
+
+error[E0432]: unresolved import `Std`
+  --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:7:5
+   |
+LL | use Std::Fmt;
+   |     ^^^ use of unresolved module or unlinked crate `Std`
+   |
+help: you might be missing a crate named `Std`, add it to your project and import it in your code
+   |
+LL + extern crate Std;
+   |
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:68:17
+   |
+LL |                 println!("  Caused by: {}", source);
+   |                 ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:66:13
+   |
+LL |             println!("Error: {}", e);
+   |             ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:64:19
+   |
+LL |         Ok(n)  => println!("The first doubled is {}", n),
+   |                   ^^^^^^^
+
+error: cannot find macro `write` in this scope
+  --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:27:17
+   |
+LL |                 write!(f, "the provided string could not be parsed as int"),
+   |                 ^^^^^
+
+error: cannot find macro `write` in this scope
+  --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:23:17
+   |
+LL |                 write!(f, "please use a list with at least one element"),
+   |                 ^^^^^
+
+error: cannot find attribute `derive` in this scope
+  --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:11:3
+   |
+LL | #[derive(Debug)]
+   |   ^^^^^^
+
+error[E0433]: cannot find type `Std` in this scope
+  --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:9:18
+   |
+LL | type Result<T> = Std::Result::Result<T, DoubleError>;
+   |                  ^^^ use of undeclared type `Std`
+
+error[E0425]: cannot find type `Option` in this scope
+  --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:33:24
+   |
+LL |     fn source(self) -> Option<dyn Error::Error> {
+   |                        ^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `None` in this scope
+  --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:35:39
+   |
+LL |             DoubleError::EmptyList => None,
+   |                                       ^^^^ not found in this scope
+
+error[E0405]: cannot find trait `From` in this scope
+  --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:47:6
+   |
+LL | impl From<ParseIntError> for DoubleError {
+   |      ^^^^ not found in this scope
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:53:40
+   |
+LL | fn double_first(list: [str]) -> Result<int> {
+   |                                        ^^^ not found in this scope
+   |
+help: perhaps you intended to use this type
+   |
+LL - fn double_first(list: [str]) -> Result<int> {
+LL + fn double_first(list: [str]) -> Result<i32> {
+   |
+help: you might be missing a type parameter
+   |
+LL | fn double_first<int>(list: [str]) -> Result<int> {
+   |                +++++
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:57:32
+   |
+LL |     let parsed = first.parse::<int>()?;
+   |                                ^^^ not found in this scope
+   |
+help: perhaps you intended to use this type
+   |
+LL -     let parsed = first.parse::<int>()?;
+LL +     let parsed = first.parse::<i32>()?;
+   |
+help: you might be missing a type parameter
+   |
+LL | fn double_first<int>(list: [str]) -> Result<int> {
+   |                +++++
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:62:25
+   |
+LL | fn print(result: Result<int>) {
+   |                         ^^^ not found in this scope
+   |
+help: perhaps you intended to use this type
+   |
+LL - fn print(result: Result<int>) {
+LL + fn print(result: Result<i32>) {
+   |
+help: you might be missing a type parameter
+   |
+LL | fn print<int>(result: Result<int>) {
+   |         +++++
+
+error[E0531]: cannot find tuple struct or tuple variant `Ok` in this scope
+  --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:64:9
+   |
+LL |         Ok(n)  => println!("The first doubled is {}", n),
+   |         ^^ not found in this scope
+
+error[E0531]: cannot find tuple struct or tuple variant `Err` in this scope
+  --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:65:9
+   |
+LL |         Err(e) => {
+   |         ^^^ not found in this scope
+
+error[E0531]: cannot find tuple struct or tuple variant `Some` in this scope
+  --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:67:20
+   |
+LL |             if let Some(source) = e.source() {
+   |                    ^^^^ not found in this scope
+
+error: requires `branch` lang_item
+  --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:54:17
+   |
+LL |     let first = list.first().ok_or(DoubleError::EmptyList)?;
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
+  --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:39:42
+   |
+LL |             DoubleError::Parse(ref e) => Some(e),
+   |                                          ^^^^ not found in this scope
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Ok` in this scope
+  --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:59:5
+   |
+LL |     Ok(2 * parsed)
+   |     ^^ not found in this scope
+
+error: aborting due to 23 previous errors
+
+Some errors have detailed explanations: E0405, E0425, E0432, E0433, E0531.
+For more information about an error, try `rustc --explain E0405`.

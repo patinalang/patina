@@ -1,0 +1,32 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/variable_bindings/scope__02.pt:19:5
+   |
+LL |     println!("shadowed in outer block: {}", shadowed_binding);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/variable_bindings/scope__02.pt:15:5
+   |
+LL |     println!("outside inner block: {}", shadowed_binding);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/variable_bindings/scope__02.pt:13:9
+   |
+LL |         println!("shadowed in inner block: {}", shadowed_binding);
+   |         ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/variable_bindings/scope__02.pt:8:9
+   |
+LL |         println!("before being shadowed: {}", shadowed_binding);
+   |         ^^^^^^^
+
+error: requires `sized` lang_item
+  --> tests/ui/src/variable_bindings/scope__02.pt:5:9
+   |
+LL |     let shadowed_binding = 1;
+   |         ^^^^^^^^^^^^^^^^
+
+error: aborting due to 5 previous errors
+

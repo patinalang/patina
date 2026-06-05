@@ -1,0 +1,74 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/macros/dsl__01.pt:8:13
+   |
+LL |               println!("{} = {}", stringify!{$e}, val);
+   |               ^^^^^^^
+...
+LL | /     calculate! {
+LL | |         eval 1 + 2 // hehehe `eval` is _not_ a Patina keyword!
+LL | |     }
+   | |_____- in this macro invocation
+   |
+   = note: this error originates in the macro `calculate` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/macros/dsl__01.pt:8:13
+   |
+LL |               println!("{} = {}", stringify!{$e}, val);
+   |               ^^^^^^^
+...
+LL | /     calculate! {
+LL | |         eval (1 + 2) * (3 / 4)
+LL | |     }
+   | |_____- in this macro invocation
+   |
+   = note: this error originates in the macro `calculate` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/macros/dsl__01.pt:7:22
+   |
+LL |               let val: int = $e; // Force types to integers
+   |                        ^^^
+   |                        |
+   |                        not found in this scope
+   |                        help: perhaps you intended to use this type: `i32`
+...
+LL | /     calculate! {
+LL | |         eval 1 + 2 // hehehe `eval` is _not_ a Patina keyword!
+LL | |     }
+   | |_____- in this macro invocation
+   |
+   = note: this error originates in the macro `calculate` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/macros/dsl__01.pt:7:22
+   |
+LL |               let val: int = $e; // Force types to integers
+   |                        ^^^
+   |                        |
+   |                        not found in this scope
+   |                        help: perhaps you intended to use this type: `i32`
+...
+LL | /     calculate! {
+LL | |         eval (1 + 2) * (3 / 4)
+LL | |     }
+   | |_____- in this macro invocation
+   |
+   = note: this error originates in the macro `calculate` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: requires `sized` lang_item
+  --> tests/ui/src/macros/dsl__01.pt:7:17
+   |
+LL |               let val: int = $e; // Force types to integers
+   |                   ^^^
+...
+LL | /     calculate! {
+LL | |         eval 1 + 2 // hehehe `eval` is _not_ a Patina keyword!
+LL | |     }
+   | |_____- in this macro invocation
+   |
+   = note: this error originates in the macro `calculate` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: aborting due to 5 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

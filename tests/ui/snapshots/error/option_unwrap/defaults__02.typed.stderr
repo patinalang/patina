@@ -1,0 +1,57 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__02.pt:21:5
+   |
+LL |     println!("first_available_fruit: {:?}", first_available_fruit);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__02.pt:14:9
+   |
+LL |         println!("Providing lemon as fallback");
+   |         ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__02.pt:10:9
+   |
+LL |         println!("Providing kiwi as fallback");
+   |         ^^^^^^^
+
+error: cannot find attribute `derive` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__02.pt:4:3
+   |
+LL | #[derive(Debug)]
+   |   ^^^^^^
+
+error[E0425]: cannot find type `Option` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__02.pt:8:19
+   |
+LL |     let no_fruit: Option<Fruit> = None;
+   |                   ^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `None` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__02.pt:8:35
+   |
+LL |     let no_fruit: Option<Fruit> = None;
+   |                                   ^^^^ not found in this scope
+
+error: requires `sized` lang_item
+  --> tests/ui/src/error/option_unwrap/defaults__02.pt:8:9
+   |
+LL |     let no_fruit: Option<Fruit> = None;
+   |         ^^^^^^^^
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__02.pt:11:9
+   |
+LL |         Some(Fruit::Kiwi)
+   |         ^^^^ not found in this scope
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__02.pt:15:9
+   |
+LL |         Some(Fruit::Lemon)
+   |         ^^^^ not found in this scope
+
+error: aborting due to 9 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

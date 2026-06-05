@@ -1,0 +1,8 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/error/result__02.pt:5:5
+   |
+LL |     println!("Hello World!");
+   |     ^^^^^^^
+
+error: aborting due to 1 previous error
+

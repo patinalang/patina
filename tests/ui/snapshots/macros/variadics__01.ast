@@ -1,0 +1,31 @@
+// source: patina-by-example/src/macros/variadics.md
+// block: 1/1
+
+macro_rules! calculate {
+    (eval $e:expr) =>
+    {
+        {
+            let val: int = $e;
+            println!("{} = {}",
+            stringify!{$e
+                // The pattern for a single `eval`
+                // Force types to be integers
+            }, val);
+        }
+    }; (eval $e:expr, $(eval $es:expr),+) =>
+    {{
+            calculate!
+            {
+                eval $e
+
+                // Decompose multiple `eval`s recursively
+            } calculate! { $(eval $es),+ }
+        }};
+}
+
+pub fn main() {
+    calculate! {
+        eval 1 + 2, eval 3 + 4, eval(2 * 3) +
+        1 // Look ma! Variadic `calculate!`!
+    }
+}

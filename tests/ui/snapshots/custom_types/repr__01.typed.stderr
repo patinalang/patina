@@ -1,0 +1,86 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/repr__01.pt:37:5
+   |
+LL |     println!("{:?}", NotJustUnits::VariantB as term);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/repr__01.pt:34:5
+   |
+LL |     println!("{:?}", NotJustUnits::VariantA as term);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/repr__01.pt:31:5
+   |
+LL |     println!("{:?}", CustomNameUnit as term);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/repr__01.pt:28:5
+   |
+LL |     println!("{:?}", Unit as term);
+   |     ^^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/custom_types/repr__01.pt:15:14
+   |
+LL |     VariantC(int),
+   |              ^^^
+   |              |
+   |              not found in this scope
+   |              help: perhaps you intended to use this type: `i32`
+
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__01.pt:6:8
+   |
+LL | #[repr(atom, name = "custom_name")]
+   |        ^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, `simd`, `i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `i64`, `u64`, `i128`, `u128`, `isize`, `usize`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__01.pt:6:14
+   |
+LL | #[repr(atom, name = "custom_name")]
+   |              ^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, `simd`, `i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `i64`, `u64`, `i128`, `u128`, `isize`, `usize`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+
+error: expected a literal (`1u8`, `1.0f32`, `"string"`, etc.) here, found expression
+  --> tests/ui/src/custom_types/repr__01.pt:10:16
+   |
+LL | #[repr(style = snake_case)]
+   |                ^^^^^^^^^^ expressions are not allowed here
+   |
+help: surround the identifier with quotation marks to make it into a string literal
+   |
+LL | #[repr(style = "snake_case")]
+   |                +          +
+
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__01.pt:13:12
+   |
+LL |     #[repr(name = "variantB")]
+   |            ^^^^^^^^^^^^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, `simd`, `i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `i64`, `u64`, `i128`, `u128`, `isize`, `usize`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+
+error: expected a literal (`1u8`, `1.0f32`, `"string"`, etc.) here, found expression
+  --> tests/ui/src/custom_types/repr__01.pt:20:22
+   |
+LL | #[repr(atom, style = snake_case)]
+   |                      ^^^^^^^^^^ expressions are not allowed here
+   |
+help: surround the identifier with quotation marks to make it into a string literal
+   |
+LL | #[repr(atom, style = "snake_case")]
+   |                      +          +
+
+error: aborting due to 10 previous errors
+
+Some errors have detailed explanations: E0425, E0552.
+For more information about an error, try `rustc --explain E0425`.

@@ -1,0 +1,192 @@
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+Ident
+CloseParen
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+Lt
+Ident
+Gt
+OpenParen
+Ident
+CloseParen
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+Ident
+Colon
+Whitespace
+Ident
+CloseParen
+Whitespace
+OpenBrace
+CloseBrace
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+Ident
+Colon
+Whitespace
+Ident
+Lt
+Ident
+Gt
+CloseParen
+Whitespace
+OpenBrace
+CloseBrace
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+Ident
+Colon
+Whitespace
+Ident
+Lt
+Ident
+Gt
+CloseParen
+Whitespace
+OpenBrace
+CloseBrace
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+Lt
+Ident
+Gt
+OpenParen
+Ident
+Colon
+Whitespace
+Ident
+Lt
+Ident
+Gt
+CloseParen
+Whitespace
+OpenBrace
+CloseBrace
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+CloseParen
+Whitespace
+OpenBrace
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+OpenParen
+Ident
+OpenParen
+Ident
+CloseParen
+CloseParen
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+OpenParen
+Ident
+OpenParen
+Ident
+CloseParen
+CloseParen
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+OpenParen
+Ident
+OpenParen
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+CloseParen
+CloseParen
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Colon
+Colon
+Lt
+Ident
+Gt
+OpenParen
+Ident
+OpenParen
+Literal { kind: Char { terminated: true }, suffix_start: 3 }
+CloseParen
+CloseParen
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+OpenParen
+Ident
+OpenParen
+Literal { kind: Char { terminated: true }, suffix_start: 3 }
+CloseParen
+CloseParen
+Semi
+Whitespace
+CloseBrace
+Whitespace

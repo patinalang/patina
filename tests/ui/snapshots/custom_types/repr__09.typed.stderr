@@ -1,0 +1,37 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/repr__09.pt:11:5
+   |
+LL |     println!("{:?}", Point{x: 1, y: 2} as term);
+   |     ^^^^^^^
+
+error[E0425]: cannot find type `float` in this scope
+  --> tests/ui/src/custom_types/repr__09.pt:6:8
+   |
+LL |     x: float,
+   |        ^^^^^
+   |        |
+   |        not found in this scope
+   |        help: perhaps you intended to use this type: `f32`
+
+error[E0425]: cannot find type `float` in this scope
+  --> tests/ui/src/custom_types/repr__09.pt:7:8
+   |
+LL |     y: float,
+   |        ^^^^^
+   |        |
+   |        not found in this scope
+   |        help: perhaps you intended to use this type: `f32`
+
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__09.pt:4:8
+   |
+LL | #[repr(Elixir)]
+   |        ^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, `simd`, `i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `i64`, `u64`, `i128`, `u128`, `isize`, `usize`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+
+error: aborting due to 4 previous errors
+
+Some errors have detailed explanations: E0425, E0552.
+For more information about an error, try `rustc --explain E0425`.

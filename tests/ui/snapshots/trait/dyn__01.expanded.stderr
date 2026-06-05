@@ -1,0 +1,18 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/trait/dyn__01.pt:38:5
+   |
+LL |     println!("You've randomly chosen an animal, and it says {}", animal.noise());
+   |     ^^^^^^^
+
+error[E0425]: cannot find type `float` in this scope
+  --> tests/ui/src/trait/dyn__01.pt:27:33
+   |
+LL | fn random_animal(random_number: float) -> dyn Animal {
+   |                                 ^^^^^
+   |                                 |
+   |                                 not found in this scope
+   |                                 help: perhaps you intended to use this type: `f32`
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

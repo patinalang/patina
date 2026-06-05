@@ -1,0 +1,11 @@
+// source: patina-by-example/src/fn/diverging.md
+// block: 3/4
+
+#![feature(never_type)]
+
+fn some_fn() -> ! { panic!("This call never returns."); }
+
+pub fn main() {
+    let _a = some_fn();
+    println!("You will never see this line!");
+}

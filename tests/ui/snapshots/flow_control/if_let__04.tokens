@@ -1,0 +1,67 @@
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Ident
+CloseBrace
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+CloseParen
+Whitespace
+OpenBrace
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Ident
+Colon
+Colon
+Ident
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+Colon
+Colon
+Ident
+Whitespace
+Eq
+Eq
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 13 }
+CloseParen
+Semi
+Whitespace
+CloseBrace
+Whitespace
+CloseBrace
+Whitespace

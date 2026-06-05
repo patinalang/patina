@@ -77,6 +77,7 @@ pub fn compile(stage: Stage, filename: &Path, src: &str, _out_dir: &Path) {
         FileName::Real(FilePathMapping::empty().to_real_filename(&RealFileName::empty(), filename));
 
     let config = make_config(filename.clone(), src);
+    let input_src = format!("{PRELUDE}\n{src}");
 
     let maybe_render = match stage {
         Stage::Dump(DumpStage::Tokens) => Some(render_tokens(src)),
@@ -84,7 +85,7 @@ pub fn compile(stage: Stage, filename: &Path, src: &str, _out_dir: &Path) {
             Some(pprust::print_crate(
                 compiler.sess.source_map(),
                 &krate,
-                filename.clone(),
+                filename,
                 src.to_string(),
                 &NoAnn,
                 false,
@@ -97,8 +98,8 @@ pub fn compile(stage: Stage, filename: &Path, src: &str, _out_dir: &Path) {
                 Some(pprust::print_crate(
                     tcx.sess.source_map(),
                     &tcx.resolver_for_lowering().borrow().1,
-                    filename.clone(),
-                    src.to_string(),
+                    filename,
+                    input_src,
                     &NoAnn,
                     true,
                     tcx.sess.edition(),
@@ -113,8 +114,8 @@ pub fn compile(stage: Stage, filename: &Path, src: &str, _out_dir: &Path) {
                 Some(pprust_hir::print_crate(
                     tcx.sess.source_map(),
                     tcx.hir_root_module(),
-                    filename.clone(),
-                    src.to_string(),
+                    filename,
+                    input_src,
                     &|id| tcx.hir_attrs(id),
                     &TypedAnn { tcx, maybe_typeck_results: Cell::new(None) },
                 ))
@@ -165,9 +166,8 @@ fn render_tokens(src: &str) -> String {
 }
 
 fn parse_with_prelude(sess: &Session, prelude: &str) -> Crate {
-    let mut krate = passes::parse(sess);
     if prelude.is_empty() {
-        return krate;
+        return passes::parse(sess);
     }
 
     let mut parser = unwrap_or_emit_fatal(new_parser_from_source_str(
@@ -180,6 +180,8 @@ fn parse_with_prelude(sess: &Session, prelude: &str) -> Crate {
         let guar: ErrorGuaranteed = err.emit();
         guar.raise_fatal();
     });
+
+    let mut krate = passes::parse(sess);
 
     let mut user_attrs = std::mem::take(&mut krate.attrs);
     krate.attrs = prelude_krate.attrs;

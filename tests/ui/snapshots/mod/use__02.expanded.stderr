@@ -1,0 +1,38 @@
+error[E0433]: cannot find module or crate `pkg` in the crate root
+  --> tests/ui/src/mod/use__02.pt:27:13
+   |
+LL |         use pkg::Deeply::Nested::function;
+   |             ^^^ use of unresolved module or unlinked crate `pkg`
+   |
+help: you might be missing a crate named `pkg`, add it to your project and import it in your code
+   |
+LL + extern crate pkg;
+   |
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/mod/use__02.pt:33:9
+   |
+LL |         println!("Leaving block");
+   |         ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/mod/use__02.pt:23:5
+   |
+LL |     println!("Entering block");
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/mod/use__02.pt:14:13
+   |
+LL |             println!("called `Deeply::Nested::function()`");
+   |             ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/mod/use__02.pt:8:5
+   |
+LL |     println!("called `function()`");
+   |     ^^^^^^^
+
+error: aborting due to 5 previous errors
+
+For more information about this error, try `rustc --explain E0433`.

@@ -1,0 +1,36 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/repr__01.pt:37:5
+   |
+LL |     println!("{:?}", NotJustUnits::VariantB as term);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/repr__01.pt:34:5
+   |
+LL |     println!("{:?}", NotJustUnits::VariantA as term);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/repr__01.pt:31:5
+   |
+LL |     println!("{:?}", CustomNameUnit as term);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/repr__01.pt:28:5
+   |
+LL |     println!("{:?}", Unit as term);
+   |     ^^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/custom_types/repr__01.pt:15:14
+   |
+LL |     VariantC(int),
+   |              ^^^
+   |              |
+   |              not found in this scope
+   |              help: perhaps you intended to use this type: `i32`
+
+error: aborting due to 5 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

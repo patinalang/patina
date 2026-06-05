@@ -1,0 +1,172 @@
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+CloseParen
+Whitespace
+OpenBrace
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Ident
+Colon
+Colon
+Lt
+Ident
+Gt
+Colon
+Colon
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+Semi
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+UnknownPrefix
+Literal { kind: Str { terminated: true }, suffix_start: 5 }
+Whitespace
+Eq
+Gt
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 14 }
+Comma
+Whitespace
+OpenParen
+UnknownPrefix
+Literal { kind: Str { terminated: true }, suffix_start: 6 }
+Comma
+Whitespace
+Ident
+CloseParen
+Whitespace
+Eq
+Gt
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 22 }
+Comma
+Whitespace
+Ident
+Whitespace
+Eq
+Gt
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 24 }
+Comma
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+CloseBrace
+Semi
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+Ident
+Colon
+Colon
+Lt
+Ident
+Gt
+Colon
+Colon
+Ident
+Whitespace
+Eq
+Gt
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 24 }
+Comma
+Whitespace
+Ident
+Colon
+Colon
+Lt
+Ident
+Gt
+Colon
+Colon
+Ident
+Whitespace
+Eq
+Gt
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 25 }
+Comma
+Whitespace
+UnknownPrefix
+Literal { kind: Str { terminated: true }, suffix_start: 5 }
+Whitespace
+Eq
+Gt
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 14 }
+Comma
+Whitespace
+Ident
+Whitespace
+Eq
+Gt
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 16 }
+Comma
+Whitespace
+CloseBrace
+Whitespace
+CloseBrace
+Semi
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 8 }
+Comma
+Whitespace
+Ident
+Comma
+Whitespace
+Ident
+CloseParen
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+CloseBrace
+Whitespace

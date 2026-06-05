@@ -1,0 +1,33 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/conversion/string__02.pt:9:5
+   |
+LL |     println!("Sum: {:?}", sum);
+   |     ^^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/conversion/string__02.pt:5:17
+   |
+LL |     let parsed: int = "5".parse().unwrap();
+   |                 ^^^
+   |                 |
+   |                 not found in this scope
+   |                 help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/conversion/string__02.pt:6:37
+   |
+LL |     let turbo_parsed = "10".parse::<int>().unwrap();
+   |                                     ^^^
+   |                                     |
+   |                                     not found in this scope
+   |                                     help: perhaps you intended to use this type: `i32`
+
+error: requires `sized` lang_item
+  --> tests/ui/src/conversion/string__02.pt:5:9
+   |
+LL |     let parsed: int = "5".parse().unwrap();
+   |         ^^^^^^
+
+error: aborting due to 4 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

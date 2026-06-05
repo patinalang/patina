@@ -1,0 +1,14 @@
+error: expected type, found `b"PNG"`
+  --> tests/ui/src/flow_control/match/binary_matching__04.pt:6:24
+   |
+LL |     let bytes: bin = <<b"PNG", '!', "rest">>;
+   |                        ^^^^^^ expected type
+
+error: requires `sized` lang_item
+  --> tests/ui/src/flow_control/match/binary_matching__04.pt:5:9
+   |
+LL |     let text: str = "Patina!";
+   |         ^^^^
+
+error: aborting due to 2 previous errors
+

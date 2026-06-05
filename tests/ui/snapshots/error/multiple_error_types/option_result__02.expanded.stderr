@@ -1,0 +1,77 @@
+error[E0433]: cannot find module or crate `Std` in the crate root
+  --> tests/ui/src/error/multiple_error_types/option_result__02.pt:4:5
+   |
+LL | use Std::Num::ParseIntError;
+   |     ^^^ use of unresolved module or unlinked crate `Std`
+   |
+help: you might be missing a crate named `Std`, add it to your project and import it in your code
+   |
+LL + extern crate Std;
+   |
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/error/multiple_error_types/option_result__02.pt:21:5
+   |
+LL |     println!("The first doubled is {:?}", double_first(strings));
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/error/multiple_error_types/option_result__02.pt:20:5
+   |
+LL |     println!("The first doubled is {:?}", double_first(empty));
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/error/multiple_error_types/option_result__02.pt:19:5
+   |
+LL |     println!("The first doubled is {:?}", double_first(numbers));
+   |     ^^^^^^^
+
+error[E0425]: cannot find type `Result` in this scope
+  --> tests/ui/src/error/multiple_error_types/option_result__02.pt:6:33
+   |
+LL | fn double_first(list: [str]) -> Result<Option<int>, ParseIntError> {
+   |                                 ^^^^^^ not found in this scope
+
+error[E0425]: cannot find type `Option` in this scope
+  --> tests/ui/src/error/multiple_error_types/option_result__02.pt:6:40
+   |
+LL | fn double_first(list: [str]) -> Result<Option<int>, ParseIntError> {
+   |                                        ^^^^^^ not found in this scope
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/error/multiple_error_types/option_result__02.pt:6:47
+   |
+LL | fn double_first(list: [str]) -> Result<Option<int>, ParseIntError> {
+   |                                               ^^^ not found in this scope
+   |
+help: perhaps you intended to use this type
+   |
+LL - fn double_first(list: [str]) -> Result<Option<int>, ParseIntError> {
+LL + fn double_first(list: [str]) -> Result<Option<i32>, ParseIntError> {
+   |
+help: you might be missing a type parameter
+   |
+LL | fn double_first<int>(list: [str]) -> Result<Option<int>, ParseIntError> {
+   |                +++++
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/error/multiple_error_types/option_result__02.pt:8:23
+   |
+LL |         first.parse::<int>().map(|n| 2 * n)
+   |                       ^^^ not found in this scope
+   |
+help: perhaps you intended to use this type
+   |
+LL -         first.parse::<int>().map(|n| 2 * n)
+LL +         first.parse::<i32>().map(|n| 2 * n)
+   |
+help: you might be missing a type parameter
+   |
+LL | fn double_first<int>(list: [str]) -> Result<Option<int>, ParseIntError> {
+   |                +++++
+
+error: aborting due to 8 previous errors
+
+Some errors have detailed explanations: E0425, E0433.
+For more information about an error, try `rustc --explain E0425`.

@@ -1,0 +1,32 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/enum/enum_use__01.pt:31:21
+   |
+LL |         Beginner => println!("Beginners are starting their learning journey!"),
+   |                     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/enum/enum_use__01.pt:32:21
+   |
+LL |         Advanced => println!("Advanced learners are mastering their subjects..."),
+   |                     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/enum/enum_use__01.pt:37:20
+   |
+LL |         Student => println!("Students are acquiring knowledge!"),
+   |                    ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/enum/enum_use__01.pt:38:20
+   |
+LL |         Teacher => println!("Teachers are spreading knowledge!"),
+   |                    ^^^^^^^
+
+error: requires `sized` lang_item
+  --> tests/ui/src/custom_types/enum/enum_use__01.pt:25:9
+   |
+LL |     let stage = Beginner;
+   |         ^^^^^
+
+error: aborting due to 5 previous errors
+

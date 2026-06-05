@@ -1,0 +1,71 @@
+error: expected `;`, found keyword `let`
+  --> tests/ui/src/primitives__01.pt:11:52
+   |
+LL |     inferred_type = add_floats(inferred_type, 3.14)
+   |                                                    ^ help: add `;` here
+...
+LL |     let mut mutable = 12; // Mutable `int`
+   |     --- unexpected token
+
+error: expected type, found `#`
+  --> tests/ui/src/primitives__01.pt:33:17
+   |
+LL |     let my_map: #{float => str} = #{3.14 => "pi", 0 => "zero"};
+   |               - ^ expected type
+   |               |
+   |               while parsing the type for `my_map`
+
+error[E0425]: cannot find type `float` in this scope
+  --> tests/ui/src/primitives__01.pt:7:18
+   |
+LL |     let a_float: float = 1.0;
+   |                  ^^^^^
+   |                  |
+   |                  not found in this scope
+   |                  help: perhaps you intended to use this type: `f32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/primitives__01.pt:26:19
+   |
+LL |     let my_list: [int] = [1, 2, 3, 4, 5];
+   |                   ^^^
+   |                   |
+   |                   not found in this scope
+   |                   help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `float` in this scope
+  --> tests/ui/src/primitives__01.pt:42:18
+   |
+LL | fn add_floats(a: float, b: float) -> float {
+   |                  ^^^^^
+   |                  |
+   |                  not found in this scope
+   |                  help: perhaps you intended to use this type: `f32`
+
+error[E0425]: cannot find type `float` in this scope
+  --> tests/ui/src/primitives__01.pt:42:28
+   |
+LL | fn add_floats(a: float, b: float) -> float {
+   |                            ^^^^^
+   |                            |
+   |                            not found in this scope
+   |                            help: perhaps you intended to use this type: `f32`
+
+error[E0425]: cannot find type `float` in this scope
+  --> tests/ui/src/primitives__01.pt:42:38
+   |
+LL | fn add_floats(a: float, b: float) -> float {
+   |                                      ^^^^^
+   |                                      |
+   |                                      not found in this scope
+   |                                      help: perhaps you intended to use this type: `f32`
+
+error: requires `sized` lang_item
+  --> tests/ui/src/primitives__01.pt:6:9
+   |
+LL |     let logical: bool  = true;
+   |         ^^^^^^^
+
+error: aborting due to 8 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

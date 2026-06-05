@@ -1,0 +1,50 @@
+error: expected pattern, found `^`
+  --> tests/ui/src/flow_control/match__01.pt:36:9
+   |
+LL |         ^expected_value => println!("found expected value")
+   |         ^ expected pattern
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match__01.pt:31:5
+   |
+LL |     println!("{} -> {}", boolean, binary);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match__01.pt:18:14
+   |
+LL |         _ => println!("Ain't special"),
+   |              ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match__01.pt:16:20
+   |
+LL |         13..=19 => println!("A teen"),
+   |                    ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match__01.pt:13:31
+   |
+LL |         2 | 3 | 5 | 7 | 11 => println!("This is a prime"),
+   |                               ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match__01.pt:11:14
+   |
+LL |         1 => println!("One!"),
+   |              ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match__01.pt:8:5
+   |
+LL |     println!("Tell me about {}", number);
+   |     ^^^^^^^
+
+error: requires `sized` lang_item
+  --> tests/ui/src/flow_control/match__01.pt:5:9
+   |
+LL |     let number = 13;
+   |         ^^^^^^
+
+error: aborting due to 8 previous errors
+

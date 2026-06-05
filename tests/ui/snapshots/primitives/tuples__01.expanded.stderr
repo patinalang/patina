@@ -1,0 +1,117 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/primitives/tuples__01.pt:47:5
+   |
+LL |     println!("{:?}", matrix);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/primitives/tuples__01.pt:44:5
+   |
+LL |     println!("{:?}, {:?}, {:?}, {:?}", a, b, c, d);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/primitives/tuples__01.pt:38:5
+   |
+LL |     println!("Just an integer: {:?}", (5));
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/primitives/tuples__01.pt:37:5
+   |
+LL |     println!("One element tuple: {:?}", (5,));
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/primitives/tuples__01.pt:33:5
+   |
+LL |     println!("The reversed pair is {:?}", reverse(pair));
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/primitives/tuples__01.pt:31:5
+   |
+LL |     println!("Pair is {:?}", pair);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/primitives/tuples__01.pt:28:5
+   |
+LL |     println!("tuple of tuples: {:?}", tuple_of_tuples);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/primitives/tuples__01.pt:22:5
+   |
+LL |     println!("Long tuple second value: {}", long_tuple.1);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/primitives/tuples__01.pt:21:5
+   |
+LL |     println!("Long tuple first value: {}", long_tuple.0);
+   |     ^^^^^^^
+
+error: cannot find attribute `derive` in this scope
+  --> tests/ui/src/primitives/tuples__01.pt:13:3
+   |
+LL | #[derive(Debug)]
+   |   ^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/primitives/tuples__01.pt:5:19
+   |
+LL | fn reverse(pair: (int, bool)) -> (bool, int) {
+   |                   ^^^
+   |                   |
+   |                   not found in this scope
+   |                   help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/primitives/tuples__01.pt:5:41
+   |
+LL | fn reverse(pair: (int, bool)) -> (bool, int) {
+   |                                         ^^^
+   |                                         |
+   |                                         not found in this scope
+   |                                         help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `float` in this scope
+  --> tests/ui/src/primitives/tuples__01.pt:14:15
+   |
+LL | struct Matrix(float, float, float, float);
+   |               ^^^^^
+   |               |
+   |               not found in this scope
+   |               help: perhaps you intended to use this type: `f32`
+
+error[E0425]: cannot find type `float` in this scope
+  --> tests/ui/src/primitives/tuples__01.pt:14:22
+   |
+LL | struct Matrix(float, float, float, float);
+   |                      ^^^^^
+   |                      |
+   |                      not found in this scope
+   |                      help: perhaps you intended to use this type: `f32`
+
+error[E0425]: cannot find type `float` in this scope
+  --> tests/ui/src/primitives/tuples__01.pt:14:29
+   |
+LL | struct Matrix(float, float, float, float);
+   |                             ^^^^^
+   |                             |
+   |                             not found in this scope
+   |                             help: perhaps you intended to use this type: `f32`
+
+error[E0425]: cannot find type `float` in this scope
+  --> tests/ui/src/primitives/tuples__01.pt:14:36
+   |
+LL | struct Matrix(float, float, float, float);
+   |                                    ^^^^^
+   |                                    |
+   |                                    not found in this scope
+   |                                    help: perhaps you intended to use this type: `f32`
+
+error: aborting due to 16 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

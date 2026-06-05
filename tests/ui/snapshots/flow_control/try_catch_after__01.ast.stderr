@@ -1,0 +1,29 @@
+error: expected one of `!`, `.`, `::`, `;`, `?`, `{`, `}`, or an operator, found `"ok"`
+  --> tests/ui/src/flow_control/try_catch_after__01.pt:5:6
+   |
+LL |     a"ok"
+   |      ^^^^ expected one of 8 possible tokens
+
+error: expected one of `,`, `:`, or `}`, found `(`
+  --> tests/ui/src/flow_control/try_catch_after__01.pt:10:22
+   |
+LL |     try {
+   |     --- while parsing this struct
+LL |         open_resource()
+   |         -------------^ expected one of `,`, `:`, or `}`
+   |         |
+   |         while parsing this struct field
+   |
+help: try naming a field
+   |
+LL |         open_resource: open_resource()
+   |         ++++++++++++++
+
+error: expected one of `.`, `;`, `?`, `}`, or an operator, found `catch`
+  --> tests/ui/src/flow_control/try_catch_after__01.pt:11:7
+   |
+LL |     } catch {
+   |       ^^^^^ expected one of `.`, `;`, `?`, `}`, or an operator
+
+error: aborting due to 3 previous errors
+

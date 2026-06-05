@@ -1,0 +1,45 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match/guard__01.pt:15:46
+   |
+LL |         Temperature::Celsius(t) if t > 30 => println!("{}C is above 30 Celsius", t),
+   |                                              ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match/guard__01.pt:17:36
+   |
+LL |         Temperature::Celsius(t) => println!("{}C is equal to or below 30 Celsius", t),
+   |                                    ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match/guard__01.pt:19:49
+   |
+LL |         Temperature::Fahrenheit(t) if t > 86 => println!("{}F is above 86 Fahrenheit", t),
+   |                                                 ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match/guard__01.pt:20:39
+   |
+LL |         Temperature::Fahrenheit(t) => println!("{}F is equal to or below 86 Fahrenheit", t),
+   |                                       ^^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/flow_control/match/guard__01.pt:6:13
+   |
+LL |     Celsius(int),
+   |             ^^^
+   |             |
+   |             not found in this scope
+   |             help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/flow_control/match/guard__01.pt:7:16
+   |
+LL |     Fahrenheit(int),
+   |                ^^^
+   |                |
+   |                not found in this scope
+   |                help: perhaps you intended to use this type: `i32`
+
+error: aborting due to 6 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

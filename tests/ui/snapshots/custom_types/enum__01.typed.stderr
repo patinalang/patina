@@ -1,0 +1,57 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/enum__01.pt:23:31
+   |
+LL |         WebEvent::PageLoad => println!("page loaded"),
+   |                               ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/enum__01.pt:24:33
+   |
+LL |         WebEvent::PageUnload => println!("page unloaded"),
+   |                                 ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/enum__01.pt:26:34
+   |
+LL |         WebEvent::KeyPress(c) => println!("pressed '{}'.", c),
+   |                                  ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/enum__01.pt:27:31
+   |
+LL |         WebEvent::Paste(s) => println!("pasted \"{}\".", s),
+   |                               ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/enum__01.pt:30:13
+   |
+LL |             println!("clicked at x={}, y={}.", x, y);
+   |             ^^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/custom_types/enum__01.pt:16:16
+   |
+LL |     Click { x: int, y: int },
+   |                ^^^
+   |                |
+   |                not found in this scope
+   |                help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/custom_types/enum__01.pt:16:24
+   |
+LL |     Click { x: int, y: int },
+   |                        ^^^
+   |                        |
+   |                        not found in this scope
+   |                        help: perhaps you intended to use this type: `i32`
+
+error: requires `sized` lang_item
+  --> tests/ui/src/custom_types/enum__01.pt:21:19
+   |
+LL | fn inspect(event: WebEvent) {
+   |                   ^^^^^^^^
+
+error: aborting due to 8 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

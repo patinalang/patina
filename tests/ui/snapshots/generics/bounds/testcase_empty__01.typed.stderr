@@ -1,0 +1,20 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/generics/bounds/testcase_empty__01.pt:27:5
+   |
+LL |     println!("A blue jay is {}", blue(blue_jay));
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/generics/bounds/testcase_empty__01.pt:26:5
+   |
+LL |     println!("A cardinal is {}", red(cardinal));
+   |     ^^^^^^^
+
+error: requires `meta_sized` lang_item
+  --> tests/ui/src/generics/bounds/testcase_empty__01.pt:16:8
+   |
+LL | fn red<T: Red>(_: T)   -> str { "red" }
+   |        ^
+
+error: aborting due to 3 previous errors
+

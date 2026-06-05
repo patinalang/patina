@@ -1,0 +1,36 @@
+error[E0432]: unresolved import `Std`
+  --> tests/ui/src/conversion/string__01.pt:4:5
+   |
+LL | use Std::Fmt;
+   |     ^^^ use of unresolved module or unlinked crate `Std`
+   |
+help: you might be missing a crate named `Std`, add it to your project and import it in your code
+   |
+LL + extern crate Std;
+   |
+
+error: cannot find macro `write` in this scope
+  --> tests/ui/src/conversion/string__01.pt:12:9
+   |
+LL |         write!(f, "Circle of radius {}", self.radius)
+   |         ^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/conversion/string__01.pt:18:5
+   |
+LL |     println!("{}", circle.to_str());
+   |     ^^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/conversion/string__01.pt:7:13
+   |
+LL |     radius: int
+   |             ^^^
+   |             |
+   |             not found in this scope
+   |             help: perhaps you intended to use this type: `i32`
+
+error: aborting due to 4 previous errors
+
+Some errors have detailed explanations: E0425, E0432.
+For more information about an error, try `rustc --explain E0425`.

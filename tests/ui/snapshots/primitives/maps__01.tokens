@@ -1,0 +1,294 @@
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+Ident
+Colon
+Whitespace
+Ident
+CloseParen
+Whitespace
+Minus
+Gt
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 10 }
+Whitespace
+Eq
+Gt
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 96 }
+Comma
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 10 }
+Whitespace
+Eq
+Gt
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 96 }
+Comma
+Whitespace
+Ident
+Whitespace
+Eq
+Gt
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 24 }
+Whitespace
+CloseBrace
+Whitespace
+CloseBrace
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+CloseParen
+Whitespace
+OpenBrace
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Pound
+OpenBrace
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 8 }
+Whitespace
+Eq
+Gt
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 10 }
+Comma
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 8 }
+Whitespace
+Eq
+Gt
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 10 }
+Comma
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 7 }
+Whitespace
+Eq
+Gt
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 10 }
+Comma
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 8 }
+Whitespace
+Eq
+Gt
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 10 }
+Comma
+Whitespace
+CloseBrace
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+Dot
+Ident
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 8 }
+CloseParen
+Whitespace
+OpenBrace
+Whitespace
+Ident
+OpenParen
+Ident
+CloseParen
+Whitespace
+Eq
+Gt
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 20 }
+Comma
+Whitespace
+Ident
+OpenParen
+Ident
+CloseParen
+CloseParen
+Comma
+Whitespace
+Ident
+Whitespace
+Eq
+Gt
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 29 }
+CloseParen
+Comma
+Whitespace
+CloseBrace
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Ident
+Dot
+Ident
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 8 }
+Comma
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 10 }
+CloseParen
+Semi
+Whitespace
+Ident
+Whitespace
+Ident
+Dot
+Ident
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 8 }
+CloseParen
+Whitespace
+OpenBrace
+Whitespace
+Ident
+OpenParen
+Ident
+CloseParen
+Whitespace
+Eq
+Gt
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 20 }
+Comma
+Whitespace
+Ident
+OpenParen
+Ident
+CloseParen
+CloseParen
+Comma
+Whitespace
+Ident
+Whitespace
+Eq
+Gt
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 29 }
+CloseParen
+Comma
+Whitespace
+CloseBrace
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Ident
+Dot
+Ident
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 8 }
+CloseParen
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Pound
+OpenBrace
+Literal { kind: Str { terminated: true }, suffix_start: 7 }
+Whitespace
+Eq
+Gt
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 10 }
+Comma
+Whitespace
+Dot
+Dot
+Ident
+CloseBrace
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+OpenParen
+Ident
+Comma
+Whitespace
+Ident
+CloseParen
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 16 }
+Comma
+Whitespace
+Ident
+Comma
+Whitespace
+Ident
+OpenParen
+Ident
+CloseParen
+CloseParen
+Semi
+Whitespace
+CloseBrace
+Whitespace
+CloseBrace
+Whitespace

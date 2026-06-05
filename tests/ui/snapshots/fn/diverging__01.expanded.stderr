@@ -1,0 +1,8 @@
+error: cannot find macro `panic` in this scope
+  --> tests/ui/src/fn/diverging__01.pt:5:5
+   |
+LL |     panic!("This call never returns.");
+   |     ^^^^^
+
+error: aborting due to 1 previous error
+

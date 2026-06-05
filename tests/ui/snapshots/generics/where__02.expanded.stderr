@@ -1,0 +1,27 @@
+error[E0433]: cannot find module or crate `Std` in the crate root
+  --> tests/ui/src/generics/where__02.pt:4:5
+   |
+LL | use Std::Fmt::Debug;
+   |     ^^^ use of unresolved module or unlinked crate `Std`
+   |
+help: you might be missing a crate named `Std`, add it to your project and import it in your code
+   |
+LL + extern crate Std;
+   |
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/generics/where__02.pt:17:9
+   |
+LL |         println!("{:?}", Some(self));
+   |         ^^^^^^^
+
+error[E0425]: cannot find type `Option` in this scope
+  --> tests/ui/src/generics/where__02.pt:13:5
+   |
+LL |     Option<T>: Debug {
+   |     ^^^^^^ not found in this scope
+
+error: aborting due to 3 previous errors
+
+Some errors have detailed explanations: E0425, E0433.
+For more information about an error, try `rustc --explain E0425`.

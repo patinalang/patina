@@ -1,0 +1,14 @@
+error: expected one of `!` or `[`, found `{`
+  --> tests/ui/src/primitives/maps__01.pt:15:25
+   |
+LL |     let mut contacts = #{
+   |                         ^ expected one of `!` or `[`
+
+error: requires `sized` lang_item
+  --> tests/ui/src/primitives/maps__01.pt:4:17
+   |
+LL | fn call(number: str) -> str {
+   |                 ^^^
+
+error: aborting due to 2 previous errors
+

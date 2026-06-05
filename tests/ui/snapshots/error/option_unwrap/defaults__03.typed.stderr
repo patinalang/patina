@@ -1,0 +1,39 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__03.pt:12:5
+   |
+LL |     println!("my_fruit is: {:?}", my_fruit);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__03.pt:11:5
+   |
+LL |     println!("first_available_fruit is: {:?}", first_available_fruit);
+   |     ^^^^^^^
+
+error: cannot find attribute `derive` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__03.pt:4:3
+   |
+LL | #[derive(Debug)]
+   |   ^^^^^^
+
+error[E0425]: cannot find type `Option` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__03.pt:8:23
+   |
+LL |     let mut my_fruit: Option<Fruit> = None;
+   |                       ^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `None` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__03.pt:8:39
+   |
+LL |     let mut my_fruit: Option<Fruit> = None;
+   |                                       ^^^^ not found in this scope
+
+error: requires `sized` lang_item
+  --> tests/ui/src/error/option_unwrap/defaults__03.pt:8:9
+   |
+LL |     let mut my_fruit: Option<Fruit> = None;
+   |         ^^^^^^^^^^^^
+
+error: aborting due to 6 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

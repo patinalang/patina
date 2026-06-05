@@ -1,0 +1,355 @@
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+Ident
+Colon
+Whitespace
+OpenParen
+Ident
+Comma
+Whitespace
+Ident
+CloseParen
+CloseParen
+Whitespace
+Minus
+Gt
+Whitespace
+OpenParen
+Ident
+Comma
+Whitespace
+Ident
+CloseParen
+Whitespace
+OpenBrace
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+OpenParen
+Ident
+Comma
+Whitespace
+Ident
+CloseParen
+Whitespace
+Eq
+Whitespace
+Ident
+Semi
+Whitespace
+OpenParen
+Ident
+Comma
+Whitespace
+Ident
+CloseParen
+Whitespace
+CloseBrace
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Pound
+OpenBracket
+Ident
+OpenParen
+Ident
+CloseParen
+CloseBracket
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+Ident
+Comma
+Whitespace
+Ident
+Comma
+Whitespace
+Ident
+Comma
+Whitespace
+Ident
+CloseParen
+Semi
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+CloseParen
+Whitespace
+OpenBrace
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+OpenParen
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Comma
+Whitespace
+Literal { kind: Float { base: Decimal, empty_exponent: false }, suffix_start: 3 }
+Comma
+Whitespace
+Literal { kind: Char { terminated: true }, suffix_start: 3 }
+Comma
+Whitespace
+Ident
+Comma
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 7 }
+Comma
+Whitespace
+Literal { kind: ByteStr { terminated: true }, suffix_start: 8 }
+CloseParen
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 28 }
+Comma
+Whitespace
+Ident
+Dot
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+CloseParen
+Semi
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 29 }
+Comma
+Whitespace
+Ident
+Dot
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+CloseParen
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+OpenParen
+OpenParen
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Comma
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Comma
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+CloseParen
+Comma
+Whitespace
+OpenParen
+Literal { kind: Float { base: Decimal, empty_exponent: false }, suffix_start: 3 }
+Comma
+Whitespace
+Minus
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+CloseParen
+Comma
+Whitespace
+Minus
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+CloseParen
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 23 }
+Comma
+Whitespace
+Ident
+CloseParen
+Semi
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+OpenParen
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Comma
+Whitespace
+Ident
+CloseParen
+Semi
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 14 }
+Comma
+Whitespace
+Ident
+CloseParen
+Semi
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 27 }
+Comma
+Whitespace
+Ident
+OpenParen
+Ident
+CloseParen
+CloseParen
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 25 }
+Comma
+Whitespace
+OpenParen
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Comma
+CloseParen
+CloseParen
+Semi
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 23 }
+Comma
+Whitespace
+OpenParen
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+CloseParen
+CloseParen
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+OpenParen
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Comma
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 7 }
+Comma
+Whitespace
+Literal { kind: Float { base: Decimal, empty_exponent: false }, suffix_start: 3 }
+Comma
+Whitespace
+Ident
+CloseParen
+Semi
+Whitespace
+Ident
+Whitespace
+OpenParen
+Ident
+Comma
+Whitespace
+Ident
+Comma
+Whitespace
+Ident
+Comma
+Whitespace
+Ident
+CloseParen
+Whitespace
+Eq
+Whitespace
+Ident
+Semi
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 24 }
+Comma
+Whitespace
+Ident
+Comma
+Whitespace
+Ident
+Comma
+Whitespace
+Ident
+Comma
+Whitespace
+Ident
+CloseParen
+Semi
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Ident
+OpenParen
+Literal { kind: Float { base: Decimal, empty_exponent: false }, suffix_start: 3 }
+Comma
+Whitespace
+Literal { kind: Float { base: Decimal, empty_exponent: false }, suffix_start: 3 }
+Comma
+Whitespace
+Literal { kind: Float { base: Decimal, empty_exponent: false }, suffix_start: 3 }
+Comma
+Whitespace
+Literal { kind: Float { base: Decimal, empty_exponent: false }, suffix_start: 3 }
+CloseParen
+Semi
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 6 }
+Comma
+Whitespace
+Ident
+CloseParen
+Semi
+Whitespace
+CloseBrace
+Whitespace

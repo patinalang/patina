@@ -1,0 +1,27 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/generics/impl__02.pt:30:5
+   |
+LL |     println!("{}, {}", x.value(), y.value());
+   |     ^^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/generics/impl__02.pt:5:10
+   |
+LL |     val: int,
+   |          ^^^
+   |          |
+   |          not found in this scope
+   |          help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/generics/impl__02.pt:14:23
+   |
+LL |     fn value(self) -> int {
+   |                       ^^^
+   |                       |
+   |                       not found in this scope
+   |                       help: perhaps you intended to use this type: `i32`
+
+error: aborting due to 3 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

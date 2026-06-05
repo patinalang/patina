@@ -1,0 +1,84 @@
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+Ident
+CloseParen
+Semi
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+Ident
+CloseParen
+Semi
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+CloseParen
+Whitespace
+OpenBrace
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Ident
+OpenParen
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 2 }
+CloseParen
+Whitespace
+Ident
+Whitespace
+Ident
+Semi
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Ident
+Dot
+Ident
+Colon
+Colon
+Lt
+Ident
+Gt
+OpenParen
+CloseParen
+Dot
+Ident
+OpenParen
+CloseParen
+Semi
+Whitespace
+CloseBrace
+Whitespace
+CloseBrace
+Whitespace

@@ -1,0 +1,187 @@
+error: expected item, found `;`
+  --> tests/ui/src/primitives/term__02.pt:9:2
+   |
+LL | };
+   |  ^
+   |
+   = help: enum declarations are not followed by a semicolon
+help: remove this semicolon
+   |
+LL - };
+LL + }
+   |
+
+error: comparison operators cannot be chained
+  --> tests/ui/src/primitives/term__02.pt:17:82
+   |
+LL |     let next_event_res: Result<UserEvent, DecodeError> = next_event.try_cast_into<UserEvent>();
+   |                                                                                  ^         ^
+   |
+help: use `::<...>` instead of `<...>` to specify lifetime, type, or const arguments
+   |
+LL |     let next_event_res: Result<UserEvent, DecodeError> = next_event.try_cast_into::<UserEvent>();
+   |                                                                                  ++
+
+error: comparison operators cannot be chained
+  --> tests/ui/src/primitives/term__02.pt:24:88
+   |
+LL |     let next_event: UserEvent = Events.get_next_event(seqnum, prev_event).try_cast_into<UserEvent>()?;
+   |                                                                                        ^         ^
+   |
+help: use `::<...>` instead of `<...>` to specify lifetime, type, or const arguments
+   |
+LL |     let next_event: UserEvent = Events.get_next_event(seqnum, prev_event).try_cast_into::<UserEvent>()?;
+   |                                                                                        ++
+
+error: expected one of `;` or `else`, found `?`
+  --> tests/ui/src/primitives/term__02.pt:24:101
+   |
+LL |     let next_event: UserEvent = Events.get_next_event(seqnum, prev_event).try_cast_into<UserEvent>()?;
+   |                                                                                                     ^ expected one of `;` or `else`
+
+error[E0433]: cannot find module or crate `Elixir` in the crate root
+  --> tests/ui/src/primitives/term__02.pt:4:5
+   |
+LL | use Elixir::ExApp::Events;
+   |     ^^^^^^ use of unresolved module or unlinked crate `Elixir`
+   |
+help: you might be missing a crate named `Elixir`, add it to your project and import it in your code
+   |
+LL + extern crate Elixir;
+   |
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/primitives/term__02.pt:31:28
+   |
+LL |         Ok(Click(x, y)) => println!("Clicked x={} y={}", x, y),
+   |                            ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/primitives/term__02.pt:32:21
+   |
+LL |         Ok(Exit) => println!("Exited"),
+   |                     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/primitives/term__02.pt:33:21
+   |
+LL |         Err(err) => println!("Failed to decode Elixir result {:?}", err),
+   |                     ^^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/primitives/term__02.pt:7:11
+   |
+LL |     Click(int, int),
+   |           ^^^
+   |           |
+   |           not found in this scope
+   |           help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/primitives/term__02.pt:7:16
+   |
+LL |     Click(int, int),
+   |                ^^^
+   |                |
+   |                not found in this scope
+   |                help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/primitives/term__02.pt:11:23
+   |
+LL | fn next_event(seqnum: int, prev_event: UserEvent) -> Result<UserEvent, DecodeError> {
+   |                       ^^^
+   |                       |
+   |                       not found in this scope
+   |                       help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `Result` in this scope
+  --> tests/ui/src/primitives/term__02.pt:11:54
+   |
+LL | fn next_event(seqnum: int, prev_event: UserEvent) -> Result<UserEvent, DecodeError> {
+   |                                                      ^^^^^^ not found in this scope
+
+error[E0425]: cannot find type `DecodeError` in this scope
+  --> tests/ui/src/primitives/term__02.pt:11:72
+   |
+LL | fn next_event(seqnum: int, prev_event: UserEvent) -> Result<UserEvent, DecodeError> {
+   |                                                                        ^^^^^^^^^^^ not found in this scope
+   |
+help: you might be missing a type parameter
+   |
+LL | fn next_event<DecodeError>(seqnum: int, prev_event: UserEvent) -> Result<UserEvent, DecodeError> {
+   |              +++++++++++++
+
+error[E0425]: cannot find type `term` in this scope
+  --> tests/ui/src/primitives/term__02.pt:13:21
+   |
+LL |     let next_event: term = Events.get_next_event(seqnum, prev_event);
+   |                     ^^^^ not found in this scope
+
+error[E0425]: cannot find type `Result` in this scope
+  --> tests/ui/src/primitives/term__02.pt:17:25
+   |
+LL |     let next_event_res: Result<UserEvent, DecodeError> = next_event.try_cast_into<UserEvent>();
+   |                         ^^^^^^ not found in this scope
+
+error[E0425]: cannot find type `DecodeError` in this scope
+  --> tests/ui/src/primitives/term__02.pt:17:43
+   |
+LL |     let next_event_res: Result<UserEvent, DecodeError> = next_event.try_cast_into<UserEvent>();
+   |                                           ^^^^^^^^^^^ not found in this scope
+   |
+help: you might be missing a type parameter
+   |
+LL | fn next_event<DecodeError>(seqnum: int, prev_event: UserEvent) -> Result<UserEvent, DecodeError> {
+   |              +++++++++++++
+
+error[E0425]: cannot find type `Result` in this scope
+  --> tests/ui/src/primitives/term__02.pt:18:25
+   |
+LL |     let next_event_res: Result<UserEvent, DecodeError> = UserEvent::unsafe_from_term(next_event);
+   |                         ^^^^^^ not found in this scope
+
+error[E0425]: cannot find type `DecodeError` in this scope
+  --> tests/ui/src/primitives/term__02.pt:18:43
+   |
+LL |     let next_event_res: Result<UserEvent, DecodeError> = UserEvent::unsafe_from_term(next_event);
+   |                                           ^^^^^^^^^^^ not found in this scope
+   |
+help: you might be missing a type parameter
+   |
+LL | fn next_event<DecodeError>(seqnum: int, prev_event: UserEvent) -> Result<UserEvent, DecodeError> {
+   |              +++++++++++++
+
+error[E0531]: cannot find tuple struct or tuple variant `Ok` in this scope
+  --> tests/ui/src/primitives/term__02.pt:31:9
+   |
+LL |         Ok(Click(x, y)) => println!("Clicked x={} y={}", x, y),
+   |         ^^ not found in this scope
+
+error[E0531]: cannot find tuple struct or tuple variant `Click` in this scope
+  --> tests/ui/src/primitives/term__02.pt:31:12
+   |
+LL |         Ok(Click(x, y)) => println!("Clicked x={} y={}", x, y),
+   |            ^^^^^ not found in this scope
+   |
+help: consider importing this tuple variant
+   |
+LL + use UserEvent::Click;
+   |
+
+error[E0531]: cannot find tuple struct or tuple variant `Ok` in this scope
+  --> tests/ui/src/primitives/term__02.pt:32:9
+   |
+LL |         Ok(Exit) => println!("Exited"),
+   |         ^^ not found in this scope
+
+error[E0531]: cannot find tuple struct or tuple variant `Err` in this scope
+  --> tests/ui/src/primitives/term__02.pt:33:9
+   |
+LL |         Err(err) => println!("Failed to decode Elixir result {:?}", err),
+   |         ^^^ not found in this scope
+
+error: aborting due to 22 previous errors
+
+Some errors have detailed explanations: E0425, E0433, E0531.
+For more information about an error, try `rustc --explain E0425`.

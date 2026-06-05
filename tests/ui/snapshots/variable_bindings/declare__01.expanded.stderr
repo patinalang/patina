@@ -1,0 +1,20 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/variable_bindings/declare__01.pt:25:5
+   |
+LL |     println!("another binding: {}", another_binding);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/variable_bindings/declare__01.pt:20:5
+   |
+LL |     println!("another binding: {}", another_binding);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/variable_bindings/declare__01.pt:15:5
+   |
+LL |     println!("a binding: {}", a_binding);
+   |     ^^^^^^^
+
+error: aborting due to 3 previous errors
+

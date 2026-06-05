@@ -1,0 +1,30 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/error/iter_result__03.pt:10:5
+   |
+LL |     println!("Results: {:?}", numbers);
+   |     ^^^^^^^
+
+error[E0425]: cannot find type `Result` in this scope
+  --> tests/ui/src/error/iter_result__03.pt:6:18
+   |
+LL |     let numbers: Result<[_], _> = strings
+   |                  ^^^^^^ not found in this scope
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/error/iter_result__03.pt:8:28
+   |
+LL |         .map(|s| s.parse::<int>())
+   |                            ^^^
+   |                            |
+   |                            not found in this scope
+   |                            help: perhaps you intended to use this type: `i32`
+
+error: requires `sized` lang_item
+  --> tests/ui/src/error/iter_result__03.pt:5:9
+   |
+LL |     let strings = ["tofu", "93", "18"];
+   |         ^^^^^^^
+
+error: aborting due to 4 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

@@ -1,0 +1,14 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/hello/comment__01.pt:38:5
+   |
+LL |     println!("Is `x` 10 or 100? x = {}", x);
+   |     ^^^^^^^
+
+error: requires `sized` lang_item
+  --> tests/ui/src/hello/comment__01.pt:37:9
+   |
+LL |     let x = 5 + /* 90 + */ 5;
+   |         ^
+
+error: aborting due to 2 previous errors
+

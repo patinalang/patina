@@ -1,0 +1,17 @@
+error: expected `;`, found `println`
+  --> tests/ui/src/types/inference__01.pt:14:24
+   |
+LL |     lst = [elem, ..lst]
+   |                        ^ help: add `;` here
+LL |     // Aha! Now the compiler knows that `lst` is a list of `int`s (`[int]`)
+LL |     println!("{:?}", lst);
+   |     ------- unexpected token
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/types/inference__01.pt:16:5
+   |
+LL |     println!("{:?}", lst);
+   |     ^^^^^^^
+
+error: aborting due to 2 previous errors
+

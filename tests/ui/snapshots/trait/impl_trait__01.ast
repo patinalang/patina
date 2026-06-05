@@ -1,0 +1,17 @@
+// source: patina-by-example/src/trait/impl_trait.md
+// block: 1/3
+
+fn parse_csv_document<R: Std::Io::BufRead>(src: R)
+    -> Std::Io::Result<[[str]]> {
+    src.lines().map(
+            // For each line in the source
+            // If the line was read successfully, process it, if not, return the error
+            // Split the line separated by commas
+            // Remove leading and trailing whitespace
+            // Collect all strings in a row into a [str]
+            |line|
+                {
+                    line.map(|line|
+                            { line.split(',').map(|entry| entry.trim()).collect() })
+                }).collect() // Collect all lines into a [[str]]
+}

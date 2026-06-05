@@ -1,0 +1,18 @@
+error: expected one of `!`, `,`, `.`, `::`, `?`, `{`, `}`, or an operator, found `"hello_foo"`
+  --> tests/ui/src/custom_types/enum/literal_enums__01.pt:5:12
+   |
+LL |     Foo = a"hello_foo",
+   |            ^^^^^^^^^^^ expected one of 8 possible tokens
+   |
+   = help: enum variants can be `Variant`, `Variant = <integer>`, `Variant(Type, ..., TypeN)` or `Variant { fields: Types }`
+
+error: expected item, found `"hello_foo"`
+  --> tests/ui/src/custom_types/enum/literal_enums__01.pt:5:12
+   |
+LL |     Foo = a"hello_foo",
+   |            ^^^^^^^^^^^ expected item
+   |
+   = note: for a full list of items that can appear in modules, see <https://doc.rust-lang.org/reference/items.html>
+
+error: aborting due to 2 previous errors
+

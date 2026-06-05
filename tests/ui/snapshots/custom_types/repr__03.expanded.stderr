@@ -1,0 +1,75 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/repr__03.pt:40:5
+   |
+LL |     println!("{:?}", TaggedEnum::WithCustomTag(42) as term);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/repr__03.pt:36:5
+   |
+LL |     println!("{:?}", TaggedEnum::WithOneUnitElem(()) as term);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/repr__03.pt:33:5
+   |
+LL |     println!("{:?}", TaggedEnum::WithUnitElem((), 42) as term);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/repr__03.pt:27:5
+   |
+LL |     println!("{:?}", TaggedEnum::StructStyle{x: 1, y: 2} as term);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/repr__03.pt:24:5
+   |
+LL |     println!("{:?}", TaggedEnum::TupleStyle("hello") as term);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/repr__03.pt:20:5
+   |
+LL |     println!("{:?}", TaggedEnum::Unit as term);
+   |     ^^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/custom_types/repr__03.pt:8:20
+   |
+LL |     StructStyle{x: int, y: int},
+   |                    ^^^
+   |                    |
+   |                    not found in this scope
+   |                    help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/custom_types/repr__03.pt:8:28
+   |
+LL |     StructStyle{x: int, y: int},
+   |                            ^^^
+   |                            |
+   |                            not found in this scope
+   |                            help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/custom_types/repr__03.pt:10:22
+   |
+LL |     WithUnitElem((), int),
+   |                      ^^^
+   |                      |
+   |                      not found in this scope
+   |                      help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/custom_types/repr__03.pt:14:19
+   |
+LL |     WithCustomTag(int),
+   |                   ^^^
+   |                   |
+   |                   not found in this scope
+   |                   help: perhaps you intended to use this type: `i32`
+
+error: aborting due to 10 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

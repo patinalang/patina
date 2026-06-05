@@ -1,0 +1,33 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/generics/new_types__01.pt:29:5
+   |
+LL |     println!("Is an adult? {}", is_adult(age_days.to_years()));
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/generics/new_types__01.pt:28:5
+   |
+LL |     println!("Is an adult? {}", is_adult(age));
+   |     ^^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/generics/new_types__01.pt:4:14
+   |
+LL | struct Years(int);
+   |              ^^^
+   |              |
+   |              not found in this scope
+   |              help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/generics/new_types__01.pt:6:13
+   |
+LL | struct Days(int);
+   |             ^^^
+   |             |
+   |             not found in this scope
+   |             help: perhaps you intended to use this type: `i32`
+
+error: aborting due to 4 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

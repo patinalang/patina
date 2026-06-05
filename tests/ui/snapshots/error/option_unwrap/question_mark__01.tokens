@@ -1,0 +1,64 @@
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+Ident
+Colon
+Whitespace
+Ident
+Lt
+Ident
+Gt
+CloseParen
+Whitespace
+Minus
+Gt
+Whitespace
+Ident
+Lt
+Ident
+Gt
+Whitespace
+OpenBrace
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+Colon
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Ident
+Question
+Whitespace
+Plus
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Semi
+Whitespace
+Ident
+OpenParen
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 24 }
+Comma
+Whitespace
+Ident
+CloseParen
+CloseParen
+Whitespace
+CloseBrace
+Whitespace

@@ -1,0 +1,201 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:39:13
+   |
+LL |             println!("Cyan: {}, magenta: {}, yellow: {}, key (black): {}!",
+   |             ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:37:13
+   |
+LL |             println!("Cyan: {}, magenta: {}, yellow: {}!", c, m, y),
+   |             ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:35:13
+   |
+LL |             println!("Hue: {}, saturation: {}, lightness: {}!", h, s, l),
+   |             ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:33:13
+   |
+LL |             println!("Hue: {}, saturation: {}, value: {}!", h, s, v),
+   |             ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:31:13
+   |
+LL |             println!("Red: {}, green: {}, and blue: {}!", r, g, b),
+   |             ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:29:25
+   |
+LL |         Color::Green => println!("The color is Green!"),
+   |                         ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:28:25
+   |
+LL |         Color::Blue  => println!("The color is Blue!"),
+   |                         ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:27:25
+   |
+LL |         Color::Red   => println!("The color is Red!"),
+   |                         ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:24:5
+   |
+LL |     println!("What color is it?");
+   |     ^^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:13:9
+   |
+LL |     RGB(int, int, int),
+   |         ^^^
+   |         |
+   |         not found in this scope
+   |         help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:13:14
+   |
+LL |     RGB(int, int, int),
+   |              ^^^
+   |              |
+   |              not found in this scope
+   |              help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:13:19
+   |
+LL |     RGB(int, int, int),
+   |                   ^^^
+   |                   |
+   |                   not found in this scope
+   |                   help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:14:9
+   |
+LL |     HSV(int, int, int),
+   |         ^^^
+   |         |
+   |         not found in this scope
+   |         help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:14:14
+   |
+LL |     HSV(int, int, int),
+   |              ^^^
+   |              |
+   |              not found in this scope
+   |              help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:14:19
+   |
+LL |     HSV(int, int, int),
+   |                   ^^^
+   |                   |
+   |                   not found in this scope
+   |                   help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:15:9
+   |
+LL |     HSL(int, int, int),
+   |         ^^^
+   |         |
+   |         not found in this scope
+   |         help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:15:14
+   |
+LL |     HSL(int, int, int),
+   |              ^^^
+   |              |
+   |              not found in this scope
+   |              help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:15:19
+   |
+LL |     HSL(int, int, int),
+   |                   ^^^
+   |                   |
+   |                   not found in this scope
+   |                   help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:16:9
+   |
+LL |     CMY(int, int, int),
+   |         ^^^
+   |         |
+   |         not found in this scope
+   |         help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:16:14
+   |
+LL |     CMY(int, int, int),
+   |              ^^^
+   |              |
+   |              not found in this scope
+   |              help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:16:19
+   |
+LL |     CMY(int, int, int),
+   |                   ^^^
+   |                   |
+   |                   not found in this scope
+   |                   help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:17:10
+   |
+LL |     CMYK(int, int, int, int),
+   |          ^^^
+   |          |
+   |          not found in this scope
+   |          help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:17:15
+   |
+LL |     CMYK(int, int, int, int),
+   |               ^^^
+   |               |
+   |               not found in this scope
+   |               help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:17:20
+   |
+LL |     CMYK(int, int, int, int),
+   |                    ^^^
+   |                    |
+   |                    not found in this scope
+   |                    help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_enum__01.pt:17:25
+   |
+LL |     CMYK(int, int, int, int),
+   |                         ^^^
+   |                         |
+   |                         not found in this scope
+   |                         help: perhaps you intended to use this type: `i32`
+
+error: aborting due to 25 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

@@ -1,0 +1,20 @@
+error: cannot find macro `format` in this scope
+  --> tests/ui/src/trait/supertraits__01.pt:25:5
+   |
+LL |     format!(
+   |     ^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/trait/supertraits__01.pt:74:5
+   |
+LL |     println!("{}", greeting);
+   |     ^^^^^^^
+
+error: requires `meta_sized` lang_item
+  --> tests/ui/src/trait/supertraits__01.pt:24:39
+   |
+LL | fn comp_sci_student_greeting(student: dyn CompSciStudent) -> str {
+   |                                       ^^^^^^^^^^^^^^^^^^
+
+error: aborting due to 3 previous errors
+

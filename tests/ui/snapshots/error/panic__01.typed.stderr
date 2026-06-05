@@ -1,0 +1,20 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/error/panic__01.pt:8:5
+   |
+LL |     println!("Some refreshing {} is all I need.", beverage);
+   |     ^^^^^^^
+
+error: cannot find macro `panic` in this scope
+  --> tests/ui/src/error/panic__01.pt:6:33
+   |
+LL |     if beverage == "lemonade" { panic!("AAAaaaaa!!!!"); }
+   |                                 ^^^^^
+
+error: requires `sized` lang_item
+  --> tests/ui/src/error/panic__01.pt:4:20
+   |
+LL | fn drink(beverage: str) {
+   |                    ^^^
+
+error: aborting due to 3 previous errors
+

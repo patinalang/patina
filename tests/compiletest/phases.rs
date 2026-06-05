@@ -16,12 +16,10 @@ pub enum Phase {
     Ast,
     Expanded,
     Typed,
-    Abstr,
 }
 
 impl Phase {
-    pub const ALL: &'static [Phase] =
-        &[Phase::Tokens, Phase::Ast, Phase::Expanded, Phase::Typed, Phase::Abstr];
+    pub const ALL: &'static [Phase] = &[Phase::Tokens, Phase::Ast, Phase::Expanded, Phase::Typed];
 
     pub fn dump_stage(self) -> &'static str {
         match self {
@@ -29,7 +27,6 @@ impl Phase {
             Phase::Ast => "ast",
             Phase::Expanded => "expanded",
             Phase::Typed => "typed",
-            Phase::Abstr => "abstr",
         }
     }
 }

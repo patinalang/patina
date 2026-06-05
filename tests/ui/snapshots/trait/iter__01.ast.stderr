@@ -1,0 +1,10 @@
+error: expected `;`, found `}`
+  --> tests/ui/src/trait/iter__01.pt:27:37
+   |
+LL |         (next_self, Some(self.curr))
+   |                                     ^ help: add `;` here
+LL |     }
+   |     - unexpected token
+
+error: aborting due to 1 previous error
+

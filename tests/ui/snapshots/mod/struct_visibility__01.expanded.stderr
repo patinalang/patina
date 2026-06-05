@@ -1,0 +1,14 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/mod/struct_visibility__01.pt:37:5
+   |
+LL |     println!("The open box contains: {}", open_box.contents);
+   |     ^^^^^^^
+
+error: cannot find attribute `beam_module` in this scope
+  --> tests/ui/src/mod/struct_visibility__01.pt:8:7
+   |
+LL |     #[beam_module("Elixir.RenamedStruct")]
+   |       ^^^^^^^^^^^
+
+error: aborting due to 2 previous errors
+

@@ -1,0 +1,52 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/error/multiple_error_types__01.pt:19:5
+   |
+LL |     println!("The first doubled is {}", double_first(strings));
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/error/multiple_error_types__01.pt:16:5
+   |
+LL |     println!("The first doubled is {}", double_first(empty));
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/error/multiple_error_types__01.pt:14:5
+   |
+LL |     println!("The first doubled is {}", double_first(numbers));
+   |     ^^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/error/multiple_error_types__01.pt:4:33
+   |
+LL | fn double_first(list: [str]) -> int {
+   |                                 ^^^
+   |                                 |
+   |                                 not found in this scope
+   |                                 help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/error/multiple_error_types__01.pt:6:23
+   |
+LL |     2 * first.parse::<int>().unwrap() // Generate error 2
+   |                       ^^^ not found in this scope
+   |
+help: perhaps you intended to use this type
+   |
+LL -     2 * first.parse::<int>().unwrap() // Generate error 2
+LL +     2 * first.parse::<i32>().unwrap() // Generate error 2
+   |
+help: you might be missing a type parameter
+   |
+LL | fn double_first<int>(list: [str]) -> int {
+   |                +++++
+
+error: requires `sized` lang_item
+  --> tests/ui/src/error/multiple_error_types__01.pt:4:23
+   |
+LL | fn double_first(list: [str]) -> int {
+   |                       ^^^^^
+
+error: aborting due to 6 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

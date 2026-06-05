@@ -1,0 +1,8 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control__01.pt:12:5
+   |
+LL |     println!("{:?}", n);
+   |     ^^^^^^^
+
+error: aborting due to 1 previous error
+

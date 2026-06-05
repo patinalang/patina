@@ -1,0 +1,14 @@
+error: cannot find macro `assert_eq` in this scope
+  --> tests/ui/src/flow_control/loop/return__01.pt:15:5
+   |
+LL |     assert_eq!(result, 20);
+   |     ^^^^^^^^^
+
+error: requires `sized` lang_item
+  --> tests/ui/src/flow_control/loop/return__01.pt:5:9
+   |
+LL |     let mut counter = 0;
+   |         ^^^^^^^^^^^
+
+error: aborting due to 2 previous errors
+

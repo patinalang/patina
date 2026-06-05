@@ -1,0 +1,69 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/types/cast__01.pt:19:5
+   |
+LL |     println!("Casting: {} -> {} -> {}", decimal, integer, character);
+   |     ^^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/types/cast__01.pt:8:18
+   |
+LL |     let integer: int = decimal;
+   |                  ^^^
+   |                  |
+   |                  not found in this scope
+   |                  help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/types/cast__01.pt:11:30
+   |
+LL |     let integer = decimal as int; // casting float to integer is equivalent to decimal.trunc()
+   |                              ^^^
+   |                              |
+   |                              not found in this scope
+   |                              help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `bin` in this scope
+  --> tests/ui/src/types/cast__01.pt:23:28
+   |
+LL |     let binary = string as bin;
+   |                            ^^^ not found in this scope
+
+error[E0425]: cannot find type `bits` in this scope
+  --> tests/ui/src/types/cast__01.pt:24:31
+   |
+LL |     let bitstring = string as bits;
+   |                               ^^^^ not found in this scope
+
+error[E0425]: cannot find type `bits` in this scope
+  --> tests/ui/src/types/cast__01.pt:27:31
+   |
+LL |     let bitstring = binary as bits;
+   |                               ^^^^ not found in this scope
+
+error[E0425]: cannot find value `byte_val` in this scope
+  --> tests/ui/src/types/cast__01.pt:34:29
+   |
+LL |     let integer_from_byte = byte_val as int;
+   |                             ^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/types/cast__01.pt:34:41
+   |
+LL |     let integer_from_byte = byte_val as int;
+   |                                         ^^^
+   |                                         |
+   |                                         not found in this scope
+   |                                         help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `byte` in this scope
+  --> tests/ui/src/types/cast__01.pt:36:50
+   |
+LL |     let byte_from_integer = integer_from_byte as byte;
+   |                                                  ^^^^
+   |                                                  |
+   |                                                  not found in this scope
+   |                                                  help: perhaps you intended to use this type: `u8`
+
+error: aborting due to 9 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

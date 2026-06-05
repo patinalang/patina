@@ -1,0 +1,14 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/mod/split__03.pt:10:5
+   |
+LL |     println!("called `MyMod::Nested::private_function()`");
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/mod/split__03.pt:5:5
+   |
+LL |     println!("called `MyMod::Nested::function()`");
+   |     ^^^^^^^
+
+error: aborting due to 2 previous errors
+

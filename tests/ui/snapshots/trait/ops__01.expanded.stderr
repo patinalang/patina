@@ -1,0 +1,50 @@
+error[E0432]: unresolved import `Std`
+  --> tests/ui/src/trait/ops__01.pt:4:5
+   |
+LL | use Std::Ops;
+   |     ^^^ use of unresolved module or unlinked crate `Std`
+   |
+help: you might be missing a crate named `Std`, add it to your project and import it in your code
+   |
+LL + extern crate Std;
+   |
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/trait/ops__01.pt:43:5
+   |
+LL |     println!("Bar + Foo = {:?}", Bar + Foo);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/trait/ops__01.pt:42:5
+   |
+LL |     println!("Foo + Bar = {:?}", Foo + Bar);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/trait/ops__01.pt:35:9
+   |
+LL |         println!("> Bar.add(Foo) was called");
+   |         ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/trait/ops__01.pt:22:9
+   |
+LL |         println!("> Foo.add(Bar) was called");
+   |         ^^^^^^^
+
+error: cannot find attribute `derive` in this scope
+  --> tests/ui/src/trait/ops__01.pt:12:3
+   |
+LL | #[derive(Debug)]
+   |   ^^^^^^
+
+error: cannot find attribute `derive` in this scope
+  --> tests/ui/src/trait/ops__01.pt:9:3
+   |
+LL | #[derive(Debug)]
+   |   ^^^^^^
+
+error: aborting due to 7 previous errors
+
+For more information about this error, try `rustc --explain E0432`.

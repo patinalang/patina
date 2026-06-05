@@ -1,0 +1,31 @@
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Pound
+OpenBracket
+Ident
+OpenParen
+Ident
+CloseParen
+CloseBracket
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+CloseParen
+Whitespace
+OpenBrace
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 49 }
+CloseParen
+Semi
+Whitespace
+CloseBrace
+Whitespace

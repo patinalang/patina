@@ -1,0 +1,169 @@
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+CloseParen
+Whitespace
+OpenBrace
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+OpenBracket
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Comma
+Whitespace
+Minus
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Comma
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+CloseBracket
+Semi
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+OpenBracket
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Comma
+Whitespace
+Ident
+Comma
+Whitespace
+Ident
+CloseBracket
+Whitespace
+Eq
+Gt
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 41 }
+Comma
+Whitespace
+Ident
+Comma
+Whitespace
+Ident
+CloseParen
+Comma
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+OpenBracket
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Comma
+Whitespace
+Ident
+Comma
+Whitespace
+Ident
+CloseBracket
+Whitespace
+Eq
+Gt
+Whitespace
+Ident
+Bang
+OpenParen
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 51 }
+Comma
+Whitespace
+Ident
+Whitespace
+CloseParen
+Comma
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+OpenBracket
+Minus
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Comma
+Whitespace
+Ident
+Comma
+Whitespace
+Dot
+Dot
+CloseBracket
+Whitespace
+Eq
+Gt
+Whitespace
+Ident
+Bang
+OpenParen
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 64 }
+Comma
+Whitespace
+Ident
+Whitespace
+CloseParen
+Comma
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+OpenBracket
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Comma
+Whitespace
+Ident
+Comma
+Whitespace
+Ident
+Whitespace
+At
+Whitespace
+Dot
+Dot
+CloseBracket
+Whitespace
+Eq
+Gt
+Whitespace
+Ident
+Bang
+OpenParen
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 60 }
+Comma
+Whitespace
+Ident
+Comma
+Whitespace
+Ident
+Whitespace
+CloseParen
+Comma
+Whitespace
+CloseBrace
+Whitespace
+CloseBrace
+Whitespace

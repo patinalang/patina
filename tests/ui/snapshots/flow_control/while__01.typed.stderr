@@ -1,0 +1,32 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/while__01.pt:17:13
+   |
+LL |             println!("{}", n);
+   |             ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/while__01.pt:15:13
+   |
+LL |             println!("buzz");
+   |             ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/while__01.pt:13:13
+   |
+LL |             println!("fizz");
+   |             ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/while__01.pt:11:13
+   |
+LL |             println!("fizzbuzz");
+   |             ^^^^^^^
+
+error: requires `sized` lang_item
+  --> tests/ui/src/flow_control/while__01.pt:6:9
+   |
+LL |     let mut n = 1;
+   |         ^^^^^
+
+error: aborting due to 5 previous errors
+

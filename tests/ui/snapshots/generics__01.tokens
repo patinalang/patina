@@ -1,0 +1,25 @@
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+Lt
+Ident
+Gt
+OpenParen
+Ident
+Colon
+Whitespace
+Ident
+CloseParen
+Whitespace
+OpenBrace
+Whitespace
+Dot
+Dot
+Dot
+Whitespace
+CloseBrace
+Whitespace

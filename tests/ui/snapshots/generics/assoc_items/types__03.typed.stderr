@@ -1,0 +1,132 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/generics/assoc_items/types__03.pt:52:5
+   |
+LL |     println!("The difference is: {}", difference(container));
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/generics/assoc_items/types__03.pt:50:5
+   |
+LL |     println!("Last number: {}", container.last());
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/generics/assoc_items/types__03.pt:49:5
+   |
+LL |     println!("First number: {}", container.first());
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/generics/assoc_items/types__03.pt:46:5
+   |
+LL |     println!("Does container contain {} and {}: {}",
+   |     ^^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/generics/assoc_items/types__03.pt:4:18
+   |
+LL | struct Container(int, int);
+   |                  ^^^
+   |                  |
+   |                  not found in this scope
+   |                  help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/generics/assoc_items/types__03.pt:4:23
+   |
+LL | struct Container(int, int);
+   |                       ^^^
+   |                       |
+   |                       not found in this scope
+   |                       help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/generics/assoc_items/types__03.pt:14:23
+   |
+LL |     fn first(self) -> int;
+   |                       ^^^
+   |                       |
+   |                       not found in this scope
+   |                       help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/generics/assoc_items/types__03.pt:15:22
+   |
+LL |     fn last(self) -> int;
+   |                      ^^^
+   |                      |
+   |                      not found in this scope
+   |                      help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/generics/assoc_items/types__03.pt:22:14
+   |
+LL |     type A = int;
+   |              ^^^
+   |              |
+   |              not found in this scope
+   |              help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/generics/assoc_items/types__03.pt:23:14
+   |
+LL |     type B = int;
+   |              ^^^
+   |              |
+   |              not found in this scope
+   |              help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/generics/assoc_items/types__03.pt:26:33
+   |
+LL |     fn contains(self, number_1: int, number_2: int) -> bool {
+   |                                 ^^^
+   |                                 |
+   |                                 not found in this scope
+   |                                 help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/generics/assoc_items/types__03.pt:26:48
+   |
+LL |     fn contains(self, number_1: int, number_2: int) -> bool {
+   |                                                ^^^
+   |                                                |
+   |                                                not found in this scope
+   |                                                help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/generics/assoc_items/types__03.pt:30:23
+   |
+LL |     fn first(self) -> int { self.0 }
+   |                       ^^^
+   |                       |
+   |                       not found in this scope
+   |                       help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/generics/assoc_items/types__03.pt:33:22
+   |
+LL |     fn last(self) -> int { self.1 }
+   |                      ^^^
+   |                      |
+   |                      not found in this scope
+   |                      help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/generics/assoc_items/types__03.pt:36:45
+   |
+LL | fn difference<C: Contains>(container: C) -> int {
+   |                                             ^^^
+   |                                             |
+   |                                             not found in this scope
+   |                                             help: perhaps you intended to use this type: `i32`
+
+error: requires `sized` lang_item
+  --> tests/ui/src/generics/assoc_items/types__03.pt:26:17
+   |
+LL |     fn contains(self, number_1: int, number_2: int) -> bool {
+   |                 ^^^^
+
+error: aborting due to 16 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

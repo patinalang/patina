@@ -1,0 +1,54 @@
+error: expected `;`, found `}`
+  --> tests/ui/src/fn/closures__02.pt:33:41
+   |
+LL |     let add = |x|{ outer_mut_var += x; }
+   |                                         ^ help: add `;` here
+LL |     // Error! Cannot assign a new value to a variable defined outside closure
+LL | }
+   | - unexpected token
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/fn/closures__02.pt:29:5
+   |
+LL |     println!("closure returning one: {}", one());
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/fn/closures__02.pt:21:5
+   |
+LL |     println!("closure_inferred: {}", closure_inferred(1));
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/fn/closures__02.pt:20:5
+   |
+LL |     println!("closure_annotated: {}", closure_annotated(1));
+   |     ^^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/fn/closures__02.pt:16:33
+   |
+LL |     let closure_annotated = |i: int| -> int { i + outer_var };
+   |                                 ^^^
+   |                                 |
+   |                                 not found in this scope
+   |                                 help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/fn/closures__02.pt:16:41
+   |
+LL |     let closure_annotated = |i: int| -> int { i + outer_var };
+   |                                         ^^^
+   |                                         |
+   |                                         not found in this scope
+   |                                         help: perhaps you intended to use this type: `i32`
+
+error: requires `sized` lang_item
+  --> tests/ui/src/fn/closures__02.pt:5:9
+   |
+LL |     let outer_var = 42;
+   |         ^^^^^^^^^
+
+error: aborting due to 7 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

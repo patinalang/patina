@@ -1,0 +1,61 @@
+error[E0433]: cannot find module or crate `Std` in the crate root
+  --> tests/ui/src/conversion/from_into__02.pt:4:5
+   |
+LL | use Std::Convert::From;
+   |     ^^^ use of unresolved module or unlinked crate `Std`
+   |
+help: you might be missing a crate named `Std`, add it to your project and import it in your code
+   |
+LL + extern crate Std;
+   |
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/conversion/from_into__02.pt:19:5
+   |
+LL |     println!("My number is {:?}", num);
+   |     ^^^^^^^
+
+error: cannot find attribute `derive` in this scope
+  --> tests/ui/src/conversion/from_into__02.pt:6:3
+   |
+LL | #[derive(Debug)]
+   |   ^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/conversion/from_into__02.pt:8:12
+   |
+LL |     value: int,
+   |            ^^^
+   |            |
+   |            not found in this scope
+   |            help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/conversion/from_into__02.pt:11:11
+   |
+LL | impl From<int> for Number {
+   |           ^^^ not found in this scope
+   |
+help: perhaps you intended to use this type
+   |
+LL - impl From<int> for Number {
+LL + impl From<i32> for Number {
+   |
+help: you might be missing a type parameter
+   |
+LL | impl<int> From<int> for Number {
+   |     +++++
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/conversion/from_into__02.pt:12:19
+   |
+LL |     fn from(item: int) -> Self {
+   |                   ^^^
+   |                   |
+   |                   not found in this scope
+   |                   help: perhaps you intended to use this type: `i32`
+
+error: aborting due to 6 previous errors
+
+Some errors have detailed explanations: E0425, E0433.
+For more information about an error, try `rustc --explain E0425`.

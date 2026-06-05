@@ -1,0 +1,11 @@
+error: expected `;`, found `}`
+  --> tests/ui/src/fn/closures__02.pt:33:41
+   |
+LL |     let add = |x|{ outer_mut_var += x; }
+   |                                         ^ help: add `;` here
+LL |     // Error! Cannot assign a new value to a variable defined outside closure
+LL | }
+   | - unexpected token
+
+error: aborting due to 1 previous error
+

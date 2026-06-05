@@ -1,0 +1,45 @@
+error[E0583]: file not found for module `Inaccessible`
+  --> tests/ui/src/mod/split__02.pt:7:1
+   |
+LL | mod Inaccessible;
+   | ^^^^^^^^^^^^^^^^^
+   |
+   = help: to create the module `Inaccessible`, create file "tests/ui/src/mod/Inaccessible.rs" or "tests/ui/src/mod/Inaccessible/mod.rs"
+   = note: if there is a `mod Inaccessible` elsewhere in the crate already, import it with `use crate::...` instead
+
+error[E0583]: file not found for module `Nested`
+  --> tests/ui/src/mod/split__02.pt:8:1
+   |
+LL | pub mod Nested;
+   | ^^^^^^^^^^^^^^^
+   |
+   = help: to create the module `Nested`, create file "tests/ui/src/mod/Nested.rs" or "tests/ui/src/mod/Nested/mod.rs"
+   = note: if there is a `mod Nested` elsewhere in the crate already, import it with `use crate::...` instead
+
+error: cannot find macro `print` in this scope
+  --> tests/ui/src/mod/split__02.pt:19:5
+   |
+LL |     print!("called `MyMod::indirect_access()`, that\n> ");
+   |     ^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/mod/split__02.pt:15:5
+   |
+LL |     println!("called `MyMod::private_function()`");
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/mod/split__02.pt:11:5
+   |
+LL |     println!("called `MyMod::function()`");
+   |     ^^^^^^^
+
+error: requires `sized` lang_item
+  --> tests/ui/src/mod/split__02.pt:21:5
+   |
+LL |     private_function();
+   |     ^^^^^^^^^^^^^^^^^^
+
+error: aborting due to 6 previous errors
+
+For more information about this error, try `rustc --explain E0583`.

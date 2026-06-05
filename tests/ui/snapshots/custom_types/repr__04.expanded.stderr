@@ -1,0 +1,24 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/repr__04.pt:14:5
+   |
+LL |     println!("{:?}", SnakeCaseEnum::StructHTTPStyle{code: 200, body: "hi"} as term);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/repr__04.pt:11:5
+   |
+LL |     println!("{:?}", SnakeCaseEnum::UnitVariant as term);
+   |     ^^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/custom_types/repr__04.pt:7:27
+   |
+LL |     StructHTTPStyle{code: int, body: str},
+   |                           ^^^
+   |                           |
+   |                           not found in this scope
+   |                           help: perhaps you intended to use this type: `i32`
+
+error: aborting due to 3 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

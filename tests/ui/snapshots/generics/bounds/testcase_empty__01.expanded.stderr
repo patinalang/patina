@@ -1,0 +1,14 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/generics/bounds/testcase_empty__01.pt:27:5
+   |
+LL |     println!("A blue jay is {}", blue(blue_jay));
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/generics/bounds/testcase_empty__01.pt:26:5
+   |
+LL |     println!("A cardinal is {}", red(cardinal));
+   |     ^^^^^^^
+
+error: aborting due to 2 previous errors
+

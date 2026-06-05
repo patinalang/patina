@@ -1,0 +1,20 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/variable_bindings/scope__01.pt:21:5
+   |
+LL |     println!("outer long: {}", long_lived_binding);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/variable_bindings/scope__01.pt:18:5
+   |
+LL |     println!("outer short: {}", short_lived_binding);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/variable_bindings/scope__01.pt:13:9
+   |
+LL |         println!("inner short: {}", short_lived_binding);
+   |         ^^^^^^^
+
+error: aborting due to 3 previous errors
+

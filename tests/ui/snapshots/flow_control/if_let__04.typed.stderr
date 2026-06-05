@@ -1,0 +1,14 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/if_let__04.pt:14:9
+   |
+LL |         println!("a is foobar");
+   |         ^^^^^^^
+
+error: requires `sized` lang_item
+  --> tests/ui/src/flow_control/if_let__04.pt:9:9
+   |
+LL |     let a = Foo::Bar;
+   |         ^
+
+error: aborting due to 2 previous errors
+

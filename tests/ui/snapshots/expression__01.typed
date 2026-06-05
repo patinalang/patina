@@ -1,0 +1,12 @@
+#![attr = Feature([no_core#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+// source: patina-by-example/src/expression.md
+// block: 1/3
+
+fn main() ({
+    // statement
+    // statement
+    // statement
+} as ())

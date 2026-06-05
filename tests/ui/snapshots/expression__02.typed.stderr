@@ -1,0 +1,8 @@
+error: requires `sized` lang_item
+  --> tests/ui/src/expression__02.pt:6:9
+   |
+LL |     let x = 5;
+   |         ^
+
+error: aborting due to 1 previous error
+

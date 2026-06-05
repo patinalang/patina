@@ -1,0 +1,28 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/macros/repeat__01.pt:18:5
+   |
+LL |     println!("{}", find_min!(5, 2 * 3, 4));
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/macros/repeat__01.pt:17:5
+   |
+LL |     println!("{}", find_min!(1 + 2, 2));
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/macros/repeat__01.pt:16:5
+   |
+LL |     println!("{}", find_min!(1));
+   |     ^^^^^^^
+
+warning: unused macro definition: `find_min`
+  --> tests/ui/src/macros/repeat__01.pt:5:14
+   |
+LL | macro_rules! find_min {
+   |              ^^^^^^^^
+   |
+   = note: `#[warn(unused_macros)]` (part of `#[warn(unused)]`) on by default
+
+error: aborting due to 3 previous errors; 1 warning emitted
+

@@ -1,0 +1,48 @@
+error: cannot find macro `assert_eq` in this scope
+  --> tests/ui/src/trait/disambiguating__01.pt:46:5
+   |
+LL |     assert_eq!(28, age);
+   |     ^^^^^^^^^
+
+error: cannot find macro `assert_eq` in this scope
+  --> tests/ui/src/trait/disambiguating__01.pt:44:5
+   |
+LL |     assert_eq!("rustacean", username);
+   |     ^^^^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/trait/disambiguating__01.pt:11:21
+   |
+LL |     fn get(self) -> int;
+   |                     ^^^
+   |                     |
+   |                     not found in this scope
+   |                     help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/trait/disambiguating__01.pt:17:10
+   |
+LL |     age: int,
+   |          ^^^
+   |          |
+   |          not found in this scope
+   |          help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/trait/disambiguating__01.pt:27:21
+   |
+LL |     fn get(self) -> int {
+   |                     ^^^
+   |                     |
+   |                     not found in this scope
+   |                     help: perhaps you intended to use this type: `i32`
+
+error: requires `sized` lang_item
+  --> tests/ui/src/trait/disambiguating__01.pt:21:12
+   |
+LL |     fn get(self) -> str {
+   |            ^^^^
+
+error: aborting due to 6 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

@@ -1,0 +1,36 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/if_let__03.pt:36:9
+   |
+LL |         println!("c is one hundred");
+   |         ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/if_let__03.pt:31:9
+   |
+LL |         println!("c is {}", value);
+   |         ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/if_let__03.pt:25:9
+   |
+LL |         println!("b is foobar");
+   |         ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/if_let__03.pt:19:9
+   |
+LL |         println!("a is foobar");
+   |         ^^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/flow_control/if_let__03.pt:8:9
+   |
+LL |     Qux(int)
+   |         ^^^
+   |         |
+   |         not found in this scope
+   |         help: perhaps you intended to use this type: `i32`
+
+error: aborting due to 5 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

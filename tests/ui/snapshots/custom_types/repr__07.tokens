@@ -1,0 +1,88 @@
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Pound
+OpenBracket
+Ident
+OpenParen
+Ident
+Comma
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Ident
+CloseParen
+CloseBracket
+Whitespace
+Ident
+Whitespace
+Ident
+Lt
+Ident
+Gt
+Whitespace
+OpenBrace
+Whitespace
+Ident
+OpenParen
+Ident
+CloseParen
+Comma
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Pound
+OpenBracket
+Ident
+OpenParen
+Ident
+Whitespace
+Eq
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 10 }
+CloseParen
+CloseBracket
+Whitespace
+Ident
+OpenParen
+Ident
+CloseParen
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Pound
+OpenBracket
+Ident
+OpenParen
+Ident
+Comma
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 7 }
+CloseParen
+CloseBracket
+Whitespace
+Ident
+OpenParen
+Ident
+CloseParen
+Comma
+Whitespace
+CloseBrace
+Whitespace

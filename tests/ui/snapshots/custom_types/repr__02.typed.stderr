@@ -1,0 +1,79 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/repr__02.pt:15:5
+   |
+LL |     println!("{:?}", Bar(x: 1, y: 2, z: ()) as term);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/repr__02.pt:11:5
+   |
+LL |     println!("{:?}", Pair(42, 3.14) as term);
+   |     ^^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/custom_types/repr__02.pt:5:13
+   |
+LL | struct Pair(int, float);
+   |             ^^^
+   |             |
+   |             not found in this scope
+   |             help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `float` in this scope
+  --> tests/ui/src/custom_types/repr__02.pt:5:18
+   |
+LL | struct Pair(int, float);
+   |                  ^^^^^
+   |                  |
+   |                  not found in this scope
+   |                  help: perhaps you intended to use this type: `f32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/custom_types/repr__02.pt:8:16
+   |
+LL | struct Bar{ x: int, y: int, z: () }
+   |                ^^^
+   |                |
+   |                not found in this scope
+   |                help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/custom_types/repr__02.pt:8:24
+   |
+LL | struct Bar{ x: int, y: int, z: () }
+   |                        ^^^
+   |                        |
+   |                        not found in this scope
+   |                        help: perhaps you intended to use this type: `i32`
+
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__02.pt:4:8
+   |
+LL | #[repr(tagged)]
+   |        ^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, `simd`, `i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `i64`, `u64`, `i128`, `u128`, `isize`, `usize`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__02.pt:7:8
+   |
+LL | #[repr(tagged, name = "Elixir.BarBar")]
+   |        ^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, `simd`, `i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `i64`, `u64`, `i128`, `u128`, `isize`, `usize`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__02.pt:7:16
+   |
+LL | #[repr(tagged, name = "Elixir.BarBar")]
+   |                ^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, `simd`, `i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `i64`, `u64`, `i128`, `u128`, `isize`, `usize`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+
+error: aborting due to 9 previous errors
+
+Some errors have detailed explanations: E0425, E0552.
+For more information about an error, try `rustc --explain E0425`.

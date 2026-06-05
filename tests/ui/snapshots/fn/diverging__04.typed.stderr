@@ -1,0 +1,42 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/fn/diverging__04.pt:22:5
+   |
+LL |     println!("Sum of odd numbers up to 9 (excluding): {}", sum_odd_numbers(9));
+   |     ^^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/fn/diverging__04.pt:5:31
+   |
+LL |     fn sum_odd_numbers(up_to: int) -> int {
+   |                               ^^^
+   |                               |
+   |                               not found in this scope
+   |                               help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/fn/diverging__04.pt:5:39
+   |
+LL |     fn sum_odd_numbers(up_to: int) -> int {
+   |                                       ^^^
+   |                                       |
+   |                                       not found in this scope
+   |                                       help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/fn/diverging__04.pt:10:27
+   |
+LL |             let addition: int = match i%2 == 1 {
+   |                           ^^^
+   |                           |
+   |                           not found in this scope
+   |                           help: perhaps you intended to use this type: `i32`
+
+error: requires `Range` lang_item
+  --> tests/ui/src/fn/diverging__04.pt:7:18
+   |
+LL |         for i in 0..up_to {
+   |                  ^^^^^^^^
+
+error: aborting due to 5 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

@@ -1,0 +1,15 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/generics/bounds__01.pt:7:5
+   |
+LL |     println!("{}", t);
+   |     ^^^^^^^
+
+error[E0405]: cannot find trait `Display` in this scope
+  --> tests/ui/src/generics/bounds__01.pt:6:15
+   |
+LL | fn printer<T: Display>(t: T) {
+   |               ^^^^^^^ not found in this scope
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0405`.

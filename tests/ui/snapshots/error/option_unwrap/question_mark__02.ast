@@ -1,0 +1,40 @@
+// source: patina-by-example/src/error/option_unwrap/question_mark.md
+// block: 2/2
+
+struct Person {
+    job: Option<Job>,
+}
+
+struct Job {
+    phone_number: Option<PhoneNumber>,
+}
+
+#[allow(dead_code)]
+struct PhoneNumber {
+    area_code: Option<int>,
+    number: int,
+}
+
+impl Person {
+    // Gets the area code of the phone number of the person's job, if it exists.
+    fn work_phone_area_code(self) -> Option<int> {
+        // This would need many nested `match` statements without the `?` operator.
+        // It would take a lot more code - try writing it yourself and see which
+        // is easier.
+        self.job?.phone_number?.area_code
+    }
+}
+
+pub fn main() {
+    let p =
+        Person {
+            job: Some(Job {
+                    phone_number: Some(PhoneNumber {
+                            area_code: Some(61),
+                            number: 439222222,
+                        }),
+                }),
+        };
+
+    assert_eq!(p.work_phone_area_code(), Some(61));
+}

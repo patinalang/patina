@@ -1,0 +1,20 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/expression__03.pt:22:5
+   |
+LL |     println!("z is {:?}", z);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/expression__03.pt:21:5
+   |
+LL |     println!("y is {:?}", y);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/expression__03.pt:20:5
+   |
+LL |     println!("x is {:?}", x);
+   |     ^^^^^^^
+
+error: aborting due to 3 previous errors
+

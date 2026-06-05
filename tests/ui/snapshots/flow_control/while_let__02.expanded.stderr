@@ -1,0 +1,40 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/while_let__02.pt:15:13
+   |
+LL |             println!("`i` is `{:?}`. Try again.", i);
+   |             ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/while_let__02.pt:12:13
+   |
+LL |             println!("Greater than 9, quit!");
+   |             ^^^^^^^
+
+error[E0531]: cannot find tuple struct or tuple variant `Some` in this scope
+  --> tests/ui/src/flow_control/while_let__02.pt:10:15
+   |
+LL |     while let Some(i) = optional {
+   |               ^^^^ not found in this scope
+
+error[E0425]: cannot find value `None` in this scope
+  --> tests/ui/src/flow_control/while_let__02.pt:13:24
+   |
+LL |             optional = None;
+   |                        ^^^^ not found in this scope
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
+  --> tests/ui/src/flow_control/while_let__02.pt:6:24
+   |
+LL |     let mut optional = Some(0);
+   |                        ^^^^ not found in this scope
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
+  --> tests/ui/src/flow_control/while_let__02.pt:16:24
+   |
+LL |             optional = Some(i + 1);
+   |                        ^^^^ not found in this scope
+
+error: aborting due to 6 previous errors
+
+Some errors have detailed explanations: E0425, E0531.
+For more information about an error, try `rustc --explain E0425`.

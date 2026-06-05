@@ -1,0 +1,57 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__04.pt:25:5
+   |
+LL |     println!("my_apple is unchanged: {:?}", my_apple);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__04.pt:24:5
+   |
+LL |     println!("should_be_apple is: {:?}", should_be_apple);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__04.pt:16:5
+   |
+LL |     println!("my_fruit is: {:?}", my_fruit);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__04.pt:15:5
+   |
+LL |     println!("first_available_fruit is: {:?}", first_available_fruit);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__04.pt:10:9
+   |
+LL |         println!("Providing lemon as fallback");
+   |         ^^^^^^^
+
+error: cannot find attribute `derive` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__04.pt:4:3
+   |
+LL | #[derive(Debug)]
+   |   ^^^^^^
+
+error[E0425]: cannot find type `Option` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__04.pt:8:23
+   |
+LL |     let mut my_fruit: Option<Fruit> = None;
+   |                       ^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `None` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__04.pt:8:39
+   |
+LL |     let mut my_fruit: Option<Fruit> = None;
+   |                                       ^^^^ not found in this scope
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__04.pt:22:24
+   |
+LL |     let mut my_apple = Some(Fruit::Apple);
+   |                        ^^^^ not found in this scope
+
+error: aborting due to 9 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

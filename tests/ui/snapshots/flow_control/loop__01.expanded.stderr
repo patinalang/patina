@@ -1,0 +1,26 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/loop__01.pt:23:13
+   |
+LL |             println!("OK, that's enough");
+   |             ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/loop__01.pt:20:9
+   |
+LL |         println!("{}", count);
+   |         ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/loop__01.pt:14:13
+   |
+LL |             println!("three");
+   |             ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/loop__01.pt:7:5
+   |
+LL |     println!("Let's count until infinity!");
+   |     ^^^^^^^
+
+error: aborting due to 4 previous errors
+

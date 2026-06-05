@@ -1,0 +1,54 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match/binding__01.pt:27:26
+   |
+LL |         n             => println!("I'm an old person of age {:?}", n),
+   |                          ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match/binding__01.pt:25:34
+   |
+LL |         n @ (1 | 7 | 15 | 13) => println!("I'm a teen of age {:?}", n),
+   |                                  ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match/binding__01.pt:23:26
+   |
+LL |         n @ 13 ..= 19 => println!("I'm a teen of age {:?}", n),
+   |                          ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match/binding__01.pt:22:26
+   |
+LL |         n @ 1  ..= 12 => println!("I'm a child of age {:?}", n),
+   |                          ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match/binding__01.pt:13:26
+   |
+LL |         0             => println!("I haven't celebrated my first birthday yet"),
+   |                          ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match/binding__01.pt:10:5
+   |
+LL |     println!("Tell me what type of person you are");
+   |     ^^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/flow_control/match/binding__01.pt:5:13
+   |
+LL | fn age() -> int {
+   |             ^^^
+   |             |
+   |             not found in this scope
+   |             help: perhaps you intended to use this type: `i32`
+
+error: requires `sized` lang_item
+  --> tests/ui/src/flow_control/match/binding__01.pt:22:9
+   |
+LL |         n @ 1  ..= 12 => println!("I'm a child of age {:?}", n),
+   |         ^^^^^^^^^^^^^
+
+error: aborting due to 8 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

@@ -1,0 +1,8 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/mod/split__04.pt:6:5
+   |
+LL |     println!("called `MyMod::Inaccessible::public_function()`");
+   |     ^^^^^^^
+
+error: aborting due to 1 previous error
+

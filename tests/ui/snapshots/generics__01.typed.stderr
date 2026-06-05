@@ -1,0 +1,39 @@
+error: unexpected token: `...`
+  --> tests/ui/src/generics__01.pt:4:21
+   |
+LL | fn foo<T>(arg: T) { ... }
+   |                     ^^^
+   |
+help: use `..` for an exclusive range
+   |
+LL - fn foo<T>(arg: T) { ... }
+LL + fn foo<T>(arg: T) { .. }
+   |
+help: or `..=` for an inclusive range
+   |
+LL - fn foo<T>(arg: T) { ... }
+LL + fn foo<T>(arg: T) { ..= }
+   |
+
+error[E0586]: inclusive range with no end
+  --> tests/ui/src/generics__01.pt:4:21
+   |
+LL | fn foo<T>(arg: T) { ... }
+   |                     ^^^
+   |
+   = note: inclusive ranges must be bounded at the end (`..=b` or `a..=b`)
+help: use `..` instead
+   |
+LL - fn foo<T>(arg: T) { ... }
+LL + fn foo<T>(arg: T) { .. }
+   |
+
+error: requires `meta_sized` lang_item
+  --> tests/ui/src/generics__01.pt:4:8
+   |
+LL | fn foo<T>(arg: T) { ... }
+   |        ^
+
+error: aborting due to 3 previous errors
+
+For more information about this error, try `rustc --explain E0586`.

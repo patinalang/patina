@@ -1,0 +1,60 @@
+error[E0433]: cannot find module or crate `Std` in the crate root
+  --> tests/ui/src/error/result__03.pt:4:5
+   |
+LL | use Std::Num::ParseIntError;
+   |     ^^^ use of unresolved module or unlinked crate `Std`
+   |
+help: you might be missing a crate named `Std`, add it to your project and import it in your code
+   |
+LL + extern crate Std;
+   |
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/error/result__03.pt:12:5
+   |
+LL |     println!("{}", number);
+   |     ^^^^^^^
+
+error[E0425]: cannot find type `Result` in this scope
+  --> tests/ui/src/error/result__03.pt:6:18
+   |
+LL | pub fn main() -> Result<(), ParseIntError> {
+   |                  ^^^^^^ not found in this scope
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/error/result__03.pt:8:43
+   |
+LL |     let number = match number_str.parse::<int>() {
+   |                                           ^^^
+   |                                           |
+   |                                           not found in this scope
+   |                                           help: perhaps you intended to use this type: `i32`
+
+error[E0531]: cannot find tuple struct or tuple variant `Ok` in this scope
+  --> tests/ui/src/error/result__03.pt:9:9
+   |
+LL |         Ok(number)  => number,
+   |         ^^ not found in this scope
+
+error[E0531]: cannot find tuple struct or tuple variant `Err` in this scope
+  --> tests/ui/src/error/result__03.pt:10:9
+   |
+LL |         Err(e) => return Err(e),
+   |         ^^^ not found in this scope
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Err` in this scope
+  --> tests/ui/src/error/result__03.pt:10:26
+   |
+LL |         Err(e) => return Err(e),
+   |                          ^^^ not found in this scope
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Ok` in this scope
+  --> tests/ui/src/error/result__03.pt:13:5
+   |
+LL |     Ok(())
+   |     ^^ not found in this scope
+
+error: aborting due to 8 previous errors
+
+Some errors have detailed explanations: E0425, E0433, E0531.
+For more information about an error, try `rustc --explain E0425`.

@@ -1,0 +1,87 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/fn/methods__01.pt:73:5
+   |
+LL |     println!("Rectangle area: {}", rectangle.area());
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/fn/methods__01.pt:72:5
+   |
+LL |     println!("Rectangle perimeter: {}", rectangle.perimeter());
+   |     ^^^^^^^
+
+error[E0425]: cannot find type `float` in this scope
+  --> tests/ui/src/fn/methods__01.pt:5:8
+   |
+LL |     x: float,
+   |        ^^^^^
+   |        |
+   |        not found in this scope
+   |        help: perhaps you intended to use this type: `f32`
+
+error[E0425]: cannot find type `float` in this scope
+  --> tests/ui/src/fn/methods__01.pt:6:8
+   |
+LL |     y: float,
+   |        ^^^^^
+   |        |
+   |        not found in this scope
+   |        help: perhaps you intended to use this type: `f32`
+
+error[E0425]: cannot find type `float` in this scope
+  --> tests/ui/src/fn/methods__01.pt:21:15
+   |
+LL |     fn new(x: float, y: float) -> Point {
+   |               ^^^^^
+   |               |
+   |               not found in this scope
+   |               help: perhaps you intended to use this type: `f32`
+
+error[E0425]: cannot find type `float` in this scope
+  --> tests/ui/src/fn/methods__01.pt:21:25
+   |
+LL |     fn new(x: float, y: float) -> Point {
+   |                         ^^^^^
+   |                         |
+   |                         not found in this scope
+   |                         help: perhaps you intended to use this type: `f32`
+
+error[E0425]: cannot find type `float` in this scope
+  --> tests/ui/src/fn/methods__01.pt:35:22
+   |
+LL |     fn area(self) -> float {
+   |                      ^^^^^
+   |                      |
+   |                      not found in this scope
+   |                      help: perhaps you intended to use this type: `f32`
+
+error[E0425]: cannot find type `float` in this scope
+  --> tests/ui/src/fn/methods__01.pt:45:27
+   |
+LL |     fn perimeter(self) -> float {
+   |                           ^^^^^
+   |                           |
+   |                           not found in this scope
+   |                           help: perhaps you intended to use this type: `f32`
+
+error[E0425]: cannot find type `float` in this scope
+  --> tests/ui/src/fn/methods__01.pt:54:27
+   |
+LL |     fn translate(self, x: float, y: float) -> Self {
+   |                           ^^^^^
+   |                           |
+   |                           not found in this scope
+   |                           help: perhaps you intended to use this type: `f32`
+
+error[E0425]: cannot find type `float` in this scope
+  --> tests/ui/src/fn/methods__01.pt:54:37
+   |
+LL |     fn translate(self, x: float, y: float) -> Self {
+   |                                     ^^^^^
+   |                                     |
+   |                                     not found in this scope
+   |                                     help: perhaps you intended to use this type: `f32`
+
+error: aborting due to 10 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

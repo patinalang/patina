@@ -1,0 +1,27 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/variable_bindings/mut__01.pt:13:5
+   |
+LL |     println!("After mutating the binding: {}", mutable_binding);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/variable_bindings/mut__01.pt:8:5
+   |
+LL |     println!("Before mutating the binding: {}", mutable_binding);
+   |     ^^^^^^^
+
+error: requires `sized` lang_item
+  --> tests/ui/src/variable_bindings/mut__01.pt:5:9
+   |
+LL |     let _immutable_binding = 1;
+   |         ^^^^^^^^^^^^^^^^^^
+
+error[E0425]: cannot find function `println` in this scope
+  --> tests/ui/src/variable_bindings/mut__01.pt:27:9
+   |
+LL |         println("{} == {} + 1", inner_mutable_binding, mutable_binding);
+   |         ^^^^^^^ not found in this scope
+
+error: aborting due to 4 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

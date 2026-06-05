@@ -1,0 +1,26 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_list__01.pt:11:13
+   |
+LL |             println!("list[0] = 0, list[1] = {}, list[2] = {}", second, third),
+   |             ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_list__01.pt:14:26
+   |
+LL |         [1, _, third] => println!(
+   |                          ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_list__01.pt:20:29
+   |
+LL |         [-1, second, ..] => println!(
+   |                             ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control/match/destructuring/destructure_list__01.pt:29:35
+   |
+LL |         [3, second, tail @ ..] => println!(
+   |                                   ^^^^^^^
+
+error: aborting due to 4 previous errors
+

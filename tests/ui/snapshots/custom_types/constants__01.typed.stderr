@@ -1,0 +1,39 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/constants__01.pt:16:5
+   |
+LL |     println!("{} is {}", n, if is_big(n) { "big" } else { "small" });
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/custom_types/constants__01.pt:15:5
+   |
+LL |     println!("The threshold is {}", THRESHOLD);
+   |     ^^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/custom_types/constants__01.pt:5:18
+   |
+LL | const THRESHOLD: int = 10;
+   |                  ^^^
+   |                  |
+   |                  not found in this scope
+   |                  help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/custom_types/constants__01.pt:7:14
+   |
+LL | fn is_big(n: int) -> bool {
+   |              ^^^
+   |              |
+   |              not found in this scope
+   |              help: perhaps you intended to use this type: `i32`
+
+error: requires `sized` lang_item
+  --> tests/ui/src/custom_types/constants__01.pt:7:14
+   |
+LL | fn is_big(n: int) -> bool {
+   |              ^^^
+
+error: aborting due to 5 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

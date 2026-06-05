@@ -1,0 +1,219 @@
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Pound
+OpenBracket
+Ident
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 22 }
+CloseParen
+CloseBracket
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+CloseBrace
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+Lt
+Ident
+Gt
+Whitespace
+OpenBrace
+Whitespace
+Ident
+Whitespace
+Ident
+Colon
+Whitespace
+Ident
+Comma
+Whitespace
+CloseBrace
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+Lt
+Ident
+Gt
+Whitespace
+OpenBrace
+Whitespace
+Ident
+Colon
+Whitespace
+Ident
+Comma
+Whitespace
+CloseBrace
+Whitespace
+Ident
+Lt
+Ident
+Gt
+Whitespace
+Ident
+Lt
+Ident
+Gt
+Whitespace
+OpenBrace
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+Ident
+Colon
+Whitespace
+Ident
+CloseParen
+Whitespace
+Minus
+Gt
+Whitespace
+Ident
+Lt
+Ident
+Gt
+Whitespace
+OpenBrace
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+Ident
+Colon
+Whitespace
+Ident
+Comma
+Whitespace
+CloseBrace
+Whitespace
+CloseBrace
+Whitespace
+CloseBrace
+Whitespace
+CloseBrace
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+CloseParen
+Whitespace
+OpenBrace
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Ident
+Colon
+Colon
+Ident
+Whitespace
+OpenBrace
+Whitespace
+Ident
+Colon
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 20 }
+Whitespace
+CloseBrace
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 27 }
+Comma
+Whitespace
+Ident
+Dot
+Ident
+CloseParen
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Ident
+Colon
+Colon
+Ident
+Colon
+Colon
+Ident
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 24 }
+CloseParen
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+CloseBrace
+Whitespace

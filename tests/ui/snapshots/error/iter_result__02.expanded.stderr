@@ -1,0 +1,18 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/error/iter_result__02.pt:10:5
+   |
+LL |     println!("Results: {:?}", numbers);
+   |     ^^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/error/iter_result__02.pt:8:35
+   |
+LL |         .filter_map(|s| s.parse::<int>().ok())
+   |                                   ^^^
+   |                                   |
+   |                                   not found in this scope
+   |                                   help: perhaps you intended to use this type: `i32`
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

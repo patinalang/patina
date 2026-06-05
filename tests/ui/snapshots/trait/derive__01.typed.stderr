@@ -1,0 +1,69 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/trait/derive__01.pt:47:5
+   |
+LL |     println!("One foot is {} than one meter.", cmp);
+   |     ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/trait/derive__01.pt:36:5
+   |
+LL |     println!("One foot equals {:?}", foot);
+   |     ^^^^^^^
+
+error: cannot find attribute `derive` in this scope
+  --> tests/ui/src/trait/derive__01.pt:9:3
+   |
+LL | #[derive(Debug)]
+   |   ^^^^^^
+
+error: cannot find attribute `derive` in this scope
+  --> tests/ui/src/trait/derive__01.pt:5:3
+   |
+LL | #[derive(PartialEq, PartialOrd)]
+   |   ^^^^^^
+
+error[E0425]: cannot find type `float` in this scope
+  --> tests/ui/src/trait/derive__01.pt:6:20
+   |
+LL | struct Centimeters(float);
+   |                    ^^^^^
+   |                    |
+   |                    not found in this scope
+   |                    help: perhaps you intended to use this type: `f32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/trait/derive__01.pt:10:15
+   |
+LL | struct Inches(int);
+   |               ^^^
+   |               |
+   |               not found in this scope
+   |               help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `float` in this scope
+  --> tests/ui/src/trait/derive__01.pt:16:31
+   |
+LL |         Centimeters(inches as float * 2.54)
+   |                               ^^^^^
+   |                               |
+   |                               not found in this scope
+   |                               help: perhaps you intended to use this type: `f32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/trait/derive__01.pt:21:16
+   |
+LL | struct Seconds(int);
+   |                ^^^
+   |                |
+   |                not found in this scope
+   |                help: perhaps you intended to use this type: `i32`
+
+error: requires `sized` lang_item
+  --> tests/ui/src/trait/derive__01.pt:13:23
+   |
+LL |     fn to_centimeters(self) -> Centimeters {
+   |                       ^^^^
+
+error: aborting due to 9 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

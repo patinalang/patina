@@ -1,0 +1,19 @@
+error: expected `;`, found keyword `let`
+  --> tests/ui/src/primitives__01.pt:11:52
+   |
+LL |     inferred_type = add_floats(inferred_type, 3.14)
+   |                                                    ^ help: add `;` here
+...
+LL |     let mut mutable = 12; // Mutable `int`
+   |     --- unexpected token
+
+error: expected type, found `#`
+  --> tests/ui/src/primitives__01.pt:33:17
+   |
+LL |     let my_map: #{float => str} = #{3.14 => "pi", 0 => "zero"};
+   |               - ^ expected type
+   |               |
+   |               while parsing the type for `my_map`
+
+error: aborting due to 2 previous errors
+

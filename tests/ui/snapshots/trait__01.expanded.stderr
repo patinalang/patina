@@ -1,0 +1,26 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/trait__01.pt:59:9
+   |
+LL |         println!("{} pauses briefly... {}", self.name, self.noise());
+   |         ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/trait__01.pt:31:13
+   |
+LL |             println!("{} gets a haircut!", self.name);
+   |             ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/trait__01.pt:28:13
+   |
+LL |             println!("{} is already naked...", self.name());
+   |             ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/trait__01.pt:16:9
+   |
+LL |         println!("{} says {}", self.name(), self.noise());
+   |         ^^^^^^^
+
+error: aborting due to 4 previous errors
+

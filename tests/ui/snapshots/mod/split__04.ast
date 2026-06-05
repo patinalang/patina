@@ -1,0 +1,7 @@
+// source: patina-by-example/src/mod/split.md
+// block: 4/4
+
+#[allow(dead_code)]
+pub fn public_function() {
+    println!("called `MyMod::Inaccessible::public_function()`");
+}

@@ -1,0 +1,14 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/flow_control__01.pt:12:5
+   |
+LL |     println!("{:?}", n);
+   |     ^^^^^^^
+
+error: requires `sized` lang_item
+  --> tests/ui/src/flow_control__01.pt:6:9
+   |
+LL |     let mut n = 5;
+   |         ^^^^^
+
+error: aborting due to 2 previous errors
+

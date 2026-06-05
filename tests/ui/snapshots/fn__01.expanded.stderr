@@ -1,0 +1,63 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/fn__01.pt:30:9
+   |
+LL |         println!("{}", n);
+   |         ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/fn__01.pt:28:9
+   |
+LL |         println!("buzz");
+   |         ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/fn__01.pt:26:9
+   |
+LL |         println!("fizz");
+   |         ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/fn__01.pt:24:9
+   |
+LL |         println!("fizzbuzz");
+   |         ^^^^^^^
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/fn__01.pt:11:25
+   |
+LL | fn is_divisible_by(lhs: int, rhs: int) -> bool {
+   |                         ^^^
+   |                         |
+   |                         not found in this scope
+   |                         help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/fn__01.pt:11:35
+   |
+LL | fn is_divisible_by(lhs: int, rhs: int) -> bool {
+   |                                   ^^^
+   |                                   |
+   |                                   not found in this scope
+   |                                   help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/fn__01.pt:22:16
+   |
+LL | fn fizzbuzz(n: int) -> () {
+   |                ^^^
+   |                |
+   |                not found in this scope
+   |                help: perhaps you intended to use this type: `i32`
+
+error[E0425]: cannot find type `int` in this scope
+  --> tests/ui/src/fn__01.pt:36:19
+   |
+LL | fn fizzbuzz_to(n: int) {
+   |                   ^^^
+   |                   |
+   |                   not found in this scope
+   |                   help: perhaps you intended to use this type: `i32`
+
+error: aborting due to 8 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

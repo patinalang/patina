@@ -1,0 +1,8 @@
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/hello/comment__01.pt:38:5
+   |
+LL |     println!("Is `x` 10 or 100? x = {}", x);
+   |     ^^^^^^^
+
+error: aborting due to 1 previous error
+

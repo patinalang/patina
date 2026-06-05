@@ -1,0 +1,50 @@
+error[E0433]: cannot find module or crate `pkg` in the crate root
+  --> tests/ui/src/mod/super__01.pt:44:17
+   |
+LL |             use pkg::Cool::function as root_function;
+   |                 ^^^ use of unresolved module or unlinked crate `pkg`
+   |
+help: you might be missing a crate named `pkg`, add it to your project and import it in your code
+   |
+LL + extern crate pkg;
+   |
+
+error: cannot find macro `print` in this scope
+  --> tests/ui/src/mod/super__01.pt:27:9
+   |
+LL |         print!("called `My::indirect_call()`, that\n> ");
+   |         ^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/mod/super__01.pt:21:13
+   |
+LL |             println!("called `My::Cool::function()`");
+   |             ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/mod/super__01.pt:16:9
+   |
+LL |         println!("called `My::function()`");
+   |         ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/mod/super__01.pt:10:9
+   |
+LL |         println!("called `Cool::function()`");
+   |         ^^^^^^^
+
+error: cannot find macro `println` in this scope
+  --> tests/ui/src/mod/super__01.pt:5:5
+   |
+LL |     println!("called `function()`");
+   |     ^^^^^^^
+
+error: requires `sized` lang_item
+  --> tests/ui/src/mod/super__01.pt:32:9
+   |
+LL |         self::function();
+   |         ^^^^^^^^^^^^^^^^
+
+error: aborting due to 7 previous errors
+
+For more information about this error, try `rustc --explain E0433`.
