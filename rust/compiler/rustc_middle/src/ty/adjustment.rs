@@ -96,6 +96,9 @@ pub enum Adjust {
     /// Go from ! to any type.
     NeverToAny,
 
+    /// Go from any type to `term`.
+    ToTerm,
+
     /// Dereference once, producing a place.
     Deref(DerefAdjustKind),
 

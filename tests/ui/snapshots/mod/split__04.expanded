@@ -19,12 +19,15 @@ pub trait Copy { }
 extern mod io;
 
 #[macro_export]
-macro_rules! println { ($s:literal) => { io::format("~s~n", [$s]) }; }
+macro_rules! println { ($s:literal) => {{ io::format("~s~n", [$s]); }}; }
 
 // source: patina-by-example/src/mod/split.md
 // block: 4/4
 
 #[allow(dead_code)]
 pub fn public_function() {
-    io::format("~s~n", ["called `MyMod::Inaccessible::public_function()`"]);
+    {
+        io::format("~s~n",
+            ["called `MyMod::Inaccessible::public_function()`"]);
+    };
 }

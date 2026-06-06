@@ -133,6 +133,11 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                 }
             }
 
+            CastKind::Term => {
+                let src = self.read_immediate(src)?;
+                self.write_immediate(*src, dest)?;
+            }
+
             CastKind::Transmute | CastKind::Subtype => {
                 assert!(src.layout.is_sized());
                 assert!(dest.layout.is_sized());

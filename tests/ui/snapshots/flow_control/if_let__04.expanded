@@ -19,7 +19,7 @@ pub trait Copy { }
 extern mod io;
 
 #[macro_export]
-macro_rules! println { ($s:literal) => { io::format("~s~n", [$s]) }; }
+macro_rules! println { ($s:literal) => {{ io::format("~s~n", [$s]); }}; }
 
 // source: patina-by-example/src/flow_control/if_let.md
 // block: 4/4
@@ -33,9 +33,11 @@ pub fn main() {
 
     // Variable a matches Foo::Bar
     if Foo::Bar == a {
-        io::format("~s~n",
-            [
-                    // ^-- this causes a compile-time error. Use `if let` instead.
-                    "a is foobar"]);
+        {
+            io::format("~s~n",
+                [
+                        // ^-- this causes a compile-time error. Use `if let` instead.
+                        "a is foobar"]);
+        };
     }
 }

@@ -19,9 +19,9 @@ trait Copy { }
 extern mod io;
 
 #[attr = MacroExport {local_inner_macros: false}]
-macro_rules! println { ($s:literal) => { io::format("~s~n", [$s]) }; }
+macro_rules! println { ($s:literal) => {{ io::format("~s~n", [$s]); }}; }
 
 extern mod used;
 extern mod unused;
 
-fn main() ({ ((used::ping as fn())() as ()); } as ())
+fn main() ({ ((used::ping as fn() -> term)() as term); } as ())

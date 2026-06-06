@@ -446,6 +446,9 @@ impl<'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> FunctionCx<'a, 'tcx, Bx> {
                         // This is a no-op at the LLVM level.
                         operand.val
                     }
+                    mir::CastKind::Term => {
+                        operand.val
+                    }
                     mir::CastKind::PointerCoercion(PointerCoercion::Unsize, _) => {
                         assert!(bx.cx().is_backend_scalar_pair(cast));
                         let (lldata, llextra) = operand.val.pointer_parts();

@@ -338,6 +338,17 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 })
             }
 
+            ExprKind::Cast(expr, _ty) => self.translate_expr(expr, scope),
+
+            ExprKind::Tup(elements) => {
+                let anno = self.anno(expr.span);
+                let elements = elements
+                    .iter()
+                    .map(|element| self.translate_expr(element, scope))
+                    .collect::<Vec<_>>();
+                eaf::Expr::Tuple(anno, elements)
+            }
+
             _ => dcx.span_fatal(
                 expr.span,
                 format!("expression kind {:?} not yet implemented", expr.kind),

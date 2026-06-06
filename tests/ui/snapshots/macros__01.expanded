@@ -19,7 +19,7 @@ pub trait Copy { }
 extern mod io;
 
 #[macro_export]
-macro_rules! println { ($s:literal) => { io::format("~s~n", [$s]) }; }
+macro_rules! println { ($s:literal) => {{ io::format("~s~n", [$s]); }}; }
 
 // source: patina-by-example/src/macros.md
 // block: 1/1
@@ -36,5 +36,5 @@ macro_rules! say_hello {
 
 pub fn main() {
     // This call will expand into `println!("Hello!")`
-    io::format("~s~n", ["Hello!"])
+    { io::format("~s~n", ["Hello!"]); }
 }

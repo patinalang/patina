@@ -245,6 +245,18 @@ impl<'f, 'tcx> Coerce<'f, 'tcx> {
         let b = self.shallow_resolve(b);
         debug!("Coerce.tys({:?} => {:?})", a, b);
 
+        // Coercing from any type to `term` is allowed.
+        if *b.kind() == ty::Term && !a.is_ty_var() {
+            if *a.kind() == ty::Term {
+                return self.unify(a, b, ForceLeakCheck::No);
+            }
+            return success(
+                vec![Adjustment { kind: Adjust::ToTerm, target: b }],
+                b,
+                PredicateObligations::new(),
+            );
+        }
+
         // Coercing from `!` to any type is allowed:
         if a.is_never() {
             if self.coerce_never {

@@ -19,7 +19,7 @@ LL |   macro_rules! println {
 note: while trying to match meta-variable `$s:literal`
   --> <patina-prelude>:24:6
    |
-LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
    |      ^^^^^^^^^^
    = note: this error originates in the macro `calculate` (in Nightly builds, run with -Z macro-backtrace for more info)
 
@@ -44,7 +44,7 @@ LL |   macro_rules! println {
 note: while trying to match meta-variable `$s:literal`
   --> <patina-prelude>:24:6
    |
-LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
    |      ^^^^^^^^^^
    = note: this error originates in the macro `calculate` (in Nightly builds, run with -Z macro-backtrace for more info)
 
@@ -69,7 +69,7 @@ LL |   macro_rules! println {
 note: while trying to match meta-variable `$s:literal`
   --> <patina-prelude>:24:6
    |
-LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
    |      ^^^^^^^^^^
    = note: this error originates in the macro `calculate` (in Nightly builds, run with -Z macro-backtrace for more info)
 

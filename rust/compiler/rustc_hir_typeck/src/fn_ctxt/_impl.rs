@@ -326,6 +326,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         debug!("apply_adjustments: adding `{:?}` as diverging type var", a.target);
                     }
                 }
+                Adjust::ToTerm => {}
                 Adjust::Deref(DerefAdjustKind::Overloaded(overloaded_deref)) => {
                     self.enforce_context_effects(
                         None,

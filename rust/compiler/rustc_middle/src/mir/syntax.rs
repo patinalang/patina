@@ -1505,6 +1505,9 @@ pub enum CastKind {
     /// borrowchecker, as we only care about subtyping that can affect trait selection and
     /// `TypeId`.
     Subtype,
+
+    /// Cast from any type to Erlang term.
+    Term,
 }
 
 /// Represents how a [`CastKind::PointerCoercion`] was constructed.

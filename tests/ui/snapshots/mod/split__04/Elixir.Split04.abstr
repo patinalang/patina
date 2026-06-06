@@ -3,5 +3,7 @@
 -compile([no_auto_import]).
 -export([public_function/0]).
 public_function() ->
-    io:format(<<"~s~n">>,
-              [<<"called `MyMod::Inaccessible::public_function()`">>]).
+    begin
+        io:format(<<"~s~n">>,
+                  [<<"called `MyMod::Inaccessible::public_function()`">>])
+    end.

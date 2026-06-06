@@ -3,4 +3,4 @@
 -compile([no_auto_import]).
 -export([main/0]).
 main() ->
-    io:format(<<"~s~n">>, [<<"Hello World!">>]).
+    begin io:format(<<"~s~n">>, [<<"Hello World!">>]) end.

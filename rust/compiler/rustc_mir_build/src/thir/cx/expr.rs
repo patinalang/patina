@@ -139,6 +139,10 @@ impl<'tcx> ThirBuildCx<'tcx> {
             }
             Adjust::NeverToAny if adjustment.target.is_never() => return expr,
             Adjust::NeverToAny => ExprKind::NeverToAny { source: self.thir.exprs.push(expr) },
+            Adjust::ToTerm => {
+                adjust_span(&mut expr);
+                ExprKind::Cast { source: self.thir.exprs.push(expr) }
+            }
             Adjust::Deref(DerefAdjustKind::Builtin) => {
                 adjust_span(&mut expr);
                 ExprKind::Deref { arg: self.thir.exprs.push(expr) }
@@ -1108,7 +1112,6 @@ impl<'tcx> ThirBuildCx<'tcx> {
             Res::Def(DefKind::Fn, _)
             | Res::Def(DefKind::AssocFn, _)
             | Res::Def(DefKind::Ctor(_, CtorKind::Fn), _)
-            | Res::Def(DefKind::ExternMod, _)
             | Res::Def(DefKind::Const { .. }, _)
             | Res::Def(DefKind::AssocConst { .. }, _) => {
                 self.typeck_results.user_provided_types().get(hir_id).copied().map(Box::new)
@@ -1121,6 +1124,8 @@ impl<'tcx> ThirBuildCx<'tcx> {
             Res::Def(DefKind::Ctor(_, CtorKind::Const), _) => {
                 self.user_args_applied_to_ty_of_hir_id(hir_id).map(Box::new)
             }
+
+            Res::Def(DefKind::ExternMod, _) => None,
 
             // `Self` is used in expression as a tuple struct constructor or a unit struct constructor
             Res::SelfCtor(_) => self.user_args_applied_to_ty_of_hir_id(hir_id).map(Box::new),

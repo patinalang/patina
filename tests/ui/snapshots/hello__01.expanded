@@ -19,7 +19,7 @@ pub trait Copy { }
 extern mod io;
 
 #[macro_export]
-macro_rules! println { ($s:literal) => { io::format("~s~n", [$s]) }; }
+macro_rules! println { ($s:literal) => {{ io::format("~s~n", [$s]); }}; }
 
 // source: patina-by-example/src/hello.md
 // block: 1/1
@@ -36,10 +36,12 @@ macro_rules! println { ($s:literal) => { io::format("~s~n", [$s]) }; }
 
 // This is the main function.
 pub fn main() {
-    io::format("~s~n",
-        [
-                // Statements here are executed when the compiled binary is called.
+    {
+        io::format("~s~n",
+            [
+                    // Statements here are executed when the compiled binary is called.
 
-                // Print text to the console.
-                "Hello World!"]);
+                    // Print text to the console.
+                    "Hello World!"]);
+    };
 }

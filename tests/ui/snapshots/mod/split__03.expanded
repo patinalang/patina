@@ -19,16 +19,16 @@ pub trait Copy { }
 extern mod io;
 
 #[macro_export]
-macro_rules! println { ($s:literal) => { io::format("~s~n", [$s]) }; }
+macro_rules! println { ($s:literal) => {{ io::format("~s~n", [$s]); }}; }
 
 // source: patina-by-example/src/mod/split.md
 // block: 3/4
 
 pub fn function() {
-    io::format("~s~n", ["called `MyMod::Nested::function()`"]);
+    { io::format("~s~n", ["called `MyMod::Nested::function()`"]); };
 }
 
 #[allow(dead_code)]
 fn private_function() {
-    io::format("~s~n", ["called `MyMod::Nested::private_function()`"]);
+    { io::format("~s~n", ["called `MyMod::Nested::private_function()`"]); };
 }

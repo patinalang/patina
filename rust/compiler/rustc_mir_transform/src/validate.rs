@@ -1391,6 +1391,7 @@ impl<'a, 'tcx> Visitor<'tcx> for TypeChecker<'a, 'tcx> {
                             );
                         }
                     }
+                    CastKind::Term => { }
                     CastKind::Transmute => {
                         // Unlike `mem::transmute`, a MIR `Transmute` is well-formed
                         // for any two `Sized` types, just potentially UB to run.

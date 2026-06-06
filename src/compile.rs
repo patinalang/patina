@@ -47,7 +47,7 @@ extern mod io;
 
 #[macro_export]
 macro_rules! println {
-    ($s:literal) => { io::format("~s~n", [$s]) };
+    ($s:literal) => {{ io::format("~s~n", [$s]); }};
 }
 "#;
 

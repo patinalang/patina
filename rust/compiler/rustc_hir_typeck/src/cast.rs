@@ -751,6 +751,8 @@ impl<'a, 'tcx> CastCheck<'tcx> {
         let (t_from, t_cast) = match (CastTy::from_ty(self.expr_ty), CastTy::from_ty(self.cast_ty))
         {
             (Some(t_from), Some(t_cast)) => (t_from, t_cast),
+            // Synthetic "from" - anything can be cast to a term.
+            (None, Some(Term)) => (Term, Term),
             // Function item types may need to be reified before casts.
             (None, Some(t_cast)) => {
                 match *self.expr_ty.kind() {
@@ -812,6 +814,9 @@ impl<'a, 'tcx> CastCheck<'tcx> {
             return Err(CastError::ForeignNonExhaustiveAdt);
         }
         match (t_from, t_cast) {
+            (_, Term) => Ok(CastKind::TermCast),
+            (Term, _) => Err(CastError::IllegalCast),
+
             // These types have invariants! can't cast into them.
             (_, Int(CEnum) | FnPtr) => Err(CastError::NonScalar),
 

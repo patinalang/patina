@@ -34,6 +34,8 @@ pub enum CastTy<'tcx> {
     FnPtr,
     /// Raw pointers.
     Ptr(ty::TypeAndMut<'tcx>),
+    /// Erlang term.
+    Term,
 }
 
 /// Cast Kind. See [RFC 401](https://rust-lang.github.io/rfcs/0401-coercions.html)
@@ -50,6 +52,7 @@ pub enum CastKind {
     ArrayPtrCast,
     FnPtrPtrCast,
     FnPtrAddrCast,
+    TermCast,
 }
 
 impl<'tcx> CastTy<'tcx> {
@@ -67,6 +70,7 @@ impl<'tcx> CastTy<'tcx> {
             ty::Adt(d, _) if d.is_enum() && d.is_payloadfree() => Some(CastTy::Int(IntTy::CEnum)),
             ty::RawPtr(ty, mutbl) => Some(CastTy::Ptr(ty::TypeAndMut { ty, mutbl })),
             ty::FnPtr(..) => Some(CastTy::FnPtr),
+            ty::Term => Some(CastTy::Term),
             _ => None,
         }
     }
@@ -88,6 +92,7 @@ pub fn mir_cast_kind<'tcx>(from_ty: Ty<'tcx>, cast_ty: Ty<'tcx>) -> mir::CastKin
         (Some(CastTy::Int(_)), Some(CastTy::Float)) => mir::CastKind::IntToFloat,
         (Some(CastTy::Float), Some(CastTy::Float)) => mir::CastKind::FloatToFloat,
         (Some(CastTy::Ptr(_)), Some(CastTy::Ptr(_))) => mir::CastKind::PtrToPtr,
+        (_, Some(CastTy::Term)) => mir::CastKind::Term,
 
         (_, _) => {
             bug!("Attempting to cast non-castable types {:?} and {:?}", from_ty, cast_ty)

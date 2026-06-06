@@ -25,7 +25,7 @@ trait Copy { }
 #[allow(unused)]
 extern mod io;
 #[attr = MacroExport {local_inner_macros: false}]
-macro_rules! println { ($s:literal) => { io::format("~s~n", [$s]) }; }
+macro_rules! println { ($s:literal) => {{ io::format("~s~n", [$s]); }}; }
 
 enum Stage { Beginner, Advanced, }
 
@@ -48,30 +48,34 @@ fn main() ({
     (match (stage as Stage) {
 
             // Note the lack of scoping because of the explicit `use` above.
-            Beginner =>
+            Beginner => {
             ((io::format as
-                    fn(&str, [&str; 1]))(("~s~n" as &str),
+                    fn(term, term) -> term)(("~s~n" as &str),
                 ([("Beginners are starting their learning journey!" as &str)]
-                    as [&str; 1])) as ()),
-        Advanced =>
+                    as [&str; 1])) as term);
+        }
+        Advanced => {
             ((io::format as
-                    fn(&str, [&str; 1]))(("~s~n" as &str),
+                    fn(term, term) -> term)(("~s~n" as &str),
                 ([("Advanced learners are mastering their subjects..." as
-                            &str)] as [&str; 1])) as ()),
+                            &str)] as [&str; 1])) as term);
+        }
     } as ())
 
     (match (role as Role) {
 
             // Note again the lack of scoping.
-            Student =>
+            Student => {
             ((io::format as
-                    fn(&str, [&str; 1]))(("~s~n" as &str),
+                    fn(term, term) -> term)(("~s~n" as &str),
                 ([("Students are acquiring knowledge!" as &str)] as
-                    [&str; 1])) as ()),
-        Teacher =>
+                    [&str; 1])) as term);
+        }
+        Teacher => {
             ((io::format as
-                    fn(&str, [&str; 1]))(("~s~n" as &str),
+                    fn(term, term) -> term)(("~s~n" as &str),
                 ([("Teachers are spreading knowledge!" as &str)] as
-                    [&str; 1])) as ()),
+                    [&str; 1])) as term);
+        }
     } as ())
 } as ())

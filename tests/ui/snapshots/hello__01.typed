@@ -19,7 +19,7 @@ trait Copy { }
 extern mod io;
 
 #[attr = MacroExport {local_inner_macros: false}]
-macro_rules! println { ($s:literal) => { io::format("~s~n", [$s]) }; }
+macro_rules! println { ($s:literal) => {{ io::format("~s~n", [$s]); }}; }
 
 // source: patina-by-example/src/hello.md
 // block: 1/1
@@ -36,11 +36,13 @@ macro_rules! println { ($s:literal) => { io::format("~s~n", [$s]) }; }
 
 // This is the main function.
 fn main() ({
-    ((io::format as
-            fn(&str, [&str; 1]))(("~s~n" as &str),
-        ([
-                // Statements here are executed when the compiled binary is called.
+    ({
+        ((io::format as
+                fn(term, term) -> term)(("~s~n" as &str),
+            ([
+                    // Statements here are executed when the compiled binary is called.
 
-                // Print text to the console.
-                ("Hello World!" as &str)] as [&str; 1])) as ());
+                    // Print text to the console.
+                    ("Hello World!" as &str)] as [&str; 1])) as term);
+    } as ());
 } as ())

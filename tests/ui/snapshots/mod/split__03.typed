@@ -19,22 +19,26 @@ trait Copy { }
 extern mod io;
 
 #[attr = MacroExport {local_inner_macros: false}]
-macro_rules! println { ($s:literal) => { io::format("~s~n", [$s]) }; }
+macro_rules! println { ($s:literal) => {{ io::format("~s~n", [$s]); }}; }
 
 // source: patina-by-example/src/mod/split.md
 // block: 3/4
 
 fn function() ({
-    ((io::format as
-            fn(&str, [&str; 1]))(("~s~n" as &str),
-        ([("called `MyMod::Nested::function()`" as &str)] as [&str; 1])) as
-        ());
+    ({
+        ((io::format as
+                fn(term, term) -> term)(("~s~n" as &str),
+            ([("called `MyMod::Nested::function()`" as &str)] as [&str; 1]))
+            as term);
+    } as ());
 } as ())
 
 #[allow(dead_code)]
 fn private_function() ({
-    ((io::format as
-            fn(&str, [&str; 1]))(("~s~n" as &str),
-        ([("called `MyMod::Nested::private_function()`" as &str)] as
-            [&str; 1])) as ());
+    ({
+        ((io::format as
+                fn(term, term) -> term)(("~s~n" as &str),
+            ([("called `MyMod::Nested::private_function()`" as &str)] as
+                [&str; 1])) as term);
+    } as ());
 } as ())

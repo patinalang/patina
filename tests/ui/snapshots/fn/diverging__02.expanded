@@ -19,7 +19,7 @@ pub trait Copy { }
 extern mod io;
 
 #[macro_export]
-macro_rules! println { ($s:literal) => { io::format("~s~n", [$s]) }; }
+macro_rules! println { ($s:literal) => {{ io::format("~s~n", [$s]); }}; }
 
 // source: patina-by-example/src/fn/diverging.md
 // block: 2/4
@@ -28,5 +28,8 @@ fn some_fn() { () }
 
 pub fn main() {
     let _a: () = some_fn();
-    io::format("~s~n", ["This function returns and you can see this line."]);
+    {
+        io::format("~s~n",
+            ["This function returns and you can see this line."]);
+    };
 }

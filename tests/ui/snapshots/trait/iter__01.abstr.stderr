@@ -20,7 +20,7 @@ LL | macro_rules! println {
 note: while trying to match meta-variable `$s:literal`
   --> <patina-prelude>:24:6
    |
-LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
    |      ^^^^^^^^^^
 
 error: no rules expected `,`
@@ -37,7 +37,7 @@ LL | macro_rules! println {
 note: while trying to match meta-variable `$s:literal`
   --> <patina-prelude>:24:6
    |
-LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
    |      ^^^^^^^^^^
 
 error: no rules expected `,`
@@ -54,7 +54,7 @@ LL | macro_rules! println {
 note: while trying to match meta-variable `$s:literal`
   --> <patina-prelude>:24:6
    |
-LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
    |      ^^^^^^^^^^
 
 error: no rules expected `,`
@@ -71,7 +71,7 @@ LL | macro_rules! println {
 note: while trying to match meta-variable `$s:literal`
   --> <patina-prelude>:24:6
    |
-LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
    |      ^^^^^^^^^^
 
 error: no rules expected `,`
@@ -88,7 +88,7 @@ LL | macro_rules! println {
 note: while trying to match meta-variable `$s:literal`
   --> <patina-prelude>:24:6
    |
-LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
    |      ^^^^^^^^^^
 
 error: no rules expected `,`
@@ -105,7 +105,7 @@ LL | macro_rules! println {
 note: while trying to match meta-variable `$s:literal`
   --> <patina-prelude>:24:6
    |
-LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
    |      ^^^^^^^^^^
 
 error: no rules expected `,`
@@ -122,7 +122,7 @@ LL | macro_rules! println {
 note: while trying to match meta-variable `$s:literal`
   --> <patina-prelude>:24:6
    |
-LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
    |      ^^^^^^^^^^
 
 error: no rules expected `,`
@@ -139,7 +139,7 @@ LL | macro_rules! println {
 note: while trying to match meta-variable `$s:literal`
   --> <patina-prelude>:24:6
    |
-LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
    |      ^^^^^^^^^^
 
 error: no rules expected `,`
@@ -156,7 +156,7 @@ LL | macro_rules! println {
 note: while trying to match meta-variable `$s:literal`
   --> <patina-prelude>:24:6
    |
-LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
    |      ^^^^^^^^^^
 
 error: no rules expected `,`
@@ -173,7 +173,7 @@ LL | macro_rules! println {
 note: while trying to match meta-variable `$s:literal`
   --> <patina-prelude>:24:6
    |
-LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
    |      ^^^^^^^^^^
 
 error: no rules expected `,`
@@ -190,7 +190,7 @@ LL | macro_rules! println {
 note: while trying to match meta-variable `$s:literal`
   --> <patina-prelude>:24:6
    |
-LL |     ($s:literal) => { io::format("~s~n", [$s]) };
+LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
    |      ^^^^^^^^^^
 
 error: aborting due to 12 previous errors

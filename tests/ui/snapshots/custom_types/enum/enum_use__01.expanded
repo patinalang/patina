@@ -25,7 +25,7 @@ pub trait Copy { }
 #[allow(unused)]
 extern mod io;
 #[macro_export]
-macro_rules! println { ($s:literal) => { io::format("~s~n", [$s]) }; }
+macro_rules! println { ($s:literal) => {{ io::format("~s~n", [$s]); }}; }
 
 enum Stage { Beginner, Advanced, }
 
@@ -45,19 +45,24 @@ pub fn main() {
     match stage {
 
             // Note the lack of scoping because of the explicit `use` above.
-            Beginner =>
+            Beginner => {
             io::format("~s~n",
-                ["Beginners are starting their learning journey!"]),
-        Advanced =>
+                ["Beginners are starting their learning journey!"]);
+        }
+        Advanced => {
             io::format("~s~n",
-                ["Advanced learners are mastering their subjects..."]),
+                ["Advanced learners are mastering their subjects..."]);
+        }
     }
 
     match role {
 
             // Note again the lack of scoping.
-            Student =>
-            io::format("~s~n", ["Students are acquiring knowledge!"]),
-        Teacher => io::format("~s~n", ["Teachers are spreading knowledge!"]),
+            Student => {
+            io::format("~s~n", ["Students are acquiring knowledge!"]);
+        }
+        Teacher => {
+            io::format("~s~n", ["Teachers are spreading knowledge!"]);
+        }
     }
 }

@@ -551,8 +551,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             return Ty::new_fn_ptr(
                 tcx,
                 ty::Binder::dummy(tcx.mk_fn_sig_safe_rust_abi(
-                    arg_exprs.iter().map(|arg| self.next_ty_var(arg.span)),
-                    tcx.types.unit,
+                    std::iter::repeat_n(tcx.types.term, arg_exprs.len()),
+                    tcx.types.term,
                 )),
             );
         }

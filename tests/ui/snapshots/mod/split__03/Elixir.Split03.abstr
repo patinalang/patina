@@ -3,7 +3,12 @@
 -compile([no_auto_import]).
 -export([function/0]).
 function() ->
-    io:format(<<"~s~n">>, [<<"called `MyMod::Nested::function()`">>]).
+    begin
+        io:format(<<"~s~n">>,
+                  [<<"called `MyMod::Nested::function()`">>])
+    end.
 private_function() ->
-    io:format(<<"~s~n">>,
-              [<<"called `MyMod::Nested::private_function()`">>]).
+    begin
+        io:format(<<"~s~n">>,
+                  [<<"called `MyMod::Nested::private_function()`">>])
+    end.

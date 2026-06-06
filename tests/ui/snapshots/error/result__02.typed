@@ -19,13 +19,15 @@ trait Copy { }
 extern mod io;
 
 #[attr = MacroExport {local_inner_macros: false}]
-macro_rules! println { ($s:literal) => { io::format("~s~n", [$s]) }; }
+macro_rules! println { ($s:literal) => {{ io::format("~s~n", [$s]); }}; }
 
 // source: patina-by-example/src/error/result.md
 // block: 2/3
 
 fn main() ({
-    ((io::format as
-            fn(&str, [&str; 1]))(("~s~n" as &str),
-        ([("Hello World!" as &str)] as [&str; 1])) as ());
+    ({
+        ((io::format as
+                fn(term, term) -> term)(("~s~n" as &str),
+            ([("Hello World!" as &str)] as [&str; 1])) as term);
+    } as ());
 } as ())

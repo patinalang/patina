@@ -13,10 +13,10 @@ LL |         print!("called `My::indirect_call()`, that\n> ");
    |         ^^^^^
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:24:23
+  --> <patina-prelude>:24:24
    |
-LL |     ($s:literal) => { io::format("~s~n", [$s]) };
-   |                       ^^ use of unresolved module or unlinked crate `io`
+LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
+   |                        ^^ use of unresolved module or unlinked crate `io`
    |
   ::: tests/ui/src/mod/super__01.pt:10:9
    |
@@ -27,15 +27,15 @@ LL |         println!("called `Cool::function()`");
    = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 help: a builtin type with a similar name exists
    |
-LL -     ($s:literal) => { io::format("~s~n", [$s]) };
-LL +     ($s:literal) => { i8::format("~s~n", [$s]) };
+LL -     ($s:literal) => {{ io::format("~s~n", [$s]); }};
+LL +     ($s:literal) => {{ i8::format("~s~n", [$s]); }};
    |
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:24:23
+  --> <patina-prelude>:24:24
    |
-LL |     ($s:literal) => { io::format("~s~n", [$s]) };
-   |                       ^^ use of unresolved module or unlinked crate `io`
+LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
+   |                        ^^ use of unresolved module or unlinked crate `io`
    |
   ::: tests/ui/src/mod/super__01.pt:16:9
    |
@@ -46,15 +46,15 @@ LL |         println!("called `My::function()`");
    = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 help: a builtin type with a similar name exists
    |
-LL -     ($s:literal) => { io::format("~s~n", [$s]) };
-LL +     ($s:literal) => { i8::format("~s~n", [$s]) };
+LL -     ($s:literal) => {{ io::format("~s~n", [$s]); }};
+LL +     ($s:literal) => {{ i8::format("~s~n", [$s]); }};
    |
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:24:23
+  --> <patina-prelude>:24:24
    |
-LL |     ($s:literal) => { io::format("~s~n", [$s]) };
-   |                       ^^ use of unresolved module or unlinked crate `io`
+LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
+   |                        ^^ use of unresolved module or unlinked crate `io`
    |
   ::: tests/ui/src/mod/super__01.pt:21:13
    |
@@ -65,8 +65,8 @@ LL |             println!("called `My::Cool::function()`");
    = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 help: a builtin type with a similar name exists
    |
-LL -     ($s:literal) => { io::format("~s~n", [$s]) };
-LL +     ($s:literal) => { i8::format("~s~n", [$s]) };
+LL -     ($s:literal) => {{ io::format("~s~n", [$s]); }};
+LL +     ($s:literal) => {{ i8::format("~s~n", [$s]); }};
    |
 
 error: aborting due to 5 previous errors
