@@ -769,18 +769,6 @@ pub(crate) struct WantedConstant {
 }
 
 #[derive(Diagnostic)]
-#[diag("unreachable {$descr}")]
-pub(crate) struct UnreachableDueToUninhabited<'desc, 'tcx> {
-    pub descr: &'desc str,
-    #[label("unreachable {$descr}")]
-    pub expr: Span,
-    #[label("any code following this expression is unreachable")]
-    #[note("this expression has type `{$ty}`, which is uninhabited")]
-    pub orig: Span,
-    pub ty: Ty<'tcx>,
-}
-
-#[derive(Diagnostic)]
 #[diag("constant pattern cannot depend on generic parameters", code = E0158)]
 pub(crate) struct ConstPatternDependsOnGenericParameter {
     #[primary_span]
@@ -1320,15 +1308,6 @@ pub(crate) struct LoopMatchInvalidMatch {
 }
 
 #[derive(Diagnostic)]
-#[diag("this `#[loop_match]` state value has type `{$ty}`, which is not supported")]
-#[note("only integers, floats, bool, char, and enums without fields are supported")]
-pub(crate) struct LoopMatchUnsupportedType<'tcx> {
-    #[primary_span]
-    pub span: Span,
-    pub ty: Ty<'tcx>,
-}
-
-#[derive(Diagnostic)]
 #[diag("statements are not allowed in this position within a `#[loop_match]`")]
 pub(crate) struct LoopMatchBadStatements {
     #[primary_span]
@@ -1350,62 +1329,8 @@ pub(crate) struct LoopMatchMissingAssignment {
 }
 
 #[derive(Diagnostic)]
-#[diag("match arms that are part of a `#[loop_match]` cannot have guards")]
-pub(crate) struct LoopMatchArmWithGuard {
-    #[primary_span]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag("could not determine the target branch for this `#[const_continue]`")]
-#[help("try extracting the expression into a `const` item")]
-pub(crate) struct ConstContinueNotMonomorphicConst {
-    #[primary_span]
-    pub span: Span,
-
-    #[subdiagnostic]
-    pub reason: ConstContinueNotMonomorphicConstReason,
-}
-
-#[derive(Subdiagnostic)]
-pub(crate) enum ConstContinueNotMonomorphicConstReason {
-    #[label("constant parameters may use generics, and are not evaluated early enough")]
-    ConstantParameter {
-        #[primary_span]
-        span: Span,
-    },
-
-    #[label("`const` blocks may use generics, and are not evaluated early enough")]
-    ConstBlock {
-        #[primary_span]
-        span: Span,
-    },
-
-    #[label("this value must be a literal or a monomorphic const")]
-    Other {
-        #[primary_span]
-        span: Span,
-    },
-}
-
-#[derive(Diagnostic)]
-#[diag("could not determine the target branch for this `#[const_continue]`")]
-pub(crate) struct ConstContinueBadConst {
-    #[primary_span]
-    #[label("this value is too generic")]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
 #[diag("a `#[const_continue]` must break to a label with a value")]
 pub(crate) struct ConstContinueMissingLabelOrValue {
-    #[primary_span]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag("the target of this `#[const_continue]` is not statically known")]
-pub(crate) struct ConstContinueUnknownJumpTarget {
     #[primary_span]
     pub span: Span,
 }

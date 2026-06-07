@@ -1,12 +1,4 @@
-// tidy-alphabetical-start
-#![feature(box_patterns)]
-#![feature(file_buffered)]
-#![feature(negative_impls)]
-#![feature(string_from_utf8_lossy_owned)]
-#![feature(trait_alias)]
-#![feature(try_blocks)]
 #![recursion_limit = "256"]
-// tidy-alphabetical-end
 
 //! This crate contains codegen code that is used by all codegen backends (LLVM and others).
 //! The backend-agnostic functions of this crate use functions defined in various traits that
@@ -25,7 +17,6 @@ use rustc_hir::def_id::CrateNum;
 use rustc_lint_defs::builtin::LINKER_INFO;
 use rustc_macros::{Decodable, Encodable};
 use rustc_metadata::EncodedMetadata;
-use rustc_middle::dep_graph::WorkProduct;
 use rustc_middle::lint::LevelAndSource;
 use rustc_middle::middle::debugger_visualizer::DebuggerVisualizerFile;
 use rustc_middle::middle::dependency_format::Dependencies;
@@ -45,82 +36,9 @@ pub mod back;
 pub mod base;
 pub mod codegen_attrs;
 pub mod common;
-pub mod debuginfo;
 pub mod errors;
-pub mod meth;
-pub mod mir;
-pub mod mono_item;
-pub mod size_of_val;
 pub mod target_features;
 pub mod traits;
-
-pub struct ModuleCodegen<M> {
-    /// The name of the module. When the crate may be saved between
-    /// compilations, incremental compilation requires that name be
-    /// unique amongst **all** crates. Therefore, it should contain
-    /// something unique to this crate (e.g., a module path) as well
-    /// as the crate name and disambiguator.
-    /// We currently generate these names via CodegenUnit::build_cgu_name().
-    pub name: String,
-    pub module_llvm: M,
-    pub kind: ModuleKind,
-    /// Saving the ThinLTO buffer for embedding in the object file.
-    pub thin_lto_buffer: Option<Vec<u8>>,
-}
-
-impl<M> ModuleCodegen<M> {
-    pub fn new_regular(name: impl Into<String>, module: M) -> Self {
-        Self {
-            name: name.into(),
-            module_llvm: module,
-            kind: ModuleKind::Regular,
-            thin_lto_buffer: None,
-        }
-    }
-
-    pub fn new_allocator(name: impl Into<String>, module: M) -> Self {
-        Self {
-            name: name.into(),
-            module_llvm: module,
-            kind: ModuleKind::Allocator,
-            thin_lto_buffer: None,
-        }
-    }
-
-    pub fn into_compiled_module(
-        self,
-        emit_obj: bool,
-        emit_dwarf_obj: bool,
-        emit_bc: bool,
-        emit_asm: bool,
-        emit_ir: bool,
-        outputs: &OutputFilenames,
-        invocation_temp: Option<&str>,
-    ) -> CompiledModule {
-        let object = emit_obj
-            .then(|| outputs.temp_path_for_cgu(OutputType::Object, &self.name, invocation_temp));
-        let dwarf_object =
-            emit_dwarf_obj.then(|| outputs.temp_path_dwo_for_cgu(&self.name, invocation_temp));
-        let bytecode = emit_bc
-            .then(|| outputs.temp_path_for_cgu(OutputType::Bitcode, &self.name, invocation_temp));
-        let assembly = emit_asm
-            .then(|| outputs.temp_path_for_cgu(OutputType::Assembly, &self.name, invocation_temp));
-        let llvm_ir = emit_ir.then(|| {
-            outputs.temp_path_for_cgu(OutputType::LlvmAssembly, &self.name, invocation_temp)
-        });
-
-        CompiledModule {
-            name: self.name,
-            kind: self.kind,
-            object,
-            dwarf_object,
-            bytecode,
-            assembly,
-            llvm_ir,
-            links_from_incr_cache: Vec::new(),
-        }
-    }
-}
 
 #[derive(Debug, Encodable, Decodable)]
 pub struct CompiledModule {
@@ -152,24 +70,10 @@ impl CompiledModule {
     }
 }
 
-pub(crate) struct CachedModuleCodegen {
-    pub name: String,
-    pub source: WorkProduct,
-}
-
 #[derive(Copy, Clone, Debug, PartialEq, Encodable, Decodable)]
 pub enum ModuleKind {
     Regular,
     Allocator,
-}
-
-bitflags::bitflags! {
-    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-    pub struct MemFlags: u8 {
-        const VOLATILE = 1 << 0;
-        const NONTEMPORAL = 1 << 1;
-        const UNALIGNED = 1 << 2;
-    }
 }
 
 // This is the same as `rustc_session::cstore::NativeLib`, except:

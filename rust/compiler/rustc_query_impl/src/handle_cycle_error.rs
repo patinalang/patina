@@ -1,7 +1,5 @@
-use std::collections::VecDeque;
 use std::fmt::Write;
 use std::iter;
-use std::ops::ControlFlow;
 
 use rustc_data_structures::fx::FxHashSet;
 use rustc_errors::codes::*;
@@ -14,8 +12,6 @@ use rustc_middle::query::Cycle;
 use rustc_middle::ty::{self, Ty, TyCtxt};
 use rustc_span::def_id::{DefId, LocalDefId};
 use rustc_span::{ErrorGuaranteed, Span};
-
-use crate::job::create_cycle_error;
 
 // Default cycle handler used for all queries that don't use the `handle_cycle_error` query
 // modifier.
@@ -106,110 +102,6 @@ pub(crate) fn variances_of<'tcx>(
     let _guar = err.delay_as_bug();
     let n = tcx.generics_of(def_id).own_params.len();
     tcx.arena.alloc_from_iter(iter::repeat_n(ty::Bivariant, n))
-}
-
-// Take a cycle of `Q` and try `try_cycle` on every permutation, falling back to `otherwise`.
-fn search_for_cycle_permutation<Q, T>(
-    cycle: &[Q],
-    try_cycle: impl Fn(&mut VecDeque<&Q>) -> ControlFlow<T, ()>,
-    otherwise: impl FnOnce() -> T,
-) -> T {
-    let mut cycle: VecDeque<_> = cycle.iter().collect();
-    for _ in 0..cycle.len() {
-        match try_cycle(&mut cycle) {
-            ControlFlow::Continue(_) => {
-                cycle.rotate_left(1);
-            }
-            ControlFlow::Break(t) => return t,
-        }
-    }
-
-    otherwise()
-}
-
-pub(crate) fn layout_of<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    _key: ty::PseudoCanonicalInput<'tcx, Ty<'tcx>>,
-    cycle: Cycle<'tcx>,
-    err: Diag<'_>,
-) -> Result<ty::layout::TyAndLayout<'tcx>, &'tcx ty::layout::LayoutError<'tcx>> {
-    let _guar = err.delay_as_bug();
-    let diag = search_for_cycle_permutation(
-        &cycle.frames,
-        |frames| {
-            if let TaggedQueryKey::layout_of(key) = frames[0].tagged_key
-                && let ty::Coroutine(def_id, _) = key.value.kind()
-                && let Some(def_id) = def_id.as_local()
-                && let def_kind = tcx.def_kind(def_id)
-                && matches!(def_kind, DefKind::Closure)
-                && let Some(coroutine_kind) = tcx.coroutine_kind(def_id)
-            {
-                // FIXME: `def_span` for an fn-like coroutine will point to the fn's body
-                // due to interactions between the desugaring into a closure expr and the
-                // def_span code. I'm not motivated to fix it, because I tried and it was
-                // not working, so just hack around it by grabbing the parent fn's span.
-                let span = if coroutine_kind.is_fn_like() {
-                    tcx.def_span(tcx.local_parent(def_id))
-                } else {
-                    tcx.def_span(def_id)
-                };
-                let mut diag = struct_span_code_err!(
-                    tcx.sess.dcx(),
-                    span,
-                    E0733,
-                    "recursion in {} {} requires boxing",
-                    tcx.def_kind_descr_article(def_kind, def_id.to_def_id()),
-                    tcx.def_kind_descr(def_kind, def_id.to_def_id()),
-                );
-                for (i, frame) in frames.iter().enumerate() {
-                    let TaggedQueryKey::layout_of(frame_key) = frame.tagged_key else {
-                        continue;
-                    };
-                    let &ty::Coroutine(frame_def_id, _) = frame_key.value.kind() else {
-                        continue;
-                    };
-                    let Some(frame_coroutine_kind) = tcx.coroutine_kind(frame_def_id) else {
-                        continue;
-                    };
-                    let frame_span =
-                        frame.tagged_key.default_span(tcx, frames[(i + 1) % frames.len()].span);
-                    if frame_span.is_dummy() {
-                        continue;
-                    }
-                    if i == 0 {
-                        diag.span_label(frame_span, "recursive call here");
-                    } else {
-                        let coroutine_span: Span = if frame_coroutine_kind.is_fn_like() {
-                            tcx.def_span(tcx.parent(frame_def_id))
-                        } else {
-                            tcx.def_span(frame_def_id)
-                        };
-                        let mut multispan = MultiSpan::from_span(coroutine_span);
-                        multispan.push_span_label(frame_span, "...leading to this recursive call");
-                        diag.span_note(
-                            multispan,
-                            format!("which leads to this {}", tcx.def_descr(frame_def_id)),
-                        );
-                    }
-                }
-                // FIXME: We could report a structured suggestion if we had
-                // enough info here... Maybe we can use a hacky HIR walker.
-                if matches!(
-                    coroutine_kind,
-                    hir::CoroutineKind::Desugared(hir::CoroutineDesugaring::Async, _)
-                ) {
-                    diag.note("a recursive `async fn` call must introduce indirection such as `Box::pin` to avoid an infinitely sized future");
-                }
-
-                ControlFlow::Break(diag)
-            } else {
-                ControlFlow::Continue(())
-            }
-        },
-        || create_cycle_error(tcx, &cycle, false),
-    );
-
-    diag.emit().raise_fatal()
 }
 
 // item_and_field_ids should form a cycle where each field contains the

@@ -1,5 +1,3 @@
-use std::fmt;
-
 use rustc_span::Symbol;
 
 use super::{InlineAsmArch, InlineAsmType, ModifierInfo};
@@ -39,15 +37,7 @@ impl S390xInlineAsmRegClass {
         self,
         _arch: InlineAsmArch,
     ) -> &'static [(InlineAsmType, Option<Symbol>)] {
-        match self {
-            Self::reg | Self::reg_addr => types! { _: I8, I16, I32, I64; },
-            Self::freg => types! { _: F16, F32, F64; },
-            Self::vreg => types! {
-                vector: I32, F16, F32, I64, F64, I128, F128,
-                    VecI8(16), VecI16(8), VecI32(4), VecI64(2), VecF16(8), VecF32(4), VecF64(2);
-            },
-            Self::areg => &[],
-        }
+        &[]
     }
 }
 
@@ -129,73 +119,5 @@ def_regs! {
         a13: areg = ["a13"],
         a14: areg = ["a14"],
         a15: areg = ["a15"],
-        #error = ["r11"] =>
-            "The frame pointer cannot be used as an operand for inline asm",
-        #error = ["r15"] =>
-            "The stack pointer cannot be used as an operand for inline asm",
-        #error = [
-            "c0", "c1", "c2", "c3",
-            "c4", "c5", "c6", "c7",
-            "c8", "c9", "c10", "c11",
-            "c12", "c13", "c14", "c15"
-        ] =>
-            "control registers are reserved by the kernel and cannot be used as operands for inline asm",
-        #error = ["a0", "a1"] =>
-            "a0 and a1 are reserved for system use and cannot be used as operands for inline asm",
-    }
-}
-
-impl S390xInlineAsmReg {
-    pub fn emit(
-        self,
-        out: &mut dyn fmt::Write,
-        _arch: InlineAsmArch,
-        _modifier: Option<char>,
-    ) -> fmt::Result {
-        write!(out, "%{}", self.name())
-    }
-
-    pub fn overlapping_regs(self, mut cb: impl FnMut(S390xInlineAsmReg)) {
-        macro_rules! reg_conflicts {
-            (
-                $(
-                    $full:ident : $($field:ident)*
-                ),*;
-            ) => {
-                match self {
-                    $(
-                        Self::$full => {
-                            cb(Self::$full);
-                            $(cb(Self::$field);)*
-                        }
-                        $(Self::$field)|* => {
-                            cb(Self::$full);
-                            cb(self);
-                        }
-                    )*
-                    r => cb(r),
-                }
-            };
-        }
-
-        // The left halves of v0-v15 are aliased to f0-f15.
-        reg_conflicts! {
-            v0 : f0,
-            v1 : f1,
-            v2 : f2,
-            v3 : f3,
-            v4 : f4,
-            v5 : f5,
-            v6 : f6,
-            v7 : f7,
-            v8 : f8,
-            v9 : f9,
-            v10 : f10,
-            v11 : f11,
-            v12 : f12,
-            v13 : f13,
-            v14 : f14,
-            v15 : f15;
-        }
     }
 }

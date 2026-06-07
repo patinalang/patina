@@ -9,7 +9,7 @@ use itertools::Itertools;
 use object::write::{self, StandardSegment, Symbol, SymbolSection};
 use object::{
     Architecture, BinaryFormat, Endianness, FileFlags, Object, ObjectSection, ObjectSymbol,
-    SectionFlags, SectionKind, SymbolFlags, SymbolKind, SymbolScope, elf, pe, xcoff,
+    SectionFlags, SectionKind, SymbolFlags, SymbolKind, SymbolScope, elf, xcoff,
 };
 use rustc_abi::Endian;
 use rustc_data_structures::memmap::Mmap;
@@ -448,112 +448,6 @@ fn macho_object_build_version_for_target(sess: &Session) -> object::write::MachO
 /// Is Apple's CPU subtype `arm64e`s
 fn macho_is_arm64e(target: &Target) -> bool {
     target.llvm_target.starts_with("arm64e")
-}
-
-pub(crate) enum MetadataPosition {
-    First,
-    Last,
-}
-
-/// For rlibs we "pack" rustc metadata into a dummy object file.
-///
-/// Historically it was needed because rustc linked rlibs as whole-archive in some cases.
-/// In that case linkers try to include all files located in an archive, so if metadata is stored
-/// in an archive then it needs to be of a form that the linker is able to process.
-/// Now it's not clear whether metadata still needs to be wrapped into an object file or not.
-///
-/// Note, though, that we don't actually want this metadata to show up in any
-/// final output of the compiler. Instead this is purely for rustc's own
-/// metadata tracking purposes.
-///
-/// With the above in mind, each "flavor" of object format gets special
-/// handling here depending on the target:
-///
-/// * MachO - macos-like targets will insert the metadata into a section that
-///   is sort of fake dwarf debug info. Inspecting the source of the macos
-///   linker this causes these sections to be skipped automatically because
-///   it's not in an allowlist of otherwise well known dwarf section names to
-///   go into the final artifact.
-///
-/// * WebAssembly - this uses wasm files themselves as the object file format
-///   so an empty file with no linking metadata but a single custom section is
-///   created holding our metadata.
-///
-/// * COFF - Windows-like targets create an object with a section that has
-///   the `IMAGE_SCN_LNK_REMOVE` flag set which ensures that if the linker
-///   ever sees the section it doesn't process it and it's removed.
-///
-/// * ELF - All other targets are similar to Windows in that there's a
-///   `SHF_EXCLUDE` flag we can set on sections in an object file to get
-///   automatically removed from the final output.
-pub(crate) fn create_wrapper_file(
-    sess: &Session,
-    section_name: String,
-    data: &[u8],
-) -> (Vec<u8>, MetadataPosition) {
-    let Some(mut file) = create_object_file(sess) else {
-        if sess.target.is_like_wasm {
-            return (
-                create_metadata_file_for_wasm(sess, data, &section_name),
-                MetadataPosition::First,
-            );
-        }
-
-        // Targets using this branch don't have support implemented here yet or
-        // they're not yet implemented in the `object` crate and will likely
-        // fill out this module over time.
-        return (data.to_vec(), MetadataPosition::Last);
-    };
-    let section = if file.format() == BinaryFormat::Xcoff {
-        file.add_section(Vec::new(), b".info".to_vec(), SectionKind::Debug)
-    } else {
-        file.add_section(
-            file.segment_name(StandardSegment::Debug).to_vec(),
-            section_name.into_bytes(),
-            SectionKind::Debug,
-        )
-    };
-    match file.format() {
-        BinaryFormat::Coff => {
-            file.section_mut(section).flags =
-                SectionFlags::Coff { characteristics: pe::IMAGE_SCN_LNK_REMOVE };
-        }
-        BinaryFormat::Elf => {
-            file.section_mut(section).flags =
-                SectionFlags::Elf { sh_flags: elf::SHF_EXCLUDE as u64 };
-        }
-        BinaryFormat::Xcoff => {
-            // AIX system linker may aborts if it meets a valid XCOFF file in archive with no .text, no .data and no .bss.
-            file.add_section(Vec::new(), b".text".to_vec(), SectionKind::Text);
-            file.section_mut(section).flags =
-                SectionFlags::Xcoff { s_flags: xcoff::STYP_INFO as u32 };
-            // Encode string stored in .info section of XCOFF.
-            // FIXME: The length of data here is not guaranteed to fit in a u32.
-            // We may have to split the data into multiple pieces in order to
-            // store in .info section.
-            let len: u32 = data.len().try_into().unwrap();
-            let offset = file.append_section_data(section, &len.to_be_bytes(), 1);
-            // Add a symbol referring to the data in .info section.
-            file.add_symbol(Symbol {
-                name: AIX_METADATA_SYMBOL_NAME.into(),
-                value: offset + 4,
-                size: 0,
-                kind: SymbolKind::Unknown,
-                scope: SymbolScope::Compilation,
-                weak: false,
-                section: SymbolSection::Section(section),
-                flags: SymbolFlags::Xcoff {
-                    n_sclass: xcoff::C_INFO,
-                    x_smtyp: xcoff::C_HIDEXT,
-                    x_smclas: xcoff::C_HIDEXT,
-                    containing_csect: None,
-                },
-            });
-        }
-        _ => {}
-    };
-    file.append_section_data(section, data, 1);
-    (file.write().unwrap(), MetadataPosition::First)
 }
 
 // Historical note:

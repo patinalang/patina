@@ -724,7 +724,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             ),
             ast::LitKind::Byte(_) => tcx.types.int,
             ast::LitKind::Char(_) => tcx.types.char,
-            ast::LitKind::Int(i) => {
+            ast::LitKind::Int(_i) => {
                 let opt_ty = expected.to_option(self).and_then(|ty| match ty.kind() {
                     ty::Int => Some(tcx.types.int),
                     // These exist to direct casts like `0x61 as char` to use
@@ -733,19 +733,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     ty::Char => Some(tcx.types.int),
                     ty::RawPtr(..) => Some(tcx.types.int),
                     ty::FnDef(..) | ty::FnPtr(..) => Some(tcx.types.int),
-                    &ty::Pat(base, _) if base.is_integral() => {
-                        let layout = tcx
-                            .layout_of(self.typing_env(self.param_env).as_query_input(ty))
-                            .ok()?;
-                        assert!(!layout.uninhabited);
-
-                        match layout.backend_repr {
-                            rustc_abi::BackendRepr::Scalar(scalar) => {
-                                scalar.valid_range(&tcx).contains(u128::from(i.get())).then_some(ty)
-                            }
-                            _ => unreachable!(),
-                        }
-                    }
+                    &ty::Pat(base, _) if base.is_integral() => Some(base),
                     _ => None,
                 });
                 opt_ty.unwrap_or(tcx.types.int)

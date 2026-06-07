@@ -1,10 +1,6 @@
-use std::fmt;
-
-use rustc_data_structures::fx::FxIndexSet;
 use rustc_span::Symbol;
 
 use super::{InlineAsmArch, InlineAsmType, ModifierInfo};
-use crate::spec::{RelocModel, Target};
 
 def_reg_class! {
     X86 X86InlineAsmRegClass {
@@ -23,249 +19,69 @@ def_reg_class! {
 }
 
 impl X86InlineAsmRegClass {
-    pub fn valid_modifiers(self, arch: super::InlineAsmArch) -> &'static [char] {
-        match self {
-            Self::reg => {
-                if arch == InlineAsmArch::X86_64 {
-                    &['l', 'x', 'e', 'r']
-                } else {
-                    &['x', 'e']
-                }
-            }
-            Self::reg_abcd => {
-                if arch == InlineAsmArch::X86_64 {
-                    &['l', 'h', 'x', 'e', 'r']
-                } else {
-                    &['l', 'h', 'x', 'e']
-                }
-            }
-            Self::reg_byte => &[],
-            Self::xmm_reg | Self::ymm_reg | Self::zmm_reg => &['x', 'y', 'z'],
-            Self::kreg | Self::kreg0 => &[],
-            Self::mmx_reg | Self::x87_reg => &[],
-            Self::tmm_reg => &[],
-        }
+    pub fn valid_modifiers(self, _arch: super::InlineAsmArch) -> &'static [char] {
+        &[]
     }
 
-    pub fn suggest_class(self, _arch: InlineAsmArch, ty: InlineAsmType) -> Option<Self> {
-        match self {
-            Self::reg | Self::reg_abcd if ty.size().bits() == 8 => Some(Self::reg_byte),
-            _ => None,
-        }
+    pub fn suggest_class(self, _arch: InlineAsmArch, _ty: InlineAsmType) -> Option<Self> {
+        None
     }
 
-    pub fn suggest_modifier(self, arch: InlineAsmArch, ty: InlineAsmType) -> Option<ModifierInfo> {
-        match self {
-            Self::reg => match ty.size().bits() {
-                16 => Some(('x', "ax", 16).into()),
-                32 if arch == InlineAsmArch::X86_64 => Some(('e', "eax", 32).into()),
-                _ => None,
-            },
-            Self::reg_abcd => match ty.size().bits() {
-                16 => Some(('x', "ax", 16).into()),
-                32 if arch == InlineAsmArch::X86_64 => Some(('e', "eax", 32).into()),
-                _ => None,
-            },
-            Self::reg_byte => None,
-            Self::xmm_reg => None,
-            Self::ymm_reg => match ty.size().bits() {
-                256 => None,
-                _ => Some(('x', "xmm0", 128).into()),
-            },
-            Self::zmm_reg => match ty.size().bits() {
-                512 => None,
-                256 => Some(('y', "ymm0", 256).into()),
-                _ => Some(('x', "xmm0", 128).into()),
-            },
-            Self::kreg | Self::kreg0 => None,
-            Self::mmx_reg | Self::x87_reg => None,
-            Self::tmm_reg => None,
-        }
+    pub fn suggest_modifier(
+        self,
+        _arch: InlineAsmArch,
+        _ty: InlineAsmType,
+    ) -> Option<ModifierInfo> {
+        None
     }
 
-    pub fn default_modifier(self, arch: InlineAsmArch) -> Option<ModifierInfo> {
-        match self {
-            Self::reg | Self::reg_abcd => {
-                if arch == InlineAsmArch::X86_64 {
-                    Some(('r', "rax", 64).into())
-                } else {
-                    Some(('e', "eax", 32).into())
-                }
-            }
-            Self::reg_byte => None,
-            Self::xmm_reg => Some(('x', "xmm0", 128).into()),
-            Self::ymm_reg => Some(('y', "ymm0", 256).into()),
-            Self::zmm_reg => Some(('z', "zmm0", 512).into()),
-            Self::kreg | Self::kreg0 => None,
-            Self::mmx_reg | Self::x87_reg => None,
-            Self::tmm_reg => None,
-        }
+    pub fn default_modifier(self, _arch: InlineAsmArch) -> Option<ModifierInfo> {
+        None
     }
 
     pub fn supported_types(
         self,
-        arch: InlineAsmArch,
-        allow_experimental_reg: bool,
+        _arch: InlineAsmArch,
+        _allow_experimental_reg: bool,
     ) -> &'static [(InlineAsmType, Option<Symbol>)] {
-        match self {
-            Self::reg | Self::reg_abcd => {
-                if arch == InlineAsmArch::X86_64 {
-                    types! { _: I16, I32, I64, F16, F32, F64; }
-                } else {
-                    types! { _: I16, I32, F16, F32; }
-                }
-            }
-            Self::reg_byte => types! { _: I8; },
-            Self::xmm_reg => {
-                if allow_experimental_reg {
-                    types! {
-                        sse: I32, I64, I128, F16, F32, F64, F128,
-                          VecI8(16), VecI16(8), VecI32(4), VecI64(2), VecF16(8), VecF32(4), VecF64(2);
-                    }
-                } else {
-                    types! {
-                        sse: I32, I64, F16, F32, F64, F128,
-                          VecI8(16), VecI16(8), VecI32(4), VecI64(2), VecF16(8), VecF32(4), VecF64(2);
-                    }
-                }
-            }
-            Self::ymm_reg => {
-                if allow_experimental_reg {
-                    types! {
-                        avx: I32, I64, I128, F16, F32, F64, F128,
-                            VecI8(16), VecI16(8), VecI32(4), VecI64(2), VecF16(8), VecF32(4), VecF64(2),
-                            VecI8(32), VecI16(16), VecI32(8), VecI64(4), VecF16(16), VecF32(8), VecF64(4);
-                    }
-                } else {
-                    types! {
-                        avx: I32, I64, F16, F32, F64, F128,
-                            VecI8(16), VecI16(8), VecI32(4), VecI64(2), VecF16(8), VecF32(4), VecF64(2),
-                            VecI8(32), VecI16(16), VecI32(8), VecI64(4), VecF16(16), VecF32(8), VecF64(4);
-                    }
-                }
-            }
-            Self::zmm_reg => {
-                if allow_experimental_reg {
-                    types! {
-                        avx512f: I32, I64, I128, F16, F32, F64, F128,
-                            VecI8(16), VecI16(8), VecI32(4), VecI64(2), VecF16(8), VecF32(4), VecF64(2),
-                            VecI8(32), VecI16(16), VecI32(8), VecI64(4), VecF16(16), VecF32(8), VecF64(4),
-                            VecI8(64), VecI16(32), VecI32(16), VecI64(8), VecF16(32), VecF32(16), VecF64(8);
-                    }
-                } else {
-                    types! {
-                    avx512f: I32, I64, F16, F32, F64, F128,
-                        VecI8(16), VecI16(8), VecI32(4), VecI64(2), VecF16(8), VecF32(4), VecF64(2),
-                        VecI8(32), VecI16(16), VecI32(8), VecI64(4), VecF16(16), VecF32(8), VecF64(4),
-                        VecI8(64), VecI16(32), VecI32(16), VecI64(8), VecF16(32), VecF32(16), VecF64(8);
-                    }
-                }
-            }
-
-            Self::kreg => types! {
-                avx512f: I8, I16;
-                avx512bw: I32, I64;
-            },
-            Self::kreg0 => &[],
-            Self::mmx_reg | Self::x87_reg => &[],
-            Self::tmm_reg => &[],
-        }
-    }
-}
-
-fn x86_64_only(
-    arch: InlineAsmArch,
-    _reloc_model: RelocModel,
-    _target_features: &FxIndexSet<Symbol>,
-    _target: &Target,
-    _is_clobber: bool,
-) -> Result<(), &'static str> {
-    match arch {
-        InlineAsmArch::X86 => Err("register is only available on x86_64"),
-        InlineAsmArch::X86_64 => Ok(()),
-        _ => unreachable!(),
-    }
-}
-
-fn high_byte(
-    arch: InlineAsmArch,
-    _reloc_model: RelocModel,
-    _target_features: &FxIndexSet<Symbol>,
-    _target: &Target,
-    _is_clobber: bool,
-) -> Result<(), &'static str> {
-    match arch {
-        InlineAsmArch::X86_64 => Err("high byte registers cannot be used as an operand on x86_64"),
-        _ => Ok(()),
-    }
-}
-
-fn rbx_reserved(
-    arch: InlineAsmArch,
-    _reloc_model: RelocModel,
-    _target_features: &FxIndexSet<Symbol>,
-    _target: &Target,
-    _is_clobber: bool,
-) -> Result<(), &'static str> {
-    match arch {
-        InlineAsmArch::X86 => Ok(()),
-        InlineAsmArch::X86_64 => {
-            Err("rbx is used internally by LLVM and cannot be used as an operand for inline asm")
-        }
-        _ => unreachable!(),
-    }
-}
-
-fn esi_reserved(
-    arch: InlineAsmArch,
-    _reloc_model: RelocModel,
-    _target_features: &FxIndexSet<Symbol>,
-    _target: &Target,
-    _is_clobber: bool,
-) -> Result<(), &'static str> {
-    match arch {
-        InlineAsmArch::X86 => {
-            Err("esi is used internally by LLVM and cannot be used as an operand for inline asm")
-        }
-        InlineAsmArch::X86_64 => Ok(()),
-        _ => unreachable!(),
+        &[]
     }
 }
 
 def_regs! {
     X86 X86InlineAsmReg X86InlineAsmRegClass {
         ax: reg, reg_abcd = ["ax", "eax", "rax"],
-        bx: reg, reg_abcd = ["bx", "ebx", "rbx"] % rbx_reserved,
+        bx: reg, reg_abcd = ["bx", "ebx", "rbx"],
         cx: reg, reg_abcd = ["cx", "ecx", "rcx"],
         dx: reg, reg_abcd = ["dx", "edx", "rdx"],
-        si: reg = ["si", "esi", "rsi"] % esi_reserved,
+        si: reg = ["si", "esi", "rsi"],
         di: reg = ["di", "edi", "rdi"],
-        r8: reg = ["r8", "r8w", "r8d"] % x86_64_only,
-        r9: reg = ["r9", "r9w", "r9d"] % x86_64_only,
-        r10: reg = ["r10", "r10w", "r10d"] % x86_64_only,
-        r11: reg = ["r11", "r11w", "r11d"] % x86_64_only,
-        r12: reg = ["r12", "r12w", "r12d"] % x86_64_only,
-        r13: reg = ["r13", "r13w", "r13d"] % x86_64_only,
-        r14: reg = ["r14", "r14w", "r14d"] % x86_64_only,
-        r15: reg = ["r15", "r15w", "r15d"] % x86_64_only,
+        r8: reg = ["r8", "r8w", "r8d"],
+        r9: reg = ["r9", "r9w", "r9d"],
+        r10: reg = ["r10", "r10w", "r10d"],
+        r11: reg = ["r11", "r11w", "r11d"],
+        r12: reg = ["r12", "r12w", "r12d"],
+        r13: reg = ["r13", "r13w", "r13d"],
+        r14: reg = ["r14", "r14w", "r14d"],
+        r15: reg = ["r15", "r15w", "r15d"],
         al: reg_byte = ["al"],
-        ah: reg_byte = ["ah"] % high_byte,
-        bl: reg_byte = ["bl"] % rbx_reserved,
-        bh: reg_byte = ["bh"] % rbx_reserved % high_byte,
+        ah: reg_byte = ["ah"],
+        bl: reg_byte = ["bl"],
+        bh: reg_byte = ["bh"],
         cl: reg_byte = ["cl"],
-        ch: reg_byte = ["ch"] % high_byte,
+        ch: reg_byte = ["ch"],
         dl: reg_byte = ["dl"],
-        dh: reg_byte = ["dh"] % high_byte,
-        sil: reg_byte = ["sil"] % x86_64_only,
-        dil: reg_byte = ["dil"] % x86_64_only,
-        r8b: reg_byte = ["r8b"] % x86_64_only,
-        r9b: reg_byte = ["r9b"] % x86_64_only,
-        r10b: reg_byte = ["r10b"] % x86_64_only,
-        r11b: reg_byte = ["r11b"] % x86_64_only,
-        r12b: reg_byte = ["r12b"] % x86_64_only,
-        r13b: reg_byte = ["r13b"] % x86_64_only,
-        r14b: reg_byte = ["r14b"] % x86_64_only,
-        r15b: reg_byte = ["r15b"] % x86_64_only,
+        dh: reg_byte = ["dh"],
+        sil: reg_byte = ["sil"],
+        dil: reg_byte = ["dil"],
+        r8b: reg_byte = ["r8b"],
+        r9b: reg_byte = ["r9b"],
+        r10b: reg_byte = ["r10b"],
+        r11b: reg_byte = ["r11b"],
+        r12b: reg_byte = ["r12b"],
+        r13b: reg_byte = ["r13b"],
+        r14b: reg_byte = ["r14b"],
+        r15b: reg_byte = ["r15b"],
         xmm0: xmm_reg = ["xmm0"],
         xmm1: xmm_reg = ["xmm1"],
         xmm2: xmm_reg = ["xmm2"],
@@ -274,14 +90,14 @@ def_regs! {
         xmm5: xmm_reg = ["xmm5"],
         xmm6: xmm_reg = ["xmm6"],
         xmm7: xmm_reg = ["xmm7"],
-        xmm8: xmm_reg = ["xmm8"] % x86_64_only,
-        xmm9: xmm_reg = ["xmm9"] % x86_64_only,
-        xmm10: xmm_reg = ["xmm10"] % x86_64_only,
-        xmm11: xmm_reg = ["xmm11"] % x86_64_only,
-        xmm12: xmm_reg = ["xmm12"] % x86_64_only,
-        xmm13: xmm_reg = ["xmm13"] % x86_64_only,
-        xmm14: xmm_reg = ["xmm14"] % x86_64_only,
-        xmm15: xmm_reg = ["xmm15"] % x86_64_only,
+        xmm8: xmm_reg = ["xmm8"],
+        xmm9: xmm_reg = ["xmm9"],
+        xmm10: xmm_reg = ["xmm10"],
+        xmm11: xmm_reg = ["xmm11"],
+        xmm12: xmm_reg = ["xmm12"],
+        xmm13: xmm_reg = ["xmm13"],
+        xmm14: xmm_reg = ["xmm14"],
+        xmm15: xmm_reg = ["xmm15"],
         ymm0: ymm_reg = ["ymm0"],
         ymm1: ymm_reg = ["ymm1"],
         ymm2: ymm_reg = ["ymm2"],
@@ -290,14 +106,14 @@ def_regs! {
         ymm5: ymm_reg = ["ymm5"],
         ymm6: ymm_reg = ["ymm6"],
         ymm7: ymm_reg = ["ymm7"],
-        ymm8: ymm_reg = ["ymm8"] % x86_64_only,
-        ymm9: ymm_reg = ["ymm9"] % x86_64_only,
-        ymm10: ymm_reg = ["ymm10"] % x86_64_only,
-        ymm11: ymm_reg = ["ymm11"] % x86_64_only,
-        ymm12: ymm_reg = ["ymm12"] % x86_64_only,
-        ymm13: ymm_reg = ["ymm13"] % x86_64_only,
-        ymm14: ymm_reg = ["ymm14"] % x86_64_only,
-        ymm15: ymm_reg = ["ymm15"] % x86_64_only,
+        ymm8: ymm_reg = ["ymm8"],
+        ymm9: ymm_reg = ["ymm9"],
+        ymm10: ymm_reg = ["ymm10"],
+        ymm11: ymm_reg = ["ymm11"],
+        ymm12: ymm_reg = ["ymm12"],
+        ymm13: ymm_reg = ["ymm13"],
+        ymm14: ymm_reg = ["ymm14"],
+        ymm15: ymm_reg = ["ymm15"],
         zmm0: zmm_reg = ["zmm0"],
         zmm1: zmm_reg = ["zmm1"],
         zmm2: zmm_reg = ["zmm2"],
@@ -306,30 +122,30 @@ def_regs! {
         zmm5: zmm_reg = ["zmm5"],
         zmm6: zmm_reg = ["zmm6"],
         zmm7: zmm_reg = ["zmm7"],
-        zmm8: zmm_reg = ["zmm8"] % x86_64_only,
-        zmm9: zmm_reg = ["zmm9"] % x86_64_only,
-        zmm10: zmm_reg = ["zmm10"] % x86_64_only,
-        zmm11: zmm_reg = ["zmm11"] % x86_64_only,
-        zmm12: zmm_reg = ["zmm12"] % x86_64_only,
-        zmm13: zmm_reg = ["zmm13"] % x86_64_only,
-        zmm14: zmm_reg = ["zmm14"] % x86_64_only,
-        zmm15: zmm_reg = ["zmm15"] % x86_64_only,
-        zmm16: zmm_reg = ["zmm16", "xmm16", "ymm16"] % x86_64_only,
-        zmm17: zmm_reg = ["zmm17", "xmm17", "ymm17"] % x86_64_only,
-        zmm18: zmm_reg = ["zmm18", "xmm18", "ymm18"] % x86_64_only,
-        zmm19: zmm_reg = ["zmm19", "xmm19", "ymm19"] % x86_64_only,
-        zmm20: zmm_reg = ["zmm20", "xmm20", "ymm20"] % x86_64_only,
-        zmm21: zmm_reg = ["zmm21", "xmm21", "ymm21"] % x86_64_only,
-        zmm22: zmm_reg = ["zmm22", "xmm22", "ymm22"] % x86_64_only,
-        zmm23: zmm_reg = ["zmm23", "xmm23", "ymm23"] % x86_64_only,
-        zmm24: zmm_reg = ["zmm24", "xmm24", "ymm24"] % x86_64_only,
-        zmm25: zmm_reg = ["zmm25", "xmm25", "ymm25"] % x86_64_only,
-        zmm26: zmm_reg = ["zmm26", "xmm26", "ymm26"] % x86_64_only,
-        zmm27: zmm_reg = ["zmm27", "xmm27", "ymm27"] % x86_64_only,
-        zmm28: zmm_reg = ["zmm28", "xmm28", "ymm28"] % x86_64_only,
-        zmm29: zmm_reg = ["zmm29", "xmm29", "ymm29"] % x86_64_only,
-        zmm30: zmm_reg = ["zmm30", "xmm30", "ymm30"] % x86_64_only,
-        zmm31: zmm_reg = ["zmm31", "xmm31", "ymm31"] % x86_64_only,
+        zmm8: zmm_reg = ["zmm8"],
+        zmm9: zmm_reg = ["zmm9"],
+        zmm10: zmm_reg = ["zmm10"],
+        zmm11: zmm_reg = ["zmm11"],
+        zmm12: zmm_reg = ["zmm12"],
+        zmm13: zmm_reg = ["zmm13"],
+        zmm14: zmm_reg = ["zmm14"],
+        zmm15: zmm_reg = ["zmm15"],
+        zmm16: zmm_reg = ["zmm16", "xmm16", "ymm16"],
+        zmm17: zmm_reg = ["zmm17", "xmm17", "ymm17"],
+        zmm18: zmm_reg = ["zmm18", "xmm18", "ymm18"],
+        zmm19: zmm_reg = ["zmm19", "xmm19", "ymm19"],
+        zmm20: zmm_reg = ["zmm20", "xmm20", "ymm20"],
+        zmm21: zmm_reg = ["zmm21", "xmm21", "ymm21"],
+        zmm22: zmm_reg = ["zmm22", "xmm22", "ymm22"],
+        zmm23: zmm_reg = ["zmm23", "xmm23", "ymm23"],
+        zmm24: zmm_reg = ["zmm24", "xmm24", "ymm24"],
+        zmm25: zmm_reg = ["zmm25", "xmm25", "ymm25"],
+        zmm26: zmm_reg = ["zmm26", "xmm26", "ymm26"],
+        zmm27: zmm_reg = ["zmm27", "xmm27", "ymm27"],
+        zmm28: zmm_reg = ["zmm28", "xmm28", "ymm28"],
+        zmm29: zmm_reg = ["zmm29", "xmm29", "ymm29"],
+        zmm30: zmm_reg = ["zmm30", "xmm30", "ymm30"],
+        zmm31: zmm_reg = ["zmm31", "xmm31", "ymm31"],
         k0: kreg0 = ["k0"],
         k1: kreg = ["k1"],
         k2: kreg = ["k2"],
@@ -354,168 +170,13 @@ def_regs! {
         st5: x87_reg = ["st(5)"],
         st6: x87_reg = ["st(6)"],
         st7: x87_reg = ["st(7)"],
-        tmm0: tmm_reg = ["tmm0"] % x86_64_only,
-        tmm1: tmm_reg = ["tmm1"] % x86_64_only,
-        tmm2: tmm_reg = ["tmm2"] % x86_64_only,
-        tmm3: tmm_reg = ["tmm3"] % x86_64_only,
-        tmm4: tmm_reg = ["tmm4"] % x86_64_only,
-        tmm5: tmm_reg = ["tmm5"] % x86_64_only,
-        tmm6: tmm_reg = ["tmm6"] % x86_64_only,
-        tmm7: tmm_reg = ["tmm7"] % x86_64_only,
-        #error = ["bp", "bpl", "ebp", "rbp"] =>
-            "the frame pointer cannot be used as an operand for inline asm",
-        #error = ["sp", "spl", "esp", "rsp"] =>
-            "the stack pointer cannot be used as an operand for inline asm",
-        #error = ["ip", "eip", "rip"] =>
-            "the instruction pointer cannot be used as an operand for inline asm",
-    }
-}
-
-impl X86InlineAsmReg {
-    pub fn emit(
-        self,
-        out: &mut dyn fmt::Write,
-        arch: InlineAsmArch,
-        modifier: Option<char>,
-    ) -> fmt::Result {
-        let reg_default_modifier = match arch {
-            InlineAsmArch::X86 => 'e',
-            InlineAsmArch::X86_64 => 'r',
-            _ => unreachable!(),
-        };
-        if self as u32 <= Self::dx as u32 {
-            let root = ['a', 'b', 'c', 'd'][self as usize - Self::ax as usize];
-            match modifier.unwrap_or(reg_default_modifier) {
-                'l' => write!(out, "{root}l"),
-                'h' => write!(out, "{root}h"),
-                'x' => write!(out, "{root}x"),
-                'e' => write!(out, "e{root}x"),
-                'r' => write!(out, "r{root}x"),
-                _ => unreachable!(),
-            }
-        } else if self as u32 <= Self::di as u32 {
-            let root = self.name();
-            match modifier.unwrap_or(reg_default_modifier) {
-                'l' => write!(out, "{root}l"),
-                'x' => write!(out, "{root}"),
-                'e' => write!(out, "e{root}"),
-                'r' => write!(out, "r{root}"),
-                _ => unreachable!(),
-            }
-        } else if self as u32 <= Self::r15 as u32 {
-            let root = self.name();
-            match modifier.unwrap_or(reg_default_modifier) {
-                'l' => write!(out, "{root}b"),
-                'x' => write!(out, "{root}w"),
-                'e' => write!(out, "{root}d"),
-                'r' => out.write_str(root),
-                _ => unreachable!(),
-            }
-        } else if self as u32 <= Self::r15b as u32 {
-            out.write_str(self.name())
-        } else if self as u32 <= Self::xmm15 as u32 {
-            let prefix = modifier.unwrap_or('x');
-            let index = self as u32 - Self::xmm0 as u32;
-            write!(out, "{prefix}{index}")
-        } else if self as u32 <= Self::ymm15 as u32 {
-            let prefix = modifier.unwrap_or('y');
-            let index = self as u32 - Self::ymm0 as u32;
-            write!(out, "{prefix}{index}")
-        } else if self as u32 <= Self::zmm31 as u32 {
-            let prefix = modifier.unwrap_or('z');
-            let index = self as u32 - Self::zmm0 as u32;
-            write!(out, "{prefix}{index}")
-        } else {
-            out.write_str(self.name())
-        }
-    }
-
-    pub fn overlapping_regs(self, mut cb: impl FnMut(X86InlineAsmReg)) {
-        macro_rules! reg_conflicts {
-            (
-                $(
-                    $w:ident : $l:ident $h:ident
-                ),*;
-                $(
-                    $w2:ident : $l2:ident
-                ),*;
-                $(
-                    $x:ident : $y:ident : $z:ident
-                ),*;
-            ) => {
-                match self {
-                    $(
-                        Self::$w => {
-                            cb(Self::$w);
-                            cb(Self::$l);
-                            cb(Self::$h);
-                        }
-                        Self::$l => {
-                            cb(Self::$w);
-                            cb(Self::$l);
-                        }
-                        Self::$h => {
-                            cb(Self::$w);
-                            cb(Self::$h);
-                        }
-                    )*
-                    $(
-                        Self::$w2 | Self::$l2 => {
-                            cb(Self::$w2);
-                            cb(Self::$l2);
-                        }
-                    )*
-                    $(
-                        Self::$x | Self::$y | Self::$z => {
-                            cb(Self::$x);
-                            cb(Self::$y);
-                            cb(Self::$z);
-                        }
-                    )*
-                    r => cb(r),
-                }
-            };
-        }
-
-        // XMM*, YMM* and ZMM* are all different views of the same register.
-        //
-        // See section 15.5 of the combined Intel® 64 and IA-32 Architectures
-        // Software Developer’s Manual for more details.
-        //
-        // We don't need to specify conflicts for [x,y,z]mm[16-31] since these
-        // registers are only available with AVX-512, so we just specify them
-        // as aliases directly.
-        reg_conflicts! {
-            ax : al ah,
-            bx : bl bh,
-            cx : cl ch,
-            dx : dl dh;
-            si : sil,
-            di : dil,
-            r8 : r8b,
-            r9 : r9b,
-            r10 : r10b,
-            r11 : r11b,
-            r12 : r12b,
-            r13 : r13b,
-            r14 : r14b,
-            r15 : r15b;
-            xmm0 : ymm0 : zmm0,
-            xmm1 : ymm1 : zmm1,
-            xmm2 : ymm2 : zmm2,
-            xmm3 : ymm3 : zmm3,
-            xmm4 : ymm4 : zmm4,
-            xmm5 : ymm5 : zmm5,
-            xmm6 : ymm6 : zmm6,
-            xmm7 : ymm7 : zmm7,
-            xmm8 : ymm8 : zmm8,
-            xmm9 : ymm9 : zmm9,
-            xmm10 : ymm10 : zmm10,
-            xmm11 : ymm11 : zmm11,
-            xmm12 : ymm12 : zmm12,
-            xmm13 : ymm13 : zmm13,
-            xmm14 : ymm14 : zmm14,
-            xmm15 : ymm15 : zmm15;
-        }
+        tmm0: tmm_reg = ["tmm0"],
+        tmm1: tmm_reg = ["tmm1"],
+        tmm2: tmm_reg = ["tmm2"],
+        tmm3: tmm_reg = ["tmm3"],
+        tmm4: tmm_reg = ["tmm4"],
+        tmm5: tmm_reg = ["tmm5"],
+        tmm6: tmm_reg = ["tmm6"],
+        tmm7: tmm_reg = ["tmm7"],
     }
 }

@@ -280,10 +280,7 @@ impl<'tcx> ThirBuildCx<'tcx> {
             let ty = adt_def.repr().discr_type();
             let discr_ty = ty.to_ty(tcx);
 
-            let size = tcx
-                .layout_of(self.typing_env.as_query_input(discr_ty))
-                .unwrap_or_else(|e| panic!("could not compute layout for {discr_ty:?}: {e:?}"))
-                .size;
+            let size = discr_ty.primitive_size(tcx);
 
             let (lit, overflowing) = ScalarInt::truncate_from_uint(discr_offset as u128, size);
             if overflowing {

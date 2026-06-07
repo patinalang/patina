@@ -433,44 +433,6 @@ pub(crate) struct DuplicateDiagnosticItemInCrate {
 }
 
 #[derive(Diagnostic)]
-#[diag("fn_abi_of({$fn_name}) = {$fn_abi}")]
-pub(crate) struct AbiOf {
-    #[primary_span]
-    pub span: Span,
-    pub fn_name: Symbol,
-    pub fn_abi: String,
-}
-
-#[derive(Diagnostic)]
-#[diag(
-    "ABIs are not compatible
-    left ABI = {$left}
-    right ABI = {$right}"
-)]
-pub(crate) struct AbiNe {
-    #[primary_span]
-    pub span: Span,
-    pub left: String,
-    pub right: String,
-}
-
-#[derive(Diagnostic)]
-#[diag(
-    "`#[rustc_abi]` can only be applied to function items, type aliases, and associated functions"
-)]
-pub(crate) struct AbiInvalidAttribute {
-    #[primary_span]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag("unrecognized argument")]
-pub(crate) struct UnrecognizedArgument {
-    #[primary_span]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
 #[diag("feature `{$feature}` is declared stable since {$since}, but was previously declared stable since {$prev_since}", code = E0711)]
 pub(crate) struct FeatureStableTwice {
     #[primary_span]

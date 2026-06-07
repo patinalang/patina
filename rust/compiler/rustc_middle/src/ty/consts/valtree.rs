@@ -109,13 +109,12 @@ impl<'tcx> Value<'tcx> {
     /// Fails if the value can't be represented as bits (e.g. because it is a reference
     /// or an aggregate).
     #[inline]
-    pub fn try_to_bits(self, tcx: TyCtxt<'tcx>, typing_env: ty::TypingEnv<'tcx>) -> Option<u128> {
+    pub fn try_to_bits(self, tcx: TyCtxt<'tcx>, _typing_env: ty::TypingEnv<'tcx>) -> Option<u128> {
         let (ty::Bool | ty::Char | ty::Int | ty::Float) = self.ty.kind() else {
             return None;
         };
         let scalar = self.try_to_leaf()?;
-        let input = typing_env.with_post_analysis_normalized(tcx).as_query_input(self.ty);
-        let size = tcx.layout_of(input).ok()?.size;
+        let size = ty::layout::ty_size_for_frontend(tcx, self.ty)?;
         Some(scalar.to_bits(size))
     }
 

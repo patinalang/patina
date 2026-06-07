@@ -1,12 +1,6 @@
 // tidy-alphabetical-start
 #![cfg_attr(test, feature(test))]
-#![feature(never_type)]
 // tidy-alphabetical-end
-
-pub(crate) use rustc_data_structures::fx::{FxIndexMap as Map, FxIndexSet as Set};
-
-pub mod layout;
-mod maybe_transmutable;
 
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Assume {
@@ -93,23 +87,21 @@ mod rustc {
 
     use super::*;
 
-    pub struct TransmuteTypeEnv<'tcx> {
-        tcx: TyCtxt<'tcx>,
-    }
+    pub struct TransmuteTypeEnv<'tcx>(std::marker::PhantomData<TyCtxt<'tcx>>);
 
     impl<'tcx> TransmuteTypeEnv<'tcx> {
-        pub fn new(tcx: TyCtxt<'tcx>) -> Self {
-            Self { tcx }
+        pub fn new(_tcx: TyCtxt<'tcx>) -> Self {
+            Self(std::marker::PhantomData)
         }
 
         pub fn is_transmutable(
             &mut self,
             src: Ty<'tcx>,
             dst: Ty<'tcx>,
-            assume: crate::Assume,
+            _assume: crate::Assume,
         ) -> crate::Answer<Region<'tcx>, Ty<'tcx>> {
-            crate::maybe_transmutable::MaybeTransmutableQuery::new(src, dst, assume, self.tcx)
-                .answer()
+            let _ = (src, dst);
+            crate::Answer::No(crate::Reason::SrcLayoutUnknown)
         }
     }
 

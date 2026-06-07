@@ -99,13 +99,10 @@ pub(super) fn vtable_allocation_provider<'tcx>(
     // This confirms that the layout computation for &dyn Trait has an accurate sizing.
     assert!(vtable_entries.len() >= vtable_min_entries(tcx, poly_trait_ref));
 
-    let layout = match tcx.layout_of(ty::TypingEnv::fully_monomorphized().as_query_input(ty)) {
-        Ok(layout) => layout,
-        Err(e) => tcx.dcx().fatal(e.to_string()),
-    };
-    assert!(layout.is_sized(), "can't create a vtable for an unsized type");
-    let size = layout.size.bytes();
-    let align = layout.align.bytes();
+    let (size, align) = ty::layout::ty_size_and_align_for_frontend(tcx, ty)
+        .unwrap_or_else(|| tcx.dcx().fatal(format!("can't create a vtable for `{ty}`")));
+    let size = size.bytes();
+    let align = align.bytes();
 
     let ptr_size = tcx.data_layout.pointer_size();
     let ptr_align = tcx.data_layout.pointer_align().abi;

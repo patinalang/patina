@@ -115,7 +115,6 @@ use crate::traits::{
     ObligationCause, OverflowError, WellFormedLoc, solve, specialization_graph,
 };
 use crate::ty::fast_reject::SimplifiedType;
-use crate::ty::layout::ValidityRequirement;
 use crate::ty::print::PrintTraitRefExt;
 use crate::ty::util::AlwaysRequiresDrop;
 use crate::ty::{
@@ -1757,63 +1756,6 @@ rustc_queries! {
         desc { "computing when `{}` has a significant destructor", ty.value }
     }
 
-    /// Computes the layout of a type. Note that this implicitly
-    /// executes in `TypingMode::PostAnalysis`, and will normalize the input type.
-    query layout_of(
-        key: ty::PseudoCanonicalInput<'tcx, Ty<'tcx>>
-    ) -> Result<ty::layout::TyAndLayout<'tcx>, &'tcx ty::layout::LayoutError<'tcx>> {
-        depth_limit
-        desc { "computing layout of `{}`", key.value }
-        handle_cycle_error
-    }
-
-    /// Compute a `FnAbi` suitable for indirect calls, i.e. to `fn` pointers.
-    ///
-    /// NB: this doesn't handle virtual calls - those should use `fn_abi_of_instance`
-    /// instead, where the instance is an `InstanceKind::Virtual`.
-    query fn_abi_of_fn_ptr(
-        key: ty::PseudoCanonicalInput<'tcx, (ty::PolyFnSig<'tcx>, &'tcx ty::List<Ty<'tcx>>)>
-    ) -> Result<&'tcx rustc_target::callconv::FnAbi<'tcx, Ty<'tcx>>, &'tcx ty::layout::FnAbiError<'tcx>> {
-        desc { "computing call ABI of `{}` function pointers", key.value.0 }
-    }
-
-    /// Compute a `FnAbi` suitable for declaring/defining an `fn` instance, and for direct calls*
-    /// to an `fn`. Indirectly-passed parameters in the returned ABI might not include all possible
-    /// codegen optimization attributes (such as `ReadOnly` or `CapturesNone`), as deducing these
-    /// requires inspection of function bodies that can lead to cycles when performed during typeck.
-    /// Post typeck, you should prefer the optimized ABI returned by `TyCtxt::fn_abi_of_instance`.
-    ///
-    /// NB: the ABI returned by this query must not differ from that returned by
-    ///     `fn_abi_of_instance_raw` in any other way.
-    ///
-    /// * that includes virtual calls, which are represented by "direct calls" to an
-    ///   `InstanceKind::Virtual` instance (of `<dyn Trait as Trait>::fn`).
-    query fn_abi_of_instance_no_deduced_attrs(
-        key: ty::PseudoCanonicalInput<'tcx, (ty::Instance<'tcx>, &'tcx ty::List<Ty<'tcx>>)>
-    ) -> Result<&'tcx rustc_target::callconv::FnAbi<'tcx, Ty<'tcx>>, &'tcx ty::layout::FnAbiError<'tcx>> {
-        desc { "computing unadjusted call ABI of `{}`", key.value.0 }
-    }
-
-    /// Compute a `FnAbi` suitable for declaring/defining an `fn` instance, and for direct calls*
-    /// to an `fn`. Indirectly-passed parameters in the returned ABI will include applicable
-    /// codegen optimization attributes, including `ReadOnly` and `CapturesNone` -- deduction of
-    /// which requires inspection of function bodies that can lead to cycles when performed during
-    /// typeck. During typeck, you should therefore use instead the unoptimized ABI returned by
-    /// `fn_abi_of_instance_no_deduced_attrs`.
-    ///
-    /// For performance reasons, you should prefer to call the inherent `TyCtxt::fn_abi_of_instance`
-    /// method rather than invoke this query: it delegates to this query if necessary, but where
-    /// possible delegates instead to the `fn_abi_of_instance_no_deduced_attrs` query (thus avoiding
-    /// unnecessary query system overhead).
-    ///
-    /// * that includes virtual calls, which are represented by "direct calls" to an
-    ///   `InstanceKind::Virtual` instance (of `<dyn Trait as Trait>::fn`).
-    query fn_abi_of_instance_raw(
-        key: ty::PseudoCanonicalInput<'tcx, (ty::Instance<'tcx>, &'tcx ty::List<Ty<'tcx>>)>
-    ) -> Result<&'tcx rustc_target::callconv::FnAbi<'tcx, Ty<'tcx>>, &'tcx ty::layout::FnAbiError<'tcx>> {
-        desc { "computing call ABI of `{}`", key.value.0 }
-    }
-
     query dylib_dependency_formats(_: CrateNum)
                                     -> &'tcx [(CrateNum, LinkagePreference)] {
         desc { "getting dylib dependency formats of crate" }
@@ -2658,10 +2600,6 @@ rustc_queries! {
         arena_cache
         eval_always
         desc { "computing the backend features for CLI flags" }
-    }
-
-    query check_validity_requirement(key: (ValidityRequirement, ty::PseudoCanonicalInput<'tcx, Ty<'tcx>>)) -> Result<bool, &'tcx ty::layout::LayoutError<'tcx>> {
-        desc { "checking validity requirement for `{}`: {}", key.1.value, key.0 }
     }
 
     /// This takes the def-id of an associated item from a impl of a trait,

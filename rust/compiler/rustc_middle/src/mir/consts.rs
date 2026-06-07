@@ -101,13 +101,10 @@ impl ConstValue {
     pub fn try_to_bits_for_ty<'tcx>(
         &self,
         tcx: TyCtxt<'tcx>,
-        typing_env: ty::TypingEnv<'tcx>,
+        _typing_env: ty::TypingEnv<'tcx>,
         ty: Ty<'tcx>,
     ) -> Option<u128> {
-        let size = tcx
-            .layout_of(typing_env.with_post_analysis_normalized(tcx).as_query_input(ty))
-            .ok()?
-            .size;
+        let size = ty::layout::ty_size_for_frontend(tcx, ty)?;
         self.try_to_bits(size)
     }
 
@@ -371,10 +368,7 @@ impl<'tcx> Const<'tcx> {
         typing_env: ty::TypingEnv<'tcx>,
     ) -> Option<u128> {
         let int = self.try_eval_scalar_int(tcx, typing_env)?;
-        let size = tcx
-            .layout_of(typing_env.with_post_analysis_normalized(tcx).as_query_input(self.ty()))
-            .ok()?
-            .size;
+        let size = ty::layout::ty_size_for_frontend(tcx, self.ty())?;
         Some(int.to_bits(size))
     }
 
@@ -419,13 +413,11 @@ impl<'tcx> Const<'tcx> {
     pub fn from_bits(
         tcx: TyCtxt<'tcx>,
         bits: u128,
-        typing_env: ty::TypingEnv<'tcx>,
+        _typing_env: ty::TypingEnv<'tcx>,
         ty: Ty<'tcx>,
     ) -> Self {
-        let size = tcx
-            .layout_of(typing_env.as_query_input(ty))
-            .unwrap_or_else(|e| bug!("could not compute layout for {ty:?}: {e:?}"))
-            .size;
+        let size = ty::layout::ty_size_for_frontend(tcx, ty)
+            .unwrap_or_else(|| bug!("could not compute size for {ty:?}"));
         let cv = ConstValue::Scalar(Scalar::from_uint(bits, size));
 
         Self::Val(cv, ty)

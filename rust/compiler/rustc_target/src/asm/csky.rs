@@ -1,5 +1,3 @@
-use std::fmt;
-
 use rustc_span::Symbol;
 
 use super::{InlineAsmArch, InlineAsmType, ModifierInfo};
@@ -36,14 +34,10 @@ impl CSKYInlineAsmRegClass {
         self,
         _arch: InlineAsmArch,
     ) -> &'static [(InlineAsmType, Option<Symbol>)] {
-        match self {
-            Self::reg => types! { _: I8, I16, I32; },
-            Self::freg => types! { _: F32; },
-        }
+        &[]
     }
 }
 
-// The reserved registers are taken from <https://github.com/llvm/llvm-project/blob/main/llvm/lib/Target/CSKY/CSKYRegisterInfo.cpp#79>
 def_regs! {
     CSKY CSKYInlineAsmReg CSKYInlineAsmRegClass {
         r0: reg = ["r0","a0"],
@@ -100,30 +94,5 @@ def_regs! {
         f29: freg = ["fr29","vr29"],
         f30: freg = ["fr30","vr30"],
         f31: freg = ["fr31","vr31"],
-        #error = ["r7", "l3"] =>
-            "the base pointer cannot be used as an operand for inline asm",
-        #error = ["r8","l4"] =>
-            "the frame pointer cannot be used as an operand for inline asm",
-        #error = ["r14","sp"] =>
-            "the stack pointer cannot be used as an operand for inline asm",
-        #error = ["r15","lr"] =>
-            "the link register cannot be used as an operand for inline asm",
-        #error = ["r31","tls"] =>
-            "reserver for tls",
-        #error = ["r28", "gb", "rgb", "rdb"] =>
-            "the global pointer cannot be used as an operand for inline asm",
-        #error = ["r26","r27","r29","tb", "rtb", "r30","svbr"] =>
-            "reserved by the ABI",
-    }
-}
-
-impl CSKYInlineAsmReg {
-    pub fn emit(
-        self,
-        out: &mut dyn fmt::Write,
-        _arch: InlineAsmArch,
-        _modifier: Option<char>,
-    ) -> fmt::Result {
-        out.write_str(self.name())
     }
 }

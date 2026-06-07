@@ -1031,13 +1031,6 @@ pub(crate) struct TransparentNonZeroSized<'a> {
 }
 
 #[derive(Diagnostic)]
-#[diag("extern static is too large for the target architecture")]
-pub(crate) struct TooLargeStatic {
-    #[primary_span]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
 #[diag("implementing `rustc_specialization_trait` traits is unstable")]
 #[help("add `#![feature(min_specialization)]` to the crate attributes to enable")]
 pub(crate) struct SpecializationTrait {

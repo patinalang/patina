@@ -1,10 +1,36 @@
+use rustc_apfloat::Float;
+use rustc_apfloat::ieee::Double;
 use rustc_ast::{self as ast};
 use rustc_hir::LangItem;
 use rustc_middle::bug;
 use rustc_middle::ty::{self, LitToConstInput, ScalarInt, Ty, TyCtxt, TypeVisitableExt as _};
+use rustc_span::Symbol;
 use tracing::trace;
 
-use crate::builder::parse_float_into_scalar;
+fn parse_float_into_scalar(num: Symbol, neg: bool) -> Option<ScalarInt> {
+    let num = num.as_str();
+    let Ok(rust_f) = num.parse::<f64>() else { return None };
+    let mut f = num
+        .parse::<Double>()
+        .unwrap_or_else(|e| panic!("apfloat::ieee::Double failed to parse `{num}`: {e:?}"));
+
+    assert!(
+        u128::from(rust_f.to_bits()) == f.to_bits(),
+        "apfloat::ieee::Double gave different result for `{}`: \
+         {}({:#x}) vs Rust's {}({:#x})",
+        rust_f,
+        f,
+        f.to_bits(),
+        Double::from_bits(rust_f.to_bits().into()),
+        rust_f.to_bits()
+    );
+
+    if neg {
+        f = -f;
+    }
+
+    Some(ScalarInt::from(f))
+}
 
 pub(crate) fn lit_to_const<'tcx>(
     tcx: TyCtxt<'tcx>,

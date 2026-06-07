@@ -1031,7 +1031,6 @@ dependencies = [
  "rustc_resolve",
  "rustc_session",
  "rustc_span",
- "rustc_target",
  "serde",
  "similar",
  "tempfile",
@@ -1516,29 +1515,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rustc_const_eval"
-version = "0.0.0"
-dependencies = [
- "either",
- "rustc_abi",
- "rustc_apfloat",
- "rustc_ast",
- "rustc_data_structures",
- "rustc_errors",
- "rustc_hir",
- "rustc_index",
- "rustc_infer",
- "rustc_macros",
- "rustc_middle",
- "rustc_mir_dataflow",
- "rustc_session",
- "rustc_span",
- "rustc_target",
- "rustc_trait_selection",
- "tracing",
-]
-
-[[package]]
 name = "rustc_data_structures"
 version = "0.0.0"
 dependencies = [
@@ -1837,7 +1813,6 @@ dependencies = [
  "rustc_attr_parsing",
  "rustc_builtin_macros",
  "rustc_codegen_ssa",
- "rustc_const_eval",
  "rustc_data_structures",
  "rustc_errors",
  "rustc_expand",
@@ -1852,7 +1827,6 @@ dependencies = [
  "rustc_metadata",
  "rustc_middle",
  "rustc_mir_build",
- "rustc_mir_transform",
  "rustc_parse",
  "rustc_passes",
  "rustc_privacy",
@@ -1860,7 +1834,6 @@ dependencies = [
  "rustc_resolve",
  "rustc_session",
  "rustc_span",
- "rustc_symbol_mangling",
  "rustc_target",
  "rustc_thread_pool",
  "rustc_trait_selection",
@@ -2019,51 +1992,6 @@ dependencies = [
  "rustc_session",
  "rustc_span",
  "rustc_trait_selection",
- "tracing",
-]
-
-[[package]]
-name = "rustc_mir_dataflow"
-version = "0.0.0"
-dependencies = [
- "polonius-engine",
- "regex",
- "rustc_abi",
- "rustc_data_structures",
- "rustc_errors",
- "rustc_graphviz",
- "rustc_hir",
- "rustc_index",
- "rustc_macros",
- "rustc_middle",
- "rustc_span",
- "smallvec",
- "tracing",
-]
-
-[[package]]
-name = "rustc_mir_transform"
-version = "0.0.0"
-dependencies = [
- "either",
- "itertools",
- "rustc_abi",
- "rustc_arena",
- "rustc_ast",
- "rustc_const_eval",
- "rustc_data_structures",
- "rustc_errors",
- "rustc_hir",
- "rustc_index",
- "rustc_infer",
- "rustc_macros",
- "rustc_middle",
- "rustc_mir_dataflow",
- "rustc_session",
- "rustc_span",
- "rustc_target",
- "rustc_trait_selection",
- "smallvec",
  "tracing",
 ]
 

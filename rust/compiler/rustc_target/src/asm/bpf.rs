@@ -1,5 +1,3 @@
-use std::fmt;
-
 use rustc_span::Symbol;
 
 use super::{InlineAsmArch, InlineAsmType, ModifierInfo};
@@ -12,7 +10,7 @@ def_reg_class! {
 }
 
 impl BpfInlineAsmRegClass {
-    pub fn valid_modifiers(self, _arch: InlineAsmArch) -> &'static [char] {
+    pub fn valid_modifiers(self, _arch: super::InlineAsmArch) -> &'static [char] {
         &[]
     }
 
@@ -36,10 +34,7 @@ impl BpfInlineAsmRegClass {
         self,
         _arch: InlineAsmArch,
     ) -> &'static [(InlineAsmType, Option<Symbol>)] {
-        match self {
-            Self::reg => types! { _: I8, I16, I32, I64; },
-            Self::wreg => types! { alu32: I8, I16, I32; },
-        }
+        &[]
     }
 }
 
@@ -66,54 +61,5 @@ def_regs! {
         w8: wreg = ["w8"],
         w9: wreg = ["w9"],
 
-        #error = ["r10", "w10"] =>
-            "the stack pointer cannot be used as an operand for inline asm",
-    }
-}
-
-impl BpfInlineAsmReg {
-    pub fn emit(
-        self,
-        out: &mut dyn fmt::Write,
-        _arch: InlineAsmArch,
-        _modifier: Option<char>,
-    ) -> fmt::Result {
-        out.write_str(self.name())
-    }
-
-    pub fn overlapping_regs(self, mut cb: impl FnMut(BpfInlineAsmReg)) {
-        cb(self);
-
-        macro_rules! reg_conflicts {
-            (
-                $(
-                    $r:ident : $w:ident
-                ),*
-            ) => {
-                match self {
-                    $(
-                        Self::$r => {
-                            cb(Self::$w);
-                        }
-                        Self::$w => {
-                            cb(Self::$r);
-                        }
-                    )*
-                }
-            };
-        }
-
-        reg_conflicts! {
-            r0 : w0,
-            r1 : w1,
-            r2 : w2,
-            r3 : w3,
-            r4 : w4,
-            r5 : w5,
-            r6 : w6,
-            r7 : w7,
-            r8 : w8,
-            r9 : w9
-        }
     }
 }

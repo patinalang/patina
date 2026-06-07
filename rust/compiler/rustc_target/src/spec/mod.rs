@@ -52,7 +52,6 @@ use rustc_abi::{
 };
 use rustc_data_structures::fx::{FxHashSet, FxIndexSet};
 use rustc_error_messages::{DiagArgValue, IntoDiagArg, into_diag_arg_using_display};
-use rustc_fs_util::try_canonicalize;
 use rustc_macros::{BlobDecodable, Decodable, Encodable, StableHash};
 use rustc_serialize::{Decodable, Decoder, Encodable, Encoder};
 use rustc_span::{Symbol, kw, sym};
@@ -3706,65 +3705,16 @@ impl Target {
     /// JSON decoding.
     pub fn search(
         target_tuple: &TargetTuple,
-        sysroot: &Path,
-        unstable_options: bool,
+        _sysroot: &Path,
+        _unstable_options: bool,
     ) -> Result<(Target, TargetWarnings), String> {
-        use std::{env, fs};
-
-        fn load_file(
-            path: &Path,
-            unstable_options: bool,
-        ) -> Result<(Target, TargetWarnings), String> {
-            if !unstable_options {
-                return Err(
-                    "custom targets are unstable and require `-Zunstable-options`".to_string()
-                );
-            }
-            let contents = fs::read_to_string(path).map_err(|e| e.to_string())?;
-            Target::from_json(&contents)
-        }
-
         match *target_tuple {
-            TargetTuple::TargetTuple(ref target_tuple) => {
-                // check if tuple is in list of built-in targets
-                if let Some(t) = load_builtin(target_tuple) {
-                    return Ok((t, TargetWarnings::empty()));
-                }
-
-                // search for a file named `target_tuple`.json in RUST_TARGET_PATH
-                let path = {
-                    let mut target = target_tuple.to_string();
-                    target.push_str(".json");
-                    PathBuf::from(target)
-                };
-
-                let target_path = env::var_os("RUST_TARGET_PATH").unwrap_or_default();
-
-                for dir in env::split_paths(&target_path) {
-                    let p = dir.join(&path);
-                    if p.is_file() {
-                        return load_file(&p, unstable_options);
-                    }
-                }
-
-                // Additionally look in the sysroot under `lib/rustlib/<tuple>/target.json`
-                // as a fallback.
-                let rustlib_path = crate::relative_target_rustlib_path(sysroot, target_tuple);
-                let p = PathBuf::from_iter([
-                    Path::new(sysroot),
-                    Path::new(&rustlib_path),
-                    Path::new("target.json"),
-                ]);
-                if p.is_file() {
-                    return load_file(&p, unstable_options);
-                }
-
-                Err(format!("could not find specification for target {target_tuple:?}"))
+            TargetTuple::TargetTuple(ref target_tuple) => load_builtin(target_tuple)
+                .map(|t| (t, TargetWarnings::empty()))
+                .ok_or_else(|| format!("could not find specification for target {target_tuple:?}")),
+            TargetTuple::TargetJson { .. } => {
+                Err("custom target JSON is not supported".to_string())
             }
-            TargetTuple::TargetJson { ref contents, .. } if !unstable_options => {
-                Err("custom targets are unstable and require `-Zunstable-options`".to_string())
-            }
-            TargetTuple::TargetJson { ref contents, .. } => Target::from_json(contents),
         }
     }
 
@@ -3973,20 +3923,8 @@ impl TargetTuple {
 
     /// Creates a target tuple from the passed target path.
     pub fn from_path(path: &Path) -> Result<Self, io::Error> {
-        let canonicalized_path = try_canonicalize(path)?;
-        let contents = std::fs::read_to_string(&canonicalized_path).map_err(|err| {
-            io::Error::new(
-                io::ErrorKind::InvalidInput,
-                format!("target path {canonicalized_path:?} is not a valid file: {err}"),
-            )
-        })?;
-        let tuple = canonicalized_path
-            .file_stem()
-            .expect("target path must not be empty")
-            .to_str()
-            .expect("target path must be valid unicode")
-            .to_owned();
-        Ok(TargetTuple::TargetJson { path_for_rustdoc: canonicalized_path, tuple, contents })
+        let _ = path;
+        Err(io::Error::new(io::ErrorKind::Unsupported, "custom target JSON is not supported"))
     }
 
     /// Returns a string tuple for this target.

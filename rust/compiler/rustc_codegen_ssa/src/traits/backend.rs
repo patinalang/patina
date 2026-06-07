@@ -1,9 +1,6 @@
 use std::any::Any;
-use std::hash::Hash;
 
-use rustc_ast::expand::allocator::AllocatorMethod;
 use rustc_data_structures::fx::FxIndexMap;
-use rustc_data_structures::sync::{DynSend, DynSync};
 use rustc_metadata::EncodedMetadata;
 use rustc_metadata::creader::MetadataLoaderDyn;
 use rustc_middle::dep_graph::{WorkProduct, WorkProductId};
@@ -13,27 +10,9 @@ use rustc_session::Session;
 use rustc_session::config::{CrateType, OutputFilenames, PrintRequest};
 use rustc_span::Symbol;
 
-use super::CodegenObject;
-use super::write::WriteBackendMethods;
 use crate::back::archive::ArArchiveBuilderBuilder;
 use crate::back::link::link_binary;
-use crate::{CompiledModules, CrateInfo, ModuleCodegen, TargetConfig};
-
-pub trait BackendTypes {
-    type Function: CodegenObject;
-    type BasicBlock: Copy;
-    type Funclet;
-
-    type Value: CodegenObject + PartialEq;
-    type Type: CodegenObject + PartialEq;
-    type FunctionSignature: CodegenObject + PartialEq;
-
-    // FIXME(eddyb) find a common convention for all of the debuginfo-related
-    // names (choose between `Dbg`, `Debug`, `DebugInfo`, `DI` etc.).
-    type DIScope: Copy + Hash + PartialEq + Eq;
-    type DILocation: Copy;
-    type DIVariable: Copy;
-}
+use crate::{CompiledModules, CrateInfo, TargetConfig};
 
 pub trait CodegenBackend {
     fn name(&self) -> &'static str;
@@ -140,31 +119,5 @@ pub trait CodegenBackend {
             outputs,
             self.name(),
         );
-    }
-}
-
-pub trait ExtraBackendMethods:
-    WriteBackendMethods + Sized + Send + Sync + DynSend + DynSync
-{
-    fn codegen_allocator<'tcx>(
-        &self,
-        tcx: TyCtxt<'tcx>,
-        module_name: &str,
-        methods: &[AllocatorMethod],
-    ) -> Self::Module;
-
-    /// This generates the codegen unit and returns it along with
-    /// a `u64` giving an estimate of the unit's processing cost.
-    fn compile_codegen_unit(
-        &self,
-        tcx: TyCtxt<'_>,
-        cgu_name: Symbol,
-    ) -> (ModuleCodegen<Self::Module>, u64);
-
-    /// Returns `true` if this backend can be safely called from multiple threads.
-    ///
-    /// Defaults to `true`.
-    fn supports_parallel(&self) -> bool {
-        true
     }
 }

@@ -25,7 +25,6 @@ rustc_feature = { path = "rust/compiler/rustc_feature" }
 rustc_hir = { path = "rust/compiler/rustc_hir" }
 rustc_middle = { path = "rust/compiler/rustc_middle" }
 rustc_query_impl = { path = "rust/compiler/rustc_query_impl" }
-rustc_target = { path = "rust/compiler/rustc_target" }
 rustc_interface = { path = "rust/compiler/rustc_interface" }
 rustc_hir_pretty = { path = "rust/compiler/rustc_hir_pretty" }
 

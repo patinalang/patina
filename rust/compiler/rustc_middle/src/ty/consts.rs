@@ -209,13 +209,11 @@ impl<'tcx> Const<'tcx> {
     pub fn from_bits(
         tcx: TyCtxt<'tcx>,
         bits: u128,
-        typing_env: ty::TypingEnv<'tcx>,
+        _typing_env: ty::TypingEnv<'tcx>,
         ty: Ty<'tcx>,
     ) -> Self {
-        let size = tcx
-            .layout_of(typing_env.as_query_input(ty))
-            .unwrap_or_else(|e| panic!("could not compute layout for {ty:?}: {e:?}"))
-            .size;
+        let size = ty::layout::ty_size_for_frontend(tcx, ty)
+            .unwrap_or_else(|| panic!("could not compute size for {ty:?}"));
         ty::Const::new_value(
             tcx,
             ty::ValTree::from_scalar_int(tcx, ScalarInt::try_from_uint(bits, size).unwrap()),

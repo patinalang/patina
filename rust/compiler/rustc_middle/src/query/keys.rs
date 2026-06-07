@@ -15,7 +15,6 @@ use crate::infer::canonical::CanonicalQueryInput;
 use crate::mono::CollectionMode;
 use crate::query::{DefIdCache, DefaultCache, SingleCache, VecCache};
 use crate::ty::fast_reject::SimplifiedType;
-use crate::ty::layout::ValidityRequirement;
 use crate::ty::{self, GenericArg, GenericArgsRef, Ty, TyCtxt};
 use crate::{mir, traits};
 
@@ -344,14 +343,6 @@ impl<'tcx> QueryKey for ty::Value<'tcx> {
 impl<'tcx> QueryKey for (LocalExpnId, &'tcx TokenStream) {
     fn default_span(&self, _tcx: TyCtxt<'_>) -> Span {
         self.0.expn_data().call_site
-    }
-}
-
-impl<'tcx> QueryKey for (ValidityRequirement, ty::PseudoCanonicalInput<'tcx, Ty<'tcx>>) {
-    // Just forward to `Ty<'tcx>`
-
-    fn default_span(&self, _: TyCtxt<'_>) -> Span {
-        DUMMY_SP
     }
 }
 

@@ -7,20 +7,17 @@
 // tidy-alphabetical-start
 #![feature(associated_type_defaults)]
 #![feature(box_patterns)]
-#![feature(iterator_try_collect)]
 #![feature(never_type)]
 // tidy-alphabetical-end
 
 use rustc_middle::query::Providers;
 
-mod abi;
 mod assoc;
 mod common_traits;
 mod consts;
 mod errors;
 mod implied_bounds;
 mod instance;
-mod layout;
 mod needs_drop;
 mod nested_bodies;
 mod opaque_types;
@@ -30,12 +27,10 @@ mod structural_match;
 mod ty;
 
 pub fn provide(providers: &mut Providers) {
-    abi::provide(providers);
     assoc::provide(providers);
     common_traits::provide(providers);
     consts::provide(providers);
     implied_bounds::provide(providers);
-    layout::provide(providers);
     needs_drop::provide(providers);
     opaque_types::provide(providers);
     representability::provide(providers);

@@ -1,5 +1,3 @@
-use std::fmt;
-
 use rustc_span::Symbol;
 
 use super::{InlineAsmArch, InlineAsmType, ModifierInfo};
@@ -34,18 +32,12 @@ impl MipsInlineAsmRegClass {
 
     pub fn supported_types(
         self,
-        arch: InlineAsmArch,
+        _arch: InlineAsmArch,
     ) -> &'static [(InlineAsmType, Option<Symbol>)] {
-        match (self, arch) {
-            (Self::reg, InlineAsmArch::Mips64) => types! { _: I8, I16, I32, I64, F32, F64; },
-            (Self::reg, _) => types! { _: I8, I16, I32, F32; },
-            (Self::freg, _) => types! { _: F32, F64; },
-        }
+        &[]
     }
 }
 
-// The reserved registers are somewhat taken from
-// <https://github.com/llvm/llvm-project/blob/deb8f8bcf31540c657716ea5242183b0792702a1/llvm/lib/Target/Mips/MipsRegisterInfo.cpp#L150>.
 def_regs! {
     Mips MipsInlineAsmReg MipsInlineAsmRegClass {
         r2: reg = ["$2"],
@@ -105,32 +97,5 @@ def_regs! {
         f29: freg = ["$f29"],
         f30: freg = ["$f30"],
         f31: freg = ["$f31"],
-        #error = ["$0"] =>
-            "constant zero cannot be used as an operand for inline asm",
-        #error = ["$1"] =>
-            "reserved for assembler (Assembler Temp)",
-        #error = ["$26"] =>
-            "OS-reserved register cannot be used as an operand for inline asm",
-        #error = ["$27"] =>
-            "OS-reserved register cannot be used as an operand for inline asm",
-        #error = ["$28"] =>
-            "the global pointer cannot be used as an operand for inline asm",
-        #error = ["$29"] =>
-            "the stack pointer cannot be used as an operand for inline asm",
-        #error = ["$30"] =>
-            "the frame pointer cannot be used as an operand for inline asm",
-        #error = ["$31"] =>
-            "the return address register cannot be used as an operand for inline asm",
-    }
-}
-
-impl MipsInlineAsmReg {
-    pub fn emit(
-        self,
-        out: &mut dyn fmt::Write,
-        _arch: InlineAsmArch,
-        _modifier: Option<char>,
-    ) -> fmt::Result {
-        out.write_str(self.name())
     }
 }

@@ -12,18 +12,16 @@ use rustc_hir::{LangItem, Node, find_attr, intravisit};
 use rustc_infer::infer::{RegionVariableOrigin, TyCtxtInferExt};
 use rustc_infer::traits::{Obligation, ObligationCauseCode, WellFormedLoc};
 use rustc_lint_defs::builtin::{REPR_TRANSPARENT_NON_ZST_FIELDS, UNSUPPORTED_CALLING_CONVENTIONS};
-use rustc_macros::Diagnostic;
 use rustc_middle::hir::nested_filter;
 use rustc_middle::middle::resolve_bound_vars::ResolvedArg;
 use rustc_middle::middle::stability::EvalResult;
 use rustc_middle::ty::error::TypeErrorToStringExt;
-use rustc_middle::ty::layout::{LayoutError, MAX_SIMD_LANES};
+use rustc_middle::ty::layout::MAX_SIMD_LANES;
 use rustc_middle::ty::util::Discr;
 use rustc_middle::ty::{
     AdtDef, BottomUpFolder, FnSig, GenericArgKind, RegionKind, TypeFoldable, TypeSuperVisitable,
     TypeVisitable, TypeVisitableExt, Unnormalized, fold_regions,
 };
-use rustc_session::lint::builtin::UNINHABITED_STATIC;
 use rustc_target::spec::{AbiMap, AbiMapping};
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
 use rustc_trait_selection::traits;
@@ -189,50 +187,7 @@ fn check_union_fields(tcx: TyCtxt<'_>, span: Span, item_def_id: LocalDefId) -> b
 }
 
 /// Check that a `static` is inhabited.
-fn check_static_inhabited(tcx: TyCtxt<'_>, def_id: LocalDefId) {
-    #[derive(Diagnostic)]
-    #[diag("static of uninhabited type")]
-    #[note("uninhabited statics cannot be initialized, and any access would be an immediate error")]
-    struct StaticOfUninhabitedType;
-
-    // Make sure statics are inhabited.
-    // Other parts of the compiler assume that there are no uninhabited places. In principle it
-    // would be enough to check this for `extern` statics, as statics with an initializer will
-    // have UB during initialization if they are uninhabited, but there also seems to be no good
-    // reason to allow any statics to be uninhabited.
-    let ty = tcx.type_of(def_id).instantiate_identity().skip_norm_wip();
-    let span = tcx.def_span(def_id);
-    let layout = match tcx.layout_of(ty::TypingEnv::fully_monomorphized().as_query_input(ty)) {
-        Ok(l) => l,
-        // Foreign statics that overflow their allowed size should emit an error
-        Err(LayoutError::SizeOverflow(_))
-            if matches!(tcx.def_kind(def_id), DefKind::Static{ .. }
-                if tcx.def_kind(tcx.local_parent(def_id)) == DefKind::ForeignMod) =>
-        {
-            tcx.dcx().emit_err(errors::TooLargeStatic { span });
-            return;
-        }
-        // SIMD types with invalid layout (e.g., zero-length) should emit an error
-        Err(e @ LayoutError::InvalidSimd { .. }) => {
-            let ty_span = tcx.ty_span(def_id);
-            tcx.dcx().span_err(ty_span, e.to_string());
-            return;
-        }
-        // Generic statics are rejected, but we still reach this case.
-        Err(e) => {
-            tcx.dcx().span_delayed_bug(span, format!("{e:?}"));
-            return;
-        }
-    };
-    if layout.is_uninhabited() {
-        tcx.emit_node_span_lint(
-            UNINHABITED_STATIC,
-            tcx.local_def_id_to_hir_id(def_id),
-            span,
-            StaticOfUninhabitedType,
-        );
-    }
-}
+fn check_static_inhabited(_tcx: TyCtxt<'_>, _def_id: LocalDefId) {}
 
 /// Checks that an opaque type does not contain cycles and does not use `Self` or `T::Foo`
 /// projections that would result in "inheriting lifetimes".
@@ -452,11 +407,8 @@ fn best_definition_site_of_opaque<'tcx>(
                 return ControlFlow::Continue(());
             }
 
-            if let Some(hidden_ty) = self
-                .tcx
-                .mir_borrowck(item_def_id)
-                .ok()
-                .and_then(|opaque_types| opaque_types.get(&self.opaque_def_id))
+            if let Some(hidden_ty) =
+                self.tcx.typeck(item_def_id).hidden_types.get(&self.opaque_def_id)
             {
                 ControlFlow::Break((hidden_ty.span, item_def_id))
             } else {
@@ -1752,10 +1704,10 @@ pub(super) fn check_transparent<'tcx>(tcx: TyCtxt<'tcx>, adt: ty::AdtDef<'tcx>) 
 
     let field_infos = adt.all_fields().map(|field| {
         let ty = field.ty(tcx, GenericArgs::identity_for_item(tcx, field.did));
-        let layout = tcx.layout_of(typing_env.as_query_input(ty));
         // We are currently checking the type this field came from, so it must be local
         let span = tcx.hir_span_if_local(field.did).unwrap();
-        let trivial = layout.is_ok_and(|layout| layout.is_1zst());
+        let trivial =
+            ty::layout::ty_size_for_frontend(tcx, ty).is_some_and(|size| size.bytes() == 0);
         FieldInfo { span, trivial, ty }
     });
 

@@ -7,12 +7,12 @@ use std::sync::Arc;
 
 use rustc_data_structures::fx::{FxIndexMap, FxIndexSet};
 use rustc_data_structures::memmap::{Mmap, MmapMut};
-use rustc_data_structures::sync::{par_for_each_in, par_join};
+use rustc_data_structures::sync::par_join;
 use rustc_data_structures::temp_dir::MaybeTempDir;
 use rustc_data_structures::thousands::usize_with_underscores;
 use rustc_hir as hir;
 use rustc_hir::attrs::{AttributeKind, EncodeCrossCrate};
-use rustc_hir::def_id::{CRATE_DEF_ID, CRATE_DEF_INDEX, LOCAL_CRATE, LocalDefId, LocalDefIdSet};
+use rustc_hir::def_id::{CRATE_DEF_ID, CRATE_DEF_INDEX, LOCAL_CRATE, LocalDefId};
 use rustc_hir::definitions::DefPathData;
 use rustc_hir::find_attr;
 use rustc_hir_pretty::id_to_string;
@@ -27,7 +27,7 @@ use rustc_middle::ty::fast_reject::{self, TreatParams};
 use rustc_middle::{bug, span_bug};
 use rustc_serialize::{Decodable, Decoder, Encodable, Encoder, opaque};
 use rustc_session::config::mitigation_coverage::DeniedPartialMitigation;
-use rustc_session::config::{CrateType, OptLevel, TargetModifier};
+use rustc_session::config::{CrateType, TargetModifier};
 use rustc_span::hygiene::HygieneEncodeContext;
 use rustc_span::{
     ByteSymbol, ExternalSource, FileName, SourceFile, SpanData, SpanEncoder, StableSourceFileId,
@@ -1092,48 +1092,6 @@ fn should_encode_stability(def_kind: DefKind) -> bool {
 ///   is either generic or has inline hint, and is reachable from the other crates (contained
 ///   in reachable set).
 ///
-/// Note: Reachable set describes definitions that might be generated or referenced from other
-/// crates and it can be used to limit optimized MIR that needs to be encoded. On the other hand,
-/// the reachable set doesn't have much to say about which definitions might be evaluated at compile
-/// time in other crates, so it cannot be used to omit CTFE MIR. For example, `f` below is
-/// unreachable and yet it can be evaluated in other crates:
-///
-/// ```
-/// const fn f() -> usize { 0 }
-/// pub struct S { pub a: [usize; f()] }
-/// ```
-fn should_encode_mir(
-    tcx: TyCtxt<'_>,
-    reachable_set: &LocalDefIdSet,
-    def_id: LocalDefId,
-) -> (bool, bool) {
-    match tcx.def_kind(def_id) {
-        // instance_mir uses mir_for_ctfe rather than optimized_mir for constructors
-        DefKind::Ctor(_, _) => (true, false),
-        // Constants
-        DefKind::AnonConst { .. }
-        | DefKind::InlineConst
-        | DefKind::AssocConst { .. }
-        | DefKind::Const { .. } => (true, false),
-        // Coroutines require optimized MIR to compute layout.
-        DefKind::Closure if tcx.is_coroutine(def_id.to_def_id()) => (false, true),
-        DefKind::SyntheticCoroutineBody => (false, true),
-        // Full-fledged functions + closures
-        DefKind::AssocFn | DefKind::Fn | DefKind::Closure => {
-            let opt = tcx.sess.opts.unstable_opts.always_encode_mir
-                || (tcx.sess.opts.output_types.should_codegen()
-                    && reachable_set.contains(&def_id)
-                    && (tcx.generics_of(def_id).requires_monomorphization(tcx)
-                        || tcx.cross_crate_inlinable(def_id)));
-            // The function has a `const` modifier or is in a `const trait`.
-            let is_const_fn = tcx.is_const_fn(def_id.to_def_id());
-            (is_const_fn, opt)
-        }
-        // The others don't have MIR.
-        _ => (false, false),
-    }
-}
-
 fn should_encode_variances<'tcx>(tcx: TyCtxt<'tcx>, def_id: DefId, def_kind: DefKind) -> bool {
     match def_kind {
         DefKind::Struct
@@ -1824,79 +1782,16 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
         }
 
         let tcx = self.tcx;
-        let reachable_set = tcx.reachable_set(());
-
-        let keys_and_jobs = tcx.mir_keys(()).iter().filter_map(|&def_id| {
-            let (encode_const, encode_opt) = should_encode_mir(tcx, reachable_set, def_id);
-            if encode_const || encode_opt { Some((def_id, encode_const, encode_opt)) } else { None }
-        });
-        for (def_id, encode_const, encode_opt) in keys_and_jobs {
-            debug_assert!(encode_const || encode_opt);
-
-            debug!("EntryBuilder::encode_mir({:?})", def_id);
-            if encode_opt {
-                record!(self.tables.optimized_mir[def_id.to_def_id()] <- tcx.optimized_mir(def_id));
-                self.tables
-                    .cross_crate_inlinable
-                    .set(def_id.to_def_id().index, self.tcx.cross_crate_inlinable(def_id));
-                record!(self.tables.closure_saved_names_of_captured_variables[def_id.to_def_id()]
-                    <- tcx.closure_saved_names_of_captured_variables(def_id));
-
-                if self.tcx.is_coroutine(def_id.to_def_id())
-                    && let Some(witnesses) = tcx.mir_coroutine_witnesses(def_id)
-                {
-                    record!(self.tables.mir_coroutine_witnesses[def_id.to_def_id()] <- witnesses);
-                }
-            }
-            let mut is_trivial = false;
-            if encode_const {
-                if let Some((val, ty)) = tcx.trivial_const(def_id) {
-                    is_trivial = true;
-                    record!(self.tables.trivial_const[def_id.to_def_id()] <- (val, ty));
-                } else {
-                    is_trivial = false;
-                    record!(self.tables.mir_for_ctfe[def_id.to_def_id()] <- tcx.mir_for_ctfe(def_id));
-                }
-
-                // FIXME(generic_const_exprs): this feels wrong to have in `encode_mir`
-                let abstract_const = tcx.thir_abstract_const(def_id);
-                if let Ok(Some(abstract_const)) = abstract_const {
-                    record!(self.tables.thir_abstract_const[def_id.to_def_id()] <- abstract_const);
-                }
-
-                if should_encode_const(tcx.def_kind(def_id)) {
-                    let qualifs = tcx.mir_const_qualif(def_id);
-                    record!(self.tables.mir_const_qualif[def_id.to_def_id()] <- qualifs);
-                    let body = tcx.hir_maybe_body_owned_by(def_id);
-                    if let Some(body) = body {
-                        let const_data = rendered_const(self.tcx, &body, def_id);
-                        record!(self.tables.rendered_const[def_id.to_def_id()] <- const_data);
-                    }
-                }
-            }
-            if !is_trivial {
-                record!(self.tables.promoted_mir[def_id.to_def_id()] <- tcx.promoted_mir(def_id));
+        for &def_id in tcx.mir_keys(()) {
+            if let Ok(Some(abstract_const)) = tcx.thir_abstract_const(def_id) {
+                record!(self.tables.thir_abstract_const[def_id.to_def_id()] <- abstract_const);
             }
 
-            if self.tcx.is_coroutine(def_id.to_def_id())
-                && let Some(witnesses) = tcx.mir_coroutine_witnesses(def_id)
+            if should_encode_const(tcx.def_kind(def_id))
+                && let Some(body) = tcx.hir_maybe_body_owned_by(def_id)
             {
-                record!(self.tables.mir_coroutine_witnesses[def_id.to_def_id()] <- witnesses);
-            }
-        }
-
-        // Encode all the deduced parameter attributes for everything that has MIR, even for items
-        // that can't be inlined. But don't if we aren't optimizing in non-incremental mode, to
-        // save the query traffic.
-        if tcx.sess.opts.output_types.should_codegen()
-            && tcx.sess.opts.optimize != OptLevel::No
-            && tcx.sess.opts.incremental.is_none()
-        {
-            for &local_def_id in tcx.mir_keys(()) {
-                if let DefKind::AssocFn | DefKind::Fn = tcx.def_kind(local_def_id) {
-                    record_array!(self.tables.deduced_param_attrs[local_def_id.to_def_id()] <-
-                        self.tcx.deduced_param_attrs(local_def_id.to_def_id()));
-                }
+                let const_data = rendered_const(self.tcx, &body, def_id);
+                record!(self.tables.rendered_const[def_id.to_def_id()] <- const_data);
             }
         }
     }
@@ -2299,30 +2194,7 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
 
 /// Used to prefetch queries which will be needed later by metadata encoding.
 /// Only a subset of the queries are actually prefetched to keep this code smaller.
-fn prefetch_mir(tcx: TyCtxt<'_>) {
-    if !tcx.sess.opts.output_types.should_codegen() {
-        // We won't emit MIR, so don't prefetch it.
-        return;
-    }
-
-    let reachable_set = tcx.reachable_set(());
-    par_for_each_in(tcx.mir_keys(()), |&&def_id| {
-        if tcx.is_trivial_const(def_id) {
-            return;
-        }
-        let (encode_const, encode_opt) = should_encode_mir(tcx, reachable_set, def_id);
-
-        if encode_const {
-            tcx.ensure_done().mir_for_ctfe(def_id);
-        }
-        if encode_opt {
-            tcx.ensure_done().optimized_mir(def_id);
-        }
-        if encode_opt || encode_const {
-            tcx.ensure_done().promoted_mir(def_id);
-        }
-    })
-}
+fn prefetch_mir(_tcx: TyCtxt<'_>) {}
 
 // NOTE(eddyb) The following comment was preserved for posterity, even
 // though it's no longer relevant as EBML (which uses nested & tagged

@@ -118,10 +118,8 @@ impl<'tcx> LateLintPass<'tcx> for DanglingPointers {
                 _ => return,
             };
 
-            if cx
-                .tcx
-                .layout_of(cx.typing_env().as_query_input(inner_ty))
-                .is_ok_and(|layout| !layout.is_1zst())
+            if ty::layout::ty_size_for_frontend(cx.tcx, inner_ty)
+                .is_some_and(|size| size.bytes() > 0)
             {
                 let dcx = &DanglingPointerLocalContext {
                     body: def_id,

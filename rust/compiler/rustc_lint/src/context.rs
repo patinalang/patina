@@ -22,7 +22,6 @@ use rustc_hir::{Pat, PatKind};
 use rustc_middle::bug;
 use rustc_middle::lint::LevelAndSource;
 use rustc_middle::middle::privacy::EffectiveVisibilities;
-use rustc_middle::ty::layout::{LayoutError, LayoutOfHelpers, TyAndLayout};
 use rustc_middle::ty::print::{PrintError, PrintTraitRefExt as _, Printer, with_no_trimmed_paths};
 use rustc_middle::ty::{
     self, GenericArg, RegisteredTools, Ty, TyCtxt, TypingEnv, TypingMode, Unnormalized,
@@ -30,7 +29,7 @@ use rustc_middle::ty::{
 use rustc_session::lint::{FutureIncompatibleInfo, Lint, LintExpectationId, LintId};
 use rustc_session::{DynLintStore, Session};
 use rustc_span::edit_distance::find_best_match_for_names;
-use rustc_span::{Ident, Span, Symbol, sym};
+use rustc_span::{Ident, Symbol, sym};
 use tracing::debug;
 
 use self::TargetLint::*;
@@ -950,28 +949,5 @@ impl<'tcx> abi::HasDataLayout for LateContext<'tcx> {
     #[inline]
     fn data_layout(&self) -> &abi::TargetDataLayout {
         &self.tcx.data_layout
-    }
-}
-
-impl<'tcx> ty::layout::HasTyCtxt<'tcx> for LateContext<'tcx> {
-    #[inline]
-    fn tcx(&self) -> TyCtxt<'tcx> {
-        self.tcx
-    }
-}
-
-impl<'tcx> ty::layout::HasTypingEnv<'tcx> for LateContext<'tcx> {
-    #[inline]
-    fn typing_env(&self) -> ty::TypingEnv<'tcx> {
-        self.typing_env()
-    }
-}
-
-impl<'tcx> LayoutOfHelpers<'tcx> for LateContext<'tcx> {
-    type LayoutOfResult = Result<TyAndLayout<'tcx>, LayoutError<'tcx>>;
-
-    #[inline]
-    fn handle_layout_err(&self, err: LayoutError<'tcx>, _: Span, _: Ty<'tcx>) -> LayoutError<'tcx> {
-        err
     }
 }

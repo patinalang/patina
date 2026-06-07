@@ -296,6 +296,10 @@ fn typing_env_normalized_for_post_analysis(tcx: TyCtxt<'_>, def_id: DefId) -> ty
     ty::TypingEnv::non_body_analysis(tcx, def_id).with_post_analysis_normalized(tcx)
 }
 
+fn constness(_tcx: TyCtxt<'_>, _def_id: LocalDefId) -> hir::Constness {
+    hir::Constness::Const
+}
+
 /// Check if a function is async.
 fn asyncness(tcx: TyCtxt<'_>, def_id: LocalDefId) -> ty::Asyncness {
     let node = tcx.hir_node_by_def_id(def_id);
@@ -401,6 +405,7 @@ fn impl_self_is_guaranteed_unsized<'tcx>(tcx: TyCtxt<'tcx>, impl_def_id: DefId) 
 
 pub(crate) fn provide(providers: &mut Providers) {
     *providers = Providers {
+        constness,
         asyncness,
         adt_sizedness_constraint,
         param_env,

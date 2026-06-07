@@ -1,18 +1,13 @@
-use std::iter;
-
-use rustc_abi::{BackendRepr, TagEncoding, Variants, WrappingRange};
 use rustc_ast as ast;
 use rustc_hir as hir;
 use rustc_hir::{Expr, ExprKind, HirId, LangItem, find_attr};
 use rustc_middle::bug;
-use rustc_middle::ty::layout::{LayoutOf, SizeSkeleton};
-use rustc_middle::ty::{self, Ty, TyCtxt, TypeVisitableExt, Unnormalized};
+use rustc_middle::ty::{self, Ty, TyCtxt};
 use rustc_session::{declare_lint, declare_lint_pass, impl_lint_pass};
 use rustc_span::{Span, Symbol, sym};
 use tracing::debug;
 
-mod improper_ctypes; // these files do the implementation for ImproperCTypesDefinitions,ImproperCTypesDeclarations
-pub(crate) use improper_ctypes::ImproperCTypesLint;
+mod improper_ctypes;
 
 use crate::lints::{
     AmbiguousWidePointerComparisons, AmbiguousWidePointerComparisonsAddrMetadataSuggestion,
@@ -21,7 +16,6 @@ use crate::lints::{
     AtomicOrderingStore, InvalidAtomicOrderingDiag, InvalidNanComparisons,
     InvalidNanComparisonsSuggestion, UnpredictableFunctionPointerComparisons,
     UnpredictableFunctionPointerComparisonsSuggestion, UnusedComparisons,
-    VariantSizeDifferencesDiag,
 };
 use crate::{LateContext, LateLintPass, LintContext};
 
@@ -681,146 +675,12 @@ pub(crate) fn transparent_newtype_field<'a, 'tcx>(
     tcx: TyCtxt<'tcx>,
     variant: &'a ty::VariantDef,
 ) -> Option<&'a ty::FieldDef> {
-    let typing_env = ty::TypingEnv::non_body_analysis(tcx, variant.def_id);
     variant.fields.iter().find(|field| {
         let field_ty = tcx.type_of(field.did).instantiate_identity().skip_norm_wip();
         let is_1zst =
-            tcx.layout_of(typing_env.as_query_input(field_ty)).is_ok_and(|layout| layout.is_1zst());
+            ty::layout::ty_size_for_frontend(tcx, field_ty).is_some_and(|size| size.bytes() == 0);
         !is_1zst
     })
-}
-
-/// Is type known to be non-null?
-fn ty_is_known_nonnull<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    typing_env: ty::TypingEnv<'tcx>,
-    ty: Ty<'tcx>,
-) -> bool {
-    let ty = tcx.try_normalize_erasing_regions(typing_env, Unnormalized::new_wip(ty)).unwrap_or(ty);
-
-    match ty.kind() {
-        ty::FnPtr(..) => true,
-        ty::Ref(..) => true,
-        ty::Adt(def, _) if def.is_box() => true,
-        ty::Adt(def, args) if def.repr().transparent() && !def.is_union() => {
-            let marked_non_null = nonnull_optimization_guaranteed(tcx, *def);
-
-            if marked_non_null {
-                return true;
-            }
-
-            // `UnsafeCell` and `UnsafePinned` have their niche hidden.
-            if def.is_unsafe_cell() || def.is_unsafe_pinned() {
-                return false;
-            }
-
-            def.variants()
-                .iter()
-                .filter_map(|variant| transparent_newtype_field(tcx, variant))
-                .any(|field| ty_is_known_nonnull(tcx, typing_env, field.ty(tcx, args)))
-        }
-        ty::Pat(base, pat) => {
-            ty_is_known_nonnull(tcx, typing_env, *base)
-                || pat_ty_is_known_nonnull(tcx, typing_env, *pat)
-        }
-        _ => false,
-    }
-}
-
-fn pat_ty_is_known_nonnull<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    typing_env: ty::TypingEnv<'tcx>,
-    pat: ty::Pattern<'tcx>,
-) -> bool {
-    try {
-        match *pat {
-            ty::PatternKind::Range { start, end } => {
-                let start = start.try_to_value()?.try_to_bits(tcx, typing_env)?;
-                let end = end.try_to_value()?.try_to_bits(tcx, typing_env)?;
-
-                // This also works for negative numbers, as we just need
-                // to ensure we aren't wrapping over zero.
-                start > 0 && end >= start
-            }
-            ty::PatternKind::NotNull => true,
-            ty::PatternKind::Or(patterns) => {
-                patterns.iter().all(|pat| pat_ty_is_known_nonnull(tcx, typing_env, pat))
-            }
-        }
-    }
-    .unwrap_or_default()
-}
-
-/// Given a non-null scalar (or transparent) type `ty`, return the nullable version of that type.
-/// If the type passed in was not scalar, returns None.
-fn get_nullable_type<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    typing_env: ty::TypingEnv<'tcx>,
-    ty: Ty<'tcx>,
-) -> Option<Ty<'tcx>> {
-    let ty = tcx.try_normalize_erasing_regions(typing_env, Unnormalized::new_wip(ty)).unwrap_or(ty);
-
-    Some(match *ty.kind() {
-        ty::Adt(field_def, field_args) => {
-            let inner_field_ty = {
-                let mut first_non_zst_ty =
-                    field_def.variants().iter().filter_map(|v| transparent_newtype_field(tcx, v));
-                debug_assert_eq!(
-                    first_non_zst_ty.clone().count(),
-                    1,
-                    "Wrong number of fields for transparent type"
-                );
-                first_non_zst_ty
-                    .next_back()
-                    .expect("No non-zst fields in transparent type.")
-                    .ty(tcx, field_args)
-            };
-            return get_nullable_type(tcx, typing_env, inner_field_ty);
-        }
-        ty::Pat(base, ..) => return get_nullable_type(tcx, typing_env, base),
-        ty::Int | ty::RawPtr(..) => ty,
-        // As these types are always non-null, the nullable equivalent of
-        // `Option<T>` of these types are their raw pointer counterparts.
-        ty::Ref(_region, ty, mutbl) => Ty::new_ptr(tcx, ty, mutbl),
-        // There is no nullable equivalent for Rust's function pointers,
-        // you must use an `Option<fn(..) -> _>` to represent it.
-        ty::FnPtr(..) => ty,
-        // We should only ever reach this case if `ty_is_known_nonnull` is
-        // extended to other types.
-        ref unhandled => {
-            debug!(
-                "get_nullable_type: Unhandled scalar kind: {:?} while checking {:?}",
-                unhandled, ty
-            );
-            return None;
-        }
-    })
-}
-
-/// A type is niche-optimization candidate iff:
-/// - Is a zero-sized type with alignment 1 (a “1-ZST”).
-/// - Is either a struct/tuple with no fields, or an enum with no variants.
-/// - Does not have the `#[non_exhaustive]` attribute.
-fn is_niche_optimization_candidate<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    typing_env: ty::TypingEnv<'tcx>,
-    ty: Ty<'tcx>,
-) -> bool {
-    if tcx.layout_of(typing_env.as_query_input(ty)).is_ok_and(|layout| !layout.is_1zst()) {
-        return false;
-    }
-
-    match ty.kind() {
-        ty::Adt(ty_def, _) => {
-            let non_exhaustive = ty_def.is_variant_list_non_exhaustive();
-            let empty = (ty_def.is_struct() && ty_def.non_enum_variant().fields.is_empty())
-                || (ty_def.is_enum() && ty_def.variants().is_empty());
-
-            !non_exhaustive && empty
-        }
-        ty::Tuple(tys) => tys.is_empty(),
-        _ => false,
-    }
 }
 
 /// Check if this enum can be safely exported based on the "nullable pointer optimization". If it
@@ -829,147 +689,17 @@ fn is_niche_optimization_candidate<'tcx>(
 /// `core::ptr::NonNull`, and `#[repr(transparent)]` newtypes.
 pub(crate) fn repr_nullable_ptr<'tcx>(
     tcx: TyCtxt<'tcx>,
-    typing_env: ty::TypingEnv<'tcx>,
+    _typing_env: ty::TypingEnv<'tcx>,
     ty: Ty<'tcx>,
 ) -> Option<Ty<'tcx>> {
     debug!("is_repr_nullable_ptr(tcx, ty = {:?})", ty);
-    match ty.kind() {
-        ty::Adt(ty_def, args) => {
-            let field_ty = match &ty_def.variants().raw[..] {
-                [var_one, var_two] => match (&var_one.fields.raw[..], &var_two.fields.raw[..]) {
-                    ([], [field]) | ([field], []) => field.ty(tcx, args),
-                    ([field1], [field2]) => {
-                        let ty1 = field1.ty(tcx, args);
-                        let ty2 = field2.ty(tcx, args);
-
-                        if is_niche_optimization_candidate(tcx, typing_env, ty1) {
-                            ty2
-                        } else if is_niche_optimization_candidate(tcx, typing_env, ty2) {
-                            ty1
-                        } else {
-                            return None;
-                        }
-                    }
-                    _ => return None,
-                },
-                _ => return None,
-            };
-
-            if !ty_is_known_nonnull(tcx, typing_env, field_ty) {
-                return None;
-            }
-
-            // At this point, the field's type is known to be nonnull and the parent enum is Option-like.
-            // If the computed size for the field and the enum are different, the nonnull optimization isn't
-            // being applied (and we've got a problem somewhere).
-            let compute_size_skeleton = |t| SizeSkeleton::compute(t, tcx, typing_env).ok();
-            if !compute_size_skeleton(ty)?.same_size(compute_size_skeleton(field_ty)?) {
-                bug!("improper_ctypes: Option nonnull optimization not applied?");
-            }
-
-            // Return the nullable type this Option-like enum can be safely represented with.
-            let field_ty_layout = tcx.layout_of(typing_env.as_query_input(field_ty));
-            if field_ty_layout.is_err() && !field_ty.has_non_region_param() {
-                bug!("should be able to compute the layout of non-polymorphic type");
-            }
-
-            let field_ty_abi = &field_ty_layout.ok()?.backend_repr;
-            if let BackendRepr::Scalar(field_ty_scalar) = field_ty_abi {
-                match field_ty_scalar.valid_range(&tcx) {
-                    WrappingRange { start: 0, end }
-                        if end == field_ty_scalar.size(&tcx).unsigned_int_max() - 1 =>
-                    {
-                        return Some(get_nullable_type(tcx, typing_env, field_ty).unwrap());
-                    }
-                    WrappingRange { start: 1, .. } => {
-                        return Some(get_nullable_type(tcx, typing_env, field_ty).unwrap());
-                    }
-                    WrappingRange { start, end } => {
-                        unreachable!("Unhandled start and end range: ({}, {})", start, end)
-                    }
-                };
-            }
-            None
-        }
-        ty::Pat(base, pat) => get_nullable_type_from_pat(tcx, typing_env, *base, *pat),
-        _ => None,
-    }
-}
-
-fn get_nullable_type_from_pat<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    typing_env: ty::TypingEnv<'tcx>,
-    base: Ty<'tcx>,
-    pat: ty::Pattern<'tcx>,
-) -> Option<Ty<'tcx>> {
-    match *pat {
-        ty::PatternKind::NotNull | ty::PatternKind::Range { .. } => {
-            get_nullable_type(tcx, typing_env, base)
-        }
-        ty::PatternKind::Or(patterns) => {
-            let first = get_nullable_type_from_pat(tcx, typing_env, base, patterns[0])?;
-            for &pat in &patterns[1..] {
-                assert_eq!(first, get_nullable_type_from_pat(tcx, typing_env, base, pat)?);
-            }
-            Some(first)
-        }
-    }
+    let _ = (tcx, ty);
+    None
 }
 
 declare_lint_pass!(VariantSizeDifferences => [VARIANT_SIZE_DIFFERENCES]);
 
-impl<'tcx> LateLintPass<'tcx> for VariantSizeDifferences {
-    fn check_item(&mut self, cx: &LateContext<'_>, it: &hir::Item<'_>) {
-        if let hir::ItemKind::Enum(_, _, ref enum_definition) = it.kind {
-            let t = cx.tcx.type_of(it.owner_id).instantiate_identity().skip_norm_wip();
-            let ty = cx.tcx.erase_and_anonymize_regions(t);
-            let Ok(layout) = cx.layout_of(ty) else { return };
-            let Variants::Multiple { tag_encoding: TagEncoding::Direct, tag, variants, .. } =
-                &layout.variants
-            else {
-                return;
-            };
-
-            let tag_size = tag.size(&cx.tcx).bytes();
-
-            debug!(
-                "enum `{}` is {} bytes large with layout:\n{:#?}",
-                t,
-                layout.size.bytes(),
-                layout
-            );
-
-            let (largest, slargest, largest_index) = iter::zip(enum_definition.variants, variants)
-                .map(|(variant, variant_layout)| {
-                    // Subtract the size of the enum tag.
-                    let bytes = variant_layout.size.bytes().saturating_sub(tag_size);
-
-                    debug!("- variant `{}` is {} bytes large", variant.ident, bytes);
-                    bytes
-                })
-                .enumerate()
-                .fold((0, 0, 0), |(l, s, li), (idx, size)| {
-                    if size > l {
-                        (size, l, idx)
-                    } else if size > s {
-                        (l, size, li)
-                    } else {
-                        (l, s, li)
-                    }
-                });
-
-            // We only warn if the largest variant is at least thrice as large as
-            // the second-largest.
-            if largest > slargest * 3 && slargest > 0 {
-                cx.emit_span_lint(
-                    VARIANT_SIZE_DIFFERENCES,
-                    enum_definition.variants[largest_index].span,
-                    VariantSizeDifferencesDiag { largest },
-                );
-            }
-        }
-    }
-}
+impl<'tcx> LateLintPass<'tcx> for VariantSizeDifferences {}
 
 declare_lint! {
     /// The `invalid_atomic_ordering` lint detects passing an `Ordering`

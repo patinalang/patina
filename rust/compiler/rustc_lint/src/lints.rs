@@ -932,87 +932,6 @@ pub(crate) enum InvalidFromUtf8Diag {
     },
 }
 
-// interior_mutable_consts.rs
-#[derive(Diagnostic)]
-#[diag("mutation of an interior mutable `const` item with call to `{$method_name}`")]
-#[note("each usage of a `const` item creates a new temporary")]
-#[note("only the temporaries and never the original `const {$const_name}` will be modified")]
-#[help(
-    "for more details on interior mutability see <https://doc.rust-lang.org/reference/interior-mutability.html>"
-)]
-pub(crate) struct ConstItemInteriorMutationsDiag<'tcx> {
-    pub method_name: Ident,
-    pub const_name: Ident,
-    pub const_ty: Ty<'tcx>,
-    #[label("`{$const_name}` is a interior mutable `const` item of type `{$const_ty}`")]
-    pub receiver_span: Span,
-    #[subdiagnostic]
-    pub sugg_static: Option<ConstItemInteriorMutationsSuggestionStatic>,
-}
-
-#[derive(Subdiagnostic)]
-pub(crate) enum ConstItemInteriorMutationsSuggestionStatic {
-    #[suggestion(
-        "for a shared instance of `{$const_name}`, consider making it a `static` item instead",
-        code = "{before}static ",
-        style = "verbose",
-        applicability = "maybe-incorrect"
-    )]
-    Spanful {
-        #[primary_span]
-        const_: Span,
-        before: &'static str,
-        const_name: Ident,
-    },
-    #[help("for a shared instance of `{$const_name}`, consider making it a `static` item instead")]
-    Spanless { const_name: Ident },
-}
-
-// reference_casting.rs
-#[derive(Diagnostic)]
-pub(crate) enum InvalidReferenceCastingDiag<'tcx> {
-    #[diag(
-        "casting `&T` to `&mut T` is undefined behavior, even if the reference is unused, consider instead using an `UnsafeCell`"
-    )]
-    #[note(
-        "for more information, visit <https://doc.rust-lang.org/book/ch15-05-interior-mutability.html>"
-    )]
-    BorrowAsMut {
-        #[label("casting happened here")]
-        orig_cast: Option<Span>,
-        #[note(
-            "even for types with interior mutability, the only legal way to obtain a mutable pointer from a shared reference is through `UnsafeCell::get`"
-        )]
-        ty_has_interior_mutability: bool,
-    },
-    #[diag("assigning to `&T` is undefined behavior, consider using an `UnsafeCell`")]
-    #[note(
-        "for more information, visit <https://doc.rust-lang.org/book/ch15-05-interior-mutability.html>"
-    )]
-    AssignToRef {
-        #[label("casting happened here")]
-        orig_cast: Option<Span>,
-        #[note(
-            "even for types with interior mutability, the only legal way to obtain a mutable pointer from a shared reference is through `UnsafeCell::get`"
-        )]
-        ty_has_interior_mutability: bool,
-    },
-    #[diag(
-        "casting references to a bigger memory layout than the backing allocation is undefined behavior, even if the reference is unused"
-    )]
-    #[note("casting from `{$from_ty}` ({$from_size} bytes) to `{$to_ty}` ({$to_size} bytes)")]
-    BiggerLayout {
-        #[label("casting happened here")]
-        orig_cast: Option<Span>,
-        #[label("backing allocation comes from here")]
-        alloc: Span,
-        from_ty: Ty<'tcx>,
-        from_size: u64,
-        to_ty: Ty<'tcx>,
-        to_size: u64,
-    },
-}
-
 // map_unit_fn.rs
 #[derive(Diagnostic)]
 #[diag("`Iterator::map` call that discard the iterator's values")]
@@ -1901,56 +1820,6 @@ impl<'a> Diagnostic<'a, ()> for DropGlue<'_> {
     }
 }
 
-// transmute.rs
-#[derive(Diagnostic)]
-#[diag("transmuting an integer to a pointer creates a pointer without provenance")]
-#[note("this is dangerous because dereferencing the resulting pointer is undefined behavior")]
-#[note(
-    "exposed provenance semantics can be used to create a pointer based on some previously exposed provenance"
-)]
-#[help(
-    "if you truly mean to create a pointer without provenance, use `std::ptr::without_provenance_mut`"
-)]
-#[help(
-    "for more information about transmute, see <https://doc.rust-lang.org/std/mem/fn.transmute.html#transmutation-between-pointers-and-integers>"
-)]
-#[help(
-    "for more information about exposed provenance, see <https://doc.rust-lang.org/std/ptr/index.html#exposed-provenance>"
-)]
-pub(crate) struct IntegerToPtrTransmutes<'tcx> {
-    #[subdiagnostic]
-    pub suggestion: Option<IntegerToPtrTransmutesSuggestion<'tcx>>,
-}
-
-#[derive(Subdiagnostic)]
-pub(crate) enum IntegerToPtrTransmutesSuggestion<'tcx> {
-    #[multipart_suggestion(
-        "use `std::ptr::with_exposed_provenance{$suffix}` instead to use a previously exposed provenance",
-        applicability = "machine-applicable",
-        style = "verbose"
-    )]
-    ToPtr {
-        dst: Ty<'tcx>,
-        suffix: &'static str,
-        #[suggestion_part(code = "std::ptr::with_exposed_provenance{suffix}::<{dst}>(")]
-        start_call: Span,
-    },
-    #[multipart_suggestion(
-        "use `std::ptr::with_exposed_provenance{$suffix}` instead to use a previously exposed provenance",
-        applicability = "machine-applicable",
-        style = "verbose"
-    )]
-    ToRef {
-        dst: Ty<'tcx>,
-        suffix: &'static str,
-        ref_mutbl: &'static str,
-        #[suggestion_part(
-            code = "&{ref_mutbl}*std::ptr::with_exposed_provenance{suffix}::<{dst}>("
-        )]
-        start_call: Span,
-    },
-}
-
 // types.rs
 #[derive(Diagnostic)]
 #[diag("literal out of range for `{$ty}`")]
@@ -1961,12 +1830,6 @@ pub(crate) struct OverflowingLiteral<'a> {
     pub ty: &'a str,
     pub lit: String,
 }
-
-#[derive(Diagnostic)]
-#[diag(
-    "repr(C) does not follow the power alignment rule. This may affect platform C ABI compatibility for this type"
-)]
-pub(crate) struct UsesPowerAlignment;
 
 #[derive(Diagnostic)]
 #[diag("comparison is useless due to type limits")]
@@ -2179,56 +2042,6 @@ pub(crate) enum UnpredictableFunctionPointerComparisonsSuggestion<'a, 'tcx> {
         #[suggestion_part(code = " as {fn_sig})")]
         right: Span,
     },
-}
-
-pub(crate) struct ImproperCTypes<'a> {
-    pub ty: Ty<'a>,
-    pub desc: &'a str,
-    pub label: Span,
-    pub help: Option<DiagMessage>,
-    pub note: DiagMessage,
-    pub span_note: Option<Span>,
-}
-
-// Used because of the complexity of Option<DiagMessage>, DiagMessage, and Option<Span>
-impl<'a> Diagnostic<'a, ()> for ImproperCTypes<'_> {
-    fn into_diag(self, dcx: DiagCtxtHandle<'a>, level: Level) -> Diag<'a, ()> {
-        let mut diag = Diag::new(
-            dcx,
-            level,
-            msg!("`extern` {$desc} uses type `{$ty}`, which is not FFI-safe"),
-        )
-        .with_arg("ty", self.ty)
-        .with_arg("desc", self.desc)
-        .with_span_label(self.label, msg!("not FFI-safe"));
-        if let Some(help) = self.help {
-            diag.help(help);
-        }
-        diag.note(self.note);
-        if let Some(note) = self.span_note {
-            diag.span_note(note, msg!("the type is defined here"));
-        }
-        diag
-    }
-}
-
-#[derive(Diagnostic)]
-#[diag("passing type `{$ty}` to a function with \"gpu-kernel\" ABI may have unexpected behavior")]
-#[help("use primitive types and raw pointers to get reliable behavior")]
-pub(crate) struct ImproperGpuKernelArg<'a> {
-    pub ty: Ty<'a>,
-}
-
-#[derive(Diagnostic)]
-#[diag("function with the \"gpu-kernel\" ABI has a mangled name")]
-#[help("use `unsafe(no_mangle)` or `unsafe(export_name = \"<name>\")`")]
-#[note("mangled names make it hard to find the kernel, this is usually not intended")]
-pub(crate) struct MissingGpuKernelExportName;
-
-#[derive(Diagnostic)]
-#[diag("enum variant is more than three times larger ({$largest} bytes) than the next largest")]
-pub(crate) struct VariantSizeDifferencesDiag {
-    pub largest: u64,
 }
 
 #[derive(Diagnostic)]
@@ -2507,46 +2320,6 @@ pub(crate) enum InvalidAsmLabel {
         missing_precise_span: bool,
         // hack to get a label on the whole span, must match the emitted span
         #[label("use a different label that doesn't start with `0` or `1`")]
-        span: Span,
-    },
-}
-
-#[derive(Diagnostic)]
-#[diag("creating a {$shared_label}reference to mutable static")]
-pub(crate) struct RefOfMutStatic<'a> {
-    #[label("{$shared_label}reference to mutable static")]
-    pub span: Span,
-    #[subdiagnostic]
-    pub sugg: Option<MutRefSugg>,
-    pub shared_label: &'a str,
-    #[note(
-        "shared references to mutable statics are dangerous; it's undefined behavior if the static is mutated or if a mutable reference is created for it while the shared reference lives"
-    )]
-    pub shared_note: bool,
-    #[note(
-        "mutable references to mutable statics are dangerous; it's undefined behavior if any other pointer to the static is used or if any other reference is created for the static while the mutable reference lives"
-    )]
-    pub mut_note: bool,
-}
-
-#[derive(Subdiagnostic)]
-pub(crate) enum MutRefSugg {
-    #[multipart_suggestion(
-        "use `&raw const` instead to create a raw pointer",
-        style = "verbose",
-        applicability = "maybe-incorrect"
-    )]
-    Shared {
-        #[suggestion_part(code = "&raw const ")]
-        span: Span,
-    },
-    #[multipart_suggestion(
-        "use `&raw mut` instead to create a raw pointer",
-        style = "verbose",
-        applicability = "maybe-incorrect"
-    )]
-    Mut {
-        #[suggestion_part(code = "&raw mut ")]
         span: Span,
     },
 }

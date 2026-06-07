@@ -79,15 +79,6 @@ pub(crate) struct UnexpectedFnPtrAssociatedItem {
 }
 
 #[derive(Diagnostic)]
-#[diag(
-    "monomorphising SIMD type `{$ty}` with a non-primitive-scalar (integer/float/pointer) element type `{$e_ty}`"
-)]
-pub(crate) struct NonPrimitiveSimdType<'tcx> {
-    pub ty: Ty<'tcx>,
-    pub e_ty: Ty<'tcx>,
-}
-
-#[derive(Diagnostic)]
 #[diag("non-defining opaque type use in defining scope")]
 pub(crate) struct DuplicateArg<'tcx> {
     pub arg: GenericArg<'tcx>,

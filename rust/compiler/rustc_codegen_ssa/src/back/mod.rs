@@ -4,14 +4,9 @@ use rustc_session::Session;
 
 pub mod apple;
 pub mod archive;
-pub(crate) mod command;
 pub mod link;
-pub(crate) mod linker;
-pub mod lto;
 pub mod metadata;
-pub(crate) mod rpath;
 pub mod symbol_export;
-pub mod write;
 
 /// The target triple depends on the deployment target, and is required to
 /// enable features such as cross-language LTO, and for picking the right

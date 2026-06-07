@@ -1,5 +1,3 @@
-use std::fmt;
-
 use rustc_span::Symbol;
 
 use super::{InlineAsmArch, InlineAsmType, ModifierInfo};
@@ -37,11 +35,7 @@ impl M68kInlineAsmRegClass {
         self,
         _arch: InlineAsmArch,
     ) -> &'static [(InlineAsmType, Option<Symbol>)] {
-        match self {
-            Self::reg => types! { _: I16, I32; },
-            Self::reg_data => types! { _: I8, I16, I32; },
-            Self::reg_addr => types! { _: I16, I32; },
-        }
+        &[]
     }
 }
 
@@ -59,24 +53,5 @@ def_regs! {
         a1: reg, reg_addr = ["a1"],
         a2: reg, reg_addr = ["a2"],
         a3: reg, reg_addr = ["a3"],
-        #error = ["a4"] =>
-            "a4 is used internally by LLVM and cannot be used as an operand for inline asm",
-        #error = ["a5", "bp"] =>
-            "a5 is used internally by LLVM and cannot be used as an operand for inline asm",
-        #error = ["a6", "fp"] =>
-            "a6 is used internally by LLVM and cannot be used as an operand for inline asm",
-        #error = ["a7", "sp", "usp", "ssp", "isp"] =>
-            "the stack pointer cannot be used as an operand for inline asm",
-    }
-}
-
-impl M68kInlineAsmReg {
-    pub fn emit(
-        self,
-        out: &mut dyn fmt::Write,
-        _arch: InlineAsmArch,
-        _modifier: Option<char>,
-    ) -> fmt::Result {
-        out.write_str(self.name())
     }
 }

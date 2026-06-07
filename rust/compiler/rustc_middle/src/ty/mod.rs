@@ -50,11 +50,9 @@ use rustc_macros::{
     TypeVisitable, extension,
 };
 use rustc_serialize::{Decodable, Encodable};
-use rustc_session::config::OptLevel;
 pub use rustc_session::lint::RegisteredTools;
 use rustc_span::hygiene::MacroKind;
 use rustc_span::{DUMMY_SP, ExpnId, ExpnKind, Ident, Span, Symbol};
-use rustc_target::callconv::FnAbi;
 pub use rustc_type_ir::data_structures::{DelayedMap, DelayedSet};
 pub use rustc_type_ir::fast_reject::DeepRejectCtxt;
 #[allow(
@@ -125,7 +123,7 @@ use crate::ty;
 use crate::ty::codec::{TyDecoder, TyEncoder};
 pub use crate::ty::diagnostics::*;
 use crate::ty::fast_reject::SimplifiedType;
-use crate::ty::layout::{FnAbiError, LayoutError};
+use crate::ty::layout::LayoutError;
 use crate::ty::util::Discr;
 use crate::ty::walk::TypeWalker;
 
@@ -2165,34 +2163,6 @@ impl<'tcx> TyCtxt<'tcx> {
 
         !self.associated_types_for_impl_traits_in_associated_fn(trait_item_def_id).is_empty()
     }
-
-    /// Compute a `FnAbi` suitable for declaring/defining an `fn` instance, and for direct calls*
-    /// to an `fn`. Indirectly-passed parameters in the returned ABI will include applicable
-    /// codegen optimization attributes, including `ReadOnly` and `CapturesNone` -- deduction of
-    /// which requires inspection of function bodies that can lead to cycles when performed during
-    /// typeck. During typeck, you should therefore use instead the unoptimized ABI returned by
-    /// `fn_abi_of_instance_no_deduced_attrs`.
-    ///
-    /// For performance reasons, you should prefer to call this inherent method rather than invoke
-    /// the `fn_abi_of_instance_raw` query: it delegates to that query if necessary, but where
-    /// possible delegates instead to the `fn_abi_of_instance_no_deduced_attrs` query (thus avoiding
-    /// unnecessary query system overhead).
-    ///
-    /// * that includes virtual calls, which are represented by "direct calls" to an
-    ///   `InstanceKind::Virtual` instance (of `<dyn Trait as Trait>::fn`).
-    #[inline]
-    pub fn fn_abi_of_instance(
-        self,
-        query: ty::PseudoCanonicalInput<'tcx, (ty::Instance<'tcx>, &'tcx ty::List<Ty<'tcx>>)>,
-    ) -> Result<&'tcx FnAbi<'tcx, Ty<'tcx>>, &'tcx FnAbiError<'tcx>> {
-        // Only deduce attrs in full, optimized builds. Otherwise, avoid the query system overhead
-        // of ever invoking the `fn_abi_of_instance_raw` query.
-        if self.sess.opts.optimize != OptLevel::No && self.sess.opts.incremental.is_none() {
-            self.fn_abi_of_instance_raw(query)
-        } else {
-            self.fn_abi_of_instance_no_deduced_attrs(query)
-        }
-    }
 }
 
 // `HasAttrs` impls: allow `find_attr!(tcx, id, ...)` to work with both DefId-like types and HirId.
@@ -2441,10 +2411,8 @@ fn typetree_from_ty_impl_inner<'tcx>(
             let element_tree =
                 typetree_from_ty_impl_inner(tcx, tuple_ty, depth + 1, visited, false);
 
-            let element_layout = tcx
-                .layout_of(ty::TypingEnv::fully_monomorphized().as_query_input(tuple_ty))
-                .ok()
-                .map(|layout| layout.size.bytes_usize())
+            let element_layout = ty::layout::ty_size_for_frontend(tcx, tuple_ty)
+                .map(|size| size.bytes_usize())
                 .unwrap_or(0);
 
             for elem_type in &element_tree.0 {
@@ -2468,34 +2436,35 @@ fn typetree_from_ty_impl_inner<'tcx>(
 
     if let ty::Adt(adt_def, args) = ty.kind() {
         if adt_def.is_struct() {
-            let struct_layout =
-                tcx.layout_of(ty::TypingEnv::fully_monomorphized().as_query_input(ty));
-            if let Ok(layout) = struct_layout {
-                let mut types = Vec::new();
+            let mut types = Vec::new();
+            let mut current_offset = 0;
 
-                for (field_idx, field_def) in adt_def.all_fields().enumerate() {
-                    let field_ty = field_def.ty(tcx, args);
-                    let field_tree =
-                        typetree_from_ty_impl_inner(tcx, field_ty, depth + 1, visited, false);
+            for field_def in adt_def.all_fields() {
+                let field_ty = field_def.ty(tcx, args);
+                let field_tree =
+                    typetree_from_ty_impl_inner(tcx, field_ty, depth + 1, visited, false);
 
-                    let field_offset = layout.fields.offset(field_idx).bytes_usize();
+                let field_offset = current_offset;
 
-                    for elem_type in &field_tree.0 {
-                        types.push(Type {
-                            offset: if elem_type.offset == -1 {
-                                field_offset as isize
-                            } else {
-                                field_offset as isize + elem_type.offset
-                            },
-                            size: elem_type.size,
-                            kind: elem_type.kind,
-                            child: elem_type.child.clone(),
-                        });
-                    }
+                for elem_type in &field_tree.0 {
+                    types.push(Type {
+                        offset: if elem_type.offset == -1 {
+                            field_offset as isize
+                        } else {
+                            field_offset as isize + elem_type.offset
+                        },
+                        size: elem_type.size,
+                        kind: elem_type.kind,
+                        child: elem_type.child.clone(),
+                    });
                 }
 
-                return TypeTree(types);
+                current_offset += ty::layout::ty_size_for_frontend(tcx, field_ty)
+                    .map(|size| size.bytes_usize())
+                    .unwrap_or(0);
             }
+
+            return TypeTree(types);
         }
     }
 

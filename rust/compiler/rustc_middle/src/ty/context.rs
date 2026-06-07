@@ -15,7 +15,7 @@ use std::ops::Deref;
 use std::sync::{Arc, OnceLock};
 use std::{fmt, iter, mem};
 
-use rustc_abi::{ExternAbi, FieldIdx, Layout, LayoutData, TargetDataLayout, VariantIdx};
+use rustc_abi::{ExternAbi, FieldIdx, HasDataLayout, TargetDataLayout, VariantIdx};
 use rustc_ast as ast;
 use rustc_data_structures::defer;
 use rustc_data_structures::fx::FxHashMap;
@@ -147,7 +147,6 @@ pub struct CtxtInterners<'tcx> {
     pat: InternedSet<'tcx, PatternKind<'tcx>>,
     const_allocation: InternedSet<'tcx, Allocation>,
     bound_variable_kinds: InternedSet<'tcx, List<ty::BoundVariableKind<'tcx>>>,
-    layout: InternedSet<'tcx, LayoutData<FieldIdx, VariantIdx>>,
     adt_def: InternedSet<'tcx, AdtDefData>,
     external_constraints: InternedSet<'tcx, ExternalConstraintsData<TyCtxt<'tcx>>>,
     predefined_opaques_in_body: InternedSet<'tcx, List<(ty::OpaqueTypeKey<'tcx>, Ty<'tcx>)>>,
@@ -185,7 +184,6 @@ impl<'tcx> CtxtInterners<'tcx> {
             pat: InternedSet::with_capacity(N),
             const_allocation: InternedSet::with_capacity(N),
             bound_variable_kinds: InternedSet::with_capacity(N * 2),
-            layout: InternedSet::with_capacity(N),
             adt_def: InternedSet::with_capacity(N),
             external_constraints: InternedSet::with_capacity(N),
             predefined_opaques_in_body: InternedSet::with_capacity(N),
@@ -642,6 +640,13 @@ impl<'tcx> Deref for TyCtxt<'tcx> {
     #[inline(always)]
     fn deref(&self) -> &Self::Target {
         &self.gcx
+    }
+}
+
+impl<'tcx> HasDataLayout for TyCtxt<'tcx> {
+    #[inline]
+    fn data_layout(&self) -> &TargetDataLayout {
+        &self.gcx.data_layout
     }
 }
 
@@ -1660,7 +1665,6 @@ nop_lift! { pat; Pattern<'a> => Pattern<'tcx> }
 nop_lift! { const_allocation; ConstAllocation<'a> => ConstAllocation<'tcx> }
 nop_lift! { predicate; Predicate<'a> => Predicate<'tcx> }
 nop_lift! { predicate; Clause<'a> => Clause<'tcx> }
-nop_lift! { layout; Layout<'a> => Layout<'tcx> }
 nop_lift! { valtree; ValTree<'a> => ValTree<'tcx> }
 
 nop_list_lift! { type_lists; Ty<'a> => Ty<'tcx> }
@@ -1780,7 +1784,6 @@ impl<'tcx> TyCtxt<'tcx> {
             writeln!(fmt, "GenericArgs interner: #{}", self.interners.args.len())?;
             writeln!(fmt, "Region interner: #{}", self.interners.region.len())?;
             writeln!(fmt, "Const Allocation interner: #{}", self.interners.const_allocation.len())?;
-            writeln!(fmt, "Layout interner: #{}", self.interners.layout.len())?;
 
             Ok(())
         })
@@ -1921,7 +1924,6 @@ direct_interners! {
     valtree: pub(crate) intern_valtree(ValTreeKind<TyCtxt<'tcx>>): ValTree -> ValTree<'tcx>,
     pat: pub mk_pat(PatternKind<'tcx>): Pattern -> Pattern<'tcx>,
     const_allocation: pub mk_const_alloc(Allocation): ConstAllocation -> ConstAllocation<'tcx>,
-    layout: pub mk_layout(LayoutData<FieldIdx, VariantIdx>): Layout -> Layout<'tcx>,
     adt_def: pub mk_adt_def_from_data(AdtDefData): AdtDef -> AdtDef<'tcx>,
     external_constraints: pub mk_external_constraints(ExternalConstraintsData<TyCtxt<'tcx>>):
         ExternalConstraints -> ExternalConstraints<'tcx>,

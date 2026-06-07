@@ -1,11 +1,8 @@
 use std::collections::hash_map::Entry::*;
 
-use rustc_abi::{CanonAbi, X86Call};
-use rustc_ast::expand::allocator::{AllocatorKind, NO_ALLOC_SHIM_IS_UNSTABLE, global_fn_name};
 use rustc_data_structures::unord::UnordMap;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{CrateNum, DefId, DefIdMap, LOCAL_CRATE, LocalDefId};
-use rustc_middle::bug;
 use rustc_middle::middle::codegen_fn_attrs::CodegenFnAttrFlags;
 use rustc_middle::middle::exported_symbols::{
     ExportedSymbol, SymbolExportInfo, SymbolExportKind, SymbolExportLevel,
@@ -14,13 +11,7 @@ use rustc_middle::query::LocalCrate;
 use rustc_middle::ty::{self, GenericArgKind, GenericArgsRef, Instance, SymbolName, Ty, TyCtxt};
 use rustc_middle::util::Providers;
 use rustc_session::config::CrateType;
-use rustc_span::Span;
-use rustc_symbol_mangling::mangle_internal_symbol;
-use rustc_target::spec::{Arch, Os, TlsModel};
 use tracing::debug;
-
-use crate::back::symbol_export;
-use crate::base::allocator_shim_contents;
 
 fn threshold(tcx: TyCtxt<'_>) -> SymbolExportLevel {
     crates_export_threshold(tcx.crate_types())
@@ -496,28 +487,6 @@ pub(crate) fn provide(providers: &mut Providers) {
         upstream_monomorphizations_for_provider;
 }
 
-pub(crate) fn allocator_shim_symbols(
-    tcx: TyCtxt<'_>,
-    kind: AllocatorKind,
-) -> impl Iterator<Item = (String, SymbolExportKind)> {
-    allocator_shim_contents(tcx, kind)
-        .into_iter()
-        .map(move |method| mangle_internal_symbol(tcx, global_fn_name(method.name).as_str()))
-        .chain([mangle_internal_symbol(tcx, NO_ALLOC_SHIM_IS_UNSTABLE)])
-        .map(move |symbol_name| {
-            let exported_symbol = ExportedSymbol::NoDefId(SymbolName::new(tcx, &symbol_name));
-
-            (
-                symbol_export::exporting_symbol_name_for_instance_in_crate(
-                    tcx,
-                    exported_symbol,
-                    LOCAL_CRATE,
-                ),
-                SymbolExportKind::Text,
-            )
-        })
-}
-
 fn symbol_export_level(tcx: TyCtxt<'_>, sym_def_id: DefId) -> SymbolExportLevel {
     // We export anything that's not mangled at the "C" layer as it probably has
     // to do with ABI concerns. We do not, however, apply such treatment to
@@ -546,210 +515,6 @@ fn symbol_export_level(tcx: TyCtxt<'_>, sym_def_id: DefId) -> SymbolExportLevel 
     }
 }
 
-/// This is the symbol name of the given instance instantiated in a specific crate.
-pub(crate) fn symbol_name_for_instance_in_crate<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    symbol: ExportedSymbol<'tcx>,
-    instantiating_crate: CrateNum,
-) -> String {
-    // If this is something instantiated in the local crate then we might
-    // already have cached the name as a query result.
-    if instantiating_crate == LOCAL_CRATE {
-        return symbol.symbol_name_for_local_instance(tcx).to_string();
-    }
-
-    // This is something instantiated in an upstream crate, so we have to use
-    // the slower (because uncached) version of computing the symbol name.
-    match symbol {
-        ExportedSymbol::NonGeneric(def_id) => {
-            rustc_symbol_mangling::symbol_name_for_instance_in_crate(
-                tcx,
-                Instance::mono(tcx, def_id),
-                instantiating_crate,
-            )
-        }
-        ExportedSymbol::Generic(def_id, args) => {
-            rustc_symbol_mangling::symbol_name_for_instance_in_crate(
-                tcx,
-                Instance::new_raw(def_id, args),
-                instantiating_crate,
-            )
-        }
-        ExportedSymbol::ThreadLocalShim(def_id) => {
-            rustc_symbol_mangling::symbol_name_for_instance_in_crate(
-                tcx,
-                ty::Instance {
-                    def: ty::InstanceKind::ThreadLocalShim(def_id),
-                    args: ty::GenericArgs::empty(),
-                },
-                instantiating_crate,
-            )
-        }
-        ExportedSymbol::DropGlue(ty) => rustc_symbol_mangling::symbol_name_for_instance_in_crate(
-            tcx,
-            Instance::resolve_drop_in_place(tcx, ty),
-            instantiating_crate,
-        ),
-        ExportedSymbol::AsyncDropGlueCtorShim(ty) => {
-            rustc_symbol_mangling::symbol_name_for_instance_in_crate(
-                tcx,
-                Instance::resolve_async_drop_in_place(tcx, ty),
-                instantiating_crate,
-            )
-        }
-        ExportedSymbol::AsyncDropGlue(def_id, ty) => {
-            rustc_symbol_mangling::symbol_name_for_instance_in_crate(
-                tcx,
-                Instance::resolve_async_drop_in_place_poll(tcx, def_id, ty),
-                instantiating_crate,
-            )
-        }
-        ExportedSymbol::NoDefId(symbol_name) => symbol_name.to_string(),
-    }
-}
-
-fn calling_convention_for_symbol<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    symbol: ExportedSymbol<'tcx>,
-) -> (CanonAbi, &'tcx [rustc_target::callconv::ArgAbi<'tcx, Ty<'tcx>>]) {
-    let instance = match symbol {
-        ExportedSymbol::NonGeneric(def_id) | ExportedSymbol::Generic(def_id, _)
-            if tcx.is_static(def_id) =>
-        {
-            None
-        }
-        ExportedSymbol::NonGeneric(def_id) => Some(Instance::mono(tcx, def_id)),
-        ExportedSymbol::Generic(def_id, args) => Some(Instance::new_raw(def_id, args)),
-        // DropGlue always use the Rust calling convention and thus follow the target's default
-        // symbol decoration scheme.
-        ExportedSymbol::DropGlue(..) => None,
-        // AsyncDropGlueCtorShim always use the Rust calling convention and thus follow the
-        // target's default symbol decoration scheme.
-        ExportedSymbol::AsyncDropGlueCtorShim(..) => None,
-        ExportedSymbol::AsyncDropGlue(..) => None,
-        // NoDefId always follow the target's default symbol decoration scheme.
-        ExportedSymbol::NoDefId(..) => None,
-        // ThreadLocalShim always follow the target's default symbol decoration scheme.
-        ExportedSymbol::ThreadLocalShim(..) => None,
-    };
-
-    instance
-        .map(|i| {
-            tcx.fn_abi_of_instance(
-                ty::TypingEnv::fully_monomorphized().as_query_input((i, ty::List::empty())),
-            )
-            .unwrap_or_else(|_| bug!("fn_abi_of_instance({i:?}) failed"))
-        })
-        .map(|fnabi| (fnabi.conv, &fnabi.args[..]))
-        // FIXME(workingjubilee): why don't we know the convention here?
-        .unwrap_or((CanonAbi::Rust, &[]))
-}
-
-/// This is the symbol name of the given instance as seen by the linker.
-///
-/// On 32-bit Windows symbols are decorated according to their calling conventions.
-pub(crate) fn linking_symbol_name_for_instance_in_crate<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    symbol: ExportedSymbol<'tcx>,
-    export_kind: SymbolExportKind,
-    instantiating_crate: CrateNum,
-) -> String {
-    let mut undecorated = symbol_name_for_instance_in_crate(tcx, symbol, instantiating_crate);
-
-    // thread local will not be a function call,
-    // so it is safe to return before windows symbol decoration check.
-    if let Some(name) = maybe_emutls_symbol_name(tcx, symbol, &undecorated) {
-        return name;
-    }
-
-    let target = &tcx.sess.target;
-    if !target.is_like_windows {
-        // Mach-O has a global "_" suffix and `object` crate will handle it.
-        // ELF does not have any symbol decorations.
-        return undecorated;
-    }
-
-    let prefix = match target.arch {
-        Arch::X86 => Some('_'),
-        Arch::X86_64 => None,
-        // Only functions are decorated for arm64ec.
-        Arch::Arm64EC if export_kind == SymbolExportKind::Text => Some('#'),
-        // Only x86/64 and arm64ec use symbol decorations.
-        _ => return undecorated,
-    };
-
-    let (callconv, args) = calling_convention_for_symbol(tcx, symbol);
-
-    // Decorate symbols with prefixes, suffixes and total number of bytes of arguments.
-    // Reference: https://docs.microsoft.com/en-us/cpp/build/reference/decorated-names?view=msvc-170
-    let (prefix, suffix) = match callconv {
-        CanonAbi::X86(X86Call::Fastcall) => ("@", "@"),
-        CanonAbi::X86(X86Call::Stdcall) => ("_", "@"),
-        CanonAbi::X86(X86Call::Vectorcall) => ("", "@@"),
-        _ => {
-            if let Some(prefix) = prefix {
-                undecorated.insert(0, prefix);
-            }
-            return undecorated;
-        }
-    };
-
-    let args_in_bytes: u64 = args
-        .iter()
-        .map(|abi| abi.layout.size.bytes().next_multiple_of(target.pointer_width as u64 / 8))
-        .sum();
-    format!("{prefix}{undecorated}{suffix}{args_in_bytes}")
-}
-
-pub(crate) fn exporting_symbol_name_for_instance_in_crate<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    symbol: ExportedSymbol<'tcx>,
-    cnum: CrateNum,
-) -> String {
-    let undecorated = symbol_name_for_instance_in_crate(tcx, symbol, cnum);
-    maybe_emutls_symbol_name(tcx, symbol, &undecorated).unwrap_or(undecorated)
-}
-
-/// On amdhsa, `gpu-kernel` functions have an associated metadata object with a `.kd` suffix.
-/// Add it to the symbols list for all kernel functions, so that it is exported in the linked
-/// object.
-pub(crate) fn extend_exported_symbols<'tcx>(
-    symbols: &mut Vec<(String, SymbolExportKind)>,
-    tcx: TyCtxt<'tcx>,
-    symbol: ExportedSymbol<'tcx>,
-    instantiating_crate: CrateNum,
-) {
-    let (callconv, _) = calling_convention_for_symbol(tcx, symbol);
-
-    if callconv != CanonAbi::GpuKernel || tcx.sess.target.os != Os::AmdHsa {
-        return;
-    }
-
-    let undecorated = symbol_name_for_instance_in_crate(tcx, symbol, instantiating_crate);
-
-    // Add the symbol for the kernel descriptor (with .kd suffix)
-    // Per https://llvm.org/docs/AMDGPUUsage.html#symbols these will always be `STT_OBJECT` so
-    // export as data.
-    symbols.push((format!("{undecorated}.kd"), SymbolExportKind::Data));
-}
-
-fn maybe_emutls_symbol_name<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    symbol: ExportedSymbol<'tcx>,
-    undecorated: &str,
-) -> Option<String> {
-    if matches!(tcx.sess.tls_model(), TlsModel::Emulated)
-        && let ExportedSymbol::NonGeneric(def_id) = symbol
-        && tcx.is_thread_local_static(def_id)
-    {
-        // When using emutls, LLVM will add the `__emutls_v.` prefix to thread local symbols,
-        // and exported symbol name need to match this.
-        Some(format!("__emutls_v.{undecorated}"))
-    } else {
-        None
-    }
-}
-
 fn wasm_import_module_map(tcx: TyCtxt<'_>, cnum: CrateNum) -> DefIdMap<String> {
     // Build up a map from DefId to a `NativeLib` structure, where
     // `NativeLib` internally contains information about
@@ -772,44 +537,4 @@ fn wasm_import_module_map(tcx: TyCtxt<'_>, cnum: CrateNum) -> DefIdMap<String> {
     }
 
     ret
-}
-
-pub fn escape_symbol_name(tcx: TyCtxt<'_>, symbol: &str, span: Span) -> String {
-    // https://github.com/llvm/llvm-project/blob/a55fbab0cffc9b4af497b9e4f187b61143743e06/llvm/lib/MC/MCSymbol.cpp
-    use rustc_target::spec::{Arch, BinaryFormat};
-    if !symbol.is_empty()
-        && symbol.chars().all(|c| matches!(c, '0'..='9' | 'A'..='Z' | 'a'..='z' | '_' | '$' | '.'))
-    {
-        return symbol.to_string();
-    }
-    if tcx.sess.target.binary_format == BinaryFormat::Xcoff {
-        tcx.sess.dcx().span_fatal(
-            span,
-            format!(
-                "symbol escaping is not supported for the binary format {}",
-                tcx.sess.target.binary_format
-            ),
-        );
-    }
-    if tcx.sess.target.arch == Arch::Nvptx64 {
-        tcx.sess.dcx().span_fatal(
-            span,
-            format!(
-                "symbol escaping is not supported for the architecture {}",
-                tcx.sess.target.arch
-            ),
-        );
-    }
-    let mut escaped_symbol = String::new();
-    escaped_symbol.push('\"');
-    for c in symbol.chars() {
-        match c {
-            '\n' => escaped_symbol.push_str("\\\n"),
-            '"' => escaped_symbol.push_str("\\\""),
-            '\\' => escaped_symbol.push_str("\\\\"),
-            c => escaped_symbol.push(c),
-        }
-    }
-    escaped_symbol.push('\"');
-    escaped_symbol
 }

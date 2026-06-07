@@ -890,11 +890,9 @@ pub static DEFAULT_QUERY_PROVIDERS: LazyLock<Providers> = LazyLock::new(|| {
     limits::provide(&mut providers.queries);
     proc_macro_decls::provide(&mut providers.queries);
     rustc_expand::provide(&mut providers.queries);
-    rustc_const_eval::provide(providers);
     rustc_middle::hir::provide(&mut providers.queries);
     rustc_incremental::provide(providers);
     rustc_mir_build::provide(providers);
-    rustc_mir_transform::provide(providers);
     rustc_privacy::provide(&mut providers.queries);
     rustc_query_impl::provide(providers);
     rustc_resolve::provide(&mut providers.queries);
@@ -908,7 +906,6 @@ pub static DEFAULT_QUERY_PROVIDERS: LazyLock<Providers> = LazyLock::new(|| {
     rustc_ty_utils::provide(&mut providers.queries);
     rustc_metadata::provide(providers);
     rustc_lint::provide(&mut providers.queries);
-    rustc_symbol_mangling::provide(&mut providers.queries);
     rustc_codegen_ssa::provide(providers);
     *providers
 });
@@ -956,9 +953,7 @@ pub fn create_and_enter_global_ctxt<T, F: for<'tcx> FnOnce(TyCtxt<'tcx>) -> T>(
 
     let query_result_on_disk_cache = rustc_incremental::load_query_result_cache(sess);
 
-    let codegen_backend = &compiler.codegen_backend;
     let mut providers = *DEFAULT_QUERY_PROVIDERS;
-    codegen_backend.provide(&mut providers);
 
     if let Some(callback) = compiler.override_queries {
         callback(sess, &mut providers);
@@ -1149,39 +1144,13 @@ fn run_required_analyses(tcx: TyCtxt<'_>) {
     // This improves performance by allowing lock-free access to them.
     tcx.untracked().definitions.freeze();
 
-    sess.time("MIR_borrow_checking", || {
+    sess.time("body_checking", || {
         tcx.par_hir_body_owners(|def_id| {
             let not_typeck_child = !tcx.is_typeck_child(def_id.to_def_id());
             if not_typeck_child {
                 // Child unsafety and borrowck happens together with the parent
                 tcx.ensure_ok().check_unsafety(def_id);
-            }
-            if tcx.is_trivial_const(def_id) {
-                return;
-            }
-            if not_typeck_child {
-                tcx.ensure_ok().mir_borrowck(def_id);
                 tcx.ensure_ok().check_transmutes(def_id);
-            }
-            tcx.ensure_ok().has_ffi_unwind_calls(def_id);
-            tcx.ensure_ok().check_liveness(def_id);
-
-            // If we need to codegen, ensure that we emit all errors from
-            // `mir_drops_elaborated_and_const_checked` now, to avoid discovering
-            // them later during codegen.
-            if tcx.sess.opts.output_types.should_codegen()
-                || tcx.hir_body_const_context(def_id).is_some()
-            {
-                tcx.ensure_ok().mir_drops_elaborated_and_const_checked(def_id);
-            }
-            if tcx.is_coroutine(def_id.to_def_id())
-                && (!tcx.is_async_drop_in_place_coroutine(def_id.to_def_id()))
-            {
-                // Eagerly check the unsubstituted layout for cycles.
-                tcx.ensure_ok().layout_of(
-                    ty::TypingEnv::post_analysis(tcx, def_id.to_def_id())
-                        .as_query_input(tcx.type_of(def_id).instantiate_identity().skip_norm_wip()),
-                );
             }
         });
     });
@@ -1253,22 +1222,6 @@ fn analysis(tcx: TyCtxt<'_>, (): ()) {
         // we will fail to emit overlap diagnostics. Thus we invoke it here unconditionally.
         let _ = tcx.all_diagnostic_items(());
     });
-
-    // If `-Zvalidate-mir` is set, we also want to compute the final MIR for each item
-    // (either its `mir_for_ctfe` or `optimized_mir`) since that helps uncover any bugs
-    // in MIR optimizations that may only be reachable through codegen, or other codepaths
-    // that requires the optimized/ctfe MIR, coroutine bodies, or evaluating consts.
-    // Nevertheless, wait after type checking is finished, as optimizing code that does not
-    // type-check is very prone to ICEs.
-    if tcx.sess.opts.unstable_opts.validate_mir {
-        sess.time("ensuring_final_MIR_is_computable", || {
-            tcx.par_hir_body_owners(|def_id| {
-                if !tcx.is_trivial_const(def_id) {
-                    tcx.instance_mir(ty::InstanceKind::Item(def_id.into()));
-                }
-            });
-        });
-    }
 }
 
 /// Runs the codegen backend, after which the AST and analysis can
@@ -1284,12 +1237,6 @@ pub(crate) fn start_codegen<'tcx>(
         && find_attr!(tcx, def_id, RustcDelayedBugFromInsideQuery)
     {
         tcx.ensure_ok().trigger_delayed_bug(def_id);
-    }
-
-    // Don't run this test assertions when not doing codegen. Compiletest tries to build
-    // build-fail tests in check mode first and expects it to not give an error in that case.
-    if tcx.sess.opts.output_types.should_codegen() {
-        rustc_symbol_mangling::test::dump_symbol_names_and_def_paths(tcx);
     }
 
     // Don't do code generation if there were any errors. Likewise if

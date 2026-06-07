@@ -16,7 +16,6 @@
 use std::fmt::Write;
 
 use ast::token::TokenKind;
-use rustc_abi::BackendRepr;
 use rustc_ast::tokenstream::{TokenStream, TokenTree};
 use rustc_ast::visit::{FnCtxt, FnKind};
 use rustc_ast::{self as ast, *};
@@ -31,7 +30,6 @@ use rustc_hir::intravisit::FnKind as HirFnKind;
 use rustc_hir::{self as hir, Body, FnDecl, ImplItemImplKind, PatKind, PredicateOrigin, find_attr};
 use rustc_middle::bug;
 use rustc_middle::lint::LevelAndSource;
-use rustc_middle::ty::layout::LayoutOf;
 use rustc_middle::ty::print::with_no_trimmed_paths;
 use rustc_middle::ty::{
     self, AssocContainer, Ty, TyCtxt, TypeVisitableExt, Unnormalized, Upcast, VariantDef,
@@ -607,7 +605,7 @@ impl<'tcx> LateLintPass<'tcx> for MissingCopyImplementations {
         // Default value of clippy::trivially_copy_pass_by_ref
         const MAX_SIZE: u64 = 256;
 
-        if let Some(size) = cx.layout_of(ty).ok().map(|l| l.size.bytes()) {
+        if let Some(size) = ty::layout::ty_size_for_frontend(cx.tcx, ty).map(|s| s.bytes()) {
             if size > MAX_SIZE {
                 return;
             }
@@ -2469,13 +2467,13 @@ impl<'tcx> LateLintPass<'tcx> for InvalidValue {
 
         fn variant_find_init_error<'tcx>(
             cx: &LateContext<'tcx>,
-            ty: Ty<'tcx>,
+            _ty: Ty<'tcx>,
             variant: &VariantDef,
             args: ty::GenericArgsRef<'tcx>,
             descr: &str,
             init: InitKind,
         ) -> Option<InitError> {
-            let mut field_err = variant.fields.iter().find_map(|field| {
+            let field_err = variant.fields.iter().find_map(|field| {
                 ty_find_init_error(cx, field.ty(cx.tcx, args), init).map(|mut err| {
                     if !field.did.is_local() {
                         err
@@ -2491,33 +2489,6 @@ impl<'tcx> LateLintPass<'tcx> for InvalidValue {
                 })
             });
 
-            // Check if this ADT has a constrained layout (like `NonNull` and friends).
-            if let Ok(layout) = cx.tcx.layout_of(cx.typing_env().as_query_input(ty)) {
-                if let BackendRepr::Scalar(scalar) | BackendRepr::ScalarPair(scalar, _) =
-                    &layout.backend_repr
-                {
-                    let range = scalar.valid_range(cx);
-                    let msg = if !range.contains(0) {
-                        "must be non-null"
-                    } else if init == InitKind::Uninit && !scalar.is_always_valid(cx) {
-                        // Prefer reporting on the fields over the entire struct for uninit,
-                        // as the information bubbles out and it may be unclear why the type can't
-                        // be null from just its outside signature.
-
-                        "must be initialized inside its custom valid range"
-                    } else {
-                        return field_err;
-                    };
-                    if let Some(field_err) = &mut field_err {
-                        // Most of the time, if the field error is the same as the struct error,
-                        // the struct error only happens because of the field error.
-                        if field_err.message.contains(msg) {
-                            field_err.message = format!("because {}", field_err.message);
-                        }
-                    }
-                    return Some(InitError::from(format!("`{ty}` {msg}")).nested(field_err));
-                }
-            }
             field_err
         }
 
@@ -2711,8 +2682,8 @@ impl<'tcx> LateLintPass<'tcx> for DerefNullPtr {
             let ty::RawPtr(pointee, _) = pointer_ty.kind() else {
                 return false;
             };
-            if let Ok(layout) = cx.tcx.layout_of(cx.typing_env().as_query_input(*pointee)) {
-                if layout.layout.size() == rustc_abi::Size::ZERO {
+            if let Some(size) = ty::layout::ty_size_for_frontend(cx.tcx, *pointee) {
+                if size == rustc_abi::Size::ZERO {
                     return false;
                 }
             }

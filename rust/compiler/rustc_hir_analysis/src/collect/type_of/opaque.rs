@@ -183,21 +183,20 @@ impl<'tcx> TaitConstraintLocator<'tcx> {
                     self.non_defining_use_in_defining_scope(item_def_id);
                 }
             }
-            DefiningScopeKind::MirBorrowck => match tcx.mir_borrowck(item_def_id) {
-                Err(guar) => self.insert_found(ty::DefinitionSiteHiddenType::new_error(tcx, guar)),
-                Ok(hidden_types) => {
-                    if let Some(&hidden_type) = hidden_types.get(&self.def_id) {
-                        debug!(?hidden_type, "found constraint");
-                        self.insert_found(hidden_type);
-                    } else if let Err(guar) =
-                        tcx.type_of_opaque_hir_typeck(self.def_id).skip_binder().error_reported()
-                    {
-                        self.insert_found(ty::DefinitionSiteHiddenType::new_error(tcx, guar));
-                    } else {
-                        self.non_defining_use_in_defining_scope(item_def_id);
-                    }
+            DefiningScopeKind::MirBorrowck => {
+                let tables = tcx.typeck(item_def_id);
+                if let Some(guar) = tables.tainted_by_errors {
+                    self.insert_found(ty::DefinitionSiteHiddenType::new_error(tcx, guar));
+                } else if let Some(&hidden_type) = tables.hidden_types.get(&self.def_id) {
+                    self.insert_found(hidden_type);
+                } else if let Err(guar) =
+                    tcx.type_of_opaque_hir_typeck(self.def_id).skip_binder().error_reported()
+                {
+                    self.insert_found(ty::DefinitionSiteHiddenType::new_error(tcx, guar));
+                } else {
+                    self.non_defining_use_in_defining_scope(item_def_id);
                 }
-            },
+            }
         }
     }
 }
@@ -268,21 +267,21 @@ pub(super) fn find_opaque_ty_constraints_for_rpit<'tcx>(
                 EarlyBinder::bind(tcx.types.unit)
             }
         }
-        DefiningScopeKind::MirBorrowck => match tcx.mir_borrowck(owner_def_id) {
-            Ok(hidden_types) => {
-                if let Some(hidden_ty) = hidden_types.get(&def_id) {
-                    hidden_ty.ty
+        DefiningScopeKind::MirBorrowck => {
+            let tables = tcx.typeck(owner_def_id);
+            if let Some(guar) = tables.tainted_by_errors {
+                EarlyBinder::bind(Ty::new_error(tcx, guar))
+            } else if let Some(hidden_ty) = tables.hidden_types.get(&def_id) {
+                hidden_ty.ty
+            } else {
+                let hir_ty = tcx.type_of_opaque_hir_typeck(def_id);
+                if let Err(guar) = hir_ty.skip_binder().error_reported() {
+                    EarlyBinder::bind(Ty::new_error(tcx, guar))
                 } else {
-                    let hir_ty = tcx.type_of_opaque_hir_typeck(def_id);
-                    if let Err(guar) = hir_ty.skip_binder().error_reported() {
-                        EarlyBinder::bind(Ty::new_error(tcx, guar))
-                    } else {
-                        assert!(!tcx.next_trait_solver_globally());
-                        hir_ty
-                    }
+                    assert!(!tcx.next_trait_solver_globally());
+                    hir_ty
                 }
             }
-            Err(guar) => EarlyBinder::bind(Ty::new_error(tcx, guar)),
-        },
+        }
     }
 }

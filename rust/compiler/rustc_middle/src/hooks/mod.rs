@@ -106,11 +106,6 @@ declare_hooks! {
     /// This checks non-recursive runtime validity.
     hook validate_scalar_in_layout(scalar: crate::ty::ScalarInt, ty: Ty<'tcx>) -> bool;
 
-    /// **Do not call this directly; call the `mir_built` query instead.**
-    ///
-    /// Creates the MIR for a given `DefId`, including unreachable code.
-    hook build_mir_inner_impl(def: LocalDefId) -> mir::Body<'tcx>;
-
     /// Serializes all eligible query return values into the on-disk cache.
     hook encode_query_values(encoder: &mut CacheEncoder<'_, 'tcx>) -> ();
 }

@@ -1,5 +1,3 @@
-use std::fmt;
-
 use rustc_span::Symbol;
 
 use super::{InlineAsmArch, InlineAsmType, ModifierInfo};
@@ -34,20 +32,12 @@ impl LoongArchInlineAsmRegClass {
 
     pub fn supported_types(
         self,
-        arch: InlineAsmArch,
+        _arch: InlineAsmArch,
     ) -> &'static [(InlineAsmType, Option<Symbol>)] {
-        match (self, arch) {
-            (Self::reg, InlineAsmArch::LoongArch64) => {
-                types! { _: I8, I16, I32, I64, F16, F32, F64; }
-            }
-            (Self::reg, InlineAsmArch::LoongArch32) => types! { _: I8, I16, I32, F16, F32; },
-            (Self::freg, _) => types! { f: F16, F32; d: F64; },
-            _ => unreachable!("unsupported register class"),
-        }
+        &[]
     }
 }
 
-// The reserved registers are taken from <https://github.com/llvm/llvm-project/blob/main/llvm/lib/Target/LoongArch/LoongArchRegisterInfo.cpp#79>
 def_regs! {
     LoongArch LoongArchInlineAsmReg LoongArchInlineAsmRegClass {
         r1: reg = ["$r1","$ra"],
@@ -108,28 +98,5 @@ def_regs! {
         f29: freg = ["$f29","$fs5"],
         f30: freg = ["$f30","$fs6"],
         f31: freg = ["$f31","$fs7"],
-        #error = ["$r0","$zero"] =>
-            "constant zero cannot be used as an operand for inline asm",
-        #error = ["$r2","$tp"] =>
-            "reserved for TLS",
-        #error = ["$r3","$sp"] =>
-            "the stack pointer cannot be used as an operand for inline asm",
-        #error = ["$r21"] =>
-            "reserved by the ABI",
-        #error = ["$r22","$fp"] =>
-            "the frame pointer cannot be used as an operand for inline asm",
-        #error = ["$r31","$s8"] =>
-            "$r31 is used internally by LLVM and cannot be used as an operand for inline asm",
-    }
-}
-
-impl LoongArchInlineAsmReg {
-    pub fn emit(
-        self,
-        out: &mut dyn fmt::Write,
-        _arch: InlineAsmArch,
-        _modifier: Option<char>,
-    ) -> fmt::Result {
-        out.write_str(self.name())
     }
 }

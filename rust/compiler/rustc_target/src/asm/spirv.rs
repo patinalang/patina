@@ -33,11 +33,7 @@ impl SpirVInlineAsmRegClass {
         self,
         _arch: InlineAsmArch,
     ) -> &'static [(InlineAsmType, Option<Symbol>)] {
-        match self {
-            Self::reg => {
-                types! { _: I8, I16, I32, I64, F32, F64; }
-            }
-        }
+        &[]
     }
 }
 

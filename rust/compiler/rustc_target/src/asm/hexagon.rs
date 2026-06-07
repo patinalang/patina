@@ -1,5 +1,3 @@
-use std::fmt;
-
 use rustc_span::Symbol;
 
 use super::{InlineAsmArch, InlineAsmType, ModifierInfo};
@@ -40,20 +38,7 @@ impl HexagonInlineAsmRegClass {
         self,
         _arch: InlineAsmArch,
     ) -> &'static [(InlineAsmType, Option<Symbol>)] {
-        match self {
-            Self::reg => types! { _: I8, I16, I32, F32; },
-            Self::reg_pair => types! { _: I64, F64; },
-            Self::preg => &[],
-            Self::vreg => types! {
-                hvx_length64b: VecI32(16);
-                hvx_length128b: VecI32(32);
-            },
-            Self::vreg_pair => types! {
-                hvx_length64b: VecI32(32);
-                hvx_length128b: VecI32(64);
-            },
-            Self::qreg => &[],
-        }
+        &[]
     }
 }
 
@@ -156,95 +141,5 @@ def_regs! {
         q1: qreg = ["q1"],
         q2: qreg = ["q2"],
         q3: qreg = ["q3"],
-        #error = ["r19"] =>
-            "r19 is used internally by LLVM and cannot be used as an operand for inline asm",
-        #error = ["r19:18"] =>
-            "r19 is used internally by LLVM and cannot be used as an operand for inline asm",
-        #error = ["r29", "sp"] =>
-            "the stack pointer cannot be used as an operand for inline asm",
-        #error = ["r29:28"] =>
-            "the stack pointer cannot be used as an operand for inline asm",
-        #error = ["r30", "fr"] =>
-            "the frame register cannot be used as an operand for inline asm",
-        #error = ["r31", "lr"] =>
-            "the link register cannot be used as an operand for inline asm",
-        #error = ["r31:30"] =>
-            "the frame register and link register cannot be used as an operand for inline asm",
-    }
-}
-
-impl HexagonInlineAsmReg {
-    pub fn emit(
-        self,
-        out: &mut dyn fmt::Write,
-        _arch: InlineAsmArch,
-        _modifier: Option<char>,
-    ) -> fmt::Result {
-        out.write_str(self.name())
-    }
-
-    pub fn overlapping_regs(self, mut cb: impl FnMut(HexagonInlineAsmReg)) {
-        cb(self);
-
-        macro_rules! reg_pair_conflicts {
-            (
-                $(
-                    $pair:ident : $hi:ident $lo:ident,
-                )*
-            ) => {
-                match self {
-                    $(
-                        Self::$pair => {
-                            cb(Self::$hi);
-                            cb(Self::$lo);
-                        }
-                        Self::$hi => {
-                            cb(Self::$pair);
-                        }
-                        Self::$lo => {
-                            cb(Self::$pair);
-                        }
-                    )*
-                    _ => {}
-                }
-            };
-        }
-
-        // GPR pair ↔ single GPR conflicts
-        reg_pair_conflicts! {
-            r1_0 : r1 r0,
-            r3_2 : r3 r2,
-            r5_4 : r5 r4,
-            r7_6 : r7 r6,
-            r9_8 : r9 r8,
-            r11_10 : r11 r10,
-            r13_12 : r13 r12,
-            r15_14 : r15 r14,
-            r17_16 : r17 r16,
-            r21_20 : r21 r20,
-            r23_22 : r23 r22,
-            r25_24 : r25 r24,
-            r27_26 : r27 r26,
-        }
-
-        // HVX vector pair ↔ single vector conflicts
-        reg_pair_conflicts! {
-            v1_0 : v1 v0,
-            v3_2 : v3 v2,
-            v5_4 : v5 v4,
-            v7_6 : v7 v6,
-            v9_8 : v9 v8,
-            v11_10 : v11 v10,
-            v13_12 : v13 v12,
-            v15_14 : v15 v14,
-            v17_16 : v17 v16,
-            v19_18 : v19 v18,
-            v21_20 : v21 v20,
-            v23_22 : v23 v22,
-            v25_24 : v25 v24,
-            v27_26 : v27 v26,
-            v29_28 : v29 v28,
-            v31_30 : v31 v30,
-        }
     }
 }

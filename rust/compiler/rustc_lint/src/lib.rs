@@ -25,7 +25,6 @@
 #![feature(iter_order_by)]
 #![feature(rustc_attrs)]
 #![feature(titlecase)]
-#![feature(try_blocks)]
 // tidy-alphabetical-end
 
 mod async_closures;
@@ -45,10 +44,8 @@ mod expect;
 mod for_loops_over_fallibles;
 mod foreign_modules;
 mod function_cast_as_integer;
-mod gpukernel_abi;
 mod if_let_rescope;
 mod impl_trait_overcaptures;
-mod interior_mutable_consts;
 mod internal;
 mod invalid_from_utf8;
 mod late;
@@ -69,11 +66,8 @@ mod passes;
 mod precedence;
 mod ptr_nulls;
 mod redundant_semicolon;
-mod reference_casting;
 mod shadowed_into_iter;
-mod static_mut_refs;
 mod traits;
-mod transmute;
 mod types;
 mod unit_bindings;
 mod unqualified_local_imports;
@@ -92,10 +86,8 @@ use drop_forget_useless::*;
 use enum_intrinsics_non_enums::EnumIntrinsicsNonEnums;
 use for_loops_over_fallibles::*;
 use function_cast_as_integer::*;
-use gpukernel_abi::*;
 use if_let_rescope::IfLetRescope;
 use impl_trait_overcaptures::ImplTraitOvercaptures;
-use interior_mutable_consts::*;
 use internal::*;
 use invalid_from_utf8::*;
 use let_underscore::*;
@@ -112,15 +104,12 @@ use opaque_hidden_inferred_bound::*;
 use precedence::*;
 use ptr_nulls::*;
 use redundant_semicolon::*;
-use reference_casting::*;
 use rustc_hir::def_id::LocalModDefId;
 use rustc_middle::query::Providers;
 use rustc_middle::ty::TyCtxt;
 use shadowed_into_iter::ShadowedIntoIter;
 pub use shadowed_into_iter::{ARRAY_INTO_ITER, BOXED_SLICE_INTO_ITER};
-use static_mut_refs::*;
 use traits::*;
-use transmute::CheckTransmutes;
 use types::*;
 use unit_bindings::*;
 use unqualified_local_imports::*;
@@ -194,13 +183,9 @@ late_lint_methods!(
             DefaultCouldBeDerived: DefaultCouldBeDerived,
             DerefIntoDynSupertrait: DerefIntoDynSupertrait,
             DropForgetUseless: DropForgetUseless,
-            ImproperCTypesLint: ImproperCTypesLint,
-            ImproperGpuKernelLint: ImproperGpuKernelLint,
             InvalidFromUtf8: InvalidFromUtf8,
-            VariantSizeDifferences: VariantSizeDifferences,
             PathStatements: PathStatements,
             LetUnderscore: LetUnderscore,
-            InvalidReferenceCasting: InvalidReferenceCasting,
             ImplicitAutorefs: ImplicitAutorefs,
             // Depends on referenced function signatures in expressions
             UnusedResults: UnusedResults,
@@ -212,7 +197,6 @@ late_lint_methods!(
             MissingCopyImplementations: MissingCopyImplementations,
             // Depends on referenced function signatures in expressions
             PtrNullChecks: PtrNullChecks,
-            MutableTransmutes: MutableTransmutes,
             TypeAliasBounds: TypeAliasBounds,
             TrivialConstraints: TrivialConstraints,
             TypeLimits: TypeLimits::new(),
@@ -221,7 +205,6 @@ late_lint_methods!(
             // Depends on effective visibilities
             UnreachablePub: UnreachablePub,
             ExplicitOutlivesRequirements: ExplicitOutlivesRequirements,
-            InvalidValue: InvalidValue,
             DerefNullPtr: DerefNullPtr,
             UnstableFeatures: UnstableFeatures,
             UngatedAsyncFnTrackCaller: UngatedAsyncFnTrackCaller,
@@ -241,13 +224,10 @@ late_lint_methods!(
             AsyncClosureUsage: AsyncClosureUsage,
             AsyncFnInTrait: AsyncFnInTrait,
             NonLocalDefinitions: NonLocalDefinitions::default(),
-            InteriorMutableConsts: InteriorMutableConsts,
             ImplTraitOvercaptures: ImplTraitOvercaptures,
             IfLetRescope: IfLetRescope::default(),
-            StaticMutRefs: StaticMutRefs,
             UnqualifiedLocalImports: UnqualifiedLocalImports,
             FunctionCastsAsInteger: FunctionCastsAsInteger,
-            CheckTransmutes: CheckTransmutes,
             LifetimeSyntax: LifetimeSyntax,
             InternalEqTraitMethodImpls: InternalEqTraitMethodImpls,
         ]
@@ -367,7 +347,6 @@ fn register_builtins(store: &mut LintStore) {
     store.register_renamed("or_patterns_back_compat", "rust_2021_incompatible_or_patterns");
     store.register_renamed("non_fmt_panic", "non_fmt_panics");
     store.register_renamed("unused_tuple_struct_fields", "dead_code");
-    store.register_renamed("static_mut_ref", "static_mut_refs");
     store.register_renamed("temporary_cstring_as_ptr", "dangling_pointers_from_temporaries");
     store.register_renamed("elided_named_lifetimes", "mismatched_lifetime_syntaxes");
     store.register_renamed(

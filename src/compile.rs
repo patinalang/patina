@@ -14,11 +14,11 @@ use rustc_interface::{interface, passes};
 use rustc_middle::ty::{TyCtxt, TypeckResults};
 use rustc_parse::lexer::StripTokens;
 use rustc_parse::{new_parser_from_source_str, unwrap_or_emit_fatal};
+use rustc_session::config::PanicStrategy;
 use rustc_session::{Session, config};
 use rustc_span::edition::Edition;
 use rustc_span::source_map::FilePathMapping;
 use rustc_span::{ErrorGuaranteed, FileName, RealFileName};
-use rustc_target::spec::PanicStrategy;
 
 use crate::{DumpStage, Stage};
 

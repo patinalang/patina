@@ -354,7 +354,7 @@ impl<'tcx> GlobalAlloc<'tcx> {
     pub fn size_and_align(
         &self,
         tcx: TyCtxt<'tcx>,
-        typing_env: ty::TypingEnv<'tcx>,
+        _typing_env: ty::TypingEnv<'tcx>,
     ) -> (Size, Align) {
         match *self {
             GlobalAlloc::Static(def_id) => {
@@ -378,18 +378,14 @@ impl<'tcx> GlobalAlloc<'tcx> {
                         .type_of(def_id)
                         .no_bound_vars()
                         .expect("statics should not have generic parameters");
-                    let layout = tcx.layout_of(typing_env.as_query_input(ty)).unwrap();
-                    assert!(layout.is_sized());
-
-                    // Take over-alignment from attributes into account.
+                    let (size, align) = ty::layout::ty_size_and_align_for_frontend(tcx, ty)
+                        .unwrap_or_else(|| bug!("could not compute size for static type {ty:?}"));
                     let align = match tcx.codegen_fn_attrs(def_id).alignment {
-                        Some(align_from_attribute) => {
-                            Ord::max(align_from_attribute, layout.align.abi)
-                        }
-                        None => layout.align.abi,
+                        Some(align_from_attribute) => Ord::max(align_from_attribute, align),
+                        None => align,
                     };
 
-                    (layout.size, align)
+                    (size, align)
                 }
             }
             GlobalAlloc::Memory(alloc) => {

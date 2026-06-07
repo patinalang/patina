@@ -1,8 +1,6 @@
 use bitflags::bitflags;
-use rustc_abi::{BackendRepr, TyAbiInterface};
-use rustc_target::callconv::ArgAbi;
 
-use crate::ty::{self, PseudoCanonicalInput, Ty, TyCtxt, TypingEnv};
+use crate::ty::{self, Ty, TyCtxt};
 
 #[derive(Debug, Copy, Clone)]
 pub struct OffloadMetadata {
@@ -66,46 +64,22 @@ impl OffloadMetadata {
         }
     }
 
-    pub fn handle_abi<'tcx, C>(
-        cx: &C,
-        tcx: TyCtxt<'tcx>,
-        ty: Ty<'tcx>,
-        arg_abi: &ArgAbi<'tcx, Ty<'tcx>>,
-    ) -> Vec<(Self, Ty<'tcx>)>
-    where
-        Ty<'tcx>: TyAbiInterface<'tcx, C>,
-    {
-        match arg_abi.layout.backend_repr {
-            BackendRepr::ScalarPair(_, _) => (0..2)
-                .map(|i| {
-                    let ty = arg_abi.layout.field(cx, i).ty;
-                    (OffloadMetadata::from_ty(tcx, ty), ty)
-                })
-                .collect(),
-            _ => vec![(OffloadMetadata::from_ty(tcx, ty), ty)],
-        }
+    pub fn handle_abi<'tcx>(tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) -> Vec<(Self, Ty<'tcx>)> {
+        vec![(OffloadMetadata::from_ty(tcx, ty), ty)]
     }
 }
 
 // FIXME(Sa4dUs): implement a solid logic to determine the payload size
 fn get_payload_size<'tcx>(tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) -> OffloadSize {
     match ty.kind() {
-        ty::Slice(elem_ty) => {
-            let layout = tcx.layout_of(PseudoCanonicalInput {
-                typing_env: TypingEnv::fully_monomorphized(),
-                value: *elem_ty,
-            });
-            OffloadSize::Slice { element_size: layout.unwrap().size.bytes() }
-        }
+        ty::Slice(elem_ty) => OffloadSize::Slice {
+            element_size: ty::layout::ty_size_for_frontend(tcx, *elem_ty)
+                .map(|size| size.bytes())
+                .unwrap_or(0),
+        },
         ty::RawPtr(inner, _) | ty::Ref(_, inner, _) => get_payload_size(tcx, *inner),
         _ => OffloadSize::Static(
-            tcx.layout_of(PseudoCanonicalInput {
-                typing_env: TypingEnv::fully_monomorphized(),
-                value: ty,
-            })
-            .unwrap()
-            .size
-            .bytes(),
+            ty::layout::ty_size_for_frontend(tcx, ty).map(|size| size.bytes()).unwrap_or(0),
         ),
     }
 }

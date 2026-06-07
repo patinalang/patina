@@ -651,11 +651,8 @@ impl<'tcx> Operand<'tcx> {
         span: Span,
     ) -> Operand<'tcx> {
         debug_assert!({
-            let typing_env = ty::TypingEnv::fully_monomorphized();
-            let type_size = tcx
-                .layout_of(typing_env.as_query_input(ty))
-                .unwrap_or_else(|e| panic!("could not compute layout for {ty:?}: {e:?}"))
-                .size;
+            let type_size = ty::layout::ty_size_for_frontend(tcx, ty)
+                .unwrap_or_else(|| panic!("could not compute size for {ty:?}"));
             let scalar_size = match val {
                 Scalar::Int(int) => int.size(),
                 _ => panic!("Invalid scalar type {val:?}"),

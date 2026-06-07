@@ -1028,13 +1028,8 @@ impl<'tcx> DeadVisitor<'tcx> {
         }
         let is_positional = field.name.as_str().starts_with(|c: char| c.is_ascii_digit());
         if is_positional
-            && self
-                .tcx
-                .layout_of(
-                    ty::TypingEnv::non_body_analysis(self.tcx, field.did)
-                        .as_query_input(field_type),
-                )
-                .map_or(true, |layout| layout.is_zst())
+            && !ty::layout::ty_size_for_frontend(self.tcx, field_type)
+                .is_some_and(|size| size.bytes() == 0)
         {
             return ShouldWarnAboutField::No;
         }

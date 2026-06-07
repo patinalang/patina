@@ -211,15 +211,7 @@ fn structurally_same_type<'tcx>(
 ) -> bool {
     let mut seen_types = UnordSet::default();
     let result = structurally_same_type_impl(&mut seen_types, tcx, typing_env, a, b);
-    if cfg!(debug_assertions) && result {
-        // Sanity-check: must have same ABI, size and alignment.
-        // `extern` blocks cannot be generic, so we'll always get a layout here.
-        let a_layout = tcx.layout_of(typing_env.as_query_input(a)).unwrap();
-        let b_layout = tcx.layout_of(typing_env.as_query_input(b)).unwrap();
-        assert_eq!(a_layout.backend_repr, b_layout.backend_repr);
-        assert_eq!(a_layout.size, b_layout.size);
-        assert_eq!(a_layout.align, b_layout.align);
-    }
+    if cfg!(debug_assertions) && result {}
     result
 }
 

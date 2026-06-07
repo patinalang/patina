@@ -372,14 +372,12 @@ impl<'tcx> Collector<'tcx> {
         argument_types
             .iter()
             .map(|ty| {
-                let layout = self
-                    .tcx
-                    .layout_of(ty::TypingEnv::fully_monomorphized().as_query_input(ty))
-                    .expect("layout")
-                    .layout;
+                let size = ty::layout::ty_size_for_frontend(self.tcx, ty)
+                    .map(|size| size.bytes_usize())
+                    .unwrap_or(4);
                 // In both stdcall and fastcall, we always round up the argument size to the
                 // nearest multiple of 4 bytes.
-                (layout.size().bytes_usize() + 3) & !3
+                (size + 3) & !3
             })
             .sum()
     }
@@ -482,10 +480,7 @@ impl<'tcx> Collector<'tcx> {
             DllImportSymbolType::Function => rustc_abi::Size::ZERO,
             DllImportSymbolType::Static | DllImportSymbolType::ThreadLocal => {
                 let ty = self.tcx.type_of(item).instantiate_identity().skip_norm_wip();
-                self.tcx
-                    .layout_of(ty::TypingEnv::fully_monomorphized().as_query_input(ty))
-                    .ok()
-                    .map(|layout| layout.size)
+                ty::layout::ty_size_for_frontend(self.tcx, ty)
                     .unwrap_or_else(|| bug!("Non-function symbols must have a size"))
             }
         };

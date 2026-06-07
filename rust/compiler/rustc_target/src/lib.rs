@@ -16,7 +16,6 @@
 use std::path::{Path, PathBuf};
 
 pub mod asm;
-pub mod callconv;
 pub mod json;
 pub mod spec;
 pub mod target_features;

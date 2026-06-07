@@ -1,6 +1,6 @@
 use rustc_ast::LitKind;
 use rustc_hir::{BinOpKind, Expr, ExprKind, TyKind, find_attr};
-use rustc_middle::ty::RawPtr;
+use rustc_middle::ty::{self, RawPtr};
 use rustc_session::{declare_lint, declare_lint_pass};
 use rustc_span::{Span, sym};
 
@@ -179,12 +179,9 @@ impl<'tcx> LateLintPass<'tcx> for PtrNullChecks {
                         && let RawPtr(ty, _mutbl) = ty.kind()
                     {
                         // If ZST are fine, don't lint on them
-                        let typing_env = cx.typing_env();
                         if are_zsts_allowed
-                            && cx
-                                .tcx
-                                .layout_of(typing_env.as_query_input(*ty))
-                                .is_ok_and(|layout| layout.is_1zst())
+                            && ty::layout::ty_size_for_frontend(cx.tcx, *ty)
+                                .is_some_and(|size| size.bytes() == 0)
                         {
                             break;
                         }
