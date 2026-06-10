@@ -669,6 +669,7 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
                 | ty::Bool
                 | ty::Char
                 | ty::Str
+                | ty::Term
                 | ty::Int(_)
                 | ty::Uint(_)
                 | ty::Float(_) => {
@@ -875,6 +876,7 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
                 }
             }
             ty::Str => write!(self, "str")?,
+            ty::Term => write!(self, "term")?,
             ty::Coroutine(did, args) => {
                 write!(self, "{{")?;
                 let coroutine_kind = self.tcx().coroutine_kind(did).unwrap();

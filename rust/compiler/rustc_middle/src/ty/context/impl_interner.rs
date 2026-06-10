@@ -522,6 +522,7 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
             | ty::Adt(_, _)
             | ty::Foreign(_)
             | ty::Str
+            | ty::Term
             | ty::Array(_, _)
             | ty::Pat(_, _)
             | ty::Slice(_)

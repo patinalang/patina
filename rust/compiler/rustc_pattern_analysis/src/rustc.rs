@@ -417,6 +417,7 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
             // FIXME(Nadrieril): which of these are actually allowed?
             ty::Float(_)
             | ty::Str
+            | ty::Term
             | ty::Foreign(_)
             | ty::RawPtr(_, _)
             | ty::FnDef(_, _)

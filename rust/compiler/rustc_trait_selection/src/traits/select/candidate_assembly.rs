@@ -696,6 +696,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 | ty::Adt(_, _)
                 | ty::Foreign(_)
                 | ty::Str
+                | ty::Term
                 | ty::Array(_, _)
                 | ty::Pat(_, _)
                 | ty::Slice(_)
@@ -873,6 +874,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 | ty::Uint(_)
                 | ty::Float(_)
                 | ty::Str
+                | ty::Term
                 | ty::Array(_, _)
                 | ty::Pat(_, _)
                 | ty::Slice(_)
@@ -1156,6 +1158,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::Float(_)
             | ty::Char
             | ty::RawPtr(..)
+            | ty::Term
             | ty::Never
             | ty::Ref(_, _, hir::Mutability::Not)
             | ty::Array(..) => {}
@@ -1258,6 +1261,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::Array(..)
             | ty::Closure(..)
             | ty::CoroutineClosure(..)
+            | ty::Term
             | ty::Never
             | ty::Error(_) => {
                 candidates.vec.push(SizedCandidate);
@@ -1335,6 +1339,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::Adt(_, _)
             | ty::Foreign(_)
             | ty::Str
+            | ty::Term
             | ty::Array(_, _)
             | ty::Slice(_)
             | ty::RawPtr(_, _)
@@ -1375,6 +1380,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::Adt(..)
             | ty::Foreign(..)
             | ty::Str
+            | ty::Term
             | ty::Array(..)
             | ty::Pat(..)
             | ty::Slice(_)
@@ -1430,6 +1436,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::Pat(..)
             | ty::Dynamic(..)
             | ty::Str
+            | ty::Term
             | ty::Slice(_)
             | ty::Foreign(..)
             | ty::Alias(..)

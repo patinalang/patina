@@ -16,12 +16,19 @@ LL | struct Fahrenheit(int);
    |                   not found in this scope
    |                   help: perhaps you intended to use this type: `i32`
 
-error[E0425]: cannot find type `term` in this scope
-  --> tests/ui/src/unsafe__01.pt:8:39
+error[E0599]: no method named `try_cast_into` found for type `term` in the current scope
+  --> tests/ui/src/unsafe__01.pt:15:39
+   |
+LL |         let fahrenheit = degrees_term.try_cast_into::<Fahrenheit>().unwrap();
+   |                                       ^^^^^^^^^^^^^ method not found in `term`
+
+error[E0605]: non-primitive cast: `Celcius` as `term`
+  --> tests/ui/src/unsafe__01.pt:8:24
    |
 LL |     let degrees_term = Celcius(10) as term;
-   |                                       ^^^^ not found in this scope
+   |                        ^^^^^^^^^^^^^^^^^^^ an `as` expression can only be used to convert between primitive types or to coerce to a specific trait object
 
-error: aborting due to 3 previous errors
+error: aborting due to 4 previous errors
 
-For more information about this error, try `rustc --explain E0425`.
+Some errors have detailed explanations: E0425, E0599, E0605.
+For more information about an error, try `rustc --explain E0425`.

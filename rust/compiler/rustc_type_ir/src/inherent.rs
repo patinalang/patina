@@ -184,6 +184,7 @@ pub trait Ty<I: Interner<Ty = Self>>:
             | ty::CoroutineClosure(_, _)
             | ty::Coroutine(_, _)
             | ty::CoroutineWitness(_, _)
+            | ty::Term
             | ty::Never
             | ty::Tuple(_)
             | ty::Alias(_)

@@ -398,6 +398,8 @@ fn layout_of_uncached<'tcx>(
         ty::Int(ity) => scalar(Int(abi::Integer::from_int_ty(dl, ity), true)),
         ty::Uint(ity) => scalar(Int(abi::Integer::from_uint_ty(dl, ity), false)),
         ty::Float(fty) => scalar(Float(abi::Float::from_float_ty(fty))),
+        // this doesn't matter
+        ty::Term => scalar(Int(I8, false)),
         ty::FnPtr(..) => {
             let mut ptr = scalar_unit(Pointer(dl.instruction_address_space));
             ptr.valid_range_mut().start = 1;

@@ -16,12 +16,6 @@ LL | struct Fahrenheit(int);
    |                   not found in this scope
    |                   help: perhaps you intended to use this type: `i32`
 
-error[E0425]: cannot find type `term` in this scope
-  --> tests/ui/src/unsafe__01.pt:8:39
-   |
-LL |     let degrees_term = Celcius(10) as term;
-   |                                       ^^^^ not found in this scope
-
-error: aborting due to 3 previous errors
+error: aborting due to 2 previous errors
 
 For more information about this error, try `rustc --explain E0425`.

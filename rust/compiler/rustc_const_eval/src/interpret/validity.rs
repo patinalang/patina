@@ -987,7 +987,7 @@ impl<'rt, 'tcx, M: Machine<'tcx>> ValidityVisitor<'rt, 'tcx, M> {
                     format!("encountered a value of the never type `!`")
                 )
             }
-            ty::Foreign(..) | ty::FnDef(..) => {
+            ty::Foreign(..) | ty::FnDef(..) | ty::Term => {
                 // Nothing to check.
                 interp_ok(true)
             }

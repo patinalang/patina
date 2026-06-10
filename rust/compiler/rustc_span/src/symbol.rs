@@ -2028,6 +2028,7 @@ symbols! {
         target_thread_local,
         target_vendor,
         tbm_target_feature,
+        term,
         termination,
         termination_trait,
         termination_trait_test,

@@ -36,6 +36,7 @@ where
         | ty::FnDef(..)
         | ty::FnPtr(..)
         | ty::Error(_)
+        | ty::Term
         | ty::Never
         | ty::Char => Ok(ty::Binder::dummy(vec![])),
 
@@ -141,6 +142,7 @@ where
         | ty::Pat(..)
         | ty::Closure(..)
         | ty::CoroutineClosure(..)
+        | ty::Term
         | ty::Never
         | ty::Error(_) => Ok(ty::Binder::dummy(vec![])),
 
@@ -211,6 +213,7 @@ where
         | ty::Float(_)
         | ty::Char
         | ty::RawPtr(..)
+        | ty::Term
         | ty::Never
         | ty::Ref(_, _, Mutability::Not)
         | ty::Array(..) => Err(NoSolution),
@@ -388,6 +391,7 @@ pub(in crate::solve) fn extract_tupled_inputs_and_output_from_callable<I: Intern
         | ty::Adt(_, _)
         | ty::Foreign(_)
         | ty::Str
+        | ty::Term
         | ty::Array(_, _)
         | ty::Slice(_)
         | ty::RawPtr(_, _)
@@ -561,6 +565,7 @@ pub(in crate::solve) fn extract_tupled_inputs_and_output_from_async_callable<I: 
         | ty::Adt(_, _)
         | ty::Foreign(_)
         | ty::Str
+        | ty::Term
         | ty::Array(_, _)
         | ty::Pat(_, _)
         | ty::Slice(_)
@@ -724,6 +729,7 @@ pub(in crate::solve) fn extract_fn_def_from_const_callable<I: Interner>(
         | ty::Adt(_, _)
         | ty::Foreign(_)
         | ty::Str
+        | ty::Term
         | ty::Array(_, _)
         | ty::Slice(_)
         | ty::RawPtr(_, _)
@@ -800,6 +806,7 @@ pub(in crate::solve) fn const_conditions_for_destruct<I: Interner>(
         | ty::Uint(..)
         | ty::Float(..)
         | ty::Str
+        | ty::Term
         | ty::RawPtr(..)
         | ty::Ref(..)
         | ty::FnDef(..)

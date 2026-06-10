@@ -152,6 +152,7 @@ impl<'a, 'tcx, F: Fn(Ty<'tcx>) -> bool> MoveDataBuilder<'a, 'tcx, F> {
                             | ty::Float(_)
                             | ty::Foreign(_)
                             | ty::Str
+                            | ty::Term
                             | ty::Array(_, _)
                             | ty::Pat(_, _)
                             | ty::Slice(_)
@@ -194,6 +195,7 @@ impl<'a, 'tcx, F: Fn(Ty<'tcx>) -> bool> MoveDataBuilder<'a, 'tcx, F> {
                             | ty::Float(_)
                             | ty::Foreign(_)
                             | ty::Str
+                            | ty::Term
                             | ty::Array(_, _)
                             | ty::Pat(_, _)
                             | ty::Slice(_)

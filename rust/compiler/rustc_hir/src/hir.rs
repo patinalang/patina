@@ -3587,11 +3587,12 @@ pub enum PrimTy {
     Str,
     Bool,
     Char,
+    Term,
 }
 
 impl PrimTy {
     /// All of the primitive types
-    pub const ALL: [Self; 19] = [
+    pub const ALL: [Self; 20] = [
         // any changes here should also be reflected in `PrimTy::from_name`
         Self::Int(IntTy::I8),
         Self::Int(IntTy::I16),
@@ -3612,6 +3613,7 @@ impl PrimTy {
         Self::Bool,
         Self::Char,
         Self::Str,
+        Self::Term,
     ];
 
     /// Like [`PrimTy::name`], but returns a &str instead of a symbol.
@@ -3625,6 +3627,7 @@ impl PrimTy {
             PrimTy::Str => "str",
             PrimTy::Bool => "bool",
             PrimTy::Char => "char",
+            PrimTy::Term => "term",
         }
     }
 
@@ -3636,6 +3639,7 @@ impl PrimTy {
             PrimTy::Str => sym::str,
             PrimTy::Bool => sym::bool,
             PrimTy::Char => sym::char,
+            PrimTy::Term => sym::term,
         }
     }
 
@@ -3663,6 +3667,7 @@ impl PrimTy {
             sym::bool => Self::Bool,
             sym::char => Self::Char,
             sym::str => Self::Str,
+            sym::term => Self::Term,
             _ => return None,
         };
         Some(ty)

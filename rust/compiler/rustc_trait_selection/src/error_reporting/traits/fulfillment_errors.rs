@@ -1837,6 +1837,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 ty::Bool => Some(0),
                 ty::Char => Some(1),
                 ty::Str => Some(2),
+                ty::Term => Some(3),
                 ty::Adt(def, _) if tcx.is_lang_item(def.did(), LangItem::String) => Some(2),
                 ty::Int(..)
                 | ty::Uint(..)

@@ -2176,6 +2176,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
             | ty::Array(..)
             | ty::Closure(..)
             | ty::CoroutineClosure(..)
+            | ty::Term
             | ty::Never
             | ty::Error(_) => ty::Binder::dummy(vec![]),
 
@@ -2277,6 +2278,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
 
             ty::Foreign(..)
             | ty::Str
+            | ty::Term
             | ty::Slice(_)
             | ty::Dynamic(..)
             | ty::Adt(..)
@@ -2321,6 +2323,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
             | ty::FnPtr(..)
             | ty::Error(_)
             | ty::Infer(ty::IntVar(_) | ty::FloatVar(_))
+            | ty::Term
             | ty::Never
             | ty::Char => {
                 ty::Binder::dummy(AutoImplConstituents { types: vec![], assumptions: vec![] })

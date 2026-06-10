@@ -647,6 +647,7 @@ where
             | ty::Infer(ty::IntVar(..) | ty::FloatVar(..))
             | ty::Coroutine(..)
             | ty::CoroutineWitness(..)
+            | ty::Term
             | ty::Never
             | ty::Foreign(..) => Ty::new_unit(cx),
 
@@ -915,6 +916,7 @@ where
             | ty::Foreign(..)
             | ty::Adt(_, _)
             | ty::Str
+            | ty::Term
             | ty::Slice(_)
             | ty::Dynamic(_, _)
             | ty::Tuple(_)

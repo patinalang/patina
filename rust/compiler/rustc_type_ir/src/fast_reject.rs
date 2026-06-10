@@ -29,6 +29,7 @@ pub enum SimplifiedType<DefId> {
     Adt(DefId),
     Foreign(DefId),
     Str,
+    Term,
     Array,
     Slice,
     Ref(Mutability),
@@ -122,6 +123,7 @@ pub fn simplify_type<I: Interner>(
         ty::Float(float_type) => Some(SimplifiedType::Float(float_type)),
         ty::Adt(def, _) => Some(SimplifiedType::Adt(def.def_id().into())),
         ty::Str => Some(SimplifiedType::Str),
+        ty::Term => Some(SimplifiedType::Term),
         ty::Array(..) => Some(SimplifiedType::Array),
         ty::Slice(..) => Some(SimplifiedType::Slice),
         ty::Pat(ty, ..) => simplify_type(cx, ty, treat_params),
@@ -291,6 +293,7 @@ impl<I: Interner, const INSTANTIATE_LHS_WITH_INFER: bool, const INSTANTIATE_RHS_
             | ty::Float(_)
             | ty::Adt(..)
             | ty::Str
+            | ty::Term
             | ty::Array(..)
             | ty::Slice(..)
             | ty::RawPtr(..)
@@ -367,6 +370,7 @@ impl<I: Interner, const INSTANTIATE_LHS_WITH_INFER: bool, const INSTANTIATE_RHS_
             | ty::Uint(_)
             | ty::Float(_)
             | ty::Str
+            | ty::Term
             | ty::Bool
             | ty::Char
             | ty::Never

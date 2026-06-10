@@ -1283,6 +1283,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::Pat(..)
             | ty::Dynamic(..)
             | ty::Str
+            | ty::Term
             | ty::Slice(_)
             | ty::Foreign(..)
             | ty::Adt(..)

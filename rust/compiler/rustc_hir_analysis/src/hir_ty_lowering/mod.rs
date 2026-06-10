@@ -2371,6 +2371,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                     hir::PrimTy::Uint(uit) => Ty::new_uint(tcx, uit),
                     hir::PrimTy::Float(ft) => Ty::new_float(tcx, ft),
                     hir::PrimTy::Str => tcx.types.str_,
+                    hir::PrimTy::Term => tcx.types.term,
                 }
             }
             Res::Err => {
@@ -3512,6 +3513,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             | ty::Float(_)
             | ty::Foreign(_)
             | ty::Str
+            | ty::Term
             | ty::RawPtr(_, _)
             | ty::Ref(_, _, _)
             | ty::FnDef(_, _)

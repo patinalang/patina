@@ -69,6 +69,7 @@ fn push_debuginfo_type_name<'tcx>(
                 output.push_str("str")
             }
         }
+        ty::Term => output.push_str("term"),
         ty::Never => {
             if cpp_like_debuginfo {
                 output.push_str("never$");

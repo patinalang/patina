@@ -1701,6 +1701,7 @@ impl<'tcx> Ty<'tcx> {
             | ty::Adt(..)
             | ty::Foreign(_)
             | ty::Str
+            | ty::Term
             | ty::Array(..)
             | ty::Slice(_)
             | ty::RawPtr(_, _)
@@ -1751,6 +1752,7 @@ impl<'tcx> Ty<'tcx> {
             | ty::CoroutineClosure(..)
             | ty::Never
             | ty::Error(_)
+            | ty::Term
             // Extern types have metadata = ().
             | ty::Foreign(..)
             // If returned by `struct_tail_raw` this is a unit struct
@@ -1941,6 +1943,7 @@ impl<'tcx> Ty<'tcx> {
             | ty::Pat(..)
             | ty::Closure(..)
             | ty::CoroutineClosure(..)
+            | ty::Term
             | ty::Never
             | ty::Error(_) => true,
 
@@ -1979,7 +1982,7 @@ impl<'tcx> Ty<'tcx> {
     /// on which we can replace cloning with dereferencing.
     pub fn is_trivially_pure_clone_copy(self) -> bool {
         match self.kind() {
-            ty::Bool | ty::Char | ty::Never => true,
+            ty::Bool | ty::Char | ty::Term | ty::Never => true,
 
             // These aren't even `Clone`
             ty::Str | ty::Slice(..) | ty::Foreign(..) | ty::Dynamic(..) => false,
@@ -2036,6 +2039,7 @@ impl<'tcx> Ty<'tcx> {
             | ty::Uint(_)
             | ty::Float(_)
             | ty::Str
+            | ty::Term
             | ty::Never
             | ty::Param(_)
             | ty::Placeholder(_)
@@ -2102,6 +2106,7 @@ impl<'tcx> Ty<'tcx> {
                 ty::UintTy::U128 => Some(sym::u128),
             },
             ty::Str => Some(sym::str),
+            ty::Term => Some(sym::term),
             _ => None,
         }
     }

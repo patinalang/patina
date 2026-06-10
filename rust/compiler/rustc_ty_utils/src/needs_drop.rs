@@ -289,6 +289,7 @@ where
                     | ty::Uint(_)
                     | ty::Float(_)
                     | ty::Str
+                    | ty::Term
                     | ty::Slice(_)
                     | ty::Ref(..)
                     | ty::RawPtr(..)

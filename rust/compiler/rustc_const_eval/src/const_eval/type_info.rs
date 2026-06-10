@@ -162,6 +162,11 @@ impl<'tcx> InterpCx<'tcx, CompileTimeMachine<'tcx>> {
                             let (variant, _variant_place) = self.downcast(&field_dest, sym::Str)?;
                             variant
                         }
+                        ty::Term => {
+                            let (variant, _variant_place) =
+                                self.downcast(&field_dest, sym::term)?;
+                            variant
+                        }
                         ty::Ref(_, ty, mutability) => {
                             let (variant, variant_place) =
                                 self.downcast(&field_dest, sym::Reference)?;

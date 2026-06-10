@@ -794,6 +794,7 @@ where
                 | ty::FnDef(..)
                 | ty::CoroutineWitness(..)
                 | ty::Foreign(..)
+                | ty::Term
                 | ty::Dynamic(_, _) => {
                     bug!("TyAndLayout::field({:?}): not applicable", this)
                 }

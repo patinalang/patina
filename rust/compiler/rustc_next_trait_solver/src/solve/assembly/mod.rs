@@ -717,6 +717,7 @@ where
             | ty::Adt(_, _)
             | ty::Foreign(_)
             | ty::Str
+            | ty::Term
             | ty::Array(_, _)
             | ty::Pat(_, _)
             | ty::Slice(_)
@@ -841,6 +842,7 @@ where
             | ty::Adt(_, _)
             | ty::Foreign(_)
             | ty::Str
+            | ty::Term
             | ty::Array(_, _)
             | ty::Pat(_, _)
             | ty::Slice(_)

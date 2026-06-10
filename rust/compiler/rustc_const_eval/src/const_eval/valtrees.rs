@@ -169,6 +169,7 @@ fn const_to_valtree_inner<'tcx>(
         ty::Never
         | ty::Error(_)
         | ty::Foreign(..)
+        | ty::Term
         | ty::Infer(ty::FreshIntTy(_))
         | ty::Infer(ty::FreshFloatTy(_))
         // FIXME(oli-obk): we could look behind opaque types
@@ -343,6 +344,7 @@ pub fn valtree_to_const_value<'tcx>(
         ty::Never
         | ty::Error(_)
         | ty::Foreign(..)
+        | ty::Term
         | ty::Infer(ty::FreshIntTy(_))
         | ty::Infer(ty::FreshFloatTy(_))
         | ty::Alias(..)

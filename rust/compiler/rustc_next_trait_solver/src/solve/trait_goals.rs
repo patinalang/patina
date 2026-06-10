@@ -753,6 +753,7 @@ where
                 | ty::Pat(..)
                 | ty::Dynamic(..)
                 | ty::Str
+                | ty::Term
                 | ty::Slice(_)
                 | ty::Foreign(..)
                 | ty::Adt(..)
@@ -1306,6 +1307,7 @@ where
             | ty::Uint(_)
             | ty::Float(_)
             | ty::Str
+            | ty::Term
             | ty::Array(_, _)
             | ty::Pat(_, _)
             | ty::Slice(_)

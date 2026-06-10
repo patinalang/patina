@@ -739,6 +739,10 @@ impl<'a, 'tcx> ImproperCTypesVisitor<'a, 'tcx> {
                 help: Some(msg!("consider using `*const u8` and a length instead")),
             },
 
+            ty::Term => {
+                FfiUnsafe { ty, reason: msg!("erlang terms have no C equivalent"), help: None }
+            }
+
             ty::Tuple(tuple) => {
                 // C functions can return void
                 let empty_and_safe = tuple.is_empty()

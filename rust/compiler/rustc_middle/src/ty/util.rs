@@ -1180,6 +1180,7 @@ impl<'tcx> Ty<'tcx> {
             | ty::Bool
             | ty::Char
             | ty::Str
+            | ty::Term
             | ty::Never
             | ty::Ref(..)
             | ty::RawPtr(_, _)
@@ -1230,6 +1231,7 @@ impl<'tcx> Ty<'tcx> {
             | ty::Bool
             | ty::Char
             | ty::Str
+            | ty::Term
             | ty::Never
             | ty::Ref(..)
             | ty::RawPtr(_, _)
@@ -1281,6 +1283,7 @@ impl<'tcx> Ty<'tcx> {
             | ty::Bool
             | ty::Char
             | ty::Str
+            | ty::Term
             | ty::Never
             | ty::Ref(..)
             | ty::RawPtr(..)
@@ -1442,7 +1445,7 @@ impl<'tcx> Ty<'tcx> {
             ty::Adt(..) => tcx.has_structural_eq_impl(self),
 
             // Primitive types that satisfy `Eq`.
-            ty::Bool | ty::Char | ty::Int(_) | ty::Uint(_) | ty::Str | ty::Never => true,
+            ty::Bool | ty::Char | ty::Int(_) | ty::Uint(_) | ty::Str | ty::Term | ty::Never => true,
 
             // Composite types that satisfy `Eq` when all of their fields do.
             //
@@ -1531,6 +1534,7 @@ pub fn needs_drop_components_with_async<'tcx>(
         | ty::Char
         | ty::RawPtr(_, _)
         | ty::Ref(..)
+        | ty::Term
         | ty::Str => Ok(SmallVec::new()),
 
         // Foreign types can never have destructors.

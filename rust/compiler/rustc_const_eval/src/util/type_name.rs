@@ -33,6 +33,7 @@ impl<'tcx> Printer<'tcx> for TypeNamePrinter<'tcx> {
             | ty::Uint(_)
             | ty::Float(_)
             | ty::Str
+            | ty::Term
             | ty::Pat(_, _)
             | ty::Array(_, _)
             | ty::Slice(_)

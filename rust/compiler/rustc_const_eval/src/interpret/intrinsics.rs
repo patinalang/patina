@@ -266,6 +266,7 @@ impl<'tcx, M: Machine<'tcx>> InterpCx<'tcx, M> {
                     | ty::Uint(_)
                     | ty::Float(_)
                     | ty::Foreign(_)
+                    | ty::Term
                     | ty::Str
                     | ty::Array(_, _)
                     | ty::Slice(_)

@@ -363,6 +363,7 @@ fn evaluate_host_effect_for_copy_clone_goal<'tcx>(
         | ty::Float(_)
         | ty::Char
         | ty::RawPtr(..)
+        | ty::Term
         | ty::Never
         | ty::Ref(_, _, ty::Mutability::Not)
         | ty::Array(..) => Err(EvaluationFailure::NoSolution),
@@ -490,6 +491,7 @@ fn evaluate_host_effect_for_destruct_goal<'tcx>(
         | ty::Uint(..)
         | ty::Float(..)
         | ty::Str
+        | ty::Term
         | ty::RawPtr(..)
         | ty::Ref(..)
         | ty::FnDef(..)
