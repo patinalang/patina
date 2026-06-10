@@ -4,13 +4,13 @@ error[E0425]: cannot find type `Result` in this scope
 LL |     let numbers: Result<[_], _> = strings
    |                  ^^^^^^ not found in this scope
 
-error[E0599]: no method named `into_iter` found for array `[&str; 3]` in the current scope
+error[E0599]: no method named `into_iter` found for array `[str; 3]` in the current scope
   --> tests/ui/src/error/iter_result__03.pt:7:10
    |
 LL |       let numbers: Result<[_], _> = strings
    |  ___________________________________-
 LL | |         .into_iter()
-   | |         -^^^^^^^^^ method not found in `[&str; 3]`
+   | |         -^^^^^^^^^ method not found in `[str; 3]`
    | |_________|
    |
 

@@ -165,7 +165,7 @@ pub trait Ty<I: Interner<Ty = Self>>:
 
     fn is_guaranteed_unsized_raw(self) -> bool {
         match self.kind() {
-            ty::Dynamic(_, _) | ty::Slice(_) | ty::Str => true,
+            ty::Dynamic(_, _) | ty::Slice(_) => true,
             ty::Bool
             | ty::Char
             | ty::Int
@@ -183,6 +183,7 @@ pub trait Ty<I: Interner<Ty = Self>>:
             | ty::CoroutineClosure(_, _)
             | ty::Coroutine(_, _)
             | ty::CoroutineWitness(_, _)
+            | ty::Str
             | ty::Term
             | ty::Never
             | ty::Tuple(_)

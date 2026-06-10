@@ -53,7 +53,7 @@ fn function() ({
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("called `MyMod::Nested::function()`" as
-                                &str)] as [&str; 1])] as [[&str; 1]; 1])) as term);
+                                str)] as [str; 1])] as [[str; 1]; 1])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 } as ())
@@ -63,7 +63,7 @@ fn private_function() ({
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("called `MyMod::Nested::private_function()`"
-                                as &str)] as [&str; 1])] as [[&str; 1]; 1])) as term);
+                                as str)] as [str; 1])] as [[str; 1]; 1])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 } as ())

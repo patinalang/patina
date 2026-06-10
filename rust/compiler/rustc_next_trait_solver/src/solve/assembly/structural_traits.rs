@@ -34,6 +34,7 @@ where
         | ty::FnDef(..)
         | ty::FnPtr(..)
         | ty::Error(_)
+        | ty::Str
         | ty::Term
         | ty::Never
         | ty::Char
@@ -43,9 +44,6 @@ where
         // Other foreign types were rejected earlier in
         // `disqualify_auto_trait_candidate_due_to_possible_impl`.
         ty::Foreign(..) => Ok(ty::Binder::dummy(vec![])),
-
-        // Treat `str` like it's defined as `struct str([u8]);`
-        ty::Str => Ok(ty::Binder::dummy(vec![Ty::new_slice(cx, Ty::new_u8(cx))])),
 
         ty::Dynamic(..)
         | ty::Param(..)
@@ -139,12 +137,13 @@ where
         | ty::Pat(..)
         | ty::Closure(..)
         | ty::CoroutineClosure(..)
+        | ty::Str
         | ty::Term
         | ty::Never
         | ty::Error(_) => Ok(ty::Binder::dummy(vec![])),
 
-        // impl {Meta,}Sized for str, [T], dyn Trait
-        ty::Str | ty::Slice(_) | ty::Dynamic(..) => match sizedness {
+        // impl {Meta,}Sized for [T], dyn Trait
+        ty::Slice(_) | ty::Dynamic(..) => match sizedness {
             SizedTraitKind::Sized => Err(NoSolution),
             SizedTraitKind::MetaSized => Ok(ty::Binder::dummy(vec![])),
         },

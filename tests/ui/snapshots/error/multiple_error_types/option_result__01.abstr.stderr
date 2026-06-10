@@ -47,24 +47,11 @@ LL |         first.parse::<int>().map(|n| 2 * n)
    |                                      |
    |                                      int
 
-error[E0277]: the trait bound `str: Sized` is not satisfied
-  --> tests/ui/src/error/multiple_error_types/option_result__01.pt:17:56
-   |
-LL |     println!("The first doubled is {:?}", double_first(numbers));
-   |                                                        ^^^^^^^ the trait `Sized` is not implemented for `str`
-   |
-help: this trait has no implementations, consider adding one
-  --> <patina-prelude>:14:1
-   |
-LL | pub trait Sized: MetaSized {}
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
-   = note: slice and array elements must have `Sized` type
-
 error[E0308]: mismatched types
   --> tests/ui/src/error/multiple_error_types/option_result__01.pt:17:56
    |
 LL |     println!("The first doubled is {:?}", double_first(numbers));
-   |                                           ------------ ^^^^^^^ expected `[str]`, found `[&str; 3]`
+   |                                           ------------ ^^^^^^^ expected `[str]`, found `[str; 3]`
    |                                           |
    |                                           arguments to this function are incorrect
    |
@@ -73,19 +60,6 @@ note: function defined here
    |
 LL | fn double_first(list: [str]) -> Option<Result<int, ParseIntError>> {
    |    ^^^^^^^^^^^^ -----------
-
-error[E0277]: the trait bound `str: Sized` is not satisfied
-  --> tests/ui/src/error/multiple_error_types/option_result__01.pt:19:56
-   |
-LL |     println!("The first doubled is {:?}", double_first(empty));
-   |                                                        ^^^^^ the trait `Sized` is not implemented for `str`
-   |
-help: this trait has no implementations, consider adding one
-  --> <patina-prelude>:14:1
-   |
-LL | pub trait Sized: MetaSized {}
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
-   = note: slice and array elements must have `Sized` type
 
 error[E0308]: mismatched types
   --> tests/ui/src/error/multiple_error_types/option_result__01.pt:19:56
@@ -103,24 +77,11 @@ note: function defined here
 LL | fn double_first(list: [str]) -> Option<Result<int, ParseIntError>> {
    |    ^^^^^^^^^^^^ -----------
 
-error[E0277]: the trait bound `str: Sized` is not satisfied
-  --> tests/ui/src/error/multiple_error_types/option_result__01.pt:22:56
-   |
-LL |     println!("The first doubled is {:?}", double_first(strings));
-   |                                                        ^^^^^^^ the trait `Sized` is not implemented for `str`
-   |
-help: this trait has no implementations, consider adding one
-  --> <patina-prelude>:14:1
-   |
-LL | pub trait Sized: MetaSized {}
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
-   = note: slice and array elements must have `Sized` type
-
 error[E0308]: mismatched types
   --> tests/ui/src/error/multiple_error_types/option_result__01.pt:22:56
    |
 LL |     println!("The first doubled is {:?}", double_first(strings));
-   |                                           ------------ ^^^^^^^ expected `[str]`, found `[&str; 3]`
+   |                                           ------------ ^^^^^^^ expected `[str]`, found `[str; 3]`
    |                                           |
    |                                           arguments to this function are incorrect
    |
@@ -144,7 +105,7 @@ LL | pub trait Sized: MetaSized {}
    = note: all function arguments must have a statically known size
    = help: unsized fn params are gated as an unstable feature
 
-error: aborting due to 13 previous errors
+error: aborting due to 10 previous errors
 
 Some errors have detailed explanations: E0277, E0308, E0369, E0425, E0433, E0599.
 For more information about an error, try `rustc --explain E0277`.

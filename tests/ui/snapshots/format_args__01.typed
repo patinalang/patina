@@ -50,22 +50,22 @@ macro_rules! println {
 // and `{:?}` (Debug), positional and captured arguments.
 
 fn main() ({
-    let name = ("world" as &str);
+    let name = ("world" as str);
     let n: int = (42 as int);
     ({
         ((io::put_chars as
-                fn(term) -> term)(([([("hello, " as &str),
+                fn(term) -> term)(([([("hello, " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(
 
-                                (name as &str)) as term), ("!" as &str)] as [term; 3])] as
+                                (name as str)) as term), ("!" as str)] as [term; 3])] as
                 [[term; 3]; 1])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
-                                    fn(term) -> term)((name as &str)) as term), (" = " as &str),
+                                    fn(term) -> term)((name as str)) as term), (" = " as str),
                             ((patina_fmt::debug as fn(term) -> term)((n as int)) as
                                 term)] as [term; 3])] as [[term; 3]; 1])) as term);
         ((io::nl as fn() -> term)() as term);
@@ -73,19 +73,18 @@ fn main() ({
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
-                                    fn(term) -> term)((name as &str)) as term),
-                            (" and " as &str),
+                                    fn(term) -> term)((name as str)) as term), (" and " as str),
                             ((patina_fmt::debug as fn(term) -> term)((n as int)) as
                                 term)] as [term; 3])] as [[term; 3]; 1])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as fn(term) -> term)(([("no " as &str)] as [&str; 1]))
+        ((io::put_chars as fn(term) -> term)(([("no " as str)] as [str; 1]))
             as term);
     } as ());
     ({
         ((io::put_chars as
-                fn(term) -> term)(([("newline" as &str)] as [&str; 1])) as
+                fn(term) -> term)(([("newline" as str)] as [str; 1])) as
             term);
     } as ());
     ({ ((io::nl as fn() -> term)() as term); } as ());

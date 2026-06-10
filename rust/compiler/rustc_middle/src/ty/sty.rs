@@ -803,13 +803,6 @@ impl<'tcx> Ty<'tcx> {
         Ty::new_coroutine_witness(tcx, def_id, args)
     }
 
-    // misc
-
-    #[inline]
-    pub fn new_static_str(tcx: TyCtxt<'tcx>) -> Ty<'tcx> {
-        Ty::new_imm_ref(tcx, tcx.lifetimes.re_static, tcx.types.str_)
-    }
-
     // lang and diagnostic tys
 
     fn new_generic_adt(tcx: TyCtxt<'tcx>, wrapper_def_id: DefId, ty_param: Ty<'tcx>) -> Ty<'tcx> {
@@ -1670,6 +1663,7 @@ impl<'tcx> Ty<'tcx> {
             | ty::Array(..)
             | ty::Closure(..)
             | ty::CoroutineClosure(..)
+            | ty::Str
             | ty::Never
             | ty::Error(_)
             | ty::Term
@@ -1682,7 +1676,7 @@ impl<'tcx> Ty<'tcx> {
             // a.k.a. unit type, which is Sized
             | ty::Tuple(..) => Ok(tcx.types.unit),
 
-            ty::Str | ty::Slice(_) => Ok(tcx.types.int),
+            ty::Slice(_) => Ok(tcx.types.int),
             ty::Dynamic(_, _) => {
                 let dyn_metadata = tcx.require_lang_item(LangItem::DynMetadata, DUMMY_SP);
                 Ok(tcx.type_of(dyn_metadata).instantiate(tcx, &[tail.into()]).skip_norm_wip())
@@ -1855,11 +1849,12 @@ impl<'tcx> Ty<'tcx> {
             | ty::Pat(..)
             | ty::Closure(..)
             | ty::CoroutineClosure(..)
+            | ty::Str
             | ty::Term
             | ty::Never
             | ty::Error(_) => true,
 
-            ty::Str | ty::Slice(_) | ty::Dynamic(_, _) => match sizedness {
+            ty::Slice(_) | ty::Dynamic(_, _) => match sizedness {
                 SizedTraitKind::Sized => false,
                 SizedTraitKind::MetaSized => true,
             },
@@ -1894,9 +1889,9 @@ impl<'tcx> Ty<'tcx> {
     /// on which we can replace cloning with dereferencing.
     pub fn is_trivially_pure_clone_copy(self) -> bool {
         match self.kind() {
-            ty::Bool | ty::Char | ty::Int | ty::Never | ty::Term => true,
+            ty::Bool | ty::Char | ty::Int | ty::Never | ty::Str | ty::Term => true,
             // These aren't even `Clone`
-            ty::Str | ty::Slice(..) | ty::Foreign(..) | ty::Dynamic(..) => false,
+            ty::Slice(..) | ty::Foreign(..) | ty::Dynamic(..) => false,
 
             ty::Float => true,
 

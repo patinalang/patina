@@ -105,7 +105,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let t = self.resolve_vars_with_obligations(t);
 
         Ok(match *t.kind() {
-            ty::Slice(_) | ty::Str => Some(PointerKind::Length),
+            ty::Slice(_) => Some(PointerKind::Length),
             ty::Dynamic(tty, _) => Some(PointerKind::VTable(tty)),
             ty::Adt(def, args) if def.is_struct() => match def.non_enum_variant().tail_opt() {
                 None => Some(PointerKind::Thin),
@@ -144,6 +144,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             | ty::CoroutineClosure(..)
             | ty::Coroutine(..)
             | ty::Adt(..)
+            | ty::Str
             | ty::Term
             | ty::Never
             | ty::Error(_) => {

@@ -62,11 +62,11 @@ fn main() ({
     (match (foo as main::Foo) {
         Foo {  x: (1, b),  y } => {
             ((io::put_chars as
-                    fn(term) -> term)(([([("First of x is 1, b = " as &str),
+                    fn(term) -> term)(([([("First of x is 1, b = " as str),
                                 ((patina_fmt::display as fn(term) -> term)((b as int)) as
-                                    term), (",  y = " as &str),
+                                    term), (",  y = " as str),
                                 ((patina_fmt::display as fn(term) -> term)((y as int)) as
-                                    term), (" " as &str)] as [term; 5])] as [[term; 5]; 1])) as
+                                    term), (" " as str)] as [term; 5])] as [[term; 5]; 1])) as
                 term);
             ((io::nl as fn() -> term)() as term);
         }
@@ -76,7 +76,7 @@ fn main() ({
             // the order is not important
             Foo {  y: 2,  x: i } => {
             ((io::put_chars as
-                    fn(term) -> term)(([([("y is 2, i = " as &str),
+                    fn(term) -> term)(([([("y is 2, i = " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((i as (int, int)))
                                     as term)] as [term; 2])] as [[term; 2]; 1])) as term);
             ((io::nl as fn() -> term)() as term);
@@ -86,9 +86,9 @@ fn main() ({
             // and you can also ignore some variables:
             Foo {  y, .. } => {
             ((io::put_chars as
-                    fn(term) -> term)(([([("y = " as &str),
+                    fn(term) -> term)(([([("y = " as str),
                                 ((patina_fmt::display as fn(term) -> term)((y as int)) as
-                                    term), (", we don\'t care about x" as &str)] as [term; 3])]
+                                    term), (", we don\'t care about x" as str)] as [term; 3])]
                     as [[term; 3]; 1])) as term);
             ((io::nl as fn() -> term)() as term);
         }
@@ -103,9 +103,9 @@ fn main() ({
     let Foo {  x: x0,  y: y0 } = (faa as main::Foo);
     ({
         ((io::put_chars as
-                fn(term) -> term)(([([("Outside: x0 = " as &str),
+                fn(term) -> term)(([([("Outside: x0 = " as str),
                             ((patina_fmt::debug as fn(term) -> term)((x0 as (int, int)))
-                                as term), (", y0 = " as &str),
+                                as term), (", y0 = " as str),
                             ((patina_fmt::display as fn(term) -> term)((y0 as int)) as
                                 term)] as [term; 4])] as [[term; 4]; 1])) as term);
         ((io::nl as fn() -> term)() as term);
@@ -120,10 +120,10 @@ fn main() ({
     let Bar {  foo: Foo {  x: nested_x,  y: nested_y } } = (bar as main::Bar);
     ({
         ((io::put_chars as
-                fn(term) -> term)(([([("Nested: nested_x = " as &str),
+                fn(term) -> term)(([([("Nested: nested_x = " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((nested_x as (int, int))) as term),
-                            (", nested_y = " as &str),
+                            (", nested_y = " as str),
                             ((patina_fmt::debug as fn(term) -> term)((nested_y as int))
                                 as term)] as [term; 4])] as [[term; 4]; 1])) as term);
         ((io::nl as fn() -> term)() as term);

@@ -1,16 +1,8 @@
-error[E0277]: the trait bound `str: Sized` is not satisfied
-  --> tests/ui/src/generics/bounds/testcase_empty__01.pt:26:34
+error: expression kind Path(Resolved(None, Path { span: tests/ui/src/generics/bounds/testcase_empty__01.pt:20:20: 20:28 (#0), res: Def(Ctor(Struct, Const), DefId(0:13 ~ rust_out[2361]::Cardinal::{constructor#0})), segments: [PathSegment { ident: Cardinal#0, hir_id: HirId(DefId(0:26 ~ rust_out[2361]::main).4), res: Def(Ctor(Struct, Const), DefId(0:13 ~ rust_out[2361]::Cardinal::{constructor#0})), args: None, infer_args: true }] })) not yet implemented
+  --> tests/ui/src/generics/bounds/testcase_empty__01.pt:20:20
    |
-LL |     println!("A cardinal is {}", red(cardinal));
-   |                                  ^^^^^^^^^^^^^ the trait `Sized` is not implemented for `str`
-   |
-help: this trait has no implementations, consider adding one
-  --> <patina-prelude>:14:1
-   |
-LL | pub trait Sized: MetaSized {}
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
-   = note: the return type of a function must have a statically known size
+LL |     let cardinal = Cardinal;
+   |                    ^^^^^^^^
 
 error: aborting due to 1 previous error
 
-For more information about this error, try `rustc --explain E0277`.

@@ -12,8 +12,7 @@ main() ->
         end,
         _var_1 = <<"abc">>,
         begin
-            io:put_chars([[<<"shadowed in inner block: ">>,
-                           io_lib:format("~tp", [_var_1])]]),
+            io:put_chars([[<<"shadowed in inner block: ">>, _var_1]]),
             io:nl()
         end
     end,

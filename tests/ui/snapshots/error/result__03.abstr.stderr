@@ -22,11 +22,11 @@ error[E0531]: cannot find tuple struct or tuple variant `Err` in this scope
 LL |         Err(e) => return Err(e),
    |         ^^^ not found in this scope
 
-error[E0599]: no method named `parse` found for reference `&str` in the current scope
+error[E0599]: no method named `parse` found for type `str` in the current scope
   --> tests/ui/src/error/result__03.pt:8:35
    |
 LL |     let number = match number_str.parse::<int>() {
-   |                                   ^^^^^ method not found in `&str`
+   |                                   ^^^^^ method not found in `str`
 
 error[E0425]: cannot find function, tuple struct or tuple variant `Err` in this scope
   --> tests/ui/src/error/result__03.pt:10:26

@@ -74,8 +74,8 @@ fn main() ({
             (17 as int), (40 as int)) as Color);
     ({
         ((io::put_chars as
-                fn(term) -> term)(([([("What color is it?" as &str)] as
-                        [&str; 1])] as [[&str; 1]; 1])) as term);
+                fn(term) -> term)(([([("What color is it?" as str)] as
+                        [str; 1])] as [[str; 1]; 1])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 
@@ -85,81 +85,81 @@ fn main() ({
     (match (color as Color) {
         Color::Red => {
             ((io::put_chars as
-                    fn(term) -> term)(([([("The color is Red!" as &str)] as
-                            [&str; 1])] as [[&str; 1]; 1])) as term);
+                    fn(term) -> term)(([([("The color is Red!" as str)] as
+                            [str; 1])] as [[str; 1]; 1])) as term);
             ((io::nl as fn() -> term)() as term);
         }
         Color::Blue => {
             ((io::put_chars as
-                    fn(term) -> term)(([([("The color is Blue!" as &str)] as
-                            [&str; 1])] as [[&str; 1]; 1])) as term);
+                    fn(term) -> term)(([([("The color is Blue!" as str)] as
+                            [str; 1])] as [[str; 1]; 1])) as term);
             ((io::nl as fn() -> term)() as term);
         }
         Color::Green => {
             ((io::put_chars as
-                    fn(term) -> term)(([([("The color is Green!" as &str)] as
-                            [&str; 1])] as [[&str; 1]; 1])) as term);
+                    fn(term) -> term)(([([("The color is Green!" as str)] as
+                            [str; 1])] as [[str; 1]; 1])) as term);
             ((io::nl as fn() -> term)() as term);
         }
         Color::RGB(r, g, b) => {
             ((io::put_chars as
-                    fn(term) -> term)(([([("Red: " as &str),
+                    fn(term) -> term)(([([("Red: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((r as int)) as
-                                    term), (", green: " as &str),
+                                    term), (", green: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((g as int)) as
-                                    term), (", and blue: " as &str),
+                                    term), (", and blue: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((b as int)) as
-                                    term), ("!" as &str)] as [term; 7])] as [[term; 7]; 1])) as
+                                    term), ("!" as str)] as [term; 7])] as [[term; 7]; 1])) as
                 term);
             ((io::nl as fn() -> term)() as term);
         }
         Color::HSV(h, s, v) => {
             ((io::put_chars as
-                    fn(term) -> term)(([([("Hue: " as &str),
+                    fn(term) -> term)(([([("Hue: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((h as int)) as
-                                    term), (", saturation: " as &str),
+                                    term), (", saturation: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((s as int)) as
-                                    term), (", value: " as &str),
+                                    term), (", value: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((v as int)) as
-                                    term), ("!" as &str)] as [term; 7])] as [[term; 7]; 1])) as
+                                    term), ("!" as str)] as [term; 7])] as [[term; 7]; 1])) as
                 term);
             ((io::nl as fn() -> term)() as term);
         }
         Color::HSL(h, s, l) => {
             ((io::put_chars as
-                    fn(term) -> term)(([([("Hue: " as &str),
+                    fn(term) -> term)(([([("Hue: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((h as int)) as
-                                    term), (", saturation: " as &str),
+                                    term), (", saturation: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((s as int)) as
-                                    term), (", lightness: " as &str),
+                                    term), (", lightness: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((l as int)) as
-                                    term), ("!" as &str)] as [term; 7])] as [[term; 7]; 1])) as
+                                    term), ("!" as str)] as [term; 7])] as [[term; 7]; 1])) as
                 term);
             ((io::nl as fn() -> term)() as term);
         }
         Color::CMY(c, m, y) => {
             ((io::put_chars as
-                    fn(term) -> term)(([([("Cyan: " as &str),
+                    fn(term) -> term)(([([("Cyan: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((c as int)) as
-                                    term), (", magenta: " as &str),
+                                    term), (", magenta: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((m as int)) as
-                                    term), (", yellow: " as &str),
+                                    term), (", yellow: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((y as int)) as
-                                    term), ("!" as &str)] as [term; 7])] as [[term; 7]; 1])) as
+                                    term), ("!" as str)] as [term; 7])] as [[term; 7]; 1])) as
                 term);
             ((io::nl as fn() -> term)() as term);
         }
         Color::CMYK(c, m, y, k) => {
             ((io::put_chars as
-                    fn(term) -> term)(([([("Cyan: " as &str),
+                    fn(term) -> term)(([([("Cyan: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((c as int)) as
-                                    term), (", magenta: " as &str),
+                                    term), (", magenta: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((m as int)) as
-                                    term), (", yellow: " as &str),
+                                    term), (", yellow: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((y as int)) as
-                                    term), (", key (black): " as &str),
+                                    term), (", key (black): " as str),
                                 ((patina_fmt::display as fn(term) -> term)((k as int)) as
-                                    term), ("!" as &str)] as [term; 9])] as [[term; 9]; 1])) as
+                                    term), ("!" as str)] as [term; 9])] as [[term; 9]; 1])) as
                 term);
             ((io::nl as fn() -> term)() as term);
         }

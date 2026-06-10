@@ -4,89 +4,12 @@ error[E0599]: no method named `parse` found for type `str` in the current scope
 LL |     let first_number = first_number_str.parse::<int>().unwrap();
    |                                         ^^^^^ method not found in `str`
 
-error[E0277]: the trait bound `str: Sized` is not satisfied
-  --> tests/ui/src/error/result__01.pt:4:31
-   |
-LL | fn multiply(first_number_str: str, second_number_str: str) -> int {
-   |                               ^^^ the trait `Sized` is not implemented for `str`
-   |
-help: this trait has no implementations, consider adding one
-  --> <patina-prelude>:14:1
-   |
-LL | pub trait Sized: MetaSized {}
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
-   = help: unsized fn params are gated as an unstable feature
-help: function arguments must have a statically known size, borrowed types always have a known size
-   |
-LL | fn multiply(first_number_str: &str, second_number_str: str) -> int {
-   |                               +
-
-error[E0277]: the trait bound `str: Sized` is not satisfied
-  --> tests/ui/src/error/result__01.pt:4:55
-   |
-LL | fn multiply(first_number_str: str, second_number_str: str) -> int {
-   |                                                       ^^^ the trait `Sized` is not implemented for `str`
-   |
-help: this trait has no implementations, consider adding one
-  --> <patina-prelude>:14:1
-   |
-LL | pub trait Sized: MetaSized {}
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
-   = help: unsized fn params are gated as an unstable feature
-help: function arguments must have a statically known size, borrowed types always have a known size
-   |
-LL | fn multiply(first_number_str: str, second_number_str: &str) -> int {
-   |                                                       +
-
 error[E0599]: no method named `parse` found for type `str` in the current scope
   --> tests/ui/src/error/result__01.pt:7:43
    |
 LL |     let second_number = second_number_str.parse::<int>().unwrap();
    |                                           ^^^^^ method not found in `str`
 
-error[E0308]: arguments to this function are incorrect
-  --> tests/ui/src/error/result__01.pt:12:18
-   |
-LL |     let twenty = multiply("10", "2");
-   |                  ^^^^^^^^ ----  --- expected `str`, found `&str`
-   |                           |
-   |                           expected `str`, found `&str`
-   |
-note: function defined here
-  --> tests/ui/src/error/result__01.pt:4:4
-   |
-LL | fn multiply(first_number_str: str, second_number_str: str) -> int {
-   |    ^^^^^^^^ ---------------------  ----------------------
+error: aborting due to 2 previous errors
 
-error[E0308]: arguments to this function are incorrect
-  --> tests/ui/src/error/result__01.pt:15:14
-   |
-LL |     let tt = multiply("t", "2");
-   |              ^^^^^^^^ ---  --- expected `str`, found `&str`
-   |                       |
-   |                       expected `str`, found `&str`
-   |
-note: function defined here
-  --> tests/ui/src/error/result__01.pt:4:4
-   |
-LL | fn multiply(first_number_str: str, second_number_str: str) -> int {
-   |    ^^^^^^^^ ---------------------  ----------------------
-
-error[E0277]: the trait bound `str: Sized` is not satisfied
-  --> tests/ui/src/error/result__01.pt:12:27
-   |
-LL |     let twenty = multiply("10", "2");
-   |                           ^^^^ the trait `Sized` is not implemented for `str`
-   |
-help: this trait has no implementations, consider adding one
-  --> <patina-prelude>:14:1
-   |
-LL | pub trait Sized: MetaSized {}
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
-   = note: all function arguments must have a statically known size
-   = help: unsized fn params are gated as an unstable feature
-
-error: aborting due to 7 previous errors
-
-Some errors have detailed explanations: E0277, E0308, E0599.
-For more information about an error, try `rustc --explain E0277`.
+For more information about this error, try `rustc --explain E0599`.

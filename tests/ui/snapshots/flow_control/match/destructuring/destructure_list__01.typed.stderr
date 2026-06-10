@@ -9,7 +9,7 @@ LL |     let list = [1, -2, 6];
 error: internal compiler error: rust/compiler/rustc_middle/src/ty/consts/int.rs:281:13: expected int of size 8, but got size 16
 
 
-thread 'rustc' (3769403) panicked at rust/compiler/rustc_middle/src/ty/consts/int.rs:281:13:
+thread 'rustc' (3797653) panicked at rust/compiler/rustc_middle/src/ty/consts/int.rs:281:13:
 Box<dyn Any>
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 error: aborting due to 2 previous errors

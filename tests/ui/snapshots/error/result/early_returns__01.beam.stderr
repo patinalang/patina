@@ -58,40 +58,6 @@ error[E0599]: no method named `parse` found for type `str` in the current scope
 LL |     let first_number = match first_number_str.parse::<int>() {
    |                                               ^^^^^ method not found in `str`
 
-error[E0277]: the trait bound `str: Sized` is not satisfied
-  --> tests/ui/src/error/result/early_returns__01.pt:6:31
-   |
-LL | fn multiply(first_number_str: str, second_number_str: str) -> Result<int, ParseIntError> {
-   |                               ^^^ the trait `Sized` is not implemented for `str`
-   |
-help: this trait has no implementations, consider adding one
-  --> <patina-prelude>:14:1
-   |
-LL | pub trait Sized: MetaSized {}
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
-   = help: unsized fn params are gated as an unstable feature
-help: function arguments must have a statically known size, borrowed types always have a known size
-   |
-LL | fn multiply(first_number_str: &str, second_number_str: str) -> Result<int, ParseIntError> {
-   |                               +
-
-error[E0277]: the trait bound `str: Sized` is not satisfied
-  --> tests/ui/src/error/result/early_returns__01.pt:6:55
-   |
-LL | fn multiply(first_number_str: str, second_number_str: str) -> Result<int, ParseIntError> {
-   |                                                       ^^^ the trait `Sized` is not implemented for `str`
-   |
-help: this trait has no implementations, consider adding one
-  --> <patina-prelude>:14:1
-   |
-LL | pub trait Sized: MetaSized {}
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
-   = help: unsized fn params are gated as an unstable feature
-help: function arguments must have a statically known size, borrowed types always have a known size
-   |
-LL | fn multiply(first_number_str: str, second_number_str: &str) -> Result<int, ParseIntError> {
-   |                                                       +
-
 error[E0425]: cannot find function, tuple struct or tuple variant `Err` in this scope
   --> tests/ui/src/error/result/early_returns__01.pt:9:26
    |
@@ -116,49 +82,7 @@ error[E0425]: cannot find function, tuple struct or tuple variant `Ok` in this s
 LL |     Ok(first_number * second_number)
    |     ^^ not found in this scope
 
-error[E0308]: arguments to this function are incorrect
-  --> tests/ui/src/error/result/early_returns__01.pt:28:11
-   |
-LL |     print(multiply("10", "2"));
-   |           ^^^^^^^^ ----  --- expected `str`, found `&str`
-   |                    |
-   |                    expected `str`, found `&str`
-   |
-note: function defined here
-  --> tests/ui/src/error/result/early_returns__01.pt:6:4
-   |
-LL | fn multiply(first_number_str: str, second_number_str: str) -> Result<int, ParseIntError> {
-   |    ^^^^^^^^ ---------------------  ----------------------
+error: aborting due to 14 previous errors
 
-error[E0308]: arguments to this function are incorrect
-  --> tests/ui/src/error/result/early_returns__01.pt:29:11
-   |
-LL |     print(multiply("t", "2"));
-   |           ^^^^^^^^ ---  --- expected `str`, found `&str`
-   |                    |
-   |                    expected `str`, found `&str`
-   |
-note: function defined here
-  --> tests/ui/src/error/result/early_returns__01.pt:6:4
-   |
-LL | fn multiply(first_number_str: str, second_number_str: str) -> Result<int, ParseIntError> {
-   |    ^^^^^^^^ ---------------------  ----------------------
-
-error[E0277]: the trait bound `str: Sized` is not satisfied
-  --> tests/ui/src/error/result/early_returns__01.pt:28:20
-   |
-LL |     print(multiply("10", "2"));
-   |                    ^^^^ the trait `Sized` is not implemented for `str`
-   |
-help: this trait has no implementations, consider adding one
-  --> <patina-prelude>:14:1
-   |
-LL | pub trait Sized: MetaSized {}
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
-   = note: all function arguments must have a statically known size
-   = help: unsized fn params are gated as an unstable feature
-
-error: aborting due to 19 previous errors
-
-Some errors have detailed explanations: E0277, E0308, E0425, E0433, E0531, E0599.
-For more information about an error, try `rustc --explain E0277`.
+Some errors have detailed explanations: E0425, E0433, E0531, E0599.
+For more information about an error, try `rustc --explain E0425`.

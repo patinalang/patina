@@ -46,23 +46,6 @@ error[E0599]: no method named `split` found for type `str` in the current scope
 LL |     let it = s.split(' ');
    |                ^^^^^ method not found in `str`
 
-error[E0277]: the trait bound `str: Sized` is not satisfied
-  --> tests/ui/src/flow_control/let_else__01.pt:6:22
-   |
-LL | fn get_count_item(s: str) -> (int, str) {
-   |                      ^^^ the trait `Sized` is not implemented for `str`
-   |
-help: this trait has no implementations, consider adding one
-  --> <patina-prelude>:14:1
-   |
-LL | pub trait Sized: MetaSized {}
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
-   = help: unsized fn params are gated as an unstable feature
-help: function arguments must have a statically known size, borrowed types always have a known size
-   |
-LL | fn get_count_item(s: &str) -> (int, str) {
-   |                      +
-
 error[E0308]: `else` clause of `let...else` does not diverge
   --> tests/ui/src/flow_control/let_else__01.pt:11:62
    |
@@ -97,21 +80,7 @@ LL | |     };
    = help: try adding a diverging expression, such as `return` or `panic!(..)`
    = help: ...or use `match` instead of `let...else`
 
-error[E0277]: the trait bound `str: Sized` is not satisfied in `(int, str)`
-  --> tests/ui/src/flow_control/let_else__01.pt:17:5
-   |
-LL |     (count, item)
-   |     ^^^^^^^^^^^^^ within `(int, str)`, the trait `Sized` is not implemented for `str`
-   |
-help: this trait has no implementations, consider adding one
-  --> <patina-prelude>:14:1
-   |
-LL | pub trait Sized: MetaSized {}
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
-   = note: required because it appears within the type `(int, str)`
-   = note: tuples must have a statically known size to be initialized
+error: aborting due to 11 previous errors
 
-error: aborting due to 13 previous errors
-
-Some errors have detailed explanations: E0277, E0308, E0432, E0531, E0599.
-For more information about an error, try `rustc --explain E0277`.
+Some errors have detailed explanations: E0308, E0432, E0531, E0599.
+For more information about an error, try `rustc --explain E0308`.

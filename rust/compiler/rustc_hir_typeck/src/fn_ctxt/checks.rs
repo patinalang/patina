@@ -716,7 +716,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let tcx = self.tcx;
 
         match lit.node {
-            ast::LitKind::Str(..) => Ty::new_static_str(tcx),
+            ast::LitKind::Str(..) => tcx.types.str_,
             ast::LitKind::ByteStr(ref v, _) => Ty::new_imm_ref(
                 tcx,
                 tcx.lifetimes.re_static,
@@ -2749,7 +2749,7 @@ impl<'a, 'tcx> FnCallDiagCtxt<'a, 'tcx> {
             && let ty::Adt(adt, _) = callee_ty.peel_refs().kind()
             && (tcx.is_diagnostic_item(sym::Option, adt.did())
                 || tcx.is_diagnostic_item(sym::Result, adt.did()))
-            && self.may_coerce(provided_ty, Ty::new_static_str(tcx))
+            && self.may_coerce(provided_ty, tcx.types.str_)
         {
             Some(call_ident.span)
         } else {

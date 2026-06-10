@@ -55,7 +55,7 @@ pub(crate) fn lit_to_const<'tcx>(
     let (valtree, valtree_ty) = match (lit, expected_ty.map(|ty| ty.kind())) {
         (ast::LitKind::Str(s, _), _) => {
             let str_bytes = s.as_str().as_bytes();
-            let valtree_ty = Ty::new_imm_ref(tcx, tcx.lifetimes.re_static, tcx.types.str_);
+            let valtree_ty = tcx.types.str_;
             (ty::ValTree::from_raw_bytes(tcx, str_bytes), valtree_ty)
         }
         (ast::LitKind::ByteStr(byte_sym, _), Some(ty::Ref(_, inner_ty, _)))

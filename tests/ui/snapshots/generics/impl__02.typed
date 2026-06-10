@@ -75,7 +75,7 @@ fn main() ({
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)(
 
-                                ((x as Val).value() as int)) as term), (", " as &str),
+                                ((x as Val).value() as int)) as term), (", " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((y as GenVal<int>).value() as int)) as
                                 term)] as [term; 3])] as [[term; 3]; 1])) as term);

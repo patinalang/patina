@@ -312,7 +312,7 @@ pub(crate) fn check_intrinsic_type(
         }
         sym::needs_drop => (1, 0, vec![], tcx.types.bool),
 
-        sym::type_name => (1, 0, vec![], Ty::new_static_str(tcx)),
+        sym::type_name => (1, 0, vec![], tcx.types.str_),
         sym::type_id => (
             1,
             0,

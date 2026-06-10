@@ -58,7 +58,7 @@ fn main() ({
     let copied_integer = (an_integer as int);
     ({
         ((io::put_chars as
-                fn(term) -> term)(([([("An integer: " as &str),
+                fn(term) -> term)(([([("An integer: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)(
 
@@ -68,7 +68,7 @@ fn main() ({
     } as ());
     ({
         ((io::put_chars as
-                fn(term) -> term)(([([("A boolean: " as &str),
+                fn(term) -> term)(([([("A boolean: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((a_boolean as bool)) as term)] as
                         [term; 2])] as [[term; 2]; 1])) as term);
@@ -76,7 +76,7 @@ fn main() ({
     } as ());
     ({
         ((io::put_chars as
-                fn(term) -> term)(([([("Meet the unit value: " as &str),
+                fn(term) -> term)(([([("Meet the unit value: " as str),
                             ((patina_fmt::debug as fn(term) -> term)((unit as ())) as
                                 term)] as [term; 2])] as [[term; 2]; 1])) as term);
         ((io::nl as fn() -> term)() as term);

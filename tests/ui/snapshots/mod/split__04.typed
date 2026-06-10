@@ -54,7 +54,7 @@ fn public_function() ({
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("called `MyMod::Inaccessible::public_function()`"
-                                as &str)] as [&str; 1])] as [[&str; 1]; 1])) as term);
+                                as str)] as [str; 1])] as [[str; 1]; 1])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 } as ())

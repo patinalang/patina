@@ -987,15 +987,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             }
         }
 
-        // When `deref_patterns` is enabled, in order to allow `deref!("..."): String`, we allow
-        // string literal patterns to have type `str`. This is accounted for when lowering to MIR.
-        if self.tcx.features().deref_patterns()
-            && matches!(lit_kind, ast::LitKind::Str(..))
-            && self.resolve_vars_with_obligations(expected).is_str()
-        {
-            pat_ty = self.tcx.types.str_;
-        }
-
         // Somewhat surprising: in this case, the subtyping relation goes the
         // opposite way as the other cases. Actually what we really want is not
         // a subtyping relation at all but rather that there exists a LUB

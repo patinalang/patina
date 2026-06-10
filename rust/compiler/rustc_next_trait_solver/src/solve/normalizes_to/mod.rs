@@ -647,11 +647,12 @@ where
             | ty::CoroutineWitness(..)
             | ty::Term
             | ty::Never
+            | ty::Str
             | ty::Foreign(..) => Ty::new_unit(cx),
 
             ty::Error(e) => Ty::new_error(cx, e),
 
-            ty::Str | ty::Slice(_) => Ty::new_usize(cx),
+            ty::Slice(_) => Ty::new_usize(cx),
 
             ty::Dynamic(_, _) => {
                 let dyn_metadata = cx.require_lang_item(SolverLangItem::DynMetadata);

@@ -2174,11 +2174,12 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
             | ty::Array(..)
             | ty::Closure(..)
             | ty::CoroutineClosure(..)
+            | ty::Str
             | ty::Term
             | ty::Never
             | ty::Error(_) => ty::Binder::dummy(vec![]),
 
-            ty::Str | ty::Slice(_) | ty::Dynamic(..) => match sizedness {
+            ty::Slice(_) | ty::Dynamic(..) => match sizedness {
                 SizedTraitKind::Sized => unreachable!("tried to assemble `Sized` for unsized type"),
                 SizedTraitKind::MetaSized => ty::Binder::dummy(vec![]),
             },
@@ -2317,6 +2318,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
             | ty::FnDef(..)
             | ty::FnPtr(..)
             | ty::Error(_)
+            | ty::Str
             | ty::Term
             | ty::Never
             | ty::Char => {
@@ -2333,12 +2335,6 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
             ty::UnsafeBinder(ty) => {
                 ty.map_bound(|ty| AutoImplConstituents { types: vec![ty], assumptions: vec![] })
             }
-
-            // Treat this like `struct str([u8]);`
-            ty::Str => ty::Binder::dummy(AutoImplConstituents {
-                types: vec![Ty::new_slice(self.tcx(), self.tcx().types.int)],
-                assumptions: vec![],
-            }),
 
             ty::Placeholder(..)
             | ty::Dynamic(..)
