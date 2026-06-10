@@ -1,53 +1,52 @@
-error: no rules expected `,`
-  --> tests/ui/src/flow_control/if_let__02.pt:13:33
+error[E0425]: cannot find type `Option` in this scope
+  --> tests/ui/src/flow_control/if_let__02.pt:7:17
    |
-LL |         println!("Matched {:?}!", i);
-   |                                 ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |     let letter: Option<int> = None;
+   |                 ^^^^^^ not found in this scope
 
-error: no rules expected `,`
-  --> tests/ui/src/flow_control/if_let__02.pt:18:33
+error[E0425]: cannot find value `None` in this scope
+  --> tests/ui/src/flow_control/if_let__02.pt:7:31
    |
-LL |         println!("Matched {:?}!", i);
-   |                                 ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |     let letter: Option<int> = None;
+   |                               ^^^^ not found in this scope
 
-error: no rules expected `,`
-  --> tests/ui/src/flow_control/if_let__02.pt:28:33
+error[E0425]: cannot find type `Option` in this scope
+  --> tests/ui/src/flow_control/if_let__02.pt:8:19
    |
-LL |         println!("Matched {:?}!", i);
-   |                                 ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |     let emoticon: Option<int> = None;
+   |                   ^^^^^^ not found in this scope
 
-error: aborting due to 3 previous errors
+error[E0425]: cannot find value `None` in this scope
+  --> tests/ui/src/flow_control/if_let__02.pt:8:33
+   |
+LL |     let emoticon: Option<int> = None;
+   |                                 ^^^^ not found in this scope
 
+error[E0531]: cannot find tuple struct or tuple variant `Some` in this scope
+  --> tests/ui/src/flow_control/if_let__02.pt:12:12
+   |
+LL |     if let Some(i) = number {
+   |            ^^^^ not found in this scope
+
+error[E0531]: cannot find tuple struct or tuple variant `Some` in this scope
+  --> tests/ui/src/flow_control/if_let__02.pt:17:12
+   |
+LL |     if let Some(i) = letter {
+   |            ^^^^ not found in this scope
+
+error[E0531]: cannot find tuple struct or tuple variant `Some` in this scope
+  --> tests/ui/src/flow_control/if_let__02.pt:27:12
+   |
+LL |     if let Some(i) = emoticon {
+   |            ^^^^ not found in this scope
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
+  --> tests/ui/src/flow_control/if_let__02.pt:6:18
+   |
+LL |     let number = Some(7);
+   |                  ^^^^ not found in this scope
+
+error: aborting due to 8 previous errors
+
+Some errors have detailed explanations: E0425, E0531.
+For more information about an error, try `rustc --explain E0425`.

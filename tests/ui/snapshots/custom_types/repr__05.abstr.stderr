@@ -1,19 +1,8 @@
-error: no rules expected `,`
-  --> tests/ui/src/custom_types/repr__05.pt:9:20
+error: non-extern-mod function calls not yet implemented: Expr { hir_id: HirId(DefId(0:15 ~ rust_out[2361]::main).18), kind: Path(Resolved(None, Path { span: tests/ui/src/custom_types/repr__05.pt:9:22: 9:29 (#0), res: Def(Ctor(Struct, Fn), DefId(0:13 ~ rust_out[2361]::Celcius::{constructor#0})), segments: [PathSegment { ident: Celcius#0, hir_id: HirId(DefId(0:15 ~ rust_out[2361]::main).19), res: Def(Ctor(Struct, Fn), DefId(0:13 ~ rust_out[2361]::Celcius::{constructor#0})), args: None, infer_args: true }] })), span: tests/ui/src/custom_types/repr__05.pt:9:22: 9:29 (#0) }
+  --> tests/ui/src/custom_types/repr__05.pt:9:22
    |
 LL |     println!("{:?}", Celcius(2.345) as term);
-   |                    ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+   |                      ^^^^^^^^^^^^^^
 
 error: aborting due to 1 previous error
 

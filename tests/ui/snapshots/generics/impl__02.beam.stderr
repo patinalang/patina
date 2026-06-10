@@ -1,19 +1,8 @@
-error: no rules expected `,`
-  --> tests/ui/src/generics/impl__02.pt:30:22
+error: expression kind Struct(Resolved(None, Path { span: tests/ui/src/generics/impl__02.pt:27:13: 27:16 (#0), res: Def(Struct, DefId(0:12 ~ rust_out[2361]::Val)), segments: [PathSegment { ident: Val#0, hir_id: HirId(DefId(0:22 ~ rust_out[2361]::main).4), res: Def(Struct, DefId(0:12 ~ rust_out[2361]::Val)), args: None, infer_args: true }] }), [ExprField { hir_id: HirId(DefId(0:22 ~ rust_out[2361]::main).5), ident: val#0, expr: Expr { hir_id: HirId(DefId(0:22 ~ rust_out[2361]::main).6), kind: Lit(Spanned { node: Int(Pu128(3)), span: tests/ui/src/generics/impl__02.pt:27:24: 27:25 (#0) }), span: tests/ui/src/generics/impl__02.pt:27:24: 27:25 (#0) }, span: tests/ui/src/generics/impl__02.pt:27:19: 27:25 (#0), is_shorthand: false }], None) not yet implemented
+  --> tests/ui/src/generics/impl__02.pt:27:13
    |
-LL |     println!("{}, {}", x.value(), y.value());
-   |                      ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |     let x = Val { val: 3 };
+   |             ^^^^^^^^^^^^^^
 
 error: aborting due to 1 previous error
 

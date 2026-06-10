@@ -19,6 +19,7 @@ use rustc_lint_defs::builtin::NAMED_ARGUMENTS_USED_POSITIONALLY;
 use rustc_parse::exp;
 use rustc_parse_format as parse;
 use rustc_span::{BytePos, ErrorGuaranteed, Ident, InnerSpan, Span, Symbol};
+use thin_vec::{ThinVec, thin_vec};
 
 use crate::errors;
 use crate::util::{ExprToSpannedString, expr_to_spanned_string};
@@ -1120,7 +1121,10 @@ fn expand_format_args_impl<'cx>(
             };
             match mac {
                 Ok(format_args) => {
-                    MacEager::expr(ecx.expr(sp, ExprKind::FormatArgs(Box::new(format_args))))
+                    // We don't have enough of the language implemented yet to lower
+                    // to `FormatArgs`, so for now we lower directly here.
+                    // MacEager::expr(ecx.expr(sp, ExprKind::FormatArgs(Box::new(format_args))))
+                    MacEager::expr(lower_format_args_to_patina(ecx, sp, &format_args))
                 }
                 Err(guar) => MacEager::expr(DummyResult::raw_expr(sp, Some(guar))),
             }
@@ -1130,6 +1134,57 @@ fn expand_format_args_impl<'cx>(
             DummyResult::any(sp, guar)
         }
     })
+}
+
+fn lower_format_args_to_patina(ecx: &ExtCtxt<'_>, sp: Span, fmt: &FormatArgs) -> Box<Expr> {
+    let error_sym = Symbol::intern("term");
+    let patina_fmt_sym = Symbol::intern("patina_fmt");
+    let display_sym = Symbol::intern("display");
+    let debug_sym = Symbol::intern("debug");
+
+    let mut pieces: ThinVec<Box<Expr>> = ThinVec::new();
+    for piece in &fmt.template {
+        match piece {
+            FormatArgsPiece::Literal(symbol) => {
+                if !symbol.as_str().is_empty() {
+                    pieces.push(ecx.expr_str(sp, *symbol));
+                }
+            }
+            FormatArgsPiece::Placeholder(placeholder) => {
+                let ph_span = placeholder.span.unwrap_or(sp);
+
+                if placeholder.format_options != FormatOptions::default() {
+                    ecx.dcx().span_err(ph_span, "format options are not yet supported in Patina");
+                }
+
+                let fn_name = match placeholder.format_trait {
+                    FormatTrait::Display => display_sym,
+                    FormatTrait::Debug => debug_sym,
+                    _ => {
+                        ecx.dcx().span_err(
+                            ph_span,
+                            "only `{}` (Display) and `{:?}` (Debug) are supported in Patina",
+                        );
+                        debug_sym
+                    }
+                };
+
+                let index = placeholder.argument.index.unwrap_or_else(|i| i);
+                let arg = match fmt.arguments.all_args().get(index) {
+                    Some(arg) => arg.expr.clone(),
+                    None => ecx.expr_str(ph_span, error_sym),
+                };
+
+                let path =
+                    ecx.path(sp, vec![Ident::new(patina_fmt_sym, sp), Ident::new(fn_name, sp)]);
+                let render = ecx.expr_call(sp, ecx.expr_path(path), thin_vec![arg]);
+
+                pieces.push(render);
+            }
+        }
+    }
+
+    ecx.expr_array(sp, pieces)
 }
 
 pub(crate) fn expand_format_args<'cx>(

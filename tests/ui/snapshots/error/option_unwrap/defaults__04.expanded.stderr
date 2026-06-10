@@ -1,70 +1,27 @@
-error: no rules expected `,`
-  --> tests/ui/src/error/option_unwrap/defaults__04.pt:15:46
+error: cannot find attribute `derive` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__04.pt:4:3
    |
-LL |     println!("first_available_fruit is: {:?}", first_available_fruit);
-   |                                              ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL | #[derive(Debug)]
+   |   ^^^^^^
 
-error: no rules expected `,`
-  --> tests/ui/src/error/option_unwrap/defaults__04.pt:16:33
+error[E0425]: cannot find type `Option` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__04.pt:8:23
    |
-LL |     println!("my_fruit is: {:?}", my_fruit);
-   |                                 ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |     let mut my_fruit: Option<Fruit> = None;
+   |                       ^^^^^^ not found in this scope
 
-error: no rules expected `,`
-  --> tests/ui/src/error/option_unwrap/defaults__04.pt:24:40
+error[E0425]: cannot find value `None` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__04.pt:8:39
    |
-LL |     println!("should_be_apple is: {:?}", should_be_apple);
-   |                                        ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |     let mut my_fruit: Option<Fruit> = None;
+   |                                       ^^^^ not found in this scope
 
-error: no rules expected `,`
-  --> tests/ui/src/error/option_unwrap/defaults__04.pt:25:43
+error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__04.pt:22:24
    |
-LL |     println!("my_apple is unchanged: {:?}", my_apple);
-   |                                           ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |     let mut my_apple = Some(Fruit::Apple);
+   |                        ^^^^ not found in this scope
 
 error: aborting due to 4 previous errors
 
+For more information about this error, try `rustc --explain E0425`.

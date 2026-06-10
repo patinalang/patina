@@ -1,36 +1,21 @@
-error: no rules expected `,`
-  --> tests/ui/src/error/iter_result__05.pt:12:29
+error[E0433]: cannot find type `Result` in this scope
+  --> tests/ui/src/error/iter_result__05.pt:9:20
    |
-LL |     println!("Numbers: {:?}", numbers);
-   |                             ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |         .partition(Result::is_ok);
+   |                    ^^^^^^ use of undeclared type `Result`
 
-error: no rules expected `,`
-  --> tests/ui/src/error/iter_result__05.pt:13:28
+error[E0433]: cannot find type `Result` in this scope
+  --> tests/ui/src/error/iter_result__05.pt:10:48
    |
-LL |     println!("Errors: {:?}", errors);
-   |                            ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |     let numbers: [_] = numbers.into_iter().map(Result::unwrap).collect();
+   |                                                ^^^^^^ use of undeclared type `Result`
 
-error: aborting due to 2 previous errors
+error[E0433]: cannot find type `Result` in this scope
+  --> tests/ui/src/error/iter_result__05.pt:11:46
+   |
+LL |     let errors: [_] = errors.into_iter().map(Result::unwrap_err).collect();
+   |                                              ^^^^^^ use of undeclared type `Result`
 
+error: aborting due to 3 previous errors
+
+For more information about this error, try `rustc --explain E0433`.

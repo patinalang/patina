@@ -1,87 +1,15 @@
-error: no rules expected `,`
-  --> tests/ui/src/custom_types/structs__01.pt:40:20
+error: cannot find attribute `derive` in this scope
+  --> tests/ui/src/custom_types/structs__01.pt:7:3
    |
-LL |     println!("{:?}", peter);
-   |                    ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL | #[derive(Debug)]
+   |   ^^^^^^
 
-error: no rules expected `,`
-  --> tests/ui/src/custom_types/structs__01.pt:47:43
+error[E0308]: mismatched types
+  --> tests/ui/src/custom_types/structs__01.pt:37:26
    |
-LL |     println!("point coordinates: ({}, {})", point.x, point.y);
-   |                                           ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |     let peter = Person { name, age };
+   |                          ^^^^ expected `str`, found `&str`
 
-error: no rules expected `,`
-  --> tests/ui/src/custom_types/structs__01.pt:55:38
-   |
-LL |     println!("second point: ({}, {})", bottom_right.x, bottom_right.y);
-   |                                      ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+error: aborting due to 2 previous errors
 
-error: no rules expected `,`
-  --> tests/ui/src/custom_types/structs__01.pt:73:43
-   |
-LL |     println!("pair contains {:?} and {:?}", pair.0, pair.1);
-   |                                           ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
-
-error: no rules expected `,`
-  --> tests/ui/src/custom_types/structs__01.pt:78:43
-   |
-LL |     println!("pair contains {:?} and {:?}", integer, decimal);
-   |                                           ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
-
-error: aborting due to 5 previous errors
-
+For more information about this error, try `rustc --explain E0308`.

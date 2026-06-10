@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, lang_items#0])]
+#![attr = Feature([no_core#0, lang_items#0, rustc_attrs#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -15,11 +15,36 @@ trait Sized: MetaSized { }
 #[attr = Lang(Copy)]
 trait Copy { }
 
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {} }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {} }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {} }
+
 #[allow(unused)]
 extern mod io;
 
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
 #[attr = MacroExport {local_inner_macros: false}]
-macro_rules! println { ($s:literal) => {{ io::format("~s~n", [$s]); }}; }
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+#[attr = MacroExport {local_inner_macros: false}]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
 
 // source: patina-by-example/src/fn/diverging.md
 // block: 2/4
@@ -29,9 +54,9 @@ fn some_fn() ({ (() as ()) } as ())
 fn main() ({
     let _a: () = ((some_fn as fn() {some_fn})() as ());
     ({
-        ((io::format as
-                fn(term, term) -> term)(("~s~n" as &str),
-            ([("This function returns and you can see this line." as &str)] as
-                [&str; 1])) as term);
+        ((io::put_chars as
+                fn(term) -> term)(([([("This function returns and you can see this line."
+                                as &str)] as [&str; 1])] as [[&str; 1]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
     } as ());
 } as ())

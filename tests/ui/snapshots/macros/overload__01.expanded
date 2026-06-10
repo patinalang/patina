@@ -1,0 +1,82 @@
+#![allow(internal_features)]
+#![feature(no_core, lang_items, rustc_attrs)]
+#![no_std]
+#![no_core]
+
+#[lang = "pointee_sized"]
+pub trait PointeeSized { }
+
+#[lang = "meta_sized"]
+pub trait MetaSized: PointeeSized { }
+
+#[lang = "sized"]
+pub trait Sized: MetaSized { }
+
+#[lang = "copy"]
+pub trait Copy { }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! stringify { () => {} }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat { () => {} }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args { () => {} }
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[macro_export]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+#[macro_export]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/macros/overload.md
+// block: 1/1
+
+// `test!` will compare `$left` and `$right`
+// in different ways depending on how you invoke it:
+macro_rules! test {
+    ($left:expr; and $right:expr) =>
+    {
+        println!("{:?} and {:?} is {:?}", stringify!($left),
+        stringify!($right), $left && $right)
+        // Arguments don't need to be separated by a comma.
+        // Any template can be used!
+    }; ($left:expr; or $right:expr) =>
+    {
+        println!("{:?} or {:?} is {:?}", stringify!($left),
+        stringify!($right), $left || $right)
+        // ^ each arm must end with a semicolon.
+    };
+}
+
+pub fn main() {
+    {
+        io::put_chars([[patina_fmt::debug("1 + 1 == 2"), " and ",
+                            patina_fmt::debug("2 * 2 == 4"), " is ",
+                            patina_fmt::debug(1 + 1 == 2 && 2 * 2 == 4)]]);
+        io::nl();
+    };
+    {
+        io::put_chars([[patina_fmt::debug("true"), " or ",
+                            patina_fmt::debug("false"), " is ",
+                            patina_fmt::debug(true || false)]]);
+        io::nl();
+    };
+}

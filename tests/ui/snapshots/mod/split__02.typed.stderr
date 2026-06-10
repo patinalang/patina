@@ -16,12 +16,6 @@ LL | pub mod Nested;
    = help: to create the module `Nested`, create file "tests/ui/src/mod/Nested.rs" or "tests/ui/src/mod/Nested/mod.rs"
    = note: if there is a `mod Nested` elsewhere in the crate already, import it with `use crate::...` instead
 
-error: cannot find macro `print` in this scope
-  --> tests/ui/src/mod/split__02.pt:19:5
-   |
-LL |     print!("called `MyMod::indirect_access()`, that\n> ");
-   |     ^^^^^
-
-error: aborting due to 3 previous errors
+error: aborting due to 2 previous errors
 
 For more information about this error, try `rustc --explain E0583`.

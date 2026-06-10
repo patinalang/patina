@@ -1,19 +1,91 @@
-error: no rules expected `,`
-  --> tests/ui/src/error/panic__01.pt:8:49
+error: cannot find macro `panic` in this scope
+  --> tests/ui/src/error/panic__01.pt:6:33
    |
-LL |     println!("Some refreshing {} is all I need.", beverage);
-   |                                                 ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |     if beverage == "lemonade" { panic!("AAAaaaaa!!!!"); }
+   |                                 ^^^^^
 
-error: aborting due to 1 previous error
+error[E0277]: the trait bound `str: Sized` is not satisfied
+  --> tests/ui/src/error/panic__01.pt:4:20
+   |
+LL | fn drink(beverage: str) {
+   |                    ^^^ the trait `Sized` is not implemented for `str`
+   |
+help: this trait has no implementations, consider adding one
+  --> <patina-prelude>:14:1
+   |
+LL | pub trait Sized: MetaSized {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: unsized fn params are gated as an unstable feature
+help: function arguments must have a statically known size, borrowed types always have a known size
+   |
+LL | fn drink(beverage: &str) {
+   |                    +
 
+error[E0369]: binary operation `==` cannot be applied to type `str`
+  --> tests/ui/src/error/panic__01.pt:6:17
+   |
+LL |     if beverage == "lemonade" { panic!("AAAaaaaa!!!!"); }
+   |        -------- ^^ ---------- &str
+   |        |
+   |        str
+
+error[E0308]: mismatched types
+  --> tests/ui/src/error/panic__01.pt:12:11
+   |
+LL |     drink("water");
+   |     ----- ^^^^^^^ expected `str`, found `&str`
+   |     |
+   |     arguments to this function are incorrect
+   |
+note: function defined here
+  --> tests/ui/src/error/panic__01.pt:4:4
+   |
+LL | fn drink(beverage: str) {
+   |    ^^^^^ -------------
+
+error[E0308]: mismatched types
+  --> tests/ui/src/error/panic__01.pt:13:11
+   |
+LL |     drink("lemonade");
+   |     ----- ^^^^^^^^^^ expected `str`, found `&str`
+   |     |
+   |     arguments to this function are incorrect
+   |
+note: function defined here
+  --> tests/ui/src/error/panic__01.pt:4:4
+   |
+LL | fn drink(beverage: str) {
+   |    ^^^^^ -------------
+
+error[E0308]: mismatched types
+  --> tests/ui/src/error/panic__01.pt:14:11
+   |
+LL |     drink("still water");
+   |     ----- ^^^^^^^^^^^^^ expected `str`, found `&str`
+   |     |
+   |     arguments to this function are incorrect
+   |
+note: function defined here
+  --> tests/ui/src/error/panic__01.pt:4:4
+   |
+LL | fn drink(beverage: str) {
+   |    ^^^^^ -------------
+
+error[E0277]: the trait bound `str: Sized` is not satisfied
+  --> tests/ui/src/error/panic__01.pt:12:11
+   |
+LL |     drink("water");
+   |           ^^^^^^^ the trait `Sized` is not implemented for `str`
+   |
+help: this trait has no implementations, consider adding one
+  --> <patina-prelude>:14:1
+   |
+LL | pub trait Sized: MetaSized {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: all function arguments must have a statically known size
+   = help: unsized fn params are gated as an unstable feature
+
+error: aborting due to 7 previous errors
+
+Some errors have detailed explanations: E0277, E0308, E0369.
+For more information about an error, try `rustc --explain E0277`.

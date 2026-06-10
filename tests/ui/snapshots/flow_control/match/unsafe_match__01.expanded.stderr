@@ -46,22 +46,37 @@ error: expected one of `=>`, `@`, `if`, or `|`, found `"nil"`
 LL |             a"nil" => "the atom nil",
    |              ^^^^^ expected one of `=>`, `@`, `if`, or `|`
 
-error: no rules expected `,`
-  --> tests/ui/src/flow_control/match/unsafe_match__01.pt:25:22
+error[E0425]: cannot find value `safe_description` in this scope
+  --> tests/ui/src/flow_control/match/unsafe_match__01.pt:25:24
    |
 LL |     println!("{}, {}", safe_description, unsafe_description);
-   |                      ^ no rules expected this token in macro call
+   |                        ^^^^^^^^^^^^^^^^
    |
-  ::: <patina-prelude>:23:1
+help: a local variable with a similar name exists
    |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
+LL -     println!("{}, {}", safe_description, unsafe_description);
+LL +     println!("{}, {}", safe_destription, unsafe_description);
    |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
 
-error: aborting due to 6 previous errors
+error[E0433]: cannot find type `Option` in this scope
+  --> tests/ui/src/flow_control/match/unsafe_match__01.pt:5:13
+   |
+LL |     let v = Option::<int>::None as term;
+   |             ^^^^^^ use of undeclared type `Option`
 
+error[E0433]: cannot find type `Option` in this scope
+  --> tests/ui/src/flow_control/match/unsafe_match__01.pt:18:13
+   |
+LL |             Option::<str>::None => "an empty string option",
+   |             ^^^^^^ use of undeclared type `Option`
+
+error[E0433]: cannot find type `Option` in this scope
+  --> tests/ui/src/flow_control/match/unsafe_match__01.pt:19:13
+   |
+LL |             Option::<int>::None => "an empty integer option",
+   |             ^^^^^^ use of undeclared type `Option`
+
+error: aborting due to 9 previous errors
+
+Some errors have detailed explanations: E0425, E0433.
+For more information about an error, try `rustc --explain E0425`.

@@ -1,36 +1,115 @@
-error: no rules expected `,`
-  --> tests/ui/src/custom_types/repr__08.pt:25:20
+error[E0425]: cannot find type `Point` in this scope
+  --> tests/ui/src/custom_types/repr__08.pt:7:28
    |
-LL |     println!("{:?}", records::get_field_names(point));
-   |                    ^ no rules expected this token in macro call
+LL |     Rectangle{ upper_left: Point, lower_right: Point },
+   |                            ^^^^^ not found in this scope
    |
-  ::: <patina-prelude>:23:1
+help: there is an enum variant `crate::NativeRecordEnum::Point`; try using the variant's enum
    |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
+LL -     Rectangle{ upper_left: Point, lower_right: Point },
+LL +     Rectangle{ upper_left: crate::NativeRecordEnum, lower_right: Point },
    |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
 
-error: no rules expected `,`
-  --> tests/ui/src/custom_types/repr__08.pt:29:20
+error[E0425]: cannot find type `Point` in this scope
+  --> tests/ui/src/custom_types/repr__08.pt:7:48
    |
-LL |     println!("{:?}", records::get_field_names(rect));
-   |                    ^ no rules expected this token in macro call
+LL |     Rectangle{ upper_left: Point, lower_right: Point },
+   |                                                ^^^^^ not found in this scope
    |
-  ::: <patina-prelude>:23:1
+help: there is an enum variant `crate::NativeRecordEnum::Point`; try using the variant's enum
    |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
+LL -     Rectangle{ upper_left: Point, lower_right: Point },
+LL +     Rectangle{ upper_left: Point, lower_right: crate::NativeRecordEnum },
    |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
 
-error: aborting due to 2 previous errors
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__08.pt:4:8
+   |
+LL | #[repr(native_record)]
+   |        ^^^^^^^^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
 
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__08.pt:9:12
+   |
+LL |     #[repr(name = "custom_name")]
+   |            ^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__08.pt:15:8
+   |
+LL | #[repr(native_record, module = "external_module", name = "custom_name")]
+   |        ^^^^^^^^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__08.pt:15:23
+   |
+LL | #[repr(native_record, module = "external_module", name = "custom_name")]
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__08.pt:15:51
+   |
+LL | #[repr(native_record, module = "external_module", name = "custom_name")]
+   |                                                   ^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+
+error[E0308]: mismatched types
+  --> tests/ui/src/custom_types/repr__08.pt:28:41
+   |
+LL |     let rect = NativeRecordStruct{ foo: "bar" };
+   |                                         ^^^^^ expected `str`, found `&str`
+
+error[E0277]: the trait bound `str: Sized` is not satisfied in `NativeRecordStruct`
+  --> tests/ui/src/custom_types/repr__08.pt:28:16
+   |
+LL |     let rect = NativeRecordStruct{ foo: "bar" };
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ within `NativeRecordStruct`, the trait `Sized` is not implemented for `str`
+   |
+help: this trait has no implementations, consider adding one
+  --> <patina-prelude>:14:1
+   |
+LL | pub trait Sized: MetaSized {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: required because it appears within the type `NativeRecordStruct`
+  --> tests/ui/src/custom_types/repr__08.pt:16:8
+   |
+LL | struct NativeRecordStruct{
+   |        ^^^^^^^^^^^^^^^^^^
+   = note: structs must have a statically known size to be initialized
+
+error[E0277]: the trait bound `str: Sized` is not satisfied in `NativeRecordStruct`
+  --> tests/ui/src/custom_types/repr__08.pt:28:9
+   |
+LL |     let rect = NativeRecordStruct{ foo: "bar" };
+   |         ^^^^ within `NativeRecordStruct`, the trait `Sized` is not implemented for `str`
+   |
+help: this trait has no implementations, consider adding one
+  --> <patina-prelude>:14:1
+   |
+LL | pub trait Sized: MetaSized {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: required because it appears within the type `NativeRecordStruct`
+  --> tests/ui/src/custom_types/repr__08.pt:16:8
+   |
+LL | struct NativeRecordStruct{
+   |        ^^^^^^^^^^^^^^^^^^
+   = note: all local variables must have a statically known size
+
+error: aborting due to 10 previous errors
+
+Some errors have detailed explanations: E0277, E0308, E0425, E0552.
+For more information about an error, try `rustc --explain E0277`.

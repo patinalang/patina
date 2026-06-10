@@ -1,36 +1,27 @@
-error: no rules expected `,`
-  --> tests/ui/src/custom_types/repr__08.pt:25:20
+error[E0425]: cannot find type `Point` in this scope
+  --> tests/ui/src/custom_types/repr__08.pt:7:28
    |
-LL |     println!("{:?}", records::get_field_names(point));
-   |                    ^ no rules expected this token in macro call
+LL |     Rectangle{ upper_left: Point, lower_right: Point },
+   |                            ^^^^^ not found in this scope
    |
-  ::: <patina-prelude>:23:1
+help: there is an enum variant `crate::NativeRecordEnum::Point`; try using the variant's enum
    |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
+LL -     Rectangle{ upper_left: Point, lower_right: Point },
+LL +     Rectangle{ upper_left: crate::NativeRecordEnum, lower_right: Point },
    |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
 
-error: no rules expected `,`
-  --> tests/ui/src/custom_types/repr__08.pt:29:20
+error[E0425]: cannot find type `Point` in this scope
+  --> tests/ui/src/custom_types/repr__08.pt:7:48
    |
-LL |     println!("{:?}", records::get_field_names(rect));
-   |                    ^ no rules expected this token in macro call
+LL |     Rectangle{ upper_left: Point, lower_right: Point },
+   |                                                ^^^^^ not found in this scope
    |
-  ::: <patina-prelude>:23:1
+help: there is an enum variant `crate::NativeRecordEnum::Point`; try using the variant's enum
    |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
+LL -     Rectangle{ upper_left: Point, lower_right: Point },
+LL +     Rectangle{ upper_left: Point, lower_right: crate::NativeRecordEnum },
    |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
 
 error: aborting due to 2 previous errors
 
+For more information about this error, try `rustc --explain E0425`.

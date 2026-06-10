@@ -1,53 +1,15 @@
-error: no rules expected `,`
-  --> tests/ui/src/variable_bindings/scope__01.pt:13:35
-   |
-LL |         println!("inner short: {}", short_lived_binding);
-   |                                   ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
-
-error: no rules expected `,`
-  --> tests/ui/src/variable_bindings/scope__01.pt:18:31
+error[E0425]: cannot find value `short_lived_binding` in this scope
+  --> tests/ui/src/variable_bindings/scope__01.pt:18:33
    |
 LL |     println!("outer short: {}", short_lived_binding);
-   |                               ^ no rules expected this token in macro call
+   |                                 ^^^^^^^^^^^^^^^^^^^
    |
-  ::: <patina-prelude>:23:1
+help: the binding `short_lived_binding` is available in a different scope in the same function
+  --> tests/ui/src/variable_bindings/scope__01.pt:11:13
    |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |         let short_lived_binding = 2;
+   |             ^^^^^^^^^^^^^^^^^^^
 
-error: no rules expected `,`
-  --> tests/ui/src/variable_bindings/scope__01.pt:21:30
-   |
-LL |     println!("outer long: {}", long_lived_binding);
-   |                              ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+error: aborting due to 1 previous error
 
-error: aborting due to 3 previous errors
-
+For more information about this error, try `rustc --explain E0425`.

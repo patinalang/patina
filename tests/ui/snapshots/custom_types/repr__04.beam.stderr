@@ -1,36 +1,20 @@
-error: no rules expected `,`
-  --> tests/ui/src/custom_types/repr__04.pt:11:20
+error: expected a literal (`1u8`, `1.0f32`, `"string"`, etc.) here, found expression
+  --> tests/ui/src/custom_types/repr__04.pt:4:24
    |
-LL |     println!("{:?}", SnakeCaseEnum::UnitVariant as term);
-   |                    ^ no rules expected this token in macro call
+LL | #[repr(tagged, style = snake_case)]
+   |                        ^^^^^^^^^^ expressions are not allowed here
    |
-  ::: <patina-prelude>:23:1
+help: surround the identifier with quotation marks to make it into a string literal
    |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL | #[repr(tagged, style = "snake_case")]
+   |                        +          +
 
-error: no rules expected `,`
-  --> tests/ui/src/custom_types/repr__04.pt:14:20
+error[E0308]: mismatched types
+  --> tests/ui/src/custom_types/repr__04.pt:14:70
    |
 LL |     println!("{:?}", SnakeCaseEnum::StructHTTPStyle{code: 200, body: "hi"} as term);
-   |                    ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+   |                                                                      ^^^^ expected `str`, found `&str`
 
 error: aborting due to 2 previous errors
 
+For more information about this error, try `rustc --explain E0308`.

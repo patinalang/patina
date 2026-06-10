@@ -1,53 +1,306 @@
-error: no rules expected `,`
-  --> tests/ui/src/custom_types/repr__10.pt:14:28
+error: argument never used
+  --> tests/ui/src/custom_types/repr__10.pt:25:48
    |
 LL |     println!("{:?}    {:?}",
-   |                            ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+   |              -------------- formatting specifier missing
+LL |         Result::<int, ()>::Ok(42), Result<int, ()>::Err(()));
+   |                                                ^^^^^^^^^^^^ argument never used
 
-error: no rules expected `,`
-  --> tests/ui/src/custom_types/repr__10.pt:19:28
+error[E0423]: expected value, found enum `Result`
+  --> tests/ui/src/custom_types/repr__10.pt:25:36
    |
-LL |     println!("{:?}    {:?}",
-   |                            ^ no rules expected this token in macro call
+LL |         Result::<int, ()>::Ok(42), Result<int, ()>::Err(()));
+   |                                    ^^^^^^
    |
-  ::: <patina-prelude>:23:1
+note: the enum is defined here
+  --> tests/ui/src/custom_types/repr__10.pt:5:1
    |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
+LL | / pub enum Result<T, E> {
+LL | |     #[repr(name = "ok")]
+LL | |     Ok(T),
+...  |
+LL | |     Err(E),
+LL | | }
+   | |_^
+help: the following enum variants are available
    |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
+LL -         Result::<int, ()>::Ok(42), Result<int, ()>::Err(()));
+LL +         Result::<int, ()>::Ok(42), (Result::Err(/* fields */))<int, ()>::Err(()));
    |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL -         Result::<int, ()>::Ok(42), Result<int, ()>::Err(()));
+LL +         Result::<int, ()>::Ok(42), (Result::Ok(/* fields */))<int, ()>::Err(()));
+   |
 
-error: no rules expected `,`
-  --> tests/ui/src/custom_types/repr__10.pt:24:28
+error[E0423]: expected value, found builtin type `int`
+  --> tests/ui/src/custom_types/repr__10.pt:25:43
    |
-LL |     println!("{:?}    {:?}",
-   |                            ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |         Result::<int, ()>::Ok(42), Result<int, ()>::Err(()));
+   |                                           ^^^ not a value
 
-error: aborting due to 3 previous errors
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__10.pt:4:8
+   |
+LL | #[repr(tagged)]
+   |        ^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
 
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__10.pt:6:12
+   |
+LL |     #[repr(name = "ok")]
+   |            ^^^^^^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__10.pt:9:12
+   |
+LL |     #[repr(name = "error")]
+   |            ^^^^^^^^^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+
+error[E0277]: the trait bound `str: Sized` is not satisfied
+  --> tests/ui/src/custom_types/repr__10.pt:15:23
+   |
+LL |         Result::<int, str>::Ok(42), Result::<int, str>::Err("reason"));
+   |                       ^^^ the trait `Sized` is not implemented for `str`
+   |
+help: this trait has no implementations, consider adding one
+  --> <patina-prelude>:14:1
+   |
+LL | pub trait Sized: MetaSized {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: required by a bound in `Result::Ok`
+  --> tests/ui/src/custom_types/repr__10.pt:5:20
+   |
+LL | pub enum Result<T, E> {
+   |                    ^ required by this bound in `Result::Ok`
+LL |     #[repr(name = "ok")]
+LL |     Ok(T),
+   |     -- required by a bound in this tuple variant
+
+error[E0277]: the trait bound `str: Sized` is not satisfied
+  --> tests/ui/src/custom_types/repr__10.pt:15:9
+   |
+LL |         Result::<int, str>::Ok(42), Result::<int, str>::Err("reason"));
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Sized` is not implemented for `str`
+   |
+help: this trait has no implementations, consider adding one
+  --> <patina-prelude>:14:1
+   |
+LL | pub trait Sized: MetaSized {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: required by an implicit `Sized` bound in `Result`
+  --> tests/ui/src/custom_types/repr__10.pt:5:20
+   |
+LL | pub enum Result<T, E> {
+   |                    ^ required by the implicit `Sized` requirement on this type parameter in `Result`
+help: you could relax the implicit `Sized` bound on `E` if it were used through indirection like `&E` or `Box<E>`
+  --> tests/ui/src/custom_types/repr__10.pt:5:20
+   |
+LL | pub enum Result<T, E> {
+   |                    ^ this could be changed to `E: ?Sized`...
+...
+LL |     Err(E),
+   |         - ...if indirection were used here: `Box<E>`
+
+error[E0277]: the trait bound `str: Sized` is not satisfied
+  --> tests/ui/src/custom_types/repr__10.pt:15:51
+   |
+LL |         Result::<int, str>::Ok(42), Result::<int, str>::Err("reason"));
+   |                                                   ^^^ the trait `Sized` is not implemented for `str`
+   |
+help: this trait has no implementations, consider adding one
+  --> <patina-prelude>:14:1
+   |
+LL | pub trait Sized: MetaSized {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: required by a bound in `Result::Err`
+  --> tests/ui/src/custom_types/repr__10.pt:5:20
+   |
+LL | pub enum Result<T, E> {
+   |                    ^ required by this bound in `Result::Err`
+...
+LL |     Err(E),
+   |     --- required by a bound in this tuple variant
+
+error[E0308]: mismatched types
+  --> tests/ui/src/custom_types/repr__10.pt:15:61
+   |
+LL |         Result::<int, str>::Ok(42), Result::<int, str>::Err("reason"));
+   |                                     ----------------------- ^^^^^^^^ expected `str`, found `&str`
+   |                                     |
+   |                                     arguments to this enum variant are incorrect
+   |
+help: the type constructed contains `&'static str` due to the type of the argument passed
+  --> tests/ui/src/custom_types/repr__10.pt:15:37
+   |
+LL |         Result::<int, str>::Ok(42), Result::<int, str>::Err("reason"));
+   |                                     ^^^^^^^^^^^^^^^^^^^^^^^^--------^
+   |                                                             |
+   |                                                             this argument influences the type of `Err`
+note: tuple variant defined here
+  --> tests/ui/src/custom_types/repr__10.pt:10:5
+   |
+LL |     Err(E),
+   |     ^^^
+
+error[E0277]: the trait bound `str: Sized` is not satisfied
+  --> tests/ui/src/custom_types/repr__10.pt:15:37
+   |
+LL |         Result::<int, str>::Ok(42), Result::<int, str>::Err("reason"));
+   |                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Sized` is not implemented for `str`
+   |
+help: this trait has no implementations, consider adding one
+  --> <patina-prelude>:14:1
+   |
+LL | pub trait Sized: MetaSized {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: required by an implicit `Sized` bound in `Result`
+  --> tests/ui/src/custom_types/repr__10.pt:5:20
+   |
+LL | pub enum Result<T, E> {
+   |                    ^ required by the implicit `Sized` requirement on this type parameter in `Result`
+help: you could relax the implicit `Sized` bound on `E` if it were used through indirection like `&E` or `Box<E>`
+  --> tests/ui/src/custom_types/repr__10.pt:5:20
+   |
+LL | pub enum Result<T, E> {
+   |                    ^ this could be changed to `E: ?Sized`...
+...
+LL |     Err(E),
+   |         - ...if indirection were used here: `Box<E>`
+
+error[E0277]: the trait bound `str: Sized` is not satisfied
+  --> tests/ui/src/custom_types/repr__10.pt:20:22
+   |
+LL |         Result::<(), str>::Ok(()), Result::<(), str>::Err("reason"));
+   |                      ^^^ the trait `Sized` is not implemented for `str`
+   |
+help: this trait has no implementations, consider adding one
+  --> <patina-prelude>:14:1
+   |
+LL | pub trait Sized: MetaSized {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: required by a bound in `Result::Ok`
+  --> tests/ui/src/custom_types/repr__10.pt:5:20
+   |
+LL | pub enum Result<T, E> {
+   |                    ^ required by this bound in `Result::Ok`
+LL |     #[repr(name = "ok")]
+LL |     Ok(T),
+   |     -- required by a bound in this tuple variant
+
+error[E0277]: the trait bound `str: Sized` is not satisfied
+  --> tests/ui/src/custom_types/repr__10.pt:20:9
+   |
+LL |         Result::<(), str>::Ok(()), Result::<(), str>::Err("reason"));
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Sized` is not implemented for `str`
+   |
+help: this trait has no implementations, consider adding one
+  --> <patina-prelude>:14:1
+   |
+LL | pub trait Sized: MetaSized {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: required by an implicit `Sized` bound in `Result`
+  --> tests/ui/src/custom_types/repr__10.pt:5:20
+   |
+LL | pub enum Result<T, E> {
+   |                    ^ required by the implicit `Sized` requirement on this type parameter in `Result`
+help: you could relax the implicit `Sized` bound on `E` if it were used through indirection like `&E` or `Box<E>`
+  --> tests/ui/src/custom_types/repr__10.pt:5:20
+   |
+LL | pub enum Result<T, E> {
+   |                    ^ this could be changed to `E: ?Sized`...
+...
+LL |     Err(E),
+   |         - ...if indirection were used here: `Box<E>`
+
+error[E0277]: the trait bound `str: Sized` is not satisfied
+  --> tests/ui/src/custom_types/repr__10.pt:20:49
+   |
+LL |         Result::<(), str>::Ok(()), Result::<(), str>::Err("reason"));
+   |                                                 ^^^ the trait `Sized` is not implemented for `str`
+   |
+help: this trait has no implementations, consider adding one
+  --> <patina-prelude>:14:1
+   |
+LL | pub trait Sized: MetaSized {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: required by a bound in `Result::Err`
+  --> tests/ui/src/custom_types/repr__10.pt:5:20
+   |
+LL | pub enum Result<T, E> {
+   |                    ^ required by this bound in `Result::Err`
+...
+LL |     Err(E),
+   |     --- required by a bound in this tuple variant
+
+error[E0308]: mismatched types
+  --> tests/ui/src/custom_types/repr__10.pt:20:59
+   |
+LL |         Result::<(), str>::Ok(()), Result::<(), str>::Err("reason"));
+   |                                    ---------------------- ^^^^^^^^ expected `str`, found `&str`
+   |                                    |
+   |                                    arguments to this enum variant are incorrect
+   |
+help: the type constructed contains `&'static str` due to the type of the argument passed
+  --> tests/ui/src/custom_types/repr__10.pt:20:36
+   |
+LL |         Result::<(), str>::Ok(()), Result::<(), str>::Err("reason"));
+   |                                    ^^^^^^^^^^^^^^^^^^^^^^^--------^
+   |                                                           |
+   |                                                           this argument influences the type of `Err`
+note: tuple variant defined here
+  --> tests/ui/src/custom_types/repr__10.pt:10:5
+   |
+LL |     Err(E),
+   |     ^^^
+
+error[E0277]: the trait bound `str: Sized` is not satisfied
+  --> tests/ui/src/custom_types/repr__10.pt:20:36
+   |
+LL |         Result::<(), str>::Ok(()), Result::<(), str>::Err("reason"));
+   |                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Sized` is not implemented for `str`
+   |
+help: this trait has no implementations, consider adding one
+  --> <patina-prelude>:14:1
+   |
+LL | pub trait Sized: MetaSized {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: required by an implicit `Sized` bound in `Result`
+  --> tests/ui/src/custom_types/repr__10.pt:5:20
+   |
+LL | pub enum Result<T, E> {
+   |                    ^ required by the implicit `Sized` requirement on this type parameter in `Result`
+help: you could relax the implicit `Sized` bound on `E` if it were used through indirection like `&E` or `Box<E>`
+  --> tests/ui/src/custom_types/repr__10.pt:5:20
+   |
+LL | pub enum Result<T, E> {
+   |                    ^ this could be changed to `E: ?Sized`...
+...
+LL |     Err(E),
+   |         - ...if indirection were used here: `Box<E>`
+
+error[E0277]: the trait bound `str: Sized` is not satisfied
+  --> tests/ui/src/custom_types/repr__10.pt:15:61
+   |
+LL |         Result::<int, str>::Ok(42), Result::<int, str>::Err("reason"));
+   |                                                             ^^^^^^^^ the trait `Sized` is not implemented for `str`
+   |
+help: this trait has no implementations, consider adding one
+  --> <patina-prelude>:14:1
+   |
+LL | pub trait Sized: MetaSized {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: all function arguments must have a statically known size
+   = help: unsized fn params are gated as an unstable feature
+
+error: aborting due to 17 previous errors
+
+Some errors have detailed explanations: E0277, E0308, E0423, E0552.
+For more information about an error, try `rustc --explain E0277`.

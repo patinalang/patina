@@ -1,70 +1,52 @@
-error: no rules expected `,`
-  --> tests/ui/src/custom_types/repr__01.pt:28:20
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__01.pt:6:8
    |
-LL |     println!("{:?}", Unit as term);
-   |                    ^ no rules expected this token in macro call
+LL | #[repr(atom, name = "custom_name")]
+   |        ^^^^
    |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
 
-error: no rules expected `,`
-  --> tests/ui/src/custom_types/repr__01.pt:31:20
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__01.pt:6:14
    |
-LL |     println!("{:?}", CustomNameUnit as term);
-   |                    ^ no rules expected this token in macro call
+LL | #[repr(atom, name = "custom_name")]
+   |              ^^^^^^^^^^^^^^^^^^^^
    |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
 
-error: no rules expected `,`
-  --> tests/ui/src/custom_types/repr__01.pt:34:20
+error: expected a literal (`1u8`, `1.0f32`, `"string"`, etc.) here, found expression
+  --> tests/ui/src/custom_types/repr__01.pt:10:16
    |
-LL |     println!("{:?}", NotJustUnits::VariantA as term);
-   |                    ^ no rules expected this token in macro call
+LL | #[repr(style = snake_case)]
+   |                ^^^^^^^^^^ expressions are not allowed here
    |
-  ::: <patina-prelude>:23:1
+help: surround the identifier with quotation marks to make it into a string literal
    |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL | #[repr(style = "snake_case")]
+   |                +          +
 
-error: no rules expected `,`
-  --> tests/ui/src/custom_types/repr__01.pt:37:20
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__01.pt:13:12
    |
-LL |     println!("{:?}", NotJustUnits::VariantB as term);
-   |                    ^ no rules expected this token in macro call
+LL |     #[repr(name = "variantB")]
+   |            ^^^^^^^^^^^^^^^^^
    |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
 
-error: aborting due to 4 previous errors
+error: expected a literal (`1u8`, `1.0f32`, `"string"`, etc.) here, found expression
+  --> tests/ui/src/custom_types/repr__01.pt:20:22
+   |
+LL | #[repr(atom, style = snake_case)]
+   |                      ^^^^^^^^^^ expressions are not allowed here
+   |
+help: surround the identifier with quotation marks to make it into a string literal
+   |
+LL | #[repr(atom, style = "snake_case")]
+   |                      +          +
 
+error: aborting due to 5 previous errors
+
+For more information about this error, try `rustc --explain E0552`.

@@ -1,19 +1,9 @@
-error: no rules expected `,`
-  --> tests/ui/src/error/iter_result__03.pt:10:29
+error[E0425]: cannot find type `Result` in this scope
+  --> tests/ui/src/error/iter_result__03.pt:6:18
    |
-LL |     println!("Results: {:?}", numbers);
-   |                             ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |     let numbers: Result<[_], _> = strings
+   |                  ^^^^^^ not found in this scope
 
 error: aborting due to 1 previous error
 
+For more information about this error, try `rustc --explain E0425`.

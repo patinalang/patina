@@ -1,36 +1,15 @@
-error: no rules expected `,`
-  --> tests/ui/src/generics/bounds__03.pt:23:20
+error[E0433]: cannot find type `Std` in this scope
+  --> tests/ui/src/generics/bounds__03.pt:5:5
    |
-LL |     println!("{:?}", t);
-   |                    ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL | use Std::Fmt::Debug;
+   |     ^^^ use of undeclared type `Std`
 
-error: no rules expected `,`
-  --> tests/ui/src/generics/bounds__03.pt:35:24
+error: cannot find attribute `derive` in this scope
+  --> tests/ui/src/generics/bounds__03.pt:15:3
    |
-LL |     println!("Area: {}", area(rectangle));
-   |                        ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL | #[derive(Debug)]
+   |   ^^^^^^
 
 error: aborting due to 2 previous errors
 
+For more information about this error, try `rustc --explain E0433`.

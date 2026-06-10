@@ -1,4 +1,4 @@
-error: statement kind Item(ItemId { owner_id: DefId(0:18 ~ rust_out[2361]::main::{use#0}) }) not yet implemented
+error: statement kind Item(ItemId { owner_id: DefId(0:23 ~ rust_out[2361]::main::{use#0}) }) not yet implemented
   --> tests/ui/src/custom_types/enum/enum_use__01.pt:20:5
    |
 LL |     use Stage::{Beginner, Advanced};

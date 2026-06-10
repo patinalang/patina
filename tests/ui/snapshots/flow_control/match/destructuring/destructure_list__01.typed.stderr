@@ -1,70 +1,17 @@
-error: no rules expected `,`
-  --> tests/ui/src/flow_control/match/destructuring/destructure_list__01.pt:11:63
+error[E0600]: cannot apply unary operator `-` to type `int`
+  --> tests/ui/src/flow_control/match/destructuring/destructure_list__01.pt:6:20
    |
-LL |             println!("list[0] = 0, list[1] = {}, list[2] = {}", second, third),
-   |                                                               ^ no rules expected this token in macro call
+LL |     let list = [1, -2, 6];
+   |                    ^^ cannot apply unary operator `-`
    |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+   = note: unsigned values cannot be negated
 
-error: no rules expected `,`
-  --> tests/ui/src/flow_control/match/destructuring/destructure_list__01.pt:15:64
-   |
-LL |             "list[0] = 1, list[2] = {} and list[1] was ignored",
-   |                                                                ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+error: internal compiler error: rust/compiler/rustc_middle/src/ty/consts/int.rs:281:13: expected int of size 8, but got size 16
 
-error: no rules expected `,`
-  --> tests/ui/src/flow_control/match/destructuring/destructure_list__01.pt:21:77
-   |
-LL |             "list[0] = -1, list[1] = {} and all the other ones were ignored",
-   |                                                                             ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
 
-error: no rules expected `,`
-  --> tests/ui/src/flow_control/match/destructuring/destructure_list__01.pt:30:73
-   |
-LL |             "list[0] = 3, list[1] = {} and the other elements were {:?}",
-   |                                                                         ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+thread 'rustc' (3769403) panicked at rust/compiler/rustc_middle/src/ty/consts/int.rs:281:13:
+Box<dyn Any>
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: aborting due to 2 previous errors
 
-error: aborting due to 4 previous errors
-
+For more information about this error, try `rustc --explain E0600`.

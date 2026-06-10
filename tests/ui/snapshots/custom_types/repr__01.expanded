@@ -1,0 +1,96 @@
+#![allow(internal_features)]
+#![feature(no_core, lang_items, rustc_attrs)]
+#![no_std]
+#![no_core]
+
+#[lang = "pointee_sized"]
+pub trait PointeeSized { }
+
+#[lang = "meta_sized"]
+pub trait MetaSized: PointeeSized { }
+
+#[lang = "sized"]
+pub trait Sized: MetaSized { }
+
+#[lang = "copy"]
+pub trait Copy { }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! stringify { () => {} }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat { () => {} }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args { () => {} }
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[macro_export]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+#[macro_export]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/custom_types/repr.md
+// block: 1/12
+
+struct Unit;
+
+#[repr(atom, name = "custom_name")]
+struct CustomNameUnit;
+
+// `style` can be used to change the style of atom tags assigned by Patina
+#[repr(style = snake_case)]
+enum NotJustUnits {
+    VariantA,
+
+    #[repr(name = "variantB")]
+    VariantB,
+    VariantC(int),
+}
+
+// Explicitly setting `#[repr(atom)]` will ensure that only unit variants
+// are ever added to an enum.
+#[repr(atom, style = snake_case)]
+enum OnlyUnits { VariantA, VariantB, VariantC, }
+
+pub fn main() {
+    { io::put_chars([[patina_fmt::debug(Unit as term)]]); io::nl(); };
+    {
+        io::put_chars([[patina_fmt::debug(
+                                // a"Elixir.Patina.ByExample.Unit"
+
+                                CustomNameUnit as term)]]);
+        io::nl();
+    };
+    {
+        io::put_chars([[patina_fmt::debug(
+                                // a"custom_name"
+
+                                NotJustUnits::VariantA as term)]]);
+        io::nl();
+    };
+    {
+        io::put_chars([[patina_fmt::debug(
+                                // a"variant_a"
+
+                                NotJustUnits::VariantB as term)]]);
+        io::nl();
+    };
+    // a"variantB"
+}

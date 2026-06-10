@@ -1,48 +1,35 @@
-error: no rules expected `,`
-  --> tests/ui/src/macros/dsl__01.pt:8:31
+error[E0369]: cannot add `int` to `int`
+  --> tests/ui/src/macros/dsl__01.pt:15:16
    |
-LL |               println!("{} = {}", stringify!{$e}, val);
-   |                                 ^ no rules expected this token in macro call
-...
-LL | /     calculate! {
-LL | |         eval 1 + 2 // hehehe `eval` is _not_ a Patina keyword!
-LL | |     }
-   | |_____- in this macro invocation
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL |   macro_rules! println {
-   |   -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
-   = note: this error originates in the macro `calculate` (in Nightly builds, run with -Z macro-backtrace for more info)
+LL |         eval 1 + 2 // hehehe `eval` is _not_ a Patina keyword!
+   |              - ^ - int
+   |              |
+   |              int
 
-error: no rules expected `,`
-  --> tests/ui/src/macros/dsl__01.pt:8:31
+error[E0369]: cannot add `int` to `int`
+  --> tests/ui/src/macros/dsl__01.pt:19:17
    |
-LL |               println!("{} = {}", stringify!{$e}, val);
-   |                                 ^ no rules expected this token in macro call
-...
-LL | /     calculate! {
-LL | |         eval (1 + 2) * (3 / 4)
-LL | |     }
-   | |_____- in this macro invocation
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL |   macro_rules! println {
-   |   -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
-   = note: this error originates in the macro `calculate` (in Nightly builds, run with -Z macro-backtrace for more info)
+LL |         eval (1 + 2) * (3 / 4)
+   |               - ^ - int
+   |               |
+   |               int
 
-error: aborting due to 2 previous errors
+error[E0369]: cannot divide `int` by `int`
+  --> tests/ui/src/macros/dsl__01.pt:19:27
+   |
+LL |         eval (1 + 2) * (3 / 4)
+   |                         - ^ - int
+   |                         |
+   |                         int
 
+error[E0369]: cannot multiply `int` by `int`
+  --> tests/ui/src/macros/dsl__01.pt:19:22
+   |
+LL |         eval (1 + 2) * (3 / 4)
+   |              ------- ^ ------- int
+   |              |
+   |              int
+
+error: aborting due to 4 previous errors
+
+For more information about this error, try `rustc --explain E0369`.

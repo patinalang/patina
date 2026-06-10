@@ -4,11 +4,11 @@
 -export([function/0]).
 function() ->
     begin
-        io:format(<<"~s~n">>,
-                  [<<"called `MyMod::Nested::function()`">>])
+        io:put_chars([[<<"called `MyMod::Nested::function()`">>]]),
+        io:nl()
     end.
 private_function() ->
     begin
-        io:format(<<"~s~n">>,
-                  [<<"called `MyMod::Nested::private_function()`">>])
+        io:put_chars([[<<"called `MyMod::Nested::private_function()`">>]]),
+        io:nl()
     end.

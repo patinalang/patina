@@ -1,0 +1,30 @@
+-file("tests/ui/src/variable_bindings/scope__02.pt", 4).
+-module('Elixir.Scope02').
+-compile([no_auto_import]).
+-export([main/0]).
+main() ->
+    _var_0 = 1,
+    begin
+        begin
+            io:put_chars([[<<"before being shadowed: ">>,
+                           io_lib:format("~tp", [_var_0])]]),
+            io:nl()
+        end,
+        _var_1 = <<"abc">>,
+        begin
+            io:put_chars([[<<"shadowed in inner block: ">>,
+                           io_lib:format("~tp", [_var_1])]]),
+            io:nl()
+        end
+    end,
+    begin
+        io:put_chars([[<<"outside inner block: ">>,
+                       io_lib:format("~tp", [_var_0])]]),
+        io:nl()
+    end,
+    _var_2 = 2,
+    begin
+        io:put_chars([[<<"shadowed in outer block: ">>,
+                       io_lib:format("~tp", [_var_2])]]),
+        io:nl()
+    end.

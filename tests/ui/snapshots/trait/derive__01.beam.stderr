@@ -1,36 +1,31 @@
-error: no rules expected `,`
-  --> tests/ui/src/trait/derive__01.pt:36:36
+error: cannot find attribute `derive` in this scope
+  --> tests/ui/src/trait/derive__01.pt:5:3
    |
-LL |     println!("One foot equals {:?}", foot);
-   |                                    ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL | #[derive(PartialEq, PartialOrd)]
+   |   ^^^^^^
 
-error: no rules expected `,`
-  --> tests/ui/src/trait/derive__01.pt:47:46
+error: cannot find attribute `derive` in this scope
+  --> tests/ui/src/trait/derive__01.pt:9:3
    |
-LL |     println!("One foot is {} than one meter.", cmp);
-   |                                              ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL | #[derive(Debug)]
+   |   ^^^^^^
 
-error: aborting due to 2 previous errors
+error[E0369]: cannot multiply `float` by `float`
+  --> tests/ui/src/trait/derive__01.pt:16:37
+   |
+LL |         Centimeters(inches as float * 2.54)
+   |                     --------------- ^ ---- float
+   |                     |
+   |                     float
 
+error[E0369]: binary operation `<` cannot be applied to type `Centimeters`
+  --> tests/ui/src/trait/derive__01.pt:41:34
+   |
+LL |         if foot.to_centimeters() < meter {
+   |            --------------------- ^ ----- Centimeters
+   |            |
+   |            Centimeters
+
+error: aborting due to 4 previous errors
+
+For more information about this error, try `rustc --explain E0369`.

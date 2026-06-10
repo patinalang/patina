@@ -1,19 +1,60 @@
-error: no rules expected `,`
-  --> tests/ui/src/flow_control/if_else__01.pt:30:24
+error[E0369]: binary operation `<` cannot be applied to type `int`
+  --> tests/ui/src/flow_control/if_else__01.pt:7:10
    |
-LL |     println!("{} -> {}", n, big_n);
-   |                        ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |     if n < 0 {
+   |        - ^ - int
+   |        |
+   |        int
 
-error: aborting due to 1 previous error
+error[E0369]: binary operation `>` cannot be applied to type `int`
+  --> tests/ui/src/flow_control/if_else__01.pt:9:17
+   |
+LL |     } else if n > 0 {
+   |               - ^ - int
+   |               |
+   |               int
 
+error[E0369]: binary operation `<` cannot be applied to type `int`
+  --> tests/ui/src/flow_control/if_else__01.pt:16:14
+   |
+LL |         if n < 10 && n > -10 {
+   |            - ^ -- int
+   |            |
+   |            int
+
+error[E0600]: cannot apply unary operator `-` to type `int`
+  --> tests/ui/src/flow_control/if_else__01.pt:16:26
+   |
+LL |         if n < 10 && n > -10 {
+   |                          ^^^ cannot apply unary operator `-`
+   |
+   = note: unsigned values cannot be negated
+
+error[E0369]: binary operation `>` cannot be applied to type `int`
+  --> tests/ui/src/flow_control/if_else__01.pt:16:24
+   |
+LL |         if n < 10 && n > -10 {
+   |                      - ^ --- int
+   |                      |
+   |                      int
+
+error[E0369]: cannot multiply `int` by `int`
+  --> tests/ui/src/flow_control/if_else__01.pt:20:16
+   |
+LL |             10 * n
+   |             -- ^ - int
+   |             |
+   |             int
+
+error[E0369]: cannot divide `int` by `int`
+  --> tests/ui/src/flow_control/if_else__01.pt:25:15
+   |
+LL |             n / 2
+   |             - ^ - int
+   |             |
+   |             int
+
+error: aborting due to 7 previous errors
+
+Some errors have detailed explanations: E0369, E0600.
+For more information about an error, try `rustc --explain E0369`.

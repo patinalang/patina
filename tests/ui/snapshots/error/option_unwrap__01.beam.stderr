@@ -1,36 +1,64 @@
-error: no rules expected `,`
-  --> tests/ui/src/error/option_unwrap__01.pt:10:53
+error: cannot find macro `panic` in this scope
+  --> tests/ui/src/error/option_unwrap__01.pt:20:31
+   |
+LL |     if inside == "lemonade" { panic!("AAAaaaaa!!!!"); }
+   |                               ^^^^^
+
+error[E0425]: cannot find type `Option` in this scope
+  --> tests/ui/src/error/option_unwrap__01.pt:6:22
+   |
+LL | fn give_adult(drink: Option<str>) {
+   |                      ^^^^^^ not found in this scope
+
+error[E0531]: cannot find tuple struct or tuple variant `Some` in this scope
+  --> tests/ui/src/error/option_unwrap__01.pt:9:9
+   |
+LL |         Some("lemonade") => println!("Yuck! Too sugary."),
+   |         ^^^^ not found in this scope
+
+error[E0531]: cannot find tuple struct or tuple variant `Some` in this scope
+  --> tests/ui/src/error/option_unwrap__01.pt:10:9
    |
 LL |         Some(inner)      => println!("{}? How nice.", inner),
-   |                                                     ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+   |         ^^^^ not found in this scope
 
-error: no rules expected `,`
-  --> tests/ui/src/error/option_unwrap__01.pt:22:31
+error[E0425]: cannot find type `Option` in this scope
+  --> tests/ui/src/error/option_unwrap__01.pt:17:17
    |
-LL |     println!("I love {}s!!!!!", inside);
-   |                               ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL | fn drink(drink: Option<str>) {
+   |                 ^^^^^^ not found in this scope
 
-error: aborting due to 2 previous errors
+error[E0425]: cannot find value `None` in this scope
+  --> tests/ui/src/error/option_unwrap__01.pt:28:20
+   |
+LL |     let void     = None;
+   |                    ^^^^ not found in this scope
 
+error[E0425]: cannot find value `None` in this scope
+  --> tests/ui/src/error/option_unwrap__01.pt:35:19
+   |
+LL |     let nothing = None;
+   |                   ^^^^ not found in this scope
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
+  --> tests/ui/src/error/option_unwrap__01.pt:26:20
+   |
+LL |     let water    = Some("water");
+   |                    ^^^^ not found in this scope
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
+  --> tests/ui/src/error/option_unwrap__01.pt:27:20
+   |
+LL |     let lemonade = Some("lemonade");
+   |                    ^^^^ not found in this scope
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
+  --> tests/ui/src/error/option_unwrap__01.pt:34:18
+   |
+LL |     let coffee = Some("coffee");
+   |                  ^^^^ not found in this scope
+
+error: aborting due to 10 previous errors
+
+Some errors have detailed explanations: E0425, E0531.
+For more information about an error, try `rustc --explain E0425`.

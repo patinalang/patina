@@ -1,19 +1,38 @@
-error: no rules expected `,`
-  --> tests/ui/src/trait/dyn__01.pt:38:64
+error[E0369]: binary operation `<` cannot be applied to type `float`
+  --> tests/ui/src/trait/dyn__01.pt:28:22
    |
-LL |     println!("You've randomly chosen an animal, and it says {}", animal.noise());
-   |                                                                ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |     if random_number < 0.5 {
+   |        ------------- ^ --- float
+   |        |
+   |        float
 
-error: aborting due to 1 previous error
+error[E0277]: the trait bound `dyn Animal: Sized` is not satisfied
+  --> tests/ui/src/trait/dyn__01.pt:37:9
+   |
+LL |     let animal = random_animal(random_number);
+   |         ^^^^^^ the trait `Sized` is not implemented for `dyn Animal`
+   |
+help: this trait has no implementations, consider adding one
+  --> <patina-prelude>:14:1
+   |
+LL | pub trait Sized: MetaSized {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: all local variables must have a statically known size
 
+error[E0277]: the trait bound `(dyn Animal + 'static): Sized` is not satisfied
+  --> tests/ui/src/trait/dyn__01.pt:37:18
+   |
+LL |     let animal = random_animal(random_number);
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Sized` is not implemented for `(dyn Animal + 'static)`
+   |
+help: this trait has no implementations, consider adding one
+  --> <patina-prelude>:14:1
+   |
+LL | pub trait Sized: MetaSized {}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: the return type of a function must have a statically known size
+
+error: aborting due to 3 previous errors
+
+Some errors have detailed explanations: E0277, E0369.
+For more information about an error, try `rustc --explain E0277`.

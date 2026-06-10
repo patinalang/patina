@@ -16,10 +16,10 @@ LL | fn some_fn() -> ! {
            found unit type `()`
 
 warning: unreachable statement
-  --> <patina-prelude>:24:22
+  --> <patina-prelude>:47:23
    |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable statement
+LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable statement
    |
   ::: tests/ui/src/fn/diverging__03.pt:11:14
    |

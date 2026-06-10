@@ -1,0 +1,81 @@
+#![allow(internal_features)]
+#![feature(no_core, lang_items, rustc_attrs)]
+#![no_std]
+#![no_core]
+
+#[lang = "pointee_sized"]
+pub trait PointeeSized { }
+
+#[lang = "meta_sized"]
+pub trait MetaSized: PointeeSized { }
+
+#[lang = "sized"]
+pub trait Sized: MetaSized { }
+
+#[lang = "copy"]
+pub trait Copy { }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! stringify { () => {} }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat { () => {} }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args { () => {} }
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[macro_export]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+#[macro_export]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/generics/new_types.md
+// block: 1/2
+
+struct Years(int);
+
+struct Days(int);
+
+impl Years {
+    pub fn to_days(self) -> Days { Days(self.0 * 365) }
+}
+
+impl Days {
+    /// truncates partial years
+    pub fn to_years(self) -> Years { Years(self.0 / 365) }
+}
+
+fn is_adult(age: Years) -> bool { age.0 >= 18 }
+
+pub fn main() {
+    let age = Years(25);
+    let age_days = age.to_days();
+    {
+        io::put_chars([["Is an adult? ",
+                            patina_fmt::display(is_adult(age))]]);
+        io::nl();
+    };
+    {
+        io::put_chars([["Is an adult? ",
+                            patina_fmt::display(is_adult(age_days.to_years()))]]);
+        io::nl();
+    };
+    // println!("Is an adult? {}", is_adult(age_days));
+}

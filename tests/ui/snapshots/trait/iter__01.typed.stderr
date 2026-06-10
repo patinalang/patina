@@ -6,192 +6,49 @@ LL |         (next_self, Some(self.curr))
 LL |     }
    |     - unexpected token
 
-error: no rules expected `,`
-  --> tests/ui/src/trait/iter__01.pt:43:22
+error[E0405]: cannot find trait `Iterator` in this scope
+  --> tests/ui/src/trait/iter__01.pt:12:6
    |
-LL |     println!("> {:?}", val);
-   |                      ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL | impl Iterator for Fibonacci {
+   |      ^^^^^^^^ not found in this scope
 
-error: no rules expected `,`
-  --> tests/ui/src/trait/iter__01.pt:45:22
+error[E0425]: cannot find type `Option` in this scope
+  --> tests/ui/src/trait/iter__01.pt:22:29
    |
-LL |     println!("> {:?}", val);
-   |                      ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |     fn next(self) -> (Self, Option<Self::Item>) {
+   |                             ^^^^^^ not found in this scope
 
-error: no rules expected `,`
-  --> tests/ui/src/trait/iter__01.pt:47:22
+error[E0425]: cannot find value `next_self` in this scope
+  --> tests/ui/src/trait/iter__01.pt:27:10
    |
-LL |     println!("> {:?}", val);
-   |                      ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |         (next_self, Some(self.curr))
+   |          ^^^^^^^^^ not found in this scope
 
-error: no rules expected `,`
-  --> tests/ui/src/trait/iter__01.pt:49:22
+error[E0425]: cannot find type `Option` in this scope
+  --> tests/ui/src/trait/iter__01.pt:39:18
    |
-LL |     println!("> {:?}", val);
-   |                      ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |     let mut val: Option<int> = None;
+   |                  ^^^^^^ not found in this scope
 
-error: no rules expected `,`
-  --> tests/ui/src/trait/iter__01.pt:55:24
+error[E0425]: cannot find value `None` in this scope
+  --> tests/ui/src/trait/iter__01.pt:39:32
    |
-LL |         println!("> {}", i);
-   |                        ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |     let mut val: Option<int> = None;
+   |                                ^^^^ not found in this scope
 
-error: no rules expected `,`
-  --> tests/ui/src/trait/iter__01.pt:61:24
+error: requires `Range` lang_item
+  --> tests/ui/src/trait/iter__01.pt:38:24
    |
-LL |         println!("> {}", i);
-   |                        ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |     let mut sequence = 0..3;
+   |                        ^^^^
 
-error: no rules expected `,`
-  --> tests/ui/src/trait/iter__01.pt:67:24
+error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
+  --> tests/ui/src/trait/iter__01.pt:27:21
    |
-LL |         println!("> {}", i);
-   |                        ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |         (next_self, Some(self.curr))
+   |                     ^^^^ not found in this scope
 
-error: no rules expected `,`
-  --> tests/ui/src/trait/iter__01.pt:73:47
-   |
-LL |     println!("Iterate the following list {:?}", list);
-   |                                               ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+error: aborting due to 8 previous errors
 
-error: no rules expected `,`
-  --> tests/ui/src/trait/iter__01.pt:75:24
-   |
-LL |         println!("> {}", i);
-   |                        ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
-
-error: no rules expected `,`
-  --> tests/ui/src/trait/iter__01.pt:78:69
-   |
-LL |     println!("Iterate the following list {:?} with implicit .iter()", list);
-   |                                                                     ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
-
-error: no rules expected `,`
-  --> tests/ui/src/trait/iter__01.pt:80:24
-   |
-LL |         println!("> {}", i);
-   |                        ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
-
-error: aborting due to 12 previous errors
-
+Some errors have detailed explanations: E0405, E0425.
+For more information about an error, try `rustc --explain E0405`.

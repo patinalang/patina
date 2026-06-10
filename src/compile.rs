@@ -26,7 +26,7 @@ static INTERNAL_FEATURES: AtomicBool = AtomicBool::new(false);
 
 const PRELUDE: &str = r#"
 #![allow(internal_features)]
-#![feature(no_core, lang_items)]
+#![feature(no_core, lang_items, rustc_attrs)]
 #![no_std]
 #![no_core]
 
@@ -42,12 +42,35 @@ pub trait Sized: MetaSized {}
 #[lang = "copy"]
 pub trait Copy {}
 
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! stringify { () => {} }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat { () => {} }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args { () => {} }
+
 #[allow(unused)]
 extern mod io;
 
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[macro_export]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
 #[macro_export]
 macro_rules! println {
-    ($s:literal) => {{ io::format("~s~n", [$s]); }};
+    () => {{ io::nl(); }};
+    ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
 }
 "#;
 

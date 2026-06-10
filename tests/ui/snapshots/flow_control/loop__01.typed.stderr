@@ -1,19 +1,28 @@
-error: no rules expected `,`
-  --> tests/ui/src/flow_control/loop__01.pt:20:22
+error[E0368]: binary assignment operation `+=` cannot be applied to type `int`
+  --> tests/ui/src/flow_control/loop__01.pt:11:9
    |
-LL |         println!("{}", count);
-   |                      ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |         count += 1;
+   |         -----^^^^^
+   |         |
+   |         cannot use `+=` on type `int`
 
-error: aborting due to 1 previous error
+error[E0369]: binary operation `==` cannot be applied to type `int`
+  --> tests/ui/src/flow_control/loop__01.pt:13:18
+   |
+LL |         if count == 3 {
+   |            ----- ^^ - int
+   |            |
+   |            int
 
+error[E0369]: binary operation `==` cannot be applied to type `int`
+  --> tests/ui/src/flow_control/loop__01.pt:22:18
+   |
+LL |         if count == 5 {
+   |            ----- ^^ - int
+   |            |
+   |            int
+
+error: aborting due to 3 previous errors
+
+Some errors have detailed explanations: E0368, E0369.
+For more information about an error, try `rustc --explain E0368`.

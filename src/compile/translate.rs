@@ -304,6 +304,11 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
 
                     let fn_name = self.arena.alloc_str(target_fun_segment.ident.as_str());
 
+                    // Temporary before we actually ship runtime modules (like `patina_fmt` could've been)
+                    if let ("patina_fmt", "display" | "debug") = (module, fn_name) {
+                        return self.translate_format_render(expr, fn_name, &args[0], scope);
+                    }
+
                     let translated_args =
                         args.iter().map(|arg| self.translate_expr(arg, scope)).collect::<Vec<_>>();
 
@@ -355,6 +360,38 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 format!("expression kind {:?} not yet implemented", expr.kind),
             ),
         }
+    }
+
+    fn translate_format_render(
+        &self,
+        expr: &'tcx Expr<'tcx>,
+        fn_name: &str,
+        arg: &'tcx Expr<'tcx>,
+        scope: &mut Scope<'arena>,
+    ) -> eaf::Expr<'arena> {
+        let anno = self.anno(expr.span);
+
+        let typeck = self.tcx.typeck(arg.hir_id.owner.def_id);
+        let ty = typeck.expr_ty(arg);
+
+        let translated = self.translate_expr(arg, scope);
+
+        if fn_name == "display" && ty.is_str() {
+            return translated;
+        }
+
+        let remote = eaf::Remote(
+            anno,
+            Box::new(eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::Atom(anno, "io_lib"))),
+            Box::new(eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::Atom(anno, "format"))),
+        );
+
+        let format_str =
+            eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::String(anno, "~tp".chars().collect()));
+        let args_list =
+            eaf::Expr::Cons(anno, Box::new(translated), Box::new(eaf::Expr::Nil { anno }));
+
+        eaf::Expr::RemoteCall(anno, remote, vec![format_str, args_list])
     }
 
     fn translate_stmt(

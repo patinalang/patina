@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![feature(no_core, lang_items)]
+#![feature(no_core, lang_items, rustc_attrs)]
 #![no_std]
 #![no_core]
 
@@ -15,11 +15,36 @@ pub trait Sized: MetaSized { }
 #[lang = "copy"]
 pub trait Copy { }
 
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! stringify { () => {} }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat { () => {} }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args { () => {} }
+
 #[allow(unused)]
 extern mod io;
 
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
 #[macro_export]
-macro_rules! println { ($s:literal) => {{ io::format("~s~n", [$s]); }}; }
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+#[macro_export]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
 
 // source: patina-by-example/src/flow_control/match/guard.md
 // block: 2/2
@@ -28,8 +53,8 @@ pub fn main() {
     let number: int = 4;
 
     match number {
-        i if i == 0 => { io::format("~s~n", ["Zero"]); }
-        i if i > 0 => { io::format("~s~n", ["Greater than zero"]); }
+        i if i == 0 => { io::put_chars([["Zero"]]); io::nl(); }
+        i if i > 0 => { io::put_chars([["Greater than zero"]]); io::nl(); }
     }
     // _ => unreachable!("Should never happen."),
     // TODO ^ uncomment to fix compilation

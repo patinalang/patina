@@ -1,53 +1,42 @@
-error: no rules expected `,`
-  --> tests/ui/src/custom_types/repr__10.pt:14:28
+error: argument never used
+  --> tests/ui/src/custom_types/repr__10.pt:25:48
    |
 LL |     println!("{:?}    {:?}",
-   |                            ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+   |              -------------- formatting specifier missing
+LL |         Result::<int, ()>::Ok(42), Result<int, ()>::Err(()));
+   |                                                ^^^^^^^^^^^^ argument never used
 
-error: no rules expected `,`
-  --> tests/ui/src/custom_types/repr__10.pt:19:28
+error[E0423]: expected value, found enum `Result`
+  --> tests/ui/src/custom_types/repr__10.pt:25:36
    |
-LL |     println!("{:?}    {:?}",
-   |                            ^ no rules expected this token in macro call
+LL |         Result::<int, ()>::Ok(42), Result<int, ()>::Err(()));
+   |                                    ^^^^^^
    |
-  ::: <patina-prelude>:23:1
+note: the enum is defined here
+  --> tests/ui/src/custom_types/repr__10.pt:5:1
    |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
+LL | / pub enum Result<T, E> {
+LL | |     #[repr(name = "ok")]
+LL | |     Ok(T),
+...  |
+LL | |     Err(E),
+LL | | }
+   | |_^
+help: the following enum variants are available
    |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
+LL -         Result::<int, ()>::Ok(42), Result<int, ()>::Err(()));
+LL +         Result::<int, ()>::Ok(42), (Result::Err(/* fields */))<int, ()>::Err(()));
    |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL -         Result::<int, ()>::Ok(42), Result<int, ()>::Err(()));
+LL +         Result::<int, ()>::Ok(42), (Result::Ok(/* fields */))<int, ()>::Err(()));
+   |
 
-error: no rules expected `,`
-  --> tests/ui/src/custom_types/repr__10.pt:24:28
+error[E0423]: expected value, found builtin type `int`
+  --> tests/ui/src/custom_types/repr__10.pt:25:43
    |
-LL |     println!("{:?}    {:?}",
-   |                            ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |         Result::<int, ()>::Ok(42), Result<int, ()>::Err(()));
+   |                                           ^^^ not a value
 
 error: aborting due to 3 previous errors
 
+For more information about this error, try `rustc --explain E0423`.

@@ -1,206 +1,44 @@
-error: no rules expected `,`
-  --> tests/ui/src/primitives/literals__01.pt:6:26
-   |
-LL |     println!("1 + 2 = {}", 1 + 2);
-   |                          ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
-
-error: no rules expected `,`
-  --> tests/ui/src/primitives/literals__01.pt:9:26
-   |
-LL |     println!("1 - 2 = {}", 1 - 2);
-   |                          ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
-
-error: no rules expected `,`
-  --> tests/ui/src/primitives/literals__01.pt:12:40
-   |
-LL |     println!("1e4 is {}, -2.5e-3 is {}", 1e4, -2.5e-3);
-   |                                        ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
-
-error: no rules expected `,`
-  --> tests/ui/src/primitives/literals__01.pt:15:36
-   |
-LL |     println!("true AND false is {}", true && false);
-   |                                    ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
-
-error: no rules expected `,`
-  --> tests/ui/src/primitives/literals__01.pt:16:35
-   |
-LL |     println!("true OR false is {}", true || false);
-   |                                   ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
-
-error: no rules expected `,`
-  --> tests/ui/src/primitives/literals__01.pt:17:30
-   |
-LL |     println!("NOT true is {}", !true);
-   |                              ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
-
-error: no rules expected `,`
-  --> tests/ui/src/primitives/literals__01.pt:20:39
+error: format options are not yet supported in Patina
+  --> tests/ui/src/primitives/literals__01.pt:20:32
    |
 LL |     println!("0011 AND 0101 is {:04b}", 0b0011 & 0b0101);
-   |                                       ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+   |                                ^^^^^^
 
-error: no rules expected `,`
-  --> tests/ui/src/primitives/literals__01.pt:21:38
+error: only `{}` (Display) and `{:?}` (Debug) are supported in Patina
+  --> tests/ui/src/primitives/literals__01.pt:20:32
+   |
+LL |     println!("0011 AND 0101 is {:04b}", 0b0011 & 0b0101);
+   |                                ^^^^^^
+
+error: format options are not yet supported in Patina
+  --> tests/ui/src/primitives/literals__01.pt:21:31
    |
 LL |     println!("0011 OR 0101 is {:04b}", 0b0011 | 0b0101);
-   |                                      ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+   |                               ^^^^^^
 
-error: no rules expected `,`
-  --> tests/ui/src/primitives/literals__01.pt:22:39
+error: only `{}` (Display) and `{:?}` (Debug) are supported in Patina
+  --> tests/ui/src/primitives/literals__01.pt:21:31
+   |
+LL |     println!("0011 OR 0101 is {:04b}", 0b0011 | 0b0101);
+   |                               ^^^^^^
+
+error: format options are not yet supported in Patina
+  --> tests/ui/src/primitives/literals__01.pt:22:32
    |
 LL |     println!("0011 XOR 0101 is {:04b}", 0b0011 ^ 0b0101);
-   |                                       ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+   |                                ^^^^^^
 
-error: no rules expected `,`
-  --> tests/ui/src/primitives/literals__01.pt:23:28
+error: only `{}` (Display) and `{:?}` (Debug) are supported in Patina
+  --> tests/ui/src/primitives/literals__01.pt:22:32
    |
-LL |     println!("1 << 5 is {}", 1 << 5);
-   |                            ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |     println!("0011 XOR 0101 is {:04b}", 0b0011 ^ 0b0101);
+   |                                ^^^^^^
 
-error: no rules expected `,`
-  --> tests/ui/src/primitives/literals__01.pt:24:35
+error: only `{}` (Display) and `{:?}` (Debug) are supported in Patina
+  --> tests/ui/src/primitives/literals__01.pt:24:30
    |
 LL |     println!("0x80 >> 2 is 0x{:x}", 0x80 >> 2);
-   |                                   ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+   |                              ^^^^
 
-error: no rules expected `,`
-  --> tests/ui/src/primitives/literals__01.pt:27:44
-   |
-LL |     println!("One million is written as {}", 1_000_000);
-   |                                            ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
-
-error: aborting due to 12 previous errors
+error: aborting due to 7 previous errors
 

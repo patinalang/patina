@@ -1,53 +1,36 @@
-error: no rules expected `,`
-  --> tests/ui/src/macros/repeat__01.pt:16:18
+error[E0433]: cannot find type `Std` in this scope
+  --> tests/ui/src/macros/repeat__01.pt:11:9
    |
-LL |     println!("{}", find_min!(1));
-   |                  ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
-
-error: no rules expected `,`
-  --> tests/ui/src/macros/repeat__01.pt:17:18
-   |
+LL |         Std::Cmp::min($x, find_min!($($y),+))
+   |         ^^^ use of undeclared type `Std`
+...
 LL |     println!("{}", find_min!(1 + 2, 2));
-   |                  ^ no rules expected this token in macro call
+   |                    ------------------- in this macro invocation
    |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+   = note: this error originates in the macro `find_min` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error: no rules expected `,`
-  --> tests/ui/src/macros/repeat__01.pt:18:18
+error[E0433]: cannot find type `Std` in this scope
+  --> tests/ui/src/macros/repeat__01.pt:11:9
    |
+LL |         Std::Cmp::min($x, find_min!($($y),+))
+   |         ^^^ use of undeclared type `Std`
+...
 LL |     println!("{}", find_min!(5, 2 * 3, 4));
-   |                  ^ no rules expected this token in macro call
+   |                    ---------------------- in this macro invocation
    |
-  ::: <patina-prelude>:23:1
+   = note: this error originates in the macro `find_min` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0433]: cannot find type `Std` in this scope
+  --> tests/ui/src/macros/repeat__01.pt:11:9
    |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
+LL |         Std::Cmp::min($x, find_min!($($y),+))
+   |         ^^^ use of undeclared type `Std`
+...
+LL |     println!("{}", find_min!(5, 2 * 3, 4));
+   |                    ---------------------- in this macro invocation
    |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+   = note: this error originates in the macro `find_min` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: aborting due to 3 previous errors
 
+For more information about this error, try `rustc --explain E0433`.

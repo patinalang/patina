@@ -1,70 +1,27 @@
-error: no rules expected `,`
-  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:40:52
+error[E0369]: binary operation `==` cannot be applied to type `int`
+  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:17:17
    |
-LL |     println!("Does container contain {} and {}: {}",
-   |                                                    ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |         (self.0 == number_1) && (self.1 == number_2)
+   |          ------ ^^ -------- int
+   |          |
+   |          int
 
-error: no rules expected `,`
-  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:43:32
+error[E0369]: binary operation `==` cannot be applied to type `int`
+  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:17:41
    |
-LL |     println!("First number: {}", container.first());
-   |                                ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |         (self.0 == number_1) && (self.1 == number_2)
+   |                                  ------ ^^ -------- int
+   |                                  |
+   |                                  int
 
-error: no rules expected `,`
-  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:44:31
+error[E0369]: cannot subtract `int` from `int`
+  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:31:22
    |
-LL |     println!("Last number: {}", container.last());
-   |                               ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |     container.last() - container.first()
+   |     ---------------- ^ ----------------- int
+   |     |
+   |     int
 
-error: no rules expected `,`
-  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:46:37
-   |
-LL |     println!("The difference is: {}", difference(container));
-   |                                     ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+error: aborting due to 3 previous errors
 
-error: aborting due to 4 previous errors
-
+For more information about this error, try `rustc --explain E0369`.

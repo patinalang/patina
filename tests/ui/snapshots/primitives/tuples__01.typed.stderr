@@ -1,155 +1,30 @@
-error: no rules expected `,`
-  --> tests/ui/src/primitives/tuples__01.pt:21:42
+error: cannot find attribute `derive` in this scope
+  --> tests/ui/src/primitives/tuples__01.pt:13:3
    |
-LL |     println!("Long tuple first value: {}", long_tuple.0);
-   |                                          ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL | #[derive(Debug)]
+   |   ^^^^^^
 
-error: no rules expected `,`
-  --> tests/ui/src/primitives/tuples__01.pt:22:43
+error[E0600]: cannot apply unary operator `-` to type `int`
+  --> tests/ui/src/primitives/tuples__01.pt:25:45
    |
-LL |     println!("Long tuple second value: {}", long_tuple.1);
-   |                                           ^ no rules expected this token in macro call
+LL |     let tuple_of_tuples = ((1, 2, 3), (4.0, -1), -2);
+   |                                             ^^ cannot apply unary operator `-`
    |
-  ::: <patina-prelude>:23:1
+   = note: unsigned values cannot be negated
+help: you may have meant the maximum value of `int`
    |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
+LL -     let tuple_of_tuples = ((1, 2, 3), (4.0, -1), -2);
+LL +     let tuple_of_tuples = ((1, 2, 3), (4.0, int::MAX), -2);
    |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
 
-error: no rules expected `,`
-  --> tests/ui/src/primitives/tuples__01.pt:28:37
+error[E0600]: cannot apply unary operator `-` to type `int`
+  --> tests/ui/src/primitives/tuples__01.pt:25:50
    |
-LL |     println!("tuple of tuples: {:?}", tuple_of_tuples);
-   |                                     ^ no rules expected this token in macro call
+LL |     let tuple_of_tuples = ((1, 2, 3), (4.0, -1), -2);
+   |                                                  ^^ cannot apply unary operator `-`
    |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+   = note: unsigned values cannot be negated
 
-error: no rules expected `,`
-  --> tests/ui/src/primitives/tuples__01.pt:31:28
-   |
-LL |     println!("Pair is {:?}", pair);
-   |                            ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+error: aborting due to 3 previous errors
 
-error: no rules expected `,`
-  --> tests/ui/src/primitives/tuples__01.pt:33:41
-   |
-LL |     println!("The reversed pair is {:?}", reverse(pair));
-   |                                         ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
-
-error: no rules expected `,`
-  --> tests/ui/src/primitives/tuples__01.pt:37:39
-   |
-LL |     println!("One element tuple: {:?}", (5,));
-   |                                       ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
-
-error: no rules expected `,`
-  --> tests/ui/src/primitives/tuples__01.pt:38:37
-   |
-LL |     println!("Just an integer: {:?}", (5));
-   |                                     ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
-
-error: no rules expected `,`
-  --> tests/ui/src/primitives/tuples__01.pt:44:38
-   |
-LL |     println!("{:?}, {:?}, {:?}, {:?}", a, b, c, d);
-   |                                      ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
-
-error: no rules expected `,`
-  --> tests/ui/src/primitives/tuples__01.pt:47:20
-   |
-LL |     println!("{:?}", matrix);
-   |                    ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
-
-error: aborting due to 9 previous errors
-
+For more information about this error, try `rustc --explain E0600`.

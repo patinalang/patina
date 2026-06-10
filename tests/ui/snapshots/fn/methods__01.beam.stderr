@@ -1,36 +1,94 @@
-error: no rules expected `,`
-  --> tests/ui/src/fn/methods__01.pt:72:39
+error[E0369]: cannot subtract `float` from `float`
+  --> tests/ui/src/fn/methods__01.pt:42:14
    |
-LL |     println!("Rectangle perimeter: {}", rectangle.perimeter());
-   |                                       ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |         ((x1 - x2) * (y1 - y2)).abs()
+   |           -- ^ -- float
+   |           |
+   |           float
 
-error: no rules expected `,`
-  --> tests/ui/src/fn/methods__01.pt:73:34
+error[E0369]: cannot subtract `float` from `float`
+  --> tests/ui/src/fn/methods__01.pt:42:26
    |
-LL |     println!("Rectangle area: {}", rectangle.area());
-   |                                  ^ no rules expected this token in macro call
-   |
-  ::: <patina-prelude>:23:1
-   |
-LL | macro_rules! println {
-   | -------------------- when calling this macro
-   |
-note: while trying to match meta-variable `$s:literal`
-  --> <patina-prelude>:24:6
-   |
-LL |     ($s:literal) => {{ io::format("~s~n", [$s]); }};
-   |      ^^^^^^^^^^
+LL |         ((x1 - x2) * (y1 - y2)).abs()
+   |                       -- ^ -- float
+   |                       |
+   |                       float
 
-error: aborting due to 2 previous errors
+error[E0369]: cannot multiply `float` by `float`
+  --> tests/ui/src/fn/methods__01.pt:42:20
+   |
+LL |         ((x1 - x2) * (y1 - y2)).abs()
+   |          --------- ^ --------- float
+   |          |
+   |          float
 
+error[E0599]: no method named `abs` found for type `float` in the current scope
+  --> tests/ui/src/fn/methods__01.pt:42:33
+   |
+LL |         ((x1 - x2) * (y1 - y2)).abs()
+   |                                 ^^^ method not found in `float`
+
+error[E0369]: cannot subtract `float` from `float`
+  --> tests/ui/src/fn/methods__01.pt:49:20
+   |
+LL |         2.0 * ((x1 - x2).abs() + (y1 - y2).abs())
+   |                 -- ^ -- float
+   |                 |
+   |                 float
+
+error[E0599]: no method named `abs` found for type `float` in the current scope
+  --> tests/ui/src/fn/methods__01.pt:49:26
+   |
+LL |         2.0 * ((x1 - x2).abs() + (y1 - y2).abs())
+   |                          ^^^ method not found in `float`
+
+error[E0369]: cannot subtract `float` from `float`
+  --> tests/ui/src/fn/methods__01.pt:49:38
+   |
+LL |         2.0 * ((x1 - x2).abs() + (y1 - y2).abs())
+   |                                   -- ^ -- float
+   |                                   |
+   |                                   float
+
+error[E0599]: no method named `abs` found for type `float` in the current scope
+  --> tests/ui/src/fn/methods__01.pt:49:44
+   |
+LL |         2.0 * ((x1 - x2).abs() + (y1 - y2).abs())
+   |                                            ^^^ method not found in `float`
+
+error[E0369]: cannot add `float` to `float`
+  --> tests/ui/src/fn/methods__01.pt:56:38
+   |
+LL |             p1: Point { x: self.p1.x + x, y: self.p1.y + y },
+   |                            --------- ^ - float
+   |                            |
+   |                            float
+
+error[E0369]: cannot add `float` to `float`
+  --> tests/ui/src/fn/methods__01.pt:56:56
+   |
+LL |             p1: Point { x: self.p1.x + x, y: self.p1.y + y },
+   |                                              --------- ^ - float
+   |                                              |
+   |                                              float
+
+error[E0369]: cannot add `float` to `float`
+  --> tests/ui/src/fn/methods__01.pt:57:38
+   |
+LL |             p2: Point { x: self.p2.x + x, y: self.p2.y + y },
+   |                            --------- ^ - float
+   |                            |
+   |                            float
+
+error[E0369]: cannot add `float` to `float`
+  --> tests/ui/src/fn/methods__01.pt:57:56
+   |
+LL |             p2: Point { x: self.p2.x + x, y: self.p2.y + y },
+   |                                              --------- ^ - float
+   |                                              |
+   |                                              float
+
+error: aborting due to 12 previous errors
+
+Some errors have detailed explanations: E0369, E0599.
+For more information about an error, try `rustc --explain E0369`.

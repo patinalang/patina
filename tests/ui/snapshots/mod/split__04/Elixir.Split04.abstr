@@ -4,6 +4,7 @@
 -export([public_function/0]).
 public_function() ->
     begin
-        io:format(<<"~s~n">>,
-                  [<<"called `MyMod::Inaccessible::public_function()`">>])
+        io:put_chars([[<<"called `MyMod::Inaccessible::public_function("
+                         ")`">>]]),
+        io:nl()
     end.
