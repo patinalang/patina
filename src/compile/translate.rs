@@ -15,11 +15,12 @@ use rustc_hir::{
     StmtKind,
 };
 use rustc_middle::ty::{TyCtxt, Visibility};
+use rustc_span::Ident;
 use rustc_span::source_map::SourceMap;
-use rustc_span::{Ident, Span};
 
-use crate::EmitStage;
-use crate::erlang::{self, abstract_format as eaf};
+use crate::compile::eaf_builder::{self, EafBuilder};
+use crate::erlang::abstract_format as eaf;
+use crate::{EmitStage, erlang};
 
 const COMPILE_ERL_CODE: &str = "\
 [InputFilename, OutputFilename] = init:get_plain_arguments(),
@@ -106,6 +107,7 @@ fn render_abstr(dcx: DiagCtxtHandle<'_>, eaf_bytes: &[u8]) -> String {
 struct Translator<'tcx, 'arena> {
     tcx: TyCtxt<'tcx>,
     source_map: &'tcx SourceMap,
+    afb: EafBuilder<'tcx>,
     arena: &'arena DroplessArena,
 }
 
@@ -150,11 +152,6 @@ struct PatinaVar {
 }
 
 impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
-    fn anno(&self, span: Span) -> eaf::Anno {
-        let loc = self.source_map.lookup_char_pos(span.lo());
-        eaf::Anno { line: loc.line, column: loc.col.0 + 1 }
-    }
-
     fn translate(&self) -> Vec<(&'arena str, eaf::Module<'arena>)> {
         let root_module = self.tcx.hir_root_module();
         vec![self.translate_module(root_module)]
@@ -171,22 +168,19 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             });
 
         let mod_name = self.mod_name(&filename);
+        let span = module.spans.inner_span;
 
-        let anno = self.anno(module.spans.inner_span);
-        let file_attr = eaf::ModuleForm::FileAttr(
-            anno,
-            eaf::FileLine(filename.to_string_lossy().chars().collect::<Vec<_>>(), anno.line),
-        );
-        let module_attr = eaf::ModuleForm::ModuleAttr(anno, mod_name);
-        let compile_attr = eaf::ModuleForm::WildAttr(anno, "compile", vec!["no_auto_import"]);
+        let file_attr = self.afb.file_attr(span, &filename.to_string_lossy());
+        let module_attr = self.afb.module_attr(span, mod_name);
+        let compile_attr = self.afb.wild_attr(span, "compile", vec!["no_auto_import"]);
 
         let pub_fns = self
             .module_funs(module)
             .filter(|fun| self.is_exported(fun))
-            .map(|fun| eaf::NameArity(fun.ident.as_str(), fun.sig.decl.inputs.len()))
+            .map(|fun| (fun.ident.as_str(), fun.sig.decl.inputs.len()))
             .collect::<Vec<_>>();
 
-        let export_attr = eaf::ModuleForm::ExportAttr(anno, pub_fns);
+        let export_attr = self.afb.export_attr(span, pub_fns);
 
         let mut forms = vec![file_attr, module_attr, compile_attr, export_attr];
 
@@ -196,7 +190,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             }
         }
 
-        (mod_name, eaf::Module(forms))
+        (mod_name, self.afb.module(forms))
     }
 
     fn translate_fun(&self, fun: Fn<'tcx>) -> eaf::ModuleForm<'arena> {
@@ -211,22 +205,13 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             function_args.push(pat);
         }
 
-        let body_expr = match self.translate_expr(body.value, &mut scope) {
-            eaf::Expr::Block(_, body) => body,
-            af_expr => eaf::Body(vec![af_expr]),
-        };
-
-        let eaf_clause = eaf::Clause {
-            anno: self.anno(fun.sig.span),
-            patterns: function_args,
-            guards: eaf::GuardSeq(vec![]),
-            body: body_expr,
-        };
+        let clause_body = self.afb.clause_body(self.translate_expr(body.value, &mut scope));
+        let clause = self.afb.clause(fun.sig.span, function_args, clause_body);
 
         let fn_name = self.arena.alloc_str(fun.ident.as_str());
         let fn_arity = fun.sig.decl.inputs.len();
 
-        eaf::ModuleForm::Function(self.anno(fun.sig.span), fn_name, fn_arity, vec![eaf_clause])
+        self.afb.function(fun.sig.span, fn_name, fn_arity, vec![clause])
     }
 
     fn translate_expr(
@@ -235,6 +220,8 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         scope: &mut Scope<'arena>,
     ) -> eaf::Expr<'arena> {
         let dcx = self.tcx.dcx();
+        let afb = &self.afb;
+
         match expr.kind {
             ExprKind::Block(block, label) => {
                 if label.is_some() {
@@ -242,39 +229,21 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 }
 
                 let mut af_exprs = Vec::new();
-                for expr in block.stmts {
-                    if let Some(af_expr) = self.translate_stmt(expr, scope) {
+                for stmt in block.stmts {
+                    if let Some(af_expr) = self.translate_stmt(stmt, scope) {
                         af_exprs.push(af_expr);
                     }
                 }
-                if let Some(expr) = block.expr {
-                    af_exprs.push(self.translate_expr(expr, scope));
+                if let Some(tail) = block.expr {
+                    af_exprs.push(self.translate_expr(tail, scope));
                 }
 
-                eaf::Expr::Block(self.anno(expr.span), eaf::Body(af_exprs))
+                afb.expr_block(expr.span, af_exprs)
             }
 
             ExprKind::Lit(lit) => match lit.node {
-                LitKind::Int(val) => eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::Integer(
-                    self.anno(lit.span),
-                    val.get().into(),
-                )),
-                LitKind::Str(symbol, _style) => {
-                    let s = symbol.as_str();
-
-                    let eaf_lit = eaf::AtomicLiteral::String(
-                        self.anno(lit.span),
-                        s.chars().collect::<Vec<_>>(),
-                    );
-                    let eaf_lit_expr = eaf::Expr::AtomicLiteral(eaf_lit);
-                    let eaf_bin_elem = eaf::BinElement {
-                        anno: self.anno(lit.span),
-                        value: eaf_lit_expr,
-                        size: eaf::BinElemSize::Default,
-                        tsl: eaf::BinElemTsl::Default,
-                    };
-                    eaf::Expr::Bin(self.anno(lit.span), vec![eaf_bin_elem])
-                }
+                LitKind::Int(val) => afb.expr_integer(lit.span, val.get()),
+                LitKind::Str(symbol, _style) => afb.expr_binary_string(lit.span, symbol.as_str()),
                 _ => dcx.span_fatal(
                     lit.span,
                     format!("literal kind {:?} not yet implemented", lit.node),
@@ -289,7 +258,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                     dcx.span_bug(expr.span, format!("variable {hir_id:?} not in scope"));
                 });
                 let name = self.arena.alloc_str(&format!("_var_{}", var.version));
-                eaf::Expr::Var(self.anno(expr.span), name)
+                afb.expr_var(expr.span, name)
             }
 
             ExprKind::Call(callee, args) => {
@@ -312,18 +281,12 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                     let translated_args =
                         args.iter().map(|arg| self.translate_expr(arg, scope)).collect::<Vec<_>>();
 
-                    let remote = eaf::Remote(
-                        self.anno(expr.span),
-                        Box::new(eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::Atom(
-                            self.anno(callee.span),
-                            module,
-                        ))),
-                        Box::new(eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::Atom(
-                            self.anno(target_fun_segment.ident.span),
-                            fn_name,
-                        ))),
-                    );
-                    eaf::Expr::RemoteCall(self.anno(expr.span), remote, translated_args)
+                    afb.expr_remote_call(
+                        expr.span,
+                        afb.expr_atom(callee.span, module),
+                        afb.expr_atom(target_fun_segment.ident.span, fn_name),
+                        translated_args,
+                    )
                 } else {
                     dcx.span_fatal(
                         expr.span,
@@ -332,27 +295,19 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 }
             }
 
-            ExprKind::Array(elements) => {
-                let anno = self.anno(expr.span);
-
-                elements.iter().rev().fold(eaf::Expr::Nil { anno }, |acc, element| {
-                    eaf::Expr::Cons(
-                        anno,
-                        Box::new(self.translate_expr(element, scope)),
-                        Box::new(acc),
-                    )
-                })
-            }
+            ExprKind::Array(elements) => self.afb.expr_list(
+                expr.span,
+                elements.iter().map(|element| self.translate_expr(element, scope)),
+            ),
 
             ExprKind::Cast(expr, _ty) => self.translate_expr(expr, scope),
 
             ExprKind::Tup(elements) => {
-                let anno = self.anno(expr.span);
                 let elements = elements
                     .iter()
                     .map(|element| self.translate_expr(element, scope))
                     .collect::<Vec<_>>();
-                eaf::Expr::Tuple(anno, elements)
+                afb.expr_tuple(expr.span, elements)
             }
 
             _ => dcx.span_fatal(
@@ -369,7 +324,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         arg: &'tcx Expr<'tcx>,
         scope: &mut Scope<'arena>,
     ) -> eaf::Expr<'arena> {
-        let anno = self.anno(expr.span);
+        let afb = &self.afb;
 
         let typeck = self.tcx.typeck(arg.hir_id.owner.def_id);
         let ty = typeck.expr_ty(arg);
@@ -380,18 +335,15 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             return translated;
         }
 
-        let remote = eaf::Remote(
-            anno,
-            Box::new(eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::Atom(anno, "io_lib"))),
-            Box::new(eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::Atom(anno, "format"))),
-        );
+        let format_str = self.afb.expr_string(expr.span, "~tp");
+        let args_list = self.afb.expr_list(expr.span, [translated]);
 
-        let format_str =
-            eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::String(anno, "~tp".chars().collect()));
-        let args_list =
-            eaf::Expr::Cons(anno, Box::new(translated), Box::new(eaf::Expr::Nil { anno }));
-
-        eaf::Expr::RemoteCall(anno, remote, vec![format_str, args_list])
+        afb.expr_remote_call(
+            expr.span,
+            afb.expr_atom(expr.span, "io_lib"),
+            afb.expr_atom(expr.span, "format"),
+            vec![format_str, args_list],
+        )
     }
 
     fn translate_stmt(
@@ -400,7 +352,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         scope: &mut Scope<'arena>,
     ) -> Option<eaf::Expr<'arena>> {
         let dcx = self.tcx.dcx();
-        let anno = self.anno(stmt.span);
+        let afb = &self.afb;
 
         match stmt.kind {
             StmtKind::Let(let_stmt) => {
@@ -409,7 +361,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                     self.translate_expr(init, scope)
                 };
                 let lhs = self.translate_pat(let_stmt.pat, scope);
-                Some(eaf::Expr::Match(anno, lhs, Box::new(rhs)))
+                Some(afb.expr_match(stmt.span, lhs, rhs))
             }
 
             StmtKind::Semi(expr) | StmtKind::Expr(expr) => Some(self.translate_expr(expr, scope)),
@@ -427,10 +379,10 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         scope: &mut Scope<'arena>,
     ) -> eaf::Pattern<'arena> {
         let dcx = self.tcx.dcx();
-        let anno = self.anno(pat.span);
+        let afb = &self.afb;
 
         match pat.kind {
-            PatKind::Wild => eaf::Pattern::Var(anno, "_"),
+            PatKind::Wild => afb.pat_var(pat.span, "_"),
 
             PatKind::Binding(binding_mode, id, ident, subpat) => {
                 let is_mut = match binding_mode {
@@ -447,7 +399,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 }
 
                 let var_name = scope.add_var(id, is_mut, ident);
-                eaf::Pattern::Var(anno, var_name)
+                afb.pat_var(pat.span, var_name)
             }
 
             _ => {
@@ -495,7 +447,8 @@ pub(super) fn translate(tcx: TyCtxt<'_>, stage: EmitStage, out_dir: &Path) {
     let source_map = tcx.sess.source_map();
     let arena = DroplessArena::default();
 
-    let translator = Translator { tcx, source_map, arena: &arena };
+    let afb = EafBuilder::new(source_map);
+    let translator = Translator { tcx, source_map, afb, arena: &arena };
 
     let modules = translator.translate();
 

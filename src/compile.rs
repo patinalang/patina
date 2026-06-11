@@ -1,3 +1,4 @@
+mod eaf_builder;
 mod translate;
 
 use std::cell::Cell;
