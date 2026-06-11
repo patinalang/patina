@@ -1,13 +1,21 @@
-error: expected a literal (`1u8`, `1.0f32`, `"string"`, etc.) here, found expression
-  --> tests/ui/src/custom_types/repr__04.pt:4:24
-   |
-LL | #[repr(tagged, style = snake_case)]
-   |                        ^^^^^^^^^^ expressions are not allowed here
-   |
-help: surround the identifier with quotation marks to make it into a string literal
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__04.pt:4:8
    |
 LL | #[repr(tagged, style = "snake_case")]
-   |                        +          +
+   |        ^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
 
-error: aborting due to 1 previous error
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__04.pt:4:16
+   |
+LL | #[repr(tagged, style = "snake_case")]
+   |                ^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
 
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0552`.

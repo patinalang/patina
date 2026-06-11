@@ -13,7 +13,7 @@ Ident
 Whitespace
 Eq
 Whitespace
-Ident
+Literal { kind: Str { terminated: true }, suffix_start: 8 }
 CloseParen
 CloseBracket
 Whitespace

@@ -1156,6 +1156,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::RawPtr(..)
             | ty::Str
             | ty::Term
+            | ty::Slice(..)
             | ty::Never
             | ty::Ref(_, _, hir::Mutability::Not)
             | ty::Array(..) => {}
@@ -1165,7 +1166,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             ty::UnsafeBinder(_) => {}
 
             // Not `Sized`, which is a supertrait of `Copy`/`Clone`.
-            ty::Dynamic(..) | ty::Slice(..) | ty::Foreign(..) => {}
+            ty::Dynamic(..) | ty::Foreign(..) => {}
 
             // Not `Copy` or `Clone` by design.
             ty::Ref(_, _, hir::Mutability::Mut) => {}
@@ -1258,6 +1259,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::CoroutineClosure(..)
             | ty::Str
             | ty::Term
+            | ty::Slice(_)
             | ty::Never
             | ty::Error(_) => {
                 candidates.vec.push(SizedCandidate);
@@ -1281,7 +1283,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             }
 
             // `MetaSized` but not `Sized`.
-            ty::Slice(_) | ty::Dynamic(..) => match sizedness {
+            ty::Dynamic(..) => match sizedness {
                 SizedTraitKind::Sized => {}
                 SizedTraitKind::MetaSized => {
                     candidates.vec.push(SizedCandidate);

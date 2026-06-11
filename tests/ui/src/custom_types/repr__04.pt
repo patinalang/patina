@@ -1,7 +1,7 @@
 // source: patina-by-example/src/custom_types/repr.md
 // block: 4/12
 
-#[repr(tagged, style = snake_case)]
+#[repr(tagged, style = "snake_case")]
 enum SnakeCaseEnum {
     UnitVariant,
     StructHTTPStyle{code: int, body: str},

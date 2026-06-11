@@ -10,16 +10,14 @@ LL |     MaybeUntagged(T)
 LL |     #[repr(tagged, name = "mytag")]
    |     ^ unexpected token
 
-error: expected a literal (`1u8`, `1.0f32`, `"string"`, etc.) here, found expression
-  --> tests/ui/src/custom_types/repr__07.pt:7:32
-   |
-LL | #[repr(transparent, fallback = tagged)]
-   |                                ^^^^^^ expressions are not allowed here
-   |
-help: surround the identifier with quotation marks to make it into a string literal
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__07.pt:7:21
    |
 LL | #[repr(transparent, fallback = "tagged")]
-   |                                +      +
+   |                     ^^^^^^^^^^^^^^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
 
 error[E0552]: unrecognized representation hint
   --> tests/ui/src/custom_types/repr__07.pt:13:12

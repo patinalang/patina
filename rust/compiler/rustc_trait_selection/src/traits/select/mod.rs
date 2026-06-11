@@ -2176,10 +2176,11 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
             | ty::CoroutineClosure(..)
             | ty::Str
             | ty::Term
+            | ty::Slice(_)
             | ty::Never
             | ty::Error(_) => ty::Binder::dummy(vec![]),
 
-            ty::Slice(_) | ty::Dynamic(..) => match sizedness {
+            ty::Dynamic(..) => match sizedness {
                 SizedTraitKind::Sized => unreachable!("tried to assemble `Sized` for unsized type"),
                 SizedTraitKind::MetaSized => ty::Binder::dummy(vec![]),
             },

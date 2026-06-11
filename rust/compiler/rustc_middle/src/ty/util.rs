@@ -228,7 +228,7 @@ impl<'tcx> TyCtxt<'tcx> {
         let tail = self.struct_tail_for_codegen(ty, typing_env);
         match tail.kind() {
             ty::Foreign(..) => false,
-            ty::Slice(..) | ty::Dynamic(..) => true,
+            ty::Dynamic(..) => true,
             _ => bug!("unexpected unsized tail: {:?}", tail),
         }
     }

@@ -1664,6 +1664,7 @@ impl<'tcx> Ty<'tcx> {
             | ty::Closure(..)
             | ty::CoroutineClosure(..)
             | ty::Str
+            | ty::Slice(_)
             | ty::Never
             | ty::Error(_)
             | ty::Term
@@ -1675,8 +1676,6 @@ impl<'tcx> Ty<'tcx> {
             // If returned by `struct_tail_raw` this is the empty tuple,
             // a.k.a. unit type, which is Sized
             | ty::Tuple(..) => Ok(tcx.types.unit),
-
-            ty::Slice(_) => Ok(tcx.types.int),
             ty::Dynamic(_, _) => {
                 let dyn_metadata = tcx.require_lang_item(LangItem::DynMetadata, DUMMY_SP);
                 Ok(tcx.type_of(dyn_metadata).instantiate(tcx, &[tail.into()]).skip_norm_wip())
@@ -1851,10 +1850,11 @@ impl<'tcx> Ty<'tcx> {
             | ty::CoroutineClosure(..)
             | ty::Str
             | ty::Term
+            | ty::Slice(_)
             | ty::Never
             | ty::Error(_) => true,
 
-            ty::Slice(_) | ty::Dynamic(_, _) => match sizedness {
+            ty::Dynamic(_, _) => match sizedness {
                 SizedTraitKind::Sized => false,
                 SizedTraitKind::MetaSized => true,
             },
@@ -1889,9 +1889,9 @@ impl<'tcx> Ty<'tcx> {
     /// on which we can replace cloning with dereferencing.
     pub fn is_trivially_pure_clone_copy(self) -> bool {
         match self.kind() {
-            ty::Bool | ty::Char | ty::Int | ty::Never | ty::Str | ty::Term => true,
+            ty::Bool | ty::Char | ty::Int | ty::Never | ty::Str | ty::Term | ty::Slice(..) => true,
             // These aren't even `Clone`
-            ty::Slice(..) | ty::Foreign(..) | ty::Dynamic(..) => false,
+            ty::Foreign(..) | ty::Dynamic(..) => false,
 
             ty::Float => true,
 

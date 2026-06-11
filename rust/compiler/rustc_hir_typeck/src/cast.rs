@@ -77,8 +77,6 @@ enum PointerKind<'tcx> {
     Thin,
     /// A trait object
     VTable(&'tcx ty::List<ty::Binder<'tcx, ty::ExistentialPredicate<'tcx>>>),
-    /// Slice
-    Length,
     /// The unsize info of this projection or opaque type
     OfAlias(ty::AliasTy<'tcx>),
     /// The unsize info of this parameter
@@ -105,7 +103,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let t = self.resolve_vars_with_obligations(t);
 
         Ok(match *t.kind() {
-            ty::Slice(_) => Some(PointerKind::Length),
             ty::Dynamic(tty, _) => Some(PointerKind::VTable(tty)),
             ty::Adt(def, args) if def.is_struct() => match def.non_enum_variant().tail_opt() {
                 None => Some(PointerKind::Thin),
@@ -146,6 +143,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             | ty::Adt(..)
             | ty::Str
             | ty::Term
+            | ty::Slice(_)
             | ty::Never
             | ty::Error(_) => {
                 let guar = self
@@ -255,7 +253,7 @@ impl<'a, 'tcx> CastCheck<'tcx> {
         // cases now. We do a more thorough check at the end, once
         // inference is more completely known.
         match cast_ty.kind() {
-            ty::Dynamic(_, _) | ty::Slice(..) => Err(check.report_cast_to_unsized_type(fcx)),
+            ty::Dynamic(_, _) => Err(check.report_cast_to_unsized_type(fcx)),
             _ => Ok(check),
         }
     }
@@ -322,37 +320,23 @@ impl<'a, 'tcx> CastCheck<'tcx> {
                     }
                     (
                         PointerKind::OfParam(_) | PointerKind::OfAlias(_),
-                        PointerKind::OfParam(_)
-                        | PointerKind::OfAlias(_)
-                        | PointerKind::VTable(_)
-                        | PointerKind::Length,
+                        PointerKind::OfParam(_) | PointerKind::OfAlias(_) | PointerKind::VTable(_),
                     )
-                    | (
-                        PointerKind::VTable(_) | PointerKind::Length,
-                        PointerKind::OfParam(_) | PointerKind::OfAlias(_),
-                    ) => {
+                    | (PointerKind::VTable(_), PointerKind::OfParam(_) | PointerKind::OfAlias(_)) =>
+                    {
                         err.note("the pointers may have different metadata");
-                    }
-                    (PointerKind::VTable(_), PointerKind::Length)
-                    | (PointerKind::Length, PointerKind::VTable(_)) => {
-                        err.note("the pointers have different metadata");
                     }
                     (
                         PointerKind::Thin,
                         PointerKind::Thin
                         | PointerKind::VTable(_)
-                        | PointerKind::Length
                         | PointerKind::OfParam(_)
                         | PointerKind::OfAlias(_),
                     )
                     | (
-                        PointerKind::VTable(_)
-                        | PointerKind::Length
-                        | PointerKind::OfParam(_)
-                        | PointerKind::OfAlias(_),
+                        PointerKind::VTable(_) | PointerKind::OfParam(_) | PointerKind::OfAlias(_),
                         PointerKind::Thin,
-                    )
-                    | (PointerKind::Length, PointerKind::Length) => {
+                    ) => {
                         span_bug!(self.span, "unexpected cast error: {e:?}")
                     }
                 }
@@ -1081,7 +1065,6 @@ impl<'a, 'tcx> CastCheck<'tcx> {
             None => Err(CastError::UnknownCastPtrKind),
             Some(PointerKind::Thin) => Ok(CastKind::AddrPtrCast),
             Some(PointerKind::VTable(_)) => Err(CastError::IntToWideCast(Some("a vtable"))),
-            Some(PointerKind::Length) => Err(CastError::IntToWideCast(Some("a length"))),
             Some(PointerKind::OfAlias(_) | PointerKind::OfParam(_)) => {
                 Err(CastError::IntToWideCast(None))
             }

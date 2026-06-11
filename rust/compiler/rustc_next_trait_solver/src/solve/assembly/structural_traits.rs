@@ -139,11 +139,12 @@ where
         | ty::CoroutineClosure(..)
         | ty::Str
         | ty::Term
+        | ty::Slice(_)
         | ty::Never
         | ty::Error(_) => Ok(ty::Binder::dummy(vec![])),
 
-        // impl {Meta,}Sized for [T], dyn Trait
-        ty::Slice(_) | ty::Dynamic(..) => match sizedness {
+        // impl {Meta,}Sized for dyn Trait
+        ty::Dynamic(..) => match sizedness {
             SizedTraitKind::Sized => Err(NoSolution),
             SizedTraitKind::MetaSized => Ok(ty::Binder::dummy(vec![])),
         },

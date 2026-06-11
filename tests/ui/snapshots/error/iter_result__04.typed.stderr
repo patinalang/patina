@@ -8,26 +8,13 @@ LL | |         .into_iter()
    | |_________|
    |
 
-error[E0277]: the trait bound `[_]: Sized` is not satisfied
-  --> tests/ui/src/error/iter_result__04.pt:6:28
-   |
-LL |     let (numbers, errors): ([_], [_]) = strings
-   |                            ^^^^^^^^^^ the trait `Sized` is not implemented for `[_]`
-   |
-help: this trait has no implementations, consider adding one
-  --> <patina-prelude>:14:1
-   |
-LL | pub trait Sized: MetaSized {}
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
-   = note: only the last element of a tuple may have a dynamically sized type
-
 error[E0433]: cannot find type `Result` in this scope
   --> tests/ui/src/error/iter_result__04.pt:9:20
    |
 LL |         .partition(Result::is_ok);
    |                    ^^^^^^ use of undeclared type `Result`
 
-error: aborting due to 3 previous errors
+error: aborting due to 2 previous errors
 
-Some errors have detailed explanations: E0277, E0433, E0599.
-For more information about an error, try `rustc --explain E0277`.
+Some errors have detailed explanations: E0433, E0599.
+For more information about an error, try `rustc --explain E0433`.

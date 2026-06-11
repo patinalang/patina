@@ -4,7 +4,7 @@
 // repr(transparent) can also be given a fallback, if the type cannot
 // be transparently represented. This is important for generic types,
 // as runtime representation will differ between concrete `T`s.
-#[repr(transparent, fallback = tagged)]
+#[repr(transparent, fallback = "tagged")]
 enum TransparentWithTags<T> {
     Untagged(str),
 

@@ -37,7 +37,7 @@ Ident
 Whitespace
 Eq
 Whitespace
-Ident
+Literal { kind: Str { terminated: true }, suffix_start: 12 }
 CloseParen
 CloseBracket
 Whitespace
@@ -88,7 +88,7 @@ Ident
 Whitespace
 Eq
 Whitespace
-Ident
+Literal { kind: Str { terminated: true }, suffix_start: 12 }
 CloseParen
 CloseBracket
 Whitespace

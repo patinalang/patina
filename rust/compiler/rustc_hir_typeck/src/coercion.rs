@@ -278,6 +278,14 @@ impl<'f, 'tcx> Coerce<'f, 'tcx> {
             return self.coerce_from_inference_variable(a, b);
         }
 
+        // Coercing from [T; N] to [T] is allowed. This is temporary, as long-term we're going to
+        // drop array as a separate type.
+        if let (&ty::Array(a_elem, _), &ty::Slice(b_elem)) = (a.kind(), b.kind()) {
+            return self
+                .unify_raw(a_elem, b_elem, ForceLeakCheck::No)
+                .and_then(|InferOk { obligations, .. }| success(vec![], b, obligations));
+        }
+
         // Consider coercing the subtype to a DST
         //
         // NOTE: this is wrapped in a `commit_if_ok` because it creates

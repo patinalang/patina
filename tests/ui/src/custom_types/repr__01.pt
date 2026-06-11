@@ -7,7 +7,7 @@ struct Unit;
 struct CustomNameUnit;
 
 // `style` can be used to change the style of atom tags assigned by Patina
-#[repr(style = snake_case)]
+#[repr(style = "snake_case")]
 enum NotJustUnits {
     VariantA,
     #[repr(name = "variantB")]
@@ -17,7 +17,7 @@ enum NotJustUnits {
 
 // Explicitly setting `#[repr(atom)]` will ensure that only unit variants
 // are ever added to an enum.
-#[repr(atom, style = snake_case)]
+#[repr(atom, style = "snake_case")]
 enum OnlyUnits {
     VariantA,
     VariantB,

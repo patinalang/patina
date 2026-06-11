@@ -67,47 +67,13 @@ error[E0599]: no method named `iter` found for slice `[int]` in the current scop
 LL |     v.iter().chain(u.iter()).cycle()
    |       ^^^^ method not found in `[int]`
 
-error[E0277]: the trait bound `[int]: Sized` is not satisfied
-  --> tests/ui/src/trait/impl_trait__03.pt:10:8
-   |
-LL |     v: [int],
-   |        ^^^^^ the trait `Sized` is not implemented for `[int]`
-   |
-help: this trait has no implementations, consider adding one
-  --> <patina-prelude>:14:1
-   |
-LL | pub trait Sized: MetaSized {}
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
-   = help: unsized fn params are gated as an unstable feature
-help: function arguments must have a statically known size, borrowed slices always have a known size
-   |
-LL |     v: &[int],
-   |        +
-
-error[E0277]: the trait bound `[int]: Sized` is not satisfied
-  --> tests/ui/src/trait/impl_trait__03.pt:11:8
-   |
-LL |     u: [int],
-   |        ^^^^^ the trait `Sized` is not implemented for `[int]`
-   |
-help: this trait has no implementations, consider adding one
-  --> <patina-prelude>:14:1
-   |
-LL | pub trait Sized: MetaSized {}
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
-   = help: unsized fn params are gated as an unstable feature
-help: function arguments must have a statically known size, borrowed slices always have a known size
-   |
-LL |     u: &[int],
-   |        +
-
 error[E0599]: no method named `iter` found for slice `[int]` in the current scope
   --> tests/ui/src/trait/impl_trait__03.pt:13:22
    |
 LL |     v.iter().chain(u.iter()).cycle()
    |                      ^^^^ method not found in `[int]`
 
-error: aborting due to 13 previous errors
+error: aborting due to 11 previous errors
 
-Some errors have detailed explanations: E0277, E0405, E0432, E0599.
-For more information about an error, try `rustc --explain E0277`.
+Some errors have detailed explanations: E0405, E0432, E0599.
+For more information about an error, try `rustc --explain E0405`.

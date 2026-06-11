@@ -1,7 +1,7 @@
 // source: patina-by-example/src/custom_types/repr.md
 // block: 11/12
 
-#[repr(transparent, fallback = tagged)]
+#[repr(transparent, fallback = "tagged")]
 pub enum Option<T> {
     #[repr(name = "some")]
     Some(T),

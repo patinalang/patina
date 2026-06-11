@@ -3,7 +3,7 @@
 
 extern mod erlang;
 
-#[repr(tagged, style = snake_case)]
+#[repr(tagged, style = "snake_case")]
 pub enum TermToBinaryOpts {
     Compressed(int),
     Deterministic,
