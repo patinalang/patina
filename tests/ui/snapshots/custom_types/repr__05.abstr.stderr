@@ -1,8 +1,0 @@
-error: literal kind Float("2.345", Unsuffixed) not yet implemented
-  --> tests/ui/src/custom_types/repr__05.pt:9:30
-   |
-LL |     println!("{:?}", Celcius(2.345) as term);
-   |                              ^^^^^
-
-error: aborting due to 1 previous error
-

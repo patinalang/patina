@@ -1,11 +1,11 @@
-error: internal compiler error: src/compile/translate.rs:323:18: path kind not yet implemented
+error: internal compiler error: src/compile/translate.rs:382:18: path kind not yet implemented
   --> tests/ui/src/custom_types/enum__02.pt:15:13
    |
 LL |     let x = Operations::Add;
    |             ^^^^^^^^^^^^^^^
 
 
-thread 'rustc' (4985736) panicked at src/compile/translate.rs:323:18:
+thread 'rustc' (4994238) panicked at src/compile/translate.rs:382:18:
 Box<dyn Any>
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 error: aborting due to 1 previous error

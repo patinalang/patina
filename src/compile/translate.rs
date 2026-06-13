@@ -8,11 +8,11 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use rustc_arena::DroplessArena;
 use rustc_ast::{BindingMode, LitKind};
 use rustc_errors::DiagCtxtHandle;
-use rustc_hir::def::Res;
+use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::LocalModDefId;
 use rustc_hir::{
     BodyId, Expr, ExprKind, FnSig, Generics, HirId, Item, ItemKind, Mod, Pat, PatKind, QPath, Stmt,
-    StmtKind, TyKind,
+    StmtKind, StructTailExpr, TyKind,
 };
 use rustc_middle::span_bug;
 use rustc_middle::ty::{TyCtxt, Visibility};
@@ -258,6 +258,12 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             ExprKind::Lit(lit) => match lit.node {
                 LitKind::Int(val) => afb.expr_integer(lit.span, val.get()),
                 LitKind::Str(symbol, _style) => afb.expr_binary_string(lit.span, symbol.as_str()),
+                LitKind::Float(symbol, _style) => {
+                    let float = symbol.as_str().parse::<f64>().unwrap_or_else(|e| {
+                        dcx.span_fatal(lit.span, format!("failed to parse float: {e}"));
+                    });
+                    afb.expr_float(lit.span, float)
+                }
                 _ => dcx.span_fatal(
                     lit.span,
                     format!("literal kind {:?} not yet implemented", lit.node),
@@ -270,29 +276,42 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 let args_exprs =
                     args.iter().map(|arg| self.translate_expr(arg, scope)).collect::<Vec<_>>();
 
-                if let ExprKind::Path(QPath::TypeRelative(
-                    rustc_hir::Ty { kind: TyKind::Path(qpath), .. },
-                    last_segment,
-                )) = callee.kind
-                {
-                    let module = self.translate_qpath(qpath, scope);
-                    let fn_name = self.arena.alloc_str(last_segment.ident.as_str());
+                match callee.kind {
+                    ExprKind::Path(QPath::TypeRelative(
+                        rustc_hir::Ty { kind: TyKind::Path(qpath), .. },
+                        last_segment,
+                    )) => {
+                        let module = self.translate_qpath(qpath, scope);
+                        let fn_name = self.arena.alloc_str(last_segment.ident.as_str());
 
-                    // Temporary before we actually ship runtime modules (like `patina_fmt` could've been)
-                    if let (
-                        eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::Atom(_, "patina_fmt")),
-                        "display" | "debug",
-                    ) = (&module, fn_name)
-                    {
-                        return self.translate_format_render(expr, fn_name, &args[0], scope);
+                        // Temporary before we actually ship runtime modules (like `patina_fmt` could've been)
+                        if let (
+                            eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::Atom(_, "patina_fmt")),
+                            "display" | "debug",
+                        ) = (&module, fn_name)
+                        {
+                            return self.translate_format_render(expr, fn_name, &args[0], scope);
+                        }
+
+                        let fn_atom = afb.expr_atom(last_segment.ident.span, fn_name);
+                        return afb.expr_remote_call(expr.span, module, fn_atom, args_exprs);
                     }
 
-                    let fn_atom = afb.expr_atom(last_segment.ident.span, fn_name);
-                    return afb.expr_remote_call(expr.span, module, fn_atom, args_exprs);
-                }
+                    ExprKind::Path(QPath::Resolved(
+                        _,
+                        rustc_hir::Path { res: Res::Def(DefKind::Ctor(..), _), .. },
+                    )) => {
+                        let mod_expr = self.translate_expr(callee, scope);
+                        let fn_name = self.arena.alloc_str("__struct__");
+                        let fn_atom = afb.expr_atom(callee.span, fn_name);
+                        return afb.expr_remote_call(expr.span, mod_expr, fn_atom, args_exprs);
+                    }
 
-                let callee_expr = self.translate_expr(callee, scope);
-                afb.expr_local_call(expr.span, callee_expr, args_exprs)
+                    _ => {
+                        let callee_expr = self.translate_expr(callee, scope);
+                        afb.expr_local_call(expr.span, callee_expr, args_exprs)
+                    }
+                }
             }
 
             ExprKind::Array(elements) => self.afb.expr_list(
@@ -308,6 +327,46 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                     .map(|element| self.translate_expr(element, scope))
                     .collect::<Vec<_>>();
                 afb.expr_tuple(expr.span, elements)
+            }
+
+            ExprKind::Struct(qpath, fields, tail) => {
+                let translated_fields = fields
+                    .iter()
+                    .map(|field| {
+                        let key = afb.expr_atom(field.ident.span, field.ident.as_str());
+                        (key, self.translate_expr(field.expr, scope))
+                    })
+                    .collect::<Vec<_>>();
+
+                match tail {
+                    StructTailExpr::None => {
+                        let tag = (
+                            afb.expr_atom(expr.span, self.arena.alloc_str("__struct__")),
+                            self.translate_qpath(qpath, scope),
+                        );
+                        let assocs =
+                            std::iter::once(tag).chain(translated_fields).collect::<Vec<_>>();
+                        afb.expr_map(expr.span, assocs)
+                    }
+                    StructTailExpr::Base(base) => {
+                        let base = self.translate_expr(base, scope);
+                        afb.expr_map_update_exact(expr.span, base, translated_fields)
+                    }
+                    StructTailExpr::DefaultFields(_) | StructTailExpr::NoneWithError(_) => dcx
+                        .span_fatal(
+                            expr.span,
+                            "struct with default field values not yet implemented",
+                        ),
+                }
+            }
+
+            ExprKind::Field(expr, ident) => {
+                let mod_name = afb.expr_atom(expr.span, self.arena.alloc_str("erlang"));
+                let fn_name = afb.expr_atom(expr.span, self.arena.alloc_str("map_get"));
+                let subject = self.translate_expr(expr, scope);
+                let field_name = afb.expr_atom(ident.span, self.arena.alloc_str(ident.as_str()));
+
+                afb.expr_remote_call(expr.span, mod_name, fn_name, vec![field_name, subject])
             }
 
             _ => dcx.span_fatal(
@@ -430,6 +489,15 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
 
                 let var_name = scope.add_var(id, is_mut, ident);
                 afb.pat_var(pat.span, var_name)
+            }
+
+            PatKind::Struct(_qpath, fields, _tail) => {
+                let translated_fields = fields.iter().map(|field| {
+                    let key = afb.pat_atom(field.ident.span, field.ident.as_str());
+                    (key, self.translate_pat(field.pat, scope))
+                });
+
+                afb.pat_map(pat.span, translated_fields)
             }
 
             _ => {

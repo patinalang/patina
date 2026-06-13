@@ -19,12 +19,20 @@ impl<'sm> EafBuilder<'sm> {
         eaf::Anno { line: loc.line, column: loc.col.0 + 1 }
     }
 
+    pub(crate) fn pat_atom<'a>(&self, span: Span, name: &'a str) -> eaf::Pattern<'a> {
+        eaf::Pattern::AtomicLiteral(eaf::AtomicLiteral::Atom(self.anno(span), name))
+    }
+
     pub(crate) fn expr_atom<'a>(&self, span: Span, name: &'a str) -> eaf::Expr<'a> {
         eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::Atom(self.anno(span), name))
     }
 
     pub(crate) fn expr_integer<'a>(&self, span: Span, value: impl Into<BigUint>) -> eaf::Expr<'a> {
         eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::Integer(self.anno(span), value.into()))
+    }
+
+    pub(crate) fn expr_float<'a>(&self, span: Span, value: f64) -> eaf::Expr<'a> {
+        eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::Float(self.anno(span), value))
     }
 
     /// List-based string literal.
@@ -51,6 +59,17 @@ impl<'sm> EafBuilder<'sm> {
 
     pub(crate) fn pat_var<'a>(&self, span: Span, name: &'a str) -> eaf::Pattern<'a> {
         eaf::Pattern::Var(self.anno(span), name)
+    }
+
+    pub(crate) fn pat_map<'a>(
+        &self,
+        span: Span,
+        assocs: impl IntoIterator<Item = (eaf::Pattern<'a>, eaf::Pattern<'a>)>,
+    ) -> eaf::Pattern<'a> {
+        let anno = self.anno(span);
+        let assocs =
+            assocs.into_iter().map(|(key, value)| eaf::MapFieldExact(anno, key, value)).collect();
+        eaf::Pattern::Map(anno, assocs)
     }
 
     pub(crate) fn expr_remote_call<'a>(
@@ -103,6 +122,31 @@ impl<'sm> EafBuilder<'sm> {
 
     pub(crate) fn expr_tuple<'a>(&self, span: Span, elements: Vec<eaf::Expr<'a>>) -> eaf::Expr<'a> {
         eaf::Expr::Tuple(self.anno(span), elements)
+    }
+
+    pub(crate) fn expr_map<'a>(
+        &self,
+        span: Span,
+        assocs: impl IntoIterator<Item = (eaf::Expr<'a>, eaf::Expr<'a>)>,
+    ) -> eaf::Expr<'a> {
+        let anno = self.anno(span);
+        let assocs =
+            assocs.into_iter().map(|(key, value)| eaf::MapFieldAssoc(anno, key, value)).collect();
+        eaf::Expr::MapCreate(anno, assocs)
+    }
+
+    pub(crate) fn expr_map_update_exact<'a>(
+        &self,
+        span: Span,
+        base: impl Into<Box<eaf::Expr<'a>>>,
+        updates: impl IntoIterator<Item = (eaf::Expr<'a>, eaf::Expr<'a>)>,
+    ) -> eaf::Expr<'a> {
+        let anno = self.anno(span);
+        let updates = updates
+            .into_iter()
+            .map(|(key, value)| eaf::MapField::MapFieldExact(anno, key, value))
+            .collect();
+        eaf::Expr::MapUpdate(anno, base.into(), updates)
     }
 
     /// `Pattern = Rhs`.

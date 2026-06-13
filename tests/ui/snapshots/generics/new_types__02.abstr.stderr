@@ -1,8 +1,8 @@
-error: expression kind Field(Expr { hir_id: HirId(DefId(0:15 ~ NewTypes02[546a]::main).13), kind: Path(Resolved(None, Path { span: tests/ui/src/generics/new_types__02.pt:8:37: 8:42 (#0), res: Local(HirId(DefId(0:15 ~ NewTypes02[546a]::main).8)), segments: [PathSegment { ident: years#0, hir_id: HirId(DefId(0:15 ~ NewTypes02[546a]::main).14), res: Local(HirId(DefId(0:15 ~ NewTypes02[546a]::main).8)), args: None, infer_args: true }] })), span: tests/ui/src/generics/new_types__02.pt:8:37: 8:42 (#0) }, 0#0) not yet implemented
-  --> tests/ui/src/generics/new_types__02.pt:8:37
+error: pattern kind TupleStruct(Resolved(None, Path { span: tests/ui/src/generics/new_types__02.pt:9:9: 9:14 (#0), res: Def(Ctor(Struct, Fn), DefId(0:13 ~ NewTypes02[546a]::Years::{constructor#0})), segments: [PathSegment { ident: Years#0, hir_id: HirId(DefId(0:15 ~ NewTypes02[546a]::main).22), res: Def(Ctor(Struct, Fn), DefId(0:13 ~ NewTypes02[546a]::Years::{constructor#0})), args: None, infer_args: true }] }), [Pat { hir_id: HirId(DefId(0:15 ~ NewTypes02[546a]::main).23), kind: Binding(BindingMode(No, Not), HirId(DefId(0:15 ~ NewTypes02[546a]::main).23), years_as_primitive_2#0, None), span: tests/ui/src/generics/new_types__02.pt:9:15: 9:35 (#0), default_binding_modes: true }], None) not yet implemented
+  --> tests/ui/src/generics/new_types__02.pt:9:9
    |
-LL |     let years_as_primitive_1: int = years.0; // Tuple
-   |                                     ^^^^^^^
+LL |     let Years(years_as_primitive_2) = years; // Destructuring
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: aborting due to 1 previous error
 
