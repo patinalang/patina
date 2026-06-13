@@ -499,6 +499,19 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 afb.pat_map(pat.span, translated_fields)
             }
 
+            PatKind::TupleStruct(_qpath, subpats, tail) => {
+                if tail.as_opt_usize().is_some() {
+                    not_implemented!(self.tcx, pat.span, "tuple struct pattern with rest", tail);
+                }
+
+                let translated_fields = subpats.iter().enumerate().map(|(i, subpat)| {
+                    let key = afb.pat_atom(pat.span, Symbol::intern(&i.to_string()));
+                    (key, self.translate_pat(subpat, scope))
+                });
+
+                afb.pat_map(pat.span, translated_fields)
+            }
+
             _ => not_implemented!(self.tcx, pat.span, "pattern kind", pat.kind),
         }
     }
