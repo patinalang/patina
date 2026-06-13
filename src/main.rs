@@ -2,6 +2,7 @@
 
 mod compile;
 mod erlang;
+mod num_utils;
 
 use std::process::ExitCode;
 

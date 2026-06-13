@@ -1,8 +1,9 @@
 use std::fmt::Display;
 
-use num_bigint::{Sign, ToBigInt};
-use num_traits::PrimInt;
+use num_traits::{PrimInt, ToBytes, WrappingNeg};
 use serde::{Serialize, ser};
+
+use crate::num_utils::{to_sign_mag, trim_trailing_zeroes};
 
 const TERM_HEADER: u8 = 131;
 const SMALL_ATOM_UTF8_EXT: u8 = 119;
@@ -56,55 +57,16 @@ where
     Ok(serializer.output)
 }
 
-#[allow(unused)]
-pub(crate) struct BigUInt(num_bigint::BigUint);
+// Unsigned integer as little endian bytes.
+#[derive(Clone, Copy, Debug)]
+pub(crate) struct BigUInt<'a>(pub &'a [u8]);
 
-impl Serialize for BigUInt {
+impl<'a> Serialize for BigUInt<'a> {
     fn serialize<S: serde::Serializer>(
         &self,
         serializer: S,
     ) -> std::result::Result<S::Ok, S::Error> {
-        use num_traits::ToPrimitive;
-
-        if let Some(v) = self.0.to_u128() {
-            serializer.serialize_u128(v)
-        } else {
-            const PREFIX: &[u8] = b"BigInt";
-
-            let sign = 0u8;
-            let mag = self.0.to_bytes_le();
-            let mut payload = Vec::with_capacity(PREFIX.len() + 1 + mag.len());
-
-            payload.extend_from_slice(PREFIX);
-            payload.push(sign);
-            payload.extend_from_slice(&mag);
-
-            serializer.serialize_bytes(&payload)
-        }
-    }
-}
-
-#[allow(unused)]
-pub(crate) fn serialize_biguint<S: serde::Serializer>(
-    v: &num_bigint::BigUint,
-    serializer: S,
-) -> std::result::Result<S::Ok, S::Error> {
-    use num_traits::ToPrimitive;
-
-    if let Some(v) = v.to_u128() {
-        serializer.serialize_u128(v)
-    } else {
-        const PREFIX: &[u8] = b"BigInt";
-
-        let sign = 0u8;
-        let mag = v.to_bytes_le();
-        let mut payload = Vec::with_capacity(PREFIX.len() + 1 + mag.len());
-
-        payload.extend_from_slice(PREFIX);
-        payload.push(sign);
-        payload.extend_from_slice(&mag);
-
-        serializer.serialize_bytes(&payload)
+        serializer.serialize_bytes(self.0)
     }
 }
 
@@ -135,6 +97,8 @@ impl Serializer {
     }
 
     pub(crate) fn write_integer_bytes(&mut self, sign: u8, bytes: &[u8]) -> Result<()> {
+        let bytes = trim_trailing_zeroes(bytes);
+
         if let Ok(len) = bytes.len().try_into() {
             self.output.push(SMALL_BIG_EXT);
             self.output.push(len);
@@ -152,7 +116,7 @@ impl Serializer {
         }
     }
 
-    fn write_integer<T: PrimInt + ToBigInt>(&mut self, v: T) -> Result<()> {
+    fn write_integer<T: PrimInt + ToBytes + WrappingNeg>(&mut self, v: T) -> Result<()> {
         if let Some(v) = v.to_u8() {
             self.output.push(SMALL_INTEGER_EXT);
             self.output.push(v);
@@ -162,10 +126,8 @@ impl Serializer {
             self.output.extend_from_slice(&v.to_be_bytes());
             Ok(())
         } else {
-            let v = v.to_bigint().expect("integer");
-            let (sign, mag) = v.to_bytes_le();
-
-            self.write_integer_bytes(if sign == Sign::Minus { 1u8 } else { 0u8 }, mag.as_ref())
+            let (sign, mag) = to_sign_mag(v);
+            self.write_integer_bytes(sign, mag.as_ref())
         }
     }
 
@@ -270,12 +232,17 @@ impl<'a> ser::Serializer for &'a mut Serializer {
         self.write_atom(v)
     }
 
+    /// Serializes an *unsigned* integer given little endian bytes.
     fn serialize_bytes(self, v: &[u8]) -> Result<()> {
+        let v = trim_trailing_zeroes(v);
+
         match v {
-            [b'B', b'i', b'g', b'I', b'n', b't', sign, rest @ ..] => {
-                self.write_integer_bytes(*sign, rest)
-            }
-            _ => Err(Error::UnsupportedType),
+            [] => self.write_integer(0u8),
+            [a] => self.write_integer(*a),
+            [a, b] => self.write_integer(u16::from_le_bytes([*a, *b])),
+            [a, b, c] => self.write_integer(u32::from_le_bytes([*a, *b, *c, 0])),
+            [a, b, c, d] => self.write_integer(u32::from_le_bytes([*a, *b, *c, *d])),
+            _ => self.write_integer_bytes(0, v),
         }
     }
 
@@ -849,13 +816,15 @@ mod tests {
 
     #[test]
     fn biguint_small_normalizes_to_small_integer() {
-        let v = BigUInt(num_bigint::BigUint::from(42u32));
+        let v = BigUInt(&[42]);
         assert_eq!(to_bytes(&v).unwrap(), vec![TERM_HEADER, SMALL_INTEGER_EXT, 42]);
     }
 
     #[test]
     fn biguint_above_u128() {
-        let v = BigUInt(num_bigint::BigUint::from(1u8) << 128);
+        let mut bytes = [0u8; 17];
+        bytes[16] = 1;
+        let v = BigUInt(&bytes);
         let mut expected = vec![TERM_HEADER, SMALL_BIG_EXT, 17, 0];
         expected.extend(std::iter::repeat(0u8).take(16));
         expected.push(1);
@@ -864,16 +833,17 @@ mod tests {
 
     #[test]
     fn biguint_zero() {
-        let v = BigUInt(num_bigint::BigUint::from(0u32));
+        let v = BigUInt(&[]);
         assert_eq!(to_bytes(&v).unwrap(), vec![TERM_HEADER, SMALL_INTEGER_EXT, 0]);
     }
 
     #[test]
-    fn raw_bytes_without_bigint_prefix_unsupported() {
-        assert!(matches!(
-            to_bytes(&serde_bytes_compat::Bytes(&[1, 2, 3])),
-            Err(Error::UnsupportedType)
-        ));
+    fn raw_bytes_serialize_as_unsigned_integer() {
+        // Three little-endian magnitude bytes normalize to INTEGER_EXT.
+        assert_eq!(
+            to_bytes(&serde_bytes_compat::Bytes(&[1, 2, 3])).unwrap(),
+            vec![TERM_HEADER, INTEGER_EXT, 0, 0x03, 0x02, 0x01]
+        );
     }
 
     #[test]

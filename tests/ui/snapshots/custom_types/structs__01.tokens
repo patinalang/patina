@@ -13,13 +13,9 @@ Ident
 CloseParen
 CloseBracket
 Whitespace
-Pound
-OpenBracket
-Ident
-OpenParen
-Ident
-CloseParen
-CloseBracket
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
 Whitespace
 Ident
 Whitespace
@@ -350,9 +346,6 @@ Ident
 Whitespace
 CloseBrace
 Comma
-Whitespace
-Ident
-Colon
 Whitespace
 Ident
 Comma

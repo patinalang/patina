@@ -1,8 +1,8 @@
-error: cannot find attribute `derive` in this scope
-  --> tests/ui/src/custom_types/structs__01.pt:7:3
+error: pattern kind not yet implemented: TupleStruct(Resolved(None, Path { span: tests/ui/src/custom_types/structs__01.pt:77:9: 77:13 (#0), res: Def(Ctor(Struct, Fn), DefId(0:18 ~ Structs01[b0a2]::Pair::{constructor#0})), segments: [PathSegment { ident: Pair#0, hir_id: HirId(DefId(0:27 ~ Structs01[b0a2]::main).228), res: Def(Ctor(Struct, Fn), DefId(0:18 ~ Structs01[b0a2]::Pair::{constructor#0})), args: None, infer_args: true }] }), [Pat { hir_id: HirId(DefId(0:27 ~ Structs01[b0a2]::main).229), kind: Binding(BindingMode(No, Not), HirId(DefId(0:27 ~ Structs01[b0a2]::main).229), integer#0, None), span: tests/ui/src/custom_types/structs__01.pt:77:14: 77:21 (#0), default_binding_modes: true }, Pat { hir_id: HirId(DefId(0:27 ~ Structs01[b0a2]::main).230), kind: Binding(BindingMode(No, Not), HirId(DefId(0:27 ~ Structs01[b0a2]::main).230), decimal#0, None), span: tests/ui/src/custom_types/structs__01.pt:77:23: 77:30 (#0), default_binding_modes: true }], None)
+  --> tests/ui/src/custom_types/structs__01.pt:77:9
    |
-LL | #[derive(Debug)]
-   |   ^^^^^^
+LL |     let Pair(integer, decimal) = pair;
+   |         ^^^^^^^^^^^^^^^^^^^^^^
 
 error: aborting due to 1 previous error
 

@@ -1,4 +1,4 @@
-error: literal kind Char('a') not yet implemented
+error: literal kind not yet implemented: Char('a')
   --> tests/ui/src/generics/gen_fn__01.pt:33:26
    |
 LL |     generic::<char>(SGen('a'));

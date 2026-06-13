@@ -4,7 +4,8 @@
 // An attribute to hide warnings for unused code.
 #![allow(dead_code)]
 
-#[derive(Debug)]
+// TODO: Uncomment this once we have a way to derive Debug for structs
+// #[derive(Debug)]
 struct Person {
     name: str,
     age: int,
@@ -60,7 +61,7 @@ pub fn main() {
     let _rectangle = Rectangle {
         // struct instantiation is an expression too
         top_left: Point { x: left_edge, y: top_edge },
-        bottom_right: bottom_right,
+        bottom_right,
     };
 
     // Instantiate a unit struct

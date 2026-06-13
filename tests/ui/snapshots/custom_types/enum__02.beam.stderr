@@ -1,12 +1,8 @@
-error: internal compiler error: src/compile/translate.rs:382:18: path kind not yet implemented
+error: qpath kind not yet implemented: TypeRelative(Ty { hir_id: HirId(DefId(0:18 ~ Enum02[8531]::main).5), span: tests/ui/src/custom_types/enum__02.pt:15:13: 15:23 (#0), kind: Path(Resolved(None, Path { span: tests/ui/src/custom_types/enum__02.pt:15:13: 15:23 (#0), res: Def(TyAlias, DefId(0:17 ~ Enum02[8531]::Operations)), segments: [PathSegment { ident: Operations#0, hir_id: HirId(DefId(0:18 ~ Enum02[8531]::main).4), res: Def(TyAlias, DefId(0:17 ~ Enum02[8531]::Operations)), args: None, infer_args: true }] })) }, PathSegment { ident: Add#0, hir_id: HirId(DefId(0:18 ~ Enum02[8531]::main).6), res: Err, args: None, infer_args: true })
   --> tests/ui/src/custom_types/enum__02.pt:15:13
    |
 LL |     let x = Operations::Add;
    |             ^^^^^^^^^^^^^^^
 
-
-thread 'rustc' (4994238) panicked at src/compile/translate.rs:382:18:
-Box<dyn Any>
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 error: aborting due to 1 previous error
 

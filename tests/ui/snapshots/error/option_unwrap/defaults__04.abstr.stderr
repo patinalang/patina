@@ -36,7 +36,7 @@ LL |         println!("Providing lemon as fallback");
    = note: this error: internal compiler error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 
-thread 'rustc' (4996175) panicked at rust/compiler/rustc_hir_typeck/src/expr_use_visitor.rs:1424:20:
+thread 'rustc' (50373867) panicked at rust/compiler/rustc_hir_typeck/src/expr_use_visitor.rs:1424:20:
 Box<dyn Any>
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 error: aborting due to 5 previous errors
