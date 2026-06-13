@@ -1806,6 +1806,7 @@ dependencies = [
 name = "rustc_interface"
 version = "0.0.0"
 dependencies = [
+ "convert_case",
  "rustc_ast",
  "rustc_ast_lowering",
  "rustc_ast_passes",

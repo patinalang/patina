@@ -1,5 +1,5 @@
 -file("tests/ui/src/format_args__01.pt", 4).
--module('Elixir.FormatArgs01').
+-module('Elixir.Patina.FormatArgs01').
 -compile([no_auto_import]).
 -export([main/0]).
 main() ->

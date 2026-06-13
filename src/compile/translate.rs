@@ -5,20 +5,21 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use convert_case::{Case, Casing};
 use rustc_arena::DroplessArena;
 use rustc_ast::{BindingMode, LitKind};
 use rustc_errors::DiagCtxtHandle;
 use rustc_hir::def::Res;
+use rustc_hir::def_id::LocalModDefId;
 use rustc_hir::{
     BodyId, Expr, ExprKind, FnSig, Generics, HirId, Item, ItemKind, Mod, Pat, PatKind, QPath, Stmt,
-    StmtKind,
+    StmtKind, TyKind,
 };
+use rustc_middle::span_bug;
 use rustc_middle::ty::{TyCtxt, Visibility};
 use rustc_span::Ident;
-use rustc_span::source_map::SourceMap;
 
-use crate::compile::eaf_builder::{self, EafBuilder};
+use crate::compile::eaf_builder::EafBuilder;
+use crate::compile::module_collector::ModuleNameCollector;
 use crate::erlang::abstract_format as eaf;
 use crate::{EmitStage, erlang};
 
@@ -104,13 +105,6 @@ fn render_abstr(dcx: DiagCtxtHandle<'_>, eaf_bytes: &[u8]) -> String {
     }
 }
 
-struct Translator<'tcx, 'arena> {
-    tcx: TyCtxt<'tcx>,
-    source_map: &'tcx SourceMap,
-    afb: EafBuilder<'tcx>,
-    arena: &'arena DroplessArena,
-}
-
 #[allow(unused)]
 struct Fn<'tcx> {
     item: &'tcx Item<'tcx>,
@@ -151,23 +145,43 @@ struct PatinaVar {
     version: usize,
 }
 
+struct Translator<'tcx, 'arena> {
+    tcx: TyCtxt<'tcx>,
+    afb: EafBuilder<'tcx>,
+    arena: &'arena DroplessArena,
+    modules: ModuleNameCollector<'tcx>,
+}
+
 impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
-    fn translate(&self) -> Vec<(&'arena str, eaf::Module<'arena>)> {
-        let root_module = self.tcx.hir_root_module();
-        vec![self.translate_module(root_module)]
+    fn new(tcx: TyCtxt<'tcx>, arena: &'arena DroplessArena) -> Translator<'tcx, 'arena> {
+        let source_map = tcx.sess.source_map();
+        let afb = EafBuilder::new(source_map);
+
+        let modules = ModuleNameCollector::new(tcx);
+
+        Translator { tcx, afb, arena, modules }
     }
 
-    fn translate_module(&self, module: &Mod<'tcx>) -> (&'arena str, eaf::Module<'arena>) {
+    fn translate(&self) -> Vec<(&'arena str, eaf::Module<'arena>)> {
+        vec![self.translate_module(LocalModDefId::CRATE_DEF_ID)]
+    }
+
+    fn translate_module(&self, module_id: LocalModDefId) -> (&'arena str, eaf::Module<'arena>) {
+        let (module, _span, _hir_id) = self.tcx.hir_get_module(module_id);
         let dcx = self.tcx.dcx();
+
         let filename = self
-            .source_map
+            .tcx
+            .sess
+            .source_map()
             .span_to_filename(module.spans.inner_span)
             .into_local_path()
             .unwrap_or_else(|| {
                 dcx.span_bug(module.spans.inner_span, "module has no filename");
             });
 
-        let mod_name = self.mod_name(&filename);
+        let mod_name =
+            self.arena.alloc_str(self.modules.module_name(module_id.to_def_id()).as_str());
         let span = module.spans.inner_span;
 
         let file_attr = self.afb.file_attr(span, &filename.to_string_lossy());
@@ -250,49 +264,35 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 ),
             },
 
-            ExprKind::Path(QPath::Resolved(
-                None,
-                rustc_hir::Path { res: Res::Local(hir_id), .. },
-            )) => {
-                let var = scope.get_var(*hir_id).unwrap_or_else(|| {
-                    dcx.span_bug(expr.span, format!("variable {hir_id:?} not in scope"));
-                });
-                let name = self.arena.alloc_str(&format!("_var_{}", var.version));
-                afb.expr_var(expr.span, name)
-            }
+            ExprKind::Path(qpath) => self.translate_qpath(&qpath, scope),
 
             ExprKind::Call(callee, args) => {
-                if let Some((path_segments, target_fun_segment)) = callee.call_segments() {
-                    let module = self.arena.alloc_str(
-                        &path_segments
-                            .iter()
-                            .map(|segment| segment.ident.as_str())
-                            .collect::<Vec<_>>()
-                            .join("."),
-                    );
+                let args_exprs =
+                    args.iter().map(|arg| self.translate_expr(arg, scope)).collect::<Vec<_>>();
 
-                    let fn_name = self.arena.alloc_str(target_fun_segment.ident.as_str());
+                if let ExprKind::Path(QPath::TypeRelative(
+                    rustc_hir::Ty { kind: TyKind::Path(qpath), .. },
+                    last_segment,
+                )) = callee.kind
+                {
+                    let module = self.translate_qpath(qpath, scope);
+                    let fn_name = self.arena.alloc_str(last_segment.ident.as_str());
 
                     // Temporary before we actually ship runtime modules (like `patina_fmt` could've been)
-                    if let ("patina_fmt", "display" | "debug") = (module, fn_name) {
+                    if let (
+                        eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::Atom(_, "patina_fmt")),
+                        "display" | "debug",
+                    ) = (&module, fn_name)
+                    {
                         return self.translate_format_render(expr, fn_name, &args[0], scope);
                     }
 
-                    let translated_args =
-                        args.iter().map(|arg| self.translate_expr(arg, scope)).collect::<Vec<_>>();
-
-                    afb.expr_remote_call(
-                        expr.span,
-                        afb.expr_atom(callee.span, module),
-                        afb.expr_atom(target_fun_segment.ident.span, fn_name),
-                        translated_args,
-                    )
-                } else {
-                    dcx.span_fatal(
-                        expr.span,
-                        format!("non-extern-mod function calls not yet implemented: {callee:?}"),
-                    );
+                    let fn_atom = afb.expr_atom(last_segment.ident.span, fn_name);
+                    return afb.expr_remote_call(expr.span, module, fn_atom, args_exprs);
                 }
+
+                let callee_expr = self.translate_expr(callee, scope);
+                afb.expr_local_call(expr.span, callee_expr, args_exprs)
             }
 
             ExprKind::Array(elements) => self.afb.expr_list(
@@ -314,6 +314,36 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 expr.span,
                 format!("expression kind {:?} not yet implemented", expr.kind),
             ),
+        }
+    }
+
+    fn translate_qpath(&self, qpath: &QPath<'tcx>, scope: &mut Scope<'arena>) -> eaf::Expr<'arena> {
+        match qpath {
+            QPath::Resolved(_, path) => self.translate_path(path, scope),
+            _ => span_bug!(qpath.span(), "path kind not yet implemented"),
+        }
+    }
+
+    fn translate_path(
+        &self,
+        path: &rustc_hir::Path<'tcx>,
+        scope: &mut Scope<'arena>,
+    ) -> eaf::Expr<'arena> {
+        match path.res {
+            Res::Local(hir_id) => {
+                let var = scope.get_var(hir_id).unwrap_or_else(|| {
+                    span_bug!(path.span, "variable {hir_id:?} not in scope");
+                });
+                let name = self.arena.alloc_str(&format!("_var_{}", var.version));
+                self.afb.expr_var(path.span, name)
+            }
+
+            Res::Def(_kind, def_id) => {
+                let name = self.modules.module_name(def_id);
+                self.afb.expr_atom(path.span, self.arena.alloc_str(name.as_str()))
+            }
+
+            _ => span_bug!(path.span, "path resolution kind {:?} not yet implemented", path.res,),
         }
     }
 
@@ -408,18 +438,6 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         }
     }
 
-    fn mod_name(&self, filename: &Path) -> &'arena str {
-        let dcx = self.tcx.dcx();
-        let mod_name = filename
-            .file_stem()
-            .unwrap_or_else(|| dcx.bug("module filename is not a valid path"))
-            .to_str()
-            .unwrap_or_else(|| dcx.bug("module filename basename is not valid UTF-8"))
-            .to_case(Case::Pascal);
-
-        self.arena.alloc_str(&format!("Elixir.{mod_name}"))
-    }
-
     fn is_exported(&self, fun: &Fn<'tcx>) -> bool {
         match self.tcx.visibility(fun.item.owner_id.def_id) {
             Visibility::Public => true,
@@ -444,11 +462,8 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
 
 pub(super) fn translate(tcx: TyCtxt<'_>, stage: EmitStage, out_dir: &Path) {
     let dcx = tcx.sess.dcx();
-    let source_map = tcx.sess.source_map();
     let arena = DroplessArena::default();
-
-    let afb = EafBuilder::new(source_map);
-    let translator = Translator { tcx, source_map, afb, arena: &arena };
+    let translator = Translator::new(tcx, &arena);
 
     let modules = translator.translate();
 

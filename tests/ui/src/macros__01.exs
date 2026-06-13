@@ -5,6 +5,8 @@ defmodule Hello01Test do
   import ExUnit.CaptureIO
 
   test "main prints Hello!" do
-    assert capture_io(fn -> Macros01.main() end) == "Hello!\n"
+    assert """
+           Hello!
+           """ == capture_io(fn -> Patina.Macros01.main() end)
   end
 end

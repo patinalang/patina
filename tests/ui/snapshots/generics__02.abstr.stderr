@@ -1,8 +1,8 @@
-error: non-extern-mod function calls not yet implemented: Expr { hir_id: HirId(DefId(0:21 ~ rust_out[2361]::main).4), kind: Path(Resolved(None, Path { span: tests/ui/src/generics__02.pt:19:14: 19:20 (#0), res: Def(Ctor(Struct, Fn), DefId(0:15 ~ rust_out[2361]::Single::{constructor#0})), segments: [PathSegment { ident: Single#0, hir_id: HirId(DefId(0:21 ~ rust_out[2361]::main).5), res: Def(Ctor(Struct, Fn), DefId(0:15 ~ rust_out[2361]::Single::{constructor#0})), args: None, infer_args: true }] })), span: tests/ui/src/generics__02.pt:19:14: 19:20 (#0) }
-  --> tests/ui/src/generics__02.pt:19:14
+error: literal kind Char('a') not yet implemented
+  --> tests/ui/src/generics__02.pt:24:44
    |
-LL |     let _s = Single(A);
-   |              ^^^^^^^^^
+LL |     let _char: SingleGen<char> = SingleGen('a');
+   |                                            ^^^
 
 error: aborting due to 1 previous error
 

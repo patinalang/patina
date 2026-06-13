@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, LazyLock, OnceLock};
 use std::{env, fs, iter};
 
+use convert_case::{Case, Casing};
 use rustc_ast::{self as ast, CRATE_NODE_ID};
 use rustc_attr_parsing::{AttributeParser, ShouldEmit};
 use rustc_codegen_ssa::traits::CodegenBackend;
@@ -1310,13 +1311,21 @@ pub fn get_crate_name(sess: &Session, krate_attrs: &[ast::Attribute]) -> Symbol 
         return validate(crate_name, Some(span));
     }
 
-    if let Input::File(ref path) = sess.io.input
+    let path = match &sess.io.input {
+        Input::File(path) => Some(path.clone()),
+        Input::Str { name, .. } => name.clone().into_local_path(),
+    };
+
+    if let Some(path) = path
         && let Some(file_stem) = path.file_stem().and_then(|s| s.to_str())
     {
         if file_stem.starts_with('-') {
             sess.dcx().emit_err(errors::CrateNameInvalid { crate_name: file_stem });
         } else {
-            return validate(Symbol::intern(&file_stem.replace('-', "_")), None);
+            return validate(
+                Symbol::intern(&file_stem.replace('-', "_").to_case(Case::Pascal)),
+                None,
+            );
         }
     }
 

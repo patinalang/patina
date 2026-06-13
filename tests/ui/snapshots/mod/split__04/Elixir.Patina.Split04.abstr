@@ -1,5 +1,5 @@
 -file("tests/ui/src/mod/split__04.pt", 4).
--module('Elixir.Split04').
+-module('Elixir.Patina.Split04').
 -compile([no_auto_import]).
 -export([public_function/0]).
 public_function() ->

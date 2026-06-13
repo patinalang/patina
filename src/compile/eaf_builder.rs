@@ -65,6 +65,16 @@ impl<'sm> EafBuilder<'sm> {
         eaf::Expr::RemoteCall(anno, remote, args)
     }
 
+    pub(crate) fn expr_local_call<'a>(
+        &self,
+        span: Span,
+        func: impl Into<Box<eaf::Expr<'a>>>,
+        args: Vec<eaf::Expr<'a>>,
+    ) -> eaf::Expr<'a> {
+        let anno = self.anno(span);
+        eaf::Expr::LocalCall(anno, func.into(), args)
+    }
+
     /// The empty list `[]`.
     pub(crate) fn expr_nil<'a>(&self, span: Span) -> eaf::Expr<'a> {
         eaf::Expr::Nil { anno: self.anno(span) }

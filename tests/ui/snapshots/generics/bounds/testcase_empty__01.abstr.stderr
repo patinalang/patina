@@ -1,8 +1,0 @@
-error: expression kind Path(Resolved(None, Path { span: tests/ui/src/generics/bounds/testcase_empty__01.pt:20:20: 20:28 (#0), res: Def(Ctor(Struct, Const), DefId(0:13 ~ rust_out[2361]::Cardinal::{constructor#0})), segments: [PathSegment { ident: Cardinal#0, hir_id: HirId(DefId(0:26 ~ rust_out[2361]::main).4), res: Def(Ctor(Struct, Const), DefId(0:13 ~ rust_out[2361]::Cardinal::{constructor#0})), args: None, infer_args: true }] })) not yet implemented
-  --> tests/ui/src/generics/bounds/testcase_empty__01.pt:20:20
-   |
-LL |     let cardinal = Cardinal;
-   |                    ^^^^^^^^
-
-error: aborting due to 1 previous error
-

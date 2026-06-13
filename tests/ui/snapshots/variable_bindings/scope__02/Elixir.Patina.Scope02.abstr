@@ -1,5 +1,5 @@
 -file("tests/ui/src/variable_bindings/scope__02.pt", 4).
--module('Elixir.Scope02').
+-module('Elixir.Patina.Scope02').
 -compile([no_auto_import]).
 -export([main/0]).
 main() ->

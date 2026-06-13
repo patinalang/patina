@@ -44,7 +44,7 @@ LL |     x * y
    |     |
    |     int
 
-error: internal compiler error: rust/compiler/rustc_hir_typeck/src/expr_use_visitor.rs:1424:20: unexpected definition in ExprUseVisitor: Def(ExternMod, DefId(0:8 ~ rust_out[2361]::io))
+error: internal compiler error: rust/compiler/rustc_hir_typeck/src/expr_use_visitor.rs:1424:20: unexpected definition in ExprUseVisitor: Def(ExternMod, DefId(0:8 ~ Parameters02[fc96]::io))
   --> <patina-prelude>:47:25
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
@@ -58,7 +58,7 @@ LL |         println!("fx evaluated!");
    = note: this error: internal compiler error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 
-thread 'rustc' (4024677) panicked at rust/compiler/rustc_hir_typeck/src/expr_use_visitor.rs:1424:20:
+thread 'rustc' (4986951) panicked at rust/compiler/rustc_hir_typeck/src/expr_use_visitor.rs:1424:20:
 Box<dyn Any>
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 error: aborting due to 6 previous errors
