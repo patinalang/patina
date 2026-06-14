@@ -1,10 +1,36 @@
--file("tests/ui/src/custom_types/repr__05.pt", 6).
--module('Elixir.Patina.Repr05').
--compile([no_auto_import]).
--export([main/0]).
-main() ->
-    begin
-        io:put_chars([[io_lib:format("~tp",
-                                     ['Elixir.Patina.Repr05.Celcius':'__struct__'(2.345)])]]),
-        io:nl()
-    end.
+[{attribute,{6,1},file,{"tests/ui/src/custom_types/repr__05.pt",6}},
+ {attribute,{6,1},module,'Elixir.Patina.Repr05'},
+ {attribute,{6,1},compile,[no_auto_import]},
+ {attribute,{6,1},export,[{main,0}]},
+ {function,
+  {8,1},
+  main,0,
+  [{clause,
+    {8,1},
+    [],[],
+    [{block,
+      {9,5},
+      [{call,
+        {9,5},
+        {remote,{9,5},{atom,{9,5},io},{atom,{9,5},put_chars}},
+        [{cons,
+          {9,5},
+          {cons,
+           {9,5},
+           {call,
+            {9,5},
+            {remote,{9,5},{atom,{9,5},io_lib},{atom,{9,5},format}},
+            [{string,{9,5},"~tp"},
+             {cons,
+              {9,5},
+              {call,
+               {9,22},
+               {remote,
+                {9,22},
+                {atom,{9,22},'Elixir.Patina.Repr05.Celcius'},
+                {atom,{9,22},'__struct__'}},
+               [{float,{9,30},2.345}]},
+              {nil,{9,5}}}]},
+           {nil,{9,5}}},
+          {nil,{9,5}}}]},
+       {call,{9,5},{remote,{9,5},{atom,{9,5},io},{atom,{9,5},nl}},[]}]}]}]}]

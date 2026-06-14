@@ -1,0 +1,76 @@
+error[E0433]: cannot find type `Std` in this scope
+  --> tests/ui/src/conversion/try_from_try_into__01.pt:4:5
+   |
+LL | use Std::Convert::TryFrom;
+   |     ^^^ use of undeclared type `Std`
+
+error[E0433]: cannot find type `Std` in this scope
+  --> tests/ui/src/conversion/try_from_try_into__01.pt:5:5
+   |
+LL | use Std::Convert::TryInto;
+   |     ^^^ use of undeclared type `Std`
+
+error: cannot find macro `assert_eq` in this scope
+  --> tests/ui/src/conversion/try_from_try_into__01.pt:33:5
+   |
+LL |     assert_eq!(result, Err(()));
+   |     ^^^^^^^^^
+
+error: cannot find macro `assert_eq` in this scope
+  --> tests/ui/src/conversion/try_from_try_into__01.pt:31:5
+   |
+LL |     assert_eq!(result, Ok(EvenNumber(8)));
+   |     ^^^^^^^^^
+
+error: cannot find macro `assert_eq` in this scope
+  --> tests/ui/src/conversion/try_from_try_into__01.pt:26:5
+   |
+LL |     assert_eq!(EvenNumber::try_from(5), Err(()));
+   |     ^^^^^^^^^
+
+error: cannot find macro `assert_eq` in this scope
+  --> tests/ui/src/conversion/try_from_try_into__01.pt:25:5
+   |
+LL |     assert_eq!(EvenNumber::try_from(8), Ok(EvenNumber(8)));
+   |     ^^^^^^^^^
+
+error: cannot find attribute `derive` in this scope
+  --> tests/ui/src/conversion/try_from_try_into__01.pt:7:3
+   |
+LL | #[derive(Debug, PartialEq)]
+   |   ^^^^^^
+
+error[E0425]: cannot find type `Result` in this scope
+  --> tests/ui/src/conversion/try_from_try_into__01.pt:13:32
+   |
+LL |     fn try_from(value: int) -> Result<Self, Self::Error> {
+   |                                ^^^^^^ not found in this scope
+
+error[E0425]: cannot find type `Result` in this scope
+  --> tests/ui/src/conversion/try_from_try_into__01.pt:30:17
+   |
+LL |     let result: Result<EvenNumber, ()> = 8.try_into();
+   |                 ^^^^^^ not found in this scope
+
+error[E0425]: cannot find type `Result` in this scope
+  --> tests/ui/src/conversion/try_from_try_into__01.pt:32:17
+   |
+LL |     let result: Result<EvenNumber, ()> = 5.try_into();
+   |                 ^^^^^^ not found in this scope
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Ok` in this scope
+  --> tests/ui/src/conversion/try_from_try_into__01.pt:15:13
+   |
+LL |             Ok(EvenNumber(value))
+   |             ^^ not found in this scope
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Err` in this scope
+  --> tests/ui/src/conversion/try_from_try_into__01.pt:17:13
+   |
+LL |             Err(())
+   |             ^^^ not found in this scope
+
+error: aborting due to 12 previous errors
+
+Some errors have detailed explanations: E0425, E0433.
+For more information about an error, try `rustc --explain E0425`.

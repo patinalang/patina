@@ -1,9 +1,31 @@
--file("tests/ui/src/macros__01.pt", 5).
--module('Elixir.Patina.Macros01').
--compile([no_auto_import]).
--export([main/0]).
-main() ->
-    begin
-        io:put_chars([[<<"Hello!">>]]),
-        io:nl()
-    end.
+[{attribute,{5,1},file,{"tests/ui/src/macros__01.pt",5}},
+ {attribute,{5,1},module,'Elixir.Patina.Macros01'},
+ {attribute,{5,1},compile,[no_auto_import]},
+ {attribute,{5,1},export,[{main,0}]},
+ {function,
+     {13,1},
+     main,0,
+     [{clause,
+          {13,1},
+          [],[],
+          [{block,
+               {15,5},
+               [{call,
+                    {15,5},
+                    {remote,{15,5},{atom,{15,5},io},{atom,{15,5},put_chars}},
+                    [{cons,
+                         {15,5},
+                         {cons,
+                             {15,5},
+                             {bin,
+                                 {15,5},
+                                 [{bin_element,
+                                      {15,5},
+                                      {string,{15,5},"Hello!"},
+                                      default,default}]},
+                             {nil,{15,5}}},
+                         {nil,{15,5}}}]},
+                {call,
+                    {15,5},
+                    {remote,{15,5},{atom,{15,5},io},{atom,{15,5},nl}},
+                    []}]}]}]}]

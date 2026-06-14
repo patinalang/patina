@@ -1,0 +1,43 @@
+error[E0369]: cannot add `int` to `int`
+  --> tests/ui/src/macros/designators__01.pt:37:21
+   |
+LL |     print_result!(1 + 1);
+   |                   - ^ - int
+   |                   |
+   |                   int
+
+error[E0369]: cannot multiply `int` by `int`
+  --> tests/ui/src/macros/designators__01.pt:43:11
+   |
+LL |         x * x + 2 * x - 1
+   |         - ^ - int
+   |         |
+   |         int
+
+error[E0369]: cannot multiply `int` by `int`
+  --> tests/ui/src/macros/designators__01.pt:43:19
+   |
+LL |         x * x + 2 * x - 1
+   |                 - ^ - int
+   |                 |
+   |                 int
+
+error[E0369]: cannot add `int` to `int`
+  --> tests/ui/src/macros/designators__01.pt:43:15
+   |
+LL |         x * x + 2 * x - 1
+   |         ----- ^ ----- int
+   |         |
+   |         int
+
+error[E0369]: cannot subtract `int` from `int`
+  --> tests/ui/src/macros/designators__01.pt:43:23
+   |
+LL |         x * x + 2 * x - 1
+   |         ------------- ^ - int
+   |         |
+   |         int
+
+error: aborting due to 5 previous errors
+
+For more information about this error, try `rustc --explain E0369`.

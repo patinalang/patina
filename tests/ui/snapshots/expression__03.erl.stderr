@@ -1,0 +1,43 @@
+error[E0369]: cannot multiply `int` by `int`
+  --> tests/ui/src/expression__03.pt:8:27
+   |
+LL |         let x_squared = x * x;
+   |                         - ^ - int
+   |                         |
+   |                         int
+
+error[E0369]: cannot multiply `int` by `int`
+  --> tests/ui/src/expression__03.pt:9:32
+   |
+LL |         let x_cube = x_squared * x;
+   |                      --------- ^ - int
+   |                      |
+   |                      int
+
+error[E0369]: cannot add `int` to `int`
+  --> tests/ui/src/expression__03.pt:12:16
+   |
+LL |         x_cube + x_squared + x
+   |         ------ ^ --------- int
+   |         |
+   |         int
+
+error[E0369]: cannot add `int` to `int`
+  --> tests/ui/src/expression__03.pt:12:28
+   |
+LL |         x_cube + x_squared + x
+   |         ------------------ ^ - int
+   |         |
+   |         int
+
+error[E0369]: cannot multiply `int` by `int`
+  --> tests/ui/src/expression__03.pt:17:11
+   |
+LL |         2 * x;
+   |         - ^ - int
+   |         |
+   |         int
+
+error: aborting due to 5 previous errors
+
+For more information about this error, try `rustc --explain E0369`.

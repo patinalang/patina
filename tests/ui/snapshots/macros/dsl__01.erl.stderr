@@ -1,0 +1,35 @@
+error[E0369]: cannot add `int` to `int`
+  --> tests/ui/src/macros/dsl__01.pt:15:16
+   |
+LL |         eval 1 + 2 // hehehe `eval` is _not_ a Patina keyword!
+   |              - ^ - int
+   |              |
+   |              int
+
+error[E0369]: cannot add `int` to `int`
+  --> tests/ui/src/macros/dsl__01.pt:19:17
+   |
+LL |         eval (1 + 2) * (3 / 4)
+   |               - ^ - int
+   |               |
+   |               int
+
+error[E0369]: cannot divide `int` by `int`
+  --> tests/ui/src/macros/dsl__01.pt:19:27
+   |
+LL |         eval (1 + 2) * (3 / 4)
+   |                         - ^ - int
+   |                         |
+   |                         int
+
+error[E0369]: cannot multiply `int` by `int`
+  --> tests/ui/src/macros/dsl__01.pt:19:22
+   |
+LL |         eval (1 + 2) * (3 / 4)
+   |              ------- ^ ------- int
+   |              |
+   |              int
+
+error: aborting due to 4 previous errors
+
+For more information about this error, try `rustc --explain E0369`.

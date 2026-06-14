@@ -1,0 +1,15 @@
+error[E0599]: no method named `parse` found for type `str` in the current scope
+  --> tests/ui/src/error/result__01.pt:6:41
+   |
+LL |     let first_number = first_number_str.parse::<int>().unwrap();
+   |                                         ^^^^^ method not found in `str`
+
+error[E0599]: no method named `parse` found for type `str` in the current scope
+  --> tests/ui/src/error/result__01.pt:7:43
+   |
+LL |     let second_number = second_number_str.parse::<int>().unwrap();
+   |                                           ^^^^^ method not found in `str`
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0599`.

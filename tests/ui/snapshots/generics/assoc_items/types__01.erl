@@ -1,0 +1,4 @@
+-file("tests/ui/src/generics/assoc_items/types__01.pt", 7).
+-module('Elixir.Patina.Types01').
+-compile([no_auto_import]).
+-export([]).

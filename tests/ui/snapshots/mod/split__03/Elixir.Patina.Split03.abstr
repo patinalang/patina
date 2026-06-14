@@ -1,14 +1,55 @@
--file("tests/ui/src/mod/split__03.pt", 4).
--module('Elixir.Patina.Split03').
--compile([no_auto_import]).
--export([function/0]).
-function() ->
-    begin
-        io:put_chars([[<<"called `MyMod::Nested::function()`">>]]),
-        io:nl()
-    end.
-private_function() ->
-    begin
-        io:put_chars([[<<"called `MyMod::Nested::private_function()`">>]]),
-        io:nl()
-    end.
+[{attribute,{4,1},file,{"tests/ui/src/mod/split__03.pt",4}},
+ {attribute,{4,1},module,'Elixir.Patina.Split03'},
+ {attribute,{4,1},compile,[no_auto_import]},
+ {attribute,{4,1},export,[{function,0}]},
+ {function,
+  {4,1},
+  function,0,
+  [{clause,
+    {4,1},
+    [],[],
+    [{block,
+      {5,5},
+      [{call,
+        {5,5},
+        {remote,{5,5},{atom,{5,5},io},{atom,{5,5},put_chars}},
+        [{cons,
+          {5,5},
+          {cons,
+           {5,5},
+           {bin,
+            {5,5},
+            [{bin_element,
+              {5,5},
+              {string,{5,5},"called `MyMod::Nested::function()`"},
+              default,default}]},
+           {nil,{5,5}}},
+          {nil,{5,5}}}]},
+       {call,{5,5},{remote,{5,5},{atom,{5,5},io},{atom,{5,5},nl}},[]}]}]}]},
+ {function,
+  {9,1},
+  private_function,0,
+  [{clause,
+    {9,1},
+    [],[],
+    [{block,
+      {10,5},
+      [{call,
+        {10,5},
+        {remote,{10,5},{atom,{10,5},io},{atom,{10,5},put_chars}},
+        [{cons,
+          {10,5},
+          {cons,
+           {10,5},
+           {bin,
+            {10,5},
+            [{bin_element,
+              {10,5},
+              {string,{10,5},"called `MyMod::Nested::private_function()`"},
+              default,default}]},
+           {nil,{10,5}}},
+          {nil,{10,5}}}]},
+       {call,
+        {10,5},
+        {remote,{10,5},{atom,{10,5},io},{atom,{10,5},nl}},
+        []}]}]}]}]

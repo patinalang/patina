@@ -1,0 +1,6 @@
+-file("tests/ui/src/mod/extern_mod_unused__01.pt", 1).
+-module('Elixir.Patina.ExternModUnused01').
+-compile([no_auto_import]).
+-export([main/0]).
+main() ->
+    used:ping().

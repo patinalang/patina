@@ -1,0 +1,21 @@
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__04.pt:4:8
+   |
+LL | #[repr(tagged, style = "snake_case")]
+   |        ^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__04.pt:4:16
+   |
+LL | #[repr(tagged, style = "snake_case")]
+   |                ^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0552`.

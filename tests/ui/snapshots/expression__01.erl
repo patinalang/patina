@@ -1,0 +1,5 @@
+-file("tests/ui/src/expression__01.pt", 4).
+-module('Elixir.Patina.Expression01').
+-compile([no_auto_import]).
+-export([main/0]).
+main() ->.

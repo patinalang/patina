@@ -1,0 +1,34 @@
+error: cannot find macro `assert_eq` in this scope
+  --> tests/ui/src/flow_control/loop/return__01.pt:15:5
+   |
+LL |     assert_eq!(result, 20);
+   |     ^^^^^^^^^
+
+error[E0368]: binary assignment operation `+=` cannot be applied to type `int`
+  --> tests/ui/src/flow_control/loop/return__01.pt:8:9
+   |
+LL |         counter += 1;
+   |         -------^^^^^
+   |         |
+   |         cannot use `+=` on type `int`
+
+error[E0369]: binary operation `==` cannot be applied to type `int`
+  --> tests/ui/src/flow_control/loop/return__01.pt:10:20
+   |
+LL |         if counter == 10 {
+   |            ------- ^^ -- int
+   |            |
+   |            int
+
+error[E0369]: cannot multiply `int` by `int`
+  --> tests/ui/src/flow_control/loop/return__01.pt:11:27
+   |
+LL |             break counter * 2;
+   |                   ------- ^ - int
+   |                   |
+   |                   int
+
+error: aborting due to 4 previous errors
+
+Some errors have detailed explanations: E0368, E0369.
+For more information about an error, try `rustc --explain E0368`.

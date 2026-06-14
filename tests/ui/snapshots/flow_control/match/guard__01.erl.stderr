@@ -1,0 +1,19 @@
+error[E0369]: binary operation `>` cannot be applied to type `int`
+  --> tests/ui/src/flow_control/match/guard__01.pt:15:38
+   |
+LL |         Temperature::Celsius(t) if t > 30 => println!("{}C is above 30 Celsius", t),
+   |                                    - ^ -- int
+   |                                    |
+   |                                    int
+
+error[E0369]: binary operation `>` cannot be applied to type `int`
+  --> tests/ui/src/flow_control/match/guard__01.pt:19:41
+   |
+LL |         Temperature::Fahrenheit(t) if t > 86 => println!("{}F is above 86 Fahrenheit", t),
+   |                                       - ^ -- int
+   |                                       |
+   |                                       int
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0369`.

@@ -1,0 +1,20 @@
+error[E0369]: binary operation `>` cannot be applied to type `int`
+  --> tests/ui/src/custom_types/constants__01.pt:9:7
+   |
+LL |     n > THRESHOLD
+   |     - ^ --------- int
+   |     |
+   |     int
+
+error[E0070]: invalid left-hand side of assignment
+  --> tests/ui/src/custom_types/constants__01.pt:19:15
+   |
+LL |     THRESHOLD = 5;
+   |     --------- ^
+   |     |
+   |     cannot assign to this expression
+
+error: aborting due to 2 previous errors
+
+Some errors have detailed explanations: E0070, E0369.
+For more information about an error, try `rustc --explain E0070`.

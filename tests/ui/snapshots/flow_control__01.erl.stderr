@@ -1,0 +1,11 @@
+error[E0369]: binary operation `>` cannot be applied to type `int`
+  --> tests/ui/src/flow_control__01.pt:8:10
+   |
+LL |     if n > 4 {
+   |        - ^ - int
+   |        |
+   |        int
+
+error: aborting due to 1 previous error
+
+For more information about this error, try `rustc --explain E0369`.

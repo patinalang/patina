@@ -1,0 +1,17 @@
+error: expected `;`, found `println`
+  --> tests/ui/src/types/inference__01.pt:14:24
+   |
+LL |     lst = [elem, ..lst]
+   |                        ^ help: add `;` here
+LL |     // Aha! Now the compiler knows that `lst` is a list of `int`s (`[int]`)
+LL |     println!("{:?}", lst);
+   |     ------- unexpected token
+
+error: requires `RangeTo` lang_item
+  --> tests/ui/src/types/inference__01.pt:19:18
+   |
+LL |     lst = ["hi", ..lst]
+   |                  ^^^^^
+
+error: aborting due to 2 previous errors
+

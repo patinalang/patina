@@ -33,12 +33,20 @@ pub enum Phase {
     Expanded,
     Typed,
     Abstr,
+    Erl,
     Beam,
 }
 
 impl Phase {
-    pub const ALL: &'static [Phase] =
-        &[Phase::Tokens, Phase::Ast, Phase::Expanded, Phase::Typed, Phase::Abstr, Phase::Beam];
+    pub const ALL: &'static [Phase] = &[
+        Phase::Tokens,
+        Phase::Ast,
+        Phase::Expanded,
+        Phase::Typed,
+        Phase::Abstr,
+        Phase::Erl,
+        Phase::Beam,
+    ];
 
     pub fn name(self) -> &'static str {
         match self {
@@ -47,6 +55,7 @@ impl Phase {
             Phase::Expanded => "expanded",
             Phase::Typed => "typed",
             Phase::Abstr => "abstr",
+            Phase::Erl => "erl",
             Phase::Beam => "beam",
         }
     }

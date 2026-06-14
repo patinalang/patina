@@ -1,0 +1,8 @@
+error: literal kind not yet implemented: Char('a')
+  --> tests/ui/src/generics__02.pt:24:44
+   |
+LL |     let _char: SingleGen<char> = SingleGen('a');
+   |                                            ^^^
+
+error: aborting due to 1 previous error
+

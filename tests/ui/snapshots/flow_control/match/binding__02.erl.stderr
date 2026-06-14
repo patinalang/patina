@@ -1,0 +1,28 @@
+error[E0425]: cannot find type `Option` in this scope
+  --> tests/ui/src/flow_control/match/binding__02.pt:4:21
+   |
+LL | fn some_number() -> Option<int> {
+   |                     ^^^^^^ not found in this scope
+
+error[E0531]: cannot find tuple struct or tuple variant `Some` in this scope
+  --> tests/ui/src/flow_control/match/binding__02.pt:19:9
+   |
+LL |         Some(n @ 42) => println!("The Answer: {}!", n),
+   |         ^^^^ not found in this scope
+
+error[E0531]: cannot find tuple struct or tuple variant `Some` in this scope
+  --> tests/ui/src/flow_control/match/binding__02.pt:21:9
+   |
+LL |         Some(n)      => println!("Not interesting... {}", n),
+   |         ^^^^ not found in this scope
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
+  --> tests/ui/src/flow_control/match/binding__02.pt:5:5
+   |
+LL |     Some(42)
+   |     ^^^^ not found in this scope
+
+error: aborting due to 4 previous errors
+
+Some errors have detailed explanations: E0425, E0531.
+For more information about an error, try `rustc --explain E0425`.

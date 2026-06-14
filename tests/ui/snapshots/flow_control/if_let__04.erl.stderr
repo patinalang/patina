@@ -1,0 +1,11 @@
+error[E0369]: binary operation `==` cannot be applied to type `Foo`
+  --> tests/ui/src/flow_control/if_let__04.pt:12:17
+   |
+LL |     if Foo::Bar == a {
+   |        -------- ^^ - Foo
+   |        |
+   |        Foo
+
+error: aborting due to 1 previous error
+
+For more information about this error, try `rustc --explain E0369`.

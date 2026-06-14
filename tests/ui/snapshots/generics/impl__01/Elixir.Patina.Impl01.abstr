@@ -1,4 +1,4 @@
--file("tests/ui/src/generics/impl__01.pt", 4).
--module('Elixir.Patina.Impl01').
--compile([no_auto_import]).
--export([]).
+[{attribute,{4,1},file,{"tests/ui/src/generics/impl__01.pt",4}},
+ {attribute,{4,1},module,'Elixir.Patina.Impl01'},
+ {attribute,{4,1},compile,[no_auto_import]},
+ {attribute,{4,1},export,[]}]

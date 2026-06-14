@@ -15,6 +15,7 @@ pub(crate) enum DumpStage {
     Ast,
     Expanded,
     Typed,
+    Erl,
 }
 
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]

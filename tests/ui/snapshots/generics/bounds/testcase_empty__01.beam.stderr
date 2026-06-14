@@ -1,14 +1,13 @@
-error: erl backend failed: Error! Failed to eval: [InputFilename, OutputFilename] = init:get_plain_arguments(),
-       {ok, Bin} = file:read_file(InputFilename),
-       Forms = binary_to_term(Bin),
-       {ok, _Mod, Beam} = compile:noenv_forms(Forms, []),
-       ok = file:write_file(OutputFilename, Beam),
-       erlang:halt()␍
-       ␍
-       Runtime terminating during boot ({{badmatch,error},[{erl_eval,expr,6,[{file,"erl_eval.erl"},{line,796}]},{erl_eval,exprs,6,[{file,"erl_eval.erl"},{line,276}]},{init,start_it,1,[]},{init,start_em,1,[]},{init,do_boot,3,[]}]})␍
-       ␍
-       Crash dump is being written to: erl_crash.dump...done␍
-       
+error: erl backend failed: [{"tests/ui/src/generics/bounds/testcase_empty__01.pt",
+         [{{26,34},
+           erl_lint,
+           {undefined_function,{'Elixir.Patina.TestcaseEmpty01.red',1}}},
+          {{27,34},
+           erl_lint,
+           {undefined_function,{'Elixir.Patina.TestcaseEmpty01.blue',1}}}]}]
+       [{"tests/ui/src/generics/bounds/testcase_empty__01.pt",
+         [{{16,1},erl_lint,{unused_function,{red,1}}},
+          {{17,1},erl_lint,{unused_function,{blue,1}}}]}]
 
 error: aborting due to 1 previous error
 

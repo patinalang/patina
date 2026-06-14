@@ -1,3 +1,4 @@
+mod compile_server;
 mod eaf_builder;
 mod module_collector;
 mod translate;
@@ -22,7 +23,7 @@ use rustc_span::edition::Edition;
 use rustc_span::source_map::FilePathMapping;
 use rustc_span::{ErrorGuaranteed, FileName, RealFileName};
 
-use crate::{DumpStage, Stage};
+use crate::{DumpStage, EmitStage, Stage};
 
 static INTERNAL_FEATURES: AtomicBool = AtomicBool::new(false);
 
@@ -169,13 +170,23 @@ pub(crate) fn compile(stage: Stage, filename: &Path, src: &str, out_dir: &Path) 
                 ))
             })
         }
+        Stage::Dump(DumpStage::Erl) => {
+            with_compiler_global_ctxt(config, PRELUDE, |_compiler, tcx| {
+                run_body_checks(tcx);
+                if let Some(guar) = tcx.sess.dcx().has_errors_or_delayed_bugs() {
+                    guar.raise_fatal();
+                }
+
+                translate::translate(tcx, translate::TranslateStage::Erl, out_dir)
+            })
+        }
         Stage::Emit(emit_stage) => with_compiler_global_ctxt(config, PRELUDE, |_compiler, tcx| {
             run_body_checks(tcx);
             if let Some(guar) = tcx.sess.dcx().has_errors_or_delayed_bugs() {
                 guar.raise_fatal();
             }
 
-            translate::translate(tcx, emit_stage, out_dir);
+            translate::translate(tcx, emit_stage.into(), out_dir);
             None
         }),
     };
@@ -273,6 +284,16 @@ where
     with_compiler(config, prelude, |compiler, krate| {
         passes::create_and_enter_global_ctxt(compiler, krate, |tcx| f(compiler, tcx))
     })
+}
+
+impl From<EmitStage> for translate::TranslateStage {
+    fn from(stage: EmitStage) -> Self {
+        match stage {
+            EmitStage::Eaf => Self::Eaf,
+            EmitStage::Abstr => Self::Abstr,
+            EmitStage::Beam => Self::Beam,
+        }
+    }
 }
 
 fn run_body_checks(tcx: TyCtxt<'_>) {

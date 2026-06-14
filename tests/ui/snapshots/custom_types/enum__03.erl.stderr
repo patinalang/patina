@@ -1,0 +1,19 @@
+error[E0369]: cannot add `int` to `int`
+  --> tests/ui/src/custom_types/enum__03.pt:12:28
+   |
+LL |             Self::Add => x + y,
+   |                          - ^ - int
+   |                          |
+   |                          int
+
+error[E0369]: cannot subtract `int` from `int`
+  --> tests/ui/src/custom_types/enum__03.pt:13:33
+   |
+LL |             Self::Subtract => x - y,
+   |                               - ^ - int
+   |                               |
+   |                               int
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0369`.

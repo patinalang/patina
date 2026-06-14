@@ -1,0 +1,87 @@
+error: expected one of `,`, `:`, or `}`, found `(`
+  --> tests/ui/src/flow_control/receive/unsafe_receive__01.pt:7:16
+   |
+LL |         receive {
+   |         ------- while parsing this struct
+LL |             int(n) => println!("got integer {:?}", n),
+   |             ---^ expected one of `,`, `:`, or `}`
+   |             |
+   |             while parsing this struct field
+   |
+help: try naming a field
+   |
+LL |             int: int(n) => println!("got integer {:?}", n),
+   |             ++++
+
+error: expected one of `,`, `:`, or `}`, found `)`
+  --> tests/ui/src/flow_control/receive/unsafe_receive__01.pt:7:53
+   |
+LL |         receive {
+   |         ------- while parsing this struct
+LL |             int(n) => println!("got integer {:?}", n),
+   |                                                     ^ expected one of `,`, `:`, or `}`
+
+error: expected one of `,`, `:`, or `}`, found `(`
+  --> tests/ui/src/flow_control/receive/unsafe_receive__01.pt:8:17
+   |
+LL |         receive {
+   |         ------- while parsing this struct
+LL |             int(n) => println!("got integer {:?}", n),
+LL |             atom(a) => println!("got atom {:?}", a),
+   |             ----^ expected one of `,`, `:`, or `}`
+   |             |
+   |             while parsing this struct field
+   |
+help: try naming a field
+   |
+LL |             atom: atom(a) => println!("got atom {:?}", a),
+   |             +++++
+
+error: expected one of `,`, `:`, or `}`, found `)`
+  --> tests/ui/src/flow_control/receive/unsafe_receive__01.pt:8:51
+   |
+LL |         receive {
+   |         ------- while parsing this struct
+LL |             int(n) => println!("got integer {:?}", n),
+LL |             atom(a) => println!("got atom {:?}", a),
+   |                                                   ^ expected one of `,`, `:`, or `}`
+
+error: expected one of `,`, `:`, or `}`, found `::`
+  --> tests/ui/src/flow_control/receive/unsafe_receive__01.pt:9:19
+   |
+LL |         receive {
+   |         ------- while parsing this struct
+...
+LL |             Option::<str>::None => println!("got an empty string option"),
+   |             ------^^ expected one of `,`, `:`, or `}`
+   |             |
+   |             while parsing this struct field
+
+error: expected one of `,`, `:`, or `}`, found `::`
+  --> tests/ui/src/flow_control/receive/unsafe_receive__01.pt:10:19
+   |
+LL |         receive {
+   |         ------- while parsing this struct
+...
+LL |             Option::<int>::None => println!("got an empty integer option"),
+   |             ------^^ expected one of `,`, `:`, or `}`
+   |             |
+   |             while parsing this struct field
+
+error: expected identifier, found reserved identifier `_`
+  --> tests/ui/src/flow_control/receive/unsafe_receive__01.pt:11:13
+   |
+LL |         receive {
+   |         ------- while parsing this struct
+...
+LL |             _ => println!("got something else"),
+   |             ^ expected identifier, found reserved identifier
+
+error: expected one of `.`, `;`, `?`, `}`, or an operator, found `timeout`
+  --> tests/ui/src/flow_control/receive/unsafe_receive__01.pt:12:11
+   |
+LL |         } timeout Duration::from_seconds(5) {
+   |           ^^^^^^^ expected one of `.`, `;`, `?`, `}`, or an operator
+
+error: aborting due to 8 previous errors
+

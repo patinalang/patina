@@ -1,0 +1,27 @@
+error[E0369]: binary operation `==` cannot be applied to type `int`
+  --> tests/ui/src/generics/assoc_items/types__03.pt:27:17
+   |
+LL |         (self.0 == number_1) && (self.1 == number_2)
+   |          ------ ^^ -------- int
+   |          |
+   |          int
+
+error[E0369]: binary operation `==` cannot be applied to type `int`
+  --> tests/ui/src/generics/assoc_items/types__03.pt:27:41
+   |
+LL |         (self.0 == number_1) && (self.1 == number_2)
+   |                                  ------ ^^ -------- int
+   |                                  |
+   |                                  int
+
+error[E0369]: cannot subtract `int` from `int`
+  --> tests/ui/src/generics/assoc_items/types__03.pt:37:22
+   |
+LL |     container.last() - container.first()
+   |     ---------------- ^ ----------------- int
+   |     |
+   |     int
+
+error: aborting due to 3 previous errors
+
+For more information about this error, try `rustc --explain E0369`.

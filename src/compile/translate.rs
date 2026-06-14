@@ -1,14 +1,11 @@
 use std::fs::File;
 use std::io::Write as IoWrite;
 use std::path::{Path, PathBuf};
-use std::process::Command;
-use std::sync::atomic::{AtomicUsize, Ordering};
 
 use rustc_arena::DroplessArena;
 use rustc_ast::{BindingMode, LitKind};
 use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::smallvec::SmallVec;
-use rustc_errors::DiagCtxtHandle;
 use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::LocalModDefId;
 use rustc_hir::{
@@ -18,25 +15,11 @@ use rustc_hir::{
 use rustc_middle::ty::{TyCtxt, Visibility};
 use rustc_span::{Ident, Span, Symbol, kw, sym};
 
+use crate::compile::compile_server::CompileServer;
 use crate::compile::eaf_builder::EafBuilder;
 use crate::compile::module_collector::ModuleNameCollector;
+use crate::erlang;
 use crate::erlang::abstract_format as eaf;
-use crate::{EmitStage, erlang};
-
-const COMPILE_ERL_CODE: &str = "\
-[InputFilename, OutputFilename] = init:get_plain_arguments(),
-{ok, Bin} = file:read_file(InputFilename),
-Forms = binary_to_term(Bin),
-{ok, _Mod, Beam} = compile:noenv_forms(Forms, []),
-ok = file:write_file(OutputFilename, Beam),
-erlang:halt()";
-
-const RENDER_ABSTR_ERL_CODE: &str = "\
-[F] = init:get_plain_arguments(),
-{ok,Bin} = file:read_file(F),
-Forms = binary_to_term(Bin),
-io:put_chars([erl_pp:form(Fm) || Fm <- Forms]),
-erlang:halt()";
 
 macro_rules! span_fatal {
     ($tcx:expr, $span:expr, $($arg:tt)*) => {
@@ -48,73 +31,6 @@ macro_rules! not_implemented {
     ($tcx:expr, $span:expr, $name:literal, $kind:expr) => {
         span_fatal!($tcx, $span, "{} not yet implemented: {:?}", $name, $kind)
     };
-}
-
-fn compile_beam(
-    dcx: DiagCtxtHandle<'_>,
-    out_dir: &Path,
-    module_name: &str,
-    data: &[u8],
-) -> PathBuf {
-    let abstract_filename = out_dir.join(format!("{module_name}.eaf"));
-    let beam_filename = out_dir.join(format!("{module_name}.beam"));
-
-    let mut file = File::create(&abstract_filename).unwrap_or_else(|e| {
-        dcx.fatal(format!("failed to create file: {e}"));
-    });
-    file.write_all(data).unwrap_or_else(|e| {
-        dcx.fatal(format!("failed to write file: {e}"));
-    });
-
-    let output = Command::new("erl")
-        .args(["-noshell", "-eval", COMPILE_ERL_CODE, "-extra"])
-        .arg(&abstract_filename)
-        .arg(&beam_filename)
-        .output()
-        .unwrap_or_else(|e| {
-            dcx.fatal(format!("failed to run erl: {e}"));
-        });
-
-    if output.status.success() {
-        beam_filename
-    } else {
-        dcx.fatal(format!("erl backend failed: {}", String::from_utf8_lossy(&output.stderr)));
-    }
-}
-
-static RENDER_ABSTR_COUNTER: AtomicUsize = AtomicUsize::new(0);
-
-fn render_abstr(dcx: DiagCtxtHandle<'_>, eaf_bytes: &[u8]) -> String {
-    let counter = RENDER_ABSTR_COUNTER.fetch_add(1, Ordering::Relaxed);
-    let scratch = std::env::temp_dir().join(format!(
-        "patina-render-abstr-{}-{}.eaf",
-        std::process::id(),
-        counter
-    ));
-    let mut file = File::create(&scratch).unwrap_or_else(|e| {
-        dcx.fatal(format!("failed to write file: {e}"));
-    });
-    file.write_all(eaf_bytes).unwrap_or_else(|e| {
-        dcx.fatal(format!("failed to write file: {e}"));
-    });
-
-    let output = Command::new("erl")
-        .args(["-noshell", "-eval", RENDER_ABSTR_ERL_CODE, "-extra"])
-        .arg(&scratch)
-        .output()
-        .unwrap_or_else(|e| {
-            dcx.fatal(format!("failed to run erl: {e}"));
-        });
-
-    let _ = std::fs::remove_file(&scratch);
-
-    if output.status.success() {
-        String::from_utf8(output.stdout).unwrap_or_else(|e| {
-            dcx.fatal(format!("erl output was not valid UTF-8: {e}"));
-        })
-    } else {
-        dcx.fatal(format!("erl backend failed: {}", String::from_utf8_lossy(&output.stderr)));
-    }
 }
 
 #[allow(unused)]
@@ -538,7 +454,14 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
     }
 }
 
-pub(super) fn translate(tcx: TyCtxt<'_>, stage: EmitStage, out_dir: &Path) {
+pub(super) enum TranslateStage {
+    Eaf,
+    Abstr,
+    Erl,
+    Beam,
+}
+
+pub(super) fn translate(tcx: TyCtxt<'_>, stage: TranslateStage, out_dir: &Path) -> Option<String> {
     let dcx = tcx.sess.dcx();
     let arena = DroplessArena::default();
     let translator = Translator::new(tcx, &arena);
@@ -546,7 +469,7 @@ pub(super) fn translate(tcx: TyCtxt<'_>, stage: EmitStage, out_dir: &Path) {
     let modules = translator.translate();
 
     match stage {
-        EmitStage::Eaf => {
+        TranslateStage::Eaf => {
             for (mod_name, module) in &modules {
                 let bytes = erlang::to_bytes(module).unwrap_or_else(|e| {
                     dcx.fatal(format!("failed to serialize module: {e}"));
@@ -559,13 +482,15 @@ pub(super) fn translate(tcx: TyCtxt<'_>, stage: EmitStage, out_dir: &Path) {
                     dcx.fatal(format!("failed to write file: {e}"));
                 });
             }
+            None
         }
-        EmitStage::Abstr => {
+        TranslateStage::Abstr => {
+            let mut server = CompileServer::start(dcx);
             for (mod_name, module) in &modules {
                 let bytes = erlang::to_bytes(module).unwrap_or_else(|e| {
                     dcx.fatal(format!("failed to serialize module: {e}"));
                 });
-                let mut rendered = render_abstr(dcx, &bytes);
+                let mut rendered = server.render_abstr(&bytes);
                 if !rendered.ends_with('\n') {
                     rendered.push('\n');
                 }
@@ -577,14 +502,47 @@ pub(super) fn translate(tcx: TyCtxt<'_>, stage: EmitStage, out_dir: &Path) {
                     dcx.fatal(format!("failed to write file: {e}"));
                 });
             }
+            None
         }
-        EmitStage::Beam => {
+        TranslateStage::Erl => {
+            let mut server = CompileServer::start(dcx);
+            let mut rendered = String::new();
+            for (_, module) in &modules {
+                let bytes = erlang::to_bytes(module).unwrap_or_else(|e| {
+                    dcx.fatal(format!("failed to serialize module: {e}"));
+                });
+                if !rendered.is_empty() {
+                    rendered.push('\n');
+                }
+                rendered.push_str(&server.render_erl(&bytes));
+            }
+            Some(rendered)
+        }
+        TranslateStage::Beam => {
+            let mut server = CompileServer::start(dcx);
             for (mod_name, module) in &modules {
                 let bytes = erlang::to_bytes(module).unwrap_or_else(|e| {
                     dcx.fatal(format!("failed to serialize module: {e}"));
                 });
-                let _beam_path = compile_beam(dcx, out_dir, mod_name.as_str(), &bytes);
+                match server.compile(&bytes) {
+                    Ok(ok) => {
+                        if !ok.warnings.is_empty() && ok.warnings != "[]" {
+                            dcx.warn(ok.warnings);
+                        }
+                        let beam_path = out_dir.join(format!("{mod_name}.beam"));
+                        let mut file = File::create(&beam_path).unwrap_or_else(|e| {
+                            dcx.fatal(format!("failed to write file: {e}"));
+                        });
+                        file.write_all(&ok.beam).unwrap_or_else(|e| {
+                            dcx.fatal(format!("failed to write file: {e}"));
+                        });
+                    }
+                    Err(err) => {
+                        dcx.fatal(format!("erl backend failed: {}\n{}", err.errors, err.warnings));
+                    }
+                }
             }
+            None
         }
     }
 }

@@ -1,0 +1,17 @@
+error[E0600]: cannot apply unary operator `-` to type `int`
+  --> tests/ui/src/flow_control/match/destructuring/destructure_list__01.pt:6:20
+   |
+LL |     let list = [1, -2, 6];
+   |                    ^^ cannot apply unary operator `-`
+   |
+   = note: unsigned values cannot be negated
+
+error: requires `neg` lang_item
+  --> tests/ui/src/flow_control/match/destructuring/destructure_list__01.pt:20:10
+   |
+LL |         [-1, second, ..] => println!(
+   |          ^^
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0600`.

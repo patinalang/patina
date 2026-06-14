@@ -1,0 +1,24 @@
+error[E0433]: cannot find type `Std` in this scope
+  --> tests/ui/src/generics/bounds__03.pt:5:5
+   |
+LL | use Std::Fmt::Debug;
+   |     ^^^ use of undeclared type `Std`
+
+error: cannot find attribute `derive` in this scope
+  --> tests/ui/src/generics/bounds__03.pt:15:3
+   |
+LL | #[derive(Debug)]
+   |   ^^^^^^
+
+error[E0369]: cannot multiply `float` by `float`
+  --> tests/ui/src/generics/bounds__03.pt:12:42
+   |
+LL |     fn area(self) -> float { self.length * self.height }
+   |                              ----------- ^ ----------- float
+   |                              |
+   |                              float
+
+error: aborting due to 3 previous errors
+
+Some errors have detailed explanations: E0369, E0433.
+For more information about an error, try `rustc --explain E0369`.

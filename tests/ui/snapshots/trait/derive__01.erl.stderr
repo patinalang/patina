@@ -1,0 +1,31 @@
+error: cannot find attribute `derive` in this scope
+  --> tests/ui/src/trait/derive__01.pt:5:3
+   |
+LL | #[derive(PartialEq, PartialOrd)]
+   |   ^^^^^^
+
+error: cannot find attribute `derive` in this scope
+  --> tests/ui/src/trait/derive__01.pt:9:3
+   |
+LL | #[derive(Debug)]
+   |   ^^^^^^
+
+error[E0369]: cannot multiply `float` by `float`
+  --> tests/ui/src/trait/derive__01.pt:16:37
+   |
+LL |         Centimeters(inches as float * 2.54)
+   |                     --------------- ^ ---- float
+   |                     |
+   |                     float
+
+error[E0369]: binary operation `<` cannot be applied to type `Centimeters`
+  --> tests/ui/src/trait/derive__01.pt:41:34
+   |
+LL |         if foot.to_centimeters() < meter {
+   |            --------------------- ^ ----- Centimeters
+   |            |
+   |            Centimeters
+
+error: aborting due to 4 previous errors
+
+For more information about this error, try `rustc --explain E0369`.

@@ -1,0 +1,26 @@
+-file("tests/ui/src/format_args__01.pt", 4).
+-module('Elixir.Patina.FormatArgs01').
+-compile([no_auto_import]).
+-export([main/0]).
+main() ->
+    _var_0 = <<"world">>,
+    _var_1 = 42,
+    begin
+        io:put_chars([[<<"hello, ">>, _var_0, <<"!">>]]),
+        io:nl()
+    end,
+    begin
+        io:put_chars([[_var_0,
+                       <<" = ">>,
+                       io_lib:format("~tp", [_var_1])]]),
+        io:nl()
+    end,
+    begin
+        io:put_chars([[_var_0,
+                       <<" and ">>,
+                       io_lib:format("~tp", [_var_1])]]),
+        io:nl()
+    end,
+    begin io:put_chars([<<"no ">>]) end,
+    begin io:put_chars([<<"newline">>]) end,
+    begin io:nl() end.

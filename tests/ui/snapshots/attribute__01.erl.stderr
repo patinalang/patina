@@ -1,0 +1,12 @@
+error: expected item after attributes
+  --> tests/ui/src/attribute__01.pt:7:1
+   |
+LL |   #[attribute(value, value2)]
+   |   --------------------------- other attributes here
+...
+LL | / #[attribute(value, value2, value3,
+LL | |             value4, value5)]
+   | |____________________________^
+
+error: aborting due to 1 previous error
+

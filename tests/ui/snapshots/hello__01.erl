@@ -1,0 +1,9 @@
+-file("tests/ui/src/hello__01.pt", 15).
+-module('Elixir.Patina.Hello01').
+-compile([no_auto_import]).
+-export([main/0]).
+main() ->
+    begin
+        io:put_chars([[<<"Hello World!">>]]),
+        io:nl()
+    end.

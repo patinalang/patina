@@ -1,0 +1,15 @@
+error[E0432]: unresolved import `Std`
+  --> tests/ui/src/conversion/string__01.pt:4:5
+   |
+LL | use Std::Fmt;
+   |     ^^^ use of undeclared type `Std`
+
+error: cannot find macro `write` in this scope
+  --> tests/ui/src/conversion/string__01.pt:12:9
+   |
+LL |         write!(f, "Circle of radius {}", self.radius)
+   |         ^^^^^
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0432`.

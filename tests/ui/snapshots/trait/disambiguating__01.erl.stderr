@@ -1,0 +1,14 @@
+error: cannot find macro `assert_eq` in this scope
+  --> tests/ui/src/trait/disambiguating__01.pt:46:5
+   |
+LL |     assert_eq!(28, age);
+   |     ^^^^^^^^^
+
+error: cannot find macro `assert_eq` in this scope
+  --> tests/ui/src/trait/disambiguating__01.pt:44:5
+   |
+LL |     assert_eq!("rustacean", username);
+   |     ^^^^^^^^^
+
+error: aborting due to 2 previous errors
+

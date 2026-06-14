@@ -1,9 +1,31 @@
--file("tests/ui/src/hello__01.pt", 15).
--module('Elixir.Patina.Hello01').
--compile([no_auto_import]).
--export([main/0]).
-main() ->
-    begin
-        io:put_chars([[<<"Hello World!">>]]),
-        io:nl()
-    end.
+[{attribute,{15,1},file,{"tests/ui/src/hello__01.pt",15}},
+ {attribute,{15,1},module,'Elixir.Patina.Hello01'},
+ {attribute,{15,1},compile,[no_auto_import]},
+ {attribute,{15,1},export,[{main,0}]},
+ {function,
+     {15,1},
+     main,0,
+     [{clause,
+          {15,1},
+          [],[],
+          [{block,
+               {19,5},
+               [{call,
+                    {19,5},
+                    {remote,{19,5},{atom,{19,5},io},{atom,{19,5},put_chars}},
+                    [{cons,
+                         {19,5},
+                         {cons,
+                             {19,5},
+                             {bin,
+                                 {19,5},
+                                 [{bin_element,
+                                      {19,5},
+                                      {string,{19,5},"Hello World!"},
+                                      default,default}]},
+                             {nil,{19,5}}},
+                         {nil,{19,5}}}]},
+                {call,
+                    {19,5},
+                    {remote,{19,5},{atom,{19,5},io},{atom,{19,5},nl}},
+                    []}]}]}]}]
