@@ -4,12 +4,6 @@ error[E0599]: no method named `first` found for slice `[str]` in the current sco
 LL |     let first = list.first().unwrap(); // Generate error 1
    |                      ^^^^^ method not found in `[str]`
 
-error: internal compiler error: rust/compiler/rustc_middle/src/ty/consts/int.rs:281:13: expected int of size 8, but got size 16
-
-
-thread 'rustc' (50380629) panicked at rust/compiler/rustc_middle/src/ty/consts/int.rs:281:13:
-Box<dyn Any>
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-error: aborting due to 2 previous errors
+error: aborting due to 1 previous error
 
 For more information about this error, try `rustc --explain E0599`.

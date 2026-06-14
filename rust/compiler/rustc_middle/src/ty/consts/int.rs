@@ -332,8 +332,8 @@ impl ScalarInt {
     }
 
     #[inline]
-    pub fn to_target_usize(&self, tcx: TyCtxt<'_>) -> u64 {
-        self.to_uint(tcx.data_layout.pointer_size()).try_into().unwrap()
+    pub fn to_target_usize(&self, _tcx: TyCtxt<'_>) -> u64 {
+        self.to_uint(self.size()).try_into().unwrap()
     }
 
     #[inline]
@@ -421,8 +421,8 @@ impl ScalarInt {
     }
 
     #[inline]
-    pub fn to_target_isize(&self, tcx: TyCtxt<'_>) -> i64 {
-        self.to_int(tcx.data_layout.pointer_size()).try_into().unwrap()
+    pub fn to_target_isize(&self, _tcx: TyCtxt<'_>) -> i64 {
+        self.to_int(self.size()).try_into().unwrap()
     }
 
     #[inline]

@@ -43,7 +43,7 @@ pub(crate) fn lit_to_const<'tcx>(
     }
 
     let trunc = |n| {
-        let width = tcx.data_layout.pointer_size();
+        let width = tcx.types.int.primitive_size(tcx);
         trace!("trunc {} with size {} and shift {}", n, width.bits(), 128 - width.bits());
         let result = width.truncate(n);
         trace!("trunc result: {}", result);
@@ -79,7 +79,9 @@ pub(crate) fn lit_to_const<'tcx>(
             let valtree_ty = Ty::new_array(tcx, tcx.types.int, byte_sym.as_byte_str().len() as u64);
             (valtree, valtree_ty)
         }
-        (ast::LitKind::Byte(n), _) => (ty::ValTree::from_scalar_int(tcx, n.into()), tcx.types.int),
+        (ast::LitKind::Byte(n), _) => {
+            (ty::ValTree::from_scalar_int(tcx, trunc(n.into())), tcx.types.int)
+        }
         (ast::LitKind::CStr(byte_sym, _), _)
             if let Some(cstr_def_id) = tcx.lang_items().get(LangItem::CStr) =>
         {

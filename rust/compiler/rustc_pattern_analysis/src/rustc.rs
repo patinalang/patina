@@ -425,7 +425,7 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
                 let bits = value.to_leaf().to_bits_unchecked();
                 match *ty.kind() {
                     ty::Int => {
-                        let size = self.tcx.data_layout.pointer_size().bits();
+                        let size = ty.primitive_size(self.tcx).bits();
                         MaybeInfiniteInt::new_finite_int(bits, size)
                     }
                     _ => MaybeInfiniteInt::new_finite_uint(bits),
@@ -524,7 +524,7 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
                             let bits = value.to_leaf().to_bits_unchecked();
                             let x = match *ty.kind() {
                                 ty::Int => {
-                                    let size = cx.tcx.data_layout.pointer_size().bits();
+                                    let size = ty.primitive_size(cx.tcx).bits();
                                     MaybeInfiniteInt::new_finite_int(bits, size)
                                 }
                                 _ => MaybeInfiniteInt::new_finite_uint(bits),
