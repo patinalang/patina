@@ -9,7 +9,7 @@ use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::LocalModDefId;
 use rustc_hir::{
-    BodyId, Expr, ExprKind, FnSig, Generics, HirId, Item, ItemKind, Mod, Pat, PatKind, QPath, Stmt,
+    BodyId, Expr, ExprKind, FnSig, Generics, HirId, ItemKind, Mod, Pat, PatKind, QPath, Stmt,
     StmtKind, StructTailExpr, TyKind,
 };
 use rustc_middle::ty::{TyCtxt, Visibility};
@@ -31,16 +31,6 @@ macro_rules! not_implemented {
     ($tcx:expr, $span:expr, $name:literal, $kind:expr) => {
         span_fatal!($tcx, $span, "{} not yet implemented: {:?}", $name, $kind)
     };
-}
-
-#[allow(unused)]
-struct Fn<'tcx> {
-    item: &'tcx Item<'tcx>,
-    sig: &'tcx FnSig<'tcx>,
-    ident: &'tcx Ident,
-    generics: &'tcx Generics<'tcx>,
-    body: &'tcx BodyId,
-    has_body: bool,
 }
 
 #[allow(unused)]
@@ -101,23 +91,18 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         let mod_name = self.modules.module_name(module_id.to_def_id());
         let span = module.spans.inner_span;
 
+        let (exported_fns,) = self.gather_items(module);
+
         let file = self.file_path(span);
         let file_attr = self.afb.file_attr(span, &file.to_string_lossy());
         let module_attr = self.afb.module_attr(span, mod_name);
         let compile_attr = self.afb.wild_attr(span, sym::compile, [sym::no_auto_import]);
-
-        let pub_fns = self
-            .module_funs(module)
-            .filter(|fun| self.is_exported(fun))
-            .map(|fun| (fun.ident.name, fun.sig.decl.inputs.len()));
-
-        let export_attr = self.afb.export_attr(span, pub_fns);
+        let export_attr = self.afb.export_attr(span, exported_fns);
 
         let mut forms = vec![file_attr, module_attr, compile_attr, export_attr];
         let mut last_file = Some(file);
-        for fun in self.module_funs(module).filter(|f| f.has_body) {
-            let span = fun.sig.span;
-            self.push_function(&mut forms, &mut last_file, span, self.translate_fun(fun));
+        for (span, function) in self.translate_items(module) {
+            self.push_function(&mut forms, &mut last_file, span, function);
         }
 
         (mod_name, self.afb.module(forms))
@@ -151,21 +136,32 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         forms.push(function);
     }
 
-    fn translate_fun(&self, fun: Fn<'tcx>) -> eaf::ModuleForm<'arena> {
+    fn translate_fun(
+        &self,
+        span: Span,
+        sig: &FnSig<'tcx>,
+        generics: &Generics<'tcx>,
+        ident: Ident,
+        body: BodyId,
+    ) -> eaf::ModuleForm<'arena> {
+        if !generics.params.is_empty() {
+            not_implemented!(self.tcx, span, "function with generic parameters", generics);
+        }
+
         let mut scope = Scope::new();
 
-        let body = self.tcx.hir_body(*fun.body);
+        let body = self.tcx.hir_body(body);
         let clause_body = self.afb.clause_body(self.translate_expr(body.value, &mut scope));
 
         let function_args =
             body.params.iter().map(|param| self.translate_pat(param.pat, &mut scope));
 
-        let clause = self.afb.clause(fun.sig.span, function_args, clause_body);
+        let clause = self.afb.clause(sig.span, function_args, clause_body);
 
-        let fn_name = fun.ident.name;
-        let fn_arity = fun.sig.decl.inputs.len();
+        let fn_name = ident.name;
+        let fn_arity = sig.decl.inputs.len();
 
-        self.afb.function(fun.sig.span, fn_name, fn_arity, [clause])
+        self.afb.function(sig.span, fn_name, fn_arity, [clause])
     }
 
     fn translate_expr(&self, expr: &'tcx Expr<'tcx>, scope: &mut Scope) -> eaf::Expr<'arena> {
@@ -432,25 +428,48 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         }
     }
 
-    fn is_exported(&self, fun: &Fn<'tcx>) -> bool {
-        match self.tcx.visibility(fun.item.owner_id.def_id) {
-            Visibility::Public => true,
-            Visibility::Restricted(restricted_id) => {
-                restricted_id
-                    != self.tcx.parent_module_from_def_id(fun.item.owner_id.def_id).to_def_id()
-            }
-        }
-    }
-
-    fn module_funs(&self, module: &Mod<'tcx>) -> impl Iterator<Item = Fn<'tcx>> {
+    fn translate_items(
+        &self,
+        module: &Mod<'tcx>,
+    ) -> impl Iterator<Item = (Span, eaf::ModuleForm<'arena>)> {
         module.item_ids.iter().flat_map(|item_id| {
             let item = self.tcx.hir_item(*item_id);
-            if let ItemKind::Fn { sig, ident, generics, body, has_body } = &item.kind {
-                Some(Fn { item, sig, ident, generics, body, has_body: *has_body })
-            } else {
-                None
+            match item.kind {
+                ItemKind::Fn { ref sig, ident, generics, body, has_body } if has_body => {
+                    Some((item.span, self.translate_fun(item.span, sig, generics, ident, body)))
+                }
+                _ => None,
             }
         })
+    }
+
+    /// Gathers important items from a module definition.
+    /// Returns a tuple of:
+    /// - A vector of exported functions (name, arity)
+    fn gather_items(&self, module: &Mod<'tcx>) -> (SmallVec<[(Symbol, usize); 8]>,) {
+        let mut exported_fns = SmallVec::<[(Symbol, usize); 8]>::new();
+
+        for item_id in module.item_ids {
+            let item = self.tcx.hir_item(*item_id);
+            match item.kind {
+                ItemKind::Fn { ref sig, ident, has_body, .. } => {
+                    let def_id = item.owner_id.def_id;
+                    let is_visible = match self.tcx.visibility(def_id) {
+                        Visibility::Public => true,
+                        Visibility::Restricted(restricted_id) => {
+                            restricted_id != self.tcx.parent_module_from_def_id(def_id).to_def_id()
+                        }
+                    };
+
+                    if has_body && is_visible {
+                        exported_fns.push((ident.name, sig.decl.inputs.len()));
+                    }
+                }
+                _ => (),
+            }
+        }
+
+        (exported_fns,)
     }
 }
 
