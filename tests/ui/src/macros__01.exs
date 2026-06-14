@@ -1,6 +1,6 @@
 ExUnit.start()
 
-defmodule Hello01Test do
+defmodule Macros01Test do
   use ExUnit.Case
   import ExUnit.CaptureIO
 

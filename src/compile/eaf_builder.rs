@@ -94,6 +94,16 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         eaf::Pattern::Var(span.into_anno(self.source_map), name.into())
     }
 
+    pub(crate) fn pat_tuple(
+        &self,
+        span: impl IntoAnno,
+        elements: impl IntoIterator<Item = eaf::Pattern<'arena>>,
+    ) -> eaf::Pattern<'arena> {
+        let anno = span.into_anno(self.source_map);
+        let elements = self.arena.alloc_from_iter(elements);
+        eaf::Pattern::Tuple(anno, elements)
+    }
+
     pub(crate) fn pat_map(
         &self,
         span: impl IntoAnno,
@@ -170,6 +180,15 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         let anno = span.into_anno(self.source_map);
         let elements = self.arena.alloc_from_iter(elements);
         eaf::Expr::Tuple(anno, elements)
+    }
+
+    pub(crate) fn expr_fun(
+        &self,
+        span: impl IntoAnno,
+        clauses: impl IntoIterator<Item = eaf::Clause<'arena>>,
+    ) -> eaf::Expr<'arena> {
+        let clauses = self.arena.alloc_from_iter(clauses);
+        eaf::Expr::ClausedFun(span.into_anno(self.source_map), eaf::Clauses { clauses })
     }
 
     pub(crate) fn expr_map(

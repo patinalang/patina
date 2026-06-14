@@ -1,3 +1,5 @@
+mod elixir_struct;
+
 use std::fs::File;
 use std::io::Write as IoWrite;
 use std::path::{Path, PathBuf};
@@ -7,16 +9,17 @@ use rustc_ast::{BindingMode, LitKind};
 use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::{DefKind, Res};
-use rustc_hir::def_id::LocalModDefId;
+use rustc_hir::def_id::{LocalDefId, LocalModDefId};
 use rustc_hir::{
-    BodyId, Expr, ExprKind, FnSig, Generics, HirId, ItemKind, Mod, Pat, PatKind, QPath, Stmt,
-    StmtKind, StructTailExpr, TyKind,
+    BodyId, Expr, ExprKind, FnSig, Generics, HirId, ImplItemKind, ItemKind, Mod, Pat, PatKind,
+    QPath, Stmt, StmtKind, StructTailExpr, TyKind, VariantData,
 };
 use rustc_middle::ty::{TyCtxt, Visibility};
 use rustc_span::{Ident, Span, Symbol, kw, sym};
 
 use crate::compile::compile_server::CompileServer;
 use crate::compile::eaf_builder::EafBuilder;
+use crate::compile::impl_collector::ImplCollector;
 use crate::compile::module_collector::ModuleNameCollector;
 use crate::erlang;
 use crate::erlang::abstract_format as eaf;
@@ -69,43 +72,60 @@ struct Translator<'tcx, 'arena> {
     tcx: TyCtxt<'tcx>,
     afb: EafBuilder<'tcx, 'arena>,
     modules: ModuleNameCollector<'tcx>,
+    impls: ImplCollector<'tcx>,
 }
 
 impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
     fn new(tcx: TyCtxt<'tcx>, arena: &'arena DroplessArena) -> Translator<'tcx, 'arena> {
-        let source_map = tcx.sess.source_map();
-        let afb = EafBuilder::new(source_map, arena);
-
-        let modules = ModuleNameCollector::new(tcx);
-
-        Translator { tcx, afb, modules }
+        Translator {
+            tcx,
+            afb: EafBuilder::new(tcx.sess.source_map(), arena),
+            modules: ModuleNameCollector::new(tcx),
+            impls: ImplCollector::new(tcx),
+        }
     }
 
     fn translate(&self) -> Vec<(Symbol, eaf::Module<'arena>)> {
-        vec![self.translate_module(LocalModDefId::CRATE_DEF_ID)]
+        let mut modules = Vec::new();
+
+        for owner in self.tcx.hir_crate_items(()).owners() {
+            let def_id = owner.def_id;
+
+            let form = match self.tcx.def_kind(def_id) {
+                DefKind::Mod => self.translate_module(def_id),
+                DefKind::Struct => self.translate_struct(def_id),
+                _ => continue,
+            };
+
+            modules.push(form);
+        }
+
+        modules
     }
 
-    fn translate_module(&self, module_id: LocalModDefId) -> (Symbol, eaf::Module<'arena>) {
+    fn translate_module(&self, def_id: LocalDefId) -> (Symbol, eaf::Module<'arena>) {
+        let module_id = LocalModDefId::new_unchecked(def_id);
         let (module, _span, _hir_id) = self.tcx.hir_get_module(module_id);
+        let (forms, exports) = self.collect_module_fns(module);
+        let mod_name = self.modules.module_name(def_id.to_def_id());
+        self.assemble_module(module.spans.inner_span, mod_name, exports, forms)
+    }
 
-        let mod_name = self.modules.module_name(module_id.to_def_id());
-        let span = module.spans.inner_span;
-
-        let (exported_fns,) = self.gather_items(module);
-
+    fn assemble_module(
+        &self,
+        span: Span,
+        mod_name: Symbol,
+        exports: impl IntoIterator<Item = (Symbol, usize)>,
+        fn_forms: impl IntoIterator<Item = eaf::ModuleForm<'arena>>,
+    ) -> (Symbol, eaf::Module<'arena>) {
         let file = self.file_path(span);
         let file_attr = self.afb.file_attr(span, &file.to_string_lossy());
         let module_attr = self.afb.module_attr(span, mod_name);
         let compile_attr = self.afb.wild_attr(span, sym::compile, [sym::no_auto_import]);
-        let export_attr = self.afb.export_attr(span, exported_fns);
+        let export_attr = self.afb.export_attr(span, exports);
 
-        let mut forms = vec![file_attr, module_attr, compile_attr, export_attr];
-        let mut last_file = Some(file);
-        for (span, function) in self.translate_items(module) {
-            self.push_function(&mut forms, &mut last_file, span, function);
-        }
-
-        (mod_name, self.afb.module(forms))
+        let attrs = [file_attr, module_attr, compile_attr, export_attr];
+        (mod_name, self.afb.module(attrs.into_iter().chain(fn_forms)))
     }
 
     /// The file that contains the outermost macro call site of `span`.
@@ -138,23 +158,25 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
 
     fn translate_fun(
         &self,
-        span: Span,
         sig: &FnSig<'tcx>,
         generics: &Generics<'tcx>,
         ident: Ident,
         body: BodyId,
     ) -> eaf::ModuleForm<'arena> {
         if !generics.params.is_empty() {
-            not_implemented!(self.tcx, span, "function with generic parameters", generics);
+            not_implemented!(self.tcx, generics.span, "function with generic parameters", generics);
         }
 
         let mut scope = Scope::new();
-
         let body = self.tcx.hir_body(body);
-        let clause_body = self.afb.clause_body(self.translate_expr(body.value, &mut scope));
 
-        let function_args =
-            body.params.iter().map(|param| self.translate_pat(param.pat, &mut scope));
+        let function_args = body
+            .params
+            .iter()
+            .map(|param| self.translate_pat(param.pat, &mut scope))
+            .collect::<SmallVec<[_; 8]>>();
+
+        let clause_body = self.afb.clause_body(self.translate_expr(body.value, &mut scope));
 
         let clause = self.afb.clause(sig.span, function_args, clause_body);
 
@@ -240,9 +262,16 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                         rustc_hir::Path { res: Res::Def(DefKind::Ctor(..), _), .. },
                     )) => {
                         let mod_expr = self.translate_expr(callee, scope);
-                        let fn_name = sym::__struct__;
-                        let fn_atom = afb.expr_atom(callee.span, fn_name);
-                        afb.expr_remote_call(expr.span, mod_expr, fn_atom, args_exprs)
+                        let base = afb.expr_remote_call(
+                            expr.span,
+                            mod_expr,
+                            afb.expr_atom(callee.span, sym::__struct__),
+                            [],
+                        );
+                        let updates = args_exprs.into_iter().enumerate().map(|(i, arg)| {
+                            (afb.expr_atom(expr.span, Symbol::intern(&i.to_string())), arg)
+                        });
+                        afb.expr_map_update_exact(expr.span, base, updates)
                     }
 
                     _ => {
@@ -266,17 +295,17 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
 
             ExprKind::Struct(qpath, fields, tail) => match tail {
                 StructTailExpr::None => {
-                    let tag = (
-                        afb.expr_atom(expr.span, sym::__struct__),
+                    let base = afb.expr_remote_call(
+                        expr.span,
                         self.translate_qpath(qpath, scope),
+                        afb.expr_atom(expr.span, sym::__struct__),
+                        [],
                     );
-
                     let translated_fields_iter = fields.iter().map(|field| {
                         let key = afb.expr_atom(field.ident.span, field.ident.name);
                         (key, self.translate_expr(field.expr, scope))
                     });
-                    let assocs = std::iter::once(tag).chain(translated_fields_iter);
-                    afb.expr_map(expr.span, assocs)
+                    afb.expr_map_update_exact(expr.span, base, translated_fields_iter)
                 }
                 StructTailExpr::Base(base) => {
                     let base = self.translate_expr(base, scope);
@@ -428,48 +457,93 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         }
     }
 
-    fn translate_items(
+    fn collect_module_fns(
         &self,
         module: &Mod<'tcx>,
-    ) -> impl Iterator<Item = (Span, eaf::ModuleForm<'arena>)> {
-        module.item_ids.iter().flat_map(|item_id| {
-            let item = self.tcx.hir_item(*item_id);
-            match item.kind {
-                ItemKind::Fn { ref sig, ident, generics, body, has_body } if has_body => {
-                    Some((item.span, self.translate_fun(item.span, sig, generics, ident, body)))
-                }
-                _ => None,
-            }
-        })
-    }
-
-    /// Gathers important items from a module definition.
-    /// Returns a tuple of:
-    /// - A vector of exported functions (name, arity)
-    fn gather_items(&self, module: &Mod<'tcx>) -> (SmallVec<[(Symbol, usize); 8]>,) {
-        let mut exported_fns = SmallVec::<[(Symbol, usize); 8]>::new();
+    ) -> (Vec<eaf::ModuleForm<'arena>>, SmallVec<[(Symbol, usize); 8]>) {
+        let mut forms = Vec::new();
+        let mut last_file = Some(self.file_path(module.spans.inner_span));
+        let mut exports = SmallVec::<[(Symbol, usize); 8]>::new();
 
         for item_id in module.item_ids {
             let item = self.tcx.hir_item(*item_id);
-            match item.kind {
-                ItemKind::Fn { ref sig, ident, has_body, .. } => {
-                    let def_id = item.owner_id.def_id;
-                    let is_visible = match self.tcx.visibility(def_id) {
-                        Visibility::Public => true,
-                        Visibility::Restricted(restricted_id) => {
-                            restricted_id != self.tcx.parent_module_from_def_id(def_id).to_def_id()
-                        }
-                    };
+            if let ItemKind::Fn { ref sig, ident, generics, body, has_body } = item.kind
+                && has_body
+            {
+                let function = self.translate_fun(sig, generics, ident, body);
+                self.push_function(&mut forms, &mut last_file, item.span, function);
 
-                    if has_body && is_visible {
-                        exported_fns.push((ident.name, sig.decl.inputs.len()));
+                let def_id = item.owner_id.def_id;
+                let is_visible = match self.tcx.visibility(def_id) {
+                    Visibility::Public => true,
+                    Visibility::Restricted(restricted_id) => {
+                        restricted_id != self.tcx.parent_module_from_def_id(def_id).to_def_id()
                     }
+                };
+
+                if is_visible {
+                    exports.push((ident.name, sig.decl.inputs.len()));
                 }
-                _ => (),
             }
         }
 
-        (exported_fns,)
+        (forms, exports)
+    }
+
+    fn translate_struct(&self, def_id: LocalDefId) -> (Symbol, eaf::Module<'arena>) {
+        let item = self.tcx.hir_expect_item(def_id);
+        let ItemKind::Struct(_ident, generics, variant_data) = item.kind else {
+            unreachable!("def_kind Struct must be an ItemKind::Struct");
+        };
+
+        if !generics.params.is_empty() {
+            not_implemented!(self.tcx, generics.span, "struct with generic parameters", generics);
+        }
+
+        let mod_name = self.modules.module_name(def_id.to_def_id());
+        let (forms, exports) = self.collect_struct_fns(item.span, mod_name, def_id, variant_data);
+        self.assemble_module(item.span, mod_name, exports, forms)
+    }
+
+    fn collect_struct_fns(
+        &self,
+        span: Span,
+        mod_name: Symbol,
+        def_id: rustc_hir::def_id::LocalDefId,
+        variant_data: VariantData<'tcx>,
+    ) -> (Vec<eaf::ModuleForm<'arena>>, SmallVec<[(Symbol, usize); 8]>) {
+        let mut forms = Vec::new();
+        let mut exports = SmallVec::<[(Symbol, usize); 8]>::new();
+
+        forms.push(elixir_struct::struct0_function(&self.afb, span, mod_name, variant_data));
+        exports.push((sym::__struct__, 0));
+
+        forms.push(elixir_struct::struct1_function(&self.afb, span));
+        exports.push((sym::__struct__, 1));
+
+        if let Some(impls) = self.impls.impls_for(def_id.to_def_id()) {
+            for imp in impls {
+                if !imp.generics.params.is_empty() {
+                    not_implemented!(
+                        self.tcx,
+                        imp.generics.span,
+                        "impl with generic parameters",
+                        imp.generics
+                    );
+                }
+                for impl_item_id in imp.items {
+                    let impl_item = self.tcx.hir_impl_item(*impl_item_id);
+                    let ImplItemKind::Fn(sig, body) = impl_item.kind else {
+                        continue;
+                    };
+
+                    forms.push(self.translate_fun(&sig, impl_item.generics, impl_item.ident, body));
+                    exports.push((impl_item.ident.name, sig.decl.inputs.len()));
+                }
+            }
+        }
+
+        (forms, exports)
     }
 }
 

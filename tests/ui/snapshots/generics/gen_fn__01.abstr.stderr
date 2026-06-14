@@ -1,8 +1,8 @@
 error: function with generic parameters not yet implemented: Generics { params: [GenericParam { hir_id: HirId(DefId(0:24 ~ GenFn01[226b]::generic).5), def_id: DefId(0:25 ~ GenFn01[226b]::generic::T), name: Plain(T#0), span: tests/ui/src/generics/gen_fn__01.pt:24:12: 24:13 (#0), pure_wrt_drop: false, kind: Type { default: None, synthetic: false }, colon_span: None, source: Generics }], predicates: [], has_where_clause_predicates: false, where_clause_span: tests/ui/src/generics/gen_fn__01.pt:24:27: 24:27 (#0), span: tests/ui/src/generics/gen_fn__01.pt:24:11: 24:14 (#0) }
-  --> tests/ui/src/generics/gen_fn__01.pt:24:1
+  --> tests/ui/src/generics/gen_fn__01.pt:24:11
    |
 LL | fn generic<T>(_s: SGen<T>) {}
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |           ^^^
 
 error: aborting due to 1 previous error
 

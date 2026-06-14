@@ -1,4 +1,0 @@
--file("tests/ui/src/generics/impl__01.pt", 4).
--module('Elixir.Patina.Impl01').
--compile([no_auto_import]).
--export([]).
