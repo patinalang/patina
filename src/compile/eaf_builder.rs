@@ -49,7 +49,7 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
     }
 
     // TODO: BigUInt literals
-    pub(crate) fn expr_integer(&self, span: impl IntoAnno, value: u128) -> eaf::Expr<'arena> {
+    pub(crate) fn expr_int(&self, span: impl IntoAnno, value: u128) -> eaf::Expr<'arena> {
         eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::Integer(
             span.into_anno(self.source_map),
             self.biguint(value),

@@ -1,4 +1,4 @@
-mod elixir_struct;
+mod elixir_compat;
 
 use std::fs::File;
 use std::io::Write as IoWrite;
@@ -209,7 +209,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             }
 
             ExprKind::Lit(lit) => match lit.node {
-                LitKind::Int(val) => afb.expr_integer(lit.span, val.0),
+                LitKind::Int(val) => afb.expr_int(lit.span, val.0),
                 LitKind::Str(symbol, _style) => afb.expr_binary_string(lit.span, symbol),
                 LitKind::Float(symbol, _style) => {
                     let symbol_str = symbol.as_str();
@@ -465,6 +465,9 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         let mut last_file = Some(self.file_path(module.spans.inner_span));
         let mut exports = SmallVec::<[(Symbol, usize); 8]>::new();
 
+        forms.push(elixir_compat::info_function(&self.afb, module.spans.inner_span, None));
+        exports.push((sym::__info__, 1));
+
         for item_id in module.item_ids {
             let item = self.tcx.hir_item(*item_id);
             if let ItemKind::Fn { ref sig, ident, generics, body, has_body } = item.kind
@@ -515,10 +518,13 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         let mut forms = Vec::new();
         let mut exports = SmallVec::<[(Symbol, usize); 8]>::new();
 
-        forms.push(elixir_struct::struct0_function(&self.afb, span, mod_name, variant_data));
+        forms.push(elixir_compat::info_function(&self.afb, span, Some(variant_data)));
+        exports.push((sym::__info__, 1));
+
+        forms.push(elixir_compat::struct0_function(&self.afb, span, mod_name, variant_data));
         exports.push((sym::__struct__, 0));
 
-        forms.push(elixir_struct::struct1_function(&self.afb, span));
+        forms.push(elixir_compat::struct1_function(&self.afb, span));
         exports.push((sym::__struct__, 1));
 
         if let Some(impls) = self.impls.impls_for(def_id.to_def_id()) {

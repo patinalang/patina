@@ -7,6 +7,9 @@ pub(crate) fn to_sign_mag<T: PrimInt + ToBytes + WrappingNeg>(v: T) -> (u8, <T a
 }
 
 pub(crate) fn trim_trailing_zeroes(bytes: &[u8]) -> &[u8] {
-    let end = bytes.iter().rposition(|&b| b != 0).map(|i| i + 1).unwrap_or(0);
+    if bytes.is_empty() {
+        return bytes;
+    }
+    let end = bytes.iter().rposition(|&b| b != 0).map(|i| i + 1).unwrap_or(1);
     &bytes[..end]
 }
