@@ -22,23 +22,6 @@ error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this
 LL |     let mut my_apple = Some(Fruit::Apple);
    |                        ^^^^ not found in this scope
 
-error: internal compiler error: rust/compiler/rustc_hir_typeck/src/expr_use_visitor.rs:1424:20: unexpected definition in ExprUseVisitor: Def(ExternMod, DefId(0:8 ~ Defaults04[50f8]::io))
-  --> <patina-prelude>:47:25
-   |
-LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-   |                         ^^^^^^^^^^^^^
-   |
-  ::: tests/ui/src/error/option_unwrap/defaults__04.pt:10:9
-   |
-LL |         println!("Providing lemon as fallback");
-   |         --------------------------------------- in this macro invocation
-   |
-   = note: this error: internal compiler error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
-
-
-thread 'rustc' (50449557) panicked at rust/compiler/rustc_hir_typeck/src/expr_use_visitor.rs:1424:20:
-Box<dyn Any>
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-error: aborting due to 5 previous errors
+error: aborting due to 4 previous errors
 
 For more information about this error, try `rustc --explain E0425`.

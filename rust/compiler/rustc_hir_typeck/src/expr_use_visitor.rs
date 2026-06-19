@@ -1404,6 +1404,7 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
                 | DefKind::ConstParam
                 | DefKind::AssocConst { .. }
                 | DefKind::Fn
+                | DefKind::ExternMod
                 | DefKind::AssocFn,
                 _,
             )

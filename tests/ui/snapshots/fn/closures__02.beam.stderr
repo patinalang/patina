@@ -38,7 +38,7 @@ LL |     println!("closure_annotated: {}", closure_annotated(1));
    |                                       ^^^^^^^^^^^^^^^^^^^^
 
 
-thread 'rustc' (50448539) panicked at rust/compiler/rustc_hir_typeck/src/callee.rs:1047:17:
+thread 'rustc' (50456786) panicked at rust/compiler/rustc_hir_typeck/src/callee.rs:1047:17:
 Box<dyn Any>
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 error: aborting due to 5 previous errors
