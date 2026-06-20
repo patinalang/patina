@@ -1,0 +1,8 @@
+pub fn function() {
+    println!("called `MyMod::Nested::function()`");
+}
+
+#[allow(dead_code)]
+fn private_function() {
+    println!("called `MyMod::Nested::private_function()`");
+}

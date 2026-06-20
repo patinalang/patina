@@ -43,7 +43,7 @@ LL |         pub(in pkg::MyMod) fn public_function_in_my_mod() {
    |                help: try: `crate::pkg::MyMod`
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:47:25
+  --> <patina-prelude>:46:25
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
    |                         ^^ use of unresolved module or unlinked crate `io`
@@ -57,7 +57,7 @@ LL |         println!("called `MyMod::private_function()`");
    = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:47:66
+  --> <patina-prelude>:46:66
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
    |                                                                  ^^ use of unresolved module or unlinked crate `io`
@@ -71,7 +71,7 @@ LL |         println!("called `MyMod::private_function()`");
    = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:47:25
+  --> <patina-prelude>:46:25
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
    |                         ^^ use of unresolved module or unlinked crate `io`
@@ -85,7 +85,7 @@ LL |         println!("called `MyMod::function()`");
    = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:47:66
+  --> <patina-prelude>:46:66
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
    |                                                                  ^^ use of unresolved module or unlinked crate `io`
@@ -113,7 +113,7 @@ LL |         print!("called `MyMod::indirect_access()`, that\n> ");
    = note: this error originates in the macro `print` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:47:25
+  --> <patina-prelude>:46:25
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
    |                         ^^ use of unresolved module or unlinked crate `io`
@@ -127,7 +127,7 @@ LL |             println!("called `MyMod::Nested::function()`");
    = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:47:66
+  --> <patina-prelude>:46:66
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
    |                                                                  ^^ use of unresolved module or unlinked crate `io`
@@ -141,7 +141,7 @@ LL |             println!("called `MyMod::Nested::function()`");
    = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:47:25
+  --> <patina-prelude>:46:25
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
    |                         ^^ use of unresolved module or unlinked crate `io`
@@ -155,7 +155,7 @@ LL |             println!("called `MyMod::Nested::private_function()`");
    = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:47:66
+  --> <patina-prelude>:46:66
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
    |                                                                  ^^ use of unresolved module or unlinked crate `io`
@@ -183,7 +183,7 @@ LL |             print!("called `MyMod::Nested::public_function_in_my_mod()`, th
    = note: this error originates in the macro `print` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:47:25
+  --> <patina-prelude>:46:25
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
    |                         ^^ use of unresolved module or unlinked crate `io`
@@ -197,7 +197,7 @@ LL |             println!("called `MyMod::Nested::public_function_in_nested()`")
    = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:47:66
+  --> <patina-prelude>:46:66
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
    |                                                                  ^^ use of unresolved module or unlinked crate `io`
@@ -211,7 +211,7 @@ LL |             println!("called `MyMod::Nested::public_function_in_nested()`")
    = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:47:25
+  --> <patina-prelude>:46:25
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
    |                         ^^ use of unresolved module or unlinked crate `io`
@@ -225,7 +225,7 @@ LL |             println!("called `MyMod::Nested::public_function_in_super_mod()
    = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:47:66
+  --> <patina-prelude>:46:66
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
    |                                                                  ^^ use of unresolved module or unlinked crate `io`
@@ -267,7 +267,7 @@ LL |         print!("> ");
    = note: this error originates in the macro `print` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:47:25
+  --> <patina-prelude>:46:25
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
    |                         ^^ use of unresolved module or unlinked crate `io`
@@ -281,7 +281,7 @@ LL |         println!("called `MyMod::public_function_in_pkg()`");
    = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:47:66
+  --> <patina-prelude>:46:66
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
    |                                                                  ^^ use of unresolved module or unlinked crate `io`
@@ -295,7 +295,7 @@ LL |         println!("called `MyMod::public_function_in_pkg()`");
    = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:47:25
+  --> <patina-prelude>:46:25
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
    |                         ^^ use of unresolved module or unlinked crate `io`
@@ -309,7 +309,7 @@ LL |             println!("called `MyMod::private_Nested::function()`");
    = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:47:66
+  --> <patina-prelude>:46:66
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
    |                                                                  ^^ use of unresolved module or unlinked crate `io`
@@ -323,7 +323,7 @@ LL |             println!("called `MyMod::private_Nested::function()`");
    = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:47:25
+  --> <patina-prelude>:46:25
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
    |                         ^^ use of unresolved module or unlinked crate `io`
@@ -337,7 +337,7 @@ LL |             println!("called `MyMod::private_Nested::restricted_function()`
    = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:47:66
+  --> <patina-prelude>:46:66
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
    |                                                                  ^^ use of unresolved module or unlinked crate `io`

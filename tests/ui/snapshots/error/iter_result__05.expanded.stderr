@@ -1,21 +1,4 @@
-error[E0433]: cannot find type `Result` in this scope
-  --> tests/ui/src/error/iter_result__05.pt:9:20
-   |
-LL |         .partition(Result::is_ok);
-   |                    ^^^^^^ use of undeclared type `Result`
 
-error[E0433]: cannot find type `Result` in this scope
-  --> tests/ui/src/error/iter_result__05.pt:10:48
-   |
-LL |     let numbers: [_] = numbers.into_iter().map(Result::unwrap).collect();
-   |                                                ^^^^^^ use of undeclared type `Result`
-
-error[E0433]: cannot find type `Result` in this scope
-  --> tests/ui/src/error/iter_result__05.pt:11:46
-   |
-LL |     let errors: [_] = errors.into_iter().map(Result::unwrap_err).collect();
-   |                                              ^^^^^^ use of undeclared type `Result`
-
-error: aborting due to 3 previous errors
-
-For more information about this error, try `rustc --explain E0433`.
+thread 'rustc' (50488959) panicked at /Users/konrad/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/odht-0.3.1/src/memory_layout.rs:214:9:
+assertion failed: raw_bytes.len() >= HEADER_SIZE
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

@@ -1,36 +1,4 @@
-error[E0433]: cannot find type `Std` in this scope
-  --> tests/ui/src/error/multiple_error_types/option_result__01.pt:4:5
-   |
-LL | use Std::Num::ParseIntError;
-   |     ^^^ use of undeclared type `Std`
 
-error[E0425]: cannot find type `Option` in this scope
-  --> tests/ui/src/error/multiple_error_types/option_result__01.pt:6:33
-   |
-LL | fn double_first(list: [str]) -> Option<Result<int, ParseIntError>> {
-   |                                 ^^^^^^ not found in this scope
-
-error[E0425]: cannot find type `Result` in this scope
-  --> tests/ui/src/error/multiple_error_types/option_result__01.pt:6:40
-   |
-LL | fn double_first(list: [str]) -> Option<Result<int, ParseIntError>> {
-   |                                        ^^^^^^ not found in this scope
-
-error[E0599]: no method named `first` found for slice `[str]` in the current scope
-  --> tests/ui/src/error/multiple_error_types/option_result__01.pt:7:10
-   |
-LL |     list.first().map(|first| {
-   |          ^^^^^ method not found in `[str]`
-
-error[E0369]: cannot multiply `int` by `_`
-  --> tests/ui/src/error/multiple_error_types/option_result__01.pt:8:40
-   |
-LL |         first.parse::<int>().map(|n| 2 * n)
-   |                                      - ^ - _
-   |                                      |
-   |                                      int
-
-error: aborting due to 5 previous errors
-
-Some errors have detailed explanations: E0369, E0425, E0433, E0599.
-For more information about an error, try `rustc --explain E0369`.
+thread 'rustc' (50489951) panicked at /Users/konrad/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/odht-0.3.1/src/memory_layout.rs:214:9:
+assertion failed: raw_bytes.len() >= HEADER_SIZE
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

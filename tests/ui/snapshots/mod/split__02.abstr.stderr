@@ -1,21 +1,87 @@
-error[E0583]: file not found for module `Inaccessible`
-  --> tests/ui/src/mod/split__02.pt:7:1
+error[E0433]: cannot find module or crate `io` in this scope
+  --> <patina-prelude>:46:25
    |
-LL | mod Inaccessible;
-   | ^^^^^^^^^^^^^^^^^
+LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+   |                         ^^ use of unresolved module or unlinked crate `io`
    |
-   = help: to create the module `Inaccessible`, create file "tests/ui/src/mod/Inaccessible.rs" or "tests/ui/src/mod/Inaccessible/mod.rs"
-   = note: if there is a `mod Inaccessible` elsewhere in the crate already, import it with `use crate::...` instead
+  ::: tests/ui/src/mod/inaccessible.pt:3:5
+   |
+LL |     println!("called `MyMod::Inaccessible::public_function()`");
+   |     ----------------------------------------------------------- in this macro invocation
+   |
+   = help: you might be missing a crate named `io`
+   = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0583]: file not found for module `Nested`
-  --> tests/ui/src/mod/split__02.pt:8:1
+error[E0433]: cannot find module or crate `io` in this scope
+  --> <patina-prelude>:46:66
    |
-LL | pub mod Nested;
-   | ^^^^^^^^^^^^^^^
+LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+   |                                                                  ^^ use of unresolved module or unlinked crate `io`
    |
-   = help: to create the module `Nested`, create file "tests/ui/src/mod/Nested.rs" or "tests/ui/src/mod/Nested/mod.rs"
-   = note: if there is a `mod Nested` elsewhere in the crate already, import it with `use crate::...` instead
+  ::: tests/ui/src/mod/inaccessible.pt:3:5
+   |
+LL |     println!("called `MyMod::Inaccessible::public_function()`");
+   |     ----------------------------------------------------------- in this macro invocation
+   |
+   = help: you might be missing a crate named `io`
+   = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error: aborting due to 2 previous errors
+error[E0433]: cannot find module or crate `io` in this scope
+  --> <patina-prelude>:46:25
+   |
+LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+   |                         ^^ use of unresolved module or unlinked crate `io`
+   |
+  ::: tests/ui/src/mod/nested.pt:2:5
+   |
+LL |     println!("called `MyMod::Nested::function()`");
+   |     ---------------------------------------------- in this macro invocation
+   |
+   = help: you might be missing a crate named `io`
+   = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-For more information about this error, try `rustc --explain E0583`.
+error[E0433]: cannot find module or crate `io` in this scope
+  --> <patina-prelude>:46:66
+   |
+LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+   |                                                                  ^^ use of unresolved module or unlinked crate `io`
+   |
+  ::: tests/ui/src/mod/nested.pt:2:5
+   |
+LL |     println!("called `MyMod::Nested::function()`");
+   |     ---------------------------------------------- in this macro invocation
+   |
+   = help: you might be missing a crate named `io`
+   = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0433]: cannot find module or crate `io` in this scope
+  --> <patina-prelude>:46:25
+   |
+LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+   |                         ^^ use of unresolved module or unlinked crate `io`
+   |
+  ::: tests/ui/src/mod/nested.pt:7:5
+   |
+LL |     println!("called `MyMod::Nested::private_function()`");
+   |     ------------------------------------------------------ in this macro invocation
+   |
+   = help: you might be missing a crate named `io`
+   = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0433]: cannot find module or crate `io` in this scope
+  --> <patina-prelude>:46:66
+   |
+LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+   |                                                                  ^^ use of unresolved module or unlinked crate `io`
+   |
+  ::: tests/ui/src/mod/nested.pt:7:5
+   |
+LL |     println!("called `MyMod::Nested::private_function()`");
+   |     ------------------------------------------------------ in this macro invocation
+   |
+   = help: you might be missing a crate named `io`
+   = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: aborting due to 6 previous errors
+
+For more information about this error, try `rustc --explain E0433`.

@@ -109,6 +109,7 @@ LL |         Ok(Click(x, y)) => println!("Clicked x={} y={}", x, y),
    |            ^^^^^ not found in this scope
    |
 help: consider importing this tuple variant
+  --> <patina-prelude>:11:1
    |
 LL + use crate::UserEvent::Click;
    |

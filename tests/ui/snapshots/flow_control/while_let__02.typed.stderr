@@ -1,28 +1,4 @@
-error[E0531]: cannot find tuple struct or tuple variant `Some` in this scope
-  --> tests/ui/src/flow_control/while_let__02.pt:10:15
-   |
-LL |     while let Some(i) = optional {
-   |               ^^^^ not found in this scope
 
-error[E0425]: cannot find value `None` in this scope
-  --> tests/ui/src/flow_control/while_let__02.pt:13:24
-   |
-LL |             optional = None;
-   |                        ^^^^ not found in this scope
-
-error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
-  --> tests/ui/src/flow_control/while_let__02.pt:6:24
-   |
-LL |     let mut optional = Some(0);
-   |                        ^^^^ not found in this scope
-
-error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
-  --> tests/ui/src/flow_control/while_let__02.pt:16:24
-   |
-LL |             optional = Some(i + 1);
-   |                        ^^^^ not found in this scope
-
-error: aborting due to 4 previous errors
-
-Some errors have detailed explanations: E0425, E0531.
-For more information about an error, try `rustc --explain E0425`.
+thread 'rustc' (50472189) panicked at /Users/konrad/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/odht-0.3.1/src/memory_layout.rs:214:9:
+assertion failed: raw_bytes.len() >= HEADER_SIZE
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

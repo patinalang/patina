@@ -1,13 +1,4 @@
-error[E0599]: no method named `into_iter` found for array `[str; 3]` in the current scope
-  --> tests/ui/src/error/iter_result__01.pt:7:10
-   |
-LL |       let numbers: [_] = strings
-   |  ________________________-
-LL | |         .into_iter()
-   | |         -^^^^^^^^^ method not found in `[str; 3]`
-   | |_________|
-   |
 
-error: aborting due to 1 previous error
-
-For more information about this error, try `rustc --explain E0599`.
+thread 'rustc' (50488880) panicked at /Users/konrad/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/odht-0.3.1/src/memory_layout.rs:214:9:
+assertion failed: raw_bytes.len() >= HEADER_SIZE
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

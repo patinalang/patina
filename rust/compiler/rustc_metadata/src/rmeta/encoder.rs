@@ -650,8 +650,6 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
 
         let incoherent_impls = stat!("incoherent-impls", || self.encode_incoherent_impls());
 
-        _ = stat!("mir", || self.encode_mir());
-
         _ = stat!("def-ids", || self.encode_def_ids());
 
         let interpret_alloc_index = stat!("interpret-alloc-index", || {
@@ -1308,45 +1306,6 @@ fn should_encode_constness(def_kind: DefKind) -> bool {
     }
 }
 
-fn should_encode_const(def_kind: DefKind) -> bool {
-    match def_kind {
-        // FIXME(mgca): should we remove Const and AssocConst here?
-        DefKind::Const { .. }
-        | DefKind::AssocConst { .. }
-        | DefKind::AnonConst
-        | DefKind::InlineConst => true,
-
-        DefKind::Struct
-        | DefKind::Union
-        | DefKind::Enum
-        | DefKind::Variant
-        | DefKind::Ctor(..)
-        | DefKind::Field
-        | DefKind::Fn
-        | DefKind::Static { .. }
-        | DefKind::TyAlias
-        | DefKind::OpaqueTy
-        | DefKind::ForeignTy
-        | DefKind::Impl { .. }
-        | DefKind::AssocFn
-        | DefKind::Closure
-        | DefKind::ConstParam
-        | DefKind::AssocTy
-        | DefKind::TyParam
-        | DefKind::Trait
-        | DefKind::TraitAlias
-        | DefKind::Mod
-        | DefKind::ForeignMod
-        | DefKind::ExternMod
-        | DefKind::Macro(..)
-        | DefKind::Use
-        | DefKind::LifetimeParam
-        | DefKind::GlobalAsm
-        | DefKind::ExternCrate
-        | DefKind::SyntheticCoroutineBody => false,
-    }
-}
-
 fn should_encode_const_of_item<'tcx>(tcx: TyCtxt<'tcx>, def_id: DefId, def_kind: DefKind) -> bool {
     // AssocConst ==> assoc item has value
     tcx.is_type_const(def_id)
@@ -1556,12 +1515,6 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
                         coroutine_for_closure.index,
                         self.tcx.coroutine_by_move_body_def_id(coroutine_for_closure).into(),
                     );
-                }
-            }
-            if let DefKind::Static { .. } = def_kind {
-                if !self.tcx.is_foreign_item(def_id) {
-                    let data = self.tcx.eval_static_initializer(def_id).unwrap();
-                    record!(self.tables.eval_static_initializer[def_id] <- data);
                 }
             }
             if let DefKind::Enum | DefKind::Struct | DefKind::Union = def_kind {
@@ -1774,26 +1727,6 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
         };
 
         record_array!(self.tables.rendered_precise_capturing_args[def_id] <- precise_capturing_args);
-    }
-
-    fn encode_mir(&mut self) {
-        if self.is_proc_macro {
-            return;
-        }
-
-        let tcx = self.tcx;
-        for &def_id in tcx.mir_keys(()) {
-            if let Ok(Some(abstract_const)) = tcx.thir_abstract_const(def_id) {
-                record!(self.tables.thir_abstract_const[def_id.to_def_id()] <- abstract_const);
-            }
-
-            if should_encode_const(tcx.def_kind(def_id))
-                && let Some(body) = tcx.hir_maybe_body_owned_by(def_id)
-            {
-                let const_data = rendered_const(self.tcx, &body, def_id);
-                record!(self.tables.rendered_const[def_id.to_def_id()] <- const_data);
-            }
-        }
     }
 
     #[instrument(level = "debug", skip(self))]

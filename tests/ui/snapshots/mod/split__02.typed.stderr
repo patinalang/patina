@@ -1,21 +1,4 @@
-error[E0583]: file not found for module `Inaccessible`
-  --> tests/ui/src/mod/split__02.pt:7:1
-   |
-LL | mod Inaccessible;
-   | ^^^^^^^^^^^^^^^^^
-   |
-   = help: to create the module `Inaccessible`, create file "tests/ui/src/mod/Inaccessible.rs" or "tests/ui/src/mod/Inaccessible/mod.rs"
-   = note: if there is a `mod Inaccessible` elsewhere in the crate already, import it with `use crate::...` instead
 
-error[E0583]: file not found for module `Nested`
-  --> tests/ui/src/mod/split__02.pt:8:1
-   |
-LL | pub mod Nested;
-   | ^^^^^^^^^^^^^^^
-   |
-   = help: to create the module `Nested`, create file "tests/ui/src/mod/Nested.rs" or "tests/ui/src/mod/Nested/mod.rs"
-   = note: if there is a `mod Nested` elsewhere in the crate already, import it with `use crate::...` instead
-
-error: aborting due to 2 previous errors
-
-For more information about this error, try `rustc --explain E0583`.
+thread 'rustc' (50492609) panicked at /Users/konrad/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/odht-0.3.1/src/memory_layout.rs:214:9:
+assertion failed: raw_bytes.len() >= HEADER_SIZE
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

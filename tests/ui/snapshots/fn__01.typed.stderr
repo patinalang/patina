@@ -1,8 +1,4 @@
-error: requires `range_inclusive_new` lang_item
-  --> tests/ui/src/fn__01.pt:37:14
-   |
-LL |     for n in 1..=n {
-   |              ^^^^^
 
-error: aborting due to 1 previous error
-
+thread 'rustc' (50473185) panicked at /Users/konrad/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/odht-0.3.1/src/memory_layout.rs:214:9:
+assertion failed: raw_bytes.len() >= HEADER_SIZE
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

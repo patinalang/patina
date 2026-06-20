@@ -1,15 +1,4 @@
-error[E0599]: no method named `parse` found for type `str` in the current scope
-  --> tests/ui/src/conversion/string__02.pt:5:27
-   |
-LL |     let parsed: int = "5".parse().unwrap();
-   |                           ^^^^^ method not found in `str`
 
-error[E0599]: no method named `parse` found for type `str` in the current scope
-  --> tests/ui/src/conversion/string__02.pt:6:29
-   |
-LL |     let turbo_parsed = "10".parse::<int>().unwrap();
-   |                             ^^^^^ method not found in `str`
-
-error: aborting due to 2 previous errors
-
-For more information about this error, try `rustc --explain E0599`.
+thread 'rustc' (50483017) panicked at /Users/konrad/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/odht-0.3.1/src/memory_layout.rs:214:9:
+assertion failed: raw_bytes.len() >= HEADER_SIZE
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

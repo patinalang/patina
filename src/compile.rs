@@ -5,7 +5,8 @@ mod module_collector;
 mod translate;
 
 use std::cell::Cell;
-use std::path::Path;
+use std::collections::BTreeMap;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::AtomicBool;
 
 use rustc_ast::Crate;
@@ -18,45 +19,30 @@ use rustc_interface::{interface, passes};
 use rustc_middle::ty::{TyCtxt, TypeckResults};
 use rustc_parse::lexer::StripTokens;
 use rustc_parse::{new_parser_from_source_str, unwrap_or_emit_fatal};
-use rustc_session::config::PanicStrategy;
+use rustc_session::config::{Externs, PanicStrategy};
+use rustc_session::search_paths::{PathKind, SearchPath};
 use rustc_session::{Session, config};
 use rustc_span::edition::Edition;
 use rustc_span::source_map::FilePathMapping;
 use rustc_span::{ErrorGuaranteed, FileName, RealFileName};
 
+use crate::package::{CORE_PACKAGE_NAME, PackageDependency};
 use crate::{DumpStage, EmitStage, Stage};
 
 static INTERNAL_FEATURES: AtomicBool = AtomicBool::new(false);
 
 const PRELUDE: &str = r#"
 #![allow(internal_features)]
-#![feature(no_core, lang_items, rustc_attrs)]
+#![feature(no_core, rustc_attrs)]
 #![no_std]
 #![no_core]
 
-#[lang = "pointee_sized"]
-pub trait PointeeSized {}
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
 
-#[lang = "meta_sized"]
-pub trait MetaSized: PointeeSized {}
-
-#[lang = "sized"]
-pub trait Sized: MetaSized {}
-
-#[lang = "copy"]
-pub trait Copy {}
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {} }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {} }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {} }
+#[allow(unused_imports)]
+use Core::*;
 
 #[allow(unused)]
 extern mod io;
@@ -65,18 +51,54 @@ extern mod io;
 extern mod patina_fmt;
 
 #[allow(unused_macros)]
-#[macro_export]
+#[rustc_builtin_macro]
+macro_rules! stringify {
+    () => {};
+}
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat {
+    () => {};
+}
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args {
+    () => {};
+}
+
+#[allow(unused_macros)]
 macro_rules! print {
     ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
 }
 
 #[allow(unused_macros)]
-#[macro_export]
 macro_rules! println {
     () => {{ io::nl(); }};
     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
 }
 "#;
+
+const CORE_SRC: &str = include_str!("core.pt");
+
+fn ensure_core(out_dir: &Path) -> PathBuf {
+    let rmeta_path = out_dir.join("libCore.rmeta");
+    if rmeta_path.is_file() {
+        return rmeta_path;
+    }
+
+    compile(
+        Stage::Emit(crate::EmitStage::Beam),
+        Path::new("core.pt"),
+        CORE_SRC,
+        out_dir,
+        CORE_PACKAGE_NAME,
+        &[],
+    );
+
+    rmeta_path
+}
 
 struct NoAnn;
 impl pprust::PpAnn for NoAnn {}
@@ -122,12 +144,20 @@ impl pprust_hir::PpAnn for TypedAnn<'_> {
     }
 }
 
-pub(crate) fn compile(stage: Stage, filename: &Path, src: &str, out_dir: &Path) {
+pub(crate) fn compile(
+    stage: Stage,
+    filename: &Path,
+    src: &str,
+    out_dir: &Path,
+    pkg_name: &str,
+    externs: &[PackageDependency],
+) {
     let filename =
         FileName::Real(FilePathMapping::empty().to_real_filename(&RealFileName::empty(), filename));
 
-    let config = make_config(filename.clone(), src);
-    let input_src = format!("{PRELUDE}\n{src}");
+    let config = make_config(filename.clone(), src, pkg_name, externs, out_dir);
+    let prelude = if pkg_name == CORE_PACKAGE_NAME { "" } else { PRELUDE };
+    let input_src = if prelude.is_empty() { src.to_string() } else { format!("{prelude}\n{src}") };
 
     let maybe_render = match stage {
         Stage::Dump(DumpStage::Tokens) => Some(render_tokens(src)),
@@ -144,7 +174,7 @@ pub(crate) fn compile(stage: Stage, filename: &Path, src: &str, out_dir: &Path) 
             ))
         }),
         Stage::Dump(DumpStage::Expanded) => {
-            with_compiler_global_ctxt(config, PRELUDE, |_compiler, tcx| {
+            with_compiler_global_ctxt(config, prelude, |_compiler, tcx| {
                 Some(pprust::print_crate(
                     tcx.sess.source_map(),
                     &tcx.resolver_for_lowering().borrow().1,
@@ -158,7 +188,7 @@ pub(crate) fn compile(stage: Stage, filename: &Path, src: &str, out_dir: &Path) 
             })
         }
         Stage::Dump(DumpStage::Typed) => {
-            with_compiler_global_ctxt(config, PRELUDE, |_compiler, tcx| {
+            with_compiler_global_ctxt(config, prelude, |_compiler, tcx| {
                 run_body_checks(tcx);
 
                 Some(pprust_hir::print_crate(
@@ -172,7 +202,7 @@ pub(crate) fn compile(stage: Stage, filename: &Path, src: &str, out_dir: &Path) 
             })
         }
         Stage::Dump(DumpStage::Erl) => {
-            with_compiler_global_ctxt(config, PRELUDE, |_compiler, tcx| {
+            with_compiler_global_ctxt(config, prelude, |_compiler, tcx| {
                 run_body_checks(tcx);
                 if let Some(guar) = tcx.sess.dcx().has_errors_or_delayed_bugs() {
                     guar.raise_fatal();
@@ -181,13 +211,21 @@ pub(crate) fn compile(stage: Stage, filename: &Path, src: &str, out_dir: &Path) 
                 translate::translate(tcx, translate::TranslateStage::Erl, out_dir)
             })
         }
-        Stage::Emit(emit_stage) => with_compiler_global_ctxt(config, PRELUDE, |_compiler, tcx| {
+        Stage::Emit(emit_stage) => with_compiler_global_ctxt(config, prelude, |_compiler, tcx| {
             run_body_checks(tcx);
             if let Some(guar) = tcx.sess.dcx().has_errors_or_delayed_bugs() {
                 guar.raise_fatal();
             }
 
+            std::fs::create_dir_all(out_dir).unwrap_or_else(|e| {
+                tcx.sess.dcx().fatal(format!("failed to create output directory: {e}"));
+            });
+
             translate::translate(tcx, emit_stage.into(), out_dir);
+
+            let metadata_path = out_dir.join(format!("lib{pkg_name}.rmeta"));
+            rustc_metadata::encode_metadata(tcx, &metadata_path, None);
+
             None
         }),
     };
@@ -197,7 +235,26 @@ pub(crate) fn compile(stage: Stage, filename: &Path, src: &str, out_dir: &Path) 
     }
 }
 
-fn make_config(filename: FileName, src: &str) -> interface::Config {
+fn make_config(
+    filename: FileName,
+    src: &str,
+    pkg_name: &str,
+    deps: &[PackageDependency],
+    out_dir: &Path,
+) -> interface::Config {
+    let has_explicit_core = deps.iter().any(|dep| dep.name == CORE_PACKAGE_NAME);
+    let is_core = pkg_name == CORE_PACKAGE_NAME;
+
+    let core_dep = (!has_explicit_core && !is_core).then(|| {
+        let core_rmeta = ensure_core(out_dir);
+        PackageDependency { name: CORE_PACKAGE_NAME.to_string(), path: Some(core_rmeta) }
+    });
+
+    let mut externs = BTreeMap::new();
+    for dep in core_dep.iter().chain(deps.iter()) {
+        externs.insert(dep.name.clone(), dep.into());
+    }
+
     interface::Config {
         crate_cfg: vec![],
         crate_check_cfg: vec![],
@@ -222,6 +279,9 @@ fn make_config(filename: FileName, src: &str) -> interface::Config {
             unstable_opts: config::UnstableOptions { ui_testing: true, ..Default::default() },
             crate_types: vec![config::CrateType::Rlib],
             cg: config::CodegenOptions { panic: Some(PanicStrategy::Abort), ..Default::default() },
+            crate_name: Some(pkg_name.to_string()),
+            externs: Externs::new(externs),
+            search_paths: vec![SearchPath::new(PathKind::Crate, out_dir.to_owned())],
             ..Default::default()
         },
     }

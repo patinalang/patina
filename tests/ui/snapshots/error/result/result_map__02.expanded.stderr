@@ -1,34 +1,4 @@
-error[E0433]: cannot find type `Std` in this scope
-  --> tests/ui/src/error/result/result_map__02.pt:4:5
-   |
-LL | use Std::Num::ParseIntError;
-   |     ^^^ use of undeclared type `Std`
 
-error[E0425]: cannot find type `Result` in this scope
-  --> tests/ui/src/error/result/result_map__02.pt:9:63
-   |
-LL | fn multiply(first_number_str: str, second_number_str: str) -> Result<int, ParseIntError> {
-   |                                                               ^^^^^^ not found in this scope
-
-error[E0425]: cannot find type `Result` in this scope
-  --> tests/ui/src/error/result/result_map__02.pt:15:18
-   |
-LL | fn print(result: Result<int, ParseIntError>) {
-   |                  ^^^^^^ not found in this scope
-
-error[E0531]: cannot find tuple struct or tuple variant `Ok` in this scope
-  --> tests/ui/src/error/result/result_map__02.pt:17:9
-   |
-LL |         Ok(n)  => println!("n is {}", n),
-   |         ^^ not found in this scope
-
-error[E0531]: cannot find tuple struct or tuple variant `Err` in this scope
-  --> tests/ui/src/error/result/result_map__02.pt:18:9
-   |
-LL |         Err(e) => println!("Error: {}", e),
-   |         ^^^ not found in this scope
-
-error: aborting due to 5 previous errors
-
-Some errors have detailed explanations: E0425, E0433, E0531.
-For more information about an error, try `rustc --explain E0425`.
+thread 'rustc' (50487552) panicked at /Users/konrad/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/odht-0.3.1/src/memory_layout.rs:214:9:
+assertion failed: raw_bytes.len() >= HEADER_SIZE
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

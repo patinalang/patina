@@ -1,14 +1,4 @@
-error[E0423]: expected function, found macro `println`
-  --> tests/ui/src/variable_bindings/mut__01.pt:27:9
-   |
-LL |         println("{} == {} + 1", inner_mutable_binding, mutable_binding);
-   |         ^^^^^^^ not a function
-   |
-help: use `!` to invoke the macro
-   |
-LL |         println!("{} == {} + 1", inner_mutable_binding, mutable_binding);
-   |                +
 
-error: aborting due to 1 previous error
-
-For more information about this error, try `rustc --explain E0423`.
+thread 'rustc' (50483824) panicked at /Users/konrad/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/odht-0.3.1/src/memory_layout.rs:214:9:
+assertion failed: raw_bytes.len() >= HEADER_SIZE
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

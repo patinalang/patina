@@ -1025,6 +1025,7 @@ dependencies = [
  "rustc_hir_pretty",
  "rustc_interface",
  "rustc_lexer",
+ "rustc_metadata",
  "rustc_middle",
  "rustc_parse",
  "rustc_query_impl",
@@ -1597,6 +1598,7 @@ dependencies = [
 name = "rustc_expand"
 version = "0.0.0"
 dependencies = [
+ "convert_case",
  "rustc_ast",
  "rustc_ast_passes",
  "rustc_ast_pretty",

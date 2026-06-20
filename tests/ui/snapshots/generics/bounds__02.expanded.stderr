@@ -1,9 +1,4 @@
-error[E0405]: cannot find trait `Display` in this scope
-  --> tests/ui/src/generics/bounds__02.pt:4:13
-   |
-LL | struct S<T: Display>(T);
-   |             ^^^^^^^ not found in this scope
 
-error: aborting due to 1 previous error
-
-For more information about this error, try `rustc --explain E0405`.
+thread 'rustc' (50463909) panicked at /Users/konrad/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/odht-0.3.1/src/memory_layout.rs:214:9:
+assertion failed: raw_bytes.len() >= HEADER_SIZE
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

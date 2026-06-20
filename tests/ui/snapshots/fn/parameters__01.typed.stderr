@@ -1,37 +1,4 @@
-error[E0425]: cannot find type `fnref` in this scope
-  --> tests/ui/src/fn/parameters__01.pt:4:19
-   |
-LL | fn call_me_ref(f: fnref(int) -> int) {
-   |                   ^^^^^ not found in this scope
 
-error[E0061]: this function takes 1 argument but 0 arguments were supplied
-  --> tests/ui/src/fn/parameters__01.pt:9:5
-   |
-LL |     f();
-   |     ^-- argument #1 of type `int` is missing
-   |
-help: provide the argument
-   |
-LL |     f(/* int */);
-   |       +++++++++
-
-error[E0369]: cannot add `int` to `int`
-  --> tests/ui/src/fn/parameters__01.pt:13:7
-   |
-LL |     x + 1
-   |     - ^ - int
-   |     |
-   |     int
-
-error[E0369]: cannot add `int` to `_`
-  --> tests/ui/src/fn/parameters__01.pt:17:25
-   |
-LL |     let closure = |x| x + 42;
-   |                       - ^ -- int
-   |                       |
-   |                       _
-
-error: aborting due to 4 previous errors
-
-Some errors have detailed explanations: E0061, E0369, E0425.
-For more information about an error, try `rustc --explain E0061`.
+thread 'rustc' (50485613) panicked at /Users/konrad/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/odht-0.3.1/src/memory_layout.rs:214:9:
+assertion failed: raw_bytes.len() >= HEADER_SIZE
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

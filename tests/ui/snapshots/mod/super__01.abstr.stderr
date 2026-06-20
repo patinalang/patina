@@ -7,7 +7,7 @@ LL |             use pkg::Cool::function as root_function;
    = help: you might be missing a crate named `pkg`
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:47:25
+  --> <patina-prelude>:46:25
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
    |                         ^^ use of unresolved module or unlinked crate `io`
@@ -21,7 +21,7 @@ LL |         println!("called `Cool::function()`");
    = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:47:66
+  --> <patina-prelude>:46:66
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
    |                                                                  ^^ use of unresolved module or unlinked crate `io`
@@ -35,7 +35,7 @@ LL |         println!("called `Cool::function()`");
    = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:47:25
+  --> <patina-prelude>:46:25
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
    |                         ^^ use of unresolved module or unlinked crate `io`
@@ -49,7 +49,7 @@ LL |         println!("called `My::function()`");
    = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:47:66
+  --> <patina-prelude>:46:66
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
    |                                                                  ^^ use of unresolved module or unlinked crate `io`
@@ -63,7 +63,7 @@ LL |         println!("called `My::function()`");
    = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:47:25
+  --> <patina-prelude>:46:25
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
    |                         ^^ use of unresolved module or unlinked crate `io`
@@ -77,7 +77,7 @@ LL |             println!("called `My::Cool::function()`");
    = note: this error originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0433]: cannot find module or crate `io` in this scope
-  --> <patina-prelude>:47:66
+  --> <patina-prelude>:46:66
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
    |                                                                  ^^ use of unresolved module or unlinked crate `io`

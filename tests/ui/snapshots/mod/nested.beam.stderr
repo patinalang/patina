@@ -1,0 +1,5 @@
+warning: [{"tests/ui/src/mod/nested.pt",
+           [{{6,1},erl_lint,{unused_function,{private_function,0}}}]}]
+
+warning: 1 warning emitted
+

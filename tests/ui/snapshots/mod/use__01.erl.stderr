@@ -1,11 +1,4 @@
-error[E0433]: cannot find module or crate `pkg` in this scope
-  --> tests/ui/src/mod/use__01.pt:4:5
-   |
-LL | use pkg::Deeply::Nested::{
-   |     ^^^ use of unresolved module or unlinked crate `pkg`
-   |
-   = help: you might be missing a crate named `pkg`
 
-error: aborting due to 1 previous error
-
-For more information about this error, try `rustc --explain E0433`.
+thread 'rustc' (50493143) panicked at /Users/konrad/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/odht-0.3.1/src/memory_layout.rs:214:9:
+assertion failed: raw_bytes.len() >= HEADER_SIZE
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

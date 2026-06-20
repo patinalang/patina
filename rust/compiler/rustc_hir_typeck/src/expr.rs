@@ -548,6 +548,10 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         {
             self.write_resolution(expr.hir_id, Ok((DefKind::ExternMod, def_id)));
 
+            if let QPath::TypeRelative(qself, _) = qpath {
+                self.write_ty(qself.hir_id, tcx.types.term);
+            }
+
             return Ty::new_fn_ptr(
                 tcx,
                 ty::Binder::dummy(tcx.mk_fn_sig_safe_rust_abi(

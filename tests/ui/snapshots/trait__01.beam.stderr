@@ -1,14 +1,14 @@
-error[E0277]: the trait bound `Self: Sized` is not satisfied
+error[E0277]: the trait bound `Self: Core::Sized` is not satisfied
   --> tests/ui/src/trait__01.pt:15:13
    |
 LL |     fn talk(self) {
-   |             ^^^^ the trait `Sized` is not implemented for `Self`
+   |             ^^^^ the trait `Core::Sized` is not implemented for `Self`
    |
    = help: unsized fn params are gated as an unstable feature
 help: consider further restricting `Self`
    |
-LL |     fn talk(self) where Self: Sized {
-   |                   +++++++++++++++++
+LL |     fn talk(self) where Self: Core::Sized {
+   |                   +++++++++++++++++++++++
 help: function arguments must have a statically known size, borrowed types always have a known size
    |
 LL |     fn talk(&self) {

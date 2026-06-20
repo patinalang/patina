@@ -1,11 +1,4 @@
-error[E0369]: cannot add `int` to `int`
-  --> tests/ui/src/hello/comment__01.pt:37:15
-   |
-LL |     let x = 5 + /* 90 + */ 5;
-   |             - ^            - int
-   |             |
-   |             int
 
-error: aborting due to 1 previous error
-
-For more information about this error, try `rustc --explain E0369`.
+thread 'rustc' (50486654) panicked at /Users/konrad/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/odht-0.3.1/src/memory_layout.rs:214:9:
+assertion failed: raw_bytes.len() >= HEADER_SIZE
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

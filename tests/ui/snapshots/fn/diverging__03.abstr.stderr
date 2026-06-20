@@ -16,7 +16,7 @@ LL | fn some_fn() -> ! {
            found unit type `()`
 
 warning: unreachable statement
-  --> <patina-prelude>:47:23
+  --> <patina-prelude>:46:23
    |
 LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
    |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable statement

@@ -7,41 +7,9 @@ LL |     // Error! Cannot assign a new value to a variable defined outside closu
 LL | }
    | - unexpected token
 
-error[E0369]: cannot add `int` to `int`
-  --> tests/ui/src/fn/closures__02.pt:16:49
-   |
-LL |     let closure_annotated = |i: int| -> int { i + outer_var };
-   |                                               - ^ --------- int
-   |                                               |
-   |                                               int
 
-error[E0369]: cannot add `int` to `_`
-  --> tests/ui/src/fn/closures__02.pt:17:49
-   |
-LL |     let closure_inferred  = |i     |          i + outer_var  ;
-   |                                               - ^ --------- int
-   |                                               |
-   |                                               _
-
-error[E0368]: binary assignment operation `+=` cannot be applied to type `int`
-  --> tests/ui/src/fn/closures__02.pt:33:20
-   |
-LL |     let add = |x|{ outer_mut_var += x; }
-   |                    -------------^^^^^
-   |                    |
-   |                    cannot use `+=` on type `int`
-
-error: internal compiler error: rust/compiler/rustc_hir_typeck/src/callee.rs:1047:17: Expected to find a suitable `Fn`/`FnMut`/`FnOnce` implementation for `{closure@tests/ui/src/fn/closures__02.pt:16:29: 16:44}`
-  --> tests/ui/src/fn/closures__02.pt:20:39
-   |
-LL |     println!("closure_annotated: {}", closure_annotated(1));
-   |                                       ^^^^^^^^^^^^^^^^^^^^
-
-
-thread 'rustc' (50456783) panicked at rust/compiler/rustc_hir_typeck/src/callee.rs:1047:17:
-Box<dyn Any>
+thread 'rustc' (50485517) panicked at /Users/konrad/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/odht-0.3.1/src/memory_layout.rs:214:9:
+assertion failed: raw_bytes.len() >= HEADER_SIZE
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-error: aborting due to 5 previous errors
+error: aborting due to 1 previous error
 
-Some errors have detailed explanations: E0368, E0369.
-For more information about an error, try `rustc --explain E0368`.

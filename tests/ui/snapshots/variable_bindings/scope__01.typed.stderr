@@ -1,15 +1,4 @@
-error[E0425]: cannot find value `short_lived_binding` in this scope
-  --> tests/ui/src/variable_bindings/scope__01.pt:18:33
-   |
-LL |     println!("outer short: {}", short_lived_binding);
-   |                                 ^^^^^^^^^^^^^^^^^^^
-   |
-help: the binding `short_lived_binding` is available in a different scope in the same function
-  --> tests/ui/src/variable_bindings/scope__01.pt:11:13
-   |
-LL |         let short_lived_binding = 2;
-   |             ^^^^^^^^^^^^^^^^^^^
 
-error: aborting due to 1 previous error
-
-For more information about this error, try `rustc --explain E0425`.
+thread 'rustc' (50484215) panicked at /Users/konrad/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/odht-0.3.1/src/memory_layout.rs:214:9:
+assertion failed: raw_bytes.len() >= HEADER_SIZE
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

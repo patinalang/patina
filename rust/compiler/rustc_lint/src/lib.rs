@@ -201,6 +201,7 @@ late_lint_methods!(
             TrivialConstraints: TrivialConstraints,
             TypeLimits: TypeLimits::new(),
             NonSnakeCase: NonSnakeCase,
+            NonCamelCaseModules: NonCamelCaseModules,
             InvalidNoMangleItems: InvalidNoMangleItems,
             // Depends on effective visibilities
             UnreachablePub: UnreachablePub,
@@ -264,6 +265,7 @@ fn register_builtins(store: &mut LintStore) {
     add_lint_group!(
         "nonstandard_style",
         NON_CAMEL_CASE_TYPES,
+        NON_CAMEL_CASE_MODULES,
         NON_SNAKE_CASE,
         NON_UPPER_CASE_GLOBALS
     );

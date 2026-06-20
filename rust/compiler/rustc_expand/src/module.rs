@@ -1,6 +1,7 @@
 use std::iter::once;
 use std::path::{self, Path, PathBuf};
 
+use convert_case::{Case, Casing};
 use rustc_ast::{AttrVec, Attribute, Inline, Item, ModSpans};
 use rustc_attr_parsing::validate_attr::emit_malformed_attribute;
 use rustc_errors::{Diag, ErrorGuaranteed};
@@ -14,14 +15,12 @@ use rustc_span::{Ident, Span, sym};
 use thin_vec::ThinVec;
 
 use crate::base::ModuleData;
-use crate::errors::{
-    ModuleCircular, ModuleFileNotFound, ModuleInBlock, ModuleInBlockName, ModuleMultipleCandidates,
-};
+use crate::errors::{ModuleCircular, ModuleFileNotFound, ModuleInBlock, ModuleInBlockName};
 
 #[derive(Copy, Clone)]
 pub enum DirOwnership {
     Owned {
-        // None if `mod.rs`, `Some("foo")` if we're in `foo.rs`.
+        // None if the module file is the crate root, Some("foo") if we're in `foo.pt`.
         relative: Option<Ident>,
     },
     UnownedViaBlock,
@@ -45,8 +44,7 @@ pub(crate) struct ParsedExternalMod {
 pub enum ModError<'a> {
     CircularInclusion(Vec<PathBuf>),
     ModInBlock(Option<Ident>),
-    FileNotFound(Ident, PathBuf, PathBuf),
-    MultipleCandidates(Ident, PathBuf, PathBuf),
+    FileNotFound(Ident, PathBuf),
     ParserError(Diag<'a>),
 }
 
@@ -121,10 +119,10 @@ pub(crate) fn mod_dir_path(
             if let DirOwnership::Owned { relative } = &mut dir_ownership {
                 if let Some(ident) = relative.take() {
                     // Remove the relative offset.
-                    dir_path.push(ident.as_str());
+                    dir_path.push(ident.as_str().to_case(Case::Snake));
                 }
             }
-            dir_path.push(ident.as_str());
+            dir_path.push(ident.as_str().to_case(Case::Snake));
 
             (dir_path, dir_ownership)
         }
@@ -173,7 +171,7 @@ fn mod_file_path<'a>(
     match dir_ownership {
         DirOwnership::Owned { .. } => result,
         DirOwnership::UnownedViaBlock => Err(ModError::ModInBlock(match result {
-            Ok(_) | Err(ModError::MultipleCandidates(..)) => Some(ident),
+            Ok(_) => Some(ident),
             _ => None,
         })),
     }
@@ -231,37 +229,27 @@ pub fn default_submod_path<'a>(
     relative: Option<Ident>,
     dir_path: &Path,
 ) -> Result<ModulePathSuccess, ModError<'a>> {
-    // If we're in a foo.rs file instead of a mod.rs file,
-    // we need to look for submodules in
-    // `./foo/<ident>.rs` and `./foo/<ident>/mod.rs` rather than
-    // `./<ident>.rs` and `./<ident>/mod.rs`.
+    // If we're in a foo.pt file instead of the crate root,
+    // we need to look for submodules in `./foo/<ident>.pt` rather than
+    // `./<ident>.pt`.
     let relative_prefix_string;
     let relative_prefix = if let Some(ident) = relative {
-        relative_prefix_string = format!("{}{}", ident.name, path::MAIN_SEPARATOR);
+        relative_prefix_string =
+            format!("{}{}", ident.as_str().to_case(Case::Snake), path::MAIN_SEPARATOR);
         &relative_prefix_string
     } else {
         ""
     };
 
-    let default_path_str = format!("{}{}.rs", relative_prefix, ident.name);
-    let secondary_path_str =
-        format!("{}{}{}mod.rs", relative_prefix, ident.name, path::MAIN_SEPARATOR);
+    let default_path_str = format!("{}{}.pt", relative_prefix, ident.as_str().to_case(Case::Snake));
     let default_path = dir_path.join(&default_path_str);
-    let secondary_path = dir_path.join(&secondary_path_str);
-    let default_exists = psess.source_map().file_exists(&default_path);
-    let secondary_exists = psess.source_map().file_exists(&secondary_path);
-
-    match (default_exists, secondary_exists) {
-        (true, false) => Ok(ModulePathSuccess {
+    if psess.source_map().file_exists(&default_path) {
+        Ok(ModulePathSuccess {
             file_path: default_path,
             dir_ownership: DirOwnership::Owned { relative: Some(ident) },
-        }),
-        (false, true) => Ok(ModulePathSuccess {
-            file_path: secondary_path,
-            dir_ownership: DirOwnership::Owned { relative: None },
-        }),
-        (false, false) => Err(ModError::FileNotFound(ident, default_path, secondary_path)),
-        (true, true) => Err(ModError::MultipleCandidates(ident, default_path, secondary_path)),
+        })
+    } else {
+        Err(ModError::FileNotFound(ident, default_path))
     }
 }
 
@@ -285,22 +273,11 @@ impl ModError<'_> {
                 span,
                 name: ident.map(|name| ModuleInBlockName { span, name }),
             }),
-            ModError::FileNotFound(name, default_path, secondary_path) => {
-                sess.dcx().emit_err(ModuleFileNotFound {
-                    span,
-                    name,
-                    default_path: default_path.display().to_string(),
-                    secondary_path: secondary_path.display().to_string(),
-                })
-            }
-            ModError::MultipleCandidates(name, default_path, secondary_path) => {
-                sess.dcx().emit_err(ModuleMultipleCandidates {
-                    span,
-                    name,
-                    default_path: default_path.display().to_string(),
-                    secondary_path: secondary_path.display().to_string(),
-                })
-            }
+            ModError::FileNotFound(name, path) => sess.dcx().emit_err(ModuleFileNotFound {
+                span,
+                name,
+                path: path.display().to_string(),
+            }),
             ModError::ParserError(err) => err.emit(),
         }
     }

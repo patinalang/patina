@@ -548,6 +548,9 @@ pub(in crate::rmeta) fn provide(providers: &mut Providers) {
         dependency_formats: |tcx, ()| Arc::new(crate::dependency_format::calculate(tcx)),
         has_global_allocator: |tcx, LocalCrate| CStore::from_tcx(tcx).has_global_allocator(),
         has_alloc_error_handler: |tcx, LocalCrate| CStore::from_tcx(tcx).has_alloc_error_handler(),
+        has_panic_handler: |_, LocalCrate| false,
+        required_panic_strategy: |tcx, LocalCrate| tcx.sess.opts.cg.panic,
+        panic_in_drop_strategy: |tcx, LocalCrate| tcx.sess.opts.unstable_opts.panic_in_drop,
         postorder_cnums: |tcx, ()| {
             tcx.arena.alloc_from_iter(
                 CStore::from_tcx(tcx).crate_dependencies_in_postorder(LOCAL_CRATE).into_iter(),

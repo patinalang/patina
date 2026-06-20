@@ -298,7 +298,7 @@ pub(crate) struct ModuleInBlockName {
 
 #[derive(Diagnostic)]
 #[diag("file not found for module `{$name}`", code = E0583)]
-#[help("to create the module `{$name}`, create file \"{$default_path}\" or \"{$secondary_path}\"")]
+#[help("to create the module `{$name}`, create file \"{$path}\"")]
 #[note(
     "if there is a `mod {$name}` elsewhere in the crate already, import it with `use crate::...` instead"
 )]
@@ -306,19 +306,7 @@ pub(crate) struct ModuleFileNotFound {
     #[primary_span]
     pub span: Span,
     pub name: Ident,
-    pub default_path: String,
-    pub secondary_path: String,
-}
-
-#[derive(Diagnostic)]
-#[diag("file for module `{$name}` found at both \"{$default_path}\" and \"{$secondary_path}\"", code = E0761)]
-#[help("delete or rename one of them to remove the ambiguity")]
-pub(crate) struct ModuleMultipleCandidates {
-    #[primary_span]
-    pub span: Span,
-    pub name: Ident,
-    pub default_path: String,
-    pub secondary_path: String,
+    pub path: String,
 }
 
 #[derive(Diagnostic)]

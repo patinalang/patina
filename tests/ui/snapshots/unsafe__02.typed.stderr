@@ -46,37 +46,9 @@ error: expected one of `=>`, `@`, `if`, or `|`, found `"nil"`
 LL |             a"nil" => "the atom nil",
    |              ^^^^^ expected one of `=>`, `@`, `if`, or `|`
 
-error[E0425]: cannot find value `safe_description` in this scope
-  --> tests/ui/src/unsafe__02.pt:24:24
-   |
-LL |     println!("{}, {}", safe_description, unsafe_description);
-   |                        ^^^^^^^^^^^^^^^^
-   |
-help: a local variable with a similar name exists
-   |
-LL -     println!("{}, {}", safe_description, unsafe_description);
-LL +     println!("{}, {}", safe_destription, unsafe_description);
-   |
 
-error[E0433]: cannot find type `Option` in this scope
-  --> tests/ui/src/unsafe__02.pt:5:13
-   |
-LL |     let v = Option::<int>::None as term;
-   |             ^^^^^^ use of undeclared type `Option`
+thread 'rustc' (50483468) panicked at /Users/konrad/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/odht-0.3.1/src/memory_layout.rs:214:9:
+assertion failed: raw_bytes.len() >= HEADER_SIZE
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: aborting due to 5 previous errors
 
-error[E0433]: cannot find type `Option` in this scope
-  --> tests/ui/src/unsafe__02.pt:18:13
-   |
-LL |             Option::<int>::None => "an empty integer option",
-   |             ^^^^^^ use of undeclared type `Option`
-
-error[E0433]: cannot find type `Option` in this scope
-  --> tests/ui/src/unsafe__02.pt:17:13
-   |
-LL |             Option::<str>::None => "an empty string option",
-   |             ^^^^^^ use of undeclared type `Option`
-
-error: aborting due to 9 previous errors
-
-Some errors have detailed explanations: E0425, E0433.
-For more information about an error, try `rustc --explain E0425`.

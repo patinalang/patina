@@ -4,17 +4,12 @@ error: cannot find macro `format` in this scope
 LL |     format!(
    |     ^^^^^^
 
-error[E0277]: the trait bound `(dyn CompSciStudent + 'static): Sized` is not satisfied
+error[E0277]: the trait bound `(dyn CompSciStudent + 'static): Core::Sized` is not satisfied
   --> tests/ui/src/trait/supertraits__01.pt:24:39
    |
 LL | fn comp_sci_student_greeting(student: dyn CompSciStudent) -> str {
-   |                                       ^^^^^^^^^^^^^^^^^^ the trait `Sized` is not implemented for `(dyn CompSciStudent + 'static)`
+   |                                       ^^^^^^^^^^^^^^^^^^ the trait `Core::Sized` is not implemented for `(dyn CompSciStudent + 'static)`
    |
-help: this trait has no implementations, consider adding one
-  --> <patina-prelude>:14:1
-   |
-LL | pub trait Sized: MetaSized {}
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
    = help: unsized fn params are gated as an unstable feature
 help: you can use `impl Trait` as the argument type
    |
@@ -43,17 +38,12 @@ note: function defined here
 LL | fn comp_sci_student_greeting(student: dyn CompSciStudent) -> str {
    |    ^^^^^^^^^^^^^^^^^^^^^^^^^ ---------------------------
 
-error[E0277]: the trait bound `(dyn CompSciStudent + 'static): Sized` is not satisfied
+error[E0277]: the trait bound `(dyn CompSciStudent + 'static): Core::Sized` is not satisfied
   --> tests/ui/src/trait/supertraits__01.pt:73:46
    |
 LL |     let greeting = comp_sci_student_greeting(student);
-   |                                              ^^^^^^^ the trait `Sized` is not implemented for `(dyn CompSciStudent + 'static)`
+   |                                              ^^^^^^^ the trait `Core::Sized` is not implemented for `(dyn CompSciStudent + 'static)`
    |
-help: this trait has no implementations, consider adding one
-  --> <patina-prelude>:14:1
-   |
-LL | pub trait Sized: MetaSized {}
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
    = note: all function arguments must have a statically known size
    = help: unsized fn params are gated as an unstable feature
 

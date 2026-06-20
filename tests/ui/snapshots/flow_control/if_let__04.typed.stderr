@@ -1,11 +1,4 @@
-error[E0369]: binary operation `==` cannot be applied to type `Foo`
-  --> tests/ui/src/flow_control/if_let__04.pt:12:17
-   |
-LL |     if Foo::Bar == a {
-   |        -------- ^^ - Foo
-   |        |
-   |        Foo
 
-error: aborting due to 1 previous error
-
-For more information about this error, try `rustc --explain E0369`.
+thread 'rustc' (50471056) panicked at /Users/konrad/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/odht-0.3.1/src/memory_layout.rs:214:9:
+assertion failed: raw_bytes.len() >= HEADER_SIZE
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

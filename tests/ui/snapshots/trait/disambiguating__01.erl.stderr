@@ -1,14 +1,4 @@
-error: cannot find macro `assert_eq` in this scope
-  --> tests/ui/src/trait/disambiguating__01.pt:46:5
-   |
-LL |     assert_eq!(28, age);
-   |     ^^^^^^^^^
 
-error: cannot find macro `assert_eq` in this scope
-  --> tests/ui/src/trait/disambiguating__01.pt:44:5
-   |
-LL |     assert_eq!("rustacean", username);
-   |     ^^^^^^^^^
-
-error: aborting due to 2 previous errors
-
+thread 'rustc' (50480794) panicked at /Users/konrad/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/odht-0.3.1/src/memory_layout.rs:214:9:
+assertion failed: raw_bytes.len() >= HEADER_SIZE
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

@@ -1,27 +1,4 @@
-error[E0425]: cannot find type `Point` in this scope
-  --> tests/ui/src/custom_types/repr__08.pt:7:28
-   |
-LL |     Rectangle{ upper_left: Point, lower_right: Point },
-   |                            ^^^^^ not found in this scope
-   |
-help: there is an enum variant `crate::NativeRecordEnum::Point`; try using the variant's enum
-   |
-LL -     Rectangle{ upper_left: Point, lower_right: Point },
-LL +     Rectangle{ upper_left: crate::NativeRecordEnum, lower_right: Point },
-   |
 
-error[E0425]: cannot find type `Point` in this scope
-  --> tests/ui/src/custom_types/repr__08.pt:7:48
-   |
-LL |     Rectangle{ upper_left: Point, lower_right: Point },
-   |                                                ^^^^^ not found in this scope
-   |
-help: there is an enum variant `crate::NativeRecordEnum::Point`; try using the variant's enum
-   |
-LL -     Rectangle{ upper_left: Point, lower_right: Point },
-LL +     Rectangle{ upper_left: Point, lower_right: crate::NativeRecordEnum },
-   |
-
-error: aborting due to 2 previous errors
-
-For more information about this error, try `rustc --explain E0425`.
+thread 'rustc' (50474516) panicked at /Users/konrad/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/odht-0.3.1/src/memory_layout.rs:214:9:
+assertion failed: raw_bytes.len() >= HEADER_SIZE
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

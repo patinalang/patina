@@ -1,4 +1,4 @@
-error: statement kind not yet implemented: Item(ItemId { owner_id: DefId(0:13 ~ DestructureStructures01[2b06]::main::Foo) })
+error: statement kind not yet implemented: Item(ItemId { owner_id: DefId(0:11 ~ DestructureStructures01[2b06]::main::Foo) })
   --> tests/ui/src/flow_control/match/destructuring/destructure_structures__01.pt:5:5
    |
 LL | /     struct Foo {

@@ -1,20 +1,4 @@
-warning: unreachable pattern
-  --> tests/ui/src/flow_control/match/binding__01.pt:25:14
-   |
-LL |         n @ (1 | 7 | 15 | 13) => println!("I'm a teen of age {:?}", n),
-   |              ^^^^^^^^^^^^^^^ no value can reach this
-   |
-note: multiple earlier patterns match some of the same values
-  --> tests/ui/src/flow_control/match/binding__01.pt:25:14
-   |
-LL |         n @ 1  ..= 12 => println!("I'm a child of age {:?}", n),
-   |             --------- matches some of the same values
-LL |         n @ 13 ..= 19 => println!("I'm a teen of age {:?}", n),
-   |             --------- matches some of the same values
-LL |         // A similar binding can be done when matching several values.
-LL |         n @ (1 | 7 | 15 | 13) => println!("I'm a teen of age {:?}", n),
-   |              ^^^^^^^^^^^^^^^ collectively making this unreachable
-   = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
 
-warning: 1 warning emitted
-
+thread 'rustc' (50467777) panicked at /Users/konrad/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/odht-0.3.1/src/memory_layout.rs:214:9:
+assertion failed: raw_bytes.len() >= HEADER_SIZE
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

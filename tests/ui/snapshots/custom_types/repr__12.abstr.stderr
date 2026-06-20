@@ -5,6 +5,7 @@ LL |     let opts: [TermToBinaryOpts] = [Deterministic, MinorVersion(2)];
    |                                     ^^^^^^^^^^^^^ not found in this scope
    |
 help: consider importing this unit variant
+  --> <patina-prelude>:11:1
    |
 LL + use crate::TermToBinaryOpts::Deterministic;
    |
@@ -16,6 +17,7 @@ LL |     let opts: [TermToBinaryOpts] = [Deterministic, MinorVersion(2)];
    |                                                    ^^^^^^^^^^^^ not found in this scope
    |
 help: consider importing this tuple variant
+  --> <patina-prelude>:11:1
    |
 LL + use crate::TermToBinaryOpts::MinorVersion;
    |

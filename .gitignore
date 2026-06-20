@@ -1,4 +1,5 @@
 /target
 tests/ui/snapshots/**/*.beam
 tests/ui/snapshots/**/*.eaf
+tests/ui/snapshots/**/*.rmeta
 erl_crash.dump

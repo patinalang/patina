@@ -1,33 +1,4 @@
-error: cannot find attribute `derive` in this scope
-  --> tests/ui/src/error/option_unwrap/defaults__02.pt:4:3
-   |
-LL | #[derive(Debug)]
-   |   ^^^^^^
 
-error[E0425]: cannot find type `Option` in this scope
-  --> tests/ui/src/error/option_unwrap/defaults__02.pt:8:19
-   |
-LL |     let no_fruit: Option<Fruit> = None;
-   |                   ^^^^^^ not found in this scope
-
-error[E0425]: cannot find value `None` in this scope
-  --> tests/ui/src/error/option_unwrap/defaults__02.pt:8:35
-   |
-LL |     let no_fruit: Option<Fruit> = None;
-   |                                   ^^^^ not found in this scope
-
-error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
-  --> tests/ui/src/error/option_unwrap/defaults__02.pt:11:9
-   |
-LL |         Some(Fruit::Kiwi)
-   |         ^^^^ not found in this scope
-
-error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
-  --> tests/ui/src/error/option_unwrap/defaults__02.pt:15:9
-   |
-LL |         Some(Fruit::Lemon)
-   |         ^^^^ not found in this scope
-
-error: aborting due to 5 previous errors
-
-For more information about this error, try `rustc --explain E0425`.
+thread 'rustc' (50491132) panicked at /Users/konrad/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/odht-0.3.1/src/memory_layout.rs:214:9:
+assertion failed: raw_bytes.len() >= HEADER_SIZE
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
