@@ -253,12 +253,12 @@ pub(crate) enum Pattern<'a> {
     /// list, or an occurrence of an expression that can be evaluated to a number at
     /// compile time), then Rep(P) = `{op,ANNO,Op,Rep(P_1),Rep(P_2)}`.
     #[serde(rename = "op")]
-    BinaryOp(Anno, Symbol, &'a Pattern<'a>, &'a Pattern<'a>),
+    BinaryOp(Anno, BinaryOp, &'a Pattern<'a>, &'a Pattern<'a>),
     /// If P is an operator pattern `Op P_0`, where `Op` is a unary operator (this is
     /// an occurrence of an expression that can be evaluated to a number at compile
     /// time), then Rep(P) = `{op,ANNO,Op,Rep(P_0)}`.
     #[serde(rename = "op")]
-    UnaryOp(Anno, Symbol, &'a Pattern<'a>),
+    UnaryOp(Anno, UnaryOp, &'a Pattern<'a>),
     /// If P is a parenthesized pattern `( P_0 )`, then Rep(P) = `Rep(P_0)`, that is,
     /// parenthesized patterns cannot be distinguished from their bodies.
     Parenthesized(&'a Pattern<'a>),
@@ -383,11 +383,11 @@ pub(crate) enum Expr<'a> {
     /// If E is an operator expression `E_1 Op E_2`, where `Op` is a binary operator
     /// other than match operator `=`, then Rep(E) = `{op,ANNO,Op,Rep(E_1),Rep(E_2)}`.
     #[serde(rename = "op")]
-    BinaryOp(Anno, Symbol, &'a Expr<'a>, &'a Expr<'a>),
+    BinaryOp(Anno, BinaryOp, &'a Expr<'a>, &'a Expr<'a>),
     /// If E is an operator expression `Op E_0`, where `Op` is a unary operator, then
     /// Rep(E) = `{op,ANNO,Op,Rep(E_0)}`.
     #[serde(rename = "op")]
-    UnaryOp(Anno, Symbol, &'a Expr<'a>),
+    UnaryOp(Anno, UnaryOp, &'a Expr<'a>),
     /// If E is a parenthesized expression `( E_0 )`, then Rep(E) = `Rep(E_0)`, that
     /// is, parenthesized expressions cannot be distinguished from their bodies.
     Parenthesized(&'a Expr<'a>),
@@ -752,11 +752,11 @@ pub(crate) enum GuardTest<'a> {
     /// operator other than match operator `=`, then Rep(Gt) =
     /// `{op,ANNO,Op,Rep(Gt_1),Rep(Gt_2)}`.
     #[serde(rename = "op")]
-    BinaryOp(Anno, Symbol, &'a GuardTest<'a>, &'a GuardTest<'a>),
+    BinaryOp(Anno, BinaryOp, &'a GuardTest<'a>, &'a GuardTest<'a>),
     /// If Gt is an operator guard test `Op Gt_0`, where `Op` is a unary operator,
     /// then Rep(Gt) = `{op,ANNO,Op,Rep(Gt_0)}`.
     #[serde(rename = "op")]
-    UnaryOp(Anno, Symbol, &'a GuardTest<'a>),
+    UnaryOp(Anno, UnaryOp, &'a GuardTest<'a>),
     /// If Gt is a parenthesized guard test `( Gt_0 )`, then Rep(Gt) = `Rep(Gt_0)`,
     /// that is, parenthesized guard tests cannot be distinguished from their bodies.
     Parenthesized(&'a GuardTest<'a>),
@@ -823,12 +823,12 @@ pub(crate) enum Type<'a> {
     /// is an occurrence of an expression that can be evaluated to an integer at
     /// compile time), then Rep(T) = `{op,ANNO,Op,Rep(T_1),Rep(T_2)}`.
     #[serde(rename = "op")]
-    BinaryOp(Anno, Symbol, Expr<'a>, Expr<'a>),
+    BinaryOp(Anno, BinaryOp, Expr<'a>, Expr<'a>),
     /// If T is an operator type `Op T_0`, where `Op` is a unary operator (this is an
     /// occurrence of an expression that can be evaluated to an integer at compile
     /// time), then Rep(T) = `{op,ANNO,Op,Rep(T_0)}`.
     #[serde(rename = "op")]
-    UnaryOp(Anno, Symbol, Expr<'a>),
+    UnaryOp(Anno, UnaryOp, Expr<'a>),
     /// If T is `( T_0 )`, then Rep(T) = `Rep(T_0)`, that is, parenthesized types
     /// cannot be distinguished from their bodies.
     Parenthesized(&'a Type<'a>),
@@ -965,6 +965,68 @@ pub(crate) enum AssociationType<'a> {
 #[derive(serde::Serialize, Debug, Clone, Copy)]
 #[serde(rename = "__type__field_type")]
 pub(crate) struct RecordFieldType<'a>(pub Anno, pub (Atom, Type<'a>));
+
+/* Binary Operators */
+
+#[derive(serde::Serialize, Debug, Clone, Copy)]
+#[serde(rename_all = "snake_case")]
+pub(crate) enum BinaryOp {
+    #[serde(rename = "/")]
+    Div,
+    #[serde(rename = "*")]
+    Mul,
+    #[serde(rename = "div")]
+    DivInt,
+    #[serde(rename = "rem")]
+    Rem,
+    Band,
+    And,
+    #[serde(rename = "+")]
+    Add,
+    #[serde(rename = "-")]
+    Sub,
+    Bor,
+    Bxor,
+    Bsl,
+    Bsr,
+    Or,
+    Xor,
+    #[serde(rename = "++")]
+    Concat,
+    #[serde(rename = "--")]
+    Subtract,
+    #[serde(rename = "==")]
+    Eq,
+    #[serde(rename = "/=")]
+    Ne,
+    #[serde(rename = "=<")]
+    Le,
+    #[serde(rename = "<")]
+    Lt,
+    #[serde(rename = ">=")]
+    Ge,
+    #[serde(rename = ">")]
+    Gt,
+    #[serde(rename = "=:=")]
+    EqExact,
+    #[serde(rename = "=/=")]
+    NeExact,
+    #[serde(rename = "!")]
+    Send,
+    Andalso,
+    Orelse,
+}
+
+#[derive(serde::Serialize, Debug, Clone, Copy)]
+#[serde(rename_all = "snake_case")]
+pub(crate) enum UnaryOp {
+    #[serde(rename = "+")]
+    Pos,
+    #[serde(rename = "-")]
+    Neg,
+    Bnot,
+    Not,
+}
 
 /* Helpers */
 

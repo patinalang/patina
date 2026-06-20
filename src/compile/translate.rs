@@ -3,7 +3,7 @@ mod elixir_compat;
 use std::path::PathBuf;
 
 use rustc_arena::DroplessArena;
-use rustc_ast::{BindingMode, LitKind};
+use rustc_ast::{BinOpKind, BindingMode, LitKind, UnOp};
 use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::{DefKind, Res};
@@ -15,7 +15,7 @@ use rustc_hir::{
 use rustc_middle::erl::{ErlCallTarget, ErlModuleId};
 use rustc_middle::span_bug;
 use rustc_middle::ty::TyCtxt;
-use rustc_span::{Ident, Span, Symbol, kw, sym};
+use rustc_span::{Ident, Span, Spanned, Symbol, kw, sym};
 
 use crate::compile::eaf_builder::EafBuilder;
 use crate::compile::impl_collector::ImplCollector;
@@ -308,6 +308,12 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 let clause = afb.clause(closure.fn_decl_span, patterns, clause_body);
                 afb.expr_fun(expr.span, [clause])
             }
+
+            ExprKind::Binary(op, left, right) => {
+                self.translate_binary_expr(op, left, right, expr, scope)
+            }
+
+            ExprKind::Unary(op, operand) => self.translate_unary_expr(op, operand, expr, scope),
 
             _ => not_implemented!(self.tcx, expr.span, "expression kind", expr.kind),
         }
@@ -688,5 +694,82 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         }
 
         (forms, exports)
+    }
+
+    fn translate_binary_expr(
+        &self,
+        op: Spanned<BinOpKind>,
+        left: &'tcx Expr<'tcx>,
+        right: &'tcx Expr<'tcx>,
+        expr: &'tcx Expr<'tcx>,
+        scope: &mut Scope,
+    ) -> eaf::Expr<'arena> {
+        let typeck = self.tcx.typeck(left.hir_id.owner.def_id);
+        let ty = typeck.expr_ty(left);
+
+        if op.node == BinOpKind::Add && ty.is_str() {
+            let left_bin_elem = self.afb.expr_binary_element(
+                left.span,
+                self.translate_expr(left, scope),
+                None,
+                Some([eaf::Tsl::Binary]),
+            );
+
+            let right_bin_elem = self.afb.expr_binary_element(
+                right.span,
+                self.translate_expr(right, scope),
+                None,
+                Some([eaf::Tsl::Binary]),
+            );
+
+            return self.afb.expr_binary(expr.span, [left_bin_elem, right_bin_elem]);
+        }
+
+        use BinOpKind::*;
+        let operator = match op.node {
+            Add if ty.is_array() || ty.is_array_slice() => eaf::BinaryOp::Concat,
+            Add => eaf::BinaryOp::Add,
+            Sub if ty.is_array() || ty.is_array_slice() => eaf::BinaryOp::Subtract,
+            Sub => eaf::BinaryOp::Sub,
+            Mul => eaf::BinaryOp::Mul,
+            Div if ty.is_floating_point() => eaf::BinaryOp::Div,
+            Div => eaf::BinaryOp::DivInt,
+            Rem => eaf::BinaryOp::Rem,
+            And => eaf::BinaryOp::Andalso,
+            Or => eaf::BinaryOp::Orelse,
+            BitXor => eaf::BinaryOp::Bxor,
+            BitAnd => eaf::BinaryOp::Band,
+            BitOr => eaf::BinaryOp::Bor,
+            Shl => eaf::BinaryOp::Bsl,
+            Shr => eaf::BinaryOp::Bsr,
+            Eq => eaf::BinaryOp::EqExact,
+            Ne => eaf::BinaryOp::NeExact,
+            Lt => eaf::BinaryOp::Lt,
+            Le => eaf::BinaryOp::Le,
+            Ge => eaf::BinaryOp::Ge,
+            Gt => eaf::BinaryOp::Gt,
+        };
+
+        let left = self.translate_expr(left, scope);
+        let right = self.translate_expr(right, scope);
+        self.afb.expr_binary_op(expr.span, operator, left, right)
+    }
+
+    fn translate_unary_expr(
+        &self,
+        op: UnOp,
+        operand: &'tcx Expr<'tcx>,
+        expr: &'tcx Expr<'tcx>,
+        scope: &mut Scope,
+    ) -> eaf::Expr<'arena> {
+        let def_id = operand.hir_id.owner.def_id;
+        let unary_op = match op {
+            UnOp::Not if self.tcx.typeck(def_id).expr_ty(operand).is_bool() => eaf::UnaryOp::Not,
+            UnOp::Not => eaf::UnaryOp::Bnot,
+            UnOp::Neg => eaf::UnaryOp::Neg,
+            UnOp::Deref => unimplemented!(),
+        };
+
+        self.afb.expr_unary_op(expr.span, unary_op, self.translate_expr(operand, scope))
     }
 }

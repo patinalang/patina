@@ -1,47 +1,8 @@
-error[E0368]: binary assignment operation `+=` cannot be applied to type `int`
+error: expression kind not yet implemented: AssignOp(Spanned { node: AddAssign, span: tests/ui/src/variable_bindings/mut__01.pt:11:21: 11:23 (#0) }, Expr { hir_id: HirId(DefId(0:10 ~ Mut01[1232]::main).33), kind: Path(Resolved(None, Path { span: tests/ui/src/variable_bindings/mut__01.pt:11:5: 11:20 (#0), res: Local(HirId(DefId(0:10 ~ Mut01[1232]::main).9)), segments: [PathSegment { ident: mutable_binding#0, hir_id: HirId(DefId(0:10 ~ Mut01[1232]::main).34), res: Local(HirId(DefId(0:10 ~ Mut01[1232]::main).9)), args: None, infer_args: true }] })), span: tests/ui/src/variable_bindings/mut__01.pt:11:5: 11:20 (#0) }, Expr { hir_id: HirId(DefId(0:10 ~ Mut01[1232]::main).35), kind: Lit(Spanned { node: Int(Pu128(1)), span: tests/ui/src/variable_bindings/mut__01.pt:11:24: 11:25 (#0) }), span: tests/ui/src/variable_bindings/mut__01.pt:11:24: 11:25 (#0) })
   --> tests/ui/src/variable_bindings/mut__01.pt:11:5
    |
 LL |     mutable_binding += 1;
-   |     ---------------^^^^^
-   |     |
-   |     cannot use `+=` on type `int`
+   |     ^^^^^^^^^^^^^^^^^^^^
 
-error[E0368]: binary assignment operation `+=` cannot be applied to type `int`
-  --> tests/ui/src/variable_bindings/mut__01.pt:16:5
-   |
-LL |     _immutable_binding += 1;
-   |     ------------------^^^^^
-   |     |
-   |     cannot use `+=` on type `int`
+error: aborting due to 1 previous error
 
-error[E0368]: binary assignment operation `+=` cannot be applied to type `int`
-  --> tests/ui/src/variable_bindings/mut__01.pt:22:9
-   |
-LL |         mutable_binding += 1;
-   |         ---------------^^^^^
-   |         |
-   |         cannot use `+=` on type `int`
-
-error[E0368]: binary assignment operation `+=` cannot be applied to type `int`
-  --> tests/ui/src/variable_bindings/mut__01.pt:26:9
-   |
-LL |         inner_mutable_binding += 1;
-   |         ---------------------^^^^^
-   |         |
-   |         cannot use `+=` on type `int`
-
-error[E0423]: expected function, found macro `println`
-  --> tests/ui/src/variable_bindings/mut__01.pt:27:9
-   |
-LL |         println("{} == {} + 1", inner_mutable_binding, mutable_binding);
-   |         ^^^^^^^ not a function
-   |
-help: use `!` to invoke the macro
-   |
-LL |         println!("{} == {} + 1", inner_mutable_binding, mutable_binding);
-   |                +
-
-error: aborting due to 5 previous errors
-
-Some errors have detailed explanations: E0368, E0423.
-For more information about an error, try `rustc --explain E0368`.

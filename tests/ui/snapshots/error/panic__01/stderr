@@ -4,14 +4,5 @@ error: cannot find macro `panic` in this scope
 LL |     if beverage == "lemonade" { panic!("AAAaaaaa!!!!"); }
    |                                 ^^^^^
 
-error[E0369]: binary operation `==` cannot be applied to type `str`
-  --> tests/ui/src/error/panic__01.pt:6:17
-   |
-LL |     if beverage == "lemonade" { panic!("AAAaaaaa!!!!"); }
-   |        -------- ^^ ---------- str
-   |        |
-   |        str
+error: aborting due to 1 previous error
 
-error: aborting due to 2 previous errors
-
-For more information about this error, try `rustc --explain E0369`.

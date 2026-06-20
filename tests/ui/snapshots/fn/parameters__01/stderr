@@ -1,19 +1,11 @@
-error[E0369]: cannot add `int` to `int`
-  --> tests/ui/src/fn/parameters__01.pt:13:7
-   |
-LL |     x + 1
-   |     - ^ - int
-   |     |
-   |     int
+warning: [{"tests/ui/src/fn/parameters__01.pt",
+           [{{12,1},erl_lint,{unused_function,{function,1}}},
+            {{19,13},
+             erl_lint,
+             {unexported_function,{'Elixir.Patina.Parameters01',function,1}}},
+            {{22,17},
+             erl_lint,
+             {unexported_function,{'Elixir.Patina.Parameters01',function,1}}}]}]
 
-error[E0369]: cannot add `int` to `_`
-  --> tests/ui/src/fn/parameters__01.pt:17:25
-   |
-LL |     let closure = |x| x + 42;
-   |                       - ^ -- int
-   |                       |
-   |                       _
+warning: 1 warning emitted
 
-error: aborting due to 2 previous errors
-
-For more information about this error, try `rustc --explain E0369`.

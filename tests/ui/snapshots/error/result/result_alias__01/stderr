@@ -34,15 +34,7 @@ error[E0599]: no method named `parse` found for type `str` in the current scope
 LL |         second_number_str.parse::<int>().map(|second_number| first_number * second_number)
    |                           ^^^^^ method not found in `str`
 
-error[E0369]: cannot multiply `_` by `_`
-  --> tests/ui/src/error/result/result_alias__01.pt:12:75
-   |
-LL |         second_number_str.parse::<int>().map(|second_number| first_number * second_number)
-   |                                                              ------------ ^ ------------- _
-   |                                                              |
-   |                                                              _
+error: aborting due to 6 previous errors
 
-error: aborting due to 7 previous errors
-
-Some errors have detailed explanations: E0369, E0425, E0433, E0531, E0599.
-For more information about an error, try `rustc --explain E0369`.
+Some errors have detailed explanations: E0425, E0433, E0531, E0599.
+For more information about an error, try `rustc --explain E0425`.

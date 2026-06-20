@@ -45,9 +45,9 @@ macro_rules! println {
 fn drink(beverage:
         str) ({
     // You shouldn't drink too many sugary beverages.
-    (if ((beverage as str) == ("lemonade" as str) as {type error}) {
+    (if ((beverage as str) == ("lemonade" as str) as bool) {
         ((/*ERROR*/) as {type error});
-    } as {type error})
+    } as ())
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("Some refreshing " as str),

@@ -1,11 +1,3 @@
-error[E0369]: binary operation `>` cannot be applied to type `int`
-  --> tests/ui/src/custom_types/constants__01.pt:9:7
-   |
-LL |     n > THRESHOLD
-   |     - ^ --------- int
-   |     |
-   |     int
-
 error[E0070]: invalid left-hand side of assignment
   --> tests/ui/src/custom_types/constants__01.pt:19:15
    |
@@ -20,10 +12,9 @@ error: internal compiler error: rust/compiler/rustc_middle/src/query/plumbing.rs
                                 
 
 
-thread 'rustc' (50625920) panicked at rust/compiler/rustc_middle/src/query/plumbing.rs:660:5:
+thread 'rustc' (50631380) panicked at rust/compiler/rustc_middle/src/query/plumbing.rs:660:5:
 Box<dyn Any>
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-error: aborting due to 3 previous errors
+error: aborting due to 2 previous errors
 
-Some errors have detailed explanations: E0070, E0369.
-For more information about an error, try `rustc --explain E0070`.
+For more information about this error, try `rustc --explain E0070`.

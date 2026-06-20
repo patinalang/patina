@@ -119,6 +119,7 @@ Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
 Semi
 Whitespace
 Ident
+Bang
 OpenParen
 Literal { kind: Str { terminated: true }, suffix_start: 14 }
 Comma

@@ -5,6 +5,14 @@ LL |     if Foo::Bar == a {
    |        -------- ^^ - Foo
    |        |
    |        Foo
+   |
+note: an implementation of `Core::PartialEq` might be missing for `Foo`
+  --> tests/ui/src/flow_control/if_let__04.pt:6:1
+   |
+LL | enum Foo {Bar}
+   | ^^^^^^^^ must implement `Core::PartialEq`
+note: the trait `Core::PartialEq` must be implemented
+  --> core.pt:351:0
 
 error: aborting due to 1 previous error
 

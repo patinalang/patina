@@ -22,15 +22,7 @@ error[E0599]: no method named `first` found for slice `[str]` in the current sco
 LL |     let opt = list.first().map(|first| {
    |                    ^^^^^ method not found in `[str]`
 
-error[E0369]: cannot multiply `int` by `_`
-  --> tests/ui/src/error/multiple_error_types/option_result__02.pt:8:40
-   |
-LL |         first.parse::<int>().map(|n| 2 * n)
-   |                                      - ^ - _
-   |                                      |
-   |                                      int
+error: aborting due to 4 previous errors
 
-error: aborting due to 5 previous errors
-
-Some errors have detailed explanations: E0369, E0425, E0433, E0599.
-For more information about an error, try `rustc --explain E0369`.
+Some errors have detailed explanations: E0425, E0433, E0599.
+For more information about an error, try `rustc --explain E0425`.

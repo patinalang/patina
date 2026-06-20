@@ -1,27 +1,22 @@
-error[E0369]: cannot add `int` to `int`
-  --> tests/ui/src/fn/parameters__02.pt:5:13
+warning: variant `Mul` is never constructed
+  --> tests/ui/src/fn/parameters__02.pt:18:5
    |
-LL |     || fx() + fy()
-   |        ---- ^ ---- int
-   |        |
-   |        int
-
-error[E0369]: cannot add `int` to `int`
-  --> tests/ui/src/fn/parameters__02.pt:9:7
+LL | enum MathOp {
+   |      ------ variant in this enum
+LL |     Add,
+LL |     Mul,
+   |     ^^^
    |
-LL |     x + y
-   |     - ^ - int
-   |     |
-   |     int
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
 
-error[E0369]: cannot multiply `int` by `int`
-  --> tests/ui/src/fn/parameters__02.pt:13:7
+error: expression kind not yet implemented: Match(Expr { hir_id: HirId(DefId(0:19 ~ Parameters02[fc96]::choose_op).5), kind: Path(Resolved(None, Path { span: tests/ui/src/fn/parameters__02.pt:22:11: 22:13 (#0), res: Local(HirId(DefId(0:19 ~ Parameters02[fc96]::choose_op).2)), segments: [PathSegment { ident: op#0, hir_id: HirId(DefId(0:19 ~ Parameters02[fc96]::choose_op).6), res: Local(HirId(DefId(0:19 ~ Parameters02[fc96]::choose_op).2)), args: None, infer_args: true }] })), span: tests/ui/src/fn/parameters__02.pt:22:11: 22:13 (#0) }, [Arm { hir_id: HirId(DefId(0:19 ~ Parameters02[fc96]::choose_op).11), span: tests/ui/src/fn/parameters__02.pt:23:9: 23:27 (#0), pat: Pat { hir_id: HirId(DefId(0:19 ~ Parameters02[fc96]::choose_op).10), kind: Expr(PatExpr { hir_id: HirId(DefId(0:19 ~ Parameters02[fc96]::choose_op).7), span: tests/ui/src/fn/parameters__02.pt:23:9: 23:20 (#0), kind: Path(Resolved(None, Path { span: tests/ui/src/fn/parameters__02.pt:23:9: 23:20 (#0), res: Def(Ctor(Variant, Const), DefId(0:16 ~ Parameters02[fc96]::MathOp::Add::{constructor#0})), segments: [PathSegment { ident: MathOp#0, hir_id: HirId(DefId(0:19 ~ Parameters02[fc96]::choose_op).8), res: Def(Enum, DefId(0:14 ~ Parameters02[fc96]::MathOp)), args: None, infer_args: true }, PathSegment { ident: Add#0, hir_id: HirId(DefId(0:19 ~ Parameters02[fc96]::choose_op).9), res: Def(Ctor(Variant, Const), DefId(0:16 ~ Parameters02[fc96]::MathOp::Add::{constructor#0})), args: None, infer_args: true }] })) }), span: tests/ui/src/fn/parameters__02.pt:23:9: 23:20 (#0), default_binding_modes: true }, guard: None, body: Expr { hir_id: HirId(DefId(0:19 ~ Parameters02[fc96]::choose_op).12), kind: Path(Resolved(None, Path { span: tests/ui/src/fn/parameters__02.pt:23:24: 23:27 (#0), res: Def(Fn, DefId(0:12 ~ Parameters02[fc96]::add)), segments: [PathSegment { ident: add#0, hir_id: HirId(DefId(0:19 ~ Parameters02[fc96]::choose_op).13), res: Def(Fn, DefId(0:12 ~ Parameters02[fc96]::add)), args: None, infer_args: true }] })), span: tests/ui/src/fn/parameters__02.pt:23:24: 23:27 (#0) } }, Arm { hir_id: HirId(DefId(0:19 ~ Parameters02[fc96]::choose_op).18), span: tests/ui/src/fn/parameters__02.pt:24:9: 24:27 (#0), pat: Pat { hir_id: HirId(DefId(0:19 ~ Parameters02[fc96]::choose_op).17), kind: Expr(PatExpr { hir_id: HirId(DefId(0:19 ~ Parameters02[fc96]::choose_op).14), span: tests/ui/src/fn/parameters__02.pt:24:9: 24:20 (#0), kind: Path(Resolved(None, Path { span: tests/ui/src/fn/parameters__02.pt:24:9: 24:20 (#0), res: Def(Ctor(Variant, Const), DefId(0:18 ~ Parameters02[fc96]::MathOp::Mul::{constructor#0})), segments: [PathSegment { ident: MathOp#0, hir_id: HirId(DefId(0:19 ~ Parameters02[fc96]::choose_op).15), res: Def(Enum, DefId(0:14 ~ Parameters02[fc96]::MathOp)), args: None, infer_args: true }, PathSegment { ident: Mul#0, hir_id: HirId(DefId(0:19 ~ Parameters02[fc96]::choose_op).16), res: Def(Ctor(Variant, Const), DefId(0:18 ~ Parameters02[fc96]::MathOp::Mul::{constructor#0})), args: None, infer_args: true }] })) }), span: tests/ui/src/fn/parameters__02.pt:24:9: 24:20 (#0), default_binding_modes: true }, guard: None, body: Expr { hir_id: HirId(DefId(0:19 ~ Parameters02[fc96]::choose_op).19), kind: Path(Resolved(None, Path { span: tests/ui/src/fn/parameters__02.pt:24:24: 24:27 (#0), res: Def(Fn, DefId(0:13 ~ Parameters02[fc96]::mul)), segments: [PathSegment { ident: mul#0, hir_id: HirId(DefId(0:19 ~ Parameters02[fc96]::choose_op).20), res: Def(Fn, DefId(0:13 ~ Parameters02[fc96]::mul)), args: None, infer_args: true }] })), span: tests/ui/src/fn/parameters__02.pt:24:24: 24:27 (#0) } }], Normal)
+  --> tests/ui/src/fn/parameters__02.pt:22:5
    |
-LL |     x * y
-   |     - ^ - int
-   |     |
-   |     int
+LL | /     match op {
+LL | |         MathOp::Add => add,
+LL | |         MathOp::Mul => mul,
+LL | |     }
+   | |_____^
 
-error: aborting due to 3 previous errors
+error: aborting due to 1 previous error; 1 warning emitted
 
-For more information about this error, try `rustc --explain E0369`.

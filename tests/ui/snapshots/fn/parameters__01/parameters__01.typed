@@ -54,13 +54,15 @@ fn function(x: int) -> int ({ ((x as int) + (1 as int) as int) } as int)
 
 fn main() ({
     let closure =
-        (|x| ((x as {type error}) + (42 as int) as {type error}) as
+        (|x| ((x as int) + (42 as int) as int) as
             {closure@tests/ui/src/fn/parameters__01.pt:17:19: 17:22});
     ((call_me as
             fn(fn(int) -> int) {call_me})((function as
             fn(int) -> int {function})) as ());
-    ((call_me as fn(fn(int) -> int) {call_me})((closure as {type error})) as
-        ());
+    ((call_me as
+            fn(fn(int) -> int) {call_me})((closure as
+            {closure@tests/ui/src/fn/parameters__01.pt:17:19: 17:22})) as ());
+
     ((call_me_ref as
             fn(fnref(int) -> int) {call_me_ref})((function as
             fn(int) -> int {function})) as ());

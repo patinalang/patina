@@ -1,17 +1,16 @@
-error[E0600]: cannot apply unary operator `-` to type `int`
-  --> tests/ui/src/flow_control/match/destructuring/destructure_list__01.pt:6:20
+error[E0004]: non-exhaustive patterns: `[..=-2_isize, _, _]`, `[2_isize, _, _]` and `[4_isize.., _, _]` not covered
+  --> tests/ui/src/flow_control/match/destructuring/destructure_list__01.pt:8:11
    |
-LL |     let list = [1, -2, 6];
-   |                    ^^ cannot apply unary operator `-`
+LL |     match list {
+   |           ^^^^ patterns `[..=-2_isize, _, _]`, `[2_isize, _, _]` and `[4_isize.., _, _]` not covered
    |
-   = note: unsigned values cannot be negated
-
-error: requires `neg` lang_item
-  --> tests/ui/src/flow_control/match/destructuring/destructure_list__01.pt:20:10
+   = note: the matched value is of type `[int; 3]`
+help: ensure that all possible cases are being handled by adding a match arm with a wildcard pattern, a match arm with multiple or-patterns as shown, or multiple match arms
    |
-LL |         [-1, second, ..] => println!(
-   |          ^^
+LL ~         ),
+LL ~         [..=-2_isize, _, _] | [2_isize, _, _] | [4_isize.., _, _] => todo!(),
+   |
 
-error: aborting due to 2 previous errors
+error: aborting due to 1 previous error
 
-For more information about this error, try `rustc --explain E0600`.
+For more information about this error, try `rustc --explain E0004`.

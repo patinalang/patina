@@ -1,43 +1,14 @@
-error[E0369]: cannot multiply `int` by `int`
-  --> tests/ui/src/expression__03.pt:8:27
-   |
-LL |         let x_squared = x * x;
-   |                         - ^ - int
-   |                         |
-   |                         int
-
-error[E0369]: cannot multiply `int` by `int`
-  --> tests/ui/src/expression__03.pt:9:32
-   |
-LL |         let x_cube = x_squared * x;
-   |                      --------- ^ - int
-   |                      |
-   |                      int
-
-error[E0369]: cannot add `int` to `int`
-  --> tests/ui/src/expression__03.pt:12:16
-   |
-LL |         x_cube + x_squared + x
-   |         ------ ^ --------- int
-   |         |
-   |         int
-
-error[E0369]: cannot add `int` to `int`
-  --> tests/ui/src/expression__03.pt:12:28
-   |
-LL |         x_cube + x_squared + x
-   |         ------------------ ^ - int
-   |         |
-   |         int
-
-error[E0369]: cannot multiply `int` by `int`
-  --> tests/ui/src/expression__03.pt:17:11
+warning: unused arithmetic operation that must be used
+  --> tests/ui/src/expression__03.pt:17:9
    |
 LL |         2 * x;
-   |         - ^ - int
-   |         |
-   |         int
+   |         ^^^^^ the arithmetic operation produces a value
+   |
+   = note: `#[warn(unused_must_use)]` (part of `#[warn(unused)]`) on by default
+help: use `let _ = ...` to ignore the resulting value
+   |
+LL |         let _ = 2 * x;
+   |         +++++++
 
-error: aborting due to 5 previous errors
+warning: 1 warning emitted
 
-For more information about this error, try `rustc --explain E0369`.

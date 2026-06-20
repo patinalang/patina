@@ -52,8 +52,7 @@ fn double_first(list: [str])
             {type error}).map((|first|
             ({
                 (((first as {type error}).parse::<int>() as
-                        {type error}).map((|n|
-                        ((2 as int) * (n as {type error}) as {type error}) as
+                        {type error}).map((|n| ((2 as int) * (n as int) as int) as
                         {closure@tests/ui/src/error/multiple_error_types/option_result__01.pt:8:34: 8:37}))
                     as {type error})
             } as {type error}) as

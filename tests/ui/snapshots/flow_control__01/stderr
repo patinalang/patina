@@ -1,11 +1,10 @@
-error[E0369]: binary operation `>` cannot be applied to type `int`
-  --> tests/ui/src/flow_control__01.pt:8:10
+error: expression kind not yet implemented: If(Expr { hir_id: HirId(DefId(0:10 ~ FlowControl01[e808]::main).7), kind: Binary(Spanned { node: Gt, span: tests/ui/src/flow_control__01.pt:8:10: 8:11 (#0) }, Expr { hir_id: HirId(DefId(0:10 ~ FlowControl01[e808]::main).8), kind: Path(Resolved(None, Path { span: tests/ui/src/flow_control__01.pt:8:8: 8:9 (#0), res: Local(HirId(DefId(0:10 ~ FlowControl01[e808]::main).5)), segments: [PathSegment { ident: n#0, hir_id: HirId(DefId(0:10 ~ FlowControl01[e808]::main).9), res: Local(HirId(DefId(0:10 ~ FlowControl01[e808]::main).5)), args: None, infer_args: true }] })), span: tests/ui/src/flow_control__01.pt:8:8: 8:9 (#0) }, Expr { hir_id: HirId(DefId(0:10 ~ FlowControl01[e808]::main).10), kind: Lit(Spanned { node: Int(Pu128(4)), span: tests/ui/src/flow_control__01.pt:8:12: 8:13 (#0) }), span: tests/ui/src/flow_control__01.pt:8:12: 8:13 (#0) }), span: tests/ui/src/flow_control__01.pt:8:8: 8:13 (#0) }, Expr { hir_id: HirId(DefId(0:10 ~ FlowControl01[e808]::main).17), kind: Block(Block { stmts: [Stmt { hir_id: HirId(DefId(0:10 ~ FlowControl01[e808]::main).16), kind: Semi(Expr { hir_id: HirId(DefId(0:10 ~ FlowControl01[e808]::main).12), kind: Assign(Expr { hir_id: HirId(DefId(0:10 ~ FlowControl01[e808]::main).13), kind: Path(Resolved(None, Path { span: tests/ui/src/flow_control__01.pt:9:9: 9:10 (#0), res: Local(HirId(DefId(0:10 ~ FlowControl01[e808]::main).5)), segments: [PathSegment { ident: n#0, hir_id: HirId(DefId(0:10 ~ FlowControl01[e808]::main).14), res: Local(HirId(DefId(0:10 ~ FlowControl01[e808]::main).5)), args: None, infer_args: true }] })), span: tests/ui/src/flow_control__01.pt:9:9: 9:10 (#0) }, Expr { hir_id: HirId(DefId(0:10 ~ FlowControl01[e808]::main).15), kind: Lit(Spanned { node: Int(Pu128(4)), span: tests/ui/src/flow_control__01.pt:9:13: 9:14 (#0) }), span: tests/ui/src/flow_control__01.pt:9:13: 9:14 (#0) }, tests/ui/src/flow_control__01.pt:9:11: 9:12 (#0)), span: tests/ui/src/flow_control__01.pt:9:9: 9:14 (#0) }), span: tests/ui/src/flow_control__01.pt:9:9: 9:15 (#0) }], expr: None, hir_id: HirId(DefId(0:10 ~ FlowControl01[e808]::main).11), rules: DefaultBlock, span: tests/ui/src/flow_control__01.pt:8:14: 10:6 (#0), targeted_by_break: false }, None), span: tests/ui/src/flow_control__01.pt:8:14: 10:6 (#0) }, None)
+  --> tests/ui/src/flow_control__01.pt:8:5
    |
-LL |     if n > 4 {
-   |        - ^ - int
-   |        |
-   |        int
+LL | /     if n > 4 {
+LL | |         n = 4;
+LL | |     }
+   | |_____^
 
 error: aborting due to 1 previous error
 
-For more information about this error, try `rustc --explain E0369`.

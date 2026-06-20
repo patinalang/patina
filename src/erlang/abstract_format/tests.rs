@@ -270,7 +270,7 @@ fn pattern_binary_op() {
     // Rep(P) = {op, ANNO, Op, Rep(P_1), Rep(P_2)}
     let v = Pattern::BinaryOp(
         anno(),
-        sym("++"),
+        BinaryOp::Concat,
         r!(Pattern::Var(anno(), sym("X"))),
         r!(Pattern::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1)))),
     );
@@ -285,7 +285,7 @@ fn pattern_unary_op() {
     // Rep(P) = {op, ANNO, Op, Rep(P_0)}
     let v = Pattern::UnaryOp(
         anno(),
-        sym("-"),
+        UnaryOp::Neg,
         r!(Pattern::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1)))),
     );
     let expected = term(tuple(&[atom("op"), anno_bytes(), atom("-"), integer_lit(1)]));
@@ -450,7 +450,7 @@ fn expr_binary_op() {
     // Rep(E) = {op, ANNO, Op, Rep(E_1), Rep(E_2)}
     let v = Expr::BinaryOp(
         anno(),
-        sym("+"),
+        BinaryOp::Add,
         r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1)))),
         r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(2)))),
     );
@@ -465,7 +465,7 @@ fn expr_unary_op() {
     // Rep(E) = {op, ANNO, Op, Rep(E_0)}
     let v = Expr::UnaryOp(
         anno(),
-        sym("-"),
+        UnaryOp::Neg,
         r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1)))),
     );
     let expected = term(tuple(&[atom("op"), anno_bytes(), atom("-"), integer_lit(1)]));
@@ -712,7 +712,7 @@ fn guard_test_binary_op() {
     // Rep(Gt) = {op, ANNO, Op, Rep(Gt_1), Rep(Gt_2)}
     let v = GuardTest::BinaryOp(
         anno(),
-        sym(">="),
+        BinaryOp::Ge,
         r!(GuardTest::Var(anno(), sym("X"))),
         r!(GuardTest::AtomicLiteral(AtomicLiteral::Integer(anno(), big(0)))),
     );
@@ -725,7 +725,7 @@ fn guard_test_binary_op() {
 eaf_test! {
 fn guard_test_unary_op() {
     // Rep(Gt) = {op, ANNO, Op, Rep(Gt_0)}
-    let v = GuardTest::UnaryOp(anno(), sym("not"), r!(GuardTest::Var(anno(), sym("X"))));
+    let v = GuardTest::UnaryOp(anno(), UnaryOp::Not, r!(GuardTest::Var(anno(), sym("X"))));
     let expected = term(tuple(&[atom("op"), anno_bytes(), atom("not"), var_lit("X")]));
     assert_eq!(to_bytes(&v).unwrap(), expected);
 }
@@ -1862,7 +1862,7 @@ fn type_binary_op() {
     // Rep(T) = {op, ANNO, Op, Rep(T_1), Rep(T_2)}
     let v = Type::BinaryOp(
         anno(),
-        sym("*"),
+        BinaryOp::Mul,
         Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(2))),
         Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(3))),
     );
@@ -1877,7 +1877,7 @@ fn type_unary_op() {
     // Rep(T) = {op, ANNO, Op, Rep(T_0)}
     let v = Type::UnaryOp(
         anno(),
-        sym("-"),
+        UnaryOp::Neg,
         Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1))),
     );
     let expected = term(tuple(&[atom("op"), anno_bytes(), atom("-"), integer_lit(1)]));
@@ -2241,7 +2241,7 @@ fn type_range_with_negated_lower_bound() {
         (
             r!(Type::UnaryOp(
                 anno(),
-                sym("-"),
+                UnaryOp::Neg,
                 Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1))),
             )),
             r!(Type::AtomicLiteral(AtomicLiteral::Integer(anno(), big(5)))),

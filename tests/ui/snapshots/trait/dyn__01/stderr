@@ -1,11 +1,3 @@
-error[E0369]: binary operation `<` cannot be applied to type `float`
-  --> tests/ui/src/trait/dyn__01.pt:28:22
-   |
-LL |     if random_number < 0.5 {
-   |        ------------- ^ --- float
-   |        |
-   |        float
-
 error[E0277]: the trait bound `dyn Animal: Core::Sized` is not satisfied
   --> tests/ui/src/trait/dyn__01.pt:37:9
    |
@@ -42,7 +34,7 @@ LL |     } else {
 LL ~         Box::new(Cow {})
    |
 
-error: aborting due to 4 previous errors
+error: aborting due to 3 previous errors
 
-Some errors have detailed explanations: E0277, E0369, E0746.
+Some errors have detailed explanations: E0277, E0746.
 For more information about an error, try `rustc --explain E0277`.

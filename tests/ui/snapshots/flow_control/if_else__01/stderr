@@ -1,60 +1,14 @@
-error[E0369]: binary operation `<` cannot be applied to type `int`
-  --> tests/ui/src/flow_control/if_else__01.pt:7:10
+error: expression kind not yet implemented: If(Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).7), kind: Binary(Spanned { node: Lt, span: tests/ui/src/flow_control/if_else__01.pt:7:10: 7:11 (#0) }, Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).8), kind: Path(Resolved(None, Path { span: tests/ui/src/flow_control/if_else__01.pt:7:8: 7:9 (#0), res: Local(HirId(DefId(0:10 ~ IfElse01[72c1]::main).5)), segments: [PathSegment { ident: n#0, hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).9), res: Local(HirId(DefId(0:10 ~ IfElse01[72c1]::main).5)), args: None, infer_args: true }] })), span: tests/ui/src/flow_control/if_else__01.pt:7:8: 7:9 (#0) }, Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).10), kind: Lit(Spanned { node: Int(Pu128(0)), span: tests/ui/src/flow_control/if_else__01.pt:7:12: 7:13 (#0) }), span: tests/ui/src/flow_control/if_else__01.pt:7:12: 7:13 (#0) }), span: tests/ui/src/flow_control/if_else__01.pt:7:8: 7:13 (#0) }, Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).28), kind: Block(Block { stmts: [Stmt { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).27), kind: Semi(Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).12), kind: Block(Block { stmts: [Stmt { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).26), kind: Semi(Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).14), kind: Call(Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).15), kind: Path(Resolved(None, Path { span: <patina-prelude>:40:25: 40:38 (#1), res: Def(ExternMod, DefId(0:11 ~ IfElse01[72c1]::io::put_chars)), segments: [PathSegment { ident: io#1, hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).16), res: Def(ExternMod, DefId(0:3 ~ IfElse01[72c1]::io)), args: None, infer_args: true }, PathSegment { ident: put_chars#1, hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).17), res: Def(ExternMod, DefId(0:11 ~ IfElse01[72c1]::io::put_chars)), args: None, infer_args: true }] })), span: <patina-prelude>:40:25: 40:38 (#1) }, [Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).18), kind: Array([Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).19), kind: Call(Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).20), kind: Path(Resolved(None, Path { span: <patina-prelude>:40:39: 40:61 (#2), res: Def(ExternMod, DefId(0:12 ~ IfElse01[72c1]::patina_fmt::display)), segments: [PathSegment { ident: patina_fmt#2, hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).21), res: Def(ExternMod, DefId(0:4 ~ IfElse01[72c1]::patina_fmt)), args: None, infer_args: true }, PathSegment { ident: display#2, hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).22), res: Def(ExternMod, DefId(0:12 ~ IfElse01[72c1]::patina_fmt::display)), args: None, infer_args: true }] })), span: <patina-prelude>:40:39: 40:61 (#2) }, [Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).23), kind: Path(Resolved(None, Path { span: tests/ui/src/flow_control/if_else__01.pt:8:34: 8:35 (#0), res: Local(HirId(DefId(0:10 ~ IfElse01[72c1]::main).5)), segments: [PathSegment { ident: n#0, hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).24), res: Local(HirId(DefId(0:10 ~ IfElse01[72c1]::main).5)), args: None, infer_args: true }] })), span: tests/ui/src/flow_control/if_else__01.pt:8:34: 8:35 (#0) }]), span: <patina-prelude>:40:39: 40:61 (#2) }, Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).25), kind: Lit(Spanned { node: Str(" is negative", Cooked), span: <patina-prelude>:40:39: 40:61 (#2) }), span: <patina-prelude>:40:39: 40:61 (#2) }]), span: <patina-prelude>:40:39: 40:61 (#2) }]), span: <patina-prelude>:40:25: 40:62 (#1) }), span: <patina-prelude>:40:25: 40:63 (#1) }], expr: None, hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).13), rules: DefaultBlock, span: <patina-prelude>:40:23: 40:65 (#1), targeted_by_break: false }, None), span: <patina-prelude>:40:23: 40:65 (#1) }), span: <patina-prelude>:40:23: 40:65 (#1) }], expr: None, hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).11), rules: DefaultBlock, span: tests/ui/src/flow_control/if_else__01.pt:7:14: 9:6 (#0), targeted_by_break: false }, None), span: tests/ui/src/flow_control/if_else__01.pt:7:14: 9:6 (#0) }, Some(Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).29), kind: If(Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).30), kind: Binary(Spanned { node: Gt, span: tests/ui/src/flow_control/if_else__01.pt:9:17: 9:18 (#0) }, Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).31), kind: Path(Resolved(None, Path { span: tests/ui/src/flow_control/if_else__01.pt:9:15: 9:16 (#0), res: Local(HirId(DefId(0:10 ~ IfElse01[72c1]::main).5)), segments: [PathSegment { ident: n#0, hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).32), res: Local(HirId(DefId(0:10 ~ IfElse01[72c1]::main).5)), args: None, infer_args: true }] })), span: tests/ui/src/flow_control/if_else__01.pt:9:15: 9:16 (#0) }, Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).33), kind: Lit(Spanned { node: Int(Pu128(0)), span: tests/ui/src/flow_control/if_else__01.pt:9:19: 9:20 (#0) }), span: tests/ui/src/flow_control/if_else__01.pt:9:19: 9:20 (#0) }), span: tests/ui/src/flow_control/if_else__01.pt:9:15: 9:20 (#0) }, Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).51), kind: Block(Block { stmts: [Stmt { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).50), kind: Semi(Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).35), kind: Block(Block { stmts: [Stmt { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).49), kind: Semi(Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).37), kind: Call(Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).38), kind: Path(Resolved(None, Path { span: <patina-prelude>:40:25: 40:38 (#3), res: Def(ExternMod, DefId(0:11 ~ IfElse01[72c1]::io::put_chars)), segments: [PathSegment { ident: io#3, hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).39), res: Def(ExternMod, DefId(0:3 ~ IfElse01[72c1]::io)), args: None, infer_args: true }, PathSegment { ident: put_chars#3, hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).40), res: Def(ExternMod, DefId(0:11 ~ IfElse01[72c1]::io::put_chars)), args: None, infer_args: true }] })), span: <patina-prelude>:40:25: 40:38 (#3) }, [Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).41), kind: Array([Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).42), kind: Call(Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).43), kind: Path(Resolved(None, Path { span: <patina-prelude>:40:39: 40:61 (#4), res: Def(ExternMod, DefId(0:12 ~ IfElse01[72c1]::patina_fmt::display)), segments: [PathSegment { ident: patina_fmt#4, hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).44), res: Def(ExternMod, DefId(0:4 ~ IfElse01[72c1]::patina_fmt)), args: None, infer_args: true }, PathSegment { ident: display#4, hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).45), res: Def(ExternMod, DefId(0:12 ~ IfElse01[72c1]::patina_fmt::display)), args: None, infer_args: true }] })), span: <patina-prelude>:40:39: 40:61 (#4) }, [Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).46), kind: Path(Resolved(None, Path { span: tests/ui/src/flow_control/if_else__01.pt:10:34: 10:35 (#0), res: Local(HirId(DefId(0:10 ~ IfElse01[72c1]::main).5)), segments: [PathSegment { ident: n#0, hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).47), res: Local(HirId(DefId(0:10 ~ IfElse01[72c1]::main).5)), args: None, infer_args: true }] })), span: tests/ui/src/flow_control/if_else__01.pt:10:34: 10:35 (#0) }]), span: <patina-prelude>:40:39: 40:61 (#4) }, Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).48), kind: Lit(Spanned { node: Str(" is positive", Cooked), span: <patina-prelude>:40:39: 40:61 (#4) }), span: <patina-prelude>:40:39: 40:61 (#4) }]), span: <patina-prelude>:40:39: 40:61 (#4) }]), span: <patina-prelude>:40:25: 40:62 (#3) }), span: <patina-prelude>:40:25: 40:63 (#3) }], expr: None, hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).36), rules: DefaultBlock, span: <patina-prelude>:40:23: 40:65 (#3), targeted_by_break: false }, None), span: <patina-prelude>:40:23: 40:65 (#3) }), span: <patina-prelude>:40:23: 40:65 (#3) }], expr: None, hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).34), rules: DefaultBlock, span: tests/ui/src/flow_control/if_else__01.pt:9:21: 11:6 (#0), targeted_by_break: false }, None), span: tests/ui/src/flow_control/if_else__01.pt:9:21: 11:6 (#0) }, Some(Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).52), kind: Block(Block { stmts: [Stmt { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).69), kind: Semi(Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).54), kind: Block(Block { stmts: [Stmt { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).68), kind: Semi(Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).56), kind: Call(Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).57), kind: Path(Resolved(None, Path { span: <patina-prelude>:40:25: 40:38 (#5), res: Def(ExternMod, DefId(0:11 ~ IfElse01[72c1]::io::put_chars)), segments: [PathSegment { ident: io#5, hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).58), res: Def(ExternMod, DefId(0:3 ~ IfElse01[72c1]::io)), args: None, infer_args: true }, PathSegment { ident: put_chars#5, hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).59), res: Def(ExternMod, DefId(0:11 ~ IfElse01[72c1]::io::put_chars)), args: None, infer_args: true }] })), span: <patina-prelude>:40:25: 40:38 (#5) }, [Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).60), kind: Array([Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).61), kind: Call(Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).62), kind: Path(Resolved(None, Path { span: <patina-prelude>:40:39: 40:61 (#6), res: Def(ExternMod, DefId(0:12 ~ IfElse01[72c1]::patina_fmt::display)), segments: [PathSegment { ident: patina_fmt#6, hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).63), res: Def(ExternMod, DefId(0:4 ~ IfElse01[72c1]::patina_fmt)), args: None, infer_args: true }, PathSegment { ident: display#6, hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).64), res: Def(ExternMod, DefId(0:12 ~ IfElse01[72c1]::patina_fmt::display)), args: None, infer_args: true }] })), span: <patina-prelude>:40:39: 40:61 (#6) }, [Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).65), kind: Path(Resolved(None, Path { span: tests/ui/src/flow_control/if_else__01.pt:12:30: 12:31 (#0), res: Local(HirId(DefId(0:10 ~ IfElse01[72c1]::main).5)), segments: [PathSegment { ident: n#0, hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).66), res: Local(HirId(DefId(0:10 ~ IfElse01[72c1]::main).5)), args: None, infer_args: true }] })), span: tests/ui/src/flow_control/if_else__01.pt:12:30: 12:31 (#0) }]), span: <patina-prelude>:40:39: 40:61 (#6) }, Expr { hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).67), kind: Lit(Spanned { node: Str(" is zero", Cooked), span: <patina-prelude>:40:39: 40:61 (#6) }), span: <patina-prelude>:40:39: 40:61 (#6) }]), span: <patina-prelude>:40:39: 40:61 (#6) }]), span: <patina-prelude>:40:25: 40:62 (#5) }), span: <patina-prelude>:40:25: 40:63 (#5) }], expr: None, hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).55), rules: DefaultBlock, span: <patina-prelude>:40:23: 40:65 (#5), targeted_by_break: false }, None), span: <patina-prelude>:40:23: 40:65 (#5) }), span: <patina-prelude>:40:23: 40:65 (#5) }], expr: None, hir_id: HirId(DefId(0:10 ~ IfElse01[72c1]::main).53), rules: DefaultBlock, span: tests/ui/src/flow_control/if_else__01.pt:11:12: 13:6 (#0), targeted_by_break: false }, None), span: tests/ui/src/flow_control/if_else__01.pt:11:12: 13:6 (#0) })), span: tests/ui/src/flow_control/if_else__01.pt:9:12: 13:6 (#0) }))
+  --> tests/ui/src/flow_control/if_else__01.pt:7:5
    |
-LL |     if n < 0 {
-   |        - ^ - int
-   |        |
-   |        int
+LL | /     if n < 0 {
+LL | |         print!("{} is negative", n);
+LL | |     } else if n > 0 {
+LL | |         print!("{} is positive", n);
+LL | |     } else {
+LL | |         print!("{} is zero", n);
+LL | |     }
+   | |_____^
 
-error[E0369]: binary operation `>` cannot be applied to type `int`
-  --> tests/ui/src/flow_control/if_else__01.pt:9:17
-   |
-LL |     } else if n > 0 {
-   |               - ^ - int
-   |               |
-   |               int
+error: aborting due to 1 previous error
 
-error[E0369]: binary operation `<` cannot be applied to type `int`
-  --> tests/ui/src/flow_control/if_else__01.pt:16:14
-   |
-LL |         if n < 10 && n > -10 {
-   |            - ^ -- int
-   |            |
-   |            int
-
-error[E0600]: cannot apply unary operator `-` to type `int`
-  --> tests/ui/src/flow_control/if_else__01.pt:16:26
-   |
-LL |         if n < 10 && n > -10 {
-   |                          ^^^ cannot apply unary operator `-`
-   |
-   = note: unsigned values cannot be negated
-
-error[E0369]: binary operation `>` cannot be applied to type `int`
-  --> tests/ui/src/flow_control/if_else__01.pt:16:24
-   |
-LL |         if n < 10 && n > -10 {
-   |                      - ^ --- int
-   |                      |
-   |                      int
-
-error[E0369]: cannot multiply `int` by `int`
-  --> tests/ui/src/flow_control/if_else__01.pt:20:16
-   |
-LL |             10 * n
-   |             -- ^ - int
-   |             |
-   |             int
-
-error[E0369]: cannot divide `int` by `int`
-  --> tests/ui/src/flow_control/if_else__01.pt:25:15
-   |
-LL |             n / 2
-   |             - ^ - int
-   |             |
-   |             int
-
-error: aborting due to 7 previous errors
-
-Some errors have detailed explanations: E0369, E0600.
-For more information about an error, try `rustc --explain E0369`.

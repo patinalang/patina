@@ -75,15 +75,58 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
     /// Binary string literal.
     pub(crate) fn expr_binary_string(&self, span: impl IntoAnno, s: Symbol) -> eaf::Expr<'arena> {
         let anno = span.into_anno(self.source_map);
-        let chars = self.arena.alloc_from_iter(s.as_str().chars());
-        let value = eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::String(anno, chars));
-        let elem = eaf::BinElement {
-            anno,
-            value,
-            size: eaf::BinElemSize::Default,
-            tsl: eaf::BinElemTsl::Default,
-        };
-        eaf::Expr::Bin(anno, self.arena.alloc_slice(&[elem]))
+        let value = self.expr_string(anno, s);
+        let elem = self.expr_binary_element(anno, value, None, None::<[eaf::Tsl; 0]>);
+        self.expr_binary(anno, [elem])
+    }
+
+    pub(crate) fn expr_binary_element(
+        &self,
+        span: impl IntoAnno,
+        value: eaf::Expr<'arena>,
+        size: Option<eaf::BinElemSize<'arena>>,
+        tsl: Option<impl IntoIterator<Item = eaf::Tsl>>,
+    ) -> eaf::BinElement<'arena, eaf::Expr<'arena>> {
+        let anno = span.into_anno(self.source_map);
+        let size = size.unwrap_or(eaf::BinElemSize::Default);
+        let tsl = tsl
+            .map(|tsl| eaf::BinElemTsl::Tsl(self.arena.alloc_from_iter(tsl)))
+            .unwrap_or(eaf::BinElemTsl::Default);
+        eaf::BinElement { anno, value, size, tsl }
+    }
+
+    pub(crate) fn expr_binary(
+        &self,
+        span: impl IntoAnno,
+        elements: impl IntoIterator<Item = eaf::BinElement<'arena, eaf::Expr<'arena>>>,
+    ) -> eaf::Expr<'arena> {
+        let anno = span.into_anno(self.source_map);
+        let elements = self.arena.alloc_from_iter(elements);
+        eaf::Expr::Bin(anno, elements)
+    }
+
+    pub(crate) fn expr_binary_op(
+        &self,
+        span: impl IntoAnno,
+        op: eaf::BinaryOp,
+        left: eaf::Expr<'arena>,
+        right: eaf::Expr<'arena>,
+    ) -> eaf::Expr<'arena> {
+        eaf::Expr::BinaryOp(
+            span.into_anno(self.source_map),
+            op,
+            self.arena.alloc(left),
+            self.arena.alloc(right),
+        )
+    }
+
+    pub(crate) fn expr_unary_op(
+        &self,
+        span: impl IntoAnno,
+        op: eaf::UnaryOp,
+        expr: eaf::Expr<'arena>,
+    ) -> eaf::Expr<'arena> {
+        eaf::Expr::UnaryOp(span.into_anno(self.source_map), op, self.arena.alloc(expr))
     }
 
     pub(crate) fn expr_var(&self, span: impl IntoAnno, name: Symbol) -> eaf::Expr<'arena> {

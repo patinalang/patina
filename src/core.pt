@@ -45,3 +45,350 @@ pub trait FnMut<Args: Tuple>: FnOnce<Args> {
 pub trait Fn<Args: Tuple>: FnMut<Args> {
     extern "rust-call" fn call(&self, args: Args) -> Self::Output;
 }
+
+#[lang = "add"]
+pub const trait Add<Rhs = Self> {
+    type Output;
+    fn add(self, rhs: Rhs) -> Self::Output;
+}
+
+#[lang = "add_assign"]
+pub const trait AddAssign<Rhs = Self> {
+    fn add_assign(&mut self, rhs: Rhs);
+}
+
+macro_rules! add_impl {
+    ($($t:ty)*) => ($(
+        impl const Add for $t {
+            type Output = $t;
+            fn add(self, other: $t) -> $t { self + other }
+        }
+        impl const AddAssign for $t {
+            fn add_assign(&mut self, other: $t) { *self += other; }
+        }
+    )*)
+}
+
+add_impl! { int float str }
+
+#[lang = "mul"]
+pub const trait Mul<Rhs = Self> {
+    type Output;
+    fn mul(self, rhs: Rhs) -> Self::Output;
+}
+
+#[lang = "mul_assign"]
+pub const trait MulAssign<Rhs = Self> {
+    fn mul_assign(&mut self, rhs: Rhs);
+}
+
+macro_rules! mul_impl {
+    ($($t:ty)*) => ($(
+        impl const Mul for $t {
+            type Output = $t;
+            fn mul(self, other: $t) -> $t { self * other }
+        }
+        impl const MulAssign for $t {
+            fn mul_assign(&mut self, other: $t) { *self *= other; }
+        }
+    )*)
+}
+
+mul_impl! { int float }
+
+#[lang = "sub"]
+pub const trait Sub<Rhs = Self> {
+    type Output;
+    fn sub(self, rhs: Rhs) -> Self::Output;
+}
+
+#[lang = "sub_assign"]
+pub const trait SubAssign<Rhs = Self> {
+    fn sub_assign(&mut self, rhs: Rhs);
+}
+
+macro_rules! sub_impl {
+    ($($t:ty)*) => ($(
+        impl const Sub for $t {
+            type Output = $t;
+            fn sub(self, other: $t) -> $t { self - other }
+        }
+        impl const SubAssign for $t {
+            fn sub_assign(&mut self, other: $t) { *self -= other; }
+        }
+    )*)
+}
+
+sub_impl! { int float }
+
+#[lang = "div"]
+pub const trait Div<Rhs = Self> {
+    type Output;
+    fn div(self, rhs: Rhs) -> Self::Output;
+}
+
+#[lang = "div_assign"]
+pub const trait DivAssign<Rhs = Self> {
+    fn div_assign(&mut self, rhs: Rhs);
+}
+
+macro_rules! div_impl {
+    ($($t:ty)*) => ($(
+        impl const Div for $t {
+            type Output = $t;
+            fn div(self, other: $t) -> $t { self / other }
+        }
+        impl const DivAssign for $t {
+            fn div_assign(&mut self, other: $t) { *self /= other; }
+        }
+    )*)
+}
+
+div_impl! { int float }
+
+#[lang = "rem"]
+pub const trait Rem<Rhs = Self> {
+    type Output;
+    fn rem(self, rhs: Rhs) -> Self::Output;
+}
+
+#[lang = "rem_assign"]
+pub const trait RemAssign<Rhs = Self> {
+    fn rem_assign(&mut self, rhs: Rhs);
+}
+
+macro_rules! rem_impl {
+    ($($t:ty)*) => ($(
+        impl const Rem for $t {
+            type Output = $t;
+            fn rem(self, other: $t) -> $t { self % other }
+        }
+        impl const RemAssign for $t {
+            fn rem_assign(&mut self, other: $t) { *self %= other; }
+        }
+    )*)
+}
+
+rem_impl! { int float }
+
+#[lang = "not"]
+pub const trait Not {
+    type Output;
+
+    #[must_use]
+    fn not(self) -> Self::Output;
+}
+
+impl const Not for bool {
+    type Output = bool;
+    fn not(self) -> bool {
+        !self
+    }
+}
+
+impl const Not for int {
+    type Output = int;
+    fn not(self) -> int {
+        !self
+    }
+}
+
+#[lang = "neg"]
+pub const trait Neg {
+    type Output;
+
+    #[must_use = "this returns the result of the operation, without modifying the original"]
+    fn neg(self) -> Self::Output;
+}
+
+macro_rules! neg_impl {
+    ($($t:ty)*) => ($(
+        impl const Neg for $t {
+            type Output = $t;
+            fn neg(self) -> $t { -self }
+        }
+    )*)
+}
+
+neg_impl! { int float }
+
+#[lang = "bitand"]
+pub const trait BitAnd<Rhs = Self> {
+    type Output;
+
+    #[must_use]
+    fn bitand(self, rhs: Rhs) -> Self::Output;
+}
+
+#[lang = "bitand_assign"]
+pub const trait BitAndAssign<Rhs = Self> {
+    fn bitand_assign(&mut self, rhs: Rhs);
+}
+
+macro_rules! bitand_impl {
+    ($($t:ty)*) => ($(
+        impl const BitAnd for $t {
+            type Output = $t;
+            fn bitand(self, other: $t) -> $t { self & other }
+        }
+        impl const BitAndAssign for $t {
+            fn bitand_assign(&mut self, other: $t) { *self &= other; }
+        }
+    )*)
+}
+
+bitand_impl! { int }
+
+#[lang = "bitor"]
+pub const trait BitOr<Rhs = Self> {
+    type Output;
+
+    #[must_use]
+    fn bitor(self, rhs: Rhs) -> Self::Output;
+}
+
+#[lang = "bitor_assign"]
+pub const trait BitOrAssign<Rhs = Self> {
+    fn bitor_assign(&mut self, rhs: Rhs);
+}
+
+macro_rules! bitor_impl {
+    ($($t:ty)*) => ($(
+        impl const BitOr for $t {
+            type Output = $t;
+            fn bitor(self, other: $t) -> $t { self | other }
+        }
+        impl const BitOrAssign for $t {
+            fn bitor_assign(&mut self, other: $t) { *self |= other; }
+        }
+    )*)
+}
+
+bitor_impl! { int }
+
+#[lang = "bitxor"]
+pub const trait BitXor<Rhs = Self> {
+    type Output;
+
+    #[must_use]
+    fn bitxor(self, rhs: Rhs) -> Self::Output;
+}
+
+#[lang = "bitxor_assign"]
+pub const trait BitXorAssign<Rhs = Self> {
+    fn bitxor_assign(&mut self, rhs: Rhs);
+}
+
+macro_rules! bitxor_impl {
+    ($($t:ty)*) => ($(
+        impl const BitXor for $t {
+            type Output = $t;
+            fn bitxor(self, other: $t) -> $t { self ^ other }
+        }
+        impl const BitXorAssign for $t {
+            fn bitxor_assign(&mut self, other: $t) { *self ^= other; }
+        }
+    )*)
+}
+
+bitxor_impl! { int }
+
+#[lang = "shl"]
+pub const trait Shl<Rhs = Self> {
+    type Output;
+
+    #[must_use]
+    fn shl(self, rhs: Rhs) -> Self::Output;
+}
+
+#[lang = "shl_assign"]
+pub const trait ShlAssign<Rhs = Self> {
+    fn shl_assign(&mut self, rhs: Rhs);
+}
+
+macro_rules! shl_impl {
+    ($($t:ty)*) => ($(
+        impl const Shl for $t {
+            type Output = $t;
+            fn shl(self, other: $t) -> $t { self << other }
+        }
+        impl const ShlAssign for $t {
+            fn shl_assign(&mut self, other: $t) { *self <<= other; }
+        }
+    )*)
+}
+
+shl_impl! { int }
+
+#[lang = "shr"]
+pub const trait Shr<Rhs = Self> {
+    type Output;
+
+    #[must_use]
+    fn shr(self, rhs: Rhs) -> Self::Output;
+}
+
+#[lang = "shr_assign"]
+pub const trait ShrAssign<Rhs = Self> {
+    fn shr_assign(&mut self, rhs: Rhs);
+}
+
+macro_rules! shr_impl {
+    ($($t:ty)*) => ($(
+        impl const Shr for $t {
+            type Output = $t;
+            fn shr(self, other: $t) -> $t { self >> other }
+        }
+        impl const ShrAssign for $t {
+            fn shr_assign(&mut self, other: $t) { *self >>= other; }
+        }
+    )*)
+}
+
+shr_impl! { int }
+
+#[lang = "eq"]
+pub const trait PartialEq<Rhs = Self> {
+    #[must_use]
+    fn eq(&self, other: &Rhs) -> bool;
+
+    #[must_use]
+    fn ne(&self, other: &Rhs) -> bool {
+        !self.eq(other)
+    }
+}
+
+macro_rules! partial_eq_impl {
+    ($($t:ty)*) => ($(
+        impl const PartialEq for $t {
+            fn eq(&self, other: &$t) -> bool { (*self) == (*other) }
+        }
+    )*)
+}
+
+partial_eq_impl! { bool int float str }
+
+#[lang = "partial_ord"]
+pub const trait PartialOrd<Rhs = Self> {
+    #[must_use]
+    fn lt(&self, other: &Rhs) -> bool;
+    #[must_use]
+    fn le(&self, other: &Rhs) -> bool;
+    #[must_use]
+    fn gt(&self, other: &Rhs) -> bool;
+    #[must_use]
+    fn ge(&self, other: &Rhs) -> bool;
+}
+
+macro_rules! partial_ord_impl {
+    ($($t:ty)*) => ($(
+        impl const PartialOrd for $t {
+            fn lt(&self, other: &$t) -> bool { (*self) < (*other) }
+            fn le(&self, other: &$t) -> bool { (*self) <= (*other) }
+            fn gt(&self, other: &$t) -> bool { (*self) > (*other) }
+            fn ge(&self, other: &$t) -> bool { (*self) >= (*other) }
+        }
+    )*)
+}
+
+partial_ord_impl! { bool int float str }
