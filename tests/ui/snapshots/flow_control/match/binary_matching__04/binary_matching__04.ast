@@ -1,0 +1,13 @@
+// source: patina-by-example/src/flow_control/match/binary_matching.md
+// block: 4/5
+
+pub fn main() {
+    let text: str = "Patina!";
+    // For literals, types are optional unless you want to override a default.
+    // In that case, you use `as type` instead of `@ type()`.
+
+
+
+    // The shorthand form can also be used with literals. 
+    (/*ERROR*/)
+}

@@ -1,0 +1,66 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/error/option_unwrap/defaults.md
+// block: 1/4
+
+#[derive(Debug)]
+enum Fruit { Apple, Orange, Banana, Kiwi, Lemon, }
+
+pub fn main() {
+    let apple = Some(Fruit::Apple);
+    let orange = Some(Fruit::Orange);
+    let no_fruit: Option<Fruit> = None;
+
+    let first_available_fruit = no_fruit.or(orange).or(apple);
+    {
+        io::put_chars([["first_available_fruit: ",
+                            patina_fmt::debug(first_available_fruit)]]);
+        io::nl();
+    };
+    // first_available_fruit: Some(Orange)
+
+    // `or` moves its argument.
+    // In the example above, `or(orange)` returned a `Some`, so `or(apple)` was not invoked.
+    // But the variable named `apple` has been moved regardless, and cannot be used anymore.
+    // println!("Variable apple was moved, so this line won't compile: {:?}", apple);
+    // TODO: uncomment the line above to see the compiler error
+}

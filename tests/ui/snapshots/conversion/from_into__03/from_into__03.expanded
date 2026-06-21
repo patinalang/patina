@@ -1,0 +1,61 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/conversion/from_into.md
+// block: 3/4
+
+use Std::Convert::Into;
+
+#[derive(Debug)]
+struct Number {
+    value: int,
+}
+
+impl Into<Number> for int {
+    fn into(self) -> Number { Number { value: self } }
+}
+
+pub fn main() {
+    let integer = 5;
+    // Try removing the type annotation
+    let num: Number = integer.into();
+    { io::put_chars([["My number is ", patina_fmt::debug(num)]]); io::nl(); };
+}

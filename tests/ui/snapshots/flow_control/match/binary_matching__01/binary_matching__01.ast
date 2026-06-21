@@ -1,0 +1,8 @@
+// source: patina-by-example/src/flow_control/match/binary_matching.md
+// block: 1/5
+
+pub fn main() {
+
+
+    (/*ERROR*/)
+}

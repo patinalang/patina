@@ -1,0 +1,176 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/fn/methods.md
+// block: 1/1
+
+struct Point {
+    x: float,
+    y: float,
+}
+
+// Implementation block, all `Point` associated functions & methods go in here
+impl Point {
+    // This is an "associated function" because this function is associated with
+    // a particular type, that is, Point.
+    //
+    // Associated functions don't need to be called with an instance.
+    // These functions are generally used like constructors.
+    fn origin()
+        ->
+            Point ({
+        (Point { x: (0.0 as float), y: (0.0 as float) } as Point)
+    } as Point)
+
+    // Another associated function, taking two arguments:
+    fn new(x: float, y: float)
+        ->
+            Point ({ (Point { x: (x as float), y: (y as float) } as Point) }
+        as Point)
+}
+
+struct Rectangle {
+    p1: Point,
+    p2: Point,
+}
+
+impl Rectangle {
+    // This is a method
+    // `self` is sugar for `self: Self`, where `Self` is the type of the
+    // caller object. In this case `Self` = `Rectangle`
+    fn area(self)
+        ->
+            float ({
+        // `self` gives access to the struct fields via the dot operator
+        let Point {  x: x1,  y: y1 } = ((self as Rectangle).p1 as Point);
+        let Point {  x: x2,  y: y2 } = ((self as Rectangle).p2 as Point);
+
+        // `abs` is a `float` method that returns the absolute value of the
+        // caller
+        ((((((x1 as float) - (x2 as float) as float)) *
+                (((y1 as float) - (y2 as float) as float)) as float)).abs() as
+            {type error})
+    } as {type error})
+
+    fn perimeter(self)
+        ->
+            float ({
+        let Point {  x: x1,  y: y1 } = ((self as Rectangle).p1 as Point);
+        let Point {  x: x2,  y: y2 } = ((self as Rectangle).p2 as Point);
+
+        ((2.0 as float) *
+            ((((((x1 as float) - (x2 as float) as float)).abs() as
+                    {type error}) +
+                ((((y1 as float) - (y2 as float) as float)).abs() as
+                    {type error}) as {type error})) as float)
+    } as float)
+
+    // Values in BEAM are immutable, so traditionally "mut" methods return
+    // the new value instead.
+    fn translate(self, x: float, y: float)
+        ->
+            Self ({
+        (Rectangle {
+            p1:
+                (Point {
+                    x:
+                        ((((self as Rectangle).p1 as Point).x as float) +
+                            (x as float) as float),
+                    y:
+                        ((((self as Rectangle).p1 as Point).y as float) +
+                            (y as float) as float) } as Point),
+            p2:
+                (Point {
+                    x:
+                        ((((self as Rectangle).p2 as Point).x as float) +
+                            (x as float) as float),
+                    y:
+                        ((((self as Rectangle).p2 as Point).y as float) +
+                            (y as float) as float) } as Point) } as Rectangle)
+    } as Rectangle)
+}
+
+fn main() ({
+    let rectangle =
+        (Rectangle {
+
+            // Associated functions are called using double colons
+            p1: ((Point::origin as fn() -> Point {Point::origin})() as Point),
+            p2:
+                ((Point::new as
+                        fn(float, float) -> Point {Point::new})((3.0 as float),
+                    (4.0 as float)) as Point) } as Rectangle);
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("Rectangle perimeter: " as str),
+                            ((patina_fmt::display as
+                                    fn(term) -> term)(
+
+                                // Methods are called using the dot operator
+                                // Note that the first argument `self` is implicitly passed, i.e.
+                                // `rectangle.perimeter()` === `Rectangle::perimeter(rectangle)`
+                                ((rectangle as Rectangle).perimeter() as float)) as term)]
+                        as [term; 2])] as [[term; 2]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("Rectangle area: " as str),
+                            ((patina_fmt::display as
+                                    fn(term) -> term)(((rectangle as Rectangle).area() as
+                                    float)) as term)] as [term; 2])] as [[term; 2]; 1])) as
+            term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+
+    // `mut` keyword lets us rebind the variable in the next statement.
+    let mut square =
+        (Rectangle {
+            p1: ((Point::origin as fn() -> Point {Point::origin})() as Point),
+            p2:
+                ((Point::new as
+                        fn(float, float) -> Point {Point::new})((1.0 as float),
+                    (1.0 as float)) as Point) } as Rectangle);
+
+    ((square as Rectangle) =
+        ((square as Rectangle).translate((1.0 as float), (1.0 as float)) as
+            Rectangle) as ());
+} as ())

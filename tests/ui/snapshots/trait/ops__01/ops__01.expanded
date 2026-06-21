@@ -1,0 +1,91 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/trait/ops.md
+// block: 1/1
+
+use Std::Ops;
+
+struct Foo;
+struct Bar;
+
+#[derive(Debug)]
+struct FooBar;
+
+#[derive(Debug)]
+struct BarFoo;
+
+// The `Std::Ops::Add` trait is used to specify the functionality of `+`.
+// Here, we make `Add<Bar>` - the trait for addition with a RHS of type `Bar`.
+// The following block implements the operation: Foo + Bar = FooBar
+impl Ops::Add<Bar> for Foo {
+    type Output = FooBar;
+
+    fn add(self, _rhs: Bar) -> FooBar {
+        { io::put_chars([["> Foo.add(Bar) was called"]]); io::nl(); };
+
+        FooBar
+    }
+}
+
+// By reversing the types, we end up implementing non-commutative addition.
+// Here, we make `Add<Foo>` - the trait for addition with a RHS of type `Foo`.
+// This block implements the operation: Bar + Foo = BarFoo
+impl Ops::Add<Foo> for Bar {
+    type Output = BarFoo;
+
+    fn add(self, _rhs: Foo) -> BarFoo {
+        { io::put_chars([["> Bar.add(Foo) was called"]]); io::nl(); };
+
+        BarFoo
+    }
+}
+
+pub fn main() {
+    {
+        io::put_chars([["Foo + Bar = ", patina_fmt::debug(Foo + Bar)]]);
+        io::nl();
+    };
+    {
+        io::put_chars([["Bar + Foo = ", patina_fmt::debug(Bar + Foo)]]);
+        io::nl();
+    };
+}

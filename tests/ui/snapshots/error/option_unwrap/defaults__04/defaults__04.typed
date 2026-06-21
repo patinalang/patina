@@ -1,0 +1,113 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/error/option_unwrap/defaults.md
+// block: 4/4
+
+enum Fruit { Apple, Orange, Banana, Kiwi, Lemon, }
+
+fn main() ({
+    let mut my_fruit: Option<Fruit> = (None as {type error});
+    let get_lemon_as_fallback =
+        (||
+            ({
+                ({
+                    ((io::put_chars as
+                            fn(term) -> term)(([([("Providing lemon as fallback" as
+                                            str)] as [str; 1])] as [[str; 1]; 1])) as term);
+                    ((io::nl as fn() -> term)() as term);
+                } as ());
+                (Fruit::Lemon as Fruit)
+            } as Fruit) as
+            {closure@tests/ui/src/error/option_unwrap/defaults__04.pt:9:33: 9:35});
+    let first_available_fruit =
+        ((my_fruit as
+                {type error}).get_or_insert_with((get_lemon_as_fallback as
+                {closure@tests/ui/src/error/option_unwrap/defaults__04.pt:9:33: 9:35}))
+            as {type error});
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("first_available_fruit is: " as str),
+                            ((patina_fmt::debug as
+                                    fn(term) -> term)((first_available_fruit as {type error}))
+                                as term)] as [term; 2])] as [[term; 2]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("my_fruit is: " as str),
+                            ((patina_fmt::debug as
+                                    fn(term) -> term)((my_fruit as {type error})) as term)] as
+                        [term; 2])] as [[term; 2]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    // Providing lemon as fallback
+    // first_available_fruit is: Lemon
+    // my_fruit is: Some(Lemon)
+
+    // If the Option has a value, it is left unchanged, and the closure is not invoked
+    let mut my_apple =
+        ((Some as {type error})((Fruit::Apple as Fruit)) as {type error});
+    let should_be_apple =
+        ((my_apple as
+                {type error}).get_or_insert_with((get_lemon_as_fallback as
+                {closure@tests/ui/src/error/option_unwrap/defaults__04.pt:9:33: 9:35}))
+            as {type error});
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("should_be_apple is: " as str),
+                            ((patina_fmt::debug as
+                                    fn(term) -> term)((should_be_apple as {type error})) as
+                                term)] as [term; 2])] as [[term; 2]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("my_apple is unchanged: " as str),
+                            ((patina_fmt::debug as
+                                    fn(term) -> term)((my_apple as {type error})) as term)] as
+                        [term; 2])] as [[term; 2]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    // The output is a follows. Note that the closure `get_lemon_as_fallback` is not invoked
+    // should_be_apple is: Apple
+    // my_apple is unchanged: Some(Apple)
+} as ())

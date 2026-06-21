@@ -1,0 +1,29 @@
+// source: patina-by-example/src/primitives/maps.md
+// block: 1/1
+
+fn call(number: str) -> str {
+    match number {
+        "798-1364" =>
+            "We're sorry, the call cannot be completed as dialed.
+            Please hang up and try again.",
+        "645-7689" =>
+            "Hello, this is Mr. Awesome's Pizza. My name is Fred.
+            What can I get for you today?",
+        _ => "Hi! Who is this again?",
+    }
+}
+
+pub fn main() {
+
+    // Returns Option<str>
+
+    // `.insert()` returns an updated map.
+    // The value must be used, otherwise it will emit a compilation warning.
+
+
+
+    // Like structs, maps can also be updated using the special `..` syntax
+
+    // `for` will iterate over the (key, value) pairs in arbitrary order.
+    (/*ERROR*/)
+}

@@ -1,0 +1,169 @@
+#![allow(internal_features)]
+
+
+
+
+
+
+
+
+
+
+// source: patina-by-example/src/error/option_unwrap/map.md
+// block: 1/1
+
+#![allow(dead_code)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+#[allow(unused_imports)]
+use Core::*;
+#[allow(unused)]
+extern mod io;
+#[allow(unused)]
+extern mod patina_fmt;
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+enum Food { Apple, Carrot, Potato, }
+
+struct Peeled(Food);
+struct Chopped(Food);
+struct Cooked(Food);
+
+// Peeling food. If there isn't any, then return `None`.
+// Otherwise, return the peeled food.
+fn peel(food: Option<Food>)
+    ->
+        Option<Peeled> ({
+    (match (food as {type error}) {
+        Some(food) =>
+            ((Some as
+                    {type error})(((Peeled as
+                        fn(Food) -> Peeled {Peeled})((food as {type error})) as
+                    Peeled)) as {type error}),
+        None => (None as {type error}),
+    } as {type error})
+} as {type error})
+
+// Chopping food. If there isn't any, then return `None`.
+// Otherwise, return the chopped food.
+fn chop(peeled: Option<Peeled>)
+    ->
+        Option<Chopped> ({
+    (match (peeled as {type error}) {
+        Some(Peeled(food)) =>
+            ((Some as
+                    {type error})(((Chopped as
+                        fn(Food) -> Chopped {Chopped})((food as Food)) as Chopped))
+                as {type error}),
+        None => (None as {type error}),
+    } as {type error})
+} as {type error})
+
+// Cooking food. Here, we showcase `map()` instead of `match` for case handling.
+fn cook(chopped: Option<Chopped>)
+    ->
+        Option<Cooked> ({
+    ((chopped as
+            {type error}).map((|Chopped(food)|
+            ((Cooked as fn(Food) -> Cooked {Cooked})((food as Food)) as
+                Cooked) as
+            {closure@tests/ui/src/error/option_unwrap/map__01.pt:32:17: 32:32}))
+        as {type error})
+} as {type error})
+
+// A function to peel, chop, and cook food all in sequence.
+// We chain multiple uses of `map()` to simplify the code.
+fn process(food: Option<Food>)
+    ->
+        Option<Cooked> ({
+    ((((food as
+                    {type error}).map((|f|
+                    ((Peeled as fn(Food) -> Peeled {Peeled})((f as Food)) as
+                        Peeled) as
+                    {closure@tests/ui/src/error/option_unwrap/map__01.pt:38:14: 38:17}))
+                as
+                {type error}).map((|Peeled(f)|
+                ((Chopped as fn(Food) -> Chopped {Chopped})((f as Food)) as
+                    Chopped) as
+                {closure@tests/ui/src/error/option_unwrap/map__01.pt:39:14: 39:25}))
+            as
+            {type error}).map((|Chopped(f)|
+            ((Cooked as fn(Food) -> Cooked {Cooked})((f as Food)) as Cooked)
+            as
+            {closure@tests/ui/src/error/option_unwrap/map__01.pt:40:14: 40:26}))
+        as {type error})
+} as {type error})
+
+// Check whether there's food or not before trying to eat it!
+fn eat(food:
+        Option<Cooked>) ({
+    (match (food as {type error}) {
+        Some(food) => {
+            ((io::put_chars as
+                    fn(term) -> term)(([([("Mmm. I love " as str),
+                                ((patina_fmt::debug as
+                                        fn(term) -> term)((food as {type error})) as term)] as
+                            [term; 2])] as [[term; 2]; 1])) as term);
+            ((io::nl as fn() -> term)() as term);
+        }
+        None => {
+            ((io::put_chars as
+                    fn(term) -> term)(([([("Oh no! It wasn\'t edible." as str)]
+                            as [str; 1])] as [[str; 1]; 1])) as term);
+            ((io::nl as fn() -> term)() as term);
+        }
+    } as ())
+} as ())
+
+fn main() ({
+    let apple =
+        ((Some as {type error})((Food::Apple as Food)) as {type error});
+    let carrot =
+        ((Some as {type error})((Food::Carrot as Food)) as {type error});
+    let potato = (None as {type error});
+
+    let cooked_apple =
+        ((cook as
+                fn({type error}) -> {type error} {cook})(((chop as
+                    fn({type error}) -> {type error} {chop})(((peel as
+                        fn({type error}) -> {type error} {peel})((apple as
+                        {type error})) as {type error})) as {type error})) as
+            {type error});
+    let cooked_carrot =
+        ((cook as
+                fn({type error}) -> {type error} {cook})(((chop as
+                    fn({type error}) -> {type error} {chop})(((peel as
+                        fn({type error}) -> {type error} {peel})((carrot as
+                        {type error})) as {type error})) as {type error})) as
+            {type error});
+    // Let's try the simpler looking `process()` now.
+    let cooked_potato =
+        ((process as
+                fn({type error}) -> {type error} {process})((potato as
+                {type error})) as {type error});
+
+    ((eat as fn({type error}) {eat})((cooked_apple as {type error})) as ());
+    ((eat as fn({type error}) {eat})((cooked_carrot as {type error})) as ());
+    ((eat as fn({type error}) {eat})((cooked_potato as {type error})) as ());
+} as ())

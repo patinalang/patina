@@ -1,8 +1,0 @@
-error: literal kind not yet implemented: Bool(true)
-  --> tests/ui/src/variable_bindings__01.pt:6:21
-   |
-LL |     let a_boolean = true;
-   |                     ^^^^
-
-error: aborting due to 1 previous error
-

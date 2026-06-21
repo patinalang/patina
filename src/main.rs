@@ -24,24 +24,57 @@ pub(crate) enum EmitStage {
     Eaf,
     Abstr,
     Beam,
+    Meta,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub(crate) enum Stage {
-    Dump(DumpStage),
-    Emit(EmitStage),
+    Tokens,
+    Ast,
+    Expanded,
+    Typed,
+    Erl,
+    Eaf,
+    Abstr,
+    Beam,
+    Meta,
+}
+
+impl From<DumpStage> for Stage {
+    fn from(stage: DumpStage) -> Self {
+        match stage {
+            DumpStage::Tokens => Stage::Tokens,
+            DumpStage::Ast => Stage::Ast,
+            DumpStage::Expanded => Stage::Expanded,
+            DumpStage::Typed => Stage::Typed,
+            DumpStage::Erl => Stage::Erl,
+        }
+    }
+}
+
+impl From<EmitStage> for Stage {
+    fn from(stage: EmitStage) -> Self {
+        match stage {
+            EmitStage::Eaf => Stage::Eaf,
+            EmitStage::Abstr => Stage::Abstr,
+            EmitStage::Beam => Stage::Beam,
+            EmitStage::Meta => Stage::Meta,
+        }
+    }
 }
 
 #[derive(Parser, Debug)]
 #[command(name = "patina", about = "Compile Patina source files.")]
 struct Args {
-    /// Dump intermediate compiler output to stdout.
-    #[arg(long, value_name = "STAGE", conflicts_with = "emit")]
-    dump: Option<DumpStage>,
-
     /// Emit compiled output.
-    #[arg(long, value_name = "STAGE", conflicts_with = "dump")]
-    emit: Option<EmitStage>,
+    #[arg(long, value_name = "STAGE")]
+    emit: Vec<EmitStage>,
+
+    /// Dump intermediate compiler output.
+    /// `--dump` differs from `--emit` in that its outputs are diagnostics
+    /// only, and there's no guarantees about their stability.
+    #[arg(long, value_name = "STAGE")]
+    dump: Vec<DumpStage>,
 
     /// Source file to compile.
     file: std::path::PathBuf,
@@ -64,11 +97,14 @@ struct Args {
 fn main() -> ExitCode {
     let args = Args::parse();
 
-    let stage = args
+    let stages = args
         .dump
-        .map(Stage::Dump)
-        .or_else(|| args.emit.map(Stage::Emit))
-        .unwrap_or(Stage::Emit(EmitStage::Beam));
+        .into_iter()
+        .map(Stage::from)
+        .chain(args.emit.into_iter().map(Stage::from))
+        .collect::<Vec<_>>();
+
+    let stages = if stages.is_empty() { vec![Stage::Meta, Stage::Beam] } else { stages };
 
     let src = match std::fs::read_to_string(&args.file) {
         Ok(src) => src,
@@ -92,7 +128,7 @@ fn main() -> ExitCode {
     }
 
     match catch_fatal_errors(|| {
-        compile::compile(stage, &args.file, &src, &args.out_dir, &pkg_name, &args.externs)
+        compile::compile(&stages, &args.file, &src, &args.out_dir, &pkg_name, &args.externs)
     }) {
         Ok(()) => ExitCode::SUCCESS,
         Err(_) => ExitCode::FAILURE,

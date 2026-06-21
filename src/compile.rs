@@ -6,14 +6,17 @@ mod translate;
 
 use std::cell::Cell;
 use std::collections::BTreeMap;
+use std::fs::File;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::AtomicBool;
 
+use rustc_arena::DroplessArena;
 use rustc_ast::Crate;
 use rustc_ast_pretty::pprust;
+use rustc_data_structures::fx::FxHashSet;
 use rustc_feature::UnstableFeatures;
 use rustc_hir_pretty as pprust_hir;
-use rustc_interface::interface::{Compiler, Config};
 use rustc_interface::util::DummyCodegenBackend;
 use rustc_interface::{interface, passes};
 use rustc_middle::ty::{TyCtxt, TypeckResults};
@@ -27,7 +30,7 @@ use rustc_span::source_map::FilePathMapping;
 use rustc_span::{ErrorGuaranteed, FileName, RealFileName};
 
 use crate::package::{CORE_PACKAGE_NAME, PackageDependency};
-use crate::{DumpStage, EmitStage, Stage};
+use crate::{Stage, erlang};
 
 static INTERNAL_FEATURES: AtomicBool = AtomicBool::new(false);
 
@@ -88,14 +91,7 @@ fn ensure_core(out_dir: &Path) -> PathBuf {
         return rmeta_path;
     }
 
-    compile(
-        Stage::Emit(crate::EmitStage::Beam),
-        Path::new("core.pt"),
-        CORE_SRC,
-        out_dir,
-        CORE_PACKAGE_NAME,
-        &[],
-    );
+    compile(&[Stage::Meta], Path::new("core.pt"), CORE_SRC, out_dir, CORE_PACKAGE_NAME, &[]);
 
     rmeta_path
 }
@@ -144,95 +140,201 @@ impl pprust_hir::PpAnn for TypedAnn<'_> {
     }
 }
 
+macro_rules! consume_stage {
+    ($stages_left:expr, $stage:expr, $body:block) => {
+        if $stages_left.remove(&$stage) {
+            $body
+            if $stages_left.is_empty() {
+                return;
+            }
+        }
+    };
+}
+
 pub(crate) fn compile(
-    stage: Stage,
+    stages: &[Stage],
     filename: &Path,
     src: &str,
     out_dir: &Path,
     pkg_name: &str,
     externs: &[PackageDependency],
 ) {
+    let filename_stem = filename
+        .file_stem()
+        .expect("filename to have a stem")
+        .to_str()
+        .expect("filename to be valid UTF-8");
+
     let filename =
         FileName::Real(FilePathMapping::empty().to_real_filename(&RealFileName::empty(), filename));
 
-    let config = make_config(filename.clone(), src, pkg_name, externs, out_dir);
-    let prelude = if pkg_name == CORE_PACKAGE_NAME { "" } else { PRELUDE };
-    let input_src = if prelude.is_empty() { src.to_string() } else { format!("{prelude}\n{src}") };
+    let mut stages_left = FxHashSet::from_iter(stages.iter());
+    if stages_left.is_empty() {
+        return;
+    }
 
-    let maybe_render = match stage {
-        Stage::Dump(DumpStage::Tokens) => Some(render_tokens(src)),
-        Stage::Dump(DumpStage::Ast) => with_compiler(config, "", |compiler, krate| {
-            Some(pprust::print_crate(
+    std::fs::create_dir_all(out_dir).unwrap_or_else(|e| {
+        panic!("failed to create output directory: {e}");
+    });
+
+    consume_stage!(stages_left, Stage::Tokens, {
+        let tokens = render_tokens(src);
+        write_file(out_dir, filename_stem, "tokens", tokens.as_bytes()).unwrap_or_else(|e| {
+            panic!("failed to write tokens file: {e}");
+        });
+    });
+
+    consume_stage!(stages_left, Stage::Ast, {
+        let config = make_config(filename.clone(), src, pkg_name, externs, out_dir);
+        interface::run_compiler(config, |compiler| {
+            let krate = parse_with_prelude(&compiler.sess, "");
+
+            let ast = pprust::print_crate(
                 compiler.sess.source_map(),
                 &krate,
-                filename,
+                filename.clone(),
                 src.to_string(),
                 &NoAnn,
                 false,
                 compiler.sess.edition(),
                 &compiler.sess.psess.attr_id_generator,
-            ))
-        }),
-        Stage::Dump(DumpStage::Expanded) => {
-            with_compiler_global_ctxt(config, prelude, |_compiler, tcx| {
-                Some(pprust::print_crate(
+            );
+
+            write_file(out_dir, filename_stem, "ast", ast.as_bytes()).unwrap_or_else(|e| {
+                panic!("failed to write ast file: {e}");
+            });
+        });
+    });
+
+    let config = make_config(filename.clone(), src, pkg_name, externs, out_dir);
+    let prelude = if pkg_name == CORE_PACKAGE_NAME { "" } else { PRELUDE };
+
+    interface::run_compiler(config, |compiler| {
+        let krate = parse_with_prelude(&compiler.sess, prelude);
+        let input_src =
+            if prelude.is_empty() { src.to_string() } else { format!("{prelude}\n{src}") };
+
+        passes::create_and_enter_global_ctxt(compiler, krate, |tcx| {
+            let dcx = tcx.sess.dcx();
+
+            consume_stage!(stages_left, Stage::Expanded, {
+                let expanded = pprust::print_crate(
                     tcx.sess.source_map(),
                     &tcx.resolver_for_lowering().borrow().1,
-                    filename,
-                    input_src,
+                    filename.clone(),
+                    input_src.clone(),
                     &NoAnn,
                     true,
                     tcx.sess.edition(),
                     &tcx.sess.psess.attr_id_generator,
-                ))
-            })
-        }
-        Stage::Dump(DumpStage::Typed) => {
-            with_compiler_global_ctxt(config, prelude, |_compiler, tcx| {
-                run_body_checks(tcx);
+                );
 
-                Some(pprust_hir::print_crate(
+                write_file(out_dir, filename_stem, "expanded", expanded.as_bytes()).unwrap_or_else(
+                    |e| {
+                        dcx.fatal(format!("failed to write expanded file: {e}"));
+                    },
+                );
+            });
+
+            consume_stage!(stages_left, Stage::Typed, {
+                tcx.hir_body_owners().for_each(|def_id| {
+                    tcx.ensure_ok().typeck(def_id);
+                    if !tcx.is_typeck_child(def_id.to_def_id()) {
+                        tcx.ensure_ok().check_unsafety(def_id);
+                        tcx.ensure_ok().check_transmutes(def_id);
+                    }
+                });
+
+                let typed = pprust_hir::print_crate(
                     tcx.sess.source_map(),
                     tcx.hir_root_module(),
-                    filename,
+                    filename.clone(),
                     input_src,
                     &|id| tcx.hir_attrs(id),
                     &TypedAnn { tcx, maybe_typeck_results: Cell::new(None) },
-                ))
-            })
-        }
-        Stage::Dump(DumpStage::Erl) => {
-            with_compiler_global_ctxt(config, prelude, |_compiler, tcx| {
-                run_body_checks(tcx);
-                if let Some(guar) = tcx.sess.dcx().has_errors_or_delayed_bugs() {
-                    guar.raise_fatal();
-                }
+                );
 
-                translate::translate(tcx, translate::TranslateStage::Erl, out_dir)
-            })
-        }
-        Stage::Emit(emit_stage) => with_compiler_global_ctxt(config, prelude, |_compiler, tcx| {
-            run_body_checks(tcx);
+                write_file(out_dir, filename_stem, "typed", typed.as_bytes()).unwrap_or_else(|e| {
+                    dcx.fatal(format!("failed to write typed file: {e}"));
+                });
+            });
+
+            tcx.ensure_ok().analysis(());
             if let Some(guar) = tcx.sess.dcx().has_errors_or_delayed_bugs() {
                 guar.raise_fatal();
             }
 
-            std::fs::create_dir_all(out_dir).unwrap_or_else(|e| {
-                tcx.sess.dcx().fatal(format!("failed to create output directory: {e}"));
+            consume_stage!(stages_left, Stage::Meta, {
+                let metadata_path = out_dir.join(format!("lib{}.rmeta", pkg_name));
+                rustc_metadata::encode_metadata(tcx, &metadata_path, None);
             });
 
-            translate::translate(tcx, emit_stage.into(), out_dir);
+            let arena = DroplessArena::default();
+            let translator = translate::Translator::new(tcx, &arena);
+            let modules = translator.translate();
 
-            let metadata_path = out_dir.join(format!("lib{pkg_name}.rmeta"));
-            rustc_metadata::encode_metadata(tcx, &metadata_path, None);
+            let serialized_modules = modules
+                .into_iter()
+                .map(|(mod_name, module)| {
+                    let bytes = erlang::to_bytes(&module).unwrap_or_else(|e| {
+                        dcx.fatal(format!("failed to serialize module: {e}"));
+                    });
+                    (mod_name, bytes)
+                })
+                .collect::<Vec<_>>();
 
-            None
-        }),
-    };
+            consume_stage!(stages_left, Stage::Eaf, {
+                for (mod_name, bytes) in &serialized_modules {
+                    write_file(out_dir, mod_name.as_str(), "eaf", bytes).unwrap_or_else(|e| {
+                        dcx.fatal(format!("failed to write eaf file: {e}"));
+                    });
+                }
+            });
 
-    if let Some(render) = maybe_render {
-        print!("{render}");
-    }
+            let mut server = compile_server::CompileServer::start(dcx);
+
+            consume_stage!(stages_left, Stage::Abstr, {
+                for (mod_name, bytes) in &serialized_modules {
+                    let mut rendered = server.render_abstr(bytes);
+                    if !rendered.ends_with('\n') {
+                        rendered.push('\n');
+                    }
+                    write_file(out_dir, mod_name.as_str(), "abstr", rendered.as_bytes())
+                        .unwrap_or_else(|e| {
+                            dcx.fatal(format!("failed to write abstr file: {e}"));
+                        });
+                }
+            });
+
+            consume_stage!(stages_left, Stage::Erl, {
+                for (mod_name, bytes) in &serialized_modules {
+                    let rendered = server.render_erl(bytes);
+                    write_file(out_dir, mod_name.as_str(), "erl", rendered.as_bytes())
+                        .unwrap_or_else(|e| {
+                            dcx.fatal(format!("failed to write erl file: {e}"));
+                        });
+                }
+            });
+
+            consume_stage!(stages_left, Stage::Beam, {
+                for (mod_name, bytes) in &serialized_modules {
+                    let compile = server.compile(bytes).unwrap_or_else(|e| {
+                        dcx.fatal(format!("erl backend failed: {}\n{}", e.errors, e.warnings));
+                    });
+
+                    if !compile.warnings.is_empty() && compile.warnings != "[]" {
+                        dcx.warn(compile.warnings);
+                    }
+
+                    write_file(out_dir, mod_name.as_str(), "beam", &compile.beam).unwrap_or_else(
+                        |e| {
+                            dcx.fatal(format!("failed to write beam file: {e}"));
+                        },
+                    );
+                }
+            });
+        });
+    });
 }
 
 fn make_config(
@@ -323,46 +425,19 @@ fn parse_with_prelude(sess: &Session, prelude: &str) -> Crate {
     krate
 }
 
-fn with_compiler<R>(
-    config: Config,
-    prelude: &'static str,
-    f: impl FnOnce(&Compiler, Crate) -> R + Send,
-) -> R
-where
-    R: Send,
-{
-    interface::run_compiler(config, move |compiler| {
-        let krate = parse_with_prelude(&compiler.sess, prelude);
-        f(compiler, krate)
-    })
-}
+fn write_file(
+    out_dir: &Path,
+    filename_stem: &str,
+    extension: &str,
+    content: &[u8],
+) -> Result<(), String> {
+    let filepath = out_dir.join(filename_stem).with_added_extension(extension);
 
-fn with_compiler_global_ctxt<T, F>(config: Config, prelude: &'static str, f: F) -> T
-where
-    T: Send,
-    F: for<'tcx> FnOnce(&Compiler, TyCtxt<'tcx>) -> T + Send,
-{
-    with_compiler(config, prelude, |compiler, krate| {
-        passes::create_and_enter_global_ctxt(compiler, krate, |tcx| f(compiler, tcx))
-    })
-}
+    let mut file = File::create(&filepath)
+        .map_err(|e| format!("failed to create file {}: {e}", filepath.display()))?;
 
-impl From<EmitStage> for translate::TranslateStage {
-    fn from(stage: EmitStage) -> Self {
-        match stage {
-            EmitStage::Eaf => Self::Eaf,
-            EmitStage::Abstr => Self::Abstr,
-            EmitStage::Beam => Self::Beam,
-        }
-    }
-}
+    file.write_all(content)
+        .map_err(|e| format!("failed to write file {}: {e}", filepath.display()))?;
 
-fn run_body_checks(tcx: TyCtxt<'_>) {
-    tcx.hir_body_owners().for_each(|def_id| {
-        tcx.ensure_ok().typeck(def_id);
-        if !tcx.is_typeck_child(def_id.to_def_id()) {
-            tcx.ensure_ok().check_unsafety(def_id);
-            tcx.ensure_ok().check_transmutes(def_id);
-        }
-    });
+    Ok(())
 }

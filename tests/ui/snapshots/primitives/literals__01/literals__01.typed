@@ -1,0 +1,162 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/primitives/literals.md
+// block: 1/1
+
+fn main() ({
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("1 + 2 = " as str),
+                            ((patina_fmt::display as
+                                    fn(term) -> term)(
+                                // Integer addition
+                                ((1 as int) + (2 as int) as int)) as term)] as [term; 2])]
+                as [[term; 2]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("1 - 2 = " as str),
+                            ((patina_fmt::display as
+                                    fn(term) -> term)(
+
+                                // Integer subtraction
+                                ((1 as int) - (2 as int) as int)) as term)] as [term; 2])]
+                as [[term; 2]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("1e4 is " as str),
+                            ((patina_fmt::display as
+                                    fn(term) -> term)(
+
+                                // Scientific notation
+                                (1e4 as float)) as term), (", -2.5e-3 is " as str),
+                            ((patina_fmt::display as
+                                    fn(term) -> term)((-(2.5e-3 as float) as float)) as term)]
+                        as [term; 4])] as [[term; 4]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("true AND false is " as str),
+                            ((patina_fmt::display as
+                                    fn(term) -> term)(
+
+                                // Short-circuiting boolean logic
+                                ((true as bool) && (false as bool) as bool)) as term)] as
+                        [term; 2])] as [[term; 2]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("true OR false is " as str),
+                            ((patina_fmt::display as
+                                    fn(term) -> term)(((true as bool) || (false as bool) as
+                                    bool)) as term)] as [term; 2])] as [[term; 2]; 1])) as
+            term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("NOT true is " as str),
+                            ((patina_fmt::display as
+                                    fn(term) -> term)((!(true as bool) as bool)) as term)] as
+                        [term; 2])] as [[term; 2]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("0011 AND 0101 is " as str),
+                            ((patina_fmt::debug as
+                                    fn(term) -> term)(
+
+                                // Bitwise operations
+                                ((3 as int) & (5 as int) as int)) as term)] as [term; 2])]
+                as [[term; 2]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("0011 OR 0101 is " as str),
+                            ((patina_fmt::debug as
+                                    fn(term) -> term)(((3 as int) | (5 as int) as int)) as
+                                term)] as [term; 2])] as [[term; 2]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("0011 XOR 0101 is " as str),
+                            ((patina_fmt::debug as
+                                    fn(term) -> term)(((3 as int) ^ (5 as int) as int)) as
+                                term)] as [term; 2])] as [[term; 2]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("1 << 5 is " as str),
+                            ((patina_fmt::display as
+                                    fn(term) -> term)(((1 as int) << (5 as int) as int)) as
+                                term)] as [term; 2])] as [[term; 2]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("0x80 >> 2 is 0x" as str),
+                            ((patina_fmt::debug as
+                                    fn(term) -> term)(((128 as int) >> (2 as int) as int)) as
+                                term)] as [term; 2])] as [[term; 2]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("One million is written as " as str),
+                            ((patina_fmt::display as
+                                    fn(term) -> term)(
+
+                                // Use underscores to improve readability!
+                                (1000000 as int)) as term)] as [term; 2])] as
+                [[term; 2]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+} as ())

@@ -1,4 +1,4 @@
-mod phases;
+mod runner;
 mod snapshot;
 
 use std::path::Path;
@@ -7,8 +7,6 @@ use std::process::ExitCode;
 use clap::Parser;
 use libtest_mimic::Trial;
 use walkdir::WalkDir;
-
-use crate::phases::Phase;
 
 pub(crate) const UI_ROOT: &str = "tests/ui/src";
 pub(crate) const SNAPSHOTS_ROOT: &str = "tests/ui/snapshots";
@@ -75,11 +73,8 @@ fn collect_snapshot_trials(bless: bool) -> anyhow::Result<Vec<Trial>> {
         let rel =
             path.strip_prefix(ui_root).expect("walkdir paths are under ui_root").to_path_buf();
 
-        for phase in Phase::ALL.iter().copied() {
-            let path = path.clone();
-            let test_name = format!("{}::{}", rel.display(), phase.name());
-            trials.push(Trial::test(test_name, move || phases::run(phase, &path, bless)));
-        }
+        let test_name = rel.display().to_string();
+        trials.push(Trial::test(test_name, move || runner::run(&path, bless)));
     }
 
     Ok(trials)
@@ -112,7 +107,7 @@ fn collect_elixir_trials() -> anyhow::Result<Vec<Trial>> {
             exs_path.strip_prefix(ui_root).expect("walkdir paths are under ui_root").to_path_buf();
 
         let test_name = format!("{}::run", rel.display());
-        trials.push(Trial::test(test_name, move || phases::run_exs(&pt_path, &exs_path)));
+        trials.push(Trial::test(test_name, move || runner::run_exs(&pt_path, &exs_path)));
     }
 
     Ok(trials)

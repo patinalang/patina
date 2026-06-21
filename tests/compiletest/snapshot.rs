@@ -3,17 +3,6 @@ use std::path::Path;
 use libtest_mimic::Failed;
 use similar::TextDiff;
 
-pub fn check_pair(
-    stdout_path: &Path,
-    stdout: &str,
-    stderr_path: &Path,
-    stderr: &str,
-    bless: bool,
-) -> Result<(), Failed> {
-    check_required(stdout_path, stdout, bless)?;
-    check_optional(stderr_path, stderr, bless)
-}
-
 pub fn check_required(path: &Path, actual: &str, bless: bool) -> Result<(), Failed> {
     if bless {
         write_snapshot(path, actual);
@@ -35,7 +24,7 @@ pub fn check_optional(path: &Path, actual: &str, bless: bool) -> Result<(), Fail
     if actual.is_empty() && path.exists() {
         Err(Failed::from(format!(
             "unexpected stderr snapshot: {}\n\
-                 compiler produced no stderr; delete the file or re-bless",
+                 compiler produced no stderr; delete `stderr` or re-bless",
             path.display(),
         )))
     } else if actual.is_empty() {

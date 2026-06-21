@@ -1,9 +1,0 @@
-error[E0599]: no method named `unsafe_cast` found for type `term` in the current scope
-  --> tests/ui/src/generics/gen_trait__01.pt:20:38
-   |
-LL |         erlang::phash2((seed, self)).unsafe_cast::<int>()
-   |                                      ^^^^^^^^^^^ method not found in `term`
-
-error: aborting due to 1 previous error
-
-For more information about this error, try `rustc --explain E0599`.

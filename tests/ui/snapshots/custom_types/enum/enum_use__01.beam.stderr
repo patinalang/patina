@@ -1,8 +1,0 @@
-error: statement kind not yet implemented: Item(ItemId { owner_id: DefId(0:21 ~ EnumUse01[1c82]::main::{use#0}) })
-  --> tests/ui/src/custom_types/enum/enum_use__01.pt:20:5
-   |
-LL |     use Stage::{Beginner, Advanced};
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-error: aborting due to 1 previous error
-

@@ -1,0 +1,62 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/unsafe.md
+// block: 1/2
+
+struct Celcius(int);
+struct Fahrenheit(int);
+
+fn main() ({
+    let degrees_term =
+        (((Celcius as fn(int) -> Celcius {Celcius})((10 as int)) as Celcius)
+            as term as term);
+
+    (unsafe {
+        // Celcius(10) and Fahrenheit(10) have the same runtime representation,
+        // so `try_cast_into` will succeed.
+        // But `degrees_term` wasn't Fahrenheit! Even with some guardrails,
+        // this circumvents the type system - which is why it's unsafe.
+        let fahrenheit =
+            (((degrees_term as term).try_cast_into::<Fahrenheit>() as
+                    {type error}).unwrap() as {type error});
+    } as ())
+} as ())

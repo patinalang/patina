@@ -1,0 +1,18 @@
+// source: patina-by-example/src/flow_control/try_catch_after.md
+// block: 1/1
+
+fn open_resource() -> atom { (/*ERROR*/) }
+
+pub fn main() {
+
+
+
+    // reason is a #{atom => term} map
+
+
+    // the 2nd tuple element (3rd for ElixirError) holds a stacktrace
+
+
+
+    (/*ERROR*/)
+}

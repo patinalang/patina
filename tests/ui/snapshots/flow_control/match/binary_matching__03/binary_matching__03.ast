@@ -1,0 +1,18 @@
+// source: patina-by-example/src/flow_control/match/binary_matching.md
+// block: 3/5
+
+pub fn main() {
+
+    // Bind `len`, then use it as the size of `payload`
+
+    // The size can also be a guard expression
+
+
+
+    // The tail expands to match the whole rest of the binary.
+
+    // The unsized segment can be in the middle, as long as both the prefix
+    // and suffix sizes are known at compilation time.
+
+    (/*ERROR*/)
+}

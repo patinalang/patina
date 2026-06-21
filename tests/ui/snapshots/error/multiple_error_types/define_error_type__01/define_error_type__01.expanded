@@ -1,0 +1,94 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/error/multiple_error_types/define_error_type.md
+// block: 1/1
+
+use Std::Fmt;
+
+type Result<T> = Std::Result::Result<T, DoubleError>;
+
+// Define our error types. These may be customized for our error handling cases.
+// Now we will be able to write our own errors, defer to an underlying error
+// implementation, or do something in between.
+#[derive(Debug)]
+struct DoubleError;
+
+// Generation of an error is completely separate from how it is displayed.
+// There's no need to be concerned about cluttering complex logic with the display style.
+//
+// Note that we don't store any extra info about the errors. This means we can't state
+// which string failed to parse without modifying our types to carry that information.
+impl Fmt::Display for DoubleError {
+    fn fmt(self, f: Fmt::Formatter) -> Fmt::Result { (/*ERROR*/) }
+}
+
+fn double_first(list: [str]) -> Result<int> {
+    list.first().ok_or(
+            // Change the error to our new type.
+            DoubleError).and_then(
+        // Update to the new error type here also.
+        |s| { s.parse::<int>().map_err(|_| DoubleError).map(|i| 2 * i) })
+}
+
+fn print(result: Result<int>) {
+    match result {
+        Ok(n) => {
+            io::put_chars([["The first doubled is ",
+                                patina_fmt::display(n)]]);
+            io::nl();
+        }
+        Err(e) => {
+            io::put_chars([["Error: ", patina_fmt::display(e)]]);
+            io::nl();
+        }
+    }
+}
+
+pub fn main() {
+    let numbers = ["42", "93", "18"];
+    let empty = [];
+    let strings = ["tofu", "93", "18"];
+
+    print(double_first(numbers));
+    print(double_first(empty));
+    print(double_first(strings));
+}

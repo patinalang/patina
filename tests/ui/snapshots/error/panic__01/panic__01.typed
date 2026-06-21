@@ -1,0 +1,67 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/error/panic.md
+// block: 1/1
+
+fn drink(beverage:
+        str) ({
+    // You shouldn't drink too many sugary beverages.
+    (if ((beverage as str) == ("lemonade" as str) as {type error}) {
+        ((/*ERROR*/) as {type error});
+    } as {type error})
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("Some refreshing " as str),
+                            ((patina_fmt::display as
+                                    fn(term) -> term)(
+
+                                (beverage as str)) as term), (" is all I need." as str)] as
+                        [term; 3])] as [[term; 3]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+} as ())
+
+fn main() ({
+    ((drink as fn(str) {drink})(("water" as str)) as ());
+    ((drink as fn(str) {drink})(("lemonade" as str)) as ());
+    ((drink as fn(str) {drink})(("still water" as str)) as ());
+} as ())

@@ -1,8 +1,0 @@
-error: requires `Range` lang_item
-  --> tests/ui/src/fn/diverging__04.pt:7:18
-   |
-LL |         for i in 0..up_to {
-   |                  ^^^^^^^^
-
-error: aborting due to 1 previous error
-

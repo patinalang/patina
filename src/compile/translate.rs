@@ -1,8 +1,6 @@
 mod elixir_compat;
 
-use std::fs::File;
-use std::io::Write as IoWrite;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use rustc_arena::DroplessArena;
 use rustc_ast::{BindingMode, LitKind};
@@ -17,11 +15,9 @@ use rustc_hir::{
 use rustc_middle::ty::{TyCtxt, Visibility};
 use rustc_span::{Ident, Span, Symbol, kw, sym};
 
-use crate::compile::compile_server::CompileServer;
 use crate::compile::eaf_builder::EafBuilder;
 use crate::compile::impl_collector::ImplCollector;
 use crate::compile::module_collector::ModuleNameCollector;
-use crate::erlang;
 use crate::erlang::abstract_format as eaf;
 
 macro_rules! span_fatal {
@@ -68,7 +64,7 @@ impl Scope {
     }
 }
 
-struct Translator<'tcx, 'arena> {
+pub(super) struct Translator<'tcx, 'arena> {
     tcx: TyCtxt<'tcx>,
     afb: EafBuilder<'tcx, 'arena>,
     modules: ModuleNameCollector<'tcx>,
@@ -76,7 +72,7 @@ struct Translator<'tcx, 'arena> {
 }
 
 impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
-    fn new(tcx: TyCtxt<'tcx>, arena: &'arena DroplessArena) -> Translator<'tcx, 'arena> {
+    pub fn new(tcx: TyCtxt<'tcx>, arena: &'arena DroplessArena) -> Translator<'tcx, 'arena> {
         Translator {
             tcx,
             afb: EafBuilder::new(tcx.sess.source_map(), arena),
@@ -85,7 +81,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         }
     }
 
-    fn translate(&self) -> Vec<(Symbol, eaf::Module<'arena>)> {
+    pub fn translate(&self) -> Vec<(Symbol, eaf::Module<'arena>)> {
         let mut modules = Vec::new();
 
         for owner in self.tcx.hir_crate_items(()).owners() {
@@ -597,98 +593,5 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         }
 
         (forms, exports)
-    }
-}
-
-pub(super) enum TranslateStage {
-    Eaf,
-    Abstr,
-    Erl,
-    Beam,
-}
-
-pub(super) fn translate(tcx: TyCtxt<'_>, stage: TranslateStage, out_dir: &Path) -> Option<String> {
-    let dcx = tcx.sess.dcx();
-    let arena = DroplessArena::default();
-    let translator = Translator::new(tcx, &arena);
-
-    let modules = translator.translate();
-
-    match stage {
-        TranslateStage::Eaf => {
-            for (mod_name, module) in &modules {
-                let bytes = erlang::to_bytes(module).unwrap_or_else(|e| {
-                    dcx.fatal(format!("failed to serialize module: {e}"));
-                });
-                let eaf_path = out_dir.join(format!("{mod_name}.eaf"));
-                let mut file = File::create(&eaf_path).unwrap_or_else(|e| {
-                    dcx.fatal(format!("failed to write file: {e}"));
-                });
-                file.write_all(&bytes).unwrap_or_else(|e| {
-                    dcx.fatal(format!("failed to write file: {e}"));
-                });
-            }
-            None
-        }
-        TranslateStage::Abstr => {
-            let mut server = CompileServer::start(dcx);
-            for (mod_name, module) in &modules {
-                let bytes = erlang::to_bytes(module).unwrap_or_else(|e| {
-                    dcx.fatal(format!("failed to serialize module: {e}"));
-                });
-                let mut rendered = server.render_abstr(&bytes);
-                if !rendered.ends_with('\n') {
-                    rendered.push('\n');
-                }
-                let abstr_path = out_dir.join(format!("{mod_name}.abstr"));
-                let mut file = File::create(&abstr_path).unwrap_or_else(|e| {
-                    dcx.fatal(format!("failed to write file: {e}"));
-                });
-                file.write_all(rendered.as_bytes()).unwrap_or_else(|e| {
-                    dcx.fatal(format!("failed to write file: {e}"));
-                });
-            }
-            None
-        }
-        TranslateStage::Erl => {
-            let mut server = CompileServer::start(dcx);
-            let mut rendered = String::new();
-            for (_, module) in &modules {
-                let bytes = erlang::to_bytes(module).unwrap_or_else(|e| {
-                    dcx.fatal(format!("failed to serialize module: {e}"));
-                });
-                if !rendered.is_empty() {
-                    rendered.push('\n');
-                }
-                rendered.push_str(&server.render_erl(&bytes));
-            }
-            Some(rendered)
-        }
-        TranslateStage::Beam => {
-            let mut server = CompileServer::start(dcx);
-            for (mod_name, module) in &modules {
-                let bytes = erlang::to_bytes(module).unwrap_or_else(|e| {
-                    dcx.fatal(format!("failed to serialize module: {e}"));
-                });
-                match server.compile(&bytes) {
-                    Ok(ok) => {
-                        if !ok.warnings.is_empty() && ok.warnings != "[]" {
-                            dcx.warn(ok.warnings);
-                        }
-                        let beam_path = out_dir.join(format!("{mod_name}.beam"));
-                        let mut file = File::create(&beam_path).unwrap_or_else(|e| {
-                            dcx.fatal(format!("failed to write file: {e}"));
-                        });
-                        file.write_all(&ok.beam).unwrap_or_else(|e| {
-                            dcx.fatal(format!("failed to write file: {e}"));
-                        });
-                    }
-                    Err(err) => {
-                        dcx.fatal(format!("erl backend failed: {}\n{}", err.errors, err.warnings));
-                    }
-                }
-            }
-            None
-        }
     }
 }

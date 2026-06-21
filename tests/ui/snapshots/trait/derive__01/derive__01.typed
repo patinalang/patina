@@ -1,0 +1,111 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/trait/derive.md
+// block: 1/1
+
+// `Centimeters`, a tuple struct that can be compared
+struct Centimeters(float);
+
+// `Inches`, a tuple struct that can be printed
+struct Inches(int);
+
+impl Inches {
+    fn to_centimeters(self)
+        ->
+            Centimeters ({
+        let Inches(inches) = (self as Inches);
+
+        ((Centimeters as
+                fn(float) -> Centimeters {Centimeters})((((inches as int) as
+                    float as float) * (2.54 as float) as float)) as Centimeters)
+    } as Centimeters)
+}
+
+// `Seconds`, a tuple struct with no additional attributes
+struct Seconds(int);
+
+fn main() ({
+    let _one_second =
+        ((Seconds as fn(int) -> Seconds {Seconds})((1 as int)) as Seconds);
+
+    // Error: `Seconds` can't be printed; it doesn't implement the `Debug` trait
+    //println!("One second looks like: {:?}", _one_second);
+    // TODO ^ Try uncommenting this line
+
+    // Error: `Seconds` can't be compared; it doesn't implement the `PartialEq` trait
+    //let _this_is_true = (_one_second == _one_second);
+    // TODO ^ Try uncommenting this line
+
+    let foot =
+        ((Inches as fn(int) -> Inches {Inches})((12 as int)) as Inches);
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("One foot equals " as str),
+                            ((patina_fmt::debug as
+                                    fn(term) -> term)(
+
+                                (foot as Inches)) as term)] as [term; 2])] as
+                [[term; 2]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+
+    let meter =
+        ((Centimeters as
+                fn(float) -> Centimeters {Centimeters})((100.0 as float)) as
+            Centimeters);
+    let cmp =
+        (if (((foot as Inches).to_centimeters() as Centimeters) <
+                (meter as Centimeters) as {type error}) {
+            ("smaller" as str)
+        } else { ("bigger" as str) } as {type error});
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("One foot is " as str),
+                            ((patina_fmt::display as
+                                    fn(term) -> term)(
+
+                                (cmp as {type error})) as term),
+                            (" than one meter." as str)] as [term; 3])] as
+                [[term; 3]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+} as ())

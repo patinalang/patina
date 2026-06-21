@@ -1,4 +1,0 @@
-
-thread 'rustc' (50519851) panicked at /Users/konrad/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/odht-0.3.1/src/memory_layout.rs:214:9:
-assertion failed: raw_bytes.len() >= HEADER_SIZE
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

@@ -1,0 +1,90 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/error/option_unwrap/defaults.md
+// block: 4/4
+
+#[derive(Debug)]
+enum Fruit { Apple, Orange, Banana, Kiwi, Lemon, }
+
+pub fn main() {
+    let mut my_fruit: Option<Fruit> = None;
+    let get_lemon_as_fallback =
+        ||
+            {
+                {
+                    io::put_chars([["Providing lemon as fallback"]]);
+                    io::nl();
+                };
+                Fruit::Lemon
+            };
+    let first_available_fruit =
+        my_fruit.get_or_insert_with(get_lemon_as_fallback);
+    {
+        io::put_chars([["first_available_fruit is: ",
+                            patina_fmt::debug(first_available_fruit)]]);
+        io::nl();
+    };
+    {
+        io::put_chars([["my_fruit is: ", patina_fmt::debug(my_fruit)]]);
+        io::nl();
+    };
+    // Providing lemon as fallback
+    // first_available_fruit is: Lemon
+    // my_fruit is: Some(Lemon)
+
+    // If the Option has a value, it is left unchanged, and the closure is not invoked
+    let mut my_apple = Some(Fruit::Apple);
+    let should_be_apple = my_apple.get_or_insert_with(get_lemon_as_fallback);
+    {
+        io::put_chars([["should_be_apple is: ",
+                            patina_fmt::debug(should_be_apple)]]);
+        io::nl();
+    };
+    {
+        io::put_chars([["my_apple is unchanged: ",
+                            patina_fmt::debug(my_apple)]]);
+        io::nl();
+    };
+    // The output is a follows. Note that the closure `get_lemon_as_fallback` is not invoked
+    // should_be_apple is: Apple
+    // my_apple is unchanged: Some(Apple)
+}

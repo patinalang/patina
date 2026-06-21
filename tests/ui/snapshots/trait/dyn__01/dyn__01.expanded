@@ -1,0 +1,77 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/trait/dyn.md
+// block: 1/1
+
+struct Sheep {}
+struct Cow {}
+
+trait Animal {
+    // Instance method signature
+    fn noise(self)
+    -> str;
+}
+
+// Implement the `Animal` trait for `Sheep`.
+impl Animal for Sheep {
+    fn noise(self) -> str { "baaaaah!" }
+}
+
+// Implement the `Animal` trait for `Cow`.
+impl Animal for Cow {
+    fn noise(self) -> str { "moooooo!" }
+}
+
+// Returns some struct that implements Animal, but we don't know which one at compile time.
+fn random_animal(random_number: float) -> dyn Animal {
+    if random_number < 0.5 { Sheep {} } else { Cow {} }
+}
+
+pub fn main() {
+    let random_number = 0.234;
+    let animal = random_animal(random_number);
+    {
+        io::put_chars([["You\'ve randomly chosen an animal, and it says ",
+                            patina_fmt::display(animal.noise())]]);
+        io::nl();
+    };
+}

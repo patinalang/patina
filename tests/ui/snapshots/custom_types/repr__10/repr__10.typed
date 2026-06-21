@@ -1,0 +1,102 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/custom_types/repr.md
+// block: 10/12
+
+#[attr = Repr {reprs: []}]
+enum Result<T, E> {
+    #[attr = Repr {reprs: []}]
+    Ok(T),
+
+    #[attr = Repr {reprs: []}]
+    Err(E),
+}
+
+fn main() ({
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::debug as
+                                    fn(term) -> term)(((Result::<int, str>::Ok as
+                                        fn(int) -> Result<int, str> {Result::<int, str>::Ok})((42 as
+                                        int)) as Result<int, str>)) as term), ("    " as str),
+                            ((patina_fmt::debug as
+                                    fn(term) -> term)(((Result::<int, str>::Err as
+                                        fn(str) -> Result<int, str> {Result::<int, str>::Err})(("reason"
+                                        as str)) as Result<int, str>)) as term)] as [term; 3])] as
+                [[term; 3]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::debug as
+                                    fn(term) -> term)(
+                                // (a"ok", 42)    (a"error", "reason")
+
+                                // The unit elision rule lets us directly represent `:ok | {:error, reason}`
+                                ((Result::<(), str>::Ok as
+                                        fn(()) -> Result<(), str> {Result::<(), str>::Ok})((() as
+                                        ())) as Result<(), str>)) as term), ("    " as str),
+                            ((patina_fmt::debug as
+                                    fn(term) -> term)(((Result::<(), str>::Err as
+                                        fn(str) -> Result<(), str> {Result::<(), str>::Err})(("reason"
+                                        as str)) as Result<(), str>)) as term)] as [term; 3])] as
+                [[term; 3]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::debug as
+                                    fn(term) -> term)(
+                                // a"ok"    (a"error", "reason")
+
+                                // Elixir's `Map.fetch` result `{:ok, val} | :error` can also be represented
+                                ((Result::<int, ()>::Ok as
+                                        fn(int) -> Result<int, ()> {Result::<int, ()>::Ok})((42 as
+                                        int)) as Result<int, ()>)) as term), ("    " as str),
+                            ((patina_fmt::debug as
+                                    fn(term) -> term)(((Result as {type error}) <
+                                    (int as {type error}) as bool)) as term)] as [term; 3])] as
+                [[term; 3]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    // (a"ok", 42)    a"error"
+} as ())
