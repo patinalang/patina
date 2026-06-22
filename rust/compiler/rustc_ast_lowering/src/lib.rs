@@ -560,6 +560,10 @@ pub fn lower_to_hir(tcx: TyCtxt<'_>, (): ()) -> mid_hir::Crate<'_> {
         };
     }
 
+    for descriptor in &resolver.synthetic_extern_mods {
+        lowerer.lower_synthetic_extern_mod(descriptor);
+    }
+
     // Don't hash unless necessary, because it's expensive.
     let opt_hir_hash =
         if tcx.needs_crate_hash() { Some(compute_hir_hash(tcx, &owners)) } else { None };

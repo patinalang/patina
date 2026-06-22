@@ -11,7 +11,7 @@ use rustc_hir::{
 };
 use rustc_index::{IndexSlice, IndexVec};
 use rustc_middle::span_bug;
-use rustc_middle::ty::{ResolverAstLowering, TyCtxt};
+use rustc_middle::ty::{ResolverAstLowering, SyntheticExternMod, TyCtxt};
 use rustc_span::def_id::DefId;
 use rustc_span::edit_distance::find_best_match_for_name;
 use rustc_span::{DUMMY_SP, DesugaringKind, Ident, Span, Symbol, kw, sym};
@@ -117,6 +117,19 @@ impl<'hir> ItemLowerer<'_, 'hir> {
                 }),
             }
         }
+    }
+
+    pub(super) fn lower_synthetic_extern_mod(&mut self, descriptor: &SyntheticExternMod) {
+        self.with_lctx(descriptor.node_id, |lctx| {
+            hir::OwnerNode::Item(lctx.arena.alloc(hir::Item {
+                owner_id: hir::HirId::make_owner(descriptor.def_id).expect_owner(),
+                kind: hir::ItemKind::ExternMod(lctx.lower_ident(descriptor.ident)),
+                span: lctx.lower_span(descriptor.span),
+                vis_span: lctx.lower_span(descriptor.ident.span),
+                has_delayed_lints: false,
+                eii: false,
+            }))
+        })
     }
 }
 

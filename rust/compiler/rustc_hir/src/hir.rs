@@ -2740,16 +2740,6 @@ impl Expr<'_> {
             _ => None,
         }
     }
-
-    pub fn call_segments(&self) -> Option<(&[PathSegment<'_>], &PathSegment<'_>)> {
-        match self.kind {
-            ExprKind::Path(QPath::TypeRelative(
-                Ty { kind: TyKind::Path(QPath::Resolved(_, Path { segments, .. })), .. },
-                last_segment,
-            )) => Some((segments, last_segment)),
-            _ => None,
-        }
-    }
 }
 
 /// Checks if the specified expression is a built-in range literal.

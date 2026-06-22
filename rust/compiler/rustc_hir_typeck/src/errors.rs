@@ -1390,3 +1390,10 @@ pub(crate) struct ProjectOnNonPinProjectType {
     )]
     pub sugg_span: Option<Span>,
 }
+
+#[derive(Diagnostic)]
+#[diag("cannot call an extern module")]
+pub(crate) struct CannotCallExternMod {
+    #[primary_span]
+    pub span: Span,
+}

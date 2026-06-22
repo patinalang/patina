@@ -196,6 +196,16 @@ pub struct ResolverGlobalCtxt {
     pub stripped_cfg_items: Vec<StrippedCfgItem>,
 }
 
+/// Descriptor for a resolver-minted nested `extern mod` child
+/// that needs a synthetic HIR owner.
+#[derive(Clone, Copy, Debug)]
+pub struct SyntheticExternMod {
+    pub node_id: ast::NodeId,
+    pub def_id: LocalDefId,
+    pub ident: Ident,
+    pub span: Span,
+}
+
 /// Resolutions that should only be used for lowering.
 /// This struct is meant to be consumed by lowering.
 #[derive(Debug)]
@@ -226,6 +236,8 @@ pub struct ResolverAstLowering<'tcx> {
     pub delegation_infos: LocalDefIdMap<DelegationInfo>,
 
     pub disambiguators: LocalDefIdMap<Steal<PerParentDisambiguatorState>>,
+
+    pub synthetic_extern_mods: Vec<SyntheticExternMod>,
 }
 
 #[derive(Debug)]

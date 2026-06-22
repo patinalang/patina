@@ -1,0 +1,15 @@
+extern mod used;extern mod unused;extern mod erlang;
+mod inner {
+    pub fn use_it() { let _hash = erlang::phash2(()); }
+}
+
+pub fn main() {
+    used::ping();
+    println!("{:?}", used::foo::bar);
+    io::foo::bar(1, 2);
+    io::a::b::c::d(1);
+    io::a::b::c::d(2);
+    io::foo::bar::baz(());
+    let _m = io::foo::bar;
+    inner::use_it();
+}

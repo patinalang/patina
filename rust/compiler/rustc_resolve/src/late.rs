@@ -588,6 +588,7 @@ impl PathSource<'_, '_, '_> {
                         | DefKind::Fn
                         | DefKind::AssocFn
                         | DefKind::AssocConst { .. }
+                        | DefKind::ExternMod
                         | DefKind::ConstParam,
                     _,
                 ) | Res::Local(..)

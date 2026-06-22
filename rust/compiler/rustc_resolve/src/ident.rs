@@ -947,7 +947,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
 
     #[instrument(level = "debug", skip(self))]
     pub(crate) fn resolve_ident_in_module<'r>(
-        self: CmResolver<'r, 'ra, 'tcx>,
+        mut self: CmResolver<'r, 'ra, 'tcx>,
         module: ModuleOrUniformRoot<'ra>,
         ident: Ident,
         ns: Namespace,
@@ -975,7 +975,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     Some(def) => ParentScope { module: self.expn_def_scope(def), ..*parent_scope },
                     None => *parent_scope,
                 };
-                self.resolve_ident_in_scope_set_inner(
+                let result = self.reborrow().resolve_ident_in_scope_set_inner(
                     ident_key,
                     ident.span,
                     ScopeSet::Module(ns, module),
@@ -983,7 +983,36 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     finalize,
                     ignore_decl,
                     ignore_import,
-                )
+                );
+                // If we stumbled on a nested `extern mod` e.g. (`Elixir::String`),
+                // we create a synthetic defid for it and retry
+                if let Err(Determinacy::Determined) = result
+                    && let Some(Res::Def(DefKind::ExternMod, _)) = module.res()
+                {
+                    let child = self
+                        .get_mut_unchecked()
+                        .get_or_create_extern_mod_child(module.expect_local(), ident);
+
+                    self.get_mut_unchecked().plant_extern_mod_child_binding(
+                        module.expect_local(),
+                        ident_key,
+                        ident.span,
+                        ns,
+                        child,
+                    );
+
+                    self.reborrow().resolve_ident_in_scope_set_inner(
+                        ident_key,
+                        ident.span,
+                        ScopeSet::Module(ns, module),
+                        &adjusted_parent_scope,
+                        finalize,
+                        ignore_decl,
+                        ignore_import,
+                    )
+                } else {
+                    result
+                }
             }
             ModuleOrUniformRoot::OpenModule(sym) => {
                 let open_ns_name = format!("{}::{}", sym.as_str(), ident.name);

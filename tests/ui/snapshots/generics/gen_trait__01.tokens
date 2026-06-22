@@ -99,7 +99,8 @@ Whitespace
 OpenBrace
 Whitespace
 Ident
-Dot
+Colon
+Colon
 Ident
 OpenParen
 OpenParen

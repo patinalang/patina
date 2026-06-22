@@ -541,24 +541,29 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     ) -> Ty<'tcx> {
         let tcx = self.tcx;
 
-        if let Some((_, arg_exprs)) = call_expr_and_args
-            && let Some((path_segments, _)) = expr.call_segments()
-            && path_segments.len() == 1
-            && let Res::Def(DefKind::ExternMod, def_id) = path_segments[0].res
+        if let QPath::Resolved(_, path) = qpath
+            && let Res::Def(DefKind::ExternMod, leaf) = path.res
         {
-            self.write_resolution(expr.hir_id, Ok((DefKind::ExternMod, def_id)));
+            self.write_resolution(expr.hir_id, Ok((DefKind::ExternMod, leaf)));
 
-            if let QPath::TypeRelative(qself, _) = qpath {
-                self.write_ty(qself.hir_id, tcx.types.term);
-            }
+            let parent_def_kind = tcx.def_kind(tcx.parent(leaf));
 
-            return Ty::new_fn_ptr(
-                tcx,
-                ty::Binder::dummy(tcx.mk_fn_sig_safe_rust_abi(
-                    std::iter::repeat_n(tcx.types.term, arg_exprs.len()),
-                    tcx.types.term,
-                )),
-            );
+            return match call_expr_and_args {
+                // io::fmt() or Elixir::IO::puts()
+                Some((_, args)) if parent_def_kind == DefKind::ExternMod => Ty::new_fn_ptr(
+                    tcx,
+                    ty::Binder::dummy(tcx.mk_fn_sig_safe_rust_abi(
+                        std::iter::repeat_n(tcx.types.term, args.len()),
+                        tcx.types.term,
+                    )),
+                ),
+                // io()
+                Some(_) => Ty::new_error(
+                    tcx,
+                    self.dcx().emit_err(crate::errors::CannotCallExternMod { span: expr.span }),
+                ),
+                None => tcx.types.term,
+            };
         }
 
         if let Some((_, [arg])) = call_expr_and_args

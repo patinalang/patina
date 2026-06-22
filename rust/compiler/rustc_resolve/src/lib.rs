@@ -1501,6 +1501,11 @@ pub struct Resolver<'ra, 'tcx> {
     // that were encountered during resolution. These names are used to generate item names
     // for APITs, so we don't want to leak details of resolution into these names.
     impl_trait_names: FxHashMap<NodeId, Symbol> = default::fx_hash_map(),
+
+    /// Cache of synthetic nested `extern mod` children keyed by `(parent, name)`.
+    extern_mod_children: FxHashMap<(LocalDefId, Symbol), LocalDefId> = default::fx_hash_map(),
+    /// Descriptors for synthetic `extern mod` defs that need HIR owners during lowering.
+    synthetic_extern_mods: Vec<ty::SyntheticExternMod> = Vec::new(),
 }
 
 /// This provides memory for the rest of the crate. The `'ra` lifetime that is
@@ -1968,8 +1973,69 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             lint_buffer: Steal::new(self.lint_buffer),
             delegation_infos: self.delegation_infos,
             disambiguators,
+            synthetic_extern_mods: self.synthetic_extern_mods,
         };
         ResolverOutputs { global_ctxt, ast_lowering }
+    }
+
+    pub(crate) fn get_or_create_extern_mod_child(
+        &mut self,
+        parent: LocalModule<'ra>,
+        ident: Ident,
+    ) -> LocalDefId {
+        let parent_def = parent.def_id().expect_local();
+        if let Some(&child) = self.extern_mod_children.get(&(parent_def, ident.name)) {
+            return child;
+        }
+
+        let node_id = self.next_node_id();
+        let feed = self.create_def(
+            parent_def,
+            node_id,
+            Some(ident.name),
+            DefKind::ExternMod,
+            LocalExpnId::ROOT.to_expn_id(),
+            ident.span,
+        );
+        let child = feed.def_id();
+        feed.visibility(ty::Visibility::Public);
+
+        self.new_local_module(
+            Some(parent),
+            ModuleKind::Def(DefKind::ExternMod, child.to_def_id(), Some(ident.name)),
+            LocalExpnId::ROOT.to_expn_id(),
+            ident.span,
+            parent.no_implicit_prelude,
+        );
+
+        self.extern_mod_children.insert((parent_def, ident.name), child);
+        self.synthetic_extern_mods.push(ty::SyntheticExternMod {
+            node_id,
+            def_id: child,
+            ident,
+            span: ident.span,
+        });
+
+        child
+    }
+
+    pub(crate) fn plant_extern_mod_child_binding(
+        &mut self,
+        parent: LocalModule<'ra>,
+        ident_key: IdentKey,
+        ident_span: Span,
+        ns: Namespace,
+        child: LocalDefId,
+    ) {
+        let res = Res::Def(DefKind::ExternMod, child.to_def_id());
+        let decl = self.arenas.new_def_decl(
+            res,
+            ty::Visibility::Public,
+            ident_span,
+            LocalExpnId::ROOT,
+            Some(parent.to_module()),
+        );
+        self.plant_decl_into_local_module(ident_key, ident_span, ns, decl);
     }
 
     fn cstore(&self) -> FreezeReadGuard<'_, CStore> {

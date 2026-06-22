@@ -227,59 +227,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
 
             ExprKind::Path(qpath) => self.translate_qpath(&qpath, scope),
 
-            ExprKind::Call(callee, args) => {
-                let args_exprs = args
-                    .iter()
-                    .map(|arg| self.translate_expr(arg, scope))
-                    .collect::<SmallVec<[_; 8]>>();
-
-                match callee.kind {
-                    ExprKind::Path(QPath::TypeRelative(
-                        rustc_hir::Ty { kind: TyKind::Path(qpath), .. },
-                        last_segment,
-                    )) => {
-                        let module = self.translate_qpath(qpath, scope);
-                        let fn_name = last_segment.ident.name;
-
-                        // Temporary before we actually ship runtime modules (like `patina_fmt` could've been)
-                        if let (
-                            eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::Atom(
-                                _,
-                                eaf::Symbol(sym::patina_fmt),
-                            )),
-                            sym::display | sym::debug,
-                        ) = (&module, fn_name)
-                        {
-                            return self.translate_format_render(expr, fn_name, &args[0], scope);
-                        }
-
-                        let fn_atom = afb.expr_atom(last_segment.ident.span, fn_name);
-                        afb.expr_remote_call(expr.span, module, fn_atom, args_exprs)
-                    }
-
-                    ExprKind::Path(QPath::Resolved(
-                        _,
-                        rustc_hir::Path { res: Res::Def(DefKind::Ctor(..), _), .. },
-                    )) => {
-                        let mod_expr = self.translate_expr(callee, scope);
-                        let base = afb.expr_remote_call(
-                            expr.span,
-                            mod_expr,
-                            afb.expr_atom(callee.span, sym::__struct__),
-                            [],
-                        );
-                        let updates = args_exprs.into_iter().enumerate().map(|(i, arg)| {
-                            (afb.expr_atom(expr.span, Symbol::intern(&i.to_string())), arg)
-                        });
-                        afb.expr_map_update_exact(expr.span, base, updates)
-                    }
-
-                    _ => {
-                        let callee_expr = self.translate_expr(callee, scope);
-                        afb.expr_local_call(expr.span, callee_expr, args_exprs)
-                    }
-                }
-            }
+            ExprKind::Call(callee, args) => self.translate_call_expr(expr, callee, args, scope),
 
             ExprKind::Array(elements) => self.afb.expr_list(
                 expr.span,
@@ -358,6 +306,99 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         }
     }
 
+    fn translate_call_expr(
+        &self,
+        expr: &'tcx Expr<'tcx>,
+        callee: &'tcx Expr<'tcx>,
+        args: &'tcx [Expr<'tcx>],
+        scope: &mut Scope,
+    ) -> eaf::Expr<'arena> {
+        let afb = &self.afb;
+
+        let args_exprs =
+            args.iter().map(|arg| self.translate_expr(arg, scope)).collect::<SmallVec<[_; 8]>>();
+
+        match callee.kind {
+            ExprKind::Path(QPath::TypeRelative(
+                rustc_hir::Ty { kind: TyKind::Path(qpath), .. },
+                last_segment,
+            )) => {
+                let module = self.translate_qpath(qpath, scope);
+                let fn_name = last_segment.ident.name;
+
+                // Temporary before we actually ship runtime modules (like `patina_fmt` could've been)
+                if let (
+                    eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::Atom(
+                        _,
+                        eaf::Symbol(sym::patina_fmt),
+                    )),
+                    sym::display | sym::debug,
+                ) = (&module, fn_name)
+                {
+                    return self.translate_format_render(expr, fn_name, &args[0], scope);
+                }
+
+                let fn_atom = afb.expr_atom(last_segment.ident.span, fn_name);
+                afb.expr_remote_call(expr.span, module, fn_atom, args_exprs)
+            }
+
+            ExprKind::Path(QPath::Resolved(
+                _,
+                rustc_hir::Path { res: Res::Def(DefKind::Fn, def_id), .. },
+            )) => {
+                let parent = self.tcx.parent(*def_id);
+                let mod_name = self.modules.module_name(parent);
+                let fn_name = self.tcx.item_name(*def_id);
+                let mod_expr = afb.expr_atom(callee.span, mod_name);
+                let fn_expr = afb.expr_atom(callee.span, fn_name);
+                afb.expr_remote_call(expr.span, mod_expr, fn_expr, args_exprs)
+            }
+
+            ExprKind::Path(QPath::Resolved(
+                _,
+                rustc_hir::Path { res: Res::Def(DefKind::ExternMod, leaf), segments, .. },
+            )) => {
+                let module = self.modules.module_name(self.tcx.parent(*leaf));
+                let fn_name = self.tcx.item_name(*leaf);
+
+                // Temporary before we actually ship runtime modules (like `patina_fmt` could've been)
+                if let (sym::patina_fmt, sym::display | sym::debug) = (module, fn_name) {
+                    return self.translate_format_render(expr, fn_name, &args[0], scope);
+                }
+
+                let mod_expr = afb.expr_atom(callee.span, module);
+
+                let last_segment =
+                    segments.last().expect("extern mod path to have at least one segment");
+                let fn_atom = afb.expr_atom(last_segment.ident.span, fn_name);
+
+                afb.expr_remote_call(expr.span, mod_expr, fn_atom, args_exprs)
+            }
+
+            ExprKind::Path(QPath::Resolved(
+                _,
+                rustc_hir::Path { res: Res::Def(DefKind::Ctor(..), _), .. },
+            )) => {
+                let mod_expr = self.translate_expr(callee, scope);
+                let base = afb.expr_remote_call(
+                    expr.span,
+                    mod_expr,
+                    afb.expr_atom(callee.span, sym::__struct__),
+                    [],
+                );
+                let updates = args_exprs.into_iter().enumerate().map(|(i, arg)| {
+                    (afb.expr_atom(expr.span, Symbol::intern(&i.to_string())), arg)
+                });
+                afb.expr_map_update_exact(expr.span, base, updates)
+            }
+
+            _ => {
+                let callee_expr = self.translate_expr(callee, scope);
+                afb.expr_local_call(expr.span, callee_expr, args_exprs)
+            }
+        }
+    }
+
     fn translate_format_render(
         &self,
         expr: &'tcx Expr<'tcx>,
@@ -406,7 +447,13 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
 
             StmtKind::Semi(expr) | StmtKind::Expr(expr) => Some(self.translate_expr(expr, scope)),
 
-            _ => not_implemented!(self.tcx, stmt.span, "statement kind", stmt.kind),
+            StmtKind::Item(item_id) => {
+                let item = self.tcx.hir_item(item_id);
+                match item.kind {
+                    ItemKind::ExternMod(_) => None,
+                    _ => not_implemented!(self.tcx, stmt.span, "statement kind", stmt.kind),
+                }
+            }
         }
     }
 

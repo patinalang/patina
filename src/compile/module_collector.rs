@@ -1,4 +1,5 @@
 use rustc_data_structures::sharded::ShardedHashMap;
+use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::DefId;
 use rustc_hir::definitions::DefPathData;
@@ -18,14 +19,17 @@ impl<'tcx> ModuleNameCollector<'tcx> {
     pub fn module_name(&self, def_id: DefId) -> Symbol {
         self.names.get_or_insert_with(def_id, || {
             let def_kind = self.tcx.def_kind(def_id);
+
+            if def_kind == DefKind::ExternMod {
+                return self.extern_module_name(def_id);
+            }
+
             let path = self.tcx.def_path(def_id);
 
-            let mut str_segments = Vec::new();
-
-            if def_kind != DefKind::ExternMod {
-                str_segments.push("Elixir.Patina".to_owned());
-                str_segments.push(self.tcx.crate_name(path.krate).as_str().to_owned());
-            };
+            let mut str_segments = SmallVec::<[String; 6]>::from_iter([
+                "Elixir.Patina".to_owned(),
+                self.tcx.crate_name(path.krate).as_str().to_owned(),
+            ]);
 
             for data in &path.data {
                 if data.data != DefPathData::Ctor {
@@ -35,5 +39,17 @@ impl<'tcx> ModuleNameCollector<'tcx> {
 
             Symbol::intern(&str_segments.join("."))
         })
+    }
+
+    fn extern_module_name(&self, mut def_id: DefId) -> Symbol {
+        let mut str_segments = SmallVec::<[String; 6]>::new();
+
+        while self.tcx.def_kind(def_id) == DefKind::ExternMod {
+            str_segments.push(self.tcx.item_name(def_id).as_str().to_owned());
+            def_id = self.tcx.parent(def_id);
+        }
+
+        str_segments.reverse();
+        Symbol::intern(&str_segments.join("."))
     }
 }
