@@ -13,6 +13,7 @@ pub mod dead;
 mod debugger_visualizer;
 mod diagnostic_items;
 mod eii;
+mod erl_export;
 pub mod entry;
 mod errors;
 pub mod hir_id_validator;
@@ -30,6 +31,7 @@ pub fn provide(providers: &mut Providers) {
     dead::provide(providers);
     debugger_visualizer::provide(providers);
     diagnostic_items::provide(providers);
+    erl_export::provide(providers);
     entry::provide(providers);
     lang_items::provide(providers);
     lib_features::provide(providers);

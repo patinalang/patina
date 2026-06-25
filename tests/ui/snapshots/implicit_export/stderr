@@ -1,0 +1,13 @@
+warning: trait `FooTrait` is never used
+  --> tests/ui/src/implicit_export.pt:3:7
+   |
+LL | trait FooTrait {
+   |       ^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: [{"tests/ui/src/implicit_export.pt",
+           [{{15,5},erl_lint,{unused_function,{bar,0}}}]}]
+
+warning: 2 warnings emitted
+

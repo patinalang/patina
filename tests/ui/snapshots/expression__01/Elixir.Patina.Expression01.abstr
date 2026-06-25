@@ -72,4 +72,4 @@
           [{var,{4,1},'Key'}],
           [],
           [{call,{4,1},{atom,{4,1},module_info},[{var,{4,1},'Key'}]}]}]},
- {function,{4,1},main,0,[{clause,{4,1},[],[],[]}]}]
+ {function,{4,1},main,0,[{clause,{4,1},[],[],[{tuple,{4,15},[]}]}]}]

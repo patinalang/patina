@@ -1188,6 +1188,32 @@ rustc_queries! {
         desc { "checking attributes in {}", describe_as_module(key, tcx) }
     }
 
+    /// Returns the set of associated functions in the local crate
+    /// that are called from the outside of the types' associated impls.
+    ///
+    /// For example, for code:
+    ///
+    ///     struct Foo;
+    ///     impl Foo {
+    ///         fn foo() { priv_foo(); }
+    ///         fn priv_foo() {}
+    ///     }
+    ///     impl Into<int> for &Foo {
+    ///         fn into(self) -> &Foo { Foo::priv_foo(); 42 }
+    ///     }
+    ///     struct Bar;
+    ///     impl Bar {
+    ///         fn bar() { Foo::foo(); }
+    ///     }
+    ///     fn top_level() { Bar::bar(); }
+    ///
+    /// `Foo::foo` and `Bar::bar` will be returned by this query, but `Foo::priv_foo` will not,
+    /// as it's only called from within `Foo`'s associated function.
+    query assoc_fns_called_externally(_: ()) -> &'tcx LocalDefIdSet {
+        arena_cache
+        desc { "finding externally called associated functions" }
+    }
+
     /// Checks for uses of unstable APIs in the module.
     query check_mod_unstable_api_usage(key: LocalModDefId) {
         desc { "checking for unstable API usage in {}", describe_as_module(key, tcx) }

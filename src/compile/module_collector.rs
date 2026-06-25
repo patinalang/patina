@@ -17,13 +17,9 @@ impl<'tcx> ModuleNameCollector<'tcx> {
     }
 
     pub fn module_name(&self, def_id: DefId) -> Symbol {
+        assert!(self.tcx.def_kind(def_id) != DefKind::ExternMod);
+
         self.names.get_or_insert_with(def_id, || {
-            let def_kind = self.tcx.def_kind(def_id);
-
-            if def_kind == DefKind::ExternMod {
-                return self.extern_module_name(def_id);
-            }
-
             let path = self.tcx.def_path(def_id);
 
             let mut str_segments = SmallVec::<[String; 6]>::from_iter([
@@ -41,15 +37,23 @@ impl<'tcx> ModuleNameCollector<'tcx> {
         })
     }
 
-    fn extern_module_name(&self, mut def_id: DefId) -> Symbol {
-        let mut str_segments = SmallVec::<[String; 6]>::new();
+    pub fn home_module_name(&self, def_id: DefId) -> Symbol {
+        self.module_name(self.tcx.erl_home_module(def_id))
+    }
 
-        while self.tcx.def_kind(def_id) == DefKind::ExternMod {
-            str_segments.push(self.tcx.item_name(def_id).as_str().to_owned());
-            def_id = self.tcx.parent(def_id);
-        }
+    pub fn extern_module_name(&self, mut def_id: DefId) -> Symbol {
+        assert!(self.tcx.def_kind(def_id) == DefKind::ExternMod);
 
-        str_segments.reverse();
-        Symbol::intern(&str_segments.join("."))
+        self.names.get_or_insert_with(def_id, || {
+            let mut str_segments = SmallVec::<[String; 6]>::new();
+
+            while self.tcx.def_kind(def_id) == DefKind::ExternMod {
+                str_segments.push(self.tcx.item_name(def_id).as_str().to_owned());
+                def_id = self.tcx.parent(def_id);
+            }
+
+            str_segments.reverse();
+            Symbol::intern(&str_segments.join("."))
+        })
     }
 }

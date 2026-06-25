@@ -7,12 +7,12 @@ use rustc_ast::{BindingMode, LitKind};
 use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::{DefKind, Res};
-use rustc_hir::def_id::{LocalDefId, LocalModDefId};
+use rustc_hir::def_id::{DefId, LocalDefId, LocalModDefId};
 use rustc_hir::{
     BodyId, Expr, ExprKind, FnSig, Generics, HirId, ImplItemKind, ItemKind, Mod, Pat, PatKind,
     QPath, Stmt, StmtKind, StructTailExpr, TyKind, VariantData,
 };
-use rustc_middle::ty::{TyCtxt, Visibility};
+use rustc_middle::ty::TyCtxt;
 use rustc_span::{Ident, Span, Symbol, kw, sym};
 
 use crate::compile::eaf_builder::EafBuilder;
@@ -201,6 +201,10 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                     exprs.push(self.translate_expr(tail, scope));
                 }
 
+                if exprs.is_empty() {
+                    exprs.push(afb.expr_tuple(expr.span, []));
+                }
+
                 afb.expr_block(expr.span, exprs)
             }
 
@@ -221,7 +225,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 _ => not_implemented!(self.tcx, lit.span, "literal kind", lit.node),
             },
 
-            ExprKind::Path(qpath) => self.translate_qpath(&qpath, scope),
+            ExprKind::Path(qpath) => self.translate_qpath(&qpath, expr.hir_id, scope),
 
             ExprKind::Call(callee, args) => self.translate_call_expr(expr, callee, args, scope),
 
@@ -241,7 +245,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 StructTailExpr::None => {
                     let base = afb.expr_remote_call(
                         expr.span,
-                        self.translate_qpath(qpath, scope),
+                        self.translate_qpath(qpath, expr.hir_id, scope),
                         afb.expr_atom(expr.span, sym::__struct__),
                         [],
                     );
@@ -277,28 +281,52 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         }
     }
 
-    fn translate_qpath(&self, qpath: &QPath<'tcx>, scope: &mut Scope) -> eaf::Expr<'arena> {
-        match qpath {
-            QPath::Resolved(_, path) => self.translate_path(path, scope),
-            _ => not_implemented!(self.tcx, qpath.span(), "qpath kind", qpath),
+    fn qpath_res(&self, qpath: &QPath<'tcx>, hir_id: HirId) -> Res {
+        self.tcx.typeck(hir_id.owner.def_id).qpath_res(qpath, hir_id)
+    }
+
+    fn translate_qpath(
+        &self,
+        qpath: &QPath<'tcx>,
+        hir_id: HirId,
+        scope: &mut Scope,
+    ) -> eaf::Expr<'arena> {
+        let span = qpath.span();
+        match self.qpath_res(qpath, hir_id) {
+            Res::Local(hir_id) => {
+                let var = scope.get_var(hir_id).unwrap_or_else(|| {
+                    span_fatal!(self.tcx, span, "variable {hir_id:?} not in scope");
+                });
+                self.afb.expr_var(span, var.erl_name)
+            }
+
+            Res::Def(DefKind::ExternMod, def_id) => {
+                let name = self.modules.extern_module_name(def_id);
+                self.afb.expr_atom(span, name)
+            }
+
+            Res::Def(_, def_id) => {
+                let name = self.modules.module_name(def_id);
+                self.afb.expr_atom(span, name)
+            }
+
+            Res::SelfTyAlias { alias_to, .. } => {
+                let name = self.modules.home_module_name(alias_to);
+                self.afb.expr_atom(span, name)
+            }
+
+            res => not_implemented!(self.tcx, span, "path resolution", res),
         }
     }
 
-    fn translate_path(&self, path: &rustc_hir::Path<'tcx>, scope: &mut Scope) -> eaf::Expr<'arena> {
-        match path.res {
-            Res::Local(hir_id) => {
-                let var = scope.get_var(hir_id).unwrap_or_else(|| {
-                    span_fatal!(self.tcx, path.span, "variable {hir_id:?} not in scope");
-                });
-                self.afb.expr_var(path.span, var.erl_name)
-            }
-
-            Res::Def(_kind, def_id) => {
-                let name = self.modules.module_name(def_id);
-                self.afb.expr_atom(path.span, name)
-            }
-
-            _ => not_implemented!(self.tcx, path.span, "path resolution", path.res),
+    fn unexported_local_assoc_fn(&self, res: Res) -> Option<DefId> {
+        if let Res::Def(DefKind::AssocFn, def_id) = res
+            && let Some(local) = def_id.as_local()
+            && !self.tcx.is_erl_exported_fn(local)
+        {
+            Some(def_id)
+        } else {
+            None
         }
     }
 
@@ -315,11 +343,21 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             args.iter().map(|arg| self.translate_expr(arg, scope)).collect::<SmallVec<[_; 8]>>();
 
         match callee.kind {
-            ExprKind::Path(QPath::TypeRelative(
-                rustc_hir::Ty { kind: TyKind::Path(qpath), .. },
-                last_segment,
-            )) => {
-                let module = self.translate_qpath(qpath, scope);
+            ExprKind::Path(
+                ref qpath @ QPath::TypeRelative(
+                    rustc_hir::Ty { kind: TyKind::Path(self_ty_qpath), .. },
+                    last_segment,
+                ),
+            ) => {
+                if let Some(def_id) =
+                    self.unexported_local_assoc_fn(self.qpath_res(qpath, callee.hir_id))
+                {
+                    let fn_atom =
+                        afb.expr_atom(last_segment.ident.span, self.tcx.item_name(def_id));
+                    return afb.expr_local_call(expr.span, fn_atom, args_exprs);
+                }
+
+                let module = self.translate_qpath(self_ty_qpath, callee.hir_id, scope);
                 let fn_name = last_segment.ident.name;
 
                 // Temporary before we actually ship runtime modules (like `patina_fmt` could've been)
@@ -342,8 +380,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 _,
                 rustc_hir::Path { res: Res::Def(DefKind::Fn, def_id), .. },
             )) => {
-                let parent = self.tcx.parent(*def_id);
-                let mod_name = self.modules.module_name(parent);
+                let mod_name = self.modules.home_module_name(*def_id);
                 let fn_name = self.tcx.item_name(*def_id);
                 let mod_expr = afb.expr_atom(callee.span, mod_name);
                 let fn_expr = afb.expr_atom(callee.span, fn_name);
@@ -354,7 +391,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 _,
                 rustc_hir::Path { res: Res::Def(DefKind::ExternMod, leaf), segments, .. },
             )) => {
-                let module = self.modules.module_name(self.tcx.parent(*leaf));
+                let module = self.modules.extern_module_name(self.tcx.parent(*leaf));
                 let fn_name = self.tcx.item_name(*leaf);
 
                 // Temporary before we actually ship runtime modules (like `patina_fmt` could've been)
@@ -519,15 +556,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 let function = self.translate_fun(sig, generics, ident, body);
                 self.push_function(&mut forms, &mut last_file, item.span, function);
 
-                let def_id = item.owner_id.def_id;
-                let is_visible = match self.tcx.visibility(def_id) {
-                    Visibility::Public => true,
-                    Visibility::Restricted(restricted_id) => {
-                        restricted_id != self.tcx.parent_module_from_def_id(def_id).to_def_id()
-                    }
-                };
-
-                if is_visible {
+                if self.tcx.is_erl_exported_fn(item.owner_id.def_id) {
                     exports.push((ident.name, sig.decl.inputs.len()));
                 }
             }
@@ -559,6 +588,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         variant_data: VariantData<'tcx>,
     ) -> (Vec<eaf::ModuleForm<'arena>>, SmallVec<[(Symbol, usize); 8]>) {
         let mut forms = Vec::new();
+        let mut last_file = Some(self.file_path(span));
         let mut exports = SmallVec::<[(Symbol, usize); 8]>::new();
 
         forms.push(elixir_compat::info_function(&self.afb, span, Some(variant_data)));
@@ -586,8 +616,12 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                         continue;
                     };
 
-                    forms.push(self.translate_fun(&sig, impl_item.generics, impl_item.ident, body));
-                    exports.push((impl_item.ident.name, sig.decl.inputs.len()));
+                    let function =
+                        self.translate_fun(&sig, impl_item.generics, impl_item.ident, body);
+                    self.push_function(&mut forms, &mut last_file, impl_item.span, function);
+                    if self.tcx.is_erl_exported_fn(impl_item.owner_id.def_id) {
+                        exports.push((impl_item.ident.name, sig.decl.inputs.len()));
+                    }
                 }
             }
         }

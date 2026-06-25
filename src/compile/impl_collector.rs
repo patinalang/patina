@@ -25,10 +25,11 @@ impl<'tcx> ImplCollector<'tcx> {
                 _ => unreachable!(),
             };
 
-            let self_ty = tcx.type_of(def_id).instantiate_identity().skip_norm_wip();
-            let Some(adt_def_id) = self_ty.ty_adt_def().map(|adt| adt.did()) else {
+            let adt_def_id = tcx.erl_home_module(def_id);
+            if !matches!(tcx.def_kind(adt_def_id), DefKind::Struct | DefKind::Enum | DefKind::Union)
+            {
                 continue;
-            };
+            }
 
             impls.entry(adt_def_id).or_default().push(impl_item);
         }

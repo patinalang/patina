@@ -20,4 +20,5 @@
     [];
 '__info__'(Key) ->
     module_info(Key).
-main() ->.
+main() ->
+    {}.
