@@ -137,11 +137,12 @@ fn typeck_with_inspect<'tcx>(
         fcx.write_ty(id, ty);
     } else if let Some(hir::FnSig { header, decl, span: fn_sig_span }) = node.fn_sig() {
         let fn_sig = if decl.output.is_suggestable_infer_ty().is_some() {
+            let kind = hir::FnPtrKind::Fn;
             // In the case that we're recovering `fn() -> W<_>` or some other return
             // type that has an infer in it, lower the type directly so that it'll
             // be correctly filled with infer. We'll use this inference to provide
             // a suggestion later on.
-            fcx.lowerer().lower_fn_ty(id, header.safety(), header.abi, decl, None, None)
+            fcx.lowerer().lower_fn_ty(id, header.safety(), header.abi, kind, decl, None, None)
         } else {
             tcx.fn_sig(def_id).instantiate_identity().skip_norm_wip()
         };

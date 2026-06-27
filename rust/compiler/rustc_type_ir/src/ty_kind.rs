@@ -620,7 +620,7 @@ impl<I: Interner> Eq for TypeAndMut<I> {}
     derive(Encodable_NoContext, Decodable_NoContext, StableHash_NoContext)
 )]
 pub struct FnSigKind<I: Interner> {
-    /// Holds the c_variadic and safety bitflags, and 6 bits for the `ExternAbi` variant and unwind
+    /// Holds the `is_fnref` and safety bitflags, and 6 bits for the `ExternAbi` variant and unwind
     /// flag.
     #[type_visitable(ignore)]
     #[type_foldable(identity)]
@@ -649,8 +649,8 @@ impl<I: Interner> fmt::Debug for FnSigKind<I> {
 
         f.field(&self.abi());
 
-        if self.c_variadic() {
-            f.field(&"CVariadic");
+        if self.is_fnref() {
+            f.field(&"FnRef");
         };
 
         f.finish()
@@ -664,22 +664,22 @@ impl<I: Interner> FnSigKind<I> {
     /// Bitflag for `Safety::Safe`. The default is `Unsafe`.
     const SAFE_FLAG: u8 = 1 << 6;
 
-    /// Bitflag for a trailing C-style variadic argument.
-    const C_VARIADIC_FLAG: u8 = 1 << 7;
+    /// Bitflag for `is_fnref`
+    const IS_FNREF_FLAG: u8 = 1 << 7;
 
-    /// Create a new FnSigKind with the "Rust" ABI, "Unsafe" safety, and no C-style variadic argument.
+    /// Create a new FnSigKind with the "Rust" ABI, "Unsafe" safety, and `is_fnref = false`.
     /// To modify these flags, use the `set_*` methods, for readability.
     // FIXME: use Default instead when that trait is const stable.
     pub fn default() -> Self {
         Self { flags: 0, _marker: PhantomData }
             .set_abi(ExternAbi::Rust)
             .set_safety(I::Safety::unsafe_mode())
-            .set_c_variadic(false)
+            .set_is_fnref(false)
     }
 
-    /// Create a new FnSigKind with the given ABI, safety, and C-style variadic flag.
-    pub fn new(abi: ExternAbi, safety: I::Safety, c_variadic: bool) -> Self {
-        Self::default().set_abi(abi).set_safety(safety).set_c_variadic(c_variadic)
+    /// Create a new FnSigKind with the given ABI, safety, and `is_fnref` flag.
+    pub fn new(abi: ExternAbi, safety: I::Safety, is_fnref: bool) -> Self {
+        Self::default().set_abi(abi).set_safety(safety).set_is_fnref(is_fnref)
     }
 
     /// Set the ABI, including the unwind flag.
@@ -706,15 +706,22 @@ impl<I: Interner> FnSigKind<I> {
         self
     }
 
-    /// Set the C-style variadic argument flag.
+    /// Set the `is_fnref` flag.
     #[must_use = "this method does not modify the receiver"]
-    pub fn set_c_variadic(mut self, c_variadic: bool) -> Self {
-        if c_variadic {
-            self.flags |= Self::C_VARIADIC_FLAG;
+    pub fn set_is_fnref(mut self, is_fnref: bool) -> Self {
+        if is_fnref {
+            self.flags |= Self::IS_FNREF_FLAG;
         } else {
-            self.flags &= !Self::C_VARIADIC_FLAG;
+            self.flags &= !Self::IS_FNREF_FLAG;
         }
 
+        self
+    }
+
+    /// Set the C-style variadic flag.
+    #[must_use = "this method does not modify the receiver"]
+    pub fn set_c_variadic(self, _c_variadic: bool) -> Self {
+        // removed
         self
     }
 
@@ -734,9 +741,15 @@ impl<I: Interner> FnSigKind<I> {
         if self.is_safe() { I::Safety::safe() } else { I::Safety::unsafe_mode() }
     }
 
+    /// Returns `true` if this is a Patina `fnref(A) -> R` type.
+    pub fn is_fnref(self) -> bool {
+        self.flags & Self::IS_FNREF_FLAG != 0
+    }
+
     /// Do the function arguments end with a C-style variadic argument?
     pub fn c_variadic(self) -> bool {
-        self.flags & Self::C_VARIADIC_FLAG != 0
+        // removed
+        false
     }
 }
 
@@ -765,11 +778,11 @@ impl<I: Interner> FnSig<I> {
     }
 
     pub fn is_fn_trait_compatible(self) -> bool {
-        !self.c_variadic() && self.safety().is_safe() && self.abi() == ExternAbi::Rust
+        !self.is_fnref() && self.safety().is_safe() && self.abi() == ExternAbi::Rust
     }
 
     pub fn set_safety(self, safety: I::Safety) -> Self {
-        Self { fn_sig_kind: FnSigKind::new(self.abi(), safety, self.c_variadic()), ..self }
+        Self { fn_sig_kind: FnSigKind::new(self.abi(), safety, self.is_fnref()), ..self }
     }
 
     pub fn safety(self) -> I::Safety {
@@ -780,8 +793,13 @@ impl<I: Interner> FnSig<I> {
         self.fn_sig_kind.abi()
     }
 
+    pub fn is_fnref(self) -> bool {
+        self.fn_sig_kind.is_fnref()
+    }
+
     pub fn c_variadic(self) -> bool {
-        self.fn_sig_kind.c_variadic()
+        // removed
+        false
     }
 
     pub fn dummy() -> Self {
@@ -818,7 +836,12 @@ impl<I: Interner> ty::Binder<I, FnSig<I>> {
     }
 
     pub fn c_variadic(self) -> bool {
-        self.skip_binder().c_variadic()
+        // removed
+        false
+    }
+
+    pub fn is_fnref(self) -> bool {
+        self.skip_binder().is_fnref()
     }
 
     pub fn safety(self) -> I::Safety {
@@ -850,20 +873,17 @@ impl<I: Interner> fmt::Debug for FnSig<I> {
             write!(f, "extern \"{:?}\" ", fn_sig_kind.abi())?;
         }
 
-        write!(f, "fn(")?;
+        if fn_sig_kind.is_fnref() {
+            write!(f, "fnref(")?;
+        } else {
+            write!(f, "fn(")?;
+        }
         let inputs = sig.inputs();
         for (i, ty) in inputs.iter().enumerate() {
             if i > 0 {
                 write!(f, ", ")?;
             }
             write!(f, "{ty:?}")?;
-        }
-        if fn_sig_kind.c_variadic() {
-            if inputs.is_empty() {
-                write!(f, "...")?;
-            } else {
-                write!(f, ", ...")?;
-            }
         }
         write!(f, ")")?;
 
@@ -1006,7 +1026,12 @@ pub struct FnHeader<I: Interner> {
 
 impl<I: Interner> FnHeader<I> {
     pub fn c_variadic(self) -> bool {
-        self.fn_sig_kind.c_variadic()
+        // removed
+        false
+    }
+
+    pub fn is_fnref(self) -> bool {
+        self.fn_sig_kind.is_fnref()
     }
 
     pub fn safety(self) -> I::Safety {

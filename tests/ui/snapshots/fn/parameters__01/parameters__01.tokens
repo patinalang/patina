@@ -24,6 +24,7 @@ OpenBrace
 Whitespace
 Ident
 OpenParen
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
 CloseParen
 Semi
 Whitespace
@@ -51,6 +52,7 @@ OpenBrace
 Whitespace
 Ident
 OpenParen
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
 CloseParen
 Semi
 Whitespace

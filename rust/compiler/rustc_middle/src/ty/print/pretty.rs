@@ -3127,8 +3127,12 @@ define_print! {
             write!(p, "extern {} ", self.abi())?;
         }
 
-        write!(p, "fn")?;
-        p.pretty_print_fn_sig(self.inputs(), self.c_variadic(), self.output())?;
+        if self.is_fnref() {
+            write!(p, "fnref")?;
+        } else {
+            write!(p, "fn")?;
+        }
+        p.pretty_print_fn_sig(self.inputs(), false, self.output())?;
     }
 
     ty::TraitRef<'tcx> {

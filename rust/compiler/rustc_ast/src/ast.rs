@@ -2476,10 +2476,41 @@ impl Ty {
     }
 }
 
+/// Erlang carries two kinds of `fun`s with slightly different semantics.
+/// Patina distinguishes between them on the type level, because for certain
+/// situations (serialization, long-lived term storage, etc.) it's useful
+/// to restrict accepted function types.
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Encodable, Decodable, Debug)]
+#[derive(StableHash, Walkable)]
+pub enum FnPtrKind {
+    // From Erlang docs:
+    /// A fun created by fun M:F/A is called an external fun.
+    /// Calling it will always call the function F with arity A in the latest
+    /// code for module M. Notice that module M does not even need to be loaded
+    /// when the fun fun M:F/A is created.
+    FnRef,
+
+    // From Erlang docs:
+    /// All other funs are called local. When a local fun is called, the same
+    /// version of the code that created the fun is called (even if a newer
+    /// version of the module has been loaded).
+    ///
+    /// Note that in our case, `FnRef` coerces to `Fn`, so this type includes
+    /// both described types.
+    Fn,
+}
+
+impl FnPtrKind {
+    pub fn is_fnref(self) -> bool {
+        matches!(self, FnPtrKind::FnRef)
+    }
+}
+
 #[derive(Clone, Encodable, Decodable, Debug, Walkable)]
 pub struct FnPtrTy {
     pub safety: Safety,
     pub ext: Extern,
+    pub kind: FnPtrKind,
     pub generic_params: ThinVec<GenericParam>,
     pub decl: Box<FnDecl>,
     /// Span of the `[unsafe] [extern] fn(...) -> ...` part, i.e. everything
@@ -3720,12 +3751,14 @@ pub struct FnHeader {
     pub safety: Safety,
     /// The `extern` keyword and corresponding ABI string, if any.
     pub ext: Extern,
+    /// Whether this is `fn(A) -> R` or `fnref(A) -> R`.
+    pub kind: FnPtrKind,
 }
 
 impl FnHeader {
     /// Does this function header have any qualifiers or is it empty?
     pub fn has_qualifiers(&self) -> bool {
-        let Self { safety, coroutine_kind, constness, ext } = self;
+        let Self { safety, coroutine_kind, constness, ext, kind: _ } = self;
         matches!(safety, Safety::Unsafe(_))
             || coroutine_kind.is_some()
             || matches!(constness, Const::Yes(_))
@@ -3740,6 +3773,7 @@ impl Default for FnHeader {
             coroutine_kind: None,
             constness: Const::No,
             ext: Extern::None,
+            kind: FnPtrKind::Fn,
         }
     }
 }

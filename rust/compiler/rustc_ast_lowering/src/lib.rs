@@ -1440,6 +1440,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     generic_params,
                     safety: self.lower_safety(f.safety, hir::Safety::Safe),
                     abi: self.lower_extern(f.ext),
+                    kind: f.kind,
                     decl: self.lower_fn_decl(&f.decl, t.id, t.span, FnDeclKind::Pointer, None),
                     param_idents: self.lower_fn_params_to_idents(&f.decl),
                 }))

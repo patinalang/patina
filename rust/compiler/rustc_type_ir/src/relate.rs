@@ -154,11 +154,8 @@ impl<I: Interner> Relate<I> for ty::FnSig<I> {
     ) -> RelateResult<I, ty::FnSig<I>> {
         let cx = relation.cx();
 
-        if a.c_variadic() != b.c_variadic() {
-            return Err(TypeError::VariadicMismatch(ExpectedFound::new(
-                a.c_variadic(),
-                b.c_variadic(),
-            )));
+        if a.is_fnref() != b.is_fnref() {
+            return Err(TypeError::FnRefMismatch(ExpectedFound::new(a.is_fnref(), b.is_fnref())));
         }
 
         if a.safety() != b.safety() {

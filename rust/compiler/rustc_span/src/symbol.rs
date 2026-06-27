@@ -88,6 +88,7 @@ symbols! {
         Box:                "box",
         Do:                 "do",
         Final:              "final",
+        FnRef:              "fnref",
         Macro:              "macro",
         Override:           "override",
         Priv:               "priv",

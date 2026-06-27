@@ -58,7 +58,6 @@ Whitespace
 Ident
 OpenParen
 CloseParen
-Semi
 Whitespace
 CloseBrace
 Whitespace

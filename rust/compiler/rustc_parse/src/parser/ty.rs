@@ -334,7 +334,11 @@ impl<'a> Parser<'a> {
         } else if self.eat_keyword(exp!(Underscore)) {
             // A type to be inferred `_`
             TyKind::Infer
-        } else if self.check_fn_front_matter(false, Case::Sensitive) {
+        } else if self.check_fn_front_matter(
+            false,
+            Case::Sensitive,
+            FrontMatterParsingMode::FunctionPtrType,
+        ) {
             // Function pointer type
             self.parse_ty_fn_ptr(lo, ThinVec::new(), None, recover_return_sign)?
         } else if self.check_keyword(exp!(For)) {
@@ -342,7 +346,11 @@ impl<'a> Parser<'a> {
             //   `for<'lt> [unsafe] [extern "ABI"] fn (&'lt S) -> T`
             //   `for<'lt> Trait1<'lt> + Trait2 + 'a`
             let (bound_vars, _) = self.parse_higher_ranked_binder()?;
-            if self.check_fn_front_matter(false, Case::Sensitive) {
+            if self.check_fn_front_matter(
+                false,
+                Case::Sensitive,
+                FrontMatterParsingMode::FunctionPtrType,
+            ) {
                 self.parse_ty_fn_ptr(
                     lo,
                     bound_vars,
@@ -893,7 +901,7 @@ impl<'a> Parser<'a> {
             tokens: None,
         };
         let span_start = self.token.span;
-        let ast::FnHeader { ext, safety, .. } = self.parse_fn_front_matter(
+        let ast::FnHeader { ext, safety, kind, .. } = self.parse_fn_front_matter(
             &inherited_vis,
             Case::Sensitive,
             FrontMatterParsingMode::FunctionPtrType,
@@ -912,6 +920,7 @@ impl<'a> Parser<'a> {
         Ok(TyKind::FnPtr(Box::new(FnPtrTy {
             ext,
             safety,
+            kind,
             generic_params: params,
             decl,
             decl_span,

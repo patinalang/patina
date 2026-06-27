@@ -2,11 +2,11 @@
 // block: 1/2
 
 fn call_me_ref(f: fnref(int) -> int) {
-    f();
+    f(1);
 }
 
 fn call_me(f: fn(int) -> int) {
-    f();
+    f(2);
 }
 
 fn function(x: int) -> int {

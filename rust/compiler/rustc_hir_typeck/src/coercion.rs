@@ -962,13 +962,41 @@ impl<'f, 'tcx> Coerce<'f, 'tcx> {
         debug_assert!(self.shallow_resolve(b) == b);
 
         match b.kind() {
-            ty::FnPtr(_, b_hdr) if a_sig.safety().is_safe() && b_hdr.safety().is_unsafe() => {
-                let a = self.tcx.safe_to_unsafe_fn_ty(a_sig);
-                let adjust = Adjust::Pointer(PointerCoercion::UnsafeFnPointer);
-                self.unify_and(a, b, [], adjust, ForceLeakCheck::Yes)
+            ty::FnPtr(_, b_hdr) => {
+                let widen = a_sig.is_fnref() && !b_hdr.is_fnref();
+                let (a_sig, a) = if widen {
+                    let a_sig = self.with_fn_ptr_is_fnref(a_sig, false);
+                    let a = Ty::new_fn_ptr(self.tcx, a_sig);
+                    (a_sig, a)
+                } else {
+                    (a_sig, a)
+                };
+
+                if a_sig.safety().is_safe() && b_hdr.safety().is_unsafe() {
+                    let adjustments = widen.then(|| Adjustment {
+                        kind: Adjust::Pointer(PointerCoercion::FnrefToFnPointer),
+                        target: a,
+                    });
+                    let a = self.tcx.safe_to_unsafe_fn_ty(a_sig);
+                    let adjust = Adjust::Pointer(PointerCoercion::UnsafeFnPointer);
+                    self.unify_and(a, b, adjustments, adjust, ForceLeakCheck::Yes)
+                } else if widen {
+                    let adjust = Adjust::Pointer(PointerCoercion::FnrefToFnPointer);
+                    self.unify_and(a, b, [], adjust, ForceLeakCheck::Yes)
+                } else {
+                    self.unify(a, b, ForceLeakCheck::Yes)
+                }
             }
             _ => self.unify(a, b, ForceLeakCheck::Yes),
         }
+    }
+
+    fn with_fn_ptr_is_fnref(
+        &self,
+        sig: ty::PolyFnSig<'tcx>,
+        is_fnref: bool,
+    ) -> ty::PolyFnSig<'tcx> {
+        sig.map_bound(|s| ty::FnSig { fn_sig_kind: s.fn_sig_kind.set_is_fnref(is_fnref), ..s })
     }
 
     fn coerce_from_fn_item(&self, a: Ty<'tcx>, b: Ty<'tcx>) -> CoerceResult<'tcx> {
@@ -982,6 +1010,7 @@ impl<'f, 'tcx> Coerce<'f, 'tcx> {
 
                 let InferOk { value: a_sig, mut obligations } =
                     self.at(&self.cause, self.param_env).normalize(Unnormalized::new_wip(a_sig));
+                let a_sig = self.with_fn_ptr_is_fnref(a_sig, b_hdr.is_fnref());
                 let a = Ty::new_fn_ptr(self.tcx, a_sig);
 
                 let adjust = Adjust::Pointer(PointerCoercion::ReifyFnPointer(b_hdr.safety()));
@@ -995,17 +1024,15 @@ impl<'f, 'tcx> Coerce<'f, 'tcx> {
         }
     }
 
-    /// Attempts to coerce from a closure to a function pointer. Fails
-    /// if the closure has any upvars.
+    /// Attempts to coerce from a closure to a function pointer.
     fn coerce_closure_to_fn(&self, a: Ty<'tcx>, b: Ty<'tcx>) -> CoerceResult<'tcx> {
         debug_assert!(self.shallow_resolve(a) == a);
         debug_assert!(self.shallow_resolve(b) == b);
 
         match b.kind() {
-            ty::FnPtr(_, hdr) => {
+            ty::FnPtr(_, hdr) if !hdr.is_fnref() => {
                 let safety = hdr.safety();
-                let terr = TypeError::Sorts(ty::error::ExpectedFound::new(a, b));
-                let closure_sig = self.sig_for_closure_coercion(a, Some(hdr.safety()), terr)?;
+                let closure_sig = self.sig_for_closure_coercion(a, Some(hdr.safety()))?;
                 let pointer_ty = Ty::new_fn_ptr(self.tcx, closure_sig);
                 debug!("coerce_closure_to_fn(a={:?}, b={:?}, pty={:?})", a, b, pointer_ty);
 
@@ -1155,14 +1182,10 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     }
 
     #[instrument(level = "debug", skip(self), ret)]
-    fn sig_for_coerce_lub(
-        &self,
-        ty: Ty<'tcx>,
-        closure_upvars_terr: TypeError<'tcx>,
-    ) -> Result<ty::PolyFnSig<'tcx>, TypeError<'tcx>> {
+    fn sig_for_coerce_lub(&self, ty: Ty<'tcx>) -> Result<ty::PolyFnSig<'tcx>, TypeError<'tcx>> {
         match ty.kind() {
             ty::FnDef(..) => self.sig_for_fn_def_coercion(ty, None),
-            ty::Closure(..) => self.sig_for_closure_coercion(ty, None, closure_upvars_terr),
+            ty::Closure(..) => self.sig_for_closure_coercion(ty, None),
             _ => unreachable!("`sig_for_fn_def_closure_coerce_lub` called with wrong ty: {:?}", ty),
         }
     }
@@ -1214,23 +1237,12 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         &self,
         closure: Ty<'tcx>,
         expected_safety: Option<hir::Safety>,
-        closure_upvars_terr: TypeError<'tcx>,
     ) -> Result<ty::PolyFnSig<'tcx>, TypeError<'tcx>> {
         let tcx = self.tcx;
 
-        let ty::Closure(closure_def, closure_args) = closure.kind() else {
+        let ty::Closure(_closure_def, closure_args) = closure.kind() else {
             unreachable!("`sig_for_closure_coercion` called with non closure ty: {:?}", closure);
         };
-
-        // At this point we haven't done capture analysis, which means
-        // that the ClosureArgs just contains an inference variable instead
-        // of tuple of captured types.
-        //
-        // All we care here is if any variable is being captured and not the exact paths,
-        // so we check `upvars_mentioned` for root variables being captured.
-        if !tcx.upvars_mentioned(closure_def.expect_local()).is_none_or(|u| u.is_empty()) {
-            return Err(closure_upvars_terr);
-        }
 
         // We coerce the closure, which has fn type
         //     `extern "rust-call" fn((arg0,arg1,...)) -> _`
@@ -1272,7 +1284,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             return Ok(prev_ty);
         }
 
-        let terr = TypeError::Sorts(ty::error::ExpectedFound::new(prev_ty, new_ty));
         let opt_sigs = match (prev_ty.kind(), new_ty.kind()) {
             // Don't coerce pairs of fndefs or pairs of closures to fn ptrs
             // if they can just be lubbed.
@@ -1304,16 +1315,16 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 match lubbed_ty {
                     Ok(ok) => return Ok(self.register_infer_ok_obligations(ok)),
                     Err(_) => {
-                        let a_sig = self.sig_for_coerce_lub(prev_ty, terr)?;
-                        let b_sig = self.sig_for_coerce_lub(new_ty, terr)?;
+                        let a_sig = self.sig_for_coerce_lub(prev_ty)?;
+                        let b_sig = self.sig_for_coerce_lub(new_ty)?;
                         Some((a_sig, b_sig))
                     }
                 }
             }
 
             (ty::Closure(..), ty::FnDef(..)) | (ty::FnDef(..), ty::Closure(..)) => {
-                let a_sig = self.sig_for_coerce_lub(prev_ty, terr)?;
-                let b_sig = self.sig_for_coerce_lub(new_ty, terr)?;
+                let a_sig = self.sig_for_coerce_lub(prev_ty)?;
+                let b_sig = self.sig_for_coerce_lub(new_ty)?;
                 Some((a_sig, b_sig))
             }
             // ty::FnPtr x ty::FnPtr is fine to just be handled through a normal `unify`

@@ -271,7 +271,7 @@ impl<'a> Parser<'a> {
 
         let info = if !self.is_use_closure() && self.eat_keyword_case(exp!(Use), case) {
             self.parse_use_item()?
-        } else if self.check_fn_front_matter(check_pub, case) {
+        } else if self.check_fn_front_matter(check_pub, case, FrontMatterParsingMode::Function) {
             // FUNCTION ITEM
             let defaultness = def_();
             if let Defaultness::Default(span) = defaultness {
@@ -2362,7 +2362,11 @@ impl<'a> Parser<'a> {
         let (ident, is_raw) = self.ident_or_err(true)?;
         if is_raw == IdentIsRaw::No && ident.is_reserved() {
             let snapshot = self.create_snapshot_for_diagnostic();
-            let err = if self.check_fn_front_matter(false, Case::Sensitive) {
+            let err = if self.check_fn_front_matter(
+                false,
+                Case::Sensitive,
+                FrontMatterParsingMode::Function,
+            ) {
                 let inherited_vis =
                     Visibility { span: DUMMY_SP, kind: VisibilityKind::Inherited, tokens: None };
                 // We use `parse_fn` to get a span for the function
@@ -2923,7 +2927,15 @@ impl<'a> Parser<'a> {
     ///
     /// `check_pub` adds additional `pub` to the checks in case users place it
     /// wrongly, can be used to ensure `pub` never comes after `default`.
-    pub(super) fn check_fn_front_matter(&mut self, check_pub: bool, case: Case) -> bool {
+    ///
+    /// `parsing_mode` determines which terminator keyword is accepted: `Function`
+    /// accepts only `fn`, while `FunctionPtrType` additionally accepts `fnref`
+    pub(super) fn check_fn_front_matter(
+        &mut self,
+        check_pub: bool,
+        case: Case,
+        parsing_mode: FrontMatterParsingMode,
+    ) -> bool {
         const ALL_QUALS: &[ExpKeywordPair] = &[
             exp!(Pub),
             exp!(Gen),
@@ -2943,12 +2955,17 @@ impl<'a> Parser<'a> {
         } else {
             &[exp!(Gen), exp!(Const), exp!(Async), exp!(Unsafe), exp!(Safe), exp!(Extern)]
         };
-        self.check_keyword_case(exp!(Fn), case) // Definitely an `fn`.
+        let allow_fnref = parsing_mode == FrontMatterParsingMode::FunctionPtrType;
+        let is_term = |t: &token::Token| {
+            t.is_keyword_case(kw::Fn, case) || (allow_fnref && t.is_keyword_case(kw::FnRef, case))
+        };
+        (self.check_keyword_case(exp!(Fn), case)
+            || (allow_fnref && self.check_keyword_case(exp!(FnRef), case))) // Definitely an `fn` (or `fnref`).
             // `$qual fn` or `$qual $qual`:
             || quals.iter().any(|&exp| self.check_keyword_case(exp, case))
                 && self.look_ahead(1, |t| {
                     // `$qual fn`, e.g. `const fn` or `async fn`.
-                    t.is_keyword_case(kw::Fn, case)
+                    is_term(t)
                     // Two qualifiers `$qual $qual` is enough, e.g. `async unsafe`.
                     || (
                         (
@@ -2978,7 +2995,7 @@ impl<'a> Parser<'a> {
                 && self.look_ahead(1, |t| t.can_begin_string_literal())
                 && (self.tree_look_ahead(2, |tt| {
                     match tt {
-                        TokenTree::Token(t, _) => t.is_keyword_case(kw::Fn, case),
+                        TokenTree::Token(t, _) => is_term(t),
                         TokenTree::Delimited(..) => false,
                     }
                 }) == Some(true) ||
@@ -2996,7 +3013,7 @@ impl<'a> Parser<'a> {
                         }) == Some(true)
                         && self.tree_look_ahead(3, |tt| {
                             match tt {
-                                TokenTree::Token(t, _) => t.is_keyword_case(kw::Fn, case),
+                                TokenTree::Token(t, _) => is_term(t),
                                 TokenTree::Delimited(..) => false,
                             }
                         }) == Some(true)
@@ -3069,7 +3086,12 @@ impl<'a> Parser<'a> {
             Some(CoroutineKind::Async { .. }) | None => {}
         }
 
-        if !self.eat_keyword_case(exp!(Fn), case) {
+        let ate_fn = self.eat_keyword_case(exp!(Fn), case);
+        let ate_fnref = !ate_fn
+            && parsing_mode == FrontMatterParsingMode::FunctionPtrType
+            && self.eat_keyword_case(exp!(FnRef), case);
+        let kind = if ate_fnref { FnPtrKind::FnRef } else { FnPtrKind::Fn };
+        if !ate_fn && !ate_fnref {
             // It is possible for `expect_one_of` to recover given the contents of
             // `self.expected_token_types`, therefore, do not use `self.unexpected()` which doesn't
             // account for this.
@@ -3253,10 +3275,19 @@ impl<'a> Parser<'a> {
 
                     if let Some(wrong_kw) = wrong_kw
                         && self.may_recover()
-                        && self.look_ahead(1, |tok| tok.is_keyword_case(kw::Fn, case))
+                        && self.look_ahead(1, |tok| {
+                            tok.is_keyword_case(kw::Fn, case)
+                                || (parsing_mode == FrontMatterParsingMode::FunctionPtrType
+                                    && tok.is_keyword_case(kw::FnRef, case))
+                        })
                     {
-                        // Advance past the misplaced keyword and `fn`
+                        // Advance past the misplaced keyword and the terminator (`fn`/`fnref`).
                         self.bump();
+                        let recover_kind = if self.token.is_keyword(kw::FnRef) {
+                            FnPtrKind::FnRef
+                        } else {
+                            FnPtrKind::Fn
+                        };
                         self.bump();
                         // When we recover from a `MisplacedDisallowedQualifier`, we already emitted an error for the disallowed qualifier
                         // So we don't emit another error that the qualifier is unexpected.
@@ -3270,6 +3301,7 @@ impl<'a> Parser<'a> {
                             safety: recover_safety,
                             coroutine_kind: recover_coroutine_kind,
                             ext,
+                            kind: recover_kind,
                         });
                     }
 
@@ -3278,7 +3310,7 @@ impl<'a> Parser<'a> {
             }
         }
 
-        Ok(FnHeader { constness, safety, coroutine_kind, ext })
+        Ok(FnHeader { constness, safety, coroutine_kind, ext, kind })
     }
 
     /// Parses the parameter list and result type of a function declaration.

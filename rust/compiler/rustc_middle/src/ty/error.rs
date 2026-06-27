@@ -96,6 +96,12 @@ impl<'tcx> TypeError<'tcx> {
                 if values.found { "variadic" } else { "non-variadic" }
             )
             .into(),
+            TypeError::FnRefMismatch(ref values) => format!(
+                "expected {}, found {}",
+                if values.expected { "fnref" } else { "fn" },
+                if values.found { "fnref" } else { "fn" }
+            )
+            .into(),
             TypeError::ProjectionMismatched(ref values) => format!(
                 "expected `{}`, found `{}`",
                 tcx.def_path_str(values.expected),

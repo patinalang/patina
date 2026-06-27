@@ -49,8 +49,8 @@ fn lazy_add(fx: fn() -> int, fy: fn() -> int)
                 int ({
     (||
         (((fx as fn() -> int)() as int) + ((fy as fn() -> int)() as int) as
-            int) as {closure@tests/ui/src/fn/parameters__02.pt:5:5: 5:7});
-} as {type error})
+            int) as {closure@tests/ui/src/fn/parameters__02.pt:5:5: 5:7})
+} as fn() -> int)
 
 fn add(x: int, y: int) -> int ({ ((x as int) + (y as int) as int) } as int)
 
@@ -60,13 +60,14 @@ enum MathOp { Add, Mul, }
 
 fn choose_op(op: MathOp)
     ->
-        fnref(int, int) ->
-        int ({
+        fn(int, int)
+            ->
+                int ({
     (match (op as MathOp) {
         MathOp::Add => (add as fn(int, int) -> int {add}),
         MathOp::Mul => (mul as fn(int, int) -> int {mul}),
-    } as {type error})
-} as {type error})
+    } as fnref(int, int) -> int)
+} as fnref(int, int) -> int)
 
 fn main() ({
     let fx =
@@ -103,8 +104,8 @@ fn main() ({
 
     let op =
         ((choose_op as
-                fn(MathOp) -> {type error} {choose_op})((MathOp::Add as
-                MathOp)) as {type error});
+                fn(MathOp) -> fnref(int, int) -> int {choose_op})((MathOp::Add
+                as MathOp)) as fnref(int, int) -> int);
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
@@ -113,7 +114,7 @@ fn main() ({
                                 term), (" = " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((op as
-                                        {type error})((3 as int), (5 as int)) as {type error})) as
+                                        fnref(int, int) -> int)((3 as int), (5 as int)) as int)) as
                                 term)] as [term; 5])] as [[term; 5]; 1])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ())

@@ -545,6 +545,7 @@ mod llvm_enzyme {
             TyKind::FnPtr(Box::new(ast::FnPtrTy {
                 safety: p_sig.header.safety,
                 ext: p_sig.header.ext,
+                kind: ast::FnPtrKind::Fn,
                 generic_params: ThinVec::new(),
                 decl: Box::new(ast::FnDecl {
                     inputs: fn_ptr_params,

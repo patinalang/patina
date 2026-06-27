@@ -43,10 +43,12 @@ macro_rules! println {
 // block: 1/2
 
 fn call_me_ref(f:
-        fnref(int) ->
-        int) ({ ((f as {type error})() as {type error}); } as ())
+        fn(int)
+            -> int) ({ ((f as fnref(int) -> int)((1 as int)) as int); } as ())
 
-fn call_me(f: fn(int) -> int) ({ ((f as fn(int) -> int)() as int); } as ())
+fn call_me(f:
+        fn(int)
+            -> int) ({ ((f as fn(int) -> int)((2 as int)) as int); } as ())
 
 fn function(x: int) -> int ({ ((x as int) + (1 as int) as int) } as int)
 
@@ -60,7 +62,7 @@ fn main() ({
     ((call_me as fn(fn(int) -> int) {call_me})((closure as {type error})) as
         ());
     ((call_me_ref as
-            fn({type error}) {call_me_ref})((function as
+            fn(fnref(int) -> int) {call_me_ref})((function as
             fn(int) -> int {function})) as ());
     // call_me_ref(closure);
     // ^ ERROR! `fn(int) -> int` cannot be used as `fnref(int) -> int`

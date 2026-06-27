@@ -42,9 +42,9 @@ macro_rules! println {
 // source: patina-by-example/src/fn/parameters.md
 // block: 1/2
 
-fn call_me_ref(f: fnref(int) -> int) { f(); }
+fn call_me_ref(f: fnref(int) -> int) { f(1); }
 
-fn call_me(f: fn(int) -> int) { f(); }
+fn call_me(f: fn(int) -> int) { f(2); }
 
 fn function(x: int) -> int { x + 1 }
 

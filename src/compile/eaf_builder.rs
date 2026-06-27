@@ -117,6 +117,27 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         eaf::Pattern::Map(anno, assocs)
     }
 
+    pub(crate) fn expr_remote_fun(
+        &self,
+        span: impl IntoAnno,
+        module: Symbol,
+        name: Symbol,
+        arity: usize,
+    ) -> eaf::Expr<'arena> {
+        let anno = span.into_anno(self.source_map);
+        let module = self.expr_atom(anno, module);
+        let name = self.expr_atom(anno, name);
+        let arity = self.expr_int(anno, arity as u128);
+        eaf::Expr::RemoteFun(
+            anno,
+            eaf::RemoteFunction(
+                self.arena.alloc(module),
+                self.arena.alloc(name),
+                self.arena.alloc(arity),
+            ),
+        )
+    }
+
     pub(crate) fn expr_remote_call(
         &self,
         span: impl IntoAnno,

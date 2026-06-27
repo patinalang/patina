@@ -1361,7 +1361,7 @@ impl<'a> State<'a> {
                 self.pclose();
             }
             ast::TyKind::FnPtr(f) => {
-                self.print_ty_fn(f.ext, f.safety, &f.decl, None, &f.generic_params);
+                self.print_ty_fn(f.ext, f.safety, &f.decl, None, &f.generic_params, f.kind);
             }
             ast::TyKind::UnsafeBinder(f) => {
                 let ib = self.ibox(INDENT_UNIT);
@@ -2252,11 +2252,12 @@ impl<'a> State<'a> {
         decl: &ast::FnDecl,
         name: Option<Ident>,
         generic_params: &[ast::GenericParam],
+        kind: ast::FnPtrKind,
     ) {
         let ib = self.ibox(INDENT_UNIT);
         self.print_formal_generic_params(generic_params);
         let generics = ast::Generics::default();
-        let header = ast::FnHeader { safety, ext, ..ast::FnHeader::default() };
+        let header = ast::FnHeader { safety, ext, kind, ..ast::FnHeader::default() };
         self.print_fn(decl, header, name, &generics);
         self.end(ib);
     }
@@ -2278,7 +2279,10 @@ impl<'a> State<'a> {
             }
         }
 
-        self.word("fn")
+        match header.kind {
+            ast::FnPtrKind::FnRef => self.word("fnref"),
+            ast::FnPtrKind::Fn => self.word("fn"),
+        }
     }
 
     fn print_safety(&mut self, s: ast::Safety) {

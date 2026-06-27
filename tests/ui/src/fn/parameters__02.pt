@@ -2,7 +2,7 @@
 // block: 2/2
 
 fn lazy_add(fx: fn() -> int, fy: fn() -> int) -> fn() -> int {
-    || fx() + fy();
+    || fx() + fy()
 }
 
 fn add(x: int, y: int) -> int {

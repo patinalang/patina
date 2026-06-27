@@ -93,6 +93,7 @@ pub enum TokenType {
     KwExtern,
     KwFinal,
     KwFn,
+    KwFnRef,
     KwFor,
     KwGen,
     KwIf,
@@ -233,6 +234,7 @@ impl TokenType {
             KwEnum,
             KwExtern,
             KwFn,
+            KwFnRef,
             KwFor,
             KwFinal,
             KwGen,
@@ -310,6 +312,7 @@ impl TokenType {
             TokenType::KwEnum => Some(kw::Enum),
             TokenType::KwExtern => Some(kw::Extern),
             TokenType::KwFn => Some(kw::Fn),
+            TokenType::KwFnRef => Some(kw::FnRef),
             TokenType::KwFor => Some(kw::For),
             TokenType::KwFinal => Some(kw::Final),
             TokenType::KwGen => Some(kw::Gen),
@@ -526,6 +529,7 @@ macro_rules! exp {
     (Enum)           => { exp!(@kw, Enum,       KwEnum) };
     (Extern)         => { exp!(@kw, Extern,     KwExtern) };
     (Fn)             => { exp!(@kw, Fn,         KwFn) };
+    (FnRef)          => { exp!(@kw, FnRef,      KwFnRef) };
     (For)            => { exp!(@kw, For,        KwFor) };
     (Final)          => { exp!(@kw, Final,      KwFinal) };
     (Gen)            => { exp!(@kw, Gen,        KwGen) };

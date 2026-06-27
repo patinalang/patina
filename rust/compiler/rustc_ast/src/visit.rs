@@ -435,6 +435,7 @@ macro_rules! common_visitor_and_walkers {
             DelimSpan,
             EnumDef,
             Extern,
+            FnPtrKind,
             ForLoopKind,
             FormatArgPosition,
             FormatArgsPiece,

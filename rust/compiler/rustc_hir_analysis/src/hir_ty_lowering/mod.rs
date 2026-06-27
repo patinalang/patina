@@ -3127,7 +3127,15 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
 
                 Ty::new_fn_ptr(
                     tcx,
-                    self.lower_fn_ty(hir_ty.hir_id, bf.safety, bf.abi, bf.decl, None, Some(hir_ty)),
+                    self.lower_fn_ty(
+                        hir_ty.hir_id,
+                        bf.safety,
+                        bf.abi,
+                        bf.kind,
+                        bf.decl,
+                        None,
+                        Some(hir_ty),
+                    ),
                 )
             }
             hir::TyKind::UnsafeBinder(binder) => Ty::new_unsafe_binder(
@@ -3600,6 +3608,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         hir_id: HirId,
         safety: hir::Safety,
         abi: rustc_abi::ExternAbi,
+        kind: hir::FnPtrKind,
         decl: &hir::FnDecl<'tcx>,
         generics: Option<&hir::Generics<'_>>,
         hir_ty: Option<&hir::Ty<'_>>,
@@ -3612,10 +3621,8 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
 
         debug!(?output_ty);
 
-        let fn_sig_kind = FnSigKind::default()
-            .set_abi(abi)
-            .set_safety(safety)
-            .set_c_variadic(decl.fn_decl_kind.c_variadic());
+        let fn_sig_kind =
+            FnSigKind::default().set_abi(abi).set_safety(safety).set_is_fnref(kind.is_fnref());
         let fn_ty = tcx.mk_fn_sig(input_tys, output_ty, fn_sig_kind);
         let fn_ptr_ty = ty::Binder::bind_with_vars(fn_ty, bound_vars);
 

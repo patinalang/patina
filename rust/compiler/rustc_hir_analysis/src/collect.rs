@@ -1004,6 +1004,7 @@ fn fn_sig(tcx: TyCtxt<'_>, def_id: LocalDefId) -> ty::EarlyBinder<'_, ty::PolyFn
                     hir_id,
                     sig.header.safety(),
                     sig.header.abi,
+                    hir::FnPtrKind::Fn,
                     sig.decl,
                     Some(generics),
                     None,
@@ -1021,6 +1022,7 @@ fn fn_sig(tcx: TyCtxt<'_>, def_id: LocalDefId) -> ty::EarlyBinder<'_, ty::PolyFn
             hir_id,
             header.safety(),
             header.abi,
+            hir::FnPtrKind::Fn,
             decl,
             Some(generics),
             None,
@@ -1077,6 +1079,7 @@ fn lower_fn_sig_recovering_infer_ret_ty<'tcx>(
         icx.tcx().local_def_id_to_hir_id(def_id),
         sig.header.safety(),
         sig.header.abi,
+        hir::FnPtrKind::Fn,
         sig.decl,
         Some(generics),
         None,
@@ -1475,8 +1478,10 @@ fn compute_sig_of_foreign_fn_decl<'tcx>(
     safety: hir::Safety,
 ) -> ty::PolyFnSig<'tcx> {
     let hir_id = tcx.local_def_id_to_hir_id(def_id);
-    let fty =
-        ItemCtxt::new(tcx, def_id).lowerer().lower_fn_ty(hir_id, safety, abi, decl, None, None);
+    let kind = hir::FnPtrKind::Fn;
+    let fty = ItemCtxt::new(tcx, def_id)
+        .lowerer()
+        .lower_fn_ty(hir_id, safety, abi, kind, decl, None, None);
 
     // Feature gate SIMD types in FFI, since I am not sure that the
     // ABIs are handled at all correctly. -huonw

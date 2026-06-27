@@ -7,7 +7,7 @@ use rustc_ast::{BindingMode, LitKind};
 use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::{DefKind, Res};
-use rustc_hir::def_id::{LocalDefId, LocalModDefId};
+use rustc_hir::def_id::{DefId, LocalDefId, LocalModDefId};
 use rustc_hir::{
     BodyId, Expr, ExprKind, FnSig, Generics, HirId, ImplItemKind, ItemKind, Mod, Pat, PatKind,
     QPath, Stmt, StmtKind, StructTailExpr, TyKind, VariantData,
@@ -297,6 +297,18 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 afb.expr_remote_call(expr.span, mod_name, fn_name, [field_name, subject])
             }
 
+            ExprKind::Closure(closure) => {
+                let body = self.tcx.hir_body(closure.body);
+                let patterns = body
+                    .params
+                    .iter()
+                    .map(|param| self.translate_pat(param.pat, scope))
+                    .collect::<SmallVec<[_; 8]>>();
+                let clause_body = afb.clause_body(self.translate_expr(body.value, scope));
+                let clause = afb.clause(closure.fn_decl_span, patterns, clause_body);
+                afb.expr_fun(expr.span, [clause])
+            }
+
             _ => not_implemented!(self.tcx, expr.span, "expression kind", expr.kind),
         }
     }
@@ -330,24 +342,37 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 self.afb.expr_atom(span, name)
             }
 
+            Res::Def(DefKind::Fn, def_id) => {
+                let module = self.expect_erl_definition_module(def_id);
+                let mod_name = self.modules.module_name(module);
+                let fn_name = self.tcx.item_name(def_id);
+                let arity = self.tcx.fn_arg_idents(def_id).len();
+                self.afb.expr_remote_fun(span, mod_name, fn_name, arity)
+            }
+
             Res::Def(_, def_id) => {
-                let Some(module) = self.tcx.erl_definition_module(def_id) else {
-                    span_bug!(span, "path definition has no resolved Erlang module");
-                };
+                let module = self.expect_erl_definition_module(def_id);
                 let name = self.modules.module_name(module);
                 self.afb.expr_atom(span, name)
             }
 
             Res::SelfTyAlias { alias_to, .. } => {
-                let Some(module) = self.tcx.erl_definition_module(alias_to) else {
-                    span_bug!(span, "Self type has no resolved Erlang module");
-                };
+                let module = self.expect_erl_definition_module(alias_to);
                 let name = self.modules.module_name(module);
                 self.afb.expr_atom(span, name)
             }
 
             res => not_implemented!(self.tcx, span, "path resolution", res),
         }
+    }
+
+    fn expect_erl_definition_module(&self, def_id: DefId) -> ErlModuleId {
+        let Some(module) = self.tcx.erl_definition_module(def_id) else {
+            let span = self.tcx.def_span(def_id);
+            let kind = self.tcx.def_kind(def_id);
+            span_bug!(span, "{kind:?} definition has no resolved Erlang module");
+        };
+        module
     }
 
     fn translate_call_expr(

@@ -26,6 +26,9 @@ pub enum PointerCoercion {
     /// Go from `*const [T; N]` to `*const T`
     ArrayToPointer,
 
+    /// Go from a `fnref(A) -> R` pointer to a `fn(A) -> R` pointer.
+    FnrefToFnPointer,
+
     /// Unsize a pointer/reference value, e.g., `&[T; n]` to
     /// `&[T]`. Note that the source could be a thin or wide pointer.
     /// This will do things like convert thin pointers to wide

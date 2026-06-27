@@ -13,7 +13,7 @@ use rustc_ast::{
 };
 pub use rustc_ast::{
     AssignOp, AssignOpKind, AttrId, AttrStyle, BinOp, BinOpKind, BindingMode, BorrowKind,
-    BoundConstness, BoundPolarity, ByRef, CaptureBy, DelimArgs, ImplPolarity, IsAuto,
+    BoundConstness, BoundPolarity, ByRef, CaptureBy, DelimArgs, FnPtrKind, ImplPolarity, IsAuto,
     MetaItemInner, MetaItemLit, Movability, Mutability, Pinnedness, UnOp,
 };
 use rustc_data_structures::fingerprint::Fingerprint;
@@ -3631,6 +3631,7 @@ impl PrimTy {
 pub struct FnPtrTy<'hir> {
     pub safety: Safety,
     pub abi: ExternAbi,
+    pub kind: FnPtrKind,
     pub generic_params: &'hir [GenericParam<'hir>],
     pub decl: &'hir FnDecl<'hir>,
     // `Option` because bare fn parameter identifiers are optional. We also end up
