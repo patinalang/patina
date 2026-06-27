@@ -2,6 +2,7 @@ use rustc_data_structures::fx::FxHashMap;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::DefId;
 use rustc_hir::{Impl, ItemKind};
+use rustc_middle::erl::ErlModuleId;
 use rustc_middle::ty::TyCtxt;
 
 pub(crate) struct ImplCollector<'tcx> {
@@ -25,13 +26,9 @@ impl<'tcx> ImplCollector<'tcx> {
                 _ => unreachable!(),
             };
 
-            let adt_def_id = tcx.erl_home_module(def_id);
-            if !matches!(tcx.def_kind(adt_def_id), DefKind::Struct | DefKind::Enum | DefKind::Union)
-            {
-                continue;
+            if let Some(ErlModuleId::Adt(adt_def_id)) = tcx.erl_definition_module(def_id) {
+                impls.entry(adt_def_id).or_default().push(impl_item);
             }
-
-            impls.entry(adt_def_id).or_default().push(impl_item);
         }
 
         ImplCollector { impls }

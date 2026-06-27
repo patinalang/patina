@@ -7,11 +7,13 @@ use rustc_ast::{BindingMode, LitKind};
 use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::{DefKind, Res};
-use rustc_hir::def_id::{DefId, LocalDefId, LocalModDefId};
+use rustc_hir::def_id::{LocalDefId, LocalModDefId};
 use rustc_hir::{
     BodyId, Expr, ExprKind, FnSig, Generics, HirId, ImplItemKind, ItemKind, Mod, Pat, PatKind,
     QPath, Stmt, StmtKind, StructTailExpr, TyKind, VariantData,
 };
+use rustc_middle::erl::{ErlCallTarget, ErlModuleId};
+use rustc_middle::span_bug;
 use rustc_middle::ty::TyCtxt;
 use rustc_span::{Ident, Span, Symbol, kw, sym};
 
@@ -103,7 +105,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         let module_id = LocalModDefId::new_unchecked(def_id);
         let (module, _span, _hir_id) = self.tcx.hir_get_module(module_id);
         let (forms, exports) = self.collect_module_fns(module);
-        let mod_name = self.modules.module_name(def_id.to_def_id());
+        let mod_name = self.modules.module_name(ErlModuleId::Mod(def_id.to_def_id()));
         self.assemble_module(module.spans.inner_span, mod_name, exports, forms)
     }
 
@@ -243,12 +245,30 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
 
             ExprKind::Struct(qpath, fields, tail) => match tail {
                 StructTailExpr::None => {
-                    let base = afb.expr_remote_call(
-                        expr.span,
-                        self.translate_qpath(qpath, expr.hir_id, scope),
-                        afb.expr_atom(expr.span, sym::__struct__),
-                        [],
-                    );
+                    // A struct literal lowers to a synthetic `__struct__()` call to the
+                    // struct's own module - there is no call `Expr`, so classify by def id.
+                    let fn_atom = afb.expr_atom(expr.span, sym::__struct__);
+                    let base = if let Some(def_id) = self.qpath_res(qpath, expr.hir_id).opt_def_id()
+                        && self
+                            .tcx
+                            .erl_call_kind_from(
+                                expr.hir_id.owner.to_def_id(),
+                                ErlCallTarget::Constructor {
+                                    nominal_type: def_id,
+                                    variant: None,
+                                    args: self
+                                        .tcx
+                                        .typeck(expr.hir_id.owner.def_id)
+                                        .node_args(expr.hir_id),
+                                },
+                            )
+                            .is_some_and(|kind| kind.can_be_local())
+                    {
+                        afb.expr_local_call(expr.span, fn_atom, [])
+                    } else {
+                        let mod_expr = self.translate_qpath(qpath, expr.hir_id, scope);
+                        afb.expr_remote_call(expr.span, mod_expr, fn_atom, [])
+                    };
                     let translated_fields_iter = fields.iter().map(|field| {
                         let key = afb.expr_atom(field.ident.span, field.ident.name);
                         (key, self.translate_expr(field.expr, scope))
@@ -301,32 +321,32 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             }
 
             Res::Def(DefKind::ExternMod, def_id) => {
-                let name = self.modules.extern_module_name(def_id);
+                let name = self.modules.module_name(ErlModuleId::Extern(def_id));
+                self.afb.expr_atom(span, name)
+            }
+
+            Res::Def(DefKind::Variant | DefKind::Ctor(..), def_id) => {
+                let name = self.modules.constructor_name(def_id);
                 self.afb.expr_atom(span, name)
             }
 
             Res::Def(_, def_id) => {
-                let name = self.modules.module_name(def_id);
+                let Some(module) = self.tcx.erl_definition_module(def_id) else {
+                    span_bug!(span, "path definition has no resolved Erlang module");
+                };
+                let name = self.modules.module_name(module);
                 self.afb.expr_atom(span, name)
             }
 
             Res::SelfTyAlias { alias_to, .. } => {
-                let name = self.modules.home_module_name(alias_to);
+                let Some(module) = self.tcx.erl_definition_module(alias_to) else {
+                    span_bug!(span, "Self type has no resolved Erlang module");
+                };
+                let name = self.modules.module_name(module);
                 self.afb.expr_atom(span, name)
             }
 
             res => not_implemented!(self.tcx, span, "path resolution", res),
-        }
-    }
-
-    fn unexported_local_assoc_fn(&self, res: Res) -> Option<DefId> {
-        if let Res::Def(DefKind::AssocFn, def_id) = res
-            && let Some(local) = def_id.as_local()
-            && !self.tcx.is_erl_exported_fn(local)
-        {
-            Some(def_id)
-        } else {
-            None
         }
     }
 
@@ -342,6 +362,14 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         let args_exprs =
             args.iter().map(|arg| self.translate_expr(arg, scope)).collect::<SmallVec<[_; 8]>>();
 
+        // Classification is single-sourced through the callee resolver; the arms below
+        // only build the corresponding Erlang node.
+        let local = self
+            .tcx
+            .erl_call_kind(expr)
+            .expect("call target to have a resolved Erlang module")
+            .can_be_local();
+
         match callee.kind {
             ExprKind::Path(
                 ref qpath @ QPath::TypeRelative(
@@ -349,8 +377,8 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                     last_segment,
                 ),
             ) => {
-                if let Some(def_id) =
-                    self.unexported_local_assoc_fn(self.qpath_res(qpath, callee.hir_id))
+                if local
+                    && let Res::Def(DefKind::AssocFn, def_id) = self.qpath_res(qpath, callee.hir_id)
                 {
                     let fn_atom =
                         afb.expr_atom(last_segment.ident.span, self.tcx.item_name(def_id));
@@ -380,10 +408,18 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 _,
                 rustc_hir::Path { res: Res::Def(DefKind::Fn, def_id), .. },
             )) => {
-                let mod_name = self.modules.home_module_name(*def_id);
                 let fn_name = self.tcx.item_name(*def_id);
-                let mod_expr = afb.expr_atom(callee.span, mod_name);
                 let fn_expr = afb.expr_atom(callee.span, fn_name);
+
+                if local {
+                    return afb.expr_local_call(expr.span, fn_expr, args_exprs);
+                }
+
+                let Some(module) = self.tcx.erl_definition_module(*def_id) else {
+                    span_bug!(callee.span, "function has no resolved Erlang module");
+                };
+                let mod_name = self.modules.module_name(module);
+                let mod_expr = afb.expr_atom(callee.span, mod_name);
                 afb.expr_remote_call(expr.span, mod_expr, fn_expr, args_exprs)
             }
 
@@ -391,7 +427,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 _,
                 rustc_hir::Path { res: Res::Def(DefKind::ExternMod, leaf), segments, .. },
             )) => {
-                let module = self.modules.extern_module_name(self.tcx.parent(*leaf));
+                let module = self.modules.module_name(ErlModuleId::Extern(self.tcx.parent(*leaf)));
                 let fn_name = self.tcx.item_name(*leaf);
 
                 // Temporary before we actually ship runtime modules (like `patina_fmt` could've been)
@@ -412,13 +448,13 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 _,
                 rustc_hir::Path { res: Res::Def(DefKind::Ctor(..), _), .. },
             )) => {
-                let mod_expr = self.translate_expr(callee, scope);
-                let base = afb.expr_remote_call(
-                    expr.span,
-                    mod_expr,
-                    afb.expr_atom(callee.span, sym::__struct__),
-                    [],
-                );
+                let fn_atom = afb.expr_atom(callee.span, sym::__struct__);
+                let base = if local {
+                    afb.expr_local_call(expr.span, fn_atom, [])
+                } else {
+                    let mod_expr = self.translate_expr(callee, scope);
+                    afb.expr_remote_call(expr.span, mod_expr, fn_atom, [])
+                };
                 let updates = args_exprs.into_iter().enumerate().map(|(i, arg)| {
                     (afb.expr_atom(expr.span, Symbol::intern(&i.to_string())), arg)
                 });
@@ -575,7 +611,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             not_implemented!(self.tcx, generics.span, "struct with generic parameters", generics);
         }
 
-        let mod_name = self.modules.module_name(def_id.to_def_id());
+        let mod_name = self.modules.module_name(ErlModuleId::Adt(def_id.to_def_id()));
         let (forms, exports) = self.collect_struct_fns(item.span, mod_name, def_id, variant_data);
         self.assemble_module(item.span, mod_name, exports, forms)
     }

@@ -6,25 +6,47 @@ use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::{DefId, LocalDefIdSet};
 use rustc_hir::intravisit::{self, Visitor};
 use rustc_hir::{Expr, ExprKind};
+use rustc_middle::erl::{ErlCallTarget, ErlItemInstance, ErlModuleId, ErlModuleResolution};
 use rustc_middle::query::Providers;
-use rustc_middle::ty::{TyCtxt, TypeckResults};
+use rustc_middle::ty::{GenericArgsRef, TyCtxt, TypeckResults};
 
 struct ExternalCallVisitor<'a, 'tcx> {
     tcx: TyCtxt<'tcx>,
     typeck: &'tcx TypeckResults<'tcx>,
-    caller_home: DefId,
+    owner: DefId,
+    caller_module: Option<ErlModuleId>,
     called_externally: &'a mut LocalDefIdSet,
 }
 
 impl<'tcx> ExternalCallVisitor<'_, 'tcx> {
-    fn record_callee(&mut self, callee: DefId) {
-        let Some(local) = callee.as_local() else { return };
-        if self.tcx.def_kind(callee) != DefKind::AssocFn {
+    fn record_callee(&mut self, def_id: DefId, args: GenericArgsRef<'tcx>) {
+        let Some(caller_module) = self.caller_module else {
+            return;
+        };
+
+        let Some(target @ ErlCallTarget::Item(item)) =
+            self.tcx.resolve_erl_item_target(self.owner, ErlItemInstance { def_id, args })
+        else {
+            return;
+        };
+
+        let Some(local) = item.def_id.as_local() else {
+            return;
+        };
+
+        if self.tcx.def_kind(item.def_id) != DefKind::AssocFn {
             return;
         }
 
-        // The call is external unless the caller lives in the very same generated module.
-        if self.caller_home != self.tcx.erl_home_module(callee) {
+        let Some(ErlModuleResolution::Static(callee_module)) =
+            self.tcx.erl_module_for_target(self.owner, target)
+        else {
+            return;
+        };
+
+        // Can't use `TyCtxt::erl_call_kind_from`, because we're computing the very query
+        // that `erl_call_kind_from` needs to make its decision.
+        if caller_module != callee_module {
             self.called_externally.insert(local);
         }
     }
@@ -37,12 +59,12 @@ impl<'tcx> Visitor<'tcx> for ExternalCallVisitor<'_, 'tcx> {
                 if let Res::Def(DefKind::AssocFn, def_id) =
                     self.typeck.qpath_res(qpath, expr.hir_id)
                 {
-                    self.record_callee(def_id);
+                    self.record_callee(def_id, self.typeck.node_args(expr.hir_id));
                 }
             }
             ExprKind::MethodCall(..) => {
                 if let Some(def_id) = self.typeck.type_dependent_def_id(expr.hir_id) {
-                    self.record_callee(def_id);
+                    self.record_callee(def_id, self.typeck.node_args(expr.hir_id));
                 }
             }
             _ => {}
@@ -59,7 +81,8 @@ fn assoc_fns_called_externally(tcx: TyCtxt<'_>, (): ()) -> LocalDefIdSet {
         let mut visitor = ExternalCallVisitor {
             tcx,
             typeck: tcx.typeck(owner),
-            caller_home: tcx.erl_home_module(owner),
+            owner: owner.to_def_id(),
+            caller_module: tcx.erl_definition_module(owner.to_def_id()),
             called_externally: &mut called_externally,
         };
         visitor.visit_body(tcx.hir_body_owned_by(owner));

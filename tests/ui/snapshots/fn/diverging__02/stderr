@@ -1,8 +1,0 @@
-warning: [{"tests/ui/src/fn/diverging__02.pt",
-           [{{4,1},erl_lint,{unused_function,{some_fn,0}}},
-            {{9,18},
-             erl_lint,
-             {unexported_function,{'Elixir.Patina.Diverging02',some_fn,0}}}]}]
-
-warning: 1 warning emitted
-

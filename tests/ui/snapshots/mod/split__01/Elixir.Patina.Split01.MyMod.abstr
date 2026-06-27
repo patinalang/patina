@@ -83,10 +83,4 @@
      [{clause,
           {12,1},
           [],[],
-          [{call,
-               {13,5},
-               {remote,
-                   {13,5},
-                   {atom,{13,5},'Elixir.Patina.Split01.MyMod'},
-                   {atom,{13,5},private_function}},
-               []}]}]}]
+          [{call,{13,5},{atom,{13,5},private_function},[]}]}]}]

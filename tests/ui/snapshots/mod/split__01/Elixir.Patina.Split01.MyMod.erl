@@ -25,4 +25,4 @@ function() ->
 private_function() ->
     2.
 indirect_access() ->
-    'Elixir.Patina.Split01.MyMod':private_function().
+    private_function().

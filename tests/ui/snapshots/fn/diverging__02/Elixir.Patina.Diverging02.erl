@@ -23,7 +23,7 @@
 some_fn() ->
     {}.
 main() ->
-    _var_0 = 'Elixir.Patina.Diverging02':some_fn(),
+    _var_0 = some_fn(),
     begin
         io:put_chars([[<<"This function returns and you can see this li"
                          "ne.">>]]),

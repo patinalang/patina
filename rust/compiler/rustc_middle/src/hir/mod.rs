@@ -224,60 +224,6 @@ impl<'tcx> TyCtxt<'tcx> {
         LocalModDefId::new_unchecked(id)
     }
 
-    /// Returns the Erlang "home module" a def is translated into.
-    /// That is, some definitions "own" an output Erlang module - mods, structs, enums, etc.
-    /// This function, for a given def_id, returns the def_id that corresponds to its output
-    /// Erlang module.
-    pub fn erl_home_module(self, def_id: impl Into<DefId>) -> DefId {
-        let mut def_id = def_id.into();
-
-        loop {
-            match self.def_kind(def_id) {
-                // ADTs and mods are their own modules.
-                DefKind::Struct | DefKind::Enum | DefKind::Union | DefKind::Mod => return def_id,
-                // An `impl` (and everything inside it) belongs to the implementing ADT.
-                DefKind::Impl { .. } => {
-                    let maybe_adt = self
-                        .type_of(def_id)
-                        .instantiate_identity()
-                        .skip_normalization()
-                        .peel_refs()
-                        .ty_adt_def();
-
-                    if let Some(adt) = maybe_adt {
-                        return adt.did();
-                    }
-                }
-                DefKind::ExternMod => {
-                    panic!("extern mod {:?} has no home module", def_id);
-                }
-                _ => {}
-            }
-            def_id = self.parent(def_id);
-        }
-    }
-
-    /// Returns `true` if the function should be exported from the Erlang module it's in.
-    /// All `pub(x)` where `x != self` are always exported.
-    /// The only complication is with associated functions, as `pub(self)` associated functions
-    /// can be called from the parent module of the `impl` block, or from local `impl`s for other
-    /// types. In that case, we additionally export those private associated functions that
-    /// are actually called externally.
-    pub fn is_erl_exported_fn(self, def_id: LocalDefId) -> bool {
-        let is_visible_from_other_modules = match self.visibility(def_id) {
-            crate::ty::Visibility::Public => true,
-            crate::ty::Visibility::Restricted(restricted) => {
-                restricted != self.parent_module_from_def_id(def_id).to_def_id()
-            }
-        };
-        if is_visible_from_other_modules {
-            return true;
-        }
-
-        self.def_kind(def_id) == DefKind::AssocFn
-            && self.assoc_fns_called_externally(()).contains(&def_id)
-    }
-
     /// Returns `true` if this is a foreign item (i.e., linked via `extern { ... }`).
     pub fn is_foreign_item(self, def_id: impl Into<DefId>) -> bool {
         self.opt_parent(def_id.into())

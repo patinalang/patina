@@ -27,6 +27,6 @@ function() ->
     end.
 main() ->
     'Elixir.Patina.Split01.MyMod':function(),
-    'Elixir.Patina.Split01':function(),
+    function(),
     'Elixir.Patina.Split01.MyMod':indirect_access(),
     'Elixir.Patina.Split01.MyMod.Nested':function().
