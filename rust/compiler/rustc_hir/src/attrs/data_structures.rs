@@ -1028,6 +1028,9 @@ pub enum AttributeKind {
     /// Represents `#[export_stable]`.
     ExportStable,
 
+    /// Represents `#[extern_call]`.
+    ExternCall(Span),
+
     /// Represents `#[feature(...)]`
     Feature(ThinVec<Ident>, Span),
 

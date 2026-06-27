@@ -1,8 +1,9 @@
 //! Erlang call resolution and module placement.
 
+use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def::{CtorKind, DefKind, Res};
 use rustc_hir::def_id::{DefId, LocalDefId};
-use rustc_hir::{Expr, ExprKind, PrimTy};
+use rustc_hir::{Attribute, Expr, ExprKind, PrimTy};
 
 use crate::ty::{self, GenericArgsRef, Ty, TyCtxt, TypingEnv, Unnormalized, Visibility};
 
@@ -123,9 +124,22 @@ impl<'tcx> TyCtxt<'tcx> {
     }
 
     /// Resolves and classifies a call without lowering it.
+    /// Wraps `erL_call_kind_from`; but unlike `erl_call_kind_from`,
+    /// checks for the `#[extern_call]` attribute and never returns `LocalOrExtern`.
     pub fn erl_call_kind(self, call: &Expr<'tcx>) -> Option<ErlCallKind> {
         let target = self.resolve_erl_call_target(call)?;
-        self.erl_call_kind_from(call.hir_id.owner.to_def_id(), target)
+        match self.erl_call_kind_from(call.hir_id.owner.to_def_id(), target) {
+            Some(ErlCallKind::LocalOrExtern) => {
+                let is_forced_extern = self
+                    .hir_attrs(call.hir_id)
+                    .iter()
+                    .any(|attr| matches!(attr, Attribute::Parsed(AttributeKind::ExternCall(..))));
+
+                if is_forced_extern { Some(ErlCallKind::Extern) } else { Some(ErlCallKind::Local) }
+            }
+
+            other => other,
+        }
     }
 
     pub fn erl_call_kind_from(

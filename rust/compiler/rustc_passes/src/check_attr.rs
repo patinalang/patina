@@ -28,6 +28,7 @@ use rustc_hir::{
     Item, ItemKind, MethodKind, Node, ParamName, Target, TraitItem, find_attr,
 };
 use rustc_macros::Diagnostic;
+use rustc_middle::erl::{ErlCallKind, ErlCallTarget};
 use rustc_middle::hir::nested_filter;
 use rustc_middle::middle::resolve_bound_vars::ObjectLifetimeDefault;
 use rustc_middle::query::Providers;
@@ -152,6 +153,9 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 }
                 Attribute::Parsed(AttributeKind::Deprecated { span: attr_span, .. }) => {
                     self.check_deprecated(hir_id, *attr_span, target)
+                }
+                Attribute::Parsed(AttributeKind::ExternCall(attr_span)) => {
+                    self.check_extern_call(hir_id, *attr_span, target)
                 }
                 Attribute::Parsed(AttributeKind::TargetFeature{ attr_span, ..}) => {
                     self.check_target_feature(hir_id, *attr_span, target, attrs)
@@ -1734,6 +1738,57 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         if !matches!(self.tcx.hir_expect_expr(hir_id).kind, hir::ExprKind::Break(..)) {
             self.dcx().emit_err(errors::ConstContinueAttr { attr_span, node_span });
         };
+    }
+
+    fn check_extern_call(&self, hir_id: HirId, attr_span: Span, target: Target) {
+        if let None = self.do_check_extern_call(hir_id, attr_span, target) {
+            self.dcx().emit_err(errors::ExternCallNonCall {
+                attr_span,
+                node_span: self.tcx.hir_span(hir_id),
+            });
+        }
+    }
+
+    fn do_check_extern_call(&self, hir_id: HirId, attr_span: Span, target: Target) -> Option<()> {
+        if !matches!(target, Target::Expression) {
+            return Some(()); // Handled in target checking during attr parse
+        }
+
+        let expr = self.tcx.hir_expect_expr(hir_id);
+        if !matches!(expr.kind, hir::ExprKind::Call(..) | hir::ExprKind::MethodCall(..)) {
+            return None;
+        }
+
+        let Some(target) = self.tcx.resolve_erl_call_target(expr) else {
+            return None;
+        };
+
+        match self.tcx.erl_call_kind_from(hir_id.owner.def_id.to_def_id(), target) {
+            Some(ErlCallKind::Extern) => {
+                self.dcx().emit_warn(errors::ExternCallRedundant {
+                    attr_span,
+                    node_span: self.tcx.hir_span(hir_id),
+                });
+                Some(())
+            }
+            Some(ErlCallKind::Local) => {
+                let target_def_id = match target {
+                    ErlCallTarget::Item(item) => item.def_id,
+                    ErlCallTarget::Constructor { variant: Some(def_id), .. } => def_id,
+                    ErlCallTarget::Constructor { nominal_type, .. } => nominal_type,
+                    _ => unreachable!("extern and dynamic targets won't be ErlCallKind::Local"),
+                };
+
+                self.dcx().emit_err(errors::ExternCallPrivateFn {
+                    attr_span,
+                    node_span: self.tcx.hir_span(hir_id),
+                    fn_span: self.tcx.def_span(target_def_id),
+                });
+                Some(())
+            }
+            Some(ErlCallKind::LocalOrExtern) => Some(()),
+            _ => None,
+        }
     }
 }
 

@@ -1,0 +1,10 @@
+warning: redundant `#[extern_call]`: the call is already external
+  --> tests/ui/src/local_and_extern_calls.pt:68:13
+   |
+LL |     let s = #[extern_call]
+   |             ^^^^^^^^^^^^^^
+LL |     StructWithNew::new(42);
+   |     ---------------------- call
+
+warning: 1 warning emitted
+

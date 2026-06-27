@@ -32,6 +32,35 @@ pub(crate) struct ConstContinueAttr {
 }
 
 #[derive(Diagnostic)]
+#[diag("`#[extern_call]` should be applied to a call expression")]
+pub(crate) struct ExternCallNonCall {
+    #[primary_span]
+    pub attr_span: Span,
+    #[label("not a call expression")]
+    pub node_span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("`#[extern_call]` should be applied to an exported function")]
+pub(crate) struct ExternCallPrivateFn {
+    #[primary_span]
+    pub attr_span: Span,
+    #[label("call")]
+    pub node_span: Span,
+    #[label("function")]
+    pub fn_span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("redundant `#[extern_call]`: the call is already external")]
+pub(crate) struct ExternCallRedundant {
+    #[primary_span]
+    pub attr_span: Span,
+    #[label("call")]
+    pub node_span: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag("`{$no_mangle_attr}` attribute may not be used in combination with `{$export_name_attr}`")]
 pub(crate) struct MixedExportNameAndNoMangle {
     #[label("`{$no_mangle_attr}` is ignored")]

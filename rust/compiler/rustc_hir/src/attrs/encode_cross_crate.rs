@@ -43,6 +43,7 @@ impl AttributeKind {
             EiiImpls(..) => No,
             ExportName { .. } => Yes,
             ExportStable => No,
+            ExternCall(..) => No,
             Feature(..) => No,
             FfiConst => No,
             FfiPure(..) => No,

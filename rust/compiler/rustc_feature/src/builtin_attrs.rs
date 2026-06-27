@@ -333,6 +333,7 @@ pub static BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
     // Code generation:
     ungated!(inline),
     ungated!(cold),
+    ungated!(extern_call),
     ungated!(no_builtins),
     ungated!(target_feature),
     ungated!(track_caller),

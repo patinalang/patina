@@ -34,6 +34,7 @@ use crate::attributes::diagnostic::on_unknown::*;
 use crate::attributes::diagnostic::on_unmatch_args::*;
 use crate::attributes::doc::*;
 use crate::attributes::dummy::*;
+use crate::attributes::extern_call::*;
 use crate::attributes::inline::*;
 use crate::attributes::instruction_set::*;
 use crate::attributes::link_attrs::*;
@@ -233,6 +234,7 @@ attribute_parsers!(
         Single<WithoutArgs<CoroutineParser>>,
         Single<WithoutArgs<DefaultLibAllocatorParser>>,
         Single<WithoutArgs<ExportStableParser>>,
+        Single<WithoutArgs<ExternCallParser>>,
         Single<WithoutArgs<FfiConstParser>>,
         Single<WithoutArgs<FfiPureParser>>,
         Single<WithoutArgs<FundamentalParser>>,

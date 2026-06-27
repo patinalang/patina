@@ -1,0 +1,71 @@
+pub struct StructWithNew {
+    value: int,
+}
+
+impl StructWithNew {
+    pub fn new(value: int) -> StructWithNew {
+        // local call
+        let _ = Self::public_new(value);
+        // local call
+        let _ = self::StructWithNew::public_new(value);
+        // remote call
+        #[extern_call]
+        Self::public_new(value)
+    }
+
+    pub fn public_new(value: int) -> StructWithNew {
+        // local call
+        Self::priv_new(value)
+    }
+
+    fn priv_new(value: int) -> StructWithNew {
+        StructWithNew { value }
+    }
+}
+
+fn priv_main() -> StructWithNew {
+    // remote call
+    StructWithNew::new(42)
+}
+
+pub fn public_main() -> StructWithNew {
+    // local call
+    let _ = priv_main();
+    // local call
+    let _ = self::priv_main();
+    // local call
+    priv_main()
+}
+
+mod Nested {
+    pub fn main() {
+        // local call
+        let _ = public_function();
+        // local call
+        let _ = self::public_function();
+        // local call
+        let _ = super::Nested::public_function();
+        // remote call
+        #[extern_call]
+        public_function()
+    }
+
+    pub fn public_function() {
+        ()
+    }
+}
+
+pub fn main() {
+    // local call
+    let _ = public_main();
+    // local call
+    let _ = self::public_main();
+    // remote call
+    let _ = Nested::main();
+    // local call
+    let _ = self::priv_main();
+    // remote call (redundant `#[extern_call]` warning)
+    let s = #[extern_call]
+    StructWithNew::new(42);
+    println!("{}", s.value);
+}

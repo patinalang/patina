@@ -1,0 +1,3 @@
+fn priv_function() -> int { 42 }
+
+pub fn main() { let _ = #[extern_call] priv_function(); }

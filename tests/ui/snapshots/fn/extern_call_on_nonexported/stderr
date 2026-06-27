@@ -1,0 +1,13 @@
+error: `#[extern_call]` should be applied to an exported function
+  --> tests/ui/src/fn/extern_call_on_nonexported.pt:6:13
+   |
+LL | fn priv_function() -> int {
+   | ------------------------- function
+...
+LL |     let _ = #[extern_call]
+   |             ^^^^^^^^^^^^^^
+LL |     priv_function();
+   |     --------------- call
+
+error: aborting due to 1 previous error
+

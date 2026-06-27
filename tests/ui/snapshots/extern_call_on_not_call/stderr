@@ -1,0 +1,10 @@
+error: `#[extern_call]` should be applied to a call expression
+  --> tests/ui/src/extern_call_on_not_call.pt:2:13
+   |
+LL |     let _ = #[extern_call]
+   |             ^^^^^^^^^^^^^^
+LL |     42;
+   |     -- not a call expression
+
+error: aborting due to 1 previous error
+
