@@ -593,7 +593,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             fn_sig.output(),
             expected,
             arg_exprs,
-            fn_sig.c_variadic(),
             TupleArgumentsFlag::DontTupleArguments,
             def_id,
         );
@@ -903,7 +902,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             fn_sig.output(),
             expected,
             arg_exprs,
-            fn_sig.c_variadic(),
             TupleArgumentsFlag::TupleArguments,
             Some(closure_def_id.to_def_id()),
         );
@@ -982,7 +980,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             method.sig.output(),
             expected,
             arg_exprs,
-            method.sig.c_variadic(),
             TupleArgumentsFlag::TupleArguments,
             Some(method.def_id),
         );

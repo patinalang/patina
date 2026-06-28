@@ -718,13 +718,6 @@ impl<I: Interner> FnSigKind<I> {
         self
     }
 
-    /// Set the C-style variadic flag.
-    #[must_use = "this method does not modify the receiver"]
-    pub fn set_c_variadic(self, _c_variadic: bool) -> Self {
-        // removed
-        self
-    }
-
     /// Get the ABI, including the unwind flag.
     pub fn abi(self) -> ExternAbi {
         let abi_index = self.flags & Self::EXTERN_ABI_MASK;
@@ -744,12 +737,6 @@ impl<I: Interner> FnSigKind<I> {
     /// Returns `true` if this is a Patina `fnref(A) -> R` type.
     pub fn is_fnref(self) -> bool {
         self.flags & Self::IS_FNREF_FLAG != 0
-    }
-
-    /// Do the function arguments end with a C-style variadic argument?
-    pub fn c_variadic(self) -> bool {
-        // removed
-        false
     }
 }
 
@@ -797,11 +784,6 @@ impl<I: Interner> FnSig<I> {
         self.fn_sig_kind.is_fnref()
     }
 
-    pub fn c_variadic(self) -> bool {
-        // removed
-        false
-    }
-
     pub fn dummy() -> Self {
         Self {
             inputs_and_output: Default::default(),
@@ -833,11 +815,6 @@ impl<I: Interner> ty::Binder<I, FnSig<I>> {
 
     pub fn fn_sig_kind(self) -> FnSigKind<I> {
         self.skip_binder().fn_sig_kind
-    }
-
-    pub fn c_variadic(self) -> bool {
-        // removed
-        false
     }
 
     pub fn is_fnref(self) -> bool {
@@ -1025,11 +1002,6 @@ pub struct FnHeader<I: Interner> {
 }
 
 impl<I: Interner> FnHeader<I> {
-    pub fn c_variadic(self) -> bool {
-        // removed
-        false
-    }
-
     pub fn is_fnref(self) -> bool {
         self.fn_sig_kind.is_fnref()
     }

@@ -717,15 +717,6 @@ pub(crate) struct MainFunctionGenericParameters {
 }
 
 #[derive(Diagnostic)]
-#[diag("C-variadic functions with the {$convention} calling convention are not supported", code = E0045)]
-pub(crate) struct VariadicFunctionCompatibleConvention<'a> {
-    #[primary_span]
-    #[label("C-variadic function must have a compatible calling convention")]
-    pub span: Span,
-    pub convention: &'a str,
-}
-
-#[derive(Diagnostic)]
 pub(crate) enum CannotCaptureLateBound {
     #[diag("cannot capture late-bound type parameter in {$what}")]
     Type {
@@ -1633,16 +1624,6 @@ pub(crate) struct OnlyCurrentTraitsPointerSugg<'a> {
     pub(crate) struct_span: Span,
     pub mut_key: &'a str,
     pub ptr_ty: Ty<'a>,
-}
-
-#[derive(Diagnostic)]
-#[diag("{$descr}")]
-pub(crate) struct UnsupportedDelegation<'a> {
-    #[primary_span]
-    pub span: Span,
-    pub descr: &'a str,
-    #[label("callee defined here")]
-    pub callee_span: Span,
 }
 
 #[derive(Diagnostic)]

@@ -420,14 +420,6 @@ declare_features! (
     (unstable, avx10_target_feature, "1.88.0", Some(138843)),
     /// Target features on bpf.
     (unstable, bpf_target_feature, "1.54.0", Some(150247)),
-    /// Allows using C-variadics.
-    (unstable, c_variadic, "1.34.0", Some(44930)),
-    /// Allows defining c-variadic functions on targets where this feature has not yet
-    /// undergone sufficient testing for stabilization.
-    (unstable, c_variadic_experimental_arch, "CURRENT_RUSTC_VERSION", Some(155973)),
-    /// Allows defining c-variadic naked functions with any extern ABI that is allowed
-    /// on c-variadic foreign functions.
-    (unstable, c_variadic_naked_functions, "1.93.0", Some(148767)),
     /// Allows the use of `#[cfg(contract_checks)` to check if contract checks are enabled.
     (unstable, cfg_contract_checks, "1.86.0", Some(128044)),
     /// Allows the use of `#[cfg(overflow_checks)` to check if integer overflow behaviour.
@@ -464,8 +456,6 @@ declare_features! (
     (unstable, const_async_blocks, "1.53.0", Some(85368)),
     /// Allows `const { ... }` as a shorthand for `const _: () = const { ... };` for module items.
     (unstable, const_block_items, "1.95.0", Some(149226)),
-    /// Allows defining and calling c-variadic functions in const contexts.
-    (unstable, const_c_variadic, "1.95.0", Some(151787)),
     /// Allows `const || {}` closures in const contexts.
     (unstable, const_closures, "1.68.0", Some(106003)),
     /// Allows using `[const] Destruct` bounds and calling drop impls in const contexts.

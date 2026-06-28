@@ -215,7 +215,6 @@ fn intrinsic_operation_unsafety(tcx: TyCtxt<'_>, intrinsic_id: LocalDefId) -> hi
         | sym::type_name
         | sym::type_of
         | sym::ub_checks
-        | sym::va_copy
         | sym::variant_count
         | sym::wrapping_add
         | sym::wrapping_mul
@@ -263,24 +262,6 @@ pub(crate) fn check_intrinsic_type(
         ty::BoundVariableKind::Region(ty::BoundRegionKind::Anon),
         ty::BoundVariableKind::Region(ty::BoundRegionKind::ClosureEnv),
     ]);
-    let mk_va_list_ty = |mutbl| {
-        let did = tcx.require_lang_item(LangItem::VaList, span);
-        let region = ty::Region::new_bound(
-            tcx,
-            ty::INNERMOST,
-            ty::BoundRegion { var: ty::BoundVar::ZERO, kind: ty::BoundRegionKind::Anon },
-        );
-        let env_region = ty::Region::new_bound(
-            tcx,
-            ty::INNERMOST,
-            ty::BoundRegion {
-                var: ty::BoundVar::from_u32(2),
-                kind: ty::BoundRegionKind::ClosureEnv,
-            },
-        );
-        let va_list_ty = tcx.type_of(did).instantiate(tcx, &[region.into()]).skip_norm_wip();
-        (Ty::new_ref(tcx, env_region, va_list_ty, mutbl), va_list_ty)
-    };
 
     let safety = intrinsic_operation_unsafety(tcx, intrinsic_id);
     let n_lts = 0;
@@ -572,17 +553,6 @@ pub(crate) fn check_intrinsic_type(
                 tcx.types.int,
             )
         }
-
-        sym::va_copy => {
-            let (va_list_ref_ty, va_list_ty) = mk_va_list_ty(hir::Mutability::Not);
-            (0, 0, vec![va_list_ref_ty], va_list_ty)
-        }
-
-        sym::va_start | sym::va_end => {
-            (0, 0, vec![mk_va_list_ty(hir::Mutability::Mut).0], tcx.types.unit)
-        }
-
-        sym::va_arg => (1, 0, vec![mk_va_list_ty(hir::Mutability::Mut).0], param(0)),
 
         sym::nontemporal_store => {
             (1, 0, vec![Ty::new_mut_ptr(tcx, param(0)), param(0)], tcx.types.unit)

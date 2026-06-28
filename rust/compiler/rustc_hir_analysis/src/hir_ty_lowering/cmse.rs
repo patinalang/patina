@@ -45,10 +45,6 @@ pub(crate) fn validate_cmse_abi<'tcx>(
                 return;
             };
 
-            if decl.c_variadic() {
-                return;
-            }
-
             decl
         }
         _ => return,

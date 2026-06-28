@@ -63,8 +63,6 @@ mod layout;
 mod tests;
 
 pub use canon_abi::{ArmCall, CanonAbi, InterruptKind, X86Call};
-#[cfg(feature = "nightly")]
-pub use extern_abi::CVariadicStatus;
 pub use extern_abi::{ExternAbi, all_names};
 pub use layout::{FIRST_VARIANT, FieldIdx, VariantIdx};
 

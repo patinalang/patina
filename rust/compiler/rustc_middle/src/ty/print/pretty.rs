@@ -1427,7 +1427,6 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
                         if let (Some(proj), None) = (projections.next(), projections.next()) {
                             p.pretty_print_fn_sig(
                                 tys,
-                                false,
                                 proj.skip_binder().term.as_type().expect("Return type was a const"),
                             )?;
                             resugared = true;
@@ -1530,17 +1529,10 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
     fn pretty_print_fn_sig(
         &mut self,
         inputs: &[Ty<'tcx>],
-        c_variadic: bool,
         output: Ty<'tcx>,
     ) -> Result<(), PrintError> {
         write!(self, "(")?;
         self.comma_sep(inputs.iter().copied())?;
-        if c_variadic {
-            if !inputs.is_empty() {
-                write!(self, ", ")?;
-            }
-            write!(self, "...")?;
-        }
         write!(self, ")")?;
         if !output.is_unit() {
             write!(self, " -> ")?;
@@ -3132,7 +3124,7 @@ define_print! {
         } else {
             write!(p, "fn")?;
         }
-        p.pretty_print_fn_sig(self.inputs(), false, self.output())?;
+        p.pretty_print_fn_sig(self.inputs(), self.output())?;
     }
 
     ty::TraitRef<'tcx> {

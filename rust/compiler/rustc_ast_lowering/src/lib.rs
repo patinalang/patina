@@ -1763,15 +1763,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
         kind: FnDeclKind,
         coro: Option<CoroutineKind>,
     ) -> &'hir hir::FnDecl<'hir> {
-        let c_variadic = decl.c_variadic();
-
-        // Skip the `...` (`CVarArgs`) trailing arguments from the AST,
-        // as they are not explicit in HIR/Ty function signatures.
-        // (instead, the `c_variadic` flag is set to `true`)
-        let mut inputs = &decl.inputs[..];
-        if decl.c_variadic() {
-            inputs = &inputs[..inputs.len() - 1];
-        }
+        let inputs = &decl.inputs[..];
         let inputs = self.arena.alloc_from_iter(inputs.iter().map(|param| {
             let itctx = match kind {
                 FnDeclKind::Fn | FnDeclKind::Inherent | FnDeclKind::Impl | FnDeclKind::Trait => {
@@ -1856,8 +1848,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     _ => hir::ImplicitSelfKind::None,
                 }
             }))
-            .set_lifetime_elision_allowed(self.resolver.lifetime_elision_allowed(fn_node_id))
-            .set_c_variadic(c_variadic);
+            .set_lifetime_elision_allowed(self.resolver.lifetime_elision_allowed(fn_node_id));
 
         self.arena.alloc(hir::FnDecl { inputs, output, fn_decl_kind })
     }

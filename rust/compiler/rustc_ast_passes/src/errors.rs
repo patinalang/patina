@@ -117,13 +117,6 @@ pub(crate) struct FnParamTooMany {
 }
 
 #[derive(Diagnostic)]
-#[diag("`...` must be the last argument of a C-variadic function")]
-pub(crate) struct FnParamCVarArgsNotLast {
-    #[primary_span]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
 #[diag("documentation comments cannot be applied to function parameters")]
 pub(crate) struct FnParamDocComment {
     #[primary_span]
@@ -407,55 +400,6 @@ pub(crate) struct ExternItemAscii {
     pub span: Span,
     #[label("in this `extern` block")]
     pub block: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag("`...` is not supported for non-extern functions")]
-#[help(
-    "only `extern \"C\"` and `extern \"C-unwind\"` functions may have a C variable argument list"
-)]
-pub(crate) struct CVariadicNoExtern {
-    #[primary_span]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag("functions with a C variable argument list must be unsafe")]
-pub(crate) struct CVariadicMustBeUnsafe {
-    #[primary_span]
-    pub span: Span,
-
-    #[suggestion(
-        "add the `unsafe` keyword to this definition",
-        applicability = "maybe-incorrect",
-        code = "unsafe ",
-        style = "verbose"
-    )]
-    pub unsafe_span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag("`...` is not supported for `extern \"{$abi}\"` functions")]
-#[help(
-    "only `extern \"C\"` and `extern \"C-unwind\"` functions may have a C variable argument list"
-)]
-pub(crate) struct CVariadicBadExtern {
-    #[primary_span]
-    pub span: Span,
-    pub abi: &'static str,
-    #[label("`extern \"{$abi}\"` because of this")]
-    pub extern_span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag("`...` is not supported for `extern \"{$abi}\"` naked functions")]
-#[help("C-variadic function must have a compatible calling convention")]
-pub(crate) struct CVariadicBadNakedExtern {
-    #[primary_span]
-    pub span: Span,
-    pub abi: &'static str,
-    #[label("`extern \"{$abi}\"` because of this")]
-    pub extern_span: Span,
 }
 
 #[derive(Diagnostic)]
@@ -838,26 +782,6 @@ pub(crate) struct ConstAndCoroutine {
     #[label("{\"\"}")]
     pub span: Span,
     pub coroutine_kind: &'static str,
-}
-
-#[derive(Diagnostic)]
-#[diag("functions cannot be both `{$coroutine_kind}` and C-variadic")]
-pub(crate) struct CoroutineAndCVariadic {
-    #[primary_span]
-    pub spans: Vec<Span>,
-    pub coroutine_kind: &'static str,
-    #[label("`{$coroutine_kind}` because of this")]
-    pub coroutine_span: Span,
-    #[label("C-variadic because of this")]
-    pub variadic_span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag("the `{$target}` target does not support c-variadic functions")]
-pub(crate) struct CVariadicNotSupported<'a> {
-    #[primary_span]
-    pub variadic_span: Span,
-    pub target: &'a str,
 }
 
 #[derive(Diagnostic)]

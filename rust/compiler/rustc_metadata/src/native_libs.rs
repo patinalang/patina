@@ -407,19 +407,7 @@ impl<'tcx> Collector<'tcx> {
                 // `__stdcall` only applies on x86 and on non-variadic functions:
                 // https://learn.microsoft.com/en-us/cpp/cpp/stdcall?view=msvc-170
                 ExternAbi::System { .. } => {
-                    let c_variadic = self
-                        .tcx
-                        .type_of(item)
-                        .instantiate_identity()
-                        .skip_norm_wip()
-                        .fn_sig(self.tcx)
-                        .c_variadic();
-
-                    if c_variadic {
-                        DllCallingConvention::C
-                    } else {
-                        DllCallingConvention::Stdcall(self.i686_arg_list_size(item))
-                    }
+                    DllCallingConvention::Stdcall(self.i686_arg_list_size(item))
                 }
                 ExternAbi::Fastcall { .. } => {
                     DllCallingConvention::Fastcall(self.i686_arg_list_size(item))

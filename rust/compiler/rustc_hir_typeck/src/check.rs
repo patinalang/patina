@@ -4,7 +4,6 @@ use rustc_hir as hir;
 use rustc_hir::def::DefKind;
 use rustc_hir::lang_items::LangItem;
 use rustc_hir_analysis::check::check_function_signature;
-use rustc_infer::infer::RegionVariableOrigin;
 use rustc_infer::traits::WellFormedLoc;
 use rustc_middle::ty::{self, Binder, Ty, TyCtxt};
 use rustc_span::def_id::LocalDefId;
@@ -52,20 +51,10 @@ pub(super) fn check_fn<'a, 'tcx>(
         GatherLocalsVisitor::gather_from_param(fcx, param);
     }
 
-    // C-variadic fns also have a `VaList` input that's not listed in `fn_sig`
-    // (as it's created inside the body itself, not passed in from outside).
-    let maybe_va_list = fn_sig.c_variadic().then(|| {
-        let span = body.params.last().unwrap().span;
-        let va_list_did = tcx.require_lang_item(LangItem::VaList, span);
-        let region = fcx.next_region_var(RegionVariableOrigin::Misc(span));
-
-        tcx.type_of(va_list_did).instantiate(tcx, &[region.into()]).skip_norm_wip()
-    });
-
     // Add formal parameters.
     let inputs_hir = tcx.hir_fn_decl_by_hir_id(fn_id).map(|decl| &decl.inputs);
     let inputs_fn = fn_sig.inputs().iter().copied();
-    for (idx, (param_ty, param)) in inputs_fn.chain(maybe_va_list).zip(body.params).enumerate() {
+    for (idx, (param_ty, param)) in inputs_fn.zip(body.params).enumerate() {
         // We checked the root's signature during wfcheck, but not the child.
         if fcx.tcx.is_typeck_child(fn_def_id.to_def_id()) {
             fcx.register_wf_obligation(

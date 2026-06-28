@@ -51,12 +51,12 @@ use rustc_trait_selection::traits::wf::object_region_bounds;
 use rustc_trait_selection::traits::{self, FulfillmentError};
 use tracing::{debug, instrument};
 
+use crate::NoVariantNamed;
 use crate::check::check_abi;
 use crate::errors::{AmbiguousLifetimeBound, BadReturnTypeNotation, NoFieldOnType};
 use crate::hir_ty_lowering::errors::{GenericsArgsErrExtend, prohibit_assoc_item_constraint};
 use crate::hir_ty_lowering::generics::{check_generic_arg_count, lower_generic_args};
 use crate::middle::resolve_bound_vars as rbv;
-use crate::{NoVariantNamed, check_c_variadic_abi};
 
 /// The context in which an implied bound is being added to a item being lowered (i.e. a sizedness
 /// trait or a default trait)
@@ -3122,22 +3122,18 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             hir::TyKind::Tup(fields) => {
                 Ty::new_tup_from_iter(tcx, fields.iter().map(|t| self.lower_ty(t)))
             }
-            hir::TyKind::FnPtr(bf) => {
-                check_c_variadic_abi(tcx, bf.decl, bf.abi, hir_ty.span);
-
-                Ty::new_fn_ptr(
-                    tcx,
-                    self.lower_fn_ty(
-                        hir_ty.hir_id,
-                        bf.safety,
-                        bf.abi,
-                        bf.kind,
-                        bf.decl,
-                        None,
-                        Some(hir_ty),
-                    ),
-                )
-            }
+            hir::TyKind::FnPtr(bf) => Ty::new_fn_ptr(
+                tcx,
+                self.lower_fn_ty(
+                    hir_ty.hir_id,
+                    bf.safety,
+                    bf.abi,
+                    bf.kind,
+                    bf.decl,
+                    None,
+                    Some(hir_ty),
+                ),
+            ),
             hir::TyKind::UnsafeBinder(binder) => Ty::new_unsafe_binder(
                 tcx,
                 ty::Binder::bind_with_vars(

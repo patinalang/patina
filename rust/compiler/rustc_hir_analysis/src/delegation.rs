@@ -11,7 +11,7 @@ use rustc_hir::{DelegationGenerics, HirId, PathSegment};
 use rustc_middle::ty::{
     self, EarlyBinder, Ty, TyCtxt, TypeFoldable, TypeFolder, TypeSuperFoldable, TypeVisitableExt,
 };
-use rustc_span::{ErrorGuaranteed, Span, kw};
+use rustc_span::{Span, kw};
 
 use crate::collect::ItemCtxt;
 use crate::hir_ty_lowering::HirTyLowerer;
@@ -580,41 +580,12 @@ fn create_folder_and_args<'tcx>(
     (ParamIndexRemapper { tcx, remap_table }, args)
 }
 
-fn check_constraints<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    def_id: LocalDefId,
-    sig_id: DefId,
-) -> Result<(), ErrorGuaranteed> {
-    let mut ret = Ok(());
-
-    let mut emit = |descr| {
-        ret = Err(tcx.dcx().emit_err(crate::errors::UnsupportedDelegation {
-            span: tcx.def_span(def_id),
-            descr,
-            callee_span: tcx.def_span(sig_id),
-        }));
-    };
-
-    if tcx.fn_sig(sig_id).skip_binder().skip_binder().c_variadic() {
-        // See issue #127443 for explanation.
-        emit("delegation to C-variadic functions is not allowed");
-    }
-
-    ret
-}
-
 pub(crate) fn inherit_sig_for_delegation_item<'tcx>(
     tcx: TyCtxt<'tcx>,
     def_id: LocalDefId,
 ) -> &'tcx [Ty<'tcx>] {
     let sig_id = tcx.hir_opt_delegation_sig_id(def_id).expect("Delegation must have sig_id");
     let caller_sig = tcx.fn_sig(sig_id);
-
-    if let Err(err) = check_constraints(tcx, def_id, sig_id) {
-        let sig_len = caller_sig.instantiate_identity().skip_binder().inputs().len() + 1;
-        let err_type = Ty::new_error(tcx, err);
-        return tcx.arena.alloc_from_iter((0..sig_len).map(|_| err_type));
-    }
 
     let (parent_args, child_args) = get_delegation_user_specified_args(tcx, def_id);
     let (mut folder, args) = create_folder_and_args(tcx, def_id, sig_id, parent_args, child_args);

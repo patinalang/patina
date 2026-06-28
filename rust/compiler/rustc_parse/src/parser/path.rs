@@ -18,7 +18,7 @@ use crate::ast::{PatKind, TyKind};
 use crate::errors::{
     self, AttributeOnEmptyType, AttributeOnGenericArg, ConstGenericWithoutBraces,
     ConstGenericWithoutBracesSugg, FnPathFoundNamedParams, PathFoundAttributeInParams,
-    PathFoundCVariadicParams, PathSingleColon, PathTripleColon,
+    PathSingleColon, PathTripleColon,
 };
 use crate::exp;
 use crate::parser::{
@@ -414,9 +414,6 @@ impl<'a> Parser<'a> {
                                 dcx.emit_err(FnPathFoundNamedParams {
                                     named_param_span: param.pat.span,
                                 });
-                            }
-                            if matches!(param.ty.kind, TyKind::CVarArgs) {
-                                dcx.emit_err(PathFoundCVariadicParams { span: param.pat.span });
                             }
                             if !param.attrs.is_empty() {
                                 dcx.emit_err(PathFoundAttributeInParams {

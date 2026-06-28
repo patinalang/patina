@@ -20,7 +20,6 @@ use rustc_middle::ty::adjustment::AllowTwoPhase;
 use rustc_middle::ty::error::TypeError;
 use rustc_middle::ty::{self, IsSuggestable, Ty, TyCtxt, TypeVisitableExt, Unnormalized};
 use rustc_middle::{bug, span_bug};
-use rustc_session::Session;
 use rustc_session::errors::ExprParenthesesNeeded;
 use rustc_span::{DUMMY_SP, Ident, Span, kw, sym};
 use rustc_trait_selection::error_reporting::infer::{FailureCode, ObligationCauseExt};
@@ -185,9 +184,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         expectation: Expectation<'tcx>,
         // The expressions for each provided argument
         provided_args: &'tcx [hir::Expr<'tcx>],
-        // Whether the function is variadic, for example when imported from C
-        // FIXME(splat): maybe change this to FnSigKind?
-        c_variadic: bool,
         // Whether the arguments have been bundled in a tuple (ex: closures)
         tuple_arguments: TupleArgumentsFlag,
         // The DefId for the function being called, for better error messages
@@ -381,13 +377,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
         // Keep track of whether we *could possibly* be satisfied, i.e. whether we're on the happy path
         // if the wrong number of arguments were supplied, we CAN'T be satisfied,
-        // and if we're c_variadic, the supplied arguments must be >= the minimum count from the function
-        // otherwise, they need to be identical, because rust doesn't currently support variadic functions
-        let mut call_appears_satisfied = if c_variadic {
-            provided_arg_count >= minimum_input_count
-        } else {
-            provided_arg_count == minimum_input_count
-        };
+        // they need to be identical, because rust doesn't currently support variadic functions
+        let mut call_appears_satisfied = provided_arg_count == minimum_input_count;
 
         // Check the arguments.
         // We do this in a pretty awful way: first we type-check any arguments
@@ -445,81 +436,14 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             }
         }
 
-        if c_variadic && provided_arg_count < minimum_input_count {
-            err_code = E0060;
-        }
-
         for arg in provided_args.iter().skip(minimum_input_count) {
             // Make sure we've checked this expr at least once.
-            let arg_ty = self.check_expr(arg);
-
-            // If the function is c-style variadic, we skipped a bunch of arguments
-            // so we need to check those, and write out the types
-            // Ideally this would be folded into the above, for uniform style
-            // but c-variadic is already a corner case
-            if c_variadic {
-                fn variadic_error<'tcx>(
-                    sess: &'tcx Session,
-                    span: Span,
-                    ty: Ty<'tcx>,
-                    cast_ty: &str,
-                ) {
-                    sess.dcx().emit_err(errors::PassToVariadicFunction {
-                        span,
-                        ty,
-                        cast_ty,
-                        sugg_span: span.shrink_to_hi(),
-                        teach: sess.teach(E0617),
-                    });
-                }
-
-                // There are a few types which get autopromoted when passed via varargs
-                // in C but we just error out instead and require explicit casts.
-                //
-                // We use implementations of VaArgSafe as the source of truth. On some embedded
-                // targets, c_double is f32 and c_int/c_uing are i16/u16, and these types implement
-                // VaArgSafe there. On all other targets, these types do not implement VaArgSafe.
-                //
-                // cfg(bootstrap): change the if let to an unwrap.
-                let arg_ty = self.structurally_resolve_type(arg.span, arg_ty);
-                if let Some(trait_def_id) = tcx.lang_items().va_arg_safe()
-                    && self
-                        .type_implements_trait(trait_def_id, [arg_ty], self.param_env)
-                        .must_apply_modulo_regions()
-                {
-                    continue;
-                }
-
-                match arg_ty.kind() {
-                    ty::Float => {
-                        variadic_error(tcx.sess, arg.span, arg_ty, "c_double");
-                    }
-                    ty::Bool | ty::Int => {
-                        variadic_error(tcx.sess, arg.span, arg_ty, "c_int");
-                    }
-                    ty::FnDef(..) => {
-                        let fn_ptr = Ty::new_fn_ptr(self.tcx, arg_ty.fn_sig(self.tcx));
-                        let fn_ptr = self.resolve_vars_if_possible(fn_ptr).to_string();
-
-                        let fn_item_spa = arg.span;
-                        tcx.sess.dcx().emit_err(errors::PassFnItemToVariadicFunction {
-                            span: fn_item_spa,
-                            sugg_span: fn_item_spa.shrink_to_hi(),
-                            replace: fn_ptr,
-                        });
-                    }
-                    _ => {}
-                }
-            }
+            self.check_expr(arg);
         }
 
         if !call_appears_satisfied {
             let compatibility_diagonal = IndexVec::from_raw(compatibility_diagonal);
-            let provided_args = IndexVec::from_iter(provided_args.iter().take(if c_variadic {
-                minimum_input_count
-            } else {
-                provided_arg_count
-            }));
+            let provided_args = IndexVec::from_iter(provided_args.iter().take(provided_arg_count));
             debug_assert_eq!(
                 formal_input_tys.len(),
                 expected_input_tys.len(),
@@ -537,7 +461,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 compatibility_diagonal,
                 formal_and_expected_inputs,
                 provided_args,
-                c_variadic,
                 err_code,
                 fn_def_id,
                 call_span,
@@ -567,7 +490,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         compatibility_diagonal: IndexVec<ProvidedIdx, Compatibility<'tcx>>,
         formal_and_expected_inputs: IndexVec<ExpectedIdx, (Ty<'tcx>, Ty<'tcx>)>,
         provided_args: IndexVec<ProvidedIdx, &'tcx hir::Expr<'tcx>>,
-        c_variadic: bool,
         err_code: ErrCode,
         fn_def_id: Option<DefId>,
         call_span: Span,
@@ -581,7 +503,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             compatibility_diagonal,
             formal_and_expected_inputs,
             provided_args,
-            c_variadic,
             err_code,
             fn_def_id,
             call_span,
@@ -1765,14 +1686,12 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             (Some(_), Some(_)) | (None, None) => unreachable!(),
             (Some(body), None) => {
                 let params = self.tcx.hir_body(body).params;
-                let params = params
-                    .get(is_method as usize..params.len() - sig.decl.c_variadic() as usize)?;
+                let params = params.get(is_method as usize..params.len())?;
                 debug_assert_eq!(params.len(), fn_inputs.len());
                 Some((fn_inputs.zip(params.iter().map(FnParam::Param)).collect(), generics))
             }
             (None, Some(params)) => {
-                let params = params
-                    .get(is_method as usize..params.len() - sig.decl.c_variadic() as usize)?;
+                let params = params.get(is_method as usize..params.len())?;
                 debug_assert_eq!(params.len(), fn_inputs.len());
                 Some((
                     fn_inputs.zip(params.iter().map(|&ident| FnParam::Ident(ident))).collect(),
@@ -1880,7 +1799,6 @@ impl<'a, 'tcx> FnCallDiagCtxt<'a, 'tcx> {
         compatibility_diagonal: IndexVec<ProvidedIdx, Compatibility<'tcx>>,
         formal_and_expected_inputs: IndexVec<ExpectedIdx, (Ty<'tcx>, Ty<'tcx>)>,
         provided_args: IndexVec<ProvidedIdx, &'tcx Expr<'tcx>>,
-        c_variadic: bool,
         err_code: ErrCode,
         fn_def_id: Option<DefId>,
         call_span: Span,
@@ -1892,7 +1810,6 @@ impl<'a, 'tcx> FnCallDiagCtxt<'a, 'tcx> {
             compatibility_diagonal,
             formal_and_expected_inputs,
             provided_args,
-            c_variadic,
             err_code,
             fn_def_id,
             call_span,
@@ -1979,8 +1896,7 @@ impl<'a, 'tcx> FnCallDiagCtxt<'a, 'tcx> {
                         err = self.dcx().struct_span_err(
                             self.arg_matching_ctxt.args_ctxt.call_metadata.full_call_span,
                             format!(
-                                "{call_name} takes {}{} but {} {} supplied",
-                                if self.c_variadic { "at least " } else { "" },
+                                "{call_name} takes {} but {} {} supplied",
                                 potentially_plural_count(
                                     self.formal_and_expected_inputs.len(),
                                     "argument"
@@ -2211,9 +2127,8 @@ impl<'a, 'tcx> FnCallDiagCtxt<'a, 'tcx> {
                 .struct_span_err(
                     self.call_metadata.full_call_span,
                     format!(
-                        "this {} takes {}{} but {} {} supplied",
+                        "this {} takes {} but {} {} supplied",
                         self.call_metadata.call_name,
-                        if self.c_variadic { "at least " } else { "" },
                         potentially_plural_count(self.formal_and_expected_inputs.len(), "argument"),
                         potentially_plural_count(self.provided_args.len(), "argument"),
                         pluralize!("was", self.provided_args.len())
@@ -2777,7 +2692,6 @@ impl<'a, 'tcx> ArgMatchingCtxt<'a, 'tcx> {
         compatibility_diagonal: IndexVec<ProvidedIdx, Compatibility<'tcx>>,
         formal_and_expected_inputs: IndexVec<ExpectedIdx, (Ty<'tcx>, Ty<'tcx>)>,
         provided_args: IndexVec<ProvidedIdx, &'tcx Expr<'tcx>>,
-        c_variadic: bool,
         err_code: ErrCode,
         fn_def_id: Option<DefId>,
         call_span: Span,
@@ -2789,7 +2703,6 @@ impl<'a, 'tcx> ArgMatchingCtxt<'a, 'tcx> {
             compatibility_diagonal,
             formal_and_expected_inputs,
             provided_args,
-            c_variadic,
             err_code,
             fn_def_id,
             call_span,
@@ -2924,7 +2837,6 @@ impl<'a, 'tcx> ArgsCtxt<'a, 'tcx> {
         compatibility_diagonal: IndexVec<ProvidedIdx, Compatibility<'tcx>>,
         formal_and_expected_inputs: IndexVec<ExpectedIdx, (Ty<'tcx>, Ty<'tcx>)>,
         provided_args: IndexVec<ProvidedIdx, &'tcx Expr<'tcx>>,
-        c_variadic: bool,
         err_code: ErrCode,
         fn_def_id: Option<DefId>,
         call_span: Span,
@@ -2936,7 +2848,6 @@ impl<'a, 'tcx> ArgsCtxt<'a, 'tcx> {
             compatibility_diagonal,
             formal_and_expected_inputs,
             provided_args,
-            c_variadic,
             err_code,
             fn_def_id,
             call_span,
@@ -3043,7 +2954,6 @@ struct CallCtxt<'a, 'tcx> {
     compatibility_diagonal: IndexVec<ProvidedIdx, Compatibility<'tcx>>,
     formal_and_expected_inputs: IndexVec<ExpectedIdx, (Ty<'tcx>, Ty<'tcx>)>,
     provided_args: IndexVec<ProvidedIdx, &'tcx hir::Expr<'tcx>>,
-    c_variadic: bool,
     err_code: ErrCode,
     fn_def_id: Option<DefId>,
     call_span: Span,
@@ -3067,7 +2977,6 @@ impl<'a, 'tcx> CallCtxt<'a, 'tcx> {
         compatibility_diagonal: IndexVec<ProvidedIdx, Compatibility<'tcx>>,
         formal_and_expected_inputs: IndexVec<ExpectedIdx, (Ty<'tcx>, Ty<'tcx>)>,
         provided_args: IndexVec<ProvidedIdx, &'tcx hir::Expr<'tcx>>,
-        c_variadic: bool,
         err_code: ErrCode,
         fn_def_id: Option<DefId>,
         call_span: Span,
@@ -3099,7 +3008,6 @@ impl<'a, 'tcx> CallCtxt<'a, 'tcx> {
             compatibility_diagonal,
             formal_and_expected_inputs,
             provided_args,
-            c_variadic,
             err_code,
             fn_def_id,
             call_span,

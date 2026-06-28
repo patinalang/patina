@@ -3899,7 +3899,7 @@ pub struct Param<'hir> {
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[derive(Encodable, Decodable, StableHash)]
 pub struct FnDeclFlags {
-    /// Holds the c_variadic and lifetime_elision_allowed bitflags, and 3 bits for the `ImplicitSelfKind`.
+    /// Holds the lifetime_elision_allowed bitflags, and 3 bits for the `ImplicitSelfKind`.
     flags: u8,
 }
 
@@ -3914,10 +3914,6 @@ impl fmt::Debug for FnDeclFlags {
             f.field(&"NoLifetimeElision");
         };
 
-        if self.c_variadic() {
-            f.field(&"CVariadic");
-        };
-
         f.finish()
     }
 }
@@ -3926,8 +3922,7 @@ impl FnDeclFlags {
     /// Mask for the implicit self kind.
     const IMPLICIT_SELF_MASK: u8 = 0b111;
 
-    /// Bitflag for a trailing C-style variadic argument.
-    const C_VARIADIC_FLAG: u8 = 1 << 3;
+    // Note: 1 << 3 flat is up for grabs (used to be C-variadic flag)
 
     /// Bitflag for lifetime elision.
     const LIFETIME_ELISION_ALLOWED_FLAG: u8 = 1 << 4;
@@ -3939,7 +3934,6 @@ impl FnDeclFlags {
         Self { flags: 0 }
             .set_implicit_self(ImplicitSelfKind::None)
             .set_lifetime_elision_allowed(false)
-            .set_c_variadic(false)
     }
 
     /// Set the implicit self kind.
@@ -3953,18 +3947,6 @@ impl FnDeclFlags {
             ImplicitSelfKind::Mut => self.flags |= 2,
             ImplicitSelfKind::RefImm => self.flags |= 3,
             ImplicitSelfKind::RefMut => self.flags |= 4,
-        }
-
-        self
-    }
-
-    /// Set the C-style variadic argument flag.
-    #[must_use = "this method does not modify the receiver"]
-    pub const fn set_c_variadic(mut self, c_variadic: bool) -> Self {
-        if c_variadic {
-            self.flags |= Self::C_VARIADIC_FLAG;
-        } else {
-            self.flags &= !Self::C_VARIADIC_FLAG;
         }
 
         self
@@ -3992,11 +3974,6 @@ impl FnDeclFlags {
             4 => ImplicitSelfKind::RefMut,
             _ => unreachable!(),
         }
-    }
-
-    /// Do the function arguments end with a C-style variadic argument?
-    pub const fn c_variadic(self) -> bool {
-        self.flags & Self::C_VARIADIC_FLAG != 0
     }
 
     /// Is lifetime elision allowed?
@@ -4040,10 +4017,6 @@ impl<'hir> FnDecl<'hir> {
 
     pub fn implicit_self(&self) -> ImplicitSelfKind {
         self.fn_decl_kind.implicit_self()
-    }
-
-    pub fn c_variadic(&self) -> bool {
-        self.fn_decl_kind.c_variadic()
     }
 
     pub fn lifetime_elision_allowed(&self) -> bool {

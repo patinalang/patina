@@ -181,14 +181,6 @@ impl<'tcx> TailCallCkVisitor<'_, 'tcx> {
                 self.report_track_caller_caller(expr.span);
             }
         }
-
-        if caller_sig.c_variadic() {
-            self.report_c_variadic_caller(expr.span);
-        }
-
-        if callee_sig.c_variadic() {
-            self.report_c_variadic_callee(expr.span);
-        }
     }
 
     /// Returns true if the caller function needs a location argument
@@ -391,28 +383,6 @@ impl<'tcx> TailCallCkVisitor<'_, 'tcx> {
                 sp,
                 "a function marked with `#[track_caller]` cannot perform a tail-call",
             )
-            .emit();
-
-        self.found_errors = Err(err);
-    }
-
-    fn report_c_variadic_caller(&mut self, sp: Span) {
-        let err = self
-            .tcx
-            .dcx()
-            // FIXME(explicit_tail_calls): highlight the `...`
-            .struct_span_err(sp, "tail-calls are not allowed in c-variadic functions")
-            .emit();
-
-        self.found_errors = Err(err);
-    }
-
-    fn report_c_variadic_callee(&mut self, sp: Span) {
-        let err = self
-            .tcx
-            .dcx()
-            // FIXME(explicit_tail_calls): highlight the function or something...
-            .struct_span_err(sp, "c-variadic functions can't be tail-called")
             .emit();
 
         self.found_errors = Err(err);

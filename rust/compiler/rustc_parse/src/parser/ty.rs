@@ -15,8 +15,8 @@ use super::{Parser, PathStyle, SeqSep, TokenType, Trailing};
 use crate::errors::{
     self, AttributeOnEmptyType, AttributeOnType, DynAfterMut, ExpectedFnPathFoundFnKeyword,
     ExpectedMutOrConstInRawPointerType, FnPtrWithGenerics, FnPtrWithGenericsSugg,
-    HelpUseLatestEdition, InvalidCVariadicType, InvalidDynKeyword, LifetimeAfterMut,
-    NeedPlusAfterTraitObjectLifetime, NestedCVariadicType, ReturnTypesUseThinArrow,
+    HelpUseLatestEdition, InvalidDynKeyword, LifetimeAfterMut, NeedPlusAfterTraitObjectLifetime,
+    ReturnTypesUseThinArrow,
 };
 use crate::parser::item::FrontMatterParsingMode;
 use crate::parser::{ExpTokenPair, FnContext, FnParseMode};
@@ -75,13 +75,6 @@ impl RecoverReturnSign {
     }
 }
 
-// Is `...` (`CVarArgs`) legal at this level of type parsing?
-#[derive(PartialEq)]
-enum AllowCVariadic {
-    Yes,
-    No,
-}
-
 /// Determine if the given token can begin a bound assuming it follows Rust 2015 identifier `dyn`.
 ///
 /// In Rust 2015, `dyn` is a contextual keyword, not a full one.
@@ -105,20 +98,10 @@ fn can_begin_dyn_bound_in_edition_2015(t: Token) -> bool {
 impl<'a> Parser<'a> {
     /// Parses a type.
     pub fn parse_ty(&mut self) -> PResult<'a, Box<Ty>> {
-        if self.token == token::DotDotDot {
-            // We special case this so that we don't talk about "nested C-variadics" in types.
-            // We still pass in `AllowCVariadic::No` so that `parse_ty_common` can complain about
-            // things like `Vec<...>`.
-            let span = self.token.span;
-            self.bump();
-            let kind = TyKind::Err(self.dcx().emit_err(InvalidCVariadicType { span }));
-            return Ok(self.mk_ty(span, kind));
-        }
         // Make sure deeply nested types don't overflow the stack.
         ensure_sufficient_stack(|| {
             self.parse_ty_common(
                 AllowPlus::Yes,
-                AllowCVariadic::No,
                 RecoverQPath::Yes,
                 RecoverReturnSign::Yes,
                 None,
@@ -133,7 +116,6 @@ impl<'a> Parser<'a> {
     ) -> PResult<'a, Box<Ty>> {
         self.parse_ty_common(
             AllowPlus::Yes,
-            AllowCVariadic::No,
             RecoverQPath::Yes,
             RecoverReturnSign::Yes,
             Some(ty_params),
@@ -147,7 +129,6 @@ impl<'a> Parser<'a> {
     pub(super) fn parse_ty_for_param(&mut self) -> PResult<'a, Box<Ty>> {
         let ty = self.parse_ty_common(
             AllowPlus::Yes,
-            AllowCVariadic::Yes,
             RecoverQPath::Yes,
             RecoverReturnSign::Yes,
             None,
@@ -187,7 +168,6 @@ impl<'a> Parser<'a> {
     pub(super) fn parse_ty_no_plus(&mut self) -> PResult<'a, Box<Ty>> {
         self.parse_ty_common(
             AllowPlus::No,
-            AllowCVariadic::No,
             RecoverQPath::Yes,
             RecoverReturnSign::Yes,
             None,
@@ -200,7 +180,6 @@ impl<'a> Parser<'a> {
     pub(super) fn parse_as_cast_ty(&mut self) -> PResult<'a, Box<Ty>> {
         self.parse_ty_common(
             AllowPlus::No,
-            AllowCVariadic::No,
             RecoverQPath::Yes,
             RecoverReturnSign::Yes,
             None,
@@ -211,7 +190,6 @@ impl<'a> Parser<'a> {
     pub(super) fn parse_ty_no_question_mark_recover(&mut self) -> PResult<'a, Box<Ty>> {
         self.parse_ty_common(
             AllowPlus::Yes,
-            AllowCVariadic::No,
             RecoverQPath::Yes,
             RecoverReturnSign::Yes,
             None,
@@ -224,7 +202,6 @@ impl<'a> Parser<'a> {
     pub(super) fn parse_ty_for_where_clause(&mut self) -> PResult<'a, Box<Ty>> {
         self.parse_ty_common(
             AllowPlus::Yes,
-            AllowCVariadic::No,
             RecoverQPath::Yes,
             RecoverReturnSign::OnlyFatArrow,
             None,
@@ -244,7 +221,6 @@ impl<'a> Parser<'a> {
             // FIXME(Centril): Can we unconditionally `allow_plus`?
             let ty = self.parse_ty_common(
                 allow_plus,
-                AllowCVariadic::No,
                 recover_qpath,
                 recover_return_sign,
                 None,
@@ -261,7 +237,6 @@ impl<'a> Parser<'a> {
             });
             let ty = self.parse_ty_common(
                 allow_plus,
-                AllowCVariadic::No,
                 recover_qpath,
                 recover_return_sign,
                 None,
@@ -276,7 +251,6 @@ impl<'a> Parser<'a> {
     fn parse_ty_common(
         &mut self,
         allow_plus: AllowPlus,
-        allow_c_variadic: AllowCVariadic,
         recover_qpath: RecoverQPath,
         recover_return_sign: RecoverReturnSign,
         ty_generics: Option<&Generics>,
@@ -424,17 +398,6 @@ impl<'a> Parser<'a> {
             self.parse_path_start_ty(lo, allow_plus, ty_generics)?
         } else if self.can_begin_bound() {
             self.parse_bare_trait_object(lo, allow_plus)?
-        } else if self.eat(exp!(DotDotDot)) {
-            match allow_c_variadic {
-                AllowCVariadic::Yes => TyKind::CVarArgs,
-                AllowCVariadic::No => {
-                    // FIXME(c_variadic): Should we just allow `...` syntactically
-                    // anywhere in a type and use semantic restrictions instead?
-                    // NOTE: This may regress certain MBE calls if done incorrectly.
-                    let guar = self.dcx().emit_err(NestedCVariadicType { span: lo });
-                    TyKind::Err(guar)
-                }
-            }
         } else if self.check_keyword(exp!(Unsafe))
             && self.look_ahead(1, |tok| tok.kind == token::Lt)
         {

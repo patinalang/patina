@@ -82,49 +82,17 @@ mod outlives;
 mod variance;
 
 pub use errors::NoVariantNamed;
-use rustc_abi::{CVariadicStatus, ExternAbi};
 use rustc_hir as hir;
 use rustc_hir::def::DefKind;
 use rustc_middle::mir::interpret::GlobalId;
 use rustc_middle::query::Providers;
 use rustc_middle::ty::{Const, Ty, TyCtxt};
 use rustc_middle::{middle, ty};
-use rustc_session::errors::feature_err;
-use rustc_span::{ErrorGuaranteed, Span};
+use rustc_span::ErrorGuaranteed;
 use rustc_trait_selection::traits;
 
 pub use crate::collect::suggest_impl_trait;
 use crate::hir_ty_lowering::HirTyLowerer;
-
-fn check_c_variadic_abi(tcx: TyCtxt<'_>, decl: &hir::FnDecl<'_>, abi: ExternAbi, span: Span) {
-    if !decl.c_variadic() {
-        // Not even a variadic function.
-        return;
-    }
-
-    match abi.supports_c_variadic() {
-        CVariadicStatus::Stable => {}
-        CVariadicStatus::NotSupported => {
-            tcx.dcx()
-                .create_err(errors::VariadicFunctionCompatibleConvention {
-                    span,
-                    convention: &format!("{abi}"),
-                })
-                .emit();
-        }
-        CVariadicStatus::Unstable { feature } => {
-            if !tcx.features().enabled(feature) {
-                feature_err(
-                    &tcx.sess,
-                    feature,
-                    span,
-                    format!("C-variadic functions with the {abi} calling convention are unstable"),
-                )
-                .emit();
-            }
-        }
-    }
-}
 
 /// Adds query implementations to the [Providers] vtable, see [`rustc_middle::query`]
 pub fn provide(providers: &mut Providers) {

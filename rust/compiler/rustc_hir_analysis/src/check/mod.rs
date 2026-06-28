@@ -103,7 +103,7 @@ use tracing::debug;
 
 use self::compare_impl_item::collect_return_position_impl_trait_in_trait_tys;
 use self::region::region_scope_tree;
-use crate::{check_c_variadic_abi, errors};
+use crate::errors;
 
 /// Adds query implementations to the [Providers] vtable, see [`rustc_middle::query`]
 pub(super) fn provide(providers: &mut Providers) {
@@ -479,7 +479,6 @@ fn fn_sig_suggestion<'tcx>(
                 }
             })
         })
-        .chain(std::iter::once(if sig.c_variadic() { Some("...".to_string()) } else { None }))
         .flatten()
         .collect::<Vec<String>>()
         .join(", ");

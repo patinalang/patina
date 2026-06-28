@@ -822,9 +822,6 @@ impl DynCompatibilityViolation {
             Self::Method(name, MethodViolation::AsyncFn, _) => {
                 format!("method `{name}` is `async`").into()
             }
-            Self::Method(name, MethodViolation::CVariadic, _) => {
-                format!("method `{name}` is C-variadic").into()
-            }
             Self::Method(name, MethodViolation::WhereClauseReferencesSelf, _) => {
                 format!("method `{name}` references the `Self` type in its `where` clause").into()
             }
@@ -978,9 +975,6 @@ pub enum MethodViolation {
 
     /// e.g., `fn foo<A>()`
     Generic,
-
-    /// e.g., `fn (mut ap: ...)`
-    CVariadic,
 
     /// the method's receiver (`self` argument) can't be dispatched on
     UndispatchableReceiver(Option<Span>),

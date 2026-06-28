@@ -47,8 +47,7 @@ use std::str::FromStr;
 use std::{fmt, io};
 
 use rustc_abi::{
-    Align, CVariadicStatus, CanonAbi, Endian, ExternAbi, Integer, Size, TargetDataLayout,
-    TargetDataLayoutError,
+    Align, CanonAbi, Endian, ExternAbi, Integer, Size, TargetDataLayout, TargetDataLayoutError,
 };
 use rustc_data_structures::fx::{FxHashSet, FxIndexSet};
 use rustc_error_messages::{DiagArgValue, IntoDiagArg, into_diag_arg_using_display};
@@ -2206,57 +2205,6 @@ impl Target {
         .map_err(|err| TargetDataLayoutError::InvalidBitsSize { err })?;
 
         Ok(dl)
-    }
-
-    pub fn supports_c_variadic_definitions(&self) -> CVariadicStatus {
-        use Arch::*;
-
-        match self.arch {
-            // These targets just inherently do not support c-variadic definitions.
-            Bpf | SpirV => CVariadicStatus::NotSupported,
-
-            // The c-variadic ABI for this target may change in the future, per this comment in
-            // clang:
-            //
-            // > To be compatible with GCC's behaviors, we force arguments with
-            // > 2×XLEN-bit alignment and size at most 2×XLEN bits like `long long`,
-            // > `unsigned long long` and `double` to have 4-byte alignment. This
-            // > behavior may be changed when RV32E/ILP32E is ratified.
-            RiscV32 if self.llvm_abiname == LlvmAbi::Ilp32e => {
-                CVariadicStatus::Unstable { feature: sym::c_variadic_experimental_arch }
-            }
-
-            // We don't know how c-variadics work for this target. Using the default LLVM
-            // fallback implementation probably works, but we can't guarantee it.
-            Other(_) => CVariadicStatus::Unstable { feature: sym::c_variadic_experimental_arch },
-
-            // These targets require more testing before we commit to c-variadic definitions
-            // being stable.
-            //
-            // To stabilize c-variadic functions for one of these targets, the following
-            // requirements must be met:
-            //
-            // - Check that `core::ffi::VaArgSafe` is (un)implemented for all the correct types.
-            // - Add an assembly test to `tests/assembly-llvm/c-variadic` that tests the assembly
-            // for all implementers of `VaArgSafe`. The generated assembly should either match
-            // `clang`, or we should understand and document why it deviates.
-            // - Ensure that `va_arg` is implemented in rustc. For stable targets we don't rely on
-            // the LLVM implementation, it has historically caused miscompilations.
-            // - The `tests/ui/c-variadic/roundtrip.rs` test must pass for the target. It may
-            // need slight modifications for embedded targets, that's fine.
-            // - Check that calling c-variadic functions defined in Rust can be called from C.
-            // For most targets `tests/run-make/c-link-to-rust-va-list-fn` can be used here.
-            // For no_std targets a manual setup may be needed.
-            Sparc | Avr | M68k | Msp430 => {
-                CVariadicStatus::Unstable { feature: sym::c_variadic_experimental_arch }
-            }
-
-            AArch64 | AmdGpu | Arm | Arm64EC | CSky | Hexagon | LoongArch32 | LoongArch64
-            | Mips | Mips32r6 | Mips64 | Mips64r6 | Nvptx64 | PowerPC | PowerPC64 | RiscV32
-            | RiscV64 | S390x | Sparc64 | Wasm32 | Wasm64 | X86 | X86_64 | Xtensa => {
-                CVariadicStatus::Stable
-            }
-        }
     }
 }
 

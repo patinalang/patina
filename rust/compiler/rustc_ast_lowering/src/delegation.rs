@@ -141,7 +141,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
 
                 let is_method = self.is_method(sig_id, span);
 
-                let (param_count, c_variadic) = self.param_count(sig_id);
+                let param_count = self.param_count(sig_id);
 
                 let mut generics =
                     self.uplift_delegation_generics(delegation, sig_id, item_id, is_method);
@@ -154,8 +154,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     span,
                 );
 
-                let decl =
-                    self.lower_delegation_decl(sig_id, param_count, c_variadic, span, &generics);
+                let decl = self.lower_delegation_decl(sig_id, param_count, span, &generics);
 
                 let sig = self.lower_delegation_sig(sig_id, decl, span);
                 let ident = self.lower_ident(delegation.ident);
@@ -270,22 +269,18 @@ impl<'hir> LoweringContext<'_, 'hir> {
     }
 
     // Function parameter count, including C variadic `...` if present.
-    fn param_count(&self, def_id: DefId) -> (usize, bool /*c_variadic*/) {
+    fn param_count(&self, def_id: DefId) -> usize {
         let sig = self.tcx.fn_sig(def_id).skip_binder().skip_binder();
-        (sig.inputs().len() + usize::from(sig.c_variadic()), sig.c_variadic())
+        sig.inputs().len()
     }
 
     fn lower_delegation_decl(
         &mut self,
         sig_id: DefId,
-        param_count: usize,
-        c_variadic: bool,
+        decl_param_count: usize,
         span: Span,
         generics: &GenericsGenerationResults<'hir>,
     ) -> &'hir hir::FnDecl<'hir> {
-        // The last parameter in C variadic functions is skipped in the signature,
-        // like during regular lowering.
-        let decl_param_count = param_count - c_variadic as usize;
         let inputs = self.arena.alloc_from_iter((0..decl_param_count).map(|arg| hir::Ty {
             hir_id: self.next_id(),
             kind: hir::TyKind::InferDelegation(hir::InferDelegation::Sig(
@@ -312,9 +307,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
         self.arena.alloc(hir::FnDecl {
             inputs,
             output: hir::FnRetTy::Return(output),
-            fn_decl_kind: FnDeclFlags::default()
-                .set_lifetime_elision_allowed(true)
-                .set_c_variadic(c_variadic),
+            fn_decl_kind: FnDeclFlags::default().set_lifetime_elision_allowed(true),
         })
     }
 

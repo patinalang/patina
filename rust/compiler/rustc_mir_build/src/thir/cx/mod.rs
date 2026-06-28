@@ -6,7 +6,6 @@ use rustc_data_structures::steal::Steal;
 use rustc_errors::ErrorGuaranteed;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LocalDefId};
-use rustc_hir::lang_items::LangItem;
 use rustc_hir::{self as hir, HirId, find_attr};
 use rustc_middle::bug;
 use rustc_middle::thir::*;
@@ -190,19 +189,7 @@ impl<'tcx> ThirBuildCx<'tcx> {
                 None
             };
 
-            // C-variadic fns also have a `VaList` input that's not listed in `fn_sig`
-            // (as it's created inside the body itself, not passed in from outside).
-            let ty = if fn_decl.c_variadic() && index == fn_decl.inputs.len() {
-                let va_list_did = self.tcx.require_lang_item(LangItem::VaList, param.span);
-
-                self.tcx
-                    .type_of(va_list_did)
-                    .instantiate(self.tcx, &[self.tcx.lifetimes.re_erased.into()])
-                    .skip_norm_wip()
-            } else {
-                fn_sig.inputs()[index]
-            };
-
+            let ty = fn_sig.inputs()[index];
             let pat: Box<Pat<'tcx>> = self.pattern_from_hir(param.pat);
             Param { pat: Some(pat), ty, ty_span, self_kind, hir_id: Some(param.hir_id) }
         })

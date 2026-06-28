@@ -1160,47 +1160,6 @@ pub(crate) struct CastThinPointerToWidePointer<'tcx> {
     pub(crate) teach: bool,
 }
 
-#[derive(Diagnostic)]
-#[diag("can't pass `{$ty}` to variadic function", code = E0617)]
-pub(crate) struct PassToVariadicFunction<'a, 'tcx> {
-    #[primary_span]
-    pub span: Span,
-    pub ty: Ty<'tcx>,
-    pub cast_ty: &'a str,
-    #[suggestion(
-        "cast the value to `{$cast_ty}`",
-        code = " as {cast_ty}",
-        applicability = "machine-applicable",
-        style = "verbose"
-    )]
-    pub sugg_span: Span,
-    #[note(
-        "certain types, like `{$ty}`, must be cast before passing them to a variadic function to match the implicit cast that a C compiler would perform as part of C's numeric promotion rules"
-    )]
-    pub(crate) teach: bool,
-}
-
-#[derive(Diagnostic)]
-#[diag("can't pass a function item to a variadic function", code = E0617)]
-#[help(
-    "a function item is zero-sized and needs to be cast into a function pointer to be used in FFI"
-)]
-#[note(
-    "for more information on function items, visit https://doc.rust-lang.org/reference/types/function-item.html"
-)]
-pub(crate) struct PassFnItemToVariadicFunction {
-    #[primary_span]
-    pub span: Span,
-    #[suggestion(
-        "use a function pointer instead",
-        code = " as {replace}",
-        applicability = "machine-applicable",
-        style = "verbose"
-    )]
-    pub sugg_span: Span,
-    pub replace: String,
-}
-
 #[derive(Subdiagnostic)]
 #[suggestion(
     "replace the comma with a semicolon to create {$descr}",

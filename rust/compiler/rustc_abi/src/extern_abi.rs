@@ -7,8 +7,6 @@ use rustc_data_structures::stable_hasher::{StableHash, StableHashCtxt, StableHas
 #[cfg(feature = "nightly")]
 use rustc_macros::{Decodable, Encodable};
 #[cfg(feature = "nightly")]
-use rustc_span::Symbol;
-
 use crate::AbiFromStrErr;
 
 #[cfg(test)]
@@ -258,14 +256,6 @@ impl StableOrd for ExternAbi {
 #[cfg(feature = "nightly")]
 rustc_error_messages::into_diag_arg_using_display!(ExternAbi);
 
-#[cfg(feature = "nightly")]
-#[derive(Debug)]
-pub enum CVariadicStatus {
-    NotSupported,
-    Stable,
-    Unstable { feature: Symbol },
-}
-
 impl ExternAbi {
     /// An ABI "like Rust"
     ///
@@ -276,34 +266,6 @@ impl ExternAbi {
     pub fn is_rustic_abi(self) -> bool {
         use ExternAbi::*;
         matches!(self, Rust | RustCall | RustCold | RustPreserveNone)
-    }
-
-    /// Returns whether the ABI supports C variadics. This only controls whether we allow *imports*
-    /// of such functions via `extern` blocks; there's a separate check during AST construction
-    /// guarding *definitions* of variadic functions.
-    #[cfg(feature = "nightly")]
-    pub fn supports_c_variadic(self) -> CVariadicStatus {
-        // * C and Cdecl obviously support varargs.
-        // * C can be based on Aapcs, SysV64 or Win64, so they must support varargs.
-        // * EfiApi is based on Win64 or C, so it also supports it.
-        // * System automatically falls back to C when used with variadics, therefore supports it.
-        //
-        // * Stdcall does not, because it would be impossible for the callee to clean
-        //   up the arguments. (callee doesn't know how many arguments are there)
-        // * Same for Fastcall, Vectorcall and Thiscall.
-        // * Other calling conventions are related to hardware or the compiler itself.
-        //
-        // All of the supported ones must have a test in `tests/codegen/cffi/c-variadic-ffi.rs`.
-        match self {
-            Self::C { .. }
-            | Self::Cdecl { .. }
-            | Self::Aapcs { .. }
-            | Self::Win64 { .. }
-            | Self::SysV64 { .. }
-            | Self::EfiApi
-            | Self::System { .. } => CVariadicStatus::Stable,
-            _ => CVariadicStatus::NotSupported,
-        }
     }
 
     /// Returns whether the ABI supports guaranteed tail calls.

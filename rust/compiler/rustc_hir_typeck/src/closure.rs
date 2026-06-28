@@ -705,9 +705,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         // Watch out for some surprises and just ignore the
         // expectation if things don't see to match up with what we
         // expect.
-        if expected_sig.sig.c_variadic() != decl.c_variadic() {
-            return self.sig_of_closure_no_expectation(expr_def_id, decl, closure_kind);
-        } else if expected_sig.sig.skip_binder().inputs_and_output.len() != decl.inputs.len() + 1 {
+        if expected_sig.sig.skip_binder().inputs_and_output.len() != decl.inputs.len() + 1 {
             return self.sig_of_closure_with_mismatched_number_of_arguments(
                 expr_def_id,
                 decl,
@@ -720,10 +718,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         // in this binder we are creating.
         assert!(!expected_sig.sig.skip_binder().has_vars_bound_above(ty::INNERMOST));
         let bound_sig = expected_sig.sig.map_bound(|sig| {
-            let fn_sig_kind = FnSigKind::default()
-                .set_abi(ExternAbi::RustCall)
-                .set_safety(hir::Safety::Safe)
-                .set_c_variadic(sig.c_variadic());
+            let fn_sig_kind =
+                FnSigKind::default().set_abi(ExternAbi::RustCall).set_safety(hir::Safety::Safe);
             self.tcx.mk_fn_sig(sig.inputs().iter().cloned(), sig.output(), fn_sig_kind)
         });
 
@@ -857,10 +853,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             let inputs =
                 supplied_sig.inputs().into_iter().map(|&ty| self.resolve_vars_if_possible(ty));
 
-            let fn_sig_kind = FnSigKind::default()
-                .set_abi(ExternAbi::RustCall)
-                .set_safety(hir::Safety::Safe)
-                .set_c_variadic(expected_sigs.liberated_sig.c_variadic());
+            let fn_sig_kind =
+                FnSigKind::default().set_abi(ExternAbi::RustCall).set_safety(hir::Safety::Safe);
             expected_sigs.liberated_sig =
                 self.tcx.mk_fn_sig(inputs, supplied_output_ty, fn_sig_kind);
 
@@ -932,10 +926,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             },
         };
 
-        let fn_sig_kind = FnSigKind::default()
-            .set_abi(ExternAbi::RustCall)
-            .set_safety(hir::Safety::Safe)
-            .set_c_variadic(decl.c_variadic());
+        let fn_sig_kind =
+            FnSigKind::default().set_abi(ExternAbi::RustCall).set_safety(hir::Safety::Safe);
         let result = ty::Binder::bind_with_vars(
             self.tcx.mk_fn_sig(supplied_arguments, supplied_return, fn_sig_kind),
             bound_vars,
@@ -1095,10 +1087,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             lowerer.lower_ty(output);
         }
 
-        let fn_sig_kind = FnSigKind::default()
-            .set_abi(ExternAbi::RustCall)
-            .set_safety(hir::Safety::Safe)
-            .set_c_variadic(decl.c_variadic());
+        let fn_sig_kind =
+            FnSigKind::default().set_abi(ExternAbi::RustCall).set_safety(hir::Safety::Safe);
         let result = ty::Binder::dummy(self.tcx.mk_fn_sig(supplied_arguments, err_ty, fn_sig_kind));
 
         debug!("supplied_sig_of_closure: result={:?}", result);

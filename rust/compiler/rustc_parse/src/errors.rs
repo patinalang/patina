@@ -2054,14 +2054,6 @@ pub(crate) struct FnPathFoundNamedParams {
 }
 
 #[derive(Diagnostic)]
-#[diag("`Trait(...)` syntax does not support c_variadic parameters")]
-pub(crate) struct PathFoundCVariadicParams {
-    #[primary_span]
-    #[suggestion("remove the `...`", applicability = "machine-applicable", code = "")]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
 #[diag("`Trait(...)` syntax does not support attributes in parameters")]
 pub(crate) struct PathFoundAttributeInParams {
     #[primary_span]
@@ -3615,23 +3607,6 @@ pub(crate) struct FnPointerCannotBeAsync {
         style = "verbose"
     )]
     pub suggestion: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag("C-variadic type `...` may not be nested inside another type", code = E0743)]
-pub(crate) struct NestedCVariadicType {
-    #[primary_span]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag("unexpected `...`")]
-#[note(
-    "only `extern \"C\"` and `extern \"C-unwind\"` functions may have a C variable argument list"
-)]
-pub(crate) struct InvalidCVariadicType {
-    #[primary_span]
-    pub span: Span,
 }
 
 #[derive(Diagnostic)]

@@ -21,7 +21,7 @@ use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
 
 use itertools::{Either, Itertools};
-use rustc_abi::{CVariadicStatus, CanonAbi, ExternAbi, InterruptKind};
+use rustc_abi::{CanonAbi, ExternAbi, InterruptKind};
 use rustc_ast::visit::{AssocCtxt, BoundKind, FnCtxt, FnKind, Visitor, walk_list};
 use rustc_ast::*;
 use rustc_ast_pretty::pprust::{self, State};
@@ -30,7 +30,6 @@ use rustc_data_structures::fx::FxIndexMap;
 use rustc_errors::{DiagCtxtHandle, Diagnostic, LintBuffer};
 use rustc_feature::Features;
 use rustc_session::Session;
-use rustc_session::errors::feature_err;
 use rustc_session::lint::builtin::{
     DEPRECATED_WHERE_CLAUSE_LOCATION, MISSING_ABI, MISSING_UNSAFE_ON_EXTERN,
     PATTERNS_IN_FNS_WITHOUT_BODY, UNUSED_VISIBILITIES,
@@ -350,7 +349,6 @@ impl<'a> AstValidator<'a> {
 
     fn check_fn_decl(&self, fn_decl: &FnDecl, self_semantic: SelfSemantic) {
         self.check_decl_num_args(fn_decl);
-        self.check_decl_cvariadic_pos(fn_decl);
         self.check_decl_attrs(fn_decl);
         self.check_decl_self_param(fn_decl, self_semantic);
     }
@@ -362,22 +360,6 @@ impl<'a> AstValidator<'a> {
         if fn_decl.inputs.len() > max_num_args {
             let Param { span, .. } = fn_decl.inputs[0];
             self.dcx().emit_fatal(errors::FnParamTooMany { span, max_num_args });
-        }
-    }
-
-    /// Emits an error if a function declaration has a variadic parameter in the
-    /// beginning or middle of parameter list.
-    /// Example: `fn foo(..., x: i32)` will emit an error.
-    fn check_decl_cvariadic_pos(&self, fn_decl: &FnDecl) {
-        match &*fn_decl.inputs {
-            [ps @ .., _] => {
-                for Param { ty, span, .. } in ps {
-                    if let TyKind::CVarArgs = ty.kind {
-                        self.dcx().emit_err(errors::FnParamCVarArgsNotLast { span: *span });
-                    }
-                }
-            }
-            _ => {}
         }
     }
 
@@ -722,149 +704,6 @@ impl<'a> AstValidator<'a> {
             self.dcx().emit_err(errors::ExternItemAscii {
                 span: ident.span,
                 block: self.current_extern_span(),
-            });
-        }
-    }
-
-    /// Reject invalid C-variadic types.
-    ///
-    /// C-variadics must be:
-    /// - Non-const
-    /// - Either foreign, or free and `unsafe extern "C"` semantically
-    fn check_c_variadic_type(&self, fk: FnKind<'_>, attrs: &AttrVec) {
-        // `...` is already rejected when it is not the final parameter.
-        let variadic_param = match fk.decl().inputs.last() {
-            Some(param) if matches!(param.ty.kind, TyKind::CVarArgs) => param,
-            _ => return,
-        };
-
-        let FnKind::Fn(fn_ctxt, _, Fn { sig, .. }) = fk else {
-            // Unreachable because the parser already rejects `...` in closures.
-            unreachable!("C variable argument list cannot be used in closures")
-        };
-
-        if let Const::Yes(_) = sig.header.constness
-            && !self.features.enabled(sym::const_c_variadic)
-        {
-            let msg = format!("c-variadic const function definitions are unstable");
-            feature_err(&self.sess, sym::const_c_variadic, sig.span, msg).emit();
-        }
-
-        if let Some(coroutine_kind) = sig.header.coroutine_kind {
-            self.dcx().emit_err(errors::CoroutineAndCVariadic {
-                spans: vec![coroutine_kind.span(), variadic_param.span],
-                coroutine_kind: coroutine_kind.as_str(),
-                coroutine_span: coroutine_kind.span(),
-                variadic_span: variadic_param.span,
-            });
-        }
-
-        match fn_ctxt {
-            FnCtxt::Foreign => return,
-            FnCtxt::Free | FnCtxt::Assoc(_) => {
-                match self.sess.target.supports_c_variadic_definitions() {
-                    CVariadicStatus::NotSupported => {
-                        self.dcx().emit_err(errors::CVariadicNotSupported {
-                            variadic_span: variadic_param.span,
-                            target: &*self.sess.target.llvm_target,
-                        });
-                        return;
-                    }
-                    CVariadicStatus::Unstable { feature } if !self.features.enabled(feature) => {
-                        let msg =
-                            format!("C-variadic function definitions on this target are unstable");
-                        feature_err(&self.sess, feature, variadic_param.span, msg).emit();
-                        return;
-                    }
-                    CVariadicStatus::Unstable { .. } | CVariadicStatus::Stable => {
-                        /* fall through */
-                    }
-                }
-
-                match sig.header.ext {
-                    Extern::Implicit(_) => {
-                        if !matches!(sig.header.safety, Safety::Unsafe(_)) {
-                            self.dcx().emit_err(errors::CVariadicMustBeUnsafe {
-                                span: variadic_param.span,
-                                unsafe_span: sig.safety_span(),
-                            });
-                        }
-                    }
-                    Extern::Explicit(StrLit { symbol_unescaped, .. }, _) => {
-                        // Just bail if the ABI is not even recognized.
-                        let Ok(abi) = ExternAbi::from_str(symbol_unescaped.as_str()) else {
-                            return;
-                        };
-
-                        self.check_c_variadic_abi(abi, attrs, variadic_param.span, sig);
-
-                        if !matches!(sig.header.safety, Safety::Unsafe(_)) {
-                            self.dcx().emit_err(errors::CVariadicMustBeUnsafe {
-                                span: variadic_param.span,
-                                unsafe_span: sig.safety_span(),
-                            });
-                        }
-                    }
-                    Extern::None => {
-                        let err = errors::CVariadicNoExtern { span: variadic_param.span };
-                        self.dcx().emit_err(err);
-                    }
-                }
-            }
-        }
-    }
-
-    fn check_c_variadic_abi(
-        &self,
-        abi: ExternAbi,
-        attrs: &AttrVec,
-        dotdotdot_span: Span,
-        sig: &FnSig,
-    ) {
-        // For naked functions we accept any ABI that is accepted on c-variadic
-        // foreign functions, if the c_variadic_naked_functions feature is enabled.
-        if attr::contains_name(attrs, sym::naked) {
-            match abi.supports_c_variadic() {
-                CVariadicStatus::Stable if let ExternAbi::C { .. } = abi => {
-                    // With `c_variadic` naked c-variadic `extern "C"` functions are allowed.
-                }
-                CVariadicStatus::Stable => {
-                    // For e.g. aapcs or sysv64 `c_variadic_naked_functions` must also be enabled.
-                    if !self.features.enabled(sym::c_variadic_naked_functions) {
-                        let msg = format!("Naked c-variadic `extern {abi}` functions are unstable");
-                        feature_err(&self.sess, sym::c_variadic_naked_functions, sig.span, msg)
-                            .emit();
-                    }
-                }
-                CVariadicStatus::Unstable { feature } => {
-                    // Some ABIs need additional features.
-                    if !self.features.enabled(sym::c_variadic_naked_functions) {
-                        let msg = format!("Naked c-variadic `extern {abi}` functions are unstable");
-                        feature_err(&self.sess, sym::c_variadic_naked_functions, sig.span, msg)
-                            .emit();
-                    }
-
-                    if !self.features.enabled(feature) {
-                        let msg = format!(
-                            "C-variadic functions with the {abi} calling convention are unstable"
-                        );
-                        feature_err(&self.sess, feature, sig.span, msg).emit();
-                    }
-                }
-                CVariadicStatus::NotSupported => {
-                    // Some ABIs, e.g. `extern "Rust"`, never support c-variadic functions.
-                    self.dcx().emit_err(errors::CVariadicBadNakedExtern {
-                        span: dotdotdot_span,
-                        abi: abi.as_str(),
-                        extern_span: sig.extern_span(),
-                    });
-                }
-            }
-        } else if !matches!(abi, ExternAbi::C { .. }) {
-            self.dcx().emit_err(errors::CVariadicBadExtern {
-                span: dotdotdot_span,
-                abi: abi.as_str(),
-                extern_span: sig.extern_span(),
             });
         }
     }
@@ -1718,8 +1557,6 @@ impl Visitor<'_> for AstValidator<'_> {
                 }
             }
         }
-
-        self.check_c_variadic_type(fk, attrs);
 
         // Functions cannot both be `const async` or `const gen`
         if let Some(&FnHeader {

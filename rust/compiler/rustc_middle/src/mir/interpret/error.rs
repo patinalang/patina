@@ -374,8 +374,6 @@ pub enum UndefinedBehaviorInfo<'tcx> {
     DerefFunctionPointer(AllocId),
     /// Trying to access the data behind a vtable pointer.
     DerefVTablePointer(AllocId),
-    /// Trying to access the data behind a va_list pointer.
-    DerefVaListPointer(AllocId),
     /// Trying to access the actual type id.
     DerefTypeIdPointer(AllocId),
     /// Using a non-boolean `u8` as bool.
@@ -386,8 +384,6 @@ pub enum UndefinedBehaviorInfo<'tcx> {
     InvalidTag(Scalar<AllocId>),
     /// Using a pointer-not-to-a-function as function pointer.
     InvalidFunctionPointer(Pointer<AllocId>),
-    /// Using a pointer-not-to-a-va-list as variable argument list pointer.
-    InvalidVaListPointer(Pointer<AllocId>),
     /// Using a pointer-not-to-a-vtable as vtable pointer.
     InvalidVTablePointer(Pointer<AllocId>),
     /// Using a vtable for the wrong trait.
@@ -420,12 +416,6 @@ pub enum UndefinedBehaviorInfo<'tcx> {
     },
     /// ABI-incompatible return types.
     AbiMismatchReturn { caller_ty: Ty<'tcx>, callee_ty: Ty<'tcx> },
-    /// `va_arg` was called on an exhausted `VaList`.
-    VaArgOutOfBounds,
-    /// The caller and callee disagree on whether they are c-variadic or not.
-    CVariadicMismatch { caller_is_c_variadic: bool, callee_is_c_variadic: bool },
-    /// The caller and callee disagree on the number of fixed (i.e. non-c-variadic) arguments.
-    CVariadicFixedCountMismatch { caller: u32, callee: u32 },
 }
 
 impl<'tcx> fmt::Display for UndefinedBehaviorInfo<'tcx> {
@@ -572,9 +562,6 @@ impl<'tcx> fmt::Display for UndefinedBehaviorInfo<'tcx> {
                 write!(f, "accessing {alloc} which contains a function")
             }
             DerefVTablePointer(alloc) => write!(f, "accessing {alloc} which contains a vtable"),
-            DerefVaListPointer(alloc) => {
-                write!(f, "accessing {alloc} which contains a variable argument list")
-            }
             DerefTypeIdPointer(alloc) => write!(f, "accessing {alloc} which contains a `TypeId`"),
             InvalidBool(value) => {
                 write!(f, "interpreting an invalid 8-bit value as a bool: 0x{value:02x}")
@@ -586,10 +573,6 @@ impl<'tcx> fmt::Display for UndefinedBehaviorInfo<'tcx> {
             InvalidFunctionPointer(ptr) => {
                 write!(f, "using {ptr} as function pointer but it does not point to a function")
             }
-            InvalidVaListPointer(ptr) => write!(
-                f,
-                "using {ptr} as variable argument list pointer but it does not point to a variable argument list"
-            ),
             InvalidVTablePointer(ptr) => {
                 write!(f, "using {ptr} as vtable pointer but it does not point to a vtable")
             }
@@ -637,15 +620,6 @@ impl<'tcx> fmt::Display for UndefinedBehaviorInfo<'tcx> {
             AbiMismatchReturn { caller_ty, callee_ty } => write!(
                 f,
                 "calling a function with return type {callee_ty} passing return place of type {caller_ty}"
-            ),
-            VaArgOutOfBounds => write!(f, "more C-variadic arguments read than were passed"),
-            CVariadicMismatch { .. } => write!(
-                f,
-                "calling a function where the caller and callee disagree on whether the function is C-variadic"
-            ),
-            CVariadicFixedCountMismatch { caller, callee } => write!(
-                f,
-                "calling a C-variadic function with {caller} fixed arguments, but the function expects {callee}"
             ),
         }
     }

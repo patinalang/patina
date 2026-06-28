@@ -4969,7 +4969,6 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 ..
             } = fn_ty.fn_sig(tcx).skip_binder()
             && fn_sig.abi() == ExternAbi::Rust
-            && !fn_sig.c_variadic()
             && fn_sig.safety() == hir::Safety::Safe
 
             // Extract first param of fn sig with peeled refs, e.g. `fn(&T)` -> `T`
