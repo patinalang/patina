@@ -1,6 +1,7 @@
 -file("tests/ui/src/fn/call_qual.pt", 41).
 -module('Elixir.Patina.CallQual.Nested').
 -compile([no_auto_import]).
+-export_record([]).
 -export(['__info__'/1,main/0,public_function/0]).
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),

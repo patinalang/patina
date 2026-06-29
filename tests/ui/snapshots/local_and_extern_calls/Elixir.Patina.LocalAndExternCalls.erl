@@ -1,6 +1,7 @@
 -file("tests/ui/src/local_and_extern_calls.pt", 1).
 -module('Elixir.Patina.LocalAndExternCalls').
 -compile([no_auto_import]).
+-export_record([]).
 -export(['__info__'/1,public_main/0,main/0]).
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),

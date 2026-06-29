@@ -1,6 +1,7 @@
 -file("tests/ui/src/format_args__01.pt", 4).
 -module('Elixir.Patina.FormatArgs01').
 -compile([no_auto_import]).
+-export_record([]).
 -export(['__info__'/1,main/0]).
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),

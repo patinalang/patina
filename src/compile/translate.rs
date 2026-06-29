@@ -1,4 +1,5 @@
 mod elixir_compat;
+mod structs;
 
 use std::path::PathBuf;
 
@@ -10,9 +11,9 @@ use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::{DefId, LocalDefId, LocalModDefId};
 use rustc_hir::{
     BodyId, Expr, ExprKind, FnSig, Generics, HirId, ImplItemKind, ItemKind, Mod, Pat, PatKind,
-    QPath, Stmt, StmtKind, StructTailExpr, TyKind, VariantData,
+    QPath, Stmt, StmtKind, TyKind, VariantData,
 };
-use rustc_middle::erl::{ErlCallTarget, ErlModuleId};
+use rustc_middle::erl::ErlModuleId;
 use rustc_middle::span_bug;
 use rustc_middle::ty::TyCtxt;
 use rustc_span::{Ident, Span, Spanned, Symbol, kw, sym};
@@ -22,12 +23,14 @@ use crate::compile::impl_collector::ImplCollector;
 use crate::compile::module_collector::ModuleNameCollector;
 use crate::erlang::abstract_format as eaf;
 
+#[macro_export]
 macro_rules! span_fatal {
     ($tcx:expr, $span:expr, $($arg:tt)*) => {
         $tcx.sess.dcx().span_fatal($span, format!($($arg)*))
     };
 }
 
+#[macro_export]
 macro_rules! not_implemented {
     ($tcx:expr, $span:expr, $name:literal, $kind:expr) => {
         span_fatal!($tcx, $span, "{} not yet implemented: {:?}", $name, $kind)
@@ -92,6 +95,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             let form = match self.tcx.def_kind(def_id) {
                 DefKind::Mod => self.translate_module(def_id),
                 DefKind::Struct => self.translate_struct(def_id),
+                DefKind::Enum => self.translate_enum(def_id),
                 _ => continue,
             };
 
@@ -106,13 +110,14 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         let (module, _span, _hir_id) = self.tcx.hir_get_module(module_id);
         let (forms, exports) = self.collect_module_fns(module);
         let mod_name = self.modules.module_name(ErlModuleId::Mod(def_id.to_def_id()));
-        self.assemble_module(module.spans.inner_span, mod_name, exports, forms)
+        self.assemble_module(module.spans.inner_span, mod_name, [], exports, forms)
     }
 
     fn assemble_module(
         &self,
         span: Span,
         mod_name: Symbol,
+        record_exports: impl IntoIterator<Item = Symbol>,
         exports: impl IntoIterator<Item = (Symbol, usize)>,
         fn_forms: impl IntoIterator<Item = eaf::ModuleForm<'arena>>,
     ) -> (Symbol, eaf::Module<'arena>) {
@@ -120,9 +125,10 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         let file_attr = self.afb.file_attr(span, &file.to_string_lossy());
         let module_attr = self.afb.module_attr(span, mod_name);
         let compile_attr = self.afb.wild_attr(span, sym::compile, [sym::no_auto_import]);
+        let record_export_attr = self.afb.export_record_attr(span, record_exports);
         let export_attr = self.afb.export_attr(span, exports);
 
-        let attrs = [file_attr, module_attr, compile_attr, export_attr];
+        let attrs = [file_attr, module_attr, compile_attr, record_export_attr, export_attr];
         (mod_name, self.afb.module(attrs.into_iter().chain(fn_forms)))
     }
 
@@ -243,50 +249,9 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 afb.expr_tuple(expr.span, elements)
             }
 
-            ExprKind::Struct(qpath, fields, tail) => match tail {
-                StructTailExpr::None => {
-                    // A struct literal lowers to a synthetic `__struct__()` call to the
-                    // struct's own module - there is no call `Expr`, so classify by def id.
-                    let fn_atom = afb.expr_atom(expr.span, sym::__struct__);
-                    let base = if let Some(def_id) = self.qpath_res(qpath, expr.hir_id).opt_def_id()
-                        && self
-                            .tcx
-                            .erl_call_kind_from(
-                                expr.hir_id.owner.to_def_id(),
-                                ErlCallTarget::Constructor {
-                                    nominal_type: def_id,
-                                    variant: None,
-                                    args: self
-                                        .tcx
-                                        .typeck(expr.hir_id.owner.def_id)
-                                        .node_args(expr.hir_id),
-                                },
-                            )
-                            .is_some_and(|kind| kind.can_be_local())
-                    {
-                        afb.expr_local_call(expr.span, fn_atom, [])
-                    } else {
-                        let mod_expr = self.translate_qpath(qpath, expr.hir_id, scope);
-                        afb.expr_remote_call(expr.span, mod_expr, fn_atom, [])
-                    };
-                    let translated_fields_iter = fields.iter().map(|field| {
-                        let key = afb.expr_atom(field.ident.span, field.ident.name);
-                        (key, self.translate_expr(field.expr, scope))
-                    });
-                    afb.expr_map_update_exact(expr.span, base, translated_fields_iter)
-                }
-                StructTailExpr::Base(base) => {
-                    let base = self.translate_expr(base, scope);
-                    let translated_fields_iter = fields.iter().map(|field| {
-                        let key = afb.expr_atom(field.ident.span, field.ident.name);
-                        (key, self.translate_expr(field.expr, scope))
-                    });
-                    afb.expr_map_update_exact(expr.span, base, translated_fields_iter)
-                }
-                StructTailExpr::DefaultFields(_) | StructTailExpr::NoneWithError(_) => {
-                    not_implemented!(self.tcx, expr.span, "struct with default field values", tail)
-                }
-            },
+            ExprKind::Struct(qpath, fields, tail) => {
+                self.struct_struct_expr(expr, qpath, fields, tail, scope)
+            }
 
             ExprKind::Field(expr, ident) => {
                 let mod_name = afb.expr_atom(expr.span, sym::erlang);
@@ -348,6 +313,11 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 self.afb.expr_atom(span, name)
             }
 
+            // Res::Def(DefKind::Variant, def_id) => {
+
+            //     let name = self.modules.constructor_name(def_id);
+            //     self.afb.expr_atom(span, name)
+            // }
             Res::Def(DefKind::Fn, def_id) => {
                 let module = self.expect_erl_definition_module(def_id);
                 let mod_name = self.modules.module_name(module);
@@ -395,11 +365,8 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
 
         // Classification is single-sourced through the callee resolver; the arms below
         // only build the corresponding Erlang node.
-        let local = self
-            .tcx
-            .erl_call_kind(expr)
-            .expect("call target to have a resolved Erlang module")
-            .can_be_local();
+        let erl_call_kind =
+            self.tcx.erl_call_kind(expr).expect("call target to have a resolved Erlang module");
 
         match callee.kind {
             ExprKind::Path(
@@ -408,7 +375,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                     last_segment,
                 ),
             ) => {
-                if local
+                if erl_call_kind.can_be_local()
                     && let Res::Def(DefKind::AssocFn, def_id) = self.qpath_res(qpath, callee.hir_id)
                 {
                     let fn_atom =
@@ -442,7 +409,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 let fn_name = self.tcx.item_name(*def_id);
                 let fn_expr = afb.expr_atom(callee.span, fn_name);
 
-                if local {
+                if erl_call_kind.can_be_local() {
                     return afb.expr_local_call(expr.span, fn_expr, args_exprs);
                 }
 
@@ -478,19 +445,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             ExprKind::Path(QPath::Resolved(
                 _,
                 rustc_hir::Path { res: Res::Def(DefKind::Ctor(..), _), .. },
-            )) => {
-                let fn_atom = afb.expr_atom(callee.span, sym::__struct__);
-                let base = if local {
-                    afb.expr_local_call(expr.span, fn_atom, [])
-                } else {
-                    let mod_expr = self.translate_expr(callee, scope);
-                    afb.expr_remote_call(expr.span, mod_expr, fn_atom, [])
-                };
-                let updates = args_exprs.into_iter().enumerate().map(|(i, arg)| {
-                    (afb.expr_atom(expr.span, Symbol::intern(&i.to_string())), arg)
-                });
-                afb.expr_map_update_exact(expr.span, base, updates)
-            }
+            )) => self.struct_tuple_expr(expr, callee, args, args_exprs, erl_call_kind, scope),
 
             _ => {
                 let callee_expr = self.translate_expr(callee, scope);
@@ -644,7 +599,42 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
 
         let mod_name = self.modules.module_name(ErlModuleId::Adt(def_id.to_def_id()));
         let (forms, exports) = self.collect_struct_fns(item.span, mod_name, def_id, variant_data);
-        self.assemble_module(item.span, mod_name, exports, forms)
+        self.assemble_module(item.span, mod_name, [], exports, forms)
+    }
+
+    fn translate_enum(&self, def_id: LocalDefId) -> (Symbol, eaf::Module<'arena>) {
+        let item = self.tcx.hir_expect_item(def_id);
+
+        let ItemKind::Enum(_ident, generics, enum_def) = item.kind else {
+            unreachable!("def_kind Enum must be an ItemKind::Enum");
+        };
+
+        if !generics.params.is_empty() {
+            not_implemented!(self.tcx, generics.span, "enum with generic parameters", generics);
+        }
+
+        let mod_name = self.modules.module_name(ErlModuleId::Adt(def_id.to_def_id()));
+
+        let mut forms = Vec::new();
+        let mut last_file = Some(self.file_path(item.span));
+        let mut exports = SmallVec::<[(Symbol, usize); 8]>::new();
+        let mut record_exports = SmallVec::<[Symbol; 8]>::new();
+
+        for variant in enum_def.variants {
+            let variant_name = variant.ident.name;
+            let variant_fields = variant
+                .data
+                .fields()
+                .iter()
+                .map(|field| self.afb.record_field_decl(field.span, field.ident, None));
+
+            forms.push(self.afb.native_record_attr(item.span, variant_name, variant_fields));
+            record_exports.push(variant_name);
+        }
+
+        self.collect_impl_fns(def_id, &mut forms, &mut last_file, &mut exports);
+
+        self.assemble_module(item.span, mod_name, record_exports, exports, forms)
     }
 
     fn collect_struct_fns(
@@ -667,6 +657,18 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         forms.push(elixir_compat::struct1_function(&self.afb, span));
         exports.push((sym::__struct__, 1));
 
+        self.collect_impl_fns(def_id, &mut forms, &mut last_file, &mut exports);
+
+        (forms, exports)
+    }
+
+    fn collect_impl_fns(
+        &self,
+        def_id: rustc_hir::def_id::LocalDefId,
+        forms: &mut Vec<eaf::ModuleForm<'arena>>,
+        last_file: &mut Option<PathBuf>,
+        exports: &mut SmallVec<[(Symbol, usize); 8]>,
+    ) {
         if let Some(impls) = self.impls.impls_for(def_id.to_def_id()) {
             for imp in impls {
                 if !imp.generics.params.is_empty() {
@@ -685,15 +687,13 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
 
                     let function =
                         self.translate_fun(&sig, impl_item.generics, impl_item.ident, body);
-                    self.push_function(&mut forms, &mut last_file, impl_item.span, function);
+                    self.push_function(forms, last_file, impl_item.span, function);
                     if self.tcx.is_erl_exported_fn(impl_item.owner_id.def_id) {
                         exports.push((impl_item.ident.name, sig.decl.inputs.len()));
                     }
                 }
             }
         }
-
-        (forms, exports)
     }
 
     fn translate_binary_expr(

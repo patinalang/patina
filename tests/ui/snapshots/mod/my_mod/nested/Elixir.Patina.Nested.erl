@@ -1,6 +1,7 @@
 -file("tests/ui/src/mod/my_mod/nested.pt", 1).
 -module('Elixir.Patina.Nested').
 -compile([no_auto_import]).
+-export_record([]).
 -export(['__info__'/1,function/0]).
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),

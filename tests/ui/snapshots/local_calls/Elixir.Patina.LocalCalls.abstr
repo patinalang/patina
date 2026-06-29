@@ -1,6 +1,7 @@
 [{attribute,{1,1},file,{"tests/ui/src/local_calls.pt",1}},
  {attribute,{1,1},module,'Elixir.Patina.LocalCalls'},
  {attribute,{1,1},compile,[no_auto_import]},
+ {attribute,{1,1},export_record,[]},
  {attribute,{1,1},export,[{'__info__',1},{main,0}]},
  {function,
   {1,1},

@@ -1,6 +1,7 @@
 -file("tests/ui/src/generics/assoc_items/types__01.pt", 7).
 -module('Elixir.Patina.Types01').
 -compile([no_auto_import]).
+-export_record([]).
 -export(['__info__'/1]).
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),

@@ -1,6 +1,7 @@
 [{attribute,{7,1},file,{"tests/ui/src/generics/assoc_items/types__01.pt",7}},
  {attribute,{7,1},module,'Elixir.Patina.Types01'},
  {attribute,{7,1},compile,[no_auto_import]},
+ {attribute,{7,1},export_record,[]},
  {attribute,{7,1},export,[{'__info__',1}]},
  {function,
      {7,1},

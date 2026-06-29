@@ -1,6 +1,7 @@
 [{attribute,{1,1},file,{"tests/ui/src/mod/my_mod/inaccessible.pt",1}},
  {attribute,{1,1},module,'Elixir.Patina.Split01.MyMod.Inaccessible'},
  {attribute,{1,1},compile,[no_auto_import]},
+ {attribute,{1,1},export_record,[]},
  {attribute,{1,1},export,[{'__info__',1},{public_function,0}]},
  {function,
      {1,1},

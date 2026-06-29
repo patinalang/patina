@@ -1,6 +1,7 @@
 -file("tests/ui/src/custom_types/repr__05.pt", 6).
 -module('Elixir.Patina.Repr05.Celcius').
 -compile([no_auto_import]).
+-export_record([]).
 -export(['__info__'/1,'__struct__'/0,'__struct__'/1]).
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),

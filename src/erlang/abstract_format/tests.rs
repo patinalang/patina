@@ -1030,7 +1030,7 @@ fn expr_record_create() {
     // Rep(E) = {record, ANNO, Name, [{record_field, ANNO, Rep(Field_i), Rep(E_i)}, ...]}
     let v = Expr::RecordCreate(
         anno(),
-        sym("rec"),
+        RecordName::Local(sym("rec")),
         svec![RecordField(
             anno(),
             AtomOrVar::Atom(anno(), sym("f")),
@@ -1053,7 +1053,7 @@ fn expr_record_field_access() {
     let v = Expr::RecordField(
         anno(),
         r!(Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("r")))),
-        sym("rec"),
+        RecordName::Local(sym("rec")),
         Atom(anno(), sym("f")),
     );
     let expected = term(tuple(&[
@@ -1070,7 +1070,7 @@ fn expr_record_field_access() {
 eaf_test! {
 fn expr_record_index() {
     // Rep(E) = {record_index, ANNO, Name, Rep(Field)}
-    let v = Expr::RecordIndex(anno(), sym("rec"), Atom(anno(), sym("f")));
+    let v = Expr::RecordIndex(anno(), RecordName::Local(sym("rec")), Atom(anno(), sym("f")));
     let expected = term(tuple(&[
         atom("record_index"),
         anno_bytes(),
@@ -1087,7 +1087,7 @@ fn expr_record_update() {
     let v = Expr::RecordUpdate(
         anno(),
         r!(Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("r")))),
-        sym("rec"),
+        RecordName::Local(sym("rec")),
         svec![RecordField(
             anno(),
             Atom(anno(), sym("f")),

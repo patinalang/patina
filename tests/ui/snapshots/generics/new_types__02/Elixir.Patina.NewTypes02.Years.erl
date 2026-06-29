@@ -1,6 +1,7 @@
 -file("tests/ui/src/generics/new_types__02.pt", 4).
 -module('Elixir.Patina.NewTypes02.Years').
 -compile([no_auto_import]).
+-export_record([]).
 -export(['__info__'/1,'__struct__'/0,'__struct__'/1]).
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),

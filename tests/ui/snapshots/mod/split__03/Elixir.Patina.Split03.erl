@@ -1,6 +1,7 @@
 -file("tests/ui/src/mod/split__03.pt", 4).
 -module('Elixir.Patina.Split03').
 -compile([no_auto_import]).
+-export_record([]).
 -export(['__info__'/1,function/0]).
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),

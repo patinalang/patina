@@ -1,6 +1,7 @@
 [{attribute,{15,1},file,{"tests/ui/src/hello__01.pt",15}},
  {attribute,{15,1},module,'Elixir.Patina.Hello01'},
  {attribute,{15,1},compile,[no_auto_import]},
+ {attribute,{15,1},export_record,[]},
  {attribute,{15,1},export,[{'__info__',1},{main,0}]},
  {function,
      {15,1},

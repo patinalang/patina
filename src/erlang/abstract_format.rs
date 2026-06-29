@@ -97,6 +97,10 @@ pub(crate) enum ModuleForm<'a> {
     /// If F is a wild attribute `-A(T)`, then Rep(F) = `{attribute,ANNO,A,T}`.
     #[serde(rename = "attribute")]
     WildAttr(Anno, Symbol, &'a [Symbol]),
+    #[serde(rename = "__attribute__native_record")]
+    NativeRecordAttr(Anno, RecordDecl<'a>),
+    #[serde(rename = "__attribute__export_record")]
+    ExportRecordAttr(Anno, &'a [Symbol]),
 }
 
 #[derive(serde::Serialize, Debug, Clone, Copy)]
@@ -405,18 +409,18 @@ pub(crate) enum Expr<'a> {
     /// `Field_i` is an atom or `_`, then Rep(E) =
     /// `{record,ANNO,Name,[{record_field,ANNO,Rep(Field_1),Rep(E_1)}, ..., {record_field,ANNO,Rep(Field_k),Rep(E_k)}]}`.
     #[serde(rename = "record")]
-    RecordCreate(Anno, Symbol, &'a [RecordField<AtomOrVar, Expr<'a>>]),
+    RecordCreate(Anno, RecordName, &'a [RecordField<AtomOrVar, Expr<'a>>]),
     /// If E is a record field access `E_0#Name.Field`, where `Field` is an atom, then
     /// Rep(E) = `{record_field,ANNO,Rep(E_0),Name,Rep(Field)}`.
-    RecordField(Anno, &'a Expr<'a>, Symbol, Atom),
+    RecordField(Anno, &'a Expr<'a>, RecordName, Atom),
     /// If E is a record field index `#Name.Field`, where `Field` is an atom, then
     /// Rep(E) = `{record_index,ANNO,Name,Rep(Field)}`.
-    RecordIndex(Anno, Symbol, Atom),
+    RecordIndex(Anno, RecordName, Atom),
     /// If E is a record update `E_0#Name{Field_1=E_1, ..., Field_k=E_k}`, where each
     /// `Field_i` is an atom, then Rep(E) =
     /// `{record,ANNO,Rep(E_0),Name,[{record_field,ANNO,Rep(Field_1),Rep(E_1)}, ..., {record_field,ANNO,Rep(Field_k),Rep(E_k)}]}`.
     #[serde(rename = "record")]
-    RecordUpdate(Anno, &'a Expr<'a>, Symbol, &'a [RecordField<Atom, Expr<'a>>]),
+    RecordUpdate(Anno, &'a Expr<'a>, RecordName, &'a [RecordField<Atom, Expr<'a>>]),
     /// If E is a tuple skeleton `{E_1, ..., E_k}`, then Rep(E) =
     /// `{tuple,ANNO,[Rep(E_1), ..., Rep(E_k)]}`.
     Tuple(Anno, &'a [Expr<'a>]),
@@ -451,6 +455,13 @@ pub(crate) enum Expr<'a> {
     /// If E is a variable `V`, then Rep(E) = `{var,ANNO,A}`, where `A` is an atom
     /// with a printname consisting of the same characters as `V`.
     Var(Anno, Symbol),
+}
+
+#[derive(serde::Serialize, Debug, Clone, Copy)]
+pub(crate) enum RecordName {
+    Local(Symbol),
+    #[serde(rename = "__elide__")]
+    Extern(Symbol, Symbol),
 }
 
 /// If E is a fun expression `fun Name/Arity`, then Rep(E) =

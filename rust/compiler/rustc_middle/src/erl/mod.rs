@@ -5,7 +5,7 @@ use rustc_hir::def::{CtorKind, DefKind, Res};
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::{Attribute, Expr, ExprKind, PrimTy};
 
-use crate::ty::{self, GenericArgsRef, Ty, TyCtxt, TypingEnv, Unnormalized, Visibility};
+use crate::ty::{self, AdtKind, GenericArgsRef, Ty, TyCtxt, TypingEnv, Unnormalized, Visibility};
 
 /// The identity of a module in the generated Erlang program.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
@@ -71,6 +71,12 @@ impl ErlCallKind {
     pub fn can_be_extern(self) -> bool {
         matches!(self, ErlCallKind::Extern | ErlCallKind::LocalOrExtern)
     }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum ErlAdtRepr {
+    Elixir,
+    NativeRecord,
 }
 
 impl<'tcx> TyCtxt<'tcx> {
@@ -367,6 +373,15 @@ impl<'tcx> TyCtxt<'tcx> {
                 return def_id;
             }
             def_id = self.parent(def_id);
+        }
+    }
+
+    pub fn erl_adt_repr(self, def_id: DefId) -> ErlAdtRepr {
+        let adt = self.adt_def(def_id);
+        match adt.adt_kind() {
+            AdtKind::Struct => ErlAdtRepr::Elixir,
+            AdtKind::Enum => ErlAdtRepr::NativeRecord,
+            AdtKind::Union => unimplemented!(),
         }
     }
 }

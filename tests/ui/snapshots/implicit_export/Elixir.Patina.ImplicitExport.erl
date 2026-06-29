@@ -1,6 +1,7 @@
 -file("tests/ui/src/implicit_export.pt", 1).
 -module('Elixir.Patina.ImplicitExport').
 -compile([no_auto_import]).
+-export_record([]).
 -export(['__info__'/1,main/0]).
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),

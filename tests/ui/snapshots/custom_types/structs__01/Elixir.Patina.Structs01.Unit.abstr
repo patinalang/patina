@@ -1,6 +1,7 @@
 [{attribute,{15,1},file,{"tests/ui/src/custom_types/structs__01.pt",15}},
  {attribute,{15,1},module,'Elixir.Patina.Structs01.Unit'},
  {attribute,{15,1},compile,[no_auto_import]},
+ {attribute,{15,1},export_record,[]},
  {attribute,{15,1},export,[{'__info__',1},{'__struct__',0},{'__struct__',1}]},
  {function,
      {15,1},

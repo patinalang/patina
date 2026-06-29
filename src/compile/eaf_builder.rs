@@ -1,6 +1,6 @@
 use rustc_arena::DroplessArena;
 use rustc_span::source_map::SourceMap;
-use rustc_span::{Span, Symbol};
+use rustc_span::{Ident, Span, Symbol};
 
 use crate::erlang::abstract_format as eaf;
 use crate::num_utils::trim_trailing_zeroes;
@@ -353,6 +353,94 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         let iter = funs.into_iter().map(|(name, arity)| eaf::NameArity(name.into(), arity));
         let funs = self.arena.alloc_from_iter(iter);
         eaf::ModuleForm::ExportAttr(span.into_anno(self.source_map), funs)
+    }
+
+    pub(crate) fn native_record_attr(
+        &self,
+        span: impl IntoAnno,
+        name: Symbol,
+        fields: impl IntoIterator<Item = eaf::RecordFieldDecl<'arena>>,
+    ) -> eaf::ModuleForm<'arena> {
+        let fields = self.arena.alloc_from_iter(fields);
+        eaf::ModuleForm::NativeRecordAttr(
+            span.into_anno(self.source_map),
+            eaf::RecordDecl(name.into(), fields),
+        )
+    }
+
+    pub(crate) fn record_field_decl(
+        &self,
+        span: impl IntoAnno,
+        field_name: Ident,
+        default: Option<eaf::Expr<'arena>>,
+    ) -> eaf::RecordFieldDecl<'arena> {
+        let name_atom =
+            eaf::Atom(field_name.span.into_anno(self.source_map), field_name.name.into());
+
+        eaf::RecordFieldDecl::Untyped(eaf::RecordField(
+            span.into_anno(self.source_map),
+            name_atom,
+            default,
+        ))
+    }
+
+    pub(crate) fn export_record_attr(
+        &self,
+        span: impl IntoAnno,
+        records: impl IntoIterator<Item = Symbol>,
+    ) -> eaf::ModuleForm<'arena> {
+        let records = self.arena.alloc_from_iter(records.into_iter().map(Into::into));
+        eaf::ModuleForm::ExportRecordAttr(span.into_anno(self.source_map), records)
+    }
+
+    pub(crate) fn expr_record_create(
+        &self,
+        span: impl IntoAnno,
+        module: Option<Symbol>,
+        name: Symbol,
+        fields: impl IntoIterator<Item = (Ident, eaf::Expr<'arena>)>,
+    ) -> eaf::Expr<'arena> {
+        let anno = span.into_anno(self.source_map);
+
+        let iter = fields.into_iter().map(|(field, value)| {
+            let anno = field.span.into_anno(self.source_map);
+            let key = eaf::AtomOrVar::Atom(anno, field.name.into());
+            eaf::RecordField(anno, key, Some(value))
+        });
+        let fields = self.arena.alloc_from_iter(iter);
+
+        let record_name = match module {
+            None => eaf::RecordName::Local(name.into()),
+            Some(module) => eaf::RecordName::Extern(module.into(), name.into()),
+        };
+
+        eaf::Expr::RecordCreate(anno, record_name, fields)
+    }
+
+    pub(crate) fn expr_record_update(
+        &self,
+        span: impl IntoAnno,
+        base: eaf::Expr<'arena>,
+        module: Option<Symbol>,
+        name: Symbol,
+        fields: impl IntoIterator<Item = (Ident, eaf::Expr<'arena>)>,
+    ) -> eaf::Expr<'arena> {
+        let anno = span.into_anno(self.source_map);
+
+        let base = self.arena.alloc(base);
+
+        let iter = fields.into_iter().map(|(field, value)| {
+            let anno = field.span.into_anno(self.source_map);
+            let key = eaf::Atom(anno, field.name.into());
+            eaf::RecordField(anno, key, Some(value))
+        });
+        let fields = self.arena.alloc_from_iter(iter);
+
+        let record_name = match module {
+            None => eaf::RecordName::Local(name.into()),
+            Some(module) => eaf::RecordName::Extern(module.into(), name.into()),
+        };
+        eaf::Expr::RecordUpdate(anno, base, record_name, fields)
     }
 
     pub(crate) fn function(
