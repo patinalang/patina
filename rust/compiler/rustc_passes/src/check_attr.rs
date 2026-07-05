@@ -20,7 +20,7 @@ use rustc_hir::attrs::{
     AttributeKind, DocAttribute, DocInline, EiiDecl, EiiImpl, EiiImplResolution, InlineAttr,
     ReprAttr, SanitizerSet,
 };
-use rustc_hir::def::DefKind;
+use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::LocalModDefId;
 use rustc_hir::intravisit::{self, Visitor};
 use rustc_hir::{
@@ -1759,11 +1759,29 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             return None;
         }
 
-        let Some(target) = self.tcx.resolve_erl_call_target(expr) else {
-            return None;
+        let typeck = self.tcx.typeck(expr.hir_id.owner.def_id);
+        let target = match expr.kind {
+            hir::ExprKind::Call(callee, _) => {
+                if let hir::ExprKind::Path(ref qpath) = callee.kind
+                    && let Res::Def(DefKind::Fn | DefKind::AssocFn | DefKind::ExternMod, def_id) =
+                        typeck.qpath_res(qpath, callee.hir_id)
+                {
+                    self.tcx.erl_call_target_for_def(def_id, typeck.node_args(callee.hir_id))
+                } else {
+                    ErlCallTarget::Dynamic
+                }
+            }
+            hir::ExprKind::MethodCall(..) => {
+                if let Some(def_id) = typeck.type_dependent_def_id(expr.hir_id) {
+                    self.tcx.erl_call_target_for_def(def_id, typeck.node_args(expr.hir_id))
+                } else {
+                    ErlCallTarget::Dynamic
+                }
+            }
+            _ => unreachable!("call expression checked above"),
         };
 
-        match self.tcx.erl_call_kind_from(hir_id.owner.def_id.to_def_id(), target) {
+        match self.tcx.erl_call_kind(hir_id.owner.def_id.to_def_id(), target, None) {
             Some(ErlCallKind::Extern) => {
                 self.dcx().emit_warn(errors::ExternCallRedundant {
                     attr_span,
@@ -1773,9 +1791,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             }
             Some(ErlCallKind::Local) => {
                 let target_def_id = match target {
-                    ErlCallTarget::Item(item) => item.def_id,
-                    ErlCallTarget::Constructor { variant: Some(def_id), .. } => def_id,
-                    ErlCallTarget::Constructor { nominal_type, .. } => nominal_type,
+                    ErlCallTarget::Item { def_id, args: _ } => def_id,
                     _ => unreachable!("extern and dynamic targets won't be ErlCallKind::Local"),
                 };
 
@@ -1787,7 +1803,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 Some(())
             }
             Some(ErlCallKind::LocalOrExtern) => Some(()),
-            _ => None,
+            Some(ErlCallKind::Dynamic) | None => None,
         }
     }
 }

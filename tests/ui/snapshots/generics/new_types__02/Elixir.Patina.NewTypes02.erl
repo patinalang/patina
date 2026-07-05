@@ -25,4 +25,5 @@ main() ->
     _var_0 =
         ('Elixir.Patina.NewTypes02.Years':'__struct__'())#{'0' := 42},
     _var_1 = map_get('0', _var_0),
-    #{'0' := _var_2} = _var_0.
+    #{'__struct__' := 'Elixir.Patina.NewTypes02.Years', '0' := _var_2} =
+        _var_0.

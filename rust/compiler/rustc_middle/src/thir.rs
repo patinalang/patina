@@ -297,6 +297,8 @@ pub enum ExprKind<'tcx> {
         /// The span of the function, without the dot and receiver
         /// (e.g. `foo(a, b)` in `x.foo(a, b)`).
         fn_span: Span,
+        /// Whether this is a forced extern call through `#[extern_call]` attribute on the expression.
+        forced_extern: bool,
     },
     /// A use expression `x.use`.
     ByUse {
@@ -516,6 +518,9 @@ pub enum ExprKind<'tcx> {
     /// A literal of a ZST type.
     ZstLiteral {
         user_ty: UserTy<'tcx>,
+    },
+    ExternMod {
+        def_id: DefId,
     },
     /// Associated constants and named constants
     NamedConst {

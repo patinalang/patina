@@ -137,5 +137,5 @@
                {remote,
                    {24,9},
                    {atom,{24,9},'Elixir.Patina.ImplicitExport.Foo'},
-                   {atom,{24,14},foo}},
+                   {atom,{24,9},foo}},
                []}]}]}]

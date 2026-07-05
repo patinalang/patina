@@ -27,10 +27,8 @@ main() ->
         #'Elixir.Patina.BasicEnum.BasicEnum':'Tuple'{'0' = 1,
                                                      '1' = <<"hello">>},
     _var_2 =
-        ('Elixir.Patina.BasicEnum.BasicEnum.Struct':'__struct__'())#{x :=
-                                                                         1,
-                                                                     y :=
-                                                                         <<"hello">>},
+        #'Elixir.Patina.BasicEnum.BasicEnum':'Struct'{x = 1,
+                                                      y = <<"hello">>},
     begin
         io:put_chars([[io_lib:format("~tp", [_var_0]),
                        <<"\n">>,

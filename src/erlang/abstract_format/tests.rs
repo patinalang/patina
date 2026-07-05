@@ -897,7 +897,7 @@ fn pattern_record() {
     // Rep(P) = {record, ANNO, Name, [{record_field, ANNO, Rep(Field), Rep(P_i)}, ...]}
     let v = Pattern::Record(
         anno(),
-        sym("rec"),
+        RecordName::Local(sym("rec")),
         svec![RecordField(anno(), AtomOrVar::Atom(anno(), sym("f")), Some(Pattern::Var(anno(), sym("V"))))],
     );
     let expected = term(tuple(&[

@@ -85,7 +85,9 @@ impl<'tcx> TailCallCkVisitor<'_, 'tcx> {
             return;
         }
 
-        let ExprKind::Call { ty, fun, ref args, from_hir_call, fn_span } = value.kind else {
+        let ExprKind::Call { ty, fun, ref args, from_hir_call, fn_span, forced_extern: _ } =
+            value.kind
+        else {
             self.report_non_call(value, expr);
             return;
         };

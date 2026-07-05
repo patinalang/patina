@@ -55,7 +55,7 @@ pub fn walk_expr<'thir, 'tcx: 'thir, V: Visitor<'thir, 'tcx>>(
                 visitor.visit_expr(&visitor.thir()[else_expr]);
             }
         }
-        Call { fun, ref args, ty: _, from_hir_call: _, fn_span: _ } => {
+        Call { fun, ref args, ty: _, from_hir_call: _, fn_span: _, forced_extern: _ } => {
             visitor.visit_expr(&visitor.thir()[fun]);
             for &arg in &**args {
                 visitor.visit_expr(&visitor.thir()[arg]);
@@ -158,6 +158,7 @@ pub fn walk_expr<'thir, 'tcx: 'thir, V: Visitor<'thir, 'tcx>>(
         NamedConst { def_id: _, args: _, user_ty: _ } => {}
         ConstParam { param: _, def_id: _ } => {}
         StaticRef { alloc_id: _, ty: _, def_id: _ } => {}
+        ExternMod { def_id: _ } => {}
         InlineAsm(box InlineAsmExpr {
             asm_macro: _,
             ref operands,

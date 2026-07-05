@@ -238,11 +238,12 @@ impl<'a, 'tcx> ThirPrinter<'a, 'tcx> {
 
                 print_indented!(self, "}", depth_lvl);
             }
-            Call { fun, args, ty, from_hir_call, fn_span } => {
+            Call { fun, args, ty, from_hir_call, fn_span, forced_extern } => {
                 print_indented!(self, "Call {", depth_lvl);
                 print_indented!(self, format!("ty: {:?}", ty), depth_lvl + 1);
                 print_indented!(self, format!("from_hir_call: {}", from_hir_call), depth_lvl + 1);
                 print_indented!(self, format!("fn_span: {:?}", fn_span), depth_lvl + 1);
+                print_indented!(self, format!("forced_extern: {}", forced_extern), depth_lvl + 1);
                 print_indented!(self, "fun:", depth_lvl + 1);
                 self.print_expr(*fun, depth_lvl + 2);
 
@@ -598,6 +599,11 @@ impl<'a, 'tcx> ThirPrinter<'a, 'tcx> {
                 print_indented!(self, "Yield {", depth_lvl);
                 print_indented!(self, "value:", depth_lvl + 1);
                 self.print_expr(*value, depth_lvl + 2);
+                print_indented!(self, "}", depth_lvl);
+            }
+            ExternMod { def_id } => {
+                print_indented!(self, "ExternMod {", depth_lvl);
+                print_indented!(self, format!("def_id: {:?}", def_id), depth_lvl + 1);
                 print_indented!(self, "}", depth_lvl);
             }
         }

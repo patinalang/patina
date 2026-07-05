@@ -378,7 +378,11 @@ fn make_config(
         opts: config::Options {
             edition: Edition::EditionFuture,
             unstable_features: UnstableFeatures::Allow,
-            unstable_opts: config::UnstableOptions { ui_testing: true, ..Default::default() },
+            unstable_opts: config::UnstableOptions {
+                ui_testing: true,
+                no_steal_thir: true,
+                ..Default::default()
+            },
             crate_types: vec![config::CrateType::Rlib],
             cg: config::CodegenOptions { panic: Some(PanicStrategy::Abort), ..Default::default() },
             crate_name: Some(pkg_name.to_string()),

@@ -69,6 +69,8 @@ pub(crate) enum GenericConstantTooComplexSub {
     InlineAsmNotSupported(#[primary_span] Span),
     #[label("unsupported operation in generic constants")]
     OperationNotSupported(#[primary_span] Span),
+    #[label("extern modules are not supported in generic constants")]
+    ExternModNotSupported(#[primary_span] Span),
 }
 
 #[derive(Diagnostic)]

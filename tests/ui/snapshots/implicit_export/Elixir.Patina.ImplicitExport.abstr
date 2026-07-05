@@ -84,5 +84,5 @@
                {remote,
                    {29,5},
                    {atom,{29,5},'Elixir.Patina.ImplicitExport.Bar'},
-                   {atom,{29,10},bar}},
+                   {atom,{29,5},bar}},
                []}]}]}]

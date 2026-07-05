@@ -272,7 +272,7 @@ pub(crate) enum Pattern<'a> {
     /// If P is a record pattern `#Name{Field_1=P_1, ..., Field_k=P_k}`, where each
     /// `Field_i` is an atom or `_`, then Rep(P) =
     /// `{record,ANNO,Name,[{record_field,ANNO,Rep(Field_1),Rep(P_1)}, ..., {record_field,ANNO,Rep(Field_k),Rep(P_k)}]}`.
-    Record(Anno, Symbol, &'a [RecordField<AtomOrVar, Pattern<'a>>]),
+    Record(Anno, RecordName, &'a [RecordField<AtomOrVar, Pattern<'a>>]),
     /// If P is a tuple pattern `{P_1, ..., P_k}`, then Rep(P) =
     /// `{tuple,ANNO,[Rep(P_1), ..., Rep(P_k)]}`.
     Tuple(Anno, &'a [Pattern<'a>]),

@@ -398,6 +398,7 @@ impl<'a, 'tcx> Visitor<'a, 'tcx> for UnsafetyVisitor<'a, 'tcx> {
             | ExprKind::If { .. }
             | ExprKind::InlineAsm { .. }
             | ExprKind::LogicalOp { .. }
+            | ExprKind::ExternMod { .. }
             | ExprKind::Use { .. } => {
                 // We don't need to save the old value and restore it
                 // because all the place expressions can't have more
@@ -415,7 +416,14 @@ impl<'a, 'tcx> Visitor<'a, 'tcx> for UnsafetyVisitor<'a, 'tcx> {
                 self.hir_context = prev_id;
                 return; // don't visit the whole expression
             }
-            ExprKind::Call { fun, ty: _, args: _, from_hir_call: _, fn_span: _ } => {
+            ExprKind::Call {
+                fun,
+                ty: _,
+                args: _,
+                from_hir_call: _,
+                fn_span: _,
+                forced_extern: _,
+            } => {
                 let fn_ty = self.thir[fun].ty;
                 let sig = fn_ty.fn_sig(self.tcx);
                 let (callee_features, safe_target_features): (&[_], _) = match *fn_ty.kind() {

@@ -1014,6 +1014,7 @@ dependencies = [
  "libtest-mimic",
  "num-bigint",
  "num-traits",
+ "rustc_abi",
  "rustc_arena",
  "rustc_ast",
  "rustc_ast_pretty",

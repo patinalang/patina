@@ -27,7 +27,10 @@ impl<'tcx> ModuleNameCollector<'tcx> {
     }
 
     pub fn constructor_name(&self, def_id: DefId) -> Symbol {
-        assert!(matches!(self.tcx.def_kind(def_id), DefKind::Variant | DefKind::Ctor(..)));
+        assert!(matches!(
+            self.tcx.def_kind(def_id),
+            DefKind::Struct | DefKind::Variant | DefKind::Ctor(..)
+        ));
         // This is more of a temporary workaround; a variant/ctor doesn't fit `ErlModuleId`,
         // but at this second it's translated the same way. It likely won't stay that way
         // as we start to properly translate Enum variants, which is why I'm not building

@@ -1,8 +1,0 @@
-error: expression kind not yet implemented: MethodCall(PathSegment { ident: to_days#0, hir_id: HirId(DefId(0:21 ~ NewTypes01[e701]::main).11), res: Err, args: None, infer_args: true }, Expr { hir_id: HirId(DefId(0:21 ~ NewTypes01[e701]::main).12), kind: Path(Resolved(None, Path { span: tests/ui/src/generics/new_types__01.pt:27:20: 27:23 (#0), res: Local(HirId(DefId(0:21 ~ NewTypes01[e701]::main).8)), segments: [PathSegment { ident: age#0, hir_id: HirId(DefId(0:21 ~ NewTypes01[e701]::main).13), res: Local(HirId(DefId(0:21 ~ NewTypes01[e701]::main).8)), args: None, infer_args: true }] })), span: tests/ui/src/generics/new_types__01.pt:27:20: 27:23 (#0) }, [], tests/ui/src/generics/new_types__01.pt:27:24: 27:33 (#0))
-  --> tests/ui/src/generics/new_types__01.pt:27:20
-   |
-LL |     let age_days = age.to_days();
-   |                    ^^^^^^^^^^^^^
-
-error: aborting due to 1 previous error
-

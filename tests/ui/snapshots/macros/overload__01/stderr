@@ -1,8 +1,0 @@
-error: literal kind not yet implemented: Bool(true)
-  --> tests/ui/src/macros/overload__01.pt:26:11
-   |
-LL |     test!(true; or false);
-   |           ^^^^
-
-error: aborting due to 1 previous error
-

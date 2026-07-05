@@ -1,9 +1,9 @@
-error: statement kind not yet implemented: Item(ItemId { owner_id: DefId(0:11 ~ DestructureStructures01[2b06]::main::Foo) })
-  --> tests/ui/src/flow_control/match/destructuring/destructure_structures__01.pt:5:5
+error: THIR expression kind not yet implemented: Match { scrutinee: e11, arms: [a0, a1, a2], match_source: Normal }
+  --> tests/ui/src/flow_control/match/destructuring/destructure_structures__01.pt:13:5
    |
-LL | /     struct Foo {
-LL | |         x: (int, int),
-LL | |         y: int,
+LL | /     match foo {
+LL | |         Foo { x: (1, b), y } => println!("First of x is 1, b = {},  y = {} ", b, y),
+...  |
 LL | |     }
    | |_____^
 

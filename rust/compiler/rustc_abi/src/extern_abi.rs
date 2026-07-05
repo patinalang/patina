@@ -6,6 +6,7 @@ use std::hash::{Hash, Hasher};
 use rustc_data_structures::stable_hasher::{StableHash, StableHashCtxt, StableHasher, StableOrd};
 #[cfg(feature = "nightly")]
 use rustc_macros::{Decodable, Encodable};
+
 #[cfg(feature = "nightly")]
 use crate::AbiFromStrErr;
 

@@ -1,6 +1,6 @@
 use rustc_arena::DroplessArena;
 use rustc_span::source_map::SourceMap;
-use rustc_span::{Ident, Span, Symbol};
+use rustc_span::{ByteSymbol, Ident, Span, Symbol};
 
 use crate::erlang::abstract_format as eaf;
 use crate::num_utils::trim_trailing_zeroes;
@@ -62,6 +62,10 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         eaf::BigUInt(slice)
     }
 
+    pub(crate) fn expr_char(&self, span: impl IntoAnno, value: char) -> eaf::Expr<'arena> {
+        eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::Char(span.into_anno(self.source_map), value))
+    }
+
     pub(crate) fn expr_float(&self, span: impl IntoAnno, value: f64) -> eaf::Expr<'arena> {
         eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::Float(span.into_anno(self.source_map), value))
     }
@@ -78,6 +82,22 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         let value = self.expr_string(anno, s);
         let elem = self.expr_binary_element(anno, value, None, None::<[eaf::Tsl; 0]>);
         self.expr_binary(anno, [elem])
+    }
+
+    /// Binary literal made out of single-byte ints.
+    pub(crate) fn expr_binary_bytes(
+        &self,
+        span: impl IntoAnno,
+        s: ByteSymbol,
+    ) -> eaf::Expr<'arena> {
+        let anno = span.into_anno(self.source_map);
+
+        let elems = s.as_byte_str().iter().map(|&b| {
+            let value = self.expr_int(anno, b as u128);
+            self.expr_binary_element(anno, value, None, None::<[eaf::Tsl; 0]>)
+        });
+
+        self.expr_binary(anno, elems)
     }
 
     pub(crate) fn expr_binary_element(
@@ -135,6 +155,17 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
 
     pub(crate) fn pat_var(&self, span: impl IntoAnno, name: Symbol) -> eaf::Pattern<'arena> {
         eaf::Pattern::Var(span.into_anno(self.source_map), name.into())
+    }
+
+    /// `Lhs = Rhs` pattern.
+    pub(crate) fn pat_match(
+        &self,
+        span: impl IntoAnno,
+        lhs: eaf::Pattern<'arena>,
+        rhs: eaf::Pattern<'arena>,
+    ) -> eaf::Pattern<'arena> {
+        let anno = span.into_anno(self.source_map);
+        eaf::Pattern::Match(anno, self.arena.alloc(lhs), self.arena.alloc(rhs))
     }
 
     pub(crate) fn pat_tuple(
@@ -441,6 +472,29 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
             Some(module) => eaf::RecordName::Extern(module.into(), name.into()),
         };
         eaf::Expr::RecordUpdate(anno, base, record_name, fields)
+    }
+
+    pub(crate) fn pat_record(
+        &self,
+        span: impl IntoAnno,
+        module: Option<Symbol>,
+        name: Symbol,
+        fields: impl IntoIterator<Item = (Ident, eaf::Pattern<'arena>)>,
+    ) -> eaf::Pattern<'arena> {
+        let anno = span.into_anno(self.source_map);
+
+        let iter = fields.into_iter().map(|(field, value)| {
+            let anno = field.span.into_anno(self.source_map);
+            let key = eaf::AtomOrVar::Atom(anno, field.name.into());
+            eaf::RecordField(anno, key, Some(value))
+        });
+        let fields = self.arena.alloc_from_iter(iter);
+
+        let record_name = match module {
+            None => eaf::RecordName::Local(name.into()),
+            Some(module) => eaf::RecordName::Extern(module.into(), name.into()),
+        };
+        eaf::Pattern::Record(anno, record_name, fields)
     }
 
     pub(crate) fn function(

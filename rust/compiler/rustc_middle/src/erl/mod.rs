@@ -1,9 +1,9 @@
 //! Erlang call resolution and module placement.
 
 use rustc_hir::attrs::AttributeKind;
-use rustc_hir::def::{CtorKind, DefKind, Res};
+use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LocalDefId};
-use rustc_hir::{Attribute, Expr, ExprKind, PrimTy};
+use rustc_hir::{Attribute, HirId, PrimTy};
 
 use crate::ty::{self, AdtKind, GenericArgsRef, Ty, TyCtxt, TypingEnv, Unnormalized, Visibility};
 
@@ -20,20 +20,13 @@ pub enum ErlModuleId {
     Prim(PrimTy),
 }
 
-/// A Rust item together with the instantiation at a particular use site.
-#[derive(Copy, Clone, Debug)]
-pub struct ErlItemInstance<'tcx> {
-    pub def_id: DefId,
-    pub args: GenericArgsRef<'tcx>,
-}
-
-/// The semantic result of resolving a Rust call expression.
+/// The semantic target of an Erlang call.
 #[derive(Copy, Clone, Debug)]
 pub enum ErlCallTarget<'tcx> {
-    /// A free function, inherent method, or statically selected trait method.
-    Item(ErlItemInstance<'tcx>),
-    /// A struct or enum-variant constructor.
-    Constructor { nominal_type: DefId, variant: Option<DefId>, args: GenericArgsRef<'tcx> },
+    /// A free function, inherent method, or trait method.
+    Item { def_id: DefId, args: GenericArgsRef<'tcx> },
+    /// Construction of a struct or enum variant.
+    Constructor { nominal_type: DefId, variant: DefId },
     /// A function named by an `extern mod`.
     Extern { module: DefId, function: DefId },
     /// A function value or genuinely dynamic dispatch.
@@ -109,6 +102,12 @@ impl<'tcx> TyCtxt<'tcx> {
         }
     }
 
+    pub fn is_forced_extern(self, hir_id: HirId) -> bool {
+        self.hir_attrs(hir_id)
+            .iter()
+            .any(|attr| matches!(attr, Attribute::Parsed(AttributeKind::ExternCall(..))))
+    }
+
     /// Returns whether a function must be exported from its generated module.
     ///
     /// All `pub(x)` where `x != self` are always exported.
@@ -129,39 +128,25 @@ impl<'tcx> TyCtxt<'tcx> {
                 && self.assoc_fns_called_externally(()).contains(&def_id))
     }
 
-    /// Resolves and classifies a call without lowering it.
-    /// Wraps `erL_call_kind_from`; but unlike `erl_call_kind_from`,
-    /// checks for the `#[extern_call]` attribute and never returns `LocalOrExtern`.
-    pub fn erl_call_kind(self, call: &Expr<'tcx>) -> Option<ErlCallKind> {
-        let target = self.resolve_erl_call_target(call)?;
-        match self.erl_call_kind_from(call.hir_id.owner.to_def_id(), target) {
-            Some(ErlCallKind::LocalOrExtern) => {
-                let is_forced_extern = self
-                    .hir_attrs(call.hir_id)
-                    .iter()
-                    .any(|attr| matches!(attr, Attribute::Parsed(AttributeKind::ExternCall(..))));
-
-                if is_forced_extern { Some(ErlCallKind::Extern) } else { Some(ErlCallKind::Local) }
-            }
-
-            other => other,
-        }
-    }
-
-    pub fn erl_call_kind_from(
+    /// Classifies a call target identified by `caller` and `target`.
+    pub fn erl_call_kind(
         self,
         caller: DefId,
         target: ErlCallTarget<'tcx>,
+        forced_extern: Option<bool>,
     ) -> Option<ErlCallKind> {
         let callee = self.erl_module_for_target(caller, target)?;
-        let caller = self.erl_definition_module(caller)?;
 
         let kind = match callee {
             ErlModuleResolution::Static(callee) => {
-                if callee != caller {
+                if callee != self.erl_definition_module(caller)? {
                     ErlCallKind::Extern
                 } else if self.erl_call_target_is_exported(target) {
-                    ErlCallKind::LocalOrExtern
+                    match forced_extern {
+                        Some(true) => ErlCallKind::Extern,
+                        Some(false) => ErlCallKind::Local,
+                        None => ErlCallKind::LocalOrExtern,
+                    }
                 } else {
                     ErlCallKind::Local
                 }
@@ -172,95 +157,24 @@ impl<'tcx> TyCtxt<'tcx> {
         Some(kind)
     }
 
-    pub fn resolve_erl_call_target(self, call: &Expr<'tcx>) -> Option<ErlCallTarget<'tcx>> {
-        let typeck = self.typeck(call.hir_id.owner.def_id);
-        let typing_env = self.erl_typing_env(call.hir_id.owner.def_id);
+    /// Classifies a statically resolved callable definition.
+    pub fn erl_call_target_for_def(
+        self,
+        def_id: DefId,
+        args: GenericArgsRef<'tcx>,
+    ) -> ErlCallTarget<'tcx> {
+        match self.def_kind(def_id) {
+            DefKind::Fn | DefKind::AssocFn => ErlCallTarget::Item { def_id, args },
 
-        match call.kind {
-            ExprKind::Call(callee, _) => match callee.kind {
-                ExprKind::Path(ref qpath) => {
-                    let res = typeck.qpath_res(qpath, callee.hir_id);
-                    let args = typeck.node_args(callee.hir_id);
-
-                    match res {
-                        Res::Def(DefKind::Fn | DefKind::AssocFn, def_id) => self
-                            .resolve_erl_item_target_with_env(
-                                ErlItemInstance { def_id, args },
-                                typing_env,
-                            ),
-
-                        Res::Def(DefKind::Ctor(_, CtorKind::Fn), ctor_def_id) => {
-                            let adt = typeck.expr_ty(call).ty_adt_def()?;
-                            let variant = adt.variant_with_ctor_id(ctor_def_id).def_id;
-
-                            Some(ErlCallTarget::Constructor {
-                                nominal_type: adt.did(),
-                                variant: Some(variant),
-                                args,
-                            })
-                        }
-
-                        Res::SelfCtor(_) => {
-                            let adt = typeck.expr_ty(call).ty_adt_def()?;
-                            Some(ErlCallTarget::Constructor {
-                                nominal_type: adt.did(),
-                                variant: Some(adt.non_enum_variant().def_id),
-                                args,
-                            })
-                        }
-
-                        // Patina models a foreign function as the leaf `ExternMod`;
-                        // its parent identifies the named foreign module.
-                        // IOW, in `Elixir::IO::puts` every segment is an `ExternMod`; if we try
-                        // to call it, the target is `Elixir::IO`.
-                        Res::Def(DefKind::ExternMod, function) => {
-                            Some(ErlCallTarget::Extern { module: self.parent(function), function })
-                        }
-
-                        _ => Some(ErlCallTarget::Dynamic),
-                    }
-                }
-
-                // Calling any expression other than a path means calling a value.
-                _ => Some(ErlCallTarget::Dynamic),
-            },
-
-            ExprKind::MethodCall(..) => {
-                let Some(def_id) = typeck.type_dependent_def_id(call.hir_id) else {
-                    return Some(ErlCallTarget::Dynamic);
-                };
-                let args = typeck.node_args(call.hir_id);
-                self.resolve_erl_item_target_with_env(ErlItemInstance { def_id, args }, typing_env)
+            // Patina models a foreign function as the leaf `ExternMod`;
+            // its parent identifies the named foreign module.
+            // IOW, in `Elixir::IO::puts` every segment is an `ExternMod`; if we try
+            // to call it, the target is `Elixir::IO`.
+            DefKind::ExternMod => {
+                ErlCallTarget::Extern { module: self.parent(def_id), function: def_id }
             }
 
-            _ => bug!("resolve_erl_call_target called on a non-call expression"),
-        }
-    }
-
-    pub fn resolve_erl_item_target(
-        self,
-        owner: DefId,
-        item: ErlItemInstance<'tcx>,
-    ) -> Option<ErlCallTarget<'tcx>> {
-        self.resolve_erl_item_target_with_env(item, self.erl_typing_env(owner))
-    }
-
-    fn resolve_erl_item_target_with_env(
-        self,
-        item: ErlItemInstance<'tcx>,
-        typing_env: TypingEnv<'tcx>,
-    ) -> Option<ErlCallTarget<'tcx>> {
-        let instance =
-            ty::Instance::try_resolve(self, typing_env, item.def_id, item.args).ok()??;
-
-        match instance.def {
-            ty::InstanceKind::Item(def_id) => {
-                Some(ErlCallTarget::Item(ErlItemInstance { def_id, args: instance.args }))
-            }
-
-            ty::InstanceKind::Virtual(..) => Some(ErlCallTarget::Dynamic),
-
-            _ => None,
+            kind => bug!("non-callable definition passed as an Erlang call target: {kind:?}"),
         }
     }
 
@@ -271,10 +185,8 @@ impl<'tcx> TyCtxt<'tcx> {
 
     fn erl_call_target_is_exported(self, target: ErlCallTarget<'tcx>) -> bool {
         let def_id = match target {
-            ErlCallTarget::Item(item) => item.def_id,
-            ErlCallTarget::Constructor { nominal_type, variant, .. } => {
-                variant.unwrap_or(nominal_type)
-            }
+            ErlCallTarget::Item { def_id, args: _ } => def_id,
+            ErlCallTarget::Constructor { variant, .. } => variant,
             ErlCallTarget::Extern { .. } | ErlCallTarget::Dynamic => return false,
         };
 
@@ -288,7 +200,9 @@ impl<'tcx> TyCtxt<'tcx> {
     ) -> Option<ErlModuleResolution> {
         let typing_env = self.erl_typing_env(owner);
         match target {
-            ErlCallTarget::Item(item) => self.place_erl_item_instance(item, typing_env),
+            ErlCallTarget::Item { def_id, args } => {
+                self.erl_module_for_target_item(def_id, args, typing_env)
+            }
 
             ErlCallTarget::Constructor { nominal_type, .. } => {
                 Some(ErlModuleResolution::Static(ErlModuleId::Adt(nominal_type)))
@@ -302,37 +216,34 @@ impl<'tcx> TyCtxt<'tcx> {
         }
     }
 
-    fn place_erl_item_instance(
+    fn erl_module_for_target_item(
         self,
-        item: ErlItemInstance<'tcx>,
+        def_id: DefId,
+        args: GenericArgsRef<'tcx>,
         typing_env: TypingEnv<'tcx>,
     ) -> Option<ErlModuleResolution> {
-        match self.def_kind(item.def_id) {
-            DefKind::Fn => Some(ErlModuleResolution::Static(ErlModuleId::Mod(
-                self.lexical_erl_module(item.def_id),
-            ))),
+        match self.def_kind(def_id) {
+            DefKind::Fn => {
+                Some(ErlModuleResolution::Static(ErlModuleId::Mod(self.lexical_erl_module(def_id))))
+            }
 
             DefKind::AssocFn => {
-                let parent = self.parent(item.def_id);
+                let parent = self.parent(def_id);
 
                 match self.def_kind(parent) {
                     DefKind::Impl { .. } => {
                         let self_ty =
-                            self.type_of(parent).instantiate(self, item.args).skip_normalization();
+                            self.type_of(parent).instantiate(self, args).skip_normalization();
                         self.resolve_erl_receiver_module(self_ty, typing_env)
                     }
 
-                    DefKind::Trait => {
-                        // Reaching this arm means method selection did not replace the
-                        // trait item with a concrete implementation.
-                        None
-                    }
+                    DefKind::Trait => self.resolve_erl_receiver_module(args.type_at(0), typing_env),
 
                     _ => bug!("associated function has unexpected parent: {parent:?}"),
                 }
             }
 
-            kind => bug!("non-callable item passed to place_erl_item_instance: {kind:?}"),
+            kind => bug!("non-callable item passed to erl_module_for_target_item: {kind:?}"),
         }
     }
 

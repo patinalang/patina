@@ -2,9 +2,8 @@ use itertools::Itertools;
 use rustc_abi::{FIRST_VARIANT, FieldIdx, Size, VariantIdx};
 use rustc_ast::UnsafeBinderCastKind;
 use rustc_data_structures::stack::ensure_sufficient_stack;
-use rustc_hir as hir;
 use rustc_hir::def::{CtorKind, CtorOf, DefKind, Res};
-use rustc_hir::{LangItem, find_attr};
+use rustc_hir::{self as hir, LangItem, find_attr};
 use rustc_index::Idx;
 use rustc_middle::hir::place::{
     Place as HirPlace, PlaceBase as HirPlaceBase, ProjectionKind as HirProjectionKind,
@@ -321,6 +320,8 @@ impl<'tcx> ThirBuildCx<'tcx> {
         let mk_expr =
             |kind, ty| Expr { temp_scope_id: expr.hir_id.local_id, span: expr.span, ty, kind };
 
+        let forced_extern = tcx.is_forced_extern(expr.hir_id);
+
         let kind = match expr.kind {
             // Here comes the interesting stuff:
             hir::ExprKind::MethodCall(segment, receiver, args, fn_span) => {
@@ -331,12 +332,14 @@ impl<'tcx> ThirBuildCx<'tcx> {
                     .chain(args.iter())
                     .map(|expr| self.mirror_expr(expr))
                     .collect();
+
                 ExprKind::Call {
                     ty: expr.ty,
                     fun: self.thir.exprs.push(expr),
                     args,
                     from_hir_call: true,
                     fn_span,
+                    forced_extern,
                 }
             }
 
@@ -366,6 +369,7 @@ impl<'tcx> ThirBuildCx<'tcx> {
                         args: Box::new([self.mirror_expr(fun), tupled_args]),
                         from_hir_call: true,
                         fn_span: expr.span,
+                        forced_extern,
                     }
                 } else {
                     // Tuple-like ADTs are represented as ExprKind::Call. We convert them here.
@@ -428,6 +432,7 @@ impl<'tcx> ThirBuildCx<'tcx> {
                             args: self.mirror_exprs(args),
                             from_hir_call: true,
                             fn_span: expr.span,
+                            forced_extern,
                         }
                     }
                 }
@@ -811,6 +816,7 @@ impl<'tcx> ThirBuildCx<'tcx> {
                             args,
                             from_hir_call: false,
                             fn_span: expr.span,
+                            forced_extern,
                         }
                     };
 
@@ -1249,10 +1255,7 @@ impl<'tcx> ThirBuildCx<'tcx> {
                 }
             }
 
-            Res::Def(DefKind::ExternMod, _) => {
-                let user_ty = self.user_args_applied_to_res(expr.hir_id, res);
-                ExprKind::ZstLiteral { user_ty }
-            }
+            Res::Def(DefKind::ExternMod, def_id) => ExprKind::ExternMod { def_id },
 
             Res::Local(var_hir_id) => self.convert_var(var_hir_id),
 
@@ -1293,6 +1296,7 @@ impl<'tcx> ThirBuildCx<'tcx> {
             args,
             from_hir_call: false,
             fn_span: expr.span,
+            forced_extern: self.tcx.is_forced_extern(expr.hir_id),
         }
     }
 
@@ -1321,11 +1325,19 @@ impl<'tcx> ThirBuildCx<'tcx> {
         let fun = self.method_callee(expr, span, overloaded_callee);
         let fun = self.thir.exprs.push(fun);
         let fun_ty = self.thir[fun].ty;
+        let forced_extern = self.tcx.is_forced_extern(expr.hir_id);
         let ref_expr = self.thir.exprs.push(Expr {
             temp_scope_id: expr.hir_id.local_id,
             ty: ref_ty,
             span,
-            kind: ExprKind::Call { ty: fun_ty, fun, args, from_hir_call: false, fn_span: span },
+            kind: ExprKind::Call {
+                ty: fun_ty,
+                fun,
+                args,
+                from_hir_call: false,
+                fn_span: span,
+                forced_extern,
+            },
         });
 
         // construct and return a deref wrapper `*foo()`

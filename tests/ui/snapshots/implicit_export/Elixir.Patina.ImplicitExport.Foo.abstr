@@ -120,9 +120,9 @@
  {function,
      {8,5},
      foo,0,
-     [{clause,{8,5},[],[],[{call,{9,9},{atom,{9,15},priv_foo},[]}]}]},
+     [{clause,{8,5},[],[],[{call,{9,9},{atom,{9,9},priv_foo},[]}]}]},
  {function,{11,5},priv_foo,0,[{clause,{11,5},[],[],[{tuple,{11,19},[]}]}]},
  {function,
      {15,5},
      bar,0,
-     [{clause,{15,5},[],[],[{call,{16,9},{atom,{16,14},priv_foo},[]}]}]}]
+     [{clause,{15,5},[],[],[{call,{16,9},{atom,{16,9},priv_foo},[]}]}]}]
