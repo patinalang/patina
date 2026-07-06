@@ -1,8 +1,8 @@
-error: THIR expression kind not yet implemented: Assign { lhs: e3, rhs: e9 }
-  --> tests/ui/src/variable_bindings/declare__01.pt:12:9
+error: variable another_binding is partially initialized
+  --> tests/ui/src/variable_bindings/declare__01.pt:20:37
    |
-LL |         a_binding = x * x;
-   |         ^^^^^^^^^^^^^^^^^
+LL |     println!("another binding: {}", another_binding);
+   |                                     ^^^^^^^^^^^^^^^
 
 error: aborting due to 1 previous error
 

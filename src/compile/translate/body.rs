@@ -4,9 +4,9 @@ use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::LocalDefId;
-use rustc_hir::{BindingMode, ByRef, Lit};
+use rustc_hir::{BindingMode, Lit};
 use rustc_middle::erl::{ErlCallKind, ErlCallTarget, ErlModuleResolution};
-use rustc_middle::mir::{BinOp, UnOp};
+use rustc_middle::mir::{AssignOp, BinOp, UnOp};
 use rustc_middle::span_bug;
 use rustc_middle::thir::{
     self, BlockId, Expr as ThirExpr, ExprId, ExprKind, LocalVarId, Pat as ThirPat, PatKind, StmtId,
@@ -32,8 +32,6 @@ pub(crate) struct Scope {
 pub(crate) struct PatinaVar {
     pub vsn: u32,
     pub erl_name: Symbol,
-    pub ident: Ident,
-    pub is_mut: bool,
 }
 
 impl Scope {
@@ -45,14 +43,14 @@ impl Scope {
         self.vars.get(&id)
     }
 
-    fn add_var(&mut self, id: LocalVarId, is_mut: bool, ident: Ident) -> &PatinaVar {
+    fn add_var(&mut self, id: LocalVarId, _ident: Ident) -> &PatinaVar {
         let vsn = self.next_var_vsn;
         self.next_var_vsn += 1;
 
         // let erl_name = Symbol::intern(&format!("_{}@{}", ident.as_str(), vsn));
         let erl_name = Symbol::intern(&format!("_var_{}", vsn));
 
-        self.vars.entry(id).insert_entry(PatinaVar { vsn, erl_name, ident, is_mut }).into_mut()
+        self.vars.entry(id).insert_entry(PatinaVar { vsn, erl_name }).into_mut()
     }
 }
 
@@ -102,6 +100,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             ExprKind::Closure(closure) => self.translate_closure(expr, closure),
 
             ExprKind::ZstLiteral { .. } => self.translate_zst_literal(expr),
+
+            ExprKind::Assign { lhs, rhs } => self.translate_assign(expr, *lhs, *rhs),
+            ExprKind::AssignOp { op, lhs, rhs } => self.translate_assign_op(expr, *op, *lhs, *rhs),
 
             _ => not_implemented!(self.tcx(), expr.span, "THIR expression kind", expr.kind),
         }
@@ -154,10 +155,12 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     }
 
     fn translate_var_ref(&self, span: Span, id: LocalVarId) -> eaf::Expr<'arena> {
-        let var = self
-            .scope
-            .get_var(id)
-            .unwrap_or_else(|| span_bug!(span, "variable {id:?} not in scope"));
+        let ident = self.tcx().hir_ident(id.0);
+
+        let var = self.scope.get_var(id).unwrap_or_else(|| {
+            // TODO: this should be `report_use_of_uninitialized` from rustc
+            span_fatal!(self.tcx(), span, "variable {} is partially initialized", ident.to_string())
+        });
         self.translator.afb.expr_var(span, var.erl_name)
     }
 
@@ -449,6 +452,59 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         }
     }
 
+    fn translate_assign(
+        &mut self,
+        expr: &ThirExpr<'tcx>,
+        lhs: ExprId,
+        rhs: ExprId,
+    ) -> eaf::Expr<'arena> {
+        let rhs = self.translate_expr(rhs);
+        self.do_translate_assign(expr, lhs, rhs)
+    }
+
+    fn translate_assign_op(
+        &mut self,
+        expr: &ThirExpr<'tcx>,
+        op: AssignOp,
+        lhs: ExprId,
+        rhs: ExprId,
+    ) -> eaf::Expr<'arena> {
+        let rhs = self.translate_binary(expr, op.into(), lhs, rhs);
+        self.do_translate_assign(expr, lhs, rhs)
+    }
+
+    fn do_translate_assign(
+        &mut self,
+        expr: &ThirExpr<'tcx>,
+        lhs: ExprId,
+        rhs: eaf::Expr<'arena>,
+    ) -> eaf::Expr<'arena> {
+        let afb = &self.translator.afb;
+        let lhs = self.resolve_expr(lhs);
+
+        // In Patina, lhs of ExprKind::Assign can only ever be a var
+        let var_id = match &lhs.kind {
+            ExprKind::VarRef { id } => *id,
+
+            ExprKind::UpvarRef { var_hir_id, .. } => {
+                span_fatal!(
+                    self.tcx(),
+                    expr.span,
+                    "cannot assign to variable {} from parent scope",
+                    self.tcx().hir_ident(var_hir_id.0).to_string()
+                )
+            }
+
+            kind => span_bug!(expr.span, "lhs of assign must be a var; got {kind:?}"),
+        };
+
+        let ident = self.tcx().hir_ident(var_id.0);
+        let var_info = self.scope.add_var(var_id, ident);
+
+        let lhs = afb.pat_var(expr.span, var_info.erl_name);
+        self.translator.afb.expr_match(expr.span, lhs, rhs)
+    }
+
     pub(super) fn translate_pattern(&mut self, pat: &ThirPat<'tcx>) -> eaf::Pattern<'arena> {
         match &pat.kind {
             PatKind::Wild => self.translator.afb.pat_var(pat.span, kw::Underscore),
@@ -487,19 +543,14 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         &mut self,
         pat: &ThirPat<'tcx>,
         name: Symbol,
-        mode: BindingMode,
+        _mode: BindingMode,
         var: LocalVarId,
         subpattern: Option<&ThirPat<'tcx>>,
         is_primary: bool,
     ) -> eaf::Pattern<'arena> {
-        let is_mut = match mode {
-            BindingMode(ByRef::No, mutability) => mutability == rustc_hir::Mutability::Mut,
-            _ => not_implemented!(self.tcx(), pat.span, "binding mode", mode),
-        };
-
         let var_info = if is_primary {
             let ident = Ident::new(name, pat.span);
-            self.scope.add_var(var, is_mut, ident)
+            self.scope.add_var(var, ident)
         } else {
             self.scope
                 .get_var(var)

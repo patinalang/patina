@@ -1,8 +1,8 @@
-error: THIR expression kind not yet implemented: AssignOp { op: AddAssign, lhs: e30, rhs: e32 }
-  --> tests/ui/src/variable_bindings/mut__01.pt:11:5
+error: cannot assign to variable mutable_binding from parent scope
+  --> tests/ui/src/variable_bindings/mut__01.pt:22:9
    |
-LL |     mutable_binding += 1;
-   |     ^^^^^^^^^^^^^^^^^^^^
+LL |         mutable_binding += 1;
+   |         ^^^^^^^^^^^^^^^^^^^^
 
 error: aborting due to 1 previous error
 
