@@ -324,6 +324,19 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         eaf::Expr::Match(span.into_anno(self.source_map), pat, self.arena.alloc(rhs))
     }
 
+    pub(crate) fn expr_case(
+        &self,
+        span: impl IntoAnno,
+        expr: eaf::Expr<'arena>,
+        clauses: impl IntoIterator<Item = eaf::Clause<'arena>>,
+    ) -> eaf::Expr<'arena> {
+        eaf::Expr::Case(
+            span.into_anno(self.source_map),
+            self.arena.alloc(expr),
+            self.arena.alloc_from_iter(clauses),
+        )
+    }
+
     /// A block expression `begin ... end` over the given expressions.
     pub(crate) fn expr_block(
         &self,
@@ -345,12 +358,20 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         &self,
         span: impl IntoAnno,
         patterns: impl IntoIterator<Item = eaf::Pattern<'arena>>,
+        guard: Option<eaf::Expr<'arena>>,
         body: eaf::Body<'arena>,
     ) -> eaf::Clause<'arena> {
+        let guards = if let Some(test) = guard {
+            let guard = eaf::Guard(self.arena.alloc_slice(&[test]));
+            eaf::GuardSeq(self.arena.alloc_slice(&[guard]))
+        } else {
+            eaf::GuardSeq(&[])
+        };
+
         eaf::Clause {
             anno: span.into_anno(self.source_map),
             patterns: self.arena.alloc_from_iter(patterns),
-            guards: eaf::GuardSeq(&[]),
+            guards,
             body,
         }
     }

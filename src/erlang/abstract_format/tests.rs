@@ -683,61 +683,6 @@ fn atom_or_var_var() {
 }
 }
 
-/* Guard tests */
-
-eaf_test! {
-fn guard_test_atomic_literal_is_transparent() {
-    let v = GuardTest::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("true")));
-    assert_eq!(to_bytes(&v).unwrap(), term(atom_lit("true")));
-}
-}
-
-eaf_test! {
-fn guard_test_var() {
-    let v = GuardTest::Var(anno(), sym("X"));
-    assert_eq!(to_bytes(&v).unwrap(), term(var_lit("X")));
-}
-}
-
-eaf_test! {
-fn guard_test_nil() {
-    let v = GuardTest::Nil { anno: anno() };
-    let expected = term(tuple(&[atom("nil"), anno_bytes()]));
-    assert_eq!(to_bytes(&v).unwrap(), expected);
-}
-}
-
-eaf_test! {
-fn guard_test_binary_op() {
-    // Rep(Gt) = {op, ANNO, Op, Rep(Gt_1), Rep(Gt_2)}
-    let v = GuardTest::BinaryOp(
-        anno(),
-        BinaryOp::Ge,
-        r!(GuardTest::Var(anno(), sym("X"))),
-        r!(GuardTest::AtomicLiteral(AtomicLiteral::Integer(anno(), big(0)))),
-    );
-    let expected =
-        term(tuple(&[atom("op"), anno_bytes(), atom(">="), var_lit("X"), integer_lit(0)]));
-    assert_eq!(to_bytes(&v).unwrap(), expected);
-}
-}
-
-eaf_test! {
-fn guard_test_unary_op() {
-    // Rep(Gt) = {op, ANNO, Op, Rep(Gt_0)}
-    let v = GuardTest::UnaryOp(anno(), UnaryOp::Not, r!(GuardTest::Var(anno(), sym("X"))));
-    let expected = term(tuple(&[atom("op"), anno_bytes(), atom("not"), var_lit("X")]));
-    assert_eq!(to_bytes(&v).unwrap(), expected);
-}
-}
-
-eaf_test! {
-fn guard_test_parenthesized_is_transparent() {
-    let v = GuardTest::Parenthesized(r!(GuardTest::Var(anno(), sym("X"))));
-    assert_eq!(to_bytes(&v).unwrap(), term(var_lit("X")));
-}
-}
-
 /* AtomicLiteral::String — list of character codes */
 
 eaf_test! {
@@ -815,7 +760,7 @@ fn guard_seq_empty_is_nil_list() {
 eaf_test! {
 fn guard_seq_serializes_as_list_of_guards() {
     // Rep(Gs) = [Rep(G_1), ..., Rep(G_k)]
-    let v = GuardSeq(svec![Guard(svec![GuardTest::Var(anno(), sym("X"))])]);
+    let v = GuardSeq(svec![Guard(svec![Expr::Var(anno(), sym("X"))])]);
     let expected = term(list(&[list(&[var_lit("X")])]));
     assert_eq!(to_bytes(&v).unwrap(), expected);
 }
@@ -824,7 +769,7 @@ fn guard_seq_serializes_as_list_of_guards() {
 eaf_test! {
 fn guard_serializes_as_list_of_guard_tests() {
     // Rep(G) = [Rep(Gt_1), ..., Rep(Gt_k)]
-    let v = Guard(svec![GuardTest::Var(anno(), sym("X")), GuardTest::Var(anno(), sym("Y"))]);
+    let v = Guard(svec![Expr::Var(anno(), sym("X")), Expr::Var(anno(), sym("Y"))]);
     let expected = term(list(&[var_lit("X"), var_lit("Y")]));
     assert_eq!(to_bytes(&v).unwrap(), expected);
 }
@@ -1545,15 +1490,15 @@ fn generator_m_generate_strict() {
 }
 }
 
-/* GuardTest variants — remaining */
+/* Guard expression variants — remaining */
 
 eaf_test! {
 fn guard_test_cons() {
     // Rep(Gt) = {cons, ANNO, Rep(Gt_h), Rep(Gt_t)}
-    let v = GuardTest::Cons(
+    let v = Expr::Cons(
         anno(),
-        r!(GuardTest::Var(anno(), sym("H"))),
-        r!(GuardTest::Nil { anno: anno() }),
+        r!(Expr::Var(anno(), sym("H"))),
+        r!(Expr::Nil { anno: anno() }),
     );
     let expected = term(tuple(&[
         atom("cons"),
@@ -1569,7 +1514,7 @@ eaf_test! {
 fn guard_test_tuple() {
     // Rep(Gt) = {tuple, ANNO, [Rep(Gt_1), ..., Rep(Gt_k)]}
     let v =
-        GuardTest::Tuple(anno(), slice![GuardTest::Var(anno(), sym("X")), GuardTest::Var(anno(), sym("Y"))]);
+        Expr::Tuple(anno(), slice![Expr::Var(anno(), sym("X")), Expr::Var(anno(), sym("Y"))]);
     let expected = term(tuple(&[atom("tuple"), anno_bytes(), list(&[var_lit("X"), var_lit("Y")])]));
     assert_eq!(to_bytes(&v).unwrap(), expected);
 }
@@ -1579,7 +1524,11 @@ eaf_test! {
 fn guard_test_local_call() {
     // Rep(Gt) = {call, ANNO, Rep(A), [Rep(Gt_1), ..., Rep(Gt_k)]}
     let v =
-        GuardTest::LocalCall(anno(), Atom(anno(), sym("is_atom")), svec![GuardTest::Var(anno(), sym("X"))]);
+        Expr::LocalCall(
+            anno(),
+            r!(Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("is_atom")))),
+            svec![Expr::Var(anno(), sym("X"))],
+        );
     let expected = term(tuple(&[
         atom("call"),
         anno_bytes(),
@@ -1593,10 +1542,14 @@ fn guard_test_local_call() {
 eaf_test! {
 fn guard_test_remote_call() {
     // Rep(Gt) = {call, ANNO, {remote, ANNO, Rep(A_m), Rep(A)}, [args]}
-    let v = GuardTest::RemoteCall(
+    let v = Expr::RemoteCall(
         anno(),
-        Remote(anno(), r!(Atom(anno(), sym("erlang"))), r!(Atom(anno(), sym("is_atom")))),
-        svec![GuardTest::Var(anno(), sym("X"))],
+        Remote(
+            anno(),
+            r!(Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("erlang")))),
+            r!(Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("is_atom")))),
+        ),
+        svec![Expr::Var(anno(), sym("X"))],
     );
     let expected = term(tuple(&[
         atom("call"),
@@ -1616,12 +1569,12 @@ fn guard_test_remote_call() {
 eaf_test! {
 fn guard_test_map_create() {
     // Rep(Gt) = {map, ANNO, [Rep(A_1), ..., Rep(A_k)]}
-    let v = GuardTest::MapCreate(
+    let v = Expr::MapCreate(
         anno(),
         svec![MapFieldAssoc(
             anno(),
-            GuardTest::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k"))),
-            GuardTest::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1))),
+            Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k"))),
+            Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1))),
         )],
     );
     let expected = term(tuple(&[
@@ -1636,13 +1589,13 @@ fn guard_test_map_create() {
 eaf_test! {
 fn guard_test_map_update() {
     // Rep(Gt) = {map, ANNO, Rep(Gt_0), [...]}
-    let v = GuardTest::MapUpdate(
+    let v = Expr::MapUpdate(
         anno(),
-        r!(GuardTest::Var(anno(), sym("M"))),
+        r!(Expr::Var(anno(), sym("M"))),
          svec![MapField::MapFieldAssoc(
             anno(),
-            GuardTest::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k"))),
-            GuardTest::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1))),
+            Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k"))),
+            Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1))),
         )],
     );
     let expected = term(tuple(&[
@@ -1661,10 +1614,10 @@ fn guard_test_record() {
     // NOTE: impl tag is "record" but the snake_case-default of the `Record` variant
     // would also be "record" — but it's NOT renamed and the variant name `Record`
     // snake_cases to "record". OK.
-    let v = GuardTest::Record(
+    let v = Expr::RecordCreate(
         anno(),
-        sym("rec"),
-        svec![RecordField(anno(), AtomOrVar::Atom(anno(), sym("f")), Some(GuardTest::Var(anno(), sym("X"))))],
+        RecordName::Local(sym("rec")),
+        svec![RecordField(anno(), AtomOrVar::Atom(anno(), sym("f")), Some(Expr::Var(anno(), sym("X"))))],
     );
     let expected = term(tuple(&[
         atom("record"),
@@ -1679,10 +1632,10 @@ fn guard_test_record() {
 eaf_test! {
 fn guard_test_record_field() {
     // Rep(Gt) = {record_field, ANNO, Rep(Gt_0), Name, Rep(Field)}
-    let v = GuardTest::RecordField(
+    let v = Expr::RecordField(
         anno(),
-        r!(GuardTest::Var(anno(), sym("R"))),
-        sym("rec"),
+        r!(Expr::Var(anno(), sym("R"))),
+        RecordName::Local(sym("rec")),
         Atom(anno(), sym("f")),
     );
     let expected = term(tuple(&[
@@ -1698,7 +1651,11 @@ fn guard_test_record_field() {
 
 eaf_test! {
 fn guard_test_record_index() {
-    let v = GuardTest::RecordIndex(anno(), sym("rec"), Atom(anno(), sym("f")));
+    let v = Expr::RecordIndex(
+        anno(),
+        RecordName::Local(sym("rec")),
+        Atom(anno(), sym("f")),
+    );
     let expected = term(tuple(&[
         atom("record_index"),
         anno_bytes(),
@@ -1711,13 +1668,13 @@ fn guard_test_record_index() {
 
 eaf_test! {
 fn guard_test_bin() {
-    let elem = BinElement::<GuardTest> {
+    let elem = BinElement::<Expr> {
         anno: anno(),
-        value: GuardTest::Var(anno(), sym("X")),
+        value: Expr::Var(anno(), sym("X")),
         size: BinElemSize::Default,
         tsl: BinElemTsl::Default,
     };
-    let v = GuardTest::Bin(anno(), svec![elem]);
+    let v = Expr::Bin(anno(), svec![elem]);
     let expected = term(tuple(&[
         atom("bin"),
         anno_bytes(),
@@ -2204,13 +2161,13 @@ fn record_field_type_struct() {
 eaf_test! {
 fn guard_test_map_update_with_exact_association() {
     // Doc: each A_i is `Gt_i_1 => Gt_i_2` or `Gt_i_1 := Gt_i_2`.
-    let v = GuardTest::MapUpdate(
+    let v = Expr::MapUpdate(
         anno(),
-        r!(GuardTest::Var(anno(), sym("M"))),
+        r!(Expr::Var(anno(), sym("M"))),
          svec![MapField::MapFieldExact(
             anno(),
-            GuardTest::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k"))),
-            GuardTest::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1))),
+            Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k"))),
+            Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1))),
         )],
     );
     let expected = term(tuple(&[
@@ -2728,7 +2685,7 @@ fn typed_record_field_struct_with_default() {
 eaf_test! {
 fn expr_var() {
     // Rep(E) = {var, ANNO, A} — third element is a bare atom, NOT a {atom, ANNO, _}
-    // wrapper. Matches Pattern::Var / GuardTest::Var / Type::Var.
+    // wrapper. Matches Pattern::Var / Type::Var.
     let v = Expr::Var(anno(), sym("X"));
     assert_eq!(to_bytes(&v).unwrap(), term(var_lit("X")));
 }

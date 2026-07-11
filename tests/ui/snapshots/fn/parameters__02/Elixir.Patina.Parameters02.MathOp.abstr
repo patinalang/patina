@@ -1,0 +1,7 @@
+[{attribute,{16,1},file,{"tests/ui/src/fn/parameters__02.pt",16}},
+ {attribute,{16,1},module,'Elixir.Patina.Parameters02.MathOp'},
+ {attribute,{16,1},compile,[no_auto_import]},
+ {attribute,{16,1},export_record,['Add','Mul']},
+ {attribute,{16,1},export,[]},
+ {attribute,{16,1},native_record,{'Add',[]}},
+ {attribute,{16,1},native_record,{'Mul',[]}}]

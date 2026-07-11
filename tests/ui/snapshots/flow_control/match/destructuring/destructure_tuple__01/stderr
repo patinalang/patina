@@ -1,13 +1,8 @@
-error: THIR expression kind not yet implemented: Match { scrutinee: e34, arms: [a0, a1, a2, a3, a4], match_source: Normal }
-  --> tests/ui/src/flow_control/match/destructuring/destructure_tuple__01.pt:10:5
+error: THIR pattern kind not yet implemented: Constant { value: Value { ty: int, valtree: Leaf(0x00000000000000000000000000000000) } }
+  --> tests/ui/src/flow_control/match/destructuring/destructure_tuple__01.pt:12:10
    |
-LL | /     match triple {
-LL | |         // Destructure the second and third elements
-LL | |         (0, y, z) => println!("First is `0`, `y` is {:?}, and `z` is {:?}", y, z),
-LL | |         (1, ..)  => println!("First is `1` and the rest doesn't matter"),
-...  |
-LL | |     }
-   | |_____^
+LL |         (0, y, z) => println!("First is `0`, `y` is {:?}, and `z` is {:?}", y, z),
+   |          ^
 
 error: aborting due to 1 previous error
 

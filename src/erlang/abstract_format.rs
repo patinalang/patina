@@ -717,77 +717,7 @@ pub(crate) struct GuardSeq<'a>(pub &'a [Guard<'a>]);
 /// A guard G is a non-empty sequence of guard tests `Gt_1, ..., Gt_k`, and Rep(G) =
 /// `[Rep(Gt_1), ..., Rep(Gt_k)]`.
 #[derive(serde::Serialize, Debug, Clone, Copy)]
-pub(crate) struct Guard<'a>(pub &'a [GuardTest<'a>]);
-
-/// A guard test Gt is one of the following.
-/// Notice that every guard test has the same source form as some expression, and is
-/// represented in the same way as the corresponding expression.
-#[derive(serde::Serialize, Debug, Clone, Copy)]
-#[serde(rename_all = "snake_case")]
-pub(crate) enum GuardTest<'a> {
-    /// If Gt is an atomic literal `L`, then Rep(Gt) = Rep(L).
-    AtomicLiteral(AtomicLiteral<'a>),
-    /// If Gt is a bitstring constructor
-    /// `<<Gt_1:Size_1/TSL_1, ..., Gt_k:Size_k/TSL_k>>`, where each `Size_i` is a
-    /// guard test and each `TSL_i` is a type specificer list, then Rep(Gt) =
-    /// `{bin,ANNO,[{bin_element,ANNO,Rep(Gt_1),Rep(Size_1),Rep(TSL_1)}, ..., {bin_element,ANNO,Rep(Gt_k),Rep(Size_k),Rep(TSL_k)}]}`.
-    /// For Rep(TSL), see above. An omitted `Size_i` is represented by `default`. An
-    /// omitted `TSL_i` is represented by `default`.
-    Bin(Anno, &'a [BinElement<'a, GuardTest<'a>>]),
-    /// If Gt is a cons skeleton `[Gt_h | Gt_t]`, then Rep(Gt) =
-    /// `{cons,ANNO,Rep(Gt_h),Rep(Gt_t)}`.
-    Cons(Anno, &'a GuardTest<'a>, &'a GuardTest<'a>),
-    /// If Gt is a function call `A(Gt_1, ..., Gt_k)`, where `A` is an atom, then
-    /// Rep(Gt) = `{call,ANNO,Rep(A),[Rep(Gt_1), ..., Rep(Gt_k)]}`.
-    #[serde(rename = "call")]
-    LocalCall(Anno, Atom, &'a [GuardTest<'a>]),
-    /// If Gt is a function call `A_m:A(Gt_1, ..., Gt_k)`, where `A_m` is the atom
-    /// `erlang` and `A` is an atom or an operator, then Rep(Gt) =
-    /// `{call,ANNO,{remote,ANNO,Rep(A_m),Rep(A)},[Rep(Gt_1), ..., Rep(Gt_k)]}`.
-    #[serde(rename = "call")]
-    RemoteCall(Anno, Remote<'a, Atom>, &'a [GuardTest<'a>]),
-    /// If Gt is a map creation `#{A_1, ..., A_k}`, where each `A_i` is an association
-    /// `Gt_i_1 => Gt_i_2`, then Rep(Gt) = `{map,ANNO,[Rep(A_1), ..., Rep(A_k)]}`. For
-    /// Rep(A), see above.
-    #[serde(rename = "map")]
-    MapCreate(Anno, &'a [MapFieldAssoc<GuardTest<'a>, GuardTest<'a>>]),
-    /// If Gt is a map update `Gt_0#{A_1, ..., A_k}`, where each `A_i` is an
-    /// association `Gt_i_1 => Gt_i_2` or `Gt_i_1 := Gt_i_2`, then Rep(Gt) =
-    /// `{map,ANNO,Rep(Gt_0),[Rep(A_1), ..., Rep(A_k)]}`. For Rep(A), see above.
-    #[serde(rename = "map")]
-    MapUpdate(Anno, &'a GuardTest<'a>, &'a [MapField<GuardTest<'a>, GuardTest<'a>>]),
-    /// If Gt is nil, `[]`, then Rep(Gt) = `{nil,ANNO}`.
-    #[rustfmt::skip]
-    Nil{ anno: Anno },
-    /// If Gt is an operator guard test `Gt_1 Op Gt_2`, where `Op` is a binary
-    /// operator other than match operator `=`, then Rep(Gt) =
-    /// `{op,ANNO,Op,Rep(Gt_1),Rep(Gt_2)}`.
-    #[serde(rename = "op")]
-    BinaryOp(Anno, BinaryOp, &'a GuardTest<'a>, &'a GuardTest<'a>),
-    /// If Gt is an operator guard test `Op Gt_0`, where `Op` is a unary operator,
-    /// then Rep(Gt) = `{op,ANNO,Op,Rep(Gt_0)}`.
-    #[serde(rename = "op")]
-    UnaryOp(Anno, UnaryOp, &'a GuardTest<'a>),
-    /// If Gt is a parenthesized guard test `( Gt_0 )`, then Rep(Gt) = `Rep(Gt_0)`,
-    /// that is, parenthesized guard tests cannot be distinguished from their bodies.
-    Parenthesized(&'a GuardTest<'a>),
-    /// If Gt is a record creation `#Name{Field_1=Gt_1, ..., Field_k=Gt_k}`, where
-    /// each `Field_i` is an atom or `_`, then Rep(Gt) =
-    /// `{record,ANNO,Name,[{record_field,ANNO,Rep(Field_1),Rep(Gt_1)}, ..., {record_field,ANNO,Rep(Field_k),Rep(Gt_k)}]}`.
-    Record(Anno, Symbol, &'a [RecordField<AtomOrVar, GuardTest<'a>>]),
-    /// If Gt is a record field access `Gt_0#Name.Field`, where `Field` is an atom,
-    /// then Rep(Gt) = `{record_field,ANNO,Rep(Gt_0),Name,Rep(Field)}`.
-    RecordField(Anno, &'a GuardTest<'a>, Symbol, Atom),
-    /// If Gt is a record field index `#Name.Field`, where `Field` is an atom, then
-    /// Rep(Gt) = `{record_index,ANNO,Name,Rep(Field)}`.
-    RecordIndex(Anno, Symbol, Atom),
-    /// If Gt is a tuple skeleton `{Gt_1, ..., Gt_k}`, then Rep(Gt) =
-    /// `{tuple,ANNO,[Rep(Gt_1), ..., Rep(Gt_k)]}`.
-    Tuple(Anno, &'a [GuardTest<'a>]),
-    /// If Gt is a variable pattern `V`, then Rep(Gt) = `{var,ANNO,A}`, where A is an
-    /// atom with a printname consisting of the same characters as `V`.
-    Var(Anno, Symbol),
-}
+pub(crate) struct Guard<'a>(pub &'a [Expr<'a>]);
 
 /* Types */
 

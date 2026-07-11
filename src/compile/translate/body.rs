@@ -104,6 +104,8 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             ExprKind::Assign { lhs, rhs } => self.translate_assign(expr, *lhs, *rhs),
             ExprKind::AssignOp { op, lhs, rhs } => self.translate_assign_op(expr, *op, *lhs, *rhs),
 
+            ExprKind::Match { scrutinee, arms, .. } => self.translate_match(expr, *scrutinee, arms),
+
             _ => not_implemented!(self.tcx(), expr.span, "THIR expression kind", expr.kind),
         }
     }
@@ -421,7 +423,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
         let afb = &self.translator.afb;
         let clause_body = afb.clause_body(translated.value);
-        let clause = afb.clause(expr.span, translated.params, clause_body);
+        let clause = afb.clause(expr.span, translated.params, None, clause_body);
         afb.expr_fun(expr.span, [clause])
     }
 
@@ -502,7 +504,29 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let var_info = self.scope.add_var(var_id, ident);
 
         let lhs = afb.pat_var(expr.span, var_info.erl_name);
-        self.translator.afb.expr_match(expr.span, lhs, rhs)
+        afb.expr_match(expr.span, lhs, rhs)
+    }
+
+    fn translate_match(
+        &mut self,
+        expr: &ThirExpr<'tcx>,
+        scrutinee: ExprId,
+        arms: &[thir::ArmId],
+    ) -> eaf::Expr<'arena> {
+        let afb = &self.translator.afb;
+
+        let scrutinee = self.translate_expr(scrutinee);
+        let clauses = arms.iter().map(|&arm| self.translate_arm(arm));
+        afb.expr_case(expr.span, scrutinee, clauses)
+    }
+
+    fn translate_arm(&mut self, arm_id: thir::ArmId) -> eaf::Clause<'arena> {
+        let arm = &self.thir[arm_id];
+        let pattern = self.translate_pattern(&arm.pattern);
+        let guard = arm.guard.map(|guard| self.translate_expr(guard));
+        let body = self.translate_expr(arm.body);
+        let body = self.translator.afb.clause_body(body);
+        self.translator.afb.clause(arm.span, [pattern], guard, body)
     }
 
     pub(super) fn translate_pattern(&mut self, pat: &ThirPat<'tcx>) -> eaf::Pattern<'arena> {
