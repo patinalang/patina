@@ -104,6 +104,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             ExprKind::Assign { lhs, rhs } => self.translate_assign(expr, *lhs, *rhs),
             ExprKind::AssignOp { op, lhs, rhs } => self.translate_assign_op(expr, *op, *lhs, *rhs),
 
+            ExprKind::If { if_then_scope: _, cond, then, else_opt } => {
+                self.translate_if(expr, *cond, *then, *else_opt)
+            }
             ExprKind::Match { scrutinee, arms, .. } => self.translate_match(expr, *scrutinee, arms),
 
             _ => not_implemented!(self.tcx(), expr.span, "THIR expression kind", expr.kind),
@@ -422,8 +425,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let translated = self.translator.translate_body(closure.closure_id, self.scope);
 
         let afb = &self.translator.afb;
-        let clause_body = afb.clause_body(translated.value);
-        let clause = afb.clause(expr.span, translated.params, None, clause_body);
+        let clause = afb.clause(expr.span, translated.params, None, translated.value);
         afb.expr_fun(expr.span, [clause])
     }
 
@@ -507,6 +509,32 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         afb.expr_match(expr.span, lhs, rhs)
     }
 
+    fn translate_if(
+        &mut self,
+        expr: &ThirExpr<'tcx>,
+        cond: ExprId,
+        then: ExprId,
+        else_opt: Option<ExprId>,
+    ) -> eaf::Expr<'arena> {
+        let afb = &self.translator.afb;
+
+        let cond = self.translate_expr(cond);
+
+        let then_body = self.translate_expr(then);
+        let then_pat = afb.pat_atom(expr.span, kw::True);
+        let then_clause = afb.clause(expr.span, [then_pat], None, then_body);
+
+        let else_body = if let Some(else_) = else_opt {
+            self.translate_expr(else_)
+        } else {
+            afb.expr_tuple(expr.span, [])
+        };
+        let else_pat = afb.pat_atom(expr.span, kw::False);
+        let else_clause = afb.clause(expr.span, [else_pat], None, else_body);
+
+        afb.expr_case(expr.span, cond, [then_clause, else_clause])
+    }
+
     fn translate_match(
         &mut self,
         expr: &ThirExpr<'tcx>,
@@ -525,7 +553,6 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let pattern = self.translate_pattern(&arm.pattern);
         let guard = arm.guard.map(|guard| self.translate_expr(guard));
         let body = self.translate_expr(arm.body);
-        let body = self.translator.afb.clause_body(body);
         self.translator.afb.clause(arm.span, [pattern], guard, body)
     }
 

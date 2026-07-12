@@ -347,20 +347,18 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         eaf::Expr::Block(span.into_anno(self.source_map), eaf::Body(exprs))
     }
 
-    pub(crate) fn clause_body(&self, expr: eaf::Expr<'arena>) -> eaf::Body<'arena> {
-        match expr {
-            eaf::Expr::Block(_, body) => body,
-            other => eaf::Body(self.arena.alloc_slice(&[other])),
-        }
-    }
-
     pub(crate) fn clause(
         &self,
         span: impl IntoAnno,
         patterns: impl IntoIterator<Item = eaf::Pattern<'arena>>,
         guard: Option<eaf::Expr<'arena>>,
-        body: eaf::Body<'arena>,
+        body: eaf::Expr<'arena>,
     ) -> eaf::Clause<'arena> {
+        let body = match body {
+            eaf::Expr::Block(_, body) => body,
+            other => eaf::Body(self.arena.alloc_slice(&[other])),
+        };
+
         let guards = if let Some(test) = guard {
             let guard = eaf::Guard(self.arena.alloc_slice(&[test]));
             eaf::GuardSeq(self.arena.alloc_slice(&[guard]))

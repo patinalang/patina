@@ -1,10 +1,8 @@
-error: THIR expression kind not yet implemented: If { if_then_scope: IfThen[edition2024](47), cond: e11, then: e30, else_opt: None }
-  --> tests/ui/src/flow_control/if_let__03.pt:18:5
+error: THIR expression kind not yet implemented: Let { expr: e9, pat: Pat { ty: Foo, span: tests/ui/src/flow_control/if_let__03.pt:18:12: 18:20 (#0), extra: None, kind: Variant { adt_def: Foo, args: [], variant_index: 0, subpatterns: [] } } }
+  --> tests/ui/src/flow_control/if_let__03.pt:18:8
    |
-LL | /     if let Foo::Bar = a {
-LL | |         println!("a is foobar");
-LL | |     }
-   | |_____^
+LL |     if let Foo::Bar = a {
+   |        ^^^^^^^^^^^^^^^^
 
 error: aborting due to 1 previous error
 

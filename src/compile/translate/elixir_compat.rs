@@ -58,7 +58,7 @@ fn info_functions_clause<'tcx, 'arena>(
     // (functions) ->
     //   ordsets:subtract(lists:sort(module_info(exports)), [{__info__, 1}, {module_info, 0}, {module_info, 1}]).
     let arg = afb.pat_atom(span, sym::functions);
-    afb.clause(span, [arg], None, afb.clause_body(exports))
+    afb.clause(span, [arg], None, exports)
 }
 
 fn info_macros_clause<'tcx, 'arena>(
@@ -68,7 +68,7 @@ fn info_macros_clause<'tcx, 'arena>(
     // (macros) -> []
     let body = afb.expr_nil(span);
     let arg = afb.pat_atom(span, sym::macros);
-    afb.clause(span, [arg], None, afb.clause_body(body))
+    afb.clause(span, [arg], None, body)
 }
 
 fn info_struct_clause<'tcx, 'arena>(
@@ -81,7 +81,7 @@ fn info_struct_clause<'tcx, 'arena>(
         None => {
             let body = afb.expr_atom(span, sym::nil);
             let arg = afb.pat_atom(span, kw::Struct);
-            return afb.clause(span, [arg], None, afb.clause_body(body));
+            return afb.clause(span, [arg], None, body);
         }
     };
 
@@ -108,7 +108,7 @@ fn info_struct_clause<'tcx, 'arena>(
     // (struct) -> [#{field => $field_name, default => nil, required => false}, ...]
     let body = afb.expr_list(span, list_elems);
     let arg = afb.pat_atom(span, kw::Struct);
-    afb.clause(span, [arg], None, afb.clause_body(body))
+    afb.clause(span, [arg], None, body)
 }
 
 fn info_exports_md5_clause<'tcx, 'arena>(
@@ -155,7 +155,7 @@ fn info_exports_md5_clause<'tcx, 'arena>(
     // (exports_md5) ->
     //     erlang:md5(term_to_binary({lists:sort(module_info(exports)), [], Struct}, [deterministic])).
     let arg = afb.pat_atom(span, sym::exports_md5);
-    afb.clause(span, [arg], None, afb.clause_body(erlang_md5))
+    afb.clause(span, [arg], None, erlang_md5)
 }
 
 fn info_deprecated_clause<'tcx, 'arena>(
@@ -165,7 +165,7 @@ fn info_deprecated_clause<'tcx, 'arena>(
     // (deprecated) -> []
     let body = afb.expr_nil(span);
     let arg = afb.pat_atom(span, sym::deprecated);
-    afb.clause(span, [arg], None, afb.clause_body(body))
+    afb.clause(span, [arg], None, body)
 }
 
 fn info_default_clause<'tcx, 'arena>(
@@ -181,7 +181,7 @@ fn info_default_clause<'tcx, 'arena>(
     );
 
     // (Key) -> module_info(Key)
-    afb.clause(span, [arg], None, afb.clause_body(body))
+    afb.clause(span, [arg], None, body)
 }
 
 pub(super) fn struct0_function<'tcx, 'arena>(
@@ -191,7 +191,7 @@ pub(super) fn struct0_function<'tcx, 'arena>(
     variant_data: VariantData<'tcx>,
 ) -> eaf::ModuleForm<'arena> {
     let base_map = base_struct_map(afb, span, mod_name, variant_data);
-    let clause0 = afb.clause(span, [], None, afb.clause_body(base_map));
+    let clause0 = afb.clause(span, [], None, base_map);
     afb.function(span, sym::__struct__, 0, [clause0])
 }
 
@@ -209,8 +209,7 @@ pub(super) fn struct1_function<'tcx, 'arena>(
         [(afb.expr_var(span, sym::Key), afb.expr_var(span, sym::Value))],
     );
     // fun({Key, Value}, Acc) -> Acc#{Key := Value} end
-    let fun_clause =
-        afb.clause(span, [pair_pat, afb.pat_var(span, sym::Acc)], None, afb.clause_body(update));
+    let fun_clause = afb.clause(span, [pair_pat, afb.pat_var(span, sym::Acc)], None, update);
     let reducer = afb.expr_fun(span, [fun_clause]);
 
     // 'Elixir.Enum':reduce(Fields, '__struct__'(), $reducer)
@@ -225,8 +224,7 @@ pub(super) fn struct1_function<'tcx, 'arena>(
         ],
     );
 
-    let clause =
-        afb.clause(span, [afb.pat_var(span, sym::Fields)], None, afb.clause_body(reduce_call));
+    let clause = afb.clause(span, [afb.pat_var(span, sym::Fields)], None, reduce_call);
     afb.function(span, sym::__struct__, 1, [clause])
 }
 

@@ -1,10 +1,6 @@
-error: THIR expression kind not yet implemented: If { if_then_scope: IfThen[edition2024](17), cond: e7, then: e15, else_opt: None }
-  --> tests/ui/src/flow_control__01.pt:8:5
-   |
-LL | /     if n > 4 {
-LL | |         n = 4;
-LL | |     }
-   | |_____^
+error: erl backend failed: [{"tests/ui/src/flow_control__01.pt",
+         [{{12,22},erl_lint,{unsafe_var,'_var_1',{'case',{8,5}}}}]}]
+       []
 
 error: aborting due to 1 previous error
 

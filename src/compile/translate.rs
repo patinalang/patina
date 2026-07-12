@@ -169,8 +169,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         let mut scope = Scope::new();
         let translated = self.translate_body(owner, &mut scope);
 
-        let clause_body = self.afb.clause_body(translated.value);
-        let clause = self.afb.clause(sig.span, translated.params, None, clause_body);
+        let clause = self.afb.clause(sig.span, translated.params, None, translated.value);
 
         let fn_name = ident.name;
         let fn_arity = sig.decl.inputs.len();
