@@ -1,0 +1,9 @@
+warning: [{"tests/ui/src/flow_control/early_return.pt",
+           [{{20,5},sys_core_fold,{ignored,useless_building}},
+            {{27,5},sys_core_fold,{ignored,useless_building}},
+            {{46,9},sys_core_fold,{ignored,useless_building}},
+            {{63,9},sys_core_fold,{ignored,useless_building}},
+            {{92,9},sys_core_fold,{ignored,useless_building}}]}]
+
+warning: 1 warning emitted
+

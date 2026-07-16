@@ -131,7 +131,8 @@ impl<'a> CompileServer<'a> {
         if parts.first().map(Vec::as_slice) == Some(b"raise") {
             let class = parts.get(1).map_or_else(|| "?".into(), |p| self.part_str(p));
             let reason = parts.get(2).map_or_else(|| "?".into(), |p| self.part_str(p));
-            self.dcx.fatal(format!("compile server raised {class}: {reason}"));
+            let stacktrace = parts.get(3).map_or_else(|| "?".into(), |p| self.part_str(p));
+            self.dcx.fatal(format!("compile server raised {class}: {reason}\n{stacktrace}"));
         }
         parts
     }

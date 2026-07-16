@@ -1,0 +1,7 @@
+-file("tests/ui/src/flow_control/early_return.pt", 6).
+-module('Elixir.Patina.EarlyReturn.Choice').
+-compile([no_auto_import]).
+-export_record(['Stop', 'Continue']).
+-export([]).
+-record #'Stop'{}.
+-record #'Continue'{}.

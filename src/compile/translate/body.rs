@@ -109,6 +109,8 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             }
             ExprKind::Match { scrutinee, arms, .. } => self.translate_match(expr, *scrutinee, arms),
 
+            ExprKind::Return { value } => self.translate_return(expr.span, *value),
+
             _ => not_implemented!(self.tcx(), expr.span, "THIR expression kind", expr.kind),
         }
     }
@@ -331,6 +333,20 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
         let operand = self.translate_expr(arg);
         self.translator.afb.expr_unary_op(expr.span, unary_op, operand)
+    }
+
+    fn translate_return(&mut self, span: Span, value: Option<ExprId>) -> eaf::Expr<'arena> {
+        let value = value
+            .map(|value| self.translate_expr(value))
+            .unwrap_or_else(|| self.translator.afb.expr_tuple(span, []));
+
+        let afb = &self.translator.afb;
+        afb.expr_remote_call(
+            span,
+            afb.expr_atom(span, sym::s_patina_marker),
+            afb.expr_atom(span, kw::Return),
+            [value],
+        )
     }
 
     fn translate_call(

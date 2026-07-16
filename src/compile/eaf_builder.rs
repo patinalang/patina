@@ -1,3 +1,4 @@
+///! Convenience functions for building Erlang Abstract Format (eaf) nodes.
 use rustc_arena::DroplessArena;
 use rustc_span::source_map::SourceMap;
 use rustc_span::{ByteSymbol, Ident, Span, Symbol};

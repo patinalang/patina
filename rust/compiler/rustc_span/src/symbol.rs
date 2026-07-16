@@ -155,6 +155,7 @@ symbols! {
     // nice to have.
     Symbols {
         // tidy-alphabetical-start
+        s_patina_marker: "$patina_marker",
         __info__,
         __struct__,
         Abi,
