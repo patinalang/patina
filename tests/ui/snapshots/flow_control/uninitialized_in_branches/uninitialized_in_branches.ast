@@ -1,0 +1,7 @@
+pub fn initialize_in_one_branch(take_then: bool) -> int {
+    let value;
+
+    if take_then { value = 30; }
+
+    value
+}

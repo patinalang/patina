@@ -22,5 +22,5 @@
 '__info__'(Key) ->
     module_info(Key).
 main() ->
-    _var_0 =
+    _x@0_0 =
         'Elixir.Patina.Enum02.VeryVerboseEnumOfThingsToDoWithNumbers.Add'.

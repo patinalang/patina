@@ -22,23 +22,23 @@
 '__info__'(Key) ->
     module_info(Key).
 main() ->
-    _var_0 = 5,
-    _var_3 =
+    _x@0_0 = 5,
+    _y@3_0 =
         begin
-            _var_1 = _var_0 * _var_0,
-            _var_2 = _var_1 * _var_0,
-            _var_2 + _var_1 + _var_0
+            _x_squared@1_0 = _x@0_0 * _x@0_0,
+            _x_cube@2_0 = _x_squared@1_0 * _x@0_0,
+            _x_cube@2_0 + _x_squared@1_0 + _x@0_0
         end,
-    _var_4 = begin 2 * _var_0 end,
+    _z@4_0 = begin 2 * _x@0_0 end,
     begin
-        io:put_chars([[<<"x is ">>, io_lib:format("~tp", [_var_0])]]),
+        io:put_chars([[<<"x is ">>, io_lib:format("~tp", [_x@0_0])]]),
         io:nl()
     end,
     begin
-        io:put_chars([[<<"y is ">>, io_lib:format("~tp", [_var_3])]]),
+        io:put_chars([[<<"y is ">>, io_lib:format("~tp", [_y@3_0])]]),
         io:nl()
     end,
     begin
-        io:put_chars([[<<"z is ">>, io_lib:format("~tp", [_var_4])]]),
+        io:put_chars([[<<"z is ">>, io_lib:format("~tp", [_z@4_0])]]),
         io:nl()
     end.

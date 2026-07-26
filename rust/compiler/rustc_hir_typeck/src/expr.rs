@@ -311,6 +311,10 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         // we don't warn for the diverging expression itself.
         self.write_ty(expr.hir_id, ty);
 
+        if self.diverges.get().is_always() {
+            self.typeck_results.borrow_mut().set_always_diverging_expr(expr.hir_id.local_id);
+        }
+
         // Combine the diverging and has_error flags.
         self.diverges.set(self.diverges.get() | old_diverges);
 

@@ -32,8 +32,8 @@ main() ->
     _ = public_main(),
     _ = 'Elixir.Patina.LocalAndExternCalls.Nested':main(),
     _ = priv_main(),
-    _var_0 = 'Elixir.Patina.LocalAndExternCalls.StructWithNew':new(42),
+    _s@0_0 = 'Elixir.Patina.LocalAndExternCalls.StructWithNew':new(42),
     begin
-        io:put_chars([[io_lib:format("~tp", [map_get(value, _var_0)])]]),
+        io:put_chars([[io_lib:format("~tp", [map_get(value, _s@0_0)])]]),
         io:nl()
     end.

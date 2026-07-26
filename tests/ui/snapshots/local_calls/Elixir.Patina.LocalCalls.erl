@@ -21,15 +21,15 @@
     [];
 '__info__'(Key) ->
     module_info(Key).
-get_age(_var_0) ->
-    map_get('0', _var_0).
+get_age(_age@0_0) ->
+    map_get('0', _age@0_0).
 main() ->
-    _var_0 = 'Elixir.Patina.LocalCalls.Years':new(25),
-    _var_1 = get_age(_var_0),
+    _age@0_0 = 'Elixir.Patina.LocalCalls.Years':new(25),
+    _age_value@1_0 = get_age(_age@0_0),
     begin
         io:put_chars([[<<"Age ">>,
-                       io_lib:format("~tp", [_var_0]),
+                       io_lib:format("~tp", [_age@0_0]),
                        <<" is ">>,
-                       io_lib:format("~tp", [_var_1])]]),
+                       io_lib:format("~tp", [_age_value@1_0])]]),
         io:nl()
     end.

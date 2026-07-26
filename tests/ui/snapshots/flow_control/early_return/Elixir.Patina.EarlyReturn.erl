@@ -30,41 +30,41 @@
     [];
 '__info__'(Key) ->
     module_info(Key).
-mark(_var_0) ->
+mark(_value@0_0) ->
     begin
-        io:put_chars([[io_lib:format("~tp", [_var_0])]]),
+        io:put_chars([[io_lib:format("~tp", [_value@0_0])]]),
         io:nl()
     end,
-    _var_0.
-match_value(_var_0) ->
-    _var_1 =
-        case _var_0 of
+    _value@0_0.
+match_value(_choice@0_0) ->
+    _value@1_0 =
+        case _choice@0_0 of
             'Elixir.Patina.EarlyReturn.Choice.Stop' ->
                 '$patina_marker':return(10);
             'Elixir.Patina.EarlyReturn.Choice.Continue' ->
                 20
         end,
-    _var_1 + 1.
-is_negative(_var_0) ->
-    case _var_0 >= 0 of
+    _value@1_0 + 1.
+is_negative(_x@0_0) ->
+    case _x@0_0 >= 0 of
         true ->
             '$patina_marker':return(false);
         false ->
             {}
     end,
     '$patina_marker':return(true).
-is_negative_implicit(_var_0) ->
-    case _var_0 >= 0 of
+is_negative_implicit(_x@0_0) ->
+    case _x@0_0 >= 0 of
         true ->
             '$patina_marker':return(false);
         false ->
             {}
     end,
     true.
-closure_value(_var_0) ->
-    _var_1 =
+closure_value(_stop@0_0) ->
+    __closure@1_0 =
         fun() ->
-               case _var_0 of
+               case _stop@0_0 of
                    true ->
                        '$patina_marker':return(4);
                    false ->
@@ -73,11 +73,11 @@ closure_value(_var_0) ->
                5
         end,
     10.
-expression_value(_var_0) ->
+expression_value(_stop@0_0) ->
     mark(1)
     +
     begin
-        case _var_0 of
+        case _stop@0_0 of
             true ->
                 '$patina_marker':return(mark(2));
             false ->
@@ -89,10 +89,10 @@ match_stopped() ->
     match_value('Elixir.Patina.EarlyReturn.Choice.Stop').
 match_continued() ->
     match_value('Elixir.Patina.EarlyReturn.Choice.Continue').
-match_scrutinee_value(_var_0) ->
+match_scrutinee_value(_stop@0_0) ->
     case
         begin
-            case _var_0 of
+            case _stop@0_0 of
                 true ->
                     '$patina_marker':return(40);
                 false ->
@@ -106,17 +106,17 @@ match_scrutinee_value(_var_0) ->
         'Elixir.Patina.EarlyReturn.Choice.Continue' ->
             60
     end.
-nested_value(_var_0) ->
-    _var_1 =
+nested_value(_x@0_0) ->
+    _result@1_0 =
         begin
-            case _var_0 =:= 0 of
+            case _x@0_0 =:= 0 of
                 true ->
                     '$patina_marker':return(10);
                 false ->
                     {}
             end,
             begin
-                case _var_0 =:= 1 of
+                case _x@0_0 =:= 1 of
                     true ->
                         '$patina_marker':return(20);
                     false ->
@@ -125,11 +125,11 @@ nested_value(_var_0) ->
                 30
             end
         end,
-    _var_1 + 1.
-if_condition_value(_var_0) ->
+    _result@1_0 + 1.
+if_condition_value(_stop@0_0) ->
     case
         begin
-            case _var_0 of
+            case _stop@0_0 of
                 true ->
                     '$patina_marker':return(10);
                 false ->

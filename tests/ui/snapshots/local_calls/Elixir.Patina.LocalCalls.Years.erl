@@ -29,5 +29,5 @@
                          fun({Key, Value}, Acc) ->
                                 Acc#{Key := Value}
                          end).
-new(_var_0) ->
-    ('__struct__'())#{'0' := _var_0}.
+new(_years@0_0) ->
+    ('__struct__'())#{'0' := _years@0_0}.

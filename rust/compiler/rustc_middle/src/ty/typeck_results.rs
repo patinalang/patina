@@ -222,6 +222,9 @@ pub struct TypeckResults<'tcx> {
 
     /// Container types and field indices of `offset_of!` expressions
     offset_of_data: ItemLocalMap<Vec<(Ty<'tcx>, VariantIdx, FieldIdx)>>,
+
+    /// Set of expressions that are known to always diverge.
+    always_diverging_exprs: ItemLocalSet,
 }
 
 impl<'tcx> TypeckResults<'tcx> {
@@ -253,6 +256,7 @@ impl<'tcx> TypeckResults<'tcx> {
             closure_size_eval: Default::default(),
             transmutes_to_check: Default::default(),
             offset_of_data: Default::default(),
+            always_diverging_exprs: Default::default(),
         }
     }
 
@@ -566,6 +570,15 @@ impl<'tcx> TypeckResults<'tcx> {
         &mut self,
     ) -> LocalTableInContextMut<'_, Vec<(Ty<'tcx>, VariantIdx, FieldIdx)>> {
         LocalTableInContextMut { hir_owner: self.hir_owner, data: &mut self.offset_of_data }
+    }
+
+    pub fn set_always_diverging_expr(&mut self, id: ItemLocalId) {
+        self.always_diverging_exprs.insert(id);
+    }
+
+    pub fn is_always_diverging_expr(&self, hir_id: HirId) -> bool {
+        validate_hir_id_for_typeck_results(self.hir_owner, hir_id);
+        self.always_diverging_exprs.contains(&hir_id.local_id)
     }
 }
 

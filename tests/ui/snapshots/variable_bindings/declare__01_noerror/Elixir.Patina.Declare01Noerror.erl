@@ -23,17 +23,17 @@
     module_info(Key).
 main() ->
     begin
-        _var_0 = 2,
-        _var_1 = _var_0 * _var_0
+        _x@1_0 = 2,
+        _a_binding@0_1 = _x@1_0 * _x@1_0
     end,
     begin
         io:put_chars([[<<"a binding: ">>,
-                       io_lib:format("~tp", [_var_1])]]),
+                       io_lib:format("~tp", [_a_binding@0_1])]]),
         io:nl()
     end,
-    _var_2 = 1,
+    _another_binding@2_1 = 1,
     begin
         io:put_chars([[<<"another binding: ">>,
-                       io_lib:format("~tp", [_var_2])]]),
+                       io_lib:format("~tp", [_another_binding@2_1])]]),
         io:nl()
     end.

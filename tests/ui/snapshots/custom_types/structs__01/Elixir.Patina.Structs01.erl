@@ -22,70 +22,73 @@
 '__info__'(Key) ->
     module_info(Key).
 main() ->
-    _var_0 = <<"Peter">>,
-    _var_1 = 27,
-    _var_2 =
+    _name@0_0 = <<"Peter">>,
+    _age@1_0 = 27,
+    _peter@2_0 =
         ('Elixir.Patina.Structs01.Person':'__struct__'())#{name :=
-                                                               _var_0,
-                                                           age := _var_1},
+                                                               _name@0_0,
+                                                           age :=
+                                                               _age@1_0},
     begin
-        io:put_chars([[io_lib:format("~tp", [_var_2])]]),
+        io:put_chars([[io_lib:format("~tp", [_peter@2_0])]]),
         io:nl()
     end,
-    _var_3 =
+    _point@3_0 =
         ('Elixir.Patina.Structs01.Point':'__struct__'())#{x := 5.2,
                                                           y := 0.4},
-    _var_4 =
+    _another_point@4_0 =
         ('Elixir.Patina.Structs01.Point':'__struct__'())#{x := 10.3,
                                                           y := 0.2},
     begin
         io:put_chars([[<<"point coordinates: (">>,
-                       io_lib:format("~tp", [map_get(x, _var_3)]),
+                       io_lib:format("~tp", [map_get(x, _point@3_0)]),
                        <<", ">>,
-                       io_lib:format("~tp", [map_get(y, _var_3)]),
+                       io_lib:format("~tp", [map_get(y, _point@3_0)]),
                        <<")">>]]),
         io:nl()
     end,
-    _var_5 = _var_4#{x := 10.3},
+    _bottom_right@5_0 = _another_point@4_0#{x := 10.3},
     begin
         io:put_chars([[<<"second point: (">>,
-                       io_lib:format("~tp", [map_get(x, _var_5)]),
+                       io_lib:format("~tp",
+                                     [map_get(x, _bottom_right@5_0)]),
                        <<", ">>,
-                       io_lib:format("~tp", [map_get(y, _var_5)]),
+                       io_lib:format("~tp",
+                                     [map_get(y, _bottom_right@5_0)]),
                        <<")">>]]),
         io:nl()
     end,
     #{'__struct__' := 'Elixir.Patina.Structs01.Point',
-      x := _var_6,
-      y := _var_7} =
-        _var_3,
-    _var_8 =
+      x := _left_edge@6_0,
+      y := _top_edge@7_0} =
+        _point@3_0,
+    __rectangle@8_0 =
         ('Elixir.Patina.Structs01.Rectangle':'__struct__'())#{top_left :=
                                                                   ('Elixir.Patina.Structs01.Point':'__struct__'())#{x :=
-                                                                                                                       _var_6,
+                                                                                                                       _left_edge@6_0,
                                                                                                                    y :=
-                                                                                                                       _var_7},
+                                                                                                                       _top_edge@7_0},
                                                               bottom_right :=
-                                                                  _var_5},
-    _var_9 = 'Elixir.Patina.Structs01.Unit',
-    _var_10 =
+                                                                  _bottom_right@5_0},
+    __unit@9_0 = 'Elixir.Patina.Structs01.Unit',
+    _pair@10_0 =
         ('Elixir.Patina.Structs01.Pair':'__struct__'())#{'0' := 1,
                                                          '1' := 0.1},
     begin
         io:put_chars([[<<"pair contains ">>,
-                       io_lib:format("~tp", [map_get('0', _var_10)]),
+                       io_lib:format("~tp", [map_get('0', _pair@10_0)]),
                        <<" and ">>,
-                       io_lib:format("~tp", [map_get('1', _var_10)])]]),
+                       io_lib:format("~tp", [map_get('1', _pair@10_0)])]]),
         io:nl()
     end,
     #{'__struct__' := 'Elixir.Patina.Structs01.Pair',
-      '0' := _var_11,
-      '1' := _var_12} =
-        _var_10,
+      '0' := _integer@11_0,
+      '1' := _decimal@12_0} =
+        _pair@10_0,
     begin
         io:put_chars([[<<"pair contains ">>,
-                       io_lib:format("~tp", [_var_11]),
+                       io_lib:format("~tp", [_integer@11_0]),
                        <<" and ">>,
-                       io_lib:format("~tp", [_var_12])]]),
+                       io_lib:format("~tp", [_decimal@12_0])]]),
         io:nl()
     end.

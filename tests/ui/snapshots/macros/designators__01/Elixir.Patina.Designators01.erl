@@ -51,8 +51,8 @@ main() ->
                        <<" = ">>,
                        io_lib:format("~tp",
                                      [begin
-                                          _var_1 = 1,
-                                          _var_1 * _var_1 + 2 * _var_1
+                                          _x@0_1 = 1,
+                                          _x@0_1 * _x@0_1 + 2 * _x@0_1
                                           -
                                           1
                                       end])]]),

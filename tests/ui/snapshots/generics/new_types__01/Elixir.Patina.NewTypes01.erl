@@ -21,20 +21,20 @@
     [];
 '__info__'(Key) ->
     module_info(Key).
-is_adult(_var_0) ->
-    map_get('0', _var_0) >= 18.
+is_adult(_age@0_0) ->
+    map_get('0', _age@0_0) >= 18.
 main() ->
-    _var_0 =
+    _age@0_0 =
         ('Elixir.Patina.NewTypes01.Years':'__struct__'())#{'0' := 25},
-    _var_1 = 'Elixir.Patina.NewTypes01.Years':to_days(_var_0),
+    _age_days@1_0 = 'Elixir.Patina.NewTypes01.Years':to_days(_age@0_0),
     begin
         io:put_chars([[<<"Is an adult? ">>,
-                       io_lib:format("~tp", [is_adult(_var_0)])]]),
+                       io_lib:format("~tp", [is_adult(_age@0_0)])]]),
         io:nl()
     end,
     begin
         io:put_chars([[<<"Is an adult? ">>,
                        io_lib:format("~tp",
-                                     [is_adult('Elixir.Patina.NewTypes01.Days':to_years(_var_1))])]]),
+                                     [is_adult('Elixir.Patina.NewTypes01.Days':to_years(_age_days@1_0))])]]),
         io:nl()
     end.

@@ -24,7 +24,7 @@
 some_fn() ->
     {}.
 main() ->
-    _var_0 = some_fn(),
+    __a@0_0 = some_fn(),
     begin
         io:put_chars([[<<"This function returns and you can see this li"
                          "ne.">>]]),

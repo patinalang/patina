@@ -1024,6 +1024,7 @@ dependencies = [
  "rustc_feature",
  "rustc_hir",
  "rustc_hir_pretty",
+ "rustc_index",
  "rustc_interface",
  "rustc_lexer",
  "rustc_metadata",

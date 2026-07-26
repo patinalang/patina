@@ -17,7 +17,7 @@ use rustc_span::{Ident, Span, Symbol, sym};
 use crate::compile::eaf_builder::EafBuilder;
 use crate::compile::impl_collector::ImplCollector;
 use crate::compile::module_collector::ModuleNameCollector;
-use crate::compile::translate::body::{BodyCx, Scope, TranslatedBody};
+use crate::compile::translate::body::{BodyCx, Scopes, TranslatedBody};
 use crate::erlang::abstract_format as eaf;
 
 #[macro_export]
@@ -54,13 +54,13 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
     pub(super) fn translate_body(
         &self,
         owner: LocalDefId,
-        scope: &mut Scope,
+        scopes: &mut Scopes,
     ) -> TranslatedBody<'arena> {
         let (thir, root) =
             self.tcx.thir_body(owner).unwrap_or_else(|guaranteed| guaranteed.raise_fatal());
 
         let thir = thir.borrow();
-        let mut cx = BodyCx { translator: self, owner, thir: &thir, scope };
+        let mut cx = BodyCx { translator: self, owner, thir: &thir, scopes };
 
         let params = thir
             .params
@@ -166,7 +166,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         }
 
         let owner = self.tcx.hir_body_owner_def_id(body);
-        let mut scope = Scope::new();
+        let mut scope = Scopes::new();
         let translated = self.translate_body(owner, &mut scope);
 
         let clause = self.afb.clause(sig.span, translated.params, None, translated.value);

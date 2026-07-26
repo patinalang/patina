@@ -22,22 +22,22 @@
 '__info__'(Key) ->
     module_info(Key).
 main() ->
-    _var_0 = <<"world">>,
-    _var_1 = 42,
+    _name@0_0 = <<"world">>,
+    _n@1_0 = 42,
     begin
-        io:put_chars([[<<"hello, ">>, _var_0, <<"!">>]]),
+        io:put_chars([[<<"hello, ">>, _name@0_0, <<"!">>]]),
         io:nl()
     end,
     begin
-        io:put_chars([[_var_0,
+        io:put_chars([[_name@0_0,
                        <<" = ">>,
-                       io_lib:format("~tp", [_var_1])]]),
+                       io_lib:format("~tp", [_n@1_0])]]),
         io:nl()
     end,
     begin
-        io:put_chars([[_var_0,
+        io:put_chars([[_name@0_0,
                        <<" and ">>,
-                       io_lib:format("~tp", [_var_1])]]),
+                       io_lib:format("~tp", [_n@1_0])]]),
         io:nl()
     end,
     begin io:put_chars([<<"no ">>]) end,

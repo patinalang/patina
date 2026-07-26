@@ -22,14 +22,15 @@
 '__info__'(Key) ->
     module_info(Key).
 main() ->
-    _var_0 = 5,
-    _var_1 = 2,
+    _nanoseconds@0_0 = 5,
+    _inches@1_0 = 2,
     begin
-        io:put_chars([[io_lib:format("~tp", [_var_0]),
+        io:put_chars([[io_lib:format("~tp", [_nanoseconds@0_0]),
                        <<" nanoseconds + ">>,
-                       io_lib:format("~tp", [_var_1]),
+                       io_lib:format("~tp", [_inches@1_0]),
                        <<" inches = ">>,
-                       io_lib:format("~tp", [_var_0 + _var_1]),
+                       io_lib:format("~tp",
+                                     [_nanoseconds@0_0 + _inches@1_0]),
                        <<" unit?">>]]),
         io:nl()
     end.

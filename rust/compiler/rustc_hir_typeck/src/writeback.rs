@@ -282,6 +282,10 @@ impl<'cx, 'tcx> Visitor<'tcx> for WritebackCx<'cx, 'tcx> {
 
         self.fix_scalar_builtin_expr(e);
         self.fix_index_builtin_expr(e);
+
+        if self.fcx.typeck_results.borrow().is_always_diverging_expr(e.hir_id) {
+            self.typeck_results.set_always_diverging_expr(e.hir_id.local_id);
+        }
     }
 
     fn visit_inline_const(&mut self, anon_const: &hir::ConstBlock) {

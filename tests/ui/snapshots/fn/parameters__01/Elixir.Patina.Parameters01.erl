@@ -21,17 +21,17 @@
     [];
 '__info__'(Key) ->
     module_info(Key).
-call_me_ref(_var_0) ->
-    _var_0(1).
-call_me(_var_0) ->
-    _var_0(2).
-function(_var_0) ->
-    _var_0 + 1.
+call_me_ref(_f@0_0) ->
+    _f@0_0(1).
+call_me(_f@0_0) ->
+    _f@0_0(2).
+function(_x@0_0) ->
+    _x@0_0 + 1.
 main() ->
-    _var_1 =
-        fun(_var_0) ->
-               _var_0 + 42
+    _closure@1_0 =
+        fun(_x@0_0) ->
+               _x@0_0 + 42
         end,
     call_me(fun 'Elixir.Patina.Parameters01':function/1),
-    call_me(_var_1),
+    call_me(_closure@1_0),
     call_me_ref(fun 'Elixir.Patina.Parameters01':function/1).

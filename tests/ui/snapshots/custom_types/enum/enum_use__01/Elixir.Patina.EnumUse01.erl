@@ -22,9 +22,9 @@
 '__info__'(Key) ->
     module_info(Key).
 main() ->
-    _var_0 = 'Elixir.Patina.EnumUse01.Stage.Beginner',
-    _var_1 = 'Elixir.Patina.EnumUse01.Role.Student',
-    case _var_0 of
+    _stage@0_0 = 'Elixir.Patina.EnumUse01.Stage.Beginner',
+    _role@1_0 = 'Elixir.Patina.EnumUse01.Role.Student',
+    case _stage@0_0 of
         'Elixir.Patina.EnumUse01.Stage.Beginner' ->
             io:put_chars([[<<"Beginners are starting their learning jou"
                              "rney!">>]]),
@@ -34,7 +34,7 @@ main() ->
                              "jects...">>]]),
             io:nl()
     end,
-    case _var_1 of
+    case _role@1_0 of
         'Elixir.Patina.EnumUse01.Role.Student' ->
             io:put_chars([[<<"Students are acquiring knowledge!">>]]),
             io:nl();

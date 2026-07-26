@@ -22,24 +22,24 @@
 '__info__'(Key) ->
     module_info(Key).
 main() ->
-    _var_0 = 1,
-    _var_1 = true,
-    _var_2 = {},
-    _var_3 = _var_0,
+    _an_integer@0_0 = 1,
+    _a_boolean@1_0 = true,
+    _unit@2_0 = {},
+    _copied_integer@3_0 = _an_integer@0_0,
     begin
         io:put_chars([[<<"An integer: ">>,
-                       io_lib:format("~tp", [_var_3])]]),
+                       io_lib:format("~tp", [_copied_integer@3_0])]]),
         io:nl()
     end,
     begin
         io:put_chars([[<<"A boolean: ">>,
-                       io_lib:format("~tp", [_var_1])]]),
+                       io_lib:format("~tp", [_a_boolean@1_0])]]),
         io:nl()
     end,
     begin
         io:put_chars([[<<"Meet the unit value: ">>,
-                       io_lib:format("~tp", [_var_2])]]),
+                       io_lib:format("~tp", [_unit@2_0])]]),
         io:nl()
     end,
-    _var_4 = 3,
-    _var_5 = 2.
+    __unused_variable@4_0 = 3,
+    _noisy_unused_variable@5_0 = 2.

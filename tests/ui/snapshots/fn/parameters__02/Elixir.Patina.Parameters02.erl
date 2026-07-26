@@ -21,23 +21,23 @@
     [];
 '__info__'(Key) ->
     module_info(Key).
-lazy_add(_var_0, _var_1) ->
+lazy_add(_fx@0_0, _fy@1_0) ->
     fun() ->
-           _var_0() + _var_1()
+           _fx@0_0() + _fy@1_0()
     end.
-add(_var_0, _var_1) ->
-    _var_0 + _var_1.
-mul(_var_0, _var_1) ->
-    _var_0 * _var_1.
-choose_op(_var_0) ->
-    case _var_0 of
+add(_x@0_0, _y@1_0) ->
+    _x@0_0 + _y@1_0.
+mul(_x@0_0, _y@1_0) ->
+    _x@0_0 * _y@1_0.
+choose_op(_op@0_0) ->
+    case _op@0_0 of
         'Elixir.Patina.Parameters02.MathOp.Add' ->
             fun 'Elixir.Patina.Parameters02':add/2;
         'Elixir.Patina.Parameters02.MathOp.Mul' ->
             fun 'Elixir.Patina.Parameters02':mul/2
     end.
 main() ->
-    _var_0 =
+    _fx@0_0 =
         fun() ->
                begin
                    io:put_chars([[<<"fx evaluated!">>]]),
@@ -45,7 +45,7 @@ main() ->
                end,
                3
         end,
-    _var_1 =
+    _fy@1_0 =
         fun() ->
                begin
                    io:put_chars([[<<"fy evaluated!">>]]),
@@ -53,13 +53,13 @@ main() ->
                end,
                5
         end,
-    _var_2 = lazy_add(_var_0, _var_1),
-    _var_3 = choose_op('Elixir.Patina.Parameters02.MathOp.Add'),
+    _lazy_result@2_0 = lazy_add(_fx@0_0, _fy@1_0),
+    _op@3_0 = choose_op('Elixir.Patina.Parameters02.MathOp.Add'),
     begin
         io:put_chars([[io_lib:format("~tp", [3]),
                        <<" op ">>,
                        io_lib:format("~tp", [5]),
                        <<" = ">>,
-                       io_lib:format("~tp", [_var_3(3, 5)])]]),
+                       io_lib:format("~tp", [_op@3_0(3, 5)])]]),
         io:nl()
     end.

@@ -1,18 +1,19 @@
 use rustc_abi::{FieldIdx, VariantIdx};
 use rustc_ast::LitKind;
-use rustc_data_structures::fx::FxHashMap;
+use rustc_data_structures::fx::FxIndexMap;
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::LocalDefId;
 use rustc_hir::{BindingMode, Lit};
 use rustc_middle::erl::{ErlCallKind, ErlCallTarget, ErlModuleResolution};
 use rustc_middle::mir::{AssignOp, BinOp, UnOp};
-use rustc_middle::span_bug;
 use rustc_middle::thir::{
-    self, BlockId, Expr as ThirExpr, ExprId, ExprKind, LocalVarId, Pat as ThirPat, PatKind, StmtId,
+    self, Arm, BlockId, Expr as ThirExpr, ExprId, ExprKind, LocalVarId, Pat as ThirPat, PatKind,
+    StmtId,
 };
 use rustc_middle::ty::{self, Ty, TyCtxt};
-use rustc_span::{Ident, Span, Symbol, kw, sym};
+use rustc_middle::{bug, span_bug};
+use rustc_span::{Span, Symbol, kw, sym};
 
 use crate::compile::translate::Translator;
 use crate::erlang::abstract_format as eaf;
@@ -23,42 +24,206 @@ pub(crate) struct TranslatedBody<'arena> {
     pub value: eaf::Expr<'arena>,
 }
 
-pub(crate) struct Scope {
-    pub vars: FxHashMap<LocalVarId, PatinaVar>,
-    pub next_var_vsn: u32,
-}
+#[derive(Clone)]
+struct Scope(FxIndexMap<LocalVarId, PatinaVar>);
 
-#[allow(unused)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub(crate) struct PatinaVar {
+    pub name: Symbol,
+    pub var_num: u32,
     pub vsn: u32,
     pub erl_name: Symbol,
+    /// How many scope levels deep are we compared to the var's declaration?
+    /// A depth of 0 means we're at the declaration scope.
+    pub decl_depth: u32,
+    /// How many scope levels deep are we compared to the var's initialization?
+    /// A depth of 0 means we're at the initialization scope.
+    /// `initialization_depth` is always less than or equal to `decl_depth`.
+    /// `None` means the var is uninitialized.
+    pub initialization_depth: Option<u32>,
+}
+
+impl PatinaVar {
+    fn new(name: Symbol, var_num: u32, initialized: bool) -> Self {
+        Self {
+            name,
+            var_num,
+            vsn: 0,
+            erl_name: Self::make_erl_name(name, var_num, 0),
+            decl_depth: 0,
+            initialization_depth: if initialized { Some(0) } else { None },
+        }
+    }
+
+    fn with_bumped_vsn(&self, from_scope_depth: u32) -> Self {
+        Self {
+            vsn: self.vsn + 1,
+            erl_name: Self::make_erl_name(self.name, self.var_num, self.vsn + 1),
+            decl_depth: self.decl_depth + from_scope_depth,
+            initialization_depth: self
+                .initialization_depth
+                .map(|depth| depth + from_scope_depth)
+                .or(Some(0)),
+            ..*self
+        }
+    }
+
+    fn initialized(&self) -> bool {
+        self.initialization_depth.is_some()
+    }
+
+    fn make_erl_name(name: Symbol, var_num: u32, vsn: u32) -> Symbol {
+        Symbol::intern(&format!("_{}@{}_{}", name, var_num, vsn))
+    }
 }
 
 impl Scope {
-    pub(super) fn new() -> Self {
-        Self { vars: FxHashMap::default(), next_var_vsn: 0 }
+    fn new() -> Self {
+        Self(FxIndexMap::default())
     }
 
     fn get_var(&self, id: LocalVarId) -> Option<&PatinaVar> {
-        self.vars.get(&id)
+        self.0.get(&id)
     }
 
-    fn add_var(&mut self, id: LocalVarId, _ident: Ident) -> &PatinaVar {
-        let vsn = self.next_var_vsn;
-        self.next_var_vsn += 1;
-
-        // let erl_name = Symbol::intern(&format!("_{}@{}", ident.as_str(), vsn));
-        let erl_name = Symbol::intern(&format!("_var_{}", vsn));
-
-        self.vars.entry(id).insert_entry(PatinaVar { vsn, erl_name }).into_mut()
+    fn bind_var(&mut self, id: LocalVarId, var: PatinaVar) -> &PatinaVar {
+        self.0.entry(id).insert_entry(var).into_mut()
     }
+}
+
+pub(crate) struct Scopes {
+    scopes: SmallVec<[Scope; 8]>,
+    next_var_num: u32,
+}
+
+impl Scopes {
+    pub(super) fn new() -> Self {
+        let mut scopes = SmallVec::new();
+        scopes.push(Scope::new());
+        Self { scopes, next_var_num: 0 }
+    }
+
+    fn get_var(&self, id: LocalVarId) -> Option<&PatinaVar> {
+        self.scopes.iter().rev().find_map(|scope| scope.get_var(id))
+    }
+
+    fn fresh_var(&mut self, name: Symbol, initialized: bool) -> PatinaVar {
+        let var = PatinaVar::new(name, self.next_var_num, initialized);
+        self.next_var_num += 1;
+        var
+    }
+
+    fn bind_var(&mut self, id: LocalVarId, name: Symbol, initialized: bool) -> &PatinaVar {
+        let var = match self
+            .scopes
+            .iter()
+            .rev()
+            .enumerate()
+            .find_map(|(idx, scope)| scope.get_var(id).map(|var| (idx, var)))
+        {
+            Some(_) if !initialized => bug!("var {:?} is rebound but is not initialized", id),
+            Some((idx, var)) => var.with_bumped_vsn(idx as u32),
+            None => self.fresh_var(name, initialized),
+        };
+
+        self.last_scope_mut().bind_var(id, var)
+    }
+
+    fn push(&mut self) {
+        self.scopes.push(Scope::new());
+    }
+
+    fn pop(&mut self) -> Scope {
+        self.scopes.pop().expect("scopes should never be empty")
+    }
+
+    /// Returns the union of all outer variables that are modified by the branch scopes.
+    /// The map value is the latest version of the variable between all branches.
+    fn modified_outer_vars<'a>(
+        &mut self,
+        branches: impl IntoIterator<Item = (&'a Scope, bool)>,
+    ) -> FxIndexMap<LocalVarId, PatinaVar> {
+        let mut modified_outer_vars = FxIndexMap::default();
+        let mut num_used = FxIndexMap::default();
+        let mut num_non_diverging_branches = 0;
+
+        for (branch, always_diverges) in branches {
+            if !always_diverges {
+                num_non_diverging_branches += 1;
+            }
+
+            for (id, branch_var) in &branch.0 {
+                if branch_var.decl_depth == 0 {
+                    continue;
+                }
+
+                let decl_depth = branch_var.decl_depth - 1;
+                let initialization_depth = match branch_var.initialization_depth {
+                    Some(0) => {
+                        if !always_diverges {
+                            num_used.entry(*id).and_modify(|count| *count += 1).or_insert(1);
+                        }
+                        None
+                    }
+                    Some(depth) => Some(depth - 1),
+                    None => bug!("outer var {:?} is not initialized in branch", id),
+                };
+
+                let branch_var = PatinaVar { decl_depth, initialization_depth, ..*branch_var };
+
+                modified_outer_vars
+                    .entry(*id)
+                    .and_modify(|var: &mut PatinaVar| {
+                        if var.vsn < branch_var.vsn {
+                            *var = branch_var;
+                        }
+                    })
+                    .or_insert(branch_var);
+            }
+        }
+
+        for (id, count) in num_used {
+            if count == num_non_diverging_branches {
+                // Initialized in all non-diverging branches, so it's fully initialized outside of the branches.
+                let var = modified_outer_vars.get_mut(&id).unwrap_or_else(|| {
+                    bug!("variable {id:?} present in num_used but not in modified_outer_vars")
+                });
+                if var.initialization_depth.is_some() {
+                    bug!("variable {id:?} already initialized");
+                }
+                var.initialization_depth = Some(0);
+            }
+        }
+
+        modified_outer_vars
+    }
+
+    /// Merges the scopes of the branches into a single after-branch scope.
+    fn join_branches(&mut self, modified_outer_vars: &FxIndexMap<LocalVarId, PatinaVar>) {
+        for (id, var) in modified_outer_vars {
+            self.last_scope_mut().0.insert(*id, *var);
+        }
+    }
+
+    fn last_scope_mut(&mut self) -> &mut Scope {
+        self.scopes.last_mut().expect("scopes should never be empty")
+    }
+}
+
+struct TranslatedArm<'arena> {
+    span: Span,
+    pattern: eaf::Pattern<'arena>,
+    guard: Option<eaf::Expr<'arena>>,
+    body: eaf::Expr<'arena>,
+    scope: Scope,
+    always_diverges: bool,
 }
 
 pub(super) struct BodyCx<'a, 'tcx, 'arena> {
     pub translator: &'a Translator<'tcx, 'arena>,
     pub owner: LocalDefId,
     pub thir: &'a thir::Thir<'tcx>,
-    pub scope: &'a mut Scope,
+    pub scopes: &'a mut Scopes,
 }
 
 impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
@@ -164,10 +329,20 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     fn translate_var_ref(&self, span: Span, id: LocalVarId) -> eaf::Expr<'arena> {
         let ident = self.tcx().hir_ident(id.0);
 
-        let var = self.scope.get_var(id).unwrap_or_else(|| {
-            // TODO: this should be `report_use_of_uninitialized` from rustc
-            span_fatal!(self.tcx(), span, "variable {} is partially initialized", ident.to_string())
-        });
+        let var = self
+            .scopes
+            .get_var(id)
+            .filter(|var| var.initialization_depth.is_some())
+            .unwrap_or_else(|| {
+                // TODO: this should be `report_use_of_uninitialized` from rustc
+                span_fatal!(
+                    self.tcx(),
+                    span,
+                    "variable {} is partially initialized",
+                    ident.to_string()
+                )
+            });
+
         self.translator.afb.expr_var(span, var.erl_name)
     }
 
@@ -204,6 +379,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     }
 
     fn translate_block(&mut self, id: BlockId) -> eaf::Expr<'arena> {
+        let afb = &self.translator.afb;
         let block = &self.thir[id];
 
         let mut exprs: Vec<eaf::Expr<'arena>> = Vec::new();
@@ -219,10 +395,10 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         }
 
         if exprs.is_empty() {
-            exprs.push(self.translator.afb.expr_tuple(block.span, []));
+            exprs.push(afb.expr_unit(block.span));
         }
 
-        self.translator.afb.expr_block(block.span, exprs)
+        afb.expr_block(block.span, exprs)
     }
 
     fn translate_stmt(&mut self, id: StmtId) -> Option<eaf::Expr<'arena>> {
@@ -236,7 +412,11 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                     not_implemented!(self.tcx(), span, "let-else", else_block);
                 }
 
-                let rhs = self.translate_expr(initializer?);
+                let Some(initializer) = initializer else {
+                    self.declare_vars_from_pattern(pattern);
+                    return None;
+                };
+                let rhs = self.translate_expr(initializer);
                 let lhs = self.translate_pattern(pattern);
                 Some(self.translator.afb.expr_match(span, lhs, rhs))
             }
@@ -304,14 +484,64 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         lhs: ExprId,
         rhs: ExprId,
     ) -> eaf::Expr<'arena> {
-        let operator = match op {
-            rustc_middle::thir::LogicalOp::And => eaf::BinaryOp::Andalso,
-            rustc_middle::thir::LogicalOp::Or => eaf::BinaryOp::Orelse,
-        };
+        let afb = &self.translator.afb;
 
         let left = self.translate_expr(lhs);
-        let right = self.translate_expr(rhs);
-        self.translator.afb.expr_binary_op(expr.span, operator, left, right)
+
+        let (right, right_scope) = self.with_scope(|cx| cx.translate_expr(rhs));
+        let right_always_diverges = self.is_always_diverging_expr(rhs);
+
+        let short_scope = Scope::new();
+
+        let changed_vars = self
+            .scopes
+            .modified_outer_vars([(&right_scope, right_always_diverges), (&short_scope, false)]);
+
+        if changed_vars.is_empty() {
+            self.scopes.join_branches(&changed_vars);
+            let operator = match op {
+                rustc_middle::thir::LogicalOp::And => eaf::BinaryOp::Andalso,
+                rustc_middle::thir::LogicalOp::Or => eaf::BinaryOp::Orelse,
+            };
+            return self.translator.afb.expr_binary_op(expr.span, operator, left, right);
+        }
+
+        let short_expr = match op {
+            rustc_middle::thir::LogicalOp::And => afb.expr_atom(expr.span, kw::False),
+            rustc_middle::thir::LogicalOp::Or => afb.expr_atom(expr.span, kw::True),
+        };
+        let short =
+            self.bind_branch_outer_variables(expr.span, short_expr, &short_scope, &changed_vars);
+
+        let right = self.bind_branch_outer_variables(
+            self.resolve_expr(rhs).span,
+            right,
+            &right_scope,
+            &changed_vars,
+        );
+
+        self.scopes.join_branches(&changed_vars);
+
+        let true_clause = afb.clause(
+            expr.span,
+            [afb.pat_atom(expr.span, kw::True)],
+            None,
+            match op {
+                rustc_middle::thir::LogicalOp::And => right,
+                rustc_middle::thir::LogicalOp::Or => short,
+            },
+        );
+        let false_clause = afb.clause(
+            expr.span,
+            [afb.pat_atom(expr.span, kw::False)],
+            None,
+            match op {
+                rustc_middle::thir::LogicalOp::And => short,
+                rustc_middle::thir::LogicalOp::Or => right,
+            },
+        );
+
+        afb.expr_case(expr.span, left, [true_clause, false_clause])
     }
 
     fn translate_unary(
@@ -336,11 +566,11 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     }
 
     fn translate_return(&mut self, span: Span, value: Option<ExprId>) -> eaf::Expr<'arena> {
-        let value = value
-            .map(|value| self.translate_expr(value))
-            .unwrap_or_else(|| self.translator.afb.expr_tuple(span, []));
-
         let afb = &self.translator.afb;
+
+        let value =
+            value.map(|value| self.translate_expr(value)).unwrap_or_else(|| afb.expr_unit(span));
+
         afb.expr_remote_call(
             span,
             afb.expr_atom(span, sym::s_patina_marker),
@@ -438,7 +668,8 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         expr: &ThirExpr<'tcx>,
         closure: &thir::ClosureExpr<'tcx>,
     ) -> eaf::Expr<'arena> {
-        let translated = self.translator.translate_body(closure.closure_id, self.scope);
+        let translated =
+            self.with_scope(|cx| cx.translator.translate_body(closure.closure_id, cx.scopes)).0;
 
         let afb = &self.translator.afb;
         let clause = afb.clause(expr.span, translated.params, None, translated.value);
@@ -519,7 +750,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         };
 
         let ident = self.tcx().hir_ident(var_id.0);
-        let var_info = self.scope.add_var(var_id, ident);
+        let var_info = self.scopes.bind_var(var_id, ident.name, true);
 
         let lhs = afb.pat_var(expr.span, var_info.erl_name);
         afb.expr_match(expr.span, lhs, rhs)
@@ -532,19 +763,36 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         then: ExprId,
         else_opt: Option<ExprId>,
     ) -> eaf::Expr<'arena> {
-        let afb = &self.translator.afb;
-
         let cond = self.translate_expr(cond);
 
-        let then_body = self.translate_expr(then);
+        let (then_body, then_scope) = self.with_scope(|cx| cx.translate_expr(then));
+        let then_span = self.resolve_expr(then).span;
+        let then_always_diverges = self.is_always_diverging_expr(then);
+
+        let ((else_body, else_span, else_always_diverges), else_scope) =
+            self.with_scope(|cx| match else_opt {
+                Some(else_expr) => (
+                    cx.translate_expr(else_expr),
+                    cx.resolve_expr(else_expr).span,
+                    cx.is_always_diverging_expr(else_expr),
+                ),
+                None => (cx.translator.afb.expr_unit(expr.span), expr.span, false),
+            });
+
+        let changed_vars = self.scopes.modified_outer_vars([
+            (&then_scope, then_always_diverges),
+            (&else_scope, else_always_diverges),
+        ]);
+        let then_body =
+            self.bind_branch_outer_variables(then_span, then_body, &then_scope, &changed_vars);
+        let else_body =
+            self.bind_branch_outer_variables(else_span, else_body, &else_scope, &changed_vars);
+
+        self.scopes.join_branches(&changed_vars);
+
+        let afb = &self.translator.afb;
         let then_pat = afb.pat_atom(expr.span, kw::True);
         let then_clause = afb.clause(expr.span, [then_pat], None, then_body);
-
-        let else_body = if let Some(else_) = else_opt {
-            self.translate_expr(else_)
-        } else {
-            afb.expr_tuple(expr.span, [])
-        };
         let else_pat = afb.pat_atom(expr.span, kw::False);
         let else_clause = afb.clause(expr.span, [else_pat], None, else_body);
 
@@ -558,18 +806,87 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         arms: &[thir::ArmId],
     ) -> eaf::Expr<'arena> {
         let afb = &self.translator.afb;
-
         let scrutinee = self.translate_expr(scrutinee);
-        let clauses = arms.iter().map(|&arm| self.translate_arm(arm));
+
+        let mut translated: SmallVec<[TranslatedArm<'arena>; 4]> =
+            arms.iter().map(|&arm_id| self.translate_arm(arm_id)).collect();
+
+        let changed_vars = self
+            .scopes
+            .modified_outer_vars(translated.iter().map(|arm| (&arm.scope, arm.always_diverges)));
+
+        for arm in &mut translated {
+            arm.body =
+                self.bind_branch_outer_variables(arm.span, arm.body, &arm.scope, &changed_vars);
+        }
+
+        self.scopes.join_branches(&changed_vars);
+
+        let clauses = translated
+            .into_iter()
+            .map(|arm| afb.clause(arm.span, [arm.pattern], arm.guard, arm.body));
         afb.expr_case(expr.span, scrutinee, clauses)
     }
 
-    fn translate_arm(&mut self, arm_id: thir::ArmId) -> eaf::Clause<'arena> {
-        let arm = &self.thir[arm_id];
-        let pattern = self.translate_pattern(&arm.pattern);
-        let guard = arm.guard.map(|guard| self.translate_expr(guard));
-        let body = self.translate_expr(arm.body);
-        self.translator.afb.clause(arm.span, [pattern], guard, body)
+    fn translate_arm(&mut self, arm_id: thir::ArmId) -> TranslatedArm<'arena> {
+        let thir = self.thir;
+        let Arm { span, pattern, guard, body, hir_id: _, scope: _ } = &thir[arm_id];
+        let ((pattern, guard, body, always_diverges), scope) = self.with_scope(|cx| {
+            let pattern = cx.translate_pattern(pattern);
+            let guard = guard.map(|guard| cx.translate_expr(guard));
+            let always_diverges = cx.is_always_diverging_expr(*body);
+            let body = cx.translate_expr(*body);
+            (pattern, guard, body, always_diverges)
+        });
+        TranslatedArm { span: *span, pattern, guard, body, scope, always_diverges }
+    }
+
+    /// Makes sure the latest version of every modified outer variable is bound by the branch.
+    fn bind_branch_outer_variables(
+        &mut self,
+        span: Span,
+        body: eaf::Expr<'arena>,
+        branch_scope: &Scope,
+        changed_vars: &FxIndexMap<LocalVarId, PatinaVar>,
+    ) -> eaf::Expr<'arena> {
+        // All vars are already bound by this branch at the latest version.
+        if changed_vars.iter().all(|(var_id, scope_var)| matches!(branch_scope.get_var(*var_id), Some(branch_var) if branch_var.vsn == scope_var.vsn)) {
+            return body;
+        }
+
+        let afb = &self.translator.afb;
+
+        let result_var = self.scopes.fresh_var(sym::branch_value, true);
+
+        let result_var_pat = afb.pat_var(span, result_var.erl_name);
+        let result_var_expr = afb.expr_var(span, result_var.erl_name);
+        let result_var_match = afb.expr_match(span, result_var_pat, body);
+
+        let exports = changed_vars.iter().flat_map(|(id, export_var)| {
+            let branch_var = branch_scope
+                .get_var(*id)
+                .or_else(|| self.scopes.get_var(*id))
+                .unwrap_or_else(|| span_bug!(span, "variable {id:?} not in scope"));
+
+            if branch_var.vsn < export_var.vsn {
+                let branch_var_expr = if branch_var.initialized() {
+                    afb.expr_var(span, branch_var.erl_name)
+                } else {
+                    afb.expr_unit(span)
+                };
+                let export_var_pat = afb.pat_var(span, export_var.erl_name);
+                Some(afb.expr_match(span, export_var_pat, branch_var_expr))
+            } else {
+                None
+            }
+        });
+
+        afb.expr_block(
+            span,
+            std::iter::once(result_var_match)
+                .chain(exports)
+                .chain(std::iter::once(result_var_expr)),
+        )
     }
 
     pub(super) fn translate_pattern(&mut self, pat: &ThirPat<'tcx>) -> eaf::Pattern<'arena> {
@@ -606,6 +923,44 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         }
     }
 
+    fn declare_vars_from_pattern(&mut self, pat: &ThirPat<'tcx>) {
+        match &pat.kind {
+            PatKind::Binding { var, subpattern, is_primary, .. } => {
+                if *is_primary {
+                    let ident = self.tcx().hir_ident(var.0);
+                    self.scopes.bind_var(*var, ident.name, false);
+                }
+                if let Some(subpattern) = subpattern {
+                    self.declare_vars_from_pattern(subpattern);
+                }
+            }
+            PatKind::Deref { subpattern, .. }
+            | PatKind::DerefPattern { subpattern, .. }
+            | PatKind::Guard { subpattern, .. } => self.declare_vars_from_pattern(subpattern),
+            PatKind::Leaf { subpatterns } | PatKind::Variant { subpatterns, .. } => {
+                for field in subpatterns {
+                    self.declare_vars_from_pattern(&field.pattern);
+                }
+            }
+            PatKind::Slice { prefix, slice, suffix } | PatKind::Array { prefix, slice, suffix } => {
+                for pattern in prefix.iter().chain(slice.as_deref()).chain(suffix.iter()) {
+                    self.declare_vars_from_pattern(pattern);
+                }
+            }
+            PatKind::Or { pats } => {
+                for pattern in pats {
+                    self.declare_vars_from_pattern(pattern);
+                }
+            }
+            PatKind::Missing
+            | PatKind::Wild
+            | PatKind::Constant { .. }
+            | PatKind::Range(_)
+            | PatKind::Never
+            | PatKind::Error(_) => {}
+        }
+    }
+
     fn translate_binding_pattern(
         &mut self,
         pat: &ThirPat<'tcx>,
@@ -616,10 +971,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         is_primary: bool,
     ) -> eaf::Pattern<'arena> {
         let var_info = if is_primary {
-            let ident = Ident::new(name, pat.span);
-            self.scope.add_var(var, ident)
+            self.scopes.bind_var(var, name, true)
         } else {
-            self.scope
+            self.scopes
                 .get_var(var)
                 .unwrap_or_else(|| span_bug!(pat.span, "variable {var:?} not in scope"))
         };
@@ -679,5 +1033,23 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 _ => return expr,
             }
         }
+    }
+
+    fn with_scope<R>(&mut self, f: impl FnOnce(&mut Self) -> R) -> (R, Scope) {
+        self.scopes.push();
+        let result = f(self);
+        let scope = self.scopes.pop();
+        (result, scope)
+    }
+
+    fn is_always_diverging_expr(&self, expr_id: ExprId) -> bool {
+        let ExprKind::Scope { hir_id, .. } = &self.thir[expr_id].kind else {
+            span_bug!(
+                self.thir[expr_id].span,
+                "expected HIR-derived expression to have an outer Scope"
+            );
+        };
+
+        self.tcx().typeck(self.owner).is_always_diverging_expr(*hir_id)
     }
 }

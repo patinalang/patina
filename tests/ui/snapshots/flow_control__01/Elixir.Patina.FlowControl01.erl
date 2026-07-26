@@ -22,14 +22,16 @@
 '__info__'(Key) ->
     module_info(Key).
 main() ->
-    _var_0 = 5,
-    case _var_0 > 4 of
+    _n@0_0 = 5,
+    case _n@0_0 > 4 of
         true ->
-            _var_1 = 4;
+            _n@0_1 = 4;
         false ->
-            {}
+            _branch_value@1_0 = {},
+            _n@0_1 = _n@0_0,
+            _branch_value@1_0
     end,
     begin
-        io:put_chars([[io_lib:format("~tp", [_var_1])]]),
+        io:put_chars([[io_lib:format("~tp", [_n@0_1])]]),
         io:nl()
     end.

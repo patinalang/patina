@@ -22,18 +22,18 @@
 '__info__'(Key) ->
     module_info(Key).
 main() ->
-    _var_0 = 'Elixir.Patina.BasicEnum.BasicEnum.Unit',
-    _var_1 =
+    _x@0_0 = 'Elixir.Patina.BasicEnum.BasicEnum.Unit',
+    _y@1_0 =
         #'Elixir.Patina.BasicEnum.BasicEnum':'Tuple'{'0' = 1,
                                                      '1' = <<"hello">>},
-    _var_2 =
+    _z@2_0 =
         #'Elixir.Patina.BasicEnum.BasicEnum':'Struct'{x = 1,
                                                       y = <<"hello">>},
     begin
-        io:put_chars([[io_lib:format("~tp", [_var_0]),
+        io:put_chars([[io_lib:format("~tp", [_x@0_0]),
                        <<"\n">>,
-                       io_lib:format("~tp", [_var_1]),
+                       io_lib:format("~tp", [_y@1_0]),
                        <<"\n">>,
-                       io_lib:format("~tp", [_var_2])]]),
+                       io_lib:format("~tp", [_z@2_0])]]),
         io:nl()
     end.

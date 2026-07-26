@@ -24,30 +24,30 @@
 main() ->
     begin
         begin
-            _var_0 = 1 + 2,
+            _val@0_0 = 1 + 2,
             begin
                 io:put_chars([[<<"1 + 2">>,
                                <<" = ">>,
-                               io_lib:format("~tp", [_var_0])]]),
+                               io_lib:format("~tp", [_val@0_0])]]),
                 io:nl()
             end
         end,
         begin
             begin
-                _var_1 = 3 + 4,
+                _val@1_0 = 3 + 4,
                 begin
                     io:put_chars([[<<"3 + 4">>,
                                    <<" = ">>,
-                                   io_lib:format("~tp", [_var_1])]]),
+                                   io_lib:format("~tp", [_val@1_0])]]),
                     io:nl()
                 end
             end,
             begin
-                _var_2 = 2 * 3 + 1,
+                _val@2_0 = 2 * 3 + 1,
                 begin
                     io:put_chars([[<<"(2 * 3) + 1">>,
                                    <<" = ">>,
-                                   io_lib:format("~tp", [_var_2])]]),
+                                   io_lib:format("~tp", [_val@2_0])]]),
                     io:nl()
                 end
             end

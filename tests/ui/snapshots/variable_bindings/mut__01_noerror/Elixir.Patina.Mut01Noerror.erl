@@ -22,28 +22,31 @@
 '__info__'(Key) ->
     module_info(Key).
 main() ->
-    _var_0 = 1,
-    _var_1 = 1,
+    __immutable_binding@0_0 = 1,
+    _mutable_binding@1_0 = 1,
     begin
         io:put_chars([[<<"Before mutating the binding: ">>,
-                       io_lib:format("~tp", [_var_1])]]),
+                       io_lib:format("~tp", [_mutable_binding@1_0])]]),
         io:nl()
     end,
-    _var_2 = _var_1 + 1,
+    _mutable_binding@1_1 = _mutable_binding@1_0 + 1,
     begin
         io:put_chars([[<<"After mutating the binding: ">>,
-                       io_lib:format("~tp", [_var_2])]]),
+                       io_lib:format("~tp", [_mutable_binding@1_1])]]),
         io:nl()
     end,
-    _var_3 = _var_0 + 1,
-    _var_6 =
+    __immutable_binding@0_1 = __immutable_binding@0_0 + 1,
+    _my_fun@3_0 =
         fun() ->
-               _var_4 = _var_2,
-               _var_5 = _var_4 + 1,
+               _inner_mutable_binding@2_0 = _mutable_binding@1_1,
+               _inner_mutable_binding@2_1 =
+                   _inner_mutable_binding@2_0 + 1,
                begin
-                   io:put_chars([[io_lib:format("~tp", [_var_5]),
+                   io:put_chars([[io_lib:format("~tp",
+                                                [_inner_mutable_binding@2_1]),
                                   <<" == ">>,
-                                  io_lib:format("~tp", [_var_2]),
+                                  io_lib:format("~tp",
+                                                [_mutable_binding@1_1]),
                                   <<" + 1">>]]),
                    io:nl()
                end

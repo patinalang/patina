@@ -29,9 +29,9 @@
                          fun({Key, Value}, Acc) ->
                                 Acc#{Key := Value}
                          end).
-to_years(_var_0) ->
+to_years(_self@0_0) ->
     ('Elixir.Patina.NewTypes01.Years':'__struct__'())#{'0' :=
                                                            map_get('0',
-                                                                   _var_0)
+                                                                   _self@0_0)
                                                            div
                                                            365}.

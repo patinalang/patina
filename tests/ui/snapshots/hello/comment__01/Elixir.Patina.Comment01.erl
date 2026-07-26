@@ -22,9 +22,9 @@
 '__info__'(Key) ->
     module_info(Key).
 main() ->
-    _var_0 = 5 + 5,
+    _x@0_0 = 5 + 5,
     begin
         io:put_chars([[<<"Is `x` 10 or 100? x = ">>,
-                       io_lib:format("~tp", [_var_0])]]),
+                       io_lib:format("~tp", [_x@0_0])]]),
         io:nl()
     end.

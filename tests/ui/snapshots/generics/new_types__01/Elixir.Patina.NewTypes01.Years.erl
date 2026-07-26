@@ -29,9 +29,9 @@
                          fun({Key, Value}, Acc) ->
                                 Acc#{Key := Value}
                          end).
-to_days(_var_0) ->
+to_days(_self@0_0) ->
     ('Elixir.Patina.NewTypes01.Days':'__struct__'())#{'0' :=
                                                           map_get('0',
-                                                                  _var_0)
+                                                                  _self@0_0)
                                                           *
                                                           365}.

@@ -547,6 +547,7 @@ symbols! {
         bpf_target_feature,
         braced_empty_structs,
         branch,
+        branch_value,
         breakpoint,
         bridge,
         bswap,

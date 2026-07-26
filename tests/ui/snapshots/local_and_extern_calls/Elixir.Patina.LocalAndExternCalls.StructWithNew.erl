@@ -30,11 +30,11 @@
                          fun({Key, Value}, Acc) ->
                                 Acc#{Key := Value}
                          end).
-new(_var_0) ->
-    _ = public_new(_var_0),
-    _ = public_new(_var_0),
-    'Elixir.Patina.LocalAndExternCalls.StructWithNew':public_new(_var_0).
-public_new(_var_0) ->
-    priv_new(_var_0).
-priv_new(_var_0) ->
-    ('__struct__'())#{value := _var_0}.
+new(_value@0_0) ->
+    _ = public_new(_value@0_0),
+    _ = public_new(_value@0_0),
+    'Elixir.Patina.LocalAndExternCalls.StructWithNew':public_new(_value@0_0).
+public_new(_value@0_0) ->
+    priv_new(_value@0_0).
+priv_new(_value@0_0) ->
+    ('__struct__'())#{value := _value@0_0}.

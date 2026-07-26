@@ -1,0 +1,10 @@
+pub fn initialize_in_short_circuit(run_rhs: bool) -> int {
+    let value;
+
+    let _ = run_rhs && {
+        value = 30;
+        true
+    };
+
+    value
+}

@@ -22,7 +22,7 @@
 '__info__'(Key) ->
     module_info(Key).
 main() ->
-    _var_0 = 5,
-    _var_0,
-    _var_0 + 1,
+    _x@0_0 = 5,
+    _x@0_0,
+    _x@0_0 + 1,
     15.

@@ -21,41 +21,42 @@
     [];
 '__info__'(Key) ->
     module_info(Key).
-inspect(_var_0) ->
-    case _var_0 of
+inspect(_event@0_0) ->
+    case _event@0_0 of
         'Elixir.Patina.Enum01.WebEvent.PageLoad' ->
             io:put_chars([[<<"page loaded">>]]),
             io:nl();
         'Elixir.Patina.Enum01.WebEvent.PageUnload' ->
             io:put_chars([[<<"page unloaded">>]]),
             io:nl();
-        #'Elixir.Patina.Enum01.WebEvent':'KeyPress'{'0' = _var_1} ->
+        #'Elixir.Patina.Enum01.WebEvent':'KeyPress'{'0' = _c@1_0} ->
             io:put_chars([[<<"pressed '">>,
-                           io_lib:format("~tp", [_var_1]),
+                           io_lib:format("~tp", [_c@1_0]),
                            <<"'.">>]]),
             io:nl();
-        #'Elixir.Patina.Enum01.WebEvent':'Paste'{'0' = _var_2} ->
-            io:put_chars([[<<"pasted \"">>, _var_2, <<"\".">>]]),
+        #'Elixir.Patina.Enum01.WebEvent':'Paste'{'0' = _s@2_0} ->
+            io:put_chars([[<<"pasted \"">>, _s@2_0, <<"\".">>]]),
             io:nl();
-        #'Elixir.Patina.Enum01.WebEvent':'Click'{x = _var_3, y = _var_4} ->
+        #'Elixir.Patina.Enum01.WebEvent':'Click'{x = _x@3_0, y = _y@4_0} ->
             begin
                 io:put_chars([[<<"clicked at x=">>,
-                               io_lib:format("~tp", [_var_3]),
+                               io_lib:format("~tp", [_x@3_0]),
                                <<", y=">>,
-                               io_lib:format("~tp", [_var_4]),
+                               io_lib:format("~tp", [_y@4_0]),
                                <<".">>]]),
                 io:nl()
             end
     end.
 main() ->
-    _var_0 = #'Elixir.Patina.Enum01.WebEvent':'KeyPress'{'0' = $x},
-    _var_1 =
+    _pressed@0_0 = #'Elixir.Patina.Enum01.WebEvent':'KeyPress'{'0' = $x},
+    _pasted@1_0 =
         #'Elixir.Patina.Enum01.WebEvent':'Paste'{'0' = <<"my text">>},
-    _var_2 = #'Elixir.Patina.Enum01.WebEvent':'Click'{x = 20, y = 80},
-    _var_3 = 'Elixir.Patina.Enum01.WebEvent.PageLoad',
-    _var_4 = 'Elixir.Patina.Enum01.WebEvent.PageUnload',
-    inspect(_var_0),
-    inspect(_var_1),
-    inspect(_var_2),
-    inspect(_var_3),
-    inspect(_var_4).
+    _click@2_0 =
+        #'Elixir.Patina.Enum01.WebEvent':'Click'{x = 20, y = 80},
+    _load@3_0 = 'Elixir.Patina.Enum01.WebEvent.PageLoad',
+    _unload@4_0 = 'Elixir.Patina.Enum01.WebEvent.PageUnload',
+    inspect(_pressed@0_0),
+    inspect(_pasted@1_0),
+    inspect(_click@2_0),
+    inspect(_load@3_0),
+    inspect(_unload@4_0).

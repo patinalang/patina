@@ -22,27 +22,28 @@
 '__info__'(Key) ->
     module_info(Key).
 main() ->
-    _var_0 = 1,
+    _shadowed_binding@0_0 = 1,
     begin
         begin
             io:put_chars([[<<"before being shadowed: ">>,
-                           io_lib:format("~tp", [_var_0])]]),
+                           io_lib:format("~tp", [_shadowed_binding@0_0])]]),
             io:nl()
         end,
-        _var_1 = <<"abc">>,
+        _shadowed_binding@1_0 = <<"abc">>,
         begin
-            io:put_chars([[<<"shadowed in inner block: ">>, _var_1]]),
+            io:put_chars([[<<"shadowed in inner block: ">>,
+                           _shadowed_binding@1_0]]),
             io:nl()
         end
     end,
     begin
         io:put_chars([[<<"outside inner block: ">>,
-                       io_lib:format("~tp", [_var_0])]]),
+                       io_lib:format("~tp", [_shadowed_binding@0_0])]]),
         io:nl()
     end,
-    _var_2 = 2,
+    _shadowed_binding@2_0 = 2,
     begin
         io:put_chars([[<<"shadowed in outer block: ">>,
-                       io_lib:format("~tp", [_var_2])]]),
+                       io_lib:format("~tp", [_shadowed_binding@2_0])]]),
         io:nl()
     end.
