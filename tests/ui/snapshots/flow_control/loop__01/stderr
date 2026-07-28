@@ -1,13 +1,6 @@
-error: THIR expression kind not yet implemented: Loop { body: e107 }
-  --> tests/ui/src/flow_control/loop__01.pt:10:5
-   |
-LL | /     loop {
-LL | |         count += 1;
-LL | |
-LL | |         if count == 3 {
-...  |
-LL | |     }
-   | |_____^
+warning: [{"tests/ui/src/flow_control/loop__01.pt",
+           [{{13,9},sys_core_fold,{ignored,useless_building}},
+            {{22,9},sys_core_fold,{ignored,useless_building}}]}]
 
-error: aborting due to 1 previous error
+warning: 1 warning emitted
 

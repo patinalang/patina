@@ -73,13 +73,20 @@ compile_forms(Forms) ->
             {error, Errors, Warnings}
     end.
 
-rewrite_asm({Module, Exports, Attributes, Meta, Functions0, LabelCount}) ->
+rewrite_asm({Module, Exports0, Attributes, Meta, Functions0, LabelCount}) ->
+    Exports = drop_loop_helper_exports(Exports0),
     Functions = lists:map(fun rewrite_function/1, Functions0),
     {Module, Exports, Attributes, Meta, Functions, LabelCount}.
 
+%% Loop helpers are exported only as an optimizer fence to prevent them from being specialized.
+drop_loop_helper_exports(Exports) ->
+    lists:filter(fun({Name, _Arity}) ->
+        not lists:prefix("$patina_loop_", atom_to_list(Name))
+    end, Exports).
+
 rewrite_function({function, Name, Arity, Entry, Instrs} = Function) ->
-    case lists:any(fun is_return_marker/1, Instrs) of
-        true -> {function, Name, Arity, Entry, rewrite_return_markers(Instrs)};
+    case lists:any(fun is_control_marker/1, Instrs) of
+        true -> {function, Name, Arity, Entry, rewrite_control_markers(Instrs, Entry)};
         false -> Function
     end.
 
@@ -109,11 +116,11 @@ write(Sock, Data) ->
     Bin = iolist_to_binary(io_lib:format("~tp", [Data])),
     write(Sock, Bin).
 
-%% Rewrites '$patina_marker':return markers to real function returns.
+%% Rewrites '$patina_marker' control-flow markers to BEAM control flow.
 %% The instructions have to be unfolded with `beam_a` first.
 %% This function traces state needed for return cleanup (allocation size, try/catch scopes)
 %% and ensures that the return markers are replaced with proper cleanup instructions.
-rewrite_return_markers(Instrs) ->
+rewrite_control_markers(Instrs, FunctionEntry) ->
     map_instrs(
         fun(Instr0, {Frame0, Scopes0, EntryStates0}) ->
             {Frame1, Scopes1} =
@@ -153,15 +160,23 @@ rewrite_return_markers(Instrs) ->
             ),
 
             Instr =
-                case is_return_marker(Instr0) of
-                    true ->
+                case control_marker(Instr0) of
+                    {Marker, Arity} ->
+                        RecursiveCall =
+                            case Marker of
+                                continue -> [{call, Arity, {f, FunctionEntry}}];
+                                _ -> []
+                            end,
+
                         Deallocate =
                             case Frame of
                                 no_frame -> [];
                                 _ -> [{deallocate, Frame}]
                             end,
-                        lists:map(fun scope_end/1, Scopes) ++ Deallocate ++ [return];
-                    false ->
+
+                        lists:map(fun scope_end/1, Scopes) ++ RecursiveCall ++ Deallocate ++ [return];
+
+                    nil ->
                         Instr0
                 end,
 
@@ -171,8 +186,10 @@ rewrite_return_markers(Instrs) ->
         Instrs
     ).
 
-is_return_marker({call_ext, _, {extfunc, '$patina_marker', return, 1}}) -> true;
-is_return_marker(_) -> false.
+is_control_marker(Instr) -> control_marker(Instr) =/= nil.
+
+control_marker({call_ext, _, {extfunc, '$patina_marker', Marker, Arity}}) -> {Marker, Arity};
+control_marker(_) -> nil.
 
 stack_allocations({allocate, Need, _Live}) -> Need;
 stack_allocations({allocate_zero, Need, _Live}) -> Need;

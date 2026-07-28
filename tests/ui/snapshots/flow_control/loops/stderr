@@ -1,0 +1,19 @@
+warning: [{"tests/ui/src/flow_control/loops.pt",
+           [{{8,9},sys_core_fold,{ignored,useless_building}},
+            {{14,9},sys_core_fold,{ignored,useless_building}},
+            {{28,9},sys_core_fold,{ignored,useless_building}},
+            {{76,13},sys_core_fold,{ignored,useless_building}},
+            {{84,9},sys_core_fold,{ignored,useless_building}},
+            {{98,9},sys_core_fold,{ignored,useless_building}},
+            {{102,9},sys_core_fold,{ignored,useless_building}},
+            {{120,13},sys_core_fold,{ignored,useless_building}},
+            {{124,13},sys_core_fold,{ignored,useless_building}},
+            {{129,9},sys_core_fold,{ignored,useless_building}},
+            {{149,13},sys_core_fold,{ignored,useless_building}},
+            {{153,13},sys_core_fold,{ignored,useless_building}},
+            {{158,9},sys_core_fold,{ignored,useless_building}},
+            {{176,13},sys_core_fold,{ignored,useless_building}},
+            {{198,17},sys_core_fold,{ignored,useless_building}}]}]
+
+warning: 1 warning emitted
+

@@ -1,0 +1,88 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+fn continue_outer_loop(limit: int)
+    ->
+        int ({
+    let mut outer = (0 as int);
+    let mut visits = (0 as int);
+
+    ('outer: loop {
+        ((outer as int) += (1 as int) as ());
+
+        (loop {
+            ((visits as int) += (1 as int) as ());
+
+            (if ((outer as int) < (limit as int) as bool) {
+                (continue 'outer as !);
+            } as ())
+
+            (break 'outer
+                (((visits as int) * (100 as int) as int) + (outer as int) as
+                    int) as !);
+        } as !)
+    } as int)
+} as int)
+
+fn continue_two_loops(limit: int)
+    ->
+        int ({
+    let mut outer = (0 as int);
+    let mut visits = (0 as int);
+
+    ('outer: loop {
+        ((outer as int) += (1 as int) as ());
+
+        (loop {
+            (loop {
+                ((visits as int) += (1 as int) as ());
+
+                (if ((outer as int) < (limit as int) as bool) {
+                    (continue 'outer as !);
+                } as ())
+
+                (break 'outer
+                    (((visits as int) * (100 as int) as int) + (outer as int) as
+                        int) as !);
+            } as !)
+        } as !)
+    } as int)
+} as int)

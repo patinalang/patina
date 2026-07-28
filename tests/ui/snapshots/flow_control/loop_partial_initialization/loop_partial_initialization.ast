@@ -1,0 +1,7 @@
+pub fn partial_initialization(take_initialized: bool) -> int {
+    let value;
+
+    loop { if take_initialized { value = 10; break; } else { break; } }
+
+    value
+}

@@ -1,0 +1,39 @@
+pub fn continue_outer_loop(limit: int) -> int {
+    let mut outer = 0;
+    let mut visits = 0;
+
+    'outer: loop {
+        outer += 1;
+
+        loop {
+            visits += 1;
+
+            if outer < limit {
+                continue 'outer;
+            }
+
+            break 'outer visits * 100 + outer;
+        }
+    }
+}
+
+pub fn continue_two_loops(limit: int) -> int {
+    let mut outer = 0;
+    let mut visits = 0;
+
+    'outer: loop {
+        outer += 1;
+
+        loop {
+            loop {
+                visits += 1;
+
+                if outer < limit {
+                    continue 'outer;
+                }
+
+                break 'outer visits * 100 + outer;
+            }
+        }
+    }
+}

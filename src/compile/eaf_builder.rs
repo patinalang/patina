@@ -42,6 +42,13 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         ))
     }
 
+    pub(crate) fn pat_int(&self, span: impl IntoAnno, value: u128) -> eaf::Pattern<'arena> {
+        eaf::Pattern::AtomicLiteral(eaf::AtomicLiteral::Integer(
+            span.into_anno(self.source_map),
+            self.biguint(value),
+        ))
+    }
+
     pub(crate) fn expr_atom(&self, span: impl IntoAnno, name: Symbol) -> eaf::Expr<'arena> {
         eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::Atom(
             span.into_anno(self.source_map),
@@ -526,6 +533,18 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
     ) -> eaf::ModuleForm<'arena> {
         let clauses = self.arena.alloc_from_iter(clauses);
         eaf::ModuleForm::Function(span.into_anno(self.source_map), name.into(), arity, clauses)
+    }
+
+    pub(crate) fn simple_function(
+        &self,
+        span: impl IntoAnno,
+        name: Symbol,
+        params: impl IntoIterator<Item = eaf::Pattern<'arena>>,
+        body: eaf::Expr<'arena>,
+    ) -> eaf::ModuleForm<'arena> {
+        let anno = span.into_anno(self.source_map);
+        let clause = self.clause(anno, params, None, body);
+        self.function(anno, name, clause.patterns.len(), [clause])
     }
 
     pub(crate) fn module(

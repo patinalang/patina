@@ -4,210 +4,26 @@ use rustc_data_structures::fx::FxIndexMap;
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::LocalDefId;
-use rustc_hir::{BindingMode, Lit};
+use rustc_hir::{BindingMode, HirId, Lit};
 use rustc_middle::erl::{ErlCallKind, ErlCallTarget, ErlModuleResolution};
+use rustc_middle::middle::region;
 use rustc_middle::mir::{AssignOp, BinOp, UnOp};
+use rustc_middle::span_bug;
 use rustc_middle::thir::{
-    self, Arm, BlockId, Expr as ThirExpr, ExprId, ExprKind, LocalVarId, Pat as ThirPat, PatKind,
-    StmtId,
+    self, Arm, BlockId, Expr, ExprId, ExprKind, LocalVarId, Pat, PatKind, StmtId,
 };
 use rustc_middle::ty::{self, Ty, TyCtxt};
-use rustc_middle::{bug, span_bug};
 use rustc_span::{Span, Symbol, kw, sym};
 
-use crate::compile::translate::Translator;
+use crate::compile::translate::loops::Loops;
+use crate::compile::translate::scopes::{PatinaVar, Scope, Scopes};
+use crate::compile::translate::{ModuleParts, Translator};
 use crate::erlang::abstract_format as eaf;
 use crate::{not_implemented, span_fatal};
 
 pub(crate) struct TranslatedBody<'arena> {
     pub params: SmallVec<[eaf::Pattern<'arena>; 8]>,
     pub value: eaf::Expr<'arena>,
-}
-
-#[derive(Clone)]
-struct Scope(FxIndexMap<LocalVarId, PatinaVar>);
-
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub(crate) struct PatinaVar {
-    pub name: Symbol,
-    pub var_num: u32,
-    pub vsn: u32,
-    pub erl_name: Symbol,
-    /// How many scope levels deep are we compared to the var's declaration?
-    /// A depth of 0 means we're at the declaration scope.
-    pub decl_depth: u32,
-    /// How many scope levels deep are we compared to the var's initialization?
-    /// A depth of 0 means we're at the initialization scope.
-    /// `initialization_depth` is always less than or equal to `decl_depth`.
-    /// `None` means the var is uninitialized.
-    pub initialization_depth: Option<u32>,
-}
-
-impl PatinaVar {
-    fn new(name: Symbol, var_num: u32, initialized: bool) -> Self {
-        Self {
-            name,
-            var_num,
-            vsn: 0,
-            erl_name: Self::make_erl_name(name, var_num, 0),
-            decl_depth: 0,
-            initialization_depth: if initialized { Some(0) } else { None },
-        }
-    }
-
-    fn with_bumped_vsn(&self, from_scope_depth: u32) -> Self {
-        Self {
-            vsn: self.vsn + 1,
-            erl_name: Self::make_erl_name(self.name, self.var_num, self.vsn + 1),
-            decl_depth: self.decl_depth + from_scope_depth,
-            initialization_depth: self
-                .initialization_depth
-                .map(|depth| depth + from_scope_depth)
-                .or(Some(0)),
-            ..*self
-        }
-    }
-
-    fn initialized(&self) -> bool {
-        self.initialization_depth.is_some()
-    }
-
-    fn make_erl_name(name: Symbol, var_num: u32, vsn: u32) -> Symbol {
-        Symbol::intern(&format!("_{}@{}_{}", name, var_num, vsn))
-    }
-}
-
-impl Scope {
-    fn new() -> Self {
-        Self(FxIndexMap::default())
-    }
-
-    fn get_var(&self, id: LocalVarId) -> Option<&PatinaVar> {
-        self.0.get(&id)
-    }
-
-    fn bind_var(&mut self, id: LocalVarId, var: PatinaVar) -> &PatinaVar {
-        self.0.entry(id).insert_entry(var).into_mut()
-    }
-}
-
-pub(crate) struct Scopes {
-    scopes: SmallVec<[Scope; 8]>,
-    next_var_num: u32,
-}
-
-impl Scopes {
-    pub(super) fn new() -> Self {
-        let mut scopes = SmallVec::new();
-        scopes.push(Scope::new());
-        Self { scopes, next_var_num: 0 }
-    }
-
-    fn get_var(&self, id: LocalVarId) -> Option<&PatinaVar> {
-        self.scopes.iter().rev().find_map(|scope| scope.get_var(id))
-    }
-
-    fn fresh_var(&mut self, name: Symbol, initialized: bool) -> PatinaVar {
-        let var = PatinaVar::new(name, self.next_var_num, initialized);
-        self.next_var_num += 1;
-        var
-    }
-
-    fn bind_var(&mut self, id: LocalVarId, name: Symbol, initialized: bool) -> &PatinaVar {
-        let var = match self
-            .scopes
-            .iter()
-            .rev()
-            .enumerate()
-            .find_map(|(idx, scope)| scope.get_var(id).map(|var| (idx, var)))
-        {
-            Some(_) if !initialized => bug!("var {:?} is rebound but is not initialized", id),
-            Some((idx, var)) => var.with_bumped_vsn(idx as u32),
-            None => self.fresh_var(name, initialized),
-        };
-
-        self.last_scope_mut().bind_var(id, var)
-    }
-
-    fn push(&mut self) {
-        self.scopes.push(Scope::new());
-    }
-
-    fn pop(&mut self) -> Scope {
-        self.scopes.pop().expect("scopes should never be empty")
-    }
-
-    /// Returns the union of all outer variables that are modified by the branch scopes.
-    /// The map value is the latest version of the variable between all branches.
-    fn modified_outer_vars<'a>(
-        &mut self,
-        branches: impl IntoIterator<Item = (&'a Scope, bool)>,
-    ) -> FxIndexMap<LocalVarId, PatinaVar> {
-        let mut modified_outer_vars = FxIndexMap::default();
-        let mut num_used = FxIndexMap::default();
-        let mut num_non_diverging_branches = 0;
-
-        for (branch, always_diverges) in branches {
-            if !always_diverges {
-                num_non_diverging_branches += 1;
-            }
-
-            for (id, branch_var) in &branch.0 {
-                if branch_var.decl_depth == 0 {
-                    continue;
-                }
-
-                let decl_depth = branch_var.decl_depth - 1;
-                let initialization_depth = match branch_var.initialization_depth {
-                    Some(0) => {
-                        if !always_diverges {
-                            num_used.entry(*id).and_modify(|count| *count += 1).or_insert(1);
-                        }
-                        None
-                    }
-                    Some(depth) => Some(depth - 1),
-                    None => bug!("outer var {:?} is not initialized in branch", id),
-                };
-
-                let branch_var = PatinaVar { decl_depth, initialization_depth, ..*branch_var };
-
-                modified_outer_vars
-                    .entry(*id)
-                    .and_modify(|var: &mut PatinaVar| {
-                        if var.vsn < branch_var.vsn {
-                            *var = branch_var;
-                        }
-                    })
-                    .or_insert(branch_var);
-            }
-        }
-
-        for (id, count) in num_used {
-            if count == num_non_diverging_branches {
-                // Initialized in all non-diverging branches, so it's fully initialized outside of the branches.
-                let var = modified_outer_vars.get_mut(&id).unwrap_or_else(|| {
-                    bug!("variable {id:?} present in num_used but not in modified_outer_vars")
-                });
-                if var.initialization_depth.is_some() {
-                    bug!("variable {id:?} already initialized");
-                }
-                var.initialization_depth = Some(0);
-            }
-        }
-
-        modified_outer_vars
-    }
-
-    /// Merges the scopes of the branches into a single after-branch scope.
-    fn join_branches(&mut self, modified_outer_vars: &FxIndexMap<LocalVarId, PatinaVar>) {
-        for (id, var) in modified_outer_vars {
-            self.last_scope_mut().0.insert(*id, *var);
-        }
-    }
-
-    fn last_scope_mut(&mut self) -> &mut Scope {
-        self.scopes.last_mut().expect("scopes should never be empty")
-    }
 }
 
 struct TranslatedArm<'arena> {
@@ -223,16 +39,28 @@ pub(super) struct BodyCx<'a, 'tcx, 'arena> {
     pub translator: &'a Translator<'tcx, 'arena>,
     pub owner: LocalDefId,
     pub thir: &'a thir::Thir<'tcx>,
+    pub parts: &'a mut ModuleParts<'arena>,
     pub scopes: &'a mut Scopes,
+    pub loops: Loops,
 }
 
 impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
+    pub(super) fn new(
+        translator: &'a Translator<'tcx, 'arena>,
+        owner: LocalDefId,
+        thir: &'a thir::Thir<'tcx>,
+        parts: &'a mut ModuleParts<'arena>,
+        scopes: &'a mut Scopes,
+    ) -> Self {
+        BodyCx { translator, owner, thir, parts, scopes, loops: Loops::new() }
+    }
+
     pub(super) fn tcx(&self) -> TyCtxt<'tcx> {
         self.translator.tcx
     }
 
     pub(super) fn translate_expr(&mut self, expr_id: ExprId) -> eaf::Expr<'arena> {
-        let expr = self.resolve_expr(expr_id);
+        let (expr, region_scope) = self.resolve_expr_with_scope(expr_id);
 
         match &expr.kind {
             ExprKind::Block { block } => self.translate_block(*block),
@@ -275,6 +103,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             ExprKind::Match { scrutinee, arms, .. } => self.translate_match(expr, *scrutinee, arms),
 
             ExprKind::Return { value } => self.translate_return(expr.span, *value),
+            ExprKind::Loop { body } => self.translate_loop(expr_id, expr, *body, region_scope),
+            ExprKind::Break { label, value } => self.translate_break(expr.span, *label, *value),
+            ExprKind::Continue { label } => self.translate_continue(expr.span, *label),
 
             _ => not_implemented!(self.tcx(), expr.span, "THIR expression kind", expr.kind),
         }
@@ -348,7 +179,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
     fn translate_field(
         &mut self,
-        expr: &ThirExpr<'tcx>,
+        expr: &Expr<'tcx>,
         lhs: ExprId,
         variant_index: VariantIdx,
         name: FieldIdx,
@@ -425,7 +256,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
     fn translate_binary(
         &mut self,
-        expr: &ThirExpr<'tcx>,
+        expr: &Expr<'tcx>,
         op: BinOp,
         lhs: ExprId,
         rhs: ExprId,
@@ -479,7 +310,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
     fn translate_logical(
         &mut self,
-        expr: &ThirExpr<'tcx>,
+        expr: &Expr<'tcx>,
         op: rustc_middle::thir::LogicalOp,
         lhs: ExprId,
         rhs: ExprId,
@@ -544,12 +375,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         afb.expr_case(expr.span, left, [true_clause, false_clause])
     }
 
-    fn translate_unary(
-        &mut self,
-        expr: &ThirExpr<'tcx>,
-        op: UnOp,
-        arg: ExprId,
-    ) -> eaf::Expr<'arena> {
+    fn translate_unary(&mut self, expr: &Expr<'tcx>, op: UnOp, arg: ExprId) -> eaf::Expr<'arena> {
         let arg_ty = self.thir[arg].ty;
 
         let unary_op = match op {
@@ -571,11 +397,26 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let value =
             value.map(|value| self.translate_expr(value)).unwrap_or_else(|| afb.expr_unit(span));
 
+        if self.loops.in_loop() {
+            self.loops.record_return();
+            self.loop_return_expr(span, value, self.loops.current())
+        } else {
+            self.marker_call(span, kw::Return, [value])
+        }
+    }
+
+    pub(super) fn marker_call(
+        &self,
+        span: Span,
+        name: Symbol,
+        args: impl IntoIterator<Item = eaf::Expr<'arena>>,
+    ) -> eaf::Expr<'arena> {
+        let afb = &self.translator.afb;
         afb.expr_remote_call(
             span,
             afb.expr_atom(span, sym::s_patina_marker),
-            afb.expr_atom(span, kw::Return),
-            [value],
+            afb.expr_atom(span, name),
+            args,
         )
     }
 
@@ -665,18 +506,19 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
     fn translate_closure(
         &mut self,
-        expr: &ThirExpr<'tcx>,
+        expr: &Expr<'tcx>,
         closure: &thir::ClosureExpr<'tcx>,
     ) -> eaf::Expr<'arena> {
-        let translated =
-            self.with_scope(|cx| cx.translator.translate_body(closure.closure_id, cx.scopes)).0;
+        let translated = self
+            .with_scope(|cx| cx.translator.translate_body(closure.closure_id, cx.parts, cx.scopes))
+            .0;
 
         let afb = &self.translator.afb;
         let clause = afb.clause(expr.span, translated.params, None, translated.value);
         afb.expr_fun(expr.span, [clause])
     }
 
-    fn translate_zst_literal(&mut self, expr: &ThirExpr<'tcx>) -> eaf::Expr<'arena> {
+    fn translate_zst_literal(&mut self, expr: &Expr<'tcx>) -> eaf::Expr<'arena> {
         let tcx = self.tcx();
         let afb = &self.translator.afb;
 
@@ -705,7 +547,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
     fn translate_assign(
         &mut self,
-        expr: &ThirExpr<'tcx>,
+        expr: &Expr<'tcx>,
         lhs: ExprId,
         rhs: ExprId,
     ) -> eaf::Expr<'arena> {
@@ -715,7 +557,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
     fn translate_assign_op(
         &mut self,
-        expr: &ThirExpr<'tcx>,
+        expr: &Expr<'tcx>,
         op: AssignOp,
         lhs: ExprId,
         rhs: ExprId,
@@ -726,7 +568,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
     fn do_translate_assign(
         &mut self,
-        expr: &ThirExpr<'tcx>,
+        expr: &Expr<'tcx>,
         lhs: ExprId,
         rhs: eaf::Expr<'arena>,
     ) -> eaf::Expr<'arena> {
@@ -758,7 +600,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
     fn translate_if(
         &mut self,
-        expr: &ThirExpr<'tcx>,
+        expr: &Expr<'tcx>,
         cond: ExprId,
         then: ExprId,
         else_opt: Option<ExprId>,
@@ -801,7 +643,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
     fn translate_match(
         &mut self,
-        expr: &ThirExpr<'tcx>,
+        expr: &Expr<'tcx>,
         scrutinee: ExprId,
         arms: &[thir::ArmId],
     ) -> eaf::Expr<'arena> {
@@ -889,7 +731,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         )
     }
 
-    pub(super) fn translate_pattern(&mut self, pat: &ThirPat<'tcx>) -> eaf::Pattern<'arena> {
+    pub(super) fn translate_pattern(&mut self, pat: &Pat<'tcx>) -> eaf::Pattern<'arena> {
         match &pat.kind {
             PatKind::Wild => self.translator.afb.pat_var(pat.span, kw::Underscore),
 
@@ -923,7 +765,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         }
     }
 
-    fn declare_vars_from_pattern(&mut self, pat: &ThirPat<'tcx>) {
+    fn declare_vars_from_pattern(&mut self, pat: &Pat<'tcx>) {
         match &pat.kind {
             PatKind::Binding { var, subpattern, is_primary, .. } => {
                 if *is_primary {
@@ -963,19 +805,17 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
     fn translate_binding_pattern(
         &mut self,
-        pat: &ThirPat<'tcx>,
+        pat: &Pat<'tcx>,
         name: Symbol,
         _mode: BindingMode,
         var: LocalVarId,
-        subpattern: Option<&ThirPat<'tcx>>,
+        subpattern: Option<&Pat<'tcx>>,
         is_primary: bool,
     ) -> eaf::Pattern<'arena> {
         let var_info = if is_primary {
             self.scopes.bind_var(var, name, true)
         } else {
-            self.scopes
-                .get_var(var)
-                .unwrap_or_else(|| span_bug!(pat.span, "variable {var:?} not in scope"))
+            self.scopes.fetch_var(var)
         };
 
         let var_pat = self.translator.afb.pat_var(pat.span, var_info.erl_name);
@@ -990,7 +830,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
     fn translate_leaf_pattern(
         &mut self,
-        pat: &ThirPat<'tcx>,
+        pat: &Pat<'tcx>,
         subpatterns: &[rustc_middle::thir::FieldPat<'tcx>],
     ) -> eaf::Pattern<'arena> {
         match pat.ty.kind() {
@@ -1017,11 +857,22 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         }
     }
 
-    fn resolve_expr(&self, expr: ExprId) -> &'a ThirExpr<'tcx> {
+    fn resolve_expr(&self, expr: ExprId) -> &'a Expr<'tcx> {
+        self.resolve_expr_with_scope(expr).0
+    }
+
+    fn resolve_expr_with_scope(
+        &self,
+        expr: ExprId,
+    ) -> (&'a Expr<'tcx>, Option<(region::Scope, HirId)>) {
         let mut expr = &self.thir[expr];
+        let mut region_scope = None;
         loop {
             match &expr.kind {
-                ExprKind::Scope { value, .. } => expr = &self.thir[*value],
+                ExprKind::Scope { region_scope: scope, hir_id, value, .. } => {
+                    region_scope = Some((*scope, *hir_id));
+                    expr = &self.thir[*value];
+                }
                 ExprKind::Use { source }
                 | ExprKind::ByUse { expr: source, .. }
                 | ExprKind::NeverToAny { source }
@@ -1030,26 +881,19 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 | ExprKind::PlaceTypeAscription { source, .. }
                 | ExprKind::ValueTypeAscription { source, .. } => expr = &self.thir[*source],
 
-                _ => return expr,
+                _ => return (expr, region_scope),
             }
         }
     }
 
-    fn with_scope<R>(&mut self, f: impl FnOnce(&mut Self) -> R) -> (R, Scope) {
-        self.scopes.push();
-        let result = f(self);
-        let scope = self.scopes.pop();
-        (result, scope)
-    }
-
     fn is_always_diverging_expr(&self, expr_id: ExprId) -> bool {
-        let ExprKind::Scope { hir_id, .. } = &self.thir[expr_id].kind else {
+        let (_expr, Some((_, hir_id))) = self.resolve_expr_with_scope(expr_id) else {
             span_bug!(
                 self.thir[expr_id].span,
                 "expected HIR-derived expression to have an outer Scope"
             );
         };
 
-        self.tcx().typeck(self.owner).is_always_diverging_expr(*hir_id)
+        self.tcx().typeck(self.owner).is_always_diverging_expr(hir_id)
     }
 }

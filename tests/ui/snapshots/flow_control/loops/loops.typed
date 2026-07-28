@@ -1,0 +1,271 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+fn normal_continue(limit: int)
+    ->
+        int ({
+    let mut count = (0 as int);
+    let mut total = (0 as int);
+
+    (loop {
+        ((count as int) += (1 as int) as ());
+
+        (if (((count as int) % (2 as int) as int) == (0 as int) as bool) {
+            (continue as !);
+        } as ())
+
+        ((total as int) += (count as int) as ());
+
+        (if ((count as int) >= (limit as int) as bool) { (break as !); } as
+            ())
+    } as ())
+
+    (((total as int) * (100 as int) as int) + (count as int) as int)
+} as int)
+
+fn loop_value(target: int)
+    ->
+        int ({
+    let mut counter = (0 as int);
+
+    let result =
+        (loop {
+            ((counter as int) += (1 as int) as ());
+
+            (if ((counter as int) == (target as int) as bool) {
+                (break ((counter as int) * (2 as int) as int) as !);
+            } as ())
+        } as int);
+
+    (((result as int) * (10 as int) as int) + (counter as int) as int)
+} as int)
+
+fn zero_parameter_loop()
+    -> int ({ (loop { (break (7 as int) as !); } as int) } as int)
+
+fn initialize_in_loop()
+    ->
+        int ({
+    let value;
+
+    (loop { ((value as int) = (7 as int) as ()); (break as !); } as ())
+
+    (value as int)
+} as int)
+
+fn while_sum(start: int, limit: int)
+    ->
+        int ({
+    let mut n = (start as int);
+    let mut total = (0 as int);
+
+    (loop {
+        (if ((n as int) < (limit as int) as bool) {
+            ((total as int) += (n as int) as ());
+            ((n as int) += (1 as int) as ());
+        } else { (break as !); } as ())
+    } as ())
+
+    (((total as int) * (100 as int) as int) + (n as int) as int)
+} as int)
+
+fn nested(outer_limit: int, inner_limit: int)
+    ->
+        int ({
+    let mut outer = (0 as int);
+    let mut visits = (0 as int);
+
+    (loop {
+        ((outer as int) += (1 as int) as ());
+        let mut inner = (0 as int);
+
+        (loop {
+            ((inner as int) += (1 as int) as ());
+
+            (if ((inner as int) < (inner_limit as int) as bool) {
+                (continue as !);
+            } as ())
+
+            ((visits as int) +=
+                (((outer as int) * (10 as int) as int) + (inner as int) as
+                    int) as ());
+            (break as !);
+        } as ())
+
+        (if ((outer as int) >= (outer_limit as int) as bool) { (break as !); }
+            as ())
+    } as ())
+
+    (((visits as int) * (100 as int) as int) + (outer as int) as int)
+} as int)
+
+fn return_from_loop(stop_at: int)
+    ->
+        int ({
+    let mut n = (0 as int);
+
+    (loop {
+        ((n as int) += (1 as int) as ());
+
+        (if ((n as int) == (stop_at as int) as bool) {
+            (return ((n as int) * (10 as int) as int) as !);
+        } as ())
+
+        (if ((n as int) >= (10 as int) as bool) { (break as !); } as ())
+    } as ())
+
+    (-(1 as int) as int)
+} as int)
+
+fn return_from_nested(outer_stop: int, inner_stop: int)
+    ->
+        int ({
+    let mut outer = (0 as int);
+
+    (loop {
+        ((outer as int) += (1 as int) as ());
+        let mut inner = (0 as int);
+
+        (loop {
+            ((inner as int) += (1 as int) as ());
+
+            (if (((outer as int) == (outer_stop as int) as bool) &&
+                    ((inner as int) == (inner_stop as int) as bool) as bool) {
+                (return (((outer as int) * (100 as int) as int) +
+                        (inner as int) as int) as !);
+            } as ())
+
+            (if ((inner as int) >= (3 as int) as bool) { (break as !); } as
+                ())
+        } as ())
+
+        (if ((outer as int) >= (3 as int) as bool) { (break as !); } as ())
+    } as ())
+
+    (-(1 as int) as int)
+} as int)
+
+fn return_from_nested_uneven_rebinds(outer_stop: int, inner_stop: int)
+    ->
+        int ({
+    let mut a = (0 as int);
+    let mut b = (0 as int);
+
+    (loop {
+        ((a as int) += (1 as int) as ());
+        ((b as int) += (10 as int) as ());
+        let mut inner = (0 as int);
+
+        (loop {
+            ((inner as int) += (1 as int) as ());
+
+            (if (((a as int) == (outer_stop as int) as bool) &&
+                    ((inner as int) == (inner_stop as int) as bool) as bool) {
+                (return ((((a as int) * (1000 as int) as int) +
+                            ((b as int) * (10 as int) as int) as int) + (inner as int)
+                        as int) as !);
+            } as ())
+
+            (if ((inner as int) >= (3 as int) as bool) { (break as !); } as
+                ())
+        } as ())
+
+        (if ((a as int) >= (3 as int) as bool) { (break as !); } as ())
+    } as ())
+
+    (-(1 as int) as int)
+} as int)
+
+fn continue_outer(limit: int)
+    ->
+        int ({
+    let mut outer = (0 as int);
+    let mut visits = (0 as int);
+
+    ('outer: loop {
+        ((outer as int) += (1 as int) as ());
+
+        (loop {
+            ((visits as int) += (1 as int) as ());
+
+            (if ((outer as int) < (limit as int) as bool) {
+                (continue 'outer as !);
+            } as ())
+
+            (break 'outer as !);
+        } as !)
+    } as ())
+
+    (((visits as int) * (100 as int) as int) + (outer as int) as int)
+} as int)
+
+fn continue_through_middle(limit: int)
+    ->
+        int ({
+    let mut outer = (0 as int);
+    let mut visits = (0 as int);
+
+    ('outer: loop {
+        ((outer as int) += (1 as int) as ());
+
+        (loop {
+            (loop {
+                ((visits as int) += (1 as int) as ());
+
+                (if ((outer as int) < (limit as int) as bool) {
+                    (continue 'outer as !);
+                } as ())
+
+                (break 'outer as !);
+            } as !)
+        } as !)
+    } as ())
+
+    (((visits as int) * (100 as int) as int) + (outer as int) as int)
+} as int)
+
+fn cast_loop_value()
+    ->
+        int ({
+    let value = ((loop { (break (1 as int) as !); } as int) as int as int);
+
+    (value as int)
+} as int)

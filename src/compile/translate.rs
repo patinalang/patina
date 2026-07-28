@@ -1,9 +1,12 @@
 mod adts;
 mod body;
 mod elixir_compat;
+mod loops;
+mod scopes;
 
 use std::path::PathBuf;
 
+use body::{BodyCx, TranslatedBody};
 use rustc_arena::DroplessArena;
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::DefKind;
@@ -13,11 +16,11 @@ use rustc_middle::bug;
 use rustc_middle::erl::ErlModuleId;
 use rustc_middle::ty::TyCtxt;
 use rustc_span::{Ident, Span, Symbol, sym};
+use scopes::Scopes;
 
 use crate::compile::eaf_builder::EafBuilder;
 use crate::compile::impl_collector::ImplCollector;
 use crate::compile::module_collector::ModuleNameCollector;
-use crate::compile::translate::body::{BodyCx, Scopes, TranslatedBody};
 use crate::erlang::abstract_format as eaf;
 
 #[macro_export]
@@ -32,6 +35,16 @@ macro_rules! not_implemented {
     ($tcx:expr, $span:expr, $name:literal, $kind:expr) => {
         span_fatal!($tcx, $span, "{} not yet implemented: {:?}", $name, $kind)
     };
+    ($tcx:expr, $span:expr, $name:literal) => {
+        span_fatal!($tcx, $span, "{} not yet implemented", $name)
+    };
+}
+
+#[derive(Default)]
+pub(crate) struct ModuleParts<'arena> {
+    pub forms: Vec<eaf::ModuleForm<'arena>>,
+    pub exports: SmallVec<[(Symbol, usize); 16]>,
+    last_file: Option<PathBuf>,
 }
 
 pub(super) struct Translator<'tcx, 'arena> {
@@ -54,13 +67,14 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
     pub(super) fn translate_body(
         &self,
         owner: LocalDefId,
+        parts: &mut ModuleParts<'arena>,
         scopes: &mut Scopes,
     ) -> TranslatedBody<'arena> {
         let (thir, root) =
             self.tcx.thir_body(owner).unwrap_or_else(|guaranteed| guaranteed.raise_fatal());
 
         let thir = thir.borrow();
-        let mut cx = BodyCx { translator: self, owner, thir: &thir, scopes };
+        let mut cx = BodyCx::new(self, owner, &thir, parts, scopes);
 
         let params = thir
             .params
@@ -102,9 +116,9 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
     fn translate_module(&self, def_id: LocalDefId) -> (Symbol, eaf::Module<'arena>) {
         let module_id = LocalModDefId::new_unchecked(def_id);
         let (module, _span, _hir_id) = self.tcx.hir_get_module(module_id);
-        let (forms, exports) = self.collect_module_fns(module);
+        let parts = self.collect_module_fns(module);
         let mod_name = self.modules.module_name(ErlModuleId::Mod(def_id.to_def_id()));
-        self.assemble_module(module.spans.inner_span, mod_name, [], exports, forms)
+        self.assemble_module(module.spans.inner_span, mod_name, [], parts)
     }
 
     fn assemble_module(
@@ -112,18 +126,21 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         span: Span,
         mod_name: Symbol,
         record_exports: impl IntoIterator<Item = Symbol>,
-        exports: impl IntoIterator<Item = (Symbol, usize)>,
-        fn_forms: impl IntoIterator<Item = eaf::ModuleForm<'arena>>,
+        parts: ModuleParts<'arena>,
     ) -> (Symbol, eaf::Module<'arena>) {
         let file = self.file_path(span);
         let file_attr = self.afb.file_attr(span, &file.to_string_lossy());
         let module_attr = self.afb.module_attr(span, mod_name);
         let compile_attr = self.afb.wild_attr(span, sym::compile, [sym::no_auto_import]);
         let record_export_attr = self.afb.export_record_attr(span, record_exports);
-        let export_attr = self.afb.export_attr(span, exports);
+        let export_attr = self.afb.export_attr(span, parts.exports);
 
         let attrs = [file_attr, module_attr, compile_attr, record_export_attr, export_attr];
-        (mod_name, self.afb.module(attrs.into_iter().chain(fn_forms)))
+        (mod_name, self.afb.module(attrs.into_iter().chain(parts.forms)))
+    }
+
+    fn module_parts(&self, span: Span) -> ModuleParts<'arena> {
+        ModuleParts { last_file: Some(self.file_path(span)), ..Default::default() }
     }
 
     /// The file that contains the outermost macro call site of `span`.
@@ -139,70 +156,62 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
 
     fn push_function(
         &self,
-        forms: &mut Vec<eaf::ModuleForm<'arena>>,
-        last_file: &mut Option<PathBuf>,
+        parts: &mut ModuleParts<'arena>,
         span: Span,
         function: eaf::ModuleForm<'arena>,
     ) {
         // If the function is in a different file than the previous, push a `-file` attribute
         // as well.
         let file = self.file_path(span);
-        if last_file.as_ref() != Some(&file) {
-            forms.push(self.afb.file_attr(span, &file.to_string_lossy()));
-            *last_file = Some(file);
+        if parts.last_file.as_ref() != Some(&file) {
+            parts.forms.push(self.afb.file_attr(span, &file.to_string_lossy()));
+            parts.last_file = Some(file);
         }
-        forms.push(function);
+        parts.forms.push(function);
     }
 
     fn translate_fun(
         &self,
+        def_id: LocalDefId,
         sig: &FnSig<'tcx>,
         generics: &Generics<'tcx>,
         ident: Ident,
         body: BodyId,
-    ) -> eaf::ModuleForm<'arena> {
+        parts: &mut ModuleParts<'arena>,
+    ) {
         if !generics.params.is_empty() {
             not_implemented!(self.tcx, generics.span, "function with generic parameters", generics);
         }
 
         let owner = self.tcx.hir_body_owner_def_id(body);
         let mut scope = Scopes::new();
-        let translated = self.translate_body(owner, &mut scope);
+        let translated = self.translate_body(owner, parts, &mut scope);
 
-        let clause = self.afb.clause(sig.span, translated.params, None, translated.value);
+        let form =
+            self.afb.simple_function(sig.span, ident.name, translated.params, translated.value);
 
-        let fn_name = ident.name;
-        let fn_arity = sig.decl.inputs.len();
-
-        self.afb.function(sig.span, fn_name, fn_arity, [clause])
+        self.push_function(parts, sig.span, form);
+        if self.tcx.is_erl_exported_fn(def_id) {
+            parts.exports.push((ident.name, sig.decl.inputs.len()));
+        }
     }
 
-    fn collect_module_fns(
-        &self,
-        module: &Mod<'tcx>,
-    ) -> (Vec<eaf::ModuleForm<'arena>>, SmallVec<[(Symbol, usize); 8]>) {
-        let mut forms = Vec::new();
-        let mut last_file = Some(self.file_path(module.spans.inner_span));
-        let mut exports = SmallVec::<[(Symbol, usize); 8]>::new();
+    fn collect_module_fns(&self, module: &Mod<'tcx>) -> ModuleParts<'arena> {
+        let mut parts = self.module_parts(module.spans.inner_span);
 
-        forms.push(elixir_compat::info_function(&self.afb, module.spans.inner_span, None));
-        exports.push((sym::__info__, 1));
+        parts.forms.push(elixir_compat::info_function(&self.afb, module.spans.inner_span, None));
+        parts.exports.push((sym::__info__, 1));
 
         for item_id in module.item_ids {
             let item = self.tcx.hir_item(*item_id);
             if let ItemKind::Fn { ref sig, ident, generics, body, has_body } = item.kind
                 && has_body
             {
-                let function = self.translate_fun(sig, generics, ident, body);
-                self.push_function(&mut forms, &mut last_file, item.span, function);
-
-                if self.tcx.is_erl_exported_fn(item.owner_id.def_id) {
-                    exports.push((ident.name, sig.decl.inputs.len()));
-                }
+                self.translate_fun(item.owner_id.def_id, sig, generics, ident, body, &mut parts);
             }
         }
 
-        (forms, exports)
+        parts
     }
 
     fn translate_struct(&self, def_id: LocalDefId) -> (Symbol, eaf::Module<'arena>) {
@@ -216,8 +225,8 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         }
 
         let mod_name = self.modules.module_name(ErlModuleId::Adt(def_id.to_def_id()));
-        let (forms, exports) = self.collect_struct_fns(item.span, mod_name, def_id, variant_data);
-        self.assemble_module(item.span, mod_name, [], exports, forms)
+        let parts = self.collect_struct_fns(item.span, mod_name, def_id, variant_data);
+        self.assemble_module(item.span, mod_name, [], parts)
     }
 
     fn translate_enum(&self, def_id: LocalDefId) -> (Symbol, eaf::Module<'arena>) {
@@ -233,9 +242,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
 
         let mod_name = self.modules.module_name(ErlModuleId::Adt(def_id.to_def_id()));
 
-        let mut forms = Vec::new();
-        let mut last_file = Some(self.file_path(item.span));
-        let mut exports = SmallVec::<[(Symbol, usize); 8]>::new();
+        let mut parts = self.module_parts(item.span);
         let mut record_exports = SmallVec::<[Symbol; 8]>::new();
 
         for variant in enum_def.variants {
@@ -246,13 +253,13 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 .iter()
                 .map(|field| self.afb.record_field_decl(field.span, field.ident, None));
 
-            forms.push(self.afb.native_record_attr(item.span, variant_name, variant_fields));
+            parts.forms.push(self.afb.native_record_attr(item.span, variant_name, variant_fields));
             record_exports.push(variant_name);
         }
 
-        self.collect_impl_fns(def_id, &mut forms, &mut last_file, &mut exports);
+        self.collect_impl_fns(def_id, &mut parts);
 
-        self.assemble_module(item.span, mod_name, record_exports, exports, forms)
+        self.assemble_module(item.span, mod_name, record_exports, parts)
     }
 
     fn collect_struct_fns(
@@ -261,31 +268,27 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         mod_name: Symbol,
         def_id: rustc_hir::def_id::LocalDefId,
         variant_data: VariantData<'tcx>,
-    ) -> (Vec<eaf::ModuleForm<'arena>>, SmallVec<[(Symbol, usize); 8]>) {
-        let mut forms = Vec::new();
-        let mut last_file = Some(self.file_path(span));
-        let mut exports = SmallVec::<[(Symbol, usize); 8]>::new();
+    ) -> ModuleParts<'arena> {
+        let mut parts = self.module_parts(span);
 
-        forms.push(elixir_compat::info_function(&self.afb, span, Some(variant_data)));
-        exports.push((sym::__info__, 1));
+        parts.forms.push(elixir_compat::info_function(&self.afb, span, Some(variant_data)));
+        parts.exports.push((sym::__info__, 1));
 
-        forms.push(elixir_compat::struct0_function(&self.afb, span, mod_name, variant_data));
-        exports.push((sym::__struct__, 0));
+        parts.forms.push(elixir_compat::struct0_function(&self.afb, span, mod_name, variant_data));
+        parts.exports.push((sym::__struct__, 0));
 
-        forms.push(elixir_compat::struct1_function(&self.afb, span));
-        exports.push((sym::__struct__, 1));
+        parts.forms.push(elixir_compat::struct1_function(&self.afb, span));
+        parts.exports.push((sym::__struct__, 1));
 
-        self.collect_impl_fns(def_id, &mut forms, &mut last_file, &mut exports);
+        self.collect_impl_fns(def_id, &mut parts);
 
-        (forms, exports)
+        parts
     }
 
     fn collect_impl_fns(
         &self,
         def_id: rustc_hir::def_id::LocalDefId,
-        forms: &mut Vec<eaf::ModuleForm<'arena>>,
-        last_file: &mut Option<PathBuf>,
-        exports: &mut SmallVec<[(Symbol, usize); 8]>,
+        parts: &mut ModuleParts<'arena>,
     ) {
         if let Some(impls) = self.impls.impls_for(def_id.to_def_id()) {
             for imp in impls {
@@ -303,12 +306,14 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                         continue;
                     };
 
-                    let function =
-                        self.translate_fun(&sig, impl_item.generics, impl_item.ident, body);
-                    self.push_function(forms, last_file, impl_item.span, function);
-                    if self.tcx.is_erl_exported_fn(impl_item.owner_id.def_id) {
-                        exports.push((impl_item.ident.name, sig.decl.inputs.len()));
-                    }
+                    self.translate_fun(
+                        impl_item.owner_id.def_id,
+                        &sig,
+                        impl_item.generics,
+                        impl_item.ident,
+                        body,
+                        parts,
+                    );
                 }
             }
         }
