@@ -41,20 +41,21 @@ macro_rules! println {
 
 fn closure_loop() ({
     let count =
-        (||
+        (|x, y|
             ({
-                let mut i = (0 as int);
+                let mut i = (x as int);
 
                 (loop {
-                    ((i as int) += (1 as int) as ());
+                    ((i as int) += (y as int) as ());
                     (if ((i as int) > (3 as int) as bool) { (break as !); } as
                         ())
                 } as ())
 
                 (i as int)
             } as int) as
-            {closure@tests/ui/src/fn/closure_loop.pt:2:17: 2:19});
+            {closure@tests/ui/src/fn/closure_loop.pt:2:17: 2:23});
 
-    ((count as {closure@tests/ui/src/fn/closure_loop.pt:2:17: 2:19})() as
-        int);
+    ((count as
+            {closure@tests/ui/src/fn/closure_loop.pt:2:17: 2:23})((1 as int),
+        (2 as int)) as int);
 } as ())

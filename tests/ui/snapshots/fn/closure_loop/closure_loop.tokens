@@ -15,6 +15,10 @@ Whitespace
 Eq
 Whitespace
 Or
+Ident
+Comma
+Whitespace
+Ident
 Or
 Whitespace
 OpenBrace
@@ -27,7 +31,7 @@ Ident
 Whitespace
 Eq
 Whitespace
-Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Ident
 Semi
 Whitespace
 Ident
@@ -39,7 +43,7 @@ Whitespace
 Plus
 Eq
 Whitespace
-Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Ident
 Semi
 Whitespace
 Ident
@@ -66,6 +70,10 @@ Semi
 Whitespace
 Ident
 OpenParen
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Comma
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
 CloseParen
 Semi
 Whitespace

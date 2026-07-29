@@ -41,14 +41,14 @@ macro_rules! println {
 
 pub fn closure_loop() {
     let count =
-        ||
+        |x, y|
             {
-                let mut i = 0;
+                let mut i = x;
 
-                loop { i += 1; if i > 3 { break; } }
+                loop { i += y; if i > 3 { break; } }
 
                 i
             };
 
-    count();
+    count(1, 2);
 }

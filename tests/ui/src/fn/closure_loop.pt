@@ -1,9 +1,9 @@
 pub fn closure_loop() {
-    let count = || {
-        let mut i = 0;
+    let count = |x, y| {
+        let mut i = x;
 
         loop {
-            i += 1;
+            i += y;
             if i > 3 {
                 break;
             }
@@ -12,5 +12,5 @@ pub fn closure_loop() {
         i
     };
 
-    count();
+    count(1, 2);
 }

@@ -1,6 +1,5 @@
-error: erl backend failed: [{"tests/ui/src/fn/closure_loop.pt",
-         [{{15,5},erl_lint,{undefined_function,{call_once,2}}}]}]
-       []
+warning: [{"tests/ui/src/fn/closure_loop.pt",
+           [{{7,13},sys_core_fold,{ignored,useless_building}}]}]
 
-error: aborting due to 1 previous error
+warning: 1 warning emitted
 

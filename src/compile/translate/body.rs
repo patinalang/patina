@@ -429,14 +429,15 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         forced_extern: bool,
     ) -> eaf::Expr<'arena> {
         let afb = &self.translator.afb;
-        let arg_exprs: SmallVec<[eaf::Expr<'arena>; 8]> =
-            args.iter().map(|&id| self.translate_expr(id)).collect();
 
         let (erl_call_target, callee_expr) = if let ty::TyKind::FnDef(callee_def_id, generic_args) =
             callable_ty.kind()
         {
-            let erl_call_target = self.tcx().erl_call_target_for_def(*callee_def_id, generic_args);
+            if self.tcx().is_fn_trait(self.tcx().parent(*callee_def_id)) {
+                return self.translate_fn_trait_call(span, args);
+            }
 
+            let erl_call_target = self.tcx().erl_call_target_for_def(*callee_def_id, generic_args);
             (erl_call_target, afb.expr_atom(span, self.tcx().item_name(*callee_def_id)))
         } else if let ExprKind::ExternMod { def_id } = &self.resolve_expr(fun).kind {
             let erl_call_target =
@@ -450,6 +451,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             .tcx()
             .erl_call_kind(self.owner.to_def_id(), erl_call_target, Some(forced_extern))
             .unwrap_or_else(|| span_bug!(span, "call target couldn't be classified"));
+
+        let arg_exprs: SmallVec<[eaf::Expr<'arena>; 8]> =
+            args.iter().map(|&id| self.translate_expr(id)).collect();
 
         if matches!(call_kind, ErlCallKind::Local | ErlCallKind::Dynamic) {
             return afb.expr_local_call(span, callee_expr, arg_exprs);
@@ -477,6 +481,23 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let mod_expr = afb.expr_atom(span, mod_name);
 
         afb.expr_remote_call(span, mod_expr, callee_expr, arg_exprs)
+    }
+
+    fn translate_fn_trait_call(&mut self, span: Span, args: &[ExprId]) -> eaf::Expr<'arena> {
+        let afb = &self.translator.afb;
+
+        let &[callee_id, tuple_id] = args else {
+            span_bug!(span, "expected 2 arguments for fn trait call");
+        };
+
+        let ExprKind::Tuple { fields } = &self.resolve_expr(tuple_id).kind else {
+            span_bug!(span, "expected tuple for fn trait call")
+        };
+
+        let callee_expr = self.translate_expr(callee_id);
+        let call_arg_exprs = fields.iter().map(|&field_id| self.translate_expr(field_id));
+
+        afb.expr_local_call(span, callee_expr, call_arg_exprs)
     }
 
     fn translate_format_render(
