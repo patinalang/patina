@@ -1,5 +1,0 @@
-warning: [{"tests/ui/src/fn/closure_loop.pt",
-           [{{7,13},sys_core_fold,{ignored,useless_building}}]}]
-
-warning: 1 warning emitted
-

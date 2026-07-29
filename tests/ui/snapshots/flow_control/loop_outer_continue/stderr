@@ -1,6 +1,0 @@
-warning: [{"tests/ui/src/flow_control/loop_outer_continue.pt",
-           [{{11,13},sys_core_fold,{ignored,useless_building}},
-            {{31,17},sys_core_fold,{ignored,useless_building}}]}]
-
-warning: 1 warning emitted
-

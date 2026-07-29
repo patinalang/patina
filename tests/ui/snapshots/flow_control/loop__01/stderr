@@ -1,6 +1,0 @@
-warning: [{"tests/ui/src/flow_control/loop__01.pt",
-           [{{13,9},sys_core_fold,{ignored,useless_building}},
-            {{22,9},sys_core_fold,{ignored,useless_building}}]}]
-
-warning: 1 warning emitted
-

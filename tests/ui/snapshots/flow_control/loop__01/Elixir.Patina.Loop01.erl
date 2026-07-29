@@ -22,33 +22,33 @@
 '__info__'(Key) ->
     module_info(Key).
 '$patina_loop_10_109'(_count@0_0) ->
-    begin
-        _count@0_1 = _count@0_0 + 1,
-        case _count@0_1 =:= 3 of
-            true ->
-                begin
-                    io:put_chars([[<<"three">>]]),
-                    io:nl()
-                end,
-                '$patina_marker':continue(_count@0_1);
-            false ->
-                {}
+    _ = begin
+            _count@0_1 = _count@0_0 + 1,
+            case _count@0_1 =:= 3 of
+                true ->
+                    begin
+                        io:put_chars([[<<"three">>]]),
+                        io:nl()
+                    end,
+                    '$patina_marker':continue(_count@0_1);
+                false ->
+                    {}
+            end,
+            begin
+                io:put_chars([[io_lib:format("~tp", [_count@0_1])]]),
+                io:nl()
+            end,
+            case _count@0_1 =:= 5 of
+                true ->
+                    begin
+                        io:put_chars([[<<"OK, that's enough">>]]),
+                        io:nl()
+                    end,
+                    '$patina_marker':break({break, 0, {}, _count@0_1});
+                false ->
+                    {}
+            end
         end,
-        begin
-            io:put_chars([[io_lib:format("~tp", [_count@0_1])]]),
-            io:nl()
-        end,
-        case _count@0_1 =:= 5 of
-            true ->
-                begin
-                    io:put_chars([[<<"OK, that's enough">>]]),
-                    io:nl()
-                end,
-                '$patina_marker':break({break, 0, {}, _count@0_1});
-            false ->
-                {}
-        end
-    end,
     '$patina_marker':continue(_count@0_1).
 main() ->
     _count@0_0 = 0,

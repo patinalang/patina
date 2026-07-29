@@ -160,11 +160,20 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let ((loop_body, _body_scope), loop_cx) = self.with_loop(expr_id, label, |cx| {
             cx.with_scope(|cx| {
                 let translated_body = cx.translate_expr(body);
-                let loop_cx = cx.loops.current();
 
+                let loop_cx = cx.loops.current();
                 let recurse_args = cx.var_exprs(expr.span, loop_cx.params.iter().copied());
                 let recurse = cx.marker_call(expr.span, kw::Continue, recurse_args);
-                afb.expr_block(expr.span, [translated_body, recurse])
+
+                // The body does not land as a tail expression, so Erlang warns
+                // the result is unused, because it doesn't know we rewrite assembly later.
+                // Assign to `_` to silence the warnings.
+                let discard_body = afb.expr_match(
+                    expr.span,
+                    afb.pat_var(expr.span, kw::Underscore),
+                    translated_body,
+                );
+                afb.expr_block(expr.span, [discard_body, recurse])
             })
         });
 

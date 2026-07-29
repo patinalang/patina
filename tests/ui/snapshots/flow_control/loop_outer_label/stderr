@@ -1,5 +1,0 @@
-warning: [{"tests/ui/src/flow_control/loop_outer_label.pt",
-           [{{20,17},sys_core_fold,{ignored,useless_building}}]}]
-
-warning: 1 warning emitted
-
