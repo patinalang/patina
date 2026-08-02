@@ -1,0 +1,96 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/primitives/maps.md
+// block: 1/1
+
+fn call(number: str) -> str {
+    match number {
+        "798-1364" =>
+            "We're sorry, the call cannot be completed as dialed.
+            Please hang up and try again.",
+        "645-7689" =>
+            "Hello, this is Mr. Awesome's Pizza. My name is Fred.
+            What can I get for you today?",
+        _ => "Hi! Who is this again?",
+    }
+}
+
+pub fn main() {
+    let mut contacts =
+        #{"Daniel" => "798-1364", "Ashley" => "645-7689", "Katie" =>
+                "435-8291", "Robert" => "956-1745"};
+
+    // Returns Option<str>
+    match contacts.get("Daniel") {
+        Some(number) => {
+            io::put_chars([["Calling Daniel: ",
+                                patina_fmt::display(call(number))]]);
+            io::nl();
+        }
+        _ => { io::put_chars([["Don\'t have Daniel\'s number."]]); io::nl(); }
+    }
+    // `.insert()` returns an updated map.
+    // The value must be used, otherwise it will emit a compilation warning.
+    contacts = contacts.insert("Daniel", "164-6743");
+
+    match contacts.get("Ashley") {
+        Some(number) => {
+            io::put_chars([["Calling Ashley: ",
+                                patina_fmt::display(call(number))]]);
+            io::nl();
+        }
+        _ => { io::put_chars([["Don\'t have Ashley\'s number."]]); io::nl(); }
+    }
+    contacts = contacts.remove("Ashley");
+
+    // Like structs, maps can also be updated using the special `..` syntax
+    contacts = #{"Laura" => "132-8372", ..contacts};
+
+    // `for` will iterate over the (key, value) pairs in arbitrary order.
+    for (contact, number) in contacts {
+        {
+            io::put_chars([["Calling ", patina_fmt::display(contact), ": ",
+                                patina_fmt::display(call(number))]]);
+            io::nl();
+        };
+    }
+}

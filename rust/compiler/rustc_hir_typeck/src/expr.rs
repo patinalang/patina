@@ -387,6 +387,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             }
             ExprKind::DropTemps(e) => self.check_expr_with_expectation(e, expected),
             ExprKind::Array(args) => self.check_expr_array(args, expected, expr),
+            ExprKind::Map(fields, rest) => self.check_expr_map(fields, rest, expected, expr),
             ExprKind::ConstBlock(ref block) => self.check_expr_const_block(block, expected),
             ExprKind::Repeat(element, ref count) => {
                 self.check_expr_repeat(element, count, expected, expr)
@@ -1697,6 +1698,90 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let array_len = args.len() as u64;
         self.suggest_array_len(expr, array_len);
         Ty::new_array(self.tcx, element_ty, array_len)
+    }
+
+    fn check_expr_map(
+        &self,
+        fields: &'tcx [hir::ExprMapField<'tcx>],
+        rest: hir::MapTailExpr<'tcx>,
+        expected: Expectation<'tcx>,
+        expr: &'tcx hir::Expr<'tcx>,
+    ) -> Ty<'tcx> {
+        let tcx = self.tcx;
+
+        let (key_hint, value_hint) = expected
+            .to_option(self)
+            .and_then(|ty| {
+                let ty = self.resolve_vars_with_obligations(ty);
+                match *ty.kind() {
+                    ty::Map(key, value) => Some((key, value)),
+                    _ => None,
+                }
+            })
+            .unwrap_or_else(|| (self.next_ty_var(expr.span), self.next_ty_var(expr.span)));
+
+        // A base fixes the entry types; so does error-recovery,
+        // to avoid unnecessary inference diagnostics.
+        let fixed_types = match rest {
+            hir::MapTailExpr::Base(base) => {
+                let expected_ty = Ty::new_map(tcx, key_hint, value_hint);
+                let base_ty = self.check_expr_coercible_to_type(base, expected_ty, None);
+                let base_ty = self.structurally_resolve_type(base.span, base_ty);
+
+                Some(match *base_ty.kind() {
+                    ty::Map(key, value) => (key, value),
+                    // Checking the base already reported the mismatch. Keep checking the
+                    // entries so errors in them are not suppressed.
+                    _ => (key_hint, value_hint),
+                })
+            }
+            hir::MapTailExpr::NoneWithError(guaranteed) => {
+                self.infcx.set_tainted_by_errors(guaranteed);
+                Some((key_hint, value_hint))
+            }
+            hir::MapTailExpr::None => None,
+        };
+
+        if let Some((key_ty, value_ty)) = fixed_types {
+            for field in fields {
+                self.check_expr_coercible_to_type(field.key, key_ty, None);
+                self.check_expr_coercible_to_type(field.value, value_ty, None);
+            }
+
+            return Ty::new_map(tcx, key_ty, value_ty);
+        }
+
+        if fields.is_empty() {
+            return Ty::new_map(tcx, key_hint, value_hint);
+        }
+
+        // Avoid using original ty vars as coerce targets
+        // if they may resolve during the first coercion.
+        let key_coerce_to = self
+            .resolve_vars_with_obligations(key_hint)
+            .is_ty_var()
+            .then(|| self.next_ty_var(expr.span))
+            .unwrap_or(key_hint);
+        let mut key_coerce = CoerceMany::with_capacity(key_coerce_to, fields.len());
+
+        let value_coerce_to = self
+            .resolve_vars_with_obligations(value_hint)
+            .is_ty_var()
+            .then(|| self.next_ty_var(expr.span))
+            .unwrap_or(value_hint);
+        let mut value_coerce = CoerceMany::with_capacity(value_coerce_to, fields.len());
+
+        for field in fields {
+            let key_ty = self.check_expr_with_hint(field.key, key_coerce_to);
+            let cause = self.misc(field.key.span);
+            key_coerce.coerce(self, &cause, field.key, key_ty);
+
+            let value_ty = self.check_expr_with_hint(field.value, value_coerce_to);
+            let cause = self.misc(field.value.span);
+            value_coerce.coerce(self, &cause, field.value, value_ty);
+        }
+
+        Ty::new_map(tcx, key_coerce.complete(self), value_coerce.complete(self))
     }
 
     fn suggest_array_len(&self, expr: &'tcx hir::Expr<'tcx>, array_len: u64) {

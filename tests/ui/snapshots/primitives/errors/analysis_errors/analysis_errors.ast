@@ -1,0 +1,22 @@
+pub fn bad_base(base: int) -> #{str => int} { #{"a" => 1, ..base} }
+
+#[allow(unreachable_code)]
+pub fn diverging_base(base: #{str => int}) -> #{str => int} {
+    #{"a" => 1, ..return base}
+}
+
+pub fn bad_keys() -> #{str => int} { #{"a" => 1, 2 => 3} }
+
+pub fn bad_values() -> #{str => int} { #{"a" => 1, "b" => "x"} }
+
+pub fn functional_update(map: #{str => int}, rest: #{str => int}) {
+    #{..rest} = map;
+}
+
+pub fn destructuring_missing_rest(map: #{str => int}) { #{} = map; }
+
+pub fn computed_key(map: #{int => int}) -> int {
+    match map { #{1 + 1 => value, ..} => value, _ => 0, }
+}
+
+pub fn unconstrained() { let value = #{}; }

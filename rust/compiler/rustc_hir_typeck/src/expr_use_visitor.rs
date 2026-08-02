@@ -468,6 +468,16 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
                 self.consume_exprs(exprs)?;
             }
 
+            hir::ExprKind::Map(fields, rest) => {
+                if let hir::MapTailExpr::Base(base) = rest {
+                    self.consume_expr(base)?;
+                }
+                for field in fields {
+                    self.consume_expr(field.key)?;
+                    self.consume_expr(field.value)?;
+                }
+            }
+
             hir::ExprKind::AddrOf(_, m, base) => {
                 // &base
                 // make sure that the thing we are pointing out stays valid
@@ -949,6 +959,11 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
                         read_discriminant();
                     }
                 }
+                PatKind::Map(fields, _) => {
+                    if !fields.is_empty() {
+                        read_discriminant();
+                    }
+                }
                 PatKind::Or(_)
                 | PatKind::Box(_)
                 | PatKind::Ref(..)
@@ -1370,6 +1385,7 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
             | hir::ExprKind::Cast(..)
             | hir::ExprKind::DropTemps(..)
             | hir::ExprKind::Array(..)
+            | hir::ExprKind::Map(..)
             | hir::ExprKind::If(..)
             | hir::ExprKind::Tup(..)
             | hir::ExprKind::Binary(..)
@@ -1806,6 +1822,19 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
                 }
                 for after_pat in after {
                     self.cat_pattern(elt_place.clone(), after_pat, op)?;
+                }
+            }
+
+            PatKind::Map(fields, _) => {
+                for field in fields {
+                    let value_ty = self.pat_ty_adjusted(field.pat)?;
+                    let value_place = self.cat_projection(
+                        pat.hir_id,
+                        place_with_id.clone(),
+                        value_ty,
+                        ProjectionKind::Index,
+                    );
+                    self.cat_pattern(value_place, field.pat, op)?;
                 }
             }
 

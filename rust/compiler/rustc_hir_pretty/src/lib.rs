@@ -197,6 +197,7 @@ impl<'a> State<'a> {
             Node::TyPat(a) => self.print_ty_pat(a),
             Node::PatField(a) => self.print_patfield(a),
             Node::PatExpr(a) => self.print_pat_expr(a),
+            Node::PatMapKey(a) => self.print_pat_expr(&a.0),
             Node::Arm(a) => self.print_arm(a),
             Node::Infer(_) => self.word("_"),
             Node::PreciseCapturingNonLifetimeArg(param) => self.print_ident(param.ident),
@@ -391,6 +392,13 @@ impl<'a> State<'a> {
                 self.word("[");
                 self.print_type(ty);
                 self.word("]");
+            }
+            hir::TyKind::Map(key, value) => {
+                self.word("#{");
+                self.print_type(key);
+                self.word(" => ");
+                self.print_type(value);
+                self.word("}");
             }
             hir::TyKind::Ptr(ref mt) => {
                 self.word("*");
@@ -1278,6 +1286,26 @@ impl<'a> State<'a> {
         self.end(ib)
     }
 
+    fn print_expr_map(&mut self, fields: &[hir::ExprMapField<'_>], rest: hir::MapTailExpr<'_>) {
+        let ib = self.ibox(INDENT_UNIT);
+        self.word("#{");
+        self.commasep(Inconsistent, fields, |s, field| {
+            s.print_expr(field.key);
+            s.space();
+            s.word_space("=>");
+            s.print_expr(field.value);
+        });
+        if let hir::MapTailExpr::Base(base) = rest {
+            if !fields.is_empty() {
+                self.word_space(",");
+            }
+            self.word("..");
+            self.print_expr(base);
+        }
+        self.word("}");
+        self.end(ib);
+    }
+
     fn print_inline_const(&mut self, constant: &hir::ConstBlock) {
         let ib = self.ibox(INDENT_UNIT);
         self.word_space("const");
@@ -1544,6 +1572,9 @@ impl<'a> State<'a> {
         match expr.kind {
             hir::ExprKind::Array(exprs) => {
                 self.print_expr_vec(exprs);
+            }
+            hir::ExprKind::Map(fields, rest) => {
+                self.print_expr_map(fields, rest);
             }
             hir::ExprKind::ConstBlock(ref anon_const) => {
                 self.print_inline_const(anon_const);
@@ -2151,6 +2182,20 @@ impl<'a> State<'a> {
                 }
                 self.commasep(Inconsistent, after, |s, p| s.print_pat(p));
                 self.word("]");
+            }
+            PatKind::Map(fields, _) => {
+                self.word("#{");
+                self.commasep(Inconsistent, fields, |s, field| {
+                    s.print_pat_expr(&field.key.0);
+                    s.space();
+                    s.word_space("=>");
+                    s.print_pat(field.pat);
+                });
+                if !fields.is_empty() {
+                    self.word_space(",");
+                }
+                self.word("..");
+                self.word("}");
             }
             PatKind::Guard(inner, cond) => {
                 self.print_pat(inner);

@@ -395,6 +395,7 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
             ty::Float
             | ty::Str
             | ty::Term
+            | ty::Map(_, _)
             | ty::Foreign(_)
             | ty::RawPtr(_, _)
             | ty::FnDef(_, _)
@@ -611,6 +612,11 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
                     .map(|(i, p)| p.at_index(i))
                     .collect();
                 arity = kind.arity();
+            }
+            PatKind::Map { fields: map_fields } => {
+                ctor = if map_fields.is_empty() { Wildcard } else { Opaque(OpaqueId::new()) };
+                fields = vec![];
+                arity = 0;
             }
             PatKind::Or { .. } => {
                 ctor = Or;

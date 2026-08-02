@@ -710,6 +710,7 @@ impl Token {
             Minus |                              // negative literal
             AndAnd |                             // double reference
             Literal(_) |                         // literal
+            Pound |                              // map pattern
             DotDot |                             // range pattern (future compat)
             DotDotDot |                          // range pattern (future compat)
             PathSep |                            // path
@@ -735,6 +736,7 @@ impl Token {
                 ident_can_begin_type(name, self.span, is_raw), // type name or keyword
             OpenParen                         | // tuple
             OpenBracket                       | // array
+            Pound                             | // map
             Bang                              | // never
             Star                              | // raw pointer
             And                               | // reference

@@ -1066,6 +1066,13 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
                 ty.print(self)?;
                 write!(self, "]")?;
             }
+            ty::Map(key, value) => {
+                write!(self, "#{{")?;
+                key.print(self)?;
+                write!(self, " => ")?;
+                value.print(self)?;
+                write!(self, "}}")?;
+            }
         }
 
         Ok(())

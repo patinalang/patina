@@ -1,8 +1,0 @@
-error: THIR pattern kind not yet implemented: Constant { value: Value { ty: int, valtree: Leaf(0x00000000000000000000000000000001) } }
-  --> tests/ui/src/flow_control/match/destructuring/destructure_structures__01.pt:14:19
-   |
-LL |         Foo { x: (1, b), y } => println!("First of x is 1, b = {},  y = {} ", b, y),
-   |                   ^
-
-error: aborting due to 1 previous error
-

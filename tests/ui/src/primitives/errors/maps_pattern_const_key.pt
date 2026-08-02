@@ -1,0 +1,8 @@
+const NAME_KEY: str = "name";
+
+pub fn const_key(map: #{str => int}) -> int {
+    match map {
+        #{NAME_KEY => value, ..} => value,
+        _ => 0,
+    }
+}

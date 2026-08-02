@@ -494,6 +494,24 @@ impl<'a, 'tcx> ThirPrinter<'a, 'tcx> {
                 print_indented!(self, "]", depth_lvl + 1);
                 print_indented!(self, "}", depth_lvl);
             }
+            Map { fields, base } => {
+                print_indented!(self, "Map {", depth_lvl);
+                print_indented!(self, "fields: [", depth_lvl + 1);
+                for field in fields.iter() {
+                    print_indented!(self, "MapFieldExpr {", depth_lvl + 2);
+                    print_indented!(self, "key:", depth_lvl + 3);
+                    self.print_expr(field.key, depth_lvl + 4);
+                    print_indented!(self, "value:", depth_lvl + 3);
+                    self.print_expr(field.value, depth_lvl + 4);
+                    print_indented!(self, "}", depth_lvl + 2);
+                }
+                print_indented!(self, "]", depth_lvl + 1);
+                if let Some(base) = base {
+                    print_indented!(self, "base:", depth_lvl + 1);
+                    self.print_expr(*base, depth_lvl + 2);
+                }
+                print_indented!(self, "}", depth_lvl);
+            }
             Tuple { fields } => {
                 print_indented!(self, "Tuple {", depth_lvl);
                 print_indented!(self, "fields: [", depth_lvl + 1);
@@ -839,6 +857,18 @@ impl<'a, 'tcx> ThirPrinter<'a, 'tcx> {
                 }
                 print_indented!(self, "]", depth_lvl + 2);
 
+                print_indented!(self, "}", depth_lvl + 1);
+            }
+            PatKind::Map { fields } => {
+                print_indented!(self, "Map {", depth_lvl + 1);
+                print_indented!(self, "fields: [", depth_lvl + 2);
+                for field in fields {
+                    print_indented!(self, "key:", depth_lvl + 3);
+                    self.print_pat(&field.key, depth_lvl + 4);
+                    print_indented!(self, "pattern:", depth_lvl + 3);
+                    self.print_pat(&field.pattern, depth_lvl + 4);
+                }
+                print_indented!(self, "]", depth_lvl + 2);
                 print_indented!(self, "}", depth_lvl + 1);
             }
             PatKind::Or { pats } => {

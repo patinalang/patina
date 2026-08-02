@@ -140,6 +140,23 @@ impl<'hir> LoweringContext<'_, 'hir> {
                         );
                     }
                     PatKind::Slice(pats) => break self.lower_pat_slice(pats),
+                    PatKind::Map(map_fields, rest) => {
+                        let fields = self.arena.alloc_from_iter(map_fields.iter().map(|field| {
+                            hir::PatMapField {
+                                key: self.lower_pat_map_key(&field.key),
+                                pat: self.lower_pat(&field.pat),
+                                span: self.lower_span(field.span),
+                            }
+                        }));
+                        let rest = match rest {
+                            ast::PatMapFieldsRest::Rest(span) => self.lower_span(*span),
+                            ast::PatMapFieldsRest::Recovered(_) => Span::default(),
+                            ast::PatMapFieldsRest::None => {
+                                span_bug!(pattern.span, "map pattern without required `..`")
+                            }
+                        };
+                        break hir::PatKind::Map(fields, rest);
+                    }
                     PatKind::Rest => {
                         // If we reach here the `..` pattern is not semantically allowed.
                         break self.ban_illegal_rest_pat(pattern.span);
@@ -394,6 +411,11 @@ impl<'hir> LoweringContext<'_, 'hir> {
         expr: &Expr,
         allow_paths: bool,
     ) -> &'hir hir::PatExpr<'hir> {
+        let expr = self.do_lower_expr_within_pat(expr, allow_paths);
+        self.arena.alloc(expr)
+    }
+
+    fn do_lower_expr_within_pat(&mut self, expr: &Expr, allow_paths: bool) -> hir::PatExpr<'hir> {
         let span = self.lower_span(expr.span);
         let err =
             |guar| hir::PatExprKind::Lit { lit: respan(span, LitKind::Err(guar)), negated: false };
@@ -434,7 +456,12 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 err(guar)
             }
         };
-        self.arena.alloc(hir::PatExpr { hir_id: self.lower_node_id(expr.id), span, kind })
+        hir::PatExpr { hir_id: self.lower_node_id(expr.id), span, kind }
+    }
+
+    pub(super) fn lower_pat_map_key(&mut self, expr: &Expr) -> &'hir hir::PatMapKey<'hir> {
+        let expr = self.do_lower_expr_within_pat(expr, true);
+        self.arena.alloc(hir::PatMapKey(expr))
     }
 
     pub(crate) fn lower_ty_pat(

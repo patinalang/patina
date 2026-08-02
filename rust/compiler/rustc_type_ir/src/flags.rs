@@ -325,6 +325,11 @@ impl<I: Interner> FlagComputation<I> {
 
             ty::Slice(tt) => self.add_ty(tt),
 
+            ty::Map(key, value) => {
+                self.add_ty(key);
+                self.add_ty(value);
+            }
+
             ty::RawPtr(ty, _) => {
                 self.add_ty(ty);
             }

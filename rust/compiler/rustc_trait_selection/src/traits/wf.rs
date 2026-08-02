@@ -747,6 +747,11 @@ impl<'a, 'tcx> TypeVisitor<TyCtxt<'tcx>> for WfPredicates<'a, 'tcx> {
                 self.require_sized(subty, ObligationCauseCode::SliceOrArrayElem);
             }
 
+            ty::Map(key, value) => {
+                self.require_sized(key, ObligationCauseCode::MapKeyOrValue);
+                self.require_sized(value, ObligationCauseCode::MapKeyOrValue);
+            }
+
             ty::Array(subty, len) => {
                 self.require_sized(subty, ObligationCauseCode::SliceOrArrayElem);
                 // Note that the len being WF is implicitly checked while visiting.

@@ -149,6 +149,34 @@ pub(crate) struct FunctionalRecordUpdateDestructuringAssignment {
 }
 
 #[derive(Diagnostic)]
+#[diag("functional map updates are not allowed in destructuring assignments")]
+pub(crate) struct FunctionalMapUpdateDestructuringAssignment {
+    #[primary_span]
+    #[suggestion(
+        "consider removing the trailing pattern",
+        code = "",
+        applicability = "machine-applicable"
+    )]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("map patterns must include `..`")]
+#[note("map patterns perform a subset match; use an explicit `map_size` or `==` for equality")]
+pub(crate) struct MapPatternMissingRest {
+    #[primary_span]
+    pub span: Span,
+    #[suggestion(
+        "consider adding `..` to the pattern",
+        style = "verbose",
+        code = "{suggestion_code}",
+        applicability = "maybe-incorrect"
+    )]
+    pub suggestion_span: Span,
+    pub suggestion_code: &'static str,
+}
+
+#[derive(Diagnostic)]
 #[diag("`async` coroutines are not yet supported", code = E0727)]
 pub(crate) struct AsyncCoroutinesNotSupported {
     #[primary_span]
@@ -333,7 +361,7 @@ pub(crate) struct ExtraDoubleDot<'a> {
 }
 
 #[derive(Diagnostic)]
-#[note("only allowed in tuple, tuple struct, and slice patterns")]
+#[note("only allowed in tuple, tuple struct, slice, and map patterns")]
 #[diag("`..` patterns are not allowed here")]
 pub(crate) struct MisplacedDoubleDot {
     #[primary_span]

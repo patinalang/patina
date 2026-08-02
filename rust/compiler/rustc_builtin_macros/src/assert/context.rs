@@ -1,8 +1,8 @@
 use rustc_ast::token::{self, Delimiter, IdentIsRaw};
 use rustc_ast::tokenstream::{DelimSpan, TokenStream, TokenTree};
 use rustc_ast::{
-    BinOpKind, BorrowKind, DUMMY_NODE_ID, DelimArgs, Expr, ExprKind, ItemKind, MacCall, MethodCall,
-    Mutability, Path, PathSegment, Stmt, StructRest, UnOp, UseTree, UseTreeKind,
+    BinOpKind, BorrowKind, DUMMY_NODE_ID, DelimArgs, Expr, ExprKind, ItemKind, MacCall, MapRest,
+    MethodCall, Mutability, Path, PathSegment, Stmt, StructRest, UnOp, UseTree, UseTreeKind,
 };
 use rustc_ast_pretty::pprust;
 use rustc_data_structures::fx::FxHashSet;
@@ -197,6 +197,15 @@ impl<'cx, 'a> Context<'cx, 'a> {
             ExprKind::Array(local_exprs) => {
                 for local_expr in local_exprs {
                     self.manage_cond_expr(local_expr);
+                }
+            }
+            ExprKind::Map(map) => {
+                for field in &mut map.fields {
+                    self.manage_cond_expr(&mut field.key);
+                    self.manage_cond_expr(&mut field.value);
+                }
+                if let MapRest::Base(base) = &mut map.rest {
+                    self.manage_cond_expr(base);
                 }
             }
             ExprKind::Binary(op, lhs, rhs) => {

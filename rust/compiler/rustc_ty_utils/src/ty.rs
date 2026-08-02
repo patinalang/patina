@@ -39,6 +39,7 @@ fn sizedness_constraint_for_ty<'tcx>(
         | ty::CoroutineWitness(..)
         | ty::Str
         | ty::Term
+        | ty::Map(..)
         | ty::Slice(..)
         | ty::Never => None,
 
@@ -402,6 +403,7 @@ fn impl_self_is_guaranteed_unsized<'tcx>(tcx: TyCtxt<'tcx>, impl_def_id: DefId) 
         | ty::Infer(_)
         | ty::Str
         | ty::Term
+        | ty::Map(_, _)
         | ty::Slice(_)
         | ty::Error(_) => false,
     }

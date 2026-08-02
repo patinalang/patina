@@ -15,14 +15,15 @@ use rustc_hir::pat_util::EnumerateAndAdjustIterator;
 use rustc_hir::{self as hir, RangeEnd};
 use rustc_index::Idx;
 use rustc_middle::thir::{
-    Ascription, DerefPatBorrowMode, FieldPat, LocalVarId, Pat, PatKind, PatRange, PatRangeBoundary,
+    Ascription, DerefPatBorrowMode, FieldPat, LocalVarId, MapFieldPat, Pat, PatKind, PatRange,
+    PatRangeBoundary,
 };
 use rustc_middle::ty::adjustment::{PatAdjust, PatAdjustment};
 use rustc_middle::ty::{
     self, CanonicalUserTypeAnnotation, LitToConstInput, Ty, TyCtxt, const_lit_matches_ty,
 };
 use rustc_middle::{bug, span_bug};
-use rustc_span::ErrorGuaranteed;
+use rustc_span::{ErrorGuaranteed, Span};
 use tracing::{debug, instrument};
 
 pub(crate) use self::check_match::check_match;
@@ -411,6 +412,17 @@ impl<'tcx, 'ptcx> PatCtxt<'tcx, 'ptcx> {
                 return self.lower_variant_or_leaf(pat, None, res, subpatterns);
             }
 
+            hir::PatKind::Map(fields, _) => {
+                let fields = fields
+                    .iter()
+                    .map(|field| MapFieldPat {
+                        key: *self.lower_map_key(field.key),
+                        pattern: *self.lower_pattern(field.pat),
+                    })
+                    .collect();
+                PatKind::Map { fields }
+            }
+
             hir::PatKind::Or(pats) => PatKind::Or { pats: self.lower_patterns(pats) },
 
             hir::PatKind::Guard(pat, condition) => PatKind::Guard {
@@ -606,20 +618,30 @@ impl<'tcx, 'ptcx> PatCtxt<'tcx, 'ptcx> {
         let ty = self.typeck_results.node_type(id);
         let res = self.typeck_results.qpath_res(qpath, id);
 
+        if let Some(pattern) = self.lower_const_pat_expr(id, span, ty, res) {
+            pattern
+        } else {
+            // The path isn't the name of a constant, so it must actually
+            // be a unit struct or unit variant (e.g. `Option::None`).
+            self.lower_variant_or_leaf(pat, Some(expr), res, vec![])
+        }
+    }
+
+    fn lower_const_pat_expr(
+        &mut self,
+        id: hir::HirId,
+        span: Span,
+        ty: Ty<'tcx>,
+        res: Res,
+    ) -> Option<Box<Pat<'tcx>>> {
         let (def_id, user_ty) = match res {
             Res::Def(DefKind::Const { .. }, def_id)
             | Res::Def(DefKind::AssocConst { .. }, def_id) => {
                 (def_id, self.typeck_results.user_provided_types().get(id))
             }
-
-            _ => {
-                // The path isn't the name of a constant, so it must actually
-                // be a unit struct or unit variant (e.g. `Option::None`).
-                return self.lower_variant_or_leaf(pat, Some(expr), res, vec![]);
-            }
+            _ => return None,
         };
 
-        // Lower the named constant to a THIR pattern.
         let args = self.typeck_results.node_args(id);
         // FIXME(mgca): we will need to special case IACs here to have type system compatible
         // generic args, instead of how we represent them in body expressions.
@@ -643,7 +665,7 @@ impl<'tcx, 'ptcx> PatCtxt<'tcx, 'ptcx> {
                 .push(Ascription { annotation, variance: ty::Contravariant });
         }
 
-        pattern
+        Some(pattern)
     }
 
     /// Lowers the kinds of "expression" that can appear in a HIR pattern:
@@ -668,19 +690,51 @@ impl<'tcx, 'ptcx> PatCtxt<'tcx, 'ptcx> {
                 // patterns to `str`, and byte-string literal patterns to `[u8; N]` or `[u8]`.
 
                 let pat_ty = self.typeck_results.node_type(pat.hir_id);
-                let lit_input = LitToConstInput { lit: lit.node, ty: Some(pat_ty), neg: *negated };
-                let constant = const_lit_matches_ty(self.tcx, &lit.node, pat_ty, *negated)
-                    .then(|| self.tcx.at(expr.span).lit_to_const(lit_input))
-                    .flatten()
-                    .map(|v| ty::Const::new_value(self.tcx, v.valtree, pat_ty))
-                    .unwrap_or_else(|| {
-                        ty::Const::new_error_with_message(
-                            self.tcx,
-                            expr.span,
-                            "literal does not match expected type",
-                        )
-                    });
-                self.const_to_pat(constant, pat_ty, expr.hir_id, lit.span)
+                self.lower_pat_expr_lit(expr, lit, negated, pat_ty)
+            }
+        }
+    }
+
+    fn lower_pat_expr_lit(
+        &mut self,
+        expr: &'tcx hir::PatExpr<'tcx>,
+        lit: &hir::Lit,
+        negated: &bool,
+        pat_ty: Ty<'tcx>,
+    ) -> Box<Pat<'tcx>> {
+        let lit_input = LitToConstInput { lit: lit.node, ty: Some(pat_ty), neg: *negated };
+        let constant = const_lit_matches_ty(self.tcx, &lit.node, pat_ty, *negated)
+            .then(|| self.tcx.at(expr.span).lit_to_const(lit_input))
+            .flatten()
+            .map(|v| ty::Const::new_value(self.tcx, v.valtree, pat_ty))
+            .unwrap_or_else(|| {
+                ty::Const::new_error_with_message(
+                    self.tcx,
+                    expr.span,
+                    "literal does not match expected type",
+                )
+            });
+        self.const_to_pat(constant, pat_ty, expr.hir_id, lit.span)
+    }
+
+    /// Lowers a map key using the type stored directly on the key's HIR node.
+    fn lower_map_key(&mut self, key: &'tcx hir::PatMapKey<'tcx>) -> Box<Pat<'tcx>> {
+        let hir::PatMapKey(expr) = key;
+        let ty = self.typeck_results.node_type(expr.hir_id);
+        match &expr.kind {
+            hir::PatExprKind::Lit { lit, negated } => {
+                self.lower_pat_expr_lit(expr, lit, negated, ty)
+            }
+            hir::PatExprKind::Path(qpath) => {
+                let res = self.typeck_results.qpath_res(qpath, expr.hir_id);
+                self.lower_const_pat_expr(expr.hir_id, expr.span, ty, res).unwrap_or_else(|| {
+                    let constant = ty::Const::new_error_with_message(
+                        self.tcx,
+                        expr.span,
+                        "map pattern key did not resolve to a constant",
+                    );
+                    self.const_to_pat(constant, ty, expr.hir_id, expr.span)
+                })
             }
         }
     }

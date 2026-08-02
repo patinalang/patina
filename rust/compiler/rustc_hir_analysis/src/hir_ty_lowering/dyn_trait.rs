@@ -565,6 +565,12 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                 kind: hir::PatExprKind::Path(hir::QPath::TypeRelative(qself, _)),
                 ..
             }) if qself.hir_id == hir_id => true,
+            hir::Node::PatMapKey(hir::PatMapKey(hir::PatExpr {
+                kind: hir::PatExprKind::Path(qpath),
+                ..
+            })) if matches!(qpath, hir::QPath::TypeRelative(qself, _) if qself.hir_id == hir_id) => {
+                true
+            }
             _ => false,
         };
         let needs_bracket = in_path
@@ -781,6 +787,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             hir::Node::Ty(_)
             | hir::Node::Expr(_)
             | hir::Node::PatExpr(_)
+            | hir::Node::PatMapKey(_)
             | hir::Node::PathSegment(_)
             | hir::Node::AssocItemConstraint(_)
             | hir::Node::TraitRef(_)

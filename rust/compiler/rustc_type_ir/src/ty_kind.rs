@@ -130,6 +130,9 @@ pub enum TyKind<I: Interner> {
     /// An opaque Erlang term. Written as `term`. Has no literal form.
     Term,
 
+    /// A homogeneous map. Written as `#{K => V}`.
+    Map(I::Ty, I::Ty),
+
     /// An array with the given length. Written as `[T; N]`.
     Array(I::Ty, I::Const),
 
@@ -337,6 +340,7 @@ impl<I: Interner> TyKind<I> {
             | ty::Foreign(_)
             | ty::Str
             | ty::Term
+            | ty::Map(_, _)
             | ty::Array(_, _)
             | ty::Pat(_, _)
             | ty::Slice(_)
@@ -389,6 +393,7 @@ impl<I: Interner> fmt::Debug for TyKind<I> {
             Foreign(d) => f.debug_tuple("Foreign").field(d).finish(),
             Str => write!(f, "str"),
             Term => write!(f, "term"),
+            Map(k, v) => write!(f, "#{{{k:?} => {v:?}}}"),
             Array(t, c) => write!(f, "[{t:?}; {c:?}]"),
             Pat(t, p) => write!(f, "pattern_type!({t:?} is {p:?})"),
             Slice(t) => write!(f, "[{:?}]", &t),

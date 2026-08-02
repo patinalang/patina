@@ -123,6 +123,15 @@ pub fn walk_expr<'thir, 'tcx: 'thir, V: Visitor<'thir, 'tcx>>(
                 visitor.visit_expr(&visitor.thir()[field]);
             }
         }
+        Map { ref fields, base } => {
+            if let Some(base) = base {
+                visitor.visit_expr(&visitor.thir()[base]);
+            }
+            for field in &**fields {
+                visitor.visit_expr(&visitor.thir()[field.key]);
+                visitor.visit_expr(&visitor.thir()[field.value]);
+            }
+        }
         Adt(box AdtExpr {
             ref fields,
             ref base,
@@ -286,6 +295,13 @@ pub(crate) fn for_each_immediate_subpat<'a, 'tcx>(
         PatKind::Slice { prefix, slice, suffix } | PatKind::Array { prefix, slice, suffix } => {
             for pat in prefix.iter().chain(slice.as_deref()).chain(suffix) {
                 callback(pat);
+            }
+        }
+
+        PatKind::Map { fields, .. } => {
+            for field in fields {
+                callback(&field.key);
+                callback(&field.pattern);
             }
         }
 

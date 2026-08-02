@@ -8,7 +8,7 @@ pub fn main() {
 
     // A type can also be inferred from context.
     let inferred_type = 12; // Type float is inferred from another line.
-    (/*ERROR*/);
+    inferred_type = add_floats(inferred_type, 3.14);
 
     // A mutable variable's value can be changed - rebound to a new value.
     let mut mutable = 12; // Mutable `int`
@@ -30,11 +30,13 @@ pub fn main() {
     let my_tuple = (5, true, -5.04);
 
     // Map's signature consists of Key type K and Value type V as #{K => V}
+    let my_map: #{float => str} = #{3.14 => "pi", 0 => "zero"};
 
     /* Function types */
 
+    let add_ref: fnref(float, float) -> float = add_float;
     // fnref is implicitly convertible to fn
-    (/*ERROR*/)
+    let add_fn: fn(float, float) -> float = add_ref;
 }
 
 fn add_floats(a: float, b: float) -> float { a + b }

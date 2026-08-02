@@ -132,6 +132,7 @@ impl CheckInlineAssembly {
         match expr.kind {
             ExprKind::ConstBlock(..)
             | ExprKind::Array(..)
+            | ExprKind::Map(..)
             | ExprKind::Call(..)
             | ExprKind::MethodCall(..)
             | ExprKind::Use(..)

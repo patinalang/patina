@@ -696,6 +696,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 | ty::Foreign(_)
                 | ty::Str
                 | ty::Term
+                | ty::Map(..)
                 | ty::Array(_, _)
                 | ty::Pat(_, _)
                 | ty::Slice(_)
@@ -873,6 +874,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 | ty::Float
                 | ty::Str
                 | ty::Term
+                | ty::Map(..)
                 | ty::Array(_, _)
                 | ty::Pat(_, _)
                 | ty::Slice(_)
@@ -1157,6 +1159,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::Str
             | ty::Term
             | ty::Slice(..)
+            | ty::Map(..)
             | ty::Never
             | ty::Ref(_, _, hir::Mutability::Not)
             | ty::Array(..) => {}
@@ -1259,6 +1262,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::CoroutineClosure(..)
             | ty::Str
             | ty::Term
+            | ty::Map(_, _)
             | ty::Slice(_)
             | ty::Never
             | ty::Error(_) => {
@@ -1337,6 +1341,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::Foreign(_)
             | ty::Str
             | ty::Term
+            | ty::Map(_, _)
             | ty::Array(_, _)
             | ty::Slice(_)
             | ty::RawPtr(_, _)
@@ -1377,6 +1382,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::Foreign(..)
             | ty::Str
             | ty::Term
+            | ty::Map(_, _)
             | ty::Array(..)
             | ty::Pat(..)
             | ty::Slice(_)
@@ -1425,6 +1431,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::Dynamic(..)
             | ty::Str
             | ty::Term
+            | ty::Map(_, _)
             | ty::Slice(_)
             | ty::Foreign(..)
             | ty::Alias(..)

@@ -143,6 +143,9 @@ fn recurse_build<'tcx>(
         ExprKind::Repeat { .. } | ExprKind::Array { .. } => {
             maybe_supported_error(GenericConstantTooComplexSub::ArrayNotSupported(node.span))?
         }
+        ExprKind::Map { .. } => {
+            maybe_supported_error(GenericConstantTooComplexSub::MapNotSupported(node.span))?
+        }
         ExprKind::NeverToAny { .. } => {
             maybe_supported_error(GenericConstantTooComplexSub::NeverToAnyNotSupported(node.span))?
         }
@@ -292,6 +295,7 @@ impl<'a, 'tcx> IsThirPolymorphic<'a, 'tcx> {
             | thir::ExprKind::Return { .. }
             | thir::ExprKind::Become { .. }
             | thir::ExprKind::Array { .. }
+            | thir::ExprKind::Map { .. }
             | thir::ExprKind::Tuple { .. }
             | thir::ExprKind::Adt(_)
             | thir::ExprKind::PlaceTypeAscription { .. }

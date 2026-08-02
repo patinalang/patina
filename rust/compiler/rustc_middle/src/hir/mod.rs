@@ -328,6 +328,7 @@ impl<'tcx> TyCtxt<'tcx> {
 
                     // Any expression child of these expressions constitute reads.
                     ExprKind::Array(_)
+                    | ExprKind::Map(_, _)
                     | ExprKind::Call(_, _)
                     | ExprKind::Use(_, _)
                     | ExprKind::MethodCall(_, _, _, _)
@@ -398,6 +399,7 @@ impl<'tcx> TyCtxt<'tcx> {
             | Node::TraitRef(_)
             | Node::PatField(_)
             | Node::PatExpr(_)
+            | Node::PatMapKey(_)
             | Node::LetStmt(_)
             | Node::Synthetic
             | Node::Err(_)

@@ -681,6 +681,11 @@ impl Pat {
             // Walk into each field of struct.
             PatKind::Struct(_, _, fields, _) => fields.iter().for_each(|field| field.pat.walk(it)),
 
+            // Walk into each value pattern of a map. Keys are expressions, not patterns.
+            PatKind::Map(fields, _) => {
+                fields.iter().for_each(|field| field.pat.walk(it));
+            }
+
             // Sequence of patterns.
             PatKind::TupleStruct(_, _, s)
             | PatKind::Tuple(s)
@@ -789,6 +794,14 @@ pub struct PatField {
     pub id: NodeId,
     pub span: Span,
     pub is_placeholder: bool,
+}
+
+/// A key/value entry in a map pattern (`key => pattern`).
+#[derive(Clone, Encodable, Decodable, Debug, Walkable)]
+pub struct PatMapField {
+    pub key: Box<Expr>,
+    pub pat: Box<Pat>,
+    pub span: Span,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -920,6 +933,9 @@ pub enum PatKind {
     /// A slice pattern `[a, b, c]`.
     Slice(ThinVec<Pat>),
 
+    /// A map pattern (e.g., `#{"name" => name, ..}`).
+    Map(ThinVec<PatMapField>, PatMapFieldsRest),
+
     /// A rest pattern `..`.
     ///
     /// Syntactically it is valid anywhere.
@@ -958,6 +974,17 @@ pub enum PatFieldsRest {
     /// `module::StructName { field, syntax error }`
     Recovered(ErrorGuaranteed),
     /// `module::StructName { field }`
+    None,
+}
+
+/// Whether the `..` is present in a map fields pattern.
+#[derive(Clone, Copy, Encodable, Decodable, Debug, PartialEq, Walkable)]
+pub enum PatMapFieldsRest {
+    /// `#{ k => v, ..}`
+    Rest(Span),
+    /// `#{ k => v, syntax error }`
+    Recovered(ErrorGuaranteed),
+    /// `#{ k => v }`
     None,
 }
 
@@ -1366,6 +1393,14 @@ pub struct ExprField {
     pub is_placeholder: bool,
 }
 
+/// A key/value entry in a map expression, e.g. `"key" => value`.
+#[derive(Clone, Encodable, Decodable, Debug, Walkable)]
+pub struct MapField {
+    pub key: Box<Expr>,
+    pub value: Box<Expr>,
+    pub span: Span,
+}
+
 #[derive(Clone, PartialEq, Encodable, Decodable, Debug, Copy, Walkable)]
 pub enum BlockCheckMode {
     Default,
@@ -1598,6 +1633,7 @@ impl Expr {
 
             // Need parens if and only if there are prefix attributes.
             ExprKind::Array(_)
+            | ExprKind::Map(_)
             | ExprKind::Await(..)
             | ExprKind::Use(..)
             | ExprKind::Block(..)
@@ -1741,11 +1777,32 @@ pub struct StructExpr {
     pub rest: StructRest,
 }
 
+#[derive(Clone, Encodable, Decodable, Debug, Walkable)]
+pub enum MapRest {
+    /// `..x`.
+    Base(Box<Expr>),
+    /// `..`.
+    Rest(Span),
+    /// No trailing `..` or expression.
+    None,
+    /// No trailing `..` or expression, and also, a parse error occurred inside the map braces.
+    NoneWithError(ErrorGuaranteed),
+}
+
+/// A map expression (`#{k => v, ..base}`).
+#[derive(Clone, Encodable, Decodable, Debug, Walkable)]
+pub struct MapExpr {
+    pub fields: ThinVec<MapField>,
+    pub rest: MapRest,
+}
+
 // Adding a new variant? Please update `test_expr` in `tests/ui/macros/stringify.rs`.
 #[derive(Clone, Encodable, Decodable, Debug)]
 pub enum ExprKind {
     /// An array (e.g, `[a, b, c, d]`).
     Array(ThinVec<Box<Expr>>),
+    /// A map expression (e.g., `#{"a" => 1, ..base}`).
+    Map(Box<MapExpr>),
     /// Allow anonymous constants from an inline `const` block.
     ConstBlock(AnonConst),
     /// A function call.
@@ -2533,6 +2590,8 @@ pub enum TyKind {
     Slice(Box<Ty>),
     /// A fixed length array (`[T; n]`).
     Array(Box<Ty>, AnonConst),
+    /// A homogeneous map type (`#{K => V}`).
+    Map(Box<Ty>, Box<Ty>),
     /// A raw pointer (`*const T` or `*mut T`).
     Ptr(MutTy),
     /// A reference (`&'a T` or `&'a mut T`).

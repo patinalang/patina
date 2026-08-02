@@ -1415,6 +1415,9 @@ impl<'hir> LoweringContext<'_, 'hir> {
             TyKind::Infer => hir::TyKind::Infer(()),
             TyKind::Err(guar) => hir::TyKind::Err(*guar),
             TyKind::Slice(ty) => hir::TyKind::Slice(self.lower_ty_alloc(ty, itctx)),
+            TyKind::Map(key, value) => {
+                hir::TyKind::Map(self.lower_ty_alloc(key, itctx), self.lower_ty_alloc(value, itctx))
+            }
             TyKind::Ptr(mt) => hir::TyKind::Ptr(self.lower_mt(mt, itctx)),
             TyKind::Ref(region, mt) => {
                 let lifetime = self.lower_ty_direct_lifetime(t, *region);

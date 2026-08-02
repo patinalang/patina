@@ -297,6 +297,7 @@ where
             | ty::Float
             | ty::Str
             | ty::Term
+            | ty::Map(_, _)
             | ty::Never
             | ty::Array(..)
             | ty::Slice(..)

@@ -48,7 +48,10 @@ impl<'a> Parser<'a> {
         let mut just_parsed_doc_comment = false;
         let start_pos = self.num_bump_calls;
         loop {
-            let attr = if self.check(exp!(Pound)) {
+            let attr = if self.check(exp!(Pound))
+                // Map expressions/types use `#{...}`; do not treat that `#` as an attribute.
+                && !self.look_ahead(1, |t| *t == token::OpenBrace)
+            {
                 let prev_outer_attr_sp = outer_attrs.last().map(|attr: &Attribute| attr.span);
 
                 let inner_error_reason = if just_parsed_doc_comment {

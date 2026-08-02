@@ -1771,6 +1771,7 @@ impl<'hir> Pat<'hir> {
                 s.walk_short_(it)
             }
             Struct(_, fields, _) => fields.iter().all(|field| field.pat.walk_short_(it)),
+            Map(fields, _) => fields.iter().all(|field| field.pat.walk_short_(it)),
             TupleStruct(_, s, _) | Tuple(s, _) | Or(s) => s.iter().all(|p| p.walk_short_(it)),
             Slice(before, slice, after) => {
                 before.iter().chain(slice).chain(after.iter()).all(|p| p.walk_short_(it))
@@ -1798,6 +1799,7 @@ impl<'hir> Pat<'hir> {
             Missing | Wild | Never | Expr(_) | Range(..) | Binding(.., None) | Err(_) => {}
             Box(s) | Deref(s) | Ref(s, _, _) | Binding(.., Some(s)) | Guard(s, _) => s.walk_(it),
             Struct(_, fields, _) => fields.iter().for_each(|field| field.pat.walk_(it)),
+            Map(fields, _) => fields.iter().for_each(|field| field.pat.walk_(it)),
             TupleStruct(_, s, _) | Tuple(s, _) | Or(s) => s.iter().for_each(|p| p.walk_(it)),
             Slice(before, slice, after) => {
                 before.iter().chain(slice).chain(after.iter()).for_each(|p| p.walk_(it))
@@ -1884,6 +1886,7 @@ impl<'hir> Pat<'hir> {
             | PatKind::Expr(_)
             | PatKind::Range(_, _, _)
             | PatKind::Slice(_, _, _)
+            | PatKind::Map(_, _)
             | PatKind::Err(_) => true,
         }
     }
@@ -1905,6 +1908,17 @@ pub struct PatField<'hir> {
     pub is_shorthand: bool,
     pub span: Span,
 }
+
+/// A single `k => v` field in a map pattern.
+#[derive(Debug, Clone, Copy, StableHash)]
+pub struct PatMapField<'hir> {
+    pub key: &'hir PatMapKey<'hir>,
+    pub pat: &'hir Pat<'hir>,
+    pub span: Span,
+}
+
+#[derive(Debug, Clone, Copy, StableHash)]
+pub struct PatMapKey<'hir>(pub PatExpr<'hir>);
 
 #[derive(Copy, Clone, PartialEq, Debug, StableHash, Hash, Eq, Encodable, Decodable)]
 pub enum RangeEnd {
@@ -2053,6 +2067,9 @@ pub enum PatKind<'hir> {
     /// ```
     Slice(&'hir [Pat<'hir>], Option<&'hir Pat<'hir>>, &'hir [Pat<'hir>]),
 
+    /// A partial map pattern. The `Span` contains the span of the required `..`.
+    Map(&'hir [PatMapField<'hir>], Span),
+
     /// A placeholder for a pattern that wasn't well formed in some way.
     Err(ErrorGuaranteed),
 }
@@ -2142,6 +2159,13 @@ pub struct ExprField<'hir> {
     pub expr: &'hir Expr<'hir>,
     pub span: Span,
     pub is_shorthand: bool,
+}
+
+#[derive(Debug, Clone, Copy, StableHash)]
+pub struct ExprMapField<'hir> {
+    pub key: &'hir Expr<'hir>,
+    pub value: &'hir Expr<'hir>,
+    pub span: Span,
 }
 
 #[derive(Copy, Clone, PartialEq, Debug, StableHash)]
@@ -2479,6 +2503,7 @@ impl Expr<'_> {
 
             // Need parens if and only if there are prefix attributes.
             ExprKind::Array(_)
+            | ExprKind::Map(..)
             | ExprKind::Block(..)
             | ExprKind::Call(..)
             | ExprKind::ConstBlock(_)
@@ -2555,6 +2580,7 @@ impl Expr<'_> {
             | ExprKind::Block(..)
             | ExprKind::Repeat(..)
             | ExprKind::Array(..)
+            | ExprKind::Map(..)
             | ExprKind::Break(..)
             | ExprKind::Continue(..)
             | ExprKind::Ret(..)
@@ -2664,6 +2690,12 @@ impl Expr<'_> {
                 },
                 args,
             ) => args.iter().any(|arg| arg.can_have_side_effects()),
+            ExprKind::Map(fields, rest) => {
+                fields
+                    .iter()
+                    .any(|f| f.key.can_have_side_effects() || f.value.can_have_side_effects())
+                    || matches!(rest, MapTailExpr::Base(b) if b.can_have_side_effects())
+            }
             ExprKind::Repeat(arg, _) => arg.can_have_side_effects(),
             ExprKind::If(..)
             | ExprKind::Match(..)
@@ -2793,6 +2825,8 @@ pub enum ExprKind<'hir> {
     ConstBlock(ConstBlock),
     /// An array (e.g., `[a, b, c, d]`).
     Array(&'hir [Expr<'hir>]),
+    /// A map expression (e.g., `#{"a" => 1, ..base}`).
+    Map(&'hir [ExprMapField<'hir>], MapTailExpr<'hir>),
     /// A function call.
     ///
     /// The first field resolves to the function itself (usually an `ExprKind::Path`),
@@ -2942,6 +2976,17 @@ pub enum StructTailExpr<'hir> {
     /// This struct should be treated similarly to as if it had an `..` in it,
     /// in particular rather than reporting missing fields, because the parse error
     /// makes which fields the struct was intended to have not fully known.
+    NoneWithError(ErrorGuaranteed),
+}
+
+#[derive(Debug, Clone, Copy, StableHash)]
+pub enum MapTailExpr<'hir> {
+    /// A map expression that creates a map from fully enumerated fields: `#{ foo => bar }`.
+    None,
+    /// A map expression with a "base", an expression of the same type as the outer map that
+    /// will be used to populate any fields not explicitly mentioned: `#{ foo => bar, ..base }`.
+    Base(&'hir Expr<'hir>),
+    /// No trailing `..` was written, and also, a parse error occurred inside the map braces.
     NoneWithError(ErrorGuaranteed),
 }
 
@@ -3766,6 +3811,8 @@ pub enum TyKind<'hir, Unambig = ()> {
     Slice(&'hir Ty<'hir>),
     /// A fixed length array (i.e., `[T; n]`).
     Array(&'hir Ty<'hir>, &'hir ConstArg<'hir>),
+    /// A homogeneous map type (i.e., `#{K => V}`).
+    Map(&'hir Ty<'hir>, &'hir Ty<'hir>),
     /// A raw pointer (i.e., `*const T` or `*mut T`).
     Ptr(MutTy<'hir>),
     /// A reference (i.e., `&'a T` or `&'a mut T`).
@@ -4939,6 +4986,7 @@ pub enum Node<'hir> {
     TyPat(&'hir TyPat<'hir>),
     Pat(&'hir Pat<'hir>),
     PatField(&'hir PatField<'hir>),
+    PatMapKey(&'hir PatMapKey<'hir>),
     /// Needed as its own node with its own HirId for tracking
     /// the unadjusted type of literals within patterns
     /// (e.g. byte str literals not being of slice type).
@@ -5002,6 +5050,7 @@ impl<'hir> Node<'hir> {
             | Node::Pat(..)
             | Node::TyPat(..)
             | Node::PatExpr(..)
+            | Node::PatMapKey(..)
             | Node::Arm(..)
             | Node::LetStmt(..)
             | Node::Crate(..)

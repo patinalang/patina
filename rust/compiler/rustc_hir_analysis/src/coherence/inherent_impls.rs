@@ -187,6 +187,7 @@ impl<'tcx> InherentCollect<'tcx> {
             | ty::Float
             | ty::Str
             | ty::Term
+            | ty::Map(..)
             | ty::Array(..)
             | ty::Slice(_)
             | ty::RawPtr(_, _)

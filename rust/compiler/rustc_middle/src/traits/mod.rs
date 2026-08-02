@@ -193,6 +193,9 @@ pub enum ObligationCauseCode<'tcx> {
     /// A tuple is WF only if its middle elements are `Sized`.
     TupleElem,
 
+    /// A map is WF only if its key and value types are `Sized`.
+    MapKeyOrValue,
+
     /// Represents a clause that comes from a specific item.
     /// The span corresponds to the clause.
     WhereClause(DefId, Span),

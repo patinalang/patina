@@ -107,6 +107,8 @@ pub trait Ty<I: Interner<Ty = Self>>:
 
     fn new_slice(interner: I, ty: Self) -> Self;
 
+    fn new_map(interner: I, key: Self, value: Self) -> Self;
+
     fn new_tup(interner: I, tys: &[I::Ty]) -> Self;
 
     fn new_tup_from_iter<It, T>(interner: I, iter: It) -> T::Output
@@ -185,6 +187,7 @@ pub trait Ty<I: Interner<Ty = Self>>:
             | ty::CoroutineWitness(_, _)
             | ty::Str
             | ty::Term
+            | ty::Map(_, _)
             | ty::Slice(_)
             | ty::Never
             | ty::Tuple(_)

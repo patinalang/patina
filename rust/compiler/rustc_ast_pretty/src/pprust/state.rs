@@ -1329,6 +1329,13 @@ impl<'a> State<'a> {
                 self.print_type(ty);
                 self.word("]");
             }
+            ast::TyKind::Map(key, value) => {
+                self.word("#{");
+                self.print_type(key);
+                self.word(" => ");
+                self.print_type(value);
+                self.word("}");
+            }
             ast::TyKind::Ptr(mt) => {
                 self.word("*");
                 self.print_mt(mt, true);
@@ -2035,6 +2042,25 @@ impl<'a> State<'a> {
                 self.word("[");
                 self.commasep(Inconsistent, elts, |s, p| s.print_pat(p));
                 self.word("]");
+            }
+            PatKind::Map(fields, rest) => {
+                self.word("#{");
+                self.commasep(Inconsistent, fields, |s, field| {
+                    s.print_expr(&field.key, FixupContext::default());
+                    s.space();
+                    s.word_space("=>");
+                    s.print_pat(&field.pat);
+                });
+                if let ast::PatMapFieldsRest::Rest(_) | ast::PatMapFieldsRest::Recovered(_) = rest {
+                    if !fields.is_empty() {
+                        self.word_space(",");
+                    }
+                    self.word("..");
+                    if let ast::PatMapFieldsRest::Recovered(_) = rest {
+                        self.word("/* recovered parse error */");
+                    }
+                }
+                self.word("}");
             }
             PatKind::Rest => self.word(".."),
             PatKind::Paren(inner) => {

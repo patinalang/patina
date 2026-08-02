@@ -646,6 +646,7 @@ where
             | ty::Coroutine(..)
             | ty::CoroutineWitness(..)
             | ty::Term
+            | ty::Map(_, _)
             | ty::Never
             | ty::Str
             | ty::Slice(_)
@@ -912,6 +913,7 @@ where
             | ty::Adt(_, _)
             | ty::Str
             | ty::Term
+            | ty::Map(_, _)
             | ty::Slice(_)
             | ty::Dynamic(_, _)
             | ty::Tuple(_)

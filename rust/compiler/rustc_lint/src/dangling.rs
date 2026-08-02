@@ -307,6 +307,8 @@ fn is_temporary_rvalue(expr: &Expr<'_>) -> bool {
         // FIXME: this has false negatives, but I do not want to deal with 'static/const promotion just yet.
         ExprKind::Array(..) => false,
 
+        ExprKind::Map(..) => false,
+
         // These typecheck to `!`
         ExprKind::Break(..) | ExprKind::Continue(..) | ExprKind::Ret(..) | ExprKind::Become(..) => {
             false

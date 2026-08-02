@@ -394,6 +394,8 @@ macro_rules! common_visitor_and_walkers {
             ThinVec<Box<Ty>>,
             ThinVec<TyPat>,
             ThinVec<EiiImpl>,
+            ThinVec<MapField>,
+            ThinVec<PatMapField>,
         );
 
         // This macro generates `impl Visitable` and `impl MutVisitable` that forward to `Walkable`
@@ -457,6 +459,9 @@ macro_rules! common_visitor_and_walkers {
             MacStmtStyle,
             MatchKind,
             MethodCall,
+            MapExpr,
+            MapField,
+            MapRest,
             ModKind,
             ModSpans,
             MutTy,
@@ -464,6 +469,8 @@ macro_rules! common_visitor_and_walkers {
             AttrItemKind,
             Parens,
             ParenthesizedArgs,
+            PatMapField,
+            PatMapFieldsRest,
             PatFieldsRest,
             PatKind,
             RangeEnd,
@@ -975,6 +982,8 @@ macro_rules! common_visitor_and_walkers {
             match kind {
                 ExprKind::Array(exprs) =>
                     visit_visitable!($($mut)? vis, exprs),
+                ExprKind::Map(map) =>
+                    visit_visitable!($($mut)? vis, map),
                 ExprKind::ConstBlock(anon_const) =>
                     visit_visitable!($($mut)? vis, anon_const),
                 ExprKind::Repeat(element, count) =>

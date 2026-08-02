@@ -297,6 +297,8 @@ impl<'a> Parser<'a> {
             self.parse_ty_ptr()?
         } else if self.eat(exp!(OpenBracket)) {
             self.parse_array_or_slice_ty()?
+        } else if self.is_map() {
+            self.parse_map_ty()?
         } else if self.check(exp!(And)) || self.check(exp!(AndAnd)) {
             // Reference
             self.expect_and()?;
@@ -646,6 +648,18 @@ impl<'a> Parser<'a> {
         };
 
         Ok(ty)
+    }
+
+    /// Parses a map type (`#{K => V}`).
+    /// The `#` and `{` tokens have not been eaten yet.
+    fn parse_map_ty(&mut self) -> PResult<'a, TyKind> {
+        self.bump(); // `#`
+        self.expect(exp!(OpenBrace))?;
+        let key = self.parse_ty()?;
+        self.expect(exp!(FatArrow))?;
+        let value = self.parse_ty()?;
+        self.expect(exp!(CloseBrace))?;
+        Ok(TyKind::Map(key, value))
     }
 
     /// Recover from malformed array type syntax.

@@ -62,6 +62,7 @@ Comma
 Whitespace
 Literal { kind: Float { base: Decimal, empty_exponent: false }, suffix_start: 4 }
 CloseParen
+Semi
 Whitespace
 LineComment { doc_style: None }
 Whitespace

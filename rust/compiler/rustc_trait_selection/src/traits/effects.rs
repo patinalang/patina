@@ -361,6 +361,7 @@ fn evaluate_host_effect_for_copy_clone_goal<'tcx>(
         | ty::Float
         | ty::Char
         | ty::Term
+        | ty::Map(..)
         | ty::RawPtr(..)
         | ty::Never
         | ty::Ref(_, _, ty::Mutability::Not)
@@ -488,6 +489,7 @@ fn evaluate_host_effect_for_destruct_goal<'tcx>(
         | ty::Float
         | ty::Str
         | ty::Term
+        | ty::Map(..)
         | ty::RawPtr(..)
         | ty::Ref(..)
         | ty::FnDef(..)

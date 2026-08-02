@@ -196,6 +196,7 @@ impl<I: Interner> TypeVisitor<I> for OutlivesCollector<'_, I> {
 
             ty::Adt(_, _)
             | ty::Foreign(_)
+            | ty::Map(_, _)
             | ty::Array(_, _)
             | ty::Pat(_, _)
             | ty::Slice(_)

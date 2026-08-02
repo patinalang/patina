@@ -466,6 +466,82 @@ pub(crate) struct MissingDotDot {
 }
 
 #[derive(Diagnostic)]
+#[diag("expected `..`, found `...`")]
+pub(crate) struct MissingEntriesDotDot {
+    #[primary_span]
+    pub token_span: Span,
+    #[suggestion(
+        "use `..` to fill in the rest of the entries",
+        applicability = "maybe-incorrect",
+        code = "..",
+        style = "verbose"
+    )]
+    pub sugg_span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("expected `=>` after map key")]
+pub(crate) struct InvalidMapKeySeparator {
+    #[primary_span]
+    #[suggestion(
+        "use `=>` between key and value",
+        applicability = "machine-applicable",
+        code = "=>"
+    )]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("map rest `..` must be the final entry")]
+pub(crate) struct MapRestNotFinal {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("map update `..base` must be the final entry")]
+pub(crate) struct MapUpdateNotFinal {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("cannot bind the rest of a map")]
+pub(crate) struct CannotBindMapRest {
+    #[primary_span]
+    #[suggestion(
+        "consider removing the trailing pattern",
+        code = "..",
+        applicability = "machine-applicable"
+    )]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("map patterns must include `..`")]
+#[note("map patterns perform a subset match; use an explicit `map_size` or `==` for equality")]
+pub(crate) struct MapPatternMissingRest {
+    #[primary_span]
+    pub span: Span,
+    #[suggestion(
+        "consider adding `..` to the pattern",
+        style = "verbose",
+        code = "{suggestion_code}",
+        applicability = "maybe-incorrect"
+    )]
+    pub suggestion_span: Span,
+    pub suggestion_code: &'static str,
+}
+
+#[derive(Diagnostic)]
+#[diag("`|` in a map pattern key is a bitwise-or expression, not a pattern alternative")]
+#[help("write separate map patterns on each side of `|` to match alternative keys")]
+pub(crate) struct BitOrInMapPatternKey {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag("cannot use a `block` macro fragment here")]
 pub(crate) struct InvalidBlockMacroSegment {
     #[primary_span]
@@ -771,6 +847,21 @@ pub(crate) struct CatchAfterTry {
 #[diag("cannot use a comma after the base struct")]
 #[note("the base struct must always be the last field")]
 pub(crate) struct CommaAfterBaseStruct {
+    #[primary_span]
+    pub span: Span,
+    #[suggestion(
+        "remove this comma",
+        style = "verbose",
+        applicability = "machine-applicable",
+        code = ""
+    )]
+    pub comma: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("cannot use a comma after the base map")]
+#[note("the base map must always be the last entry")]
+pub(crate) struct CommaAfterBaseMap {
     #[primary_span]
     pub span: Span,
     #[suggestion(

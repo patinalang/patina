@@ -1095,6 +1095,21 @@ impl<'tcx> ThirBuildCx<'tcx> {
             hir::ExprKind::Array(fields) => ExprKind::Array { fields: self.mirror_exprs(fields) },
             hir::ExprKind::Tup(fields) => ExprKind::Tuple { fields: self.mirror_exprs(fields) },
 
+            hir::ExprKind::Map(fields, rest) => {
+                let fields = fields
+                    .iter()
+                    .map(|field| MapFieldExpr {
+                        key: self.mirror_expr(field.key),
+                        value: self.mirror_expr(field.value),
+                    })
+                    .collect();
+                let base = match rest {
+                    hir::MapTailExpr::Base(base) => Some(self.mirror_expr(base)),
+                    hir::MapTailExpr::None | hir::MapTailExpr::NoneWithError(_) => None,
+                };
+                ExprKind::Map { fields, base }
+            }
+
             hir::ExprKind::Yield(v, _) => ExprKind::Yield { value: self.mirror_expr(v) },
             hir::ExprKind::Err(_) => unreachable!("cannot lower a `hir::ExprKind::Err` to THIR"),
         };

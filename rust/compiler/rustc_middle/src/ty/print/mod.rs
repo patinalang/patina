@@ -311,6 +311,13 @@ fn characteristic_def_id_of_type_cached<'a>(
             characteristic_def_id_of_type_cached(subty, visited)
         }
 
+        ty::Map(key, value) => [key, value].into_iter().find_map(|ty| {
+            if visited.insert(ty) {
+                return characteristic_def_id_of_type_cached(ty, visited);
+            }
+            return None;
+        }),
+
         ty::RawPtr(ty, _) => characteristic_def_id_of_type_cached(ty, visited),
 
         ty::Ref(_, ty, _) => characteristic_def_id_of_type_cached(ty, visited),

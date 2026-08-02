@@ -18,9 +18,9 @@ use visit::{Visitor, walk_expr};
 
 use super::errors::{
     AsyncCoroutinesNotSupported, AwaitOnlyInAsyncFnAndBlocks, ClosureCannotBeStatic,
-    CoroutineTooManyParameters, FunctionalRecordUpdateDestructuringAssignment,
-    InclusiveRangeWithNoEnd, MatchArmWithNoBody, NeverPatternWithBody, NeverPatternWithGuard,
-    UnderscoreExprLhsAssign,
+    CoroutineTooManyParameters, FunctionalMapUpdateDestructuringAssignment,
+    FunctionalRecordUpdateDestructuringAssignment, InclusiveRangeWithNoEnd, MapPatternMissingRest,
+    MatchArmWithNoBody, NeverPatternWithBody, NeverPatternWithGuard, UnderscoreExprLhsAssign,
 };
 use super::{
     GenericArgsMode, ImplTraitContext, LoweringContext, ParamMode, ResolverAstLoweringExt,
@@ -102,6 +102,28 @@ impl<'hir> LoweringContext<'_, 'hir> {
 
             let kind = match &e.kind {
                 ExprKind::Array(exprs) => hir::ExprKind::Array(self.lower_exprs(exprs)),
+                ExprKind::Map(map) => {
+                    let fields = self.arena.alloc_from_iter(map.fields.iter().map(|field| {
+                        hir::ExprMapField {
+                            key: self.lower_expr(&field.key),
+                            value: self.lower_expr(&field.value),
+                            span: self.lower_span(field.span),
+                        }
+                    }));
+                    let rest = match &map.rest {
+                        MapRest::Base(base) => hir::MapTailExpr::Base(self.lower_expr(base)),
+                        MapRest::Rest(span) => {
+                            let guar = self.dcx().span_err(
+                                *span,
+                                "map update `..` must be followed by a base expression",
+                            );
+                            hir::MapTailExpr::NoneWithError(guar)
+                        }
+                        MapRest::None => hir::MapTailExpr::None,
+                        MapRest::NoneWithError(guar) => hir::MapTailExpr::NoneWithError(*guar),
+                    };
+                    hir::ExprKind::Map(fields, rest)
+                }
                 ExprKind::ConstBlock(c) => hir::ExprKind::ConstBlock(self.lower_const_block(c)),
                 ExprKind::Repeat(expr, count) => {
                     let expr = self.lower_expr(expr);
@@ -1232,6 +1254,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
         fn is_ordinary(lower_ctx: &mut LoweringContext<'_, '_>, lhs: &Expr) -> bool {
             match &lhs.kind {
                 ExprKind::Array(..)
+                | ExprKind::Map(..)
                 | ExprKind::Struct(..)
                 | ExprKind::Tup(..)
                 | ExprKind::Underscore => false,
@@ -1437,6 +1460,38 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 };
                 let struct_pat = hir::PatKind::Struct(qpath, field_pats, fields_omitted);
                 return self.pat_without_dbm(lhs.span, struct_pat);
+            }
+            // Maps.
+            ExprKind::Map(map) => {
+                let field_pats =
+                    self.arena.alloc_from_iter(map.fields.iter().map(|field| hir::PatMapField {
+                        key: self.lower_pat_map_key(&field.key),
+                        pat: self.destructure_assign(&field.value, eq_sign_span, assignments),
+                        span: self.lower_span(field.span),
+                    }));
+                let rest = match &map.rest {
+                    MapRest::Rest(span) => self.lower_span(*span),
+                    MapRest::Base(base) => {
+                        self.dcx().emit_err(FunctionalMapUpdateDestructuringAssignment {
+                            span: base.span,
+                        });
+                        self.lower_span(base.span)
+                    }
+                    MapRest::None => {
+                        let (suggestion_span, suggestion_code) = match map.fields.last() {
+                            Some(field) => (field.span.shrink_to_hi(), ", .."),
+                            None => (lhs.span, "#{ .. }"),
+                        };
+                        self.dcx().emit_err(MapPatternMissingRest {
+                            span: lhs.span,
+                            suggestion_span,
+                            suggestion_code,
+                        });
+                        Span::default()
+                    }
+                    MapRest::NoneWithError(_) => Span::default(),
+                };
+                return self.pat_without_dbm(lhs.span, hir::PatKind::Map(field_pats, rest));
             }
             // Tuples.
             ExprKind::Tup(elements) => {

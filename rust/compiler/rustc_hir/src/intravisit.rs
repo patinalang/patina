@@ -342,6 +342,9 @@ pub trait Visitor<'v>: Sized {
     fn visit_pat_expr(&mut self, expr: &'v PatExpr<'v>) -> Self::Result {
         walk_pat_expr(self, expr)
     }
+    fn visit_pat_map_key(&mut self, key: &'v PatMapKey<'v>) -> Self::Result {
+        self.visit_pat_expr(&key.0)
+    }
     fn visit_lit(&mut self, _hir_id: HirId, _lit: Lit, _negated: bool) -> Self::Result {
         Self::Result::output()
     }
@@ -750,6 +753,12 @@ pub fn walk_pat<'v, V: Visitor<'v>>(visitor: &mut V, pattern: &'v Pat<'v>) -> V:
             try_visit!(visitor.visit_qpath(qpath, *hir_id, *span));
             walk_list!(visitor, visit_pat_field, fields);
         }
+        PatKind::Map(fields, _) => {
+            for field in fields {
+                try_visit!(visitor.visit_pat_map_key(field.key));
+                try_visit!(visitor.visit_pat(field.pat));
+            }
+        }
         PatKind::Or(pats) => walk_list!(visitor, visit_pat, pats),
         PatKind::Tuple(tuple_elements, _) => {
             walk_list!(visitor, visit_pat, tuple_elements);
@@ -798,6 +807,10 @@ pub fn walk_pat_expr<'v, V: Visitor<'v>>(visitor: &mut V, expr: &'v PatExpr<'v>)
     }
 }
 
+pub fn walk_pat_map_key<'v, V: Visitor<'v>>(visitor: &mut V, key: &'v PatMapKey<'v>) -> V::Result {
+    walk_pat_expr(visitor, &key.0)
+}
+
 pub fn walk_anon_const<'v, V: Visitor<'v>>(visitor: &mut V, constant: &'v AnonConst) -> V::Result {
     let AnonConst { hir_id, def_id: _, body, span: _ } = constant;
     try_visit!(visitor.visit_id(*hir_id));
@@ -819,6 +832,16 @@ pub fn walk_expr<'v, V: Visitor<'v>>(visitor: &mut V, expression: &'v Expr<'v>) 
     match *kind {
         ExprKind::Array(subexpressions) => {
             walk_list!(visitor, visit_expr, subexpressions);
+        }
+        ExprKind::Map(fields, rest) => {
+            for field in fields {
+                try_visit!(visitor.visit_expr(field.key));
+                try_visit!(visitor.visit_expr(field.value));
+            }
+            match rest {
+                MapTailExpr::Base(base) => try_visit!(visitor.visit_expr(base)),
+                MapTailExpr::None | MapTailExpr::NoneWithError(_) => {}
+            }
         }
         ExprKind::ConstBlock(ref const_block) => {
             try_visit!(visitor.visit_inline_const(const_block))
@@ -1010,6 +1033,10 @@ pub fn walk_ty<'v, V: Visitor<'v>>(visitor: &mut V, typ: &'v Ty<'v, AmbigArg>) -
 
     match *kind {
         TyKind::Slice(ref ty) => try_visit!(visitor.visit_ty_unambig(ty)),
+        TyKind::Map(ref key, ref value) => {
+            try_visit!(visitor.visit_ty_unambig(key));
+            try_visit!(visitor.visit_ty_unambig(value));
+        }
         TyKind::Ptr(ref mutable_type) => try_visit!(visitor.visit_ty_unambig(mutable_type.ty)),
         TyKind::Ref(ref lifetime, ref mutable_type) => {
             try_visit!(visitor.visit_lifetime(lifetime));

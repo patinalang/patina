@@ -99,6 +99,10 @@ fn push_inner<I: Interner>(stack: &mut TypeWalkerStack<I>, parent: I::GenericArg
             ty::Slice(ty) => {
                 stack.push(ty.into());
             }
+            ty::Map(key, value) => {
+                stack.push(value.into());
+                stack.push(key.into());
+            }
             ty::RawPtr(ty, _) => {
                 stack.push(ty.into());
             }

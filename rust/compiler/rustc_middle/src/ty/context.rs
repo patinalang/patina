@@ -1760,6 +1760,7 @@ impl<'tcx> TyCtxt<'tcx> {
                 self,
                 Adt,
                 Array,
+                Map,
                 Slice,
                 RawPtr,
                 Ref,

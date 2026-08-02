@@ -577,6 +577,8 @@ fn resolve_local<'tcx>(
 
             PatKind::Struct(_, field_pats, _) => field_pats.iter().any(|fp| is_binding_pat(fp.pat)),
 
+            PatKind::Map(fields, _) => fields.iter().any(|field| is_binding_pat(field.pat)),
+
             PatKind::Slice(pats1, pats2, pats3) => {
                 pats1.iter().any(|p| is_binding_pat(p))
                     || pats2.iter().any(|p| is_binding_pat(p))
@@ -607,6 +609,7 @@ fn resolve_local<'tcx>(
     /// ```text
     ///     E& = & ET
     ///        | StructName { ..., f: E&, ... }
+    ///        | #{ ..., E& => E&, ... }
     ///        | [ ..., E&, ... ]
     ///        | ( ..., E&, ... )
     ///        | {...; E&}
@@ -630,6 +633,12 @@ fn resolve_local<'tcx>(
             hir::ExprKind::Struct(_, fields, _) => {
                 for field in fields {
                     record_rvalue_scope_if_borrow_expr(visitor, field.expr, blk_id);
+                }
+            }
+            hir::ExprKind::Map(fields, _) => {
+                for field in fields {
+                    record_rvalue_scope_if_borrow_expr(visitor, field.key, blk_id);
+                    record_rvalue_scope_if_borrow_expr(visitor, field.value, blk_id);
                 }
             }
             hir::ExprKind::Array(subexprs) | hir::ExprKind::Tup(subexprs) => {

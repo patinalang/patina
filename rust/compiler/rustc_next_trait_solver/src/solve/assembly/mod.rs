@@ -717,6 +717,7 @@ where
             | ty::Foreign(_)
             | ty::Str
             | ty::Term
+            | ty::Map(_, _)
             | ty::Array(_, _)
             | ty::Pat(_, _)
             | ty::Slice(_)
@@ -840,6 +841,7 @@ where
             | ty::Foreign(_)
             | ty::Str
             | ty::Term
+            | ty::Map(_, _)
             | ty::Array(_, _)
             | ty::Pat(_, _)
             | ty::Slice(_)

@@ -2176,6 +2176,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
             | ty::CoroutineClosure(..)
             | ty::Str
             | ty::Term
+            | ty::Map(_, _)
             | ty::Slice(_)
             | ty::Never
             | ty::Error(_) => ty::Binder::dummy(vec![]),
@@ -2223,6 +2224,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
             | ty::Char
             | ty::RawPtr(..)
             | ty::Never
+            | ty::Map(..)
             | ty::Ref(_, _, hir::Mutability::Not)
             | ty::Array(..) => {
                 unreachable!("tried to assemble `Sized` for type with libcore-provided impl")
@@ -2359,6 +2361,11 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
             ty::Pat(ty, _) | ty::Array(ty, _) | ty::Slice(ty) => {
                 ty::Binder::dummy(AutoImplConstituents { types: vec![ty], assumptions: vec![] })
             }
+
+            ty::Map(key, value) => ty::Binder::dummy(AutoImplConstituents {
+                types: vec![key, value],
+                assumptions: vec![],
+            }),
 
             ty::Tuple(tys) => {
                 // (T1, ..., Tn) -- meets any bound that all of T1...Tn meet

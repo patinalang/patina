@@ -33,7 +33,7 @@ use super::diagnostics::SnapshotParser;
 use super::pat::{CommaRecoveryMode, Expected, RecoverColon, RecoverComma};
 use super::ty::{AllowPlus, RecoverQPath, RecoverReturnSign};
 use super::{
-    AttrWrapper, BlockMode, ClosureSpans, ExpTokenPair, ForceCollect, Parser, PathStyle,
+    AttrWrapper, BlockMode, ClosureSpans, ExpTokenPair, ForceCollect, Parser, PathStyle, Recovery,
     Restrictions, SemiColonMode, SeqSep, TokenType, Trailing, UsePreAttrPos,
 };
 use crate::{errors, exp, maybe_recover_from_interpolated_ty_qpath};
@@ -1484,6 +1484,8 @@ impl<'a> Parser<'a> {
                 })
             } else if this.check(exp!(OpenBracket)) {
                 this.parse_expr_array_or_repeat(exp!(CloseBracket))
+            } else if this.is_map() {
+                this.parse_expr_map()
             } else if this.is_builtin() {
                 this.parse_expr_builtin()
             } else if this.check_path() {
@@ -1646,6 +1648,153 @@ impl<'a> Parser<'a> {
         };
         let expr = self.mk_expr(lo.to(self.prev_token.span), kind);
         self.maybe_recover_from_bad_qpath(expr)
+    }
+
+    /// Parses a map expression: `#{k => v, ..base}`.
+    fn parse_expr_map(&mut self) -> PResult<'a, Box<Expr>> {
+        let lo = self.token.span;
+        self.bump(); // `#`
+        self.expect(exp!(OpenBrace))?;
+
+        let mut fields = ThinVec::new();
+        let mut rest = ast::MapRest::None;
+        let mut err_guar = None;
+
+        while self.token != token::CloseBrace {
+            if self.eat(exp!(DotDot)) || self.recover_map_field_dots() {
+                let rest_span = self.prev_token.span;
+                if self.check(exp!(CloseBrace)) {
+                    // Preserve the `..` required when this is later interpreted as the left-hand
+                    // side of a destructuring assignment.
+                    rest = ast::MapRest::Rest(rest_span);
+                    break;
+                }
+                if matches!(self.token.kind, token::DotDot | token::DotDotDot) {
+                    let guar =
+                        self.dcx().emit_err(errors::MapRestNotFinal { span: self.token.span });
+                    rest = ast::MapRest::NoneWithError(guar);
+                    self.eat_to_tokens(&[exp!(CloseBrace)]);
+                    break;
+                }
+                match self.parse_expr() {
+                    Ok(base_expr) => rest = ast::MapRest::Base(base_expr),
+                    Err(e) => {
+                        let guar = e.emit();
+                        self.eat_to_tokens(&[exp!(CloseBrace)]);
+                        err_guar = Some(guar);
+                        break;
+                    }
+                }
+                // Like a struct update, `..base` must be followed immediately by `}`.
+                if self.token == token::Comma {
+                    self.recover_map_comma_after_dotdot(rest_span);
+                } else if self.token != token::CloseBrace {
+                    self.dcx().emit_err(errors::MapUpdateNotFinal { span: self.token.span });
+                    // Skip remaining entries without consuming this map's closing brace.
+                    self.eat_to_tokens(&[exp!(CloseBrace)]);
+                }
+                break;
+            }
+
+            let (field, recovered) = match self.parse_expr_map_field() {
+                Ok(field) => field,
+                Err(e) => {
+                    let guar = e.emit();
+                    err_guar = Some(guar);
+                    if !self.recover_map_entry() {
+                        break;
+                    }
+                    continue;
+                }
+            };
+            fields.push(field);
+            if let Recovered::Yes(guar) = recovered {
+                err_guar = Some(guar);
+            }
+
+            let (recovered, can_continue) = self.expect_map_entry_separator();
+            if let Recovered::Yes(guar) = recovered {
+                err_guar = Some(guar);
+            }
+            if !can_continue {
+                break;
+            }
+        }
+
+        self.expect(exp!(CloseBrace))?;
+        if let Some(guar) = err_guar
+            && matches!(rest, ast::MapRest::None)
+        {
+            rest = ast::MapRest::NoneWithError(guar);
+        }
+        let kind = ExprKind::Map(Box::new(ast::MapExpr { fields, rest }));
+        let expr = self.mk_expr(lo.to(self.prev_token.span), kind);
+        self.maybe_recover_from_bad_qpath(expr)
+    }
+
+    fn recover_map_field_dots(&mut self) -> bool {
+        if !self.look_ahead(1, |&t| t == token::CloseBrace) && self.eat(exp!(DotDotDot)) {
+            let span = self.prev_token.span;
+            self.dcx().emit_err(errors::MissingEntriesDotDot { token_span: span, sugg_span: span });
+            return true;
+        }
+        false
+    }
+
+    fn parse_expr_map_field(&mut self) -> PResult<'a, (ast::MapField, Recovered)> {
+        let key = self.parse_map_key()?;
+        let recovered = self.expect_map_fat_arrow();
+        let value = match (recovered, self.token.kind) {
+            (Recovered::Yes(guar), token::Comma | token::CloseBrace) => {
+                self.mk_expr_err(self.token.span.shrink_to_lo(), guar)
+            }
+            _ => self.parse_expr()?,
+        };
+        let span = key.span.to(value.span);
+        Ok((ast::MapField { key, value, span }, recovered))
+    }
+
+    pub(super) fn parse_map_key(&mut self) -> PResult<'a, Box<Expr>> {
+        let attrs = self.parse_outer_attributes()?;
+        // Disable expression recovery so we can diagnose `->` as a map key separator.
+        self.with_recovery(Recovery::Forbidden, |this| {
+            this.parse_expr_assoc_with(Bound::Excluded(ExprPrecedence::Assign), attrs)
+                .map(|(expr, _)| expr)
+        })
+    }
+
+    pub(super) fn expect_map_fat_arrow(&mut self) -> Recovered {
+        if self.eat(exp!(FatArrow)) {
+            return Recovered::No;
+        }
+
+        match self.token.kind {
+            token::Colon | token::Eq | token::RArrow => {
+                let span = self.token.span;
+                self.bump();
+                let guar = self.dcx().emit_err(errors::InvalidMapKeySeparator { span });
+                Recovered::Yes(guar)
+            }
+            _ => match self.expect(exp!(FatArrow)) {
+                Ok(recovered) => recovered,
+                Err(e) => Recovered::Yes(e.emit()),
+            },
+        }
+    }
+
+    pub(super) fn recover_map_entry(&mut self) -> bool {
+        self.eat_to_tokens(&[exp!(Comma), exp!(CloseBrace)]);
+        self.eat(exp!(Comma))
+    }
+
+    pub(super) fn expect_map_entry_separator(&mut self) -> (Recovered, bool) {
+        match self.expect_one_of(&[exp!(Comma)], &[exp!(CloseBrace)]) {
+            Ok(recovered) => (recovered, true),
+            Err(e) => {
+                let guar = e.emit();
+                (Recovered::Yes(guar), self.recover_map_entry())
+            }
+        }
     }
 
     fn parse_expr_path_start(&mut self) -> PResult<'a, Box<Expr>> {
@@ -3603,6 +3752,10 @@ impl<'a> Parser<'a> {
         self.token.is_keyword(kw::Builtin) && self.look_ahead(1, |t| *t == token::Pound)
     }
 
+    pub(crate) fn is_map(&self) -> bool {
+        self.token == token::Pound && self.look_ahead(1, |t| *t == token::OpenBrace)
+    }
+
     /// Parses a `try {...}` or `try bikeshed Ty {...}` expression (`try` token already eaten).
     fn parse_try_block(&mut self, span_lo: Span) -> PResult<'a, Box<Expr>> {
         let annotation =
@@ -3987,6 +4140,15 @@ impl<'a> Parser<'a> {
             return;
         }
         self.dcx().emit_err(errors::CommaAfterBaseStruct {
+            span: span.to(self.prev_token.span),
+            comma: self.token.span,
+        });
+        self.recover_stmt();
+    }
+
+    fn recover_map_comma_after_dotdot(&mut self, span: Span) {
+        debug_assert_eq!(self.token, token::Comma);
+        self.dcx().emit_err(errors::CommaAfterBaseMap {
             span: span.to(self.prev_token.span),
             comma: self.token.span,
         });
@@ -4414,6 +4576,7 @@ impl MutVisitor for CondChecker<'_> {
             }
             ExprKind::Let(_, _, _, Recovered::Yes(_))
             | ExprKind::Array(_)
+            | ExprKind::Map(_)
             | ExprKind::ConstBlock(_)
             | ExprKind::Lit(_)
             | ExprKind::If(_, _, _)

@@ -1026,6 +1026,7 @@ fn assemble_candidates_from_impls<'cx, 'tcx>(
                         | ty::Foreign(_)
                         | ty::Str
                         | ty::Term
+                        | ty::Map(..)
                         | ty::Array(..)
                         | ty::Pat(..)
                         | ty::Slice(_)
@@ -1079,6 +1080,7 @@ fn assemble_candidates_from_impls<'cx, 'tcx>(
                             | ty::Float
                             | ty::Str
                             | ty::Term
+                            | ty::Map(..)
                             | ty::Array(..)
                             | ty::Pat(..)
                             | ty::Slice(_)

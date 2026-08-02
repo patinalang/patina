@@ -302,6 +302,7 @@ impl<'tcx, 'a> TypeVisitor<TyCtxt<'tcx>> for ExportableItemsChecker<'tcx, 'a> {
             | ty::Coroutine(_, _)
             | ty::Foreign(_)
             | ty::Str
+            | ty::Map(_, _)
             | ty::Tuple(_)
             | ty::Pat(..)
             | ty::Slice(_)

@@ -72,6 +72,8 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
             ExprKind::Array { fields } => self.translate_list(expr.span, fields),
 
+            ExprKind::Map { fields, base } => self.translate_map(expr.span, fields, *base),
+
             ExprKind::Tuple { fields } => self.translate_tuple(expr.span, fields),
 
             ExprKind::Field { lhs, variant_index, name } => {
@@ -115,6 +117,28 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let afb = &self.translator.afb;
         let items = fields.iter().map(|&id| self.translate_expr(id));
         afb.expr_list(span, items)
+    }
+
+    fn translate_map(
+        &mut self,
+        span: Span,
+        fields: &[thir::MapFieldExpr],
+        base: Option<ExprId>,
+    ) -> eaf::Expr<'arena> {
+        let afb = &self.translator.afb;
+        let base_expr = base.map(|base_id| self.translate_expr(base_id));
+
+        let assocs = fields.iter().map(|field| {
+            let key = self.translate_expr(field.key);
+            let value = self.translate_expr(field.value);
+            (key, value)
+        });
+
+        if let Some(base_expr) = base_expr {
+            afb.expr_map_update_assoc(span, base_expr, assocs)
+        } else {
+            afb.expr_map(span, assocs)
+        }
     }
 
     fn translate_tuple(&mut self, span: Span, fields: &[ExprId]) -> eaf::Expr<'arena> {
@@ -753,6 +777,8 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     }
 
     pub(super) fn translate_pattern(&mut self, pat: &Pat<'tcx>) -> eaf::Pattern<'arena> {
+        let afb = &self.translator.afb;
+
         match &pat.kind {
             PatKind::Wild => self.translator.afb.pat_var(pat.span, kw::Underscore),
 
@@ -780,6 +806,17 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             PatKind::Variant { adt_def, variant_index, subpatterns, .. } => {
                 let variant = adt_def.variant(*variant_index);
                 self.translate_adt_pattern(pat.span, *adt_def, variant, subpatterns)
+            }
+
+            PatKind::Constant { value } => self.translate_constant_pattern(pat.span, *value),
+
+            PatKind::Map { fields } => {
+                let assocs = fields.iter().map(|field| {
+                    let key = self.translate_pattern(&field.key);
+                    let value = self.translate_pattern(&field.pattern);
+                    (key, value)
+                });
+                afb.pat_map(pat.span, assocs)
             }
 
             _ => not_implemented!(self.tcx(), pat.span, "THIR pattern kind", pat.kind),
@@ -815,12 +852,61 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                     self.declare_vars_from_pattern(pattern);
                 }
             }
+            PatKind::Map { fields, .. } => {
+                for field in fields {
+                    self.declare_vars_from_pattern(&field.pattern);
+                }
+            }
             PatKind::Missing
             | PatKind::Wild
             | PatKind::Constant { .. }
             | PatKind::Range(_)
             | PatKind::Never
             | PatKind::Error(_) => {}
+        }
+    }
+
+    fn translate_constant_pattern(
+        &self,
+        span: Span,
+        value: ty::Value<'tcx>,
+    ) -> eaf::Pattern<'arena> {
+        let afb = &self.translator.afb;
+        match *value.ty.kind() {
+            ty::TyKind::Bool => afb.pat_atom(
+                span,
+                if value
+                    .try_to_bool()
+                    .unwrap_or_else(|| span_bug!(span, "invalid boolean pattern constant"))
+                {
+                    kw::True
+                } else {
+                    kw::False
+                },
+            ),
+            ty::TyKind::Char => {
+                let character = char::try_from(value.to_leaf())
+                    .unwrap_or_else(|_| span_bug!(span, "invalid character pattern constant"));
+                afb.pat_char(span, character)
+            }
+            ty::TyKind::Int => {
+                let int = value.to_leaf().to_i128();
+                if int < 0 {
+                    let magnitude = int.unsigned_abs();
+                    let pat = afb.pat_int(span, magnitude);
+                    afb.pat_unary_op(span, eaf::UnaryOp::Neg, pat)
+                } else {
+                    afb.pat_int(span, int as u128)
+                }
+            }
+            ty::TyKind::Float => afb.pat_float(span, f64::from_bits(value.to_leaf().to_u64())),
+            ty::TyKind::Str => {
+                let bytes = value.try_to_raw_bytes(self.tcx()).unwrap_or_else(|| {
+                    span_bug!(span, "string pattern did not lower to raw bytes")
+                });
+                afb.pat_binary_bytes(span, bytes)
+            }
+            _ => not_implemented!(self.tcx(), span, "constant pattern type", value.ty),
         }
     }
 

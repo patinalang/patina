@@ -214,6 +214,7 @@ pub(crate) fn orphan_check_impl(
             | ty::Float
             | ty::Str
             | ty::Term
+            | ty::Map(..)
             | ty::Array(..)
             | ty::Slice(..)
             | ty::RawPtr(..)

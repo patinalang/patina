@@ -29,6 +29,7 @@ pub enum SimplifiedType<DefId> {
     Foreign(DefId),
     Str,
     Term,
+    Map,
     Array,
     Slice,
     Ref(Mutability),
@@ -122,6 +123,7 @@ pub fn simplify_type<I: Interner>(
         ty::Adt(def, _) => Some(SimplifiedType::Adt(def.def_id().into())),
         ty::Str => Some(SimplifiedType::Str),
         ty::Term => Some(SimplifiedType::Term),
+        ty::Map(..) => Some(SimplifiedType::Map),
         ty::Array(..) => Some(SimplifiedType::Array),
         ty::Slice(..) => Some(SimplifiedType::Slice),
         ty::Pat(ty, ..) => simplify_type(cx, ty, treat_params),
@@ -291,6 +293,7 @@ impl<I: Interner, const INSTANTIATE_LHS_WITH_INFER: bool, const INSTANTIATE_RHS_
             | ty::Adt(..)
             | ty::Str
             | ty::Term
+            | ty::Map(..)
             | ty::Array(..)
             | ty::Slice(..)
             | ty::RawPtr(..)
@@ -399,6 +402,14 @@ impl<I: Interner, const INSTANTIATE_LHS_WITH_INFER: bool, const INSTANTIATE_RHS_
             ty::Slice(lhs_ty) => {
                 matches!(rhs.kind(), ty::Slice(rhs_ty) if self.types_may_unify_inner(lhs_ty, rhs_ty, depth))
             }
+
+            ty::Map(lhs_key, lhs_value) => match rhs.kind() {
+                ty::Map(rhs_key, rhs_value) => {
+                    self.types_may_unify_inner(lhs_key, rhs_key, depth)
+                        && self.types_may_unify_inner(lhs_value, rhs_value, depth)
+                }
+                _ => false,
+            },
 
             ty::Dynamic(lhs_preds, ..) => {
                 // Ideally we would walk the existential predicates here or at least

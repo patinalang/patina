@@ -515,6 +515,12 @@ impl<'tcx> Printer<'tcx> for V0SymbolMangler<'tcx> {
                 ty.print(self)?;
             }
 
+            ty::Map(key, value) => {
+                self.push("H");
+                key.print(self)?;
+                value.print(self)?;
+            }
+
             ty::Tuple(tys) => {
                 self.push("T");
                 for ty in tys.iter() {

@@ -113,6 +113,7 @@ impl MappingFlags {
             | ty::CoroutineClosure(_, _)
             | ty::Coroutine(_, _)
             | ty::CoroutineWitness(_, _)
+            | ty::Map(_, _)
             | ty::Never
             | ty::Bound(_, _)
             | ty::Placeholder(_)

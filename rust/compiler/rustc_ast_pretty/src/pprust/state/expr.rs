@@ -118,6 +118,35 @@ impl<'a> State<'a> {
         self.end(ib);
     }
 
+    fn print_expr_map(&mut self, fields: &[ast::MapField], rest: &ast::MapRest) {
+        let ib = self.ibox(INDENT_UNIT);
+        self.word("#{");
+        self.commasep(Inconsistent, fields, |s, field| {
+            s.print_expr(&field.key, FixupContext::default());
+            s.space();
+            s.word_space("=>");
+            s.print_expr(&field.value, FixupContext::default());
+        });
+        match rest {
+            ast::MapRest::Base(base) => {
+                if !fields.is_empty() {
+                    self.word_space(",");
+                }
+                self.word("..");
+                self.print_expr(base, FixupContext::default());
+            }
+            ast::MapRest::Rest(_) => {
+                if !fields.is_empty() {
+                    self.word_space(",");
+                }
+                self.word("..");
+            }
+            ast::MapRest::None | ast::MapRest::NoneWithError(_) => {}
+        }
+        self.word("}");
+        self.end(ib);
+    }
+
     pub(super) fn print_expr_anon_const(
         &mut self,
         expr: &ast::AnonConst,
@@ -448,6 +477,9 @@ impl<'a> State<'a> {
         match &expr.kind {
             ast::ExprKind::Array(exprs) => {
                 self.print_expr_vec(exprs);
+            }
+            ast::ExprKind::Map(map) => {
+                self.print_expr_map(&map.fields, &map.rest);
             }
             ast::ExprKind::ConstBlock(anon_const) => {
                 self.print_expr_anon_const(anon_const, attrs);

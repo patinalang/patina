@@ -225,6 +225,14 @@ impl<'a, 'hir> Visitor<'hir> for NodeCollector<'a, 'hir> {
         });
     }
 
+    fn visit_pat_map_key(&mut self, key: &'hir PatMapKey<'hir>) {
+        self.insert(key.0.span, key.0.hir_id, Node::PatMapKey(key));
+
+        self.with_parent(key.0.hir_id, |this| {
+            intravisit::walk_pat_map_key(this, key);
+        });
+    }
+
     fn visit_pat_field(&mut self, field: &'hir PatField<'hir>) {
         self.insert(field.span, field.hir_id, Node::PatField(field));
         self.with_parent(field.hir_id, |this| {

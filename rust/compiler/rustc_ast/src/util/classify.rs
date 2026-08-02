@@ -125,6 +125,7 @@ pub fn leading_labeled_expr(mut expr: &ast::Expr) -> bool {
 
             AddrOf(..)
             | Array(..)
+            | Map(..)
             | Become(..)
             | Break(..)
             | Closure(..)
@@ -199,6 +200,7 @@ pub fn expr_trailing_brace(mut expr: &ast::Expr) -> Option<TrailingBrace<'_>> {
             | If(..)
             | Loop(..)
             | Match(..)
+            | Map(..)
             | Struct(..)
             | TryBlock(..)
             | While(..)
@@ -291,6 +293,7 @@ fn type_trailing_braced_mac_call(mut ty: &ast::Ty) -> Option<&ast::MacCall> {
 
             ast::TyKind::Slice(..)
             | ast::TyKind::Array(..)
+            | ast::TyKind::Map(..)
             | ast::TyKind::Never
             | ast::TyKind::Tup(..)
             | ast::TyKind::Paren(..)

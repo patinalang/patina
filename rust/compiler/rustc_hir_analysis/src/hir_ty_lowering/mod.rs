@@ -3111,6 +3111,9 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         let result_ty = match &hir_ty.kind {
             hir::TyKind::InferDelegation(infer) => self.lower_delegation_ty(*infer),
             hir::TyKind::Slice(ty) => Ty::new_slice(tcx, self.lower_ty(ty)),
+            hir::TyKind::Map(key, value) => {
+                Ty::new_map(tcx, self.lower_ty(key), self.lower_ty(value))
+            }
             hir::TyKind::Ptr(mt) => Ty::new_ptr(tcx, self.lower_ty(mt.ty), mt.mutbl),
             hir::TyKind::Ref(region, mt) => {
                 let r = self.lower_lifetime(region, RegionInferReason::Reference);
@@ -3530,6 +3533,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             | ty::Param(_)
             | ty::Bound(_, _)
             | ty::Placeholder(_)
+            | ty::Map(..)
             | ty::Slice(..) => Ty::new_error(
                 tcx,
                 dcx.span_err(ty_span, format!("type `{ty}` doesn't have fields")),

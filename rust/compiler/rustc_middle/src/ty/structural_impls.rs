@@ -343,6 +343,9 @@ impl<'tcx> TypeSuperFoldable<TyCtxt<'tcx>> for Ty<'tcx> {
             ty::RawPtr(ty, mutbl) => ty::RawPtr(ty.try_fold_with(folder)?, mutbl),
             ty::Array(typ, sz) => ty::Array(typ.try_fold_with(folder)?, sz.try_fold_with(folder)?),
             ty::Slice(typ) => ty::Slice(typ.try_fold_with(folder)?),
+            ty::Map(key, value) => {
+                ty::Map(key.try_fold_with(folder)?, value.try_fold_with(folder)?)
+            }
             ty::Adt(tid, args) => ty::Adt(tid, args.try_fold_with(folder)?),
             ty::Dynamic(trait_ty, region) => {
                 ty::Dynamic(trait_ty.try_fold_with(folder)?, region.try_fold_with(folder)?)
@@ -388,6 +391,7 @@ impl<'tcx> TypeSuperFoldable<TyCtxt<'tcx>> for Ty<'tcx> {
             ty::RawPtr(ty, mutbl) => ty::RawPtr(ty.fold_with(folder), mutbl),
             ty::Array(typ, sz) => ty::Array(typ.fold_with(folder), sz.fold_with(folder)),
             ty::Slice(typ) => ty::Slice(typ.fold_with(folder)),
+            ty::Map(key, value) => ty::Map(key.fold_with(folder), value.fold_with(folder)),
             ty::Adt(tid, args) => ty::Adt(tid, args.fold_with(folder)),
             ty::Dynamic(trait_ty, region) => {
                 ty::Dynamic(trait_ty.fold_with(folder), region.fold_with(folder))
@@ -432,6 +436,10 @@ impl<'tcx> TypeSuperVisitable<TyCtxt<'tcx>> for Ty<'tcx> {
                 sz.visit_with(visitor)
             }
             ty::Slice(typ) => typ.visit_with(visitor),
+            ty::Map(key, value) => {
+                try_visit!(key.visit_with(visitor));
+                value.visit_with(visitor)
+            }
             ty::Adt(_, args) => args.visit_with(visitor),
             ty::Dynamic(trait_ty, reg) => {
                 try_visit!(trait_ty.visit_with(visitor));

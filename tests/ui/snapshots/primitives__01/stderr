@@ -1,19 +1,60 @@
-error: expected `;`, found keyword `let`
-  --> tests/ui/src/primitives__01.pt:11:52
+error[E0425]: cannot find value `add_float` in this scope
+  --> tests/ui/src/primitives__01.pt:37:49
    |
-LL |     inferred_type = add_floats(inferred_type, 3.14)
-   |                                                    ^ help: add `;` here
+LL |     let add_ref: fnref(float, float) -> float = add_float;
+   |                                                 ^^^^^^^^^
 ...
-LL |     let mut mutable = 12; // Mutable `int`
-   |     --- unexpected token
+LL | fn add_floats(a: float, b: float) -> float {
+   | ------------------------------------------ similarly named function `add_floats` defined here
+   |
+help: a function with a similar name exists
+   |
+LL |     let add_ref: fnref(float, float) -> float = add_floats;
+   |                                                          +
 
-error: expected type, found `#`
-  --> tests/ui/src/primitives__01.pt:33:17
+error[E0308]: mismatched types
+  --> tests/ui/src/primitives__01.pt:11:32
+   |
+LL |     inferred_type = add_floats(inferred_type, 3.14);
+   |                     ---------- ^^^^^^^^^^^^^ expected `float`, found `int`
+   |                     |
+   |                     arguments to this function are incorrect
+   |
+note: function defined here
+  --> tests/ui/src/primitives__01.pt:42:4
+   |
+LL | fn add_floats(a: float, b: float) -> float {
+   |    ^^^^^^^^^^ --------
+
+error[E0308]: mismatched types
+  --> tests/ui/src/primitives__01.pt:11:21
+   |
+LL |     let inferred_type = 12; // Type float is inferred from another line.
+   |                         -- expected due to this value
+LL |     inferred_type = add_floats(inferred_type, 3.14);
+   |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `int`, found `float`
+
+error[E0308]: mismatched types
+  --> tests/ui/src/primitives__01.pt:18:15
+   |
+LL |     let mut mutable = 12; // Mutable `int`
+   |                       -- expected due to this value
+...
+LL |     mutable = true;
+   |               ^^^^ expected `int`, found `bool`
+
+error[E0308]: mismatched types
+  --> tests/ui/src/primitives__01.pt:33:51
    |
 LL |     let my_map: #{float => str} = #{3.14 => "pi", 0 => "zero"};
-   |               - ^ expected type
-   |               |
-   |               while parsing the type for `my_map`
+   |                                                   ^ expected `float`, found `int`
+   |
+help: use a float literal
+   |
+LL |     let my_map: #{float => str} = #{3.14 => "pi", 0.0 => "zero"};
+   |                                                    ++
 
-error: aborting due to 2 previous errors
+error: aborting due to 5 previous errors
 
+Some errors have detailed explanations: E0308, E0425.
+For more information about an error, try `rustc --explain E0308`.

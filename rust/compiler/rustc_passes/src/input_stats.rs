@@ -332,6 +332,7 @@ impl<'v> hir_visit::Visitor<'v> for StatCollector<'v> {
                 Guard,
                 Range,
                 Slice,
+                Map,
                 Err
             ]
         );
@@ -349,6 +350,7 @@ impl<'v> hir_visit::Visitor<'v> for StatCollector<'v> {
             [
                 ConstBlock,
                 Array,
+                Map,
                 Call,
                 MethodCall,
                 Use,
@@ -399,6 +401,7 @@ impl<'v> hir_visit::Visitor<'v> for StatCollector<'v> {
                 InferDelegation,
                 Slice,
                 Array,
+                Map,
                 Ptr,
                 Ref,
                 FnPtr,
@@ -642,6 +645,7 @@ impl<'v> ast_visit::Visitor<'v> for StatCollector<'v> {
                 Expr,
                 Range,
                 Slice,
+                Map,
                 Rest,
                 Never,
                 Guard,
@@ -658,7 +662,7 @@ impl<'v> ast_visit::Visitor<'v> for StatCollector<'v> {
         record_variants!(
             (self, e, e.kind, None, ast, Expr, ExprKind),
             [
-                Array, ConstBlock, Call, MethodCall, Tup, Binary, Unary, Lit, Cast, Type, Let,
+                Array, Map, ConstBlock, Call, MethodCall, Tup, Binary, Unary, Lit, Cast, Type, Let,
                 If, While, ForLoop, Loop, Match, Closure, Block, Await, Use, TryBlock, Assign,
                 AssignOp, Field, Index, Range, Underscore, Path, AddrOf, Break, Continue, Ret,
                 InlineAsm, FormatArgs, OffsetOf, MacCall, Struct, Repeat, Paren, Try, Yield, Yeet,
@@ -674,6 +678,7 @@ impl<'v> ast_visit::Visitor<'v> for StatCollector<'v> {
             [
                 Slice,
                 Array,
+                Map,
                 Ptr,
                 Ref,
                 PinnedRef,

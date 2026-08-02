@@ -1,0 +1,19 @@
+pub fn lookup_name(map: #{str => int}) -> int {
+    match map {
+        #{"name" => name, ..} => name,
+        _ => -1,
+    }
+}
+
+pub fn nested_lookup(map: #{str => #{str => int}}) -> int {
+    match map {
+        #{"outer" => #{"inner" => value, ..}, ..} => value,
+        _ => -1,
+    }
+}
+
+pub fn is_map(map: #{str => int}) -> bool {
+    match map {
+        #{..} => true,
+    }
+}

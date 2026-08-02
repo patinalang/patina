@@ -14,7 +14,7 @@ use rustc_hir::def_id::DefId;
 use rustc_hir::pat_util::EnumerateAndAdjustIterator;
 use rustc_hir::{
     self as hir, BindingMode, ByRef, ExprKind, HirId, LangItem, Mutability, Pat, PatExpr,
-    PatExprKind, PatKind, expr_needs_parens,
+    PatExprKind, PatKind, PatMapField, PatMapKey, expr_needs_parens,
 };
 use rustc_hir_analysis::autoderef::report_autoderef_recursion_limit_error;
 use rustc_infer::infer::RegionVariableOrigin;
@@ -676,6 +676,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             PatKind::Slice(before, slice, after) => {
                 self.check_pat_slice(pat.span, before, slice, after, expected, pat_info)
             }
+            PatKind::Map(fields, _) => self.check_pat_map(pat.span, fields, expected, pat_info),
         }
     }
 
@@ -775,7 +776,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         match &pat.kind {
             // Type checking these product-like types successfully always require
             // that the expected type be of those types and not reference types.
-            PatKind::Tuple(..) | PatKind::Range(..) | PatKind::Slice(..) => AdjustMode::peel_all(),
+            PatKind::Tuple(..) | PatKind::Range(..) | PatKind::Slice(..) | PatKind::Map(..) => {
+                AdjustMode::peel_all()
+            }
             // When checking an explicit deref pattern, only peel reference types.
             // FIXME(deref_patterns): If box patterns and deref patterns need to coexist, box
             // patterns may want `PeelKind::Implicit`, stopping on encountering a box.
@@ -915,6 +918,12 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     }
 
     fn check_pat_expr_unadjusted(&self, lt: &'tcx hir::PatExpr<'tcx>) -> Ty<'tcx> {
+        let ty = self.do_check_pat_expr_unadjusted(lt);
+        self.write_ty(lt.hir_id, ty);
+        ty
+    }
+
+    fn do_check_pat_expr_unadjusted(&self, lt: &'tcx hir::PatExpr<'tcx>) -> Ty<'tcx> {
         let ty = match &lt.kind {
             rustc_hir::PatExprKind::Lit { lit, negated } => {
                 let ty = self.check_expr_lit(lit, lt.hir_id, Expectation::NoExpectation);
@@ -933,8 +942,56 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 self.instantiate_value_path(segments, opt_ty, res, lt.span, lt.span, lt.hir_id).0
             }
         };
-        self.write_ty(lt.hir_id, ty);
         ty
+    }
+
+    fn check_map_key(
+        &self,
+        key: &'tcx PatMapKey<'tcx>,
+        expected: Ty<'tcx>,
+        ti: &TopInfo<'tcx>,
+    ) -> Ty<'tcx> {
+        let PatMapKey(expr) = key;
+        let ty = match &expr.kind {
+            PatExprKind::Lit { .. } => self.do_check_pat_expr_unadjusted(expr),
+            PatExprKind::Path(qpath) => {
+                let (res, opt_ty, segments) =
+                    self.resolve_ty_and_res_fully_qualified_call(qpath, expr.hir_id, expr.span);
+                match res {
+                    Res::Def(DefKind::Const { .. } | DefKind::AssocConst { .. }, _) => {
+                        self.instantiate_value_path(
+                            segments,
+                            opt_ty,
+                            res,
+                            expr.span,
+                            expr.span,
+                            expr.hir_id,
+                        )
+                        .0
+                    }
+                    Res::Err => Ty::new_error(
+                        self.tcx,
+                        self.dcx().span_delayed_bug(
+                            expr.span,
+                            "map key path resolved to `Res::Err` without an error",
+                        ),
+                    ),
+                    _ => Ty::new_error(
+                        self.tcx,
+                        self.dcx()
+                            .struct_span_err(
+                                expr.span,
+                                "map pattern key must resolve to a constant",
+                            )
+                            .emit(),
+                    ),
+                }
+            }
+        };
+        match self.demand_eqtype_pat(expr.span, expected, ty, ti) {
+            Ok(()) => ty,
+            Err(guar) => Ty::new_error(self.tcx, guar),
+        }
     }
 
     fn check_pat_lit(
@@ -1371,6 +1428,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         | PatKind::TupleStruct(..)
                         | PatKind::Or(..)
                         | PatKind::Guard(..)
+                        | PatKind::Map(..)
                         | PatKind::Tuple(..)
                         | PatKind::Slice(..) => "binding",
 
@@ -3138,6 +3196,46 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
         // If we get here, we must have emitted an error.
         (Some(Ty::new_error(self.tcx, guar)), arr_ty)
+    }
+
+    fn check_pat_map(
+        &self,
+        span: Span,
+        fields: &'tcx [PatMapField],
+        expected: Ty<'tcx>,
+        pat_info: PatInfo<'tcx>,
+    ) -> Ty<'tcx> {
+        let key_ty = self.next_ty_var(span);
+        let value_ty = self.next_ty_var(span);
+        let map_ty = Ty::new_map(self.tcx, key_ty, value_ty);
+        let had_err = self.demand_eqtype_pat(span, expected, map_ty, &pat_info.top_info);
+
+        match self.check_map_pat_fields(fields, key_ty, value_ty, pat_info) {
+            Ok(()) => match had_err {
+                Ok(()) => map_ty,
+                Err(guar) => Ty::new_error(self.tcx, guar),
+            },
+            Err(guar) => Ty::new_error(self.tcx, guar),
+        }
+    }
+
+    fn check_map_pat_fields(
+        &self,
+        fields: &'tcx [PatMapField],
+        key_ty: Ty<'tcx>,
+        value_ty: Ty<'tcx>,
+        pat_info: PatInfo<'tcx>,
+    ) -> Result<(), ErrorGuaranteed> {
+        let mut result = Ok(());
+        for field in fields {
+            let ty = self.check_map_key(field.key, key_ty, &pat_info.top_info);
+            self.write_ty(field.key.0.hir_id, ty);
+            if let Err(guar) = ty.error_reported() {
+                result = Err(guar);
+            }
+            self.check_pat(field.pat, value_ty, pat_info);
+        }
+        result
     }
 
     fn error_scrutinee_inconsistent_length(

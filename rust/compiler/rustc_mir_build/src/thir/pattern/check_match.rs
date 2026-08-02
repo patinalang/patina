@@ -339,6 +339,7 @@ impl<'p, 'tcx> MatchVisitor<'p, 'tcx> {
             RawBorrow { .. }
             | Adt { .. }
             | Array { .. }
+            | Map { .. }
             | Binary { .. }
             | Block { .. }
             | Borrow { .. }

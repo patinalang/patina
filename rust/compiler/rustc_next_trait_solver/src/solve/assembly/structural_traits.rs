@@ -65,6 +65,8 @@ where
             Ok(ty::Binder::dummy(vec![element_ty]))
         }
 
+        ty::Map(key_ty, value_ty) => Ok(ty::Binder::dummy(vec![key_ty, value_ty])),
+
         ty::Tuple(tys) => {
             // (T1, ..., Tn) -- meets any bound that all of T1...Tn meet
             Ok(ty::Binder::dummy(tys.to_vec()))
@@ -139,6 +141,7 @@ where
         | ty::CoroutineClosure(..)
         | ty::Str
         | ty::Term
+        | ty::Map(..)
         | ty::Slice(_)
         | ty::Never
         | ty::Error(_) => Ok(ty::Binder::dummy(vec![])),
@@ -208,6 +211,7 @@ where
         | ty::Char
         | ty::RawPtr(..)
         | ty::Term
+        | ty::Map(..)
         | ty::Never
         | ty::Ref(_, _, Mutability::Not)
         | ty::Array(..) => Err(NoSolution),
@@ -384,6 +388,7 @@ pub(in crate::solve) fn extract_tupled_inputs_and_output_from_callable<I: Intern
         | ty::Foreign(_)
         | ty::Str
         | ty::Term
+        | ty::Map(_, _)
         | ty::Array(_, _)
         | ty::Slice(_)
         | ty::RawPtr(_, _)
@@ -555,6 +560,7 @@ pub(in crate::solve) fn extract_tupled_inputs_and_output_from_async_callable<I: 
         | ty::Foreign(_)
         | ty::Str
         | ty::Term
+        | ty::Map(_, _)
         | ty::Array(_, _)
         | ty::Pat(_, _)
         | ty::Slice(_)
@@ -716,6 +722,7 @@ pub(in crate::solve) fn extract_fn_def_from_const_callable<I: Interner>(
         | ty::Foreign(_)
         | ty::Str
         | ty::Term
+        | ty::Map(_, _)
         | ty::Array(_, _)
         | ty::Slice(_)
         | ty::RawPtr(_, _)
@@ -780,6 +787,11 @@ pub(in crate::solve) fn const_conditions_for_destruct<I: Interner>(
 
         ty::Tuple(tys) => Ok(tys
             .iter()
+            .map(|field_ty| ty::TraitRef::new(cx, destruct_def_id, [field_ty]))
+            .collect()),
+
+        ty::Map(key_ty, value_ty) => Ok([key_ty, value_ty]
+            .into_iter()
             .map(|field_ty| ty::TraitRef::new(cx, destruct_def_id, [field_ty]))
             .collect()),
 

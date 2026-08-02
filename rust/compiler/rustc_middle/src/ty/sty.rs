@@ -639,6 +639,11 @@ impl<'tcx> Ty<'tcx> {
     }
 
     #[inline]
+    pub fn new_map(tcx: TyCtxt<'tcx>, key: Ty<'tcx>, value: Ty<'tcx>) -> Ty<'tcx> {
+        Ty::new(tcx, Map(key, value))
+    }
+
+    #[inline]
     pub fn new_tup(tcx: TyCtxt<'tcx>, ts: &[Ty<'tcx>]) -> Ty<'tcx> {
         if ts.is_empty() { tcx.types.unit } else { Ty::new(tcx, Tuple(tcx.mk_type_list(ts))) }
     }
@@ -985,6 +990,10 @@ impl<'tcx> rustc_type_ir::inherent::Ty<TyCtxt<'tcx>> for Ty<'tcx> {
 
     fn new_slice(interner: TyCtxt<'tcx>, ty: Self) -> Self {
         Ty::new_slice(interner, ty)
+    }
+
+    fn new_map(interner: TyCtxt<'tcx>, key: Self, value: Self) -> Self {
+        Ty::new_map(interner, key, value)
     }
 
     fn new_tup(interner: TyCtxt<'tcx>, tys: &[Ty<'tcx>]) -> Self {
@@ -1620,6 +1629,7 @@ impl<'tcx> Ty<'tcx> {
             | ty::Foreign(_)
             | ty::Str
             | ty::Term
+            | ty::Map(_, _)
             | ty::Array(..)
             | ty::Slice(_)
             | ty::RawPtr(_, _)
@@ -1668,6 +1678,7 @@ impl<'tcx> Ty<'tcx> {
             | ty::Never
             | ty::Error(_)
             | ty::Term
+            | ty::Map(_, _)
             // Extern types have metadata = ().
             | ty::Foreign(..)
             // If returned by `struct_tail_raw` this is a unit struct
@@ -1850,6 +1861,7 @@ impl<'tcx> Ty<'tcx> {
             | ty::CoroutineClosure(..)
             | ty::Str
             | ty::Term
+            | ty::Map(_, _)
             | ty::Slice(_)
             | ty::Never
             | ty::Error(_) => true,
@@ -1889,7 +1901,15 @@ impl<'tcx> Ty<'tcx> {
     /// on which we can replace cloning with dereferencing.
     pub fn is_trivially_pure_clone_copy(self) -> bool {
         match self.kind() {
-            ty::Bool | ty::Char | ty::Int | ty::Never | ty::Str | ty::Term | ty::Slice(..) => true,
+            ty::Bool
+            | ty::Char
+            | ty::Int
+            | ty::Never
+            | ty::Str
+            | ty::Term
+            | ty::Map(..)
+            | ty::Slice(..) => true,
+
             // These aren't even `Clone`
             ty::Foreign(..) | ty::Dynamic(..) => false,
 
@@ -1950,6 +1970,9 @@ impl<'tcx> Ty<'tcx> {
             ty::Slice(ty) => {
                 ty.is_trivially_wf(tcx) && ty.has_trivial_sizedness(tcx, SizedTraitKind::Sized)
             }
+            ty::Map(key, value) => [key, value].into_iter().all(|ty| {
+                ty.is_trivially_wf(tcx) && ty.has_trivial_sizedness(tcx, SizedTraitKind::Sized)
+            }),
             ty::RawPtr(ty, _) => ty.is_trivially_wf(tcx),
 
             ty::FnPtr(sig_tys, _) => {

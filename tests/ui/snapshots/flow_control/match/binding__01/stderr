@@ -16,11 +16,11 @@ LL |         n @ (1 | 7 | 15 | 13) => println!("I'm a teen of age {:?}", n),
    |              ^^^^^^^^^^^^^^^ collectively making this unreachable
    = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
 
-error: THIR pattern kind not yet implemented: Constant { value: Value { ty: int, valtree: Leaf(0x00000000000000000000000000000000) } }
-  --> tests/ui/src/flow_control/match/binding__01.pt:13:9
+error: THIR pattern kind not yet implemented: Range(PatRange { lo: Finite(Leaf(0x00000000000000000000000000000001)), hi: Finite(Leaf(0x0000000000000000000000000000000c)), end: Included, ty: int })
+  --> tests/ui/src/flow_control/match/binding__01.pt:22:13
    |
-LL |         0             => println!("I haven't celebrated my first birthday yet"),
-   |         ^
+LL |         n @ 1  ..= 12 => println!("I'm a child of age {:?}", n),
+   |             ^^^^^^^^^
 
 error: aborting due to 1 previous error; 1 warning emitted
 

@@ -468,6 +468,12 @@ pub fn structurally_relate_tys<I: Interner, R: TypeRelation<I>>(
             Ok(Ty::new_slice(cx, t))
         }
 
+        (ty::Map(a_k, a_v), ty::Map(b_k, b_v)) => {
+            let k = relation.relate(a_k, b_k)?;
+            let v = relation.relate(a_v, b_v)?;
+            Ok(Ty::new_map(cx, k, v))
+        }
+
         (ty::Tuple(as_), ty::Tuple(bs)) => {
             if as_.len() == bs.len() {
                 Ok(Ty::new_tup_from_iter(

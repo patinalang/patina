@@ -1,0 +1,5 @@
+warning: [{"tests/ui/src/primitives/maps_native.pt",
+           [{{35,7},v3_core,{map_key_repeated,<<"a">>}}]}]
+
+warning: 1 warning emitted
+

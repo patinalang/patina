@@ -6,9 +6,9 @@ use rustc_ast::token::{self, IdentIsRaw, MetaVarKind, Token};
 use rustc_ast::util::parser::ExprPrecedence;
 use rustc_ast::visit::{self, Visitor};
 use rustc_ast::{
-    self as ast, Arm, AttrVec, BindingMode, ByRef, Expr, ExprKind, Guard, LocalKind, MacCall,
-    Mutability, Pat, PatField, PatFieldsRest, PatKind, Path, QSelf, RangeEnd, RangeSyntax, Stmt,
-    StmtKind,
+    self as ast, Arm, AttrVec, BinOpKind, BindingMode, ByRef, Expr, ExprKind, Guard, LocalKind,
+    MacCall, Mutability, Pat, PatField, PatFieldsRest, PatKind, PatMapFieldsRest, Path, QSelf,
+    RangeEnd, RangeSyntax, Recovered, Stmt, StmtKind,
 };
 use rustc_ast_pretty::pprust;
 use rustc_errors::{Applicability, Diag, DiagArgValue, PResult, StashKey};
@@ -763,6 +763,8 @@ impl<'a> Parser<'a> {
                     )
                 })?;
             PatKind::Slice(pats)
+        } else if self.is_map() {
+            self.parse_pat_map()?
         } else if self.check(exp!(DotDot)) && !self.is_pat_range_end_start(1) {
             // A rest pattern `..`.
             self.bump(); // `..`
@@ -900,6 +902,167 @@ impl<'a> Parser<'a> {
         }
 
         Ok(pat)
+    }
+
+    /// Parses a map pattern: `#{key => pattern, ..}`.
+    fn parse_pat_map(&mut self) -> PResult<'a, PatKind> {
+        let lo = self.token.span;
+        self.bump(); // `#`
+        self.expect(exp!(OpenBrace))?;
+
+        let mut fields = ThinVec::new();
+        let mut rest = PatMapFieldsRest::None;
+        let mut err_guar = None;
+        let mut delayed_rest_err: Option<(Diag<'a>, Span, Span)> = None;
+
+        while self.token != token::CloseBrace {
+            if self.check(exp!(DotDot))
+                || self.check_noexpect(&token::DotDotDot)
+                || self.check_keyword(exp!(Underscore))
+            {
+                self.recover_bad_dot_dot();
+                self.bump(); // `..` || `...` || `_`
+                let rest_span = self.prev_token.span;
+                rest = PatMapFieldsRest::Rest(rest_span);
+
+                if matches!(self.token.kind, token::DotDot | token::DotDotDot) {
+                    err_guar = Some(
+                        self.dcx().emit_err(errors::MapRestNotFinal { span: self.token.span }),
+                    );
+                    self.eat_to_tokens(&[exp!(CloseBrace)]);
+                } else if !matches!(self.token.kind, token::Comma | token::CloseBrace) {
+                    let trailing_span = self.token.span;
+                    let guar = self
+                        .dcx()
+                        .emit_err(errors::CannotBindMapRest { span: rest_span.to(trailing_span) });
+                    err_guar = Some(guar);
+                    self.eat_to_tokens(&[exp!(Comma), exp!(CloseBrace)]);
+                }
+
+                if self.token == token::Comma {
+                    let comma_span = self.token.span;
+                    let token_str = super::token_descr(&self.token);
+                    let mut err = self
+                        .dcx()
+                        .struct_span_err(comma_span, format!("expected `}}`, found {token_str}"));
+                    err.span_label(comma_span, "expected `}`");
+                    err.span_label(
+                        rest_span.to(comma_span),
+                        "`..` must be at the end and cannot have a trailing comma",
+                    );
+                    let remove_span =
+                        rest_span.to(self.psess.source_map().span_until_non_whitespace(comma_span));
+                    self.bump();
+                    if self.token == token::CloseBrace {
+                        err.span_suggestion_short(
+                            comma_span,
+                            "remove this comma",
+                            "",
+                            Applicability::MachineApplicable,
+                        );
+                        err_guar = Some(err.emit());
+                        break;
+                    } else if let Some((delayed, ..)) = delayed_rest_err.take() {
+                        delayed.emit();
+                        err_guar = Some(err.emit());
+                        self.eat_to_tokens(&[exp!(CloseBrace)]);
+                        break;
+                    } else {
+                        delayed_rest_err = Some((err, remove_span, rest_span));
+                        continue;
+                    }
+                }
+                break;
+            }
+
+            let (field, recovered) = match self.parse_pat_map_field() {
+                Ok(field) => field,
+                Err(e) => {
+                    let guar = e.emit();
+                    err_guar = Some(guar);
+                    if !self.recover_map_entry() {
+                        break;
+                    }
+                    continue;
+                }
+            };
+            fields.push(field);
+            if let Recovered::Yes(guar) = recovered {
+                err_guar = Some(guar);
+            }
+
+            let (recovered, can_continue) = self.expect_map_entry_separator();
+            if let Recovered::Yes(guar) = recovered {
+                err_guar = Some(guar);
+            }
+            if !can_continue {
+                break;
+            }
+        }
+
+        if let Some((mut err, remove_span, first_rest_span)) = delayed_rest_err {
+            if matches!(rest, PatMapFieldsRest::Rest(span) if span != first_rest_span) {
+                err.multipart_suggestion(
+                    "remove the starting `..`",
+                    vec![(remove_span, String::new())],
+                    Applicability::MachineApplicable,
+                );
+            } else if let Some(field) = fields.last() {
+                err.multipart_suggestion(
+                    "move the `..` to the end of the entry list",
+                    vec![
+                        (remove_span, String::new()),
+                        (field.span.shrink_to_hi(), ", ..".to_string()),
+                    ],
+                    Applicability::MachineApplicable,
+                );
+            }
+            err_guar = Some(err.emit());
+        }
+
+        self.expect(exp!(CloseBrace))?;
+        if matches!(rest, PatMapFieldsRest::None) && err_guar.is_none() {
+            let (suggestion_span, suggestion_code) = match fields.last() {
+                Some(field) => (field.span.shrink_to_hi(), ", .."),
+                None => (lo.to(self.prev_token.span), "#{ .. }"),
+            };
+            err_guar = Some(self.dcx().emit_err(errors::MapPatternMissingRest {
+                span: lo.to(self.prev_token.span),
+                suggestion_span,
+                suggestion_code,
+            }));
+        }
+        if let Some(guar) = err_guar {
+            rest = PatMapFieldsRest::Recovered(guar);
+        }
+        Ok(PatKind::Map(fields, rest))
+    }
+
+    fn parse_pat_map_field(&mut self) -> PResult<'a, (ast::PatMapField, Recovered)> {
+        let mut key = self.parse_map_key()?;
+        let mut recovered = Recovered::No;
+        if let ExprKind::Binary(Spanned { node: BinOpKind::BitOr, span }, ..) = &key.kind {
+            let guar = self.dcx().emit_err(errors::BitOrInMapPatternKey { span: *span });
+            key = self.mk_expr_err(key.span, guar);
+            recovered = Recovered::Yes(guar);
+        }
+        let arrow_recovered = self.expect_map_fat_arrow();
+        if let Recovered::Yes(guar) = arrow_recovered {
+            recovered = Recovered::Yes(guar);
+        }
+        let pat = match arrow_recovered {
+            Recovered::Yes(guar) if matches!(self.token.kind, token::Comma | token::CloseBrace) => {
+                self.mk_pat(self.token.span.shrink_to_lo(), PatKind::Err(guar))
+            }
+            _ => self.parse_pat_allow_top_guard(
+                None,
+                RecoverComma::No,
+                RecoverColon::No,
+                CommaRecoveryMode::EitherTupleOrPipe,
+            )?,
+        };
+        let span = key.span.to(pat.span);
+        Ok((ast::PatMapField { key, pat: Box::new(pat), span }, recovered))
     }
 
     /// Recover from a typoed `...` pattern that was encountered

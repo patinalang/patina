@@ -1173,6 +1173,7 @@ impl<'tcx> Ty<'tcx> {
             | ty::FnPtr(..) => true,
             ty::Tuple(fields) => fields.iter().all(Self::is_trivially_freeze),
             ty::Pat(ty, _) | ty::Slice(ty) | ty::Array(ty, _) => ty.is_trivially_freeze(),
+            ty::Map(key, value) => key.is_trivially_freeze() && value.is_trivially_freeze(),
             ty::Adt(..)
             | ty::Bound(..)
             | ty::Closure(..)
@@ -1223,6 +1224,7 @@ impl<'tcx> Ty<'tcx> {
             | ty::FnPtr(..) => true,
             ty::Tuple(fields) => fields.iter().all(Self::is_trivially_unpin),
             ty::Pat(ty, _) | ty::Slice(ty) | ty::Array(ty, _) => ty.is_trivially_unpin(),
+            ty::Map(key, value) => key.is_trivially_unpin() && value.is_trivially_unpin(),
             ty::Adt(..)
             | ty::Bound(..)
             | ty::Closure(..)
@@ -1277,6 +1279,9 @@ impl<'tcx> Ty<'tcx> {
             ty::Tuple(fields) => fields.iter().all(Self::is_trivially_not_async_drop),
             ty::Pat(elem_ty, _) | ty::Slice(elem_ty) | ty::Array(elem_ty, _) => {
                 elem_ty.is_trivially_not_async_drop()
+            }
+            ty::Map(key, value) => {
+                key.is_trivially_not_async_drop() && value.is_trivially_not_async_drop()
             }
             ty::Adt(..)
             | ty::Bound(..)
@@ -1433,7 +1438,12 @@ impl<'tcx> Ty<'tcx> {
             //
             // Because this function is "shallow", we return `true` for these composites regardless
             // of the type(s) contained within.
-            ty::Pat(..) | ty::Ref(..) | ty::Array(..) | ty::Slice(_) | ty::Tuple(..) => true,
+            ty::Pat(..)
+            | ty::Ref(..)
+            | ty::Array(..)
+            | ty::Slice(_)
+            | ty::Map(..)
+            | ty::Tuple(..) => true,
 
             // Raw pointers use bitwise comparison.
             ty::RawPtr(_, _) | ty::FnPtr(..) => true,
@@ -1514,6 +1524,9 @@ pub fn needs_drop_components_with_async<'tcx>(
         | ty::RawPtr(_, _)
         | ty::Ref(..)
         | ty::Term
+        // Drop is not a thing in Patina, so not implementing it for maps.
+        // Eventually, this function will be removed.
+        | ty::Map(..)
         | ty::Str => Ok(SmallVec::new()),
 
         // Foreign types can never have destructors.

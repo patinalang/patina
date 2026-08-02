@@ -49,6 +49,47 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         ))
     }
 
+    pub(crate) fn pat_char(&self, span: impl IntoAnno, value: char) -> eaf::Pattern<'arena> {
+        eaf::Pattern::AtomicLiteral(eaf::AtomicLiteral::Char(
+            span.into_anno(self.source_map),
+            value,
+        ))
+    }
+
+    pub(crate) fn pat_float(&self, span: impl IntoAnno, value: f64) -> eaf::Pattern<'arena> {
+        eaf::Pattern::AtomicLiteral(eaf::AtomicLiteral::Float(
+            span.into_anno(self.source_map),
+            value,
+        ))
+    }
+
+    pub(crate) fn pat_binary_bytes(
+        &self,
+        span: impl IntoAnno,
+        bytes: &[u8],
+    ) -> eaf::Pattern<'arena> {
+        let anno = span.into_anno(self.source_map);
+        let elements = bytes.iter().map(|&byte| {
+            let value = self.pat_int(anno, byte as u128);
+            eaf::BinElement {
+                anno,
+                value,
+                size: eaf::BinElemSize::Default,
+                tsl: eaf::BinElemTsl::Default,
+            }
+        });
+        eaf::Pattern::Bin(anno, self.arena.alloc_from_iter(elements))
+    }
+
+    pub(crate) fn pat_unary_op(
+        &self,
+        span: impl IntoAnno,
+        op: eaf::UnaryOp,
+        pat: eaf::Pattern<'arena>,
+    ) -> eaf::Pattern<'arena> {
+        eaf::Pattern::UnaryOp(span.into_anno(self.source_map), op, self.arena.alloc(pat))
+    }
+
     pub(crate) fn expr_atom(&self, span: impl IntoAnno, name: Symbol) -> eaf::Expr<'arena> {
         eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::Atom(
             span.into_anno(self.source_map),
@@ -317,6 +358,21 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
 
         let iter =
             updates.into_iter().map(|(key, value)| eaf::MapField::MapFieldExact(anno, key, value));
+        let updates = self.arena.alloc_from_iter(iter);
+
+        eaf::Expr::MapUpdate(anno, self.arena.alloc(base), updates)
+    }
+
+    pub(crate) fn expr_map_update_assoc(
+        &self,
+        span: impl IntoAnno,
+        base: eaf::Expr<'arena>,
+        updates: impl IntoIterator<Item = (eaf::Expr<'arena>, eaf::Expr<'arena>)>,
+    ) -> eaf::Expr<'arena> {
+        let anno = span.into_anno(self.source_map);
+
+        let iter =
+            updates.into_iter().map(|(key, value)| eaf::MapField::MapFieldAssoc(anno, key, value));
         let updates = self.arena.alloc_from_iter(iter);
 
         eaf::Expr::MapUpdate(anno, self.arena.alloc(base), updates)

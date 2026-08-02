@@ -470,6 +470,11 @@ pub enum ExprKind<'tcx> {
     Array {
         fields: Box<[ExprId]>,
     },
+    /// A map, e.g. `#{"a" => 1, ..base}`.
+    Map {
+        fields: Box<[MapFieldExpr]>,
+        base: Option<ExprId>,
+    },
     /// A tuple, e.g. `(a, b, c, d)`.
     Tuple {
         fields: Box<[ExprId]>,
@@ -559,6 +564,13 @@ pub enum ExprKind<'tcx> {
 pub struct FieldExpr {
     pub name: FieldIdx,
     pub expr: ExprId,
+}
+
+/// A key/value pair in a map expression.
+#[derive(Clone, Debug, StableHash)]
+pub struct MapFieldExpr {
+    pub key: ExprId,
+    pub value: ExprId,
 }
 
 #[derive(Clone, Debug, StableHash)]
@@ -864,6 +876,11 @@ pub enum PatKind<'tcx> {
         suffix: Box<[Pat<'tcx>]>,
     },
 
+    /// A homogeneous map pattern.
+    Map {
+        fields: Box<[MapFieldPat<'tcx>]>,
+    },
+
     /// An or-pattern, e.g. `p | q`.
     /// Invariant: `pats.len() >= 2`.
     Or {
@@ -883,6 +900,12 @@ pub enum PatKind<'tcx> {
     /// An error has been encountered during lowering. We probably shouldn't report more lints
     /// related to this pattern.
     Error(ErrorGuaranteed),
+}
+
+#[derive(Clone, Debug, StableHash, TypeVisitable)]
+pub struct MapFieldPat<'tcx> {
+    pub key: Pat<'tcx>,
+    pub pattern: Pat<'tcx>,
 }
 
 #[derive(Copy, Clone, Debug, StableHash)]

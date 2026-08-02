@@ -229,6 +229,10 @@ impl<'tcx> LateLintPass<'tcx> for TyTyKind {
                             kind: hir::PatExprKind::Path(qpath),
                             ..
                         })
+                        | hir::Node::PatMapKey(hir::PatMapKey(hir::PatExpr {
+                            kind: hir::PatExprKind::Path(qpath),
+                            ..
+                        }))
                         | hir::Node::Pat(hir::Pat {
                             kind:
                                 hir::PatKind::TupleStruct(qpath, ..) | hir::PatKind::Struct(qpath, ..),
@@ -688,6 +692,11 @@ impl EarlyLintPass for BadUseOfFindAttr {
                         find_attr_kind_in_pat(cx, pat);
                     }
                 }
+                PatKind::Map(fields, _) => {
+                    for field in fields {
+                        find_attr_kind_in_pat(cx, &field.pat);
+                    }
+                }
 
                 PatKind::Guard(pat, ..) => {
                     find_attr_kind_in_pat(cx, pat);
@@ -758,6 +767,7 @@ fn pat_is_not_exhaustive_heuristic(pat: &hir::Pat<'_>) -> Option<(Span, &'static
         hir::PatKind::Guard(..) => None,
         hir::PatKind::Range(..) => None,
         hir::PatKind::Slice(..) => None,
+        hir::PatKind::Map(..) => None,
         hir::PatKind::Err(..) => None,
     }
 }

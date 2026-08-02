@@ -3525,6 +3525,9 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             ObligationCauseCode::TupleElem => {
                 err.note("only the last element of a tuple may have a dynamically sized type");
             }
+            ObligationCauseCode::MapKeyOrValue => {
+                err.note("map key and value types must be `Sized`");
+            }
             ObligationCauseCode::DynCompatible(span) => {
                 err.multipart_suggestion(
                     "you might have meant to use `Self` to refer to the implementing type",
