@@ -257,6 +257,20 @@ impl<'f, 'tcx> Coerce<'f, 'tcx> {
             );
         }
 
+        // Coercing from any component of an aggregate type to `term` is allowed.
+        if matches!(
+            (a.kind(), b.kind()),
+            (ty::Slice(_), ty::Slice(_))
+                | (ty::Array(..), ty::Slice(_))
+                | (ty::Array(..), ty::Array(..))
+                | (ty::Tuple(_), ty::Tuple(_))
+                | (ty::Map(..), ty::Map(..))
+        ) && self.has_term_components(b)
+            && let Ok(ok) = self.coerce_term_structure(a, b)
+        {
+            return Ok(ok);
+        }
+
         // Coercing from `!` to any type is allowed:
         if a.is_never() {
             if self.coerce_never {
@@ -344,6 +358,81 @@ impl<'f, 'tcx> Coerce<'f, 'tcx> {
                 // Otherwise, just use unification rules.
                 self.unify(a, b, ForceLeakCheck::No)
             }
+        }
+    }
+
+    fn coerce_term_structure(&self, a: Ty<'tcx>, b: Ty<'tcx>) -> CoerceResult<'tcx> {
+        self.commit_if_ok(|_| {
+            let (adjusted, obligations) = self.coerce_term_component(a, b)?;
+            if !adjusted {
+                return Err(TypeError::Mismatch);
+            }
+
+            success(vec![Adjustment { kind: Adjust::ToTerm, target: b }], b, obligations)
+        })
+    }
+
+    fn coerce_term_component(
+        &self,
+        a: Ty<'tcx>,
+        b: Ty<'tcx>,
+    ) -> RelateResult<'tcx, (bool, PredicateObligations<'tcx>)> {
+        let a = self.shallow_resolve(a);
+        let b = self.shallow_resolve(b);
+
+        if *b.kind() == ty::Term && !a.is_ty_var() {
+            return Ok((*a.kind() != ty::Term, PredicateObligations::new()));
+        }
+
+        match (a.kind(), b.kind()) {
+            (ty::Slice(a), ty::Slice(b)) => self.coerce_term_components([(*a, *b)]),
+            (ty::Array(a, a_len), ty::Array(b, b_len)) => {
+                let (adjusted, mut obligations) = self.coerce_term_components([(*a, *b)])?;
+                let InferOk { obligations: len_obligations, .. } = self
+                    .at(&self.cause, self.param_env)
+                    .eq(DefineOpaqueTypes::Yes, *a_len, *b_len)?;
+                obligations.extend(len_obligations);
+                Ok((adjusted, obligations))
+            }
+            (ty::Tuple(a), ty::Tuple(b)) if a.len() == b.len() => {
+                self.coerce_term_components(std::iter::zip(a.iter(), b.iter()))
+            }
+            (ty::Map(a_key, a_value), ty::Map(b_key, b_value)) => {
+                self.coerce_term_components([(*a_key, *b_key), (*a_value, *b_value)])
+            }
+            _ => {
+                // Structural coercion remains directional even when the caller is computing a
+                // coercion LUB.
+                Coerce::new(self.fcx, self.cause.clone(), self.allow_two_phase, self.coerce_never)
+                    .unify_raw(a, b, ForceLeakCheck::No)
+                    .map(|InferOk { obligations, .. }| (false, obligations))
+            }
+        }
+    }
+
+    fn coerce_term_components(
+        &self,
+        components: impl IntoIterator<Item = (Ty<'tcx>, Ty<'tcx>)>,
+    ) -> RelateResult<'tcx, (bool, PredicateObligations<'tcx>)> {
+        let mut adjusted = false;
+        let mut obligations = PredicateObligations::new();
+        for (a, b) in components {
+            let (component_adjusted, component_obligations) = self.coerce_term_component(a, b)?;
+            adjusted |= component_adjusted;
+            obligations.extend(component_obligations);
+        }
+        Ok((adjusted, obligations))
+    }
+
+    /// Fast pre-check before we commit to snapshotting the entire type in `coerce_term_structure`.
+    fn has_term_components(&self, b: Ty<'tcx>) -> bool {
+        let b = self.shallow_resolve(b);
+        match *b.kind() {
+            ty::Term => true,
+            ty::Slice(elem) | ty::Array(elem, _) => self.has_term_components(elem),
+            ty::Tuple(tys) => tys.iter().any(|ty| self.has_term_components(ty)),
+            ty::Map(key, value) => self.has_term_components(key) || self.has_term_components(value),
+            _ => false,
         }
     }
 
