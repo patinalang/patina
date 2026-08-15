@@ -18,6 +18,9 @@ use rustc_middle::util::Providers;
 pub fn provide(providers: &mut Providers) {
     providers.queries.check_match = thir::pattern::check_match;
     providers.queries.lit_to_const = thir::constant::lit_to_const;
+    providers.queries.eval_to_valtree = thir::constant::eval_to_valtree;
+    providers.queries.eval_to_const_value_raw = thir::constant::eval_to_const_value_raw;
+    providers.queries.valtree_to_const_val = thir::constant::valtree_to_const_value;
     providers.queries.check_unsafety = check_unsafety::check_unsafety;
     providers.queries.check_tail_calls = check_tail_calls::check_tail_calls;
     providers.queries.thir_body = thir::cx::thir_body;

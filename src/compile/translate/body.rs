@@ -96,6 +96,10 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
             ExprKind::ZstLiteral { .. } => self.translate_zst_literal(expr),
 
+            ExprKind::NamedConst { def_id, args, .. } => {
+                self.translate_named_const(expr.span, *def_id, args)
+            }
+
             ExprKind::Assign { lhs, rhs } => self.translate_assign(expr, *lhs, *rhs),
             ExprKind::AssignOp { op, lhs, rhs } => self.translate_assign_op(expr, *op, *lhs, *rhs),
 
@@ -145,6 +149,23 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let afb = &self.translator.afb;
         let elems = fields.iter().map(|&id| self.translate_expr(id));
         afb.expr_tuple(span, elems)
+    }
+
+    fn translate_named_const(
+        &mut self,
+        span: Span,
+        def_id: rustc_hir::def_id::DefId,
+        args: ty::GenericArgsRef<'tcx>,
+    ) -> eaf::Expr<'arena> {
+        if !args.is_empty() {
+            not_implemented!(self.tcx(), span, "generic named constants", args);
+        }
+
+        let Some(local_def_id) = def_id.as_local() else {
+            not_implemented!(self.tcx(), span, "external named constants", def_id);
+        };
+
+        self.translator.translate_const(span, local_def_id, self.parts)
     }
 
     fn translate_literal(&self, span: Span, lit: &Lit, neg: bool) -> eaf::Expr<'arena> {

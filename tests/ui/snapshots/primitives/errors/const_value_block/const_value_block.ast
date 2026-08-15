@@ -1,0 +1,3 @@
+const BLOCK_VALUE: int = { let value = 1; value };
+
+pub fn const_value_block() -> int { BLOCK_VALUE }

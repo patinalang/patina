@@ -16,6 +16,16 @@ mod precise_captures;
 pub(crate) use precise_captures::*;
 
 #[derive(Diagnostic)]
+#[diag("unsupported expression in constant value")]
+#[note(
+    "constant values may only contain literals, local named constants, arrays, tuples, and maps"
+)]
+pub(crate) struct UnsupportedConstValueExpr {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag("ambiguous associated {$assoc_kind} `{$assoc_ident}` in bounds of `{$qself}`")]
 pub(crate) struct AmbiguousAssocItem<'a> {
     #[primary_span]

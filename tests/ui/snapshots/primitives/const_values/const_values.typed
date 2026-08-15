@@ -1,0 +1,53 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+const KEY: str = ("answer" as str);
+const NUMBERS: [int] = ([(1 as int), (2 as int), (3 as int)] as [int; 3]);
+const PAIR: ([int], #{str => int}) =
+    (((NUMBERS as [int]), (#{(KEY as str) => (42 as int)} as #{str => int}))
+        as ([int], #{str => int}));
+const ALIAS: ([int], #{str => int}) = (PAIR as ([int], #{str => int}));
+
+fn const_values()
+    ->
+        ([int],
+        #{str => int}) ({ (ALIAS as ([int], #{str => int})) } as
+    ([int], #{str => int}))

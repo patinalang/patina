@@ -124,6 +124,15 @@ pub(crate) struct MaxNumNodesInValtree {
 }
 
 #[derive(Diagnostic)]
+#[diag(
+    "constant evaluation is not yet supported here; only local constants with literal bodies can be evaluated"
+)]
+pub struct UnevaluableConst {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag("constant {$global_const_id} cannot be used as pattern")]
 #[note("constants that reference mutable or external memory cannot be used as patterns")]
 pub(crate) struct InvalidConstInValtree {

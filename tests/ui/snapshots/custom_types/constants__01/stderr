@@ -6,15 +6,6 @@ LL |     THRESHOLD = 5;
    |     |
    |     cannot assign to this expression
 
-error: internal compiler error: rust/compiler/rustc_middle/src/query/plumbing.rs:660:5: `tcx.eval_to_const_value_raw(PseudoCanonicalInput { typing_env: TypingEnv { typing_mode: TypingModeEqWrapper(PostAnalysis), param_env: ParamEnv { caller_bounds: [] } }, value: GlobalId { instance: Instance { def: Item(DefId(0:10 ~ Constants01[3f0a]::THRESHOLD)), args: [] }, promoted: None } })` is not supported for this key;
-                                hint: Queries can be either made to the local crate, or the external crate. This error means you tried to use it for one that's not supported.
-                                If that's not the case, eval_to_const_value_raw was likely never assigned to a provider function.
-                                
-
-
-thread 'rustc' (50902375) panicked at rust/compiler/rustc_middle/src/query/plumbing.rs:660:5:
-Box<dyn Any>
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-error: aborting due to 2 previous errors
+error: aborting due to 1 previous error
 
 For more information about this error, try `rustc --explain E0070`.

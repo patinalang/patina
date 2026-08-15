@@ -101,6 +101,8 @@ impl From<ReportedErrorInfo> for ErrorGuaranteed {
 pub enum ValTreeCreationError<'tcx> {
     /// The constant is too big to be valtree'd.
     NodesOverflow,
+    /// CTFE is not implemented yet, so only literal constant bodies can be evaluated.
+    Unevaluable,
     /// The constant references mutable or external memory, so it cannot be valtree'd.
     InvalidConst,
     /// Values of this type, or this particular value, are not supported as valtrees.

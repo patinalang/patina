@@ -1,0 +1,14 @@
+error: unsupported expression in constant value
+  --> tests/ui/src/primitives/errors/const_value_block.pt:1:26
+   |
+LL |   const BLOCK_VALUE: int = {
+   |  __________________________^
+LL | |     let value = 1;
+LL | |     value
+LL | | };
+   | |_^
+   |
+   = note: constant values may only contain literals, local named constants, arrays, tuples, and maps
+
+error: aborting due to 1 previous error
+

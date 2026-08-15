@@ -218,6 +218,10 @@ impl<'tcx> TyCtxt<'tcx> {
                         });
                         Err(ReportedErrorInfo::allowed_in_infallible(handled).into())
                     }
+                    ValTreeCreationError::Unevaluable => {
+                        let handled = self.dcx().emit_err(error::UnevaluableConst { span });
+                        Err(ReportedErrorInfo::allowed_in_infallible(handled).into())
+                    }
                     ValTreeCreationError::InvalidConst => {
                         let handled = self.dcx().emit_err(error::InvalidConstInValtree {
                             span,

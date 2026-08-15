@@ -1,11 +1,20 @@
 use rustc_apfloat::Float;
 use rustc_apfloat::ieee::Double;
 use rustc_ast::{self as ast};
+use rustc_hir as hir;
 use rustc_hir::LangItem;
-use rustc_middle::bug;
-use rustc_middle::ty::{self, LitToConstInput, ScalarInt, Ty, TyCtxt, TypeVisitableExt as _};
+use rustc_hir::def::DefKind;
+use rustc_middle::mir::ConstValue;
+use rustc_middle::mir::interpret::{
+    EvalToConstValueResult, EvalToValTreeResult, GlobalId, ReportedErrorInfo, Scalar,
+    ValTreeCreationError,
+};
+use rustc_middle::ty::{
+    self, LitToConstInput, PseudoCanonicalInput, ScalarInt, Ty, TyCtxt, TypeVisitableExt as _,
+};
+use rustc_middle::{bug, error};
 use rustc_span::Symbol;
-use tracing::trace;
+use tracing::{debug, instrument, trace};
 
 fn parse_float_into_scalar(num: Symbol, neg: bool) -> Option<ScalarInt> {
     let num = num.as_str();
@@ -109,4 +118,101 @@ pub(crate) fn lit_to_const<'tcx>(
     };
 
     Some(ty::Value { ty: valtree_ty, valtree })
+}
+
+/// Limited `eval_to_valtree`: only named/anon consts whose body is a literal.
+/// Full CTFE is not wired up yet, so `key.typing_env` cannot affect the supported subset.
+#[instrument(level = "debug", skip(tcx), ret)]
+pub(crate) fn eval_to_valtree<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    key: PseudoCanonicalInput<'tcx, GlobalId<'tcx>>,
+) -> EvalToValTreeResult<'tcx> {
+    let cid = key.value;
+    if cid.promoted.is_some() {
+        return Err(ValTreeCreationError::Unevaluable);
+    }
+
+    let def_id = cid.instance.def_id();
+    let Some(local_def_id) = def_id.as_local() else {
+        // Cross-crate: encoded valtrees should already be available via metadata paths.
+        // Until then, refuse.
+        return Err(ValTreeCreationError::Unevaluable);
+    };
+
+    match tcx.def_kind(def_id) {
+        DefKind::Const { .. }
+        | DefKind::AssocConst { .. }
+        | DefKind::AnonConst
+        | DefKind::InlineConst => {}
+        _ => bug!("eval_to_valtree: {def_id:?} is not a const"),
+    }
+
+    let ty =
+        tcx.type_of(cid.instance.def_id()).instantiate(tcx, cid.instance.args).skip_normalization();
+
+    let Some(body) = tcx.hir_maybe_body_owned_by(local_def_id) else {
+        return Err(ValTreeCreationError::Unevaluable);
+    };
+    let expr = body.value;
+
+    let (expr, neg) = match expr.kind {
+        hir::ExprKind::Unary(hir::UnOp::Neg, inner) => (inner, true),
+        _ => (expr, false),
+    };
+    let hir::ExprKind::Lit(lit) = expr.kind else {
+        debug!(?expr.kind, "const body is not a literal; CTFE not available");
+        return Err(ValTreeCreationError::Unevaluable);
+    };
+    let lit_input = LitToConstInput { lit: lit.node, ty: Some(ty), neg };
+
+    match lit_to_const(tcx, lit_input) {
+        Some(value) => Ok(value.valtree),
+        None => match lit.node {
+            ast::LitKind::Err(guar) => Err(ValTreeCreationError::ErrorHandled(
+                ReportedErrorInfo::non_const_eval_error(guar).into(),
+            )),
+            _ => Err(ValTreeCreationError::Unevaluable),
+        },
+    }
+}
+
+/// Limited `eval_to_const_value_raw`: literal const bodies only, via `eval_to_valtree`.
+#[instrument(level = "debug", skip(tcx), ret)]
+pub(crate) fn eval_to_const_value_raw<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    key: PseudoCanonicalInput<'tcx, GlobalId<'tcx>>,
+) -> EvalToConstValueResult<'tcx> {
+    match eval_to_valtree(tcx, key) {
+        Ok(valtree) => {
+            let ty = tcx
+                .type_of(key.value.instance.def_id())
+                .instantiate(tcx, key.value.instance.args)
+                .skip_normalization();
+
+            Ok(valtree_to_const_value(tcx, ty::Value { ty, valtree }))
+        }
+        Err(ValTreeCreationError::ErrorHandled(err)) => Err(err),
+        Err(_) => {
+            let span = tcx.def_span(key.value.instance.def_id());
+            let guar = tcx.dcx().emit_err(error::UnevaluableConst { span });
+            Err(ReportedErrorInfo::allowed_in_infallible(guar).into())
+        }
+    }
+}
+
+/// Convert a type-level value into a MIR `ConstValue` for the literal subset we support.
+pub(crate) fn valtree_to_const_value<'tcx>(tcx: TyCtxt<'tcx>, cv: ty::Value<'tcx>) -> ConstValue {
+    match *cv.ty.kind() {
+        ty::Bool | ty::Char | ty::Int | ty::Float => ConstValue::Scalar(Scalar::Int(cv.to_leaf())),
+        ty::FnDef(..) => ConstValue::ZeroSized,
+        ty::Tuple(fields) if fields.is_empty() => ConstValue::ZeroSized,
+        ty::Str | ty::Ref(..) if cv.ty.peel_refs().is_str() => {
+            let bytes = cv
+                .try_to_raw_bytes(tcx)
+                .unwrap_or_else(|| bug!("str valtree did not lower to raw bytes: {cv:?}"));
+            let alloc_id = tcx.allocate_bytes_dedup(bytes, /* salt */ 0);
+            ConstValue::Slice { alloc_id, meta: bytes.len() as u64 }
+        }
+        _ => bug!("valtree_to_const_value: unsupported type {:?}", cv.ty),
+    }
 }

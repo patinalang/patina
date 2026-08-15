@@ -4,10 +4,12 @@ mod elixir_compat;
 mod loops;
 mod scopes;
 
+use std::cell::RefCell;
 use std::path::PathBuf;
 
 use body::{BodyCx, TranslatedBody};
 use rustc_arena::DroplessArena;
+use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{LocalDefId, LocalModDefId};
@@ -47,11 +49,18 @@ pub(crate) struct ModuleParts<'arena> {
     last_file: Option<PathBuf>,
 }
 
+#[derive(Clone, Copy)]
+enum TranslatedConst<'arena> {
+    Translating,
+    Value(eaf::Expr<'arena>),
+}
+
 pub(super) struct Translator<'tcx, 'arena> {
     tcx: TyCtxt<'tcx>,
     afb: EafBuilder<'tcx, 'arena>,
     modules: ModuleNameCollector<'tcx>,
     impls: ImplCollector<'tcx>,
+    translated_consts: RefCell<FxHashMap<LocalDefId, TranslatedConst<'arena>>>,
 }
 
 impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
@@ -61,6 +70,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             afb: EafBuilder::new(tcx.sess.source_map(), arena),
             modules: ModuleNameCollector::new(tcx),
             impls: ImplCollector::new(tcx),
+            translated_consts: RefCell::new(FxHashMap::default()),
         }
     }
 
@@ -94,7 +104,53 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         TranslatedBody { params, value }
     }
 
+    pub(super) fn translate_const(
+        &self,
+        span: Span,
+        def_id: LocalDefId,
+        parts: &mut ModuleParts<'arena>,
+    ) -> eaf::Expr<'arena> {
+        match self.translated_consts.borrow().get(&def_id) {
+            Some(TranslatedConst::Value(value)) => return *value,
+            Some(TranslatedConst::Translating) => span_fatal!(
+                self.tcx,
+                span,
+                "recursive named constant `{}`",
+                self.tcx.item_name(def_id)
+            ),
+            None => {}
+        }
+
+        self.translated_consts.borrow_mut().insert(def_id, TranslatedConst::Translating);
+        let value = self.translate_body(def_id, parts, &mut Scopes::new()).value;
+        self.translated_consts.borrow_mut().insert(def_id, TranslatedConst::Value(value));
+        value
+    }
+
+    fn translate_consts(&self) {
+        let mut parts = ModuleParts::default();
+
+        for owner in self.tcx.hir_crate_items(()).owners() {
+            let def_id = owner.def_id;
+            match self.tcx.def_kind(def_id) {
+                DefKind::Const { .. }
+                    if !self.tcx.generics_of(def_id).own_requires_monomorphization()
+                        && !self.tcx.is_type_const(def_id) =>
+                {
+                    self.translate_const(self.tcx.def_span(def_id), def_id, &mut parts);
+                }
+                _ => {}
+            }
+        }
+
+        if !parts.forms.is_empty() || !parts.exports.is_empty() {
+            bug!("named const translation emitted module forms or exports");
+        }
+    }
+
     pub fn translate(&self) -> Vec<(Symbol, eaf::Module<'arena>)> {
+        self.translate_consts();
+
         let mut modules = Vec::new();
 
         for owner in self.tcx.hir_crate_items(()).owners() {

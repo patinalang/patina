@@ -392,3 +392,6 @@ macro_rules! partial_ord_impl {
 }
 
 partial_ord_impl! { bool int float str }
+
+#[lang = "structural_peq"]
+pub const trait StructuralPartialEq {}

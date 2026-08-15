@@ -83,7 +83,7 @@ mod variance;
 
 pub use errors::NoVariantNamed;
 use rustc_hir as hir;
-use rustc_hir::def::DefKind;
+use rustc_hir::def::{DefKind, Res};
 use rustc_middle::mir::interpret::GlobalId;
 use rustc_middle::query::Providers;
 use rustc_middle::ty::{Const, Ty, TyCtxt};
@@ -93,6 +93,67 @@ use rustc_trait_selection::traits;
 
 pub use crate::collect::suggest_impl_trait;
 use crate::hir_ty_lowering::HirTyLowerer;
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum SupportedConstBody {
+    Literal,
+    Composite,
+}
+
+fn supported_const_body(tcx: TyCtxt<'_>, def_id: hir::def_id::LocalDefId) -> SupportedConstBody {
+    let body = tcx.hir_body_owned_by(def_id);
+    if let Some(span) = unsupported_const_value_expr(tcx, body.value) {
+        tcx.dcx().emit_err(errors::UnsupportedConstValueExpr { span });
+        return SupportedConstBody::Composite;
+    }
+
+    match body.value.kind {
+        hir::ExprKind::Lit(_)
+        | hir::ExprKind::Unary(hir::UnOp::Neg, hir::Expr { kind: hir::ExprKind::Lit(_), .. }) => {
+            SupportedConstBody::Literal
+        }
+        _ => SupportedConstBody::Composite,
+    }
+}
+
+fn unsupported_const_value_expr(tcx: TyCtxt<'_>, expr: &hir::Expr<'_>) -> Option<rustc_span::Span> {
+    match expr.kind {
+        hir::ExprKind::Lit(_) => None,
+
+        hir::ExprKind::Unary(hir::UnOp::Neg, inner) => {
+            (!matches!(inner.kind, hir::ExprKind::Lit(_))).then_some(expr.span)
+        }
+
+        hir::ExprKind::Array(items) | hir::ExprKind::Tup(items) => {
+            items.iter().find_map(|item| unsupported_const_value_expr(tcx, item))
+        }
+
+        hir::ExprKind::Map(fields, tail) => fields
+            .iter()
+            .find_map(|field| {
+                unsupported_const_value_expr(tcx, field.key)
+                    .or_else(|| unsupported_const_value_expr(tcx, field.value))
+            })
+            .or_else(|| match tail {
+                hir::MapTailExpr::None | hir::MapTailExpr::NoneWithError(_) => None,
+                hir::MapTailExpr::Base(base) => unsupported_const_value_expr(tcx, base),
+            }),
+
+        hir::ExprKind::Path(ref qpath) => {
+            let typeck_results = tcx.typeck(expr.hir_id.owner.def_id);
+            (!matches!(
+                typeck_results.qpath_res(qpath, expr.hir_id),
+                Res::Def(DefKind::Const { .. }, def_id) if def_id.is_local()
+            ))
+            .then_some(expr.span)
+        }
+
+        // This wrapper is introduced by lowering and is not a user-authored block.
+        hir::ExprKind::DropTemps(inner) => unsupported_const_value_expr(tcx, inner),
+
+        _ => Some(expr.span),
+    }
+}
 
 /// Adds query implementations to the [Providers] vtable, see [`rustc_middle::query`]
 pub fn provide(providers: &mut Providers) {
@@ -147,9 +208,11 @@ pub fn check_crate(tcx: TyCtxt<'_>) {
                 // FIXME(generic_const_items): Passing empty instead of identity args is fishy but
                 //                             seems to be fine for now. Revisit this!
                 let instance = ty::Instance::new_raw(item_def_id.into(), ty::GenericArgs::empty());
-                let cid = GlobalId { instance, promoted: None };
-                let typing_env = ty::TypingEnv::fully_monomorphized();
-                tcx.ensure_ok().eval_to_const_value_raw(typing_env.as_query_input(cid));
+                if supported_const_body(tcx, item_def_id) == SupportedConstBody::Literal {
+                    let cid = GlobalId { instance, promoted: None };
+                    let typing_env = ty::TypingEnv::fully_monomorphized();
+                    tcx.ensure_ok().eval_to_const_value_raw(typing_env.as_query_input(cid));
+                }
             }
             _ => (),
         }
