@@ -45,7 +45,7 @@ macro_rules! not_implemented {
 #[derive(Default)]
 pub(crate) struct ModuleParts<'arena> {
     pub forms: Vec<eaf::ModuleForm<'arena>>,
-    pub exports: SmallVec<[(Symbol, usize); 16]>,
+    pub exports: SmallVec<[(Symbol, u32); 16]>,
     last_file: Option<PathBuf>,
 }
 
@@ -248,7 +248,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
 
         self.push_function(parts, sig.span, form);
         if self.tcx.is_erl_exported_fn(def_id) {
-            parts.exports.push((ident.name, sig.decl.inputs.len()));
+            parts.exports.push((ident.name, sig.decl.inputs.len() as u32));
         }
     }
 

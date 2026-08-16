@@ -605,7 +605,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             let mod_name = self.translator.modules.module_name(module_id);
             let fn_name = tcx.item_name(*def_id);
             let arity = tcx.fn_arg_idents(*def_id).len();
-            afb.expr_remote_fun(expr.span, mod_name, fn_name, arity)
+            afb.expr_remote_fun(expr.span, mod_name, fn_name, arity as u32)
         } else {
             not_implemented!(tcx, expr.span, "ZST literal", expr.ty)
         }

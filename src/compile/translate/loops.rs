@@ -185,7 +185,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         );
 
         self.translator.push_function(self.parts, expr.span, helper_function);
-        self.parts.exports.push((loop_cx.helper_erl_name, loop_cx.params.len()));
+        self.parts.exports.push((loop_cx.helper_erl_name, loop_cx.params.len() as u32));
 
         let loop_helper_call = afb.expr_local_call(
             expr.span,

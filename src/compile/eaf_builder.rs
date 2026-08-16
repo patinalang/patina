@@ -14,7 +14,7 @@ impl IntoAnno for Span {
     fn into_anno(self, source_map: &SourceMap) -> eaf::Anno {
         // If we're in a macro, point to the macro's outermost callsite.
         let loc = source_map.lookup_char_pos(self.source_callsite().lo());
-        eaf::Anno { line: loc.line, column: loc.col.0 + 1 }
+        eaf::Anno { line: loc.line as u32, column: (loc.col.0 + 1) as u32 }
     }
 }
 
@@ -70,7 +70,7 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
     ) -> eaf::Pattern<'arena> {
         let anno = span.into_anno(self.source_map);
         let elements = bytes.iter().map(|&byte| {
-            let value = self.pat_int(anno, byte as u128);
+            let value = self.arena.alloc(self.pat_int(anno, byte as u128));
             eaf::BinElement {
                 anno,
                 value,
@@ -161,7 +161,7 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         let tsl = tsl
             .map(|tsl| eaf::BinElemTsl::Tsl(self.arena.alloc_from_iter(tsl)))
             .unwrap_or(eaf::BinElemTsl::Default);
-        eaf::BinElement { anno, value, size, tsl }
+        eaf::BinElement { anno, value: self.arena.alloc(value), size, tsl }
     }
 
     pub(crate) fn expr_binary(
@@ -234,7 +234,9 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
     ) -> eaf::Pattern<'arena> {
         let anno = span.into_anno(self.source_map);
 
-        let iter = assocs.into_iter().map(|(key, value)| eaf::MapFieldExact(anno, key, value));
+        let iter = assocs.into_iter().map(|(key, value)| {
+            eaf::MapFieldExact(anno, self.arena.alloc(key), self.arena.alloc(value))
+        });
         let assocs = self.arena.alloc_from_iter(iter);
 
         eaf::Pattern::Map(anno, assocs)
@@ -245,7 +247,7 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         span: impl IntoAnno,
         module: Symbol,
         name: Symbol,
-        arity: usize,
+        arity: u32,
     ) -> eaf::Expr<'arena> {
         let anno = span.into_anno(self.source_map);
         let module = self.expr_atom(anno, module);
@@ -342,7 +344,9 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
     ) -> eaf::Expr<'arena> {
         let anno = span.into_anno(self.source_map);
 
-        let iter = assocs.into_iter().map(|(key, value)| eaf::MapFieldAssoc(anno, key, value));
+        let iter = assocs.into_iter().map(|(key, value)| {
+            eaf::MapFieldAssoc(anno, self.arena.alloc(key), self.arena.alloc(value))
+        });
         let assocs = self.arena.alloc_from_iter(iter);
 
         eaf::Expr::MapCreate(anno, assocs)
@@ -356,8 +360,9 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
     ) -> eaf::Expr<'arena> {
         let anno = span.into_anno(self.source_map);
 
-        let iter =
-            updates.into_iter().map(|(key, value)| eaf::MapField::MapFieldExact(anno, key, value));
+        let iter = updates.into_iter().map(|(key, value)| {
+            eaf::MapField::MapFieldExact(anno, self.arena.alloc(key), self.arena.alloc(value))
+        });
         let updates = self.arena.alloc_from_iter(iter);
 
         eaf::Expr::MapUpdate(anno, self.arena.alloc(base), updates)
@@ -371,8 +376,9 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
     ) -> eaf::Expr<'arena> {
         let anno = span.into_anno(self.source_map);
 
-        let iter =
-            updates.into_iter().map(|(key, value)| eaf::MapField::MapFieldAssoc(anno, key, value));
+        let iter = updates.into_iter().map(|(key, value)| {
+            eaf::MapField::MapFieldAssoc(anno, self.arena.alloc(key), self.arena.alloc(value))
+        });
         let updates = self.arena.alloc_from_iter(iter);
 
         eaf::Expr::MapUpdate(anno, self.arena.alloc(base), updates)
@@ -385,7 +391,11 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         pat: eaf::Pattern<'arena>,
         rhs: eaf::Expr<'arena>,
     ) -> eaf::Expr<'arena> {
-        eaf::Expr::Match(span.into_anno(self.source_map), pat, self.arena.alloc(rhs))
+        eaf::Expr::Match(
+            span.into_anno(self.source_map),
+            self.arena.alloc(pat),
+            self.arena.alloc(rhs),
+        )
     }
 
     pub(crate) fn expr_case(
@@ -462,7 +472,7 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
     pub(crate) fn export_attr(
         &self,
         span: impl IntoAnno,
-        funs: impl IntoIterator<Item = (Symbol, usize)>,
+        funs: impl IntoIterator<Item = (Symbol, u32)>,
     ) -> eaf::ModuleForm<'arena> {
         let iter = funs.into_iter().map(|(name, arity)| eaf::NameArity(name.into(), arity));
         let funs = self.arena.alloc_from_iter(iter);
@@ -494,7 +504,7 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         eaf::RecordFieldDecl::Untyped(eaf::RecordField(
             span.into_anno(self.source_map),
             name_atom,
-            default,
+            default.map(|e| &*self.arena.alloc(e)),
         ))
     }
 
@@ -519,7 +529,7 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         let iter = fields.into_iter().map(|(field, value)| {
             let anno = field.span.into_anno(self.source_map);
             let key = eaf::AtomOrVar::Atom(anno, field.name.into());
-            eaf::RecordField(anno, key, Some(value))
+            eaf::RecordField(anno, key, Some(self.arena.alloc(value)))
         });
         let fields = self.arena.alloc_from_iter(iter);
 
@@ -546,7 +556,7 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         let iter = fields.into_iter().map(|(field, value)| {
             let anno = field.span.into_anno(self.source_map);
             let key = eaf::Atom(anno, field.name.into());
-            eaf::RecordField(anno, key, Some(value))
+            eaf::RecordField(anno, key, Some(self.arena.alloc(value)))
         });
         let fields = self.arena.alloc_from_iter(iter);
 
@@ -569,7 +579,7 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         let iter = fields.into_iter().map(|(field, value)| {
             let anno = field.span.into_anno(self.source_map);
             let key = eaf::AtomOrVar::Atom(anno, field.name.into());
-            eaf::RecordField(anno, key, Some(value))
+            eaf::RecordField(anno, key, Some(self.arena.alloc(value)))
         });
         let fields = self.arena.alloc_from_iter(iter);
 
@@ -584,7 +594,7 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         &self,
         span: impl IntoAnno,
         name: Symbol,
-        arity: usize,
+        arity: u32,
         clauses: impl IntoIterator<Item = eaf::Clause<'arena>>,
     ) -> eaf::ModuleForm<'arena> {
         let clauses = self.arena.alloc_from_iter(clauses);
@@ -600,7 +610,7 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
     ) -> eaf::ModuleForm<'arena> {
         let anno = span.into_anno(self.source_map);
         let clause = self.clause(anno, params, None, body);
-        self.function(anno, name, clause.patterns.len(), [clause])
+        self.function(anno, name, clause.patterns.len() as u32, [clause])
     }
 
     pub(crate) fn module(

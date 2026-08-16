@@ -82,7 +82,7 @@ fn small_int(n: u8) -> Vec<u8> {
     vec![SMALL_INTEGER_EXT, n]
 }
 
-fn file_line_chars(chars: &[char], line: usize) -> FileLine<'_> {
+fn file_line_chars(chars: &[char], line: u32) -> FileLine<'_> {
     FileLine(chars, line)
 }
 
@@ -390,7 +390,7 @@ fn expr_match() {
     // Rep(E) = {match, ANNO, Rep(P), Rep(E_0)}
     let v = Expr::Match(
         anno(),
-        Pattern::Var(anno(), sym("X")),
+        r!(Pattern::Var(anno(), sym("X"))),
         r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(42)))),
     );
     let expected = term(tuple(&[atom("match"), anno_bytes(), var_lit("X"), integer_lit(42)]));
@@ -403,7 +403,7 @@ fn expr_maybe_match() {
     // Rep(E) = {maybe_match, ANNO, Rep(P), Rep(E_0)}
     let v = Expr::MaybeMatch(
         anno(),
-        Pattern::Var(anno(), sym("X")),
+        r!(Pattern::Var(anno(), sym("X"))),
         r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(42)))),
     );
     let expected = term(tuple(&[atom("maybe_match"), anno_bytes(), var_lit("X"), integer_lit(42)]));
@@ -571,8 +571,8 @@ fn generator_generate() {
     // Rep(Q) = {generate, ANNO, Rep(P), Rep(E)}
     let v = Generator::Generate(
         anno(),
-        Pattern::Var(anno(), sym("X")),
-        Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("list"))),
+        r!(Pattern::Var(anno(), sym("X"))),
+        r!(Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("list")))),
     );
     let expected = term(tuple(&[atom("generate"), anno_bytes(), var_lit("X"), atom_lit("list")]));
     assert_eq!(to_bytes(&v).unwrap(), expected);
@@ -584,8 +584,8 @@ fn generator_generate_strict() {
     // Rep(Q) = {generate_strict, ANNO, Rep(P), Rep(E)}
     let v = Generator::GenerateStrict(
         anno(),
-        Pattern::Var(anno(), sym("X")),
-        Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("list"))),
+        r!(Pattern::Var(anno(), sym("X"))),
+        r!(Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("list")))),
     );
     let expected =
         term(tuple(&[atom("generate_strict"), anno_bytes(), var_lit("X"), atom_lit("list")]));
@@ -598,8 +598,8 @@ fn generator_b_generate() {
     // Rep(Q) = {b_generate, ANNO, Rep(P), Rep(E)}
     let v = Generator::BGenerate(
         anno(),
-        Pattern::Var(anno(), sym("X")),
-        Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("bin"))),
+        r!(Pattern::Var(anno(), sym("X"))),
+        r!(Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("bin")))),
     );
     let expected = term(tuple(&[atom("b_generate"), anno_bytes(), var_lit("X"), atom_lit("bin")]));
     assert_eq!(to_bytes(&v).unwrap(), expected);
@@ -611,8 +611,8 @@ fn generator_m_generate() {
     // Rep(Q) = {m_generate, ANNO, Rep(P), Rep(E)}
     let v = Generator::MGenerate(
         anno(),
-        Pattern::Var(anno(), sym("X")),
-        Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("map"))),
+        r!(Pattern::Var(anno(), sym("X"))),
+        r!(Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("map")))),
     );
     let expected = term(tuple(&[atom("m_generate"), anno_bytes(), var_lit("X"), atom_lit("map")]));
     assert_eq!(to_bytes(&v).unwrap(), expected);
@@ -624,10 +624,10 @@ fn generator_m_generate() {
 eaf_test! {
 fn map_field_assoc_variant() {
     // {map_field_assoc, ANNO, Rep(K), Rep(V)}
-    let v: MapField<Expr<'_>, Expr<'_>> = MapField::MapFieldAssoc(
+    let v: MapField<'_, Expr<'_>, Expr<'_>> = MapField::MapFieldAssoc(
         anno(),
-        Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k"))),
-        Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1))),
+        r!(Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k")))),
+        r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1)))),
     );
     let expected =
         term(tuple(&[atom("map_field_assoc"), anno_bytes(), atom_lit("k"), integer_lit(1)]));
@@ -638,10 +638,10 @@ fn map_field_assoc_variant() {
 eaf_test! {
 fn map_field_exact_variant() {
     // {map_field_exact, ANNO, Rep(K), Rep(V)}
-    let v: MapField<Expr<'_>, Expr<'_>> = MapField::MapFieldExact(
+    let v: MapField<'_, Expr<'_>, Expr<'_>> = MapField::MapFieldExact(
         anno(),
-        Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k"))),
-        Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1))),
+        r!(Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k")))),
+        r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1)))),
     );
     let expected =
         term(tuple(&[atom("map_field_exact"), anno_bytes(), atom_lit("k"), integer_lit(1)]));
@@ -782,7 +782,7 @@ fn pattern_bin() {
     // Rep(P) = {bin, ANNO, [{bin_element, ANNO, Rep(P_i), Rep(Size_i), Rep(TSL_i)}, ...]}
     let elem = BinElement::<Pattern> {
         anno: anno(),
-        value: Pattern::Var(anno(), sym("X")),
+        value: r!(Pattern::Var(anno(), sym("X"))),
         size: BinElemSize::Default,
         tsl: BinElemTsl::Default,
     };
@@ -810,8 +810,8 @@ fn pattern_map() {
         anno(),
         svec![MapFieldExact(
             anno(),
-            Pattern::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k"))),
-            Pattern::Var(anno(), sym("V")),
+            r!(Pattern::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k")))),
+            r!(Pattern::Var(anno(), sym("V"))),
         )],
     );
     let expected = term(tuple(&[
@@ -843,7 +843,7 @@ fn pattern_record() {
     let v = Pattern::Record(
         anno(),
         RecordName::Local(sym("rec")),
-        svec![RecordField(anno(), AtomOrVar::Atom(anno(), sym("f")), Some(Pattern::Var(anno(), sym("V"))))],
+        svec![RecordField(anno(), AtomOrVar::Atom(anno(), sym("f")), Some(r!(Pattern::Var(anno(), sym("V")))))],
     );
     let expected = term(tuple(&[
         atom("record"),
@@ -862,7 +862,7 @@ fn expr_bin() {
     // Rep(E) = {bin, ANNO, [{bin_element, ANNO, Rep(E_i), Rep(Size_i), Rep(TSL_i)}, ...]}
     let elem = BinElement::<Expr> {
         anno: anno(),
-        value: Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(7))),
+        value: r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(7)))),
         size: BinElemSize::Size(r!(Expr::AtomicLiteral(AtomicLiteral::Integer(
             anno(),
             big(8),
@@ -935,8 +935,8 @@ fn expr_map_create() {
         anno(),
         svec![MapFieldAssoc(
             anno(),
-            Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k"))),
-            Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1))),
+            r!(Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k")))),
+            r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1)))),
         )],
     );
     let expected = term(tuple(&[
@@ -956,8 +956,8 @@ fn expr_map_update() {
         r!(Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("m")))),
          svec![MapField::MapFieldExact(
             anno(),
-            Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k"))),
-            Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1))),
+            r!(Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k")))),
+            r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1)))),
         )],
     );
     let expected = term(tuple(&[
@@ -979,7 +979,7 @@ fn expr_record_create() {
         svec![RecordField(
             anno(),
             AtomOrVar::Atom(anno(), sym("f")),
-            Some(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1)))),
+            Some(r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1))))),
         )],
     );
     let expected = term(tuple(&[
@@ -1036,7 +1036,7 @@ fn expr_record_update() {
         svec![RecordField(
             anno(),
             Atom(anno(), sym("f")),
-            Some(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1)))),
+            Some(r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1))))),
         )],
     );
     let expected = term(tuple(&[
@@ -1169,13 +1169,13 @@ fn expr_receive_after() {
 eaf_test! {
 fn expr_try_minimal() {
     // try B catch ... end → {'try', ANNO, Rep(B), [], [Rep(Tc_1), ..., Rep(Tc_k)], []}
-    let v = Expr::Try {
+    let v = Expr::Try(r!(Try {
         anno: anno(),
         body: Body(svec![Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("ok")))]),
         of: &[],
         catch: &[],
         after: Body(&[]),
-    };
+    }));
     let expected =
         term(tuple(&[atom("try"), anno_bytes(), list(&[atom_lit("ok")]), nil(), nil(), nil()]));
     assert_eq!(to_bytes(&v).unwrap(), expected);
@@ -1266,7 +1266,7 @@ fn catch_what_struct() {
         anno(),
         (
             ExceptionKind::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("throw"))),
-            Pattern::Var(anno(), sym("P")),
+            r!(Pattern::Var(anno(), sym("P"))),
             Var(anno(), sym("S")),
         ),
     );
@@ -1289,7 +1289,7 @@ fn catch_clause_struct() {
             anno(),
             (
                 ExceptionKind::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("throw"))),
-                Pattern::Var(anno(), sym("P")),
+                r!(Pattern::Var(anno(), sym("P"))),
                 Var(anno(), sym("S")),
             ),
         ),),
@@ -1319,7 +1319,7 @@ fn bin_element_struct_full() {
     // {bin_element, ANNO, Rep(V), Rep(Size), Rep(TSL)}
     let v = BinElement::<Expr> {
         anno: anno(),
-        value: Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(42))),
+        value: r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(42)))),
         size: BinElemSize::Size(r!(Expr::AtomicLiteral(AtomicLiteral::Integer(
             anno(),
             big(8),
@@ -1361,10 +1361,10 @@ fn bin_elem_tsl_with_list_is_transparent() {
 eaf_test! {
 fn map_field_assoc_struct() {
     // {map_field_assoc, ANNO, Rep(K), Rep(V)}
-    let v = MapFieldAssoc::<Expr, Expr>(
+    let v = MapFieldAssoc::<'_, Expr<'_>, Expr<'_>>(
         anno(),
-        Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k"))),
-        Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1))),
+        r!(Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k")))),
+        r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1)))),
     );
     let expected =
         term(tuple(&[atom("map_field_assoc"), anno_bytes(), atom_lit("k"), integer_lit(1)]));
@@ -1375,10 +1375,10 @@ fn map_field_assoc_struct() {
 eaf_test! {
 fn map_field_exact_struct() {
     // {map_field_exact, ANNO, Rep(K), Rep(V)}
-    let v = MapFieldExact::<Expr, Expr>(
+    let v = MapFieldExact::<'_, Expr<'_>, Expr<'_>>(
         anno(),
-        Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k"))),
-        Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1))),
+        r!(Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k")))),
+        r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1)))),
     );
     let expected =
         term(tuple(&[atom("map_field_exact"), anno_bytes(), atom_lit("k"), integer_lit(1)]));
@@ -1394,7 +1394,7 @@ fn record_field_struct() {
     let v = RecordField::<Atom, Expr>(
         anno(),
         Atom(anno(), sym("f")),
-        Some(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1)))),
+        Some(r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1))))),
     );
     let expected = term(tuple(&[
         atom("record_field"),
@@ -1434,8 +1434,8 @@ fn qualifier_generator_is_transparent() {
     // Rep(Q) = Rep(Generator) — newtype variant
     let v = Qualifier::Generator(r!(Generator::Generate(
         anno(),
-        Pattern::Var(anno(), sym("X")),
-        Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("list"))),
+        r!(Pattern::Var(anno(), sym("X"))),
+        r!(Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("list")))),
     )));
     let expected = term(tuple(&[atom("generate"), anno_bytes(), var_lit("X"), atom_lit("list")]));
     assert_eq!(to_bytes(&v).unwrap(), expected);
@@ -1449,8 +1449,8 @@ fn qualifier_zip() {
         anno(),
         svec![Generator::Generate(
             anno(),
-            Pattern::Var(anno(), sym("X")),
-            Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("list"))),
+            r!(Pattern::Var(anno(), sym("X"))),
+            r!(Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("list")))),
         )],
     );
     let expected = term(tuple(&[
@@ -1468,8 +1468,8 @@ eaf_test! {
 fn generator_b_generate_strict() {
     let v = Generator::BGenerateStrict(
         anno(),
-        Pattern::Var(anno(), sym("X")),
-        Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("bin"))),
+        r!(Pattern::Var(anno(), sym("X"))),
+        r!(Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("bin")))),
     );
     let expected =
         term(tuple(&[atom("b_generate_strict"), anno_bytes(), var_lit("X"), atom_lit("bin")]));
@@ -1481,8 +1481,8 @@ eaf_test! {
 fn generator_m_generate_strict() {
     let v = Generator::MGenerateStrict(
         anno(),
-        Pattern::Var(anno(), sym("X")),
-        Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("map"))),
+        r!(Pattern::Var(anno(), sym("X"))),
+        r!(Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("map")))),
     );
     let expected =
         term(tuple(&[atom("m_generate_strict"), anno_bytes(), var_lit("X"), atom_lit("map")]));
@@ -1573,8 +1573,8 @@ fn guard_test_map_create() {
         anno(),
         svec![MapFieldAssoc(
             anno(),
-            Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k"))),
-            Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1))),
+            r!(Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k")))),
+            r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1)))),
         )],
     );
     let expected = term(tuple(&[
@@ -1594,8 +1594,8 @@ fn guard_test_map_update() {
         r!(Expr::Var(anno(), sym("M"))),
          svec![MapField::MapFieldAssoc(
             anno(),
-            Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k"))),
-            Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1))),
+            r!(Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k")))),
+            r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1)))),
         )],
     );
     let expected = term(tuple(&[
@@ -1617,7 +1617,7 @@ fn guard_test_record() {
     let v = Expr::RecordCreate(
         anno(),
         RecordName::Local(sym("rec")),
-        svec![RecordField(anno(), AtomOrVar::Atom(anno(), sym("f")), Some(Expr::Var(anno(), sym("X"))))],
+        svec![RecordField(anno(), AtomOrVar::Atom(anno(), sym("f")), Some(r!(Expr::Var(anno(), sym("X")))))],
     );
     let expected = term(tuple(&[
         atom("record"),
@@ -1670,7 +1670,7 @@ eaf_test! {
 fn guard_test_bin() {
     let elem = BinElement::<Expr> {
         anno: anno(),
-        value: Expr::Var(anno(), sym("X")),
+        value: r!(Expr::Var(anno(), sym("X"))),
         size: BinElemSize::Default,
         tsl: BinElemTsl::Default,
     };
@@ -1800,7 +1800,7 @@ fn type_map_with_assocs() {
     // Rep(T) = {type, ANNO, map, [Rep(A_1), ..., Rep(A_k)]}
     let assoc = AssociationType::MapFieldAssoc(
         anno(),
-        (Type::Predefined(anno(), sym("atom"), &[]), Type::Predefined(anno(), sym("integer"), &[])),
+        (r!(Type::Predefined(anno(), sym("atom"), &[])), r!(Type::Predefined(anno(), sym("integer"), &[]))),
     );
     let v = Type::Map(anno(), MapTypeAssocs::Assocs(svec![assoc]));
     let assoc_bytes = tuple(&[
@@ -1820,8 +1820,8 @@ fn type_binary_op() {
     let v = Type::BinaryOp(
         anno(),
         BinaryOp::Mul,
-        Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(2))),
-        Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(3))),
+        r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(2)))),
+        r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(3)))),
     );
     let expected =
         term(tuple(&[atom("op"), anno_bytes(), atom("*"), integer_lit(2), integer_lit(3)]));
@@ -1835,7 +1835,7 @@ fn type_unary_op() {
     let v = Type::UnaryOp(
         anno(),
         UnaryOp::Neg,
-        Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1))),
+        r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1)))),
     );
     let expected = term(tuple(&[atom("op"), anno_bytes(), atom("-"), integer_lit(1)]));
     assert_eq!(to_bytes(&v).unwrap(), expected);
@@ -1869,7 +1869,7 @@ eaf_test! {
 fn type_record() {
     // Rep(T) = {type, ANNO, record, [Rep(Name), Rep(F_1), ..., Rep(F_k)]}
     let field =
-        RecordFieldType(anno(), (Atom(anno(), sym("f")), Type::Predefined(anno(), sym("atom"), &[])));
+        RecordFieldType(anno(), (Atom(anno(), sym("f")), r!(Type::Predefined(anno(), sym("atom"), &[]))));
     let v = Type::Record(anno(), RecordTypeFields(Atom(anno(), sym("rec")), svec![field]));
     let field_bytes = tuple(&[
         atom("type"),
@@ -2029,7 +2029,7 @@ fn function_type_bounded_fun() {
         anno(),
         (
             IsSubtype(anno(), IsSubtypeMark),
-            (Var(anno(), sym("X")), Type::Predefined(anno(), sym("atom"), &[])),
+            (Var(anno(), sym("X")), r!(Type::Predefined(anno(), sym("atom"), &[]))),
         ),
     )]);
     let v = FunctionType::BoundedFun(anno(), (r!(inner_fun), fc));
@@ -2073,7 +2073,7 @@ fn constraint_struct() {
         anno(),
         (
             IsSubtype(anno(), IsSubtypeMark),
-            (Var(anno(), sym("X")), Type::Predefined(anno(), sym("atom"), &[])),
+            (Var(anno(), sym("X")), r!(Type::Predefined(anno(), sym("atom"), &[]))),
         ),
     );
     let expected = term(tuple(&[
@@ -2112,7 +2112,7 @@ fn association_type_map_field_assoc() {
     // {type, ANNO, map_field_assoc, [Rep(K), Rep(V)]}
     let v = AssociationType::MapFieldAssoc(
         anno(),
-        (Type::Predefined(anno(), sym("atom"), &[]), Type::Predefined(anno(), sym("integer"), &[])),
+        (r!(Type::Predefined(anno(), sym("atom"), &[])), r!(Type::Predefined(anno(), sym("integer"), &[]))),
     );
     let expected = term(tuple(&[
         atom("type"),
@@ -2128,7 +2128,7 @@ eaf_test! {
 fn association_type_map_field_exact() {
     let v = AssociationType::MapFieldExact(
         anno(),
-        (Type::Predefined(anno(), sym("atom"), &[]), Type::Predefined(anno(), sym("integer"), &[])),
+        (r!(Type::Predefined(anno(), sym("atom"), &[])), r!(Type::Predefined(anno(), sym("integer"), &[]))),
     );
     let expected = term(tuple(&[
         atom("type"),
@@ -2145,7 +2145,7 @@ fn association_type_map_field_exact() {
 eaf_test! {
 fn record_field_type_struct() {
     // Doc: {type, ANNO, field_type, [Rep(Name), Rep(Type)]}
-    let v = RecordFieldType(anno(), (Atom(anno(), sym("f")), Type::Predefined(anno(), sym("atom"), &[])));
+    let v = RecordFieldType(anno(), (Atom(anno(), sym("f")), r!(Type::Predefined(anno(), sym("atom"), &[]))));
     let expected = term(tuple(&[
         atom("type"),
         anno_bytes(),
@@ -2166,8 +2166,8 @@ fn guard_test_map_update_with_exact_association() {
         r!(Expr::Var(anno(), sym("M"))),
          svec![MapField::MapFieldExact(
             anno(),
-            Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k"))),
-            Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1))),
+            r!(Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k")))),
+            r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1)))),
         )],
     );
     let expected = term(tuple(&[
@@ -2199,7 +2199,7 @@ fn type_range_with_negated_lower_bound() {
             r!(Type::UnaryOp(
                 anno(),
                 UnaryOp::Neg,
-                Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1))),
+                r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(1)))),
             )),
             r!(Type::AtomicLiteral(AtomicLiteral::Integer(anno(), big(5)))),
         ),
@@ -2374,7 +2374,7 @@ fn module_form_record_attr_untyped_with_default() {
              svec![RecordFieldDecl::Untyped(RecordField(
                 anno(),
                 Atom(anno(), sym("x")),
-                Some(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(0)))),
+                Some(r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(0))))),
             ))],
         ),
     );
@@ -2419,7 +2419,7 @@ fn module_form_record_attr_typed_without_default() {
         sym("r"),
              svec![RecordFieldDecl::Typed(r!(TypedRecordField(
                 RecordField(anno(), Atom(anno(), sym("x")), None),
-                Type::Predefined(anno(), sym("atom"), &[]),
+                r!(Type::Predefined(anno(), sym("atom"), &[])),
             )))],
         ),
     );
@@ -2450,9 +2450,9 @@ fn module_form_record_attr_typed_with_default() {
                 RecordField(
                     anno(),
                     Atom(anno(), sym("x")),
-                    Some(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(0)))),
+                    Some(r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(0))))),
                 ),
-                Type::Predefined(anno(), sym("atom"), &[]),
+                r!(Type::Predefined(anno(), sym("atom"), &[])),
             )))],
         ),
     );
@@ -2479,7 +2479,7 @@ fn module_form_type_attr_type() {
     let v = ModuleForm::TypeAttr(
         anno(),
         TypeDeclType::Type,
-        r!(TypeDecl(sym("my_t"), Type::Predefined(anno(), sym("atom"), &[]), &[])),
+        r!(TypeDecl(sym("my_t"), r!(Type::Predefined(anno(), sym("atom"), &[])), &[])),
     );
     let expected =
         term(attribute("type", &[tuple(&[atom("my_t"), predefined_type("atom", &[]), nil()])]));
@@ -2495,7 +2495,7 @@ fn module_form_type_attr_opaque() {
         TypeDeclType::Opaque,
         r!(TypeDecl(
             sym("handle"),
-            Type::Predefined(anno(), sym("reference"), &[]),
+            r!(Type::Predefined(anno(), sym("reference"), &[])),
             svec![Type::Var(anno(), sym("T"))],
         )),
     );
@@ -2609,7 +2609,7 @@ fn record_decl_struct() {
 eaf_test! {
 fn type_decl_struct() {
     // __elide__: {Name, Type, [Vars]}
-    let v = TypeDecl(sym("t"), Type::Predefined(anno(), sym("atom"), &[]), svec![Type::Var(anno(), sym("A"))]);
+    let v = TypeDecl(sym("t"), r!(Type::Predefined(anno(), sym("atom"), &[])), svec![Type::Var(anno(), sym("A"))]);
     let expected = term(tuple(&[atom("t"), predefined_type("atom", &[]), list(&[var_lit("A")])]));
     assert_eq!(to_bytes(&v).unwrap(), expected);
 }
@@ -2629,7 +2629,7 @@ fn record_field_decl_typed_is_transparent() {
     // Newtype variants serialize as the inner value.
     let v = RecordFieldDecl::Typed(r!(TypedRecordField::<Atom, Expr, Type>(
         RecordField(anno(), Atom(anno(), sym("x")), None),
-        Type::Predefined(anno(), sym("atom"), &[]),
+        r!(Type::Predefined(anno(), sym("atom"), &[])),
     )));
     let inner_record_field = tuple(&[atom("record_field"), anno_bytes(), atom_lit("x")]);
     let expected = term(tuple(&[
@@ -2646,7 +2646,7 @@ fn typed_record_field_struct_without_default() {
     // V = A :: T → {typed_record_field, {record_field, ANNO, Rep(A)}, Rep(T)}
     let v = TypedRecordField::<Atom, Expr, Type>(
         RecordField(anno(), Atom(anno(), sym("x")), None),
-        Type::Predefined(anno(), sym("atom"), &[]),
+        r!(Type::Predefined(anno(), sym("atom"), &[])),
     );
     let inner_record_field = tuple(&[atom("record_field"), anno_bytes(), atom_lit("x")]);
     let expected = term(tuple(&[
@@ -2665,9 +2665,9 @@ fn typed_record_field_struct_with_default() {
         RecordField(
             anno(),
             Atom(anno(), sym("x")),
-            Some(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(0)))),
+            Some(r!(Expr::AtomicLiteral(AtomicLiteral::Integer(anno(), big(0))))),
         ),
-        Type::Predefined(anno(), sym("atom"), &[]),
+        r!(Type::Predefined(anno(), sym("atom"), &[])),
     );
     let inner_record_field =
         tuple(&[atom("record_field"), anno_bytes(), atom_lit("x"), integer_lit(0)]);

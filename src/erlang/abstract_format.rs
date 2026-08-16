@@ -30,8 +30,8 @@ impl From<rustc_span::Symbol> for Symbol {
 #[derive(serde::Serialize, Debug, Clone, Copy)]
 #[serde(rename = "__elide__")]
 pub(crate) struct Anno {
-    pub line: usize,
-    pub column: usize,
+    pub line: u32,
+    pub column: u32,
 }
 
 /* Module Declarations and Forms
@@ -68,7 +68,7 @@ pub(crate) enum ModuleForm<'a> {
     /// `Fc_i` is a function clause with a pattern sequence of the same length
     /// `Arity`, then Rep(F) =
     /// `{function,ANNO,Name,Arity,[Rep(Fc_1), ...,Rep(Fc_k)]}`.
-    Function(Anno, Symbol, usize, &'a [Clause<'a>]),
+    Function(Anno, Symbol, u32, &'a [Clause<'a>]),
     /// If F is a function specification `-Spec Name Ft_1; ...; Ft_k`, where `Spec` is
     /// either the atom `spec` or the atom `callback`, and each `Ft_i` is a possibly
     /// constrained function type with an argument sequence of the same length
@@ -105,15 +105,15 @@ pub(crate) enum ModuleForm<'a> {
 
 #[derive(serde::Serialize, Debug, Clone, Copy)]
 #[serde(rename = "__elide__")]
-pub(crate) struct NameArity(pub Symbol, pub usize);
+pub(crate) struct NameArity(pub Symbol, pub u32);
 
 #[derive(serde::Serialize, Debug, Clone, Copy)]
 #[serde(rename = "__elide__")]
-pub(crate) struct FileLine<'a>(pub &'a [char], pub usize);
+pub(crate) struct FileLine<'a>(pub &'a [char], pub u32);
 
 #[derive(serde::Serialize, Debug, Clone, Copy)]
 #[serde(rename = "__elide__")]
-pub(crate) struct ModNameArity(pub Symbol, pub Symbol, pub usize);
+pub(crate) struct ModNameArity(pub Symbol, pub Symbol, pub u32);
 
 #[derive(serde::Serialize, Debug, Clone, Copy)]
 #[serde(rename = "__elide__")]
@@ -140,8 +140,8 @@ pub(crate) struct RecordDecl<'a>(pub Symbol, pub &'a [RecordFieldDecl<'a>]);
 
 #[derive(serde::Serialize, Debug, Clone, Copy)]
 pub(crate) enum RecordFieldDecl<'a> {
-    Untyped(RecordField<Atom, Expr<'a>>),
-    Typed(&'a TypedRecordField<Atom, Expr<'a>, Type<'a>>),
+    Untyped(RecordField<'a, Atom, Expr<'a>>),
+    Typed(&'a TypedRecordField<'a, Atom, Expr<'a>, Type<'a>>),
 }
 
 #[derive(serde::Serialize, Debug, Clone, Copy)]
@@ -153,7 +153,7 @@ pub(crate) enum TypeDeclType {
 
 #[derive(serde::Serialize, Debug, Clone, Copy)]
 #[serde(rename = "__elide__")]
-pub(crate) struct TypeDecl<'a>(pub Symbol, pub Type<'a>, pub &'a [Type<'a>]);
+pub(crate) struct TypeDecl<'a>(pub Symbol, pub &'a Type<'a>, pub &'a [Type<'a>]);
 
 /* Record Fields
 
@@ -167,10 +167,10 @@ initializer expression, and an optional type.
 /// `{record_field,ANNO,Rep(A),Rep(E)}`.
 #[derive(serde::Serialize, Debug, Clone, Copy)]
 #[serde(rename = "record_field")]
-pub(crate) struct RecordField<A: Serialize + Copy, E: Serialize + Copy>(
+pub(crate) struct RecordField<'a, A: Serialize + Copy, E: Serialize + Copy>(
     pub Anno,
     pub A,
-    #[serde(skip_serializing_if = "Option::is_none")] pub Option<E>,
+    #[serde(skip_serializing_if = "Option::is_none")] pub Option<&'a E>,
 );
 
 /// If V is `A :: T`, where `T` is a type, then Rep(V) =
@@ -180,10 +180,12 @@ pub(crate) struct RecordField<A: Serialize + Copy, E: Serialize + Copy>(
 /// Rep(V) = `{typed_record_field,{record_field,ANNO,Rep(A),Rep(E)},Rep(T)}`.
 #[derive(serde::Serialize, Debug, Clone, Copy)]
 #[serde(rename = "typed_record_field")]
-pub(crate) struct TypedRecordField<A: Serialize + Copy, E: Serialize + Copy, T: Serialize + Copy>(
-    pub RecordField<A, E>,
-    pub T,
-);
+pub(crate) struct TypedRecordField<
+    'a,
+    A: Serialize + Copy,
+    E: Serialize + Copy,
+    T: Serialize + Copy,
+>(pub RecordField<'a, A, E>, pub &'a T);
 
 /* Atomic Literals */
 
@@ -248,7 +250,7 @@ pub(crate) enum Pattern<'a> {
     /// If P is a map pattern `#{A_1, ..., A_k}`, where each `A_i` is an association
     /// `P_i_1 := P_i_2`, then Rep(P) = `{map,ANNO,[Rep(A_1), ..., Rep(A_k)]}`. For
     /// Rep(A), see below.
-    Map(Anno, &'a [MapFieldExact<Pattern<'a>, Pattern<'a>>]),
+    Map(Anno, &'a [MapFieldExact<'a, Pattern<'a>, Pattern<'a>>]),
     /// If P is a nil pattern `[]`, then Rep(P) = `{nil,ANNO}`.
     #[rustfmt::skip]
     Nil { anno: Anno },
@@ -272,7 +274,7 @@ pub(crate) enum Pattern<'a> {
     /// If P is a record pattern `#Name{Field_1=P_1, ..., Field_k=P_k}`, where each
     /// `Field_i` is an atom or `_`, then Rep(P) =
     /// `{record,ANNO,Name,[{record_field,ANNO,Rep(Field_1),Rep(P_1)}, ..., {record_field,ANNO,Rep(Field_k),Rep(P_k)}]}`.
-    Record(Anno, RecordName, &'a [RecordField<AtomOrVar, Pattern<'a>>]),
+    Record(Anno, RecordName, &'a [RecordField<'a, AtomOrVar, Pattern<'a>>]),
     /// If P is a tuple pattern `{P_1, ..., P_k}`, then Rep(P) =
     /// `{tuple,ANNO,[Rep(P_1), ..., Rep(P_k)]}`.
     Tuple(Anno, &'a [Pattern<'a>]),
@@ -361,18 +363,18 @@ pub(crate) enum Expr<'a> {
     /// `E_i_1 => E_i_2`, then Rep(E) = `{map,ANNO,[Rep(A_1), ..., Rep(A_k)]}`. For
     /// Rep(A), see below.
     #[serde(rename = "map")]
-    MapCreate(Anno, &'a [MapFieldAssoc<Expr<'a>, Expr<'a>>]),
+    MapCreate(Anno, &'a [MapFieldAssoc<'a, Expr<'a>, Expr<'a>>]),
     /// If E is a map update `E_0#{A_1, ..., A_k}`, where each `A_i` is an association
     /// `E_i_1 => E_i_2` or `E_i_1 := E_i_2`, then Rep(E) =
     /// `{map,ANNO,Rep(E_0),[Rep(A_1), ..., Rep(A_k)]}`. For Rep(A), see below.
     #[serde(rename = "map")]
-    MapUpdate(Anno, &'a Expr<'a>, &'a [MapField<Expr<'a>, Expr<'a>>]),
+    MapUpdate(Anno, &'a Expr<'a>, &'a [MapField<'a, Expr<'a>, Expr<'a>>]),
     /// If E is a match operator expression `P = E_0`, where `P` is a pattern, then
     /// Rep(E) = `{match,ANNO,Rep(P),Rep(E_0)}`.
-    Match(Anno, Pattern<'a>, &'a Expr<'a>),
+    Match(Anno, &'a Pattern<'a>, &'a Expr<'a>),
     /// If E is a conditional match operator expression `P ?= E_0`, where `P` is a
     /// pattern, then Rep(E) = `{maybe_match,ANNO,Rep(P),Rep(E_0)}`.
-    MaybeMatch(Anno, Pattern<'a>, &'a Expr<'a>),
+    MaybeMatch(Anno, &'a Pattern<'a>, &'a Expr<'a>),
     /// If E is a maybe expression `maybe B end`, where `B` is a body then Rep(E) =
     /// `{'maybe',ANNO,Rep(B)}`.
     Maybe(Anno, Body<'a>),
@@ -409,7 +411,7 @@ pub(crate) enum Expr<'a> {
     /// `Field_i` is an atom or `_`, then Rep(E) =
     /// `{record,ANNO,Name,[{record_field,ANNO,Rep(Field_1),Rep(E_1)}, ..., {record_field,ANNO,Rep(Field_k),Rep(E_k)}]}`.
     #[serde(rename = "record")]
-    RecordCreate(Anno, RecordName, &'a [RecordField<AtomOrVar, Expr<'a>>]),
+    RecordCreate(Anno, RecordName, &'a [RecordField<'a, AtomOrVar, Expr<'a>>]),
     /// If E is a record field access `E_0#Name.Field`, where `Field` is an atom, then
     /// Rep(E) = `{record_field,ANNO,Rep(E_0),Name,Rep(Field)}`.
     RecordField(Anno, &'a Expr<'a>, RecordName, Atom),
@@ -420,7 +422,7 @@ pub(crate) enum Expr<'a> {
     /// `Field_i` is an atom, then Rep(E) =
     /// `{record,ANNO,Rep(E_0),Name,[{record_field,ANNO,Rep(Field_1),Rep(E_1)}, ..., {record_field,ANNO,Rep(Field_k),Rep(E_k)}]}`.
     #[serde(rename = "record")]
-    RecordUpdate(Anno, &'a Expr<'a>, RecordName, &'a [RecordField<Atom, Expr<'a>>]),
+    RecordUpdate(Anno, &'a Expr<'a>, RecordName, &'a [RecordField<'a, Atom, Expr<'a>>]),
     /// If E is a tuple skeleton `{E_1, ..., E_k}`, then Rep(E) =
     /// `{tuple,ANNO,[Rep(E_1), ..., Rep(E_k)]}`.
     Tuple(Anno, &'a [Expr<'a>]),
@@ -445,16 +447,20 @@ pub(crate) enum Expr<'a> {
     /// and `A` are a bodies, each `Cc_i` is a case clause, and each `Tc_j` is a catch
     /// clause, then Rep(E) =
     /// `{'try',ANNO,Rep(B),[Rep(Cc_1), ..., Rep(Cc_k)],[Rep(Tc_1), ..., Rep(Tc_n)],Rep(A)}`.
-    Try {
-        anno: Anno,
-        body: Body<'a>,
-        of: &'a [Clause<'a>],
-        catch: &'a [CatchClause<'a>],
-        after: Body<'a>,
-    },
+    Try(&'a Try<'a>),
     /// If E is a variable `V`, then Rep(E) = `{var,ANNO,A}`, where `A` is an atom
     /// with a printname consisting of the same characters as `V`.
     Var(Anno, Symbol),
+}
+
+#[derive(serde::Serialize, Debug, Clone, Copy)]
+#[serde(rename = "try")]
+pub(crate) struct Try<'a> {
+    pub anno: Anno,
+    pub body: Body<'a>,
+    pub of: &'a [Clause<'a>],
+    pub catch: &'a [CatchClause<'a>],
+    pub after: Body<'a>,
 }
 
 #[derive(serde::Serialize, Debug, Clone, Copy)]
@@ -470,7 +476,7 @@ pub(crate) enum RecordName {
 #[serde(rename = "function")]
 pub(crate) struct Function {
     pub name: Symbol,
-    pub arity: usize,
+    pub arity: u32,
 }
 
 /// If E is a fun expression `fun Module:Name/Arity`, then Rep(E) =
@@ -525,24 +531,24 @@ pub(crate) enum Qualifier<'a> {
 pub(crate) enum Generator<'a> {
     /// If Q is a list generator `P <- E`, where `P` is a pattern and `E` is an
     /// expression, then Rep(Q) = `{generate,ANNO,Rep(P),Rep(E)}`.
-    Generate(Anno, Pattern<'a>, Expr<'a>),
+    Generate(Anno, &'a Pattern<'a>, &'a Expr<'a>),
     /// If Q is a list generator `P <:- E`, where `P` is a pattern and `E` is an
     /// expression, then Rep(Q) = `{generate_strict,ANNO,Rep(P),Rep(E)}`.
-    GenerateStrict(Anno, Pattern<'a>, Expr<'a>),
+    GenerateStrict(Anno, &'a Pattern<'a>, &'a Expr<'a>),
     /// If Q is a bitstring generator `P <= E`, where `P` is a pattern and `E` is an
     /// expression, then Rep(Q) = `{b_generate,ANNO,Rep(P),Rep(E)}`.
-    BGenerate(Anno, Pattern<'a>, Expr<'a>),
+    BGenerate(Anno, &'a Pattern<'a>, &'a Expr<'a>),
     /// If Q is a bitstring generator `P <:= E`, where `P` is a pattern and `E` is an
     /// expression, then Rep(Q) = `{b_generate_strict,ANNO,Rep(P),Rep(E)}`.
-    BGenerateStrict(Anno, Pattern<'a>, Expr<'a>),
+    BGenerateStrict(Anno, &'a Pattern<'a>, &'a Expr<'a>),
     /// If Q is a map generator `P <- E`, where `P` is an association pattern
     /// `P_1 := P_2` and `E` is an expression, then Rep(Q) =
     /// `{m_generate,ANNO,Rep(P),Rep(E)}`. For Rep(P), see below.
-    MGenerate(Anno, Pattern<'a>, Expr<'a>),
+    MGenerate(Anno, &'a Pattern<'a>, &'a Expr<'a>),
     /// If Q is a map generator `P <:- E`, where `P` is an association pattern
     /// `P_1 := P_2` and `E` is an expression, then Rep(Q) =
     /// `{m_generate_strict,ANNO,Rep(P),Rep(E)}`.
-    MGenerateStrict(Anno, Pattern<'a>, Expr<'a>),
+    MGenerateStrict(Anno, &'a Pattern<'a>, &'a Expr<'a>),
 }
 
 /* Bitstring Element Type Specifiers */
@@ -551,7 +557,7 @@ pub(crate) enum Generator<'a> {
 #[serde(rename = "bin_element")]
 pub(crate) struct BinElement<'a, V: Serialize + Copy> {
     pub anno: Anno,
-    pub value: V,
+    pub value: &'a V,
     pub size: BinElemSize<'a>,
     pub tsl: BinElemTsl<'a>,
 }
@@ -592,7 +598,7 @@ pub(crate) enum Tsl {
     /// If TS is a type specifier `A:Value`, where `A` is an atom and `Value` is an
     /// integer, then Rep(TS) = `{A,Value}`.
     #[rustfmt::skip]
-    Unit { size: usize },
+    Unit { size: u32 },
 }
 
 /* Associations */
@@ -600,13 +606,13 @@ pub(crate) enum Tsl {
 /// An association A is one of the following
 #[derive(serde::Serialize, Debug, Clone, Copy)]
 #[serde(rename_all = "snake_case")]
-pub(crate) enum MapField<K: Serialize + Copy, V: Serialize + Copy> {
+pub(crate) enum MapField<'a, K: Serialize + Copy, V: Serialize + Copy> {
     /// If A is an association `K => V`, then Rep(A) =
     /// `{map_field_assoc,ANNO,Rep(K),Rep(V)}`.
-    MapFieldAssoc(Anno, K, V),
+    MapFieldAssoc(Anno, &'a K, &'a V),
     /// If A is an association `K := V`, then Rep(A) =
     /// `{map_field_exact,ANNO,Rep(K),Rep(V)}`.
-    MapFieldExact(Anno, K, V),
+    MapFieldExact(Anno, &'a K, &'a V),
 }
 
 /// If A is an association `K => V`, then Rep(A) =
@@ -614,14 +620,22 @@ pub(crate) enum MapField<K: Serialize + Copy, V: Serialize + Copy> {
 /// Moved outside of MapField because it's used individually in many places.
 #[derive(serde::Serialize, Debug, Clone, Copy)]
 #[serde(rename = "map_field_assoc")]
-pub(crate) struct MapFieldAssoc<K: Serialize + Copy, V: Serialize + Copy>(pub Anno, pub K, pub V);
+pub(crate) struct MapFieldAssoc<'a, K: Serialize + Copy, V: Serialize + Copy>(
+    pub Anno,
+    pub &'a K,
+    pub &'a V,
+);
 
 /// If A is an association `K := V`, then Rep(A) =
 /// `{map_field_exact,ANNO,Rep(K),Rep(V)}`.
 /// Moved outside of MapField because it's used individually in many places.
 #[derive(serde::Serialize, Debug, Clone, Copy)]
 #[serde(rename = "map_field_exact")]
-pub(crate) struct MapFieldExact<K: Serialize + Copy, V: Serialize + Copy>(pub Anno, pub K, pub V);
+pub(crate) struct MapFieldExact<'a, K: Serialize + Copy, V: Serialize + Copy>(
+    pub Anno,
+    pub &'a K,
+    pub &'a V,
+);
 
 /* Clauses
 
@@ -697,7 +711,7 @@ pub(crate) struct CatchClause<'a> {
 
 #[derive(serde::Serialize, Debug, Clone, Copy)]
 #[serde(rename = "tuple")]
-pub(crate) struct CatchWhat<'a>(pub Anno, pub (ExceptionKind<'a>, Pattern<'a>, Var));
+pub(crate) struct CatchWhat<'a>(pub Anno, pub (ExceptionKind<'a>, &'a Pattern<'a>, Var));
 
 #[derive(serde::Serialize, Debug, Clone, Copy)]
 #[serde(rename_all = "snake_case")]
@@ -764,12 +778,12 @@ pub(crate) enum Type<'a> {
     /// is an occurrence of an expression that can be evaluated to an integer at
     /// compile time), then Rep(T) = `{op,ANNO,Op,Rep(T_1),Rep(T_2)}`.
     #[serde(rename = "op")]
-    BinaryOp(Anno, BinaryOp, Expr<'a>, Expr<'a>),
+    BinaryOp(Anno, BinaryOp, &'a Expr<'a>, &'a Expr<'a>),
     /// If T is an operator type `Op T_0`, where `Op` is a unary operator (this is an
     /// occurrence of an expression that can be evaluated to an integer at compile
     /// time), then Rep(T) = `{op,ANNO,Op,Rep(T_0)}`.
     #[serde(rename = "op")]
-    UnaryOp(Anno, UnaryOp, Expr<'a>),
+    UnaryOp(Anno, UnaryOp, &'a Expr<'a>),
     /// If T is `( T_0 )`, then Rep(T) = `Rep(T_0)`, that is, parenthesized types
     /// cannot be distinguished from their bodies.
     Parenthesized(&'a Type<'a>),
@@ -874,7 +888,7 @@ pub(crate) struct FunctionConstraint<'a>(pub &'a [Constraint<'a>]);
 /// `{type,ANNO,constraint,[{atom,ANNO,is_subtype},[Rep(V),Rep(T)]]}`.
 #[derive(serde::Serialize, Debug, Clone, Copy)]
 #[serde(rename = "__type__constraint")]
-pub(crate) struct Constraint<'a>(pub Anno, pub (IsSubtype, (Var, Type<'a>)));
+pub(crate) struct Constraint<'a>(pub Anno, pub (IsSubtype, (Var, &'a Type<'a>)));
 
 #[derive(serde::Serialize, Debug, Clone, Copy)]
 #[serde(rename = "atom")]
@@ -892,11 +906,11 @@ pub(crate) enum AssociationType<'a> {
     /// If A is an association type `K => V`, where `K` and `V` are types, then Rep(A)
     /// = `{type,ANNO,map_field_assoc,[Rep(K),Rep(V)]}`.
     #[serde(rename = "__type__map_field_assoc")]
-    MapFieldAssoc(Anno, (Type<'a>, Type<'a>)),
+    MapFieldAssoc(Anno, (&'a Type<'a>, &'a Type<'a>)),
     /// If A is an association type `K := V`, where `K` and `V` are types, then Rep(A)
     /// = `{type,ANNO,map_field_exact,[Rep(K),Rep(V)]}`.
     #[serde(rename = "__type__map_field_exact")]
-    MapFieldExact(Anno, (Type<'a>, Type<'a>)),
+    MapFieldExact(Anno, (&'a Type<'a>, &'a Type<'a>)),
 }
 
 /* Record Field Types */
@@ -905,7 +919,7 @@ pub(crate) enum AssociationType<'a> {
 /// Rep(F) = `{type,ANNO,field_type,[Rep(Name),Rep(Type)]}`.
 #[derive(serde::Serialize, Debug, Clone, Copy)]
 #[serde(rename = "__type__field_type")]
-pub(crate) struct RecordFieldType<'a>(pub Anno, pub (Atom, Type<'a>));
+pub(crate) struct RecordFieldType<'a>(pub Anno, pub (Atom, &'a Type<'a>));
 
 /* Binary Operators */
 
