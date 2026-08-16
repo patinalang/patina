@@ -230,15 +230,11 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         &self,
         def_id: LocalDefId,
         sig: &FnSig<'tcx>,
-        generics: &Generics<'tcx>,
+        _generics: &Generics<'tcx>,
         ident: Ident,
         body: BodyId,
         parts: &mut ModuleParts<'arena>,
     ) {
-        if !generics.params.is_empty() {
-            not_implemented!(self.tcx, generics.span, "function with generic parameters", generics);
-        }
-
         let owner = self.tcx.hir_body_owner_def_id(body);
         let mut scope = Scopes::new();
         let translated = self.translate_body(owner, parts, &mut scope);
@@ -272,13 +268,9 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
 
     fn translate_struct(&self, def_id: LocalDefId) -> (Symbol, eaf::Module<'arena>) {
         let item = self.tcx.hir_expect_item(def_id);
-        let ItemKind::Struct(_ident, generics, variant_data) = item.kind else {
+        let ItemKind::Struct(_ident, _generics, variant_data) = item.kind else {
             unreachable!("def_kind Struct must be an ItemKind::Struct");
         };
-
-        if !generics.params.is_empty() {
-            not_implemented!(self.tcx, generics.span, "struct with generic parameters", generics);
-        }
 
         let mod_name = self.modules.module_name(ErlModuleId::Adt(def_id.to_def_id()));
         let parts = self.collect_struct_fns(item.span, mod_name, def_id, variant_data);
@@ -288,13 +280,9 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
     fn translate_enum(&self, def_id: LocalDefId) -> (Symbol, eaf::Module<'arena>) {
         let item = self.tcx.hir_expect_item(def_id);
 
-        let ItemKind::Enum(_ident, generics, enum_def) = item.kind else {
+        let ItemKind::Enum(_ident, _generics, enum_def) = item.kind else {
             unreachable!("def_kind Enum must be an ItemKind::Enum");
         };
-
-        if !generics.params.is_empty() {
-            not_implemented!(self.tcx, generics.span, "enum with generic parameters", generics);
-        }
 
         let mod_name = self.modules.module_name(ErlModuleId::Adt(def_id.to_def_id()));
 
@@ -348,14 +336,6 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
     ) {
         if let Some(impls) = self.impls.impls_for(def_id.to_def_id()) {
             for imp in impls {
-                if !imp.generics.params.is_empty() {
-                    not_implemented!(
-                        self.tcx,
-                        imp.generics.span,
-                        "impl with generic parameters",
-                        imp.generics
-                    );
-                }
                 for impl_item_id in imp.items {
                     let impl_item = self.tcx.hir_impl_item(*impl_item_id);
                     let ImplItemKind::Fn(sig, body) = impl_item.kind else {

@@ -1,0 +1,10 @@
+#![allow(dead_code)]
+
+trait Tr {
+    fn tr(self)
+    -> int;
+}
+
+impl<T> Tr for T {
+    fn tr(self) -> int { 0 }
+}

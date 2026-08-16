@@ -1,0 +1,11 @@
+#![allow(dead_code)]
+
+trait MyTrait {
+    fn f(self) -> int;
+}
+
+impl MyTrait for int {
+    fn f(self) -> int {
+        1
+    }
+}

@@ -2,8 +2,11 @@ use rustc_data_structures::fx::FxHashMap;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::DefId;
 use rustc_hir::{Impl, ItemKind};
+use rustc_middle::bug;
 use rustc_middle::erl::ErlModuleId;
 use rustc_middle::ty::TyCtxt;
+
+use crate::{not_implemented, span_fatal};
 
 pub(crate) struct ImplCollector<'tcx> {
     impls: FxHashMap<DefId, Vec<&'tcx Impl<'tcx>>>,
@@ -26,8 +29,17 @@ impl<'tcx> ImplCollector<'tcx> {
                 _ => unreachable!(),
             };
 
-            if let Some(ErlModuleId::Adt(adt_def_id)) = tcx.erl_definition_module(def_id) {
-                impls.entry(adt_def_id).or_default().push(impl_item);
+            match tcx.erl_definition_module(def_id) {
+                Some(ErlModuleId::Adt(adt_def_id)) => {
+                    impls.entry(adt_def_id).or_default().push(impl_item);
+                }
+                Some(ErlModuleId::Prim(_)) => {
+                    not_implemented!(tcx, impl_item.self_ty.span, "impl for a primitive type");
+                }
+                None => {
+                    not_implemented!(tcx, impl_item.self_ty.span, "impl with a non-ADT self type");
+                }
+                _ => bug!("inherent impl resolved to a non-ADT, non-primitive module"),
             }
         }
 

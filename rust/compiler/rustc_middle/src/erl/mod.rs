@@ -247,6 +247,24 @@ impl<'tcx> TyCtxt<'tcx> {
         }
     }
 
+    /// The receiver type for a method call.
+    ///
+    /// Returns `Some` for a trait method (`args.type_at(0)`) or an inherent
+    /// method (the impl's self type), and `None` for non-associated items.
+    pub fn erl_call_target_self_ty(self, target: ErlCallTarget<'tcx>) -> Option<Ty<'tcx>> {
+        let ErlCallTarget::Item { def_id, args } = target else { return None };
+        let DefKind::AssocFn = self.def_kind(def_id) else { return None };
+
+        let parent = self.parent(def_id);
+        match self.def_kind(parent) {
+            DefKind::Impl { .. } => {
+                Some(self.type_of(parent).instantiate(self, args).skip_normalization())
+            }
+            DefKind::Trait => Some(args.type_at(0)),
+            _ => None,
+        }
+    }
+
     /// Finds the module used to dispatch an associated callable on `receiver`.
     fn resolve_erl_receiver_module(
         self,

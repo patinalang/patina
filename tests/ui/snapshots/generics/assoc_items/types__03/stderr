@@ -1,8 +1,8 @@
-error: function with generic parameters not yet implemented: Generics { params: [GenericParam { hir_id: HirId(DefId(0:26 ~ Types03[693d]::difference).19), def_id: DefId(0:27 ~ Types03[693d]::difference::C), name: Plain(C#0), span: tests/ui/src/generics/assoc_items/types__03.pt:36:15: 36:16 (#0), pure_wrt_drop: false, kind: Type { default: None, synthetic: false }, colon_span: Some(tests/ui/src/generics/assoc_items/types__03.pt:36:16: 36:17 (#0)), source: Generics }], predicates: [WherePredicate { hir_id: HirId(DefId(0:26 ~ Types03[693d]::difference).16), span: tests/ui/src/generics/assoc_items/types__03.pt:36:16: 36:26 (#0), kind: BoundPredicate(WhereBoundPredicate { origin: GenericParam, bound_generic_params: [], bounded_ty: Ty { hir_id: HirId(DefId(0:26 ~ Types03[693d]::difference).18), span: tests/ui/src/generics/assoc_items/types__03.pt:36:15: 36:16 (#0), kind: Path(Resolved(None, Path { span: tests/ui/src/generics/assoc_items/types__03.pt:36:15: 36:16 (#0), res: Def(TyParam, DefId(0:27 ~ Types03[693d]::difference::C)), segments: [PathSegment { ident: C#0, hir_id: HirId(DefId(0:26 ~ Types03[693d]::difference).17), res: Def(TyParam, DefId(0:27 ~ Types03[693d]::difference::C)), args: None, infer_args: true }] })) }, bounds: [Trait(PolyTraitRef { bound_generic_params: [], modifiers: TraitBoundModifiers { constness: Never, polarity: Positive }, trait_ref: TraitRef { path: Path { span: tests/ui/src/generics/assoc_items/types__03.pt:36:18: 36:26 (#0), res: Def(Trait, DefId(0:14 ~ Types03[693d]::Contains)), segments: [PathSegment { ident: Contains#0, hir_id: HirId(DefId(0:26 ~ Types03[693d]::difference).14), res: Def(Trait, DefId(0:14 ~ Types03[693d]::Contains)), args: None, infer_args: false }] }, hir_ref_id: HirId(DefId(0:26 ~ Types03[693d]::difference).15) }, span: tests/ui/src/generics/assoc_items/types__03.pt:36:18: 36:26 (#0) })] }) }], has_where_clause_predicates: false, where_clause_span: tests/ui/src/generics/assoc_items/types__03.pt:36:48: 36:48 (#0), span: tests/ui/src/generics/assoc_items/types__03.pt:36:14: 36:27 (#0) }
-  --> tests/ui/src/generics/assoc_items/types__03.pt:36:14
+error: dispatch through a type parameter not yet implemented: C/#0
+  --> tests/ui/src/generics/assoc_items/types__03.pt:37:5
    |
-LL | fn difference<C: Contains>(container: C) -> int {
-   |              ^^^^^^^^^^^^^
+LL |     container.last() - container.first()
+   |     ^^^^^^^^^^^^^^^^
 
 error: aborting due to 1 previous error
 

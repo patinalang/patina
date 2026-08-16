@@ -12,11 +12,5 @@ warning: struct `GenericVal` is never constructed
 LL | struct GenericVal<T>(T); // Generic type `GenericVal`
    |        ^^^^^^^^^^
 
-error: struct with generic parameters not yet implemented: Generics { params: [GenericParam { hir_id: HirId(DefId(0:12 ~ Impl01[98fc]::GenericVal).1), def_id: DefId(0:14 ~ Impl01[98fc]::GenericVal::T), name: Plain(T#0), span: tests/ui/src/generics/impl__01.pt:5:19: 5:20 (#0), pure_wrt_drop: false, kind: Type { default: None, synthetic: false }, colon_span: None, source: Generics }], predicates: [], has_where_clause_predicates: false, where_clause_span: tests/ui/src/generics/impl__01.pt:5:24: 5:24 (#0), span: tests/ui/src/generics/impl__01.pt:5:18: 5:21 (#0) }
-  --> tests/ui/src/generics/impl__01.pt:5:18
-   |
-LL | struct GenericVal<T>(T); // Generic type `GenericVal`
-   |                  ^^^
-
-error: aborting due to 1 previous error; 2 warnings emitted
+warning: 2 warnings emitted
 

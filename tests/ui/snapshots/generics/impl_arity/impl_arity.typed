@@ -1,0 +1,69 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+struct GenVal<T> {
+    gen_val: T,
+}
+
+impl GenVal<int> {
+    fn value(self) -> int ({ ((self as GenVal<int>).gen_val as int) } as int)
+}
+
+impl GenVal<str> {
+    fn value(self, _extra: int)
+        -> str ({ ((self as GenVal<str>).gen_val as str) } as str)
+}
+
+fn main() ({
+    let a = (GenVal { gen_val: (5 as int) } as GenVal<int>);
+    let b = (GenVal { gen_val: ("hi" as str) } as GenVal<str>);
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::display as
+                                    fn(term) -> term)(
+
+                                ((a as GenVal<int>).value() as int)) as term), (" " as str),
+                            ((patina_fmt::display as
+                                    fn(term) -> term)(((b as GenVal<str>).value((0 as int)) as
+                                    str)) as term)] as [term; 3])] as [[term; 3]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+} as ())

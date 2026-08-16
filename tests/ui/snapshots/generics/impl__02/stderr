@@ -1,8 +1,0 @@
-error: struct with generic parameters not yet implemented: Generics { params: [GenericParam { hir_id: HirId(DefId(0:12 ~ Impl02[6d9a]::GenVal).1), def_id: DefId(0:13 ~ Impl02[6d9a]::GenVal::T), name: Plain(T#0), span: tests/ui/src/generics/impl__02.pt:8:15: 8:16 (#0), pure_wrt_drop: false, kind: Type { default: None, synthetic: false }, colon_span: None, source: Generics }], predicates: [], has_where_clause_predicates: false, where_clause_span: tests/ui/src/generics/impl__02.pt:8:17: 8:17 (#0), span: tests/ui/src/generics/impl__02.pt:8:14: 8:17 (#0) }
-  --> tests/ui/src/generics/impl__02.pt:8:14
-   |
-LL | struct GenVal<T> {
-   |              ^^^
-
-error: aborting due to 1 previous error
-

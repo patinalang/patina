@@ -492,10 +492,15 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             (ErlCallTarget::Dynamic, self.translate_expr(fun))
         };
 
-        let call_kind = self
-            .tcx()
-            .erl_call_kind(self.owner.to_def_id(), erl_call_target, Some(forced_extern))
-            .unwrap_or_else(|| span_bug!(span, "call target couldn't be classified"));
+        let Some(call_kind) =
+            self.tcx().erl_call_kind(self.owner.to_def_id(), erl_call_target, Some(forced_extern))
+        else {
+            let receiver =
+                self.tcx().erl_call_target_self_ty(erl_call_target).unwrap_or_else(|| {
+                    span_bug!(span, "dispatch through a type parameter must have a receiver")
+                });
+            not_implemented!(self.tcx(), span, "dispatch through a type parameter", receiver)
+        };
 
         let arg_exprs: SmallVec<[eaf::Expr<'arena>; 8]> =
             args.iter().map(|&id| self.translate_expr(id)).collect();
@@ -593,10 +598,13 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         {
             let target = tcx.erl_call_target_for_def(*def_id, args);
 
-            let module_resolution =
-                tcx.erl_module_for_target(self.owner.to_def_id(), target).unwrap_or_else(|| {
-                    span_bug!(expr.span, "function-item target must resolve to a module")
+            let Some(module_resolution) = tcx.erl_module_for_target(self.owner.to_def_id(), target)
+            else {
+                let receiver = tcx.erl_call_target_self_ty(target).unwrap_or_else(|| {
+                    span_bug!(expr.span, "dispatch through a type parameter must have a receiver")
                 });
+                not_implemented!(tcx, expr.span, "dispatch through a type parameter", receiver);
+            };
 
             let ErlModuleResolution::Static(module_id) = module_resolution else {
                 not_implemented!(tcx, expr.span, "dynamic function-item value", expr.ty);

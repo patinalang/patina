@@ -1,0 +1,14 @@
+error[E0592]: duplicate definitions with name `value`
+  --> tests/ui/src/generics/error/impl_collision.pt:8:5
+   |
+LL |     fn value(self) -> int {
+   |     ^^^^^^^^^^^^^^^^^^^^^ duplicate definitions for `value`
+...
+LL |     fn value(self) -> str {
+   |     --------------------- other definition for `value`
+   |
+   = note: a Patina type compiles to a single generics-erased Erlang module, so `value/1` may only be defined once
+
+error: aborting due to 1 previous error
+
+For more information about this error, try `rustc --explain E0592`.

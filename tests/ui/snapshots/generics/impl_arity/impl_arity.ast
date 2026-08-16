@@ -1,0 +1,18 @@
+struct GenVal<T> {
+    gen_val: T,
+}
+
+impl GenVal<int> {
+    fn value(self) -> int { self.gen_val }
+}
+
+impl GenVal<str> {
+    fn value(self, _extra: int) -> str { self.gen_val }
+}
+
+pub fn main() {
+    let a = GenVal { gen_val: 5 };
+    let b = GenVal { gen_val: "hi" };
+
+    println!("{} {}", a.value(), b.value(0));
+}
