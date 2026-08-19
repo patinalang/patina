@@ -1,8 +1,209 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+error: cannot use a comma after the base map
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:2:7
    |
-LL | add_impl! { int float str }
-   |             ^^^
+LL |     #{..base,}
+   |       ^^^^^^
+   |
+   = note: the base map must always be the last entry
+help: remove this comma
+   |
+LL -     #{..base,}
+LL +     #{..base}
+   |
 
-error: aborting due to 1 previous error
+error: expected `..`, found `...`
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:6:7
+   |
+LL |     #{...base}
+   |       ^^^
+   |
+help: use `..` to fill in the rest of the entries
+   |
+LL -     #{...base}
+LL +     #{..base}
+   |
+
+error: cannot use a comma after the base map
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:10:17
+   |
+LL |     #{"a" => 1, ..base, "b" => 2}
+   |                 ^^^^^^
+   |
+   = note: the base map must always be the last entry
+help: remove this comma
+   |
+LL -     #{"a" => 1, ..base, "b" => 2}
+LL +     #{"a" => 1, ..base "b" => 2}
+   |
+
+error: map update `..base` must be the final entry
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:14:14
+   |
+LL |     #{..base "b" => 2}
+   |              ^^^
+
+error: expected `}`, found `,`
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:19:13
+   |
+LL |         #{.., "b" => value} => value,
+   |           --^
+   |           | |
+   |           | expected `}`
+   |           `..` must be at the end and cannot have a trailing comma
+   |
+help: move the `..` to the end of the entry list
+   |
+LL -         #{.., "b" => value} => value,
+LL +         #{ "b" => value, ..} => value,
+   |
+
+error: expected expression, found `+`
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:25:9
+   |
+LL |     #{..+}
+   |         ^ expected expression
+
+error: expected `=>` after map key
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:29:10
+   |
+LL |     #{"a": 1}
+   |          ^ help: use `=>` between key and value: `=>`
+
+error: expected `=>` after map key
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:33:11
+   |
+LL |     #{"a" = 1}
+   |           ^ help: use `=>` between key and value: `=>`
+
+error: expected `=>` after map key
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:37:11
+   |
+LL |     #{"a" -> 1}
+   |           ^^ help: use `=>` between key and value: `=>`
+
+error: expected one of `.`, `=>`, `?`, or an operator, found `1`
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:41:11
+   |
+LL |     #{"a" 1}
+   |           ^ expected one of `.`, `=>`, `?`, or an operator
+
+error: expected one of `.`, `=>`, `?`, or an operator, found `1`
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:45:11
+   |
+LL |     #{"a" 1, ..base}
+   |           ^ expected one of `.`, `=>`, `?`, or an operator
+
+error: map patterns must include `..`
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:50:9
+   |
+LL |         #{"name" => value} => value,
+   |         ^^^^^^^^^^^^^^^^^^
+   |
+   = note: map patterns perform a subset match; use an explicit `map_size` or `==` for equality
+help: consider adding `..` to the pattern
+   |
+LL |         #{"name" => value, ..} => value,
+   |                          ++++
+
+error: map patterns must include `..`
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:57:9
+   |
+LL |         #{} => true,
+   |         ^^^
+   |
+   = note: map patterns perform a subset match; use an explicit `map_size` or `==` for equality
+help: consider adding `..` to the pattern
+   |
+LL |         #{ .. } => true,
+   |            ++
+
+error: `|` in a map pattern key is a bitwise-or expression, not a pattern alternative
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:64:13
+   |
+LL |         #{1 | 2 => value, ..} => value,
+   |             ^
+   |
+   = help: write separate map patterns on each side of `|` to match alternative keys
+
+error: cannot bind the rest of a map
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:71:28
+   |
+LL |         #{"name" => value, ..rest} => value,
+   |                            ^^^^^^ help: consider removing the trailing pattern: `..`
+
+error: expected field pattern, found `...`
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:78:11
+   |
+LL |         #{...} => true,
+   |           ^^^
+   |
+help: to omit remaining fields, use `..`
+   |
+LL -         #{...} => true,
+LL +         #{..} => true,
+   |
+
+error: expected field pattern, found `_`
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:85:11
+   |
+LL |         #{_} => true,
+   |           ^
+   |
+help: to omit remaining fields, use `..`
+   |
+LL -         #{_} => true,
+LL +         #{..} => true,
+   |
+
+error: cannot use a comma after the base map
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:91:7
+   |
+LL |     #{..a, ..b}
+   |       ^^^
+   |
+   = note: the base map must always be the last entry
+help: remove this comma
+   |
+LL -     #{..a, ..b}
+LL +     #{..a ..b}
+   |
+
+error: map rest `..` must be the final entry
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:95:10
+   |
+LL |     #{.. ..}
+   |          ^^
+
+error: expected `}`, found `,`
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:100:13
+   |
+LL |         #{.., ..} => true,
+   |           --^
+   |           | |
+   |           | expected `}`
+   |           `..` must be at the end and cannot have a trailing comma
+   |
+help: remove the starting `..`
+   |
+LL -         #{.., ..} => true,
+LL +         #{ ..} => true,
+   |
+
+error: expected expression, found `,`
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:106:9
+   |
+LL |     #{..,} = map;
+   |         ^ expected expression
+
+error: expected `}`, found `,`
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:111:13
+   |
+LL |         #{..,} => true,
+   |           --^
+   |           | |
+   |           | expected `}`
+   |           | help: remove this comma
+   |           `..` must be at the end and cannot have a trailing comma
+
+error: aborting due to 22 previous errors
 

@@ -1,0 +1,4 @@
+// source: patina-by-example/src/fn/diverging.md
+// block: 1/4
+
+fn foo() -> ! { panic!("This call never returns."); }

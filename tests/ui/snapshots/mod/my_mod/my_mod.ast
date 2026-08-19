@@ -1,0 +1,8 @@
+mod Inaccessible;
+pub mod Nested;
+
+pub fn function() -> int { 1 }
+
+fn private_function() -> int { 2 }
+
+pub fn indirect_access() -> int { private_function() }

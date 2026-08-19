@@ -1,0 +1,105 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/mod/struct_visibility.md
+// block: 1/1
+
+mod My {
+    // On BEAM side, struct `RenamedStruct` and its functions will live
+    // in their own BEAM module `Elixir.Patina.MyPkg.My.RenamedStruct.beam` .
+    // However, this is configurable so you can name your BEAM module anything.
+    struct RenamedStruct {
+    }
+
+    // A public struct with a public field of generic type `T`
+    struct OpenBox<T> {
+        contents: T,
+    }
+
+    // A public struct with a private field of generic type `T`
+    struct ClosedBox<T> {
+        contents: T,
+    }
+
+    impl <T> ClosedBox<T> {
+        // A public constructor method
+        fn new(contents: T)
+            ->
+                ClosedBox<T> ({
+            (ClosedBox { contents: (contents as T) } as My::ClosedBox<T>)
+        } as My::ClosedBox<T>)
+    }
+}
+
+fn main() ({
+    // Public structs with public fields can be constructed as usual
+    let open_box =
+        (My::OpenBox { contents: ("public information" as str) } as
+            My::OpenBox<str>);
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("The open box contains: " as str),
+                            ((patina_fmt::display as
+                                    fn(term) -> term)(
+
+                                // and their fields can be normally accessed.
+                                ((open_box as My::OpenBox<str>).contents as str)) as term)]
+                        as [term; 2])] as [[term; 2]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+
+    // Public structs with private fields cannot be constructed using field names.
+    // Error! `ClosedBox` has private fields
+    //let closed_box = My::ClosedBox { contents: "classified information" };
+    // TODO ^ Try uncommenting this line
+
+    // However, structs with private fields can be created using
+    // public constructors
+    let _closed_box =
+        ((My::ClosedBox::new as
+                fn(str) -> My::ClosedBox<str> {My::ClosedBox::<str>::new})(("classified information"
+                as str)) as My::ClosedBox<str>);
+
+    // and the private fields of a public struct cannot be accessed.
+    // Error! The `contents` field is private
+    //println!("The closed box contains: {}", _closed_box.contents);
+    // TODO ^ Try uncommenting this line
+} as ())

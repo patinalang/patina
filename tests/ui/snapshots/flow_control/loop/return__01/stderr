@@ -1,8 +1,8 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+error: cannot find macro `assert_eq` in this scope
+  --> tests/ui/src/flow_control/loop/return__01.pt:15:5
    |
-LL | add_impl! { int float str }
-   |             ^^^
+LL |     assert_eq!(result, 20);
+   |     ^^^^^^^^^
 
 error: aborting due to 1 previous error
 

@@ -1,0 +1,71 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/fn/parameters.md
+// block: 1/2
+
+fn call_me_ref(f:
+        fn(int)
+            -> int) ({ ((f as fnref(int) -> int)((1 as int)) as int); } as ())
+
+fn call_me(f:
+        fn(int)
+            -> int) ({ ((f as fn(int) -> int)((2 as int)) as int); } as ())
+
+fn function(x: int) -> int ({ ((x as int) + (1 as int) as int) } as int)
+
+fn main() ({
+    let closure =
+        (|x| ((x as int) + (42 as int) as int) as
+            {closure@tests/ui/src/fn/parameters__01.pt:17:19: 17:22});
+    ((call_me as
+            fn(fn(int) -> int) {call_me})((function as
+            fn(int) -> int {function})) as ());
+    ((call_me as
+            fn(fn(int) -> int) {call_me})((closure as
+            {closure@tests/ui/src/fn/parameters__01.pt:17:19: 17:22})) as ());
+
+    ((call_me_ref as
+            fn(fnref(int) -> int) {call_me_ref})((function as
+            fn(int) -> int {function})) as ());
+    // call_me_ref(closure);
+    // ^ ERROR! `fn(int) -> int` cannot be used as `fnref(int) -> int`
+} as ())

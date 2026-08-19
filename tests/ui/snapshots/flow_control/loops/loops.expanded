@@ -1,0 +1,221 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+pub fn normal_continue(limit: int) -> int {
+    let mut count = 0;
+    let mut total = 0;
+
+    loop {
+        count += 1;
+
+        if count % 2 == 0 { continue; }
+
+        total += count;
+
+        if count >= limit { break; }
+    }
+
+    total * 100 + count
+}
+
+pub fn loop_value(target: int) -> int {
+    let mut counter = 0;
+
+    let result =
+        loop {
+            counter += 1;
+
+            if counter == target { break counter * 2; }
+        };
+
+    result * 10 + counter
+}
+
+pub fn zero_parameter_loop() -> int { loop { break 7; } }
+
+pub fn initialize_in_loop() -> int {
+    let value;
+
+    loop { value = 7; break; }
+
+    value
+}
+
+pub fn while_sum(start: int, limit: int) -> int {
+    let mut n = start;
+    let mut total = 0;
+
+    while n < limit { total += n; n += 1; }
+
+    total * 100 + n
+}
+
+pub fn nested(outer_limit: int, inner_limit: int) -> int {
+    let mut outer = 0;
+    let mut visits = 0;
+
+    loop {
+        outer += 1;
+        let mut inner = 0;
+
+        loop {
+            inner += 1;
+
+            if inner < inner_limit { continue; }
+
+            visits += outer * 10 + inner;
+            break;
+        }
+
+        if outer >= outer_limit { break; }
+    }
+
+    visits * 100 + outer
+}
+
+pub fn return_from_loop(stop_at: int) -> int {
+    let mut n = 0;
+
+    loop {
+        n += 1;
+
+        if n == stop_at { return n * 10; }
+
+        if n >= 10 { break; }
+    }
+
+    -1
+}
+
+pub fn return_from_nested(outer_stop: int, inner_stop: int) -> int {
+    let mut outer = 0;
+
+    loop {
+        outer += 1;
+        let mut inner = 0;
+
+        loop {
+            inner += 1;
+
+            if outer == outer_stop && inner == inner_stop {
+                return outer * 100 + inner;
+            }
+
+            if inner >= 3 { break; }
+        }
+
+        if outer >= 3 { break; }
+    }
+
+    -1
+}
+
+pub fn return_from_nested_uneven_rebinds(outer_stop: int, inner_stop: int)
+    -> int {
+    let mut a = 0;
+    let mut b = 0;
+
+    loop {
+        a += 1;
+        b += 10;
+        let mut inner = 0;
+
+        loop {
+            inner += 1;
+
+            if a == outer_stop && inner == inner_stop {
+                return a * 1000 + b * 10 + inner;
+            }
+
+            if inner >= 3 { break; }
+        }
+
+        if a >= 3 { break; }
+    }
+
+    -1
+}
+
+pub fn continue_outer(limit: int) -> int {
+    let mut outer = 0;
+    let mut visits = 0;
+
+    'outer: loop {
+        outer += 1;
+
+        loop {
+            visits += 1;
+
+            if outer < limit { continue 'outer; }
+
+            break 'outer;
+        }
+    }
+
+    visits * 100 + outer
+}
+
+pub fn continue_through_middle(limit: int) -> int {
+    let mut outer = 0;
+    let mut visits = 0;
+
+    'outer: loop {
+        outer += 1;
+
+        loop {
+            loop {
+                visits += 1;
+
+                if outer < limit { continue 'outer; }
+
+                break 'outer;
+            }
+        }
+    }
+
+    visits * 100 + outer
+}
+
+pub fn cast_loop_value() -> int {
+    let value = loop { break 1; } as int;
+
+    value
+}

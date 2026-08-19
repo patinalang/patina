@@ -1,8 +1,8 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+error: variable another_binding is partially initialized
+  --> tests/ui/src/variable_bindings/declare__01.pt:20:37
    |
-LL | add_impl! { int float str }
-   |             ^^^
+LL |     println!("another binding: {}", another_binding);
+   |                                     ^^^^^^^^^^^^^^^
 
 error: aborting due to 1 previous error
 

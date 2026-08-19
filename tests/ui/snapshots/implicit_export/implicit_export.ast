@@ -1,0 +1,22 @@
+struct Foo;
+
+trait FooTrait {
+    fn bar() {}
+}
+
+impl Foo {
+    fn foo() { Self::priv_foo(); }
+    fn priv_foo() {}
+}
+
+impl FooTrait for Foo {
+    fn bar() { Foo::priv_foo(); }
+}
+
+struct Bar;
+
+impl Bar {
+    fn bar() { Foo::foo(); }
+}
+
+pub fn main() { Bar::bar(); }

@@ -1,20 +1,24 @@
 use rustc_data_structures::fx::FxHashMap;
 use rustc_hir::def::DefKind;
-use rustc_hir::def_id::DefId;
+use rustc_hir::def_id::{DefId, LOCAL_CRATE};
 use rustc_hir::{Impl, ItemKind};
-use rustc_middle::bug;
 use rustc_middle::erl::ErlModuleId;
 use rustc_middle::ty::TyCtxt;
+use rustc_span::Symbol;
 
+use crate::package::CORE_PACKAGE_NAME;
 use crate::{not_implemented, span_fatal};
 
 pub(crate) struct ImplCollector<'tcx> {
-    impls: FxHashMap<DefId, Vec<&'tcx Impl<'tcx>>>,
+    impls: FxHashMap<ErlModuleId, Vec<(DefId, &'tcx Impl<'tcx>)>>,
 }
 
 impl<'tcx> ImplCollector<'tcx> {
     pub fn new(tcx: TyCtxt<'tcx>) -> ImplCollector<'tcx> {
-        let mut impls: FxHashMap<DefId, Vec<&'tcx Impl<'tcx>>> = FxHashMap::default();
+        let mut impls: FxHashMap<ErlModuleId, Vec<(DefId, &'tcx Impl<'tcx>)>> =
+            FxHashMap::default();
+
+        let bootstrap = tcx.crate_name(LOCAL_CRATE) == Symbol::intern(CORE_PACKAGE_NAME);
 
         for item_id in tcx.hir_free_items() {
             if !matches!(tcx.def_kind(item_id.owner_id), DefKind::Impl { .. }) {
@@ -30,23 +34,32 @@ impl<'tcx> ImplCollector<'tcx> {
             };
 
             match tcx.erl_definition_module(def_id) {
-                Some(ErlModuleId::Adt(adt_def_id)) => {
-                    impls.entry(adt_def_id).or_default().push(impl_item);
+                Some(ErlModuleId::Prim(prim_ty)) => {
+                    if !bootstrap {
+                        not_implemented!(tcx, impl_item.self_ty.span, "impl for a primitive type");
+                    }
+                    impls
+                        .entry(ErlModuleId::Prim(prim_ty))
+                        .or_default()
+                        .push((def_id.to_def_id(), impl_item));
                 }
-                Some(ErlModuleId::Prim(_)) => {
-                    not_implemented!(tcx, impl_item.self_ty.span, "impl for a primitive type");
+                Some(module_id) => {
+                    impls.entry(module_id).or_default().push((def_id.to_def_id(), impl_item));
                 }
                 None => {
                     not_implemented!(tcx, impl_item.self_ty.span, "impl with a non-ADT self type");
                 }
-                _ => bug!("inherent impl resolved to a non-ADT, non-primitive module"),
             }
         }
 
         ImplCollector { impls }
     }
 
-    pub fn impls_for(&self, def_id: DefId) -> Option<&Vec<&'tcx Impl<'tcx>>> {
-        self.impls.get(&def_id)
+    pub fn impls_for(&self, module: ErlModuleId) -> Option<&Vec<(DefId, &'tcx Impl<'tcx>)>> {
+        self.impls.get(&module)
+    }
+
+    pub fn prim_modules(&self) -> impl Iterator<Item = &ErlModuleId> + '_ {
+        self.impls.keys().filter(|&module| matches!(module, ErlModuleId::Prim(_)))
     }
 }

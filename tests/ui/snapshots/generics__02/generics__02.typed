@@ -1,0 +1,82 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/generics.md
+// block: 2/2
+
+// A concrete type `A`.
+struct A;
+
+// In defining the type `Single`, the first use of `A` is not preceded by `<A>`.
+// Therefore, `Single` is a concrete type, and `A` is defined as above.
+struct Single(A);
+//            ^ Here is `Single`s first use of the type `A`.
+
+// Here, `<T>` precedes the first use of `T`, so `SingleGen` is a generic type.
+// Because the type parameter `T` is generic, it could be anything, including
+// the concrete type `A` defined at the top.
+struct SingleGen<T>(T);
+
+fn main() ({
+    // `Single` is concrete and explicitly takes `A`.
+    let _s = ((Single as fn(A) -> Single {Single})((A as A)) as Single);
+
+    // Create a variable `_char` of type `SingleGen<char>`
+    // and give it the value `SingleGen('a')`.
+    // Here, `SingleGen` has a type parameter explicitly specified.
+    let _char: SingleGen<char> =
+        ((SingleGen as
+                fn(char) -> SingleGen<char> {SingleGen::<char>})(('a' as
+                char)) as SingleGen<char>);
+
+    // `SingleGen` can also have a type parameter implicitly specified:
+    let _t =
+        ((SingleGen as fn(A) -> SingleGen<A> {SingleGen::<A>})((A as A)) as
+            SingleGen<A>); // Uses `A` defined at the top.
+    let _int =
+        ((SingleGen as
+                fn(int) -> SingleGen<int> {SingleGen::<int>})((6 as int)) as
+            SingleGen<int>); // Uses `int`.
+    let _char =
+        ((SingleGen as
+                fn(char) -> SingleGen<char> {SingleGen::<char>})(('a' as
+                char)) as SingleGen<char>); // Uses `char`.
+} as ())

@@ -1,0 +1,83 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/flow_control/while_let.md
+// block: 2/2
+
+fn main() ({
+    // Make `optional` of type `Option<int>`
+    let mut optional = ((Some as {type error})((0 as int)) as {type error});
+
+    // This reads: "while `let` destructures `optional` into
+    // `Some(i)`, evaluate the block (`{}`). Else `break`.
+    (loop {
+        (if (let Some(i) = (optional as {type error}) as {type error}) {
+            (if ((i as {type error}) > (9 as int) as bool) {
+                ({
+                    ((io::put_chars as
+                            fn(term) -> term)(([([("Greater than 9, quit!" as str)] as
+                                    [str; 1])] as [[str; 1]; 1])) as term);
+                    ((io::nl as fn() -> term)() as term);
+                } as ());
+                ((optional as {type error}) = (None as {type error}) as
+                    {type error});
+            } else {
+                ({
+                    ((io::put_chars as
+                            fn(term) -> term)(([([("`i` is `" as str),
+                                        ((patina_fmt::debug as
+                                                fn(term) -> term)((i as {type error})) as term),
+                                        ("`. Try again." as str)] as [term; 3])] as [[term; 3]; 1]))
+                        as term);
+                    ((io::nl as fn() -> term)() as term);
+                } as ());
+                ((optional as {type error}) =
+                    ((Some as
+                            {type error})(((i as {type error}) + (1 as int) as
+                            {type error})) as {type error}) as {type error});
+            } as ())
+            // ^ Less rightward drift and doesn't require
+            // explicitly handling the failing case.
+        } else { (break as !); } as ())
+    } as ())
+    // ^ `if let` had additional optional `else`/`else if`
+    // clauses. `while let` does not have these.
+} as ())

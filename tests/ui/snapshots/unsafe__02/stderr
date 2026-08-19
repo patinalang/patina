@@ -1,8 +1,50 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+error: prefix `a` is unknown
+  --> tests/ui/src/unsafe__02.pt:8:9
    |
-LL | add_impl! { int float str }
-   |             ^^^
+LL |         a"nil" => "the atom nil",
+   |         ^ unknown prefix
+   |
+   = note: prefixed identifiers and literals are reserved since Rust 2021
+help: consider inserting whitespace here
+   |
+LL |         a "nil" => "the atom nil",
+   |          +
 
-error: aborting due to 1 previous error
+error: prefix `a` is unknown
+  --> tests/ui/src/unsafe__02.pt:9:10
+   |
+LL |         (a"some", val) => "some value (tagged?)",
+   |          ^ unknown prefix
+   |
+   = note: prefixed identifiers and literals are reserved since Rust 2021
+help: consider inserting whitespace here
+   |
+LL |         (a "some", val) => "some value (tagged?)",
+   |           +
+
+error: prefix `a` is unknown
+  --> tests/ui/src/unsafe__02.pt:19:13
+   |
+LL |             a"nil" => "the atom nil",
+   |             ^ unknown prefix
+   |
+   = note: prefixed identifiers and literals are reserved since Rust 2021
+help: consider inserting whitespace here
+   |
+LL |             a "nil" => "the atom nil",
+   |              +
+
+error: expected one of `=>`, `@`, `if`, or `|`, found `"nil"`
+  --> tests/ui/src/unsafe__02.pt:8:10
+   |
+LL |         a"nil" => "the atom nil",
+   |          ^^^^^ expected one of `=>`, `@`, `if`, or `|`
+
+error: expected one of `=>`, `@`, `if`, or `|`, found `"nil"`
+  --> tests/ui/src/unsafe__02.pt:19:14
+   |
+LL |             a"nil" => "the atom nil",
+   |              ^^^^^ expected one of `=>`, `@`, `if`, or `|`
+
+error: aborting due to 5 previous errors
 

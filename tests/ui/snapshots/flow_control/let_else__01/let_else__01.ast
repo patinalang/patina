@@ -1,0 +1,21 @@
+// source: patina-by-example/src/flow_control/let_else.md
+// block: 1/1
+
+use str::FromStr;
+
+fn get_count_item(s: str) -> (int, str) {
+    let it = s.split(' ');
+    let (it, first) = it.next();
+    let (it, second) = it.next();
+
+    let (Some(count_str), Some(item)) =
+        (first,
+            second) else { panic!("Can't segment count item pair: '{s}'"); };
+    let Ok(count) =
+        int::from_str(count_str) else {
+            panic!("Can't parse integer: '{count_str}'");
+        };
+    (count, item)
+}
+
+pub fn main() { assert_eq!(get_count_item("3 chairs"), (3, "chairs")); }

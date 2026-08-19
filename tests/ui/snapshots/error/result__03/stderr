@@ -1,8 +1,46 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+error[E0433]: cannot find type `Std` in this scope
+  --> tests/ui/src/error/result__03.pt:4:5
    |
-LL | add_impl! { int float str }
-   |             ^^^
+LL | use Std::Num::ParseIntError;
+   |     ^^^ use of undeclared type `Std`
 
-error: aborting due to 1 previous error
+error[E0425]: cannot find type `Result` in this scope
+  --> tests/ui/src/error/result__03.pt:6:18
+   |
+LL | pub fn main() -> Result<(), ParseIntError> {
+   |                  ^^^^^^ not found in this scope
 
+error[E0531]: cannot find tuple struct or tuple variant `Ok` in this scope
+  --> tests/ui/src/error/result__03.pt:9:9
+   |
+LL |         Ok(number)  => number,
+   |         ^^ not found in this scope
+
+error[E0531]: cannot find tuple struct or tuple variant `Err` in this scope
+  --> tests/ui/src/error/result__03.pt:10:9
+   |
+LL |         Err(e) => return Err(e),
+   |         ^^^ not found in this scope
+
+error[E0599]: no method named `parse` found for type `str` in the current scope
+  --> tests/ui/src/error/result__03.pt:8:35
+   |
+LL |     let number = match number_str.parse::<int>() {
+   |                                   ^^^^^ method not found in `str`
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Err` in this scope
+  --> tests/ui/src/error/result__03.pt:10:26
+   |
+LL |         Err(e) => return Err(e),
+   |                          ^^^ not found in this scope
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Ok` in this scope
+  --> tests/ui/src/error/result__03.pt:13:5
+   |
+LL |     Ok(())
+   |     ^^ not found in this scope
+
+error: aborting due to 7 previous errors
+
+Some errors have detailed explanations: E0425, E0433, E0531, E0599.
+For more information about an error, try `rustc --explain E0425`.

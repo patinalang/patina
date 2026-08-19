@@ -1,0 +1,36 @@
+// source: patina-by-example/src/custom_types/repr.md
+// block: 1/12
+
+struct Unit;
+
+#[repr(atom, name = "custom_name")]
+struct CustomNameUnit;
+
+// `style` can be used to change the style of atom tags assigned by Patina
+#[repr(style = "snake_case")]
+enum NotJustUnits {
+    VariantA,
+
+    #[repr(name = "variantB")]
+    VariantB,
+    VariantC(int),
+}
+
+// Explicitly setting `#[repr(atom)]` will ensure that only unit variants
+// are ever added to an enum.
+#[repr(atom, style = "snake_case")]
+enum OnlyUnits { VariantA, VariantB, VariantC, }
+
+pub fn main() {
+    println!("{:?}", Unit as term);
+    // a"Elixir.Patina.ByExample.Unit"
+
+    println!("{:?}", CustomNameUnit as term);
+    // a"custom_name"
+
+    println!("{:?}", NotJustUnits::VariantA as term);
+    // a"variant_a"
+
+    println!("{:?}", NotJustUnits::VariantB as term);
+    // a"variantB"
+}

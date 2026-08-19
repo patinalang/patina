@@ -1,0 +1,95 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/flow_control/match/guard.md
+// block: 1/2
+
+#[allow(dead_code)]
+enum Temperature { Celsius(int), Fahrenheit(int), }
+
+fn main() ({
+    let temperature =
+        ((Temperature::Celsius as
+                fn(int) -> Temperature {Temperature::Celsius})((35 as int)) as
+            Temperature);
+
+    // ^ TODO try different values for `temperature`
+
+    (match (temperature as Temperature) {
+        Temperature::Celsius(t) if ((t as int) > (30 as int) as bool) => {
+            ((io::put_chars as
+                    fn(term) -> term)(([([((patina_fmt::display as
+                                        fn(term) -> term)((t as int)) as term),
+                                ("C is above 30 Celsius" as str)] as [term; 2])] as
+                    [[term; 2]; 1])) as term);
+            ((io::nl as fn() -> term)() as term);
+        }
+
+            // The `if condition` part ^ is a guard
+            Temperature::Celsius(t) => {
+            ((io::put_chars as
+                    fn(term) -> term)(([([((patina_fmt::display as
+                                        fn(term) -> term)((t as int)) as term),
+                                ("C is equal to or below 30 Celsius" as str)] as [term; 2])]
+                    as [[term; 2]; 1])) as term);
+            ((io::nl as fn() -> term)() as term);
+        }
+
+
+            Temperature::Fahrenheit(t) if ((t as int) > (86 as int) as bool)
+            => {
+            ((io::put_chars as
+                    fn(term) -> term)(([([((patina_fmt::display as
+                                        fn(term) -> term)((t as int)) as term),
+                                ("F is above 86 Fahrenheit" as str)] as [term; 2])] as
+                    [[term; 2]; 1])) as term);
+            ((io::nl as fn() -> term)() as term);
+        }
+        Temperature::Fahrenheit(t) => {
+            ((io::put_chars as
+                    fn(term) -> term)(([([((patina_fmt::display as
+                                        fn(term) -> term)((t as int)) as term),
+                                ("F is equal to or below 86 Fahrenheit" as str)] as
+                            [term; 2])] as [[term; 2]; 1])) as term);
+            ((io::nl as fn() -> term)() as term);
+        }
+    } as ())
+} as ())

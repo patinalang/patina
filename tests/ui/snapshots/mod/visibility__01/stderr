@@ -1,8 +1,33 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+error[E0704]: incorrect visibility restriction
+  --> tests/ui/src/mod/visibility__01.pt:73:9
    |
-LL | add_impl! { int float str }
+LL |     pub(pkg) fn public_function_in_pkg() {
+   |         ^^^
+   |
+   = help: some possible visibility restrictions are:
+           `pub(crate)`: visible only on the current crate
+           `pub(super)`: visible only in the current module's parent
+           `pub(in path::to::module)`: visible only on the specified path
+help: make this visible only to module `pkg` with `in`
+   |
+LL |     pub(in pkg) fn public_function_in_pkg() {
+   |         ++
+
+error[E0704]: incorrect visibility restriction
+  --> tests/ui/src/mod/visibility__01.pt:87:13
+   |
+LL |         pub(pkg) fn restricted_function() {
    |             ^^^
+   |
+   = help: some possible visibility restrictions are:
+           `pub(crate)`: visible only on the current crate
+           `pub(super)`: visible only in the current module's parent
+           `pub(in path::to::module)`: visible only on the specified path
+help: make this visible only to module `pkg` with `in`
+   |
+LL |         pub(in pkg) fn restricted_function() {
+   |             ++
 
-error: aborting due to 1 previous error
+error: aborting due to 2 previous errors
 
+For more information about this error, try `rustc --explain E0704`.

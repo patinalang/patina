@@ -1,8 +1,11 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+error[E0433]: cannot find module or crate `pkg` in this scope
+  --> tests/ui/src/mod/use__01.pt:4:5
    |
-LL | add_impl! { int float str }
-   |             ^^^
+LL | use pkg::Deeply::Nested::{
+   |     ^^^ use of unresolved module or unlinked crate `pkg`
+   |
+   = help: you might be missing a crate named `pkg`
 
 error: aborting due to 1 previous error
 
+For more information about this error, try `rustc --explain E0433`.

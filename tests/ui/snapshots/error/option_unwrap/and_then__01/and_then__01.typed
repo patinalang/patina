@@ -1,0 +1,147 @@
+#![allow(internal_features)]
+
+
+
+
+
+
+
+
+
+
+// source: patina-by-example/src/error/option_unwrap/and_then.md
+// block: 1/1
+
+#![allow(dead_code)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+#[allow(unused_imports)]
+use Core::*;
+#[allow(unused)]
+extern mod io;
+#[allow(unused)]
+extern mod patina_fmt;
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+enum Food { CordonBleu, Steak, Sushi, }
+enum Day { Monday, Tuesday, Wednesday, }
+
+// We don't have the ingredients to make Sushi.
+fn have_ingredients(food: Food)
+    ->
+        Option<Food> ({
+    (match (food as Food) {
+        Food::Sushi => (None as {type error}),
+        _ => ((Some as {type error})((food as Food)) as {type error}),
+    } as {type error})
+} as {type error})
+
+// We have the recipe for everything except Cordon Bleu.
+fn have_recipe(food: Food)
+    ->
+        Option<Food> ({
+    (match (food as Food) {
+        Food::CordonBleu => (None as {type error}),
+        _ => ((Some as {type error})((food as Food)) as {type error}),
+    } as {type error})
+} as {type error})
+
+// To make a dish, we need both the recipe and the ingredients.
+// We can represent the logic with a chain of `match`es:
+fn cookable_v1(food: Food)
+    ->
+        Option<Food> ({
+    (match ((have_recipe as
+                fn(Food) -> {type error} {have_recipe})((food as Food)) as
+            {type error}) {
+        None => (None as {type error}),
+        Some(food) =>
+            ((have_ingredients as
+                    fn(Food) -> {type error} {have_ingredients})((food as
+                    {type error})) as {type error}),
+    } as {type error})
+} as {type error})
+
+// This can conveniently be rewritten more compactly with `and_then()`:
+fn cookable_v3(food: Food)
+    ->
+        Option<Food> ({
+    (((have_recipe as fn(Food) -> {type error} {have_recipe})((food as Food))
+            as
+            {type error}).and_then((have_ingredients as
+            fn(Food) -> {type error} {have_ingredients})) as {type error})
+} as {type error})
+
+// Otherwise we'd need to `flatten()` an `Option<Option<Food>>`
+// to get an `Option<Food>`:
+fn cookable_v2(food: Food)
+    ->
+        Option<Food> ({
+    ((((have_recipe as fn(Food) -> {type error} {have_recipe})((food as Food))
+                as
+                {type error}).map((have_ingredients as
+                fn(Food) -> {type error} {have_ingredients})) as
+            {type error}).flatten() as {type error})
+} as {type error})
+
+fn eat(food: Food,
+    day:
+        Day) ({
+    (match ((cookable_v3 as
+                fn(Food) -> {type error} {cookable_v3})((food as Food)) as
+            {type error}) {
+        Some(food) => {
+            ((io::put_chars as
+                    fn(term) -> term)(([([("Yay! On " as str),
+                                ((patina_fmt::debug as fn(term) -> term)((day as Day)) as
+                                    term), (" we get to eat " as str),
+                                ((patina_fmt::debug as
+                                        fn(term) -> term)((food as {type error})) as term),
+                                ("." as str)] as [term; 5])] as [[term; 5]; 1])) as term);
+            ((io::nl as fn() -> term)() as term);
+        }
+        None => {
+            ((io::put_chars as
+                    fn(term) -> term)(([([("Oh no. We don\'t get to eat on " as
+                                    str),
+                                ((patina_fmt::debug as fn(term) -> term)((day as Day)) as
+                                    term), ("?" as str)] as [term; 3])] as [[term; 3]; 1])) as
+                term);
+            ((io::nl as fn() -> term)() as term);
+        }
+    } as ())
+} as ())
+
+fn main() ({
+    let (cordon_bleu, steak, sushi) =
+        (((Food::CordonBleu as Food), (Food::Steak as Food),
+            (Food::Sushi as Food)) as (Food, Food, Food));
+
+    ((eat as fn(Food, Day) {eat})((cordon_bleu as Food), (Day::Monday as Day))
+        as ());
+    ((eat as fn(Food, Day) {eat})((steak as Food), (Day::Tuesday as Day)) as
+        ());
+    ((eat as fn(Food, Day) {eat})((sushi as Food), (Day::Wednesday as Day)) as
+        ());
+} as ())

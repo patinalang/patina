@@ -1,8 +1,10 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+warning: redundant `#[extern_call]`: the call is already external
+  --> tests/ui/src/fn/call_qual.pt:68:13
    |
-LL | add_impl! { int float str }
-   |             ^^^
+LL |     let s = #[extern_call]
+   |             ^^^^^^^^^^^^^^
+LL |     StructWithNew::new(42);
+   |     ---------------------- call
 
-error: aborting due to 1 previous error
+warning: 1 warning emitted
 

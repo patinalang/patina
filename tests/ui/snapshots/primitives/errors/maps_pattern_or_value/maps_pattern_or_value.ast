@@ -1,0 +1,3 @@
+pub fn has_expected_status(map: #{str => int}) -> bool {
+    match map { #{"status" => 1 | 2, ..} => true, _ => false, }
+}

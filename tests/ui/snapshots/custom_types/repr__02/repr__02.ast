@@ -1,0 +1,21 @@
+// source: patina-by-example/src/custom_types/repr.md
+// block: 2/12
+
+#[repr(tagged)]
+struct Pair(int, float);
+
+#[repr(tagged, name = "Elixir.BarBar")]
+struct Bar {
+    x: int,
+    y: int,
+    z: (),
+}
+
+pub fn main() {
+    println!("{:?}", Pair(42, 3.14) as term);
+    // (a"Elixir.Patina.ByExample.Pair", 42, 3.14)
+
+    // z is omitted from the representation
+    println!("{:?}", Bar(x: 1, y: 2, z: ()) as term);
+    // (a"Elixir.BarBar", 1, 2)
+}

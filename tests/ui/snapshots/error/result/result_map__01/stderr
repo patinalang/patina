@@ -1,8 +1,88 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+error[E0433]: cannot find type `Std` in this scope
+  --> tests/ui/src/error/result/result_map__01.pt:4:5
    |
-LL | add_impl! { int float str }
-   |             ^^^
+LL | use Std::Num::ParseIntError;
+   |     ^^^ use of undeclared type `Std`
 
-error: aborting due to 1 previous error
+error[E0425]: cannot find type `Result` in this scope
+  --> tests/ui/src/error/result/result_map__01.pt:7:63
+   |
+LL | fn multiply(first_number_str: str, second_number_str: str) -> Result<int, ParseIntError> {
+   |                                                               ^^^^^^ not found in this scope
 
+error[E0531]: cannot find tuple struct or tuple variant `Ok` in this scope
+  --> tests/ui/src/error/result/result_map__01.pt:9:9
+   |
+LL |         Ok(first_number)  => {
+   |         ^^ not found in this scope
+
+error[E0531]: cannot find tuple struct or tuple variant `Ok` in this scope
+  --> tests/ui/src/error/result/result_map__01.pt:11:17
+   |
+LL |                 Ok(second_number)  => {
+   |                 ^^ not found in this scope
+
+error[E0531]: cannot find tuple struct or tuple variant `Err` in this scope
+  --> tests/ui/src/error/result/result_map__01.pt:14:17
+   |
+LL |                 Err(e) => Err(e),
+   |                 ^^^ not found in this scope
+
+error[E0531]: cannot find tuple struct or tuple variant `Err` in this scope
+  --> tests/ui/src/error/result/result_map__01.pt:17:9
+   |
+LL |         Err(e) => Err(e),
+   |         ^^^ not found in this scope
+
+error[E0425]: cannot find type `Result` in this scope
+  --> tests/ui/src/error/result/result_map__01.pt:21:18
+   |
+LL | fn print(result: Result<int, ParseIntError>) {
+   |                  ^^^^^^ not found in this scope
+
+error[E0531]: cannot find tuple struct or tuple variant `Ok` in this scope
+  --> tests/ui/src/error/result/result_map__01.pt:23:9
+   |
+LL |         Ok(n)  => println!("n is {}", n),
+   |         ^^ not found in this scope
+
+error[E0531]: cannot find tuple struct or tuple variant `Err` in this scope
+  --> tests/ui/src/error/result/result_map__01.pt:24:9
+   |
+LL |         Err(e) => println!("Error: {}", e),
+   |         ^^^ not found in this scope
+
+error[E0599]: no method named `parse` found for type `str` in the current scope
+  --> tests/ui/src/error/result/result_map__01.pt:8:28
+   |
+LL |     match first_number_str.parse::<int>() {
+   |                            ^^^^^ method not found in `str`
+
+error[E0599]: no method named `parse` found for type `str` in the current scope
+  --> tests/ui/src/error/result/result_map__01.pt:10:37
+   |
+LL |             match second_number_str.parse::<int>() {
+   |                                     ^^^^^ method not found in `str`
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Ok` in this scope
+  --> tests/ui/src/error/result/result_map__01.pt:12:21
+   |
+LL |                     Ok(first_number * second_number)
+   |                     ^^ not found in this scope
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Err` in this scope
+  --> tests/ui/src/error/result/result_map__01.pt:14:27
+   |
+LL |                 Err(e) => Err(e),
+   |                           ^^^ not found in this scope
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Err` in this scope
+  --> tests/ui/src/error/result/result_map__01.pt:17:19
+   |
+LL |         Err(e) => Err(e),
+   |                   ^^^ not found in this scope
+
+error: aborting due to 14 previous errors
+
+Some errors have detailed explanations: E0425, E0433, E0531, E0599.
+For more information about an error, try `rustc --explain E0425`.

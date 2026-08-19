@@ -1,8 +1,57 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__01.pt:6:8
    |
-LL | add_impl! { int float str }
-   |             ^^^
+LL | #[repr(atom, name = "custom_name")]
+   |        ^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
 
-error: aborting due to 1 previous error
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__01.pt:6:14
+   |
+LL | #[repr(atom, name = "custom_name")]
+   |              ^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
 
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__01.pt:10:8
+   |
+LL | #[repr(style = "snake_case")]
+   |        ^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__01.pt:13:12
+   |
+LL |     #[repr(name = "variantB")]
+   |            ^^^^^^^^^^^^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__01.pt:20:8
+   |
+LL | #[repr(atom, style = "snake_case")]
+   |        ^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__01.pt:20:14
+   |
+LL | #[repr(atom, style = "snake_case")]
+   |              ^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+
+error: aborting due to 6 previous errors
+
+For more information about this error, try `rustc --explain E0552`.

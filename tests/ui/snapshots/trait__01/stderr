@@ -1,8 +1,19 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+error[E0277]: the trait bound `Self: Core::Sized` is not satisfied
+  --> tests/ui/src/trait__01.pt:15:13
    |
-LL | add_impl! { int float str }
-   |             ^^^
+LL |     fn talk(self) {
+   |             ^^^^ the trait `Core::Sized` is not implemented for `Self`
+   |
+   = help: unsized fn params are gated as an unstable feature
+help: consider further restricting `Self`
+   |
+LL |     fn talk(self) where Self: Core::Sized {
+   |                   +++++++++++++++++++++++
+help: function arguments must have a statically known size, borrowed types always have a known size
+   |
+LL |     fn talk(&self) {
+   |             +
 
 error: aborting due to 1 previous error
 
+For more information about this error, try `rustc --explain E0277`.

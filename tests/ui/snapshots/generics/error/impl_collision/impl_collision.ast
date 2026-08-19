@@ -1,0 +1,13 @@
+#![allow(dead_code)]
+
+struct GenVal<T> {
+    gen_val: T,
+}
+
+impl GenVal<int> {
+    fn value(self) -> int { self.gen_val }
+}
+
+impl GenVal<str> {
+    fn value(self) -> str { self.gen_val }
+}

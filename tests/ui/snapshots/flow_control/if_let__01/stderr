@@ -1,8 +1,13 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+error: expected item, found keyword `let`
+  --> tests/ui/src/flow_control/if_let__01.pt:5:1
    |
-LL | add_impl! { int float str }
-   |             ^^^
+LL | let optional = Some(7);
+   | ^^^
+   | |
+   | `let` cannot be used for global variables
+   | help: consider using `static` or `const` instead of `let`
+   |
+   = note: for a full list of items that can appear in modules, see <https://doc.rust-lang.org/reference/items.html>
 
 error: aborting due to 1 previous error
 

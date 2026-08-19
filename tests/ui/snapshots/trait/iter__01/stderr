@@ -1,8 +1,10 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+error: expected `;`, found `}`
+  --> tests/ui/src/trait/iter__01.pt:27:37
    |
-LL | add_impl! { int float str }
-   |             ^^^
+LL |         (next_self, Some(self.curr))
+   |                                     ^ help: add `;` here
+LL |     }
+   |     - unexpected token
 
 error: aborting due to 1 previous error
 

@@ -1,8 +1,43 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+error: expected item, found `;`
+  --> tests/ui/src/primitives/term__02.pt:9:2
    |
-LL | add_impl! { int float str }
-   |             ^^^
+LL | };
+   |  ^
+   |
+   = help: enum declarations are not followed by a semicolon
+help: remove this semicolon
+   |
+LL - };
+LL + }
+   |
 
-error: aborting due to 1 previous error
+error: comparison operators cannot be chained
+  --> tests/ui/src/primitives/term__02.pt:17:82
+   |
+LL |     let next_event_res: Result<UserEvent, DecodeError> = next_event.try_cast_into<UserEvent>();
+   |                                                                                  ^         ^
+   |
+help: use `::<...>` instead of `<...>` to specify lifetime, type, or const arguments
+   |
+LL |     let next_event_res: Result<UserEvent, DecodeError> = next_event.try_cast_into::<UserEvent>();
+   |                                                                                  ++
+
+error: comparison operators cannot be chained
+  --> tests/ui/src/primitives/term__02.pt:24:88
+   |
+LL |     let next_event: UserEvent = Events.get_next_event(seqnum, prev_event).try_cast_into<UserEvent>()?;
+   |                                                                                        ^         ^
+   |
+help: use `::<...>` instead of `<...>` to specify lifetime, type, or const arguments
+   |
+LL |     let next_event: UserEvent = Events.get_next_event(seqnum, prev_event).try_cast_into::<UserEvent>()?;
+   |                                                                                        ++
+
+error: expected one of `;` or `else`, found `?`
+  --> tests/ui/src/primitives/term__02.pt:24:101
+   |
+LL |     let next_event: UserEvent = Events.get_next_event(seqnum, prev_event).try_cast_into<UserEvent>()?;
+   |                                                                                                     ^ expected one of `;` or `else`
+
+error: aborting due to 4 previous errors
 

@@ -1,0 +1,103 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/custom_types/repr.md
+// block: 1/12
+
+struct Unit;
+
+#[attr = Repr {reprs: []}]
+struct CustomNameUnit;
+
+// `style` can be used to change the style of atom tags assigned by Patina
+#[attr = Repr {reprs: []}]
+enum NotJustUnits {
+    VariantA,
+    #[attr = Repr {reprs: []}]
+    VariantB,
+    VariantC(int),
+}
+
+// Explicitly setting `#[repr(atom)]` will ensure that only unit variants
+// are ever added to an enum.
+#[attr = Repr {reprs: []}]
+enum OnlyUnits { VariantA, VariantB, VariantC, }
+
+fn main() ({
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::debug as
+                                    fn(term) -> term)(((Unit as Unit) as term as term)) as
+                                term)] as [term; 1])] as [[term; 1]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::debug as
+                                    fn(term) -> term)(
+                                // a"Elixir.Patina.ByExample.Unit"
+
+                                ((CustomNameUnit as CustomNameUnit) as term as term)) as
+                                term)] as [term; 1])] as [[term; 1]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::debug as
+                                    fn(term) -> term)(
+                                // a"custom_name"
+
+                                ((NotJustUnits::VariantA as NotJustUnits) as term as term))
+                                as term)] as [term; 1])] as [[term; 1]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::debug as
+                                    fn(term) -> term)(
+                                // a"variant_a"
+
+                                ((NotJustUnits::VariantB as NotJustUnits) as term as term))
+                                as term)] as [term; 1])] as [[term; 1]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    // a"variantB"
+} as ())

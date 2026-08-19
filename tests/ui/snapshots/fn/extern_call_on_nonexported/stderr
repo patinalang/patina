@@ -1,8 +1,13 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+error: `#[extern_call]` should be applied to an exported function
+  --> tests/ui/src/fn/extern_call_on_nonexported.pt:6:13
    |
-LL | add_impl! { int float str }
-   |             ^^^
+LL | fn priv_function() -> int {
+   | ------------------------- function
+...
+LL |     let _ = #[extern_call]
+   |             ^^^^^^^^^^^^^^
+LL |     priv_function();
+   |     --------------- call
 
 error: aborting due to 1 previous error
 

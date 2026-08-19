@@ -1,0 +1,63 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/fn/extern_calls.md
+// block: 1/1
+
+fn priv_function() -> int ({ (42 as int) } as int)
+
+fn public_function() -> int ({ (42 as int) } as int)
+
+fn main() ({
+    // Local call: `public_function()`
+    ((public_function as fn() -> int {public_function})() as int);
+
+    // Qualified, but still a local call: `public_function()`
+    ((self::public_function as fn() -> int {public_function})() as int);
+
+    // Remote call: `'Elixir.Patina.MyPkg':public_function()`
+    #[attr = ExternCall]
+    ((public_function as fn() -> int {public_function})() as int);
+
+    // Always a local call: `priv_function` is not exported!
+    // Prepending `#[extern_call]` would result in a compilation error.
+    ((priv_function as fn() -> int {priv_function})() as int);
+} as ())

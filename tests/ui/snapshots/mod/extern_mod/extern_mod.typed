@@ -1,0 +1,69 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+extern mod used;
+extern mod unused;
+extern mod erlang;
+
+mod inner {
+    fn use_it() ({
+        let _hash =
+            ((erlang::phash2 as {type error})((() as ())) as {type error});
+    } as ())
+}
+
+fn main() ({
+    ((used::ping as fn() -> term)() as term);
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::debug as
+                                    fn(term) -> term)((used::foo::bar as term)) as term)] as
+                        [term; 1])] as [[term; 1]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ((io::foo::bar as fn(term, term) -> term)((1 as int), (2 as int)) as
+        term);
+    ((io::a::b::c::d as fn(term) -> term)((1 as int)) as term);
+    ((io::a::b::c::d as fn(term) -> term)((2 as int)) as term);
+    ((io::foo::bar::baz as fn(term) -> term)((() as ())) as term);
+    let _m = (io::foo::bar as term);
+    ((inner::use_it as fn() {inner::use_it})() as ());
+} as ())

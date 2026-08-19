@@ -1,8 +1,9 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+error[E0433]: cannot find type `Std` in this scope
+  --> tests/ui/src/generics/multi_bounds__01.pt:4:5
    |
-LL | add_impl! { int float str }
-   |             ^^^
+LL | use Std::Fmt::{Debug, Display};
+   |     ^^^ use of undeclared type `Std`
 
 error: aborting due to 1 previous error
 
+For more information about this error, try `rustc --explain E0433`.

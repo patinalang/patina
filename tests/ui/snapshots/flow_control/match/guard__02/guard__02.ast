@@ -1,0 +1,13 @@
+// source: patina-by-example/src/flow_control/match/guard.md
+// block: 2/2
+
+pub fn main() {
+    let number: int = 4;
+
+    match number {
+        i if i == 0 => println!("Zero"),
+        i if i > 0 => println!("Greater than zero"),
+    }
+    // _ => unreachable!("Should never happen."),
+    // TODO ^ uncomment to fix compilation
+}

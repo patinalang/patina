@@ -1,0 +1,70 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+pub fn main() {
+    // Declare a variable binding
+    let a_binding;
+
+    {
+        let x = 2;
+
+        // Initialize the binding
+        a_binding = x * x;
+    }
+    {
+        io::put_chars([["a binding: ",
+                            patina_fmt::display(
+
+                                a_binding)]]);
+        io::nl();
+    };
+
+    let another_binding;
+
+    another_binding = 1;
+    {
+        io::put_chars([["another binding: ",
+                            patina_fmt::display(
+
+                                another_binding)]]);
+        io::nl();
+    };
+}

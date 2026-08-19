@@ -9,7 +9,7 @@ use std::path::PathBuf;
 
 use body::{BodyCx, TranslatedBody};
 use rustc_arena::DroplessArena;
-use rustc_data_structures::fx::FxHashMap;
+use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{LocalDefId, LocalModDefId};
@@ -84,24 +84,48 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             self.tcx.thir_body(owner).unwrap_or_else(|guaranteed| guaranteed.raise_fatal());
 
         let thir = thir.borrow();
+        let mut params = self.witness_params(owner, scopes);
         let mut cx = BodyCx::new(self, owner, &thir, parts, scopes);
 
-        let params = thir
-            .params
-            .iter()
-            .filter(|param| param.hir_id.is_some())
-            .map(|param| {
-                let pat = param
-                    .pat
-                    .as_deref()
-                    .unwrap_or_else(|| bug!("explicit parameter must have a THIR pattern"));
-                cx.translate_pattern(pat)
-            })
-            .collect();
+        for param in thir.params.iter() {
+            let Some(_hir_id) = param.hir_id else { continue };
+
+            let pat = param
+                .pat
+                .as_deref()
+                .unwrap_or_else(|| bug!("explicit parameter must have a THIR pattern"));
+
+            params.push(cx.translate_pattern(pat));
+        }
 
         let value = cx.translate_expr(root);
 
         TranslatedBody { params, value }
+    }
+
+    fn witness_params(
+        &self,
+        owner: LocalDefId,
+        scopes: &mut Scopes,
+    ) -> SmallVec<[eaf::Pattern<'arena>; 8]> {
+        let mut params = SmallVec::new();
+
+        if self.tcx.def_kind(owner) != DefKind::AssocFn
+            || self.tcx.trait_item_of(owner.to_def_id()).is_none()
+        {
+            return params;
+        }
+
+        let span = self.tcx.def_span(owner);
+        let witnesses = std::iter::once(sym::witness_self)
+            .chain(self.tcx.erl_trait_args(owner.to_def_id()).iter().map(|_| sym::witness));
+
+        for name in witnesses {
+            let var = scopes.fresh_var(name, true);
+            params.push(self.afb.pat_var(span, var.erl_name));
+        }
+
+        params
     }
 
     pub(super) fn translate_const(
@@ -164,6 +188,10 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             };
 
             modules.push(form);
+        }
+
+        for module_id in self.impls.prim_modules() {
+            modules.push(self.translate_prim_module(*module_id));
         }
 
         modules
@@ -231,7 +259,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         def_id: LocalDefId,
         sig: &FnSig<'tcx>,
         _generics: &Generics<'tcx>,
-        ident: Ident,
+        _ident: Ident,
         body: BodyId,
         parts: &mut ModuleParts<'arena>,
     ) {
@@ -239,12 +267,14 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         let mut scope = Scopes::new();
         let translated = self.translate_body(owner, parts, &mut scope);
 
-        let form =
-            self.afb.simple_function(sig.span, ident.name, translated.params, translated.value);
+        let name = self.tcx.erl_fn_name(def_id);
+        let arity = translated.params.len() as u32;
+
+        let form = self.afb.simple_function(sig.span, name, translated.params, translated.value);
 
         self.push_function(parts, sig.span, form);
         if self.tcx.is_erl_exported_fn(def_id) {
-            parts.exports.push((ident.name, sig.decl.inputs.len() as u32));
+            parts.exports.push((name, arity));
         }
     }
 
@@ -301,7 +331,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             record_exports.push(variant_name);
         }
 
-        self.collect_impl_fns(def_id, &mut parts);
+        self.collect_impl_fns(ErlModuleId::Adt(def_id.to_def_id()), &mut parts);
 
         self.assemble_module(item.span, mod_name, record_exports, parts)
     }
@@ -324,34 +354,59 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         parts.forms.push(elixir_compat::struct1_function(&self.afb, span));
         parts.exports.push((sym::__struct__, 1));
 
-        self.collect_impl_fns(def_id, &mut parts);
+        self.collect_impl_fns(ErlModuleId::Adt(def_id.to_def_id()), &mut parts);
 
         parts
     }
 
-    fn collect_impl_fns(
-        &self,
-        def_id: rustc_hir::def_id::LocalDefId,
-        parts: &mut ModuleParts<'arena>,
-    ) {
-        if let Some(impls) = self.impls.impls_for(def_id.to_def_id()) {
-            for imp in impls {
-                for impl_item_id in imp.items {
-                    let impl_item = self.tcx.hir_impl_item(*impl_item_id);
-                    let ImplItemKind::Fn(sig, body) = impl_item.kind else {
-                        continue;
-                    };
+    fn collect_impl_fns(&self, module_id: ErlModuleId, parts: &mut ModuleParts<'arena>) {
+        let Some(impls) = self.impls.impls_for(module_id) else { return };
 
-                    self.translate_fun(
-                        impl_item.owner_id.def_id,
-                        &sig,
-                        impl_item.generics,
-                        impl_item.ident,
-                        body,
-                        parts,
-                    );
-                }
+        let mut seen_traits = FxHashSet::default();
+        for (impl_def_id, imp) in impls {
+            if let Some(trait_def_id) = self.tcx.impl_opt_trait_id(*impl_def_id)
+                && !seen_traits.insert(trait_def_id)
+            {
+                not_implemented!(
+                    self.tcx,
+                    imp.self_ty.span,
+                    "multiple impls of one trait for one type"
+                );
+            }
+
+            for impl_item_id in imp.items {
+                let impl_item = self.tcx.hir_impl_item(*impl_item_id);
+                let ImplItemKind::Fn(sig, body) = impl_item.kind else {
+                    continue;
+                };
+
+                self.translate_fun(
+                    impl_item.owner_id.def_id,
+                    &sig,
+                    impl_item.generics,
+                    impl_item.ident,
+                    body,
+                    parts,
+                );
             }
         }
+    }
+
+    fn translate_prim_module(&self, module_id: ErlModuleId) -> (Symbol, eaf::Module<'arena>) {
+        let mod_name = self.modules.module_name(module_id);
+
+        let impls = self
+            .impls
+            .impls_for(module_id)
+            .unwrap_or_else(|| bug!("primitive module has no impls"));
+
+        let span = impls[0].1.self_ty.span;
+
+        let mut parts = self.module_parts(span);
+        parts.forms.push(elixir_compat::info_function(&self.afb, span, None));
+        parts.exports.push((sym::__info__, 1));
+
+        self.collect_impl_fns(module_id, &mut parts);
+        self.assemble_module(span, mod_name, [], parts)
     }
 }

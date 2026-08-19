@@ -1,8 +1,11 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+error: expected `;`, found `println`
+  --> tests/ui/src/types/inference__01.pt:14:24
    |
-LL | add_impl! { int float str }
-   |             ^^^
+LL |     lst = [elem, ..lst]
+   |                        ^ help: add `;` here
+LL |     // Aha! Now the compiler knows that `lst` is a list of `int`s (`[int]`)
+LL |     println!("{:?}", lst);
+   |     ------- unexpected token
 
 error: aborting due to 1 previous error
 

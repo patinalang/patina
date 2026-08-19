@@ -1,0 +1,8 @@
+// source: patina-by-example/src/expression.md
+// block: 1/3
+
+pub fn main() {
+    // statement
+    // statement
+    // statement
+}

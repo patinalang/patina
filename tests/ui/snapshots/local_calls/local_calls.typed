@@ -1,0 +1,69 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+struct Years(int);
+
+impl Years {
+    fn new(years: int)
+        ->
+            Years ({
+        ((Years as fn(int) -> Years {Years})((years as int)) as Years)
+    } as Years)
+}
+
+fn get_age(age: Years) -> int ({ ((age as Years).0 as int) } as int)
+
+fn main() ({
+    let age =
+        ((Years::new as fn(int) -> Years {Years::new})((25 as int)) as Years);
+    let age_value =
+        ((get_age as fn(Years) -> int {get_age})((age as Years)) as int);
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("Age " as str),
+                            ((patina_fmt::debug as fn(term) -> term)((age as Years)) as
+                                term), (" is " as str),
+                            ((patina_fmt::display as
+                                    fn(term) -> term)((age_value as int)) as term)] as
+                        [term; 4])] as [[term; 4]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+} as ())

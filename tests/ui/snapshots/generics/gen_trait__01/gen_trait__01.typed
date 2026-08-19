@@ -1,0 +1,76 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/generics/gen_trait.md
+// block: 1/1
+
+extern mod erlang;
+
+struct Empty;
+struct StaticSeed;
+
+// A trait generic over `T`.
+trait SeededHash<T> {
+    // Define a method on the caller type which takes an
+    // additional single parameter `T`.
+    fn seeded_hash(self, seed: T)
+    -> int;
+}
+
+// Implement `SeededHash<T>` for any generic parameter `T` and
+// caller `U`.
+impl <T, U> SeededHash<T> for U {
+    fn seeded_hash(self, seed: T)
+        ->
+            int ({
+        (((erlang::phash2 as
+                    fn(term) -> term)((((seed as T), (self as U)) as (T, U))) as
+                term).unsafe_cast::<int>() as {type error})
+    } as {type error})
+}
+
+fn main() ({
+    let empty = (Empty as Empty);
+    let seed = (StaticSeed as StaticSeed);
+
+    // hash `empty` with static seed
+    ((empty as Empty).seeded_hash((seed as StaticSeed)) as int);
+} as ())

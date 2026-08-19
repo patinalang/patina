@@ -1,0 +1,94 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/generics/gen_fn.md
+// block: 1/1
+
+struct A;
+// Concrete type `A`.
+struct S(A);
+// Concrete type `S`.
+struct SGen<T>(T);
+// Generic type `SGen`.
+
+// Define a function `reg_fn` that takes an argument `_s` of type `S`.
+// This has no `<T>` so this is not a generic function.
+fn reg_fn(_s: S) ({ } as ())
+
+// Define a function `gen_spec_t` that takes an argument `_s` of type `SGen<T>`.
+// It has been explicitly given the type parameter `A`, but because `A` has not
+// been specified as a generic type parameter for `gen_spec_t`, it is not generic.
+fn gen_spec_t(_s: SGen<A>) ({ } as ())
+
+// Define a function `gen_spec_int` that takes an argument `_s` of type `SGen<int>`.
+// It has been explicitly given the type parameter `int`, which is a specific type.
+// Because `int` is not a generic type, this function is also not generic.
+fn gen_spec_int(_s: SGen<int>) ({ } as ())
+
+// Define a function `generic` that takes an argument `_s` of type `SGen<T>`.
+// Because `SGen<T>` is preceded by `<T>`, this function is generic over `T`.
+fn generic<T>(_s: SGen<T>) ({ } as ())
+
+fn main() ({
+    // Using the non-generic functions
+    ((reg_fn as fn(S) {reg_fn})(((S as fn(A) -> S {S})((A as A)) as S)) as
+        ()); // Concrete type.
+    ((gen_spec_t as
+            fn(SGen<A>) {gen_spec_t})(((SGen as
+                fn(A) -> SGen<A> {SGen::<A>})((A as A)) as SGen<A>)) as
+        ()); // Implicitly specified type parameter `A`.
+    ((gen_spec_int as
+            fn(SGen<int>) {gen_spec_int})(((SGen as
+                fn(int) -> SGen<int> {SGen::<int>})((6 as int)) as SGen<int>))
+        as ()); // Implicitly specified type parameter `int`.
+
+    // Explicitly specified type parameter `char` to `generic()`.
+    ((generic::<char> as
+            fn(SGen<char>) {generic::<char>})(((SGen as
+                fn(char) -> SGen<char> {SGen::<char>})(('a' as char)) as
+            SGen<char>)) as ());
+
+    // Implicitly specified type parameter `char` to `generic()`.
+    ((generic as
+            fn(SGen<char>) {generic::<char>})(((SGen as
+                fn(char) -> SGen<char> {SGen::<char>})(('c' as char)) as
+            SGen<char>)) as ());
+} as ())

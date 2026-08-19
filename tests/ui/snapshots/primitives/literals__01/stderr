@@ -1,8 +1,44 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+error: format options are not yet supported in Patina
+  --> tests/ui/src/primitives/literals__01.pt:20:32
    |
-LL | add_impl! { int float str }
-   |             ^^^
+LL |     println!("0011 AND 0101 is {:04b}", 0b0011 & 0b0101);
+   |                                ^^^^^^
 
-error: aborting due to 1 previous error
+error: only `{}` (Display) and `{:?}` (Debug) are supported in Patina
+  --> tests/ui/src/primitives/literals__01.pt:20:32
+   |
+LL |     println!("0011 AND 0101 is {:04b}", 0b0011 & 0b0101);
+   |                                ^^^^^^
+
+error: format options are not yet supported in Patina
+  --> tests/ui/src/primitives/literals__01.pt:21:31
+   |
+LL |     println!("0011 OR 0101 is {:04b}", 0b0011 | 0b0101);
+   |                               ^^^^^^
+
+error: only `{}` (Display) and `{:?}` (Debug) are supported in Patina
+  --> tests/ui/src/primitives/literals__01.pt:21:31
+   |
+LL |     println!("0011 OR 0101 is {:04b}", 0b0011 | 0b0101);
+   |                               ^^^^^^
+
+error: format options are not yet supported in Patina
+  --> tests/ui/src/primitives/literals__01.pt:22:32
+   |
+LL |     println!("0011 XOR 0101 is {:04b}", 0b0011 ^ 0b0101);
+   |                                ^^^^^^
+
+error: only `{}` (Display) and `{:?}` (Debug) are supported in Patina
+  --> tests/ui/src/primitives/literals__01.pt:22:32
+   |
+LL |     println!("0011 XOR 0101 is {:04b}", 0b0011 ^ 0b0101);
+   |                                ^^^^^^
+
+error: only `{}` (Display) and `{:?}` (Debug) are supported in Patina
+  --> tests/ui/src/primitives/literals__01.pt:24:30
+   |
+LL |     println!("0x80 >> 2 is 0x{:x}", 0x80 >> 2);
+   |                              ^^^^
+
+error: aborting due to 7 previous errors
 

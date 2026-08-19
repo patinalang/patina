@@ -1,0 +1,77 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/mod/use.md
+// block: 2/2
+
+// Bind the `deeply::nested::function` path to `other_function`.
+use Deeply::Nested::function as other_function;
+
+fn function() { { io::put_chars([["called `function()`"]]); io::nl(); }; }
+
+mod Deeply {
+    pub mod Nested {
+        pub fn function() {
+            {
+                io::put_chars([["called `Deeply::Nested::function()`"]]);
+                io::nl();
+            };
+        }
+    }
+}
+
+pub fn main() {
+    // Easier access to `Deeply::Nested::function`
+    other_function();
+    { io::put_chars([["Entering block"]]); io::nl(); };
+
+    {
+        // This is equivalent to `use Deeply::Nested::function as function`.
+        // This `function()` will shadow the outer one.
+        use pkg::Deeply::Nested::function;
+        // `use` bindings have a local scope. In this case, the
+        // shadowing of `function()` is only in this block.
+        function();
+        { io::put_chars([["Leaving block"]]); io::nl(); };
+
+    }
+    function();
+}

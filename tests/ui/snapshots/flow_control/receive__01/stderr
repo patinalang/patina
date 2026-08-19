@@ -1,8 +1,79 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+error: prefix `a` is unknown
+  --> tests/ui/src/flow_control/receive__01.pt:8:9
    |
-LL | add_impl! { int float str }
-   |             ^^^
+LL |         a"ping" => println!("received ping"),
+   |         ^ unknown prefix
+   |
+   = note: prefixed identifiers and literals are reserved since Rust 2021
+help: consider inserting whitespace here
+   |
+LL |         a "ping" => println!("received ping"),
+   |          +
 
-error: aborting due to 1 previous error
+error: expected one of `,`, `:`, or `}`, found `(`
+  --> tests/ui/src/flow_control/receive__01.pt:6:12
+   |
+LL |     receive {
+   |     ------- while parsing this struct
+LL |         int(n) => println!("received integer {:?}", n),
+   |         ---^ expected one of `,`, `:`, or `}`
+   |         |
+   |         while parsing this struct field
+   |
+help: try naming a field
+   |
+LL |         int: int(n) => println!("received integer {:?}", n),
+   |         ++++
+
+error: expected one of `,`, `:`, or `}`, found `)`
+  --> tests/ui/src/flow_control/receive__01.pt:6:54
+   |
+LL |     receive {
+   |     ------- while parsing this struct
+LL |         int(n) => println!("received integer {:?}", n),
+   |                                                      ^ expected one of `,`, `:`, or `}`
+
+error: expected one of `,`, `:`, or `}`, found `"ping"`
+  --> tests/ui/src/flow_control/receive__01.pt:8:10
+   |
+LL |     receive {
+   |     ------- while parsing this struct
+...
+LL |         a"ping" => println!("received ping"),
+   |         -^^^^^^ expected one of `,`, `:`, or `}`
+   |         |
+   |         while parsing this struct field
+
+error: expected one of `,`, `:`, or `}`, found `(`
+  --> tests/ui/src/flow_control/receive__01.pt:9:13
+   |
+LL |     receive {
+   |     ------- while parsing this struct
+...
+LL |         atom(a) => println!("received atom {:?}", a),
+   |         ----^ expected one of `,`, `:`, or `}`
+   |         |
+   |         while parsing this struct field
+   |
+help: try naming a field
+   |
+LL |         atom: atom(a) => println!("received atom {:?}", a),
+   |         +++++
+
+error: expected one of `,`, `:`, or `}`, found `)`
+  --> tests/ui/src/flow_control/receive__01.pt:9:52
+   |
+LL |     receive {
+   |     ------- while parsing this struct
+...
+LL |         atom(a) => println!("received atom {:?}", a),
+   |                                                    ^ expected one of `,`, `:`, or `}`
+
+error: expected one of `.`, `;`, `?`, `}`, or an operator, found `timeout`
+  --> tests/ui/src/flow_control/receive__01.pt:10:7
+   |
+LL |     } timeout Duration::from_seconds(5) {
+   |       ^^^^^^^ expected one of `.`, `;`, `?`, `}`, or an operator
+
+error: aborting due to 7 previous errors
 

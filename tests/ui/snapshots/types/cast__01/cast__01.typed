@@ -1,0 +1,94 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/types/cast.md
+// block: 1/1
+
+fn main() ({
+    let decimal = (65.4321 as float);
+
+    // Error! No implicit conversion
+    let integer: int = (decimal as float);
+
+    // Explicit conversion
+    let integer =
+        ((decimal as float) as int as
+            int); // casting float to integer is equivalent to decimal.trunc()
+    let character = ((integer as int) as char as char);
+
+    // Error! There are limitations in conversion rules.
+    // A float cannot be directly converted to a char.
+    let character = ((decimal as float) as char as char);
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("Casting: " as str),
+                            ((patina_fmt::display as
+                                    fn(term) -> term)(
+                                // FIXME ^ Comment out this line
+
+                                (decimal as float)) as term), (" -> " as str),
+                            ((patina_fmt::display as fn(term) -> term)((integer as int))
+                                as term), (" -> " as str),
+                            ((patina_fmt::display as
+                                    fn(term) -> term)((character as char)) as term)] as
+                        [term; 6])] as [[term; 6]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+
+    // str can be cast to bin or bits
+    let string = ("hello" as str);
+    let binary = ((string as str) as bin as {type error});
+    let bitstring = ((string as str) as bits as {type error});
+
+    // bin can be cast to bits
+    let bitstring = ((binary as {type error}) as bits as {type error});
+
+    // PATINA TODO: how useful is the byte type, really?
+    // integer literal can be cast to a byte
+    // let byte_val = 123 as byte;
+
+    // byte can be cast to an integer, but not the other way around!
+    let integer_from_byte =
+        ((byte_val as {type error}) as int as {type error});
+    // Error! Byte cannot be cast from an arbitrary integer
+    let byte_from_integer =
+        ((integer_from_byte as {type error}) as byte as {type error});
+} as ())

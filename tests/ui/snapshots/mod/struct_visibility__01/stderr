@@ -1,8 +1,8 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+error: cannot find attribute `beam_module` in this scope
+  --> tests/ui/src/mod/struct_visibility__01.pt:8:7
    |
-LL | add_impl! { int float str }
-   |             ^^^
+LL |     #[beam_module("Elixir.RenamedStruct")]
+   |       ^^^^^^^^^^^
 
 error: aborting due to 1 previous error
 

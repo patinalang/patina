@@ -1,8 +1,40 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+error[E0277]: the trait bound `dyn Animal: Core::Sized` is not satisfied
+  --> tests/ui/src/trait/dyn__01.pt:37:9
    |
-LL | add_impl! { int float str }
-   |             ^^^
+LL |     let animal = random_animal(random_number);
+   |         ^^^^^^ the trait `Core::Sized` is not implemented for `dyn Animal`
+   |
+   = note: all local variables must have a statically known size
 
-error: aborting due to 1 previous error
+error[E0277]: the trait bound `(dyn Animal + 'static): Core::Sized` is not satisfied
+  --> tests/ui/src/trait/dyn__01.pt:37:18
+   |
+LL |     let animal = random_animal(random_number);
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Core::Sized` is not implemented for `(dyn Animal + 'static)`
+   |
+   = note: the return type of a function must have a statically known size
 
+error[E0746]: return type cannot be a trait object without pointer indirection
+  --> tests/ui/src/trait/dyn__01.pt:27:43
+   |
+LL | fn random_animal(random_number: float) -> dyn Animal {
+   |                                           ^^^^^^^^^^ the trait `Core::Sized` is not implemented for `(dyn Animal + 'static)`
+   |
+help: consider returning an `impl Trait` instead of a `dyn Trait`
+   |
+LL - fn random_animal(random_number: float) -> dyn Animal {
+LL + fn random_animal(random_number: float) -> impl Animal {
+   |
+help: alternatively, box the return type, and wrap all of the returned values in `Box::new`
+   |
+LL ~ fn random_animal(random_number: float) -> Box<dyn Animal> {
+LL |     if random_number < 0.5 {
+LL ~         Box::new(Sheep {})
+LL |     } else {
+LL ~         Box::new(Cow {})
+   |
+
+error: aborting due to 3 previous errors
+
+Some errors have detailed explanations: E0277, E0746.
+For more information about an error, try `rustc --explain E0277`.

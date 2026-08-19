@@ -1,8 +1,8 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+error: variable value is partially initialized
+  --> tests/ui/src/flow_control/uninitialized_in_short_circuit.pt:9:5
    |
-LL | add_impl! { int float str }
-   |             ^^^
+LL |     value
+   |     ^^^^^
 
 error: aborting due to 1 previous error
 

@@ -1,8 +1,41 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+error[E0425]: cannot find type `atom` in this scope
+  --> tests/ui/src/custom_types/repr__06.pt:26:12
    |
-LL | add_impl! { int float str }
-   |             ^^^
+LL |     OrAtom(atom)
+   |            ^^^^ not found in this scope
 
-error: aborting due to 1 previous error
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__06.pt:4:8
+   |
+LL | #[repr(Elixir)]
+   |        ^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
 
+error[E0731]: transparent enum needs exactly one variant, but has 3
+  --> tests/ui/src/custom_types/repr__06.pt:11:1
+   |
+LL | enum TransparentEnum {
+   | ^^^^^^^^^^^^^^^^^^^^ needs exactly one variant, but has 3
+LL |     Unit,
+   |     ---- variant here
+LL |     TupleStyle(int, str),
+   |     ---------- variant here
+LL |     StructStyle{point: Point},
+   |     ----------- too many variants in `TransparentEnum`
+
+error[E0731]: transparent enum needs exactly one variant, but has 2
+  --> tests/ui/src/custom_types/repr__06.pt:24:1
+   |
+LL | enum InvalidTransparentEnum {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^ needs exactly one variant, but has 2
+LL |     MyName,
+   |     ------ variant here
+LL |     OrAtom(atom)
+   |     ------ too many variants in `InvalidTransparentEnum`
+
+error: aborting due to 4 previous errors
+
+Some errors have detailed explanations: E0425, E0552, E0731.
+For more information about an error, try `rustc --explain E0425`.

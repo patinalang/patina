@@ -1,8 +1,15 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+error: `mut` must be attached to each individual binding
+  --> tests/ui/src/trait/impl_trait__03.pt:29:9
    |
-LL | add_impl! { int float str }
-   |             ^^^
+LL |     let mut (iter, item) = combine_lists(v1, v2).next();
+   |         ^^^^^^^^^^^^^^^^
+   |
+   = note: `mut` may be followed by `variable` and `variable @ pattern`
+help: add `mut` to each binding
+   |
+LL -     let mut (iter, item) = combine_lists(v1, v2).next();
+LL +     let (mut iter, mut item) = combine_lists(v1, v2).next();
+   |
 
 error: aborting due to 1 previous error
 

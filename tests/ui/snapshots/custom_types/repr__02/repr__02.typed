@@ -1,0 +1,77 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/custom_types/repr.md
+// block: 2/12
+
+#[attr = Repr {reprs: []}]
+struct Pair(int, float);
+
+#[attr = Repr {reprs: []}]
+struct Bar {
+    x: int,
+    y: int,
+    z: (),
+}
+
+fn main() ({
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::debug as
+                                    fn(term) -> term)((((Pair as
+                                            fn(int, float) -> Pair {Pair})((42 as int), (3.14 as float))
+                                        as Pair) as term as term)) as term)] as [term; 1])] as
+                [[term; 1]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::debug as
+                                    fn(term) -> term)(
+                                // (a"Elixir.Patina.ByExample.Pair", 42, 3.14)
+
+                                // z is omitted from the representation
+                                (((/*ERROR*/) as {type error}) as term as {type error})) as
+                                term)] as [term; 1])] as [[term; 1]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    // (a"Elixir.BarBar", 1, 2)
+} as ())

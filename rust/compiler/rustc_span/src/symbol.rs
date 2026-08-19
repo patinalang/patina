@@ -2316,6 +2316,8 @@ symbols! {
         windows,
         windows_subsystem,
         with_negative_coherence,
+        witness,
+        witness_self,
         wrap_binder,
         wrapping_add,
         wrapping_div,

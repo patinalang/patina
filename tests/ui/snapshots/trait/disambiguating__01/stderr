@@ -1,8 +1,14 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+error: cannot find macro `assert_eq` in this scope
+  --> tests/ui/src/trait/disambiguating__01.pt:46:5
    |
-LL | add_impl! { int float str }
-   |             ^^^
+LL |     assert_eq!(28, age);
+   |     ^^^^^^^^^
 
-error: aborting due to 1 previous error
+error: cannot find macro `assert_eq` in this scope
+  --> tests/ui/src/trait/disambiguating__01.pt:44:5
+   |
+LL |     assert_eq!("rustacean", username);
+   |     ^^^^^^^^^
+
+error: aborting due to 2 previous errors
 

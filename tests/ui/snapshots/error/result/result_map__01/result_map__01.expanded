@@ -1,0 +1,82 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/error/result/result_map.md
+// block: 1/2
+
+use Std::Num::ParseIntError;
+
+// With the return type rewritten, we use pattern matching without `unwrap()`.
+fn multiply(first_number_str: str, second_number_str: str)
+    -> Result<int, ParseIntError> {
+    match first_number_str.parse::<int>() {
+        Ok(first_number) => {
+            match second_number_str.parse::<int>() {
+                Ok(second_number) => { Ok(first_number * second_number) }
+                Err(e) => Err(e),
+            }
+        }
+        Err(e) => Err(e),
+    }
+}
+
+fn print(result: Result<int, ParseIntError>) {
+    match result {
+        Ok(n) => {
+            io::put_chars([["n is ", patina_fmt::display(n)]]);
+            io::nl();
+        }
+        Err(e) => {
+            io::put_chars([["Error: ", patina_fmt::display(e)]]);
+            io::nl();
+        }
+    }
+}
+
+pub fn main() {
+    // This still presents a reasonable answer.
+    let twenty = multiply("10", "2");
+    print(twenty);
+
+    // The following now provides a much more helpful error message.
+    let tt = multiply("t", "2");
+    print(tt);
+}

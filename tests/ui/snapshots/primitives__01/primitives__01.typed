@@ -1,0 +1,91 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/primitives.md
+// block: 1/1
+
+fn main() ({
+    // Variables can be type annotated.
+    let logical: bool = (true as bool);
+    let a_float: float = (1.0 as float);
+
+    // A type can also be inferred from context.
+    let inferred_type =
+        (12 as int); // Type float is inferred from another line.
+    ((inferred_type as int) =
+        ((add_floats as
+                fn(float, float) -> float {add_floats})((inferred_type as
+                int), (3.14 as float)) as float) as ());
+
+    // A mutable variable's value can be changed - rebound to a new value.
+    let mut mutable = (12 as int); // Mutable `int`
+    ((mutable as int) = (21 as int) as ());
+
+    // Error! The type of a variable can't be changed.
+    ((mutable as int) = (true as bool) as ());
+
+    // Variables can be overwritten with shadowing.
+    let mutable = (true as bool);
+
+    /* Compound types - List, Tuple and Maps */
+
+    // List's signature consists of type T as [T].
+    let my_list: [int] =
+        ([(1 as int), (2 as int), (3 as int), (4 as int), (5 as int)] as
+            [int; 5]);
+    // Tuple is a collection of values of different types
+    // and is constructed using parentheses ().
+    let my_tuple =
+        (((5 as int), (true as bool), (-(5.04 as float) as float)) as
+            (int, bool, float));
+    // Map's signature consists of Key type K and Value type V as #{K => V}
+    let my_map: #{float => str} =
+        (#{(3.14 as float) => ("pi" as str), (0 as int) => ("zero" as str)} as
+            #{{type error} => str});
+    /* Function types */
+
+    let add_ref: fn(float, float) -> float = (add_float as {type error});
+    // fnref is implicitly convertible to fn
+    let add_fn: fn(float, float) -> float = (add_ref as {type error});
+} as ())
+
+fn add_floats(a: float, b: float)
+    -> float ({ ((a as float) + (b as float) as float) } as float)

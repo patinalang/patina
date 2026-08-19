@@ -1,0 +1,167 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+fn mark(value: int)
+    ->
+        int ({
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::display as
+                                    fn(term) -> term)((value as int)) as term)] as [term; 1])]
+                as [[term; 1]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    (value as int)
+} as int)
+
+enum Choice { Stop, Continue, }
+
+fn match_value(choice: Choice)
+    ->
+        int ({
+    let value =
+        (match (choice as Choice) {
+            Choice::Stop => (return (10 as int) as !),
+            Choice::Continue => (20 as int),
+        } as int);
+    ((value as int) + (1 as int) as int)
+} as int)
+
+fn is_negative(x: int)
+    ->
+        bool ({
+    (if ((x as int) >= (0 as int) as bool) { (return (false as bool) as !); }
+        as ())
+    (return (true as bool) as !);
+} as !)
+
+fn is_negative_implicit(x: int)
+    ->
+        bool ({
+    (if ((x as int) >= (0 as int) as bool) { (return (false as bool) as !); }
+        as ())
+    (true as bool)
+} as bool)
+
+fn closure_value(stop: bool)
+    ->
+        int ({
+    let _closure =
+        (|| -> int
+            ({
+                (if (stop as bool) { (return (4 as int) as !); } as ())
+                (5 as int)
+            } as int) as
+            {closure@tests/ui/src/flow_control/early_return.pt:34:20: 34:29});
+
+    (10 as int)
+} as int)
+
+fn expression_value(stop: bool)
+    ->
+        int ({
+    (((mark as fn(int) -> int {mark})((1 as int)) as int) +
+        ({
+            (if (stop as bool) {
+                (return ((mark as fn(int) -> int {mark})((2 as int)) as int)
+                    as !);
+            } as ())
+            ((mark as fn(int) -> int {mark})((3 as int)) as int)
+        } as int) as int)
+} as int)
+
+fn match_stopped()
+    ->
+        int ({
+    ((match_value as
+            fn(Choice) -> int {match_value})((Choice::Stop as Choice)) as int)
+} as int)
+
+fn match_continued()
+    ->
+        int ({
+    ((match_value as
+            fn(Choice) -> int {match_value})((Choice::Continue as Choice)) as
+        int)
+} as int)
+
+fn match_scrutinee_value(stop: bool)
+    ->
+        int ({
+    (match ({
+            (if (stop as bool) { (return (40 as int) as !); } as ())
+            (Choice::Continue as Choice)
+        } as Choice) {
+        Choice::Stop => (50 as int),
+        Choice::Continue => (60 as int),
+    } as int)
+} as int)
+
+fn nested_value(x: int)
+    ->
+        int ({
+    let result =
+        ({
+            (if ((x as int) == (0 as int) as bool) {
+                (return (10 as int) as !);
+            } as ())
+
+            ({
+                (if ((x as int) == (1 as int) as bool) {
+                    (return (20 as int) as !);
+                } as ())
+                (30 as int)
+            } as int)
+        } as int);
+
+    ((result as int) + (1 as int) as int)
+} as int)
+
+fn if_condition_value(stop: bool)
+    ->
+        int ({
+    (if ({
+            (if (stop as bool) { (return (10 as int) as !); } as ())
+            (true as bool)
+        } as bool) {
+        (20 as int)
+    } else { (30 as int) } as int)
+} as int)

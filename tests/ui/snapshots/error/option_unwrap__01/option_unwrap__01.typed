@@ -1,0 +1,113 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/error/option_unwrap.md
+// block: 1/1
+
+// The adult has seen it all, and can handle any drink well.
+// All drinks are handled explicitly using `match`.
+fn give_adult(drink:
+        Option<str>) ({
+
+    // Specify a course of action for each case.
+    (match (drink as {type error}) {
+        Some("lemonade") => {
+            ((io::put_chars as
+                    fn(term) -> term)(([([("Yuck! Too sugary." as str)] as
+                            [str; 1])] as [[str; 1]; 1])) as term);
+            ((io::nl as fn() -> term)() as term);
+        }
+        Some(inner) => {
+            ((io::put_chars as
+                    fn(term) -> term)(([([((patina_fmt::display as
+                                        fn(term) -> term)((inner as {type error})) as term),
+                                ("? How nice." as str)] as [term; 2])] as [[term; 2]; 1]))
+                as term);
+            ((io::nl as fn() -> term)() as term);
+        }
+        None => {
+            ((io::put_chars as
+                    fn(term) -> term)(([([("No drink? Oh well." as str)] as
+                            [str; 1])] as [[str; 1]; 1])) as term);
+            ((io::nl as fn() -> term)() as term);
+        }
+    } as ())
+} as ())
+
+// Others will `panic` before drinking sugary drinks.
+// All drinks are handled implicitly using `unwrap`.
+fn drink(drink:
+        Option<str>) ({
+    // `unwrap` returns a `panic` when it receives a `None`.
+    let inside = ((drink as {type error}).unwrap() as {type error});
+    (if ((inside as {type error}) == ("lemonade" as str) as bool) {
+        ((/*ERROR*/) as {type error});
+    } as ())
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("I love " as str),
+                            ((patina_fmt::display as
+                                    fn(term) -> term)(
+
+                                (inside as {type error})) as term), ("s!!!!!" as str)] as
+                        [term; 3])] as [[term; 3]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+} as ())
+
+fn main() ({
+    let water = ((Some as {type error})(("water" as str)) as {type error});
+    let lemonade =
+        ((Some as {type error})(("lemonade" as str)) as {type error});
+    let void = (None as {type error});
+
+    ((give_adult as fn({type error}) {give_adult})((water as {type error})) as
+        ());
+    ((give_adult as fn({type error}) {give_adult})((lemonade as {type error}))
+        as ());
+    ((give_adult as fn({type error}) {give_adult})((void as {type error})) as
+        ());
+    let coffee = ((Some as {type error})(("coffee" as str)) as {type error});
+    let nothing = (None as {type error});
+
+    ((drink as fn({type error}) {drink})((coffee as {type error})) as ());
+    ((drink as fn({type error}) {drink})((nothing as {type error})) as ());
+} as ())

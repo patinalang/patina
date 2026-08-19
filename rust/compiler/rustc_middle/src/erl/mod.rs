@@ -4,6 +4,7 @@ use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::{Attribute, HirId, PrimTy};
+use rustc_span::Symbol;
 
 use crate::ty::{self, AdtKind, GenericArgsRef, Ty, TyCtxt, TypingEnv, Unnormalized, Visibility};
 
@@ -100,6 +101,42 @@ impl<'tcx> TyCtxt<'tcx> {
                 _ => def_id = self.parent(def_id),
             }
         }
+    }
+
+    /// The Erlang function name of a callable item.
+    ///
+    /// Trait impl items names are mangled with the full trait path, e.g. `Std::Ops::Add::add`.
+    pub fn erl_fn_name(self, def_id: impl Into<DefId>) -> Symbol {
+        let def_id = def_id.into();
+        let item_name = self.item_name(def_id);
+        match self.trait_item_of(def_id) {
+            Some(trait_item_def_id) => {
+                let trait_def_id = self.parent(trait_item_def_id);
+                let path = self.def_path_str(trait_def_id);
+                let qualified = if trait_def_id.is_local() {
+                    let crate_name = self.crate_name(trait_def_id.krate);
+                    format!("{crate_name}::{path}")
+                } else {
+                    path
+                };
+                Symbol::intern(&format!("{qualified}::{item_name}"))
+            }
+            None => item_name,
+        }
+    }
+
+    /// The trait's own generic arguments for a trait impl item, excluding the
+    /// leading `Self` argument. Empty for inherent impl items and free items.
+    pub fn erl_trait_args(self, def_id: impl Into<DefId>) -> &'tcx [ty::GenericArg<'tcx>] {
+        let def_id = def_id.into();
+        let Some(impl_def_id) = self.trait_impl_of_assoc(def_id) else {
+            return &[];
+        };
+        let Some(trait_ref) = self.impl_opt_trait_ref(impl_def_id) else {
+            return &[];
+        };
+        let trait_ref = trait_ref.skip_binder();
+        &trait_ref.args[1..]
     }
 
     pub fn is_forced_extern(self, hir_id: HirId) -> bool {

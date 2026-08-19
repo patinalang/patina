@@ -1,8 +1,11 @@
-error: impl for a primitive type not yet implemented
-  --> core.pt:69:13
+error[E0070]: invalid left-hand side of assignment
+  --> tests/ui/src/custom_types/constants__01.pt:19:15
    |
-LL | add_impl! { int float str }
-   |             ^^^
+LL |     THRESHOLD = 5;
+   |     --------- ^
+   |     |
+   |     cannot assign to this expression
 
 error: aborting due to 1 previous error
 
+For more information about this error, try `rustc --explain E0070`.

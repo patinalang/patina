@@ -1,0 +1,86 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/mod/split.md
+// block: 1/4
+
+// This declaration will look for a file named `my_mod.rs` and will
+// insert its contents inside a module named `MyMod` under this scope
+mod MyMod {
+
+
+
+
+
+
+    mod Inaccessible {
+        #[allow(dead_code)]
+        fn public_function() -> int ({ (3 as int) } as int)
+    }
+    mod Nested {
+        fn function() -> int ({ (1 as int) } as int)
+        #[allow(dead_code)]
+        fn private_function() -> int ({ (2 as int) } as int)
+    }
+    fn function() -> int ({ (1 as int) } as int)
+    fn private_function() -> int ({ (2 as int) } as int)
+    fn indirect_access()
+        ->
+            int ({
+        ((private_function as fn() -> int {MyMod::private_function})() as int)
+    } as int)
+}
+fn function() ({
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([("called `function()`" as str)] as
+                        [str; 1])] as [[str; 1]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+} as ())
+fn main() ({
+    ((MyMod::function as fn() -> int {MyMod::function})() as int);
+    ((function as fn() {function})() as ());
+    ((MyMod::indirect_access as fn() -> int {MyMod::indirect_access})() as
+        int);
+    ((MyMod::Nested::function as fn() -> int {MyMod::Nested::function})() as
+        int);
+} as ())
