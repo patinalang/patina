@@ -1169,16 +1169,16 @@ fn lang_item_for_binop(tcx: TyCtxt<'_>, op: Op) -> (Symbol, Option<DefId>) {
     let lang = tcx.lang_items();
     match op {
         Op::AssignOp(op) => match op.node {
-            AssignOpKind::AddAssign => (sym::add_assign, lang.add_assign_trait()),
-            AssignOpKind::SubAssign => (sym::sub_assign, lang.sub_assign_trait()),
-            AssignOpKind::MulAssign => (sym::mul_assign, lang.mul_assign_trait()),
-            AssignOpKind::DivAssign => (sym::div_assign, lang.div_assign_trait()),
-            AssignOpKind::RemAssign => (sym::rem_assign, lang.rem_assign_trait()),
-            AssignOpKind::BitXorAssign => (sym::bitxor_assign, lang.bitxor_assign_trait()),
-            AssignOpKind::BitAndAssign => (sym::bitand_assign, lang.bitand_assign_trait()),
-            AssignOpKind::BitOrAssign => (sym::bitor_assign, lang.bitor_assign_trait()),
-            AssignOpKind::ShlAssign => (sym::shl_assign, lang.shl_assign_trait()),
-            AssignOpKind::ShrAssign => (sym::shr_assign, lang.shr_assign_trait()),
+            AssignOpKind::AddAssign => (sym::add, lang.add_trait()),
+            AssignOpKind::SubAssign => (sym::sub, lang.sub_trait()),
+            AssignOpKind::MulAssign => (sym::mul, lang.mul_trait()),
+            AssignOpKind::DivAssign => (sym::div, lang.div_trait()),
+            AssignOpKind::RemAssign => (sym::rem, lang.rem_trait()),
+            AssignOpKind::BitXorAssign => (sym::bitxor, lang.bitxor_trait()),
+            AssignOpKind::BitAndAssign => (sym::bitand, lang.bitand_trait()),
+            AssignOpKind::BitOrAssign => (sym::bitor, lang.bitor_trait()),
+            AssignOpKind::ShlAssign => (sym::shl, lang.shl_trait()),
+            AssignOpKind::ShrAssign => (sym::shr, lang.shr_trait()),
         },
         Op::BinOp(op) => match op.node {
             BinOpKind::Add => (sym::add, lang.add_trait()),

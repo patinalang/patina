@@ -63,9 +63,6 @@ macro_rules! add_impl {
             type Output = $t;
             fn add(self, other: $t) -> $t { self + other }
         }
-        impl const AddAssign for $t {
-            fn add_assign(&mut self, other: $t) { *self += other; }
-        }
     )*)
 }
 
@@ -87,9 +84,6 @@ macro_rules! mul_impl {
         impl const Mul for $t {
             type Output = $t;
             fn mul(self, other: $t) -> $t { self * other }
-        }
-        impl const MulAssign for $t {
-            fn mul_assign(&mut self, other: $t) { *self *= other; }
         }
     )*)
 }
@@ -113,9 +107,6 @@ macro_rules! sub_impl {
             type Output = $t;
             fn sub(self, other: $t) -> $t { self - other }
         }
-        impl const SubAssign for $t {
-            fn sub_assign(&mut self, other: $t) { *self -= other; }
-        }
     )*)
 }
 
@@ -138,9 +129,6 @@ macro_rules! div_impl {
             type Output = $t;
             fn div(self, other: $t) -> $t { self / other }
         }
-        impl const DivAssign for $t {
-            fn div_assign(&mut self, other: $t) { *self /= other; }
-        }
     )*)
 }
 
@@ -162,9 +150,6 @@ macro_rules! rem_impl {
         impl const Rem for $t {
             type Output = $t;
             fn rem(self, other: $t) -> $t { self % other }
-        }
-        impl const RemAssign for $t {
-            fn rem_assign(&mut self, other: $t) { *self %= other; }
         }
     )*)
 }
@@ -231,9 +216,6 @@ macro_rules! bitand_impl {
             type Output = $t;
             fn bitand(self, other: $t) -> $t { self & other }
         }
-        impl const BitAndAssign for $t {
-            fn bitand_assign(&mut self, other: $t) { *self &= other; }
-        }
     )*)
 }
 
@@ -257,9 +239,6 @@ macro_rules! bitor_impl {
         impl const BitOr for $t {
             type Output = $t;
             fn bitor(self, other: $t) -> $t { self | other }
-        }
-        impl const BitOrAssign for $t {
-            fn bitor_assign(&mut self, other: $t) { *self |= other; }
         }
     )*)
 }
@@ -285,9 +264,6 @@ macro_rules! bitxor_impl {
             type Output = $t;
             fn bitxor(self, other: $t) -> $t { self ^ other }
         }
-        impl const BitXorAssign for $t {
-            fn bitxor_assign(&mut self, other: $t) { *self ^= other; }
-        }
     )*)
 }
 
@@ -311,9 +287,6 @@ macro_rules! shl_impl {
         impl const Shl for $t {
             type Output = $t;
             fn shl(self, other: $t) -> $t { self << other }
-        }
-        impl const ShlAssign for $t {
-            fn shl_assign(&mut self, other: $t) { *self <<= other; }
         }
     )*)
 }
@@ -339,9 +312,6 @@ macro_rules! shr_impl {
             type Output = $t;
             fn shr(self, other: $t) -> $t { self >> other }
         }
-        impl const ShrAssign for $t {
-            fn shr_assign(&mut self, other: $t) { *self >>= other; }
-        }
     )*)
 }
 
@@ -350,10 +320,13 @@ shr_impl! { int }
 #[lang = "eq"]
 pub const trait PartialEq<Rhs = Self> {
     #[must_use]
-    fn eq(&self, other: &Rhs) -> bool;
+    fn eq(self, other: Rhs) -> bool;
 
     #[must_use]
-    fn ne(&self, other: &Rhs) -> bool {
+    fn ne(self, other: Rhs) -> bool
+    where
+        Self: Sized,
+    {
         !self.eq(other)
     }
 }
@@ -361,7 +334,7 @@ pub const trait PartialEq<Rhs = Self> {
 macro_rules! partial_eq_impl {
     ($($t:ty)*) => ($(
         impl const PartialEq for $t {
-            fn eq(&self, other: &$t) -> bool { (*self) == (*other) }
+            fn eq(self, other: $t) -> bool { self == other }
         }
     )*)
 }
@@ -371,22 +344,22 @@ partial_eq_impl! { bool int float str }
 #[lang = "partial_ord"]
 pub const trait PartialOrd<Rhs = Self> {
     #[must_use]
-    fn lt(&self, other: &Rhs) -> bool;
+    fn lt(self, other: Rhs) -> bool;
     #[must_use]
-    fn le(&self, other: &Rhs) -> bool;
+    fn le(self, other: Rhs) -> bool;
     #[must_use]
-    fn gt(&self, other: &Rhs) -> bool;
+    fn gt(self, other: Rhs) -> bool;
     #[must_use]
-    fn ge(&self, other: &Rhs) -> bool;
+    fn ge(self, other: Rhs) -> bool;
 }
 
 macro_rules! partial_ord_impl {
     ($($t:ty)*) => ($(
         impl const PartialOrd for $t {
-            fn lt(&self, other: &$t) -> bool { (*self) < (*other) }
-            fn le(&self, other: &$t) -> bool { (*self) <= (*other) }
-            fn gt(&self, other: &$t) -> bool { (*self) > (*other) }
-            fn ge(&self, other: &$t) -> bool { (*self) >= (*other) }
+            fn lt(self, other: $t) -> bool { self < other }
+            fn le(self, other: $t) -> bool { self <= other }
+            fn gt(self, other: $t) -> bool { self > other }
+            fn ge(self, other: $t) -> bool { self >= other }
         }
     )*)
 }
