@@ -1,60 +1,8 @@
-error: functional map updates are not allowed in destructuring assignments
-  --> tests/ui/src/primitives/errors/analysis_errors.pt:19:9
+error: impl for a primitive type not yet implemented
+  --> core.pt:69:13
    |
-LL |     #{..rest} = map;
-   |         ^^^^ help: consider removing the trailing pattern
+LL | add_impl! { int float str }
+   |             ^^^
 
-error: map patterns must include `..`
-  --> tests/ui/src/primitives/errors/analysis_errors.pt:23:5
-   |
-LL |     #{} = map;
-   |     ^^^
-   |
-   = note: map patterns perform a subset match; use an explicit `map_size` or `==` for equality
-help: consider adding `..` to the pattern
-   |
-LL |     #{ .. } = map;
-   |        ++
+error: aborting due to 1 previous error
 
-error: arbitrary expressions aren't allowed in patterns
-  --> tests/ui/src/primitives/errors/analysis_errors.pt:28:11
-   |
-LL |         #{1 + 1 => value, ..} => value,
-   |           ^^^^^
-
-error[E0308]: mismatched types
-  --> tests/ui/src/primitives/errors/analysis_errors.pt:2:19
-   |
-LL |     #{"a" => 1, ..base}
-   |                   ^^^^ expected `#{str => int}`, found `int`
-   |
-   = note: expected map `#{str => int}`
-             found type `int`
-
-error[E0308]: mismatched types
-  --> tests/ui/src/primitives/errors/analysis_errors.pt:11:17
-   |
-LL |     #{"a" => 1, 2 => 3}
-   |                 ^ expected `str`, found `int`
-
-error[E0308]: mismatched types
-  --> tests/ui/src/primitives/errors/analysis_errors.pt:15:24
-   |
-LL |     #{"a" => 1, "b" => "x"}
-   |                        ^^^ expected `int`, found `str`
-
-error[E0282]: type annotations needed for `#{_ => _}`
-  --> tests/ui/src/primitives/errors/analysis_errors.pt:34:9
-   |
-LL |     let value = #{};
-   |         ^^^^^   --- type must be known at this point
-   |
-help: consider giving `value` an explicit type, where the placeholders `_` are specified
-   |
-LL |     let value: #{_ => _} = #{};
-   |              +++++++++++
-
-error: aborting due to 7 previous errors
-
-Some errors have detailed explanations: E0282, E0308.
-For more information about an error, try `rustc --explain E0282`.

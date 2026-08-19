@@ -1,21 +1,8 @@
-error[E0432]: unresolved import `Std`
-  --> tests/ui/src/trait/ops__01.pt:4:5
+error: impl for a primitive type not yet implemented
+  --> core.pt:69:13
    |
-LL | use Std::Ops;
-   |     ^^^ use of undeclared type `Std`
+LL | add_impl! { int float str }
+   |             ^^^
 
-error: cannot find attribute `derive` in this scope
-  --> tests/ui/src/trait/ops__01.pt:9:3
-   |
-LL | #[derive(Debug)]
-   |   ^^^^^^
+error: aborting due to 1 previous error
 
-error: cannot find attribute `derive` in this scope
-  --> tests/ui/src/trait/ops__01.pt:12:3
-   |
-LL | #[derive(Debug)]
-   |   ^^^^^^
-
-error: aborting due to 3 previous errors
-
-For more information about this error, try `rustc --explain E0432`.

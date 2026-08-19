@@ -1,8 +1,0 @@
-// source: patina-by-example/src/mod/use.md
-// block: 1/2
-
-use pkg::Deeply::Nested::{
-    my_first_function, my_second_function, AndATraitType,
-};
-
-pub fn main() { my_first_function(); }

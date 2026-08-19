@@ -1,64 +1,8 @@
-error: cannot find macro `panic` in this scope
-  --> tests/ui/src/error/option_unwrap__01.pt:20:31
+error: impl for a primitive type not yet implemented
+  --> core.pt:69:13
    |
-LL |     if inside == "lemonade" { panic!("AAAaaaaa!!!!"); }
-   |                               ^^^^^
+LL | add_impl! { int float str }
+   |             ^^^
 
-error[E0425]: cannot find type `Option` in this scope
-  --> tests/ui/src/error/option_unwrap__01.pt:6:22
-   |
-LL | fn give_adult(drink: Option<str>) {
-   |                      ^^^^^^ not found in this scope
+error: aborting due to 1 previous error
 
-error[E0531]: cannot find tuple struct or tuple variant `Some` in this scope
-  --> tests/ui/src/error/option_unwrap__01.pt:9:9
-   |
-LL |         Some("lemonade") => println!("Yuck! Too sugary."),
-   |         ^^^^ not found in this scope
-
-error[E0531]: cannot find tuple struct or tuple variant `Some` in this scope
-  --> tests/ui/src/error/option_unwrap__01.pt:10:9
-   |
-LL |         Some(inner)      => println!("{}? How nice.", inner),
-   |         ^^^^ not found in this scope
-
-error[E0425]: cannot find type `Option` in this scope
-  --> tests/ui/src/error/option_unwrap__01.pt:17:17
-   |
-LL | fn drink(drink: Option<str>) {
-   |                 ^^^^^^ not found in this scope
-
-error[E0425]: cannot find value `None` in this scope
-  --> tests/ui/src/error/option_unwrap__01.pt:28:20
-   |
-LL |     let void     = None;
-   |                    ^^^^ not found in this scope
-
-error[E0425]: cannot find value `None` in this scope
-  --> tests/ui/src/error/option_unwrap__01.pt:35:19
-   |
-LL |     let nothing = None;
-   |                   ^^^^ not found in this scope
-
-error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
-  --> tests/ui/src/error/option_unwrap__01.pt:26:20
-   |
-LL |     let water    = Some("water");
-   |                    ^^^^ not found in this scope
-
-error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
-  --> tests/ui/src/error/option_unwrap__01.pt:27:20
-   |
-LL |     let lemonade = Some("lemonade");
-   |                    ^^^^ not found in this scope
-
-error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
-  --> tests/ui/src/error/option_unwrap__01.pt:34:18
-   |
-LL |     let coffee = Some("coffee");
-   |                  ^^^^ not found in this scope
-
-error: aborting due to 10 previous errors
-
-Some errors have detailed explanations: E0425, E0531.
-For more information about an error, try `rustc --explain E0425`.

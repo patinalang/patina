@@ -1,8 +1,8 @@
-error: expected type, found `1`
-  --> tests/ui/src/flow_control/match/binary_matching__01.pt:5:21
+error: impl for a primitive type not yet implemented
+  --> core.pt:69:13
    |
-LL |     let payload = <<1, 17, 42, 99>>;
-   |                     ^ expected type
+LL | add_impl! { int float str }
+   |             ^^^
 
 error: aborting due to 1 previous error
 

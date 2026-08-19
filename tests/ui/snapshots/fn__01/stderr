@@ -1,8 +1,8 @@
-error: requires `range_inclusive_new` lang_item
-  --> tests/ui/src/fn__01.pt:37:14
+error: impl for a primitive type not yet implemented
+  --> core.pt:69:13
    |
-LL |     for n in 1..=n {
-   |              ^^^^^
+LL | add_impl! { int float str }
+   |             ^^^
 
 error: aborting due to 1 previous error
 

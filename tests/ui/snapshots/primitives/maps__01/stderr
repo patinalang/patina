@@ -1,23 +1,8 @@
-error[E0531]: cannot find tuple struct or tuple variant `Some` in this scope
-  --> tests/ui/src/primitives/maps__01.pt:24:9
+error: impl for a primitive type not yet implemented
+  --> core.pt:69:13
    |
-LL |         Some(number) => println!("Calling Daniel: {}", call(number)),
-   |         ^^^^ not found in this scope
+LL | add_impl! { int float str }
+   |             ^^^
 
-error[E0531]: cannot find tuple struct or tuple variant `Some` in this scope
-  --> tests/ui/src/primitives/maps__01.pt:33:9
-   |
-LL |         Some(number) => println!("Calling Ashley: {}", call(number)),
-   |         ^^^^ not found in this scope
+error: aborting due to 1 previous error
 
-error: requires `None` lang_item
-  --> tests/ui/src/primitives/maps__01.pt:43:5
-   |
-LL | /     for (contact, number) in contacts {
-LL | |         println!("Calling {}: {}", contact, call(number));
-LL | |     }
-   | |_____^
-
-error: aborting due to 3 previous errors
-
-For more information about this error, try `rustc --explain E0531`.

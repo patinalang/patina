@@ -1,73 +1,8 @@
-error[E0425]: cannot find type `Point` in this scope
-  --> tests/ui/src/custom_types/repr__08.pt:7:28
+error: impl for a primitive type not yet implemented
+  --> core.pt:69:13
    |
-LL |     Rectangle{ upper_left: Point, lower_right: Point },
-   |                            ^^^^^ not found in this scope
-   |
-help: there is an enum variant `crate::NativeRecordEnum::Point`; try using the variant's enum
-   |
-LL -     Rectangle{ upper_left: Point, lower_right: Point },
-LL +     Rectangle{ upper_left: crate::NativeRecordEnum, lower_right: Point },
-   |
+LL | add_impl! { int float str }
+   |             ^^^
 
-error[E0425]: cannot find type `Point` in this scope
-  --> tests/ui/src/custom_types/repr__08.pt:7:48
-   |
-LL |     Rectangle{ upper_left: Point, lower_right: Point },
-   |                                                ^^^^^ not found in this scope
-   |
-help: there is an enum variant `crate::NativeRecordEnum::Point`; try using the variant's enum
-   |
-LL -     Rectangle{ upper_left: Point, lower_right: Point },
-LL +     Rectangle{ upper_left: Point, lower_right: crate::NativeRecordEnum },
-   |
+error: aborting due to 1 previous error
 
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__08.pt:4:8
-   |
-LL | #[repr(native_record)]
-   |        ^^^^^^^^^^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
-
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__08.pt:9:12
-   |
-LL |     #[repr(name = "custom_name")]
-   |            ^^^^^^^^^^^^^^^^^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
-
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__08.pt:15:8
-   |
-LL | #[repr(native_record, module = "external_module", name = "custom_name")]
-   |        ^^^^^^^^^^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
-
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__08.pt:15:23
-   |
-LL | #[repr(native_record, module = "external_module", name = "custom_name")]
-   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
-
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__08.pt:15:51
-   |
-LL | #[repr(native_record, module = "external_module", name = "custom_name")]
-   |                                                   ^^^^^^^^^^^^^^^^^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
-
-error: aborting due to 7 previous errors
-
-Some errors have detailed explanations: E0425, E0552.
-For more information about an error, try `rustc --explain E0425`.

@@ -1,25 +1,8 @@
-error: prefix `a` is unknown
-  --> tests/ui/src/primitives/term__01.pt:4:9
+error: impl for a primitive type not yet implemented
+  --> core.pt:69:13
    |
-LL | let v = a"nil" as term;
-   |         ^ unknown prefix
-   |
-   = note: prefixed identifiers and literals are reserved since Rust 2021
-help: consider inserting whitespace here
-   |
-LL | let v = a "nil" as term;
-   |          +
+LL | add_impl! { int float str }
+   |             ^^^
 
-error: expected item, found keyword `let`
-  --> tests/ui/src/primitives/term__01.pt:4:1
-   |
-LL | let v = a"nil" as term;
-   | ^^^
-   | |
-   | `let` cannot be used for global variables
-   | help: consider using `static` or `const` instead of `let`
-   |
-   = note: for a full list of items that can appear in modules, see <https://doc.rust-lang.org/reference/items.html>
-
-error: aborting due to 2 previous errors
+error: aborting due to 1 previous error
 

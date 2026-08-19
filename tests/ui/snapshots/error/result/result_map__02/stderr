@@ -1,46 +1,8 @@
-error[E0433]: cannot find type `Std` in this scope
-  --> tests/ui/src/error/result/result_map__02.pt:4:5
+error: impl for a primitive type not yet implemented
+  --> core.pt:69:13
    |
-LL | use Std::Num::ParseIntError;
-   |     ^^^ use of undeclared type `Std`
+LL | add_impl! { int float str }
+   |             ^^^
 
-error[E0425]: cannot find type `Result` in this scope
-  --> tests/ui/src/error/result/result_map__02.pt:9:63
-   |
-LL | fn multiply(first_number_str: str, second_number_str: str) -> Result<int, ParseIntError> {
-   |                                                               ^^^^^^ not found in this scope
+error: aborting due to 1 previous error
 
-error[E0425]: cannot find type `Result` in this scope
-  --> tests/ui/src/error/result/result_map__02.pt:15:18
-   |
-LL | fn print(result: Result<int, ParseIntError>) {
-   |                  ^^^^^^ not found in this scope
-
-error[E0531]: cannot find tuple struct or tuple variant `Ok` in this scope
-  --> tests/ui/src/error/result/result_map__02.pt:17:9
-   |
-LL |         Ok(n)  => println!("n is {}", n),
-   |         ^^ not found in this scope
-
-error[E0531]: cannot find tuple struct or tuple variant `Err` in this scope
-  --> tests/ui/src/error/result/result_map__02.pt:18:9
-   |
-LL |         Err(e) => println!("Error: {}", e),
-   |         ^^^ not found in this scope
-
-error[E0599]: no method named `parse` found for type `str` in the current scope
-  --> tests/ui/src/error/result/result_map__02.pt:10:22
-   |
-LL |     first_number_str.parse::<int>().and_then(|first_number| {
-   |                      ^^^^^ method not found in `str`
-
-error[E0599]: no method named `parse` found for type `str` in the current scope
-  --> tests/ui/src/error/result/result_map__02.pt:11:27
-   |
-LL |         second_number_str.parse::<int>().map(|second_number| first_number * second_number)
-   |                           ^^^^^ method not found in `str`
-
-error: aborting due to 7 previous errors
-
-Some errors have detailed explanations: E0425, E0433, E0531, E0599.
-For more information about an error, try `rustc --explain E0425`.

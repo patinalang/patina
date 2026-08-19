@@ -1,13 +1,8 @@
-warning: variant `Subtract` is never constructed
-  --> tests/ui/src/custom_types/enum__02.pt:6:5
+error: impl for a primitive type not yet implemented
+  --> core.pt:69:13
    |
-LL | enum VeryVerboseEnumOfThingsToDoWithNumbers {
-   |      -------------------------------------- variant in this enum
-LL |     Add,
-LL |     Subtract,
-   |     ^^^^^^^^
-   |
-   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+LL | add_impl! { int float str }
+   |             ^^^
 
-warning: 1 warning emitted
+error: aborting due to 1 previous error
 

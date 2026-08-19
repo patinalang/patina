@@ -1,63 +1,8 @@
-error: unexpected token: `...`
-  --> tests/ui/src/generics/assoc_items/types__02.pt:6:25
+error: impl for a primitive type not yet implemented
+  --> core.pt:69:13
    |
-LL |     C: Contains<A, B> { ... }
-   |                         ^^^
-   |
-help: use `..` for an exclusive range
-   |
-LL -     C: Contains<A, B> { ... }
-LL +     C: Contains<A, B> { .. }
-   |
-help: or `..=` for an inclusive range
-   |
-LL -     C: Contains<A, B> { ... }
-LL +     C: Contains<A, B> { ..= }
-   |
+LL | add_impl! { int float str }
+   |             ^^^
 
-error[E0586]: inclusive range with no end
-  --> tests/ui/src/generics/assoc_items/types__02.pt:6:25
-   |
-LL |     C: Contains<A, B> { ... }
-   |                         ^^^
-   |
-   = note: inclusive ranges must be bounded at the end (`..=b` or `a..=b`)
-help: use `..` instead
-   |
-LL -     C: Contains<A, B> { ... }
-LL +     C: Contains<A, B> { .. }
-   |
+error: aborting due to 1 previous error
 
-error: unexpected token: `...`
-  --> tests/ui/src/generics/assoc_items/types__02.pt:9:51
-   |
-LL | fn difference<C: Contains>(container: C) -> int { ... }
-   |                                                   ^^^
-   |
-help: use `..` for an exclusive range
-   |
-LL - fn difference<C: Contains>(container: C) -> int { ... }
-LL + fn difference<C: Contains>(container: C) -> int { .. }
-   |
-help: or `..=` for an inclusive range
-   |
-LL - fn difference<C: Contains>(container: C) -> int { ... }
-LL + fn difference<C: Contains>(container: C) -> int { ..= }
-   |
-
-error[E0586]: inclusive range with no end
-  --> tests/ui/src/generics/assoc_items/types__02.pt:9:51
-   |
-LL | fn difference<C: Contains>(container: C) -> int { ... }
-   |                                                   ^^^
-   |
-   = note: inclusive ranges must be bounded at the end (`..=b` or `a..=b`)
-help: use `..` instead
-   |
-LL - fn difference<C: Contains>(container: C) -> int { ... }
-LL + fn difference<C: Contains>(container: C) -> int { .. }
-   |
-
-error: aborting due to 4 previous errors
-
-For more information about this error, try `rustc --explain E0586`.

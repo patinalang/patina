@@ -1,16 +1,8 @@
-error: expected type, found `^`
-  --> tests/ui/src/flow_control/match/binary_matching__05.pt:9:11
+error: impl for a primitive type not yet implemented
+  --> core.pt:69:13
    |
-LL |         <<^png_prefix, rest @ str()>> => println!("png data {:?}", rest),
-   |           ^ expected type
+LL | add_impl! { int float str }
+   |             ^^^
 
-error: expected type, found `119`
-  --> tests/ui/src/flow_control/match/binary_matching__05.pt:16:13
-   |
-LL |     match <<119>> {
-   |     -----   ^^^ expected type
-   |     |
-   |     while parsing this `match` expression
-
-error: aborting due to 2 previous errors
+error: aborting due to 1 previous error
 

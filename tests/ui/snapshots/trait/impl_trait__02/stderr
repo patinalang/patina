@@ -1,15 +1,8 @@
-error[E0433]: cannot find type `Std` in this scope
-  --> tests/ui/src/trait/impl_trait__02.pt:4:33
+error: impl for a primitive type not yet implemented
+  --> core.pt:69:13
    |
-LL | fn parse_csv_document(src: impl Std::Io::BufRead) -> Std::Io::Result<[[str]]> {
-   |                                 ^^^ use of undeclared type `Std`
+LL | add_impl! { int float str }
+   |             ^^^
 
-error[E0433]: cannot find type `Std` in this scope
-  --> tests/ui/src/trait/impl_trait__02.pt:4:54
-   |
-LL | fn parse_csv_document(src: impl Std::Io::BufRead) -> Std::Io::Result<[[str]]> {
-   |                                                      ^^^ use of undeclared type `Std`
+error: aborting due to 1 previous error
 
-error: aborting due to 2 previous errors
-
-For more information about this error, try `rustc --explain E0433`.

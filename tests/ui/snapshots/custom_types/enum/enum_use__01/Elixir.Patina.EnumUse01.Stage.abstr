@@ -1,7 +1,0 @@
-[{attribute,{7,1},file,{"tests/ui/src/custom_types/enum/enum_use__01.pt",7}},
- {attribute,{7,1},module,'Elixir.Patina.EnumUse01.Stage'},
- {attribute,{7,1},compile,[no_auto_import]},
- {attribute,{7,1},export_record,['Beginner','Advanced']},
- {attribute,{7,1},export,[]},
- {attribute,{7,1},native_record,{'Beginner',[]}},
- {attribute,{7,1},native_record,{'Advanced',[]}}]

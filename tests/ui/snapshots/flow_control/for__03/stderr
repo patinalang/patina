@@ -1,13 +1,8 @@
-error: requires `None` lang_item
-  --> tests/ui/src/flow_control/for__03.pt:7:5
+error: impl for a primitive type not yet implemented
+  --> core.pt:69:13
    |
-LL | /     for name in names.iter() {
-LL | |         match name {
-LL | |             "Ferris" => println!("There is a rustacean among us!"),
-LL | |             _ => println!("Hello {}", name),
-LL | |         }
-LL | |     }
-   | |_____^
+LL | add_impl! { int float str }
+   |             ^^^
 
 error: aborting due to 1 previous error
 

@@ -1,8 +1,8 @@
-error: expected pattern, found `^`
-  --> tests/ui/src/flow_control/match__01.pt:36:9
+error: impl for a primitive type not yet implemented
+  --> core.pt:69:13
    |
-LL |         ^expected_value => println!("found expected value")
-   |         ^ expected pattern
+LL | add_impl! { int float str }
+   |             ^^^
 
 error: aborting due to 1 previous error
 

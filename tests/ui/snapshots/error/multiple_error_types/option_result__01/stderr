@@ -1,28 +1,8 @@
-error[E0433]: cannot find type `Std` in this scope
-  --> tests/ui/src/error/multiple_error_types/option_result__01.pt:4:5
+error: impl for a primitive type not yet implemented
+  --> core.pt:69:13
    |
-LL | use Std::Num::ParseIntError;
-   |     ^^^ use of undeclared type `Std`
+LL | add_impl! { int float str }
+   |             ^^^
 
-error[E0425]: cannot find type `Option` in this scope
-  --> tests/ui/src/error/multiple_error_types/option_result__01.pt:6:33
-   |
-LL | fn double_first(list: [str]) -> Option<Result<int, ParseIntError>> {
-   |                                 ^^^^^^ not found in this scope
+error: aborting due to 1 previous error
 
-error[E0425]: cannot find type `Result` in this scope
-  --> tests/ui/src/error/multiple_error_types/option_result__01.pt:6:40
-   |
-LL | fn double_first(list: [str]) -> Option<Result<int, ParseIntError>> {
-   |                                        ^^^^^^ not found in this scope
-
-error[E0599]: no method named `first` found for slice `[str]` in the current scope
-  --> tests/ui/src/error/multiple_error_types/option_result__01.pt:7:10
-   |
-LL |     list.first().map(|first| {
-   |          ^^^^^ method not found in `[str]`
-
-error: aborting due to 4 previous errors
-
-Some errors have detailed explanations: E0425, E0433, E0599.
-For more information about an error, try `rustc --explain E0425`.

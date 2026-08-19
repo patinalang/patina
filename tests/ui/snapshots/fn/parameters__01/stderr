@@ -1,11 +1,8 @@
-warning: [{"tests/ui/src/fn/parameters__01.pt",
-           [{{12,1},erl_lint,{unused_function,{function,1}}},
-            {{19,13},
-             erl_lint,
-             {unexported_function,{'Elixir.Patina.Parameters01',function,1}}},
-            {{22,17},
-             erl_lint,
-             {unexported_function,{'Elixir.Patina.Parameters01',function,1}}}]}]
+error: impl for a primitive type not yet implemented
+  --> core.pt:69:13
+   |
+LL | add_impl! { int float str }
+   |             ^^^
 
-warning: 1 warning emitted
+error: aborting due to 1 previous error
 

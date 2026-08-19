@@ -1,3 +1,0 @@
-const NESTED_BLOCK: #{str => int} = #{"value" => { let value = 1; value }};
-
-pub fn const_value_nested_block() -> #{str => int} { NESTED_BLOCK }

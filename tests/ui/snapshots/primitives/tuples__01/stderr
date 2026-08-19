@@ -1,8 +1,8 @@
-error: cannot find attribute `derive` in this scope
-  --> tests/ui/src/primitives/tuples__01.pt:13:3
+error: impl for a primitive type not yet implemented
+  --> core.pt:69:13
    |
-LL | #[derive(Debug)]
-   |   ^^^^^^
+LL | add_impl! { int float str }
+   |             ^^^
 
 error: aborting due to 1 previous error
 

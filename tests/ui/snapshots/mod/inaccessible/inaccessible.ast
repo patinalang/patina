@@ -1,4 +1,0 @@
-#[allow(dead_code)]
-pub fn public_function() {
-    println!("called `MyMod::Inaccessible::public_function()`");
-}

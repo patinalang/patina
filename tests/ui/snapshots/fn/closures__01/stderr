@@ -1,10 +1,8 @@
-error: expected item, found `|`
-  --> tests/ui/src/fn/closures__01.pt:4:1
+error: impl for a primitive type not yet implemented
+  --> core.pt:69:13
    |
-LL | |val| val + x
-   | ^ expected item
-   |
-   = note: for a full list of items that can appear in modules, see <https://doc.rust-lang.org/reference/items.html>
+LL | add_impl! { int float str }
+   |             ^^^
 
 error: aborting due to 1 previous error
 

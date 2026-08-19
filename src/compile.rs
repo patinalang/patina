@@ -87,11 +87,20 @@ const CORE_SRC: &str = include_str!("core.pt");
 
 fn ensure_core(out_dir: &Path) -> PathBuf {
     let rmeta_path = out_dir.join("libCore.rmeta");
-    if rmeta_path.is_file() {
+    let beam_path = out_dir.join("Elixir.Patina.Core.beam");
+
+    if rmeta_path.is_file() && beam_path.is_file() {
         return rmeta_path;
     }
 
-    compile(&[Stage::Meta], Path::new("core.pt"), CORE_SRC, out_dir, CORE_PACKAGE_NAME, &[]);
+    compile(
+        &[Stage::Meta, Stage::Beam],
+        Path::new("core.pt"),
+        CORE_SRC,
+        out_dir,
+        CORE_PACKAGE_NAME,
+        &[],
+    );
 
     rmeta_path
 }

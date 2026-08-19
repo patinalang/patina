@@ -1,9 +1,0 @@
-[{attribute,{4,1},file,{"tests/ui/src/custom_types/enum__02.pt",4}},
- {attribute,{4,1},
-            module,
-            'Elixir.Patina.Enum02.VeryVerboseEnumOfThingsToDoWithNumbers'},
- {attribute,{4,1},compile,[no_auto_import]},
- {attribute,{4,1},export_record,['Add','Subtract']},
- {attribute,{4,1},export,[]},
- {attribute,{4,1},native_record,{'Add',[]}},
- {attribute,{4,1},native_record,{'Subtract',[]}}]

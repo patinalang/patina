@@ -1,14 +1,8 @@
-error: expected one of `,`, `=`, or `}`, found `#`
-  --> tests/ui/src/custom_types/repr__07.pt:18:5
+error: impl for a primitive type not yet implemented
+  --> core.pt:69:13
    |
-LL |     MaybeUntagged(T)
-   |                     -
-   |                     |
-   |                     expected one of `,`, `=`, or `}`
-   |                     help: missing `,`
-...
-LL |     #[repr(tagged, name = "mytag")]
-   |     ^ unexpected token
+LL | add_impl! { int float str }
+   |             ^^^
 
 error: aborting due to 1 previous error
 

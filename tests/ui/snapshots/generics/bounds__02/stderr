@@ -1,22 +1,8 @@
-error[E0405]: cannot find trait `Display` in this scope
-  --> tests/ui/src/generics/bounds__02.pt:4:13
+error: impl for a primitive type not yet implemented
+  --> core.pt:69:13
    |
-LL | struct S<T: Display>(T);
-   |             ^^^^^^^ not found in this scope
+LL | add_impl! { int float str }
+   |             ^^^
 
-warning: unnecessary parentheses around function argument
-  --> tests/ui/src/generics/bounds__02.pt:9:15
-   |
-LL |     let s = S((1));
-   |               ^ ^
-   |
-   = note: `#[warn(unused_parens)]` (part of `#[warn(unused)]`) on by default
-help: remove these parentheses
-   |
-LL -     let s = S((1));
-LL +     let s = S(1);
-   |
+error: aborting due to 1 previous error
 
-error: aborting due to 1 previous error; 1 warning emitted
-
-For more information about this error, try `rustc --explain E0405`.

@@ -1,50 +1,8 @@
-error: prefix `a` is unknown
-  --> tests/ui/src/flow_control/match/unsafe_match__01.pt:8:9
+error: impl for a primitive type not yet implemented
+  --> core.pt:69:13
    |
-LL |         a"nil" => "the atom nil",
-   |         ^ unknown prefix
-   |
-   = note: prefixed identifiers and literals are reserved since Rust 2021
-help: consider inserting whitespace here
-   |
-LL |         a "nil" => "the atom nil",
-   |          +
+LL | add_impl! { int float str }
+   |             ^^^
 
-error: prefix `a` is unknown
-  --> tests/ui/src/flow_control/match/unsafe_match__01.pt:9:10
-   |
-LL |         (a"some", val) => "some value (tagged?)",
-   |          ^ unknown prefix
-   |
-   = note: prefixed identifiers and literals are reserved since Rust 2021
-help: consider inserting whitespace here
-   |
-LL |         (a "some", val) => "some value (tagged?)",
-   |           +
-
-error: prefix `a` is unknown
-  --> tests/ui/src/flow_control/match/unsafe_match__01.pt:20:13
-   |
-LL |             a"nil" => "the atom nil",
-   |             ^ unknown prefix
-   |
-   = note: prefixed identifiers and literals are reserved since Rust 2021
-help: consider inserting whitespace here
-   |
-LL |             a "nil" => "the atom nil",
-   |              +
-
-error: expected one of `=>`, `@`, `if`, or `|`, found `"nil"`
-  --> tests/ui/src/flow_control/match/unsafe_match__01.pt:8:10
-   |
-LL |         a"nil" => "the atom nil",
-   |          ^^^^^ expected one of `=>`, `@`, `if`, or `|`
-
-error: expected one of `=>`, `@`, `if`, or `|`, found `"nil"`
-  --> tests/ui/src/flow_control/match/unsafe_match__01.pt:20:14
-   |
-LL |             a"nil" => "the atom nil",
-   |              ^^^^^ expected one of `=>`, `@`, `if`, or `|`
-
-error: aborting due to 5 previous errors
+error: aborting due to 1 previous error
 

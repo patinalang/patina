@@ -1,31 +1,8 @@
-error: cannot find attribute `derive` in this scope
-  --> tests/ui/src/trait/derive__01.pt:5:3
+error: impl for a primitive type not yet implemented
+  --> core.pt:69:13
    |
-LL | #[derive(PartialEq, PartialOrd)]
-   |   ^^^^^^
+LL | add_impl! { int float str }
+   |             ^^^
 
-error: cannot find attribute `derive` in this scope
-  --> tests/ui/src/trait/derive__01.pt:9:3
-   |
-LL | #[derive(Debug)]
-   |   ^^^^^^
+error: aborting due to 1 previous error
 
-error[E0369]: binary operation `<` cannot be applied to type `Centimeters`
-  --> tests/ui/src/trait/derive__01.pt:41:34
-   |
-LL |         if foot.to_centimeters() < meter {
-   |            --------------------- ^ ----- Centimeters
-   |            |
-   |            Centimeters
-   |
-note: an implementation of `Core::PartialOrd` might be missing for `Centimeters`
-  --> tests/ui/src/trait/derive__01.pt:6:1
-   |
-LL | struct Centimeters(float);
-   | ^^^^^^^^^^^^^^^^^^ must implement `Core::PartialOrd`
-note: the trait `Core::PartialOrd` must be implemented
-  --> core.pt:345:0
-
-error: aborting due to 3 previous errors
-
-For more information about this error, try `rustc --explain E0369`.

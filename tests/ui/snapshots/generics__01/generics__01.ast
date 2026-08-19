@@ -1,4 +1,0 @@
-// source: patina-by-example/src/generics.md
-// block: 1/2
-
-fn foo<T>(arg: T) { (/*ERROR*/) }

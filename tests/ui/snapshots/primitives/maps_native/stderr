@@ -1,5 +1,8 @@
-warning: [{"tests/ui/src/primitives/maps_native.pt",
-           [{{35,7},v3_core,{map_key_repeated,<<"a">>}}]}]
+error: impl for a primitive type not yet implemented
+  --> core.pt:69:13
+   |
+LL | add_impl! { int float str }
+   |             ^^^
 
-warning: 1 warning emitted
+error: aborting due to 1 previous error
 

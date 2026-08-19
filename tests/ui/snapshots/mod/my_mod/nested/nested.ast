@@ -1,4 +1,0 @@
-pub fn function() -> int { 1 }
-
-#[allow(dead_code)]
-fn private_function() -> int { 2 }
