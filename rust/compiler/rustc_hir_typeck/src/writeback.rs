@@ -161,7 +161,10 @@ impl<'cx, 'tcx> WritebackCx<'cx, 'tcx> {
                 let lhs_ty = self.typeck_results.node_type(lhs.hir_id);
                 let rhs_ty = self.typeck_results.node_type(rhs.hir_id);
 
-                if lhs_ty.is_scalar() && rhs_ty.is_scalar() {
+                let lhs_builtin = lhs_ty.is_scalar() || lhs_ty.is_str();
+                let rhs_builtin = rhs_ty.is_scalar() || rhs_ty.is_str();
+
+                if lhs_builtin && rhs_builtin {
                     self.typeck_results.type_dependent_defs_mut().remove(e.hir_id);
                     self.typeck_results.node_args_mut().remove(e.hir_id);
 
