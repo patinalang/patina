@@ -29,12 +29,12 @@ main() ->
     _age_days@1_0 = 'Elixir.Patina.NewTypes01.Years':to_days(_age@0_0),
     begin
         io:put_chars([[<<"Is an adult? ">>,
-                       io_lib:format("~tp", [is_adult(_age@0_0)])]]),
+                       io_lib:format("~ktp", [is_adult(_age@0_0)])]]),
         io:nl()
     end,
     begin
         io:put_chars([[<<"Is an adult? ">>,
-                       io_lib:format("~tp",
+                       io_lib:format("~ktp",
                                      [is_adult('Elixir.Patina.NewTypes01.Days':to_years(_age_days@1_0))])]]),
         io:nl()
     end.

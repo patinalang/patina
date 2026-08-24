@@ -1,0 +1,20 @@
+struct Point {
+    x: int,
+    y: int,
+}
+
+trait Area {
+    fn area(self)
+    -> int;
+}
+
+impl Area for Point {
+    fn area(self) -> int {
+        println!("Area::area({:?})", self);
+        self.x * self.y
+    }
+}
+
+fn total_area<T: Area>(t: T) -> int { t.area() }
+
+pub fn main() { let p = Point { x: 3, y: 4 }; println!("{}", total_area(p)); }

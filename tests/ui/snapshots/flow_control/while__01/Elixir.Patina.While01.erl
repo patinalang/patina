@@ -47,7 +47,7 @@
                                             end;
                                         false ->
                                             begin
-                                                io:put_chars([[io_lib:format("~tp",
+                                                io:put_chars([[io_lib:format("~ktp",
                                                                              [_n@0_0])]]),
                                                 io:nl()
                                             end

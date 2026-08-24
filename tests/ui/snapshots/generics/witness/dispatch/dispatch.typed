@@ -1,0 +1,81 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+struct Point {
+    x: int,
+    y: int,
+}
+
+trait Area {
+    fn area(self)
+    -> int;
+}
+
+impl Area for Point {
+    fn area(self)
+        ->
+            int ({
+        ({
+            ((io::put_chars as
+                    fn(term) -> term)(([([("Area::area(" as str),
+                                ((patina_fmt::debug as fn(term) -> term)((self as Point)) as
+                                    term), (")" as str)] as [term; 3])] as [[term; 3]; 1])) as
+                term);
+            ((io::nl as fn() -> term)() as term);
+        } as ());
+        (((self as Point).x as int) * ((self as Point).y as int) as int)
+    } as int)
+}
+
+fn total_area<T>(t: T) -> int where
+    T: Area ({ ((t as T).area() as int) } as int)
+
+fn main() ({
+    let p = (Point { x: (3 as int), y: (4 as int) } as Point);
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::display as
+                                    fn(term) -> term)(((total_area as
+                                        fn(Point) -> int {total_area::<Point>})((p as Point)) as
+                                    int)) as term)] as [term; 1])] as [[term; 1]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+} as ())

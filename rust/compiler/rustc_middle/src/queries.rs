@@ -1214,6 +1214,13 @@ rustc_queries! {
         desc { "finding externally called associated functions" }
     }
 
+    /// The Erlang function name of a callable item.
+    ///
+    /// Trait impl items names are mangled with the full trait path, e.g. `Std::Ops::Add::add`.
+    query erl_fn_name(def_id: DefId) -> Symbol {
+        desc { "computing the Erlang function name of `{}`", tcx.def_path_str(def_id) }
+    }
+
     /// Checks for uses of unstable APIs in the module.
     query check_mod_unstable_api_usage(key: LocalModDefId) {
         desc { "checking for unstable API usage in {}", describe_as_module(key, tcx) }

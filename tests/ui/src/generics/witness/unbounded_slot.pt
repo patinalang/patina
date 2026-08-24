@@ -1,0 +1,18 @@
+#![allow(dead_code)]
+
+struct Holder<T> { value: T }
+
+trait Tr {
+    fn method(self);
+}
+
+impl<T> Tr for Holder<T> {
+    fn method(self) { println!("Tr::method({:?})", self); }
+}
+
+fn call<T>(h: Holder<T>) { h.method() }
+
+pub fn main() {
+    let h = Holder { value: 1 };
+    call(h);
+}

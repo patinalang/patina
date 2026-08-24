@@ -28,17 +28,17 @@ main() ->
     _copied_integer@3_0 = _an_integer@0_0,
     begin
         io:put_chars([[<<"An integer: ">>,
-                       io_lib:format("~tp", [_copied_integer@3_0])]]),
+                       io_lib:format("~ktp", [_copied_integer@3_0])]]),
         io:nl()
     end,
     begin
         io:put_chars([[<<"A boolean: ">>,
-                       io_lib:format("~tp", [_a_boolean@1_0])]]),
+                       io_lib:format("~ktp", [_a_boolean@1_0])]]),
         io:nl()
     end,
     begin
         io:put_chars([[<<"Meet the unit value: ">>,
-                       io_lib:format("~tp", [_unit@2_0])]]),
+                       io_lib:format("~ktp", [_unit@2_0])]]),
         io:nl()
     end,
     __unused_variable@4_0 = 3,

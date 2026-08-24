@@ -35,7 +35,7 @@
                     {}
             end,
             begin
-                io:put_chars([[io_lib:format("~tp", [_count@0_1])]]),
+                io:put_chars([[io_lib:format("~ktp", [_count@0_1])]]),
                 io:nl()
             end,
             case _count@0_1 =:= 5 of

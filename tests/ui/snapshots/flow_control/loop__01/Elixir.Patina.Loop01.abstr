@@ -118,7 +118,7 @@
               {call,
                {20,9},
                {remote,{20,9},{atom,{20,9},io_lib},{atom,{20,9},format}},
-               [{string,{20,9},"~tp"},
+               [{string,{20,9},"~ktp"},
                 {cons,{20,9},{var,{20,24},'_count@0_1'},{nil,{20,9}}}]},
               {nil,{20,9}}},
              {nil,{20,9}}}]},

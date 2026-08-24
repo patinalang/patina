@@ -25,11 +25,11 @@ main() ->
     _nanoseconds@0_0 = 5,
     _inches@1_0 = 2,
     begin
-        io:put_chars([[io_lib:format("~tp", [_nanoseconds@0_0]),
+        io:put_chars([[io_lib:format("~ktp", [_nanoseconds@0_0]),
                        <<" nanoseconds + ">>,
-                       io_lib:format("~tp", [_inches@1_0]),
+                       io_lib:format("~ktp", [_inches@1_0]),
                        <<" inches = ">>,
-                       io_lib:format("~tp",
+                       io_lib:format("~ktp",
                                      [_nanoseconds@0_0 + _inches@1_0]),
                        <<" unit?">>]]),
         io:nl()

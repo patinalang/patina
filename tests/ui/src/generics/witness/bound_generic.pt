@@ -1,0 +1,34 @@
+#![allow(dead_code)]
+
+struct Holder<T> { value: T }
+
+struct Number { n: int }
+
+trait Bound {
+    fn b(self) -> int;
+}
+
+impl Bound for Number {
+    fn b(self) -> int {
+        println!("Bound::b({:?})", self);
+        self.n
+    }
+}
+
+trait Tr {
+    fn method(self) -> int;
+}
+
+impl<T: Bound> Tr for Holder<T> {
+    fn method(self) -> int {
+        println!("Tr::method({:?})", self);
+        self.value.b()
+    }
+}
+
+fn call<T: Bound>(h: Holder<T>) -> int { h.method() }
+
+pub fn main() {
+    let h = Holder { value: Number { n: 5 } };
+    println!("{}", call(h));
+}

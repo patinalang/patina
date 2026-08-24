@@ -85,7 +85,7 @@
            {call,
             {2,5},
             {remote,{2,5},{atom,{2,5},io_lib},{atom,{2,5},format}},
-            [{string,{2,5},"~tp"},
+            [{string,{2,5},"~ktp"},
              {cons,{2,5},{var,{2,20},'_value@0_0'},{nil,{2,5}}}]},
            {nil,{2,5}}},
           {nil,{2,5}}}]},

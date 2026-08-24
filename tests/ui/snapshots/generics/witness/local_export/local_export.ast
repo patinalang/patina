@@ -1,0 +1,17 @@
+#![allow(dead_code)]
+
+struct S;
+
+trait Priv {
+    fn p(self);
+}
+
+impl Priv for S {
+    fn p(self) { println!("Priv::p({:?})", self); }
+}
+
+impl S {
+    fn q(self) { self.p() }
+}
+
+pub fn main() { S.q(); }

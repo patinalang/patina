@@ -1,0 +1,110 @@
+#![allow(internal_features)]
+
+
+
+
+
+
+
+
+
+
+#![allow(dead_code)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+#[allow(unused_imports)]
+use Core::*;
+#[allow(unused)]
+extern mod io;
+#[allow(unused)]
+extern mod patina_fmt;
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+struct Holder<T> {
+    value: T,
+}
+
+struct Number {
+    n: int,
+}
+
+trait Bound {
+    fn b(self)
+    -> int;
+}
+
+impl Bound for Number {
+    fn b(self)
+        ->
+            int ({
+        ({
+            ((io::put_chars as
+                    fn(term) -> term)(([([("Bound::b(" as str),
+                                ((patina_fmt::debug as fn(term) -> term)((self as Number))
+                                    as term), (")" as str)] as [term; 3])] as [[term; 3]; 1]))
+                as term);
+            ((io::nl as fn() -> term)() as term);
+        } as ());
+        ((self as Number).n as int)
+    } as int)
+}
+
+trait Tr {
+    fn method(self)
+    -> int;
+}
+
+impl <T> Tr for Holder<T> where T: Bound {
+    fn method(self)
+        ->
+            int ({
+        ({
+            ((io::put_chars as
+                    fn(term) -> term)(([([("Tr::method(" as str),
+                                ((patina_fmt::debug as
+                                        fn(term) -> term)((self as Holder<T>)) as term),
+                                (")" as str)] as [term; 3])] as [[term; 3]; 1])) as term);
+            ((io::nl as fn() -> term)() as term);
+        } as ());
+        (((self as Holder<T>).value as T).b() as int)
+    } as int)
+}
+
+fn call<T>(h: Holder<T>) -> int where
+    T: Bound ({ ((h as Holder<T>).method() as int) } as int)
+
+fn main() ({
+    let h =
+        (Holder { value: (Number { n: (5 as int) } as Number) } as
+            Holder<Number>);
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::display as
+                                    fn(term) -> term)(((call as
+                                        fn(Holder<Number>) -> int {call::<Number>})((h as
+                                        Holder<Number>)) as int)) as term)] as [term; 1])] as
+                [[term; 1]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+} as ())

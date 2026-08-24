@@ -28,7 +28,7 @@ main() ->
         ('Elixir.Patina.ImplArity.GenVal':'__struct__'())#{gen_val :=
                                                                <<"hi">>},
     begin
-        io:put_chars([[io_lib:format("~tp",
+        io:put_chars([[io_lib:format("~ktp",
                                      ['Elixir.Patina.ImplArity.GenVal':value(_a@0_0)]),
                        <<" ">>,
                        'Elixir.Patina.ImplArity.GenVal':value(_b@1_0, 0)]]),

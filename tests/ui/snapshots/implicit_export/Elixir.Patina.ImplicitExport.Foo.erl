@@ -33,5 +33,5 @@ foo() ->
     priv_foo().
 priv_foo() ->
     {}.
-'ImplicitExport::FooTrait::bar'(_witness_self@0_0) ->
+'ImplicitExport::FooTrait::bar'(_Self@0_0) ->
     priv_foo().

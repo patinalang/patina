@@ -9,15 +9,15 @@ use std::path::PathBuf;
 
 use body::{BodyCx, TranslatedBody};
 use rustc_arena::DroplessArena;
-use rustc_data_structures::fx::{FxHashMap, FxHashSet};
+use rustc_data_structures::fx::{FxHashMap, FxHashSet, FxIndexMap};
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::DefKind;
-use rustc_hir::def_id::{LocalDefId, LocalModDefId};
-use rustc_hir::{BodyId, FnSig, Generics, ImplItemKind, ItemKind, Mod, VariantData};
+use rustc_hir::def_id::{DefId, LocalDefId, LocalModDefId};
+use rustc_hir::{BodyId, Defaultness, FnSig, Generics, ImplItemKind, ItemKind, Mod, VariantData};
 use rustc_middle::bug;
-use rustc_middle::erl::ErlModuleId;
-use rustc_middle::ty::TyCtxt;
-use rustc_span::{Ident, Span, Symbol, sym};
+use rustc_middle::erl::{ErlModuleId, ErlModuleResolution};
+use rustc_middle::ty::{self, Ty, TyCtxt};
+use rustc_span::{Ident, Span, Symbol, kw, sym};
 use scopes::Scopes;
 
 use crate::compile::eaf_builder::EafBuilder;
@@ -55,6 +55,11 @@ enum TranslatedConst<'arena> {
     Value(eaf::Expr<'arena>),
 }
 
+enum Witness {
+    Param(ty::ParamTy),
+    ModuleWithSubtypes { module: Symbol, subtypes: Vec<Witness> },
+}
+
 pub(super) struct Translator<'tcx, 'arena> {
     tcx: TyCtxt<'tcx>,
     afb: EafBuilder<'tcx, 'arena>,
@@ -79,13 +84,15 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         owner: LocalDefId,
         parts: &mut ModuleParts<'arena>,
         scopes: &mut Scopes,
+        witness_vars: &FxIndexMap<ty::ParamTy, Symbol>,
     ) -> TranslatedBody<'arena> {
         let (thir, root) =
             self.tcx.thir_body(owner).unwrap_or_else(|guaranteed| guaranteed.raise_fatal());
 
         let thir = thir.borrow();
-        let mut params = self.witness_params(owner, scopes);
-        let mut cx = BodyCx::new(self, owner, &thir, parts, scopes);
+        let mut cx = BodyCx::new(self, owner, &thir, parts, scopes, witness_vars);
+
+        let mut params = SmallVec::new();
 
         for param in thir.params.iter() {
             let Some(_hir_id) = param.hir_id else { continue };
@@ -101,31 +108,6 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         let value = cx.translate_expr(root);
 
         TranslatedBody { params, value }
-    }
-
-    fn witness_params(
-        &self,
-        owner: LocalDefId,
-        scopes: &mut Scopes,
-    ) -> SmallVec<[eaf::Pattern<'arena>; 8]> {
-        let mut params = SmallVec::new();
-
-        if self.tcx.def_kind(owner) != DefKind::AssocFn
-            || self.tcx.trait_item_of(owner.to_def_id()).is_none()
-        {
-            return params;
-        }
-
-        let span = self.tcx.def_span(owner);
-        let witnesses = std::iter::once(sym::witness_self)
-            .chain(self.tcx.erl_trait_args(owner.to_def_id()).iter().map(|_| sym::witness));
-
-        for name in witnesses {
-            let var = scopes.fresh_var(name, true);
-            params.push(self.afb.pat_var(span, var.erl_name));
-        }
-
-        params
     }
 
     pub(super) fn translate_const(
@@ -146,7 +128,8 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         }
 
         self.translated_consts.borrow_mut().insert(def_id, TranslatedConst::Translating);
-        let value = self.translate_body(def_id, parts, &mut Scopes::new()).value;
+        let value =
+            self.translate_body(def_id, parts, &mut Scopes::new(), &FxIndexMap::default()).value;
         self.translated_consts.borrow_mut().insert(def_id, TranslatedConst::Value(value));
         value
     }
@@ -265,17 +248,244 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
     ) {
         let owner = self.tcx.hir_body_owner_def_id(body);
         let mut scope = Scopes::new();
-        let translated = self.translate_body(owner, parts, &mut scope);
+
+        let (mut params, witness_vars) =
+            self.translate_witness_params(def_id, sig.span, &mut scope);
+
+        let translated = self.translate_body(owner, parts, &mut scope, &witness_vars);
+        params.extend(translated.params);
 
         let name = self.tcx.erl_fn_name(def_id);
-        let arity = translated.params.len() as u32;
+        let arity = params.len() as u32;
 
-        let form = self.afb.simple_function(sig.span, name, translated.params, translated.value);
+        let form = self.afb.simple_function(sig.span, name, params, translated.value);
 
         self.push_function(parts, sig.span, form);
         if self.tcx.is_erl_exported_fn(def_id) {
             parts.exports.push((name, arity));
         }
+    }
+
+    /// Returns the witness parameter patterns and their type-parameter variable bindings.
+    fn translate_witness_params(
+        &self,
+        def_id: LocalDefId,
+        span: Span,
+        scopes: &mut Scopes,
+    ) -> (SmallVec<[eaf::Pattern<'arena>; 8]>, FxIndexMap<ty::ParamTy, Symbol>) {
+        let tcx = self.tcx;
+        let def_id = def_id.to_def_id();
+        let afb = &self.afb;
+
+        let mut params = SmallVec::new();
+        let entry_trait = tcx.erl_entry_trait(def_id);
+        let parent_generic_count = tcx.generics_of(def_id).parent_count as u32;
+
+        let witness_vars = tcx
+            .erl_witness_params(def_id)
+            .into_iter()
+            .map(|param| {
+                let name = scopes.fresh_var(param.name, true).erl_name;
+                (param, name)
+            })
+            .collect::<FxIndexMap<_, _>>();
+
+        if let Some(entry_trait) = entry_trait {
+            let impl_def_id = tcx.trait_impl_of_assoc(def_id).unwrap_or_else(|| {
+                bug!("trait entry without a trait impl: {}", tcx.item_name(def_id))
+            });
+
+            // The self_type (self-type) witness, destructured to recover the impl's own generics
+            // that are fixed by the self type.
+            // E.g. `impl<T: Debug> Debug for Vec<T>` binds `T` from `{_, {TMod}}`.
+            let self_ty = tcx.type_of(impl_def_id).instantiate_identity().skip_normalization();
+            let mut self_type_params = FxHashSet::default();
+            let self_witness_pat = self
+                .witness_subtypes_pat(
+                    self_ty,
+                    &witness_vars,
+                    parent_generic_count,
+                    span,
+                    &mut self_type_params,
+                )
+                .unwrap_or_else(|| {
+                    let name = scopes.fresh_var(kw::SelfUpper, true).erl_name;
+                    afb.pat_var(span, name)
+                });
+            params.push(self_witness_pat);
+
+            let trait_generics = tcx.generics_of(entry_trait);
+            let trait_params =
+                trait_generics.own_params.iter().skip(trait_generics.has_self as usize);
+            for (arg, trait_param) in tcx.erl_trait_args(def_id).iter().zip(trait_params) {
+                let arg_ty = arg.expect_ty();
+                match arg_ty.kind() {
+                    // Already recovered from the self-type witness.
+                    // They are still part of the function arity because dynamic callers
+                    // (calling through a trait) can't know beforehand which params are repeated
+                    // on the self-type.
+                    ty::Param(param) if self_type_params.contains(param) => {
+                        params.push(afb.pat_var(span, kw::Underscore));
+                    }
+                    ty::Param(param)
+                        if param.index < parent_generic_count
+                            && let Some(&name) = witness_vars.get(param) =>
+                    {
+                        params.push(afb.pat_var(span, name));
+                    }
+                    ty::Param(_) => {
+                        let name = scopes.fresh_var(trait_param.name, true).erl_name;
+                        params.push(afb.pat_var(span, name));
+                    }
+                    _ => {
+                        let name = scopes.fresh_var(trait_param.name, true).erl_name;
+                        let trait_pat = afb.pat_var(span, name);
+                        let witness_pat =
+                            self.witness_pat(def_id, span, arg_ty, &witness_vars, scopes);
+                        params.push(afb.pat_match(span, trait_pat, witness_pat));
+                    }
+                }
+            }
+        }
+
+        // Witness parameters for the item's own generic parameters that appear in a trait bound.
+        // For trait entries, the impl's generics are recovered from the self-type witness above,
+        // so only the method's own generics take a parameter.
+        for (param, &name) in &witness_vars {
+            if entry_trait.is_some() && param.index < parent_generic_count {
+                continue;
+            }
+            params.push(afb.pat_var(span, name));
+        }
+
+        (params, witness_vars)
+    }
+
+    fn witness_pat(
+        &self,
+        owner: DefId,
+        span: Span,
+        ty: Ty<'tcx>,
+        witness_vars: &FxIndexMap<ty::ParamTy, Symbol>,
+        scopes: &mut Scopes,
+    ) -> eaf::Pattern<'arena> {
+        fn render<'tcx, 'arena>(
+            witness: Witness,
+            afb: &EafBuilder<'tcx, 'arena>,
+            span: Span,
+            witness_vars: &FxIndexMap<ty::ParamTy, Symbol>,
+            scopes: &mut Scopes,
+        ) -> eaf::Pattern<'arena> {
+            match witness {
+                Witness::Param(param) => match witness_vars.get(&param) {
+                    Some(&name) => afb.pat_var(span, name),
+                    None => {
+                        let name = scopes.fresh_var(param.name, true).erl_name;
+                        afb.pat_var(span, name)
+                    }
+                },
+                Witness::ModuleWithSubtypes { module, subtypes } => {
+                    let subtype_pats = subtypes
+                        .into_iter()
+                        .map(|subtype| render(subtype, afb, span, witness_vars, scopes));
+                    let subtypes_pat = afb.pat_tuple(span, subtype_pats);
+                    afb.pat_tuple(span, [afb.pat_atom(span, module), subtypes_pat])
+                }
+            }
+        }
+
+        render(self.build_witness(owner, span, ty), &self.afb, span, witness_vars, scopes)
+    }
+
+    fn build_witness(&self, owner: DefId, span: Span, ty: Ty<'tcx>) -> Witness {
+        if let ty::Param(param_ty) = ty.kind() {
+            return Witness::Param(*param_ty);
+        }
+
+        let module_id = match self.tcx.erl_module_for_type(owner, ty) {
+            Some(ErlModuleResolution::Static(module_id)) => module_id,
+            Some(ErlModuleResolution::Dynamic) => {
+                not_implemented!(self.tcx, span, "witness for a dynamic type", ty)
+            }
+            None => not_implemented!(self.tcx, span, "witness for a type with no module", ty),
+        };
+
+        let mod_name = self.modules.module_name(module_id);
+        let subtypes = self
+            .tcx
+            .subtypes_of(ty)
+            .into_iter()
+            .map(|subty| self.build_witness(owner, span, subty))
+            .collect();
+
+        Witness::ModuleWithSubtypes { module: mod_name, subtypes }
+    }
+
+    /// The pattern for a single witness subtype slot, or `None` when the slot binds nothing
+    /// and should be a wildcard.
+    /// `self_type_params` gathers the generic parameters that are fixed by the self type.
+    fn witness_self_type_subtype_pat(
+        &self,
+        ty: Ty<'tcx>,
+        witness_vars: &FxIndexMap<ty::ParamTy, Symbol>,
+        parent_generic_count: u32,
+        span: Span,
+        self_type_params: &mut FxHashSet<ty::ParamTy>,
+    ) -> Option<eaf::Pattern<'arena>> {
+        match ty.kind() {
+            ty::Param(param)
+                if param.index < parent_generic_count
+                    && let Some(&name) = witness_vars.get(param) =>
+            {
+                self_type_params.insert(*param);
+                Some(self.afb.pat_var(span, name))
+            }
+            ty::Param(_) => None,
+            _ => self.witness_subtypes_pat(
+                ty,
+                witness_vars,
+                parent_generic_count,
+                span,
+                self_type_params,
+            ),
+        }
+    }
+
+    /// The witness pattern `{_, {..subtype pats}}` for `ty`, binding every generic fixed by `ty`
+    /// that needs a witness. `None` when no subtype binds anything, in which case the whole
+    /// witness can be ignored.
+    fn witness_subtypes_pat(
+        &self,
+        ty: Ty<'tcx>,
+        witness_vars: &FxIndexMap<ty::ParamTy, Symbol>,
+        parent_generic_count: u32,
+        span: Span,
+        self_type_params: &mut FxHashSet<ty::ParamTy>,
+    ) -> Option<eaf::Pattern<'arena>> {
+        let afb = &self.afb;
+
+        let mut has_any_subtype_pat = false;
+
+        let subtype_pats = self
+            .tcx
+            .subtypes_of(ty)
+            .into_iter()
+            .map(|subty| {
+                self.witness_self_type_subtype_pat(
+                    subty,
+                    witness_vars,
+                    parent_generic_count,
+                    span,
+                    self_type_params,
+                )
+            })
+            .inspect(|pat| has_any_subtype_pat |= pat.is_some())
+            .map(|pat| pat.unwrap_or_else(|| afb.pat_var(span, kw::Underscore)));
+
+        let subtype_tuple_pat = afb.pat_tuple(span, subtype_pats);
+
+        has_any_subtype_pat
+            .then(|| afb.pat_tuple(span, [afb.pat_var(span, kw::Underscore), subtype_tuple_pat]))
     }
 
     fn collect_module_fns(&self, module: &Mod<'tcx>) -> ModuleParts<'arena> {
@@ -374,6 +584,10 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 );
             }
 
+            if self.tcx.impl_opt_trait_id(*impl_def_id).is_some() {
+                self.check_trait_default_methods(*impl_def_id, imp.self_ty.span);
+            }
+
             for impl_item_id in imp.items {
                 let impl_item = self.tcx.hir_impl_item(*impl_item_id);
                 let ImplItemKind::Fn(sig, body) = impl_item.kind else {
@@ -388,6 +602,34 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                     body,
                     parts,
                 );
+            }
+        }
+    }
+
+    /// Rejects trait impls that omit a method with a default body, since default
+    /// method bodies are not implemented yet (see `handoff.md`).
+    fn check_trait_default_methods(&self, impl_def_id: DefId, span: Span) {
+        let tcx = self.tcx;
+        let Some(trait_def_id) = tcx.impl_opt_trait_id(impl_def_id) else {
+            return;
+        };
+
+        let impl_items = tcx.associated_items(impl_def_id);
+
+        for trait_item in tcx.associated_items(trait_def_id).in_definition_order() {
+            if !matches!(trait_item.kind, ty::AssocKind::Fn { .. }) {
+                continue;
+            }
+            if !matches!(trait_item.defaultness(tcx), Defaultness::Default { has_value: true }) {
+                continue;
+            }
+
+            let provided = impl_items
+                .in_definition_order()
+                .any(|item| item.trait_item_def_id() == Some(trait_item.def_id));
+
+            if !provided {
+                not_implemented!(tcx, span, "default trait method body", trait_item.def_id);
             }
         }
     }

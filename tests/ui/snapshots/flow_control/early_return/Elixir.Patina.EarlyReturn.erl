@@ -32,7 +32,7 @@
     module_info(Key).
 mark(_value@0_0) ->
     begin
-        io:put_chars([[io_lib:format("~tp", [_value@0_0])]]),
+        io:put_chars([[io_lib:format("~ktp", [_value@0_0])]]),
         io:nl()
     end,
     _value@0_0.

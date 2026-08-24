@@ -30,7 +30,7 @@ main() ->
                                                            age :=
                                                                _age@1_0},
     begin
-        io:put_chars([[io_lib:format("~tp", [_peter@2_0])]]),
+        io:put_chars([[io_lib:format("~ktp", [_peter@2_0])]]),
         io:nl()
     end,
     _point@3_0 =
@@ -41,19 +41,19 @@ main() ->
                                                           y := 0.2},
     begin
         io:put_chars([[<<"point coordinates: (">>,
-                       io_lib:format("~tp", [map_get(x, _point@3_0)]),
+                       io_lib:format("~ktp", [map_get(x, _point@3_0)]),
                        <<", ">>,
-                       io_lib:format("~tp", [map_get(y, _point@3_0)]),
+                       io_lib:format("~ktp", [map_get(y, _point@3_0)]),
                        <<")">>]]),
         io:nl()
     end,
     _bottom_right@5_0 = _another_point@4_0#{x := 10.3},
     begin
         io:put_chars([[<<"second point: (">>,
-                       io_lib:format("~tp",
+                       io_lib:format("~ktp",
                                      [map_get(x, _bottom_right@5_0)]),
                        <<", ">>,
-                       io_lib:format("~tp",
+                       io_lib:format("~ktp",
                                      [map_get(y, _bottom_right@5_0)]),
                        <<")">>]]),
         io:nl()
@@ -76,9 +76,9 @@ main() ->
                                                          '1' := 0.1},
     begin
         io:put_chars([[<<"pair contains ">>,
-                       io_lib:format("~tp", [map_get('0', _pair@10_0)]),
+                       io_lib:format("~ktp", [map_get('0', _pair@10_0)]),
                        <<" and ">>,
-                       io_lib:format("~tp", [map_get('1', _pair@10_0)])]]),
+                       io_lib:format("~ktp", [map_get('1', _pair@10_0)])]]),
         io:nl()
     end,
     #{'__struct__' := 'Elixir.Patina.Structs01.Pair',
@@ -87,8 +87,8 @@ main() ->
         _pair@10_0,
     begin
         io:put_chars([[<<"pair contains ">>,
-                       io_lib:format("~tp", [_integer@11_0]),
+                       io_lib:format("~ktp", [_integer@11_0]),
                        <<" and ">>,
-                       io_lib:format("~tp", [_decimal@12_0])]]),
+                       io_lib:format("~ktp", [_decimal@12_0])]]),
         io:nl()
     end.

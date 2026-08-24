@@ -23,22 +23,22 @@
     module_info(Key).
 main() ->
     begin
-        io:put_chars([[io_lib:format("~tp", [<<"1 + 1 == 2">>]),
+        io:put_chars([[io_lib:format("~ktp", [<<"1 + 1 == 2">>]),
                        <<" and ">>,
-                       io_lib:format("~tp", [<<"2 * 2 == 4">>]),
+                       io_lib:format("~ktp", [<<"2 * 2 == 4">>]),
                        <<" is ">>,
-                       io_lib:format("~tp",
+                       io_lib:format("~ktp",
                                      [1 + 1 =:= 2
                                       andalso
                                       2 * 2 =:= 4])]]),
         io:nl()
     end,
     begin
-        io:put_chars([[io_lib:format("~tp", [<<"true">>]),
+        io:put_chars([[io_lib:format("~ktp", [<<"true">>]),
                        <<" or ">>,
-                       io_lib:format("~tp", [<<"false">>]),
+                       io_lib:format("~ktp", [<<"false">>]),
                        <<" is ">>,
-                       io_lib:format("~tp",
+                       io_lib:format("~ktp",
                                      [true
                                       orelse
                                       false])]]),

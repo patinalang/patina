@@ -155,7 +155,8 @@ symbols! {
     // nice to have.
     Symbols {
         // tidy-alphabetical-start
-        s_patina_marker: "$patina_marker",
+        dollar_patina_marker: "$patina_marker",
+        dollar_patina_unbounded_type: "$patina_unbounded_type",
         __info__,
         __struct__,
         Abi,
@@ -769,7 +770,7 @@ symbols! {
         debug_assert_macro,
         debug_assert_ne_macro,
         debug_assertions,
-        debug_format_str: "~tp",
+        debug_format_str: "~ktp",
         debug_struct_fields_finish,
         debug_tuple_fields_finish,
         debugger_visualizer,
@@ -869,6 +870,7 @@ symbols! {
         eii_declaration,
         eii_internals,
         eii_shared_macro,
+        element,
         element_ty,
         elf,
         // Notes about `sym::empty`:

@@ -36,9 +36,9 @@ main() ->
           x := {1, _b@1_0},
           y := _y@2_0} ->
             io:put_chars([[<<"First of x is 1, b = ">>,
-                           io_lib:format("~tp", [_b@1_0]),
+                           io_lib:format("~ktp", [_b@1_0]),
                            <<",  y = ">>,
-                           io_lib:format("~tp", [_y@2_0]),
+                           io_lib:format("~ktp", [_y@2_0]),
                            <<" ">>]]),
             io:nl();
         #{'__struct__' :=
@@ -46,13 +46,13 @@ main() ->
           y := 2,
           x := _i@3_0} ->
             io:put_chars([[<<"y is 2, i = ">>,
-                           io_lib:format("~tp", [_i@3_0])]]),
+                           io_lib:format("~ktp", [_i@3_0])]]),
             io:nl();
         #{'__struct__' :=
               'Elixir.Patina.DestructureStructures01.main.Foo',
           y := _y@4_0} ->
             io:put_chars([[<<"y = ">>,
-                           io_lib:format("~tp", [_y@4_0]),
+                           io_lib:format("~ktp", [_y@4_0]),
                            <<", we don't care about x">>]]),
             io:nl()
     end,
@@ -68,9 +68,9 @@ main() ->
         _faa@5_0,
     begin
         io:put_chars([[<<"Outside: x0 = ">>,
-                       io_lib:format("~tp", [_x0@6_0]),
+                       io_lib:format("~ktp", [_x0@6_0]),
                        <<", y0 = ">>,
-                       io_lib:format("~tp", [_y0@7_0])]]),
+                       io_lib:format("~ktp", [_y0@7_0])]]),
         io:nl()
     end,
     _bar@8_0 =
@@ -85,8 +85,8 @@ main() ->
         _bar@8_0,
     begin
         io:put_chars([[<<"Nested: nested_x = ">>,
-                       io_lib:format("~tp", [_nested_x@9_0]),
+                       io_lib:format("~ktp", [_nested_x@9_0]),
                        <<", nested_y = ">>,
-                       io_lib:format("~tp", [_nested_y@10_0])]]),
+                       io_lib:format("~ktp", [_nested_y@10_0])]]),
         io:nl()
     end.

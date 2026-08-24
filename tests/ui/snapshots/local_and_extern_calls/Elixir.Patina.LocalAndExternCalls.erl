@@ -34,6 +34,6 @@ main() ->
     _ = priv_main(),
     _s@0_0 = 'Elixir.Patina.LocalAndExternCalls.StructWithNew':new(42),
     begin
-        io:put_chars([[io_lib:format("~tp", [map_get(value, _s@0_0)])]]),
+        io:put_chars([[io_lib:format("~ktp", [map_get(value, _s@0_0)])]]),
         io:nl()
     end.

@@ -132,7 +132,7 @@
            {call,
             {70,5},
             {remote,{70,5},{atom,{70,5},io_lib},{atom,{70,5},format}},
-            [{string,{70,5},"~tp"},
+            [{string,{70,5},"~ktp"},
              {cons,
               {70,5},
               {call,

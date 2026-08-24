@@ -26,7 +26,8 @@ main() ->
     begin
         begin
             io:put_chars([[<<"before being shadowed: ">>,
-                           io_lib:format("~tp", [_shadowed_binding@0_0])]]),
+                           io_lib:format("~ktp",
+                                         [_shadowed_binding@0_0])]]),
             io:nl()
         end,
         _shadowed_binding@1_0 = <<"abc">>,
@@ -38,12 +39,12 @@ main() ->
     end,
     begin
         io:put_chars([[<<"outside inner block: ">>,
-                       io_lib:format("~tp", [_shadowed_binding@0_0])]]),
+                       io_lib:format("~ktp", [_shadowed_binding@0_0])]]),
         io:nl()
     end,
     _shadowed_binding@2_0 = 2,
     begin
         io:put_chars([[<<"shadowed in outer block: ">>,
-                       io_lib:format("~tp", [_shadowed_binding@2_0])]]),
+                       io_lib:format("~ktp", [_shadowed_binding@2_0])]]),
         io:nl()
     end.

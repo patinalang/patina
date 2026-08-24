@@ -28,12 +28,12 @@ main() ->
     end,
     begin
         io:put_chars([[<<"a binding: ">>,
-                       io_lib:format("~tp", [_a_binding@0_1])]]),
+                       io_lib:format("~ktp", [_a_binding@0_1])]]),
         io:nl()
     end,
     _another_binding@2_1 = 1,
     begin
         io:put_chars([[<<"another binding: ">>,
-                       io_lib:format("~tp", [_another_binding@2_1])]]),
+                       io_lib:format("~ktp", [_another_binding@2_1])]]),
         io:nl()
     end.

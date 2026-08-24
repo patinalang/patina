@@ -1,0 +1,170 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+struct UnboundContainer;
+struct BoundContainer;
+struct NestedContainer;
+struct Marked {
+    value: int,
+}
+struct Wrapped<T> {
+    value: T,
+}
+
+trait Marker {
+    fn value(self)
+    -> int;
+}
+
+impl Marker for Marked {
+    fn value(self)
+        ->
+            int ({
+        ({
+            ((io::put_chars as
+                    fn(term) -> term)(([([("Marker::value(" as str),
+                                ((patina_fmt::debug as fn(term) -> term)((self as Marked))
+                                    as term), (")" as str)] as [term; 3])] as [[term; 3]; 1]))
+                as term);
+            ((io::nl as fn() -> term)() as term);
+        } as ());
+        ((self as Marked).value as int)
+    } as int)
+}
+
+trait Contains<A, B> {
+    fn contains(self, _: A, _: B)
+    -> bool;
+}
+
+impl <T> Contains<int, T> for UnboundContainer {
+    fn contains(self, a: int, b: T)
+        ->
+            bool ({
+        ({
+            ((io::put_chars as
+                    fn(term) -> term)(([([("UnboundContainer::contains(" as
+                                    str),
+                                ((patina_fmt::debug as
+                                        fn(term) -> term)((self as UnboundContainer)) as term),
+                                (", " as str),
+                                ((patina_fmt::debug as fn(term) -> term)((a as int)) as
+                                    term), (", " as str),
+                                ((patina_fmt::debug as fn(term) -> term)((b as T)) as term),
+                                (")" as str)] as [term; 7])] as [[term; 7]; 1])) as term);
+            ((io::nl as fn() -> term)() as term);
+        } as ());
+        (true as bool)
+    } as bool)
+}
+
+impl <T> Contains<int, T> for BoundContainer where T: Marker {
+    fn contains(self, a: int, value: T)
+        ->
+            bool ({
+        ({
+            ((io::put_chars as
+                    fn(term) -> term)(([([("BoundContainer::contains(" as str),
+                                ((patina_fmt::debug as
+                                        fn(term) -> term)((self as BoundContainer)) as term),
+                                (", " as str),
+                                ((patina_fmt::debug as fn(term) -> term)((a as int)) as
+                                    term), (", " as str),
+                                ((patina_fmt::debug as fn(term) -> term)((value as T)) as
+                                    term), (")" as str)] as [term; 7])] as [[term; 7]; 1])) as
+                term);
+            ((io::nl as fn() -> term)() as term);
+        } as ());
+        (((value as T).value() as int) > (0 as int) as bool)
+    } as bool)
+}
+
+impl <T> Contains<int, Wrapped<T>> for NestedContainer {
+    fn contains(self, a: int, wrapped: Wrapped<T>)
+        ->
+            bool ({
+        ({
+            ((io::put_chars as
+                    fn(term) -> term)(([([("NestedContainer::contains(" as str),
+                                ((patina_fmt::debug as
+                                        fn(term) -> term)((self as NestedContainer)) as term),
+                                (", " as str),
+                                ((patina_fmt::debug as fn(term) -> term)((a as int)) as
+                                    term), (", " as str),
+                                ((patina_fmt::debug as
+                                        fn(term) -> term)((wrapped as Wrapped<T>)) as term),
+                                (")" as str)] as [term; 7])] as [[term; 7]; 1])) as term);
+            ((io::nl as fn() -> term)() as term);
+        } as ());
+        (true as bool)
+    } as bool)
+}
+
+fn main() ({
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::display as
+                                    fn(term) -> term)(((UnboundContainer as
+                                        UnboundContainer).contains((1 as int), (false as bool)) as
+                                    bool)) as term)] as [term; 1])] as [[term; 1]; 1])) as
+            term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::display as
+                                    fn(term) -> term)(((BoundContainer as
+                                        BoundContainer).contains((1 as int),
+                                    (Marked { value: (2 as int) } as Marked)) as bool)) as
+                                term)] as [term; 1])] as [[term; 1]; 1])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::display as
+                                    fn(term) -> term)(((NestedContainer as
+                                        NestedContainer).contains((1 as int),
+                                    (Wrapped { value: (false as bool) } as Wrapped<bool>)) as
+                                    bool)) as term)] as [term; 1])] as [[term; 1]; 1])) as
+            term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+} as ())

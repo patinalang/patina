@@ -21,19 +21,25 @@
     [];
 '__info__'(Key) ->
     module_info(Key).
-red(_) ->
+red(_T@0_0, _) ->
     <<"red">>.
-blue(_) ->
+blue(_T@0_0, _) ->
     <<"blue">>.
 main() ->
     _cardinal@0_0 = 'Elixir.Patina.TestcaseEmpty01.Cardinal',
     _blue_jay@1_0 = 'Elixir.Patina.TestcaseEmpty01.BlueJay',
     __turkey@2_0 = 'Elixir.Patina.TestcaseEmpty01.Turkey',
     begin
-        io:put_chars([[<<"A cardinal is ">>, red(_cardinal@0_0)]]),
+        io:put_chars([[<<"A cardinal is ">>,
+                       red({'Elixir.Patina.TestcaseEmpty01.Cardinal',
+                            {}},
+                           _cardinal@0_0)]]),
         io:nl()
     end,
     begin
-        io:put_chars([[<<"A blue jay is ">>, blue(_blue_jay@1_0)]]),
+        io:put_chars([[<<"A blue jay is ">>,
+                       blue({'Elixir.Patina.TestcaseEmpty01.BlueJay',
+                             {}},
+                            _blue_jay@1_0)]]),
         io:nl()
     end.

@@ -31,7 +31,7 @@ inspect(_event@0_0) ->
             io:nl();
         #'Elixir.Patina.Enum01.WebEvent':'KeyPress'{'0' = _c@1_0} ->
             io:put_chars([[<<"pressed '">>,
-                           io_lib:format("~tp", [_c@1_0]),
+                           io_lib:format("~ktp", [_c@1_0]),
                            <<"'.">>]]),
             io:nl();
         #'Elixir.Patina.Enum01.WebEvent':'Paste'{'0' = _s@2_0} ->
@@ -40,9 +40,9 @@ inspect(_event@0_0) ->
         #'Elixir.Patina.Enum01.WebEvent':'Click'{x = _x@3_0, y = _y@4_0} ->
             begin
                 io:put_chars([[<<"clicked at x=">>,
-                               io_lib:format("~tp", [_x@3_0]),
+                               io_lib:format("~ktp", [_x@3_0]),
                                <<", y=">>,
-                               io_lib:format("~tp", [_y@4_0]),
+                               io_lib:format("~ktp", [_y@4_0]),
                                <<".">>]]),
                 io:nl()
             end

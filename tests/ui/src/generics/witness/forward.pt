@@ -1,0 +1,17 @@
+trait Tr {
+    fn method(self);
+}
+
+struct S;
+
+impl Tr for S {
+    fn method(self) { println!("Tr::method({:?})", self); }
+}
+
+fn b<T: Tr>(x: T) { x.method() }
+
+fn a<T: Tr>(x: T) { b(x) }
+
+pub fn main() {
+    a(S);
+}

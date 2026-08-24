@@ -1,0 +1,3 @@
+fn compare<T: PartialEq>(a: T, b: T) -> bool { a == b }
+
+pub fn main() { println!("{}", compare(1, 1)); }

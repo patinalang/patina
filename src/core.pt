@@ -323,18 +323,14 @@ pub const trait PartialEq<Rhs = Self> {
     fn eq(self, other: Rhs) -> bool;
 
     #[must_use]
-    fn ne(self, other: Rhs) -> bool
-    where
-        Self: Sized,
-    {
-        !self.eq(other)
-    }
+    fn ne(self, other: Rhs) -> bool;
 }
 
 macro_rules! partial_eq_impl {
     ($($t:ty)*) => ($(
         impl const PartialEq for $t {
             fn eq(self, other: $t) -> bool { self == other }
+            fn ne(self, other: $t) -> bool { self != other }
         }
     )*)
 }

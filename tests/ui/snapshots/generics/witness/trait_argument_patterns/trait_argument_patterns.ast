@@ -1,0 +1,55 @@
+struct UnboundContainer;
+struct BoundContainer;
+struct NestedContainer;
+struct Marked {
+    value: int,
+}
+struct Wrapped<T> {
+    value: T,
+}
+
+trait Marker {
+    fn value(self)
+    -> int;
+}
+
+impl Marker for Marked {
+    fn value(self) -> int {
+        println!("Marker::value({:?})", self);
+        self.value
+    }
+}
+
+trait Contains<A, B> {
+    fn contains(self, _: A, _: B)
+    -> bool;
+}
+
+impl<T> Contains<int, T> for UnboundContainer {
+    fn contains(self, a: int, b: T) -> bool {
+        println!("UnboundContainer::contains({:?}, {:?}, {:?})", self, a, b);
+        true
+    }
+}
+
+impl<T: Marker> Contains<int, T> for BoundContainer {
+    fn contains(self, a: int, value: T) -> bool {
+        println!("BoundContainer::contains({:?}, {:?}, {:?})", self, a,
+        value);
+        value.value() > 0
+    }
+}
+
+impl<T> Contains<int, Wrapped<T>> for NestedContainer {
+    fn contains(self, a: int, wrapped: Wrapped<T>) -> bool {
+        println!("NestedContainer::contains({:?}, {:?}, {:?})", self, a,
+        wrapped);
+        true
+    }
+}
+
+pub fn main() {
+    println!("{}", UnboundContainer.contains(1, false));
+    println!("{}", BoundContainer.contains(1, Marked { value: 2 }));
+    println!("{}", NestedContainer.contains(1, Wrapped { value: false }));
+}

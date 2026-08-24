@@ -26,10 +26,10 @@ main() ->
     _y@1_0 =
         ('Elixir.Patina.Impl02.GenVal':'__struct__'())#{gen_val := 42},
     begin
-        io:put_chars([[io_lib:format("~tp",
+        io:put_chars([[io_lib:format("~ktp",
                                      ['Elixir.Patina.Impl02.Val':value(_x@0_0)]),
                        <<", ">>,
-                       io_lib:format("~tp",
+                       io_lib:format("~ktp",
                                      ['Elixir.Patina.Impl02.GenVal':value(_y@1_0)])]]),
         io:nl()
     end.

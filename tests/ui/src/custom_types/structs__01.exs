@@ -6,8 +6,8 @@ defmodule Structs01Test do
 
   test "main debug-prints Person struct" do
     assert capture_io(fn -> Patina.Structs01.main() end) =~ ~S"""
-           #{name => <<"Peter">>,'__struct__' => 'Elixir.Patina.Structs01.Person',
-             age => 27}
+           #{'__struct__' => 'Elixir.Patina.Structs01.Person',age => 27,
+             name => <<"Peter">>}
            """
   end
 

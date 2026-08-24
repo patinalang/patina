@@ -17,7 +17,7 @@ use rustc_span::{Span, Symbol, kw, sym};
 
 use crate::compile::translate::loops::Loops;
 use crate::compile::translate::scopes::{PatinaVar, Scope, Scopes};
-use crate::compile::translate::{ModuleParts, Translator};
+use crate::compile::translate::{ModuleParts, Translator, Witness};
 use crate::erlang::abstract_format as eaf;
 use crate::{not_implemented, span_fatal};
 
@@ -42,6 +42,7 @@ pub(super) struct BodyCx<'a, 'tcx, 'arena> {
     pub parts: &'a mut ModuleParts<'arena>,
     pub scopes: &'a mut Scopes,
     pub loops: Loops,
+    pub witness_vars: &'a FxIndexMap<ty::ParamTy, Symbol>,
 }
 
 impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
@@ -51,8 +52,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         thir: &'a thir::Thir<'tcx>,
         parts: &'a mut ModuleParts<'arena>,
         scopes: &'a mut Scopes,
+        witness_vars: &'a FxIndexMap<ty::ParamTy, Symbol>,
     ) -> Self {
-        BodyCx { translator, owner, thir, parts, scopes, loops: Loops::new() }
+        BodyCx { translator, owner, thir, parts, scopes, witness_vars, loops: Loops::new() }
     }
 
     pub(super) fn tcx(&self) -> TyCtxt<'tcx> {
@@ -459,7 +461,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let afb = &self.translator.afb;
         afb.expr_remote_call(
             span,
-            afb.expr_atom(span, sym::s_patina_marker),
+            afb.expr_atom(span, sym::dollar_patina_marker),
             afb.expr_atom(span, name),
             args,
         )
@@ -483,7 +485,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             }
 
             let erl_call_target = self.tcx().erl_call_target_for_def(*callee_def_id, generic_args);
-            (erl_call_target, afb.expr_atom(span, self.tcx().item_name(*callee_def_id)))
+            (erl_call_target, afb.expr_atom(span, self.tcx().erl_fn_name(*callee_def_id)))
         } else if let ExprKind::ExternMod { def_id } = &self.resolve_expr(fun).kind {
             let erl_call_target =
                 self.tcx().erl_call_target_for_def(*def_id, ty::GenericArgs::empty());
@@ -492,18 +494,18 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             (ErlCallTarget::Dynamic, self.translate_expr(fun))
         };
 
+        let mut arg_exprs = self.call_witness_exprs(span, erl_call_target);
+        arg_exprs.extend(args.iter().map(|&id| self.translate_expr(id)));
+
         let Some(call_kind) =
             self.tcx().erl_call_kind(self.owner.to_def_id(), erl_call_target, Some(forced_extern))
         else {
-            let receiver =
-                self.tcx().erl_call_target_self_ty(erl_call_target).unwrap_or_else(|| {
-                    span_bug!(span, "dispatch through a type parameter must have a receiver")
-                });
-            not_implemented!(self.tcx(), span, "dispatch through a type parameter", receiver)
+            return self.translate_call_via_dispatch_through_type_parameter(
+                span,
+                erl_call_target,
+                arg_exprs,
+            );
         };
-
-        let arg_exprs: SmallVec<[eaf::Expr<'arena>; 8]> =
-            args.iter().map(|&id| self.translate_expr(id)).collect();
 
         if matches!(call_kind, ErlCallKind::Local | ErlCallKind::Dynamic) {
             return afb.expr_local_call(span, callee_expr, arg_exprs);
@@ -531,6 +533,72 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let mod_expr = afb.expr_atom(span, mod_name);
 
         afb.expr_remote_call(span, mod_expr, callee_expr, arg_exprs)
+    }
+
+    fn translate_call_via_dispatch_through_type_parameter(
+        &mut self,
+        span: Span,
+        erl_call_target: ErlCallTarget<'tcx>,
+        arg_exprs: SmallVec<[eaf::Expr<'arena>; 8]>,
+    ) -> eaf::Expr<'arena> {
+        let afb = &self.translator.afb;
+
+        let ErlCallTarget::Item { def_id, .. } = erl_call_target else {
+            span_bug!(span, "dispatch through a type parameter must have an item target");
+        };
+
+        let self_witness = arg_exprs
+            .first()
+            .unwrap_or_else(|| span_bug!(span, "dispatch must have a receiver witness"));
+
+        let element_call = afb.expr_remote_call(
+            span,
+            afb.expr_atom(span, sym::erlang),
+            afb.expr_atom(span, sym::element),
+            [afb.expr_int(span, 1), *self_witness],
+        );
+
+        afb.expr_remote_call(
+            span,
+            element_call,
+            afb.expr_atom(span, self.tcx().erl_fn_name(def_id)),
+            arg_exprs,
+        )
+    }
+
+    /// The witness arguments a call site must pass to `target`, in order.
+    fn call_witness_exprs(
+        &self,
+        span: Span,
+        target: ErlCallTarget<'tcx>,
+    ) -> SmallVec<[eaf::Expr<'arena>; 8]> {
+        let ErlCallTarget::Item { def_id, args } = target else {
+            return SmallVec::new();
+        };
+        self.tcx()
+            .erl_call_witness_tys(def_id, args)
+            .into_iter()
+            .map(|ty| {
+                let witness = self.translator.build_witness(self.owner.to_def_id(), span, ty);
+                self.materialize_witness(span, witness)
+            })
+            .collect()
+    }
+
+    fn materialize_witness(&self, span: Span, witness: Witness) -> eaf::Expr<'arena> {
+        let afb = &self.translator.afb;
+        match witness {
+            Witness::Param(param) => match self.witness_vars.get(&param) {
+                Some(&var) => afb.expr_var(span, var),
+                None => afb.expr_atom(span, sym::dollar_patina_unbounded_type),
+            },
+            Witness::ModuleWithSubtypes { module, subtypes } => {
+                let subtype_exprs =
+                    subtypes.into_iter().map(|subtype| self.materialize_witness(span, subtype));
+                let subtypes_expr_tuple = afb.expr_tuple(span, subtype_exprs);
+                afb.expr_tuple(span, [afb.expr_atom(span, module), subtypes_expr_tuple])
+            }
+        }
     }
 
     fn translate_fn_trait_call(&mut self, span: Span, args: &[ExprId]) -> eaf::Expr<'arena> {
@@ -581,7 +649,14 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         closure: &thir::ClosureExpr<'tcx>,
     ) -> eaf::Expr<'arena> {
         let translated = self
-            .with_scope(|cx| cx.translator.translate_body(closure.closure_id, cx.parts, cx.scopes))
+            .with_scope(|cx| {
+                cx.translator.translate_body(
+                    closure.closure_id,
+                    cx.parts,
+                    cx.scopes,
+                    cx.witness_vars,
+                )
+            })
             .0;
 
         let afb = &self.translator.afb;

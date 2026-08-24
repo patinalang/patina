@@ -1,11 +1,14 @@
 //! Erlang call resolution and module placement.
 
+use rustc_data_structures::fx::FxIndexSet;
 use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::{Attribute, HirId, PrimTy};
 use rustc_span::Symbol;
+use smallvec::SmallVec;
 
+use crate::query::Providers;
 use crate::ty::{self, AdtKind, GenericArgsRef, Ty, TyCtxt, TypingEnv, Unnormalized, Visibility};
 
 /// The identity of a module in the generated Erlang program.
@@ -103,26 +106,13 @@ impl<'tcx> TyCtxt<'tcx> {
         }
     }
 
-    /// The Erlang function name of a callable item.
-    ///
-    /// Trait impl items names are mangled with the full trait path, e.g. `Std::Ops::Add::add`.
-    pub fn erl_fn_name(self, def_id: impl Into<DefId>) -> Symbol {
-        let def_id = def_id.into();
-        let item_name = self.item_name(def_id);
-        match self.trait_item_of(def_id) {
-            Some(trait_item_def_id) => {
-                let trait_def_id = self.parent(trait_item_def_id);
-                let path = self.def_path_str(trait_def_id);
-                let qualified = if trait_def_id.is_local() {
-                    let crate_name = self.crate_name(trait_def_id.krate);
-                    format!("{crate_name}::{path}")
-                } else {
-                    path
-                };
-                Symbol::intern(&format!("{qualified}::{item_name}"))
-            }
-            None => item_name,
+    /// The trait `def_id` is a method of, for a trait method or a trait impl item.
+    pub fn erl_entry_trait(self, def_id: DefId) -> Option<DefId> {
+        if let Some(trait_def_id) = self.trait_of_assoc(def_id) {
+            return Some(trait_def_id);
         }
+        let impl_def_id = self.trait_impl_of_assoc(def_id)?;
+        self.impl_opt_trait_id(impl_def_id)
     }
 
     /// The trait's own generic arguments for a trait impl item, excluding the
@@ -137,6 +127,118 @@ impl<'tcx> TyCtxt<'tcx> {
         };
         let trait_ref = trait_ref.skip_binder();
         &trait_ref.args[1..]
+    }
+
+    /// The type parameters (in `def_id`'s own generic space) that appear in a
+    /// trait bound, and therefore need a witness at runtime.
+    ///
+    /// For associated items, the parent impl's predicates are also walked, so
+    /// an inherent method's enclosing `impl<T: Bound>` marks `T`. Unbounded
+    /// parameters get no witness.
+    ///
+    /// This is callable for foreign items: predicates are encoded in rmeta.
+    pub fn erl_witness_params(self, def_id: impl Into<DefId>) -> SmallVec<[ty::ParamTy; 6]> {
+        let def_id = def_id.into();
+        let mut params = FxIndexSet::default();
+
+        self.collect_witness_params(def_id, &mut params);
+
+        if let Some(parent) = self.predicates_of(def_id).parent {
+            self.collect_witness_params(parent, &mut params);
+        }
+
+        let mut params = params.into_iter().collect::<SmallVec<[ty::ParamTy; 6]>>();
+        params.sort_unstable();
+        params
+    }
+
+    fn collect_witness_params(self, def_id: DefId, params: &mut FxIndexSet<ty::ParamTy>) {
+        for &(clause, _span) in self.predicates_of(def_id).predicates {
+            let ty::ClauseKind::Trait(trait_pred) = clause.kind().skip_binder() else {
+                continue;
+            };
+
+            // Skip implicit rustc traits from determining whether T is bounded or not.
+            let lang_items = self.lang_items();
+            if lang_items.sized_trait() == Some(trait_pred.def_id())
+                || lang_items.meta_sized_trait() == Some(trait_pred.def_id())
+                || lang_items.pointee_sized_trait() == Some(trait_pred.def_id())
+            {
+                continue;
+            }
+
+            for arg in trait_pred.trait_ref.args.iter() {
+                let ty::GenericArgKind::Type(ty) = arg.kind() else { continue };
+
+                // for each type parameter in the trait argument (outer loop), recursively collect
+                // it and its sub-type parameters (inner loop)
+                for arg in ty.walk() {
+                    if let ty::GenericArgKind::Type(ty) = arg.kind()
+                        && let ty::TyKind::Param(param) = ty.kind()
+                    {
+                        params.insert(*param);
+                    }
+                }
+            }
+        }
+    }
+
+    /// The witness types a call site must pass for `def_id`, in order: the
+    /// receiver witness (Self-type; needed for trait entries only, so only materialized for them),
+    /// the trait-argument witnesses (for trait's generic params; trait entries only), then the
+    /// witnesses for the callee's own generic parameters that appear in a trait bound.
+    pub fn erl_call_witness_tys(
+        self,
+        def_id: DefId,
+        args: GenericArgsRef<'tcx>,
+    ) -> SmallVec<[Ty<'tcx>; 6]> {
+        let mut tys = SmallVec::new();
+        let is_trait_entry = self.erl_entry_trait(def_id).is_some();
+
+        if is_trait_entry {
+            let Some(receiver) = self.erl_call_target_self_ty(ErlCallTarget::Item { def_id, args })
+            else {
+                bug!("trait entry call must have a receiver");
+            };
+            tys.push(receiver);
+
+            let trait_args = match self.def_kind(def_id) {
+                DefKind::AssocFn if self.def_kind(self.parent(def_id)) == DefKind::Trait => {
+                    // A trait method's args are `[Self, trait args..., method args...]`.
+                    let parent_count = self.generics_of(def_id).parent_count;
+                    &args[1..parent_count]
+                }
+                _ => bug!("trait entry call resolved to impl item `{}`", self.def_path_str(def_id)),
+            };
+            tys.extend(trait_args.iter().filter_map(|arg| arg.as_type()));
+        }
+
+        let parent_count = self.generics_of(def_id).parent_count;
+        for param in self.erl_witness_params(def_id) {
+            // Trait entries recover the receiver and trait arguments via the self-type witness
+            // and the leading trait-argument witnesses, so only the callee's *own* generics
+            // need a witness here.
+            if !is_trait_entry || param.index as usize >= parent_count {
+                tys.push(args.type_at(param.index as usize));
+            }
+        }
+
+        tys
+    }
+
+    /// Resolves which Erlang module implements `ty`.
+    pub fn erl_module_for_type(self, owner: DefId, ty: Ty<'tcx>) -> Option<ErlModuleResolution> {
+        self.resolve_erl_receiver_module(ty, self.erl_typing_env(owner))
+    }
+
+    /// For a given adt or tuple type, list its subtypes.
+    /// For example, `Result<T, E>` has subtypes `T` and `E`.
+    pub fn subtypes_of(self, ty: Ty<'tcx>) -> SmallVec<[Ty<'tcx>; 3]> {
+        match ty.kind() {
+            ty::Adt(_, args) => args.iter().filter_map(|arg| arg.as_type()).collect(),
+            ty::Tuple(types) => types.iter().collect(),
+            _ => SmallVec::new(),
+        }
     }
 
     pub fn is_forced_extern(self, hir_id: HirId) -> bool {
@@ -350,4 +452,25 @@ impl<'tcx> TyCtxt<'tcx> {
             AdtKind::Union => unimplemented!(),
         }
     }
+}
+
+/// Provider for [`TyCtxt::erl_fn_name`].
+fn erl_fn_name(tcx: TyCtxt<'_>, def_id: DefId) -> Symbol {
+    let item_name = tcx.item_name(def_id);
+
+    let Some(trait_def_id) = tcx.erl_entry_trait(def_id) else { return item_name };
+
+    let path = tcx.def_path_str(trait_def_id);
+    let qualified = if trait_def_id.is_local() {
+        let crate_name = tcx.crate_name(trait_def_id.krate);
+        format!("{crate_name}::{path}")
+    } else {
+        path
+    };
+
+    Symbol::intern(&format!("{qualified}::{item_name}"))
+}
+
+pub fn provide(providers: &mut Providers) {
+    *providers = Providers { erl_fn_name, ..*providers };
 }

@@ -1,8 +1,0 @@
-error: dispatch through a type parameter not yet implemented: C/#2
-  --> tests/ui/src/generics/assoc_items/the_problem__01.pt:31:5
-   |
-LL |     container.last() - container.first()
-   |     ^^^^^^^^^^^^^^^^
-
-error: aborting due to 1 previous error
-

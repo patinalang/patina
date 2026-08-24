@@ -30,10 +30,10 @@ main() ->
         #'Elixir.Patina.BasicEnum.BasicEnum':'Struct'{x = 1,
                                                       y = <<"hello">>},
     begin
-        io:put_chars([[io_lib:format("~tp", [_x@0_0]),
+        io:put_chars([[io_lib:format("~ktp", [_x@0_0]),
                        <<"\n">>,
-                       io_lib:format("~tp", [_y@1_0]),
+                       io_lib:format("~ktp", [_y@1_0]),
                        <<"\n">>,
-                       io_lib:format("~tp", [_z@2_0])]]),
+                       io_lib:format("~ktp", [_z@2_0])]]),
         io:nl()
     end.

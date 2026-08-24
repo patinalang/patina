@@ -27,15 +27,15 @@ main() ->
     _triple@0_0 = {0, -2, 3},
     begin
         io:put_chars([[<<"Tell me about ">>,
-                       io_lib:format("~tp", [_triple@0_0])]]),
+                       io_lib:format("~ktp", [_triple@0_0])]]),
         io:nl()
     end,
     case _triple@0_0 of
         {0, _y@1_0, _z@2_0} ->
             io:put_chars([[<<"First is `0`, `y` is ">>,
-                           io_lib:format("~tp", [_y@1_0]),
+                           io_lib:format("~ktp", [_y@1_0]),
                            <<", and `z` is ">>,
-                           io_lib:format("~tp", [_z@2_0])]]),
+                           io_lib:format("~ktp", [_z@2_0])]]),
             io:nl();
         {1, _, _} ->
             io:put_chars([[<<"First is `1` and the rest doesn't matter">>]]),

@@ -27,7 +27,7 @@ main() ->
         begin
             io:put_chars([[<<"1 + 2">>,
                            <<" = ">>,
-                           io_lib:format("~tp", [_val@0_0])]]),
+                           io_lib:format("~ktp", [_val@0_0])]]),
             io:nl()
         end
     end,
@@ -36,7 +36,7 @@ main() ->
         begin
             io:put_chars([[<<"(1 + 2) * (3 / 4)">>,
                            <<" = ">>,
-                           io_lib:format("~tp", [_val@1_0])]]),
+                           io_lib:format("~ktp", [_val@1_0])]]),
             io:nl()
         end
     end.

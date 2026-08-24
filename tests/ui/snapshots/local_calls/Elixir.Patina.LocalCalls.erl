@@ -28,8 +28,8 @@ main() ->
     _age_value@1_0 = get_age(_age@0_0),
     begin
         io:put_chars([[<<"Age ">>,
-                       io_lib:format("~tp", [_age@0_0]),
+                       io_lib:format("~ktp", [_age@0_0]),
                        <<" is ">>,
-                       io_lib:format("~tp", [_age_value@1_0])]]),
+                       io_lib:format("~ktp", [_age_value@1_0])]]),
         io:nl()
     end.

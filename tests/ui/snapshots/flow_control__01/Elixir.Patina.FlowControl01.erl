@@ -32,6 +32,6 @@ main() ->
             _branch_value@1_0
     end,
     begin
-        io:put_chars([[io_lib:format("~tp", [_n@0_1])]]),
+        io:put_chars([[io_lib:format("~ktp", [_n@0_1])]]),
         io:nl()
     end.

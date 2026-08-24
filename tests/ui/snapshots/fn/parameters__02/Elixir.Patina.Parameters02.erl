@@ -56,10 +56,10 @@ main() ->
     _lazy_result@2_0 = lazy_add(_fx@0_0, _fy@1_0),
     _op@3_0 = choose_op('Elixir.Patina.Parameters02.MathOp.Add'),
     begin
-        io:put_chars([[io_lib:format("~tp", [3]),
+        io:put_chars([[io_lib:format("~ktp", [3]),
                        <<" op ">>,
-                       io_lib:format("~tp", [5]),
+                       io_lib:format("~ktp", [5]),
                        <<" = ">>,
-                       io_lib:format("~tp", [_op@3_0(3, 5)])]]),
+                       io_lib:format("~ktp", [_op@3_0(3, 5)])]]),
         io:nl()
     end.

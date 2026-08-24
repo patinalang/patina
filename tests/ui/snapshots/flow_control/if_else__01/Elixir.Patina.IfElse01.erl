@@ -26,19 +26,19 @@ main() ->
     case _n@0_0 < 0 of
         true ->
             begin
-                io:put_chars([io_lib:format("~tp", [_n@0_0]),
+                io:put_chars([io_lib:format("~ktp", [_n@0_0]),
                               <<" is negative">>])
             end;
         false ->
             case _n@0_0 > 0 of
                 true ->
                     begin
-                        io:put_chars([io_lib:format("~tp", [_n@0_0]),
+                        io:put_chars([io_lib:format("~ktp", [_n@0_0]),
                                       <<" is positive">>])
                     end;
                 false ->
                     begin
-                        io:put_chars([io_lib:format("~tp", [_n@0_0]),
+                        io:put_chars([io_lib:format("~ktp", [_n@0_0]),
                                       <<" is zero">>])
                     end
             end
@@ -65,8 +65,8 @@ main() ->
                 _n@0_0 div 2
         end,
     begin
-        io:put_chars([[io_lib:format("~tp", [_n@0_0]),
+        io:put_chars([[io_lib:format("~ktp", [_n@0_0]),
                        <<" -> ">>,
-                       io_lib:format("~tp", [_big_n@1_0])]]),
+                       io_lib:format("~ktp", [_big_n@1_0])]]),
         io:nl()
     end.

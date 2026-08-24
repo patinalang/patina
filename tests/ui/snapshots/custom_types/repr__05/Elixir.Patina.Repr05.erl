@@ -23,7 +23,7 @@
     module_info(Key).
 main() ->
     begin
-        io:put_chars([[io_lib:format("~tp",
+        io:put_chars([[io_lib:format("~ktp",
                                      [('Elixir.Patina.Repr05.Celcius':'__struct__'())#{'0' :=
                                                                                           2.345}])]]),
         io:nl()

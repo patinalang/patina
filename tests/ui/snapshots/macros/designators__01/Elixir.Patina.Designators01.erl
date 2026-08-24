@@ -24,14 +24,14 @@
 foo() ->
     begin
         io:put_chars([[<<"You called ">>,
-                       io_lib:format("~tp", [<<"foo">>]),
+                       io_lib:format("~ktp", [<<"foo">>]),
                        <<"()">>]]),
         io:nl()
     end.
 bar() ->
     begin
         io:put_chars([[<<"You called ">>,
-                       io_lib:format("~tp", [<<"bar">>]),
+                       io_lib:format("~ktp", [<<"bar">>]),
                        <<"()">>]]),
         io:nl()
     end.
@@ -39,17 +39,17 @@ main() ->
     foo(),
     bar(),
     begin
-        io:put_chars([[io_lib:format("~tp", [<<"1 + 1">>]),
+        io:put_chars([[io_lib:format("~ktp", [<<"1 + 1">>]),
                        <<" = ">>,
-                       io_lib:format("~tp", [1 + 1])]]),
+                       io_lib:format("~ktp", [1 + 1])]]),
         io:nl()
     end,
     begin
-        io:put_chars([[io_lib:format("~tp",
+        io:put_chars([[io_lib:format("~ktp",
                                      [<<"{ let x = 1; x * x + 2 * x - 1"
                                         " }">>]),
                        <<" = ">>,
-                       io_lib:format("~tp",
+                       io_lib:format("~ktp",
                                      [begin
                                           _x@0_1 = 1,
                                           _x@0_1 * _x@0_1 + 2 * _x@0_1

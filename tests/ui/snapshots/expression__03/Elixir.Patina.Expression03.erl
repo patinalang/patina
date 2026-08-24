@@ -31,14 +31,14 @@ main() ->
         end,
     _z@4_0 = begin 2 * _x@0_0 end,
     begin
-        io:put_chars([[<<"x is ">>, io_lib:format("~tp", [_x@0_0])]]),
+        io:put_chars([[<<"x is ">>, io_lib:format("~ktp", [_x@0_0])]]),
         io:nl()
     end,
     begin
-        io:put_chars([[<<"y is ">>, io_lib:format("~tp", [_y@3_0])]]),
+        io:put_chars([[<<"y is ">>, io_lib:format("~ktp", [_y@3_0])]]),
         io:nl()
     end,
     begin
-        io:put_chars([[<<"z is ">>, io_lib:format("~tp", [_z@4_0])]]),
+        io:put_chars([[<<"z is ">>, io_lib:format("~ktp", [_z@4_0])]]),
         io:nl()
     end.
