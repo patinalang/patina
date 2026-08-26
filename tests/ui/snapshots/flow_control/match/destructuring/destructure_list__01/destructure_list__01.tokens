@@ -163,6 +163,20 @@ Whitespace
 CloseParen
 Comma
 Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Eq
+Gt
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 25 }
+CloseParen
+Comma
+Whitespace
 CloseBrace
 Whitespace
 CloseBrace

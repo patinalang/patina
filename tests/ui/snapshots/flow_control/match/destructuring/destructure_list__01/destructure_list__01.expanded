@@ -84,5 +84,12 @@ pub fn main() {
                                 " and the other elements were ", patina_fmt::debug(tail)]]);
             io::nl();
         }
+
+
+            // We have to include a catch-all for match exhaustiveness.
+            _ => {
+            io::put_chars([["no list pattern matched"]]);
+            io::nl();
+        }
     }
 }

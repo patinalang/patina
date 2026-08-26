@@ -235,7 +235,6 @@ impl<'hir> LoweringContext<'_, 'hir> {
         let mut before = Vec::new();
         let mut after = Vec::new();
         let mut slice = None;
-        let mut prev_rest_span = None;
 
         // Lowers `$bm $ident @ ..` to `$bm $ident @ _`.
         let lower_rest_sub = |this: &mut Self, pat: &Pat, &ann, &ident, sub: &Pat| {
@@ -252,7 +251,6 @@ impl<'hir> LoweringContext<'_, 'hir> {
             match &pat.kind {
                 // Found a sub-slice pattern `..`. Record, lower it to `_`, and stop here.
                 PatKind::Rest => {
-                    prev_rest_span = Some(pat.span);
                     let hir_id = self.lower_node_id(pat.id);
                     slice = Some(self.pat_wild_with_node_id_of(pat, hir_id));
                     break;
@@ -260,7 +258,6 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 // Found a sub-slice pattern `$binding_mode $ident @ ..`.
                 // Record, lower it to `$binding_mode $ident @ _`, and stop here.
                 PatKind::Ident(ann, ident, Some(sub)) if sub.is_rest() => {
-                    prev_rest_span = Some(sub.span);
                     slice = Some(self.arena.alloc(lower_rest_sub(self, pat, ann, ident, sub)));
                     break;
                 }
@@ -271,7 +268,8 @@ impl<'hir> LoweringContext<'_, 'hir> {
 
         // Lower all the patterns after the first sub-slice pattern.
         for pat in iter {
-            // There was a previous subslice pattern; make sure we don't allow more.
+            // Parser has already rejected any rest before the final list element.
+            // Continue lowering only to recover after that diagnostic.
             let rest_span = match &pat.kind {
                 PatKind::Rest => Some(pat.span),
                 PatKind::Ident(ann, ident, Some(sub)) if sub.is_rest() => {
@@ -281,10 +279,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 }
                 _ => None,
             };
-            if let Some(rest_span) = rest_span {
-                // We have e.g., `[a, .., b, ..]`. That's no good, error!
-                self.ban_extra_rest_pat(rest_span, prev_rest_span.unwrap(), "slice");
-            } else {
+            if rest_span.is_none() {
                 // Lower the pattern normally.
                 after.push(self.lower_pat_mut(pat));
             }

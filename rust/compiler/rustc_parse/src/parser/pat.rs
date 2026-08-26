@@ -762,6 +762,20 @@ impl<'a> Parser<'a> {
                         CommaRecoveryMode::EitherTupleOrPipe,
                     )
                 })?;
+            if let Some((_, preceding)) = pats.split_last() {
+                for pattern in preceding {
+                    let rest_span = match &pattern.kind {
+                        PatKind::Rest => Some(pattern.span),
+                        PatKind::Ident(_, _, Some(subpattern)) if subpattern.is_rest() => {
+                            Some(subpattern.span)
+                        }
+                        _ => None,
+                    };
+                    if let Some(rest_span) = rest_span {
+                        self.dcx().emit_err(errors::ListPatternRestNotFinal { span: rest_span });
+                    }
+                }
+            }
             PatKind::Slice(pats)
         } else if self.is_map() {
             self.parse_pat_map()?

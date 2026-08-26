@@ -1,0 +1,20 @@
+error: list rest patterns must be the final element
+  --> tests/ui/src/primitives/errors/list_pattern_position.pt:3:17
+   |
+LL |         [first, .., last] => (),
+   |                 ^^
+
+error: list rest patterns must be the final element
+  --> tests/ui/src/primitives/errors/list_pattern_position.pt:10:26
+   |
+LL |         [first, middle @ .., last] => (),
+   |                          ^^
+
+error: list rest patterns must be the final element
+  --> tests/ui/src/primitives/errors/list_pattern_position.pt:17:17
+   |
+LL |         [first, .., ..] => (),
+   |                 ^^
+
+error: aborting due to 3 previous errors
+

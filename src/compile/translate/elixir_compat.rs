@@ -33,6 +33,7 @@ fn info_functions_clause<'tcx, 'arena>(
             afb.expr_tuple(span, [afb.expr_atom(span, sym::module_info), afb.expr_int(span, 0)]),
             afb.expr_tuple(span, [afb.expr_atom(span, sym::module_info), afb.expr_int(span, 1)]),
         ],
+        None,
     );
     // module_info(exports)
     let exports = afb.expr_local_call(
@@ -106,7 +107,7 @@ fn info_struct_clause<'tcx, 'arena>(
     });
 
     // (struct) -> [#{field => $field_name, default => nil, required => false}, ...]
-    let body = afb.expr_list(span, list_elems);
+    let body = afb.expr_list(span, list_elems, None);
     let arg = afb.pat_atom(span, kw::Struct);
     afb.clause(span, [arg], None, body)
 }
@@ -136,7 +137,7 @@ fn info_exports_md5_clause<'tcx, 'arena>(
     // {lists:sort(module_info(exports)), [], '__info__'(struct)}
     let tuple = afb.expr_tuple(s, [exports, afb.expr_nil(s), strukt]);
     // [deterministic]
-    let deterministic_list = afb.expr_list(s, [afb.expr_atom(s, sym::deterministic)]);
+    let deterministic_list = afb.expr_list(s, [afb.expr_atom(s, sym::deterministic)], None);
     // term_to_binary({lists:sort(module_info(exports)), [], '__info__'(struct)}, [deterministic])
     let term_to_binary = afb.expr_remote_call(
         s,

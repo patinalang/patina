@@ -1,0 +1,3 @@
+pub fn list_patterns_are_refutable(xs: [int]) {
+    let [first, second] = xs;
+}

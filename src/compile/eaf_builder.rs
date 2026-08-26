@@ -242,6 +242,37 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         eaf::Pattern::Map(anno, assocs)
     }
 
+    /// The empty list `[]`.
+    pub(crate) fn pat_nil(&self, span: impl IntoAnno) -> eaf::Pattern<'arena> {
+        eaf::Pattern::Nil { anno: span.into_anno(self.source_map) }
+    }
+
+    /// `[head | tail]`.
+    pub(crate) fn pat_cons(
+        &self,
+        span: impl IntoAnno,
+        head: eaf::Pattern<'arena>,
+        tail: eaf::Pattern<'arena>,
+    ) -> eaf::Pattern<'arena> {
+        eaf::Pattern::Cons(
+            span.into_anno(self.source_map),
+            self.arena.alloc(head),
+            self.arena.alloc(tail),
+        )
+    }
+
+    pub(crate) fn pat_list(
+        &self,
+        span: impl IntoAnno,
+        items: impl IntoIterator<Item = eaf::Pattern<'arena>, IntoIter: DoubleEndedIterator>,
+        tail: Option<eaf::Pattern<'arena>>,
+    ) -> eaf::Pattern<'arena> {
+        let anno = span.into_anno(self.source_map);
+        items.into_iter().rev().fold(tail.unwrap_or_else(|| self.pat_nil(anno)), |acc, item| {
+            self.pat_cons(anno, item, acc)
+        })
+    }
+
     pub(crate) fn expr_remote_fun(
         &self,
         span: impl IntoAnno,
@@ -310,12 +341,12 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         &self,
         span: impl IntoAnno,
         items: impl IntoIterator<Item = eaf::Expr<'arena>, IntoIter: DoubleEndedIterator>,
+        tail: Option<eaf::Expr<'arena>>,
     ) -> eaf::Expr<'arena> {
         let anno = span.into_anno(self.source_map);
-        items
-            .into_iter()
-            .rev()
-            .fold(self.expr_nil(anno), |acc, item| self.expr_cons(anno, item, acc))
+        items.into_iter().rev().fold(tail.unwrap_or_else(|| self.expr_nil(anno)), |acc, item| {
+            self.expr_cons(anno, item, acc)
+        })
     }
 
     pub(crate) fn expr_tuple(

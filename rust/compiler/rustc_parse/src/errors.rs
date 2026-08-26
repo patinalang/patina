@@ -499,6 +499,13 @@ pub(crate) struct MapRestNotFinal {
 }
 
 #[derive(Diagnostic)]
+#[diag("list rest patterns must be the final element")]
+pub(crate) struct ListPatternRestNotFinal {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag("fixed-size array types [T; N] are not supported")]
 #[note("patina only supports unbounded list type `[T]`")]
 pub(crate) struct FixedSizeArrayType {

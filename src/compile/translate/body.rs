@@ -122,7 +122,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     fn translate_list(&mut self, span: Span, fields: &[ExprId]) -> eaf::Expr<'arena> {
         let afb = &self.translator.afb;
         let items = fields.iter().map(|&id| self.translate_expr(id));
-        afb.expr_list(span, items)
+        afb.expr_list(span, items, None)
     }
 
     fn translate_map(
@@ -633,7 +633,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         }
 
         let format_str = self.translator.afb.expr_string(span, sym::debug_format_str);
-        let args_list = self.translator.afb.expr_list(span, [translated]);
+        let args_list = self.translator.afb.expr_list(span, [translated], None);
 
         afb.expr_remote_call(
             span,
@@ -921,6 +921,16 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                     (key, value)
                 });
                 afb.pat_map(pat.span, assocs)
+            }
+
+            PatKind::Slice { prefix, slice, suffix } => {
+                if !suffix.is_empty() {
+                    span_bug!(pat.span, "list rest pattern must be trailing")
+                }
+
+                let tail = slice.as_ref().map(|pattern| self.translate_pattern(pattern));
+                let prefix = prefix.iter().map(|pattern| self.translate_pattern(pattern));
+                afb.pat_list(pat.span, prefix, tail)
             }
 
             _ => not_implemented!(self.tcx(), pat.span, "THIR pattern kind", pat.kind),

@@ -95,5 +95,14 @@ fn main() ({
                                     term)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
+
+
+            // We have to include a catch-all for match exhaustiveness.
+            _ => {
+            ((io::put_chars as
+                    fn(term) -> term)(([([("no list pattern matched" as str)] as
+                            [str])] as [[str]])) as term);
+            ((io::nl as fn() -> term)() as term);
+        }
     } as ())
 } as ())
