@@ -1,0 +1,9 @@
+pub fn tuple_pattern() -> int {
+    let (20, second) = (20, 22) else { return 0; };
+    20 + second
+}
+
+pub fn list_pattern(values: [int]) -> int {
+    let [first, second, ..] = values else { return 0; };
+    first + second
+}

@@ -1,0 +1,16 @@
+error[E0308]: `else` clause of `let...else` does not diverge
+  --> tests/ui/src/primitives/errors/let_else_non_diverging.pt:2:32
+   |
+LL |       let [first, ..] = [1] else {
+   |  ________________________________^
+LL | |     };
+   | |_____^ expected `!`, found `()`
+   |
+   = note:   expected type `!`
+           found unit type `()`
+   = help: try adding a diverging expression, such as `return` or `panic!(..)`
+   = help: ...or use `match` instead of `let...else`
+
+error: aborting due to 1 previous error
+
+For more information about this error, try `rustc --explain E0308`.

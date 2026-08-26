@@ -281,22 +281,53 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
     fn translate_stmt(&mut self, id: StmtId) -> Option<eaf::Expr<'arena>> {
         let stmt = &self.thir[id];
+        let afb = &self.translator.afb;
 
         match stmt.kind {
             thir::StmtKind::Expr { expr, .. } => Some(self.translate_expr(expr)),
 
             thir::StmtKind::Let { ref pattern, initializer, else_block, span, .. } => {
-                if else_block.is_some() {
-                    not_implemented!(self.tcx(), span, "let-else", else_block);
-                }
-
                 let Some(initializer) = initializer else {
                     self.declare_vars_from_pattern(pattern);
                     return None;
                 };
                 let rhs = self.translate_expr(initializer);
-                let lhs = self.translate_pattern(pattern);
-                Some(self.translator.afb.expr_match(span, lhs, rhs))
+
+                let Some(else_block) = else_block else {
+                    let lhs = self.translate_pattern(pattern);
+                    return Some(afb.expr_match(span, lhs, rhs));
+                };
+
+                self.declare_vars_from_pattern(pattern);
+
+                let ((success_pattern, success_body), success_scope) =
+                    self.with_scope(|cx| (cx.translate_pattern(pattern), afb.expr_unit(span)));
+
+                let (else_body, else_scope) = self.with_scope(|cx| cx.translate_block(else_block));
+                let else_span = self.thir[else_block].span;
+
+                let translated = [
+                    TranslatedArm {
+                        span,
+                        pattern: success_pattern,
+                        guard: None,
+                        body: success_body,
+                        scope: success_scope,
+                        always_diverges: false,
+                    },
+                    TranslatedArm {
+                        span: else_span,
+                        pattern: afb.pat_var(else_span, kw::Underscore),
+                        guard: None,
+                        body: else_body,
+                        scope: else_scope,
+                        always_diverges: true,
+                    },
+                ]
+                .into_iter()
+                .collect();
+
+                Some(self.translate_to_case(span, rhs, translated))
             }
         }
     }
@@ -796,11 +827,21 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         scrutinee: ExprId,
         arms: &[thir::ArmId],
     ) -> eaf::Expr<'arena> {
-        let afb = &self.translator.afb;
         let scrutinee = self.translate_expr(scrutinee);
 
-        let mut translated: SmallVec<[TranslatedArm<'arena>; 4]> =
+        let translated: SmallVec<[TranslatedArm<'arena>; 4]> =
             arms.iter().map(|&arm_id| self.translate_arm(arm_id)).collect();
+
+        self.translate_to_case(expr.span, scrutinee, translated)
+    }
+
+    fn translate_to_case(
+        &mut self,
+        span: Span,
+        scrutinee: eaf::Expr<'arena>,
+        mut translated: SmallVec<[TranslatedArm<'arena>; 4]>,
+    ) -> eaf::Expr<'arena> {
+        let afb = &self.translator.afb;
 
         let changed_vars = self
             .scopes
@@ -816,7 +857,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let clauses = translated
             .into_iter()
             .map(|arm| afb.clause(arm.span, [arm.pattern], arm.guard, arm.body));
-        afb.expr_case(expr.span, scrutinee, clauses)
+        afb.expr_case(span, scrutinee, clauses)
     }
 
     fn translate_arm(&mut self, arm_id: thir::ArmId) -> TranslatedArm<'arena> {
