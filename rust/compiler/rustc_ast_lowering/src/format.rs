@@ -396,7 +396,10 @@ fn expand_format_args<'hir>(
     let (let_statements, args) = if arguments.is_empty() {
         // Generate:
         //     []
-        (vec![], ctx.arena.alloc(ctx.expr(macsp, hir::ExprKind::Array(&[]))))
+        (
+            vec![],
+            ctx.arena.alloc(ctx.expr(macsp, hir::ExprKind::Array(&[], hir::ArrayTailExpr::None))),
+        )
     } else {
         // Generate:
         //     super let args = (&arg0, &arg1, &…);
@@ -447,7 +450,8 @@ fn expand_format_args<'hir>(
                 }
             },
         ));
-        let args = ctx.arena.alloc(ctx.expr(macsp, hir::ExprKind::Array(args)));
+        let args =
+            ctx.arena.alloc(ctx.expr(macsp, hir::ExprKind::Array(args, hir::ArrayTailExpr::None)));
         let (args_pat, args_hir_id) = ctx.pat_ident(macsp, args_ident);
         let let_statement_2 = ctx.stmt_super_let_pat(macsp, args_pat, Some(args));
         (

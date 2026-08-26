@@ -485,13 +485,17 @@ impl<'a, 'tcx> ThirPrinter<'a, 'tcx> {
                 self.print_expr(*value, depth_lvl + 2);
                 print_indented!(self, "}", depth_lvl);
             }
-            Array { fields } => {
+            Array { fields, tail } => {
                 print_indented!(self, "Array {", depth_lvl);
                 print_indented!(self, "fields: [", depth_lvl + 1);
                 for field_id in fields.iter() {
                     self.print_expr(*field_id, depth_lvl + 2);
                 }
                 print_indented!(self, "]", depth_lvl + 1);
+                if let Some(tail) = tail {
+                    print_indented!(self, "tail:", depth_lvl + 1);
+                    self.print_expr(*tail, depth_lvl + 2);
+                }
                 print_indented!(self, "}", depth_lvl);
             }
             Map { fields, base } => {

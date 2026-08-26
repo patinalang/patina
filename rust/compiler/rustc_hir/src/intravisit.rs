@@ -830,8 +830,11 @@ pub fn walk_expr<'v, V: Visitor<'v>>(visitor: &mut V, expression: &'v Expr<'v>) 
     let Expr { hir_id, kind, span } = expression;
     try_visit!(visitor.visit_id(*hir_id));
     match *kind {
-        ExprKind::Array(subexpressions) => {
+        ExprKind::Array(subexpressions, tail) => {
             walk_list!(visitor, visit_expr, subexpressions);
+            if let ArrayTailExpr::Tail(tail) = tail {
+                try_visit!(visitor.visit_expr(tail));
+            }
         }
         ExprKind::Map(fields, rest) => {
             for field in fields {

@@ -1,0 +1,26 @@
+error: list tail requires at least one preceding element
+  --> tests/ui/src/primitives/errors/list_tail_position.pt:2:14
+   |
+LL |     let _ = [..xs, 1];
+   |              ^^
+
+error: list tail `..tail` must be the final element
+  --> tests/ui/src/primitives/errors/list_tail_position.pt:2:18
+   |
+LL |     let _ = [..xs, 1];
+   |                  ^
+
+error: list tail requires at least one preceding element
+  --> tests/ui/src/primitives/errors/list_tail_position.pt:6:14
+   |
+LL |     let _ = [..xs];
+   |              ^^
+
+error: list tail `..tail` must be the final element
+  --> tests/ui/src/primitives/errors/list_tail_position.pt:10:21
+   |
+LL |     let _ = [1, ..xs, ..ys];
+   |                     ^
+
+error: aborting due to 4 previous errors
+

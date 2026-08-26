@@ -1623,29 +1623,58 @@ impl<'a> Parser<'a> {
         let lo = self.token.span;
         self.bump(); // `[` or other open delim
 
-        let kind = if self.eat(close) {
-            // Empty vector
-            ExprKind::Array(ThinVec::new())
-        } else {
-            // Non-empty vector
-            let first_expr = self.parse_expr()?;
-            if self.eat(exp!(Semi)) {
-                self.dcx().emit_err(errors::RepeatedListSyntax { span: self.prev_token.span });
-                let _count = self.parse_expr_anon_const(|_, _| MgcaDisambiguation::Direct)?;
-                self.expect(close)?;
-                ExprKind::Array(thin_vec![first_expr])
-            } else if self.eat(exp!(Comma)) {
-                // Vector with two or more elements.
-                let sep = SeqSep::trailing_allowed(exp!(Comma));
-                let (mut exprs, _) = self.parse_seq_to_end(close, sep, |p| p.parse_expr())?;
-                exprs.insert(0, first_expr);
-                ExprKind::Array(exprs)
-            } else {
-                // Vector with one element
-                self.expect(close)?;
-                ExprKind::Array(thin_vec![first_expr])
+        let mut elements = ThinVec::new();
+        let mut tail = ast::ArrayTail::None;
+
+        while !self.check(close) {
+            if self.eat(exp!(DotDot)) {
+                let tail_span = self.prev_token.span;
+
+                let prefix_error = elements.is_empty().then(|| {
+                    let err =
+                        self.dcx().emit_err(errors::ListTailWithoutPrefix { span: tail_span });
+
+                    ast::ArrayTail::NoneWithError(err)
+                });
+
+                let parsed_tail = if self.check(close) {
+                    ast::ArrayTail::Rest(tail_span)
+                } else {
+                    let tail_expr = self.parse_expr()?;
+                    ast::ArrayTail::Tail(tail_expr)
+                };
+
+                // A list tail must be followed immediately by the closing bracket.
+                tail = if self.check(close) {
+                    prefix_error.unwrap_or(parsed_tail)
+                } else {
+                    let guar =
+                        self.dcx().emit_err(errors::ListTailNotFinal { span: self.token.span });
+                    self.eat_to_tokens(&[close]);
+                    ast::ArrayTail::NoneWithError(guar)
+                };
+
+                break;
             }
-        };
+
+            let element = self.parse_expr()?;
+            elements.push(element);
+
+            if elements.len() == 1 && self.eat(exp!(Semi)) {
+                let guar =
+                    self.dcx().emit_err(errors::RepeatedListSyntax { span: self.prev_token.span });
+                let _count = self.parse_expr_anon_const(|_, _| MgcaDisambiguation::Direct)?;
+                tail = ast::ArrayTail::NoneWithError(guar);
+                break;
+            }
+
+            if !self.eat(exp!(Comma)) {
+                break;
+            }
+        }
+
+        self.expect(close)?;
+        let kind = ExprKind::Array(Box::new(ast::ArrayExpr { elements, tail }));
         let expr = self.mk_expr(lo.to(self.prev_token.span), kind);
         self.maybe_recover_from_bad_qpath(expr)
     }

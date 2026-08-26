@@ -1,8 +1,9 @@
 use rustc_ast::token::{self, Delimiter, IdentIsRaw};
 use rustc_ast::tokenstream::{DelimSpan, TokenStream, TokenTree};
 use rustc_ast::{
-    BinOpKind, BorrowKind, DUMMY_NODE_ID, DelimArgs, Expr, ExprKind, ItemKind, MacCall, MapRest,
-    MethodCall, Mutability, Path, PathSegment, Stmt, StructRest, UnOp, UseTree, UseTreeKind,
+    ArrayTail, BinOpKind, BorrowKind, DUMMY_NODE_ID, DelimArgs, Expr, ExprKind, ItemKind, MacCall,
+    MapRest, MethodCall, Mutability, Path, PathSegment, Stmt, StructRest, UnOp, UseTree,
+    UseTreeKind,
 };
 use rustc_ast_pretty::pprust;
 use rustc_data_structures::fx::FxHashSet;
@@ -194,9 +195,12 @@ impl<'cx, 'a> Context<'cx, 'a> {
                     this.manage_cond_expr(local_expr)
                 });
             }
-            ExprKind::Array(local_exprs) => {
-                for local_expr in local_exprs {
+            ExprKind::Array(array) => {
+                for local_expr in &mut array.elements {
                     self.manage_cond_expr(local_expr);
+                }
+                if let ArrayTail::Tail(tail) = &mut array.tail {
+                    self.manage_cond_expr(tail);
                 }
             }
             ExprKind::Map(map) => {

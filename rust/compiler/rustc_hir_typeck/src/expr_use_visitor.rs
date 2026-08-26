@@ -464,8 +464,11 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
                 }
             }
 
-            hir::ExprKind::Array(exprs) => {
+            hir::ExprKind::Array(exprs, tail) => {
                 self.consume_exprs(exprs)?;
+                if let hir::ArrayTailExpr::Tail(tail) = tail {
+                    self.consume_expr(tail)?;
+                }
             }
 
             hir::ExprKind::Map(fields, rest) => {

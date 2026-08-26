@@ -2417,7 +2417,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     ) -> bool {
         // Check if `expr` is contained in array of two elements
         if let hir::Node::Expr(array_expr) = self.tcx.parent_hir_node(expr.hir_id)
-            && let hir::ExprKind::Array(elements) = array_expr.kind
+            && let hir::ExprKind::Array(elements, _) = array_expr.kind
             && let [first, second] = elements
             && second.hir_id == expr.hir_id
         {

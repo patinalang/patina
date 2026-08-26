@@ -510,7 +510,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     ) -> bool {
         let parent_node = self.tcx.parent_hir_node(call_expr.hir_id);
         if let (
-            hir::Node::Expr(hir::Expr { kind: hir::ExprKind::Array(_), .. }),
+            hir::Node::Expr(hir::Expr { kind: hir::ExprKind::Array(..), .. }),
             hir::ExprKind::Tup(exp),
             hir::ExprKind::Call(_, args),
         ) = (parent_node, &callee_expr.kind, &call_expr.kind)

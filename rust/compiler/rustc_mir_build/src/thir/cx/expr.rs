@@ -1092,7 +1092,13 @@ impl<'tcx> ThirBuildCx<'tcx> {
             }
 
             hir::ExprKind::DropTemps(source) => ExprKind::Use { source: self.mirror_expr(source) },
-            hir::ExprKind::Array(fields) => ExprKind::Array { fields: self.mirror_exprs(fields) },
+            hir::ExprKind::Array(fields, tail) => {
+                let tail = match tail {
+                    hir::ArrayTailExpr::Tail(tail) => Some(self.mirror_expr(tail)),
+                    hir::ArrayTailExpr::None | hir::ArrayTailExpr::NoneWithError(_) => None,
+                };
+                ExprKind::Array { fields: self.mirror_exprs(fields), tail }
+            }
             hir::ExprKind::Tup(fields) => ExprKind::Tuple { fields: self.mirror_exprs(fields) },
 
             hir::ExprKind::Map(fields, rest) => {

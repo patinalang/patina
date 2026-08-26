@@ -2502,7 +2502,7 @@ impl Expr<'_> {
             | ExprKind::Unary(..) => ExprPrecedence::Prefix,
 
             // Need parens if and only if there are prefix attributes.
-            ExprKind::Array(_)
+            ExprKind::Array(..)
             | ExprKind::Map(..)
             | ExprKind::Block(..)
             | ExprKind::Call(..)
@@ -2677,8 +2677,12 @@ impl Expr<'_> {
                     || init_side_effects
             }
 
-            ExprKind::Array(args)
-            | ExprKind::Tup(args)
+            ExprKind::Array(args, tail) => {
+                args.iter().any(|arg| arg.can_have_side_effects())
+                    || matches!(tail, ArrayTailExpr::Tail(tail) if tail.can_have_side_effects())
+            }
+
+            ExprKind::Tup(args)
             | ExprKind::Call(
                 Expr {
                     kind:
@@ -2722,7 +2726,7 @@ impl Expr<'_> {
     /// To a first-order approximation, is this a pattern?
     pub fn is_approximately_pattern(&self) -> bool {
         match &self.kind {
-            ExprKind::Array(_)
+            ExprKind::Array(..)
             | ExprKind::Call(..)
             | ExprKind::Tup(_)
             | ExprKind::Lit(_)
@@ -2823,8 +2827,8 @@ pub fn expr_needs_parens(expr: &Expr<'_>) -> bool {
 pub enum ExprKind<'hir> {
     /// Allow anonymous constants from an inline `const` block
     ConstBlock(ConstBlock),
-    /// An array (e.g., `[a, b, c, d]`).
-    Array(&'hir [Expr<'hir>]),
+    /// A list (e.g., `[a, b, c, d]` or `[a, b, ..tail]`).
+    Array(&'hir [Expr<'hir>], ArrayTailExpr<'hir>),
     /// A map expression (e.g., `#{"a" => 1, ..base}`).
     Map(&'hir [ExprMapField<'hir>], MapTailExpr<'hir>),
     /// A function call.
@@ -2987,6 +2991,16 @@ pub enum MapTailExpr<'hir> {
     /// will be used to populate any fields not explicitly mentioned: `#{ foo => bar, ..base }`.
     Base(&'hir Expr<'hir>),
     /// No trailing `..` was written, and also, a parse error occurred inside the map braces.
+    NoneWithError(ErrorGuaranteed),
+}
+
+#[derive(Debug, Clone, Copy, StableHash)]
+pub enum ArrayTailExpr<'hir> {
+    /// A list expression without a tail: `[a, b]`.
+    None,
+    /// A list expression with an explicit tail: `[a, b, ..tail]`.
+    Tail(&'hir Expr<'hir>),
+    /// No trailing `..` was written, and also, a parse error occurred inside the array brackets.
     NoneWithError(ErrorGuaranteed),
 }
 

@@ -460,7 +460,13 @@ impl<'a> ExtCtxt<'a> {
 
     /// `[expr1, expr2, ...]`
     pub fn expr_array(&self, sp: Span, exprs: ThinVec<Box<ast::Expr>>) -> Box<ast::Expr> {
-        self.expr(sp, ast::ExprKind::Array(exprs))
+        self.expr(
+            sp,
+            ast::ExprKind::Array(Box::new(ast::ArrayExpr {
+                elements: exprs,
+                tail: ast::ArrayTail::None,
+            })),
+        )
     }
 
     /// `&[expr1, expr2, ...]`

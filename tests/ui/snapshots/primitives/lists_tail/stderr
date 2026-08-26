@@ -1,0 +1,5 @@
+warning: [{"tests/ui/src/primitives/lists_tail.pt",
+           [{{9,9},sys_core_fold,{nomatch,{shadow,8}}}]}]
+
+warning: 1 warning emitted
+

@@ -466,9 +466,10 @@ pub enum ExprKind<'tcx> {
         value: ExprId,
         count: ty::Const<'tcx>,
     },
-    /// An array, e.g. `[a, b, c, d]`.
+    /// A list, e.g. `[a, b, c, d]` or `[a, b, ..tail]`.
     Array {
         fields: Box<[ExprId]>,
+        tail: Option<ExprId>,
     },
     /// A map, e.g. `#{"a" => 1, ..base}`.
     Map {

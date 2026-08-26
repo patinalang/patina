@@ -140,8 +140,8 @@ pub(crate) fn expand_concat_bytes(
     let mut guar = None;
     for e in es {
         match &e.kind {
-            ExprKind::Array(exprs) => {
-                for expr in exprs {
+            ExprKind::Array(array) => {
+                for expr in &array.elements {
                     if let Some(elem) =
                         handle_array_element(cx, &mut guar, &mut missing_literals, expr)
                     {

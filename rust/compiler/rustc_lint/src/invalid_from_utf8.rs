@@ -113,7 +113,7 @@ impl<'tcx> LateLintPass<'tcx> for InvalidFromUtf8 {
                         lint(init.span, utf8_error);
                     }
                 }
-                ExprKind::Array(args) => {
+                ExprKind::Array(args, _) => {
                     let elements = args
                         .iter()
                         .map(|e| match &e.kind {

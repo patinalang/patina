@@ -90,8 +90,8 @@ pub fn main() {
         io::nl();
     };
 
-    // Lists can also be destructured using the same syntax
-    let [first, second, third, ..rest] = more_xs;
+    // Lists can also be destructured using a similar syntax
+    let [first, second, third, rest @ ..] = more_xs else { return };
     {
         io::put_chars([["Sum of first three elements is ",
                             patina_fmt::display(first + second + third)]]);

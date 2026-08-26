@@ -161,6 +161,13 @@ pub(crate) struct FunctionalMapUpdateDestructuringAssignment {
 }
 
 #[derive(Diagnostic)]
+#[diag("list tails are not allowed in destructuring assignments")]
+pub(crate) struct ListTailDestructuringAssignment {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag("map patterns must include `..`")]
 #[note("map patterns perform a subset match; use an explicit `map_size` or `==` for equality")]
 pub(crate) struct MapPatternMissingRest {

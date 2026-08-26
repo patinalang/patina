@@ -521,6 +521,20 @@ pub(crate) struct RepeatedListSyntax {
 }
 
 #[derive(Diagnostic)]
+#[diag("list tail `..tail` must be the final element")]
+pub(crate) struct ListTailNotFinal {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("list tail requires at least one preceding element")]
+pub(crate) struct ListTailWithoutPrefix {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag("map update `..base` must be the final entry")]
 pub(crate) struct MapUpdateNotFinal {
     #[primary_span]

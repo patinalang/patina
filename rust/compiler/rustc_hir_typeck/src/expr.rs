@@ -386,7 +386,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 self.check_expr_if(expr.hir_id, cond, then_expr, opt_else_expr, expr.span, expected)
             }
             ExprKind::DropTemps(e) => self.check_expr_with_expectation(e, expected),
-            ExprKind::Array(args) => self.check_expr_array(args, expected, expr),
+            ExprKind::Array(args, tail) => self.check_expr_array(args, tail, expected, expr),
             ExprKind::Map(fields, rest) => self.check_expr_map(fields, rest, expected, expr),
             ExprKind::ConstBlock(ref block) => self.check_expr_const_block(block, expected),
             ExprKind::Repeat(element, ref count) => {
@@ -1665,6 +1665,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     fn check_expr_array(
         &self,
         args: &'tcx [hir::Expr<'tcx>],
+        tail: hir::ArrayTailExpr<'tcx>,
         expected: Expectation<'tcx>,
         expr: &'tcx hir::Expr<'tcx>,
     ) -> Ty<'tcx> {
@@ -1695,7 +1696,17 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         } else {
             self.next_ty_var(expr.span)
         };
-        Ty::new_slice(self.tcx, element_ty)
+        let list_ty = Ty::new_slice(self.tcx, element_ty);
+        match tail {
+            hir::ArrayTailExpr::Tail(tail) => {
+                self.check_expr_coercible_to_type(tail, list_ty, None);
+            }
+            hir::ArrayTailExpr::NoneWithError(guaranteed) => {
+                self.infcx.set_tainted_by_errors(guaranteed);
+            }
+            hir::ArrayTailExpr::None => {}
+        }
+        list_ty
     }
 
     fn check_expr_map(

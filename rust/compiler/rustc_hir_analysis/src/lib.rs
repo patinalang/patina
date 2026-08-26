@@ -124,7 +124,15 @@ fn unsupported_const_value_expr(tcx: TyCtxt<'_>, expr: &hir::Expr<'_>) -> Option
             (!matches!(inner.kind, hir::ExprKind::Lit(_))).then_some(expr.span)
         }
 
-        hir::ExprKind::Array(items) | hir::ExprKind::Tup(items) => {
+        hir::ExprKind::Array(items, tail) => items
+            .iter()
+            .find_map(|item| unsupported_const_value_expr(tcx, item))
+            .or_else(|| match tail {
+                hir::ArrayTailExpr::Tail(tail) => unsupported_const_value_expr(tcx, tail),
+                hir::ArrayTailExpr::None | hir::ArrayTailExpr::NoneWithError(_) => None,
+            }),
+
+        hir::ExprKind::Tup(items) => {
             items.iter().find_map(|item| unsupported_const_value_expr(tcx, item))
         }
 

@@ -2590,11 +2590,12 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     span,
                 }
             }
-            ExprKind::Array(elements) => {
-                let lowered_elems = self.arena.alloc_from_iter(elements.iter().map(|element| {
-                    let const_arg = self.lower_expr_to_const_arg_direct(element);
-                    &*self.arena.alloc(const_arg)
-                }));
+            ExprKind::Array(array) => {
+                let lowered_elems =
+                    self.arena.alloc_from_iter(array.elements.iter().map(|element| {
+                        let const_arg = self.lower_expr_to_const_arg_direct(element);
+                        &*self.arena.alloc(const_arg)
+                    }));
                 let array_expr = self.arena.alloc(hir::ConstArgArrayExpr {
                     span: self.lower_span(expr.span),
                     elems: lowered_elems,

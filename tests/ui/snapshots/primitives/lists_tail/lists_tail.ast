@@ -1,0 +1,12 @@
+pub fn prepend(xs: [int]) -> [int] { [-1, 0, ..xs] }
+
+pub fn match_tail(xs: [int]) -> [int] {
+    let more_xs = [-1, 0, ..xs];
+    match more_xs { [-1, 0, tail @ ..] => tail, _ => [], }
+}
+
+pub fn let_else_tail(xs: [int]) -> [int] {
+    let more_xs = [-1, 0, ..xs];
+    let [-1, 0, tail @ ..] = more_xs else { return []; };
+    tail
+}

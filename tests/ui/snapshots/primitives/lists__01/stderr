@@ -4,37 +4,46 @@ error[E0531]: cannot find tuple struct or tuple variant `Some` in this scope
 LL |         Some(xval) => println!("elem 0: {}", {}),
    |         ^^^^ not found in this scope
 
-error[E0425]: cannot find value `rest` in this scope
-  --> tests/ui/src/primitives/lists__01.pt:32:34
+error[E0599]: no method named `get` found for slice `[int]` in the current scope
+  --> tests/ui/src/primitives/lists__01.pt:11:14
    |
-LL |     let [first, second, third, ..rest] = more_xs;
-   |                                  ^^^^ not found in this scope
-   |
-   = note: range patterns match against the start and end of a range; to bind the components, use a struct pattern
-help: if you meant to collect the rest of the slice in `rest`, use the at operator
-   |
-LL -     let [first, second, third, ..rest] = more_xs;
-LL +     let [first, second, third, rest @ ..] = more_xs;
-   |
-help: if you meant to destructure a range use a struct pattern
-   |
-LL -     let [first, second, third, ..rest] = more_xs;
-LL +     let [first, second, third, std::ops::RangeTo { end: rest }] = more_xs;
-   |
+LL |     match xs.get(0) {
+   |              ^^^ method not found in `[int]`
 
-error[E0425]: cannot find value `rest` in this scope
-  --> tests/ui/src/primitives/lists__01.pt:34:39
+error[E0308]: mismatched types
+  --> tests/ui/src/primitives/lists__01.pt:12:46
    |
-LL |     println!("...and the rest: {:?}", rest);
-   |                                       ^^^^ not found in this scope
-
-error: requires `RangeTo` lang_item
-  --> tests/ui/src/primitives/lists__01.pt:26:27
+LL |         Some(xval) => println!("elem 0: {}", {}),
+   |                                              ^^ expected `term`, found `()`
    |
-LL |     let more_xs = [-1, 0, ..xs];
-   |                           ^^^^
+   = note:   expected type `term`
+           found unit type `()`
 
-error: aborting due to 4 previous errors
+error[E0599]: no method named `len` found for slice `[int]` in the current scope
+  --> tests/ui/src/primitives/lists__01.pt:18:52
+   |
+LL |     println!("Number of elements in array: {}", xs.len());
+   |                                                    ^^^ method not found in `[int]`
 
-Some errors have detailed explanations: E0425, E0531.
-For more information about an error, try `rustc --explain E0425`.
+error[E0609]: no field `head` on type `[int]`
+  --> tests/ui/src/primitives/lists__01.pt:22:50
+   |
+LL |     println!("First element of the list: {}", xs.head);
+   |                                                  ^^^^ unknown field
+
+error[E0609]: no field `tail` on type `[int]`
+  --> tests/ui/src/primitives/lists__01.pt:23:43
+   |
+LL |     println!("Rest of the list: {:?}", xs.tail);
+   |                                           ^^^^ unknown field
+
+error[E0609]: no field `tail` on type `[int]`
+  --> tests/ui/src/primitives/lists__01.pt:29:57
+   |
+LL |     println!("more_xs tail is equal to xs: {}", more_xs.tail == xs);
+   |                                                         ^^^^ unknown field
+
+error: aborting due to 7 previous errors
+
+Some errors have detailed explanations: E0308, E0531, E0599, E0609.
+For more information about an error, try `rustc --explain E0308`.

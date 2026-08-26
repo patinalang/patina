@@ -1553,7 +1553,9 @@ impl Expr {
                 expr.to_ty().map(|ty| TyKind::Array(ty, expr_len.clone()))?
             }
 
-            ExprKind::Array(exprs) if let [expr] = exprs.as_slice() => {
+            ExprKind::Array(box ArrayExpr { elements, tail: ArrayTail::None })
+                if let [expr] = elements.as_slice() =>
+            {
                 expr.to_ty().map(TyKind::Slice)?
             }
 
@@ -1796,11 +1798,30 @@ pub struct MapExpr {
     pub rest: MapRest,
 }
 
+#[derive(Clone, Encodable, Decodable, Debug, Walkable)]
+pub enum ArrayTail {
+    /// `..tail`.
+    Tail(Box<Expr>),
+    /// `..`
+    Rest(Span),
+    /// No trailing `..` or expression.
+    None,
+    /// No trailing `..` or expression, and a parse error occurred in the list.
+    NoneWithError(ErrorGuaranteed),
+}
+
+/// A list expression (`[a, b, ..tail]`).
+#[derive(Clone, Encodable, Decodable, Debug, Walkable)]
+pub struct ArrayExpr {
+    pub elements: ThinVec<Box<Expr>>,
+    pub tail: ArrayTail,
+}
+
 // Adding a new variant? Please update `test_expr` in `tests/ui/macros/stringify.rs`.
 #[derive(Clone, Encodable, Decodable, Debug)]
 pub enum ExprKind {
-    /// An array (e.g, `[a, b, c, d]`).
-    Array(ThinVec<Box<Expr>>),
+    /// A list (e.g. `[a, b, c, d]` or `[a, b, ..tail]`).
+    Array(Box<ArrayExpr>),
     /// A map expression (e.g., `#{"a" => 1, ..base}`).
     Map(Box<MapExpr>),
     /// Allow anonymous constants from an inline `const` block.

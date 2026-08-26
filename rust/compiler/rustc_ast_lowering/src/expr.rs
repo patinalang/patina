@@ -19,8 +19,9 @@ use visit::{Visitor, walk_expr};
 use super::errors::{
     AsyncCoroutinesNotSupported, AwaitOnlyInAsyncFnAndBlocks, ClosureCannotBeStatic,
     CoroutineTooManyParameters, FunctionalMapUpdateDestructuringAssignment,
-    FunctionalRecordUpdateDestructuringAssignment, InclusiveRangeWithNoEnd, MapPatternMissingRest,
-    MatchArmWithNoBody, NeverPatternWithBody, NeverPatternWithGuard, UnderscoreExprLhsAssign,
+    FunctionalRecordUpdateDestructuringAssignment, InclusiveRangeWithNoEnd,
+    ListTailDestructuringAssignment, MapPatternMissingRest, MatchArmWithNoBody,
+    NeverPatternWithBody, NeverPatternWithGuard, UnderscoreExprLhsAssign,
 };
 use super::{
     GenericArgsMode, ImplTraitContext, LoweringContext, ParamMode, ResolverAstLoweringExt,
@@ -101,7 +102,21 @@ impl<'hir> LoweringContext<'_, 'hir> {
             let attrs = self.lower_attrs(expr_hir_id, &e.attrs, e.span, Target::from_expr(e));
 
             let kind = match &e.kind {
-                ExprKind::Array(exprs) => hir::ExprKind::Array(self.lower_exprs(exprs)),
+                ExprKind::Array(array) => {
+                    let tail = match &array.tail {
+                        ArrayTail::Tail(tail) => hir::ArrayTailExpr::Tail(self.lower_expr(tail)),
+                        ArrayTail::Rest(span) => {
+                            let guar = self.dcx().span_err(
+                                *span,
+                                "list tail `..` must be followed by an expression",
+                            );
+                            hir::ArrayTailExpr::NoneWithError(guar)
+                        }
+                        ArrayTail::None => hir::ArrayTailExpr::None,
+                        ArrayTail::NoneWithError(guar) => hir::ArrayTailExpr::NoneWithError(*guar),
+                    };
+                    hir::ExprKind::Array(self.lower_exprs(&array.elements), tail)
+                }
                 ExprKind::Map(map) => {
                     let fields = self.arena.alloc_from_iter(map.fields.iter().map(|field| {
                         hir::ExprMapField {
@@ -1364,20 +1379,23 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 return self.pat_without_dbm(lhs.span, hir::PatKind::Wild);
             }
             // Slice patterns.
-            ExprKind::Array(elements) => {
-                let (pats, rest) =
-                    self.destructure_sequence(elements, "slice", eq_sign_span, assignments);
-                let slice_pat = if let Some((i, span)) = rest {
-                    let (before, after) = pats.split_at(i);
-                    hir::PatKind::Slice(
-                        before,
-                        Some(self.arena.alloc(self.pat_without_dbm(span, hir::PatKind::Wild))),
-                        after,
-                    )
-                } else {
-                    hir::PatKind::Slice(pats, None, &[])
+            ExprKind::Array(array) => {
+                let pats = self.arena.alloc_from_iter(array.elements.iter().map(|element| {
+                    self.destructure_assign_mut(element, eq_sign_span, assignments)
+                }));
+
+                if let ArrayTail::Tail(tail) = &array.tail {
+                    self.dcx().emit_err(ListTailDestructuringAssignment { span: tail.span });
+                }
+
+                let tail: Option<&'hir hir::Pat<'hir>> = match &array.tail {
+                    ArrayTail::Rest(span) | ArrayTail::Tail(box Expr { span, .. }) => {
+                        Some(self.arena.alloc(self.pat_without_dbm(*span, hir::PatKind::Wild)))
+                    }
+                    ArrayTail::None | ArrayTail::NoneWithError(_) => None,
                 };
-                return self.pat_without_dbm(lhs.span, slice_pat);
+
+                return self.pat_without_dbm(lhs.span, hir::PatKind::Slice(pats, tail, &[]));
             }
             // Tuple structs.
             ExprKind::Call(callee, args) => {

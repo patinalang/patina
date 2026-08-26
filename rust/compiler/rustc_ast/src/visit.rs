@@ -404,6 +404,8 @@ macro_rules! common_visitor_and_walkers {
         impl_visitable_direct!(<$($lt)? $($mut)?>
             AngleBracketedArg,
             AngleBracketedArgs,
+            ArrayExpr,
+            ArrayTail,
             AsmMacro,
             AssignOpKind,
             AssocItemConstraintKind,
@@ -980,8 +982,8 @@ macro_rules! common_visitor_and_walkers {
             let Expr { id, kind, span, attrs, tokens: _ } = self;
             visit_visitable!($($mut)? vis, id, attrs);
             match kind {
-                ExprKind::Array(exprs) =>
-                    visit_visitable!($($mut)? vis, exprs),
+                ExprKind::Array(array) =>
+                    visit_visitable!($($mut)? vis, array),
                 ExprKind::Map(map) =>
                     visit_visitable!($($mut)? vis, map),
                 ExprKind::ConstBlock(anon_const) =>

@@ -72,7 +72,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             ExprKind::VarRef { id } => self.translate_var_ref(expr.span, *id),
             ExprKind::UpvarRef { var_hir_id, .. } => self.translate_var_ref(expr.span, *var_hir_id),
 
-            ExprKind::Array { fields } => self.translate_list(expr.span, fields),
+            ExprKind::Array { fields, tail } => self.translate_list(expr.span, fields, *tail),
 
             ExprKind::Map { fields, base } => self.translate_map(expr.span, fields, *base),
 
@@ -119,10 +119,16 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         }
     }
 
-    fn translate_list(&mut self, span: Span, fields: &[ExprId]) -> eaf::Expr<'arena> {
+    fn translate_list(
+        &mut self,
+        span: Span,
+        fields: &[ExprId],
+        tail: Option<ExprId>,
+    ) -> eaf::Expr<'arena> {
         let afb = &self.translator.afb;
+        let tail = tail.map(|id| self.translate_expr(id));
         let items = fields.iter().map(|&id| self.translate_expr(id));
-        afb.expr_list(span, items, None)
+        afb.expr_list(span, items, tail)
     }
 
     fn translate_map(

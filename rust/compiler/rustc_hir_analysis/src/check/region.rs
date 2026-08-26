@@ -641,7 +641,15 @@ fn resolve_local<'tcx>(
                     record_rvalue_scope_if_borrow_expr(visitor, field.value, blk_id);
                 }
             }
-            hir::ExprKind::Array(subexprs) | hir::ExprKind::Tup(subexprs) => {
+            hir::ExprKind::Array(subexprs, tail) => {
+                for subexpr in subexprs {
+                    record_rvalue_scope_if_borrow_expr(visitor, subexpr, blk_id);
+                }
+                if let hir::ArrayTailExpr::Tail(tail) = tail {
+                    record_rvalue_scope_if_borrow_expr(visitor, tail, blk_id);
+                }
+            }
+            hir::ExprKind::Tup(subexprs) => {
                 for subexpr in subexprs {
                     record_rvalue_scope_if_borrow_expr(visitor, subexpr, blk_id);
                 }

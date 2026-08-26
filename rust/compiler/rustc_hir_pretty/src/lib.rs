@@ -1278,10 +1278,17 @@ impl<'a> State<'a> {
         }
     }
 
-    fn print_expr_vec(&mut self, exprs: &[hir::Expr<'_>]) {
+    fn print_expr_vec(&mut self, exprs: &[hir::Expr<'_>], tail: hir::ArrayTailExpr<'_>) {
         let ib = self.ibox(INDENT_UNIT);
         self.word("[");
         self.commasep_exprs(Inconsistent, exprs);
+        if let hir::ArrayTailExpr::Tail(tail) = tail {
+            if !exprs.is_empty() {
+                self.word_space(",");
+            }
+            self.word("..");
+            self.print_expr(tail);
+        }
         self.word("]");
         self.end(ib)
     }
@@ -1570,8 +1577,8 @@ impl<'a> State<'a> {
         let ib = self.ibox(INDENT_UNIT);
         self.ann.pre(self, AnnNode::Expr(expr));
         match expr.kind {
-            hir::ExprKind::Array(exprs) => {
-                self.print_expr_vec(exprs);
+            hir::ExprKind::Array(exprs, tail) => {
+                self.print_expr_vec(exprs, tail);
             }
             hir::ExprKind::Map(fields, rest) => {
                 self.print_expr_map(fields, rest);
