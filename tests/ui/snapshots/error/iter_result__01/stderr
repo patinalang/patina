@@ -1,10 +1,10 @@
-error[E0599]: no method named `into_iter` found for array `[str; 3]` in the current scope
+error[E0599]: no method named `into_iter` found for slice `[str]` in the current scope
   --> tests/ui/src/error/iter_result__01.pt:7:10
    |
 LL |       let numbers: [_] = strings
    |  ________________________-
 LL | |         .into_iter()
-   | |         -^^^^^^^^^ method not found in `[str; 3]`
+   | |         -^^^^^^^^^ method not found in `[str]`
    | |_________|
    |
 

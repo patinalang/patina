@@ -80,7 +80,7 @@ fn main() ({
         ((io::put_chars as
                 fn(term) -> term)(([([("Is `x` 10 or 100? x = " as str),
                             ((patina_fmt::display as fn(term) -> term)((x as int)) as
-                                term)] as [term; 2])] as [[term; 2]; 1])) as term);
+                                term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 } as ())

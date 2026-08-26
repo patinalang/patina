@@ -48,8 +48,8 @@ fn main() ({
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)(((compare as
                                         fn(int, int) -> bool {compare::<int>})((1 as int),
-                                    (1 as int)) as bool)) as term)] as [term; 1])] as
-                [[term; 1]; 1])) as term);
+                                    (1 as int)) as bool)) as term)] as [term])] as [[term]])) as
+            term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 } as ())

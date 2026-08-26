@@ -52,8 +52,8 @@ fn main() ({
                                     fn(term) -> term)(
                                 // TODO ^ Try different values for `triple`
 
-                                (triple as (int, int, int))) as term)] as [term; 2])] as
-                [[term; 2]; 1])) as term);
+                                (triple as (int, int, int))) as term)] as [term])] as
+                [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 
@@ -67,25 +67,25 @@ fn main() ({
                                 ((patina_fmt::debug as fn(term) -> term)((y as int)) as
                                     term), (", and `z` is " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((z as int)) as
-                                    term)] as [term; 4])] as [[term; 4]; 1])) as term);
+                                    term)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
         (1, ..) => {
             ((io::put_chars as
                     fn(term) -> term)(([([("First is `1` and the rest doesn\'t matter"
-                                    as str)] as [str; 1])] as [[str; 1]; 1])) as term);
+                                    as str)] as [str])] as [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
         (..,2) => {
             ((io::put_chars as
                     fn(term) -> term)(([([("last is `2` and the rest doesn\'t matter"
-                                    as str)] as [str; 1])] as [[str; 1]; 1])) as term);
+                                    as str)] as [str])] as [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
         (3, ..,4) => {
             ((io::put_chars as
                     fn(term) -> term)(([([("First is `3`, last is `4`, and the rest doesn\'t matter"
-                                    as str)] as [str; 1])] as [[str; 1]; 1])) as term);
+                                    as str)] as [str])] as [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
 
@@ -93,7 +93,7 @@ fn main() ({
             _ => {
             ((io::put_chars as
                     fn(term) -> term)(([([("It doesn\'t matter what they are" as
-                                    str)] as [str; 1])] as [[str; 1]; 1])) as term);
+                                    str)] as [str])] as [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
     } as ())

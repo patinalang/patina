@@ -1,0 +1,16 @@
+error: fixed-size array types [T; N] are not supported
+  --> tests/ui/src/primitives/errors/array_syntax.pt:2:16
+   |
+LL |     let _: [int; 2] = [value, value];
+   |                ^
+   |
+   = note: patina only supports unbounded list type `[T]`
+
+error: repeated list syntax is not supported
+  --> tests/ui/src/primitives/errors/array_syntax.pt:6:19
+   |
+LL |     let _ = [value; 2];
+   |                   ^
+
+error: aborting due to 2 previous errors
+

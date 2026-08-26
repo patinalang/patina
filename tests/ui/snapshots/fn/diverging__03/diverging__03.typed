@@ -50,7 +50,7 @@ fn main() ({
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("You will never see this line!" as
-                                str)] as [str; 1])] as [[str; 1]; 1])) as term);
+                                str)] as [str])] as [[str]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 } as !)

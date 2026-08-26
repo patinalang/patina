@@ -633,6 +633,7 @@ impl<'a> Parser<'a> {
         };
 
         let ty = if self.eat(exp!(Semi)) {
+            self.dcx().emit_err(errors::FixedSizeArrayType { span: self.prev_token.span });
             let mut length = self.parse_expr_anon_const(|_, _| MgcaDisambiguation::Direct)?;
 
             if let Err(e) = self.expect(exp!(CloseBracket)) {
@@ -640,7 +641,7 @@ impl<'a> Parser<'a> {
                 self.check_mistyped_turbofish_with_multiple_type_params(e, &mut length.value)?;
                 self.expect(exp!(CloseBracket))?;
             }
-            TyKind::Array(elt_ty, length)
+            TyKind::Slice(elt_ty)
         } else if self.eat(exp!(CloseBracket)) {
             TyKind::Slice(elt_ty)
         } else {

@@ -1630,10 +1630,10 @@ impl<'a> Parser<'a> {
             // Non-empty vector
             let first_expr = self.parse_expr()?;
             if self.eat(exp!(Semi)) {
-                // Repeating array syntax: `[ 0; 512 ]`
-                let count = self.parse_expr_anon_const(|_, _| MgcaDisambiguation::Direct)?;
+                self.dcx().emit_err(errors::RepeatedListSyntax { span: self.prev_token.span });
+                let _count = self.parse_expr_anon_const(|_, _| MgcaDisambiguation::Direct)?;
                 self.expect(close)?;
-                ExprKind::Repeat(first_expr, count)
+                ExprKind::Array(thin_vec![first_expr])
             } else if self.eat(exp!(Comma)) {
                 // Vector with two or more elements.
                 let sep = SeqSep::trailing_allowed(exp!(Comma));

@@ -56,13 +56,12 @@ fn main() ({
     let opts: [TermToBinaryOpts] =
         ([(Deterministic as {type error}),
                 ((MinorVersion as {type error})((2 as int)) as {type error})]
-            as [{type error}; 2]);
+            as [{type error}]);
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)(((opts as {type error}) as term as
-                                    {type error})) as term)] as [term; 1])] as [[term; 1]; 1]))
-            as term);
+                                    {type error})) as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -73,8 +72,8 @@ fn main() ({
 
                                 ((erlang::term_to_binary as
                                         fn(term, term) -> term)((val as {type error}),
-                                    (opts as {type error})) as term)) as term)] as [term; 1])]
-                as [[term; 1]; 1])) as term);
+                                    (opts as {type error})) as term)) as term)] as [term])] as
+                [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     // <<131, 97, 42>>

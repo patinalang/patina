@@ -56,7 +56,7 @@ fn main() ({
                     fn(term) -> term)(([([("Matched " as str),
                                 ((patina_fmt::debug as
                                         fn(term) -> term)((i as {type error})) as term),
-                                ("!" as str)] as [term; 3])] as [[term; 3]; 1])) as term);
+                                ("!" as str)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
     } as ())
@@ -68,14 +68,14 @@ fn main() ({
                     fn(term) -> term)(([([("Matched " as str),
                                 ((patina_fmt::debug as
                                         fn(term) -> term)((i as {type error})) as term),
-                                ("!" as str)] as [term; 3])] as [[term; 3]; 1])) as term);
+                                ("!" as str)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
     } else {
         ({
             ((io::put_chars as
                     fn(term) -> term)(([([("Didn\'t match a number. Let\'s go with a letter!"
-                                    as str)] as [str; 1])] as [[str; 1]; 1])) as term);
+                                    as str)] as [str])] as [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
         // Destructure failed. Change to the failure case.
@@ -90,7 +90,7 @@ fn main() ({
                     fn(term) -> term)(([([("Matched " as str),
                                 ((patina_fmt::debug as
                                         fn(term) -> term)((i as {type error})) as term),
-                                ("!" as str)] as [term; 3])] as [[term; 3]; 1])) as term);
+                                ("!" as str)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
         // Destructure failed. Evaluate an `else if` condition to see if the
@@ -99,14 +99,14 @@ fn main() ({
         ({
             ((io::put_chars as
                     fn(term) -> term)(([([("Didn\'t match a number. Let\'s go with a letter!"
-                                    as str)] as [str; 1])] as [[str; 1]; 1])) as term);
+                                    as str)] as [str])] as [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
     } else {
         ({
             ((io::put_chars as
                     fn(term) -> term)(([([("I don\'t like letters. Let\'s go with an emoticon :)!"
-                                    as str)] as [str; 1])] as [[str; 1]; 1])) as term);
+                                    as str)] as [str])] as [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
         // The condition evaluated false. This branch is the default:

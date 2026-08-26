@@ -1695,9 +1695,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         } else {
             self.next_ty_var(expr.span)
         };
-        let array_len = args.len() as u64;
-        self.suggest_array_len(expr, array_len);
-        Ty::new_array(self.tcx, element_ty, array_len)
+        Ty::new_slice(self.tcx, element_ty)
     }
 
     fn check_expr_map(

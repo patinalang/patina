@@ -8,7 +8,6 @@
          coerce_map_key/1,
          update_map/1,
          coerce_slice/1,
-         coerce_array/1,
          coerce_tuple/1,
          coerce_nested_map/1]).
 '__info__'(functions) ->
@@ -38,8 +37,6 @@ coerce_map_key(_base@0_0) ->
 update_map(_base@0_0) ->
     _base@0_0#{<<"enabled">> => true}.
 coerce_slice(_values@0_0) ->
-    _values@0_0.
-coerce_array(_values@0_0) ->
     _values@0_0.
 coerce_tuple(_value@0_0) ->
     _value@0_0.

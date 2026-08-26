@@ -118,7 +118,7 @@ fn eat(food: Food,
                                     term), (" we get to eat " as str),
                                 ((patina_fmt::debug as
                                         fn(term) -> term)((food as {type error})) as term),
-                                ("." as str)] as [term; 5])] as [[term; 5]; 1])) as term);
+                                ("." as str)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
         None => {
@@ -126,8 +126,7 @@ fn eat(food: Food,
                     fn(term) -> term)(([([("Oh no. We don\'t get to eat on " as
                                     str),
                                 ((patina_fmt::debug as fn(term) -> term)((day as Day)) as
-                                    term), ("?" as str)] as [term; 3])] as [[term; 3]; 1])) as
-                term);
+                                    term), ("?" as str)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
     } as ())

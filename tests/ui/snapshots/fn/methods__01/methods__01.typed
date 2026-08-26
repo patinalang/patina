@@ -148,7 +148,7 @@ fn main() ({
                                 // Note that the first argument `self` is implicitly passed, i.e.
                                 // `rectangle.perimeter()` === `Rectangle::perimeter(rectangle)`
                                 ((rectangle as Rectangle).perimeter() as float)) as term)]
-                        as [term; 2])] as [[term; 2]; 1])) as term);
+                        as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -156,8 +156,7 @@ fn main() ({
                 fn(term) -> term)(([([("Rectangle area: " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((rectangle as Rectangle).area() as
-                                    float)) as term)] as [term; 2])] as [[term; 2]; 1])) as
-            term);
+                                    float)) as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 

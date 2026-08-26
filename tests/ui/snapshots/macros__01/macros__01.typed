@@ -55,8 +55,8 @@ macro_rules! say_hello {
 fn main() ({
     ({
         ((io::put_chars as
-                fn(term) -> term)(([([("Hello!" as str)] as [str; 1])] as
-                [[str; 1]; 1])) as term);
+                fn(term) -> term)(([([("Hello!" as str)] as [str])] as
+                [[str]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ())
     // This call will expand into `println!("Hello!")`

@@ -237,6 +237,7 @@ impl<'tcx> TyCtxt<'tcx> {
         match ty.kind() {
             ty::Adt(_, args) => args.iter().filter_map(|arg| arg.as_type()).collect(),
             ty::Tuple(types) => types.iter().collect(),
+            ty::Slice(element) => SmallVec::from_iter([*element]),
             _ => SmallVec::new(),
         }
     }

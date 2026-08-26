@@ -55,8 +55,8 @@ fn main() ({
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
-                                    fn(term) -> term)((1 as int)) as term)] as [term; 1])] as
-                [[term; 1]; 1])) as term);
+                                    fn(term) -> term)((1 as int)) as term)] as [term])] as
+                [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -64,8 +64,8 @@ fn main() ({
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)(((Std::Cmp::min as
                                         {type error})(((1 as int) + (2 as int) as int), (2 as int))
-                                    as {type error})) as term)] as [term; 1])] as
-                [[term; 1]; 1])) as term);
+                                    as {type error})) as term)] as [term])] as [[term]])) as
+            term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -75,8 +75,8 @@ fn main() ({
                                         {type error})((5 as int),
                                     ((Std::Cmp::min as
                                             {type error})(((2 as int) * (3 as int) as int), (4 as int))
-                                        as {type error})) as {type error})) as term)] as [term; 1])]
-                as [[term; 1]; 1])) as term);
+                                        as {type error})) as {type error})) as term)] as [term])] as
+                [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 } as ())

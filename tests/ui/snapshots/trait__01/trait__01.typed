@@ -67,7 +67,7 @@ trait Animal {
                                 (" says " as str),
                                 ((patina_fmt::display as
                                         fn(term) -> term)(((self as Self).noise() as str)) as term)]
-                            as [term; 3])] as [[term; 3]; 1])) as term);
+                            as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
     } as ())
@@ -86,8 +86,8 @@ impl Sheep {
                                             fn(term) -> term)(
                                         // Implementor methods can use the implementor's trait methods.
                                         ((self as Sheep).name() as str)) as term),
-                                    (" is already naked..." as str)] as [term; 2])] as
-                        [[term; 2]; 1])) as term);
+                                    (" is already naked..." as str)] as [term])] as [[term]]))
+                    as term);
                 ((io::nl as fn() -> term)() as term);
             } as ());
             (self as Sheep)
@@ -96,8 +96,8 @@ impl Sheep {
                 ((io::put_chars as
                         fn(term) -> term)(([([((patina_fmt::display as
                                             fn(term) -> term)(((self as Sheep).name as str)) as term),
-                                    (" gets a haircut!" as str)] as [term; 2])] as
-                        [[term; 2]; 1])) as term);
+                                    (" gets a haircut!" as str)] as [term])] as [[term]])) as
+                    term);
                 ((io::nl as fn() -> term)() as term);
             } as ());
             (Sheep { naked: (true as bool), ..(self as Sheep) } as Sheep)
@@ -135,7 +135,7 @@ impl Animal for Sheep {
                                 (" pauses briefly... " as str),
                                 ((patina_fmt::display as
                                         fn(term) -> term)(((self as Sheep).noise() as str)) as
-                                    term)] as [term; 3])] as [[term; 3]; 1])) as term);
+                                    term)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
     } as ())

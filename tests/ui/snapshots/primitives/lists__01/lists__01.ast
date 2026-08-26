@@ -2,7 +2,7 @@
 // block: 1/1
 
 pub fn main() {
-    // Fixed-size array (type signature is superfluous).
+    // List (type signature is superfluous).
     let xs: [int] = [1, 2, 3, 4, 5];
 
     // Indexing starts at 0.

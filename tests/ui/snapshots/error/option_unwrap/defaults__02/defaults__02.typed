@@ -52,7 +52,7 @@ fn main() ({
                 ({
                     ((io::put_chars as
                             fn(term) -> term)(([([("Providing kiwi as fallback" as str)]
-                                    as [str; 1])] as [[str; 1]; 1])) as term);
+                                    as [str])] as [[str]])) as term);
                     ((io::nl as fn() -> term)() as term);
                 } as ());
                 ((Some as {type error})((Fruit::Kiwi as Fruit)) as
@@ -65,7 +65,7 @@ fn main() ({
                 ({
                     ((io::put_chars as
                             fn(term) -> term)(([([("Providing lemon as fallback" as
-                                            str)] as [str; 1])] as [[str; 1]; 1])) as term);
+                                            str)] as [str])] as [[str]])) as term);
                     ((io::nl as fn() -> term)() as term);
                 } as ());
                 ((Some as {type error})((Fruit::Lemon as Fruit)) as
@@ -83,7 +83,7 @@ fn main() ({
                 fn(term) -> term)(([([("first_available_fruit: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((first_available_fruit as {type error}))
-                                as term)] as [term; 2])] as [[term; 2]; 1])) as term);
+                                as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     // Providing kiwi as fallback

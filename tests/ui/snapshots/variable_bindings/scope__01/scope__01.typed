@@ -56,8 +56,8 @@ fn main() ({
                                 ((patina_fmt::display as
                                         fn(term) -> term)(
 
-                                    (short_lived_binding as int)) as term)] as [term; 2])] as
-                    [[term; 2]; 1])) as term);
+                                    (short_lived_binding as int)) as term)] as [term])] as
+                    [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
     } as ())
@@ -69,8 +69,8 @@ fn main() ({
                                 // End of the block
 
                                 // Error! `short_lived_binding` doesn't exist in this scope
-                                (short_lived_binding as {type error})) as term)] as
-                        [term; 2])] as [[term; 2]; 1])) as term);
+                                (short_lived_binding as {type error})) as term)] as [term])]
+                as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -80,8 +80,8 @@ fn main() ({
                                     fn(term) -> term)(
                                 // FIXME ^ Comment out this line
 
-                                (long_lived_binding as int)) as term)] as [term; 2])] as
-                [[term; 2]; 1])) as term);
+                                (long_lived_binding as int)) as term)] as [term])] as
+                [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 } as ())

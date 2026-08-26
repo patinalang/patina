@@ -58,8 +58,8 @@ fn main() ({
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)((((Pair as
                                             fn(int, float) -> Pair {Pair})((42 as int), (3.14 as float))
-                                        as Pair) as term as term)) as term)] as [term; 1])] as
-                [[term; 1]; 1])) as term);
+                                        as Pair) as term as term)) as term)] as [term])] as
+                [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -70,7 +70,7 @@ fn main() ({
 
                                 // z is omitted from the representation
                                 (((/*ERROR*/) as {type error}) as term as {type error})) as
-                                term)] as [term; 1])] as [[term; 1]; 1])) as term);
+                                term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     // (a"Elixir.BarBar", 1, 2)

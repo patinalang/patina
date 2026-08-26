@@ -49,8 +49,8 @@ fn main() ({
                             ((patina_fmt::display as
                                     fn(term) -> term)(
 
-                                (mutable_binding as int)) as term)] as [term; 2])] as
-                [[term; 2]; 1])) as term);
+                                (mutable_binding as int)) as term)] as [term])] as
+                [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 
@@ -62,8 +62,8 @@ fn main() ({
                             ((patina_fmt::display as
                                     fn(term) -> term)(
 
-                                (mutable_binding as int)) as term)] as [term; 2])] as
-                [[term; 2]; 1])) as term);
+                                (mutable_binding as int)) as term)] as [term])] as
+                [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 
@@ -85,8 +85,7 @@ fn main() ({
                                         (" == " as str),
                                         ((patina_fmt::display as
                                                 fn(term) -> term)((mutable_binding as int)) as term),
-                                        (" + 1" as str)] as [term; 4])] as [[term; 4]; 1])) as
-                        term);
+                                        (" + 1" as str)] as [term])] as [[term]])) as term);
                     ((io::nl as fn() -> term)() as term);
                 } as ());
             } as ()) as

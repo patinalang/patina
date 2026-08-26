@@ -79,7 +79,7 @@ fn main() ({
                             ((patina_fmt::display as
                                     fn(term) -> term)(((is_adult as
                                         fn(Years) -> bool {is_adult})((age as Years)) as bool)) as
-                                term)] as [term; 2])] as [[term; 2]; 1])) as term);
+                                term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -88,8 +88,8 @@ fn main() ({
                             ((patina_fmt::display as
                                     fn(term) -> term)(((is_adult as
                                         fn(Years) -> bool {is_adult})(((age_days as Days).to_years()
-                                        as Years)) as bool)) as term)] as [term; 2])] as
-                [[term; 2]; 1])) as term);
+                                        as Years)) as bool)) as term)] as [term])] as [[term]])) as
+            term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     // println!("Is an adult? {}", is_adult(age_days));

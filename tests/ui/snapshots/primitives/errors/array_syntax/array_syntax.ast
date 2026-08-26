@@ -1,0 +1,3 @@
+pub fn fixed_size_array_type(value: int) { let _: [int] = [value, value]; }
+
+pub fn repeated_list_syntax(value: int) { let _ = [value]; }

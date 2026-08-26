@@ -55,7 +55,7 @@ mod Inaccessible {
         ({
             ((io::put_chars as
                     {type error})(([([("called `MyMod::Inaccessible::public_function()`"
-                                    as str)] as [str; 1])] as [[str; 1]; 1])) as {type error});
+                                    as str)] as [str])] as [[str]])) as {type error});
             ((io::nl as {type error})() as {type error});
         } as ());
     } as ())
@@ -65,7 +65,7 @@ mod Nested {
         ({
             ((io::put_chars as
                     {type error})(([([("called `MyMod::Nested::function()`" as
-                                    str)] as [str; 1])] as [[str; 1]; 1])) as {type error});
+                                    str)] as [str])] as [[str]])) as {type error});
             ((io::nl as {type error})() as {type error});
         } as ());
     } as ())
@@ -74,7 +74,7 @@ mod Nested {
         ({
             ((io::put_chars as
                     {type error})(([([("called `MyMod::Nested::private_function()`"
-                                    as str)] as [str; 1])] as [[str; 1]; 1])) as {type error});
+                                    as str)] as [str])] as [[str]])) as {type error});
             ((io::nl as {type error})() as {type error});
         } as ());
     } as ())
@@ -83,7 +83,7 @@ fn function() ({
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("called `MyMod::function()`" as str)]
-                        as [str; 1])] as [[str; 1]; 1])) as term);
+                        as [str])] as [[str]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 } as ())
@@ -91,7 +91,7 @@ fn private_function() ({
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("called `MyMod::private_function()`" as
-                                str)] as [str; 1])] as [[str; 1]; 1])) as term);
+                                str)] as [str])] as [[str]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 } as ())
@@ -99,7 +99,7 @@ fn indirect_access() ({
     ({
         ((io::put_chars as
                 fn(term) -> term)(([("called `MyMod::indirect_access()`, that\n> "
-                        as str)] as [str; 1])) as term);
+                        as str)] as [str])) as term);
     } as ());
     ((private_function as fn() {private_function})() as ());
 } as ())

@@ -52,8 +52,8 @@ fn main() ({
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)((((Celcius as
                                             fn(float) -> Celcius {Celcius})((2.345 as float)) as
-                                        Celcius) as term as term)) as term)] as [term; 1])] as
-                [[term; 1]; 1])) as term);
+                                        Celcius) as term as term)) as term)] as [term])] as
+                [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     // 2.345

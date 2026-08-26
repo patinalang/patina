@@ -43,10 +43,9 @@ macro_rules! println {
 // block: 5/5
 
 fn main() ({
-    let strings =
-        ([("tofu" as str), ("93" as str), ("18" as str)] as [str; 3]);
+    let strings = ([("tofu" as str), ("93" as str), ("18" as str)] as [str]);
     let (numbers, errors): ([_], [_]) =
-        ((((strings as [str; 3]).into_iter() as
+        ((((strings as [str]).into_iter() as
                     {type error}).map((|s|
                     ((s as {type error}).parse::<int>() as {type error}) as
                     {closure@tests/ui/src/error/iter_result__05.pt:8:14: 8:17}))
@@ -65,7 +64,7 @@ fn main() ({
                 fn(term) -> term)(([([("Numbers: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((numbers as {type error})) as term)] as
-                        [term; 2])] as [[term; 2]; 1])) as term);
+                        [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -73,7 +72,7 @@ fn main() ({
                 fn(term) -> term)(([([("Errors: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((errors as {type error})) as term)] as
-                        [term; 2])] as [[term; 2]; 1])) as term);
+                        [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 } as ())

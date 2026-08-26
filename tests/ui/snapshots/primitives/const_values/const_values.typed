@@ -40,7 +40,7 @@ macro_rules! println {
 }
 
 const KEY: str = ("answer" as str);
-const NUMBERS: [int] = ([(1 as int), (2 as int), (3 as int)] as [int; 3]);
+const NUMBERS: [int] = ([(1 as int), (2 as int), (3 as int)] as [int]);
 const PAIR: ([int], #{str => int}) =
     (((NUMBERS as [int]), (#{(KEY as str) => (42 as int)} as #{str => int}))
         as ([int], #{str => int}));

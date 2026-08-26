@@ -44,9 +44,9 @@ macro_rules! println {
 
 fn main() ({
     // Try changing the values in the list!
-    let list = ([(1 as int), (-(2 as int) as int), (6 as int)] as [int; 3]);
+    let list = ([(1 as int), (-(2 as int) as int), (6 as int)] as [int]);
 
-    (match (list as [int; 3]) {
+    (match (list as [int]) {
 
             // Binds the second and the third elements to the respective variables
             [0, second, third] => {
@@ -55,7 +55,7 @@ fn main() ({
                                 ((patina_fmt::display as fn(term) -> term)((second as int))
                                     as term), (", list[2] = " as str),
                                 ((patina_fmt::display as fn(term) -> term)((third as int))
-                                    as term)] as [term; 4])] as [[term; 4]; 1])) as term);
+                                    as term)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
 
@@ -65,8 +65,8 @@ fn main() ({
             ((io::put_chars as
                     fn(term) -> term)(([([("list[0] = 1, list[2] = " as str),
                                 ((patina_fmt::display as fn(term) -> term)((third as int))
-                                    as term), (" and list[1] was ignored" as str)] as
-                            [term; 3])] as [[term; 3]; 1])) as term);
+                                    as term), (" and list[1] was ignored" as str)] as [term])]
+                    as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
 
@@ -77,7 +77,7 @@ fn main() ({
                     fn(term) -> term)(([([("list[0] = -1, list[1] = " as str),
                                 ((patina_fmt::display as fn(term) -> term)((second as int))
                                     as term), (" and all the other ones were ignored" as str)]
-                            as [term; 3])] as [[term; 3]; 1])) as term);
+                            as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
 
@@ -91,8 +91,8 @@ fn main() ({
                     fn(term) -> term)(([([("list[0] = 3, list[1] = " as str),
                                 ((patina_fmt::display as fn(term) -> term)((second as int))
                                     as term), (" and the other elements were " as str),
-                                ((patina_fmt::debug as fn(term) -> term)((tail as [int; 1]))
-                                    as term)] as [term; 4])] as [[term; 4]; 1])) as term);
+                                ((patina_fmt::debug as fn(term) -> term)((tail as [int])) as
+                                    term)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
     } as ())

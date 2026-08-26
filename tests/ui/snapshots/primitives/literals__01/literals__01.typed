@@ -49,8 +49,8 @@ fn main() ({
                             ((patina_fmt::display as
                                     fn(term) -> term)(
                                 // Integer addition
-                                ((1 as int) + (2 as int) as int)) as term)] as [term; 2])]
-                as [[term; 2]; 1])) as term);
+                                ((1 as int) + (2 as int) as int)) as term)] as [term])] as
+                [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -60,8 +60,8 @@ fn main() ({
                                     fn(term) -> term)(
 
                                 // Integer subtraction
-                                ((1 as int) - (2 as int) as int)) as term)] as [term; 2])]
-                as [[term; 2]; 1])) as term);
+                                ((1 as int) - (2 as int) as int)) as term)] as [term])] as
+                [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -74,7 +74,7 @@ fn main() ({
                                 (1e4 as float)) as term), (", -2.5e-3 is " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)((-(2.5e-3 as float) as float)) as term)]
-                        as [term; 4])] as [[term; 4]; 1])) as term);
+                        as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -85,7 +85,7 @@ fn main() ({
 
                                 // Short-circuiting boolean logic
                                 ((true as bool) && (false as bool) as bool)) as term)] as
-                        [term; 2])] as [[term; 2]; 1])) as term);
+                        [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -93,8 +93,7 @@ fn main() ({
                 fn(term) -> term)(([([("true OR false is " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((true as bool) || (false as bool) as
-                                    bool)) as term)] as [term; 2])] as [[term; 2]; 1])) as
-            term);
+                                    bool)) as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -102,7 +101,7 @@ fn main() ({
                 fn(term) -> term)(([([("NOT true is " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)((!(true as bool) as bool)) as term)] as
-                        [term; 2])] as [[term; 2]; 1])) as term);
+                        [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -112,8 +111,8 @@ fn main() ({
                                     fn(term) -> term)(
 
                                 // Bitwise operations
-                                ((3 as int) & (5 as int) as int)) as term)] as [term; 2])]
-                as [[term; 2]; 1])) as term);
+                                ((3 as int) & (5 as int) as int)) as term)] as [term])] as
+                [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -121,7 +120,7 @@ fn main() ({
                 fn(term) -> term)(([([("0011 OR 0101 is " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)(((3 as int) | (5 as int) as int)) as
-                                term)] as [term; 2])] as [[term; 2]; 1])) as term);
+                                term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -129,7 +128,7 @@ fn main() ({
                 fn(term) -> term)(([([("0011 XOR 0101 is " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)(((3 as int) ^ (5 as int) as int)) as
-                                term)] as [term; 2])] as [[term; 2]; 1])) as term);
+                                term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -137,7 +136,7 @@ fn main() ({
                 fn(term) -> term)(([([("1 << 5 is " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((1 as int) << (5 as int) as int)) as
-                                term)] as [term; 2])] as [[term; 2]; 1])) as term);
+                                term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -145,7 +144,7 @@ fn main() ({
                 fn(term) -> term)(([([("0x80 >> 2 is 0x" as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)(((128 as int) >> (2 as int) as int)) as
-                                term)] as [term; 2])] as [[term; 2]; 1])) as term);
+                                term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -155,8 +154,8 @@ fn main() ({
                                     fn(term) -> term)(
 
                                 // Use underscores to improve readability!
-                                (1000000 as int)) as term)] as [term; 2])] as
-                [[term; 2]; 1])) as term);
+                                (1000000 as int)) as term)] as [term])] as [[term]])) as
+            term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 } as ())

@@ -65,7 +65,7 @@ fn main() ({
                     fn(term) -> term)(([([("The Answer: " as str),
                                 ((patina_fmt::display as
                                         fn(term) -> term)((n as {type error})) as term),
-                                ("!" as str)] as [term; 3])] as [[term; 3]; 1])) as term);
+                                ("!" as str)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
 
@@ -74,8 +74,8 @@ fn main() ({
             ((io::put_chars as
                     fn(term) -> term)(([([("Not interesting... " as str),
                                 ((patina_fmt::display as
-                                        fn(term) -> term)((n as {type error})) as term)] as
-                            [term; 2])] as [[term; 2]; 1])) as term);
+                                        fn(term) -> term)((n as {type error})) as term)] as [term])]
+                    as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
 

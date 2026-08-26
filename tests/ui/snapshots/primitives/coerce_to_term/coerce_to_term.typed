@@ -56,9 +56,6 @@ fn update_map(base: #{str => int})
 
 fn coerce_slice(values: [int]) -> [term] ({ (values as [int]) } as [term])
 
-fn coerce_array(values: [int; (2 as int)])
-    -> [term; (2 as int)] ({ (values as [int; 2]) } as [term; 2])
-
 fn coerce_tuple(value: (int, bool))
     -> (term, term) ({ (value as (int, bool)) } as (term, term))
 

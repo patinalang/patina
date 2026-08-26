@@ -70,14 +70,14 @@ fn inspect(event:
     (match (event as WebEvent) {
         WebEvent::PageLoad => {
             ((io::put_chars as
-                    fn(term) -> term)(([([("page loaded" as str)] as [str; 1])]
-                    as [[str; 1]; 1])) as term);
+                    fn(term) -> term)(([([("page loaded" as str)] as [str])] as
+                    [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
         WebEvent::PageUnload => {
             ((io::put_chars as
-                    fn(term) -> term)(([([("page unloaded" as str)] as
-                            [str; 1])] as [[str; 1]; 1])) as term);
+                    fn(term) -> term)(([([("page unloaded" as str)] as [str])]
+                    as [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
 
@@ -86,16 +86,14 @@ fn inspect(event:
             ((io::put_chars as
                     fn(term) -> term)(([([("pressed \'" as str),
                                 ((patina_fmt::display as fn(term) -> term)((c as char)) as
-                                    term), ("\'." as str)] as [term; 3])] as [[term; 3]; 1])) as
-                term);
+                                    term), ("\'." as str)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
         WebEvent::Paste(s) => {
             ((io::put_chars as
                     fn(term) -> term)(([([("pasted \"" as str),
                                 ((patina_fmt::display as fn(term) -> term)((s as str)) as
-                                    term), ("\"." as str)] as [term; 3])] as [[term; 3]; 1])) as
-                term);
+                                    term), ("\"." as str)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
 
@@ -107,8 +105,7 @@ fn inspect(event:
                                     ((patina_fmt::display as fn(term) -> term)((x as int)) as
                                         term), (", y=" as str),
                                     ((patina_fmt::display as fn(term) -> term)((y as int)) as
-                                        term), ("." as str)] as [term; 5])] as [[term; 5]; 1])) as
-                    term);
+                                        term), ("." as str)] as [term])] as [[term]])) as term);
                 ((io::nl as fn() -> term)() as term);
             } as ());
         }

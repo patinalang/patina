@@ -49,7 +49,7 @@ fn main() ({
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("This function returns and you can see this line."
-                                as str)] as [str; 1])] as [[str; 1]; 1])) as term);
+                                as str)] as [str])] as [[str]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 } as ())

@@ -66,7 +66,7 @@ fn main() ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)(((Unit as Unit) as term as term)) as
-                                term)] as [term; 1])] as [[term; 1]; 1])) as term);
+                                term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -76,7 +76,7 @@ fn main() ({
                                 // a"Elixir.Patina.ByExample.Unit"
 
                                 ((CustomNameUnit as CustomNameUnit) as term as term)) as
-                                term)] as [term; 1])] as [[term; 1]; 1])) as term);
+                                term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -86,7 +86,7 @@ fn main() ({
                                 // a"custom_name"
 
                                 ((NotJustUnits::VariantA as NotJustUnits) as term as term))
-                                as term)] as [term; 1])] as [[term; 1]; 1])) as term);
+                                as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -96,7 +96,7 @@ fn main() ({
                                 // a"variant_a"
 
                                 ((NotJustUnits::VariantB as NotJustUnits) as term as term))
-                                as term)] as [term; 1])] as [[term; 1]; 1])) as term);
+                                as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     // a"variantB"

@@ -58,8 +58,8 @@ fn main() ({
             ((io::put_chars as
                     fn(term) -> term)(([([((patina_fmt::display as
                                         fn(term) -> term)((t as int)) as term),
-                                ("C is above 30 Celsius" as str)] as [term; 2])] as
-                    [[term; 2]; 1])) as term);
+                                ("C is above 30 Celsius" as str)] as [term])] as [[term]]))
+                as term);
             ((io::nl as fn() -> term)() as term);
         }
 
@@ -68,8 +68,8 @@ fn main() ({
             ((io::put_chars as
                     fn(term) -> term)(([([((patina_fmt::display as
                                         fn(term) -> term)((t as int)) as term),
-                                ("C is equal to or below 30 Celsius" as str)] as [term; 2])]
-                    as [[term; 2]; 1])) as term);
+                                ("C is equal to or below 30 Celsius" as str)] as [term])] as
+                    [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
 
@@ -79,16 +79,16 @@ fn main() ({
             ((io::put_chars as
                     fn(term) -> term)(([([((patina_fmt::display as
                                         fn(term) -> term)((t as int)) as term),
-                                ("F is above 86 Fahrenheit" as str)] as [term; 2])] as
-                    [[term; 2]; 1])) as term);
+                                ("F is above 86 Fahrenheit" as str)] as [term])] as
+                    [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
         Temperature::Fahrenheit(t) => {
             ((io::put_chars as
                     fn(term) -> term)(([([((patina_fmt::display as
                                         fn(term) -> term)((t as int)) as term),
-                                ("F is equal to or below 86 Fahrenheit" as str)] as
-                            [term; 2])] as [[term; 2]; 1])) as term);
+                                ("F is equal to or below 86 Fahrenheit" as str)] as [term])]
+                    as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
     } as ())

@@ -64,10 +64,9 @@ fn double_first(list: [str])
 } as {type error})
 
 fn main() ({
-    let numbers = ([("42" as str), ("93" as str), ("18" as str)] as [str; 3]);
-    let empty = ([] as [str; 0]);
-    let strings =
-        ([("tofu" as str), ("93" as str), ("18" as str)] as [str; 3]);
+    let numbers = ([("42" as str), ("93" as str), ("18" as str)] as [str]);
+    let empty = ([] as [str]);
+    let strings = ([("tofu" as str), ("93" as str), ("18" as str)] as [str]);
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("The first doubled is " as str),
@@ -76,8 +75,8 @@ fn main() ({
 
                                 ((double_first as
                                         fn([str]) -> {type error} {double_first})((numbers as
-                                        [str; 3])) as {type error})) as term)] as [term; 2])] as
-                [[term; 2]; 1])) as term);
+                                        [str])) as {type error})) as term)] as [term])] as
+                [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -85,9 +84,9 @@ fn main() ({
                 fn(term) -> term)(([([("The first doubled is " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)(((double_first as
-                                        fn([str]) -> {type error} {double_first})((empty as
-                                        [str; 0])) as {type error})) as term)] as [term; 2])] as
-                [[term; 2]; 1])) as term);
+                                        fn([str]) -> {type error} {double_first})((empty as [str]))
+                                    as {type error})) as term)] as [term])] as [[term]])) as
+            term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -96,8 +95,8 @@ fn main() ({
                             ((patina_fmt::debug as
                                     fn(term) -> term)(((double_first as
                                         fn([str]) -> {type error} {double_first})((strings as
-                                        [str; 3])) as {type error})) as term)] as [term; 2])] as
-                [[term; 2]; 1])) as term);
+                                        [str])) as {type error})) as term)] as [term])] as
+                [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 } as ())

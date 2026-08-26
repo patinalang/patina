@@ -124,13 +124,13 @@ fn eat(food:
                     fn(term) -> term)(([([("Mmm. I love " as str),
                                 ((patina_fmt::debug as
                                         fn(term) -> term)((food as {type error})) as term)] as
-                            [term; 2])] as [[term; 2]; 1])) as term);
+                            [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
         None => {
             ((io::put_chars as
                     fn(term) -> term)(([([("Oh no! It wasn\'t edible." as str)]
-                            as [str; 1])] as [[str; 1]; 1])) as term);
+                            as [str])] as [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
     } as ())

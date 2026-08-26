@@ -66,22 +66,21 @@ fn main() ({
                             ((patina_fmt::debug as
                                     fn(term) -> term)(
 
-                                (x as int)) as term)] as [term; 2])] as [[term; 2]; 1])) as
-            term);
+                                (x as int)) as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("y is " as str),
                             ((patina_fmt::debug as fn(term) -> term)((y as int)) as
-                                term)] as [term; 2])] as [[term; 2]; 1])) as term);
+                                term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("z is " as str),
                             ((patina_fmt::debug as fn(term) -> term)((z as ())) as
-                                term)] as [term; 2])] as [[term; 2]; 1])) as term);
+                                term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 } as ())

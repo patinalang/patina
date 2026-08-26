@@ -52,7 +52,7 @@ fn main() ({
                 ({
                     ((io::put_chars as
                             fn(term) -> term)(([([("Providing lemon as fallback" as
-                                            str)] as [str; 1])] as [[str; 1]; 1])) as term);
+                                            str)] as [str])] as [[str]])) as term);
                     ((io::nl as fn() -> term)() as term);
                 } as ());
                 (Fruit::Lemon as Fruit)
@@ -68,7 +68,7 @@ fn main() ({
                 fn(term) -> term)(([([("first_available_fruit is: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((first_available_fruit as {type error}))
-                                as term)] as [term; 2])] as [[term; 2]; 1])) as term);
+                                as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -76,7 +76,7 @@ fn main() ({
                 fn(term) -> term)(([([("my_fruit is: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((my_fruit as {type error})) as term)] as
-                        [term; 2])] as [[term; 2]; 1])) as term);
+                        [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     // Providing lemon as fallback
@@ -96,7 +96,7 @@ fn main() ({
                 fn(term) -> term)(([([("should_be_apple is: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((should_be_apple as {type error})) as
-                                term)] as [term; 2])] as [[term; 2]; 1])) as term);
+                                term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -104,7 +104,7 @@ fn main() ({
                 fn(term) -> term)(([([("my_apple is unchanged: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((my_apple as {type error})) as term)] as
-                        [term; 2])] as [[term; 2]; 1])) as term);
+                        [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     // The output is a follows. Note that the closure `get_lemon_as_fallback` is not invoked

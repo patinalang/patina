@@ -62,8 +62,7 @@ impl Marker for Marked {
             ((io::put_chars as
                     fn(term) -> term)(([([("Marker::value(" as str),
                                 ((patina_fmt::debug as fn(term) -> term)((self as Marked))
-                                    as term), (")" as str)] as [term; 3])] as [[term; 3]; 1]))
-                as term);
+                                    as term), (")" as str)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
         ((self as Marked).value as int)
@@ -89,7 +88,7 @@ impl <T> Contains<int, T> for UnboundContainer {
                                 ((patina_fmt::debug as fn(term) -> term)((a as int)) as
                                     term), (", " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((b as T)) as term),
-                                (")" as str)] as [term; 7])] as [[term; 7]; 1])) as term);
+                                (")" as str)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
         (true as bool)
@@ -109,8 +108,7 @@ impl <T> Contains<int, T> for BoundContainer where T: Marker {
                                 ((patina_fmt::debug as fn(term) -> term)((a as int)) as
                                     term), (", " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((value as T)) as
-                                    term), (")" as str)] as [term; 7])] as [[term; 7]; 1])) as
-                term);
+                                    term), (")" as str)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
         (((value as T).value() as int) > (0 as int) as bool)
@@ -131,7 +129,7 @@ impl <T> Contains<int, Wrapped<T>> for NestedContainer {
                                     term), (", " as str),
                                 ((patina_fmt::debug as
                                         fn(term) -> term)((wrapped as Wrapped<T>)) as term),
-                                (")" as str)] as [term; 7])] as [[term; 7]; 1])) as term);
+                                (")" as str)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
         (true as bool)
@@ -144,8 +142,7 @@ fn main() ({
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)(((UnboundContainer as
                                         UnboundContainer).contains((1 as int), (false as bool)) as
-                                    bool)) as term)] as [term; 1])] as [[term; 1]; 1])) as
-            term);
+                                    bool)) as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -154,7 +151,7 @@ fn main() ({
                                     fn(term) -> term)(((BoundContainer as
                                         BoundContainer).contains((1 as int),
                                     (Marked { value: (2 as int) } as Marked)) as bool)) as
-                                term)] as [term; 1])] as [[term; 1]; 1])) as term);
+                                term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -163,8 +160,7 @@ fn main() ({
                                     fn(term) -> term)(((NestedContainer as
                                         NestedContainer).contains((1 as int),
                                     (Wrapped { value: (false as bool) } as Wrapped<bool>)) as
-                                    bool)) as term)] as [term; 1])] as [[term; 1]; 1])) as
-            term);
+                                    bool)) as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 } as ())

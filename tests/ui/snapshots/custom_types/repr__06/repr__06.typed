@@ -71,8 +71,8 @@ fn main() ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)(((TransparentEnum::Unit as
-                                        TransparentEnum) as term as term)) as term)] as [term; 1])]
-                as [[term; 1]; 1])) as term);
+                                        TransparentEnum) as term as term)) as term)] as [term])] as
+                [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -84,8 +84,7 @@ fn main() ({
                                 (((TransparentEnum::TupleStyle as
                                             fn(int, str) -> TransparentEnum {TransparentEnum::TupleStyle})((200
                                             as int), ("hello" as str)) as TransparentEnum) as term as
-                                    term)) as term)] as [term; 1])] as [[term; 1]; 1])) as
-            term);
+                                    term)) as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -96,8 +95,8 @@ fn main() ({
 
                                 ((TransparentEnum::StructStyle {
                                         point: (Point { x: (1 as int), y: (2 as int) } as Point) }
-                                        as TransparentEnum) as term as term)) as term)] as
-                        [term; 1])] as [[term; 1]; 1])) as term);
+                                        as TransparentEnum) as term as term)) as term)] as [term])]
+                as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     // #{ a"__struct__" => a"Elixir.Patina.ByExample.Point", a"x" => 1, a"y" => 2 }

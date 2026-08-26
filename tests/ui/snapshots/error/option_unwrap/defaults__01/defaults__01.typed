@@ -59,7 +59,7 @@ fn main() ({
                 fn(term) -> term)(([([("first_available_fruit: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((first_available_fruit as {type error}))
-                                as term)] as [term; 2])] as [[term; 2]; 1])) as term);
+                                as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     // first_available_fruit: Some(Orange)

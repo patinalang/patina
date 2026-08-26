@@ -49,7 +49,7 @@ fn main() ({
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("Tell me what type of person you are"
-                                as str)] as [str; 1])] as [[str; 1]; 1])) as term);
+                                as str)] as [str])] as [[str]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 
@@ -57,7 +57,7 @@ fn main() ({
         0 => {
             ((io::put_chars as
                     fn(term) -> term)(([([("I haven\'t celebrated my first birthday yet"
-                                    as str)] as [str; 1])] as [[str; 1]; 1])) as term);
+                                    as str)] as [str])] as [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
 
@@ -73,14 +73,14 @@ fn main() ({
             ((io::put_chars as
                     fn(term) -> term)(([([("I\'m a child of age " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((n as int)) as
-                                    term)] as [term; 2])] as [[term; 2]; 1])) as term);
+                                    term)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
         n@13...19 => {
             ((io::put_chars as
                     fn(term) -> term)(([([("I\'m a teen of age " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((n as int)) as
-                                    term)] as [term; 2])] as [[term; 2]; 1])) as term);
+                                    term)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
 
@@ -89,7 +89,7 @@ fn main() ({
             ((io::put_chars as
                     fn(term) -> term)(([([("I\'m a teen of age " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((n as int)) as
-                                    term)] as [term; 2])] as [[term; 2]; 1])) as term);
+                                    term)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
 
@@ -98,7 +98,7 @@ fn main() ({
             ((io::put_chars as
                     fn(term) -> term)(([([("I\'m an old person of age " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((n as int)) as
-                                    term)] as [term; 2])] as [[term; 2]; 1])) as term);
+                                    term)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
     } as ())

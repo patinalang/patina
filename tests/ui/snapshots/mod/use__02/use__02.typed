@@ -49,7 +49,7 @@ fn function() ({
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("called `function()`" as str)] as
-                        [str; 1])] as [[str; 1]; 1])) as term);
+                        [str])] as [[str]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 } as ())
@@ -60,7 +60,7 @@ mod Deeply {
             ({
                 ((io::put_chars as
                         {type error})(([([("called `Deeply::Nested::function()`" as
-                                        str)] as [str; 1])] as [[str; 1]; 1])) as {type error});
+                                        str)] as [str])] as [[str]])) as {type error});
                 ((io::nl as {type error})() as {type error});
             } as ());
         } as ())
@@ -72,8 +72,8 @@ fn main() ({
     ((other_function as fn() {Deeply::Nested::function})() as ());
     ({
         ((io::put_chars as
-                fn(term) -> term)(([([("Entering block" as str)] as [str; 1])]
-                as [[str; 1]; 1])) as term);
+                fn(term) -> term)(([([("Entering block" as str)] as [str])] as
+                [[str]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 
@@ -87,8 +87,8 @@ fn main() ({
         ((function as {type error})() as {type error});
         ({
             ((io::put_chars as
-                    fn(term) -> term)(([([("Leaving block" as str)] as
-                            [str; 1])] as [[str; 1]; 1])) as term);
+                    fn(term) -> term)(([([("Leaving block" as str)] as [str])]
+                    as [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
 

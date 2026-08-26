@@ -66,7 +66,7 @@ fn main() ({
                             ((patina_fmt::debug as fn(term) -> term)((y as BasicEnum))
                                 as term), ("\n" as str),
                             ((patina_fmt::debug as fn(term) -> term)((z as BasicEnum))
-                                as term)] as [term; 5])] as [[term; 5]; 1])) as term);
+                                as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 } as ())

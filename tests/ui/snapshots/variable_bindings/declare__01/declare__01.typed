@@ -58,8 +58,8 @@ fn main() ({
                             ((patina_fmt::display as
                                     fn(term) -> term)(
 
-                                (a_binding as int)) as term)] as [term; 2])] as
-                [[term; 2]; 1])) as term);
+                                (a_binding as int)) as term)] as [term])] as [[term]])) as
+            term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 
@@ -71,8 +71,8 @@ fn main() ({
                                     fn(term) -> term)(
 
                                 // Error! Use of uninitialized binding
-                                (another_binding as term)) as term)] as [term; 2])] as
-                [[term; 2]; 1])) as term);
+                                (another_binding as term)) as term)] as [term])] as
+                [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     // FIXME ^ Comment out this line
@@ -84,8 +84,8 @@ fn main() ({
                             ((patina_fmt::display as
                                     fn(term) -> term)(
 
-                                (another_binding as term)) as term)] as [term; 2])] as
-                [[term; 2]; 1])) as term);
+                                (another_binding as term)) as term)] as [term])] as
+                [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 } as ())

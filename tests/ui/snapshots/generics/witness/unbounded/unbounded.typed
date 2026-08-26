@@ -54,8 +54,7 @@ impl <T> Pair<T> {
             ((io::put_chars as
                     fn(term) -> term)(([([("Pair::len(" as str),
                                 ((patina_fmt::debug as fn(term) -> term)((self as Pair<T>))
-                                    as term), (")" as str)] as [term; 3])] as [[term; 3]; 1]))
-                as term);
+                                    as term), (")" as str)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
         (2 as int)
@@ -68,7 +67,7 @@ fn main() ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)(((p as Pair<int>).len() as int)) as term)]
-                        as [term; 1])] as [[term; 1]; 1])) as term);
+                        as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 } as ())

@@ -49,8 +49,7 @@ fn main() ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)(((AllUnits::Foo as AllUnits) as atom as
-                                    {type error})) as term)] as [term; 1])] as [[term; 1]; 1]))
-            as term);
+                                    {type error})) as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ())
     // a"Elixir.Patina.ByExample.AllUnits.Foo"

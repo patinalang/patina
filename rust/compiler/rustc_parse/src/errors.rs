@@ -499,6 +499,21 @@ pub(crate) struct MapRestNotFinal {
 }
 
 #[derive(Diagnostic)]
+#[diag("fixed-size array types [T; N] are not supported")]
+#[note("patina only supports unbounded list type `[T]`")]
+pub(crate) struct FixedSizeArrayType {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("repeated list syntax is not supported")]
+pub(crate) struct RepeatedListSyntax {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag("map update `..base` must be the final entry")]
 pub(crate) struct MapUpdateNotFinal {
     #[primary_span]

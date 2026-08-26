@@ -75,7 +75,7 @@ fn main() ({
                                             fn(term) -> term)(("1 + 2" as str)) as term),
                                     (" = " as str),
                                     ((patina_fmt::display as fn(term) -> term)((val as int)) as
-                                        term)] as [term; 3])] as [[term; 3]; 1])) as term);
+                                        term)] as [term])] as [[term]])) as term);
                 ((io::nl as fn() -> term)() as term);
             } as ());
         } as ())
@@ -88,7 +88,7 @@ fn main() ({
                                                 fn(term) -> term)(("3 + 4" as str)) as term),
                                         (" = " as str),
                                         ((patina_fmt::display as fn(term) -> term)((val as int)) as
-                                            term)] as [term; 3])] as [[term; 3]; 1])) as term);
+                                            term)] as [term])] as [[term]])) as term);
                     ((io::nl as fn() -> term)() as term);
                 } as ());
             } as ())
@@ -101,7 +101,7 @@ fn main() ({
                                                 fn(term) -> term)(("(2 * 3) + 1" as str)) as term),
                                         (" = " as str),
                                         ((patina_fmt::display as fn(term) -> term)((val as int)) as
-                                            term)] as [term; 3])] as [[term; 3]; 1])) as term);
+                                            term)] as [term])] as [[term]])) as term);
                     ((io::nl as fn() -> term)() as term);
                 } as ());
             } as ())

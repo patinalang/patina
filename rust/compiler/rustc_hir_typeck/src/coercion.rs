@@ -261,8 +261,6 @@ impl<'f, 'tcx> Coerce<'f, 'tcx> {
         if matches!(
             (a.kind(), b.kind()),
             (ty::Slice(_), ty::Slice(_))
-                | (ty::Array(..), ty::Slice(_))
-                | (ty::Array(..), ty::Array(..))
                 | (ty::Tuple(_), ty::Tuple(_))
                 | (ty::Map(..), ty::Map(..))
         ) && self.has_term_components(b)
@@ -290,14 +288,6 @@ impl<'f, 'tcx> Coerce<'f, 'tcx> {
         // ultimately fall back to some form of subtyping.
         if a.is_ty_var() {
             return self.coerce_from_inference_variable(a, b);
-        }
-
-        // Coercing from [T; N] to [T] is allowed. This is temporary, as long-term we're going to
-        // drop array as a separate type.
-        if let (&ty::Array(a_elem, _), &ty::Slice(b_elem)) = (a.kind(), b.kind()) {
-            return self
-                .unify_raw(a_elem, b_elem, ForceLeakCheck::No)
-                .and_then(|InferOk { obligations, .. }| success(vec![], b, obligations));
         }
 
         // Consider coercing the subtype to a DST

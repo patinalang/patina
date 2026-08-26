@@ -53,8 +53,8 @@ fn main() ({
     (if ((Foo::Bar as Foo) == (a as Foo) as {type error}) {
         ({
             ((io::put_chars as
-                    fn(term) -> term)(([([("a is foobar" as str)] as [str; 1])]
-                    as [[str; 1]; 1])) as term);
+                    fn(term) -> term)(([([("a is foobar" as str)] as [str])] as
+                    [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
         // ^-- this causes a compile-time error. Use `if let` instead.

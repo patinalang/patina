@@ -83,8 +83,8 @@ fn main() ({
                                     fn(term) -> term)(
 
                                 // Print debug struct
-                                (peter as Person)) as term)] as [term; 1])] as
-                [[term; 1]; 1])) as term);
+                                (peter as Person)) as term)] as [term])] as [[term]])) as
+            term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 
@@ -103,7 +103,7 @@ fn main() ({
                                 ((point as Point).x as float)) as term), (", " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((point as Point).y as float)) as term),
-                            (")" as str)] as [term; 5])] as [[term; 5]; 1])) as term);
+                            (")" as str)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 
@@ -123,8 +123,7 @@ fn main() ({
                             (", " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((bottom_right as Point).y as float)) as
-                                term), (")" as str)] as [term; 5])] as [[term; 5]; 1])) as
-            term);
+                                term), (")" as str)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 
@@ -157,7 +156,7 @@ fn main() ({
                                 ((pair as Pair).0 as int)) as term), (" and " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)(((pair as Pair).1 as float)) as term)] as
-                        [term; 4])] as [[term; 4]; 1])) as term);
+                        [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 
@@ -171,7 +170,7 @@ fn main() ({
 
                                 (integer as int)) as term), (" and " as str),
                             ((patina_fmt::debug as fn(term) -> term)((decimal as float))
-                                as term)] as [term; 4])] as [[term; 4]; 1])) as term);
+                                as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 } as ())

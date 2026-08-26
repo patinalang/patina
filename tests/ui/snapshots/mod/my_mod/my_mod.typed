@@ -48,7 +48,7 @@ mod Inaccessible {
         ({
             ((io::put_chars as
                     {type error})(([([("called `MyMod::Inaccessible::public_function()`"
-                                    as str)] as [str; 1])] as [[str; 1]; 1])) as {type error});
+                                    as str)] as [str])] as [[str]])) as {type error});
             ((io::nl as {type error})() as {type error});
         } as ());
     } as ())
@@ -58,7 +58,7 @@ mod Nested {
         ({
             ((io::put_chars as
                     {type error})(([([("called `MyMod::Nested::function()`" as
-                                    str)] as [str; 1])] as [[str; 1]; 1])) as {type error});
+                                    str)] as [str])] as [[str]])) as {type error});
             ((io::nl as {type error})() as {type error});
         } as ());
     } as ())
@@ -67,7 +67,7 @@ mod Nested {
         ({
             ((io::put_chars as
                     {type error})(([([("called `MyMod::Nested::private_function()`"
-                                    as str)] as [str; 1])] as [[str; 1]; 1])) as {type error});
+                                    as str)] as [str])] as [[str]])) as {type error});
             ((io::nl as {type error})() as {type error});
         } as ());
     } as ())

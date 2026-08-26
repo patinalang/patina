@@ -10,8 +10,6 @@ pub fn update_map(base: #{str => int}) -> #{str => term} {
 
 pub fn coerce_slice(values: [int]) -> [term] { values }
 
-pub fn coerce_array(values: [int; 2]) -> [term; 2] { values }
-
 pub fn coerce_tuple(value: (int, bool)) -> (term, term) { value }
 
 pub fn coerce_nested_map(base: #{str => #{str => int}})

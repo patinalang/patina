@@ -55,8 +55,8 @@ fn main() ({
     (if (let Foo::Bar = (a as Foo) as bool) {
         ({
             ((io::put_chars as
-                    fn(term) -> term)(([([("a is foobar" as str)] as [str; 1])]
-                    as [[str; 1]; 1])) as term);
+                    fn(term) -> term)(([([("a is foobar" as str)] as [str])] as
+                    [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
     } as ())
@@ -66,8 +66,8 @@ fn main() ({
     (if (let Foo::Bar = (b as Foo) as bool) {
         ({
             ((io::put_chars as
-                    fn(term) -> term)(([([("b is foobar" as str)] as [str; 1])]
-                    as [[str; 1]; 1])) as term);
+                    fn(term) -> term)(([([("b is foobar" as str)] as [str])] as
+                    [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
     } as ())
@@ -79,7 +79,7 @@ fn main() ({
             ((io::put_chars as
                     fn(term) -> term)(([([("c is " as str),
                                 ((patina_fmt::display as fn(term) -> term)((value as int))
-                                    as term)] as [term; 2])] as [[term; 2]; 1])) as term);
+                                    as term)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
     } as ())
@@ -89,7 +89,7 @@ fn main() ({
         ({
             ((io::put_chars as
                     fn(term) -> term)(([([("c is one hundred" as str)] as
-                            [str; 1])] as [[str; 1]; 1])) as term);
+                            [str])] as [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
     } as ())

@@ -56,7 +56,7 @@ fn main() ({
                 fn(term) -> term)(([([("Sum: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((sum as {type error})) as term)] as
-                        [term; 2])] as [[term; 2]; 1])) as term);
+                        [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
 } as ())

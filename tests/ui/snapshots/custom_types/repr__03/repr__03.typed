@@ -66,7 +66,7 @@ fn main() ({
                                 // In every representation, unit variants with are always encoded
                                 // directly as atoms.
                                 ((TaggedEnum::Unit as TaggedEnum) as term as term)) as
-                                term)] as [term; 1])] as [[term; 1]; 1])) as term);
+                                term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -78,8 +78,8 @@ fn main() ({
                                 // Both tuple- and struct-style variants are represented as tagged tuples.
                                 (((TaggedEnum::TupleStyle as
                                             fn(str) -> TaggedEnum {TaggedEnum::TupleStyle})(("hello" as
-                                            str)) as TaggedEnum) as term as term)) as term)] as
-                        [term; 1])] as [[term; 1]; 1])) as term);
+                                            str)) as TaggedEnum) as term as term)) as term)] as [term])]
+                as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -89,8 +89,8 @@ fn main() ({
                                 // (a"Elixir.Patina.ByExample.TaggedEnum.TupleStyle", "hello")
 
                                 ((TaggedEnum::StructStyle { x: (1 as int), y: (2 as int) }
-                                        as TaggedEnum) as term as term)) as term)] as [term; 1])] as
-                [[term; 1]; 1])) as term);
+                                        as TaggedEnum) as term as term)) as term)] as [term])] as
+                [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -105,7 +105,7 @@ fn main() ({
                                 (((TaggedEnum::WithUnitElem as
                                             fn((), int) -> TaggedEnum {TaggedEnum::WithUnitElem})((() as
                                             ()), (42 as int)) as TaggedEnum) as term as term)) as term)]
-                        as [term; 1])] as [[term; 1]; 1])) as term);
+                        as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -116,8 +116,8 @@ fn main() ({
 
                                 (((TaggedEnum::WithOneUnitElem as
                                             fn(()) -> TaggedEnum {TaggedEnum::WithOneUnitElem})((() as
-                                            ())) as TaggedEnum) as term as term)) as term)] as
-                        [term; 1])] as [[term; 1]; 1])) as term);
+                                            ())) as TaggedEnum) as term as term)) as term)] as [term])]
+                as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -129,8 +129,8 @@ fn main() ({
                                 // You can set a custom tag by specifying it with `#[repr(name = "...")]`.
                                 (((TaggedEnum::WithCustomTag as
                                             fn(int) -> TaggedEnum {TaggedEnum::WithCustomTag})((42 as
-                                            int)) as TaggedEnum) as term as term)) as term)] as
-                        [term; 1])] as [[term; 1]; 1])) as term);
+                                            int)) as TaggedEnum) as term as term)) as term)] as [term])]
+                as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     // (a"my_tag", 42)

@@ -71,8 +71,8 @@ fn main() ({
                                 // because of the bounds.
                                 ((red as
                                         fn(Cardinal) -> str {red::<Cardinal>})((cardinal as
-                                        Cardinal)) as str)) as term)] as [term; 2])] as
-                [[term; 2]; 1])) as term);
+                                        Cardinal)) as str)) as term)] as [term])] as [[term]])) as
+            term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -81,8 +81,7 @@ fn main() ({
                             ((patina_fmt::display as
                                     fn(term) -> term)(((blue as
                                         fn(BlueJay) -> str {blue::<BlueJay>})((blue_jay as BlueJay))
-                                    as str)) as term)] as [term; 2])] as [[term; 2]; 1])) as
-            term);
+                                    as str)) as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     //println!("A turkey is {}", red(_turkey));

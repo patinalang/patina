@@ -69,13 +69,13 @@ fn main() ({
             Beginner => {
             ((io::put_chars as
                     fn(term) -> term)(([([("Beginners are starting their learning journey!"
-                                    as str)] as [str; 1])] as [[str; 1]; 1])) as term);
+                                    as str)] as [str])] as [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
         Advanced => {
             ((io::put_chars as
                     fn(term) -> term)(([([("Advanced learners are mastering their subjects..."
-                                    as str)] as [str; 1])] as [[str; 1]; 1])) as term);
+                                    as str)] as [str])] as [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
     } as ())
@@ -86,13 +86,13 @@ fn main() ({
             Student => {
             ((io::put_chars as
                     fn(term) -> term)(([([("Students are acquiring knowledge!"
-                                    as str)] as [str; 1])] as [[str; 1]; 1])) as term);
+                                    as str)] as [str])] as [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
         Teacher => {
             ((io::put_chars as
                     fn(term) -> term)(([([("Teachers are spreading knowledge!"
-                                    as str)] as [str; 1])] as [[str; 1]; 1])) as term);
+                                    as str)] as [str])] as [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
     } as ())

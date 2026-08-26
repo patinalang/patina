@@ -75,7 +75,7 @@ fn main() ({
                                 // The field names of a tuple-structs and -variants are atomized integers.
                                 ((records::get_field_names as
                                         fn(term) -> term)((point as NativeRecordEnum)) as term)) as
-                                term)] as [term; 1])] as [[term; 1]; 1])) as term);
+                                term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     // [a"0", a"1"]
@@ -87,7 +87,7 @@ fn main() ({
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)(((records::get_field_names as
                                         fn(term) -> term)((rect as NativeRecordStruct)) as term)) as
-                                term)] as [term; 1])] as [[term; 1]; 1])) as term);
+                                term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     // [a"foo"]
