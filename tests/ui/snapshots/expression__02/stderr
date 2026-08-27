@@ -18,8 +18,5 @@ help: use `let _ = ...` to ignore the resulting value
 LL |     let _ = x + 1;
    |     +++++++
 
-warning: [{"tests/ui/src/expression__02.pt",
-           [{{10,5},sys_core_fold,{ignored,{result,{erlang,'+',2}}}}]}]
-
-warning: 3 warnings emitted
+warning: 2 warnings emitted
 

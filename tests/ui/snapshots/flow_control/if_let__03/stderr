@@ -1,8 +1,0 @@
-error: THIR expression kind not yet implemented: Let { expr: e9, pat: Pat { ty: Foo, span: tests/ui/src/flow_control/if_let__03.pt:18:12: 18:20 (#0), extra: None, kind: Variant { adt_def: Foo, args: [], variant_index: 0, subpatterns: [] } } }
-  --> tests/ui/src/flow_control/if_let__03.pt:18:8
-   |
-LL |     if let Foo::Bar = a {
-   |        ^^^^^^^^^^^^^^^^
-
-error: aborting due to 1 previous error
-

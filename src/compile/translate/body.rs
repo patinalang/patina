@@ -791,6 +791,51 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         then: ExprId,
         else_opt: Option<ExprId>,
     ) -> eaf::Expr<'arena> {
+        if let ExprKind::Let { expr: scrutinee, pat } = &self.resolve_expr(cond).kind {
+            let scrutinee = self.translate_expr(*scrutinee);
+            let ((then_pattern, then_body, then_always_diverges), then_scope) =
+                self.with_scope(|cx| {
+                    let pattern = cx.translate_pattern(pat);
+                    let always_diverges = cx.is_always_diverging_expr(then);
+                    let body = cx.translate_expr(then);
+                    (pattern, body, always_diverges)
+                });
+            let then_span = self.resolve_expr(then).span;
+
+            let ((else_body, else_span, else_always_diverges), else_scope) =
+                self.with_scope(|cx| match else_opt {
+                    Some(else_expr) => (
+                        cx.translate_expr(else_expr),
+                        cx.resolve_expr(else_expr).span,
+                        cx.is_always_diverging_expr(else_expr),
+                    ),
+                    None => (cx.translator.afb.expr_unit(expr.span), expr.span, false),
+                });
+
+            let afb = &self.translator.afb;
+            let translated: SmallVec<[TranslatedArm<'arena>; 4]> = [
+                TranslatedArm {
+                    span: then_span,
+                    pattern: then_pattern,
+                    guard: None,
+                    body: then_body,
+                    scope: then_scope,
+                    always_diverges: then_always_diverges,
+                },
+                TranslatedArm {
+                    span: else_span,
+                    pattern: afb.pat_var(else_span, kw::Underscore),
+                    guard: None,
+                    body: else_body,
+                    scope: else_scope,
+                    always_diverges: else_always_diverges,
+                },
+            ]
+            .into_iter()
+            .collect();
+            return self.translate_to_case(expr.span, scrutinee, translated);
+        }
+
         let cond = self.translate_expr(cond);
 
         let (then_body, then_scope) = self.with_scope(|cx| cx.translate_expr(then));

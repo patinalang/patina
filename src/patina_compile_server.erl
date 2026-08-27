@@ -59,11 +59,12 @@ handle_request(Sock, Op, Eaf) ->
     end.
 
 compile_forms(Forms) ->
-    case compile:noenv_forms(Forms, [binary, return, to_asm, no_postopt]) of
+    CompileOpts = [binary, return, nowarn_opportunistic],
+    case compile:noenv_forms(Forms, [to_asm, no_postopt | CompileOpts]) of
         {ok, _Mod, Asm0, Warnings0} ->
             {ok, Asm1} = beam_a:module(Asm0, []),
             Asm2 = rewrite_asm(Asm1),
-            case compile:noenv_forms(Asm2, [binary, return, from_asm]) of
+            case compile:noenv_forms(Asm2, [from_asm | CompileOpts]) of
                 {ok, Mod, Asm, Warnings1} ->
                     {ok, Mod, Asm, lists:uniq(Warnings0 ++ Warnings1)};
                 {error, Errors, Warnings1} ->
