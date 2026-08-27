@@ -1,0 +1,33 @@
+error: arbitrary expressions aren't allowed in patterns
+  --> tests/ui/src/flow_control/errors/or_pattern_rejected_contexts.pt:9:11
+   |
+LL |         #{(1 | 2) => value, ..} => value,
+   |           ^^^^^^^
+   |
+   = note: the `expr` fragment specifier forces the metavariable's content to be an expression
+
+error[E0005]: refutable pattern in function argument
+  --> tests/ui/src/flow_control/errors/or_pattern_rejected_contexts.pt:1:46
+   |
+LL | pub fn reject_or_pattern_function_parameter((0 | 1): int) {}
+   |                                              ^^^^^ patterns `..=-1_isize` and `2_isize..` not covered
+   |
+   = note: the matched value is of type `int`
+
+error[E0005]: refutable pattern in local binding
+  --> tests/ui/src/flow_control/errors/or_pattern_rejected_contexts.pt:4:10
+   |
+LL |     let (0 | 1) = value;
+   |          ^^^^^ patterns `..=-1_isize` and `2_isize..` not covered
+   |
+   = note: `let` bindings require an "irrefutable pattern", like a `struct` or an `enum` with only one variant
+   = note: for more information, visit https://doc.rust-lang.org/book/ch19-02-refutability.html
+   = note: the matched value is of type `int`
+help: you might want to use `if let` to ignore the variants that aren't matched
+   |
+LL |     if let (0 | 1) = value { todo!() };
+   |     ++                     +++++++++++
+
+error: aborting due to 3 previous errors
+
+For more information about this error, try `rustc --explain E0005`.

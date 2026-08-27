@@ -37,8 +37,8 @@ list_pattern(_values@0_0) ->
             {};
         _ ->
             _branch_value@3_0 = begin '$patina_marker':return(0) end,
-            _second@2_1 = {},
             _first@1_1 = {},
+            _second@2_1 = {},
             _branch_value@3_0
     end,
     _first@1_1 + _second@2_1.

@@ -39,11 +39,16 @@ macro_rules! println {
     {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
 }
 
-fn has_expected_status(map: #{str => int})
+fn reject_or_pattern_function_parameter(0 | 1: int) ({ } as ())
+
+fn reject_or_pattern_plain_let(value:
+        int) ({ let 0 | 1 = (value as int); } as ())
+
+fn reject_or_pattern_map_key(map: #{int => int})
     ->
-        bool ({
-    (match (map as #{str => int}) {
-        #{"status" => 1 | 2, ..} => (true as bool),
-        _ => (false as bool),
-    } as bool)
-} as bool)
+        int ({
+    (match (map as #{int => int}) {
+        #{<bad-literal> => value, ..} => (value as int),
+        _ => (0 as int),
+    } as int)
+} as int)

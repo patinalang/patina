@@ -1,7 +1,7 @@
 use rustc_abi::{FieldIdx, VariantIdx};
 use rustc_ast::LitKind;
 use rustc_data_structures::fx::FxIndexMap;
-use rustc_data_structures::smallvec::SmallVec;
+use rustc_data_structures::smallvec::{SmallVec, smallvec};
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::LocalDefId;
 use rustc_hir::{BindingMode, HirId, Lit};
@@ -10,7 +10,7 @@ use rustc_middle::middle::region;
 use rustc_middle::mir::{AssignOp, BinOp, UnOp};
 use rustc_middle::span_bug;
 use rustc_middle::thir::{
-    self, Arm, BlockId, Expr, ExprId, ExprKind, LocalVarId, Pat, PatKind, StmtId,
+    self, Arm, BlockId, Expr, ExprId, ExprKind, LocalVarId, MapFieldPat, Pat, PatKind, StmtId,
 };
 use rustc_middle::ty::{self, Ty, TyCtxt};
 use rustc_span::{Span, Symbol, kw, sym};
@@ -21,6 +21,8 @@ use crate::compile::translate::{ModuleParts, Translator, Witness};
 use crate::erlang::abstract_format as eaf;
 use crate::{not_implemented, span_fatal};
 
+pub(super) type Patterns<'arena> = SmallVec<[eaf::Pattern<'arena>; 1]>;
+
 pub(crate) struct TranslatedBody<'arena> {
     pub params: SmallVec<[eaf::Pattern<'arena>; 8]>,
     pub value: eaf::Expr<'arena>,
@@ -28,7 +30,7 @@ pub(crate) struct TranslatedBody<'arena> {
 
 struct TranslatedArm<'arena> {
     span: Span,
-    pattern: eaf::Pattern<'arena>,
+    patterns: Patterns<'arena>,
     guard: Option<eaf::Expr<'arena>>,
     body: eaf::Expr<'arena>,
     scope: Scope,
@@ -300,38 +302,38 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 let rhs = self.translate_expr(initializer);
 
                 let Some(else_block) = else_block else {
-                    let lhs = self.translate_pattern(pattern);
+                    let lhs = self.translate_single_pattern(pattern);
                     return Some(afb.expr_match(span, lhs, rhs));
                 };
 
                 self.declare_vars_from_pattern(pattern);
 
-                let ((success_pattern, success_body), success_scope) =
-                    self.with_scope(|cx| (cx.translate_pattern(pattern), afb.expr_unit(span)));
-
-                let (else_body, else_scope) = self.with_scope(|cx| cx.translate_block(else_block));
                 let else_span = self.thir[else_block].span;
+                let ((success_patterns, success_body), success_scope) = self.with_scope(|cx| {
+                    let patterns = cx.translate_pattern(pattern);
+                    let body = afb.expr_unit(span);
+                    (patterns, body)
+                });
+                let (else_body, else_scope) = self.with_scope(|cx| cx.translate_block(else_block));
 
-                let translated = [
-                    TranslatedArm {
-                        span,
-                        pattern: success_pattern,
-                        guard: None,
-                        body: success_body,
-                        scope: success_scope,
-                        always_diverges: false,
-                    },
-                    TranslatedArm {
-                        span: else_span,
-                        pattern: afb.pat_var(else_span, kw::Underscore),
-                        guard: None,
-                        body: else_body,
-                        scope: else_scope,
-                        always_diverges: true,
-                    },
-                ]
-                .into_iter()
-                .collect();
+                let mut translated = SmallVec::new();
+                translated.push(TranslatedArm {
+                    span,
+                    patterns: success_patterns,
+                    guard: None,
+                    body: success_body,
+                    scope: success_scope,
+                    always_diverges: false,
+                });
+                let else_pattern = afb.pat_var(else_span, kw::Underscore);
+                translated.push(TranslatedArm {
+                    span: else_span,
+                    patterns: smallvec![else_pattern],
+                    guard: None,
+                    body: else_body,
+                    scope: else_scope,
+                    always_diverges: true,
+                });
 
                 Some(self.translate_to_case(span, rhs, translated))
             }
@@ -793,14 +795,14 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     ) -> eaf::Expr<'arena> {
         if let ExprKind::Let { expr: scrutinee, pat } = &self.resolve_expr(cond).kind {
             let scrutinee = self.translate_expr(*scrutinee);
-            let ((then_pattern, then_body, then_always_diverges), then_scope) =
+            let then_span = self.resolve_expr(then).span;
+            let ((then_patterns, then_body, then_always_diverges), then_scope) =
                 self.with_scope(|cx| {
-                    let pattern = cx.translate_pattern(pat);
+                    let patterns = cx.translate_pattern(pat);
                     let always_diverges = cx.is_always_diverging_expr(then);
                     let body = cx.translate_expr(then);
-                    (pattern, body, always_diverges)
+                    (patterns, body, always_diverges)
                 });
-            let then_span = self.resolve_expr(then).span;
 
             let ((else_body, else_span, else_always_diverges), else_scope) =
                 self.with_scope(|cx| match else_opt {
@@ -812,27 +814,24 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                     None => (cx.translator.afb.expr_unit(expr.span), expr.span, false),
                 });
 
-            let afb = &self.translator.afb;
-            let translated: SmallVec<[TranslatedArm<'arena>; 4]> = [
-                TranslatedArm {
-                    span: then_span,
-                    pattern: then_pattern,
-                    guard: None,
-                    body: then_body,
-                    scope: then_scope,
-                    always_diverges: then_always_diverges,
-                },
-                TranslatedArm {
-                    span: else_span,
-                    pattern: afb.pat_var(else_span, kw::Underscore),
-                    guard: None,
-                    body: else_body,
-                    scope: else_scope,
-                    always_diverges: else_always_diverges,
-                },
-            ]
-            .into_iter()
-            .collect();
+            let mut translated = SmallVec::new();
+            translated.push(TranslatedArm {
+                span: then_span,
+                patterns: then_patterns,
+                guard: None,
+                body: then_body,
+                scope: then_scope,
+                always_diverges: then_always_diverges,
+            });
+            let else_pattern = self.translator.afb.pat_var(else_span, kw::Underscore);
+            translated.push(TranslatedArm {
+                span: else_span,
+                patterns: smallvec![else_pattern],
+                guard: None,
+                body: else_body,
+                scope: else_scope,
+                always_diverges: else_always_diverges,
+            });
             return self.translate_to_case(expr.span, scrutinee, translated);
         }
 
@@ -880,8 +879,10 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     ) -> eaf::Expr<'arena> {
         let scrutinee = self.translate_expr(scrutinee);
 
-        let translated: SmallVec<[TranslatedArm<'arena>; 4]> =
-            arms.iter().map(|&arm_id| self.translate_arm(arm_id)).collect();
+        let mut translated: SmallVec<[TranslatedArm<'arena>; 4]> = SmallVec::new();
+        for &arm_id in arms {
+            self.translate_arm(arm_id, &mut translated);
+        }
 
         self.translate_to_case(expr.span, scrutinee, translated)
     }
@@ -905,23 +906,35 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
         self.scopes.join_branches(&changed_vars);
 
-        let clauses = translated
-            .into_iter()
-            .map(|arm| afb.clause(arm.span, [arm.pattern], arm.guard, arm.body));
+        let clauses = translated.into_iter().flat_map(|arm| {
+            let TranslatedArm { span, patterns, guard, body, .. } = arm;
+            patterns.into_iter().map(move |pattern| afb.clause(span, [pattern], guard, body))
+        });
         afb.expr_case(span, scrutinee, clauses)
     }
 
-    fn translate_arm(&mut self, arm_id: thir::ArmId) -> TranslatedArm<'arena> {
+    fn translate_arm(
+        &mut self,
+        arm_id: thir::ArmId,
+        translated: &mut SmallVec<[TranslatedArm<'arena>; 4]>,
+    ) {
         let thir = self.thir;
         let Arm { span, pattern, guard, body, hir_id: _, scope: _ } = &thir[arm_id];
-        let ((pattern, guard, body, always_diverges), scope) = self.with_scope(|cx| {
-            let pattern = cx.translate_pattern(pattern);
+        let ((patterns, guard, body, always_diverges), scope) = self.with_scope(|cx| {
+            let patterns = cx.translate_pattern(pattern);
             let guard = guard.map(|guard| cx.translate_expr(guard));
             let always_diverges = cx.is_always_diverging_expr(*body);
             let body = cx.translate_expr(*body);
-            (pattern, guard, body, always_diverges)
+            (patterns, guard, body, always_diverges)
         });
-        TranslatedArm { span: *span, pattern, guard, body, scope, always_diverges }
+        translated.push(TranslatedArm {
+            span: *span,
+            patterns,
+            guard,
+            body,
+            scope,
+            always_diverges,
+        });
     }
 
     /// Makes sure the latest version of every modified outer variable is bound by the branch.
@@ -972,11 +985,24 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         )
     }
 
-    pub(super) fn translate_pattern(&mut self, pat: &Pat<'tcx>) -> eaf::Pattern<'arena> {
+    pub(super) fn translate_single_pattern(&mut self, pat: &Pat<'tcx>) -> eaf::Pattern<'arena> {
+        let patterns = self.translate_pattern(pat);
+        if let [pattern] = patterns.as_slice() {
+            *pattern
+        } else {
+            span_bug!(pat.span, "pattern expanded to multiple patterns in a singleton context")
+        }
+    }
+
+    pub(super) fn translate_pattern(&mut self, pat: &Pat<'tcx>) -> Patterns<'arena> {
         let afb = &self.translator.afb;
 
         match &pat.kind {
-            PatKind::Wild => self.translator.afb.pat_var(pat.span, kw::Underscore),
+            PatKind::Or { pats } => {
+                pats.iter().flat_map(|pattern| self.translate_pattern(pattern)).collect()
+            }
+
+            PatKind::Wild => smallvec![afb.pat_var(pat.span, kw::Underscore)],
 
             PatKind::Binding {
                 name,
@@ -1004,29 +1030,63 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 self.translate_adt_pattern(pat.span, *adt_def, variant, subpatterns)
             }
 
-            PatKind::Constant { value } => self.translate_constant_pattern(pat.span, *value),
-
-            PatKind::Map { fields } => {
-                let assocs = fields.iter().map(|field| {
-                    let key = self.translate_pattern(&field.key);
-                    let value = self.translate_pattern(&field.pattern);
-                    (key, value)
-                });
-                afb.pat_map(pat.span, assocs)
+            PatKind::Constant { value } => {
+                smallvec![self.translate_constant_pattern(pat.span, *value)]
             }
 
-            PatKind::Slice { prefix, slice, suffix } => {
-                if !suffix.is_empty() {
-                    span_bug!(pat.span, "list rest pattern must be trailing")
-                }
+            PatKind::Map { fields } => self.translate_map_pattern(pat.span, fields),
 
-                let tail = slice.as_ref().map(|pattern| self.translate_pattern(pattern));
-                let prefix = prefix.iter().map(|pattern| self.translate_pattern(pattern));
-                afb.pat_list(pat.span, prefix, tail)
+            PatKind::Slice { prefix, slice, suffix } => {
+                self.translate_slice_pattern(pat.span, prefix, slice.as_deref(), suffix)
             }
 
             _ => not_implemented!(self.tcx(), pat.span, "THIR pattern kind", pat.kind),
         }
+    }
+
+    fn translate_map_pattern(
+        &mut self,
+        span: Span,
+        fields: &[MapFieldPat<'tcx>],
+    ) -> Patterns<'arena> {
+        let afb = &self.translator.afb;
+
+        let keys: SmallVec<[_; 4]> =
+            fields.iter().map(|field| self.translate_single_pattern(&field.key)).collect();
+        let groups: SmallVec<[_; 4]> =
+            fields.iter().map(|field| self.translate_pattern(&field.pattern)).collect();
+
+        self.pattern_cartesian_product(span, &groups, |values| {
+            afb.pat_map(span, keys.iter().copied().zip(values.iter().copied()))
+        })
+    }
+
+    fn translate_slice_pattern(
+        &mut self,
+        span: Span,
+        prefix: &[Pat<'tcx>],
+        slice: Option<&Pat<'tcx>>,
+        suffix: &[Pat<'tcx>],
+    ) -> Patterns<'arena> {
+        let afb = &self.translator.afb;
+
+        if !suffix.is_empty() {
+            span_bug!(span, "list rest pattern must be trailing")
+        }
+
+        let tail = slice.map(|pattern| self.translate_pattern(pattern));
+        let groups: SmallVec<[_; 4]> =
+            prefix.iter().map(|pattern| self.translate_pattern(pattern)).chain(tail).collect();
+
+        self.pattern_cartesian_product(span, &groups, |patterns| {
+            let (items, tail) = if slice.is_some() {
+                let (tail, items) = patterns.split_last().unwrap();
+                (items, Some(*tail))
+            } else {
+                (patterns, None)
+            };
+            afb.pat_list(span, items.iter().copied(), tail)
+        })
     }
 
     fn declare_vars_from_pattern(&mut self, pat: &Pat<'tcx>) {
@@ -1124,7 +1184,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         var: LocalVarId,
         subpattern: Option<&Pat<'tcx>>,
         is_primary: bool,
-    ) -> eaf::Pattern<'arena> {
+    ) -> Patterns<'arena> {
         let var_info = if is_primary {
             self.scopes.bind_var(var, name, true)
         } else {
@@ -1134,10 +1194,12 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let var_pat = self.translator.afb.pat_var(pat.span, var_info.erl_name);
 
         if let Some(sub) = subpattern {
-            let sub_pat = self.translate_pattern(sub);
-            self.translator.afb.pat_match(pat.span, var_pat, sub_pat)
+            self.translate_pattern(sub)
+                .into_iter()
+                .map(|subpat| self.translator.afb.pat_match(pat.span, var_pat, subpat))
+                .collect()
         } else {
-            var_pat
+            smallvec![var_pat]
         }
     }
 
@@ -1145,20 +1207,22 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         &mut self,
         pat: &Pat<'tcx>,
         subpatterns: &[rustc_middle::thir::FieldPat<'tcx>],
-    ) -> eaf::Pattern<'arena> {
+    ) -> Patterns<'arena> {
         match pat.ty.kind() {
             ty::TyKind::Tuple(_) => {
                 let field_count = pat.ty.tuple_fields().len();
                 let afb = &self.translator.afb;
 
-                let elements = (0..field_count).map(|idx| {
-                    match subpatterns.iter().find(|field_pat| field_pat.field.index() == idx) {
-                        Some(field_pat) => self.translate_pattern(&field_pat.pattern),
-                        None => afb.pat_var(pat.span, kw::Underscore),
-                    }
-                });
+                let groups: SmallVec<[_; 4]> = (0..field_count)
+                    .map(|idx| match subpatterns.iter().find(|field| field.field.index() == idx) {
+                        Some(field) => self.translate_pattern(&field.pattern),
+                        None => smallvec![afb.pat_var(pat.span, kw::Underscore)],
+                    })
+                    .collect();
 
-                afb.pat_tuple(pat.span, elements)
+                self.pattern_cartesian_product(pat.span, &groups, |elements| {
+                    afb.pat_tuple(pat.span, elements.iter().copied())
+                })
             }
 
             ty::TyKind::Adt(adt_def, _) => {
@@ -1208,5 +1272,42 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         };
 
         self.tcx().typeck(self.owner).is_always_diverging_expr(hir_id)
+    }
+
+    pub(super) fn pattern_cartesian_product(
+        &self,
+        span: Span,
+        groups: &[Patterns<'arena>],
+        mut build: impl FnMut(&[eaf::Pattern<'arena>]) -> eaf::Pattern<'arena>,
+    ) -> Patterns<'arena> {
+        let combinations = groups.iter().fold(1usize, |acc, group| acc.saturating_mul(group.len()));
+        if combinations > 1000 {
+            span_fatal!(self.tcx(), span, "or-pattern expands to too many combinations");
+        }
+
+        // Build a cartesian product via DFS.
+        // Somewhat prematurely optimized to avoid a Vec of Vecs
+        fn visit<'arena>(
+            groups: &[Patterns<'arena>],
+            index: usize,
+            combination: &mut SmallVec<[eaf::Pattern<'arena>; 4]>,
+            translated: &mut Patterns<'arena>,
+            build: &mut impl FnMut(&[eaf::Pattern<'arena>]) -> eaf::Pattern<'arena>,
+        ) {
+            if index == groups.len() {
+                translated.push(build(combination));
+                return;
+            }
+
+            for &alternative in &groups[index] {
+                combination.push(alternative);
+                visit(groups, index + 1, combination, translated, build);
+                combination.pop();
+            }
+        }
+
+        let mut translated = SmallVec::new();
+        visit(groups, 0, &mut SmallVec::new(), &mut translated, &mut build);
+        translated
     }
 }

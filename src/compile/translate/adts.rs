@@ -1,4 +1,5 @@
 use rustc_abi::FieldIdx;
+use rustc_data_structures::smallvec::{SmallVec, smallvec};
 use rustc_hir::def::CtorKind;
 use rustc_hir::def_id::DefId;
 use rustc_middle::erl::{ErlAdtRepr, ErlCallKind, ErlCallTarget, ErlModuleResolution};
@@ -7,7 +8,7 @@ use rustc_middle::thir::{AdtExpr, AdtExprBase, Expr, FieldPat};
 use rustc_middle::ty::{AdtDef, VariantDef};
 use rustc_span::{Ident, Span, Symbol, kw, sym};
 
-use crate::compile::translate::body::BodyCx;
+use crate::compile::translate::body::{BodyCx, Patterns};
 use crate::erlang::abstract_format as eaf;
 use crate::{not_implemented, span_fatal};
 
@@ -18,13 +19,10 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         adt_def: AdtDef<'tcx>,
         variant: &VariantDef,
         subpatterns: &[FieldPat<'tcx>],
-    ) -> eaf::Pattern<'arena> {
-        let afb = &self.translator.afb;
-
-        // Unit structs always compile down to atom
+    ) -> Patterns<'arena> {
         if variant.ctor_kind() == Some(CtorKind::Const) {
             let name = self.translator.modules.constructor_name(variant.def_id);
-            return afb.pat_atom(span, name);
+            return smallvec![self.translator.afb.pat_atom(span, name)];
         }
 
         match self.tcx().erl_adt_repr(adt_def.did()) {
@@ -139,23 +137,28 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         adt_def: AdtDef<'tcx>,
         variant: &VariantDef,
         subpatterns: &[FieldPat<'tcx>],
-    ) -> eaf::Pattern<'arena> {
+    ) -> Patterns<'arena> {
         let afb = &self.translator.afb;
 
-        // Always include the `__struct__` discriminator.
         let struct_module = self.resolve_module_name(span, adt_def.did(), variant.def_id);
         let struct_key = afb.pat_atom(span, sym::__struct__);
         let struct_val = afb.pat_atom(span, struct_module);
 
-        let fields =
-            std::iter::once((struct_key, struct_val)).chain(subpatterns.iter().map(|field_pat| {
-                let field_def = &variant.fields[field_pat.field];
-                let key = afb.pat_atom(field_pat.pattern.span, field_def.name);
-                let value = self.translate_pattern(&field_pat.pattern);
-                (key, value)
-            }));
+        let (keys, groups) = subpatterns
+            .iter()
+            .map(|field| {
+                let field_def = &variant.fields[field.field];
+                let key = afb.pat_atom(field.pattern.span, field_def.name);
+                let alternatives = self.translate_pattern(&field.pattern);
+                (key, alternatives)
+            })
+            .collect::<(SmallVec<[_; 4]>, SmallVec<[_; 4]>)>();
 
-        afb.pat_map(span, fields)
+        self.pattern_cartesian_product(span, &groups, |values| {
+            let fields = std::iter::once((struct_key, struct_val))
+                .chain(keys.iter().copied().zip(values.iter().copied()));
+            afb.pat_map(span, fields)
+        })
     }
 
     fn translate_native_record_pattern(
@@ -164,24 +167,31 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         adt_def: AdtDef<'tcx>,
         variant: &VariantDef,
         subpatterns: &[FieldPat<'tcx>],
-    ) -> eaf::Pattern<'arena> {
-        let afb = &self.translator.afb;
-
+    ) -> Patterns<'arena> {
         let module = self.resolve_extern_module_name(span, adt_def.did(), variant.def_id);
-
         let field_count = variant.fields.len();
 
-        let fields = (0..field_count).map(|idx| {
-            let val = match subpatterns.iter().find(|field_pat| field_pat.field.index() == idx) {
-                Some(field_pat) => self.translate_pattern(&field_pat.pattern),
-                None => afb.pat_var(span, kw::Underscore),
-            };
+        let (groups, fields) = (0..field_count)
+            .map(|idx| {
+                let alternatives = match subpatterns.iter().find(|field| field.field.index() == idx)
+                {
+                    Some(field) => self.translate_pattern(&field.pattern),
+                    None => smallvec![self.translator.afb.pat_var(span, kw::Underscore)],
+                };
 
-            let field = &variant.fields[FieldIdx::from_u32(idx as u32)];
-            (Ident::new(field.name, span), val)
-        });
+                let field = &variant.fields[FieldIdx::from_u32(idx as u32)];
+                (alternatives, Ident::new(field.name, span))
+            })
+            .collect::<(SmallVec<[_; 4]>, SmallVec<[_; 4]>)>();
 
-        afb.pat_record(span, module, variant.name, fields)
+        self.pattern_cartesian_product(span, &groups, |values| {
+            self.translator.afb.pat_record(
+                span,
+                module,
+                variant.name,
+                fields.iter().copied().zip(values.iter().copied()),
+            )
+        })
     }
 
     fn resolve_module_name(

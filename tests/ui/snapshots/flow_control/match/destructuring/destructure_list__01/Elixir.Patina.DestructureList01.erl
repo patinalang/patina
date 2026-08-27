@@ -26,11 +26,11 @@
 main() ->
     _list@0_0 = [1, -2, 6],
     case _list@0_0 of
-        [0, _second@2_0, _third@1_0] ->
+        [0, _second@1_0, _third@2_0] ->
             io:put_chars([[<<"list[0] = 0, list[1] = ">>,
-                           io_lib:format("~ktp", [_second@2_0]),
+                           io_lib:format("~ktp", [_second@1_0]),
                            <<", list[2] = ">>,
-                           io_lib:format("~ktp", [_third@1_0])]]),
+                           io_lib:format("~ktp", [_third@2_0])]]),
             io:nl();
         [1, _, _third@3_0] ->
             io:put_chars([[<<"list[0] = 1, list[2] = ">>,

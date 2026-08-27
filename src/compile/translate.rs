@@ -102,7 +102,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 .as_deref()
                 .unwrap_or_else(|| bug!("explicit parameter must have a THIR pattern"));
 
-            params.push(cx.translate_pattern(pat));
+            params.push(cx.translate_single_pattern(pat));
         }
 
         let value = cx.translate_expr(root);
