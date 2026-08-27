@@ -933,7 +933,7 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
                         }
                     }
                 }
-                PatKind::Expr(_) | PatKind::Range(..) => {
+                PatKind::Expr(_) | PatKind::Range(..) | PatKind::Pin(_) => {
                     // When matching against a literal or range, we need to
                     // borrow the place to compare it against the pattern.
                     //
@@ -1839,6 +1839,16 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
                     );
                     self.cat_pattern(value_place, field.pat, op)?;
                 }
+            }
+
+            PatKind::Pin(expr) => {
+                let PatExprKind::Path(qpath) = &expr.kind else {
+                    return Err(self.cx.report_bug(expr.span, "pin operand is not a path"));
+                };
+                let res = self.cx.typeck_results().qpath_res(qpath, expr.hir_id);
+                let ty = self.node_ty(expr.hir_id)?;
+                let pinned_place = self.cat_res(expr.hir_id, expr.span, ty, res)?;
+                self.consume_or_copy(&pinned_place, expr.hir_id);
             }
 
             PatKind::Binding(.., None)

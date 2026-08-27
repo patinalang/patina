@@ -298,6 +298,21 @@ impl<'tcx, 'ptcx> PatCtxt<'tcx, 'ptcx> {
 
             hir::PatKind::Expr(value) => return self.lower_pat_expr(pat, value),
 
+            hir::PatKind::Pin(expr) => {
+                let hir::PatExprKind::Path(qpath) = &expr.kind else {
+                    let guar =
+                        self.tcx.dcx().span_delayed_bug(expr.span, "pin operand is not a path");
+                    return Box::new(Pat { ty, span, kind: PatKind::Error(guar), extra: None });
+                };
+                match self.typeck_results.qpath_res(qpath, expr.hir_id) {
+                    Res::Local(id) => PatKind::Pin { var: LocalVarId(id) },
+                    res => PatKind::Error(self.tcx.dcx().span_delayed_bug(
+                        expr.span,
+                        format!("pin operand unexpectedly resolved to {res:?}"),
+                    )),
+                }
+            }
+
             hir::PatKind::Range(lo_expr, hi_expr, end) => {
                 match self.lower_pattern_range(pat, lo_expr, hi_expr, end) {
                     Ok(thir_pat) => return thir_pat,

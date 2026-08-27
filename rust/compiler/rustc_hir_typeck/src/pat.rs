@@ -614,6 +614,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             PatKind::Expr(expr @ PatExpr { kind: PatExprKind::Lit { lit, .. }, .. }) => {
                 self.check_pat_lit(pat.span, expr, &lit.node, expected, &pat_info.top_info)
             }
+            PatKind::Pin(expr) => self.check_pat_pin(pat, expr, expected, &pat_info.top_info),
             PatKind::Range(lhs, rhs, _) => {
                 self.check_pat_range(pat.span, lhs, rhs, expected, &pat_info.top_info)
             }
@@ -787,6 +788,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             }
             // A never pattern behaves somewhat like a literal or unit variant.
             PatKind::Never => AdjustMode::peel_all(),
+            // We don't really care about refs and derefs for pin patterns.
+            PatKind::Pin(_) => AdjustMode::peel_all(),
             // For patterns with paths, how we peel the scrutinee depends on the path's resolution.
             PatKind::Struct(..)
             | PatKind::TupleStruct(..)
@@ -989,6 +992,56 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             }
         };
         match self.demand_eqtype_pat(expr.span, expected, ty, ti) {
+            Ok(()) => ty,
+            Err(guar) => Ty::new_error(self.tcx, guar),
+        }
+    }
+
+    fn check_pat_pin(
+        &self,
+        pat: &'tcx Pat<'tcx>,
+        expr: &'tcx PatExpr<'tcx>,
+        expected: Ty<'tcx>,
+        ti: &TopInfo<'tcx>,
+    ) -> Ty<'tcx> {
+        let ty = match &expr.kind {
+            PatExprKind::Path(qpath) => {
+                let res = self.typeck_results.borrow().qpath_res(qpath, expr.hir_id);
+                match res {
+                    Res::Local(id) => self.local_ty(expr.span, id),
+                    Res::Err => Ty::new_error(
+                        self.tcx,
+                        self.dcx().span_delayed_bug(
+                            expr.span,
+                            "pin pattern path resolved to `Res::Err` without an error",
+                        ),
+                    ),
+                    _ => {
+                        let path = rustc_hir_pretty::qpath_to_string(&self.tcx, qpath);
+                        Ty::new_error(
+                            self.tcx,
+                            self.dcx()
+                                .struct_span_err(
+                                    expr.span,
+                                    format!(
+                                        "cannot pin `{path}`: expected a local variable, found {}",
+                                        res.descr()
+                                    ),
+                                )
+                                .emit(),
+                        )
+                    }
+                }
+            }
+            PatExprKind::Lit { .. } => Ty::new_error(
+                self.tcx,
+                self.dcx()
+                    .span_delayed_bug(expr.span, "literal unexpectedly lowered as a pin operand"),
+            ),
+        };
+
+        self.write_ty(expr.hir_id, ty);
+        match self.demand_eqtype_pat(pat.span, expected, ty, ti) {
             Ok(()) => ty,
             Err(guar) => Ty::new_error(self.tcx, guar),
         }
@@ -1440,6 +1493,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         | PatKind::Deref(_)
                         | PatKind::Ref(..)
                         | PatKind::Expr(..)
+                        | PatKind::Pin(..)
                         | PatKind::Range(..)
                         | PatKind::Err(_) => break 'block None,
                     },

@@ -3,61 +3,43 @@
 #![no_std]
 #![no_core]
 
-
-
-
-
-
-
-
-
-
-#![allow(dead_code)]
 #[allow(unused_imports)]
 #[macro_use]
 extern crate Core;
+
 #[allow(unused_imports)]
 use Core::*;
+
 #[allow(unused)]
 extern mod io;
+
 #[allow(unused)]
 extern mod patina_fmt;
+
 #[allow(unused_macros)]
 #[rustc_builtin_macro]
 macro_rules! stringify { () => {}; }
+
 #[allow(unused_macros)]
 #[rustc_builtin_macro]
 macro_rules! concat { () => {}; }
+
 #[allow(unused_macros)]
 #[rustc_builtin_macro]
 macro_rules! format_args { () => {}; }
+
 #[allow(unused_macros)]
 macro_rules! print {
     ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
 }
+
 #[allow(unused_macros)]
 macro_rules! println {
     () => {{ io::nl(); }}; ($($arg:tt)*) =>
     {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
 }
 
-struct Holder<T> {
-    value: T,
+pub fn pin_partial_initialization(value: int) -> bool {
+    let expected;
+    match value { ^expected => true, _ => false, }
 }
-
-trait Tr {
-    fn method(self);
-}
-
-impl<T> Tr for Holder<T> {
-    fn method(self) {
-        {
-            io::put_chars([["Tr::method(", patina_fmt::debug(self), ")"]]);
-            io::nl();
-        };
-    }
-}
-
-fn call<T>(h: Holder<T>) { h.method() }
-
-pub fn main() { let h = Holder { value: 1 }; call(h); }

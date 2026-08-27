@@ -499,6 +499,21 @@ pub(crate) struct MapRestNotFinal {
 }
 
 #[derive(Diagnostic)]
+#[diag("`^` takes a plain variable name, not a path")]
+pub(crate) struct PinPatternPathOperand {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("expected the name of a local variable after `^`")]
+#[note("a pin pattern matches against the current value of an in-scope local variable")]
+pub(crate) struct PinPatternExpectedIdent {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag("list rest patterns must be the final element")]
 pub(crate) struct ListPatternRestNotFinal {
     #[primary_span]

@@ -705,6 +705,7 @@ impl Pat {
             | PatKind::Rest
             | PatKind::Never
             | PatKind::Expr(_)
+            | PatKind::Pin(_)
             | PatKind::Range(..)
             | PatKind::Ident(..)
             | PatKind::Path(..)
@@ -926,6 +927,9 @@ pub enum PatKind {
 
     /// A literal, const block or path.
     Expr(Box<Expr>),
+
+    /// A pin pattern (e.g., `^value`) that matches an existing local variable's value.
+    Pin(Box<Expr>),
 
     /// A range pattern (e.g., `1...2`, `1..2`, `1..`, `..2`, `1..=2`, `..=2`).
     Range(Option<Box<Expr>>, Option<Box<Expr>>, Spanned<RangeEnd>),

@@ -59,7 +59,7 @@ handle_request(Sock, Op, Eaf) ->
     end.
 
 compile_forms(Forms) ->
-    CompileOpts = [binary, return, nowarn_opportunistic],
+    CompileOpts = [binary, return, nowarn_opportunistic, nowarn_underscore_match],
     case compile:noenv_forms(Forms, [to_asm, no_postopt | CompileOpts]) of
         {ok, _Mod, Asm0, Warnings0} ->
             {ok, Asm1} = beam_a:module(Asm0, []),

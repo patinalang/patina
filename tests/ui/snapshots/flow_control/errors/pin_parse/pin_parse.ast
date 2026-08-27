@@ -1,0 +1,11 @@
+pub fn literal(value: int) -> bool {
+    match value { (/*ERROR*/) => true, _ => false, }
+}
+
+pub fn expression(value: int, expected: int) -> bool {
+    match value { (/*ERROR*/) => true, _ => false, }
+}
+
+pub fn path(value: int) -> bool {
+    match value { (/*ERROR*/) => true, _ => false, }
+}

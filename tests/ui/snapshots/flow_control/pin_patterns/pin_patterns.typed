@@ -1,0 +1,182 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+fn match_pin(actual: int, expected: int)
+    ->
+        bool ({
+    (match (actual as int) {
+        ^expected => (true as bool),
+        _ => (false as bool),
+    } as bool)
+} as bool)
+
+fn if_let_pin(actual: int, expected: int)
+    ->
+        bool ({
+    (if (let ^expected = (actual as int) as bool) {
+        (true as bool)
+    } else { (false as bool) } as bool)
+} as bool)
+
+fn while_let_pin(start: int, expected: int)
+    ->
+        int ({
+    let mut current = (start as int);
+    let mut count = (0 as int);
+    (loop {
+        (if (let ^expected = (current as int) as bool) {
+            ((count as int) += (1 as int) as ());
+            ((current as int) += (1 as int) as ());
+        } else { (break as !); } as ())
+    } as ())
+    (((count as int) * (10 as int) as int) + (current as int) as int)
+} as int)
+
+fn let_else_pin(actual: int, expected: int)
+    ->
+        bool ({
+    let ^expected = (actual as int) else { (return (false as bool) as !); };
+    (true as bool)
+} as bool)
+
+fn or_pin(value: int, first: int, second: int)
+    ->
+        bool ({
+    (match (value as int) {
+        ^first | ^second => (true as bool),
+        _ => (false as bool),
+    } as bool)
+} as bool)
+
+fn map_value_pin(map: #{str => int}, expected: int)
+    ->
+        bool ({
+    (match (map as #{str => int}) {
+        #{"key" => ^expected, ..} => (true as bool),
+        _ => (false as bool),
+    } as bool)
+} as bool)
+
+fn alias_pin(value: int, expected: int)
+    ->
+        int ({
+    (match (value as int) {
+        matched@^expected => (matched as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)
+
+fn closure_pin(actual: int, expected: int)
+    ->
+        bool ({
+    let matcher =
+        (||
+            (match (actual as int) {
+                ^expected => (true as bool),
+                _ => (false as bool),
+            } as bool) as
+            {closure@tests/ui/src/flow_control/pin_patterns.pt:51:19: 51:21});
+    ((matcher as
+            {closure@tests/ui/src/flow_control/pin_patterns.pt:51:19: 51:21})()
+        as bool)
+} as bool)
+
+fn mutable_closure_pin(actual: int, initial: int)
+    ->
+        bool ({
+    let mut expected = (initial as int);
+    ((expected as int) += (1 as int) as ());
+    let matcher =
+        (||
+            (match (actual as int) {
+                ^expected => (true as bool),
+                _ => (false as bool),
+            } as bool) as
+            {closure@tests/ui/src/flow_control/pin_patterns.pt:61:19: 61:21});
+    ((matcher as
+            {closure@tests/ui/src/flow_control/pin_patterns.pt:61:19: 61:21})()
+        as bool)
+} as bool)
+
+fn loop_rebound_pin(target: int)
+    ->
+        int ({
+    let mut expected = (1 as int);
+    (loop {
+        (match (target as int) {
+            ^expected => (break (expected as int) as !),
+            _ => ((expected as int) += (1 as int) as ()),
+        } as ())
+    } as int)
+} as int)
+
+fn sibling_shadow_pin(first: int, second: int, outer: int)
+    ->
+        int ({
+    let a = (outer as int);
+    (match (((first as int), (second as int)) as (int, int)) {
+        (a, ^a) => (a as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)
+
+fn guarded_pin(value: int, expected: int, enabled: bool)
+    ->
+        bool ({
+    (match (value as int) {
+        ^expected if (enabled as bool) => (true as bool),
+        _ => (false as bool),
+    } as bool)
+} as bool)
+
+macro_rules! matches_pattern {
+    ($value:expr, $pattern:pat) =>
+    { match $value { $pattern => true, _ => false, } };
+}
+
+fn macro_pin(value: int, expected: int)
+    ->
+        bool ({
+    (match (value as int) {
+        ^expected => (true as bool),
+        _ => (false as bool),
+    } as bool)
+} as bool)

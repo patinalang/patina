@@ -599,6 +599,7 @@ fn resolve_local<'tcx>(
             | PatKind::Wild
             | PatKind::Never
             | PatKind::Expr(_)
+            | PatKind::Pin(_)
             | PatKind::Range(_, _, _)
             | PatKind::Err(_) => false,
         }

@@ -41,6 +41,9 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     PatKind::Expr(e) => {
                         break hir::PatKind::Expr(self.lower_expr_within_pat(e, false));
                     }
+                    PatKind::Pin(e) => {
+                        break hir::PatKind::Pin(self.lower_expr_within_pat(e, true));
+                    }
                     PatKind::TupleStruct(qself, path, pats) => {
                         let qpath = self.lower_qpath(
                             pattern.id,

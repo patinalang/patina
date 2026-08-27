@@ -779,6 +779,8 @@ impl<'a> Parser<'a> {
             PatKind::Slice(pats)
         } else if self.is_map() {
             self.parse_pat_map()?
+        } else if self.eat_noexpect(&token::Caret) {
+            self.parse_pat_pin()?
         } else if self.check(exp!(DotDot)) && !self.is_pat_range_end_start(1) {
             // A rest pattern `..`.
             self.bump(); // `..`
@@ -916,6 +918,28 @@ impl<'a> Parser<'a> {
         }
 
         Ok(pat)
+    }
+
+    /// Parses a pin pattern: `^ident`.
+    fn parse_pat_pin(&mut self) -> PResult<'a, PatKind> {
+        if self.token.is_non_reserved_ident() {
+            if self.look_ahead(1, |token| token.kind == token::PathSep) {
+                let path = self.parse_path(PathStyle::Pat)?;
+                let guar = self.dcx().emit_err(errors::PinPatternPathOperand { span: path.span });
+                return Ok(PatKind::Err(guar));
+            }
+
+            let ident = self.parse_ident_common(false)?;
+            let expr = self.mk_expr(ident.span, ExprKind::Path(None, Path::from_ident(ident)));
+            Ok(PatKind::Pin(expr))
+        } else {
+            let span = self.token.span;
+            let guar = self.dcx().emit_err(errors::PinPatternExpectedIdent { span });
+            if self.token.can_begin_pattern(token::NtPatKind::PatParam { inferred: false }) {
+                let _ = self.parse_pat_no_top_alt(None, None)?;
+            }
+            Ok(PatKind::Err(guar))
+        }
     }
 
     /// Parses a map pattern: `#{key => pattern, ..}`.

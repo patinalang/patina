@@ -1,0 +1,107 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+pub fn match_pin(actual: int, expected: int) -> bool {
+    match actual { ^expected => true, _ => false, }
+}
+
+pub fn if_let_pin(actual: int, expected: int) -> bool {
+    if let ^expected = actual { true } else { false }
+}
+
+pub fn while_let_pin(start: int, expected: int) -> int {
+    let mut current = start;
+    let mut count = 0;
+    while let ^expected = current { count += 1; current += 1; }
+    count * 10 + current
+}
+
+pub fn let_else_pin(actual: int, expected: int) -> bool {
+    let ^expected = actual else { return false; };
+    true
+}
+
+pub fn or_pin(value: int, first: int, second: int) -> bool {
+    match value { ^first | ^second => true, _ => false, }
+}
+
+pub fn map_value_pin(map: #{str => int}, expected: int) -> bool {
+    match map { #{"key" => ^expected, ..} => true, _ => false, }
+}
+
+pub fn alias_pin(value: int, expected: int) -> int {
+    match value { matched @ ^expected => matched, _ => -1, }
+}
+
+pub fn closure_pin(actual: int, expected: int) -> bool {
+    let matcher = || match actual { ^expected => true, _ => false, };
+    matcher()
+}
+
+pub fn mutable_closure_pin(actual: int, initial: int) -> bool {
+    let mut expected = initial;
+    expected += 1;
+    let matcher = || match actual { ^expected => true, _ => false, };
+    matcher()
+}
+
+pub fn loop_rebound_pin(target: int) -> int {
+    let mut expected = 1;
+    loop { match target { ^expected => break expected, _ => expected += 1, } }
+}
+
+pub fn sibling_shadow_pin(first: int, second: int, outer: int) -> int {
+    let a = outer;
+    match (first, second) { (a, ^a) => a, _ => -1, }
+}
+
+pub fn guarded_pin(value: int, expected: int, enabled: bool) -> bool {
+    match value { ^expected if enabled => true, _ => false, }
+}
+
+macro_rules! matches_pattern {
+    ($value:expr, $pattern:pat) =>
+    { match $value { $pattern => true, _ => false, } };
+}
+
+pub fn macro_pin(value: int, expected: int) -> bool {
+    match value { ^expected => true, _ => false, }
+}

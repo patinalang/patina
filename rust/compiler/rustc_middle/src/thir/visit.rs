@@ -285,6 +285,7 @@ pub(crate) fn for_each_immediate_subpat<'a, 'tcx>(
         PatKind::Missing
         | PatKind::Wild
         | PatKind::Binding { subpattern: None, .. }
+        | PatKind::Pin { var: _ }
         | PatKind::Constant { value: _ }
         | PatKind::Range(_)
         | PatKind::Never

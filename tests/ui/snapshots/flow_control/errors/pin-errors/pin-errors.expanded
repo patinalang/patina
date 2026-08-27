@@ -1,0 +1,65 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+const EXPECTED: int = 7;
+
+pub fn pin_not_found(value: int) -> bool {
+    match value { ^nosuch => true, _ => false, }
+}
+
+pub fn pin_self_resolution(first: int, second: int) -> int {
+    match (first, second) { (a, ^a) => a, _ => -1, }
+}
+
+pub fn pin_const(value: int) -> bool {
+    match value { ^EXPECTED => true, _ => false, }
+}
+
+pub fn pin_type_mismatch(value: int, expected: bool) -> bool {
+    match value { ^expected => true, _ => false, }
+}
+
+pub fn closure_parameter(expected: int) -> int {
+    let closure = |^expected: int| 0;
+    closure(expected)
+}
+
+pub fn refutable_local(value: int, expected: int) { let ^expected = value; }

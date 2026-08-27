@@ -1,70 +1,50 @@
 #![allow(internal_features)]
-
-
-
-
-
-
-
-
-
-
-#![allow(dead_code)]
 #![attr = Feature([no_core#0, rustc_attrs#0])]
 #![attr = NoStd]
 #![attr = NoCore]
+
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
 extern crate Core;
+
 #[allow(unused_imports)]
 use Core::*;
+
 #[allow(unused)]
 extern mod io;
+
 #[allow(unused)]
 extern mod patina_fmt;
+
 #[allow(unused_macros)]
 #[attr = RustcBuiltinMacro {helper_attrs: []}]
 macro_rules! stringify { () => {}; }
+
 #[allow(unused_macros)]
 #[attr = RustcBuiltinMacro {helper_attrs: []}]
 macro_rules! concat { () => {}; }
+
 #[allow(unused_macros)]
 #[attr = RustcBuiltinMacro {helper_attrs: []}]
 macro_rules! format_args { () => {}; }
+
 #[allow(unused_macros)]
 macro_rules! print {
     ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
 }
+
 #[allow(unused_macros)]
 macro_rules! println {
     () => {{ io::nl(); }}; ($($arg:tt)*) =>
     {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
 }
 
-struct Holder<T> {
-    value: T,
-}
-
-trait Tr {
-    fn method(self);
-}
-
-impl <T> Tr for Holder<T> {
-    fn method(self) ({
-        ({
-            ((io::put_chars as
-                    fn(term) -> term)(([([("Tr::method(" as str),
-                                ((patina_fmt::debug as
-                                        fn(term) -> term)((self as Holder<T>)) as term),
-                                (")" as str)] as [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
-        } as ());
-    } as ())
-}
-
-fn call<T>(h: Holder<T>) ({ ((h as Holder<T>).method() as ()) } as ())
-
-fn main() ({
-    let h = (Holder { value: (1 as int) } as Holder<int>);
-    ((call as fn(Holder<int>) {call::<int>})((h as Holder<int>)) as ());
-} as ())
+fn pin_partial_initialization(value: int)
+    ->
+        bool ({
+    let expected;
+    (match (value as int) {
+        ^expected => (true as bool),
+        _ => (false as bool),
+    } as bool)
+} as bool)

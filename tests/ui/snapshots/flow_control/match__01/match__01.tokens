@@ -208,6 +208,7 @@ Bang
 OpenParen
 Literal { kind: Str { terminated: true }, suffix_start: 22 }
 CloseParen
+Comma
 Whitespace
 Ident
 Whitespace
@@ -222,6 +223,7 @@ Comma
 Whitespace
 Ident
 CloseParen
+Comma
 Whitespace
 CloseBrace
 Whitespace

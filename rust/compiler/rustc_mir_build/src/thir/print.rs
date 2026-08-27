@@ -770,6 +770,11 @@ impl<'a, 'tcx> ThirPrinter<'a, 'tcx> {
 
                 print_indented!(self, "}", depth_lvl + 1);
             }
+            PatKind::Pin { var } => {
+                print_indented!(self, "Pin {", depth_lvl + 1);
+                print_indented!(self, format!("var: {:?}", var), depth_lvl + 2);
+                print_indented!(self, "}", depth_lvl + 1);
+            }
             PatKind::Variant { adt_def, args, variant_index, subpatterns } => {
                 print_indented!(self, "Variant {", depth_lvl + 1);
                 print_indented!(self, "adt_def: ", depth_lvl + 2);

@@ -452,6 +452,11 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
                 fields = vec![];
                 arity = 0;
             }
+            PatKind::Pin { .. } => {
+                ctor = Opaque(OpaqueId::new());
+                fields = vec![];
+                arity = 0;
+            }
             PatKind::Deref { pin, subpattern } => {
                 fields = vec![self.lower_pat(subpattern).at_index(0)];
                 arity = 1;

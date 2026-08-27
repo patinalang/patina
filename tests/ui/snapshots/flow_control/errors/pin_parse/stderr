@@ -1,0 +1,24 @@
+error: expected the name of a local variable after `^`
+  --> tests/ui/src/flow_control/errors/pin_parse.pt:3:10
+   |
+LL |         ^1 => true,
+   |          ^
+   |
+   = note: a pin pattern matches against the current value of an in-scope local variable
+
+error: expected the name of a local variable after `^`
+  --> tests/ui/src/flow_control/errors/pin_parse.pt:10:10
+   |
+LL |         ^(expected) => true,
+   |          ^
+   |
+   = note: a pin pattern matches against the current value of an in-scope local variable
+
+error: `^` takes a plain variable name, not a path
+  --> tests/ui/src/flow_control/errors/pin_parse.pt:17:10
+   |
+LL |         ^foo::bar => true,
+   |          ^^^^^^^^
+
+error: aborting due to 3 previous errors
+

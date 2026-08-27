@@ -1,0 +1,90 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+const EXPECTED: int = (7 as int);
+
+fn pin_not_found(value: int)
+    ->
+        bool ({
+    (match (value as int) { ^nosuch => (true as bool), _ => (false as bool), }
+        as bool)
+} as bool)
+
+fn pin_self_resolution(first: int, second: int)
+    ->
+        int ({
+    (match (((first as int), (second as int)) as (int, int)) {
+        (a, ^a) => (a as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)
+
+fn pin_const(value: int)
+    ->
+        bool ({
+    (match (value as int) {
+        ^EXPECTED => (true as bool),
+        _ => (false as bool),
+    } as bool)
+} as bool)
+
+fn pin_type_mismatch(value: int, expected: bool)
+    ->
+        bool ({
+    (match (value as int) {
+        ^expected => (true as bool),
+        _ => (false as bool),
+    } as bool)
+} as bool)
+
+fn closure_parameter(expected: int)
+    ->
+        int ({
+    let closure =
+        (|^expected: int| (0 as int) as
+            {closure@tests/ui/src/flow_control/errors/pin-errors.pt:32:19: 32:35});
+    ((closure as
+            {closure@tests/ui/src/flow_control/errors/pin-errors.pt:32:19: 32:35})((expected
+            as int)) as int)
+} as int)
+
+fn refutable_local(value: int,
+    expected: int) ({ let ^expected = (value as int); } as ())

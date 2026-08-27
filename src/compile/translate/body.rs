@@ -233,14 +233,21 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         if neg { afb.expr_unary_op(span, eaf::UnaryOp::Neg, value) } else { value }
     }
 
+    fn translate_pin_var_ref(&self, span: Span, id: LocalVarId) -> eaf::Pattern<'arena> {
+        let var = self.var_for_read(span, id);
+        self.translator.afb.pat_var(span, var.erl_name)
+    }
+
     fn translate_var_ref(&self, span: Span, id: LocalVarId) -> eaf::Expr<'arena> {
+        let var = self.var_for_read(span, id);
+        self.translator.afb.expr_var(span, var.erl_name)
+    }
+
+    fn var_for_read(&self, span: Span, id: LocalVarId) -> PatinaVar {
         let ident = self.tcx().hir_ident(id.0);
 
-        let var = self
-            .scopes
-            .get_var(id)
-            .filter(|var| var.initialization_depth.is_some())
-            .unwrap_or_else(|| {
+        *self.scopes.get_var(id).filter(|var| var.initialization_depth.is_some()).unwrap_or_else(
+            || {
                 // TODO: this should be `report_use_of_uninitialized` from rustc
                 span_fatal!(
                     self.tcx(),
@@ -248,9 +255,8 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                     "variable {} is partially initialized",
                     ident.to_string()
                 )
-            });
-
-        self.translator.afb.expr_var(span, var.erl_name)
+            },
+        )
     }
 
     fn translate_field(
@@ -1051,6 +1057,8 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 *is_primary,
             ),
 
+            PatKind::Pin { var } => self.translate_pin_var_ref(pat.span, *var).into(),
+
             PatKind::Deref { subpattern, .. } => self.translate_pattern(subpattern),
 
             PatKind::Leaf { subpatterns } => self.translate_leaf_pattern(pat, subpatterns),
@@ -1153,6 +1161,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             }
             PatKind::Missing
             | PatKind::Wild
+            | PatKind::Pin { .. }
             | PatKind::Constant { .. }
             | PatKind::Range(_)
             | PatKind::Never

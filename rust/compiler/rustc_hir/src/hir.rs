@@ -1766,7 +1766,7 @@ impl<'hir> Pat<'hir> {
         use PatKind::*;
         match self.kind {
             Missing => unreachable!(),
-            Wild | Never | Expr(_) | Range(..) | Binding(.., None) | Err(_) => true,
+            Wild | Never | Expr(_) | Pin(_) | Range(..) | Binding(.., None) | Err(_) => true,
             Box(s) | Deref(s) | Ref(s, _, _) | Binding(.., Some(s)) | Guard(s, _) => {
                 s.walk_short_(it)
             }
@@ -1796,7 +1796,7 @@ impl<'hir> Pat<'hir> {
 
         use PatKind::*;
         match self.kind {
-            Missing | Wild | Never | Expr(_) | Range(..) | Binding(.., None) | Err(_) => {}
+            Missing | Wild | Never | Expr(_) | Pin(_) | Range(..) | Binding(.., None) | Err(_) => {}
             Box(s) | Deref(s) | Ref(s, _, _) | Binding(.., Some(s)) | Guard(s, _) => s.walk_(it),
             Struct(_, fields, _) => fields.iter().for_each(|field| field.pat.walk_(it)),
             Map(fields, _) => fields.iter().for_each(|field| field.pat.walk_(it)),
@@ -1884,6 +1884,7 @@ impl<'hir> Pat<'hir> {
             | PatKind::Ref(_, _, _)
             | PatKind::Deref(_)
             | PatKind::Expr(_)
+            | PatKind::Pin(_)
             | PatKind::Range(_, _, _)
             | PatKind::Slice(_, _, _)
             | PatKind::Map(_, _)
@@ -2049,6 +2050,9 @@ pub enum PatKind<'hir> {
 
     /// A literal, const block or path.
     Expr(&'hir PatExpr<'hir>),
+
+    /// A pin pattern that compares against the current value of a local variable.
+    Pin(&'hir PatExpr<'hir>),
 
     /// A guard pattern (e.g., `x if guard(x)`).
     Guard(&'hir Pat<'hir>, &'hir Expr<'hir>),

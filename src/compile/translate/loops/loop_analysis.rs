@@ -1,6 +1,6 @@
 use rustc_data_structures::fx::FxIndexSet;
 use rustc_middle::thir::visit::{self, Visitor};
-use rustc_middle::thir::{self, Expr, ExprId, ExprKind, LocalVarId};
+use rustc_middle::thir::{self, Expr, ExprId, ExprKind, LocalVarId, Pat, PatKind};
 
 use crate::compile::translate::scopes::Scopes;
 
@@ -87,5 +87,14 @@ impl<'thir, 'tcx: 'thir> Visitor<'thir, 'tcx> for LoopVarAnalysis<'thir, 'tcx, '
             }
             _ => visit::walk_expr(self, expr),
         }
+    }
+
+    fn visit_pat(&mut self, pat: &'thir Pat<'tcx>) {
+        if let PatKind::Pin { var } = pat.kind
+            && self.scopes.get_var(var).is_some()
+        {
+            self.referenced.insert(var);
+        }
+        visit::walk_pat(self, pat);
     }
 }

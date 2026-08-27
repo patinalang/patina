@@ -2017,6 +2017,10 @@ impl<'a> State<'a> {
                 }
             }
             PatKind::Expr(e) => self.print_expr(e, FixupContext::default()),
+            PatKind::Pin(e) => {
+                self.word("^");
+                self.print_expr(e, FixupContext::default());
+            }
             PatKind::Range(begin, end, Spanned { node: end_kind, .. }) => {
                 if let Some(e) = begin {
                     self.print_expr(e, FixupContext::default());

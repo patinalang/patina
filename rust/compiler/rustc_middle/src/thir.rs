@@ -805,6 +805,12 @@ pub enum PatKind<'tcx> {
         is_shorthand: bool,
     },
 
+    /// Match against the current value of an existing local variable.
+    Pin {
+        #[type_visitable(ignore)]
+        var: LocalVarId,
+    },
+
     /// `Foo(...)` or `Foo{...}` or `Foo`, where `Foo` is a variant name from an ADT with
     /// multiple variants.
     Variant {

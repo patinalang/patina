@@ -1,8 +1,0 @@
-error: expected pattern, found `^`
-  --> tests/ui/src/flow_control/match__01.pt:36:9
-   |
-LL |         ^expected_value => println!("found expected value")
-   |         ^ expected pattern
-
-error: aborting due to 1 previous error
-

@@ -711,6 +711,7 @@ impl Token {
             AndAnd |                             // double reference
             Literal(_) |                         // literal
             Pound |                              // map pattern
+            Caret |                              // pin pattern
             DotDot |                             // range pattern (future compat)
             DotDotDot |                          // range pattern (future compat)
             PathSep |                            // path

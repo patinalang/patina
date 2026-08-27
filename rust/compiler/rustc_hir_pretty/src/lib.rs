@@ -2158,6 +2158,10 @@ impl<'a> State<'a> {
                 }
             }
             PatKind::Expr(e) => self.print_pat_expr(e),
+            PatKind::Pin(e) => {
+                self.word("^");
+                self.print_pat_expr(e);
+            }
             PatKind::Range(begin, end, end_kind) => {
                 if let Some(expr) = begin {
                     self.print_pat_expr(expr);
