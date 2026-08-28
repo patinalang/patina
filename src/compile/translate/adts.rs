@@ -1,5 +1,5 @@
 use rustc_abi::FieldIdx;
-use rustc_data_structures::smallvec::{SmallVec, smallvec};
+use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::CtorKind;
 use rustc_hir::def_id::DefId;
 use rustc_middle::erl::{ErlAdtRepr, ErlCallKind, ErlCallTarget, ErlModuleResolution};
@@ -22,7 +22,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     ) -> Patterns<'arena> {
         if variant.ctor_kind() == Some(CtorKind::Const) {
             let name = self.translator.modules.constructor_name(variant.def_id);
-            return smallvec![self.translator.afb.pat_atom(span, name)];
+            return self.translator.afb.pat_atom(span, name).into();
         }
 
         match self.tcx().erl_adt_repr(adt_def.did()) {
@@ -176,7 +176,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 let alternatives = match subpatterns.iter().find(|field| field.field.index() == idx)
                 {
                     Some(field) => self.translate_pattern(&field.pattern),
-                    None => smallvec![self.translator.afb.pat_var(span, kw::Underscore)],
+                    None => self.translator.afb.pat_var(span, kw::Underscore).into(),
                 };
 
                 let field = &variant.fields[FieldIdx::from_u32(idx as u32)];

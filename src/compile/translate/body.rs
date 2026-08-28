@@ -1,7 +1,7 @@
 use rustc_abi::{FieldIdx, VariantIdx};
 use rustc_ast::LitKind;
 use rustc_data_structures::fx::FxIndexMap;
-use rustc_data_structures::smallvec::{SmallVec, smallvec};
+use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::LocalDefId;
 use rustc_hir::{BindingMode, HirId, Lit};
@@ -21,7 +21,28 @@ use crate::compile::translate::{ModuleParts, Translator, Witness};
 use crate::erlang::abstract_format as eaf;
 use crate::{not_implemented, span_fatal};
 
-pub(super) type Patterns<'arena> = SmallVec<[eaf::Pattern<'arena>; 1]>;
+/// Pattern with optional guards needed to match it.
+#[derive(Debug, Clone)]
+pub(super) struct GuardedPattern<'arena>(eaf::Pattern<'arena>, SmallVec<[eaf::Expr<'arena>; 1]>);
+pub(super) type Patterns<'arena> = SmallVec<[GuardedPattern<'arena>; 1]>;
+
+impl<'arena> From<eaf::Pattern<'arena>> for GuardedPattern<'arena> {
+    fn from(pattern: eaf::Pattern<'arena>) -> Self {
+        Self(pattern, SmallVec::new())
+    }
+}
+
+impl<'arena> From<GuardedPattern<'arena>> for Patterns<'arena> {
+    fn from(val: GuardedPattern<'arena>) -> Self {
+        SmallVec::from_elem(val, 1)
+    }
+}
+
+impl<'arena> From<eaf::Pattern<'arena>> for Patterns<'arena> {
+    fn from(val: eaf::Pattern<'arena>) -> Self {
+        Into::<GuardedPattern<'arena>>::into(val).into()
+    }
+}
 
 pub(crate) struct TranslatedBody<'arena> {
     pub params: SmallVec<[eaf::Pattern<'arena>; 8]>,
@@ -328,7 +349,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 let else_pattern = afb.pat_var(else_span, kw::Underscore);
                 translated.push(TranslatedArm {
                     span: else_span,
-                    patterns: smallvec![else_pattern],
+                    patterns: else_pattern.into(),
                     guard: None,
                     body: else_body,
                     scope: else_scope,
@@ -826,7 +847,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             let else_pattern = self.translator.afb.pat_var(else_span, kw::Underscore);
             translated.push(TranslatedArm {
                 span: else_span,
-                patterns: smallvec![else_pattern],
+                patterns: else_pattern.into(),
                 guard: None,
                 body: else_body,
                 scope: else_scope,
@@ -908,7 +929,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
         let clauses = translated.into_iter().flat_map(|arm| {
             let TranslatedArm { span, patterns, guard, body, .. } = arm;
-            patterns.into_iter().map(move |pattern| afb.clause(span, [pattern], guard, body))
+            patterns.into_iter().map(move |GuardedPattern(pattern, pattern_guards)| {
+                afb.clause(span, [pattern], guard.into_iter().chain(pattern_guards), body)
+            })
         });
         afb.expr_case(span, scrutinee, clauses)
     }
@@ -987,10 +1010,15 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
     pub(super) fn translate_single_pattern(&mut self, pat: &Pat<'tcx>) -> eaf::Pattern<'arena> {
         let patterns = self.translate_pattern(pat);
-        if let [pattern] = patterns.as_slice() {
+        if let [GuardedPattern(pattern, guards)] = patterns.as_slice()
+            && guards.is_empty()
+        {
             *pattern
         } else {
-            span_bug!(pat.span, "pattern expanded to multiple patterns in a singleton context")
+            span_bug!(
+                pat.span,
+                "pattern expanded to multiple patterns or guards in a singleton context"
+            )
         }
     }
 
@@ -1002,7 +1030,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 pats.iter().flat_map(|pattern| self.translate_pattern(pattern)).collect()
             }
 
-            PatKind::Wild => smallvec![afb.pat_var(pat.span, kw::Underscore)],
+            PatKind::Range(range) => self.translate_range_pattern(pat.span, range),
+
+            PatKind::Wild => afb.pat_var(pat.span, kw::Underscore).into(),
 
             PatKind::Binding {
                 name,
@@ -1030,9 +1060,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 self.translate_adt_pattern(pat.span, *adt_def, variant, subpatterns)
             }
 
-            PatKind::Constant { value } => {
-                smallvec![self.translate_constant_pattern(pat.span, *value)]
-            }
+            PatKind::Constant { value } => self.translate_constant_pattern(pat.span, *value).into(),
 
             PatKind::Map { fields } => self.translate_map_pattern(pat.span, fields),
 
@@ -1176,6 +1204,58 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         }
     }
 
+    fn translate_range_pattern(
+        &mut self,
+        span: Span,
+        range: &thir::PatRange<'tcx>,
+    ) -> Patterns<'arena> {
+        let afb = &self.translator.afb;
+        let range_var = self.scopes.fresh_var(sym::range, true);
+
+        let lower = range.lo.as_finite().map(|value| {
+            let lhs = afb.expr_var(span, range_var.erl_name);
+            let rhs = self.translate_range_boundary(span, range.ty, value);
+            afb.expr_binary_op(span, eaf::BinaryOp::Ge, lhs, rhs)
+        });
+        let upper = range.hi.as_finite().map(|value| {
+            let lhs = afb.expr_var(span, range_var.erl_name);
+            let rhs = self.translate_range_boundary(span, range.ty, value);
+            let op = match range.end {
+                rustc_hir::RangeEnd::Included => eaf::BinaryOp::Le,
+                rustc_hir::RangeEnd::Excluded => eaf::BinaryOp::Lt,
+            };
+            afb.expr_binary_op(span, op, lhs, rhs)
+        });
+
+        GuardedPattern(
+            afb.pat_var(span, range_var.erl_name),
+            lower.into_iter().chain(upper).collect(),
+        )
+        .into()
+    }
+
+    fn translate_range_boundary(
+        &self,
+        span: Span,
+        ty: Ty<'tcx>,
+        value: ty::ValTree<'tcx>,
+    ) -> eaf::Expr<'arena> {
+        let afb = &self.translator.afb;
+        match ty.kind() {
+            ty::TyKind::Int => {
+                let value = value.to_leaf().to_i128();
+                afb.expr_sint(span, value)
+            }
+            ty::TyKind::Char => {
+                let value = char::try_from(value.to_leaf())
+                    .unwrap_or_else(|_| span_bug!(span, "invalid range character"));
+                afb.expr_char(span, value)
+            }
+            ty::TyKind::Float => afb.expr_float(span, f64::from_bits(value.to_leaf().to_u64())),
+            _ => not_implemented!(self.tcx(), span, "range pattern type", ty),
+        }
+    }
+
     fn translate_binding_pattern(
         &mut self,
         pat: &Pat<'tcx>,
@@ -1196,10 +1276,15 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         if let Some(sub) = subpattern {
             self.translate_pattern(sub)
                 .into_iter()
-                .map(|subpat| self.translator.afb.pat_match(pat.span, var_pat, subpat))
+                .map(|GuardedPattern(pattern, guards)| {
+                    GuardedPattern(
+                        self.translator.afb.pat_match(pat.span, var_pat, pattern),
+                        guards,
+                    )
+                })
                 .collect()
         } else {
-            smallvec![var_pat]
+            var_pat.into()
         }
     }
 
@@ -1216,7 +1301,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 let groups: SmallVec<[_; 4]> = (0..field_count)
                     .map(|idx| match subpatterns.iter().find(|field| field.field.index() == idx) {
                         Some(field) => self.translate_pattern(&field.pattern),
-                        None => smallvec![afb.pat_var(pat.span, kw::Underscore)],
+                        None => afb.pat_var(pat.span, kw::Underscore).into(),
                     })
                     .collect();
 
@@ -1290,17 +1375,26 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         fn visit<'arena>(
             groups: &[Patterns<'arena>],
             index: usize,
-            combination: &mut SmallVec<[eaf::Pattern<'arena>; 4]>,
+            combination: &mut SmallVec<[GuardedPattern<'arena>; 4]>,
             translated: &mut Patterns<'arena>,
             build: &mut impl FnMut(&[eaf::Pattern<'arena>]) -> eaf::Pattern<'arena>,
         ) {
             if index == groups.len() {
-                translated.push(build(combination));
+                let guards = combination
+                    .iter()
+                    .flat_map(|GuardedPattern(_, guards)| guards.into_iter())
+                    .copied()
+                    .collect();
+
+                let patterns: SmallVec<[eaf::Pattern<'arena>; 4]> =
+                    combination.iter().map(|GuardedPattern(pattern, _)| pattern).copied().collect();
+
+                translated.push(GuardedPattern(build(&patterns), guards));
                 return;
             }
 
-            for &alternative in &groups[index] {
-                combination.push(alternative);
+            for alternative in &groups[index] {
+                combination.push(alternative.clone());
                 visit(groups, index + 1, combination, translated, build);
                 combination.pop();
             }

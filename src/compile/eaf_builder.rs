@@ -105,6 +105,17 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         ))
     }
 
+    pub(crate) fn expr_sint(&self, span: impl IntoAnno, value: i128) -> eaf::Expr<'arena> {
+        let anno = span.into_anno(self.source_map);
+        let value_expr = self.expr_int(anno, value.unsigned_abs());
+
+        if value < 0 {
+            eaf::Expr::UnaryOp(anno, eaf::UnaryOp::Neg, self.arena.alloc(value_expr))
+        } else {
+            value_expr
+        }
+    }
+
     fn biguint(&self, value: u128) -> eaf::BigUInt<'arena> {
         let bytes = value.to_le_bytes();
         let slice = self.arena.alloc_slice(trim_trailing_zeroes(&bytes));
@@ -456,7 +467,7 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         &self,
         span: impl IntoAnno,
         patterns: impl IntoIterator<Item = eaf::Pattern<'arena>>,
-        guard: Option<eaf::Expr<'arena>>,
+        guards: impl IntoIterator<Item = eaf::Expr<'arena>>,
         body: eaf::Expr<'arena>,
     ) -> eaf::Clause<'arena> {
         let body = match body {
@@ -464,17 +475,17 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
             other => eaf::Body(self.arena.alloc_slice(&[other])),
         };
 
-        let guards = if let Some(test) = guard {
-            let guard = eaf::Guard(self.arena.alloc_slice(&[test]));
-            eaf::GuardSeq(self.arena.alloc_slice(&[guard]))
-        } else {
+        let guards = eaf::Guard(self.arena.alloc_from_iter(guards));
+        let guard_seq = if guards.0.is_empty() {
             eaf::GuardSeq(&[])
+        } else {
+            eaf::GuardSeq(self.arena.alloc_slice(&[guards]))
         };
 
         eaf::Clause {
             anno: span.into_anno(self.source_map),
             patterns: self.arena.alloc_from_iter(patterns),
-            guards,
+            guards: guard_seq,
             body,
         }
     }

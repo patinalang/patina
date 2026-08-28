@@ -1647,6 +1647,7 @@ symbols! {
         public,
         pure,
         pushpop_unsafe,
+        range,
         qreg,
         qreg_low4,
         qreg_low8,
