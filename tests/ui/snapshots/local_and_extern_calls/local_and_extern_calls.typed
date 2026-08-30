@@ -1,0 +1,158 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+struct StructWithNew {
+    value: int,
+}
+
+impl StructWithNew {
+    fn new(value: int)
+        ->
+            StructWithNew ({
+        // local call
+        let _ =
+            ((Self::public_new as
+                    fn(int) -> StructWithNew {StructWithNew::public_new})((value
+                    as int)) as StructWithNew);
+        // local call
+        let _ =
+            ((self::StructWithNew::public_new as
+                    fn(int) -> StructWithNew {StructWithNew::public_new})((value
+                    as int)) as StructWithNew);
+
+        // remote call
+        #[attr = ExternCall]
+        ((Self::public_new as
+                fn(int) -> StructWithNew {StructWithNew::public_new})((value
+                as int)) as StructWithNew)
+    } as StructWithNew)
+
+    fn public_new(value: int)
+        ->
+            StructWithNew ({
+
+        // local call
+        ((Self::priv_new as
+                fn(int) -> StructWithNew {StructWithNew::priv_new})((value as
+                int)) as StructWithNew)
+    } as StructWithNew)
+
+    fn priv_new(value: int)
+        ->
+            StructWithNew ({
+        (StructWithNew { (value as int) } as StructWithNew)
+    } as StructWithNew)
+}
+
+fn priv_main()
+    ->
+        StructWithNew ({
+
+    // remote call
+    ((StructWithNew::new as
+            fn(int) -> StructWithNew {StructWithNew::new})((42 as int)) as
+        StructWithNew)
+} as StructWithNew)
+
+fn public_main()
+    ->
+        StructWithNew ({
+    // local call
+    let _ =
+        ((priv_main as fn() -> StructWithNew {priv_main})() as StructWithNew);
+    // local call
+    let _ =
+        ((self::priv_main as fn() -> StructWithNew {priv_main})() as
+            StructWithNew);
+
+    // local call
+    ((priv_main as fn() -> StructWithNew {priv_main})() as StructWithNew)
+} as StructWithNew)
+
+mod Nested {
+    fn main() ({
+        // local call
+        let _ = ((public_function as fn() {Nested::public_function})() as ());
+        // local call
+        let _ =
+            ((self::public_function as fn() {Nested::public_function})() as
+                ());
+        // local call
+        let _ =
+            ((super::Nested::public_function as
+                    fn() {Nested::public_function})() as ());
+
+        // remote call
+        #[attr = ExternCall]
+        ((public_function as fn() {Nested::public_function})() as ())
+    } as ())
+
+    fn public_function() ({ (() as ()) } as ())
+}
+
+fn main() ({
+    // local call
+    let _ =
+        ((public_main as fn() -> StructWithNew {public_main})() as
+            StructWithNew);
+    // local call
+    let _ =
+        ((self::public_main as fn() -> StructWithNew {public_main})() as
+            StructWithNew);
+    // remote call
+    let _ = ((Nested::main as fn() {Nested::main})() as ());
+    // local call
+    let _ =
+        ((self::priv_main as fn() -> StructWithNew {priv_main})() as
+            StructWithNew);
+    // remote call (redundant `#[extern_call]` warning)
+    let s = #[attr = ExternCall]
+        ((StructWithNew::new as
+                fn(int) -> StructWithNew {StructWithNew::new})((42 as int)) as
+            StructWithNew);
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::display as
+                                    fn(term) -> term)(((s as StructWithNew).value as int)) as
+                                term)] as [term])] as [[term]])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+} as ())

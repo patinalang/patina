@@ -1,40 +1,40 @@
 -file("tests/ui/src/generics/witness/dispatch.pt", 1).
+
 -module('Elixir.Patina.Dispatch.Point').
+
 -compile([no_auto_import]).
+
 -export_record([]).
+
 -export(['__info__'/1,
          '__struct__'/0,
          '__struct__'/1,
          'Dispatch::Area::area'/2]).
+
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
-                     [{'__info__', 1},
-                      {module_info, 0},
-                      {module_info, 1}]);
-'__info__'(macros) ->
-    [];
+                     [{'__info__', 1}, {module_info, 0}, {module_info, 1}]);
+'__info__'(macros) -> [];
 '__info__'(struct) ->
     [#{field => x, default => nil, required => false},
      #{field => y, default => nil, required => false}];
 '__info__'(exports_md5) ->
-    erlang:md5(term_to_binary({lists:sort(module_info(exports)),
-                               [],
-                               '__info__'(struct)},
-                              [deterministic]));
-'__info__'(deprecated) ->
-    [];
-'__info__'(Key) ->
-    module_info(Key).
+    erlang:md5(erlang:term_to_binary({lists:sort(module_info(exports)),
+                                      [],
+                                      '__info__'(struct)},
+                                     [deterministic]));
+'__info__'(deprecated) -> [];
+'__info__'(Key) -> module_info(Key).
+
 '__struct__'() ->
     #{'__struct__' => 'Elixir.Patina.Dispatch.Point',
-      x => nil,
-      y => nil}.
+      x => nil, y => nil}.
+
 '__struct__'(Fields) ->
     'Elixir.Enum':reduce(Fields,
                          '__struct__'(),
-                         fun({Key, Value}, Acc) ->
-                                Acc#{Key := Value}
-                         end).
+                         fun ({Key, Value}, Acc) -> Acc#{Key := Value} end).
+
 'Dispatch::Area::area'(_Self@0_0, _self@1_0) ->
     begin
         io:put_chars([[<<"Area::area(">>,
@@ -42,4 +42,5 @@
                        <<")">>]]),
         io:nl()
     end,
-    map_get(x, _self@1_0) * map_get(y, _self@1_0).
+    erlang:map_get(x, _self@1_0) *
+        erlang:map_get(y, _self@1_0).

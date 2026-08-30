@@ -1,7 +1,14 @@
--file("tests/ui/src/flow_control/match/guard__01.pt", 5).
+-file("tests/ui/src/flow_control/match/guard__01.pt",
+      5).
+
 -module('Elixir.Patina.Guard01.Temperature').
+
 -compile([no_auto_import]).
+
 -export_record(['Celsius', 'Fahrenheit']).
+
 -export([]).
+
 -record #'Celsius'{'0'}.
+
 -record #'Fahrenheit'{'0'}.

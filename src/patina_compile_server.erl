@@ -50,7 +50,7 @@ handle_request(Sock, Op, Eaf) ->
                 Rendered = unicode:characters_to_binary(io_lib:format("~tp", [Forms])),
                 write_msg(Sock, [~"ok", Rendered]);
             ~"erl" ->
-                Rendered = unicode:characters_to_binary([erl_pp:form(Fm) || Fm <- Forms]),
+                Rendered = unicode:characters_to_binary([erl_prettypr:format(erl_syntax:form_list(Forms)), "\n"]),
                 write_msg(Sock, [~"ok", Rendered])
         end
     catch
