@@ -240,6 +240,30 @@ impl<'psess, 'src> Lexer<'psess, 'src> {
                     self.psess.raw_identifier_spans.push(span);
                     token::Ident(sym, IdentIsRaw::Yes)
                 }
+                rustc_lexer::TokenKind::BacktickIdent { terminated } => {
+                    let span = self.mk_sp(start, self.pos);
+                    let content_end = if terminated { self.pos - BytePos(1) } else { self.pos };
+                    let content = self.str_from_to(start + BytePos(1), content_end);
+                    if !terminated {
+                        self.dcx().emit_err(errors::UnterminatedBacktickIdent { span });
+                    }
+                    let (sym, has_content) = if content.is_empty() {
+                        if terminated {
+                            self.dcx().emit_err(errors::EmptyBacktickIdent { span });
+                        }
+                        (sym::dummy, false)
+                    } else {
+                        (nfc_normalize(content), true)
+                    };
+                    if has_content {
+                        self.psess.symbol_gallery.insert(sym, span);
+                        if !sym.can_be_raw() {
+                            self.dcx().emit_err(errors::CannotBeBacktickIdent { span, ident: sym });
+                        }
+                    }
+                    self.psess.raw_identifier_spans.push(span);
+                    token::Ident(sym, IdentIsRaw::Yes)
+                }
                 rustc_lexer::TokenKind::UnknownPrefix => {
                     self.report_unknown_prefix(start);
                     self.ident(start)

@@ -39,16 +39,9 @@ impl Symbol {
             return Self::new(string);
         }
 
-        // Slow-path: If the string is already ASCII we're done, otherwise ask
-        // our server to do this for us over RPC.
-        // We don't need to check for identifiers which can't be raw here,
-        // because all of them are ASCII.
-        if string.is_ascii() {
-            Err(())
-        } else {
-            client::Methods::symbol_normalize_and_validate_ident(string)
-        }
-        .unwrap_or_else(|_| panic!("`{:?}` is not a valid identifier", string))
+        // Slow-path: ask our server to do this for us over RPC.
+        client::Methods::symbol_normalize_and_validate_ident(string, is_raw)
+            .unwrap_or_else(|_| panic!("`{:?}` is not a valid identifier", string))
     }
 
     /// Run a callback with the symbol's string value.

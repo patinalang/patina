@@ -2751,10 +2751,14 @@ fn names_to_string(names: impl Iterator<Item = Symbol>) -> String {
         if i > 0 {
             result.push_str("::");
         }
-        if Ident::with_dummy_span(name).is_raw_guess() {
-            result.push_str("r#");
+        let is_raw = Ident::with_dummy_span(name).is_raw_guess();
+        if is_raw {
+            result.push_str("`");
         }
         result.push_str(name.as_str());
+        if is_raw {
+            result.push_str("`");
+        }
     }
     result
 }

@@ -1107,9 +1107,13 @@ impl Ident {
 impl fmt::Display for Ident {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.0.is_raw {
-            f.write_str("r#")?;
+            f.write_str("`")?;
         }
-        fmt::Display::fmt(&self.0.sym, f)
+        fmt::Display::fmt(&self.0.sym, f)?;
+        if self.0.is_raw {
+            f.write_str("`")?;
+        }
+        Ok(())
     }
 }
 

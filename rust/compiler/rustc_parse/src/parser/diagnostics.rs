@@ -313,7 +313,7 @@ impl<'a> Parser<'a> {
         // the diagnostic, regardless of eager recovery.
         let bad_token = self.token;
 
-        // suggest prepending a keyword in identifier position with `r#`
+        // suggest wrapping a keyword in identifier position with backticks
         let suggest_raw = if let Some((ident, IdentIsRaw::No)) = self.token.ident()
             && ident.is_raw_guess()
             && self.look_ahead(1, |t| valid_follow.contains(&t.kind))
@@ -321,10 +321,10 @@ impl<'a> Parser<'a> {
             recovered_ident = Some((ident, IdentIsRaw::Yes));
 
             // `Symbol::to_string()` is different from `Symbol::into_diag_arg()`,
-            // which uses `Symbol::to_ident_string()` and "helpfully" adds an implicit `r#`
+            // which uses `Symbol::to_ident_string()` and "helpfully" adds backticks.
             let ident_name = ident.name.to_string();
 
-            Some(SuggEscapeIdentifier { span: ident.span.shrink_to_lo(), ident_name })
+            Some(SuggEscapeIdentifier { span: ident.span, ident_name })
         } else {
             None
         };
@@ -2069,7 +2069,7 @@ impl<'a> Parser<'a> {
                     Applicability::MachineApplicable,
                 );
             }
-            err.span_suggestion(lo.shrink_to_lo(), format!("{prefix}you can still access the deprecated `try!()` macro using the \"raw identifier\" syntax"), "r#", Applicability::MachineApplicable);
+            err.span_suggestion(lo, format!("{prefix}you can still access the deprecated `try!()` macro using backtick escaping"), "`try`", Applicability::MachineApplicable);
             let guar = err.emit();
             Ok(self.mk_expr_err(lo.to(hi), guar))
         } else {

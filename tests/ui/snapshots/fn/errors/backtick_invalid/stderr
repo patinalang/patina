@@ -1,0 +1,44 @@
+error: backtick identifier cannot be empty
+  --> tests/ui/src/fn/errors/backtick_invalid.pt:3:13
+   |
+LL |     let x = ``;
+   |             ^^
+
+error: `self` cannot be a backtick-escaped identifier
+  --> tests/ui/src/fn/errors/backtick_invalid.pt:4:9
+   |
+LL |     let `self` = 1;
+   |         ^^^^^^
+
+error: `_` cannot be a backtick-escaped identifier
+  --> tests/ui/src/fn/errors/backtick_invalid.pt:5:9
+   |
+LL |     let `_` = 1;
+   |         ^^^
+
+error: `'a` cannot be a backtick-escaped identifier
+  --> tests/ui/src/fn/errors/backtick_invalid.pt:6:9
+   |
+LL |     let `'a` = 1;
+   |         ^^^^
+
+error: `0` cannot be a backtick-escaped identifier
+  --> tests/ui/src/fn/errors/backtick_invalid.pt:7:9
+   |
+LL |     let `0` = 1;
+   |         ^^^
+
+error: expected identifier, found keyword `type`
+  --> tests/ui/src/fn/errors/backtick_invalid.pt:2:9
+   |
+LL |     let type = 1;
+   |         ^^^^ expected identifier, found keyword
+   |
+help: escape `type` to use it as an identifier
+   |
+LL -     let type = 1;
+LL +     let `type` = 1;
+   |
+
+error: aborting due to 6 previous errors
+

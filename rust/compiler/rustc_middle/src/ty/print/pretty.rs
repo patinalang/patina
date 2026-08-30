@@ -2410,14 +2410,17 @@ impl<'tcx> Printer<'tcx> for FmtPrinter<'_, 'tcx> {
             write!(self, "::")?;
         }
 
-        if let DefPathDataName::Named(name) = name {
-            if Ident::with_dummy_span(name).is_raw_guess() {
-                write!(self, "r#")?;
-            }
+        let is_raw = matches!(name, DefPathDataName::Named(name) if Ident::with_dummy_span(name).is_raw_guess());
+        if is_raw {
+            write!(self, "`")?;
         }
 
         let verbose = self.should_print_verbose();
         write!(self, "{}", disambiguated_data.as_sym(verbose))?;
+
+        if is_raw {
+            write!(self, "`")?;
+        }
 
         self.empty_path = false;
 

@@ -101,6 +101,14 @@ pub enum TokenKind {
     /// A raw identifier, e.g. "r#ident".
     RawIdent,
 
+    /// A backtick-quoted identifier, e.g. "`exists?`".
+    ///
+    /// The contents between the backticks may contain any characters except
+    /// backtick, newline, or carriage return. Empty contents are invalid.
+    BacktickIdent {
+        terminated: bool,
+    },
+
     /// An unknown literal prefix, like `foo#`, `foo'`, `foo"`. Excludes
     /// literal prefixes that contain emoji, which are considered "invalid".
     ///
@@ -662,6 +670,10 @@ impl<'a> Cursor<'a> {
             }
             // Identifier starting with an emoji. Only lexed for graceful error recovery.
             c if !c.is_ascii() && c.is_emoji_char() => self.invalid_ident(),
+            '`' => {
+                let terminated = self.backtick_ident();
+                BacktickIdent { terminated }
+            }
             _ => Unknown,
         };
         if matches!(self.frontmatter_allowed, FrontmatterAllowed::Yes)
@@ -830,6 +842,16 @@ impl<'a> Cursor<'a> {
         // Eat the identifier part of RawIdent.
         self.eat_identifier();
         RawIdent
+    }
+
+    fn backtick_ident(&mut self) -> bool {
+        self.eat_while(|c| c != '`' && c != '\n' && c != '\r');
+        if self.first() == '`' {
+            self.bump();
+            true
+        } else {
+            false
+        }
     }
 
     fn ident_or_unknown_prefix(&mut self) -> TokenKind {

@@ -481,13 +481,32 @@ pub(crate) enum BuiltinEllipsisInclusiveRangePatternsLint {
 pub(crate) struct BuiltinKeywordIdents {
     pub kw: Ident,
     pub next: Edition,
+    #[subdiagnostic]
+    pub suggestion: BuiltinKeywordIdentsSuggestion,
+}
+
+#[derive(Subdiagnostic)]
+pub(crate) enum BuiltinKeywordIdentsSuggestion {
     #[suggestion(
-        "you can use a raw identifier to stay compatible",
-        code = "{prefix}r#{kw}",
+        "you can escape this identifier to stay compatible",
+        code = "`{kw}`",
         applicability = "machine-applicable"
     )]
-    pub suggestion: Span,
-    pub prefix: &'static str,
+    Ident {
+        kw: Ident,
+        #[primary_span]
+        suggestion: Span,
+    },
+    #[suggestion(
+        "you can escape this lifetime to stay compatible",
+        code = "'r#{kw}",
+        applicability = "machine-applicable"
+    )]
+    Lifetime {
+        kw: Ident,
+        #[primary_span]
+        suggestion: Span,
+    },
 }
 
 #[derive(Diagnostic)]

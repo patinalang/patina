@@ -842,8 +842,16 @@ impl server::Server for Rustc<'_, '_> {
         })
     }
 
-    fn symbol_normalize_and_validate_ident(&mut self, string: &str) -> Result<Self::Symbol, ()> {
+    fn symbol_normalize_and_validate_ident(
+        &mut self,
+        string: &str,
+        is_raw: bool,
+    ) -> Result<Self::Symbol, ()> {
         let sym = nfc_normalize(string);
-        if rustc_lexer::is_ident(sym.as_str()) { Ok(sym) } else { Err(()) }
+        if (!is_raw && rustc_lexer::is_ident(sym.as_str())) || (is_raw && sym.can_be_raw()) {
+            Ok(sym)
+        } else {
+            Err(())
+        }
     }
 }

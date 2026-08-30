@@ -369,3 +369,88 @@ fn main() {}
         "#]],
     )
 }
+
+#[test]
+fn backtick_ident() {
+    check_lexing(
+        "`exists?`",
+        FrontmatterAllowed::No,
+        expect![[r#"
+            Token { kind: BacktickIdent { terminated: true }, len: 9 }
+        "#]],
+    );
+}
+
+#[test]
+fn strict_identifier_validation() {
+    assert!(is_ident("ordinary"));
+    assert!(!is_ident("foo bar"));
+    assert!(!is_ident("1+2"));
+    assert!(!is_ident("0"));
+}
+
+#[test]
+fn backtick_ident_in_path() {
+    check_lexing(
+        "A::`save!`(x)",
+        FrontmatterAllowed::No,
+        expect![[r#"
+            Token { kind: Ident, len: 1 }
+            Token { kind: Colon, len: 1 }
+            Token { kind: Colon, len: 1 }
+            Token { kind: BacktickIdent { terminated: true }, len: 7 }
+            Token { kind: OpenParen, len: 1 }
+            Token { kind: Ident, len: 1 }
+            Token { kind: CloseParen, len: 1 }
+        "#]],
+    );
+}
+
+#[test]
+fn backtick_ident_empty() {
+    check_lexing(
+        "``",
+        FrontmatterAllowed::No,
+        expect![[r#"
+            Token { kind: BacktickIdent { terminated: true }, len: 2 }
+        "#]],
+    );
+}
+
+#[test]
+fn backtick_ident_unterminated_newline() {
+    check_lexing(
+        "`exists?\n",
+        FrontmatterAllowed::No,
+        expect![[r#"
+            Token { kind: BacktickIdent { terminated: false }, len: 8 }
+            Token { kind: Whitespace, len: 1 }
+        "#]],
+    );
+}
+
+#[test]
+fn backtick_ident_unterminated_eof() {
+    check_lexing(
+        "`exists?",
+        FrontmatterAllowed::No,
+        expect![[r#"
+            Token { kind: BacktickIdent { terminated: false }, len: 8 }
+        "#]],
+    );
+}
+
+#[test]
+fn backtick_ident_method_call() {
+    check_lexing(
+        "x.`valid?`()",
+        FrontmatterAllowed::No,
+        expect![[r#"
+            Token { kind: Ident, len: 1 }
+            Token { kind: Dot, len: 1 }
+            Token { kind: BacktickIdent { terminated: true }, len: 8 }
+            Token { kind: OpenParen, len: 1 }
+            Token { kind: CloseParen, len: 1 }
+        "#]],
+    );
+}

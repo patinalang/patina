@@ -2540,8 +2540,10 @@ impl fmt::Display for IdentPrinter {
             }
             IdentPrintMode::Normal => self.symbol,
             IdentPrintMode::RawIdent => {
-                f.write_str("r#")?;
-                self.symbol
+                f.write_str("`")?;
+                self.symbol.fmt(f)?;
+                f.write_str("`")?;
+                return Ok(());
             }
             IdentPrintMode::RawLifetime => {
                 f.write_str("'r#")?;
@@ -2961,7 +2963,13 @@ impl Symbol {
 
     /// Returns `true` if this symbol can be a raw identifier.
     pub fn can_be_raw(self) -> bool {
-        self != sym::empty && self != kw::Underscore && !self.is_path_segment_keyword()
+        let string = self.as_str();
+        self != sym::empty
+            && self != kw::Underscore
+            && !self.is_path_segment_keyword()
+            && !string.contains(['`', '\n', '\r'])
+            && !string.starts_with('\'')
+            && !string.bytes().all(|b| b.is_ascii_digit())
     }
 
     /// Was this symbol index predefined in the compiler's `symbols!` macro?
@@ -3007,7 +3015,7 @@ impl Ident {
     /// We see this identifier in a normal identifier position, like variable name or a type.
     /// How was it written originally? Did it use the raw form? Let's try to guess.
     pub fn is_raw_guess(self) -> bool {
-        self.name.can_be_raw() && self.is_reserved()
+        self.name.can_be_raw() && (self.is_reserved() || !rustc_lexer::is_ident(self.name.as_str()))
     }
 
     /// Given the name of a lifetime without the first quote (`'`),

@@ -1,0 +1,16 @@
+error: unterminated backtick identifier
+  --> tests/ui/src/fn/errors/backtick_unterminated.pt:2:13
+   |
+LL |     let x = `exists?
+   |             ^^^^^^^^
+
+error: expected `;`, found `}`
+  --> tests/ui/src/fn/errors/backtick_unterminated.pt:2:21
+   |
+LL |     let x = `exists?
+   |                     ^ help: add `;` here
+LL | }
+   | - unexpected token
+
+error: aborting due to 2 previous errors
+

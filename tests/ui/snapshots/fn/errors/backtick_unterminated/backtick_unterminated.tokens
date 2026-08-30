@@ -1,0 +1,20 @@
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+CloseParen
+Whitespace
+OpenBrace
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+BacktickIdent { terminated: false }
+Whitespace
+CloseBrace
+Whitespace

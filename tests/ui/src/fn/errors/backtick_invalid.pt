@@ -1,0 +1,8 @@
+pub fn main() {
+    let type = 1;
+    let x = ``;
+    let `self` = 1;
+    let `_` = 1;
+    let `'a` = 1;
+    let `0` = 1;
+}

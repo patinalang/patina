@@ -1,0 +1,16 @@
+error: unterminated backtick identifier
+  --> tests/ui/src/fn/errors/backtick_unterminated_eof.pt:2:13
+   |
+LL |     let x = `exists?
+   |             ^^^^^^^^
+
+error: this file contains an unclosed delimiter
+  --> tests/ui/src/fn/errors/backtick_unterminated_eof.pt:2:22
+   |
+LL | pub fn main() {
+   |               - unclosed delimiter
+LL |     let x = `exists?
+   |                     ^
+
+error: aborting due to 2 previous errors
+

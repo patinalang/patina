@@ -52,12 +52,13 @@ use crate::lints::{
     BuiltinDoubleNegationsAddParens, BuiltinEllipsisInclusiveRangePatternsLint,
     BuiltinExplicitOutlives, BuiltinExplicitOutlivesSuggestion, BuiltinFeatureIssueNote,
     BuiltinIncompleteFeatures, BuiltinIncompleteFeaturesHelp, BuiltinInternalFeatures,
-    BuiltinKeywordIdents, BuiltinMissingCopyImpl, BuiltinMissingDebugImpl, BuiltinMissingDoc,
-    BuiltinMutablesTransmutes, BuiltinNoMangleGeneric, BuiltinNonShorthandFieldPatterns,
-    BuiltinSpecialModuleNameUsed, BuiltinTrivialBounds, BuiltinTypeAliasBounds,
-    BuiltinUngatedAsyncFnTrackCaller, BuiltinUnpermittedTypeInit, BuiltinUnpermittedTypeInitSub,
-    BuiltinUnreachablePub, BuiltinUnsafe, BuiltinUnstableFeatures, BuiltinUnusedDocComment,
-    BuiltinUnusedDocCommentSub, BuiltinWhileTrue, EqInternalMethodImplemented, InvalidAsmLabel,
+    BuiltinKeywordIdents, BuiltinKeywordIdentsSuggestion, BuiltinMissingCopyImpl,
+    BuiltinMissingDebugImpl, BuiltinMissingDoc, BuiltinMutablesTransmutes, BuiltinNoMangleGeneric,
+    BuiltinNonShorthandFieldPatterns, BuiltinSpecialModuleNameUsed, BuiltinTrivialBounds,
+    BuiltinTypeAliasBounds, BuiltinUngatedAsyncFnTrackCaller, BuiltinUnpermittedTypeInit,
+    BuiltinUnpermittedTypeInitSub, BuiltinUnreachablePub, BuiltinUnsafe, BuiltinUnstableFeatures,
+    BuiltinUnusedDocComment, BuiltinUnusedDocCommentSub, BuiltinWhileTrue,
+    EqInternalMethodImplemented, InvalidAsmLabel,
 };
 use crate::{EarlyContext, EarlyLintPass, LateContext, LateLintPass, Level, LintContext};
 declare_lint! {
@@ -1845,14 +1846,26 @@ impl KeywordIdents {
                 TokenTree::Token(token, _) => {
                     if let Some((ident, token::IdentIsRaw::No)) = token.ident() {
                         if !prev_dollar {
-                            self.check_ident_token(cx, UnderMacro(true), ident, "");
+                            self.check_ident_token(
+                                cx,
+                                UnderMacro(true),
+                                ident,
+                                BuiltinKeywordIdentsSuggestion::Ident {
+                                    kw: ident,
+                                    suggestion: ident.span,
+                                },
+                            );
                         }
                     } else if let Some((ident, token::IdentIsRaw::No)) = token.lifetime() {
+                        let ident = ident.without_first_quote();
                         self.check_ident_token(
                             cx,
                             UnderMacro(true),
-                            ident.without_first_quote(),
-                            "'",
+                            ident,
+                            BuiltinKeywordIdentsSuggestion::Lifetime {
+                                kw: ident,
+                                suggestion: ident.span,
+                            },
                         );
                     } else if token.kind == TokenKind::Dollar {
                         prev_dollar = true;
@@ -1870,7 +1883,7 @@ impl KeywordIdents {
         cx: &EarlyContext<'_>,
         UnderMacro(under_macro): UnderMacro,
         ident: Ident,
-        prefix: &'static str,
+        suggestion: BuiltinKeywordIdentsSuggestion,
     ) {
         let (lint, edition) = match ident.name {
             kw::Async | kw::Await | kw::Try => (KEYWORD_IDENTS_2018, Edition::Edition2018),
@@ -1904,7 +1917,7 @@ impl KeywordIdents {
         cx.emit_span_lint(
             lint,
             ident.span,
-            BuiltinKeywordIdents { kw: ident, next: edition, suggestion: ident.span, prefix },
+            BuiltinKeywordIdents { kw: ident, next: edition, suggestion },
         );
     }
 }
@@ -1918,9 +1931,20 @@ impl EarlyLintPass for KeywordIdents {
     }
     fn check_ident(&mut self, cx: &EarlyContext<'_>, ident: &Ident) {
         if ident.name.as_str().starts_with('\'') {
-            self.check_ident_token(cx, UnderMacro(false), ident.without_first_quote(), "'");
+            let ident = ident.without_first_quote();
+            self.check_ident_token(
+                cx,
+                UnderMacro(false),
+                ident,
+                BuiltinKeywordIdentsSuggestion::Lifetime { kw: ident, suggestion: ident.span },
+            );
         } else {
-            self.check_ident_token(cx, UnderMacro(false), *ident, "");
+            self.check_ident_token(
+                cx,
+                UnderMacro(false),
+                *ident,
+                BuiltinKeywordIdentsSuggestion::Ident { kw: *ident, suggestion: ident.span },
+            );
         }
     }
 }

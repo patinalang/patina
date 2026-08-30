@@ -1540,7 +1540,7 @@ pub(crate) struct InvalidMetaItemQuoteIdentSugg {
     "escape `{$ident_name}` to use it as an identifier",
     style = "verbose",
     applicability = "maybe-incorrect",
-    code = "r#"
+    code = "`{ident_name}`"
 )]
 pub(crate) struct SuggEscapeIdentifier {
     #[primary_span]
@@ -2788,6 +2788,28 @@ pub(crate) struct CannotBeRawIdent {
     #[primary_span]
     pub span: Span,
     pub ident: Symbol,
+}
+
+#[derive(Diagnostic)]
+#[diag("`{$ident}` cannot be a backtick-escaped identifier")]
+pub(crate) struct CannotBeBacktickIdent {
+    #[primary_span]
+    pub span: Span,
+    pub ident: Symbol,
+}
+
+#[derive(Diagnostic)]
+#[diag("backtick identifier cannot be empty")]
+pub(crate) struct EmptyBacktickIdent {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("unterminated backtick identifier")]
+pub(crate) struct UnterminatedBacktickIdent {
+    #[primary_span]
+    pub span: Span,
 }
 
 #[derive(Diagnostic)]
@@ -4071,14 +4093,13 @@ pub(crate) struct BoxNotPat {
     #[primary_span]
     pub span: Span,
     #[note("`box` is a reserved keyword")]
-    pub kw: Span,
     #[suggestion(
         "escape `box` to use it as an identifier",
-        code = "r#",
+        code = "`box`",
         applicability = "maybe-incorrect",
         style = "verbose"
     )]
-    pub lo: Span,
+    pub kw: Span,
     pub descr: String,
 }
 

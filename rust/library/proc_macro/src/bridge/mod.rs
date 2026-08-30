@@ -78,7 +78,7 @@ macro_rules! with_api {
             fn span_save_span(span: $Span) -> usize;
             fn span_recover_proc_macro_span(id: usize) -> $Span;
 
-            fn symbol_normalize_and_validate_ident(string: &str) -> Result<$Symbol, ()>;
+            fn symbol_normalize_and_validate_ident(string: &str, is_raw: bool) -> Result<$Symbol, ()>;
         }
     };
 }

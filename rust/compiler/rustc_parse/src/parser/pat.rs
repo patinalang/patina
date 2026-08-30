@@ -1679,12 +1679,7 @@ impl<'a> Parser<'a> {
 
         if self.isnt_pattern_start() {
             let descr = super::token_descr(&self.token);
-            self.dcx().emit_err(errors::BoxNotPat {
-                span: self.token.span,
-                kw: box_span,
-                lo: box_span.shrink_to_lo(),
-                descr,
-            });
+            self.dcx().emit_err(errors::BoxNotPat { span: self.token.span, kw: box_span, descr });
 
             // We cannot use `parse_pat_ident()` since it will complain `box`
             // is not an identifier.

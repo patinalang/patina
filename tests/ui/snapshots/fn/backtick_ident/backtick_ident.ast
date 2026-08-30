@@ -1,0 +1,36 @@
+pub fn `exists?`(x: int) -> bool { x > 0 }
+
+pub fn `save!`() { println!("saved!"); }
+
+pub fn `a{b}`() -> int { 1 }
+
+pub fn `type`() -> int { 2 }
+
+struct S {
+    value: int,
+}
+
+impl S {
+    fn `valid?`(self) -> bool { self.value > 0 }
+
+    fn check_via_self(s: S) -> bool { Self::`valid?`(s) }
+}
+
+macro_rules! invoke { ($f:ident) => { $f(1) }; }
+
+pub fn main() {
+    let s = S { value: 1 };
+    let _ = `type`();
+    let `value?` = true;
+    let `type` = 2;
+    if !s.`valid?`() { return; }
+    if !S::`valid?`(s) { return; }
+    if !S::check_via_self(s) { return; }
+    if !self::`exists?`(1) { return; }
+    invoke!(`exists?`);
+    `save!`();
+    println!("{}", stringify!(`a{b}`));
+    println!("{}", `value?`);
+    println!("{}", `type`);
+    let _ = `a{b}`();
+}

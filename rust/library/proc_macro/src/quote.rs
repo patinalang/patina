@@ -408,7 +408,11 @@ pub fn quote(stream: TokenStream) -> TokenStream {
             }
             TokenTree::Ident(tt) => {
                 let literal = tt.to_string();
-                let (literal, ctor) = if let Some(stripped) = literal.strip_prefix("r#") {
+                let (literal, ctor) = if let Some(inner) =
+                    literal.strip_prefix('`').and_then(|s| s.strip_suffix('`'))
+                {
+                    (inner, minimal_quote!(crate::Ident::new_raw))
+                } else if let Some(stripped) = literal.strip_prefix("r#") {
                     (stripped, minimal_quote!(crate::Ident::new_raw))
                 } else {
                     (literal.as_str(), minimal_quote!(crate::Ident::new))
