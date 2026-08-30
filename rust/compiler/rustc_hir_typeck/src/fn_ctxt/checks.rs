@@ -638,6 +638,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
         match lit.node {
             ast::LitKind::Str(..) => tcx.types.str_,
+            ast::LitKind::Atom(..) => tcx.types.atom,
             ast::LitKind::ByteStr(ref v, _) => Ty::new_imm_ref(
                 tcx,
                 tcx.lifetimes.re_static,

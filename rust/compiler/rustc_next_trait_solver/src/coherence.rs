@@ -336,6 +336,7 @@ where
             | ty::Float
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Map(_, _)
             | ty::Pat(..)
             | ty::FnPtr(..)

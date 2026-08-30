@@ -1026,6 +1026,7 @@ fn assemble_candidates_from_impls<'cx, 'tcx>(
                         | ty::Foreign(_)
                         | ty::Str
                         | ty::Term
+                        | ty::Atom
                         | ty::Map(..)
                         | ty::Array(..)
                         | ty::Pat(..)
@@ -1080,6 +1081,7 @@ fn assemble_candidates_from_impls<'cx, 'tcx>(
                             | ty::Float
                             | ty::Str
                             | ty::Term
+                            | ty::Atom
                             | ty::Map(..)
                             | ty::Array(..)
                             | ty::Pat(..)

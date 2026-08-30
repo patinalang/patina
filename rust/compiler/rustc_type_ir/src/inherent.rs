@@ -187,6 +187,7 @@ pub trait Ty<I: Interner<Ty = Self>>:
             | ty::CoroutineWitness(_, _)
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Map(_, _)
             | ty::Slice(_)
             | ty::Never

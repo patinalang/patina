@@ -44,6 +44,7 @@ Ident
 Whitespace
 Ident
 CloseParen
+Semi
 Whitespace
 LineComment { doc_style: None }
 Whitespace

@@ -137,10 +137,10 @@ impl<'tcx> Value<'tcx> {
     pub fn try_to_raw_bytes(self, tcx: TyCtxt<'tcx>) -> Option<&'tcx [u8]> {
         match self.ty.kind() {
             // `str` is a sized value type holding raw bytes directly
-            ty::Str => {}
+            ty::Str | ty::Atom => {}
             ty::Ref(_, inner_ty, _) => match inner_ty.kind() {
                 // `&str` can be interpreted as raw bytes
-                ty::Str => {}
+                ty::Str | ty::Atom => {}
                 // `&[T]` can be interpreted as raw bytes if elements are `u8`
                 ty::Slice(_) => {}
                 // other `&_` can't be interpreted as raw bytes

@@ -1,0 +1,82 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/custom_types/enum/literal_enums.md
+// block: 1/2
+
+enum AtomEnum { Foo = (a"hello_foo" as atom), Bar = (a"hello_bar" as atom), }
+
+enum IntEnum { Ok = (200 as int), NotFound = (404 as int), }
+
+enum StrEnum { Peter = ("Peter" as str), Paul = ("Paul" as str), }
+
+fn main() ({
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::debug as
+                                    fn(term) -> term)(
+                                // literal enums can be safely cast to their underlying type
+                                ((AtomEnum::Foo as AtomEnum) as atom as atom)) as term)] as
+                        [term])] as [[term]])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::debug as
+                                    fn(term) -> term)(
+                                // a"hello_foo"
+
+                                ((IntEnum::NotFound as IntEnum) as int as int)) as term)] as
+                        [term])] as [[term]])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::debug as
+                                    fn(term) -> term)(
+                                // 404
+
+                                ((StrEnum::Peter as StrEnum) as str as str)) as term)] as
+                        [term])] as [[term]])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    // "Peter"
+} as ())

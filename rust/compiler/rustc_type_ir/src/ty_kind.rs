@@ -130,6 +130,9 @@ pub enum TyKind<I: Interner> {
     /// An opaque Erlang term. Written as `term`. Has no literal form.
     Term,
 
+    /// An Erlang atom. Written as `atom`, with literals `a"…"`.
+    Atom,
+
     /// A homogeneous map. Written as `#{K => V}`.
     Map(I::Ty, I::Ty),
 
@@ -340,6 +343,7 @@ impl<I: Interner> TyKind<I> {
             | ty::Foreign(_)
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Map(_, _)
             | ty::Array(_, _)
             | ty::Pat(_, _)
@@ -393,6 +397,7 @@ impl<I: Interner> fmt::Debug for TyKind<I> {
             Foreign(d) => f.debug_tuple("Foreign").field(d).finish(),
             Str => write!(f, "str"),
             Term => write!(f, "term"),
+            Atom => write!(f, "atom"),
             Map(k, v) => write!(f, "#{{{k:?} => {v:?}}}"),
             Array(t, c) => write!(f, "[{t:?}; {c:?}]"),
             Pat(t, p) => write!(f, "pattern_type!({t:?} is {p:?})"),

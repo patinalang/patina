@@ -1,0 +1,71 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+const NAMED: atom = (a"named" as atom);
+
+fn annotated()
+    ->
+        atom ({ let value: atom = (a"hello" as atom); (value as atom) } as
+    atom)
+
+fn named() -> atom ({ (NAMED as atom) } as atom)
+
+fn escaped() -> atom ({ (a"line\nbreak" as atom) } as atom)
+
+fn raw() -> atom ({ (ar#"no \escapes"# as atom) } as atom)
+
+fn unicode() -> atom ({ (a"za\u{17c}\u{f3}\u{142}\u{107}" as atom) } as atom)
+
+fn equal(left: atom, right: atom)
+    -> bool ({ ((left as atom) == (right as atom) as bool) } as bool)
+
+fn less_than(left: atom, right: atom)
+    -> bool ({ ((left as atom) < (right as atom) as bool) } as bool)
+
+fn classify(value: atom)
+    ->
+        atom ({
+    (match (value as atom) {
+        a"hello" => (a"greeting" as atom),
+        a"goodbye" => (a"farewell" as atom),
+        _ => (a"unknown" as atom),
+    } as atom)
+} as atom)

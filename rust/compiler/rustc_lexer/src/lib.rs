@@ -249,6 +249,10 @@ pub enum LiteralKind {
     RawByteStr { n_hashes: Option<u8> },
     /// `cr"abc"`, "cr#"abc"#", `cr#"a`. `None` indicates an invalid literal.
     RawCStr { n_hashes: Option<u8> },
+    /// `a"abc"`, `a"abc`
+    AtomStr { terminated: bool },
+    /// `ar"abc"`, `ar#"abc"#`, `ar#"a`. `None` indicates an invalid literal.
+    RawAtomStr { n_hashes: Option<u8> },
 }
 
 /// `#"abc"#`, `##"a"` (fewer closing), or even `#"a` (unterminated).
@@ -606,6 +610,13 @@ impl<'a> Cursor<'a> {
             'c' => self.c_or_byte_string(
                 |terminated| CStr { terminated },
                 |n_hashes| RawCStr { n_hashes },
+                None,
+            ),
+
+            // Atom string literal, raw atom string literal or identifier.
+            'a' => self.c_or_byte_string(
+                |terminated| AtomStr { terminated },
+                |n_hashes| RawAtomStr { n_hashes },
                 None,
             ),
 

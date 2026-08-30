@@ -62,6 +62,8 @@ impl FromInternal<token::LitKind> for LitKind {
             token::Float => LitKind::Float,
             token::Str => LitKind::Str,
             token::StrRaw(n) => LitKind::StrRaw(n),
+            token::AtomStr => LitKind::AtomStr,
+            token::AtomStrRaw(n) => LitKind::AtomStrRaw(n),
             token::ByteStr => LitKind::ByteStr,
             token::ByteStrRaw(n) => LitKind::ByteStrRaw(n),
             token::CStr => LitKind::CStr,
@@ -86,6 +88,8 @@ impl ToInternal<token::LitKind> for LitKind {
             LitKind::Float => token::Float,
             LitKind::Str => token::Str,
             LitKind::StrRaw(n) => token::StrRaw(n),
+            LitKind::AtomStr => token::AtomStr,
+            LitKind::AtomStrRaw(n) => token::AtomStrRaw(n),
             LitKind::ByteStr => token::ByteStr,
             LitKind::ByteStrRaw(n) => token::ByteStrRaw(n),
             LitKind::CStr => token::CStr,
@@ -522,6 +526,8 @@ impl server::Server for Rustc<'_, '_> {
                 | token::LitKind::Char
                 | token::LitKind::Str
                 | token::LitKind::StrRaw(_)
+                | token::LitKind::AtomStr
+                | token::LitKind::AtomStrRaw(_)
                 | token::LitKind::ByteStr
                 | token::LitKind::ByteStrRaw(_)
                 | token::LitKind::CStr

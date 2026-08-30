@@ -203,6 +203,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let afb = &self.translator.afb;
         let value = match lit.node {
             LitKind::Str(symbol, _style) => afb.expr_binary_string(lit.span, symbol),
+            LitKind::Atom(symbol, _style) => afb.expr_atom(lit.span, symbol),
             LitKind::ByteStr(symbol, _style) => afb.expr_binary_bytes(lit.span, symbol),
             LitKind::Char(char) => afb.expr_char(lit.span, char),
             LitKind::Int(val) => afb.expr_int(lit.span, val.0),
@@ -1208,6 +1209,16 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                     span_bug!(span, "string pattern did not lower to raw bytes")
                 });
                 afb.pat_binary_bytes(span, bytes)
+            }
+            ty::TyKind::Atom => {
+                let bytes = value
+                    .try_to_raw_bytes(self.tcx())
+                    .unwrap_or_else(|| span_bug!(span, "atom pattern did not lower to raw bytes"));
+                let sym = Symbol::intern(
+                    std::str::from_utf8(bytes)
+                        .unwrap_or_else(|_| span_bug!(span, "atom pattern is not valid UTF-8")),
+                );
+                afb.pat_atom(span, sym)
             }
             _ => not_implemented!(self.tcx(), span, "constant pattern type", value.ty),
         }

@@ -29,6 +29,7 @@ pub enum SimplifiedType<DefId> {
     Foreign(DefId),
     Str,
     Term,
+    Atom,
     Map,
     Array,
     Slice,
@@ -123,6 +124,7 @@ pub fn simplify_type<I: Interner>(
         ty::Adt(def, _) => Some(SimplifiedType::Adt(def.def_id().into())),
         ty::Str => Some(SimplifiedType::Str),
         ty::Term => Some(SimplifiedType::Term),
+        ty::Atom => Some(SimplifiedType::Atom),
         ty::Map(..) => Some(SimplifiedType::Map),
         ty::Array(..) => Some(SimplifiedType::Array),
         ty::Slice(..) => Some(SimplifiedType::Slice),
@@ -293,6 +295,7 @@ impl<I: Interner, const INSTANTIATE_LHS_WITH_INFER: bool, const INSTANTIATE_RHS_
             | ty::Adt(..)
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Map(..)
             | ty::Array(..)
             | ty::Slice(..)
@@ -370,6 +373,7 @@ impl<I: Interner, const INSTANTIATE_LHS_WITH_INFER: bool, const INSTANTIATE_RHS_
             | ty::Float
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Bool
             | ty::Char
             | ty::Never

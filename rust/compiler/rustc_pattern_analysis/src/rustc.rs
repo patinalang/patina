@@ -395,6 +395,7 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
             ty::Float
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Map(_, _)
             | ty::Foreign(_)
             | ty::RawPtr(_, _)
@@ -548,7 +549,7 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
                         fields = vec![];
                         arity = 0;
                     }
-                    ty::Str => {
+                    ty::Str | ty::Atom => {
                         // For constant/literal patterns of type `&str`, the THIR
                         // pattern is a `PatKind::Deref` of type `&str` wrapping a
                         // `PatKind::Const` of type `str`.

@@ -389,6 +389,7 @@ impl<'cx, 'tcx> TypeFolder<TyCtxt<'tcx>> for Canonicalizer<'cx, 'tcx> {
             | ty::Adt(..)
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Map(..)
             | ty::Error(_)
             | ty::Array(..)

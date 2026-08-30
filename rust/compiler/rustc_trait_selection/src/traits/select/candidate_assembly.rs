@@ -696,6 +696,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 | ty::Foreign(_)
                 | ty::Str
                 | ty::Term
+                | ty::Atom
                 | ty::Map(..)
                 | ty::Array(_, _)
                 | ty::Pat(_, _)
@@ -874,6 +875,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 | ty::Float
                 | ty::Str
                 | ty::Term
+                | ty::Atom
                 | ty::Map(..)
                 | ty::Array(_, _)
                 | ty::Pat(_, _)
@@ -1158,6 +1160,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::RawPtr(..)
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Slice(..)
             | ty::Map(..)
             | ty::Never
@@ -1262,6 +1265,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::CoroutineClosure(..)
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Map(_, _)
             | ty::Slice(_)
             | ty::Never
@@ -1341,6 +1345,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::Foreign(_)
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Map(_, _)
             | ty::Array(_, _)
             | ty::Slice(_)
@@ -1382,6 +1387,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::Foreign(..)
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Map(_, _)
             | ty::Array(..)
             | ty::Pat(..)
@@ -1431,6 +1437,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::Dynamic(..)
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Map(_, _)
             | ty::Slice(_)
             | ty::Foreign(..)

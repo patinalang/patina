@@ -28,6 +28,7 @@ pub fn const_lit_matches_ty<'tcx>(
     match (*kind, ty.kind()) {
         (LitKind::Str(..), ty::Ref(_, inner_ty, _)) if inner_ty.is_str() => true,
         (LitKind::Str(..), ty::Str) => true,
+        (LitKind::Atom(..), ty::Atom) => true,
         (LitKind::ByteStr(..), ty::Ref(_, inner_ty, _))
             if let ty::Slice(ty) | ty::Array(ty, _) = inner_ty.kind()
                 && matches!(ty.kind(), ty::Int) =>

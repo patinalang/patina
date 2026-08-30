@@ -1,50 +1,21 @@
-error: prefix `a` is unknown
-  --> tests/ui/src/unsafe__02.pt:8:9
+error[E0433]: cannot find type `Option` in this scope
+  --> tests/ui/src/unsafe__02.pt:5:13
    |
-LL |         a"nil" => "the atom nil",
-   |         ^ unknown prefix
-   |
-   = note: prefixed identifiers and literals are reserved since Rust 2021
-help: consider inserting whitespace here
-   |
-LL |         a "nil" => "the atom nil",
-   |          +
+LL |     let v = Option::<int>::None as term;
+   |             ^^^^^^ use of undeclared type `Option`
 
-error: prefix `a` is unknown
-  --> tests/ui/src/unsafe__02.pt:9:10
+error[E0433]: cannot find type `Option` in this scope
+  --> tests/ui/src/unsafe__02.pt:18:13
    |
-LL |         (a"some", val) => "some value (tagged?)",
-   |          ^ unknown prefix
-   |
-   = note: prefixed identifiers and literals are reserved since Rust 2021
-help: consider inserting whitespace here
-   |
-LL |         (a "some", val) => "some value (tagged?)",
-   |           +
+LL |             Option::<int>::None => "an empty integer option",
+   |             ^^^^^^ use of undeclared type `Option`
 
-error: prefix `a` is unknown
-  --> tests/ui/src/unsafe__02.pt:19:13
+error[E0433]: cannot find type `Option` in this scope
+  --> tests/ui/src/unsafe__02.pt:17:13
    |
-LL |             a"nil" => "the atom nil",
-   |             ^ unknown prefix
-   |
-   = note: prefixed identifiers and literals are reserved since Rust 2021
-help: consider inserting whitespace here
-   |
-LL |             a "nil" => "the atom nil",
-   |              +
+LL |             Option::<str>::None => "an empty string option",
+   |             ^^^^^^ use of undeclared type `Option`
 
-error: expected one of `=>`, `@`, `if`, or `|`, found `"nil"`
-  --> tests/ui/src/unsafe__02.pt:8:10
-   |
-LL |         a"nil" => "the atom nil",
-   |          ^^^^^ expected one of `=>`, `@`, `if`, or `|`
+error: aborting due to 3 previous errors
 
-error: expected one of `=>`, `@`, `if`, or `|`, found `"nil"`
-  --> tests/ui/src/unsafe__02.pt:19:14
-   |
-LL |             a"nil" => "the atom nil",
-   |              ^^^^^ expected one of `=>`, `@`, `if`, or `|`
-
-error: aborting due to 5 previous errors
-
+For more information about this error, try `rustc --explain E0433`.

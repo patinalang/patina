@@ -531,6 +531,14 @@ struct IntLiteralTooLarge {
 }
 
 #[derive(Diagnostic)]
+#[diag("atom literal is too long: {$len} characters, maximum is 255")]
+struct AtomLiteralTooLong {
+    #[primary_span]
+    span: Span,
+    len: u32,
+}
+
+#[derive(Diagnostic)]
 #[diag("hexadecimal float literal is not supported")]
 struct HexadecimalFloatLiteralNotSupported {
     #[primary_span]
@@ -632,6 +640,7 @@ pub fn create_lit_error(psess: &ParseSess, err: LitError, lit: token::Lit, span:
             };
             dcx.create_err(IntLiteralTooLarge { span, limit })
         }
+        LitError::AtomTooLong(len) => dcx.create_err(AtomLiteralTooLong { span, len }),
     }
 }
 

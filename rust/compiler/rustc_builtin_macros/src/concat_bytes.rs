@@ -54,6 +54,9 @@ fn invalid_type_err(
             };
             dcx.emit_err(ConcatBytesInvalid { span, lit_kind: "string", sugg, cs_note: None })
         }
+        Ok(LitKind::Atom(..)) => {
+            dcx.emit_err(ConcatBytesInvalid { span, lit_kind: "atom", sugg: None, cs_note: None })
+        }
         Ok(LitKind::Float(_, _)) => {
             dcx.emit_err(ConcatBytesInvalid { span, lit_kind: "float", sugg: None, cs_note: None })
         }

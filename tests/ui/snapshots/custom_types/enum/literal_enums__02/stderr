@@ -1,9 +1,9 @@
-error[E0425]: cannot find type `atom` in this scope
-  --> tests/ui/src/custom_types/enum/literal_enums__02.pt:11:39
+error[E0605]: non-primitive cast: `AllUnits` as `atom`
+  --> tests/ui/src/custom_types/enum/literal_enums__02.pt:11:22
    |
-LL |     println!("{:?}", AllUnits::Foo as atom)
-   |                                       ^^^^ not found in this scope
+LL |     println!("{:?}", AllUnits::Foo as atom);
+   |                      ^^^^^^^^^^^^^^^^^^^^^ an `as` expression can only be used to convert between primitive types or to coerce to a specific trait object
 
 error: aborting due to 1 previous error
 
-For more information about this error, try `rustc --explain E0425`.
+For more information about this error, try `rustc --explain E0605`.

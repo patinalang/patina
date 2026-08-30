@@ -36,8 +36,7 @@ Comma
 Whitespace
 LineComment { doc_style: None }
 Whitespace
-UnknownPrefix
-Literal { kind: Str { terminated: true }, suffix_start: 6 }
+Literal { kind: AtomStr { terminated: true }, suffix_start: 7 }
 Whitespace
 Eq
 Gt

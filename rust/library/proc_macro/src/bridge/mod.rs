@@ -249,6 +249,8 @@ pub enum LitKind {
     ByteStrRaw(u8),
     CStr,
     CStrRaw(u8),
+    AtomStr,
+    AtomStrRaw(u8),
     // This should have an `ErrorGuaranteed`, except that type isn't available
     // in this crate. (Imagine it is there.) Hence the `WithGuar` suffix. Must
     // only be constructed in `LitKind::from_internal`, where an
@@ -268,6 +270,8 @@ rpc_encode_decode!(
         ByteStrRaw(n),
         CStr,
         CStrRaw(n),
+        AtomStr,
+        AtomStrRaw(n),
         ErrWithGuar,
     }
 );

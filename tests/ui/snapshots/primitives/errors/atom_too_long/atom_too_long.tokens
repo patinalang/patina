@@ -1,0 +1,19 @@
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+CloseParen
+Whitespace
+Minus
+Gt
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+Literal { kind: AtomStr { terminated: true }, suffix_start: 259 }
+Whitespace
+CloseBrace
+Whitespace

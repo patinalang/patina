@@ -454,3 +454,76 @@ fn backtick_ident_method_call() {
         "#]],
     );
 }
+
+#[test]
+fn atom_str() {
+    check_lexing(
+        "a\"hello\"",
+        FrontmatterAllowed::No,
+        expect![[r#"
+            Token { kind: Literal { kind: AtomStr { terminated: true }, suffix_start: 8 }, len: 8 }
+        "#]],
+    );
+}
+
+#[test]
+fn atom_str_unterminated() {
+    check_lexing(
+        "a\"hello",
+        FrontmatterAllowed::No,
+        expect![[r#"
+            Token { kind: Literal { kind: AtomStr { terminated: false }, suffix_start: 7 }, len: 7 }
+        "#]],
+    );
+}
+
+#[test]
+fn raw_atom_str() {
+    check_lexing(
+        "ar\"no \\escapes\"",
+        FrontmatterAllowed::No,
+        expect![[r#"
+            Token { kind: Literal { kind: RawAtomStr { n_hashes: Some(0) }, suffix_start: 15 }, len: 15 }
+        "#]],
+    );
+}
+
+#[test]
+fn raw_atom_str_hashes() {
+    check_lexing(
+        "ar#\"no \"quotes\" here\"#",
+        FrontmatterAllowed::No,
+        expect![[r#"
+            Token { kind: Literal { kind: RawAtomStr { n_hashes: Some(1) }, suffix_start: 22 }, len: 22 }
+        "#]],
+    );
+}
+
+#[test]
+fn plain_ident_starting_with_a() {
+    check_lexing(
+        "a ab ba ax",
+        FrontmatterAllowed::No,
+        expect![[r#"
+            Token { kind: Ident, len: 1 }
+            Token { kind: Whitespace, len: 1 }
+            Token { kind: Ident, len: 2 }
+            Token { kind: Whitespace, len: 1 }
+            Token { kind: Ident, len: 2 }
+            Token { kind: Whitespace, len: 1 }
+            Token { kind: Ident, len: 2 }
+        "#]],
+    );
+}
+
+#[test]
+fn unknown_a_prefix() {
+    check_lexing(
+        "aq\"foo\"",
+        FrontmatterAllowed::No,
+        expect![[r#"
+            Token { kind: UnknownPrefix, len: 2 }
+            Token { kind: Literal { kind: Str { terminated: true }, suffix_start: 5 }, len: 5 }
+        "#]],
+    );
+}

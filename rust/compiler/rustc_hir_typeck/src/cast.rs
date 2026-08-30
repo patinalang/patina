@@ -143,6 +143,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             | ty::Adt(..)
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Map(..)
             | ty::Slice(_)
             | ty::Never

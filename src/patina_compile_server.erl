@@ -47,10 +47,10 @@ handle_request(Sock, Op, Eaf) ->
                         write_msg(Sock, [~"error", Errors, Warnings])
                 end;
             ~"abstr" ->
-                Rendered = iolist_to_binary(io_lib:format("~tp", [Forms])),
+                Rendered = unicode:characters_to_binary(io_lib:format("~tp", [Forms])),
                 write_msg(Sock, [~"ok", Rendered]);
             ~"erl" ->
-                Rendered = iolist_to_binary([erl_pp:form(Fm) || Fm <- Forms]),
+                Rendered = unicode:characters_to_binary([erl_pp:form(Fm) || Fm <- Forms]),
                 write_msg(Sock, [~"ok", Rendered])
         end
     catch
@@ -114,7 +114,7 @@ write(Sock, <<Data/binary>>) ->
     socket:send(Sock, <<Len:32/unsigned-integer>>),
     socket:send(Sock, Data);
 write(Sock, Data) ->
-    Bin = iolist_to_binary(io_lib:format("~tp", [Data])),
+    Bin = unicode:characters_to_binary(io_lib:format("~tp", [Data])),
     write(Sock, Bin).
 
 %% Rewrites '$patina_marker' control-flow markers to BEAM control flow.

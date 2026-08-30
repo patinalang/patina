@@ -1,5 +1,5 @@
 error[E0425]: cannot find value `add_float` in this scope
-  --> tests/ui/src/primitives__01.pt:37:49
+  --> tests/ui/src/primitives__01.pt:38:49
    |
 LL |     let add_ref: fnref(float, float) -> float = add_float;
    |                                                 ^^^^^^^^^
@@ -13,7 +13,7 @@ LL |     let add_ref: fnref(float, float) -> float = add_floats;
    |                                                          +
 
 error[E0308]: mismatched types
-  --> tests/ui/src/primitives__01.pt:11:32
+  --> tests/ui/src/primitives__01.pt:12:32
    |
 LL |     inferred_type = add_floats(inferred_type, 3.14);
    |                     ---------- ^^^^^^^^^^^^^ expected `float`, found `int`
@@ -21,13 +21,13 @@ LL |     inferred_type = add_floats(inferred_type, 3.14);
    |                     arguments to this function are incorrect
    |
 note: function defined here
-  --> tests/ui/src/primitives__01.pt:42:4
+  --> tests/ui/src/primitives__01.pt:43:4
    |
 LL | fn add_floats(a: float, b: float) -> float {
    |    ^^^^^^^^^^ --------
 
 error[E0308]: mismatched types
-  --> tests/ui/src/primitives__01.pt:11:21
+  --> tests/ui/src/primitives__01.pt:12:21
    |
 LL |     let inferred_type = 12; // Type float is inferred from another line.
    |                         -- expected due to this value
@@ -35,7 +35,7 @@ LL |     inferred_type = add_floats(inferred_type, 3.14);
    |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `int`, found `float`
 
 error[E0308]: mismatched types
-  --> tests/ui/src/primitives__01.pt:18:15
+  --> tests/ui/src/primitives__01.pt:19:15
    |
 LL |     let mut mutable = 12; // Mutable `int`
    |                       -- expected due to this value
@@ -44,7 +44,7 @@ LL |     mutable = true;
    |               ^^^^ expected `int`, found `bool`
 
 error[E0308]: mismatched types
-  --> tests/ui/src/primitives__01.pt:33:51
+  --> tests/ui/src/primitives__01.pt:34:51
    |
 LL |     let my_map: #{float => str} = #{3.14 => "pi", 0 => "zero"};
    |                                                   ^ expected `float`, found `int`

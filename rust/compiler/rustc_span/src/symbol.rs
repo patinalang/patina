@@ -475,6 +475,7 @@ symbols! {
         async_iterator,
         async_iterator_poll_next,
         async_trait_bounds,
+        atom,
         atomic_and,
         atomic_cxchg,
         atomic_cxchgweak,

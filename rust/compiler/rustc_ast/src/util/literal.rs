@@ -38,6 +38,7 @@ pub enum LitError {
     InvalidFloatSuffix(Symbol),
     NonDecimalFloat(u32), // u32 is the base
     IntTooLarge(u32),     // u32 is the base
+    AtomTooLong(u32),     // u32 is the character count
 }
 
 impl LitKind {
@@ -74,7 +75,7 @@ impl LitKind {
             token::Integer => return integer_lit(symbol, suffix),
             token::Float => return float_lit(symbol, suffix),
 
-            token::Str => {
+            token::Str | token::AtomStr => {
                 // If there are no characters requiring special treatment we can
                 // reuse the symbol from the token. Otherwise, we must generate a
                 // new symbol because the string in the LitKind is different to the
@@ -93,7 +94,9 @@ impl LitKind {
                         |_, res| match res {
                             Ok(c) => buf.push(c),
                             Err(err) => {
-                                assert!(!err.is_fatal(), "failed to unescape string literal")
+                                let kind_name =
+                                    if let token::Str = kind { "string" } else { "atom" };
+                                assert!(!err.is_fatal(), "failed to unescape {kind_name} literal")
                             }
                         },
                     );
@@ -101,11 +104,34 @@ impl LitKind {
                 } else {
                     symbol
                 };
-                LitKind::Str(symbol, ast::StrStyle::Cooked)
+
+                match kind {
+                    token::AtomStr => {
+                        if let char_count = symbol.as_str().chars().count()
+                            && char_count > 255
+                        {
+                            return Err(LitError::AtomTooLong(char_count as u32));
+                        }
+
+                        LitKind::Atom(symbol, ast::StrStyle::Cooked)
+                    }
+
+                    token::Str => LitKind::Str(symbol, ast::StrStyle::Cooked),
+                    _ => unreachable!(),
+                }
             }
             token::StrRaw(n) => {
                 // Raw strings have no escapes so no work is needed here.
                 LitKind::Str(symbol, ast::StrStyle::Raw(n))
+            }
+            token::AtomStrRaw(n) => {
+                // Raw atom strings have no escapes so no work is needed here.
+                if let char_count = symbol.as_str().chars().count()
+                    && char_count > 255
+                {
+                    return Err(LitError::AtomTooLong(char_count as u32));
+                }
+                LitKind::Atom(symbol, ast::StrStyle::Raw(n))
             }
             token::ByteStr => {
                 let s = symbol.as_str();
@@ -165,6 +191,15 @@ impl fmt::Display for LitKind {
                 "r{delim}\"{string}\"{delim}",
                 delim = "#".repeat(n as usize),
                 string = sym
+            )?,
+            LitKind::Atom(sym, StrStyle::Cooked) => {
+                write!(f, "a\"{}\"", escape_string_symbol(sym))?
+            }
+            LitKind::Atom(sym, StrStyle::Raw(n)) => write!(
+                f,
+                "ar{delim}\"{symbol}\"{delim}",
+                delim = "#".repeat(n as usize),
+                symbol = sym
             )?,
             LitKind::ByteStr(ref byte_sym, StrStyle::Cooked) => {
                 write!(f, "b\"{}\"", escape_byte_str_symbol(byte_sym.as_byte_str()))?
@@ -226,6 +261,8 @@ impl MetaItemLit {
             LitKind::Bool(_) => token::Bool,
             LitKind::Str(_, ast::StrStyle::Cooked) => token::Str,
             LitKind::Str(_, ast::StrStyle::Raw(n)) => token::StrRaw(n),
+            LitKind::Atom(_, ast::StrStyle::Cooked) => token::AtomStr,
+            LitKind::Atom(_, ast::StrStyle::Raw(n)) => token::AtomStrRaw(n),
             LitKind::ByteStr(_, ast::StrStyle::Cooked) => token::ByteStr,
             LitKind::ByteStr(_, ast::StrStyle::Raw(n)) => token::ByteStrRaw(n),
             LitKind::CStr(_, ast::StrStyle::Cooked) => token::CStr,

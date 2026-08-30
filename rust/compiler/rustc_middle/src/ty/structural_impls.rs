@@ -373,6 +373,7 @@ impl<'tcx> TypeSuperFoldable<TyCtxt<'tcx>> for Ty<'tcx> {
             | ty::Int
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Float
             | ty::Error(_)
             | ty::Infer(_)
@@ -413,6 +414,7 @@ impl<'tcx> TypeSuperFoldable<TyCtxt<'tcx>> for Ty<'tcx> {
             | ty::Int
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Float
             | ty::Error(_)
             | ty::Infer(_)
@@ -471,6 +473,7 @@ impl<'tcx> TypeSuperVisitable<TyCtxt<'tcx>> for Ty<'tcx> {
             | ty::Int
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Float
             | ty::Infer(_)
             | ty::Bound(..)

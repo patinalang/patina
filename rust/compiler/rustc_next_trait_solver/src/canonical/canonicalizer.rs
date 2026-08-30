@@ -360,6 +360,7 @@ impl<'a, D: SolverDelegate<Interner = I>, I: Interner> Canonicalizer<'a, D, I> {
             | ty::Foreign(_)
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Map(_, _)
             | ty::Array(_, _)
             | ty::Slice(_)

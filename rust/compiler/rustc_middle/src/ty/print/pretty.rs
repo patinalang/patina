@@ -671,6 +671,7 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
                 | ty::Int
                 | ty::Str
                 | ty::Term
+                | ty::Atom
                 | ty::Float => {
                     return self_ty.print(self);
                 }
@@ -875,6 +876,7 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
             }
             ty::Str => write!(self, "str")?,
             ty::Term => write!(self, "term")?,
+            ty::Atom => write!(self, "atom")?,
             ty::Coroutine(did, args) => {
                 write!(self, "{{")?;
                 let coroutine_kind = self.tcx().coroutine_kind(did).unwrap();
@@ -1902,11 +1904,12 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
                     });
                     return self.pretty_print_byte_str(bytes);
                 }
-                ty::Str => {
+                ty::Str | ty::Atom => {
                     let bytes = cv.try_to_raw_bytes(self.tcx()).unwrap_or_else(|| {
                         bug!("expected to convert valtree to raw bytes for type {:?}", cv.ty)
                     });
-                    write!(self, "{:?}", String::from_utf8_lossy(bytes))?;
+                    let prefix = if let ty::Str = inner_ty.kind() { "" } else { "a" };
+                    write!(self, "{prefix}{:?}", String::from_utf8_lossy(bytes))?;
                     return Ok(());
                 }
                 _ => {
@@ -1916,6 +1919,24 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
                     return Ok(());
                 }
             },
+            (ty::ValTreeKind::Branch(_), ty::Slice(t)) if t == u8_type => {
+                let bytes = cv.try_to_raw_bytes(self.tcx()).unwrap_or_else(|| {
+                    bug!(
+                        "expected to convert valtree {:?} to raw bytes for type {:?}",
+                        cv.valtree,
+                        t
+                    )
+                });
+                return self.pretty_print_byte_str(bytes);
+            }
+            (ty::ValTreeKind::Branch(_), kind @ (ty::Str | ty::Atom)) => {
+                let bytes = cv.try_to_raw_bytes(self.tcx()).unwrap_or_else(|| {
+                    bug!("expected to convert valtree to raw bytes for type {:?}", cv.ty)
+                });
+                let prefix = if let ty::Str = kind { "" } else { "a" };
+                write!(self, "{prefix}{:?}", String::from_utf8_lossy(bytes))?;
+                return Ok(());
+            }
             // If it is a branch with an array, and this array can be printed as raw bytes, then dump its bytes
             (ty::ValTreeKind::Branch(_), ty::Array(t, _))
                 if t == u8_type

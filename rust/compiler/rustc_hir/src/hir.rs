@@ -3633,18 +3633,20 @@ pub enum PrimTy {
     Bool,
     Char,
     Term,
+    Atom,
     Int,
 }
 
 impl PrimTy {
     /// All of the primitive types
-    pub const ALL: [Self; 6] = [
+    pub const ALL: [Self; 7] = [
         // any changes here should also be reflected in `PrimTy::from_name`
         Self::Float,
         Self::Bool,
         Self::Char,
         Self::Str,
         Self::Term,
+        Self::Atom,
         Self::Int,
     ];
 
@@ -3658,6 +3660,7 @@ impl PrimTy {
             PrimTy::Bool => "bool",
             PrimTy::Char => "char",
             PrimTy::Term => "term",
+            PrimTy::Atom => "atom",
             PrimTy::Int => "int",
         }
     }
@@ -3669,6 +3672,7 @@ impl PrimTy {
             PrimTy::Bool => sym::bool,
             PrimTy::Char => sym::char,
             PrimTy::Term => sym::term,
+            PrimTy::Atom => sym::atom,
             PrimTy::Int => sym::int,
         }
     }
@@ -3683,6 +3687,7 @@ impl PrimTy {
             sym::char => Self::Char,
             sym::str => Self::Str,
             sym::term => Self::Term,
+            sym::atom => Self::Atom,
             sym::int => Self::Int,
             _ => return None,
         };

@@ -243,6 +243,7 @@ impl<I: Interner> FlagComputation<I> {
             | ty::Never
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Foreign(..) => {}
 
             ty::Error(_) => self.add_flags(TypeFlags::HAS_NON_REGION_ERROR),

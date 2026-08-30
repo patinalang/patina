@@ -38,6 +38,18 @@ Whitespace
 Literal { kind: Float { base: Decimal, empty_exponent: false }, suffix_start: 3 }
 Semi
 Whitespace
+Ident
+Whitespace
+Ident
+Colon
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Literal { kind: AtomStr { terminated: true }, suffix_start: 8 }
+Semi
+Whitespace
 LineComment { doc_style: None }
 Whitespace
 Ident

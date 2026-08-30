@@ -335,7 +335,7 @@ macro_rules! partial_eq_impl {
     )*)
 }
 
-partial_eq_impl! { bool int float str }
+partial_eq_impl! { bool int float str atom }
 
 #[lang = "partial_ord"]
 pub const trait PartialOrd<Rhs = Self> {
@@ -360,7 +360,7 @@ macro_rules! partial_ord_impl {
     )*)
 }
 
-partial_ord_impl! { bool int float str }
+partial_ord_impl! { bool int float str atom }
 
 #[lang = "structural_peq"]
 pub const trait StructuralPartialEq {}

@@ -1,0 +1,38 @@
+const NAMED: atom = a"named";
+
+pub fn annotated() -> atom {
+    let value: atom = a"hello";
+    value
+}
+
+pub fn named() -> atom {
+    NAMED
+}
+
+pub fn escaped() -> atom {
+    a"line\nbreak"
+}
+
+pub fn raw() -> atom {
+    ar#"no \escapes"#
+}
+
+pub fn unicode() -> atom {
+    a"zażółć"
+}
+
+pub fn equal(left: atom, right: atom) -> bool {
+    left == right
+}
+
+pub fn less_than(left: atom, right: atom) -> bool {
+    left < right
+}
+
+pub fn classify(value: atom) -> atom {
+    match value {
+        a"hello" => a"greeting",
+        a"goodbye" => a"farewell",
+        _ => a"unknown",
+    }
+}

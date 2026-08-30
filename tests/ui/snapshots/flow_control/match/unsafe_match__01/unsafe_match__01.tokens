@@ -45,8 +45,7 @@ Ident
 Whitespace
 OpenBrace
 Whitespace
-UnknownPrefix
-Literal { kind: Str { terminated: true }, suffix_start: 5 }
+Literal { kind: AtomStr { terminated: true }, suffix_start: 6 }
 Whitespace
 Eq
 Gt
@@ -55,8 +54,7 @@ Literal { kind: Str { terminated: true }, suffix_start: 14 }
 Comma
 Whitespace
 OpenParen
-UnknownPrefix
-Literal { kind: Str { terminated: true }, suffix_start: 6 }
+Literal { kind: AtomStr { terminated: true }, suffix_start: 7 }
 Comma
 Whitespace
 Ident
@@ -142,8 +140,7 @@ Whitespace
 Literal { kind: Str { terminated: true }, suffix_start: 25 }
 Comma
 Whitespace
-UnknownPrefix
-Literal { kind: Str { terminated: true }, suffix_start: 5 }
+Literal { kind: AtomStr { terminated: true }, suffix_start: 6 }
 Whitespace
 Eq
 Gt

@@ -67,6 +67,11 @@ pub(crate) fn lit_to_const<'tcx>(
             let valtree_ty = tcx.types.str_;
             (ty::ValTree::from_raw_bytes(tcx, str_bytes), valtree_ty)
         }
+        (ast::LitKind::Atom(s, _), _) => {
+            let atom_bytes = s.as_str().as_bytes();
+            let valtree_ty = tcx.types.atom;
+            (ty::ValTree::from_raw_bytes(tcx, atom_bytes), valtree_ty)
+        }
         (ast::LitKind::ByteStr(byte_sym, _), Some(ty::Ref(_, inner_ty, _)))
             if let ty::Slice(ty) | ty::Array(ty, _) = inner_ty.kind()
                 && let ty::Int = ty.kind() =>
@@ -189,7 +194,18 @@ pub(crate) fn eval_to_const_value_raw<'tcx>(
                 .instantiate(tcx, key.value.instance.args)
                 .skip_normalization();
 
-            Ok(valtree_to_const_value(tcx, ty::Value { ty, valtree }))
+            match try_valtree_to_const_value(tcx, ty::Value { ty, valtree }) {
+                Some(value) => Ok(value),
+                None => {
+                    let span = tcx.def_span(key.value.instance.def_id());
+                    let guar = tcx
+                        .dcx()
+                        .has_errors()
+                        .unwrap_or_else(|| tcx.dcx().emit_err(error::UnevaluableConst { span }));
+
+                    Err(ReportedErrorInfo::allowed_in_infallible(guar).into())
+                }
+            }
         }
         Err(ValTreeCreationError::ErrorHandled(err)) => Err(err),
         Err(_) => {
@@ -202,17 +218,26 @@ pub(crate) fn eval_to_const_value_raw<'tcx>(
 
 /// Convert a type-level value into a MIR `ConstValue` for the literal subset we support.
 pub(crate) fn valtree_to_const_value<'tcx>(tcx: TyCtxt<'tcx>, cv: ty::Value<'tcx>) -> ConstValue {
+    try_valtree_to_const_value(tcx, cv)
+        .unwrap_or_else(|| bug!("valtree_to_const_value: unsupported value {cv:?}"))
+}
+
+/// A valtree produced while recovering from a type error may not have the shape implied by
+/// `cv.ty`. Return `None` in that case instead of turning the original error into an ICE.
+fn try_valtree_to_const_value<'tcx>(tcx: TyCtxt<'tcx>, cv: ty::Value<'tcx>) -> Option<ConstValue> {
     match *cv.ty.kind() {
-        ty::Bool | ty::Char | ty::Int | ty::Float => ConstValue::Scalar(Scalar::Int(cv.to_leaf())),
-        ty::FnDef(..) => ConstValue::ZeroSized,
-        ty::Tuple(fields) if fields.is_empty() => ConstValue::ZeroSized,
-        ty::Str | ty::Ref(..) if cv.ty.peel_refs().is_str() => {
-            let bytes = cv
-                .try_to_raw_bytes(tcx)
-                .unwrap_or_else(|| bug!("str valtree did not lower to raw bytes: {cv:?}"));
-            let alloc_id = tcx.allocate_bytes_dedup(bytes, /* salt */ 0);
-            ConstValue::Slice { alloc_id, meta: bytes.len() as u64 }
+        ty::Bool | ty::Char | ty::Int | ty::Float => {
+            Some(ConstValue::Scalar(Scalar::Int(cv.try_to_leaf()?)))
         }
-        _ => bug!("valtree_to_const_value: unsupported type {:?}", cv.ty),
+        ty::FnDef(..) => Some(ConstValue::ZeroSized),
+        ty::Tuple(fields) if fields.is_empty() => Some(ConstValue::ZeroSized),
+        ty::Str | ty::Atom | ty::Ref(..)
+            if cv.ty.peel_refs().is_str() || cv.ty.peel_refs().is_atom() =>
+        {
+            let bytes = cv.try_to_raw_bytes(tcx)?;
+            let alloc_id = tcx.allocate_bytes_dedup(bytes, /* salt */ 0);
+            Some(ConstValue::Slice { alloc_id, meta: bytes.len() as u64 })
+        }
+        _ => None,
     }
 }

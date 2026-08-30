@@ -12,16 +12,14 @@ Ident
 Whitespace
 Eq
 Whitespace
-UnknownPrefix
-Literal { kind: Str { terminated: true }, suffix_start: 11 }
+Literal { kind: AtomStr { terminated: true }, suffix_start: 12 }
 Comma
 Whitespace
 Ident
 Whitespace
 Eq
 Whitespace
-UnknownPrefix
-Literal { kind: Str { terminated: true }, suffix_start: 11 }
+Literal { kind: AtomStr { terminated: true }, suffix_start: 12 }
 Comma
 Whitespace
 CloseBrace
@@ -97,6 +95,7 @@ Ident
 Whitespace
 Ident
 CloseParen
+Semi
 Whitespace
 LineComment { doc_style: None }
 Whitespace
@@ -115,6 +114,7 @@ Ident
 Whitespace
 Ident
 CloseParen
+Semi
 Whitespace
 LineComment { doc_style: None }
 Whitespace
@@ -133,6 +133,7 @@ Ident
 Whitespace
 Ident
 CloseParen
+Semi
 Whitespace
 LineComment { doc_style: None }
 Whitespace

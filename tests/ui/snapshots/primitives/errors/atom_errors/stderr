@@ -1,0 +1,23 @@
+error: unknown character escape: `q`
+  --> tests/ui/src/primitives/errors/atom_errors.pt:2:11
+   |
+LL |     a"bad\qescape"
+   |           ^ unknown character escape
+   |
+   = help: for more information, visit <https://doc.rust-lang.org/reference/tokens.html#literals>
+help: if you meant to write a literal backslash (perhaps escaping in a regular expression), consider a raw string literal
+   |
+LL -     a"bad\qescape"
+LL +     r"bad\qescape"
+   |
+
+error: unterminated double quote atom string
+  --> tests/ui/src/primitives/errors/atom_errors.pt:6:6
+   |
+LL |       a"unterminated
+   |  ______^
+LL | | }
+   | |__^
+
+error: aborting due to 2 previous errors
+

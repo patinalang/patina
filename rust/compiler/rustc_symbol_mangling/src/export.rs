@@ -105,6 +105,7 @@ impl<'tcx> AbiHashStable<'tcx> for Ty<'tcx> {
             | ty::Ref(_, _, _)
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Map(_, _)
             | ty::Array(_, _)
             | ty::Pat(_, _)

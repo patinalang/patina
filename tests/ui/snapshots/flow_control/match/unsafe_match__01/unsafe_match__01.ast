@@ -4,7 +4,13 @@
 pub fn main() {
     let v = Option::<int>::None as term;
 
-    let safe_destription = match v { (/*ERROR*/) => (/*ERROR*/), };
+    let safe_description =
+        match v {
+            a"nil" => "the atom nil",
+            (a"some", val) => "some value (tagged?)",
+            int(_) => "some integer value (untagged?)",
+            val => "some value (untagged?)",
+        };
     // Option<str>::None => "string option (none)",
     // ^ERROR - can't safely match by runtime representation!
 
@@ -13,7 +19,8 @@ pub fn main() {
             match v {
                 Option::<str>::None => "an empty string option",
                 Option::<int>::None => "an empty integer option",
-                (/*ERROR*/) => (/*ERROR*/),
+                a"nil" => "the atom nil",
+                _ => "something else",
             }
         };
 

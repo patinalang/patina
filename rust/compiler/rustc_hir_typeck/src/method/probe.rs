@@ -885,6 +885,7 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
             | ty::Float
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Map(..)
             | ty::Array(..)
             | ty::Slice(_)

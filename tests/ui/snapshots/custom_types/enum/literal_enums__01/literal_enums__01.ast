@@ -1,0 +1,20 @@
+// source: patina-by-example/src/custom_types/enum/literal_enums.md
+// block: 1/2
+
+enum AtomEnum { Foo = a"hello_foo", Bar = a"hello_bar", }
+
+enum IntEnum { Ok = 200, NotFound = 404, }
+
+enum StrEnum { Peter = "Peter", Paul = "Paul", }
+
+pub fn main() {
+    // literal enums can be safely cast to their underlying type
+    println!("{:?}", AtomEnum::Foo as atom);
+    // a"hello_foo"
+
+    println!("{:?}", IntEnum::NotFound as int);
+    // 404
+
+    println!("{:?}", StrEnum::Peter as str);
+    // "Peter"
+}

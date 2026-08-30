@@ -180,6 +180,7 @@ impl<'tcx> Ty<'tcx> {
             | ty::Float
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Never => "type".into(),
             ty::Tuple(tys) if tys.is_empty() => "unit type".into(),
             ty::Adt(def, _) => def.descr().into(),

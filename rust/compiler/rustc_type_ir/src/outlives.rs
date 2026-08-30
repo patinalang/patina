@@ -185,6 +185,7 @@ impl<I: Interner> TypeVisitor<I> for OutlivesCollector<'_, I> {
             | ty::Float
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Never
             | ty::Error(_) => {
                 // Trivial

@@ -1165,6 +1165,7 @@ impl<'tcx> Ty<'tcx> {
             | ty::Char
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Never
             | ty::Ref(..)
             | ty::RawPtr(_, _)
@@ -1216,6 +1217,7 @@ impl<'tcx> Ty<'tcx> {
             | ty::Char
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Never
             | ty::Ref(..)
             | ty::RawPtr(_, _)
@@ -1268,6 +1270,7 @@ impl<'tcx> Ty<'tcx> {
             | ty::Char
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Never
             | ty::Ref(..)
             | ty::RawPtr(..)
@@ -1432,7 +1435,7 @@ impl<'tcx> Ty<'tcx> {
             ty::Adt(..) => tcx.has_structural_eq_impl(self),
 
             // Primitive types that satisfy `Eq`.
-            ty::Bool | ty::Char | ty::Int | ty::Str | ty::Term | ty::Never => true,
+            ty::Bool | ty::Char | ty::Int | ty::Str | ty::Term | ty::Atom | ty::Never => true,
 
             // Composite types that satisfy `Eq` when all of their fields do.
             //
@@ -1524,6 +1527,7 @@ pub fn needs_drop_components_with_async<'tcx>(
         | ty::RawPtr(_, _)
         | ty::Ref(..)
         | ty::Term
+        | ty::Atom
         // Drop is not a thing in Patina, so not implementing it for maps.
         // Eventually, this function will be removed.
         | ty::Map(..)

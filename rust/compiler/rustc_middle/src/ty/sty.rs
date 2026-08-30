@@ -1145,6 +1145,12 @@ impl<'tcx> Ty<'tcx> {
         *self.kind() == Str
     }
 
+    /// Returns `true` if this type is an `atom`.
+    #[inline]
+    pub fn is_atom(self) -> bool {
+        *self.kind() == Atom
+    }
+
     /// Returns true if this type is `&str`. The reference's lifetime is ignored.
     #[inline]
     pub fn is_imm_ref_str(self) -> bool {
@@ -1198,7 +1204,6 @@ impl<'tcx> Ty<'tcx> {
         match self.kind() {
             Array(ty, _) | Slice(ty) => *ty,
             Str => tcx.types.int,
-            Term => tcx.types.int,
             _ => bug!("`sequence_element_type` called on non-sequence value: {}", self),
         }
     }
@@ -1629,6 +1634,7 @@ impl<'tcx> Ty<'tcx> {
             | ty::Foreign(_)
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Map(_, _)
             | ty::Array(..)
             | ty::Slice(_)
@@ -1678,6 +1684,7 @@ impl<'tcx> Ty<'tcx> {
             | ty::Never
             | ty::Error(_)
             | ty::Term
+            | ty::Atom
             | ty::Map(_, _)
             // Extern types have metadata = ().
             | ty::Foreign(..)
@@ -1861,6 +1868,7 @@ impl<'tcx> Ty<'tcx> {
             | ty::CoroutineClosure(..)
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Map(_, _)
             | ty::Slice(_)
             | ty::Never
@@ -1907,6 +1915,7 @@ impl<'tcx> Ty<'tcx> {
             | ty::Never
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Map(..)
             | ty::Slice(..) => true,
 
@@ -1962,6 +1971,7 @@ impl<'tcx> Ty<'tcx> {
             | ty::Float
             | ty::Str
             | ty::Term
+            | ty::Atom
             | ty::Never
             | ty::Param(_)
             | ty::Placeholder(_)
@@ -2011,6 +2021,7 @@ impl<'tcx> Ty<'tcx> {
             ty::Float => Some(sym::float),
             ty::Str => Some(sym::str),
             ty::Term => Some(sym::term),
+            ty::Atom => Some(sym::atom),
             _ => None,
         }
     }

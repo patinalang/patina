@@ -5,6 +5,7 @@ pub fn main() {
     // Variables can be type annotated.
     let logical: bool  = true;
     let a_float: float = 1.0;
+    let an_atom: atom = a"hello";
 
     // A type can also be inferred from context.
     let inferred_type = 12; // Type float is inferred from another line.

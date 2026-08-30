@@ -1,0 +1,7 @@
+pub fn atom_bad_escape() -> atom {
+    a"bad\qescape"
+}
+
+pub fn atom_unterminated() -> atom {
+    a"unterminated
+}

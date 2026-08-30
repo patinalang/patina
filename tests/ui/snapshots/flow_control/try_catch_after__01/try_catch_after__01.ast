@@ -1,7 +1,7 @@
 // source: patina-by-example/src/flow_control/try_catch_after.md
 // block: 1/1
 
-fn open_resource() -> atom { (/*ERROR*/) }
+fn open_resource() -> atom { a"ok" }
 
 pub fn main() {
 

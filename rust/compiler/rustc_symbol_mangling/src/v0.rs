@@ -448,6 +448,7 @@ impl<'tcx> Printer<'tcx> for V0SymbolMangler<'tcx> {
             ty::Char => "c",
             ty::Str => "e",
             ty::Term => "t",
+            ty::Atom => "a",
             ty::Int => "g",
             ty::Float => "f",
             ty::Never => "z",
@@ -472,7 +473,14 @@ impl<'tcx> Printer<'tcx> for V0SymbolMangler<'tcx> {
 
         match *ty.kind() {
             // Basic types, handled above.
-            ty::Bool | ty::Char | ty::Int | ty::Str | ty::Term | ty::Float | ty::Never => {
+            ty::Bool
+            | ty::Char
+            | ty::Int
+            | ty::Str
+            | ty::Term
+            | ty::Atom
+            | ty::Float
+            | ty::Never => {
                 unreachable!()
             }
             ty::Tuple(_) if ty.is_unit() => unreachable!(),

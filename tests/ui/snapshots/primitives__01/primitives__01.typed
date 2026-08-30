@@ -46,6 +46,7 @@ fn main() ({
     // Variables can be type annotated.
     let logical: bool = (true as bool);
     let a_float: float = (1.0 as float);
+    let an_atom: atom = (a"hello" as atom);
 
     // A type can also be inferred from context.
     let inferred_type =

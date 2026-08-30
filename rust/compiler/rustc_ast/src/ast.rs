@@ -2343,6 +2343,9 @@ pub enum LitKind {
     Float(Symbol, LitFloatType),
     /// A boolean literal (`true`, `false`).
     Bool(bool),
+    /// An atom literal (`a"foo"`). The symbol is unescaped, and so may differ
+    /// from the original token's symbol.
+    Atom(Symbol, StrStyle),
     /// Placeholder for a literal that wasn't well-formed in some way.
     Err(ErrorGuaranteed),
 }
@@ -2363,6 +2366,11 @@ impl LitKind {
     /// Returns `true` if this literal is byte literal string.
     pub fn is_bytestr(&self) -> bool {
         matches!(self, LitKind::ByteStr(..))
+    }
+
+    /// Returns `true` if this literal is an atom literal string.
+    pub fn is_atom(&self) -> bool {
+        matches!(self, LitKind::Atom(..))
     }
 
     /// Returns `true` if this is a numeric literal.
@@ -2390,6 +2398,7 @@ impl LitKind {
             | LitKind::Int(_)
             | LitKind::Float(_, LitFloatType::Unsuffixed)
             | LitKind::Bool(..)
+            | LitKind::Atom(..)
             | LitKind::Err(_) => false,
         }
     }

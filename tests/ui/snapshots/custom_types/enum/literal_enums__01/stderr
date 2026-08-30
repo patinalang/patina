@@ -1,42 +1,52 @@
-error: prefix `a` is unknown
+error[E0308]: mismatched types
   --> tests/ui/src/custom_types/enum/literal_enums__01.pt:5:11
    |
 LL |     Foo = a"hello_foo",
-   |           ^ unknown prefix
+   |           ^^^^^^^^^^^^ expected `int`, found `atom`
    |
-   = note: prefixed identifiers and literals are reserved since Rust 2021
-help: consider inserting whitespace here
-   |
-LL |     Foo = a "hello_foo",
-   |            +
+   = note: expected type `int`
+              found type `atom`
+   = note: enum variant discriminant can only be of a primitive type compatible with the enum's `repr`
 
-error: prefix `a` is unknown
+error[E0308]: mismatched types
   --> tests/ui/src/custom_types/enum/literal_enums__01.pt:6:11
    |
 LL |     Bar = a"hello_bar",
-   |           ^ unknown prefix
+   |           ^^^^^^^^^^^^ expected `int`, found `atom`
    |
-   = note: prefixed identifiers and literals are reserved since Rust 2021
-help: consider inserting whitespace here
-   |
-LL |     Bar = a "hello_bar",
-   |            +
+   = note: expected type `int`
+              found type `atom`
+   = note: enum variant discriminant can only be of a primitive type compatible with the enum's `repr`
 
-error: expected one of `!`, `,`, `.`, `::`, `?`, `{`, `}`, or an operator, found `"hello_foo"`
-  --> tests/ui/src/custom_types/enum/literal_enums__01.pt:5:12
+error[E0308]: mismatched types
+  --> tests/ui/src/custom_types/enum/literal_enums__01.pt:15:13
    |
-LL |     Foo = a"hello_foo",
-   |            ^^^^^^^^^^^ expected one of 8 possible tokens
+LL |     Peter = "Peter",
+   |             ^^^^^^^ expected `int`, found `str`
    |
-   = help: enum variants can be `Variant`, `Variant = <integer>`, `Variant(Type, ..., TypeN)` or `Variant { fields: Types }`
+   = note: enum variant discriminant can only be of a primitive type compatible with the enum's `repr`
 
-error: expected item, found `"hello_foo"`
-  --> tests/ui/src/custom_types/enum/literal_enums__01.pt:5:12
+error[E0308]: mismatched types
+  --> tests/ui/src/custom_types/enum/literal_enums__01.pt:16:12
    |
-LL |     Foo = a"hello_foo",
-   |            ^^^^^^^^^^^ expected item
+LL |     Paul = "Paul",
+   |            ^^^^^^ expected `int`, found `str`
    |
-   = note: for a full list of items that can appear in modules, see <https://doc.rust-lang.org/reference/items.html>
+   = note: enum variant discriminant can only be of a primitive type compatible with the enum's `repr`
 
-error: aborting due to 4 previous errors
+error[E0605]: non-primitive cast: `AtomEnum` as `atom`
+  --> tests/ui/src/custom_types/enum/literal_enums__01.pt:21:22
+   |
+LL |     println!("{:?}", AtomEnum::Foo as atom);
+   |                      ^^^^^^^^^^^^^^^^^^^^^ an `as` expression can only be used to convert between primitive types or to coerce to a specific trait object
 
+error[E0605]: non-primitive cast: `StrEnum` as `str`
+  --> tests/ui/src/custom_types/enum/literal_enums__01.pt:27:22
+   |
+LL |     println!("{:?}", StrEnum::Peter as str);
+   |                      ^^^^^^^^^^^^^^^^^^^^^ an `as` expression can only be used to convert between primitive types or to coerce to a specific trait object
+
+error: aborting due to 6 previous errors
+
+Some errors have detailed explanations: E0308, E0605.
+For more information about an error, try `rustc --explain E0308`.

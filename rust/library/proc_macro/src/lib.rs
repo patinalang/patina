@@ -1454,6 +1454,11 @@ impl Literal {
                 let hashes = get_hashes_str(n);
                 f(&["cr", hashes, "\"", symbol, "\"", hashes, suffix])
             }
+            bridge::LitKind::AtomStr => f(&["a\"", symbol, "\"", suffix]),
+            bridge::LitKind::AtomStrRaw(n) => {
+                let hashes = get_hashes_str(n);
+                f(&["ar", hashes, "\"", symbol, "\"", hashes, suffix])
+            }
 
             bridge::LitKind::Integer | bridge::LitKind::Float | bridge::LitKind::ErrWithGuar => {
                 f(&[symbol, suffix])

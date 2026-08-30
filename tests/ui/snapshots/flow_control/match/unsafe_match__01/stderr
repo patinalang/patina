@@ -1,50 +1,28 @@
-error: prefix `a` is unknown
-  --> tests/ui/src/flow_control/match/unsafe_match__01.pt:8:9
+error[E0532]: expected tuple struct or tuple variant, found builtin type `int`
+  --> tests/ui/src/flow_control/match/unsafe_match__01.pt:10:9
    |
-LL |         a"nil" => "the atom nil",
-   |         ^ unknown prefix
-   |
-   = note: prefixed identifiers and literals are reserved since Rust 2021
-help: consider inserting whitespace here
-   |
-LL |         a "nil" => "the atom nil",
-   |          +
+LL |         int(_) => "some integer value (untagged?)",
+   |         ^^^ not a tuple struct or tuple variant
 
-error: prefix `a` is unknown
-  --> tests/ui/src/flow_control/match/unsafe_match__01.pt:9:10
+error[E0433]: cannot find type `Option` in this scope
+  --> tests/ui/src/flow_control/match/unsafe_match__01.pt:5:13
    |
-LL |         (a"some", val) => "some value (tagged?)",
-   |          ^ unknown prefix
-   |
-   = note: prefixed identifiers and literals are reserved since Rust 2021
-help: consider inserting whitespace here
-   |
-LL |         (a "some", val) => "some value (tagged?)",
-   |           +
+LL |     let v = Option::<int>::None as term;
+   |             ^^^^^^ use of undeclared type `Option`
 
-error: prefix `a` is unknown
-  --> tests/ui/src/flow_control/match/unsafe_match__01.pt:20:13
+error[E0433]: cannot find type `Option` in this scope
+  --> tests/ui/src/flow_control/match/unsafe_match__01.pt:19:13
    |
-LL |             a"nil" => "the atom nil",
-   |             ^ unknown prefix
-   |
-   = note: prefixed identifiers and literals are reserved since Rust 2021
-help: consider inserting whitespace here
-   |
-LL |             a "nil" => "the atom nil",
-   |              +
+LL |             Option::<int>::None => "an empty integer option",
+   |             ^^^^^^ use of undeclared type `Option`
 
-error: expected one of `=>`, `@`, `if`, or `|`, found `"nil"`
-  --> tests/ui/src/flow_control/match/unsafe_match__01.pt:8:10
+error[E0433]: cannot find type `Option` in this scope
+  --> tests/ui/src/flow_control/match/unsafe_match__01.pt:18:13
    |
-LL |         a"nil" => "the atom nil",
-   |          ^^^^^ expected one of `=>`, `@`, `if`, or `|`
+LL |             Option::<str>::None => "an empty string option",
+   |             ^^^^^^ use of undeclared type `Option`
 
-error: expected one of `=>`, `@`, `if`, or `|`, found `"nil"`
-  --> tests/ui/src/flow_control/match/unsafe_match__01.pt:20:14
-   |
-LL |             a"nil" => "the atom nil",
-   |              ^^^^^ expected one of `=>`, `@`, `if`, or `|`
+error: aborting due to 4 previous errors
 
-error: aborting due to 5 previous errors
-
+Some errors have detailed explanations: E0433, E0532.
+For more information about an error, try `rustc --explain E0433`.

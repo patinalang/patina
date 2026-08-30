@@ -8,6 +8,6 @@ enum AllUnits {
 }
 
 pub fn main() {
-    println!("{:?}", AllUnits::Foo as atom)
+    println!("{:?}", AllUnits::Foo as atom);
     // a"Elixir.Patina.ByExample.AllUnits.Foo"
 }

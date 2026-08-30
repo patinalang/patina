@@ -1,0 +1,78 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/unsafe.md
+// block: 2/2
+
+fn main() ({
+    let v = ((Option::<int>::None as {type error}) as term as {type error});
+
+    let safe_description =
+        (match (v as {type error}) {
+            a"nil" => ("the atom nil" as str),
+            (a"some", val) => ("some value (tagged?)" as str),
+            val => ("some value (untagged?)" as str),
+        } as str);
+    // Option<str>::None => "string option (none)",
+    // ^ERROR - can't safely match by runtime representation!
+
+    let unsafe_description =
+        (unsafe {
+            (match (v as {type error}) {
+                Option::<str>::None => ("an empty string option" as str),
+                Option::<int>::None => ("an empty integer option" as str),
+                a"nil" => ("the atom nil" as str),
+                _ => ("something else" as str),
+            } as str)
+        } as str);
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::display as
+                                    fn(term) -> term)(
+
+                                (safe_description as str)) as term), (", " as str),
+                            ((patina_fmt::display as
+                                    fn(term) -> term)((unsafe_description as str)) as term)] as
+                        [term])] as [[term]])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    // "the atom nil, an empty string option"
+} as ())

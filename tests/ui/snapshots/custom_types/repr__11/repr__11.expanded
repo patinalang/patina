@@ -1,0 +1,81 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/custom_types/repr.md
+// block: 11/12
+
+#[repr(transparent, fallback = "tagged")]
+pub enum Option<T> {
+
+    #[repr(name = "some")]
+    Some(T),
+
+    #[repr(name = "nil")]
+    None,
+}
+
+pub fn main() {
+    {
+        io::put_chars([[patina_fmt::debug(Option::<int>::Some(42)), "    ",
+                            patina_fmt::debug(Option::<int>::None)]]);
+        io::nl();
+    };
+    {
+        io::put_chars([[patina_fmt::debug(
+                                // 42    a"nil"
+
+                                // `Option<atom>` cannot be transparent, as `a"nil"` is a valid `Some`
+                                Option::<atom>::Some(a"hi")), "    ",
+                            patina_fmt::debug(Option::<atom>::None)]]);
+        io::nl();
+    };
+    {
+        io::put_chars([[patina_fmt::debug(
+                                // (a"some", a"hi")    a"nil"
+
+                                // Option<Option<int>> also cannot be transparently represented
+                                Option::<Option<int>>::Some(Some(42))), "    ",
+                            patina_fmt::debug(Option::<Option<int>>::Some(None)),
+                            "    ", patina_fmt::debug(Option::<Option<int>>::None)]]);
+        io::nl();
+    };
+    // (a"some", 42)    (a"some", a"nil")    a"nil"
+}

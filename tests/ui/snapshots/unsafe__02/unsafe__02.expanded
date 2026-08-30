@@ -1,0 +1,74 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/unsafe.md
+// block: 2/2
+
+pub fn main() {
+    let v = Option::<int>::None as term;
+
+    let safe_description =
+        match v {
+            a"nil" => "the atom nil",
+            (a"some", val) => "some value (tagged?)",
+            val => "some value (untagged?)",
+        };
+    // Option<str>::None => "string option (none)",
+    // ^ERROR - can't safely match by runtime representation!
+
+    let unsafe_description =
+        unsafe {
+            match v {
+                Option::<str>::None => "an empty string option",
+                Option::<int>::None => "an empty integer option",
+                a"nil" => "the atom nil",
+                _ => "something else",
+            }
+        };
+    {
+        io::put_chars([[patina_fmt::display(
+
+                                safe_description), ", ",
+                            patina_fmt::display(unsafe_description)]]);
+        io::nl();
+    };
+    // "the atom nil, an empty string option"
+}

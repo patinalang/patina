@@ -595,6 +595,10 @@ impl<'psess, 'src> Lexer<'psess, 'src> {
             token::LitKind::StrRaw(n) => (n as u32 + 2, true),
             // account for `cr###"`
             token::LitKind::CStrRaw(n) => (n as u32 + 3, true),
+            // account for `a"`
+            token::LitKind::AtomStr => (2, true),
+            // account for `ar###"`
+            token::LitKind::AtomStrRaw(n) => (n as u32 + 3, true),
             // suppress bad literals.
             token::LitKind::Err(_) => return,
             // Be conservative just in case new literals do support these.
@@ -823,6 +827,20 @@ impl<'psess, 'src> Lexer<'psess, 'src> {
                 }
                 self.cook_quoted(token::Str, Mode::Str, start, end, 1, 1) // " "
             }
+            rustc_lexer::LiteralKind::AtomStr { terminated } => {
+                if !terminated {
+                    self.dcx()
+                        .struct_span_fatal(
+                            self.mk_sp(start + BytePos(1), end),
+                            "unterminated double quote atom string",
+                        )
+                        // TODO: add code
+                        // .with_code(E0766)
+                        .emit()
+                }
+                self.cook_quoted(token::AtomStr, Mode::Str, start, end, 2, 1)
+                // a" "
+            }
             rustc_lexer::LiteralKind::ByteStr { terminated } => {
                 if !terminated {
                     self.dcx()
@@ -856,6 +874,16 @@ impl<'psess, 'src> Lexer<'psess, 'src> {
                 // r##" "##
                 } else {
                     self.report_raw_str_error(start, 1);
+                }
+            }
+            rustc_lexer::LiteralKind::RawAtomStr { n_hashes } => {
+                if let Some(n_hashes) = n_hashes {
+                    let n = u32::from(n_hashes);
+                    let kind = token::AtomStrRaw(n_hashes);
+                    self.cook_quoted(kind, Mode::RawStr, start, end, 3 + n, 1 + n)
+                // ar##" "##
+                } else {
+                    self.report_raw_str_error(start, 2);
                 }
             }
             rustc_lexer::LiteralKind::RawByteStr { n_hashes } => {

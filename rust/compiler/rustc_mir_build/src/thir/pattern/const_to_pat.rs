@@ -356,7 +356,7 @@ impl<'tcx> ConstToPat<'tcx> {
                 slice: None,
                 suffix: Box::new([]),
             },
-            ty::Str => {
+            ty::Str | ty::Atom => {
                 // Constant/literal patterns of type `&str` are lowered to a
                 // `PatKind::Deref` wrapping a `PatKind::Constant` of type `str`.
                 // This pattern node is the `str` constant part.

@@ -8,8 +8,7 @@ Ident
 Whitespace
 Eq
 Whitespace
-UnknownPrefix
-Literal { kind: Str { terminated: true }, suffix_start: 5 }
+Literal { kind: AtomStr { terminated: true }, suffix_start: 6 }
 Whitespace
 Ident
 Whitespace

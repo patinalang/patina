@@ -25,7 +25,7 @@ pub(crate) fn expand_concat(
     for e in es {
         match e.kind {
             ExprKind::Lit(token_lit) => match LitKind::from_token_lit(token_lit) {
-                Ok(LitKind::Str(s, _) | LitKind::Float(s, _)) => {
+                Ok(LitKind::Str(s, _) | LitKind::Float(s, _) | LitKind::Atom(s, _)) => {
                     accumulator.push_str(s.as_str());
                 }
                 Ok(LitKind::Char(c)) => {

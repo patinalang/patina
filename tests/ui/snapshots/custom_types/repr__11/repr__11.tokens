@@ -125,8 +125,7 @@ Colon
 Colon
 Ident
 OpenParen
-UnknownPrefix
-Literal { kind: Str { terminated: true }, suffix_start: 4 }
+Literal { kind: AtomStr { terminated: true }, suffix_start: 5 }
 CloseParen
 Comma
 Whitespace

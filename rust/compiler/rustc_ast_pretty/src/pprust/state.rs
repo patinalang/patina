@@ -426,6 +426,10 @@ fn literal_to_string(lit: token::Lit) -> String {
         token::StrRaw(n) => {
             format!("r{delim}\"{string}\"{delim}", delim = "#".repeat(n as usize), string = symbol)
         }
+        token::AtomStr => format!("a\"{symbol}\""),
+        token::AtomStrRaw(n) => {
+            format!("ar{delim}\"{symbol}\"{delim}", delim = "#".repeat(n as usize))
+        }
         token::ByteStr => format!("b\"{symbol}\""),
         token::ByteStrRaw(n) => {
             format!("br{delim}\"{string}\"{delim}", delim = "#".repeat(n as usize), string = symbol)

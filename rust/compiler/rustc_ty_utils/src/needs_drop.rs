@@ -289,6 +289,7 @@ where
                     | ty::Float
                     | ty::Str
                     | ty::Term
+                    | ty::Atom
                     | ty::Map(..)
                     | ty::Slice(_)
                     | ty::Ref(..)
