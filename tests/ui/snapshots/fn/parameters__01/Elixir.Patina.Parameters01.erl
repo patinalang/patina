@@ -32,6 +32,6 @@ main() ->
         fun(_x@0_0) ->
                _x@0_0 + 42
         end,
-    call_me(fun 'Elixir.Patina.Parameters01':function/1),
+    call_me(fun function/1),
     call_me(_closure@1_0),
-    call_me_ref(fun 'Elixir.Patina.Parameters01':function/1).
+    call_me_ref(fun function/1).

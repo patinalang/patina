@@ -740,22 +740,35 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         {
             let target = tcx.erl_call_target_for_def(*def_id, args);
 
-            let Some(module_resolution) = tcx.erl_module_for_target(self.owner.to_def_id(), target)
-            else {
+            let Some(call_kind) = tcx.erl_call_kind(self.owner.to_def_id(), target, None) else {
                 let receiver = tcx.erl_call_target_self_ty(target).unwrap_or_else(|| {
                     span_bug!(expr.span, "dispatch through a type parameter must have a receiver")
                 });
                 not_implemented!(tcx, expr.span, "dispatch through a type parameter", receiver);
             };
 
-            let ErlModuleResolution::Static(module_id) = module_resolution else {
-                not_implemented!(tcx, expr.span, "dynamic function-item value", expr.ty);
-            };
+            let fn_name = tcx.erl_fn_name(*def_id);
+            let arity = tcx.fn_arg_idents(*def_id).len() as u32;
 
-            let mod_name = self.translator.modules.module_name(module_id);
-            let fn_name = tcx.item_name(*def_id);
-            let arity = tcx.fn_arg_idents(*def_id).len();
-            afb.expr_remote_fun(expr.span, mod_name, fn_name, arity as u32)
+            match call_kind {
+                ErlCallKind::Local | ErlCallKind::LocalOrExtern => {
+                    afb.expr_local_fun(expr.span, fn_name, arity)
+                }
+                ErlCallKind::Extern => {
+                    let module_resolution =
+                        tcx.erl_module_for_target(self.owner.to_def_id(), target).unwrap_or_else(
+                            || span_bug!(expr.span, "external function item must have a module"),
+                        );
+                    let ErlModuleResolution::Static(module_id) = module_resolution else {
+                        span_bug!(expr.span, "external function item must have a static module");
+                    };
+                    let mod_name = self.translator.modules.module_name(module_id);
+                    afb.expr_remote_fun(expr.span, mod_name, fn_name, arity)
+                }
+                ErlCallKind::Dynamic => {
+                    not_implemented!(tcx, expr.span, "dynamic function-item value", expr.ty)
+                }
+            }
         } else {
             not_implemented!(tcx, expr.span, "ZST literal", expr.ty)
         }

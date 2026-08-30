@@ -9,15 +9,5 @@ LL |     Mul,
    |
    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
 
-warning: [{"tests/ui/src/fn/parameters__02.pt",
-           [{{8,1},erl_lint,{unused_function,{add,2}}},
-            {{12,1},erl_lint,{unused_function,{mul,2}}},
-            {{23,24},
-             erl_lint,
-             {unexported_function,{'Elixir.Patina.Parameters02',add,2}}},
-            {{24,24},
-             erl_lint,
-             {unexported_function,{'Elixir.Patina.Parameters02',mul,2}}}]}]
-
-warning: 2 warnings emitted
+warning: 1 warning emitted
 

@@ -32,9 +32,9 @@ mul(_x@0_0, _y@1_0) ->
 choose_op(_op@0_0) ->
     case _op@0_0 of
         'Elixir.Patina.Parameters02.MathOp.Add' ->
-            fun 'Elixir.Patina.Parameters02':add/2;
+            fun add/2;
         'Elixir.Patina.Parameters02.MathOp.Mul' ->
-            fun 'Elixir.Patina.Parameters02':mul/2
+            fun mul/2
     end.
 main() ->
     _fx@0_0 =

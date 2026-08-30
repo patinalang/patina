@@ -49,19 +49,18 @@ fn main() ({
     let an_atom: atom = (a"hello" as atom);
 
     // A type can also be inferred from context.
-    let inferred_type =
-        (12 as int); // Type float is inferred from another line.
-    ((inferred_type as int) =
+    let inferred_type; // Type float is inferred from another line.
+    ((inferred_type as float) =
         ((add_floats as
-                fn(float, float) -> float {add_floats})((inferred_type as
-                int), (3.14 as float)) as float) as ());
+                fn(float, float) -> float {add_floats})((12.0 as float),
+            (3.14 as float)) as float) as ());
 
     // A mutable variable's value can be changed - rebound to a new value.
     let mut mutable = (12 as int); // Mutable `int`
     ((mutable as int) = (21 as int) as ());
 
     // Error! The type of a variable can't be changed.
-    ((mutable as int) = (true as bool) as ());
+    // mutable = true;
 
     // Variables can be overwritten with shadowing.
     let mutable = (true as bool);
@@ -79,13 +78,16 @@ fn main() ({
             (int, bool, float));
     // Map's signature consists of Key type K and Value type V as #{K => V}
     let my_map: #{float => str} =
-        (#{(3.14 as float) => ("pi" as str), (0 as int) => ("zero" as str)} as
-            #{{type error} => str});
+        (#{(3.14 as float) => ("pi" as str), (0.0 as float) =>
+                ("zero" as str)} as #{float => str});
+
     /* Function types */
 
-    let add_ref: fn(float, float) -> float = (add_float as {type error});
+    let add_ref: fn(float, float) -> float =
+        (add_floats as fn(float, float) -> float {add_floats});
     // fnref is implicitly convertible to fn
-    let add_fn: fn(float, float) -> float = (add_ref as {type error});
+    let add_fn: fn(float, float) -> float =
+        (add_ref as fnref(float, float) -> float);
 } as ())
 
 fn add_floats(a: float, b: float)

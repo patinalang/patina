@@ -305,6 +305,18 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         )
     }
 
+    pub(crate) fn expr_local_fun(
+        &self,
+        span: impl IntoAnno,
+        name: Symbol,
+        arity: u32,
+    ) -> eaf::Expr<'arena> {
+        eaf::Expr::LocalFun(
+            span.into_anno(self.source_map),
+            eaf::Function { name: name.into(), arity },
+        )
+    }
+
     pub(crate) fn expr_remote_call(
         &self,
         span: impl IntoAnno,

@@ -55,10 +55,6 @@ Whitespace
 Ident
 Whitespace
 Ident
-Whitespace
-Eq
-Whitespace
-Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 2 }
 Semi
 Whitespace
 LineComment { doc_style: None }
@@ -69,7 +65,7 @@ Eq
 Whitespace
 Ident
 OpenParen
-Ident
+Literal { kind: Float { base: Decimal, empty_exponent: false }, suffix_start: 4 }
 Comma
 Whitespace
 Literal { kind: Float { base: Decimal, empty_exponent: false }, suffix_start: 4 }
@@ -100,12 +96,7 @@ Semi
 Whitespace
 LineComment { doc_style: None }
 Whitespace
-Ident
-Whitespace
-Eq
-Whitespace
-Ident
-Semi
+LineComment { doc_style: None }
 Whitespace
 LineComment { doc_style: None }
 Whitespace
@@ -201,7 +192,7 @@ Whitespace
 Literal { kind: Str { terminated: true }, suffix_start: 4 }
 Comma
 Whitespace
-Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Literal { kind: Float { base: Decimal, empty_exponent: false }, suffix_start: 3 }
 Whitespace
 Eq
 Gt
