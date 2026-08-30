@@ -111,6 +111,8 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
             ExprKind::Unary { op, arg } => self.translate_unary(expr, *op, *arg),
 
+            ExprKind::Cast { source } => self.translate_cast(expr, *source),
+
             ExprKind::Call { ty, fun, args, forced_extern, .. } => {
                 self.translate_call(expr.span, *ty, *fun, args, *forced_extern)
             }
@@ -180,6 +182,27 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let afb = &self.translator.afb;
         let elems = fields.iter().map(|&id| self.translate_expr(id));
         afb.expr_tuple(span, elems)
+    }
+
+    fn translate_cast(&mut self, expr: &Expr<'tcx>, source: ExprId) -> eaf::Expr<'arena> {
+        let afb = &self.translator.afb;
+        let source_ty = self.thir[source].ty;
+        let source = self.translate_expr(source);
+
+        let function = if source_ty.is_floating_point() && expr.ty.is_integral() {
+            sym::trunc
+        } else if source_ty.is_integral() && expr.ty.is_floating_point() {
+            sym::float
+        } else {
+            return source;
+        };
+
+        afb.expr_remote_call(
+            expr.span,
+            afb.expr_atom(expr.span, sym::erlang),
+            afb.expr_atom(expr.span, function),
+            [source],
+        )
     }
 
     fn translate_named_const(
@@ -692,7 +715,10 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         arg: ExprId,
     ) -> eaf::Expr<'arena> {
         let afb = &self.translator.afb;
-        let ty = self.resolve_expr(arg).ty;
+        let (_, Some((_, hir_id))) = self.resolve_expr_with_scope(arg) else {
+            span_bug!(span, "format argument must be a HIR-derived expression");
+        };
+        let ty = self.tcx().typeck(self.owner).node_type(hir_id);
 
         let translated = self.translate_expr(arg);
         if fn_name == sym::display && ty.is_str() {
@@ -1371,7 +1397,6 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 ExprKind::Use { source }
                 | ExprKind::ByUse { expr: source, .. }
                 | ExprKind::NeverToAny { source }
-                | ExprKind::Cast { source, .. }
                 | ExprKind::PointerCoercion { source, .. }
                 | ExprKind::PlaceTypeAscription { source, .. }
                 | ExprKind::ValueTypeAscription { source, .. } => expr = &self.thir[*source],

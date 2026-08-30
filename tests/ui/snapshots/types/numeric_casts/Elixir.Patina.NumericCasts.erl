@@ -1,8 +1,13 @@
--file("tests/ui/src/local_and_extern_calls.pt", 1).
--module('Elixir.Patina.LocalAndExternCalls').
+-file("tests/ui/src/types/numeric_casts.pt", 1).
+-module('Elixir.Patina.NumericCasts').
 -compile([no_auto_import]).
 -export_record([]).
--export(['__info__'/1,public_main/0,main/0]).
+-export(['__info__'/1,
+         float_to_int/1,
+         int_to_float/1,
+         float_to_int_to_term/1,
+         int_to_float_to_term/1,
+         main/0]).
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
                      [{'__info__', 1},
@@ -21,19 +26,16 @@
     [];
 '__info__'(Key) ->
     module_info(Key).
-priv_main() ->
-    'Elixir.Patina.LocalAndExternCalls.StructWithNew':new(42).
-public_main() ->
-    _ = priv_main(),
-    _ = priv_main(),
-    priv_main().
+float_to_int(_value@0_0) ->
+    trunc(_value@0_0).
+int_to_float(_value@0_0) ->
+    erlang:float(_value@0_0).
+float_to_int_to_term(_value@0_0) ->
+    trunc(_value@0_0).
+int_to_float_to_term(_value@0_0) ->
+    erlang:float(_value@0_0).
 main() ->
-    _ = public_main(),
-    _ = public_main(),
-    _ = 'Elixir.Patina.LocalAndExternCalls.Nested':main(),
-    _ = priv_main(),
-    _s@0_0 = 'Elixir.Patina.LocalAndExternCalls.StructWithNew':new(42),
-    begin
-        io:put_chars([[io_lib:format("~ktp", [map_get(value, _s@0_0)])]]),
-        io:nl()
-    end.
+    _ = float_to_int(3.14),
+    _ = int_to_float(42),
+    _ = float_to_int_to_term(3.14),
+    _ = int_to_float_to_term(42).

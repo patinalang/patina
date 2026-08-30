@@ -1,0 +1,68 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+fn float_to_int(value: float)
+    -> int ({ ((value as float) as int as int) } as int)
+
+fn int_to_float(value: int)
+    -> float ({ ((value as int) as float as float) } as float)
+
+fn float_to_int_to_term(value: float)
+    -> term ({ (((value as float) as int as int) as term as term) } as term)
+
+fn int_to_float_to_term(value: int)
+    -> term ({ (((value as int) as float as float) as term as term) } as term)
+
+fn main() ({
+    let _ =
+        ((float_to_int as fn(float) -> int {float_to_int})((3.14 as float)) as
+            int);
+    let _ =
+        ((int_to_float as fn(int) -> float {int_to_float})((42 as int)) as
+            float);
+    let _ =
+        ((float_to_int_to_term as
+                fn(float) -> term {float_to_int_to_term})((3.14 as float)) as
+            term);
+    let _ =
+        ((int_to_float_to_term as
+                fn(int) -> term {int_to_float_to_term})((42 as int)) as term);
+} as ())
