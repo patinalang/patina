@@ -46,10 +46,10 @@ fn continue_outer_loop(limit: int)
     let mut visits = (0 as int);
 
     ('outer: loop {
-        ((outer as int) += (1 as int) as ());
+        ((outer as int) += (1 as int) as int);
 
         (loop {
-            ((visits as int) += (1 as int) as ());
+            ((visits as int) += (1 as int) as int);
 
             (if ((outer as int) < (limit as int) as bool) {
                 (continue 'outer as !);
@@ -69,11 +69,11 @@ fn continue_two_loops(limit: int)
     let mut visits = (0 as int);
 
     ('outer: loop {
-        ((outer as int) += (1 as int) as ());
+        ((outer as int) += (1 as int) as int);
 
         (loop {
             (loop {
-                ((visits as int) += (1 as int) as ());
+                ((visits as int) += (1 as int) as int);
 
                 (if ((outer as int) < (limit as int) as bool) {
                     (continue 'outer as !);

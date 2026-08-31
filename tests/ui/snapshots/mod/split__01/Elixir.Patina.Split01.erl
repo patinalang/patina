@@ -23,11 +23,12 @@
 
 function() ->
     begin
-        io:put_chars([[<<"called `function()`">>]]), io:nl()
+        io:put_chars([[<<"called `function()`">>]]), io:nl(), {}
     end.
 
 main() ->
     'Elixir.Patina.Split01.MyMod':function(),
     function(),
     'Elixir.Patina.Split01.MyMod':indirect_access(),
-    'Elixir.Patina.Split01.MyMod.Nested':function().
+    'Elixir.Patina.Split01.MyMod.Nested':function(),
+    {}.

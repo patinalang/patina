@@ -40,20 +40,23 @@ main() ->
                            <<",  y = ">>,
                            io_lib:format("~ktp", [_y@2_0]),
                            <<" ">>]]),
-            io:nl();
+            io:nl(),
+            {};
         #{'__struct__' :=
               'Elixir.Patina.DestructureStructures01.main.Foo',
           y := 2, x := _i@3_0} ->
             io:put_chars([[<<"y is 2, i = ">>,
                            io_lib:format("~ktp", [_i@3_0])]]),
-            io:nl();
+            io:nl(),
+            {};
         #{'__struct__' :=
               'Elixir.Patina.DestructureStructures01.main.Foo',
           y := _y@4_0} ->
             io:put_chars([[<<"y = ">>,
                            io_lib:format("~ktp", [_y@4_0]),
                            <<", we don't care about x">>]]),
-            io:nl()
+            io:nl(),
+            {}
     end,
     _faa@5_0 =
         ('Elixir.Patina.DestructureStructures01.main.Foo':'__struct__'())#{x
@@ -71,7 +74,8 @@ main() ->
                        io_lib:format("~ktp", [_x0@6_0]),
                        <<", y0 = ">>,
                        io_lib:format("~ktp", [_y0@7_0])]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     _bar@8_0 =
         ('Elixir.Patina.DestructureStructures01.main.Bar':'__struct__'())#{foo
@@ -89,5 +93,6 @@ main() ->
                        io_lib:format("~ktp", [_nested_x@9_0]),
                        <<", nested_y = ">>,
                        io_lib:format("~ktp", [_nested_y@10_0])]]),
-        io:nl()
+        io:nl(),
+        {}
     end.

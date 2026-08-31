@@ -27,5 +27,6 @@ main() ->
                                      [('Elixir.Patina.Repr05.Celcius':'__struct__'())#{'0'
                                                                                            :=
                                                                                            2.345}])]]),
-        io:nl()
+        io:nl(),
+        {}
     end.

@@ -33,5 +33,6 @@ main() ->
                                      ['Elixir.Patina.ImplArity.GenVal':value(_a@0_0)]),
                        <<" ">>,
                        'Elixir.Patina.ImplArity.GenVal':value(_b@1_0, 0)]]),
-        io:nl()
+        io:nl(),
+        {}
     end.

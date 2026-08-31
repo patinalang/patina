@@ -32,21 +32,25 @@ main() ->
             when _t@1_0 > 30 ->
             io:put_chars([[io_lib:format("~ktp", [_t@1_0]),
                            <<"C is above 30 Celsius">>]]),
-            io:nl();
+            io:nl(),
+            {};
         #'Elixir.Patina.Guard01.Temperature':'Celsius'{'0' =
                                                            _t@2_0} ->
             io:put_chars([[io_lib:format("~ktp", [_t@2_0]),
                            <<"C is equal to or below 30 Celsius">>]]),
-            io:nl();
+            io:nl(),
+            {};
         #'Elixir.Patina.Guard01.Temperature':'Fahrenheit'{'0' =
                                                               _t@3_0}
             when _t@3_0 > 86 ->
             io:put_chars([[io_lib:format("~ktp", [_t@3_0]),
                            <<"F is above 86 Fahrenheit">>]]),
-            io:nl();
+            io:nl(),
+            {};
         #'Elixir.Patina.Guard01.Temperature':'Fahrenheit'{'0' =
                                                               _t@4_0} ->
             io:put_chars([[io_lib:format("~ktp", [_t@4_0]),
                            <<"F is equal to or below 86 Fahrenheit">>]]),
-            io:nl()
+            io:nl(),
+            {}
     end.

@@ -23,4 +23,5 @@
 
 main() ->
     _x@0_0 =
-        'Elixir.Patina.Enum02.VeryVerboseEnumOfThingsToDoWithNumbers.Add'.
+        'Elixir.Patina.Enum02.VeryVerboseEnumOfThingsToDoWithNumbers.Add',
+    {}.

@@ -79,5 +79,5 @@ fn main() ({
     } as ());
 
     // Error! Cannot modify a `const`.
-    ((THRESHOLD as int) = (5 as int) as ());
+    ((THRESHOLD as int) = (5 as int) as int);
 } as ())

@@ -182,5 +182,6 @@
                   [{bin_element,{38,9},{string,{38,9},")"},default,default}]},
                  {nil,{38,9}}}}}}}}},
           {nil,{38,9}}}]},
-       {call,{38,9},{remote,{38,9},{atom,{38,9},io},{atom,{38,9},nl}},[]}]},
+       {call,{38,9},{remote,{38,9},{atom,{38,9},io},{atom,{38,9},nl}},[]},
+       {tuple,{38,9},[]}]},
      {atom,{39,9},true}]}]}]

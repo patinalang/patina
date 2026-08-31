@@ -32,5 +32,6 @@ main() ->
                        <<" inches = ">>,
                        io_lib:format("~ktp", [_nanoseconds@0_0 + _inches@1_0]),
                        <<" unit?">>]]),
-        io:nl()
+        io:nl(),
+        {}
     end.

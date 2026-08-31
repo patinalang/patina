@@ -29,4 +29,5 @@ main() ->
     public_function(),
     public_function(),
     'Elixir.Patina.ExternCalls01':public_function(),
-    priv_function().
+    priv_function(),
+    {}.

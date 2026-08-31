@@ -28,20 +28,23 @@
             _count@0_1 = _count@0_0 + 1,
             case _count@0_1 =:= 3 of
                 true ->
-                    begin io:put_chars([[<<"three">>]]), io:nl() end,
-                    '$patina_marker':continue(_count@0_1);
+                    begin io:put_chars([[<<"three">>]]), io:nl(), {} end,
+                    '$patina_marker':continue(_count@0_1),
+                    {};
                 false -> {}
             end,
             begin
                 io:put_chars([[io_lib:format("~ktp", [_count@0_1])]]),
-                io:nl()
+                io:nl(),
+                {}
             end,
             case _count@0_1 =:= 5 of
                 true ->
                     begin
-                        io:put_chars([[<<"OK, that's enough">>]]), io:nl()
+                        io:put_chars([[<<"OK, that's enough">>]]), io:nl(), {}
                     end,
-                    '$patina_marker':break({break, 0, {}, _count@0_1});
+                    '$patina_marker':break({break, 0, {}, _count@0_1}),
+                    {};
                 false -> {}
             end
         end,
@@ -51,7 +54,8 @@ main() ->
     _count@0_0 = 0,
     begin
         io:put_chars([[<<"Let's count until infinity!">>]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     case '$patina_loop_10_109'(_count@0_0) of
         {break, 0, _loop_value@1_0, _count@0_1} ->

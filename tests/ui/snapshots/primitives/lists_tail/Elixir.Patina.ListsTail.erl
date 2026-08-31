@@ -39,7 +39,7 @@ let_else_tail(_xs@0_0) ->
         [-1, 0 | _tail@2_1 = _] -> {};
         _ ->
             _branch_value@3_0 = begin
-                                    '$patina_marker':return([])
+                                    '$patina_marker':return([]), {}
                                 end,
             _tail@2_1 = {},
             _branch_value@3_0

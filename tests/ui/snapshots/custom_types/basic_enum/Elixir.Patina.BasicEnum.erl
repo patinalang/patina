@@ -35,5 +35,6 @@ main() ->
                        io_lib:format("~ktp", [_y@1_0]),
                        <<"\n">>,
                        io_lib:format("~ktp", [_z@2_0])]]),
-        io:nl()
+        io:nl(),
+        {}
     end.

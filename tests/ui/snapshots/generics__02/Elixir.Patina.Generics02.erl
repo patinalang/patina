@@ -38,4 +38,5 @@ main() ->
                                                                    := 6},
     __char@4_0 =
         ('Elixir.Patina.Generics02.SingleGen':'__struct__'())#{'0'
-                                                                   := $a}.
+                                                                   := $a},
+    {}.

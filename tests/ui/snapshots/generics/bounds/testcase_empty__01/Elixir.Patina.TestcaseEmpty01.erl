@@ -36,11 +36,13 @@ main() ->
         io:put_chars([[<<"A cardinal is ">>,
                        red({'Elixir.Patina.TestcaseEmpty01.Cardinal', {}},
                            _cardinal@0_0)]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     begin
         io:put_chars([[<<"A blue jay is ">>,
                        blue({'Elixir.Patina.TestcaseEmpty01.BlueJay', {}},
                             _blue_jay@1_0)]]),
-        io:nl()
+        io:nl(),
+        {}
     end.

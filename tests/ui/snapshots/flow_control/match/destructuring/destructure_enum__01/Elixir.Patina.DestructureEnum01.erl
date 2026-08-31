@@ -29,18 +29,21 @@ main() ->
                                                            122,
                                                        '1' = 17, '2' = 40},
     begin
-        io:put_chars([[<<"What color is it?">>]]), io:nl()
+        io:put_chars([[<<"What color is it?">>]]), io:nl(), {}
     end,
     case _color@0_0 of
         'Elixir.Patina.DestructureEnum01.Color.Red' ->
             io:put_chars([[<<"The color is Red!">>]]),
-            io:nl();
+            io:nl(),
+            {};
         'Elixir.Patina.DestructureEnum01.Color.Blue' ->
             io:put_chars([[<<"The color is Blue!">>]]),
-            io:nl();
+            io:nl(),
+            {};
         'Elixir.Patina.DestructureEnum01.Color.Green' ->
             io:put_chars([[<<"The color is Green!">>]]),
-            io:nl();
+            io:nl(),
+            {};
         #'Elixir.Patina.DestructureEnum01.Color':'RGB'{'0' =
                                                            _r@1_0,
                                                        '1' = _g@2_0,
@@ -52,7 +55,8 @@ main() ->
                            <<", and blue: ">>,
                            io_lib:format("~ktp", [_b@3_0]),
                            <<"!">>]]),
-            io:nl();
+            io:nl(),
+            {};
         #'Elixir.Patina.DestructureEnum01.Color':'HSV'{'0' =
                                                            _h@4_0,
                                                        '1' = _s@5_0,
@@ -64,7 +68,8 @@ main() ->
                            <<", value: ">>,
                            io_lib:format("~ktp", [_v@6_0]),
                            <<"!">>]]),
-            io:nl();
+            io:nl(),
+            {};
         #'Elixir.Patina.DestructureEnum01.Color':'HSL'{'0' =
                                                            _h@7_0,
                                                        '1' = _s@8_0,
@@ -76,7 +81,8 @@ main() ->
                            <<", lightness: ">>,
                            io_lib:format("~ktp", [_l@9_0]),
                            <<"!">>]]),
-            io:nl();
+            io:nl(),
+            {};
         #'Elixir.Patina.DestructureEnum01.Color':'CMY'{'0' =
                                                            _c@10_0,
                                                        '1' = _m@11_0,
@@ -88,7 +94,8 @@ main() ->
                            <<", yellow: ">>,
                            io_lib:format("~ktp", [_y@12_0]),
                            <<"!">>]]),
-            io:nl();
+            io:nl(),
+            {};
         #'Elixir.Patina.DestructureEnum01.Color':'CMYK'{'0' =
                                                             _c@13_0,
                                                         '1' = _m@14_0,
@@ -103,5 +110,6 @@ main() ->
                            <<", key (black): ">>,
                            io_lib:format("~ktp", [_k@16_0]),
                            <<"!">>]]),
-            io:nl()
+            io:nl(),
+            {}
     end.

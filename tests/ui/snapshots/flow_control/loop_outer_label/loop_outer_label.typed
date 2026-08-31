@@ -46,7 +46,7 @@ fn break_outer_loop()
 
     ('outer: loop {
         (loop {
-            ((value as int) += (1 as int) as ());
+            ((value as int) += (1 as int) as int);
             (break 'outer (value as int) as !);
         } as !)
     } as int)
@@ -60,7 +60,7 @@ fn break_two_loops()
     ('outer: loop {
         (loop {
             (loop {
-                ((value as int) += (1 as int) as ());
+                ((value as int) += (1 as int) as int);
 
                 (if ((value as int) == (3 as int) as bool) {
                     (break 'outer ((value as int) * (10 as int) as int) as !);
@@ -76,8 +76,8 @@ fn outer_break_initializes()
     let value;
 
     ('outer: loop {
-        (loop { ((value as int) = (7 as int) as ()); (break 'outer as !); } as
-            !)
+        (loop { ((value as int) = (7 as int) as int); (break 'outer as !); }
+            as !)
     } as ())
 
     (value as int)

@@ -320,30 +320,33 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let block = &self.thir[id];
 
         let mut exprs: Vec<eaf::Expr<'arena>> = Vec::new();
+        let mut last_stmt_guaranteed_evaluates_to_unit = false;
 
-        for stmt_id in block.stmts.iter() {
-            if let Some(expr) = self.translate_stmt(*stmt_id) {
+        for &stmt_id in block.stmts.iter() {
+            if let Some((expr, guaranteed_evaluates_to_unit)) = self.translate_stmt(stmt_id) {
                 exprs.push(expr);
+                last_stmt_guaranteed_evaluates_to_unit = guaranteed_evaluates_to_unit;
             }
         }
 
         if let Some(tail) = block.expr {
             exprs.push(self.translate_expr(tail));
-        }
-
-        if exprs.is_empty() {
+        } else if !last_stmt_guaranteed_evaluates_to_unit {
             exprs.push(afb.expr_unit(block.span));
         }
 
         afb.expr_block(block.span, exprs)
     }
 
-    fn translate_stmt(&mut self, id: StmtId) -> Option<eaf::Expr<'arena>> {
+    // Returns the expression and whether it's guaranteed to evaluate to unit
+    fn translate_stmt(&mut self, id: StmtId) -> Option<(eaf::Expr<'arena>, bool)> {
         let stmt = &self.thir[id];
         let afb = &self.translator.afb;
 
         match stmt.kind {
-            thir::StmtKind::Expr { expr, .. } => Some(self.translate_expr(expr)),
+            thir::StmtKind::Expr { expr, .. } => {
+                Some((self.translate_expr(expr), self.thir[expr].ty.is_unit()))
+            }
 
             thir::StmtKind::Let { ref pattern, initializer, else_block, span, .. } => {
                 let Some(initializer) = initializer else {
@@ -354,7 +357,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
                 let Some(else_block) = else_block else {
                     let lhs = self.translate_single_pattern(pattern);
-                    return Some(afb.expr_match(span, lhs, rhs));
+                    return Some((afb.expr_match(span, lhs, rhs), false));
                 };
 
                 self.declare_vars_from_pattern(pattern);
@@ -386,7 +389,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                     always_diverges: true,
                 });
 
-                Some(self.translate_to_case(span, rhs, translated))
+                Some((self.translate_to_case(span, rhs, translated), true))
             }
         }
     }

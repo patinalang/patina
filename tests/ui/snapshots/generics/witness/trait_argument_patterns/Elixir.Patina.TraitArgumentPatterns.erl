@@ -35,7 +35,8 @@ main() ->
                                                                                                                                          'Elixir.Patina.TraitArgumentPatterns.UnboundContainer',
                                                                                                                                          1,
                                                                                                                                          false)])]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     begin
         io:put_chars([[io_lib:format("~ktp",
@@ -50,7 +51,8 @@ main() ->
                                                                                                                                        ('Elixir.Patina.TraitArgumentPatterns.Marked':'__struct__'())#{value
                                                                                                                                                                                                           :=
                                                                                                                                                                                                           2})])]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     begin
         io:put_chars([[io_lib:format("~ktp",
@@ -66,5 +68,6 @@ main() ->
                                                                                                                                         ('Elixir.Patina.TraitArgumentPatterns.Wrapped':'__struct__'())#{value
                                                                                                                                                                                                             :=
                                                                                                                                                                                                             false})])]]),
-        io:nl()
+        io:nl(),
+        {}
     end.

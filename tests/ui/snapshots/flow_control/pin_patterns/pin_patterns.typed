@@ -63,8 +63,8 @@ fn while_let_pin(start: int, expected: int)
     let mut count = (0 as int);
     (loop {
         (if (let ^expected = (current as int) as bool) {
-            ((count as int) += (1 as int) as ());
-            ((current as int) += (1 as int) as ());
+            ((count as int) += (1 as int) as int);
+            ((current as int) += (1 as int) as int);
         } else { (break as !); } as ())
     } as ())
     (((count as int) * (10 as int) as int) + (current as int) as int)
@@ -123,7 +123,7 @@ fn mutable_closure_pin(actual: int, initial: int)
     ->
         bool ({
     let mut expected = (initial as int);
-    ((expected as int) += (1 as int) as ());
+    ((expected as int) += (1 as int) as int);
     let matcher =
         (||
             (match (actual as int) {
@@ -143,8 +143,8 @@ fn loop_rebound_pin(target: int)
     (loop {
         (match (target as int) {
             ^expected => (break (expected as int) as !),
-            _ => ((expected as int) += (1 as int) as ()),
-        } as ())
+            _ => ((expected as int) += (1 as int) as int),
+        } as int);
     } as int)
 } as int)
 

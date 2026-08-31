@@ -171,5 +171,5 @@ fn main() ({
 
     ((square as Rectangle) =
         ((square as Rectangle).translate((1.0 as float), (1.0 as float)) as
-            Rectangle) as ());
+            Rectangle) as Rectangle);
 } as ())

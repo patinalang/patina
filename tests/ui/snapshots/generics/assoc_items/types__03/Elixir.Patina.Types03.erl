@@ -52,7 +52,8 @@ main() ->
                                                                                                       _container@2_0,
                                                                                                       _number_1@0_0,
                                                                                                       _number_2@1_0)])]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     begin
         io:put_chars([[<<"First number: ">>,
@@ -60,7 +61,8 @@ main() ->
                                      ['Elixir.Patina.Types03.Container':'Types03::Contains::first'({'Elixir.Patina.Types03.Container',
                                                                                                     {}},
                                                                                                    _container@2_0)])]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     begin
         io:put_chars([[<<"Last number: ">>,
@@ -68,7 +70,8 @@ main() ->
                                      ['Elixir.Patina.Types03.Container':'Types03::Contains::last'({'Elixir.Patina.Types03.Container',
                                                                                                    {}},
                                                                                                   _container@2_0)])]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     begin
         io:put_chars([[<<"The difference is: ">>,
@@ -76,5 +79,6 @@ main() ->
                                      [difference({'Elixir.Patina.Types03.Container',
                                                   {}},
                                                  _container@2_0)])]]),
-        io:nl()
+        io:nl(),
+        {}
     end.

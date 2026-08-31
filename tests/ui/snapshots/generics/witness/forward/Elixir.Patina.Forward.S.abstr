@@ -135,7 +135,5 @@
               [{bin_element,{8,23},{string,{8,23},")"},default,default}]},
              {nil,{8,23}}}}},
           {nil,{8,23}}}]},
-       {call,
-        {8,23},
-        {remote,{8,23},{atom,{8,23},io},{atom,{8,23},nl}},
-        []}]}]}]}]
+       {call,{8,23},{remote,{8,23},{atom,{8,23},io},{atom,{8,23},nl}},[]},
+       {tuple,{8,23},[]}]}]}]}]

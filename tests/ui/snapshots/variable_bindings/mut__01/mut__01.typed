@@ -58,7 +58,7 @@ fn main() ({
     } as ());
 
     // Ok
-    ((mutable_binding as int) += (1 as int) as ());
+    ((mutable_binding as int) += (1 as int) as int);
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("After mutating the binding: " as str),
@@ -71,7 +71,7 @@ fn main() ({
     } as ());
 
     // Error! Cannot assign a new value to an immutable variable
-    ((_immutable_binding as int) += (1 as int) as ());
+    ((_immutable_binding as int) += (1 as int) as int);
 
     // Inside closures (lambda functions) and `try` blocks, `let mut` variables
     // defined in outer scopes lose their `mut` modifier
@@ -79,11 +79,11 @@ fn main() ({
         (||
             ({
                 // Error! Cannot assign a new value to a variable defined outside closure
-                ((mutable_binding as int) += (1 as int) as ());
+                ((mutable_binding as int) += (1 as int) as int);
 
                 // You must define a new variable to modify it inside your closure
                 let mut inner_mutable_binding = (mutable_binding as int);
-                ((inner_mutable_binding as int) += (1 as int) as ());
+                ((inner_mutable_binding as int) += (1 as int) as int);
                 ({
                     ((io::put_chars as
                             fn(term) -> term)(([([((patina_fmt::display as

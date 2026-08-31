@@ -40,7 +40,8 @@
         io:put_chars([[<<"Area::area(">>,
                        io_lib:format("~ktp", [_self@1_0]),
                        <<")">>]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     erlang:map_get(x, _self@1_0) *
         erlang:map_get(y, _self@1_0).

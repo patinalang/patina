@@ -40,6 +40,7 @@ len(_self@0_0) ->
         io:put_chars([[<<"Pair::len(">>,
                        io_lib:format("~ktp", [_self@0_0]),
                        <<")">>]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     2.

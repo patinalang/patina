@@ -34,5 +34,6 @@ main() ->
                                      [total_area({'Elixir.Patina.Dispatch.Point',
                                                   {}},
                                                  _p@0_0)])]]),
-        io:nl()
+        io:nl(),
+        {}
     end.

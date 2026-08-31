@@ -26,20 +26,23 @@ main() ->
     _n@1_0 = 42,
     begin
         io:put_chars([[<<"hello, ">>, _name@0_0, <<"!">>]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     begin
         io:put_chars([[_name@0_0,
                        <<" = ">>,
                        io_lib:format("~ktp", [_n@1_0])]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     begin
         io:put_chars([[_name@0_0,
                        <<" and ">>,
                        io_lib:format("~ktp", [_n@1_0])]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
-    begin io:put_chars([<<"no ">>]) end,
-    begin io:put_chars([<<"newline">>]) end,
-    begin io:nl() end.
+    begin io:put_chars([<<"no ">>]), {} end,
+    begin io:put_chars([<<"newline">>]), {} end,
+    begin io:nl(), {} end.

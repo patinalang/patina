@@ -31,24 +31,29 @@ main() ->
                            io_lib:format("~ktp", [_second@1_0]),
                            <<", list[2] = ">>,
                            io_lib:format("~ktp", [_third@2_0])]]),
-            io:nl();
+            io:nl(),
+            {};
         [1, _, _third@3_0] ->
             io:put_chars([[<<"list[0] = 1, list[2] = ">>,
                            io_lib:format("~ktp", [_third@3_0]),
                            <<" and list[1] was ignored">>]]),
-            io:nl();
+            io:nl(),
+            {};
         [-1, _second@4_0 | _] ->
             io:put_chars([[<<"list[0] = -1, list[1] = ">>,
                            io_lib:format("~ktp", [_second@4_0]),
                            <<" and all the other ones were ignored">>]]),
-            io:nl();
+            io:nl(),
+            {};
         [3, _second@6_0 | _tail@5_0 = _] ->
             io:put_chars([[<<"list[0] = 3, list[1] = ">>,
                            io_lib:format("~ktp", [_second@6_0]),
                            <<" and the other elements were ">>,
                            io_lib:format("~ktp", [_tail@5_0])]]),
-            io:nl();
+            io:nl(),
+            {};
         _ ->
             io:put_chars([[<<"no list pattern matched">>]]),
-            io:nl()
+            io:nl(),
+            {}
     end.

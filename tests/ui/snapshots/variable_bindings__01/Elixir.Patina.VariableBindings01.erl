@@ -29,17 +29,21 @@ main() ->
     begin
         io:put_chars([[<<"An integer: ">>,
                        io_lib:format("~ktp", [_copied_integer@3_0])]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     begin
         io:put_chars([[<<"A boolean: ">>,
                        io_lib:format("~ktp", [_a_boolean@1_0])]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     begin
         io:put_chars([[<<"Meet the unit value: ">>,
                        io_lib:format("~ktp", [_unit@2_0])]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     __unused_variable@4_0 = 3,
-    _noisy_unused_variable@5_0 = 2.
+    _noisy_unused_variable@5_0 = 2,
+    {}.

@@ -28,5 +28,6 @@ main() ->
     begin
         io:put_chars([[io_lib:format("~ktp",
                                      ['Elixir.Patina.Unbounded.Pair':len(_p@0_0)])]]),
-        io:nl()
+        io:nl(),
+        {}
     end.

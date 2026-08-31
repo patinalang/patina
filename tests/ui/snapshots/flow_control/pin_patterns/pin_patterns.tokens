@@ -650,6 +650,7 @@ Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
 Comma
 Whitespace
 CloseBrace
+Semi
 Whitespace
 CloseBrace
 Whitespace

@@ -24,7 +24,9 @@
 main() ->
     _n@0_0 = 5,
     case _n@0_0 > 4 of
-        true -> _n@0_1 = 4;
+        true ->
+            _n@0_1 = 4,
+            {};
         false ->
             _branch_value@1_0 = {},
             _n@0_1 = _n@0_0,
@@ -32,5 +34,6 @@ main() ->
     end,
     begin
         io:put_chars([[io_lib:format("~ktp", [_n@0_1])]]),
-        io:nl()
+        io:nl(),
+        {}
     end.

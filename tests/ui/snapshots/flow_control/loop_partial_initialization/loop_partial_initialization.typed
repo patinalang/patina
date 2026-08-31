@@ -46,7 +46,7 @@ fn partial_initialization(take_initialized: bool)
 
     (loop {
         (if (take_initialized as bool) {
-            ((value as int) = (10 as int) as ());
+            ((value as int) = (10 as int) as int);
             (break as !);
         } else { (break as !); } as ())
     } as ())

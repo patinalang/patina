@@ -1,0 +1,37 @@
+pub fn assign() -> int { let mut value = 0; value = 42 }
+
+pub fn assign_op() -> int { let mut value = 40; value += 2 }
+
+pub fn chained_assign() -> int {
+    let mut first = 0;
+    let mut second = 0;
+    first = second = 21
+}
+
+fn identity(value: int) -> int { value }
+
+pub fn assign_as_argument() -> int { let mut value = 0; identity(value = 42) }
+
+pub fn assign_as_match_scrutinee() -> int {
+    let mut value = 0;
+    match value = 42 { 42 => value, _ => 0, }
+}
+
+pub fn assign_in_boolean_context() -> bool {
+    let mut value = false;
+    if value = true { value } else { false }
+}
+
+pub fn empty_block() {}
+
+pub fn block_ending_in_let() { let _value = 42; }
+
+pub fn block_ending_in_uninitialized_let() { let _value: int; }
+
+pub fn block_ending_in_let_else(value: int) {
+    let 42 = value else { return; };
+}
+
+pub fn block_ending_in_unit_expr() { (); }
+
+pub fn block_ending_in_assignment() { let mut value = 0; value = 42; }

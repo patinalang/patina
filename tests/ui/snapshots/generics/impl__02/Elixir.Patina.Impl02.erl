@@ -33,5 +33,6 @@ main() ->
                        <<", ">>,
                        io_lib:format("~ktp",
                                      ['Elixir.Patina.Impl02.GenVal':value(_y@1_0)])]]),
-        io:nl()
+        io:nl(),
+        {}
     end.

@@ -29,13 +29,15 @@ main() ->
     begin
         io:put_chars([[<<"Before mutating the binding: ">>,
                        io_lib:format("~ktp", [_mutable_binding@1_0])]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     _mutable_binding@1_1 = _mutable_binding@1_0 + 1,
     begin
         io:put_chars([[<<"After mutating the binding: ">>,
                        io_lib:format("~ktp", [_mutable_binding@1_1])]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     __immutable_binding@0_1 = __immutable_binding@0_0 + 1,
     _my_fun@3_0 = fun () ->
@@ -49,6 +51,8 @@ main() ->
                                              io_lib:format("~ktp",
                                                            [_mutable_binding@1_1]),
                                              <<" + 1">>]]),
-                              io:nl()
+                              io:nl(),
+                              {}
                           end
-                  end.
+                  end,
+    {}.

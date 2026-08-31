@@ -1,4 +1,4 @@
-pub fn closure_loop() {
+pub fn closure_loop() -> int {
     let count = |x, y| {
         let mut i = x;
 
@@ -12,5 +12,5 @@ pub fn closure_loop() {
         i
     };
 
-    count(1, 2);
+    count(1, 2)
 }

@@ -33,6 +33,7 @@ main() ->
     _my_tuple@7_0 = {5, true, -5.04},
     _my_map@8_0 = #{3.14 => <<"pi">>, 0.0 => <<"zero">>},
     _add_ref@9_0 = fun add_floats/2,
-    _add_fn@10_0 = _add_ref@9_0.
+    _add_fn@10_0 = _add_ref@9_0,
+    {}.
 
 add_floats(_a@0_0, _b@1_0) -> _a@0_0 + _b@1_0.

@@ -39,7 +39,7 @@ macro_rules! println {
     {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
 }
 
-pub fn closure_loop() {
+pub fn closure_loop() -> int {
     let count =
         |x, y|
             {
@@ -50,5 +50,5 @@ pub fn closure_loop() {
                 i
             };
 
-    count(1, 2);
+    count(1, 2)
 }

@@ -29,30 +29,37 @@
                 true ->
                     case _n@0_0 rem 15 =:= 0 of
                         true ->
-                            begin io:put_chars([[<<"fizzbuzz">>]]), io:nl() end;
+                            begin
+                                io:put_chars([[<<"fizzbuzz">>]]), io:nl(), {}
+                            end;
                         false ->
                             case _n@0_0 rem 3 =:= 0 of
                                 true ->
                                     begin
-                                        io:put_chars([[<<"fizz">>]]), io:nl()
+                                        io:put_chars([[<<"fizz">>]]),
+                                        io:nl(),
+                                        {}
                                     end;
                                 false ->
                                     case _n@0_0 rem 5 =:= 0 of
                                         true ->
                                             begin
                                                 io:put_chars([[<<"buzz">>]]),
-                                                io:nl()
+                                                io:nl(),
+                                                {}
                                             end;
                                         false ->
                                             begin
                                                 io:put_chars([[io_lib:format("~ktp",
                                                                              [_n@0_0])]]),
-                                                io:nl()
+                                                io:nl(),
+                                                {}
                                             end
                                     end
                             end
                     end,
-                    _n@0_1 = _n@0_0 + 1;
+                    _n@0_1 = _n@0_0 + 1,
+                    {};
                 false ->
                     _branch_value@1_0 = begin
                                             '$patina_marker':break({break,

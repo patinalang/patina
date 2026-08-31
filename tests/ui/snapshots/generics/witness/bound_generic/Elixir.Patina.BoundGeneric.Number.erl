@@ -40,6 +40,7 @@
         io:put_chars([[<<"Bound::b(">>,
                        io_lib:format("~ktp", [_self@1_0]),
                        <<")">>]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     erlang:map_get(n, _self@1_0).

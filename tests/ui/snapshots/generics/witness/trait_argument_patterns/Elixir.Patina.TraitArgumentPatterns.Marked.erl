@@ -43,6 +43,7 @@
         io:put_chars([[<<"Marker::value(">>,
                        io_lib:format("~ktp", [_self@1_0]),
                        <<")">>]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     erlang:map_get(value, _self@1_0).

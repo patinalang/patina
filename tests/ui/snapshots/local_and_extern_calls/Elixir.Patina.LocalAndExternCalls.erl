@@ -39,5 +39,6 @@ main() ->
     begin
         io:put_chars([[io_lib:format("~ktp",
                                      [erlang:map_get(value, _s@0_0)])]]),
-        io:nl()
+        io:nl(),
+        {}
     end.

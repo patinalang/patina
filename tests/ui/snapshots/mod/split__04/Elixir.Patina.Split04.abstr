@@ -77,4 +77,5 @@
               default,default}]},
            {nil,{6,5}}},
           {nil,{6,5}}}]},
-       {call,{6,5},{remote,{6,5},{atom,{6,5},io},{atom,{6,5},nl}},[]}]}]}]}]
+       {call,{6,5},{remote,{6,5},{atom,{6,5},io},{atom,{6,5},nl}},[]},
+       {tuple,{6,5},[]}]}]}]}]

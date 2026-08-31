@@ -77,7 +77,8 @@
               default,default}]},
            {nil,{2,5}}},
           {nil,{2,5}}}]},
-       {call,{2,5},{remote,{2,5},{atom,{2,5},io},{atom,{2,5},nl}},[]}]}]}]},
+       {call,{2,5},{remote,{2,5},{atom,{2,5},io},{atom,{2,5},nl}},[]},
+       {tuple,{2,5},[]}]}]}]},
  {function,
   {6,1},
   private_function,0,
@@ -101,4 +102,5 @@
               default,default}]},
            {nil,{7,5}}},
           {nil,{7,5}}}]},
-       {call,{7,5},{remote,{7,5},{atom,{7,5},io},{atom,{7,5},nl}},[]}]}]}]}]
+       {call,{7,5},{remote,{7,5},{atom,{7,5},io},{atom,{7,5},nl}},[]},
+       {tuple,{7,5},[]}]}]}]}]

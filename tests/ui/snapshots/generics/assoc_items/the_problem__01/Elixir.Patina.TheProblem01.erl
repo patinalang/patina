@@ -61,7 +61,8 @@ main() ->
                                                                                                                 _container@2_0,
                                                                                                                 _number_1@0_0,
                                                                                                                 _number_2@1_0)])]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     begin
         io:put_chars([[<<"First number: ">>,
@@ -73,7 +74,8 @@ main() ->
                                                                                                              {'Elixir.Patina.Core.int',
                                                                                                               {}},
                                                                                                              _container@2_0)])]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     begin
         io:put_chars([[<<"Last number: ">>,
@@ -85,7 +87,8 @@ main() ->
                                                                                                             {'Elixir.Patina.Core.int',
                                                                                                              {}},
                                                                                                             _container@2_0)])]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     begin
         io:put_chars([[<<"The difference is: ">>,
@@ -95,5 +98,6 @@ main() ->
                                                  {'Elixir.Patina.TheProblem01.Container',
                                                   {}},
                                                  _container@2_0)])]]),
-        io:nl()
+        io:nl(),
+        {}
     end.

@@ -28,7 +28,8 @@ main() ->
     begin
         io:put_chars([[<<"Tell me about ">>,
                        io_lib:format("~ktp", [_triple@0_0])]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     case _triple@0_0 of
         {0, _y@1_0, _z@2_0} ->
@@ -36,18 +37,23 @@ main() ->
                            io_lib:format("~ktp", [_y@1_0]),
                            <<", and `z` is ">>,
                            io_lib:format("~ktp", [_z@2_0])]]),
-            io:nl();
+            io:nl(),
+            {};
         {1, _, _} ->
             io:put_chars([[<<"First is `1` and the rest doesn't matter">>]]),
-            io:nl();
+            io:nl(),
+            {};
         {_, _, 2} ->
             io:put_chars([[<<"last is `2` and the rest doesn't matter">>]]),
-            io:nl();
+            io:nl(),
+            {};
         {3, _, 4} ->
             io:put_chars([[<<"First is `3`, last is `4`, and the rest "
                              "doesn't matter">>]]),
-            io:nl();
+            io:nl(),
+            {};
         _ ->
             io:put_chars([[<<"It doesn't matter what they are">>]]),
-            io:nl()
+            io:nl(),
+            {}
     end.

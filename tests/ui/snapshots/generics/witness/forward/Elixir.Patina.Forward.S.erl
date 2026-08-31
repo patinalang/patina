@@ -37,5 +37,6 @@
         io:put_chars([[<<"Tr::method(">>,
                        io_lib:format("~ktp", [_self@1_0]),
                        <<")">>]]),
-        io:nl()
+        io:nl(),
+        {}
     end.

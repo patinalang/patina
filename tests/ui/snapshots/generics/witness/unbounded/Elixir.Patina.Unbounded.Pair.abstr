@@ -149,5 +149,6 @@
               [{bin_element,{7,9},{string,{7,9},")"},default,default}]},
              {nil,{7,9}}}}},
           {nil,{7,9}}}]},
-       {call,{7,9},{remote,{7,9},{atom,{7,9},io},{atom,{7,9},nl}},[]}]},
+       {call,{7,9},{remote,{7,9},{atom,{7,9},io},{atom,{7,9},nl}},[]},
+       {tuple,{7,9},[]}]},
      {integer,{8,9},2}]}]}]

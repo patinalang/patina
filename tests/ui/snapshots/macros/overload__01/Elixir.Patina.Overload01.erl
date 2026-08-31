@@ -30,7 +30,8 @@ main() ->
                        <<" is ">>,
                        io_lib:format("~ktp",
                                      [1 + 1 =:= 2 andalso 2 * 2 =:= 4])]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     begin
         io:put_chars([[io_lib:format("~ktp", [<<"true">>]),
@@ -38,5 +39,6 @@ main() ->
                        io_lib:format("~ktp", [<<"false">>]),
                        <<" is ">>,
                        io_lib:format("~ktp", [true orelse false])]]),
-        io:nl()
+        io:nl(),
+        {}
     end.

@@ -53,11 +53,11 @@ fn main() ({
     ((inferred_type as float) =
         ((add_floats as
                 fn(float, float) -> float {add_floats})((12.0 as float),
-            (3.14 as float)) as float) as ());
+            (3.14 as float)) as float) as float);
 
     // A mutable variable's value can be changed - rebound to a new value.
     let mut mutable = (12 as int); // Mutable `int`
-    ((mutable as int) = (21 as int) as ());
+    ((mutable as int) = (21 as int) as int);
 
     // Error! The type of a variable can't be changed.
     // mutable = true;

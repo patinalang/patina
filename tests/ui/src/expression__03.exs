@@ -8,7 +8,7 @@ defmodule Expression03Test do
     assert """
            x is 5
            y is 155
-           z is 10
+           z is {}
            """ == capture_io(fn -> Patina.Expression03.main() end)
   end
 end

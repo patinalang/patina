@@ -48,6 +48,7 @@
                        <<", ">>,
                        io_lib:format("~ktp", [_b@5_0]),
                        <<")">>]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     true.

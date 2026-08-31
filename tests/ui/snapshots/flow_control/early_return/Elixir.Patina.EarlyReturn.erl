@@ -33,7 +33,8 @@
 mark(_value@0_0) ->
     begin
         io:put_chars([[io_lib:format("~ktp", [_value@0_0])]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     _value@0_0.
 
@@ -47,14 +48,19 @@ match_value(_choice@0_0) ->
 
 is_negative(_x@0_0) ->
     case _x@0_0 >= 0 of
-        true -> '$patina_marker':return(false);
+        true ->
+            '$patina_marker':return(false),
+            {};
         false -> {}
     end,
-    '$patina_marker':return(true).
+    '$patina_marker':return(true),
+    {}.
 
 is_negative_implicit(_x@0_0) ->
     case _x@0_0 >= 0 of
-        true -> '$patina_marker':return(false);
+        true ->
+            '$patina_marker':return(false),
+            {};
         false -> {}
     end,
     true.
@@ -62,7 +68,9 @@ is_negative_implicit(_x@0_0) ->
 closure_value(_stop@0_0) ->
     __closure@1_0 = fun () ->
                             case _stop@0_0 of
-                                true -> '$patina_marker':return(4);
+                                true ->
+                                    '$patina_marker':return(4),
+                                    {};
                                 false -> {}
                             end,
                             5
@@ -73,7 +81,9 @@ expression_value(_stop@0_0) ->
     mark(1) +
         begin
             case _stop@0_0 of
-                true -> '$patina_marker':return(mark(2));
+                true ->
+                    '$patina_marker':return(mark(2)),
+                    {};
                 false -> {}
             end,
             mark(3)
@@ -88,7 +98,9 @@ match_continued() ->
 match_scrutinee_value(_stop@0_0) ->
     case begin
              case _stop@0_0 of
-                 true -> '$patina_marker':return(40);
+                 true ->
+                     '$patina_marker':return(40),
+                     {};
                  false -> {}
              end,
              'Elixir.Patina.EarlyReturn.Choice.Continue'
@@ -101,12 +113,16 @@ match_scrutinee_value(_stop@0_0) ->
 nested_value(_x@0_0) ->
     _result@1_0 = begin
                       case _x@0_0 =:= 0 of
-                          true -> '$patina_marker':return(10);
+                          true ->
+                              '$patina_marker':return(10),
+                              {};
                           false -> {}
                       end,
                       begin
                           case _x@0_0 =:= 1 of
-                              true -> '$patina_marker':return(20);
+                              true ->
+                                  '$patina_marker':return(20),
+                                  {};
                               false -> {}
                           end,
                           30
@@ -117,7 +133,9 @@ nested_value(_x@0_0) ->
 if_condition_value(_stop@0_0) ->
     case begin
              case _stop@0_0 of
-                 true -> '$patina_marker':return(10);
+                 true ->
+                     '$patina_marker':return(10),
+                     {};
                  false -> {}
              end,
              true

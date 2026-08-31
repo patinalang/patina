@@ -54,7 +54,8 @@ if_let_pin(_actual@0_0, _expected@1_0) ->
             case _current@2_0 of
                 _expected@1_0 ->
                     _count@3_1 = _count@3_0 + 1,
-                    _current@2_1 = _current@2_0 + 1;
+                    _current@2_1 = _current@2_0 + 1,
+                    {};
                 _ ->
                     _branch_value@4_0 = begin
                                             '$patina_marker':break({break,
@@ -87,7 +88,9 @@ while_let_pin(_start@0_0, _expected@1_0) ->
 let_else_pin(_actual@0_0, _expected@1_0) ->
     case _actual@0_0 of
         _expected@1_0 -> {};
-        _ -> '$patina_marker':return(false)
+        _ ->
+            '$patina_marker':return(false),
+            {}
     end,
     true.
 
@@ -141,7 +144,8 @@ mutable_closure_pin(_actual@0_0, _initial@1_0) ->
                     _expected@1_1 = _expected@1_0,
                     _branch_value@2_0;
                 _ -> _expected@1_1 = _expected@1_0 + 1
-            end
+            end,
+            {}
         end,
     '$patina_marker':continue(_target@0_0, _expected@1_1).
 

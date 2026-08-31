@@ -81,7 +81,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             }
         });
 
-        self.tcx.types.unit
+        lhs_ty
     }
 
     /// Checks a potentially overloaded binary operator.

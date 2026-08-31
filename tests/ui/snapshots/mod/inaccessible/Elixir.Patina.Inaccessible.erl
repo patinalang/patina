@@ -24,5 +24,6 @@
 public_function() ->
     begin
         io:put_chars([[<<"called `MyMod::Inaccessible::public_function()`">>]]),
-        io:nl()
+        io:nl(),
+        {}
     end.

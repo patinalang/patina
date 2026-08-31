@@ -48,9 +48,10 @@ latest_version_wins(_take_then@0_0) ->
     case _take_then@0_0 of
         true ->
             _value@1_1 = 2,
-            _value@1_2 = 3;
+            _value@1_2 = 3,
+            {};
         false ->
-            _branch_value@2_0 = begin _value@1_1 = 4 end,
+            _branch_value@2_0 = begin _value@1_1 = 4, {} end,
             _value@1_2 = _value@1_1,
             _branch_value@2_0
     end,
@@ -58,17 +59,23 @@ latest_version_wins(_take_then@0_0) ->
 
 initialize_in_branches(_take_then@0_0) ->
     case _take_then@0_0 of
-        true -> _value@1_1 = 10;
-        false -> _value@1_1 = 20
+        true ->
+            _value@1_1 = 10,
+            {};
+        false ->
+            _value@1_1 = 20,
+            {}
     end,
     _value@1_1.
 
 initialize_or_return(_take_then@0_0) ->
     case _take_then@0_0 of
-        true -> _value@1_1 = 30;
+        true ->
+            _value@1_1 = 30,
+            {};
         false ->
             _branch_value@2_0 = begin
-                                    '$patina_marker':return(40)
+                                    '$patina_marker':return(40), {}
                                 end,
             _value@1_1 = {},
             _branch_value@2_0
@@ -114,7 +121,8 @@ nested_diverging_rebind(_take_outer@0_0,
             case _take_inner@1_0 of
                 true ->
                     _value@2_1 = 1,
-                    '$patina_marker':return(_value@2_1);
+                    '$patina_marker':return(_value@2_1),
+                    {};
                 false ->
                     _branch_value@3_0 = begin {} end,
                     _value@2_1 = _value@2_0,

@@ -26,7 +26,8 @@ foo() ->
         io:put_chars([[<<"You called ">>,
                        io_lib:format("~ktp", [<<"foo">>]),
                        <<"()">>]]),
-        io:nl()
+        io:nl(),
+        {}
     end.
 
 bar() ->
@@ -34,7 +35,8 @@ bar() ->
         io:put_chars([[<<"You called ">>,
                        io_lib:format("~ktp", [<<"bar">>]),
                        <<"()">>]]),
-        io:nl()
+        io:nl(),
+        {}
     end.
 
 main() ->
@@ -44,7 +46,8 @@ main() ->
         io:put_chars([[io_lib:format("~ktp", [<<"1 + 1">>]),
                        <<" = ">>,
                        io_lib:format("~ktp", [1 + 1])]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     begin
         io:put_chars([[io_lib:format("~ktp",
@@ -55,5 +58,6 @@ main() ->
                                           _x@0_1 = 1,
                                           _x@0_1 * _x@0_1 + 2 * _x@0_1 - 1
                                       end])]]),
-        io:nl()
+        io:nl(),
+        {}
     end.

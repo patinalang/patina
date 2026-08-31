@@ -34,5 +34,6 @@ main() ->
                                      [compare({'Elixir.Patina.Core.int', {}},
                                               1,
                                               1)])]]),
-        io:nl()
+        io:nl(),
+        {}
     end.

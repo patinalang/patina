@@ -1262,7 +1262,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     }
 
     /// Type check assignment expression `expr` of form `lhs = rhs`.
-    /// The expected type is `()` and is passed to the function for the purposes of diagnostics.
     fn check_expr_assign(
         &self,
         expr: &'tcx hir::Expr<'tcx>,
@@ -1272,11 +1271,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         span: Span,
     ) -> Ty<'tcx> {
         let expected_ty = expected.only_has_type(self);
-        if expected_ty == Some(self.tcx.types.bool) {
-            let guar = self.expr_assign_expected_bool_error(expr, lhs, rhs, span);
-            return Ty::new_error(self.tcx, guar);
-        }
-
         let lhs_ty = self.check_expr_with_needs(lhs, Needs::MutPlace);
 
         let suggest_deref_binop = |err: &mut Diag<'_>, rhs_ty: Ty<'tcx>| {
@@ -1320,28 +1314,30 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
         self.require_type_is_sized(lhs_ty, lhs.span, ObligationCauseCode::AssignmentLhsSized);
 
+        if expected_ty == Some(self.tcx.types.bool) {
+            self.expr_assign_expected_bool_warning(expr, lhs, rhs, span, lhs_ty, rhs_ty);
+        }
+
         if let Err(guar) = (lhs_ty, rhs_ty).error_reported() {
             Ty::new_error(self.tcx, guar)
         } else {
-            self.tcx.types.unit
+            lhs_ty
         }
     }
 
-    /// The expected type is `bool` but this will result in `()` so we can reasonably
-    /// say that the user intended to write `lhs == rhs` instead of `lhs = rhs`.
-    /// The likely cause of this is `if foo = bar { .. }`.
-    fn expr_assign_expected_bool_error(
+    /// An assignment in a boolean context is valid when its LHS is boolean, but it may be a typo
+    /// for equality or pattern matching, so retain the assignment-specific diagnostic as a warning.
+    fn expr_assign_expected_bool_warning(
         &self,
         expr: &'tcx hir::Expr<'tcx>,
         lhs: &'tcx hir::Expr<'tcx>,
         rhs: &'tcx hir::Expr<'tcx>,
         span: Span,
-    ) -> ErrorGuaranteed {
-        let actual_ty = self.tcx.types.unit;
-        let expected_ty = self.tcx.types.bool;
-        let mut err = self.demand_suptype_diag(expr.span, expected_ty, actual_ty).unwrap_err();
-        let lhs_ty = self.check_expr(lhs);
-        let rhs_ty = self.check_expr(rhs);
+        lhs_ty: Ty<'tcx>,
+        rhs_ty: Ty<'tcx>,
+    ) {
+        let mut warning =
+            self.dcx().struct_span_warn(expr.span, "assignment used in a boolean context");
         let refs_can_coerce = |lhs: Ty<'tcx>, rhs: Ty<'tcx>| {
             let lhs = Ty::new_imm_ref(self.tcx, self.tcx.lifetimes.re_erased, lhs.peel_refs());
             let rhs = Ty::new_imm_ref(self.tcx, self.tcx.lifetimes.re_erased, rhs.peel_refs());
@@ -1387,7 +1383,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             if let hir::Node::Expr(hir::Expr { kind: ExprKind::If { .. }, .. }) =
                 self.tcx.parent_hir_node(expr.hir_id)
             {
-                err.span_suggestion_verbose(
+                warning.span_suggestion_verbose(
                     expr.span.shrink_to_lo(),
                     "you might have meant to use pattern matching",
                     "let ",
@@ -1396,7 +1392,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             };
         }
         if eq {
-            err.span_suggestion_verbose(
+            warning.span_suggestion_verbose(
                 span.shrink_to_hi(),
                 "you might have meant to compare for equality",
                 '=',
@@ -1404,9 +1400,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             );
         }
 
-        // If the assignment expression itself is ill-formed, don't
-        // bother emitting another error
-        err.emit_unless_delay(lhs_ty.references_error() || rhs_ty.references_error())
+        if !lhs_ty.references_error() && !rhs_ty.references_error() {
+            warning.emit();
+        }
     }
 
     pub(super) fn check_expr_let(

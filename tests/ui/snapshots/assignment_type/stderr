@@ -1,0 +1,13 @@
+warning: assignment used in a boolean context
+  --> tests/ui/src/assignment_type.pt:36:8
+   |
+LL |     if value = true { value } else { false }
+   |        ^^^^^^^^^^^^
+   |
+help: you might have meant to compare for equality
+   |
+LL |     if value == true { value } else { false }
+   |               +
+
+warning: 1 warning emitted
+

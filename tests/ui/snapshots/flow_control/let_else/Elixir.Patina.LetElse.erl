@@ -28,7 +28,7 @@ tuple_pattern() ->
         {20, _second@0_1} -> {};
         _ ->
             _branch_value@1_0 = begin
-                                    '$patina_marker':return(0)
+                                    '$patina_marker':return(0), {}
                                 end,
             _second@0_1 = {},
             _branch_value@1_0
@@ -40,7 +40,7 @@ list_pattern(_values@0_0) ->
         [_first@1_1, _second@2_1 | _] -> {};
         _ ->
             _branch_value@3_0 = begin
-                                    '$patina_marker':return(0)
+                                    '$patina_marker':return(0), {}
                                 end,
             _first@1_1 = {},
             _second@2_1 = {},

@@ -39,5 +39,6 @@ main() ->
                                      [call({'Elixir.Patina.BoundGeneric.Number',
                                             {}},
                                            _h@0_0)])]]),
-        io:nl()
+        io:nl(),
+        {}
     end.

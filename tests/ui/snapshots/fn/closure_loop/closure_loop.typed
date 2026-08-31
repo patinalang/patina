@@ -39,14 +39,16 @@ macro_rules! println {
     {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
 }
 
-fn closure_loop() ({
+fn closure_loop()
+    ->
+        int ({
     let count =
         (|x, y|
             ({
                 let mut i = (x as int);
 
                 (loop {
-                    ((i as int) += (y as int) as ());
+                    ((i as int) += (y as int) as int);
                     (if ((i as int) > (3 as int) as bool) { (break as !); } as
                         ())
                 } as ())
@@ -57,5 +59,5 @@ fn closure_loop() ({
 
     ((count as
             {closure@tests/ui/src/fn/closure_loop.pt:2:17: 2:23})((1 as int),
-        (2 as int)) as int);
-} as ())
+        (2 as int)) as int)
+} as int)

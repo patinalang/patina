@@ -38,7 +38,8 @@
         io:put_chars([[<<"Priv::p(">>,
                        io_lib:format("~ktp", [_self@1_0]),
                        <<")">>]]),
-        io:nl()
+        io:nl(),
+        {}
     end.
 
 q(_self@0_0) ->

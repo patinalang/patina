@@ -96,10 +96,8 @@
                                       default,default}]},
                              {nil,{9,5}}},
                          {nil,{9,5}}}]},
-                {call,
-                    {9,5},
-                    {remote,{9,5},{atom,{9,5},io},{atom,{9,5},nl}},
-                    []}]}]}]},
+                {call,{9,5},{remote,{9,5},{atom,{9,5},io},{atom,{9,5},nl}},[]},
+                {tuple,{9,5},[]}]}]}]},
  {function,
      {12,1},
      main,0,
@@ -127,4 +125,5 @@
                    {19,5},
                    {atom,{19,5},'Elixir.Patina.Split01.MyMod.Nested'},
                    {atom,{19,5},function}},
-               []}]}]}]
+               []},
+           {tuple,{12,15},[]}]}]}]

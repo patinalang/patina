@@ -28,5 +28,6 @@ main() ->
     begin
         io:put_chars([[<<"This function returns and you can see "
                          "this line.">>]]),
-        io:nl()
+        io:nl(),
+        {}
     end.

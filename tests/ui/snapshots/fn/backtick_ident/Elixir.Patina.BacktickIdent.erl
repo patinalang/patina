@@ -29,7 +29,7 @@
 'exists?'(_x@0_0) -> _x@0_0 > 0.
 
 'save!'() ->
-    begin io:put_chars([[<<"saved!">>]]), io:nl() end.
+    begin io:put_chars([[<<"saved!">>]]), io:nl(), {} end.
 
 'a{b}'() -> 1.
 
@@ -45,34 +45,45 @@ main() ->
     case not
              'Elixir.Patina.BacktickIdent.S':'valid?'(_s@0_0)
         of
-        true -> '$patina_marker':return({});
+        true ->
+            '$patina_marker':return({}),
+            {};
         false -> {}
     end,
     case not
              'Elixir.Patina.BacktickIdent.S':'valid?'(_s@0_0)
         of
-        true -> '$patina_marker':return({});
+        true ->
+            '$patina_marker':return({}),
+            {};
         false -> {}
     end,
     case not
              'Elixir.Patina.BacktickIdent.S':check_via_self(_s@0_0)
         of
-        true -> '$patina_marker':return({});
+        true ->
+            '$patina_marker':return({}),
+            {};
         false -> {}
     end,
     case not 'exists?'(1) of
-        true -> '$patina_marker':return({});
+        true ->
+            '$patina_marker':return({}),
+            {};
         false -> {}
     end,
     'exists?'(1),
     'save!'(),
-    begin io:put_chars([[<<"`a{b}`">>]]), io:nl() end,
+    begin io:put_chars([[<<"`a{b}`">>]]), io:nl(), {} end,
     begin
         io:put_chars([[io_lib:format("~ktp", [_value?@1_0])]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     begin
         io:put_chars([[io_lib:format("~ktp", [_type@2_0])]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
-    _ = 'a{b}'().
+    _ = 'a{b}'(),
+    {}.

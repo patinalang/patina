@@ -29,4 +29,5 @@ main() ->
                                                _years@0_0),
     #{'__struct__' := 'Elixir.Patina.NewTypes02.Years',
       '0' := _years_as_primitive_2@2_0} =
-        _years@0_0.
+        _years@0_0,
+    {}.

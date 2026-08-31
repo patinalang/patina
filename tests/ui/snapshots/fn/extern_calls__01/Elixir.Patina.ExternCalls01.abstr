@@ -93,4 +93,5 @@
                    {atom,{21,5},'Elixir.Patina.ExternCalls01'},
                    {atom,{21,5},public_function}},
                []},
-           {call,{25,5},{atom,{25,5},priv_function},[]}]}]}]
+           {call,{25,5},{atom,{25,5},priv_function},[]},
+           {tuple,{12,15},[]}]}]}]

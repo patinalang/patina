@@ -1,0 +1,108 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+fn assign()
+    ->
+        int ({
+    let mut value = (0 as int);
+    ((value as int) = (42 as int) as int)
+} as int)
+
+fn assign_op()
+    ->
+        int ({
+    let mut value = (40 as int);
+    ((value as int) += (2 as int) as int)
+} as int)
+
+fn chained_assign()
+    ->
+        int ({
+    let mut first = (0 as int);
+    let mut second = (0 as int);
+    ((first as int) = ((second as int) = (21 as int) as int) as int)
+} as int)
+
+fn identity(value: int) -> int ({ (value as int) } as int)
+
+fn assign_as_argument()
+    ->
+        int ({
+    let mut value = (0 as int);
+    ((identity as
+            fn(int) -> int {identity})(((value as int) = (42 as int) as int))
+        as int)
+} as int)
+
+fn assign_as_match_scrutinee()
+    ->
+        int ({
+    let mut value = (0 as int);
+    (match ((value as int) = (42 as int) as int) {
+        42 => (value as int),
+        _ => (0 as int),
+    } as int)
+} as int)
+
+fn assign_in_boolean_context()
+    ->
+        bool ({
+    let mut value = (false as bool);
+    (if ((value as bool) = (true as bool) as bool) {
+        (value as bool)
+    } else { (false as bool) } as bool)
+} as bool)
+
+fn empty_block() ({ } as ())
+
+fn block_ending_in_let() ({ let _value = (42 as int); } as ())
+
+fn block_ending_in_uninitialized_let() ({ let _value: int; } as ())
+
+fn block_ending_in_let_else(value:
+        int) ({ let 42 = (value as int) else { (return as !); }; } as ())
+
+fn block_ending_in_unit_expr() ({ (() as ()); } as ())
+
+fn block_ending_in_assignment() ({
+    let mut value = (0 as int);
+    ((value as int) = (42 as int) as int);
+} as ())

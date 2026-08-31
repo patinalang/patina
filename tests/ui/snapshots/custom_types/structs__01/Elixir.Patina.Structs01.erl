@@ -30,7 +30,8 @@ main() ->
                                                            age := _age@1_0},
     begin
         io:put_chars([[io_lib:format("~ktp", [_peter@2_0])]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     _point@3_0 =
         ('Elixir.Patina.Structs01.Point':'__struct__'())#{x :=
@@ -46,7 +47,8 @@ main() ->
                        <<", ">>,
                        io_lib:format("~ktp", [erlang:map_get(y, _point@3_0)]),
                        <<")">>]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     _bottom_right@5_0 = _another_point@4_0#{x := 1.03e+1},
     begin
@@ -57,7 +59,8 @@ main() ->
                        io_lib:format("~ktp",
                                      [erlang:map_get(y, _bottom_right@5_0)]),
                        <<")">>]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     #{'__struct__' := 'Elixir.Patina.Structs01.Point',
       x := _left_edge@6_0, y := _top_edge@7_0} =
@@ -85,7 +88,8 @@ main() ->
                        <<" and ">>,
                        io_lib:format("~ktp",
                                      [erlang:map_get('1', _pair@10_0)])]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     #{'__struct__' := 'Elixir.Patina.Structs01.Pair',
       '0' := _integer@11_0, '1' := _decimal@12_0} =
@@ -95,5 +99,6 @@ main() ->
                        io_lib:format("~ktp", [_integer@11_0]),
                        <<" and ">>,
                        io_lib:format("~ktp", [_decimal@12_0])]]),
-        io:nl()
+        io:nl(),
+        {}
     end.

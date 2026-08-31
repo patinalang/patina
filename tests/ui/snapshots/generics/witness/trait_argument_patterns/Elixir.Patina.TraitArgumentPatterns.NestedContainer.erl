@@ -50,6 +50,7 @@
                        <<", ">>,
                        io_lib:format("~ktp", [_wrapped@6_0]),
                        <<")">>]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     true.

@@ -27,19 +27,22 @@ main() ->
         true ->
             begin
                 io:put_chars([io_lib:format("~ktp", [_n@0_0]),
-                              <<" is negative">>])
+                              <<" is negative">>]),
+                {}
             end;
         false ->
             case _n@0_0 > 0 of
                 true ->
                     begin
                         io:put_chars([io_lib:format("~ktp", [_n@0_0]),
-                                      <<" is positive">>])
+                                      <<" is positive">>]),
+                        {}
                     end;
                 false ->
                     begin
                         io:put_chars([io_lib:format("~ktp", [_n@0_0]),
-                                      <<" is zero">>])
+                                      <<" is zero">>]),
+                        {}
                     end
             end
     end,
@@ -47,13 +50,15 @@ main() ->
                      true ->
                          begin
                              io:put_chars([[<<", and is a small number, increase ten-fold">>]]),
-                             io:nl()
+                             io:nl(),
+                             {}
                          end,
                          10 * _n@0_0;
                      false ->
                          begin
                              io:put_chars([[<<", and is a big number, halve the number">>]]),
-                             io:nl()
+                             io:nl(),
+                             {}
                          end,
                          _n@0_0 div 2
                  end,
@@ -61,5 +66,6 @@ main() ->
         io:put_chars([[io_lib:format("~ktp", [_n@0_0]),
                        <<" -> ">>,
                        io_lib:format("~ktp", [_big_n@1_0])]]),
-        io:nl()
+        io:nl(),
+        {}
     end.

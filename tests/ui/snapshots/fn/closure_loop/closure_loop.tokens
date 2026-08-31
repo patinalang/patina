@@ -6,6 +6,11 @@ Ident
 OpenParen
 CloseParen
 Whitespace
+Minus
+Gt
+Whitespace
+Ident
+Whitespace
 OpenBrace
 Whitespace
 Ident
@@ -75,7 +80,6 @@ Comma
 Whitespace
 Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
 CloseParen
-Semi
 Whitespace
 CloseBrace
 Whitespace

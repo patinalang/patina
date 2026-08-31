@@ -27,12 +27,16 @@ main() ->
     _c@2_0 = #'Elixir.Patina.IfLet03.Foo':'Qux'{'0' = 100},
     case _a@0_0 of
         'Elixir.Patina.IfLet03.Foo.Bar' ->
-            begin io:put_chars([[<<"a is foobar">>]]), io:nl() end;
+            begin
+                io:put_chars([[<<"a is foobar">>]]), io:nl(), {}
+            end;
         _ -> {}
     end,
     case _b@1_0 of
         'Elixir.Patina.IfLet03.Foo.Bar' ->
-            begin io:put_chars([[<<"b is foobar">>]]), io:nl() end;
+            begin
+                io:put_chars([[<<"b is foobar">>]]), io:nl(), {}
+            end;
         _ -> {}
     end,
     case _c@2_0 of
@@ -40,7 +44,8 @@ main() ->
             begin
                 io:put_chars([[<<"c is ">>,
                                io_lib:format("~ktp", [_value@3_0])]]),
-                io:nl()
+                io:nl(),
+                {}
             end;
         _ -> {}
     end,
@@ -48,7 +53,7 @@ main() ->
         #'Elixir.Patina.IfLet03.Foo':'Qux'{'0' =
                                                _value@4_0 = 100} ->
             begin
-                io:put_chars([[<<"c is one hundred">>]]), io:nl()
+                io:put_chars([[<<"c is one hundred">>]]), io:nl(), {}
             end;
         _ -> {}
     end.

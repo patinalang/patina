@@ -48,7 +48,8 @@
                        <<", ">>,
                        io_lib:format("~ktp", [_value@5_0]),
                        <<")">>]]),
-        io:nl()
+        io:nl(),
+        {}
     end,
     (erlang:element(1,
                     _T@0_0)):'TraitArgumentPatterns::Marker::value'(_T@0_0,

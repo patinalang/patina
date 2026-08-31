@@ -71,7 +71,7 @@ pub fn loop_rebound_pin(target: int) -> int {
         match target {
             ^expected => break expected,
             _ => expected += 1,
-        }
+        };
     }
 }
 
