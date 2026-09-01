@@ -41,6 +41,7 @@ impl AttributeKind {
             DocComment { .. } => Yes,
             EiiDeclaration(_) => Yes,
             EiiImpls(..) => No,
+            ErlModule(..) => Yes,
             ExportName { .. } => Yes,
             ExportStable => No,
             ExternCall(..) => No,

@@ -479,6 +479,10 @@ fn erl_fn_name(tcx: TyCtxt<'_>, def_id: DefId) -> Symbol {
 fn erl_module_name(tcx: TyCtxt<'_>, module: ErlModuleId) -> Symbol {
     match module {
         ErlModuleId::Mod(def_id) | ErlModuleId::Adt(def_id) => {
+            if let Some(name) = rustc_hir::find_attr!(tcx, def_id, ErlModule(name, _) => *name) {
+                return name;
+            }
+
             let path = tcx.def_path(def_id);
 
             let mut segments = SmallVec::<[String; 6]>::from_iter([

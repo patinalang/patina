@@ -44,6 +44,7 @@ pub(crate) mod deprecation;
 pub(crate) mod diagnostic;
 pub(crate) mod doc;
 pub(crate) mod dummy;
+pub(crate) mod erl_module;
 pub(crate) mod extern_call;
 pub(crate) mod inline;
 pub(crate) mod instruction_set;

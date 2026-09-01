@@ -322,6 +322,7 @@ pub static BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
 
     // Modules, prelude, and resolution:
     ungated!(path),
+    ungated!(module),
     ungated!(no_std),
     ungated!(no_implicit_prelude),
     ungated!(non_exhaustive),

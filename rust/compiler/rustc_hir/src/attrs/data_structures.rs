@@ -1028,6 +1028,9 @@ pub enum AttributeKind {
     /// Represents `#[export_stable]`.
     ExportStable,
 
+    /// Represents `#[module = "..."]`.
+    ErlModule(Symbol, Span),
+
     /// Represents `#[extern_call]`.
     ExternCall(Span),
 

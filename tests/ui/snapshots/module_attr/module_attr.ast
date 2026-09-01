@@ -1,0 +1,27 @@
+#![allow(dead_code)]
+
+#[module = "Elixir.ModuleAttr.Person"]
+struct Person {
+    name: str,
+}
+
+#[module = "module_attr_web_event"]
+enum WebEvent {
+    Click {
+        x: int,
+        y: int,
+    },
+}
+
+#[module = "module_attr_helpers"]
+mod Helpers {
+    pub fn answer() -> int { 42 }
+}
+
+#[module = "future_trait_module"]
+trait Named { }
+
+pub fn main() {
+    let _person = Person { name: "Patina" };
+    let _event = WebEvent::Click { x: 10, y: 20 };
+}

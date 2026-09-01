@@ -34,6 +34,7 @@ use crate::attributes::diagnostic::on_unknown::*;
 use crate::attributes::diagnostic::on_unmatch_args::*;
 use crate::attributes::doc::*;
 use crate::attributes::dummy::*;
+use crate::attributes::erl_module::*;
 use crate::attributes::extern_call::*;
 use crate::attributes::inline::*;
 use crate::attributes::instruction_set::*;
@@ -177,6 +178,7 @@ attribute_parsers!(
         Single<CustomMirParser>,
         Single<DeprecatedParser>,
         Single<DoNotRecommendParser>,
+        Single<ErlModuleParser>,
         Single<ExportNameParser>,
         Single<IgnoreParser>,
         Single<InlineParser>,
