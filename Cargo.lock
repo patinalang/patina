@@ -1945,6 +1945,7 @@ name = "rustc_middle"
 version = "0.0.0"
 dependencies = [
  "bitflags",
+ "convert_case",
  "either",
  "gsgdt",
  "parking_lot",

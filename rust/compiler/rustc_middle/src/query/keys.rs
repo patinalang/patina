@@ -11,6 +11,7 @@ use rustc_hir::hir_id::OwnerId;
 use rustc_span::{DUMMY_SP, Ident, LocalExpnId, Span, Symbol};
 
 use crate::dep_graph::DepNodeIndex;
+use crate::erl::ErlModuleId;
 use crate::infer::canonical::CanonicalQueryInput;
 use crate::mono::CollectionMode;
 use crate::query::{DefIdCache, DefaultCache, SingleCache, VecCache};
@@ -58,6 +59,26 @@ impl QueryKey for () {
 
     fn default_span(&self, _: TyCtxt<'_>) -> Span {
         DUMMY_SP
+    }
+}
+
+impl QueryKey for ErlModuleId {
+    fn default_span(&self, tcx: TyCtxt<'_>) -> Span {
+        match *self {
+            ErlModuleId::Mod(def_id) | ErlModuleId::Adt(def_id) | ErlModuleId::Extern(def_id) => {
+                tcx.def_span(def_id)
+            }
+            ErlModuleId::Prim(_) => DUMMY_SP,
+        }
+    }
+
+    fn key_as_def_id(&self) -> Option<DefId> {
+        match *self {
+            ErlModuleId::Mod(def_id) | ErlModuleId::Adt(def_id) | ErlModuleId::Extern(def_id) => {
+                Some(def_id)
+            }
+            ErlModuleId::Prim(_) => None,
+        }
     }
 }
 

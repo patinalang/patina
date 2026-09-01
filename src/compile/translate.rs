@@ -22,7 +22,6 @@ use scopes::Scopes;
 
 use crate::compile::eaf_builder::EafBuilder;
 use crate::compile::impl_collector::ImplCollector;
-use crate::compile::module_collector::ModuleNameCollector;
 use crate::erlang::abstract_format as eaf;
 
 #[macro_export]
@@ -63,7 +62,6 @@ enum Witness {
 pub(super) struct Translator<'tcx, 'arena> {
     tcx: TyCtxt<'tcx>,
     afb: EafBuilder<'tcx, 'arena>,
-    modules: ModuleNameCollector<'tcx>,
     impls: ImplCollector<'tcx>,
     translated_consts: RefCell<FxHashMap<LocalDefId, TranslatedConst<'arena>>>,
 }
@@ -73,7 +71,6 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         Translator {
             tcx,
             afb: EafBuilder::new(tcx.sess.source_map(), arena),
-            modules: ModuleNameCollector::new(tcx),
             impls: ImplCollector::new(tcx),
             translated_consts: RefCell::new(FxHashMap::default()),
         }
@@ -184,7 +181,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         let module_id = LocalModDefId::new_unchecked(def_id);
         let (module, _span, _hir_id) = self.tcx.hir_get_module(module_id);
         let parts = self.collect_module_fns(module);
-        let mod_name = self.modules.module_name(ErlModuleId::Mod(def_id.to_def_id()));
+        let mod_name = self.tcx.erl_module_name(ErlModuleId::Mod(def_id.to_def_id()));
         self.assemble_module(module.spans.inner_span, mod_name, [], parts)
     }
 
@@ -410,7 +407,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             None => not_implemented!(self.tcx, span, "witness for a type with no module", ty),
         };
 
-        let mod_name = self.modules.module_name(module_id);
+        let mod_name = self.tcx.erl_module_name(module_id);
         let subtypes = self
             .tcx
             .subtypes_of(ty)
@@ -512,7 +509,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             unreachable!("def_kind Struct must be an ItemKind::Struct");
         };
 
-        let mod_name = self.modules.module_name(ErlModuleId::Adt(def_id.to_def_id()));
+        let mod_name = self.tcx.erl_module_name(ErlModuleId::Adt(def_id.to_def_id()));
         let parts = self.collect_struct_fns(item.span, mod_name, def_id, variant_data);
         self.assemble_module(item.span, mod_name, [], parts)
     }
@@ -524,7 +521,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             unreachable!("def_kind Enum must be an ItemKind::Enum");
         };
 
-        let mod_name = self.modules.module_name(ErlModuleId::Adt(def_id.to_def_id()));
+        let mod_name = self.tcx.erl_module_name(ErlModuleId::Adt(def_id.to_def_id()));
 
         let mut parts = self.module_parts(item.span);
         let mut record_exports = SmallVec::<[Symbol; 8]>::new();
@@ -635,7 +632,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
     }
 
     fn translate_prim_module(&self, module_id: ErlModuleId) -> (Symbol, eaf::Module<'arena>) {
-        let mod_name = self.modules.module_name(module_id);
+        let mod_name = self.tcx.erl_module_name(module_id);
 
         let impls = self
             .impls

@@ -1,7 +1,6 @@
 mod compile_server;
 mod eaf_builder;
 mod impl_collector;
-mod module_collector;
 mod translate;
 
 use std::cell::Cell;

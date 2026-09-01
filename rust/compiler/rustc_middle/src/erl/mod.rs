@@ -4,7 +4,9 @@ use rustc_data_structures::fx::FxIndexSet;
 use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LocalDefId};
+use rustc_hir::definitions::DefPathData;
 use rustc_hir::{Attribute, HirId, PrimTy};
+use rustc_macros::StableHash;
 use rustc_span::Symbol;
 use smallvec::SmallVec;
 
@@ -12,7 +14,7 @@ use crate::query::Providers;
 use crate::ty::{self, AdtKind, GenericArgsRef, Ty, TyCtxt, TypingEnv, Unnormalized, Visibility};
 
 /// The identity of a module in the generated Erlang program.
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, StableHash)]
 pub enum ErlModuleId {
     /// A module generated for a Rust `mod`.
     Mod(DefId),
@@ -473,6 +475,42 @@ fn erl_fn_name(tcx: TyCtxt<'_>, def_id: DefId) -> Symbol {
     Symbol::intern(&format!("{qualified}::{item_name}"))
 }
 
+/// Provider for [`TyCtxt::erl_module_name`].
+fn erl_module_name(tcx: TyCtxt<'_>, module: ErlModuleId) -> Symbol {
+    match module {
+        ErlModuleId::Mod(def_id) | ErlModuleId::Adt(def_id) => {
+            let path = tcx.def_path(def_id);
+
+            let mut segments = SmallVec::<[String; 6]>::from_iter([
+                "Elixir.Patina".to_owned(),
+                tcx.crate_name(path.krate).as_str().to_owned(),
+            ]);
+
+            for data in &path.data {
+                if data.data != DefPathData::Ctor {
+                    segments.push(data.as_sym(true).as_str().to_owned());
+                }
+            }
+
+            Symbol::intern(&segments.join("."))
+        }
+        ErlModuleId::Extern(mut def_id) => {
+            let mut segments = SmallVec::<[String; 6]>::new();
+
+            while tcx.def_kind(def_id) == DefKind::ExternMod {
+                segments.push(tcx.item_name(def_id).as_str().to_owned());
+                def_id = tcx.parent(def_id);
+            }
+
+            segments.reverse();
+            Symbol::intern(&segments.join("."))
+        }
+        ErlModuleId::Prim(prim_ty) => {
+            Symbol::intern(&format!("Elixir.Patina.Core.{}", prim_ty.name()))
+        }
+    }
+}
+
 pub fn provide(providers: &mut Providers) {
-    *providers = Providers { erl_fn_name, ..*providers };
+    *providers = Providers { erl_fn_name, erl_module_name, ..*providers };
 }

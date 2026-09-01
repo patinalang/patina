@@ -613,7 +613,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             span_bug!(span, "dynamic target in static call path");
         };
 
-        let mod_name = self.translator.modules.module_name(module_id);
+        let mod_name = self.tcx().erl_module_name(module_id);
 
         // Temporary before we actually ship runtime modules (like `patina_fmt` could've been)
         if let ErlCallTarget::Extern { function, .. } = erl_call_target {
@@ -791,7 +791,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                     let ErlModuleResolution::Static(module_id) = module_resolution else {
                         span_bug!(expr.span, "external function item must have a static module");
                     };
-                    let mod_name = self.translator.modules.module_name(module_id);
+                    let mod_name = tcx.erl_module_name(module_id);
                     afb.expr_remote_fun(expr.span, mod_name, fn_name, arity)
                 }
                 ErlCallKind::Dynamic => {

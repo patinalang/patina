@@ -1221,6 +1221,11 @@ rustc_queries! {
         desc { "computing the Erlang function name of `{}`", tcx.def_path_str(def_id) }
     }
 
+    /// The Erlang module name for a generated, external, or primitive module.
+    query erl_module_name(module: crate::erl::ErlModuleId) -> Symbol {
+        desc { "computing the Erlang module name for `{module:?}`" }
+    }
+
     /// Checks for uses of unstable APIs in the module.
     query check_mod_unstable_api_usage(key: LocalModDefId) {
         desc { "checking for unstable API usage in {}", describe_as_module(key, tcx) }

@@ -2,7 +2,7 @@ use rustc_abi::FieldIdx;
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::CtorKind;
 use rustc_hir::def_id::DefId;
-use rustc_middle::erl::{ErlAdtRepr, ErlCallKind, ErlCallTarget, ErlModuleResolution};
+use rustc_middle::erl::{ErlAdtRepr, ErlCallKind, ErlCallTarget, ErlModuleId, ErlModuleResolution};
 use rustc_middle::span_bug;
 use rustc_middle::thir::{AdtExpr, AdtExprBase, Expr, FieldPat};
 use rustc_middle::ty::{AdtDef, VariantDef};
@@ -21,7 +21,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         subpatterns: &[FieldPat<'tcx>],
     ) -> Patterns<'arena> {
         if variant.ctor_kind() == Some(CtorKind::Const) {
-            let name = self.translator.modules.constructor_name(variant.def_id);
+            let name = self.tcx().erl_module_name(ErlModuleId::Adt(variant.def_id));
             return self.translator.afb.pat_atom(span, name).into();
         }
 
@@ -46,7 +46,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
         // Unit structs always compile down to atom
         if variant.ctor_kind() == Some(CtorKind::Const) {
-            let name = self.translator.modules.constructor_name(variant.def_id);
+            let name = self.tcx().erl_module_name(ErlModuleId::Adt(variant.def_id));
             return afb.expr_atom(expr.span, name);
         }
 
@@ -213,7 +213,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             span_bug!(span, "adt constructor has dynamic module");
         };
 
-        self.translator.modules.module_name(module_id)
+        tcx.erl_module_name(module_id)
     }
 
     fn resolve_extern_module_name(
