@@ -40,38 +40,24 @@ macro_rules! println {
 }
 
 // source: patina-by-example/src/custom_types/repr.md
-// block: 6/12
+// block: 6/14
 
 #[attr = Repr {reprs: []}]
-struct Point {
-    x: int,
-    y: int,
-}
-
-#[attr = Repr {reprs: [ReprTransparent]}]
-enum TransparentEnum {
-    Unit,
-    TupleStyle(int, str),
-    StructStyle {
-            point: Point,
+enum SnakeCaseEnum {
+    #[attr = Repr {reprs: []}]
+    UnitVariant,
+    StructHTTPStyle {
+            code: int,
+            body: str,
         },
 }
-
-// Compiling this enum will result in an error, as the variants
-// are not uniquely distinguishable at runtime:
-//
-//   TransparentEnum::MyName ==
-//     TransparentEnum::OrAtom(a"Elixir.Patina.ByExample.TransparentEnum.MyName")
-//
-#[attr = Repr {reprs: [ReprTransparent]}]
-enum InvalidTransparentEnum { MyName, OrAtom(atom), }
 
 fn main() ({
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)(((TransparentEnum::Unit as
-                                        TransparentEnum) as term as term)) as term)] as [term])] as
+                                    fn(term) -> term)(((SnakeCaseEnum::UnitVariant as
+                                        SnakeCaseEnum) as term as term)) as term)] as [term])] as
                 [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
@@ -79,25 +65,13 @@ fn main() ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)(
-                                // a"Elixir.Patina.ByExample.TransparentEnum.Unit"
+                                // a"unit_variant"
 
-                                (((TransparentEnum::TupleStyle as
-                                            fn(int, str) -> TransparentEnum {TransparentEnum::TupleStyle})((200
-                                            as int), ("hello" as str)) as TransparentEnum) as term as
-                                    term)) as term)] as [term])] as [[term]])) as term);
+                                ((SnakeCaseEnum::StructHTTPStyle {
+                                        code: (200 as int), body: ("hi" as str) } as SnakeCaseEnum)
+                                    as term as term)) as term)] as [term])] as [[term]])) as
+            term);
         ((io::nl as fn() -> term)() as term);
     } as ());
-    ({
-        ((io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)(
-                                // (200, "hello")
-
-                                ((TransparentEnum::StructStyle {
-                                        point: (Point { x: (1 as int), y: (2 as int) } as Point) }
-                                        as TransparentEnum) as term as term)) as term)] as [term])]
-                as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
-    } as ());
-    // #{ a"__struct__" => a"Elixir.Patina.ByExample.Point", a"x" => 1, a"y" => 2 }
+    // (a"struct_http_style", 200, "hi")
 } as ())

@@ -40,42 +40,19 @@ macro_rules! println {
 }
 
 // source: patina-by-example/src/custom_types/repr.md
-// block: 11/12
+// block: 11/14
 
-#[repr(transparent, fallback = "tagged")]
-pub enum Option<T> {
-
-    #[repr(name = "some")]
-    Some(T),
-
-    #[repr(name = "nil")]
-    None,
+#[repr(Elixir)]
+struct Point {
+    x: float,
+    y: float,
 }
 
 pub fn main() {
     {
-        io::put_chars([[patina_fmt::debug(Option::<int>::Some(42)), "    ",
-                            patina_fmt::debug(Option::<int>::None)]]);
+        io::put_chars([[patina_fmt::debug(Point { x: 5.2, y: 0.4 } as
+                                    term)]]);
         io::nl();
     };
-    {
-        io::put_chars([[patina_fmt::debug(
-                                // 42    a"nil"
-
-                                // `Option<atom>` cannot be transparent, as `a"nil"` is a valid `Some`
-                                Option::<atom>::Some(a"hi")), "    ",
-                            patina_fmt::debug(Option::<atom>::None)]]);
-        io::nl();
-    };
-    {
-        io::put_chars([[patina_fmt::debug(
-                                // (a"some", a"hi")    a"nil"
-
-                                // Option<Option<int>> also cannot be transparently represented
-                                Option::<Option<int>>::Some(Some(42))), "    ",
-                            patina_fmt::debug(Option::<Option<int>>::Some(None)),
-                            "    ", patina_fmt::debug(Option::<Option<int>>::None)]]);
-        io::nl();
-    };
-    // (a"some", 42)    (a"some", a"nil")    a"nil"
+    // #{ a"__struct__" => a"Elixir.Patina.ByExample.Point", a"x" => 5.2, a"y" => 0.4 }
 }

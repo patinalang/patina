@@ -40,18 +40,55 @@ macro_rules! println {
 }
 
 // source: patina-by-example/src/custom_types/repr.md
-// block: 9/12
+// block: 9/14
 
-#[repr(Elixir)]
-struct Point {
-    x: float,
-    y: float,
+#[repr(transparent)]
+enum TransparentWithTags<T> {
+    Untagged(str),
+
+    // `MaybeUntagged(T)` values are represented as themselves, except
+    // for values that could be mistaken for another variant.
+    #[repr(tag = "othertag")]
+    MaybeUntagged(T),
+
+    // Individual enum variants can have their own representation set.
+    // Tagged(int) will always be tagged with `(a"mytag", _)`.
+    #[repr(tagged, tag = "mytag")]
+    Tagged(int),
 }
 
 pub fn main() {
+    use TransparentWithTags::*;
     {
-        io::put_chars([[patina_fmt::debug(Point { x: 1, y: 2 } as term)]]);
+        io::put_chars([[patina_fmt::debug(
+
+                                // A `str` payload could be mistaken for Untagged, so it's wrapped.
+                                MaybeUntagged("hello") as term)]]);
         io::nl();
     };
-    // #{a"__struct__" => a"Elixir.Patina.ByExample.Point", a"x" => 5.2, a"y" => 0.4}
+    {
+        io::put_chars([[patina_fmt::debug(
+                                // (a"othertag", "hello")
+
+                                // An int payload cannot be mistaken for anything - it stays transparent.
+                                MaybeUntagged(42) as term)]]);
+        io::nl();
+    };
+    {
+        io::put_chars([[patina_fmt::debug(
+                                // 42
+
+                                // The decision is per-value, not per-type. Most terms stay transparent...
+                                MaybeUntagged(a"hi" as term) as term)]]);
+        io::nl();
+    };
+    {
+        io::put_chars([[patina_fmt::debug(
+                                // a"hi"
+
+                                // ...but a term that looks like another variant is wrapped, too.
+                                MaybeUntagged((a"othertag", 1) as term) as term)]]);
+        io::nl();
+    };
+    // (a"othertag", (a"othertag", 1))
 }

@@ -7,6 +7,13 @@ OpenBracket
 Ident
 OpenParen
 Ident
+Comma
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 12 }
 CloseParen
 CloseBracket
 Whitespace
@@ -15,20 +22,6 @@ Whitespace
 Ident
 Whitespace
 OpenBrace
-Whitespace
-Ident
-Colon
-Whitespace
-Ident
-Comma
-Whitespace
-Ident
-Colon
-Whitespace
-Ident
-Comma
-Whitespace
-CloseBrace
 Whitespace
 Pound
 OpenBracket
@@ -39,21 +32,6 @@ CloseParen
 CloseBracket
 Whitespace
 Ident
-Whitespace
-Ident
-Whitespace
-OpenBrace
-Whitespace
-Ident
-Comma
-Whitespace
-Ident
-OpenParen
-Ident
-Comma
-Whitespace
-Ident
-CloseParen
 Comma
 Whitespace
 Ident
@@ -62,44 +40,14 @@ Ident
 Colon
 Whitespace
 Ident
-CloseBrace
-Comma
-Whitespace
-CloseBrace
-Whitespace
-LineComment { doc_style: None }
-Whitespace
-LineComment { doc_style: None }
-Whitespace
-LineComment { doc_style: None }
-Whitespace
-LineComment { doc_style: None }
-Whitespace
-LineComment { doc_style: None }
-Whitespace
-LineComment { doc_style: None }
-Whitespace
-Pound
-OpenBracket
-Ident
-OpenParen
-Ident
-CloseParen
-CloseBracket
-Whitespace
-Ident
-Whitespace
-Ident
-Whitespace
-OpenBrace
-Whitespace
-Ident
 Comma
 Whitespace
 Ident
-OpenParen
+Colon
+Whitespace
 Ident
-CloseParen
+CloseBrace
+Comma
 Whitespace
 CloseBrace
 Whitespace
@@ -142,48 +90,17 @@ Ident
 Colon
 Colon
 Ident
-OpenParen
+OpenBrace
+Ident
+Colon
+Whitespace
 Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 3 }
 Comma
 Whitespace
-Literal { kind: Str { terminated: true }, suffix_start: 7 }
-CloseParen
-Whitespace
-Ident
-Whitespace
-Ident
-CloseParen
-Semi
-Whitespace
-LineComment { doc_style: None }
-Whitespace
-Ident
-Bang
-OpenParen
-Literal { kind: Str { terminated: true }, suffix_start: 6 }
-Comma
-Whitespace
-Ident
-Colon
-Colon
-Ident
-OpenBrace
 Ident
 Colon
 Whitespace
-Ident
-OpenBrace
-Ident
-Colon
-Whitespace
-Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
-Comma
-Whitespace
-Ident
-Colon
-Whitespace
-Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
-CloseBrace
+Literal { kind: Str { terminated: true }, suffix_start: 4 }
 CloseBrace
 Whitespace
 Ident

@@ -1,35 +1,45 @@
 error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__09.pt:4:8
+  --> tests/ui/src/custom_types/repr__09.pt:10:12
    |
-LL | #[repr(Elixir)]
-   |        ^^^^^^
+LL |     #[repr(tag = "othertag")]
+   |            ^^^^^^^^^^^^^^^^
    |
    = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
    = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
 
-error[E0308]: mismatched types
-  --> tests/ui/src/custom_types/repr__09.pt:11:31
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__09.pt:15:12
    |
-LL |     println!("{:?}", Point{x: 1, y: 2} as term);
-   |                               ^ expected `float`, found `int`
+LL |     #[repr(tagged, tag = "mytag")]
+   |            ^^^^^^
    |
-help: use a float literal
-   |
-LL |     println!("{:?}", Point{x: 1.0, y: 2} as term);
-   |                                ++
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
 
-error[E0308]: mismatched types
-  --> tests/ui/src/custom_types/repr__09.pt:11:37
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__09.pt:15:20
    |
-LL |     println!("{:?}", Point{x: 1, y: 2} as term);
-   |                                     ^ expected `float`, found `int`
+LL |     #[repr(tagged, tag = "mytag")]
+   |                    ^^^^^^^^^^^^^
    |
-help: use a float literal
-   |
-LL |     println!("{:?}", Point{x: 1, y: 2.0} as term);
-   |                                      ++
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
 
-error: aborting due to 3 previous errors
+error[E0731]: transparent enum needs exactly one variant, but has 3
+  --> tests/ui/src/custom_types/repr__09.pt:5:1
+   |
+LL | enum TransparentWithTags<T> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^ needs exactly one variant, but has 3
+LL |     Untagged(str),
+   |     -------- variant here
+...
+LL |     MaybeUntagged(T),
+   |     ------------- variant here
+...
+LL |     Tagged(int),
+   |     ------ too many variants in `TransparentWithTags`
 
-Some errors have detailed explanations: E0308, E0552.
-For more information about an error, try `rustc --explain E0308`.
+error: aborting due to 4 previous errors
+
+Some errors have detailed explanations: E0552, E0731.
+For more information about an error, try `rustc --explain E0552`.

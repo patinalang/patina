@@ -2,17 +2,74 @@ LineComment { doc_style: None }
 Whitespace
 LineComment { doc_style: None }
 Whitespace
-LineComment { doc_style: None }
-Whitespace
-LineComment { doc_style: None }
+Pound
+OpenBracket
+Ident
+OpenParen
+Ident
+CloseParen
+CloseBracket
 Whitespace
 Ident
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+Ident
+Comma
 Whitespace
 Ident
 OpenParen
 Ident
 CloseParen
-Semi
+Comma
+Whitespace
+Ident
+OpenBrace
+Ident
+Colon
+Whitespace
+Ident
+Comma
+Whitespace
+Ident
+Colon
+Whitespace
+Ident
+CloseBrace
+Comma
+Whitespace
+Pound
+OpenBracket
+Ident
+OpenParen
+Ident
+CloseParen
+CloseBracket
+Whitespace
+Ident
+Comma
+Whitespace
+Pound
+OpenBracket
+Ident
+OpenParen
+Ident
+Whitespace
+Eq
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 12 }
+CloseParen
+CloseBracket
+Whitespace
+Ident
+OpenParen
+Ident
+CloseParen
+Comma
+Whitespace
+CloseBrace
 Whitespace
 Ident
 Whitespace
@@ -25,14 +82,118 @@ Whitespace
 OpenBrace
 Whitespace
 Ident
+Whitespace
+Ident
+Colon
+Colon
+Star
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
 Bang
 OpenParen
 Literal { kind: Str { terminated: true }, suffix_start: 6 }
 Comma
 Whitespace
 Ident
+Whitespace
+Ident
+Whitespace
+Ident
+CloseParen
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Bang
 OpenParen
-Literal { kind: Float { base: Decimal, empty_exponent: false }, suffix_start: 5 }
+Literal { kind: Str { terminated: true }, suffix_start: 6 }
+Comma
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+CloseParen
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 6 }
+Comma
+Whitespace
+Ident
+Colon
+Colon
+Ident
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 7 }
+CloseParen
+Whitespace
+Ident
+Whitespace
+Ident
+CloseParen
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 6 }
+Comma
+Whitespace
+Ident
+Colon
+Colon
+Ident
+OpenBrace
+Ident
+Colon
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Comma
+Whitespace
+Ident
+Colon
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+CloseBrace
+Whitespace
+Ident
+Whitespace
+Ident
+CloseParen
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 6 }
+Comma
+Whitespace
+Ident
+Colon
+Colon
+Ident
+OpenParen
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 2 }
 CloseParen
 Whitespace
 Ident

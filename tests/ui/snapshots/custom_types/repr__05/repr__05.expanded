@@ -40,16 +40,63 @@ macro_rules! println {
 }
 
 // source: patina-by-example/src/custom_types/repr.md
-// block: 5/12
+// block: 5/14
 
-// Omitting repr is equivalent to `#[repr(Patina)]`.
-// In a special case of a single-element struct, it's also equivalent to `#[repr(transparent)]`.
-struct Celcius(float);
+#[repr(tagged)]
+enum TaggedEnum {
+    Unit,
+    TupleStyle(str),
+    StructStyle {
+        x: int,
+        y: int,
+    },
+
+    #[repr(atom)]
+    UnitWithAtomOverride,
+
+    #[repr(tag = "custom_tag")]
+    WithCustomTag(int),
+}
 
 pub fn main() {
+    use TaggedEnum::*;
     {
-        io::put_chars([[patina_fmt::debug(Celcius(2.345) as term)]]);
+        io::put_chars([[patina_fmt::debug(
+
+                                // Unit inherits #[repr(tagged)] from the enum setting.
+                                Unit as term)]]);
         io::nl();
     };
-    // 2.345
+    {
+        io::put_chars([[patina_fmt::debug(
+                                // (a"Elixir.Patina.ByExample.TaggedEnum.Unit")
+
+                                // UnitWithAtomOverride overrides the enum repr.
+                                UnitWithAtomOverride as term)]]);
+        io::nl();
+    };
+    {
+        io::put_chars([[patina_fmt::debug(
+                                // a"Elixir.Patina.ByExample.TaggedEnum.UnitWithAtomOverride"
+
+                                // Both tuple- and struct-style variants are represented as tagged tuples.
+                                TaggedEnum::TupleStyle("hello") as term)]]);
+        io::nl();
+    };
+    {
+        io::put_chars([[patina_fmt::debug(
+                                // (a"Elixir.Patina.ByExample.TaggedEnum.TupleStyle", "hello")
+
+                                TaggedEnum::StructStyle { x: 1, y: 2 } as term)]]);
+        io::nl();
+    };
+    {
+        io::put_chars([[patina_fmt::debug(
+                                // (a"Elixir.Patina.ByExample.TaggedEnum.StructStyle", 1, 2)
+
+                                // You can set a custom tag by specifying it with `#[repr(tag = "...")]`.
+                                TaggedEnum::WithCustomTag(42) as term)]]);
+        io::nl();
+    };
+    // (a"custom_tag", 42)
 }

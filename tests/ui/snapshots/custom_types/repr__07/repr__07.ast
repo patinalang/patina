@@ -1,20 +1,11 @@
 // source: patina-by-example/src/custom_types/repr.md
-// block: 7/12
+// block: 7/14
 
-// repr(transparent) can also be given a fallback, if the type cannot
-// be transparently represented. This is important for generic types,
-// as runtime representation will differ between concrete `T`s.
-#[repr(transparent, fallback = "tagged")]
-enum TransparentWithTags<T> {
-    Untagged(str),
+// Omitting repr is equivalent to `#[repr(Patina)]`.
+// In a special case of a single-element struct, it's also equivalent to `#[repr(transparent)]`.
+struct Celsius(float);
 
-    // `MaybeTagged(T)` will only be tagged if T representation conflicts with
-    // `Untagged(str)` above.
-    #[repr(name = "othertag")]
-    MaybeUntagged(T),
-
-    // Individual enum variants can have their own representation set.
-    // Tagged(int) will always be tagged with `(a"mytag", _)
-    #[repr(tagged, name = "mytag")]
-    Tagged(int),
+pub fn main() {
+    println!("{:?}", Celsius(2.345) as term);
+    // 2.345
 }

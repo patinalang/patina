@@ -1,35 +1,30 @@
 error[E0552]: unrecognized representation hint
   --> tests/ui/src/custom_types/repr__06.pt:4:8
    |
-LL | #[repr(Elixir)]
+LL | #[repr(tagged, tag_style = "snake_case")]
    |        ^^^^^^
    |
    = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
    = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
 
-error[E0731]: transparent enum needs exactly one variant, but has 3
-  --> tests/ui/src/custom_types/repr__06.pt:11:1
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__06.pt:4:16
    |
-LL | enum TransparentEnum {
-   | ^^^^^^^^^^^^^^^^^^^^ needs exactly one variant, but has 3
-LL |     Unit,
-   |     ---- variant here
-LL |     TupleStyle(int, str),
-   |     ---------- variant here
-LL |     StructStyle{point: Point},
-   |     ----------- too many variants in `TransparentEnum`
+LL | #[repr(tagged, tag_style = "snake_case")]
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
 
-error[E0731]: transparent enum needs exactly one variant, but has 2
-  --> tests/ui/src/custom_types/repr__06.pt:24:1
+error[E0552]: unrecognized representation hint
+  --> tests/ui/src/custom_types/repr__06.pt:6:12
    |
-LL | enum InvalidTransparentEnum {
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^ needs exactly one variant, but has 2
-LL |     MyName,
-   |     ------ variant here
-LL |     OrAtom(atom)
-   |     ------ too many variants in `InvalidTransparentEnum`
+LL |     #[repr(atom)]
+   |            ^^^^
+   |
+   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
+   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
 
 error: aborting due to 3 previous errors
 
-Some errors have detailed explanations: E0552, E0731.
-For more information about an error, try `rustc --explain E0552`.
+For more information about this error, try `rustc --explain E0552`.

@@ -40,41 +40,53 @@ macro_rules! println {
 }
 
 // source: patina-by-example/src/custom_types/repr.md
-// block: 12/12
-
-extern mod erlang;
+// block: 12/14
 
 #[attr = Repr {reprs: []}]
-enum TermToBinaryOpts {
-    Compressed(int),
-    Deterministic,
-    MinorVersion(int),
-    Local,
+enum Result<T, E> {
+    #[attr = Repr {reprs: []}]
+    Ok(T),
+
+    #[attr = Repr {reprs: []}]
+    Err(E),
 }
 
 fn main() ({
-    let opts: [TermToBinaryOpts] =
-        ([(Deterministic as {type error}),
-                ((MinorVersion as {type error})((2 as int)) as {type error})]
-            as [{type error}]);
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)(((opts as {type error}) as term as
-                                    {type error})) as term)] as [term])] as [[term]])) as term);
+                                    fn(term) -> term)((((Result::<int, str>::Ok as
+                                            fn(int) -> Result<int, str> {Result::<int, str>::Ok})((42 as
+                                            int)) as Result<int, str>) as term as term)) as term)] as
+                        [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)(
-                                // [a"deterministic", (a"minor_version", 2)]
+                                // (a"ok", 42)
 
-                                ((erlang::term_to_binary as
-                                        fn(term, term) -> term)((val as {type error}),
-                                    (opts as {type error})) as term)) as term)] as [term])] as
-                [[term]])) as term);
+                                (((Result::<int, str>::Err as
+                                            fn(str) -> Result<int, str> {Result::<int, str>::Err})(("reason"
+                                            as str)) as Result<int, str>) as term as term)) as term)] as
+                        [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
-    // <<131, 97, 42>>
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::debug as
+                                    fn(term) -> term)(
+                                // (a"error", "reason")
+
+                                // Note that `Result<T, E>` can't represent a bare `:ok` by itself,
+                                // but we have helpers for that.
+                                ((((Result::<(), str>::Ok as
+                                                fn(()) -> Result<(), str> {Result::<(), str>::Ok})((() as
+                                                ())) as Result<(), str>).into::<Compat::BareOkResult>() as
+                                        {type error}) as term as {type error})) as term)] as
+                        [term])] as [[term]])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    // a"ok"
 } as ())

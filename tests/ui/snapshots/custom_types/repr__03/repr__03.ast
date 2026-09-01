@@ -1,45 +1,36 @@
 // source: patina-by-example/src/custom_types/repr.md
-// block: 3/12
+// block: 3/14
 
-#[repr(tagged)]
-enum TaggedEnum {
-    Unit,
-    TupleStyle(str),
-    StructStyle {
-        x: int,
-        y: int,
-    },
+struct Unit;
 
-    WithUnitElem((), int),
-    WithOneUnitElem(()),
+#[repr(atom, tag = "custom_name")]
+struct CustomNameUnit;
 
-    #[repr(name = "custom_tag")]
-    WithCustomTag(int),
+// repr settings on an enum are inherited by variants
+#[repr(tag_style = "snake_case")]
+enum NotJustUnits {
+    VariantA,
+
+    #[repr(tag = "variantB")]
+    VariantB,
+    VariantC(int),
 }
 
+// Explicitly setting `#[repr(atom)]` will ensure that only unit variants
+// are ever added to an enum.
+#[repr(atom, tag_style = "snake_case")]
+enum OnlyUnits { VariantA, VariantB, VariantC, }
+
 pub fn main() {
-    // In every representation, unit variants with are always encoded
-    // directly as atoms.
-    println!("{:?}", TaggedEnum::Unit as term);
-    // a"Elixir.Patina.ByExample.TaggedEnum.Unit"
+    println!("{:?}", Unit as term);
+    // a"Elixir.Patina.ByExample.Unit"
 
-    // Both tuple- and struct-style variants are represented as tagged tuples.
-    println!("{:?}", TaggedEnum::TupleStyle("hello") as term);
-    // (a"Elixir.Patina.ByExample.TaggedEnum.TupleStyle", "hello")
+    println!("{:?}", CustomNameUnit as term);
+    // a"custom_name"
 
-    println!("{:?}", TaggedEnum::StructStyle{x: 1, y: 2} as term);
-    // (a"Elixir.Patina.ByExample.TaggedEnum.StructStyle", 1, 2)
+    println!("{:?}", NotJustUnits::VariantA as term);
+    // a"variant_a"
 
-    // Unit elements are omitted in the runtime representation. If all elements
-    // of the variant are unit type, the variant is represented directly
-    // as an atom.
-    println!("{:?}", TaggedEnum::WithUnitElem((), 42) as term);
-    // (a"Elixir.Patina.ByExample.TaggedEnum.WithUnitElem", 42)
-
-    println!("{:?}", TaggedEnum::WithOneUnitElem(()) as term);
-    // a"Elixir.Patina.ByExample.TaggedEnum.WithOneUnitElem"
-
-    // You can set a custom tag by specifying it with `#[repr(name = "...")]`.
-    println!("{:?}", TaggedEnum::WithCustomTag(42) as term);
-    // (a"my_tag", 42)
+    println!("{:?}", NotJustUnits::VariantB as term);
+    // a"variantB"
 }

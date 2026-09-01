@@ -40,43 +40,45 @@ macro_rules! println {
 }
 
 // source: patina-by-example/src/custom_types/repr.md
-// block: 8/12
+// block: 8/14
 
-#[repr(native_record)]
-enum NativeRecordEnum {
-    Point(int, int),
-    Rectangle {
-        upper_left: Point,
-        lower_right: Point,
+#[repr(Elixir)]
+struct Point {
+    x: int,
+    y: int,
+}
+
+#[repr(transparent)]
+enum TransparentEnum {
+    IntVariant(int),
+    PointVariant {
+        point: Point,
     },
-
-    #[repr(name = "custom_name")]
-    WithCustomName(float),
 }
 
-// For structs (not enums!) you can reference an existing, external native record.
-// The record's existence and fields will be checked on module load.
-#[repr(native_record, module = "external_module", name = "custom_name")]
-struct NativeRecordStruct {
-    foo: str,
-}
-
-extern mod records;
+// Compiling this enum will result in an error, as the variants
+// are not uniquely distinguishable at runtime:
+//
+// #[repr(transparent)]
+// enum InvalidTransparentEnum {
+//     MyName,
+//     OrAtom(atom)
+// }
 
 pub fn main() {
-    let point = NativeRecordEnum::Point(1, 2);
+    use TransparentEnum::*;
     {
         io::put_chars([[patina_fmt::debug(
-                                // The field names of a tuple-structs and -variants are atomized integers.
-                                records::get_field_names(point))]]);
-        io::nl();
-    };
-    // [a"0", a"1"]
 
-    let rect = NativeRecordStruct { foo: "bar" };
-    {
-        io::put_chars([[patina_fmt::debug(records::get_field_names(rect))]]);
+                                IntVariant(200) as term)]]);
         io::nl();
     };
-    // [a"foo"]
+    {
+        io::put_chars([[patina_fmt::debug(
+                                // 200
+
+                                PointVariant { point: Point { x: 1, y: 2 } } as term)]]);
+        io::nl();
+    };
+    // #{ a"__struct__" => a"Elixir.Patina.ByExample.Point", a"x" => 1, a"y" => 2 }
 }

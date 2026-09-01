@@ -1,47 +1,11 @@
-error: invalid `struct` delimiters or `fn` call arguments
-  --> tests/ui/src/custom_types/repr__02.pt:15:22
+error: expected `;`, found `println`
+  --> tests/ui/src/custom_types/repr__02.pt:19:54
    |
-LL |     println!("{:?}", Bar(x: 1, y: 2, z: ()) as term);
-   |                      ^^^^^^^^^^^^^^^^^^^^^^
-   |
-help: if `Bar` is a struct, use braces as delimiters
-   |
-LL -     println!("{:?}", Bar(x: 1, y: 2, z: ()) as term);
-LL +     println!("{:?}", Bar { x: 1, y: 2, z: () } as term);
-   |
-help: if `Bar` is a function, use the arguments directly
-   |
-LL -     println!("{:?}", Bar(x: 1, y: 2, z: ()) as term);
-LL +     println!("{:?}", Bar(1, 2, ()) as term);
-   |
+LL |         println!("{:?}", MyOtherStruct(1, 2) as term)
+   |                                                      ^ help: add `;` here
+...
+LL |         println!("{:?}", MySnakeCaseStruct(1, 2) as term)
+   |         ------- unexpected token
 
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__02.pt:4:8
-   |
-LL | #[repr(tagged)]
-   |        ^^^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+error: aborting due to 1 previous error
 
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__02.pt:7:8
-   |
-LL | #[repr(tagged, name = "Elixir.BarBar")]
-   |        ^^^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
-
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__02.pt:7:16
-   |
-LL | #[repr(tagged, name = "Elixir.BarBar")]
-   |                ^^^^^^^^^^^^^^^^^^^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
-
-error: aborting due to 4 previous errors
-
-For more information about this error, try `rustc --explain E0552`.

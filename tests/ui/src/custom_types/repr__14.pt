@@ -1,0 +1,23 @@
+// source: patina-by-example/src/custom_types/repr.md
+// block: 14/14
+
+extern mod erlang;
+
+#[repr(tagged, tag_style = "snake_case")]
+pub enum TermToBinaryOpts {
+    Compressed(int),
+    #[repr(atom)]
+    Deterministic,
+    MinorVersion(int),
+    #[repr(atom)]
+    Local,
+}
+
+pub fn main() {
+    let opts: [TermToBinaryOpts] = [Deterministic, MinorVersion(2)];
+    println!("{:?}", opts as term);
+    // [a"deterministic", (a"minor_version", 2)]
+
+    println!("{:?}", erlang::term_to_binary(42, opts));
+    // <<131, 97, 42>>
+}

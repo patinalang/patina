@@ -40,30 +40,16 @@ macro_rules! println {
 }
 
 // source: patina-by-example/src/custom_types/repr.md
-// block: 2/12
+// block: 7/14
 
-#[repr(tagged)]
-struct Pair(int, float);
-
-#[repr(tagged, name = "Elixir.BarBar")]
-struct Bar {
-    x: int,
-    y: int,
-    z: (),
-}
+// Omitting repr is equivalent to `#[repr(Patina)]`.
+// In a special case of a single-element struct, it's also equivalent to `#[repr(transparent)]`.
+struct Celsius(float);
 
 pub fn main() {
     {
-        io::put_chars([[patina_fmt::debug(Pair(42, 3.14) as term)]]);
+        io::put_chars([[patina_fmt::debug(Celsius(2.345) as term)]]);
         io::nl();
     };
-    {
-        io::put_chars([[patina_fmt::debug(
-                                // (a"Elixir.Patina.ByExample.Pair", 42, 3.14)
-
-                                // z is omitted from the representation
-                                (/*ERROR*/) as term)]]);
-        io::nl();
-    };
-    // (a"Elixir.BarBar", 1, 2)
+    // 2.345
 }

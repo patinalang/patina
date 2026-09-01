@@ -6,83 +6,42 @@ LineComment { doc_style: None }
 Whitespace
 LineComment { doc_style: None }
 Whitespace
-LineComment { doc_style: None }
+Ident
 Whitespace
-Pound
-OpenBracket
 Ident
 OpenParen
 Ident
-Comma
-Whitespace
-Ident
-Whitespace
-Eq
-Whitespace
-Literal { kind: Str { terminated: true }, suffix_start: 8 }
 CloseParen
-CloseBracket
+Semi
 Whitespace
 Ident
 Whitespace
 Ident
-Lt
+Whitespace
 Ident
-Gt
+OpenParen
+CloseParen
 Whitespace
 OpenBrace
 Whitespace
 Ident
+Bang
 OpenParen
-Ident
-CloseParen
-Comma
-Whitespace
-LineComment { doc_style: None }
-Whitespace
-LineComment { doc_style: None }
-Whitespace
-Pound
-OpenBracket
-Ident
-OpenParen
-Ident
-Whitespace
-Eq
-Whitespace
-Literal { kind: Str { terminated: true }, suffix_start: 10 }
-CloseParen
-CloseBracket
-Whitespace
-Ident
-OpenParen
-Ident
-CloseParen
-Whitespace
-LineComment { doc_style: None }
-Whitespace
-LineComment { doc_style: None }
-Whitespace
-Pound
-OpenBracket
-Ident
-OpenParen
-Ident
+Literal { kind: Str { terminated: true }, suffix_start: 6 }
 Comma
 Whitespace
 Ident
-Whitespace
-Eq
-Whitespace
-Literal { kind: Str { terminated: true }, suffix_start: 7 }
-CloseParen
-CloseBracket
-Whitespace
-Ident
 OpenParen
+Literal { kind: Float { base: Decimal, empty_exponent: false }, suffix_start: 5 }
+CloseParen
+Whitespace
+Ident
+Whitespace
 Ident
 CloseParen
-Comma
+Semi
+Whitespace
+LineComment { doc_style: None }
 Whitespace
 CloseBrace
 Whitespace

@@ -1,27 +1,13 @@
 // source: patina-by-example/src/custom_types/repr.md
-// block: 11/12
+// block: 11/14
 
-#[repr(transparent, fallback = "tagged")]
-pub enum Option<T> {
-
-    #[repr(name = "some")]
-    Some(T),
-
-    #[repr(name = "nil")]
-    None,
+#[repr(Elixir)]
+struct Point {
+    x: float,
+    y: float,
 }
 
 pub fn main() {
-    println!("{:?}    {:?}", Option::<int>::Some(42), Option::<int>::None);
-    // 42    a"nil"
-
-    // `Option<atom>` cannot be transparent, as `a"nil"` is a valid `Some`
-    println!("{:?}    {:?}", Option::<atom>::Some(a"hi"),
-    Option::<atom>::None);
-    // (a"some", a"hi")    a"nil"
-
-    // Option<Option<int>> also cannot be transparently represented
-    println!("{:?}    {:?}    {:?}", Option::<Option<int>>::Some(Some(42)),
-    Option::<Option<int>>::Some(None), Option::<Option<int>>::None);
-    // (a"some", 42)    (a"some", a"nil")    a"nil"
+    println!("{:?}", Point{x: 5.2, y: 0.4} as term);
+    // #{ a"__struct__" => a"Elixir.Patina.ByExample.Point", a"x" => 5.2, a"y" => 0.4 }
 }

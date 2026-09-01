@@ -40,63 +40,53 @@ macro_rules! println {
 }
 
 // source: patina-by-example/src/custom_types/repr.md
-// block: 10/12
+// block: 10/14
 
 #[attr = Repr {reprs: []}]
-enum Result<T, E> {
-    #[attr = Repr {reprs: []}]
-    Ok(T),
+enum NativeRecordEnum {
+    Point(int, int),
 
     #[attr = Repr {reprs: []}]
-    Err(E),
+    WithCustomName(float),
 }
 
+// For structs (not enums!) you can reference an existing, external native record.
+// The record's existence and fields will be checked on module load.
+// Note that `#[repr(record_module = "...")]` does *not* influence the name of the
+// module that will hold the struct's implementation.
+// For that, use `#[module = "..."]`.
+#[attr = Repr {reprs: []}]
+struct NativeRecordStruct {
+    foo: str,
+}
+
+extern mod records;
 fn main() ({
-    ({
-        ((io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)(((Result::<int, str>::Ok as
-                                        fn(int) -> Result<int, str> {Result::<int, str>::Ok})((42 as
-                                        int)) as Result<int, str>)) as term), ("    " as str),
-                            ((patina_fmt::debug as
-                                    fn(term) -> term)(((Result::<int, str>::Err as
-                                        fn(str) -> Result<int, str> {Result::<int, str>::Err})(("reason"
-                                        as str)) as Result<int, str>)) as term)] as [term])] as
-                [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
-    } as ());
+    let point =
+        ((NativeRecordEnum::Point as
+                fn(int, int) -> NativeRecordEnum {NativeRecordEnum::Point})((1
+                as int), (2 as int)) as NativeRecordEnum);
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)(
-                                // (a"ok", 42)    (a"error", "reason")
-
-                                // The unit elision rule lets us directly represent `:ok | {:error, reason}`
-                                ((Result::<(), str>::Ok as
-                                        fn(()) -> Result<(), str> {Result::<(), str>::Ok})((() as
-                                        ())) as Result<(), str>)) as term), ("    " as str),
-                            ((patina_fmt::debug as
-                                    fn(term) -> term)(((Result::<(), str>::Err as
-                                        fn(str) -> Result<(), str> {Result::<(), str>::Err})(("reason"
-                                        as str)) as Result<(), str>)) as term)] as [term])] as
-                [[term]])) as term);
+                                // The field names of a tuple-structs and -variants are atomized integers.
+                                ((records::get_field_names as
+                                        fn(term) -> term)((point as NativeRecordEnum)) as term)) as
+                                term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
+    // [a"0", a"1"]
+
+    let rect =
+        (NativeRecordStruct { foo: ("bar" as str) } as NativeRecordStruct);
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)(
-                                // a"ok"    (a"error", "reason")
-
-                                // Elixir's `Map.fetch` result `{:ok, val} | :error` can also be represented
-                                ((Result::<int, ()>::Ok as
-                                        fn(int) -> Result<int, ()> {Result::<int, ()>::Ok})((42 as
-                                        int)) as Result<int, ()>)) as term), ("    " as str),
-                            ((patina_fmt::debug as
-                                    fn(term) -> term)(((Result as {type error}) <
-                                    (int as {type error}) as bool)) as term)] as [term])] as
-                [[term]])) as term);
+                                    fn(term) -> term)(((records::get_field_names as
+                                        fn(term) -> term)((rect as NativeRecordStruct)) as term)) as
+                                term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
-    // (a"ok", 42)    a"error"
+    // [a"foo"]
 } as ())

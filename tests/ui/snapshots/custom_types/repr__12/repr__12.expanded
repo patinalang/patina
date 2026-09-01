@@ -40,27 +40,40 @@ macro_rules! println {
 }
 
 // source: patina-by-example/src/custom_types/repr.md
-// block: 12/12
+// block: 12/14
 
-extern mod erlang;
+#[repr(tagged)]
+pub enum Result<T, E> {
 
-#[repr(tagged, style = "snake_case")]
-pub enum TermToBinaryOpts {
-    Compressed(int),
-    Deterministic,
-    MinorVersion(int),
-    Local,
+    #[repr(tag = "ok")]
+    Ok(T),
+
+    #[repr(tag = "error")]
+    Err(E),
 }
 
 pub fn main() {
-    let opts: [TermToBinaryOpts] = [Deterministic, MinorVersion(2)];
-    { io::put_chars([[patina_fmt::debug(opts as term)]]); io::nl(); };
     {
-        io::put_chars([[patina_fmt::debug(
-                                // [a"deterministic", (a"minor_version", 2)]
-
-                                erlang::term_to_binary(val, opts))]]);
+        io::put_chars([[patina_fmt::debug(Result::<int, str>::Ok(42) as
+                                    term)]]);
         io::nl();
     };
-    // <<131, 97, 42>>
+    {
+        io::put_chars([[patina_fmt::debug(
+                                // (a"ok", 42)
+
+                                Result::<int, str>::Err("reason") as term)]]);
+        io::nl();
+    };
+    {
+        io::put_chars([[patina_fmt::debug(
+                                // (a"error", "reason")
+
+                                // Note that `Result<T, E>` can't represent a bare `:ok` by itself,
+                                // but we have helpers for that.
+                                Result::<(), str>::Ok(()).into::<Compat::BareOkResult>() as
+                                    term)]]);
+        io::nl();
+    };
+    // a"ok"
 }

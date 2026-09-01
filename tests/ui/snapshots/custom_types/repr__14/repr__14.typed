@@ -40,38 +40,42 @@ macro_rules! println {
 }
 
 // source: patina-by-example/src/custom_types/repr.md
-// block: 2/12
+// block: 14/14
+
+extern mod erlang;
 
 #[attr = Repr {reprs: []}]
-struct Pair(int, float);
-
-#[attr = Repr {reprs: []}]
-struct Bar {
-    x: int,
-    y: int,
-    z: (),
+enum TermToBinaryOpts {
+    Compressed(int),
+    #[attr = Repr {reprs: []}]
+    Deterministic,
+    MinorVersion(int),
+    #[attr = Repr {reprs: []}]
+    Local,
 }
 
 fn main() ({
+    let opts: [TermToBinaryOpts] =
+        ([(Deterministic as {type error}),
+                ((MinorVersion as {type error})((2 as int)) as {type error})]
+            as [{type error}]);
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)((((Pair as
-                                            fn(int, float) -> Pair {Pair})((42 as int), (3.14 as float))
-                                        as Pair) as term as term)) as term)] as [term])] as
-                [[term]])) as term);
+                                    fn(term) -> term)(((opts as {type error}) as term as
+                                    {type error})) as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)(
-                                // (a"Elixir.Patina.ByExample.Pair", 42, 3.14)
+                                // [a"deterministic", (a"minor_version", 2)]
 
-                                // z is omitted from the representation
-                                (((/*ERROR*/) as {type error}) as term as {type error})) as
-                                term)] as [term])] as [[term]])) as term);
+                                ((erlang::term_to_binary as
+                                        fn(term, term) -> term)((42 as int), (opts as {type error}))
+                                    as term)) as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
-    // (a"Elixir.BarBar", 1, 2)
+    // <<131, 97, 42>>
 } as ())

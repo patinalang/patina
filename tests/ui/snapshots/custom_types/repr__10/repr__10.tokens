@@ -14,30 +14,13 @@ Ident
 Whitespace
 Ident
 Whitespace
-Ident
-Lt
-Ident
-Comma
-Whitespace
-Ident
-Gt
-Whitespace
 OpenBrace
 Whitespace
-Pound
-OpenBracket
 Ident
 OpenParen
 Ident
+Comma
 Whitespace
-Eq
-Whitespace
-Literal { kind: Str { terminated: true }, suffix_start: 4 }
-CloseParen
-CloseBracket
-Whitespace
-Ident
-OpenParen
 Ident
 CloseParen
 Comma
@@ -50,7 +33,7 @@ Ident
 Whitespace
 Eq
 Whitespace
-Literal { kind: Str { terminated: true }, suffix_start: 7 }
+Literal { kind: Str { terminated: true }, suffix_start: 13 }
 CloseParen
 CloseBracket
 Whitespace
@@ -62,6 +45,58 @@ Comma
 Whitespace
 CloseBrace
 Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Pound
+OpenBracket
+Ident
+OpenParen
+Ident
+Comma
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 17 }
+Comma
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 13 }
+CloseParen
+CloseBracket
+Whitespace
+Ident
+Whitespace
+Ident
+OpenBrace
+Whitespace
+Ident
+Colon
+Whitespace
+Ident
+Comma
+Whitespace
+CloseBrace
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+Semi
+Whitespace
 Ident
 Whitespace
 Ident
@@ -73,136 +108,72 @@ Whitespace
 OpenBrace
 Whitespace
 Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Ident
+Colon
+Colon
+Ident
+OpenParen
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Comma
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+CloseParen
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
 Bang
 OpenParen
-Literal { kind: Str { terminated: true }, suffix_start: 14 }
+Literal { kind: Str { terminated: true }, suffix_start: 6 }
 Comma
 Whitespace
 Ident
-Colon
-Colon
-Lt
-Ident
-Comma
-Whitespace
-Ident
-Gt
 Colon
 Colon
 Ident
 OpenParen
-Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 2 }
-CloseParen
-Comma
-Whitespace
 Ident
-Colon
-Colon
-Lt
-Ident
-Comma
-Whitespace
-Ident
-Gt
-Colon
-Colon
-Ident
-OpenParen
-Literal { kind: Str { terminated: true }, suffix_start: 8 }
 CloseParen
 CloseParen
 Semi
 Whitespace
 LineComment { doc_style: None }
 Whitespace
-LineComment { doc_style: None }
+Ident
 Whitespace
 Ident
-Bang
-OpenParen
-Literal { kind: Str { terminated: true }, suffix_start: 14 }
-Comma
+Whitespace
+Eq
 Whitespace
 Ident
-Colon
-Colon
-Lt
-OpenParen
-CloseParen
-Comma
-Whitespace
-Ident
-Gt
-Colon
-Colon
-Ident
-OpenParen
-OpenParen
-CloseParen
-CloseParen
-Comma
+OpenBrace
 Whitespace
 Ident
 Colon
-Colon
-Lt
-OpenParen
-CloseParen
-Comma
 Whitespace
-Ident
-Gt
-Colon
-Colon
-Ident
-OpenParen
-Literal { kind: Str { terminated: true }, suffix_start: 8 }
-CloseParen
-CloseParen
+Literal { kind: Str { terminated: true }, suffix_start: 5 }
+Whitespace
+CloseBrace
 Semi
 Whitespace
-LineComment { doc_style: None }
-Whitespace
-LineComment { doc_style: None }
-Whitespace
 Ident
 Bang
 OpenParen
-Literal { kind: Str { terminated: true }, suffix_start: 14 }
+Literal { kind: Str { terminated: true }, suffix_start: 6 }
 Comma
 Whitespace
 Ident
 Colon
 Colon
-Lt
-Ident
-Comma
-Whitespace
-OpenParen
-CloseParen
-Gt
-Colon
-Colon
 Ident
 OpenParen
-Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 2 }
-CloseParen
-Comma
-Whitespace
 Ident
-Lt
-Ident
-Comma
-Whitespace
-OpenParen
-CloseParen
-Gt
-Colon
-Colon
-Ident
-OpenParen
-OpenParen
-CloseParen
 CloseParen
 CloseParen
 Semi

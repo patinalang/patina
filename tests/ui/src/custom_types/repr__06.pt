@@ -1,38 +1,17 @@
 // source: patina-by-example/src/custom_types/repr.md
-// block: 6/12
+// block: 6/14
 
-#[repr(Elixir)]
-struct Point {
-    x: int,
-    y: int,
-}
-
-#[repr(transparent)]
-enum TransparentEnum {
-    Unit,
-    TupleStyle(int, str),
-    StructStyle{point: Point},
-}
-
-// Compiling this enum will result in an error, as the variants
-// are not uniquely distinguishable at runtime:
-//
-//   TransparentEnum::MyName ==
-//     TransparentEnum::OrAtom(a"Elixir.Patina.ByExample.TransparentEnum.MyName")
-//
-#[repr(transparent)]
-enum InvalidTransparentEnum {
-    MyName,
-    OrAtom(atom)
+#[repr(tagged, tag_style = "snake_case")]
+enum SnakeCaseEnum {
+    #[repr(atom)]
+    UnitVariant,
+    StructHTTPStyle{code: int, body: str},
 }
 
 pub fn main() {
-    println!("{:?}", TransparentEnum::Unit as term);
-    // a"Elixir.Patina.ByExample.TransparentEnum.Unit"
+    println!("{:?}", SnakeCaseEnum::UnitVariant as term);
+    // a"unit_variant"
 
-    println!("{:?}", TransparentEnum::TupleStyle(200, "hello") as term);
-    // (200, "hello")
-
-    println!("{:?}", TransparentEnum::StructStyle{point: Point{x: 1, y: 2}} as term);
-    // #{ a"__struct__" => a"Elixir.Patina.ByExample.Point", a"x" => 1, a"y" => 2 }
+    println!("{:?}", SnakeCaseEnum::StructHTTPStyle{code: 200, body: "hi"} as term);
+    // (a"struct_http_style", 200, "hi")
 }

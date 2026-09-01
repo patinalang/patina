@@ -1,11 +1,38 @@
 // source: patina-by-example/src/custom_types/repr.md
-// block: 5/12
+// block: 5/14
 
-// Omitting repr is equivalent to `#[repr(Patina)]`.
-// In a special case of a single-element struct, it's also equivalent to `#[repr(transparent)]`.
-struct Celcius(float);
+#[repr(tagged)]
+enum TaggedEnum {
+    Unit,
+    TupleStyle(str),
+    StructStyle{x: int, y: int},
+
+    #[repr(atom)]
+    UnitWithAtomOverride,
+
+    #[repr(tag = "custom_tag")]
+    WithCustomTag(int),
+}
 
 pub fn main() {
-    println!("{:?}", Celcius(2.345) as term);
-    // 2.345
+    use TaggedEnum::*;
+
+    // Unit inherits #[repr(tagged)] from the enum setting.
+    println!("{:?}", Unit as term);
+    // (a"Elixir.Patina.ByExample.TaggedEnum.Unit")
+
+    // UnitWithAtomOverride overrides the enum repr.
+    println!("{:?}", UnitWithAtomOverride as term);
+    // a"Elixir.Patina.ByExample.TaggedEnum.UnitWithAtomOverride"
+
+    // Both tuple- and struct-style variants are represented as tagged tuples.
+    println!("{:?}", TaggedEnum::TupleStyle("hello") as term);
+    // (a"Elixir.Patina.ByExample.TaggedEnum.TupleStyle", "hello")
+
+    println!("{:?}", TaggedEnum::StructStyle{x: 1, y: 2} as term);
+    // (a"Elixir.Patina.ByExample.TaggedEnum.StructStyle", 1, 2)
+
+    // You can set a custom tag by specifying it with `#[repr(tag = "...")]`.
+    println!("{:?}", TaggedEnum::WithCustomTag(42) as term);
+    // (a"custom_tag", 42)
 }

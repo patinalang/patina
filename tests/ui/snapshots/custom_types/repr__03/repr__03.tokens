@@ -2,60 +2,32 @@ LineComment { doc_style: None }
 Whitespace
 LineComment { doc_style: None }
 Whitespace
+Ident
+Whitespace
+Ident
+Semi
+Whitespace
 Pound
 OpenBracket
 Ident
 OpenParen
 Ident
+Comma
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 13 }
 CloseParen
 CloseBracket
 Whitespace
 Ident
 Whitespace
 Ident
+Semi
 Whitespace
-OpenBrace
-Whitespace
-Ident
-Comma
-Whitespace
-Ident
-OpenParen
-Ident
-CloseParen
-Comma
-Whitespace
-Ident
-OpenBrace
-Ident
-Colon
-Whitespace
-Ident
-Comma
-Whitespace
-Ident
-Colon
-Whitespace
-Ident
-CloseBrace
-Comma
-Whitespace
-Ident
-OpenParen
-OpenParen
-CloseParen
-Comma
-Whitespace
-Ident
-CloseParen
-Comma
-Whitespace
-Ident
-OpenParen
-OpenParen
-CloseParen
-CloseParen
-Comma
+LineComment { doc_style: None }
 Whitespace
 Pound
 OpenBracket
@@ -70,9 +42,69 @@ CloseParen
 CloseBracket
 Whitespace
 Ident
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+Ident
+Comma
+Whitespace
+Pound
+OpenBracket
+Ident
+OpenParen
+Ident
+Whitespace
+Eq
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 10 }
+CloseParen
+CloseBracket
+Whitespace
+Ident
+Comma
+Whitespace
+Ident
 OpenParen
 Ident
 CloseParen
+Comma
+Whitespace
+CloseBrace
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Pound
+OpenBracket
+Ident
+OpenParen
+Ident
+Comma
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 12 }
+CloseParen
+CloseBracket
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+Ident
+Comma
+Whitespace
+Ident
+Comma
+Whitespace
+Ident
 Comma
 Whitespace
 CloseBrace
@@ -87,7 +119,35 @@ CloseParen
 Whitespace
 OpenBrace
 Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 6 }
+Comma
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+CloseParen
+Semi
+Whitespace
 LineComment { doc_style: None }
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 6 }
+Comma
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+CloseParen
+Semi
 Whitespace
 LineComment { doc_style: None }
 Whitespace
@@ -110,8 +170,6 @@ Semi
 Whitespace
 LineComment { doc_style: None }
 Whitespace
-LineComment { doc_style: None }
-Whitespace
 Ident
 Bang
 OpenParen
@@ -122,119 +180,6 @@ Ident
 Colon
 Colon
 Ident
-OpenParen
-Literal { kind: Str { terminated: true }, suffix_start: 7 }
-CloseParen
-Whitespace
-Ident
-Whitespace
-Ident
-CloseParen
-Semi
-Whitespace
-LineComment { doc_style: None }
-Whitespace
-Ident
-Bang
-OpenParen
-Literal { kind: Str { terminated: true }, suffix_start: 6 }
-Comma
-Whitespace
-Ident
-Colon
-Colon
-Ident
-OpenBrace
-Ident
-Colon
-Whitespace
-Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
-Comma
-Whitespace
-Ident
-Colon
-Whitespace
-Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
-CloseBrace
-Whitespace
-Ident
-Whitespace
-Ident
-CloseParen
-Semi
-Whitespace
-LineComment { doc_style: None }
-Whitespace
-LineComment { doc_style: None }
-Whitespace
-LineComment { doc_style: None }
-Whitespace
-LineComment { doc_style: None }
-Whitespace
-Ident
-Bang
-OpenParen
-Literal { kind: Str { terminated: true }, suffix_start: 6 }
-Comma
-Whitespace
-Ident
-Colon
-Colon
-Ident
-OpenParen
-OpenParen
-CloseParen
-Comma
-Whitespace
-Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 2 }
-CloseParen
-Whitespace
-Ident
-Whitespace
-Ident
-CloseParen
-Semi
-Whitespace
-LineComment { doc_style: None }
-Whitespace
-Ident
-Bang
-OpenParen
-Literal { kind: Str { terminated: true }, suffix_start: 6 }
-Comma
-Whitespace
-Ident
-Colon
-Colon
-Ident
-OpenParen
-OpenParen
-CloseParen
-CloseParen
-Whitespace
-Ident
-Whitespace
-Ident
-CloseParen
-Semi
-Whitespace
-LineComment { doc_style: None }
-Whitespace
-LineComment { doc_style: None }
-Whitespace
-Ident
-Bang
-OpenParen
-Literal { kind: Str { terminated: true }, suffix_start: 6 }
-Comma
-Whitespace
-Ident
-Colon
-Colon
-Ident
-OpenParen
-Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 2 }
-CloseParen
 Whitespace
 Ident
 Whitespace

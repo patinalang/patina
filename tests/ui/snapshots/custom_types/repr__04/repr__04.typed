@@ -40,23 +40,21 @@ macro_rules! println {
 }
 
 // source: patina-by-example/src/custom_types/repr.md
-// block: 4/12
+// block: 4/14
 
 #[attr = Repr {reprs: []}]
-enum SnakeCaseEnum {
-    UnitVariant,
-    StructHTTPStyle {
-            code: int,
-            body: str,
-        },
-}
+struct Pair(int, float);
+
+#[attr = Repr {reprs: []}]
+struct Bar;
 
 fn main() ({
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)(((SnakeCaseEnum::UnitVariant as
-                                        SnakeCaseEnum) as term as term)) as term)] as [term])] as
+                                    fn(term) -> term)((((Pair as
+                                            fn(int, float) -> Pair {Pair})((42 as int), (3.14 as float))
+                                        as Pair) as term as term)) as term)] as [term])] as
                 [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
@@ -64,13 +62,11 @@ fn main() ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)(
-                                // a"unit_variant"
+                                // (a"Elixir.Patina.ByExample.Pair", 42, 3.14)
 
-                                ((SnakeCaseEnum::StructHTTPStyle {
-                                        code: (200 as int), body: ("hi" as str) } as SnakeCaseEnum)
-                                    as term as term)) as term)] as [term])] as [[term]])) as
-            term);
+                                ((Bar as Bar) as term as term)) as term)] as [term])] as
+                [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
-    // (a"struct_http_style", 200, "hi")
+    // (a"Elixir.BarBar")
 } as ())

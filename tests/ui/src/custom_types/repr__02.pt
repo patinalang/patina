@@ -1,17 +1,25 @@
 // source: patina-by-example/src/custom_types/repr.md
-// block: 2/12
+// block: 2/14
 
-#[repr(tagged)]
-struct Pair(int, float);
+mod MyMod {
+    #[repr(tagged)]
+    struct MyStruct(int, int);
 
-#[repr(tagged, name = "Elixir.BarBar")]
-struct Bar{ x: int, y: int, z: () }
+    #[repr(tagged, tag = "my_tag")]
+    struct MyOtherStruct(int, int);
 
-pub fn main() {
-    println!("{:?}", Pair(42, 3.14) as term);
-    // (a"Elixir.Patina.ByExample.Pair", 42, 3.14)
+    // `tag_style` can be set to automatically derive a snake case tag.
+    #[repr(tagged, tag_style = "snake_case")]
+    struct MySnakeCaseStruct(int, int);
 
-    // z is omitted from the representation
-    println!("{:?}", Bar(x: 1, y: 2, z: ()) as term);
-    // (a"Elixir.BarBar", 1, 2)
+    pub fn main() {
+        println!("{:?}", MyStruct(1, 2) as term);
+        // (a"Elixir.Patina.ByExample.MyMod.MyStruct", 1, 2)
+
+        println!("{:?}", MyOtherStruct(1, 2) as term)
+        // (a"my_tag", 1, 2)
+
+        println!("{:?}", MySnakeCaseStruct(1, 2) as term)
+        // (a"my_snake_case_struct", 1, 2)
+    }
 }

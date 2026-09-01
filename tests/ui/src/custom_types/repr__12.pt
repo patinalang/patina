@@ -1,21 +1,24 @@
 // source: patina-by-example/src/custom_types/repr.md
-// block: 12/12
+// block: 12/14
 
-extern mod erlang;
+#[repr(tagged)]
+pub enum Result<T, E> {
+    #[repr(tag = "ok")]
+    Ok(T),
 
-#[repr(tagged, style = "snake_case")]
-pub enum TermToBinaryOpts {
-    Compressed(int),
-    Deterministic,
-    MinorVersion(int),
-    Local,
+    #[repr(tag = "error")]
+    Err(E),
 }
 
 pub fn main() {
-    let opts: [TermToBinaryOpts] = [Deterministic, MinorVersion(2)];
-    println!("{:?}", opts as term);
-    // [a"deterministic", (a"minor_version", 2)]
+    println!("{:?}", Result::<int, str>::Ok(42) as term);
+    // (a"ok", 42)
 
-    println!("{:?}", erlang::term_to_binary(val, opts));
-    // <<131, 97, 42>>
+    println!("{:?}", Result::<int, str>::Err("reason") as term);
+    // (a"error", "reason")
+
+    // Note that `Result<T, E>` can't represent a bare `:ok` by itself,
+    // but we have helpers for that.
+    println!("{:?}", Result::<(), str>::Ok(()).into::<Compat::BareOkResult>() as term);
+    // a"ok"
 }

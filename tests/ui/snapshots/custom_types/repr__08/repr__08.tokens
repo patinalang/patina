@@ -17,18 +17,6 @@ Whitespace
 OpenBrace
 Whitespace
 Ident
-OpenParen
-Ident
-Comma
-Whitespace
-Ident
-CloseParen
-Comma
-Whitespace
-Ident
-OpenBrace
-Whitespace
-Ident
 Colon
 Whitespace
 Ident
@@ -38,26 +26,37 @@ Ident
 Colon
 Whitespace
 Ident
+Comma
 Whitespace
 CloseBrace
-Comma
 Whitespace
 Pound
 OpenBracket
 Ident
 OpenParen
 Ident
-Whitespace
-Eq
-Whitespace
-Literal { kind: Str { terminated: true }, suffix_start: 13 }
 CloseParen
 CloseBracket
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+OpenBrace
 Whitespace
 Ident
 OpenParen
 Ident
 CloseParen
+Comma
+Whitespace
+Ident
+OpenBrace
+Ident
+Colon
+Whitespace
+Ident
+CloseBrace
 Comma
 Whitespace
 CloseBrace
@@ -66,73 +65,50 @@ LineComment { doc_style: None }
 Whitespace
 LineComment { doc_style: None }
 Whitespace
-Pound
-OpenBracket
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
 Ident
 OpenParen
-Ident
-Comma
-Whitespace
-Ident
-Whitespace
-Eq
-Whitespace
-Literal { kind: Str { terminated: true }, suffix_start: 17 }
-Comma
-Whitespace
-Ident
-Whitespace
-Eq
-Whitespace
-Literal { kind: Str { terminated: true }, suffix_start: 13 }
 CloseParen
-CloseBracket
 Whitespace
-Ident
-Whitespace
-Ident
 OpenBrace
 Whitespace
 Ident
+Whitespace
+Ident
 Colon
-Whitespace
-Ident
-Comma
-Whitespace
-CloseBrace
-Whitespace
-Ident
-Whitespace
-Ident
-Whitespace
-Ident
+Colon
+Star
 Semi
 Whitespace
 Ident
-Whitespace
-Ident
-Whitespace
-Ident
+Bang
 OpenParen
-CloseParen
-Whitespace
-OpenBrace
-Whitespace
-Ident
-Whitespace
-Ident
-Whitespace
-Eq
-Whitespace
-Ident
-Colon
-Colon
-Ident
-OpenParen
-Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Literal { kind: Str { terminated: true }, suffix_start: 6 }
 Comma
 Whitespace
-Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Ident
+OpenParen
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 3 }
+CloseParen
+Whitespace
+Ident
+Whitespace
+Ident
 CloseParen
 Semi
 Whitespace
@@ -145,47 +121,28 @@ Literal { kind: Str { terminated: true }, suffix_start: 6 }
 Comma
 Whitespace
 Ident
+OpenBrace
+Ident
 Colon
-Colon
-Ident
-OpenParen
-Ident
-CloseParen
-CloseParen
-Semi
-Whitespace
-LineComment { doc_style: None }
-Whitespace
-Ident
-Whitespace
-Ident
-Whitespace
-Eq
 Whitespace
 Ident
 OpenBrace
-Whitespace
 Ident
 Colon
 Whitespace
-Literal { kind: Str { terminated: true }, suffix_start: 5 }
-Whitespace
-CloseBrace
-Semi
-Whitespace
-Ident
-Bang
-OpenParen
-Literal { kind: Str { terminated: true }, suffix_start: 6 }
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
 Comma
 Whitespace
 Ident
 Colon
-Colon
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+CloseBrace
+CloseBrace
+Whitespace
 Ident
-OpenParen
+Whitespace
 Ident
-CloseParen
 CloseParen
 Semi
 Whitespace

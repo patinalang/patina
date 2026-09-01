@@ -40,32 +40,32 @@ macro_rules! println {
 }
 
 // source: patina-by-example/src/custom_types/repr.md
-// block: 3/12
+// block: 3/14
+
+struct Unit;
 
 #[attr = Repr {reprs: []}]
-enum TaggedEnum {
-    Unit,
-    TupleStyle(str),
-    StructStyle {
-            x: int,
-            y: int,
-        },
+struct CustomNameUnit;
 
-    WithUnitElem((), int),
-    WithOneUnitElem(()),
-
+// repr settings on an enum are inherited by variants
+#[attr = Repr {reprs: []}]
+enum NotJustUnits {
+    VariantA,
     #[attr = Repr {reprs: []}]
-    WithCustomTag(int),
+    VariantB,
+    VariantC(int),
 }
+
+// Explicitly setting `#[repr(atom)]` will ensure that only unit variants
+// are ever added to an enum.
+#[attr = Repr {reprs: []}]
+enum OnlyUnits { VariantA, VariantB, VariantC, }
 
 fn main() ({
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)(
-                                // In every representation, unit variants with are always encoded
-                                // directly as atoms.
-                                ((TaggedEnum::Unit as TaggedEnum) as term as term)) as
+                                    fn(term) -> term)(((Unit as Unit) as term as term)) as
                                 term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
@@ -73,65 +73,31 @@ fn main() ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)(
-                                // a"Elixir.Patina.ByExample.TaggedEnum.Unit"
+                                // a"Elixir.Patina.ByExample.Unit"
 
-                                // Both tuple- and struct-style variants are represented as tagged tuples.
-                                (((TaggedEnum::TupleStyle as
-                                            fn(str) -> TaggedEnum {TaggedEnum::TupleStyle})(("hello" as
-                                            str)) as TaggedEnum) as term as term)) as term)] as [term])]
-                as [[term]])) as term);
+                                ((CustomNameUnit as CustomNameUnit) as term as term)) as
+                                term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)(
-                                // (a"Elixir.Patina.ByExample.TaggedEnum.TupleStyle", "hello")
+                                // a"custom_name"
 
-                                ((TaggedEnum::StructStyle { x: (1 as int), y: (2 as int) }
-                                        as TaggedEnum) as term as term)) as term)] as [term])] as
-                [[term]])) as term);
+                                ((NotJustUnits::VariantA as NotJustUnits) as term as term))
+                                as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)(
-                                // (a"Elixir.Patina.ByExample.TaggedEnum.StructStyle", 1, 2)
+                                // a"variant_a"
 
-                                // Unit elements are omitted in the runtime representation. If all elements
-                                // of the variant are unit type, the variant is represented directly
-                                // as an atom.
-                                (((TaggedEnum::WithUnitElem as
-                                            fn((), int) -> TaggedEnum {TaggedEnum::WithUnitElem})((() as
-                                            ()), (42 as int)) as TaggedEnum) as term as term)) as term)]
-                        as [term])] as [[term]])) as term);
+                                ((NotJustUnits::VariantB as NotJustUnits) as term as term))
+                                as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
-    ({
-        ((io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)(
-                                // (a"Elixir.Patina.ByExample.TaggedEnum.WithUnitElem", 42)
-
-                                (((TaggedEnum::WithOneUnitElem as
-                                            fn(()) -> TaggedEnum {TaggedEnum::WithOneUnitElem})((() as
-                                            ())) as TaggedEnum) as term as term)) as term)] as [term])]
-                as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
-    } as ());
-    ({
-        ((io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)(
-                                // a"Elixir.Patina.ByExample.TaggedEnum.WithOneUnitElem"
-
-                                // You can set a custom tag by specifying it with `#[repr(name = "...")]`.
-                                (((TaggedEnum::WithCustomTag as
-                                            fn(int) -> TaggedEnum {TaggedEnum::WithCustomTag})((42 as
-                                            int)) as TaggedEnum) as term as term)) as term)] as [term])]
-                as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
-    } as ());
-    // (a"my_tag", 42)
+    // a"variantB"
 } as ())

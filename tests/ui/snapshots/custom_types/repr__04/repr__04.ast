@@ -1,20 +1,16 @@
 // source: patina-by-example/src/custom_types/repr.md
-// block: 4/12
+// block: 4/14
 
-#[repr(tagged, style = "snake_case")]
-enum SnakeCaseEnum {
-    UnitVariant,
-    StructHTTPStyle {
-        code: int,
-        body: str,
-    },
-}
+#[repr(tagged)]
+struct Pair(int, float);
+
+#[repr(tagged, tag = "Elixir.BarBar")]
+struct Bar;
 
 pub fn main() {
-    println!("{:?}", SnakeCaseEnum::UnitVariant as term);
-    // a"unit_variant"
+    println!("{:?}", Pair(42, 3.14) as term);
+    // (a"Elixir.Patina.ByExample.Pair", 42, 3.14)
 
-    println!("{:?}", SnakeCaseEnum::StructHTTPStyle{code: 200, body: "hi"} as
-    term);
-    // (a"struct_http_style", 200, "hi")
+    println!("{:?}", Bar as term);
+    // (a"Elixir.BarBar")
 }

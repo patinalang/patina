@@ -40,50 +40,13 @@ macro_rules! println {
 }
 
 // source: patina-by-example/src/custom_types/repr.md
-// block: 1/12
+// block: 1/14
 
-struct Unit;
+mod MyMod {
+    // This struct's module name is `Elixir.Patina.ByExample.MyMod.MyStruct`.
+    struct MyStruct;
 
-#[repr(atom, name = "custom_name")]
-struct CustomNameUnit;
-
-// `style` can be used to change the style of atom tags assigned by Patina
-#[repr(style = "snake_case")]
-enum NotJustUnits {
-    VariantA,
-
-    #[repr(name = "variantB")]
-    VariantB,
-    VariantC(int),
-}
-
-// Explicitly setting `#[repr(atom)]` will ensure that only unit variants
-// are ever added to an enum.
-#[repr(atom, style = "snake_case")]
-enum OnlyUnits { VariantA, VariantB, VariantC, }
-
-pub fn main() {
-    { io::put_chars([[patina_fmt::debug(Unit as term)]]); io::nl(); };
-    {
-        io::put_chars([[patina_fmt::debug(
-                                // a"Elixir.Patina.ByExample.Unit"
-
-                                CustomNameUnit as term)]]);
-        io::nl();
-    };
-    {
-        io::put_chars([[patina_fmt::debug(
-                                // a"custom_name"
-
-                                NotJustUnits::VariantA as term)]]);
-        io::nl();
-    };
-    {
-        io::put_chars([[patina_fmt::debug(
-                                // a"variant_a"
-
-                                NotJustUnits::VariantB as term)]]);
-        io::nl();
-    };
-    // a"variantB"
+    // This struct's module name is `my_other_struct`.
+    #[module = "my_other_struct"]
+    struct MyOtherStruct;
 }

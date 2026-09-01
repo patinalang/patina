@@ -40,65 +40,22 @@ macro_rules! println {
 }
 
 // source: patina-by-example/src/custom_types/repr.md
-// block: 11/12
+// block: 11/14
 
-#[attr = Repr {reprs: [ReprTransparent]}]
-enum Option<T> {
-    #[attr = Repr {reprs: []}]
-    Some(T),
-
-    #[attr = Repr {reprs: []}]
-    None,
+#[attr = Repr {reprs: []}]
+struct Point {
+    x: float,
+    y: float,
 }
 
 fn main() ({
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)(((Option::<int>::Some as
-                                        fn(int) -> Option<int> {Option::<int>::Some})((42 as int))
-                                    as Option<int>)) as term), ("    " as str),
-                            ((patina_fmt::debug as
-                                    fn(term) -> term)((Option::<int>::None as Option<int>)) as
-                                term)] as [term])] as [[term]])) as term);
+                                    fn(term) -> term)(((Point {
+                                        x: (5.2 as float), y: (0.4 as float) } as Point) as term as
+                                    term)) as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
-    ({
-        ((io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)(
-                                // 42    a"nil"
-
-                                // `Option<atom>` cannot be transparent, as `a"nil"` is a valid `Some`
-                                ((Option::<atom>::Some as
-                                        fn(atom) -> Option<atom> {Option::<atom>::Some})((a"hi" as
-                                        atom)) as Option<atom>)) as term), ("    " as str),
-                            ((patina_fmt::debug as
-                                    fn(term) -> term)((Option::<atom>::None as Option<atom>)) as
-                                term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
-    } as ());
-    ({
-        ((io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)(
-                                // (a"some", a"hi")    a"nil"
-
-                                // Option<Option<int>> also cannot be transparently represented
-                                ((Option::<Option<int>>::Some as
-                                        fn(Option<int>) -> Option<Option<int>> {Option::<Option<int>>::Some})(((Some
-                                            as {type error})((42 as int)) as {type error})) as
-                                    Option<Option<int>>)) as term), ("    " as str),
-                            ((patina_fmt::debug as
-                                    fn(term) -> term)(((Option::<Option<int>>::Some as
-                                        fn(Option<int>) -> Option<Option<int>> {Option::<Option<int>>::Some})((None
-                                        as {type error})) as Option<Option<int>>)) as term),
-                            ("    " as str),
-                            ((patina_fmt::debug as
-                                    fn(term) -> term)((Option::<Option<int>>::None as
-                                    Option<Option<int>>)) as term)] as [term])] as [[term]])) as
-            term);
-        ((io::nl as fn() -> term)() as term);
-    } as ());
-    // (a"some", 42)    (a"some", a"nil")    a"nil"
+    // #{ a"__struct__" => a"Elixir.Patina.ByExample.Point", a"x" => 5.2, a"y" => 0.4 }
 } as ())

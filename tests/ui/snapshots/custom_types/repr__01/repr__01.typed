@@ -40,64 +40,13 @@ macro_rules! println {
 }
 
 // source: patina-by-example/src/custom_types/repr.md
-// block: 1/12
+// block: 1/14
 
-struct Unit;
+mod MyMod {
+    // This struct's module name is `Elixir.Patina.ByExample.MyMod.MyStruct`.
+    struct MyStruct;
 
-#[attr = Repr {reprs: []}]
-struct CustomNameUnit;
-
-// `style` can be used to change the style of atom tags assigned by Patina
-#[attr = Repr {reprs: []}]
-enum NotJustUnits {
-    VariantA,
-    #[attr = Repr {reprs: []}]
-    VariantB,
-    VariantC(int),
+    // This struct's module name is `my_other_struct`.
+    #[attr = ErlModule("my_other_struct")]
+    struct MyOtherStruct;
 }
-
-// Explicitly setting `#[repr(atom)]` will ensure that only unit variants
-// are ever added to an enum.
-#[attr = Repr {reprs: []}]
-enum OnlyUnits { VariantA, VariantB, VariantC, }
-
-fn main() ({
-    ({
-        ((io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)(((Unit as Unit) as term as term)) as
-                                term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
-    } as ());
-    ({
-        ((io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)(
-                                // a"Elixir.Patina.ByExample.Unit"
-
-                                ((CustomNameUnit as CustomNameUnit) as term as term)) as
-                                term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
-    } as ());
-    ({
-        ((io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)(
-                                // a"custom_name"
-
-                                ((NotJustUnits::VariantA as NotJustUnits) as term as term))
-                                as term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
-    } as ());
-    ({
-        ((io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)(
-                                // a"variant_a"
-
-                                ((NotJustUnits::VariantB as NotJustUnits) as term as term))
-                                as term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
-    } as ());
-    // a"variantB"
-} as ())

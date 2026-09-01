@@ -13,19 +13,63 @@ Whitespace
 Ident
 Whitespace
 Ident
+Lt
+Ident
+Gt
 Whitespace
 OpenBrace
 Whitespace
 Ident
-Colon
+OpenParen
+Ident
+CloseParen
+Comma
 Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Pound
+OpenBracket
+Ident
+OpenParen
+Ident
+Whitespace
+Eq
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 10 }
+CloseParen
+CloseBracket
+Whitespace
+Ident
+OpenParen
+Ident
+CloseParen
+Comma
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Pound
+OpenBracket
+Ident
+OpenParen
 Ident
 Comma
 Whitespace
 Ident
-Colon
+Whitespace
+Eq
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 7 }
+CloseParen
+CloseBracket
 Whitespace
 Ident
+OpenParen
+Ident
+CloseParen
 Comma
 Whitespace
 CloseBrace
@@ -41,24 +85,101 @@ Whitespace
 OpenBrace
 Whitespace
 Ident
+Whitespace
+Ident
+Colon
+Colon
+Star
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
 Bang
 OpenParen
 Literal { kind: Str { terminated: true }, suffix_start: 6 }
 Comma
 Whitespace
 Ident
-OpenBrace
-Ident
-Colon
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 7 }
+CloseParen
 Whitespace
-Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Ident
+Whitespace
+Ident
+CloseParen
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 6 }
 Comma
 Whitespace
 Ident
-Colon
+OpenParen
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 2 }
+CloseParen
+Whitespace
+Ident
+Whitespace
+Ident
+CloseParen
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 6 }
+Comma
+Whitespace
+Ident
+OpenParen
+Literal { kind: AtomStr { terminated: true }, suffix_start: 5 }
+Whitespace
+Ident
+Whitespace
+Ident
+CloseParen
+Whitespace
+Ident
+Whitespace
+Ident
+CloseParen
+Semi
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 6 }
+Comma
+Whitespace
+Ident
+OpenParen
+OpenParen
+Literal { kind: AtomStr { terminated: true }, suffix_start: 11 }
+Comma
 Whitespace
 Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
-CloseBrace
+CloseParen
+Whitespace
+Ident
+Whitespace
+Ident
+CloseParen
 Whitespace
 Ident
 Whitespace

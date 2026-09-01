@@ -1,13 +1,36 @@
 // source: patina-by-example/src/custom_types/repr.md
-// block: 9/12
+// block: 9/14
 
-#[repr(Elixir)]
-struct Point {
-    x: float,
-    y: float,
+#[repr(transparent)]
+enum TransparentWithTags<T> {
+    Untagged(str),
+
+    // `MaybeUntagged(T)` values are represented as themselves, except
+    // for values that could be mistaken for another variant.
+    #[repr(tag = "othertag")]
+    MaybeUntagged(T),
+
+    // Individual enum variants can have their own representation set.
+    // Tagged(int) will always be tagged with `(a"mytag", _)`.
+    #[repr(tagged, tag = "mytag")]
+    Tagged(int),
 }
 
 pub fn main() {
-    println!("{:?}", Point{x: 1, y: 2} as term);
-    // #{a"__struct__" => a"Elixir.Patina.ByExample.Point", a"x" => 5.2, a"y" => 0.4}
+    use TransparentWithTags::*;
+    // A `str` payload could be mistaken for Untagged, so it's wrapped.
+    println!("{:?}", MaybeUntagged("hello") as term);
+    // (a"othertag", "hello")
+
+    // An int payload cannot be mistaken for anything - it stays transparent.
+    println!("{:?}", MaybeUntagged(42) as term);
+    // 42
+
+    // The decision is per-value, not per-type. Most terms stay transparent...
+    println!("{:?}", MaybeUntagged(a"hi" as term) as term);
+    // a"hi"
+
+    // ...but a term that looks like another variant is wrapped, too.
+    println!("{:?}", MaybeUntagged((a"othertag", 1) as term) as term);
+    // (a"othertag", (a"othertag", 1))
 }

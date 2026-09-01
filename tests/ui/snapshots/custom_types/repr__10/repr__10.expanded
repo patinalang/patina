@@ -40,41 +40,41 @@ macro_rules! println {
 }
 
 // source: patina-by-example/src/custom_types/repr.md
-// block: 10/12
+// block: 10/14
 
-#[repr(tagged)]
-pub enum Result<T, E> {
+#[repr(native_record)]
+enum NativeRecordEnum {
+    Point(int, int),
 
-    #[repr(name = "ok")]
-    Ok(T),
-
-    #[repr(name = "error")]
-    Err(E),
+    #[repr(tag = "custom_name")]
+    WithCustomName(float),
 }
 
+// For structs (not enums!) you can reference an existing, external native record.
+// The record's existence and fields will be checked on module load.
+// Note that `#[repr(record_module = "...")]` does *not* influence the name of the
+// module that will hold the struct's implementation.
+// For that, use `#[module = "..."]`.
+#[repr(native_record, record_module = "external_module", tag = "custom_name")]
+struct NativeRecordStruct {
+    foo: str,
+}
+
+extern mod records;
 pub fn main() {
-    {
-        io::put_chars([[patina_fmt::debug(Result::<int, str>::Ok(42)), "    ",
-                            patina_fmt::debug(Result::<int, str>::Err("reason"))]]);
-        io::nl();
-    };
+    let point = NativeRecordEnum::Point(1, 2);
     {
         io::put_chars([[patina_fmt::debug(
-                                // (a"ok", 42)    (a"error", "reason")
-
-                                // The unit elision rule lets us directly represent `:ok | {:error, reason}`
-                                Result::<(), str>::Ok(())), "    ",
-                            patina_fmt::debug(Result::<(), str>::Err("reason"))]]);
+                                // The field names of a tuple-structs and -variants are atomized integers.
+                                records::get_field_names(point))]]);
         io::nl();
     };
+    // [a"0", a"1"]
+
+    let rect = NativeRecordStruct { foo: "bar" };
     {
-        io::put_chars([[patina_fmt::debug(
-                                // a"ok"    (a"error", "reason")
-
-                                // Elixir's `Map.fetch` result `{:ok, val} | :error` can also be represented
-                                Result::<int, ()>::Ok(42)), "    ",
-                            patina_fmt::debug(Result < int)]]);
+        io::put_chars([[patina_fmt::debug(records::get_field_names(rect))]]);
         io::nl();
     };
-    // (a"ok", 42)    a"error"
+    // [a"foo"]
 }
