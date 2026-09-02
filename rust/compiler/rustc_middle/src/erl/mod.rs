@@ -2,7 +2,7 @@
 
 use rustc_data_structures::fx::FxIndexSet;
 use rustc_hir::attrs::AttributeKind;
-use rustc_hir::def::DefKind;
+use rustc_hir::def::{CtorKind, DefKind};
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::definitions::DefPathData;
 use rustc_hir::{Attribute, HirId, PrimTy};
@@ -72,10 +72,20 @@ impl ErlCallKind {
     }
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum ErlAdtRepr {
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, StableHash)]
+pub enum ErlRepr {
     Elixir,
+    Tagged,
+    Atom,
+    Transparent,
     NativeRecord,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, StableHash)]
+pub struct ErlVariantRepr {
+    pub kind: ErlRepr,
+    pub tag: Symbol,
+    pub record_module: Option<Symbol>,
 }
 
 impl<'tcx> TyCtxt<'tcx> {
@@ -448,13 +458,41 @@ impl<'tcx> TyCtxt<'tcx> {
         }
     }
 
-    pub fn erl_adt_repr(self, def_id: DefId) -> ErlAdtRepr {
+    pub fn erl_adt_repr(self, def_id: DefId) -> ErlRepr {
         let adt = self.adt_def(def_id);
         match adt.adt_kind() {
-            AdtKind::Struct => ErlAdtRepr::Elixir,
-            AdtKind::Enum => ErlAdtRepr::NativeRecord,
+            AdtKind::Struct => ErlRepr::Elixir,
+            AdtKind::Enum => ErlRepr::NativeRecord,
             AdtKind::Union => unimplemented!(),
         }
+    }
+
+    /// Resolves the runtime representation of a struct or enum variant.
+    pub fn erl_variant_repr(self, variant_def_id: DefId) -> ErlVariantRepr {
+        let adt = match self.def_kind(variant_def_id) {
+            DefKind::Struct => self.adt_def(variant_def_id),
+            DefKind::Variant => self.adt_def(self.parent(variant_def_id)),
+            kind => bug!("expected struct or enum variant, got {kind:?}"),
+        };
+        let variant = if adt.is_enum() {
+            adt.variant_with_id(variant_def_id)
+        } else {
+            adt.non_enum_variant()
+        };
+
+        let kind = if variant.ctor_kind() == Some(CtorKind::Const) {
+            ErlRepr::Atom
+        } else {
+            self.erl_adt_repr(adt.did())
+        };
+
+        ErlVariantRepr { kind, tag: self.erl_adt_tag(variant_def_id), record_module: None }
+    }
+
+    /// Returns the atom used to tag a struct or enum variant.
+    pub fn erl_adt_tag(self, variant_def_id: DefId) -> Symbol {
+        assert!(matches!(self.def_kind(variant_def_id), DefKind::Struct | DefKind::Variant));
+        self.erl_module_name(ErlModuleId::Adt(variant_def_id))
     }
 }
 

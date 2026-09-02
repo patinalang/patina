@@ -1,8 +1,7 @@
 use rustc_abi::FieldIdx;
 use rustc_data_structures::smallvec::SmallVec;
-use rustc_hir::def::CtorKind;
 use rustc_hir::def_id::DefId;
-use rustc_middle::erl::{ErlAdtRepr, ErlCallKind, ErlCallTarget, ErlModuleId, ErlModuleResolution};
+use rustc_middle::erl::{ErlCallKind, ErlCallTarget, ErlModuleResolution, ErlRepr, ErlVariantRepr};
 use rustc_middle::span_bug;
 use rustc_middle::thir::{AdtExpr, AdtExprBase, Expr, FieldPat};
 use rustc_middle::ty::{AdtDef, VariantDef};
@@ -20,17 +19,17 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         variant: &VariantDef,
         subpatterns: &[FieldPat<'tcx>],
     ) -> Patterns<'arena> {
-        if variant.ctor_kind() == Some(CtorKind::Const) {
-            let name = self.tcx().erl_module_name(ErlModuleId::Adt(variant.def_id));
-            return self.translator.afb.pat_atom(span, name).into();
-        }
-
-        match self.tcx().erl_adt_repr(adt_def.did()) {
-            ErlAdtRepr::Elixir => {
+        let repr = self.tcx().erl_variant_repr(variant.def_id);
+        match repr.kind {
+            ErlRepr::Atom => self.translator.afb.pat_atom(span, repr.tag).into(),
+            ErlRepr::Elixir => {
                 self.translate_elixir_struct_pattern(span, adt_def, variant, subpatterns)
             }
-            ErlAdtRepr::NativeRecord => {
-                self.translate_native_record_pattern(span, adt_def, variant, subpatterns)
+            ErlRepr::NativeRecord => {
+                self.translate_native_record_pattern(span, adt_def, variant, subpatterns, repr)
+            }
+            ErlRepr::Tagged | ErlRepr::Transparent => {
+                not_implemented!(self.tcx(), span, "ADT pattern representation", repr.kind)
             }
         }
     }
@@ -44,15 +43,14 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let adt_def = adt_expr.adt_def;
         let variant = adt_def.variant(adt_expr.variant_index);
 
-        // Unit structs always compile down to atom
-        if variant.ctor_kind() == Some(CtorKind::Const) {
-            let name = self.tcx().erl_module_name(ErlModuleId::Adt(variant.def_id));
-            return afb.expr_atom(expr.span, name);
-        }
-
-        match self.tcx().erl_adt_repr(adt_def.did()) {
-            ErlAdtRepr::Elixir => self.translate_elixir_struct(expr, adt_expr, variant),
-            ErlAdtRepr::NativeRecord => self.translate_native_record(expr, adt_expr, variant),
+        let repr = self.tcx().erl_variant_repr(variant.def_id);
+        match repr.kind {
+            ErlRepr::Atom => afb.expr_atom(expr.span, repr.tag),
+            ErlRepr::Elixir => self.translate_elixir_struct(expr, adt_expr, variant),
+            ErlRepr::NativeRecord => self.translate_native_record(expr, adt_expr, variant, repr),
+            ErlRepr::Tagged | ErlRepr::Transparent => {
+                not_implemented!(self.tcx(), expr.span, "ADT representation", repr.kind)
+            }
         }
     }
 
@@ -102,6 +100,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         expr: &Expr<'tcx>,
         adt_expr: &AdtExpr<'tcx>,
         variant: &VariantDef,
+        repr: ErlVariantRepr,
     ) -> eaf::Expr<'arena> {
         let tcx = self.tcx();
         let afb = &self.translator.afb;
@@ -115,8 +114,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         };
 
         let record_name = variant.name;
-        let module =
-            self.resolve_extern_module_name(expr.span, adt_expr.adt_def.did(), variant.def_id);
+        let module = repr.record_module.or_else(|| {
+            self.resolve_extern_module_name(expr.span, adt_expr.adt_def.did(), variant.def_id)
+        });
 
         let fields = adt_expr.fields.iter().map(|field| {
             let field_def = &variant.fields[field.name];
@@ -167,8 +167,11 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         adt_def: AdtDef<'tcx>,
         variant: &VariantDef,
         subpatterns: &[FieldPat<'tcx>],
+        repr: ErlVariantRepr,
     ) -> Patterns<'arena> {
-        let module = self.resolve_extern_module_name(span, adt_def.did(), variant.def_id);
+        let module = repr
+            .record_module
+            .or_else(|| self.resolve_extern_module_name(span, adt_def.did(), variant.def_id));
         let field_count = variant.fields.len();
 
         let (groups, fields) = (0..field_count)

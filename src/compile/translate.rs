@@ -15,7 +15,7 @@ use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LocalDefId, LocalModDefId};
 use rustc_hir::{BodyId, Defaultness, FnSig, Generics, ImplItemKind, ItemKind, Mod, VariantData};
 use rustc_middle::bug;
-use rustc_middle::erl::{ErlModuleId, ErlModuleResolution};
+use rustc_middle::erl::{ErlModuleId, ErlModuleResolution, ErlRepr};
 use rustc_middle::ty::{self, Ty, TyCtxt};
 use rustc_span::{Ident, Span, Symbol, kw, sym};
 use scopes::Scopes;

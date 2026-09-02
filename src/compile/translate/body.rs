@@ -301,7 +301,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let field = &variant.fields[name];
         let key = field.name;
 
-        if self.tcx().erl_adt_repr(adt_def.did()) != rustc_middle::erl::ErlAdtRepr::Elixir {
+        if self.tcx().erl_variant_repr(variant.def_id).kind != rustc_middle::erl::ErlRepr::Elixir {
             not_implemented!(self.tcx(), expr.span, "field access on non-Elixir ADT", ty);
         }
 
