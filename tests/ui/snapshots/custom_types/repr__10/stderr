@@ -1,48 +1,21 @@
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__10.pt:4:8
+warning: variant `WithCustomName` is never constructed
+  --> tests/ui/src/custom_types/repr__10.pt:9:5
    |
-LL | #[repr(native_record)]
-   |        ^^^^^^^^^^^^^
+LL | enum NativeRecordEnum {
+   |      ---------------- variant in this enum
+...
+LL |     WithCustomName(float),
+   |     ^^^^^^^^^^^^^^
    |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
 
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__10.pt:8:12
+warning: field `foo` is never read
+  --> tests/ui/src/custom_types/repr__10.pt:19:5
    |
-LL |     #[repr(tag = "custom_name")]
-   |            ^^^^^^^^^^^^^^^^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+LL | struct NativeRecordStruct{
+   |        ------------------ field in this struct
+LL |     foo: str,
+   |     ^^^
 
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__10.pt:17:8
-   |
-LL | #[repr(native_record, record_module = "external_module", tag = "custom_name")]
-   |        ^^^^^^^^^^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+warning: 2 warnings emitted
 
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__10.pt:17:23
-   |
-LL | #[repr(native_record, record_module = "external_module", tag = "custom_name")]
-   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
-
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__10.pt:17:58
-   |
-LL | #[repr(native_record, record_module = "external_module", tag = "custom_name")]
-   |                                                          ^^^^^^^^^^^^^^^^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
-
-error: aborting due to 5 previous errors
-
-For more information about this error, try `rustc --explain E0552`.

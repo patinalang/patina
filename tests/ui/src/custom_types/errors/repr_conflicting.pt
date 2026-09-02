@@ -1,0 +1,11 @@
+// A `#[repr(...)]` can only pick a single runtime representation.
+// The `tag` modifier is not at fault, so it is not part of the error span.
+#[repr(tagged, tag = "my_tag", transparent)]
+struct Conflict(int);
+
+// `record_module` references an external native record, so it is only
+// valid together with `native_record`.
+#[repr(tagged, record_module = "external_module")]
+struct NotANativeRecord(int);
+
+pub fn main() {}

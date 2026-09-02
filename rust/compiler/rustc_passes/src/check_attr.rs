@@ -11,6 +11,7 @@ use std::slice;
 use rustc_abi::ExternAbi;
 use rustc_ast::{AttrStyle, MetaItemKind, ast};
 use rustc_attr_parsing::AttributeParser;
+use rustc_data_structures::smallvec::SmallVec;
 use rustc_data_structures::thin_vec::ThinVec;
 use rustc_data_structures::unord::UnordMap;
 use rustc_errors::{DiagCtxtHandle, IntoDiagArg, MultiSpan, msg};
@@ -1208,80 +1209,10 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             find_attr!(attrs, Repr { reprs, first_span } => (reprs.as_slice(), Some(*first_span)))
                 .unwrap_or((&[], None));
 
-        let mut int_reprs = 0;
-        let mut is_explicit_rust = false;
-        let mut is_c = false;
-        let mut is_simd = false;
         let mut is_transparent = false;
 
         for (repr, repr_span) in reprs {
             match repr {
-                ReprAttr::ReprRust => {
-                    is_explicit_rust = true;
-                    match target {
-                        Target::Struct | Target::Union | Target::Enum => continue,
-                        _ => {
-                            self.dcx().emit_err(errors::AttrApplication::StructEnumUnion {
-                                hint_span: *repr_span,
-                                span,
-                            });
-                        }
-                    }
-                }
-                ReprAttr::ReprC => {
-                    is_c = true;
-                    match target {
-                        Target::Struct | Target::Union | Target::Enum => continue,
-                        _ => {
-                            self.dcx().emit_err(errors::AttrApplication::StructEnumUnion {
-                                hint_span: *repr_span,
-                                span,
-                            });
-                        }
-                    }
-                }
-                ReprAttr::ReprAlign(..) => match target {
-                    Target::Struct | Target::Union | Target::Enum => {}
-                    Target::Fn | Target::Method(_) if self.tcx.features().fn_align() => {
-                        self.dcx().emit_err(errors::ReprAlignShouldBeAlign {
-                            span: *repr_span,
-                            item: target.plural_name(),
-                        });
-                    }
-                    Target::Static if self.tcx.features().static_align() => {
-                        self.dcx().emit_err(errors::ReprAlignShouldBeAlignStatic {
-                            span: *repr_span,
-                            item: target.plural_name(),
-                        });
-                    }
-                    _ => {
-                        self.dcx().emit_err(errors::AttrApplication::StructEnumUnion {
-                            hint_span: *repr_span,
-                            span,
-                        });
-                    }
-                },
-                ReprAttr::ReprPacked(_) => {
-                    if target != Target::Struct && target != Target::Union {
-                        self.dcx().emit_err(errors::AttrApplication::StructUnion {
-                            hint_span: *repr_span,
-                            span,
-                        });
-                    } else {
-                        continue;
-                    }
-                }
-                ReprAttr::ReprSimd => {
-                    is_simd = true;
-                    if target != Target::Struct {
-                        self.dcx().emit_err(errors::AttrApplication::Struct {
-                            hint_span: *repr_span,
-                            span,
-                        });
-                    } else {
-                        continue;
-                    }
-                }
                 ReprAttr::ReprTransparent => {
                     is_transparent = true;
                     match target {
@@ -1295,7 +1226,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     }
                 }
                 ReprAttr::ReprInt => {
-                    int_reprs += 1;
                     if target != Target::Enum {
                         self.dcx().emit_err(errors::AttrApplication::Enum {
                             hint_span: *repr_span,
@@ -1305,6 +1235,23 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                         continue;
                     }
                 }
+                ReprAttr::Patina
+                | ReprAttr::Elixir
+                | ReprAttr::Tagged
+                | ReprAttr::Atom
+                | ReprAttr::Transparent
+                | ReprAttr::NativeRecord
+                | ReprAttr::Tag(..)
+                | ReprAttr::TagStyle(..)
+                | ReprAttr::RecordModule(..) => match target {
+                    Target::Struct | Target::Enum | Target::Variant => continue,
+                    _ => {
+                        self.dcx().emit_err(errors::AttrApplication::StructEnumVariant {
+                            hint_span: *repr_span,
+                            span,
+                        });
+                    }
+                },
             };
         }
 
@@ -1335,6 +1282,39 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         // This is not ideal, but tracking precisely which ones are at fault is a huge hassle.
         let hint_spans = reprs.iter().map(|(_, span)| *span);
 
+        // Representation hints that each determine the runtime representation
+        let mut primaries: SmallVec<[(ReprAttr, Span); 1]> = SmallVec::new();
+        let mut primary_hints = 0;
+        let mut record_module_span = None;
+        for (repr, repr_span) in reprs {
+            match repr {
+                ReprAttr::Patina
+                | ReprAttr::Elixir
+                | ReprAttr::Tagged
+                | ReprAttr::Atom
+                | ReprAttr::Transparent
+                | ReprAttr::NativeRecord
+                | ReprAttr::ReprInt => {
+                    primary_hints += 1;
+                    if !primaries.iter().any(|(primary, _)| primary == repr) {
+                        primaries.push((*repr, *repr_span));
+                    }
+                }
+                ReprAttr::RecordModule(..) => record_module_span = Some(*repr_span),
+                ReprAttr::ReprTransparent | ReprAttr::Tag(..) | ReprAttr::TagStyle(..) => {}
+            }
+        }
+
+        if primaries.len() > 1 {
+            let hint_spans = primaries.iter().map(|(_, span)| *span).collect();
+            self.dcx().emit_err(errors::ReprConflicting { hint_spans });
+        }
+        if let Some(record_module_span) = record_module_span
+            && !primaries.iter().any(|(primary, _)| matches!(primary, ReprAttr::NativeRecord))
+        {
+            self.dcx().emit_err(errors::ReprConflicting { hint_spans: vec![record_module_span] });
+        }
+
         // Error on repr(transparent, <anything else>).
         if is_transparent && reprs.len() > 1 {
             let hint_spans = hint_spans.clone().collect();
@@ -1354,19 +1334,8 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 target: target.to_string(),
             });
         }
-        if is_explicit_rust && (int_reprs > 0 || is_c || is_simd) {
-            let hint_spans = hint_spans.clone().collect();
-            self.dcx().emit_err(errors::ReprConflicting { hint_spans });
-        }
-        // Warn on repr(u8, u16), repr(C, simd), and c-like-enum-repr(C, u8)
-        if (int_reprs > 1)
-            || (is_simd && is_c)
-            || (int_reprs == 1
-                && is_c
-                && item.is_some_and(|item| {
-                    if let ItemLike::Item(item) = item { is_c_like_enum(item) } else { false }
-                }))
-        {
+        // Warn on duplicate representation hints, like `#[repr(int, int)]`.
+        if primary_hints > primaries.len() {
             self.tcx.emit_node_span_lint(
                 CONFLICTING_REPR_HINTS,
                 hir_id,
@@ -1913,20 +1882,6 @@ impl<'tcx> Visitor<'tcx> for CheckAttrVisitor<'tcx> {
     fn visit_pat_field(&mut self, field: &'tcx hir::PatField<'tcx>) {
         self.check_attributes(field.hir_id, field.span, Target::PatField, None);
         intravisit::walk_pat_field(self, field);
-    }
-}
-
-fn is_c_like_enum(item: &Item<'_>) -> bool {
-    if let ItemKind::Enum(_, _, ref def) = item.kind {
-        for variant in def.variants {
-            match variant.data {
-                hir::VariantData::Unit(..) => { /* continue */ }
-                _ => return false,
-            }
-        }
-        true
-    } else {
-        false
     }
 }
 

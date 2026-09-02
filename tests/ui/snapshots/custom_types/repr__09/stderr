@@ -1,45 +1,15 @@
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__09.pt:10:12
-   |
-LL |     #[repr(tag = "othertag")]
-   |            ^^^^^^^^^^^^^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
-
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__09.pt:15:12
-   |
-LL |     #[repr(tagged, tag = "mytag")]
-   |            ^^^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
-
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__09.pt:15:20
-   |
-LL |     #[repr(tagged, tag = "mytag")]
-   |                    ^^^^^^^^^^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
-
-error[E0731]: transparent enum needs exactly one variant, but has 3
-  --> tests/ui/src/custom_types/repr__09.pt:5:1
+warning: variants `Untagged` and `Tagged` are never constructed
+  --> tests/ui/src/custom_types/repr__09.pt:6:5
    |
 LL | enum TransparentWithTags<T> {
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^ needs exactly one variant, but has 3
+   |      ------------------- variants in this enum
 LL |     Untagged(str),
-   |     -------- variant here
-...
-LL |     MaybeUntagged(T),
-   |     ------------- variant here
+   |     ^^^^^^^^
 ...
 LL |     Tagged(int),
-   |     ------ too many variants in `TransparentWithTags`
+   |     ^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
 
-error: aborting due to 4 previous errors
+warning: 1 warning emitted
 
-Some errors have detailed explanations: E0552, E0731.
-For more information about an error, try `rustc --explain E0552`.

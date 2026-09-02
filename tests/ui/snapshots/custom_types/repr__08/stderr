@@ -1,23 +1,22 @@
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__08.pt:4:8
+warning: fields `x` and `y` are never read
+  --> tests/ui/src/custom_types/repr__08.pt:6:5
    |
-LL | #[repr(Elixir)]
-   |        ^^^^^^
+LL | struct Point {
+   |        ----- fields in this struct
+LL |     x: int,
+   |     ^
+LL |     y: int,
+   |     ^
    |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
 
-error[E0731]: transparent enum needs exactly one variant, but has 2
-  --> tests/ui/src/custom_types/repr__08.pt:11:1
+warning: field `point` is never read
+  --> tests/ui/src/custom_types/repr__08.pt:13:18
    |
-LL | enum TransparentEnum {
-   | ^^^^^^^^^^^^^^^^^^^^ needs exactly one variant, but has 2
-LL |     IntVariant(int),
-   |     ---------- variant here
 LL |     PointVariant{point: Point},
-   |     ------------ too many variants in `TransparentEnum`
+   |     ------------ ^^^^^
+   |     |
+   |     field in this variant
 
-error: aborting due to 2 previous errors
+warning: 2 warnings emitted
 
-Some errors have detailed explanations: E0552, E0731.
-For more information about an error, try `rustc --explain E0552`.

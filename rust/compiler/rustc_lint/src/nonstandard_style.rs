@@ -1,18 +1,16 @@
 use rustc_abi::ExternAbi;
 use rustc_ast as ast;
-use rustc_attr_parsing::AttributeParser;
 use rustc_errors::{Applicability, Diag, DiagCtxtHandle, Diagnostic, Level};
 use rustc_hir as hir;
-use rustc_hir::attrs::{AttributeKind, ReprAttr};
 use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::DefId;
 use rustc_hir::intravisit::{FnKind, Visitor};
-use rustc_hir::{Attribute, GenericParamKind, PatExprKind, PatKind, find_attr};
+use rustc_hir::{GenericParamKind, PatExprKind, PatKind, find_attr};
 use rustc_middle::hir::nested_filter::All;
 use rustc_middle::ty::AssocContainer;
 use rustc_session::{declare_lint, declare_lint_pass};
 use rustc_span::def_id::LocalDefId;
-use rustc_span::{BytePos, Ident, Span, sym};
+use rustc_span::{BytePos, Ident, Span};
 
 use crate::lints::{
     NonCamelCaseType, NonCamelCaseTypeSub, NonSnakeCaseDiag, NonSnakeCaseDiagSub,
@@ -158,15 +156,6 @@ impl NonCamelCaseTypes {
 
 impl EarlyLintPass for NonCamelCaseTypes {
     fn check_item(&mut self, cx: &EarlyContext<'_>, it: &ast::Item) {
-        let has_repr_c = matches!(
-            AttributeParser::parse_limited(cx.sess(), &it.attrs, &[sym::repr]),
-            Some(Attribute::Parsed(AttributeKind::Repr { reprs, ..})) if reprs.iter().any(|(r, _)| r == &ReprAttr::ReprC)
-        );
-
-        if has_repr_c {
-            return;
-        }
-
         match &it.kind {
             ast::ItemKind::TyAlias(box ast::TyAlias { ident, .. })
             | ast::ItemKind::Enum(ident, ..)

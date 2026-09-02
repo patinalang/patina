@@ -696,18 +696,11 @@ pub(crate) enum AttrApplication {
         #[label("not an enum")]
         span: Span,
     },
-    #[diag("attribute should be applied to a struct", code = E0517)]
-    Struct {
+    #[diag("attribute should be applied to a struct, enum, or enum variant", code = E0517)]
+    StructEnumVariant {
         #[primary_span]
         hint_span: Span,
-        #[label("not a struct")]
-        span: Span,
-    },
-    #[diag("attribute should be applied to a struct or union", code = E0517)]
-    StructUnion {
-        #[primary_span]
-        hint_span: Span,
-        #[label("not a struct or union")]
+        #[label("not a struct, enum, or enum variant")]
         span: Span,
     },
     #[diag("attribute should be applied to a struct, enum, or union", code = E0517)]
@@ -1138,15 +1131,6 @@ pub(crate) enum UnexportableItem<'a> {
 pub(crate) struct ReprAlignShouldBeAlign {
     #[primary_span]
     #[help("use `#[rustc_align(...)]` instead")]
-    pub span: Span,
-    pub item: &'static str,
-}
-
-#[derive(Diagnostic)]
-#[diag("`#[repr(align(...))]` is not supported on {$item}")]
-pub(crate) struct ReprAlignShouldBeAlignStatic {
-    #[primary_span]
-    #[help("use `#[rustc_align_static(...)]` instead")]
     pub span: Span,
     pub item: &'static str,
 }

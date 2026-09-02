@@ -97,7 +97,7 @@ impl AttributeKind {
             RecursionLimit { .. } => No,
             ReexportTestHarnessMain(..) => No,
             RegisterTool(..) => No,
-            Repr { .. } => No,
+            Repr { .. } => Yes,
             RustcAbi { .. } => No,
             RustcAlign { .. } => No,
             RustcAllocator => No,

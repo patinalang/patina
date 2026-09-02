@@ -24,9 +24,7 @@ pub use assoc::*;
 pub use generic_args::{GenericArgKind, TermKind, *};
 pub use generics::*;
 pub use intrinsic::IntrinsicDef;
-use rustc_abi::{
-    Align, FieldIdx, Integer, IntegerType, ReprFlags, ReprOptions, ScalableElt, VariantIdx,
-};
+use rustc_abi::{FieldIdx, Integer, IntegerType, ReprFlags, ReprOptions, ScalableElt, VariantIdx};
 use rustc_ast as ast;
 use rustc_ast::expand::typetree::{FncTree, Kind, Type, TypeTree};
 use rustc_ast::node_id::NodeMap;
@@ -1475,8 +1473,6 @@ impl<'tcx> TyCtxt<'tcx> {
     pub fn repr_options_of_def(self, did: LocalDefId) -> ReprOptions {
         let mut flags = ReprFlags::empty();
         let mut size = None;
-        let mut max_align: Option<Align> = None;
-        let mut min_pack: Option<Align> = None;
 
         // Generate a deterministically-derived seed from the item's path hash
         // to allow for cross-crate compilation to actually work
@@ -1501,26 +1497,20 @@ impl<'tcx> TyCtxt<'tcx> {
         if let Some(reprs) = find_attr!(self, did, Repr { reprs, .. } => reprs) {
             for (r, _) in reprs {
                 flags.insert(match *r {
-                    attr::ReprRust => ReprFlags::empty(),
-                    attr::ReprC => ReprFlags::IS_C,
-                    attr::ReprPacked(pack) => {
-                        min_pack = Some(if let Some(min_pack) = min_pack {
-                            min_pack.min(pack)
-                        } else {
-                            pack
-                        });
-                        ReprFlags::empty()
-                    }
                     attr::ReprTransparent => ReprFlags::IS_TRANSPARENT,
-                    attr::ReprSimd => ReprFlags::IS_SIMD,
                     attr::ReprInt => {
                         size = Some(IntegerType::Fixed(Integer::I128, true));
                         ReprFlags::empty()
                     }
-                    attr::ReprAlign(align) => {
-                        max_align = max_align.max(Some(align));
-                        ReprFlags::empty()
-                    }
+                    attr::Patina
+                    | attr::Elixir
+                    | attr::Tagged
+                    | attr::Atom
+                    | attr::Transparent
+                    | attr::NativeRecord
+                    | attr::Tag(_)
+                    | attr::TagStyle(_)
+                    | attr::RecordModule(_) => ReprFlags::empty(),
                 });
             }
         }
@@ -1545,14 +1535,7 @@ impl<'tcx> TyCtxt<'tcx> {
             flags.insert(ReprFlags::PASS_INDIRECTLY_IN_NON_RUSTIC_ABIS);
         }
 
-        ReprOptions {
-            int: size,
-            align: max_align,
-            pack: min_pack,
-            flags,
-            field_shuffle_seed,
-            scalable: elt,
-        }
+        ReprOptions { int: size, align: None, pack: None, flags, field_shuffle_seed, scalable: elt }
     }
 
     /// Look up the name of a definition across crates. This does not look at HIR.

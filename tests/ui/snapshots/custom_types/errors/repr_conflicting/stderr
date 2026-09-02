@@ -1,0 +1,15 @@
+error[E0566]: conflicting representation hints
+  --> tests/ui/src/custom_types/errors/repr_conflicting.pt:3:8
+   |
+LL | #[repr(tagged, tag = "my_tag", transparent)]
+   |        ^^^^^^                  ^^^^^^^^^^^
+
+error[E0566]: conflicting representation hints
+  --> tests/ui/src/custom_types/errors/repr_conflicting.pt:8:16
+   |
+LL | #[repr(tagged, record_module = "external_module")]
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0566`.

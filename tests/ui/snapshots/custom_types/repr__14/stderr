@@ -22,43 +22,6 @@ help: consider importing this tuple variant
 LL + use crate::TermToBinaryOpts::MinorVersion;
    |
 
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__14.pt:6:8
-   |
-LL | #[repr(tagged, tag_style = "snake_case")]
-   |        ^^^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
+error: aborting due to 2 previous errors
 
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__14.pt:6:16
-   |
-LL | #[repr(tagged, tag_style = "snake_case")]
-   |                ^^^^^^^^^^^^^^^^^^^^^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
-
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__14.pt:9:12
-   |
-LL |     #[repr(atom)]
-   |            ^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
-
-error[E0552]: unrecognized representation hint
-  --> tests/ui/src/custom_types/repr__14.pt:12:12
-   |
-LL |     #[repr(atom)]
-   |            ^^^^
-   |
-   = help: valid reprs are `Rust` (default), `C`, `align`, `packed`, `transparent`, and `simd`
-   = note: for more information, visit <https://doc.rust-lang.org/reference/type-layout.html?highlight=repr#representations>
-
-error: aborting due to 6 previous errors
-
-Some errors have detailed explanations: E0425, E0552.
-For more information about an error, try `rustc --explain E0425`.
+For more information about this error, try `rustc --explain E0425`.

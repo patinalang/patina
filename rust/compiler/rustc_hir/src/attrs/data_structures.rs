@@ -156,14 +156,23 @@ impl OptimizeAttr {
 }
 
 #[derive(PartialEq, Debug, Encodable, Decodable, Copy, Clone, StableHash, PrintAttribute)]
+pub enum ErlTagStyle {
+    SnakeCase,
+}
+
+#[derive(PartialEq, Debug, Encodable, Decodable, Copy, Clone, StableHash, PrintAttribute)]
 pub enum ReprAttr {
     ReprInt,
-    ReprRust,
-    ReprC,
-    ReprPacked(Align),
-    ReprSimd,
     ReprTransparent,
-    ReprAlign(Align),
+    Patina,
+    Elixir,
+    Tagged,
+    Atom,
+    Transparent,
+    NativeRecord,
+    Tag(Symbol),
+    TagStyle(ErlTagStyle),
+    RecordModule(Symbol),
 }
 
 pub enum TransparencyError {

@@ -6,7 +6,6 @@ use rustc_data_structures::unord::{UnordMap, UnordSet};
 use rustc_errors::codes::*;
 use rustc_errors::{Diag, DiagCtxtHandle, Diagnostic, EmissionGuarantee, Level, MultiSpan};
 use rustc_hir as hir;
-use rustc_hir::attrs::ReprAttr::ReprPacked;
 use rustc_hir::def::{CtorKind, DefKind};
 use rustc_hir::{LangItem, Node, find_attr, intravisit};
 use rustc_infer::infer::{RegionVariableOrigin, TyCtxtInferExt};
@@ -1547,22 +1546,6 @@ fn check_scalable_vector(tcx: TyCtxt<'_>, span: Span, def_id: LocalDefId, scalab
 pub(super) fn check_packed(tcx: TyCtxt<'_>, sp: Span, def: ty::AdtDef<'_>) {
     let repr = def.repr();
     if repr.packed() {
-        if let Some(reprs) = find_attr!(tcx, def.did(), Repr { reprs, .. } => reprs) {
-            for (r, _) in reprs {
-                if let ReprPacked(pack) = r
-                    && let Some(repr_pack) = repr.pack
-                    && pack != &repr_pack
-                {
-                    struct_span_code_err!(
-                        tcx.dcx(),
-                        sp,
-                        E0634,
-                        "type has conflicting packed representation hints"
-                    )
-                    .emit();
-                }
-            }
-        }
         if repr.align.is_some() {
             struct_span_code_err!(
                 tcx.dcx(),

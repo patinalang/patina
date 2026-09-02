@@ -144,8 +144,6 @@ attribute_parsers!(
         OnUnimplementedParser,
         OnUnknownParser,
         OnUnmatchArgsParser,
-        RustcAlignParser,
-        RustcAlignStaticParser,
         RustcCguTestAttributeParser,
         StabilityParser,
         UsedParser,
