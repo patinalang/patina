@@ -4,11 +4,9 @@
 
 -compile([no_auto_import]).
 
--export_record(['Unit', 'Tuple', 'Struct']).
+-export_record(['Tuple', 'Struct']).
 
 -export([]).
-
--record #'Unit'{}.
 
 -record #'Tuple'{'0', '1'}.
 

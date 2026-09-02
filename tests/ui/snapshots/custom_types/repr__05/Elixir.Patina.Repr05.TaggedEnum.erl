@@ -4,20 +4,14 @@
 
 -compile([no_auto_import]).
 
--export_record(['Unit',
-                'TupleStyle',
+-export_record(['TupleStyle',
                 'StructStyle',
-                'UnitWithAtomOverride',
                 'WithCustomTag']).
 
 -export([]).
 
--record #'Unit'{}.
-
 -record #'TupleStyle'{'0'}.
 
 -record #'StructStyle'{x, y}.
-
--record #'UnitWithAtomOverride'{}.
 
 -record #'WithCustomTag'{'0'}.

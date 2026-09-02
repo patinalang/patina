@@ -5,10 +5,6 @@
 
 -compile([no_auto_import]).
 
--export_record(['Student', 'Teacher']).
+-export_record([]).
 
 -export([]).
-
--record #'Student'{}.
-
--record #'Teacher'{}.

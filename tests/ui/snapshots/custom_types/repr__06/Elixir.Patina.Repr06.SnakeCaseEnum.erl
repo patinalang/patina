@@ -4,10 +4,8 @@
 
 -compile([no_auto_import]).
 
--export_record(['UnitVariant', 'StructHTTPStyle']).
+-export_record(['StructHTTPStyle']).
 
 -export([]).
-
--record #'UnitVariant'{}.
 
 -record #'StructHTTPStyle'{code, body}.

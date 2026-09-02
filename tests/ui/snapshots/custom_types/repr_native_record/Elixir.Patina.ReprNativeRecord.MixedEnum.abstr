@@ -1,0 +1,6 @@
+[{attribute,{6,1},file,{"tests/ui/src/custom_types/repr_native_record.pt",6}},
+ {attribute,{6,1},module,'Elixir.Patina.ReprNativeRecord.MixedEnum'},
+ {attribute,{6,1},compile,[no_auto_import]},
+ {attribute,{6,1},export_record,['RecordUnit']},
+ {attribute,{6,1},export,[]},
+ {attribute,{6,1},native_record,{'RecordUnit',[]}}]

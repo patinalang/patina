@@ -5,10 +5,6 @@
 
 -compile([no_auto_import]).
 
--export_record(['Beginner', 'Advanced']).
+-export_record([]).
 
 -export([]).
-
--record #'Beginner'{}.
-
--record #'Advanced'{}.

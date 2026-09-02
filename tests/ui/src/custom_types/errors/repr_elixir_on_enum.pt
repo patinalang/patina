@@ -1,0 +1,9 @@
+#[repr(Elixir)]
+enum ElixirEnum {
+    Variant(int),
+}
+
+enum ElixirVariant {
+    #[repr(Elixir)]
+    Variant(int),
+}

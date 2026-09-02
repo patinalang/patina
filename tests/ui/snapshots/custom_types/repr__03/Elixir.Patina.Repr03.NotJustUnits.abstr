@@ -1,10 +1,8 @@
 [{attribute,{11,1},file,{"tests/ui/src/custom_types/repr__03.pt",11}},
  {attribute,{11,1},module,'Elixir.Patina.Repr03.NotJustUnits'},
  {attribute,{11,1},compile,[no_auto_import]},
- {attribute,{11,1},export_record,['VariantA','VariantB','VariantC']},
+ {attribute,{11,1},export_record,['VariantC']},
  {attribute,{11,1},export,[]},
- {attribute,{11,1},native_record,{'VariantA',[]}},
- {attribute,{11,1},native_record,{'VariantB',[]}},
  {attribute,{11,1},
             native_record,
             {'VariantC',[{record_field,{15,14},{atom,{15,14},'0'}}]}}]

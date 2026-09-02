@@ -6,22 +6,9 @@
 
 -compile([no_auto_import]).
 
--export_record(['Red',
-                'Blue',
-                'Green',
-                'RGB',
-                'HSV',
-                'HSL',
-                'CMY',
-                'CMYK']).
+-export_record(['RGB', 'HSV', 'HSL', 'CMY', 'CMYK']).
 
 -export([]).
-
--record #'Red'{}.
-
--record #'Blue'{}.
-
--record #'Green'{}.
 
 -record #'RGB'{'0', '1', '2'}.
 

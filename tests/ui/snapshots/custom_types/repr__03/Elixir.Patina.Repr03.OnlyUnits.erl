@@ -4,12 +4,6 @@
 
 -compile([no_auto_import]).
 
--export_record(['VariantA', 'VariantB', 'VariantC']).
+-export_record([]).
 
 -export([]).
-
--record #'VariantA'{}.
-
--record #'VariantB'{}.
-
--record #'VariantC'{}.

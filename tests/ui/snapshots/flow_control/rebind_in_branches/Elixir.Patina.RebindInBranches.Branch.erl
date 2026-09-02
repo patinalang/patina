@@ -5,10 +5,6 @@
 
 -compile([no_auto_import]).
 
--export_record(['First', 'Second']).
+-export_record([]).
 
 -export([]).
-
--record #'First'{}.
-
--record #'Second'{}.

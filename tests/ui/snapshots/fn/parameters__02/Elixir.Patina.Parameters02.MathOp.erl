@@ -4,10 +4,6 @@
 
 -compile([no_auto_import]).
 
--export_record(['Add', 'Mul']).
+-export_record([]).
 
 -export([]).
-
--record #'Add'{}.
-
--record #'Mul'{}.

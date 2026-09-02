@@ -33,9 +33,9 @@ main() ->
         {}
     end,
     _rect@1_0 =
-        ('Elixir.Patina.Repr10.NativeRecordStruct':'__struct__'())#{foo
-                                                                        :=
-                                                                        <<"bar">>},
+        #'Elixir.Patina.Repr10.NativeRecordStruct':'NativeRecordStruct'{foo
+                                                                            =
+                                                                            <<"bar">>},
     begin
         io:put_chars([[io_lib:format("~ktp",
                                      [records:get_field_names(_rect@1_0)])]]),

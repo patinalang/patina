@@ -3,7 +3,5 @@
             {"tests/ui/src/flow_control/rebind_in_branches.pt",116}},
  {attribute,{116,1},module,'Elixir.Patina.RebindInBranches.Branch'},
  {attribute,{116,1},compile,[no_auto_import]},
- {attribute,{116,1},export_record,['First','Second']},
- {attribute,{116,1},export,[]},
- {attribute,{116,1},native_record,{'First',[]}},
- {attribute,{116,1},native_record,{'Second',[]}}]
+ {attribute,{116,1},export_record,[]},
+ {attribute,{116,1},export,[]}]

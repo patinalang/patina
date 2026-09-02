@@ -20,9 +20,6 @@ defmodule DestructureEnum01Test do
   test "enum module exports its variant record definitions" do
     Enum.each(
       [
-        {:Red, []},
-        {:Blue, []},
-        {:Green, []},
         {:RGB, [:"0", :"1", :"2"]},
         {:HSV, [:"0", :"1", :"2"]},
         {:HSL, [:"0", :"1", :"2"]},

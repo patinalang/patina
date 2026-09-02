@@ -16,6 +16,16 @@ mod precise_captures;
 pub(crate) use precise_captures::*;
 
 #[derive(Diagnostic)]
+#[diag("the `Elixir` repr attribute is only allowed on structs")]
+pub(crate) struct ElixirReprRequiresStruct {
+    #[primary_span]
+    #[label("invalid `Elixir` repr attribute")]
+    pub span: Span,
+    #[label("not a struct")]
+    pub item_span: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag("unsupported expression in constant value")]
 #[note(
     "constant values may only contain literals, local named constants, arrays, tuples, and maps"

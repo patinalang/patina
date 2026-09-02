@@ -1,10 +1,8 @@
 [{attribute,{5,1},file,{"tests/ui/src/flow_control/if_let__03.pt",5}},
  {attribute,{5,1},module,'Elixir.Patina.IfLet03.Foo'},
  {attribute,{5,1},compile,[no_auto_import]},
- {attribute,{5,1},export_record,['Bar','Baz','Qux']},
+ {attribute,{5,1},export_record,['Qux']},
  {attribute,{5,1},export,[]},
- {attribute,{5,1},native_record,{'Bar',[]}},
- {attribute,{5,1},native_record,{'Baz',[]}},
  {attribute,{5,1},
             native_record,
             {'Qux',[{record_field,{8,9},{atom,{8,9},'0'}}]}}]

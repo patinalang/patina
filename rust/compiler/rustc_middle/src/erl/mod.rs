@@ -1,13 +1,13 @@
 //! Erlang call resolution and module placement.
 
 use rustc_data_structures::fx::FxIndexSet;
-use rustc_hir::attrs::AttributeKind;
+use rustc_hir::attrs::{AttributeKind, ReprAttr};
 use rustc_hir::def::{CtorKind, DefKind};
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::definitions::DefPathData;
 use rustc_hir::{Attribute, HirId, PrimTy};
 use rustc_macros::StableHash;
-use rustc_span::Symbol;
+use rustc_span::{Span, Symbol};
 use smallvec::SmallVec;
 
 use crate::query::Providers;
@@ -459,6 +459,10 @@ impl<'tcx> TyCtxt<'tcx> {
     }
 
     pub fn erl_adt_repr(self, def_id: DefId) -> ErlRepr {
+        if let Some(kind) = self.explicit_erl_repr(def_id) {
+            return kind;
+        }
+
         let adt = self.adt_def(def_id);
         match adt.adt_kind() {
             AdtKind::Struct => ErlRepr::Elixir,
@@ -480,13 +484,38 @@ impl<'tcx> TyCtxt<'tcx> {
             adt.non_enum_variant()
         };
 
-        let kind = if variant.ctor_kind() == Some(CtorKind::Const) {
-            ErlRepr::Atom
-        } else {
-            self.erl_adt_repr(adt.did())
+        let kind = match self.explicit_erl_repr(variant_def_id) {
+            Some(repr) => repr,
+            None if variant.ctor_kind() == Some(CtorKind::Const) => ErlRepr::Atom,
+            None => self.erl_adt_repr(adt.did()),
         };
 
         ErlVariantRepr { kind, tag: self.erl_adt_tag(variant_def_id), record_module: None }
+    }
+
+    /// Returns the nearest explicitly selected representation, inheriting from an enum when needed.
+    fn explicit_erl_repr(self, def_id: DefId) -> Option<ErlRepr> {
+        if let Some((repr, _)) = self.find_primary_erl_repr_attr(def_id) {
+            return Some(repr);
+        }
+
+        if self.def_kind(def_id) == DefKind::Variant
+            && let Some((repr, _)) = self.find_primary_erl_repr_attr(self.parent(def_id))
+        {
+            return Some(repr);
+        }
+
+        None
+    }
+
+    pub fn find_primary_erl_repr_attr(self, def_id: DefId) -> Option<(ErlRepr, Span)> {
+        let reprs = rustc_hir::find_attr!(self, def_id, Repr { reprs, .. } => reprs)?;
+
+        reprs.iter().find_map(|(repr, span)| match repr {
+            ReprAttr::Elixir => Some((ErlRepr::Elixir, *span)),
+            ReprAttr::NativeRecord => Some((ErlRepr::NativeRecord, *span)),
+            _ => None,
+        })
     }
 
     /// Returns the atom used to tag a struct or enum variant.

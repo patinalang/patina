@@ -4,10 +4,6 @@
 
 -compile([no_auto_import]).
 
--export_record(['Stop', 'Continue']).
+-export_record([]).
 
 -export([]).
-
--record #'Stop'{}.
-
--record #'Continue'{}.

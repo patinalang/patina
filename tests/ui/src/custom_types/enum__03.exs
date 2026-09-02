@@ -9,9 +9,9 @@ defmodule Enum03Test do
     Code.ensure_all_loaded!([Operation])
   end
 
-  test "enum module exports its variant record definitions" do
+  test "unit variants do not emit record definitions" do
     Enum.each([:Add, :Subtract], fn variant ->
-      assert {%{is_exported: true}, []} = :records.get_definition(Operation, variant)
+      assert_raise ArgumentError, fn -> :records.get_definition(Operation, variant) end
     end)
   end
 end

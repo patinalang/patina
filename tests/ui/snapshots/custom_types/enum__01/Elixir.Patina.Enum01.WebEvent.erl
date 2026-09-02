@@ -4,17 +4,9 @@
 
 -compile([no_auto_import]).
 
--export_record(['PageLoad',
-                'PageUnload',
-                'KeyPress',
-                'Paste',
-                'Click']).
+-export_record(['KeyPress', 'Paste', 'Click']).
 
 -export([]).
-
--record #'PageLoad'{}.
-
--record #'PageUnload'{}.
 
 -record #'KeyPress'{'0'}.
 

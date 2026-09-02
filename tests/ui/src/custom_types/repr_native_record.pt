@@ -1,0 +1,25 @@
+#[repr(native_record)]
+enum WholeEnum {
+    Unit,
+}
+
+enum MixedEnum {
+    AtomUnit,
+    #[repr(native_record)]
+    RecordUnit,
+}
+
+#[repr(Elixir)]
+struct ElixirUnit;
+
+pub fn inherited_unit() -> term {
+    WholeEnum::Unit as term
+}
+
+pub fn overridden_unit() -> term {
+    MixedEnum::RecordUnit as term
+}
+
+pub fn elixir_unit() -> term {
+    ElixirUnit as term
+}

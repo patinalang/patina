@@ -23,8 +23,6 @@ defmodule Enum01Test do
   test "enum module exports its variant record definitions" do
     Enum.each(
       [
-        {:PageLoad, []},
-        {:PageUnload, []},
         {:KeyPress, [:"0"]},
         {:Paste, [:"0"]},
         {:Click, [:x, :y]}

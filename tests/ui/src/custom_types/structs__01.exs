@@ -24,7 +24,6 @@ defmodule Structs01Test do
     %Patina.Structs01.Person{name: "Peter", age: 27}
     %Patina.Structs01.Point{x: 5.2, y: 0.4}
     %Patina.Structs01.Pair{"0": 1, "1": 0.1}
-    %Patina.Structs01.Unit{}
 
     %Patina.Structs01.Rectangle{
       top_left: %Patina.Structs01.Point{x: 5.2, y: 0.4},

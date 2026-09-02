@@ -4,10 +4,6 @@
 
 -compile([no_auto_import]).
 
--export_record(['Add', 'Subtract']).
+-export_record([]).
 
 -export([]).
-
--record #'Add'{}.
-
--record #'Subtract'{}.

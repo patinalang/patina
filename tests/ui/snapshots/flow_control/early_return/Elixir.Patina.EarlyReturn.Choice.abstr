@@ -1,7 +1,5 @@
 [{attribute,{6,1},file,{"tests/ui/src/flow_control/early_return.pt",6}},
  {attribute,{6,1},module,'Elixir.Patina.EarlyReturn.Choice'},
  {attribute,{6,1},compile,[no_auto_import]},
- {attribute,{6,1},export_record,['Stop','Continue']},
- {attribute,{6,1},export,[]},
- {attribute,{6,1},native_record,{'Stop',[]}},
- {attribute,{6,1},native_record,{'Continue',[]}}]
+ {attribute,{6,1},export_record,[]},
+ {attribute,{6,1},export,[]}]

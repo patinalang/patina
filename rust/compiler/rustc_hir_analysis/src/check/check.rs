@@ -11,6 +11,7 @@ use rustc_hir::{LangItem, Node, find_attr, intravisit};
 use rustc_infer::infer::{RegionVariableOrigin, TyCtxtInferExt};
 use rustc_infer::traits::{Obligation, ObligationCauseCode, WellFormedLoc};
 use rustc_lint_defs::builtin::{REPR_TRANSPARENT_NON_ZST_FIELDS, UNSUPPORTED_CALLING_CONVENTIONS};
+use rustc_middle::erl::ErlRepr;
 use rustc_middle::hir::nested_filter;
 use rustc_middle::middle::resolve_bound_vars::ResolvedArg;
 use rustc_middle::middle::stability::EvalResult;
@@ -111,6 +112,7 @@ fn check_struct(tcx: TyCtxt<'_>, def_id: LocalDefId) {
     }
 
     check_transparent(tcx, def);
+    check_erl_repr(tcx, def);
     check_packed(tcx, span, def);
 }
 
@@ -1843,6 +1845,23 @@ fn check_enum(tcx: TyCtxt<'_>, def_id: LocalDefId) {
 
     detect_discriminant_duplicate(tcx, def);
     check_transparent(tcx, def);
+    check_erl_repr(tcx, def);
+}
+
+fn check_erl_repr(tcx: TyCtxt<'_>, adt: AdtDef<'_>) {
+    if !adt.is_enum() {
+        return;
+    }
+
+    let definitions = std::iter::once(adt.did()).chain(adt.variants().iter().map(|v| v.def_id));
+    for def_id in definitions {
+        if let Some((ErlRepr::Elixir, elixir_attr_span)) = tcx.find_primary_erl_repr_attr(def_id) {
+            tcx.dcx().emit_err(crate::errors::ElixirReprRequiresStruct {
+                span: elixir_attr_span,
+                item_span: tcx.def_span(def_id),
+            });
+        }
+    }
 }
 
 /// Part of enum check. Given the discriminants of an enum, errors if two or more discriminants are equal

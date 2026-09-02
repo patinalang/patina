@@ -4,12 +4,8 @@
 
 -compile([no_auto_import]).
 
--export_record(['Bar', 'Baz', 'Qux']).
+-export_record(['Qux']).
 
 -export([]).
-
--record #'Bar'{}.
-
--record #'Baz'{}.
 
 -record #'Qux'{'0'}.

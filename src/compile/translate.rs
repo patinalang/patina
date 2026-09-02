@@ -14,9 +14,9 @@ use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LocalDefId, LocalModDefId};
 use rustc_hir::{BodyId, Defaultness, FnSig, Generics, ImplItemKind, ItemKind, Mod, VariantData};
-use rustc_middle::bug;
 use rustc_middle::erl::{ErlModuleId, ErlModuleResolution, ErlRepr};
 use rustc_middle::ty::{self, Ty, TyCtxt};
+use rustc_middle::{bug, span_bug};
 use rustc_span::{Ident, Span, Symbol, kw, sym};
 use scopes::Scopes;
 
@@ -505,13 +505,15 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
 
     fn translate_struct(&self, def_id: LocalDefId) -> (Symbol, eaf::Module<'arena>) {
         let item = self.tcx.hir_expect_item(def_id);
-        let ItemKind::Struct(_ident, _generics, variant_data) = item.kind else {
+        let ItemKind::Struct(ident, _generics, variant_data) = item.kind else {
             unreachable!("def_kind Struct must be an ItemKind::Struct");
         };
 
         let mod_name = self.tcx.erl_module_name(ErlModuleId::Adt(def_id.to_def_id()));
-        let parts = self.collect_struct_fns(item.span, mod_name, def_id, variant_data);
-        self.assemble_module(item.span, mod_name, [], parts)
+        let repr = self.tcx.erl_variant_repr(def_id.to_def_id());
+        let parts = self.collect_struct_fns(item.span, mod_name, def_id, variant_data, repr.kind);
+        let record_exports = (repr.kind == ErlRepr::NativeRecord).then_some(ident.name).into_iter();
+        self.assemble_module(item.span, mod_name, record_exports, parts)
     }
 
     fn translate_enum(&self, def_id: LocalDefId) -> (Symbol, eaf::Module<'arena>) {
@@ -527,6 +529,22 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         let mut record_exports = SmallVec::<[Symbol; 8]>::new();
 
         for variant in enum_def.variants {
+            let repr = self.tcx.erl_variant_repr(variant.def_id.to_def_id());
+            match repr.kind {
+                // fall through to the loop impl
+                ErlRepr::NativeRecord => (),
+                ErlRepr::Atom => continue,
+                ErlRepr::Elixir => {
+                    span_bug!(variant.span, "Elixir repr attribute on enum variant")
+                }
+                ErlRepr::Tagged | ErlRepr::Transparent => not_implemented!(
+                    self.tcx,
+                    variant.span,
+                    "repr attribute on enum variant",
+                    repr.kind
+                ),
+            }
+
             let variant_name = variant.ident.name;
             let variant_fields = variant
                 .data
@@ -549,17 +567,44 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         mod_name: Symbol,
         def_id: rustc_hir::def_id::LocalDefId,
         variant_data: VariantData<'tcx>,
+        repr: ErlRepr,
     ) -> ModuleParts<'arena> {
         let mut parts = self.module_parts(span);
 
-        parts.forms.push(elixir_compat::info_function(&self.afb, span, Some(variant_data)));
+        let struct_info = (repr == ErlRepr::Elixir).then_some(variant_data);
+        parts.forms.push(elixir_compat::info_function(&self.afb, span, struct_info));
         parts.exports.push((sym::__info__, 1));
 
-        parts.forms.push(elixir_compat::struct0_function(&self.afb, span, mod_name, variant_data));
-        parts.exports.push((sym::__struct__, 0));
+        match repr {
+            ErlRepr::Elixir => {
+                parts.forms.push(elixir_compat::struct0_function(
+                    &self.afb,
+                    span,
+                    mod_name,
+                    variant_data,
+                ));
+                parts.exports.push((sym::__struct__, 0));
 
-        parts.forms.push(elixir_compat::struct1_function(&self.afb, span));
-        parts.exports.push((sym::__struct__, 1));
+                parts.forms.push(elixir_compat::struct1_function(&self.afb, span));
+                parts.exports.push((sym::__struct__, 1));
+            }
+
+            ErlRepr::NativeRecord => {
+                let variant = self.tcx.adt_def(def_id).non_enum_variant();
+                let fields = variant_data
+                    .fields()
+                    .iter()
+                    .map(|field| self.afb.record_field_decl(field.span, field.ident, None));
+
+                parts.forms.push(self.afb.native_record_attr(span, variant.name, fields));
+            }
+
+            ErlRepr::Atom => {}
+
+            ErlRepr::Tagged | ErlRepr::Transparent => {
+                not_implemented!(self.tcx, span, "repr attribute on struct", repr)
+            }
+        }
 
         self.collect_impl_fns(ErlModuleId::Adt(def_id.to_def_id()), &mut parts);
 

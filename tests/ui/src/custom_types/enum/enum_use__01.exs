@@ -18,11 +18,11 @@ defmodule EnumUse01Test do
            """ == capture_io(fn -> Patina.EnumUse01.main() end)
   end
 
-  test "enum modules export their variant record definitions" do
+  test "unit variants do not emit record definitions" do
     Enum.each(
       [{Stage, :Beginner}, {Stage, :Advanced}, {Role, :Student}, {Role, :Teacher}],
       fn {module, variant} ->
-        assert {%{is_exported: true}, []} = :records.get_definition(module, variant)
+        assert_raise ArgumentError, fn -> :records.get_definition(module, variant) end
       end
     )
   end

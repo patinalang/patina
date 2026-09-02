@@ -1,8 +1,5 @@
 [{attribute,{21,1},file,{"tests/ui/src/custom_types/repr__03.pt",21}},
  {attribute,{21,1},module,'Elixir.Patina.Repr03.OnlyUnits'},
  {attribute,{21,1},compile,[no_auto_import]},
- {attribute,{21,1},export_record,['VariantA','VariantB','VariantC']},
- {attribute,{21,1},export,[]},
- {attribute,{21,1},native_record,{'VariantA',[]}},
- {attribute,{21,1},native_record,{'VariantB',[]}},
- {attribute,{21,1},native_record,{'VariantC',[]}}]
+ {attribute,{21,1},export_record,[]},
+ {attribute,{21,1},export,[]}]
