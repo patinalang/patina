@@ -51,6 +51,24 @@ enum MixedEnum {
 #[attr = Repr {reprs: [Elixir]}]
 struct ElixirUnit;
 
+#[attr = Repr {reprs: [NativeRecord]}]
+struct NativeRecordStruct {
+    x: int,
+    y: int,
+}
+
+#[attr = Repr {reprs: [NativeRecord]}]
+struct NativeRecordPair(int, int);
+
+impl NativeRecordStruct {
+    fn sum(self)
+        ->
+            int ({
+        (((self as NativeRecordStruct).x as int) +
+            ((self as NativeRecordStruct).y as int) as int)
+    } as int)
+}
+
 fn inherited_unit()
     -> term ({ ((WholeEnum::Unit as WholeEnum) as term as term) } as term)
 
@@ -61,3 +79,24 @@ fn overridden_unit()
 
 fn elixir_unit()
     -> term ({ ((ElixirUnit as ElixirUnit) as term as term) } as term)
+
+fn record_struct()
+    ->
+        NativeRecordStruct ({
+    (NativeRecordStruct { x: (10 as int), y: (20 as int) } as
+        NativeRecordStruct)
+} as NativeRecordStruct)
+
+fn struct_x(value: NativeRecordStruct)
+    -> int ({ ((value as NativeRecordStruct).x as int) } as int)
+
+fn record_pair()
+    ->
+        NativeRecordPair ({
+    ((NativeRecordPair as
+            fn(int, int) -> NativeRecordPair {NativeRecordPair})((30 as int),
+        (40 as int)) as NativeRecordPair)
+} as NativeRecordPair)
+
+fn pair_second(value: NativeRecordPair)
+    -> int ({ ((value as NativeRecordPair).1 as int) } as int)

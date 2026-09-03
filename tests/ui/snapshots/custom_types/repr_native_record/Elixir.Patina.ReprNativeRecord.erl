@@ -10,7 +10,11 @@
 -export(['__info__'/1,
          inherited_unit/0,
          overridden_unit/0,
-         elixir_unit/0]).
+         elixir_unit/0,
+         record_struct/0,
+         struct_x/1,
+         record_pair/0,
+         pair_second/1]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -33,3 +37,24 @@ overridden_unit() ->
 
 elixir_unit() ->
     ('Elixir.Patina.ReprNativeRecord.ElixirUnit':'__struct__'())#{}.
+
+record_struct() ->
+    #'Elixir.Patina.ReprNativeRecord.NativeRecordStruct':'NativeRecordStruct'{x
+                                                                                  =
+                                                                                  10,
+                                                                              y
+                                                                                  =
+                                                                                  20}.
+
+struct_x(_value@0_0) ->
+    _value@0_0#'Elixir.Patina.ReprNativeRecord.NativeRecordStruct':'NativeRecordStruct'.x.
+
+record_pair() ->
+    #'Elixir.Patina.ReprNativeRecord.NativeRecordPair':'NativeRecordPair'{'0'
+                                                                              =
+                                                                              30,
+                                                                          '1' =
+                                                                              40}.
+
+pair_second(_value@0_0) ->
+    _value@0_0#'Elixir.Patina.ReprNativeRecord.NativeRecordPair':'NativeRecordPair'.'1'.

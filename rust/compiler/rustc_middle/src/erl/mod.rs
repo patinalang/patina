@@ -86,7 +86,7 @@ pub enum ErlRepr {
 pub struct ErlVariantRepr {
     pub kind: ErlRepr,
     pub tag: Symbol,
-    pub record_module: Option<Symbol>,
+    pub record_module: Symbol,
 }
 
 enum ErlTag {
@@ -496,7 +496,11 @@ impl<'tcx> TyCtxt<'tcx> {
             None => self.erl_adt_repr(adt.did()),
         };
 
-        ErlVariantRepr { kind, tag: self.erl_adt_tag(variant_def_id), record_module: None }
+        ErlVariantRepr {
+            kind,
+            tag: self.erl_adt_tag(variant_def_id),
+            record_module: self.erl_module_name(ErlModuleId::Adt(adt.did())),
+        }
     }
 
     /// Returns the nearest explicitly selected representation, inheriting from an enum when needed.

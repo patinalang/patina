@@ -318,9 +318,15 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 afb.expr_atom(expr.span, sym::element),
                 [afb.expr_int(expr.span, name.index() as u128 + 2), subject],
             ),
-            ErlRepr::Atom | ErlRepr::Transparent | ErlRepr::NativeRecord => {
-                not_implemented!(self.tcx(), expr.span, "field access for ADT representation", repr)
-            }
+            ErlRepr::Transparent => subject,
+            ErlRepr::NativeRecord => afb.expr_record_field(
+                expr.span,
+                subject,
+                self.record_module_for_access(repr.record_module),
+                variant.name,
+                variant.fields[name].name,
+            ),
+            ErlRepr::Atom => span_bug!(expr.span, "field access on atom-represented ADT"),
         }
     }
 

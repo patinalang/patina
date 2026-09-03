@@ -595,6 +595,28 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         eaf::Expr::RecordCreate(anno, record_name, fields)
     }
 
+    pub(crate) fn expr_record_field(
+        &self,
+        span: impl IntoAnno,
+        subject: eaf::Expr<'arena>,
+        module: Option<Symbol>,
+        name: Symbol,
+        field: Symbol,
+    ) -> eaf::Expr<'arena> {
+        let anno = span.into_anno(self.source_map);
+        let record_name = match module {
+            None => eaf::RecordName::Local(name.into()),
+            Some(module) => eaf::RecordName::Extern(module.into(), name.into()),
+        };
+
+        eaf::Expr::RecordField(
+            anno,
+            self.arena.alloc(subject),
+            record_name,
+            eaf::Atom(anno, field.into()),
+        )
+    }
+
     pub(crate) fn expr_record_update(
         &self,
         span: impl IntoAnno,

@@ -27,7 +27,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 self.translate_elixir_struct_pattern(span, adt_def, variant, subpatterns)
             }
             ErlRepr::NativeRecord => {
-                self.translate_native_record_pattern(span, adt_def, variant, subpatterns, repr)
+                self.translate_native_record_pattern(span, variant, subpatterns, repr)
             }
             ErlRepr::Transparent => {
                 not_implemented!(self.tcx(), span, "ADT pattern representation", repr.kind)
@@ -175,9 +175,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         };
 
         let record_name = variant.name;
-        let module = repr.record_module.or_else(|| {
-            self.resolve_extern_module_name(expr.span, adt_expr.adt_def.did(), variant.def_id)
-        });
+        let module = self.record_module_for_access(repr.record_module);
 
         let fields = adt_expr.fields.iter().map(|field| {
             let field_def = &variant.fields[field.name];
@@ -225,14 +223,11 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     fn translate_native_record_pattern(
         &mut self,
         span: Span,
-        adt_def: AdtDef<'tcx>,
         variant: &VariantDef,
         subpatterns: &[FieldPat<'tcx>],
         repr: ErlVariantRepr,
     ) -> Patterns<'arena> {
-        let module = repr
-            .record_module
-            .or_else(|| self.resolve_extern_module_name(span, adt_def.did(), variant.def_id));
+        let module = self.record_module_for_access(repr.record_module);
         let field_count = variant.fields.len();
 
         let (groups, fields) = (0..field_count)
@@ -299,6 +294,15 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         };
 
         tcx.erl_module_name(module_id)
+    }
+
+    pub(super) fn record_module_for_access(&self, record_module: Symbol) -> Option<Symbol> {
+        let tcx = self.tcx();
+        let current_module = tcx
+            .erl_definition_module(self.owner.to_def_id())
+            .map(|module_id| tcx.erl_module_name(module_id));
+
+        (current_module != Some(record_module)).then_some(record_module)
     }
 
     fn resolve_extern_module_name(

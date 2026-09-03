@@ -12,6 +12,21 @@ enum MixedEnum {
 #[repr(Elixir)]
 struct ElixirUnit;
 
+#[repr(native_record)]
+pub struct NativeRecordStruct {
+    x: int,
+    y: int,
+}
+
+#[repr(native_record)]
+pub struct NativeRecordPair(int, int);
+
+impl NativeRecordStruct {
+    pub fn sum(self) -> int {
+        self.x + self.y
+    }
+}
+
 pub fn inherited_unit() -> term {
     WholeEnum::Unit as term
 }
@@ -22,4 +37,20 @@ pub fn overridden_unit() -> term {
 
 pub fn elixir_unit() -> term {
     ElixirUnit as term
+}
+
+pub fn record_struct() -> NativeRecordStruct {
+    NativeRecordStruct { x: 10, y: 20 }
+}
+
+pub fn struct_x(value: NativeRecordStruct) -> int {
+    value.x
+}
+
+pub fn record_pair() -> NativeRecordPair {
+    NativeRecordPair(30, 40)
+}
+
+pub fn pair_second(value: NativeRecordPair) -> int {
+    value.1
 }
