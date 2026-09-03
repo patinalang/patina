@@ -24,7 +24,7 @@
 main() ->
     begin
         io:put_chars([[io_lib:format("~ktp",
-                                     ['Elixir.Patina.Repr05.TaggedEnum.Unit'])]]),
+                                     [{'Elixir.Patina.Repr05.TaggedEnum.Unit'}])]]),
         io:nl(),
         {}
     end,
@@ -36,28 +36,22 @@ main() ->
     end,
     begin
         io:put_chars([[io_lib:format("~ktp",
-                                     [#'Elixir.Patina.Repr05.TaggedEnum':'TupleStyle'{'0'
-                                                                                          =
-                                                                                          <<"hello">>}])]]),
+                                     [{'Elixir.Patina.Repr05.TaggedEnum.TupleStyle',
+                                       <<"hello">>}])]]),
         io:nl(),
         {}
     end,
     begin
         io:put_chars([[io_lib:format("~ktp",
-                                     [#'Elixir.Patina.Repr05.TaggedEnum':'StructStyle'{x
-                                                                                           =
-                                                                                           1,
-                                                                                       y
-                                                                                           =
-                                                                                           2}])]]),
+                                     [{'Elixir.Patina.Repr05.TaggedEnum.StructStyle',
+                                       1,
+                                       2}])]]),
         io:nl(),
         {}
     end,
     begin
         io:put_chars([[io_lib:format("~ktp",
-                                     [#'Elixir.Patina.Repr05.TaggedEnum':'WithCustomTag'{'0'
-                                                                                             =
-                                                                                             42}])]]),
+                                     [{custom_tag, 42}])]]),
         io:nl(),
         {}
     end.

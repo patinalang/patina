@@ -1,0 +1,5 @@
+[{attribute,{13,1},file,{"tests/ui/src/custom_types/repr_tagged.pt",13}},
+ {attribute,{13,1},module,'Elixir.Patina.ReprTagged.TaggedEnum'},
+ {attribute,{13,1},compile,[no_auto_import]},
+ {attribute,{13,1},export_record,[]},
+ {attribute,{13,1},export,[]}]

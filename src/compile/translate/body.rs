@@ -5,7 +5,7 @@ use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::LocalDefId;
 use rustc_hir::{BindingMode, HirId, Lit};
-use rustc_middle::erl::{ErlCallKind, ErlCallTarget, ErlModuleResolution};
+use rustc_middle::erl::{ErlCallKind, ErlCallTarget, ErlModuleResolution, ErlRepr};
 use rustc_middle::middle::region;
 use rustc_middle::mir::{AssignOp, BinOp, UnOp};
 use rustc_middle::span_bug;
@@ -298,21 +298,30 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         });
 
         let variant = adt_def.variant(variant_index);
-        let field = &variant.fields[name];
-        let key = field.name;
-
-        if self.tcx().erl_variant_repr(variant.def_id).kind != rustc_middle::erl::ErlRepr::Elixir {
-            not_implemented!(self.tcx(), expr.span, "field access on non-Elixir ADT", ty);
-        }
-
+        let repr = self.tcx().erl_variant_repr(variant.def_id);
         let subject = self.translate_expr(lhs);
-
         let afb = &self.translator.afb;
-        let mod_name = afb.expr_atom(expr.span, sym::erlang);
-        let fn_name = afb.expr_atom(expr.span, sym::map_get);
-        let field_name = afb.expr_atom(lhs_expr.span, key);
 
-        afb.expr_remote_call(expr.span, mod_name, fn_name, [field_name, subject])
+        match repr.kind {
+            ErlRepr::Elixir => {
+                let field_name = afb.expr_atom(lhs_expr.span, variant.fields[name].name);
+                afb.expr_remote_call(
+                    expr.span,
+                    afb.expr_atom(expr.span, sym::erlang),
+                    afb.expr_atom(expr.span, sym::map_get),
+                    [field_name, subject],
+                )
+            }
+            ErlRepr::Tagged => afb.expr_remote_call(
+                expr.span,
+                afb.expr_atom(expr.span, sym::erlang),
+                afb.expr_atom(expr.span, sym::element),
+                [afb.expr_int(expr.span, name.index() as u128 + 2), subject],
+            ),
+            ErlRepr::Atom | ErlRepr::Transparent | ErlRepr::NativeRecord => {
+                not_implemented!(self.tcx(), expr.span, "field access for ADT representation", repr)
+            }
+        }
     }
 
     fn translate_block(&mut self, id: BlockId) -> eaf::Expr<'arena> {

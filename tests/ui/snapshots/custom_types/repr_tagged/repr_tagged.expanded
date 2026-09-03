@@ -1,0 +1,123 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs)]
+#![no_std]
+#![no_core]
+
+
+
+
+
+
+
+
+
+
+#![allow(dead_code)]
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+#[allow(unused_imports)]
+use Core::*;
+#[allow(unused)]
+extern mod io;
+#[allow(unused)]
+extern mod patina_fmt;
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! stringify { () => {}; }
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat { () => {}; }
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args { () => {}; }
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+#[repr(tagged, tag_style = "snake_case")]
+pub struct StructHTTPStyle {
+    code: int,
+    body: str,
+}
+
+#[repr(tagged, tag = "custom_unit")]
+pub struct Unit;
+
+#[repr(tagged)]
+pub enum TaggedEnum {
+    Unit,
+    TupleValue(int),
+    RecordValue {
+        x: int,
+        y: int,
+    },
+
+    #[repr(atom)]
+    AtomOverride,
+}
+
+#[repr(tagged)]
+pub enum ResultShape<T, E> {
+
+    #[repr(tag = "ok")]
+    Ok(T),
+
+    #[repr(tag = "error")]
+    Err(E),
+}
+
+pub fn struct_value() -> StructHTTPStyle {
+    StructHTTPStyle { body: "ok", code: 200 }
+}
+
+pub fn struct_code(value: StructHTTPStyle) -> int { value.code }
+
+pub fn update_code(value: StructHTTPStyle) -> StructHTTPStyle {
+    StructHTTPStyle { code: 201, ..value }
+}
+
+pub fn update_fields(value: StructHTTPStyle) -> StructHTTPStyle {
+    StructHTTPStyle { body: "updated", code: 202, ..value }
+}
+
+pub fn destructure_struct(value: StructHTTPStyle) -> int {
+    let StructHTTPStyle { code, body: _ } = value;
+    code
+}
+
+pub fn unit_value() -> Unit { Unit }
+
+pub fn enum_values() -> [TaggedEnum] {
+    [TaggedEnum::Unit, TaggedEnum::TupleValue(10),
+            TaggedEnum::RecordValue { y: 30, x: 20 },
+            TaggedEnum::AtomOverride]
+}
+
+pub fn enum_payload(value: TaggedEnum) -> int {
+    match value {
+        TaggedEnum::Unit => 0,
+        TaggedEnum::TupleValue(value) => value,
+        TaggedEnum::RecordValue { x, y: _ } => x,
+        TaggedEnum::AtomOverride => -1,
+    }
+}
+
+pub fn result_values() -> [ResultShape<int, str>] {
+    [ResultShape::<int, str>::Ok(42), ResultShape::<int, str>::Err("reason")]
+}
+
+pub fn result_payload(value: ResultShape<int, str>) -> int {
+    match value {
+        ResultShape::Ok(value) => value,
+        ResultShape::Err(_) => -1,
+    }
+}
+
+pub fn main() {}

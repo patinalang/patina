@@ -24,18 +24,15 @@
 main() ->
     begin
         io:put_chars([[io_lib:format("~ktp",
-                                     [('Elixir.Patina.Repr04.Pair':'__struct__'())#{'0'
-                                                                                        :=
-                                                                                        42,
-                                                                                    '1'
-                                                                                        :=
-                                                                                        3.14}])]]),
+                                     [{'Elixir.Patina.Repr04.Pair',
+                                       42,
+                                       3.14}])]]),
         io:nl(),
         {}
     end,
     begin
         io:put_chars([[io_lib:format("~ktp",
-                                     ['Elixir.BarBar'])]]),
+                                     [{'Elixir.BarBar'}])]]),
         io:nl(),
         {}
     end.

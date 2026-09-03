@@ -1,0 +1,5 @@
+[{attribute,{22,1},file,{"tests/ui/src/custom_types/repr_tagged.pt",22}},
+ {attribute,{22,1},module,'Elixir.Patina.ReprTagged.ResultShape'},
+ {attribute,{22,1},compile,[no_auto_import]},
+ {attribute,{22,1},export_record,[]},
+ {attribute,{22,1},export,[]}]

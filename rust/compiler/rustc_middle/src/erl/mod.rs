@@ -519,6 +519,7 @@ impl<'tcx> TyCtxt<'tcx> {
 
         reprs.iter().find_map(|(repr, span)| match repr {
             ReprAttr::Elixir => Some((ErlRepr::Elixir, *span)),
+            ReprAttr::Tagged => Some((ErlRepr::Tagged, *span)),
             ReprAttr::Atom => Some((ErlRepr::Atom, *span)),
             ReprAttr::NativeRecord => Some((ErlRepr::NativeRecord, *span)),
             _ => None,

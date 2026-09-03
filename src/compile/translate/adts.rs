@@ -22,13 +22,14 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let repr = self.tcx().erl_variant_repr(variant.def_id);
         match repr.kind {
             ErlRepr::Atom => self.translator.afb.pat_atom(span, repr.tag).into(),
+            ErlRepr::Tagged => self.translate_tagged_pattern(span, variant, subpatterns, repr),
             ErlRepr::Elixir => {
                 self.translate_elixir_struct_pattern(span, adt_def, variant, subpatterns)
             }
             ErlRepr::NativeRecord => {
                 self.translate_native_record_pattern(span, adt_def, variant, subpatterns, repr)
             }
-            ErlRepr::Tagged | ErlRepr::Transparent => {
+            ErlRepr::Transparent => {
                 not_implemented!(self.tcx(), span, "ADT pattern representation", repr.kind)
             }
         }
@@ -46,10 +47,65 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let repr = self.tcx().erl_variant_repr(variant.def_id);
         match repr.kind {
             ErlRepr::Atom => afb.expr_atom(expr.span, repr.tag),
+            ErlRepr::Tagged => self.translate_tagged(expr, adt_expr, variant, repr),
             ErlRepr::Elixir => self.translate_elixir_struct(expr, adt_expr, variant),
             ErlRepr::NativeRecord => self.translate_native_record(expr, adt_expr, variant, repr),
-            ErlRepr::Tagged | ErlRepr::Transparent => {
+            ErlRepr::Transparent => {
                 not_implemented!(self.tcx(), expr.span, "ADT representation", repr.kind)
+            }
+        }
+    }
+
+    fn translate_tagged(
+        &mut self,
+        expr: &Expr<'tcx>,
+        adt_expr: &AdtExpr<'tcx>,
+        variant: &VariantDef,
+        repr: ErlVariantRepr,
+    ) -> eaf::Expr<'arena> {
+        let afb = &self.translator.afb;
+
+        match &adt_expr.base {
+            AdtExprBase::None => {
+                let tag = afb.expr_atom(expr.span, repr.tag);
+                let fields = (0..variant.fields.len()).map(|index| {
+                    let field = adt_expr
+                        .fields
+                        .iter()
+                        .find(|field| field.name.index() == index)
+                        .unwrap_or_else(|| {
+                            span_bug!(
+                                expr.span,
+                                "tagged tuple construction is missing field {index}"
+                            )
+                        });
+                    self.translate_expr(field.expr)
+                });
+
+                afb.expr_tuple(expr.span, std::iter::once(tag).chain(fields))
+            }
+            AdtExprBase::Base(base) => {
+                let mut value = self.translate_expr(base.base);
+
+                for field in &adt_expr.fields {
+                    let field_span = self.thir[field.expr].span;
+                    let field_value = self.translate_expr(field.expr);
+                    value = afb.expr_remote_call(
+                        field_span,
+                        afb.expr_atom(field_span, sym::erlang),
+                        afb.expr_atom(field_span, sym::setelement),
+                        [
+                            afb.expr_int(field_span, field.name.index() as u128 + 2),
+                            value,
+                            field_value,
+                        ],
+                    );
+                }
+
+                value
+            }
+            AdtExprBase::DefaultFields(_) => {
+                not_implemented!(self.tcx(), expr.span, "tagged tuple with default fields")
             }
         }
     }
@@ -109,7 +165,12 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             AdtExprBase::None => None,
             AdtExprBase::Base(base) => Some(self.translate_expr(base.base)),
             AdtExprBase::DefaultFields(_) => {
-                not_implemented!(tcx, expr.span, "native record with base", adt_expr.base);
+                not_implemented!(
+                    tcx,
+                    expr.span,
+                    "native record with default fields",
+                    adt_expr.base
+                );
             }
         };
 
@@ -194,6 +255,27 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 variant.name,
                 fields.iter().copied().zip(values.iter().copied()),
             )
+        })
+    }
+
+    fn translate_tagged_pattern(
+        &mut self,
+        span: Span,
+        variant: &VariantDef,
+        subpatterns: &[FieldPat<'tcx>],
+        repr: ErlVariantRepr,
+    ) -> Patterns<'arena> {
+        let field_count = variant.fields.len();
+        let groups = (0..field_count)
+            .map(|idx| match subpatterns.iter().find(|field| field.field.index() == idx) {
+                Some(field) => self.translate_pattern(&field.pattern),
+                None => self.translator.afb.pat_var(span, kw::Underscore).into(),
+            })
+            .collect::<SmallVec<[_; 4]>>();
+
+        self.pattern_cartesian_product(span, &groups, |fields| {
+            let tag = self.translator.afb.pat_atom(span, repr.tag);
+            self.translator.afb.pat_tuple(span, std::iter::once(tag).chain(fields.iter().copied()))
         })
     }
 

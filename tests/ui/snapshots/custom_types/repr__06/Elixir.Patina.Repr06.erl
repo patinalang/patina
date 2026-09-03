@@ -29,12 +29,7 @@ main() ->
     end,
     begin
         io:put_chars([[io_lib:format("~ktp",
-                                     [#'Elixir.Patina.Repr06.SnakeCaseEnum':'StructHTTPStyle'{code
-                                                                                                  =
-                                                                                                  200,
-                                                                                              body
-                                                                                                  =
-                                                                                                  <<"hi">>}])]]),
+                                     [{struct_http_style, 200, <<"hi">>}])]]),
         io:nl(),
         {}
     end.

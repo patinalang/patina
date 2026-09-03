@@ -4,14 +4,6 @@
 
 -compile([no_auto_import]).
 
--export_record(['TupleStyle',
-                'StructStyle',
-                'WithCustomTag']).
+-export_record([]).
 
 -export([]).
-
--record #'TupleStyle'{'0'}.
-
--record #'StructStyle'{x, y}.
-
--record #'WithCustomTag'{'0'}.

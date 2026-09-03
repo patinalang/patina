@@ -537,7 +537,8 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 ErlRepr::Elixir => {
                     span_bug!(variant.span, "Elixir repr attribute on enum variant")
                 }
-                ErlRepr::Tagged | ErlRepr::Transparent => not_implemented!(
+                ErlRepr::Tagged => continue,
+                ErlRepr::Transparent => not_implemented!(
                     self.tcx,
                     variant.span,
                     "repr attribute on enum variant",
@@ -599,9 +600,9 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 parts.forms.push(self.afb.native_record_attr(span, variant.name, fields));
             }
 
-            ErlRepr::Atom => {}
+            ErlRepr::Tagged | ErlRepr::Atom => {}
 
-            ErlRepr::Tagged | ErlRepr::Transparent => {
+            ErlRepr::Transparent => {
                 not_implemented!(self.tcx, span, "repr attribute on struct", repr)
             }
         }

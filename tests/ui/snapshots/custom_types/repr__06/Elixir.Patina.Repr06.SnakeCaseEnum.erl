@@ -4,8 +4,6 @@
 
 -compile([no_auto_import]).
 
--export_record(['StructHTTPStyle']).
+-export_record([]).
 
 -export([]).
-
--record #'StructHTTPStyle'{code, body}.

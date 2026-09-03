@@ -1,9 +1,5 @@
 [{attribute,{5,1},file,{"tests/ui/src/custom_types/repr__06.pt",5}},
  {attribute,{5,1},module,'Elixir.Patina.Repr06.SnakeCaseEnum'},
  {attribute,{5,1},compile,[no_auto_import]},
- {attribute,{5,1},export_record,['StructHTTPStyle']},
- {attribute,{5,1},export,[]},
- {attribute,{5,1},
-            native_record,
-            {'StructHTTPStyle',[{record_field,{8,21},{atom,{8,21},code}},
-                                {record_field,{8,32},{atom,{8,32},body}}]}}]
+ {attribute,{5,1},export_record,[]},
+ {attribute,{5,1},export,[]}]

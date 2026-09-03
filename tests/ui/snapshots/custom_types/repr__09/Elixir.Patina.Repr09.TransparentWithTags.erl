@@ -4,12 +4,10 @@
 
 -compile([no_auto_import]).
 
--export_record(['Untagged', 'MaybeUntagged', 'Tagged']).
+-export_record(['Untagged', 'MaybeUntagged']).
 
 -export([]).
 
 -record #'Untagged'{'0'}.
 
 -record #'MaybeUntagged'{'0'}.
-
--record #'Tagged'{'0'}.
