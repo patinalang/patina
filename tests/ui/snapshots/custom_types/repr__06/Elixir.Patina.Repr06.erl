@@ -23,8 +23,7 @@
 
 main() ->
     begin
-        io:put_chars([[io_lib:format("~ktp",
-                                     ['Elixir.Patina.Repr06.SnakeCaseEnum.UnitVariant'])]]),
+        io:put_chars([[io_lib:format("~ktp", [unit_variant])]]),
         io:nl(),
         {}
     end,

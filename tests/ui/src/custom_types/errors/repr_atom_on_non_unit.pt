@@ -1,0 +1,15 @@
+#[repr(atom)]
+struct NonUnitStruct(int);
+
+enum AtomVariant {
+    #[repr(atom)]
+    NonUnit(int),
+}
+
+#[repr(atom)]
+enum InheritedAtom {
+    Unit,
+    NonUnit(int),
+}
+
+pub fn main() {}

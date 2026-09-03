@@ -29,20 +29,17 @@ main() ->
         {}
     end,
     begin
-        io:put_chars([[io_lib:format("~ktp",
-                                     ['Elixir.Patina.Repr03.CustomNameUnit'])]]),
+        io:put_chars([[io_lib:format("~ktp", [custom_name])]]),
         io:nl(),
         {}
     end,
     begin
-        io:put_chars([[io_lib:format("~ktp",
-                                     ['Elixir.Patina.Repr03.NotJustUnits.VariantA'])]]),
+        io:put_chars([[io_lib:format("~ktp", [variant_a])]]),
         io:nl(),
         {}
     end,
     begin
-        io:put_chars([[io_lib:format("~ktp",
-                                     ['Elixir.Patina.Repr03.NotJustUnits.VariantB'])]]),
+        io:put_chars([[io_lib:format("~ktp", [variantB])]]),
         io:nl(),
         {}
     end.

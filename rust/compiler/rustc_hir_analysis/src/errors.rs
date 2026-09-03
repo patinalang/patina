@@ -26,6 +26,16 @@ pub(crate) struct ElixirReprRequiresStruct {
 }
 
 #[derive(Diagnostic)]
+#[diag("the `atom` repr attribute is only allowed on structs and variants without fields")]
+pub(crate) struct AtomReprRequiresNoFields {
+    #[primary_span]
+    #[label("invalid `atom` repr attribute")]
+    pub span: Span,
+    #[label("has fields")]
+    pub item_span: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag("unsupported expression in constant value")]
 #[note(
     "constant values may only contain literals, local named constants, arrays, tuples, and maps"

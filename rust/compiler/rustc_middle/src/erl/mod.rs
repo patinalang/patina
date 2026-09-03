@@ -1,7 +1,8 @@
 //! Erlang call resolution and module placement.
 
+use convert_case::{Case, Casing};
 use rustc_data_structures::fx::FxIndexSet;
-use rustc_hir::attrs::{AttributeKind, ReprAttr};
+use rustc_hir::attrs::{AttributeKind, ErlTagStyle, ReprAttr};
 use rustc_hir::def::{CtorKind, DefKind};
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::definitions::DefPathData;
@@ -86,6 +87,11 @@ pub struct ErlVariantRepr {
     pub kind: ErlRepr,
     pub tag: Symbol,
     pub record_module: Option<Symbol>,
+}
+
+enum ErlTag {
+    Explicit(Symbol),
+    Style(ErlTagStyle),
 }
 
 impl<'tcx> TyCtxt<'tcx> {
@@ -513,6 +519,7 @@ impl<'tcx> TyCtxt<'tcx> {
 
         reprs.iter().find_map(|(repr, span)| match repr {
             ReprAttr::Elixir => Some((ErlRepr::Elixir, *span)),
+            ReprAttr::Atom => Some((ErlRepr::Atom, *span)),
             ReprAttr::NativeRecord => Some((ErlRepr::NativeRecord, *span)),
             _ => None,
         })
@@ -521,7 +528,43 @@ impl<'tcx> TyCtxt<'tcx> {
     /// Returns the atom used to tag a struct or enum variant.
     pub fn erl_adt_tag(self, variant_def_id: DefId) -> Symbol {
         assert!(matches!(self.def_kind(variant_def_id), DefKind::Struct | DefKind::Variant));
-        self.erl_module_name(ErlModuleId::Adt(variant_def_id))
+
+        let own_tag = self.explicit_erl_tag(variant_def_id);
+        let inherited_tag = (self.def_kind(variant_def_id) == DefKind::Variant)
+            .then(|| self.explicit_erl_tag(self.parent(variant_def_id)))
+            .flatten();
+
+        match own_tag.or(inherited_tag) {
+            Some(ErlTag::Explicit(tag)) => tag,
+            Some(ErlTag::Style(ErlTagStyle::SnakeCase)) => {
+                Symbol::intern(&self.item_name(variant_def_id).as_str().to_case(Case::Snake))
+            }
+            None => match self.def_kind(variant_def_id) {
+                DefKind::Struct => self.erl_module_name(ErlModuleId::Adt(variant_def_id)),
+                DefKind::Variant => {
+                    let enum_module =
+                        self.erl_module_name(ErlModuleId::Adt(self.parent(variant_def_id)));
+                    Symbol::intern(&format!("{enum_module}.{}", self.item_name(variant_def_id)))
+                }
+                _ => unreachable!(),
+            },
+        }
+    }
+
+    fn explicit_erl_tag(self, def_id: DefId) -> Option<ErlTag> {
+        let reprs = rustc_hir::find_attr!(self, def_id, Repr { reprs, .. } => reprs)?;
+
+        if let Some(tag) = reprs.iter().find_map(|(repr, _)| match repr {
+            ReprAttr::Tag(tag) => Some(*tag),
+            _ => None,
+        }) {
+            return Some(ErlTag::Explicit(tag));
+        }
+
+        reprs.iter().find_map(|(repr, _)| match repr {
+            ReprAttr::TagStyle(style) => Some(ErlTag::Style(*style)),
+            _ => None,
+        })
     }
 }
 

@@ -35,7 +35,7 @@ main() ->
     end,
     begin
         io:put_chars([[io_lib:format("~ktp",
-                                     ['Elixir.Patina.Repr04.Bar'])]]),
+                                     ['Elixir.BarBar'])]]),
         io:nl(),
         {}
     end.
