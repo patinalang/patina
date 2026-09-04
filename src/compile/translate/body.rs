@@ -323,7 +323,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 expr.span,
                 subject,
                 self.record_module_for_access(repr.record_module),
-                variant.name,
+                repr.tag,
                 variant.fields[name].name,
             ),
             ErlRepr::Atom => span_bug!(expr.span, "field access on atom-represented ADT"),

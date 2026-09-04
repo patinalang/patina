@@ -713,6 +713,27 @@ pub(crate) enum AttrApplication {
 }
 
 #[derive(Diagnostic)]
+#[diag("the `Elixir` repr attribute is only allowed on structs")]
+pub(crate) struct ElixirReprRequiresStruct {
+    #[primary_span]
+    #[label("invalid `Elixir` repr attribute")]
+    pub span: Span,
+    #[label("not a struct")]
+    pub item_span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("the `record_module` repr attribute requires a native-record struct or variant")]
+#[note("`record_module` points to an existing module for a given record definition")]
+pub(crate) struct RecordModuleRequiresNativeRecord {
+    #[primary_span]
+    #[label("invalid `record_module` repr attribute")]
+    pub span: Span,
+    #[label("not a native-record struct or variant")]
+    pub item_span: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag("transparent {$target} cannot have other repr hints", code = E0692)]
 pub(crate) struct TransparentIncompatible {
     #[primary_span]

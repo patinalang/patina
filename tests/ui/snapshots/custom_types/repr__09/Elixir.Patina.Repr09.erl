@@ -24,34 +24,34 @@
 main() ->
     begin
         io:put_chars([[io_lib:format("~ktp",
-                                     [#'Elixir.Patina.Repr09.TransparentWithTags':'MaybeUntagged'{'0'
-                                                                                                      =
-                                                                                                      <<"hello">>}])]]),
+                                     [#'Elixir.Patina.Repr09.TransparentWithTags':othertag{'0'
+                                                                                               =
+                                                                                               <<"hello">>}])]]),
         io:nl(),
         {}
     end,
     begin
         io:put_chars([[io_lib:format("~ktp",
-                                     [#'Elixir.Patina.Repr09.TransparentWithTags':'MaybeUntagged'{'0'
-                                                                                                      =
-                                                                                                      42}])]]),
+                                     [#'Elixir.Patina.Repr09.TransparentWithTags':othertag{'0'
+                                                                                               =
+                                                                                               42}])]]),
         io:nl(),
         {}
     end,
     begin
         io:put_chars([[io_lib:format("~ktp",
-                                     [#'Elixir.Patina.Repr09.TransparentWithTags':'MaybeUntagged'{'0'
-                                                                                                      =
-                                                                                                      hi}])]]),
+                                     [#'Elixir.Patina.Repr09.TransparentWithTags':othertag{'0'
+                                                                                               =
+                                                                                               hi}])]]),
         io:nl(),
         {}
     end,
     begin
         io:put_chars([[io_lib:format("~ktp",
-                                     [#'Elixir.Patina.Repr09.TransparentWithTags':'MaybeUntagged'{'0'
-                                                                                                      =
-                                                                                                      {othertag,
-                                                                                                       1}}])]]),
+                                     [#'Elixir.Patina.Repr09.TransparentWithTags':othertag{'0'
+                                                                                               =
+                                                                                               {othertag,
+                                                                                                1}}])]]),
         io:nl(),
         {}
     end.

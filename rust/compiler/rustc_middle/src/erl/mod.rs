@@ -89,6 +89,7 @@ pub struct ErlVariantRepr {
     pub record_module: Symbol,
 }
 
+#[derive(Copy, Clone)]
 enum ErlTag {
     Explicit(Symbol),
     Style(ErlTagStyle),
@@ -496,11 +497,13 @@ impl<'tcx> TyCtxt<'tcx> {
             None => self.erl_adt_repr(adt.did()),
         };
 
-        ErlVariantRepr {
-            kind,
-            tag: self.erl_adt_tag(variant_def_id),
-            record_module: self.erl_module_name(ErlModuleId::Adt(adt.did())),
-        }
+        let tag = self.erl_adt_tag(variant_def_id, kind);
+        let record_module = self
+            .find_erl_record_module_attr(variant_def_id)
+            .map(|(module, _)| module)
+            .unwrap_or_else(|| self.erl_module_name(ErlModuleId::Adt(adt.did())));
+
+        ErlVariantRepr { kind, tag, record_module }
     }
 
     /// Returns the nearest explicitly selected representation, inheriting from an enum when needed.
@@ -530,8 +533,26 @@ impl<'tcx> TyCtxt<'tcx> {
         })
     }
 
+    pub fn find_erl_record_module_attr(self, def_id: DefId) -> Option<(Symbol, Span)> {
+        let reprs = rustc_hir::find_attr!(self, def_id, Repr { reprs, .. } => reprs)?;
+
+        reprs.iter().find_map(|(repr, span)| match repr {
+            ReprAttr::RecordModule(module) => Some((*module, *span)),
+            _ => None,
+        })
+    }
+
+    pub fn find_erl_tag_attr(self, def_id: DefId) -> Option<(Symbol, Span)> {
+        let reprs = rustc_hir::find_attr!(self, def_id, Repr { reprs, .. } => reprs)?;
+
+        reprs.iter().find_map(|(repr, span)| match repr {
+            ReprAttr::Tag(tag) => Some((*tag, *span)),
+            _ => None,
+        })
+    }
+
     /// Returns the atom used to tag a struct or enum variant.
-    pub fn erl_adt_tag(self, variant_def_id: DefId) -> Symbol {
+    pub fn erl_adt_tag(self, variant_def_id: DefId, repr: ErlRepr) -> Symbol {
         assert!(matches!(self.def_kind(variant_def_id), DefKind::Struct | DefKind::Variant));
 
         let own_tag = self.explicit_erl_tag(variant_def_id);
@@ -544,6 +565,7 @@ impl<'tcx> TyCtxt<'tcx> {
             Some(ErlTag::Style(ErlTagStyle::SnakeCase)) => {
                 Symbol::intern(&self.item_name(variant_def_id).as_str().to_case(Case::Snake))
             }
+            None if repr == ErlRepr::NativeRecord => self.item_name(variant_def_id),
             None => match self.def_kind(variant_def_id) {
                 DefKind::Struct => self.erl_module_name(ErlModuleId::Adt(variant_def_id)),
                 DefKind::Variant => {

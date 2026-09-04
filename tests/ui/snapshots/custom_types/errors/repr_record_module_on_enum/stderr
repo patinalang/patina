@@ -1,0 +1,30 @@
+error: the `record_module` repr attribute requires a native-record struct or variant
+  --> tests/ui/src/custom_types/errors/repr_record_module_on_enum.pt:1:23
+   |
+LL |   #[repr(native_record, record_module = "external_records")]
+   |                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ invalid `record_module` repr attribute
+LL | / enum EnumLevel {
+LL | |     Value(int),
+LL | | }
+   | |_- not a native-record struct or variant
+   |
+   = note: `record_module` points to an existing module for a given record definition
+
+error: the `record_module` repr attribute requires a native-record struct or variant
+  --> tests/ui/src/custom_types/errors/repr_record_module_on_enum.pt:7:20
+   |
+LL |     #[repr(tagged, record_module = "external_records")]
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ invalid `record_module` repr attribute
+LL |     Value(int),
+   |     ----- not a native-record struct or variant
+
+error: the `record_module` repr attribute requires a native-record struct or variant
+  --> tests/ui/src/custom_types/errors/repr_record_module_on_enum.pt:11:16
+   |
+LL | #[repr(Elixir, record_module = "external_records")]
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ invalid `record_module` repr attribute
+LL | struct NotNativeRecord {
+   | ---------------------- not a native-record struct or variant
+
+error: aborting due to 3 previous errors
+

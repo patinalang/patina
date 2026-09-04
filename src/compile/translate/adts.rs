@@ -174,7 +174,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             }
         };
 
-        let record_name = variant.name;
+        let record_name = repr.tag;
         let module = self.record_module_for_access(repr.record_module);
 
         let fields = adt_expr.fields.iter().map(|field| {
@@ -247,7 +247,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             self.translator.afb.pat_record(
                 span,
                 module,
-                variant.name,
+                repr.tag,
                 fields.iter().copied().zip(values.iter().copied()),
             )
         })

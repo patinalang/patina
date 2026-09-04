@@ -16,22 +16,22 @@ mod precise_captures;
 pub(crate) use precise_captures::*;
 
 #[derive(Diagnostic)]
-#[diag("the `Elixir` repr attribute is only allowed on structs")]
-pub(crate) struct ElixirReprRequiresStruct {
-    #[primary_span]
-    #[label("invalid `Elixir` repr attribute")]
-    pub span: Span,
-    #[label("not a struct")]
-    pub item_span: Span,
-}
-
-#[derive(Diagnostic)]
 #[diag("the `atom` repr attribute is only allowed on structs and variants without fields")]
 pub(crate) struct AtomReprRequiresNoFields {
     #[primary_span]
     #[label("invalid `atom` repr attribute")]
     pub span: Span,
     #[label("has fields")]
+    pub item_span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("the `record_module` repr attribute requires a native-record struct or variant")]
+pub(crate) struct RecordModuleRequiresNativeRecord {
+    #[primary_span]
+    #[label("invalid `record_module` repr attribute")]
+    pub span: Span,
+    #[label("not a native-record struct or variant")]
     pub item_span: Span,
 }
 

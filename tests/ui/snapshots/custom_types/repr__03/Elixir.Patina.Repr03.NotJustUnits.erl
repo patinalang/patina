@@ -4,8 +4,8 @@
 
 -compile([no_auto_import]).
 
--export_record(['VariantC']).
+-export_record([variant_c]).
 
 -export([]).
 
--record #'VariantC'{'0'}.
+-record #variant_c{'0'}.

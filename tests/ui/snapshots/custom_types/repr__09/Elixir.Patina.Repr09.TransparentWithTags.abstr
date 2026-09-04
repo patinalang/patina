@@ -1,11 +1,11 @@
 [{attribute,{5,1},file,{"tests/ui/src/custom_types/repr__09.pt",5}},
  {attribute,{5,1},module,'Elixir.Patina.Repr09.TransparentWithTags'},
  {attribute,{5,1},compile,[no_auto_import]},
- {attribute,{5,1},export_record,['Untagged','MaybeUntagged']},
+ {attribute,{5,1},export_record,['Untagged',othertag]},
  {attribute,{5,1},export,[]},
  {attribute,{5,1},
             native_record,
             {'Untagged',[{record_field,{6,14},{atom,{6,14},'0'}}]}},
  {attribute,{5,1},
             native_record,
-            {'MaybeUntagged',[{record_field,{11,19},{atom,{11,19},'0'}}]}}]
+            {othertag,[{record_field,{11,19},{atom,{11,19},'0'}}]}}]

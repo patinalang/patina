@@ -4,11 +4,13 @@ error[E0566]: conflicting representation hints
 LL | #[repr(tagged, tag = "my_tag", transparent)]
    |        ^^^^^^                  ^^^^^^^^^^^
 
-error[E0566]: conflicting representation hints
+error: the `record_module` repr attribute requires a native-record struct or variant
   --> tests/ui/src/custom_types/errors/repr_conflicting.pt:8:16
    |
 LL | #[repr(tagged, record_module = "external_module")]
-   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ invalid `record_module` repr attribute
+LL | struct NotANativeRecord(int);
+   | ----------------------- not a native-record struct or variant
 
 error: aborting due to 2 previous errors
 

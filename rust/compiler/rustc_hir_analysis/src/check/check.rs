@@ -1849,25 +1849,24 @@ fn check_enum(tcx: TyCtxt<'_>, def_id: LocalDefId) {
 }
 
 fn check_erl_repr(tcx: TyCtxt<'_>, adt: AdtDef<'_>) {
-    if adt.is_enum() {
-        let definitions = std::iter::once(adt.did()).chain(adt.variants().iter().map(|v| v.def_id));
-        for def_id in definitions {
-            if let Some((ErlRepr::Elixir, elixir_attr_span)) =
-                tcx.find_primary_erl_repr_attr(def_id)
-            {
-                tcx.dcx().emit_err(crate::errors::ElixirReprRequiresStruct {
-                    span: elixir_attr_span,
-                    item_span: tcx.def_span(def_id),
-                });
-            }
-        }
-    }
-
     let inherited_repr = tcx.find_primary_erl_repr_attr(adt.did());
+
     for variant in adt.variants() {
-        if let Some((ErlRepr::Atom, atom_attr_span)) =
-            tcx.find_primary_erl_repr_attr(variant.def_id).or(inherited_repr)
+        let repr = tcx.erl_variant_repr(variant.def_id).kind;
+
+        if let Some((_module, attr_span)) = tcx.find_erl_record_module_attr(variant.def_id)
+            && repr != ErlRepr::NativeRecord
+        {
+            tcx.dcx().emit_err(crate::errors::RecordModuleRequiresNativeRecord {
+                span: attr_span,
+                item_span: tcx.def_span(variant.def_id),
+            });
+        }
+
+        if repr == ErlRepr::Atom
             && !variant.fields.is_empty()
+            && let Some((_repr, atom_attr_span)) =
+                tcx.find_primary_erl_repr_attr(variant.def_id).or(inherited_repr)
         {
             tcx.dcx().emit_err(crate::errors::AtomReprRequiresNoFields {
                 span: atom_attr_span,

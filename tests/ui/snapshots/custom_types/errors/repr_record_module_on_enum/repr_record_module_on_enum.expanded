@@ -39,19 +39,18 @@ macro_rules! println {
     {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
 }
 
-// source: patina-by-example/src/generics/impl.md
-// block: 1/2
+#[repr(native_record, record_module = "external_records")]
+enum EnumLevel { Value(int), }
 
-struct S;
-// Concrete type `S`
-struct GenericVal<T>(T);
-// Generic type `GenericVal`
+enum InvalidVariant {
 
-// impl of GenericVal where we explicitly specify type parameters:
-impl GenericVal<float> {}
-// Specify `float`
-impl GenericVal<S> {}
-// Specify `S` as defined above
+    #[repr(tagged, record_module = "external_records")]
+    Value(int),
+}
 
-// `<T>` Must precede the type to remain generic
-impl<T> GenericVal<T> {}
+#[repr(Elixir, record_module = "external_records")]
+struct NotNativeRecord {
+    value: int,
+}
+
+pub fn main() {}

@@ -1,0 +1,16 @@
+#[repr(native_record, record_module = "external_records")]
+enum EnumLevel {
+    Value(int),
+}
+
+enum InvalidVariant {
+    #[repr(tagged, record_module = "external_records")]
+    Value(int),
+}
+
+#[repr(Elixir, record_module = "external_records")]
+struct NotNativeRecord {
+    value: int,
+}
+
+pub fn main() {}

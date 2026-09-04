@@ -1235,15 +1235,31 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                         continue;
                     }
                 }
+                ReprAttr::Elixir => match target {
+                    Target::Struct => continue,
+                    _ => {
+                        self.dcx().emit_err(errors::ElixirReprRequiresStruct {
+                            span: *repr_span,
+                            item_span: span,
+                        });
+                    }
+                },
+                ReprAttr::RecordModule(..) => match target {
+                    Target::Struct | Target::Variant => continue,
+                    _ => {
+                        self.dcx().emit_err(errors::RecordModuleRequiresNativeRecord {
+                            span: *repr_span,
+                            item_span: span,
+                        });
+                    }
+                },
                 ReprAttr::Patina
-                | ReprAttr::Elixir
                 | ReprAttr::Tagged
                 | ReprAttr::Atom
                 | ReprAttr::Transparent
                 | ReprAttr::NativeRecord
                 | ReprAttr::Tag(..)
-                | ReprAttr::TagStyle(..)
-                | ReprAttr::RecordModule(..) => match target {
+                | ReprAttr::TagStyle(..) => match target {
                     Target::Struct | Target::Enum | Target::Variant => continue,
                     _ => {
                         self.dcx().emit_err(errors::AttrApplication::StructEnumVariant {
@@ -1285,7 +1301,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         // Representation hints that each determine the runtime representation
         let mut primaries: SmallVec<[(ReprAttr, Span); 1]> = SmallVec::new();
         let mut primary_hints = 0;
-        let mut record_module_span = None;
         for (repr, repr_span) in reprs {
             match repr {
                 ReprAttr::Patina
@@ -1300,8 +1315,10 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                         primaries.push((*repr, *repr_span));
                     }
                 }
-                ReprAttr::RecordModule(..) => record_module_span = Some(*repr_span),
-                ReprAttr::ReprTransparent | ReprAttr::Tag(..) | ReprAttr::TagStyle(..) => {}
+                ReprAttr::ReprTransparent
+                | ReprAttr::Tag(..)
+                | ReprAttr::TagStyle(..)
+                | ReprAttr::RecordModule(..) => {}
             }
         }
 
@@ -1309,12 +1326,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             let hint_spans = primaries.iter().map(|(_, span)| *span).collect();
             self.dcx().emit_err(errors::ReprConflicting { hint_spans });
         }
-        if let Some(record_module_span) = record_module_span
-            && !primaries.iter().any(|(primary, _)| matches!(primary, ReprAttr::NativeRecord))
-        {
-            self.dcx().emit_err(errors::ReprConflicting { hint_spans: vec![record_module_span] });
-        }
-
         // Error on repr(transparent, <anything else>).
         if is_transparent && reprs.len() > 1 {
             let hint_spans = hint_spans.clone().collect();

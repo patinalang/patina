@@ -1,10 +1,12 @@
 error: the `Elixir` repr attribute is only allowed on structs
   --> tests/ui/src/custom_types/errors/repr_elixir_on_enum.pt:1:8
    |
-LL | #[repr(Elixir)]
-   |        ^^^^^^ invalid `Elixir` repr attribute
-LL | enum ElixirEnum {
-   | --------------- not a struct
+LL |   #[repr(Elixir)]
+   |          ^^^^^^ invalid `Elixir` repr attribute
+LL | / enum ElixirEnum {
+LL | |     Variant(int),
+LL | | }
+   | |_- not a struct
 
 error: the `Elixir` repr attribute is only allowed on structs
   --> tests/ui/src/custom_types/errors/repr_elixir_on_enum.pt:7:12
@@ -12,7 +14,7 @@ error: the `Elixir` repr attribute is only allowed on structs
 LL |     #[repr(Elixir)]
    |            ^^^^^^ invalid `Elixir` repr attribute
 LL |     Variant(int),
-   |     ------- not a struct
+   |     ------------ not a struct
 
 error: aborting due to 2 previous errors
 
