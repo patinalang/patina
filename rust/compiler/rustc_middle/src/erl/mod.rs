@@ -1,5 +1,7 @@
 //! Erlang call resolution and module placement.
 
+pub mod shape;
+
 use convert_case::{Case, Casing};
 use rustc_data_structures::fx::FxIndexSet;
 use rustc_hir::attrs::{AttributeKind, ErlTagStyle, ReprAttr};
