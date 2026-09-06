@@ -44,7 +44,8 @@ macro_rules! println {
 
 #[attr = Repr {reprs: [Transparent]}]
 enum Option<T> {
-    #[attr = Repr {reprs: [Tag("some")]}]
+    #[attr = Repr {reprs: [DynamicWrap,
+    Tag("some")]}]
     Some(T),
 
     #[attr = Repr {reprs: [Atom,
@@ -105,10 +106,11 @@ fn main() ({
                                 // Nested options stay distinguishable: only the values that would be
                                 // mistaken for `None` are wrapped.
                                 (((Option::<Option<int>>::Some as
-                                            fn(Option<int>) -> Option<Option<int>> {Option::<Option<int>>::Some})(((Some
-                                                as {type error})((42 as int)) as {type error})) as
-                                        Option<Option<int>>) as term as term)) as term)] as [term])]
-                as [[term]])) as term);
+                                            fn(Option<int>) -> Option<Option<int>> {Option::<Option<int>>::Some})(((Option::Some
+                                                as
+                                                fn(int) -> Option<int> {Option::<int>::Some})((42 as int))
+                                            as Option<int>)) as Option<Option<int>>) as term as term))
+                                as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -117,8 +119,8 @@ fn main() ({
                                     fn(term) -> term)(
                                 // 42
                                 (((Option::<Option<int>>::Some as
-                                            fn(Option<int>) -> Option<Option<int>> {Option::<Option<int>>::Some})((None
-                                            as {type error})) as Option<Option<int>>) as term as term))
+                                            fn(Option<int>) -> Option<Option<int>> {Option::<Option<int>>::Some})((Option::None
+                                            as Option<int>)) as Option<Option<int>>) as term as term))
                                 as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());

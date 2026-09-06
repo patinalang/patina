@@ -92,9 +92,8 @@ use rustc_middle::ty::{
     Unnormalized,
 };
 use rustc_middle::{bug, span_bug};
-use rustc_session::errors::feature_err;
 use rustc_span::def_id::CRATE_DEF_ID;
-use rustc_span::{BytePos, DUMMY_SP, Ident, Span, Symbol, kw, sym};
+use rustc_span::{BytePos, DUMMY_SP, Ident, Span, Symbol, kw};
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
 use rustc_trait_selection::error_reporting::infer::ObligationCauseExt as _;
 use rustc_trait_selection::error_reporting::traits::suggestions::ReturnsVisitor;
@@ -565,53 +564,6 @@ fn suggestion_signature<'tcx>(
                 .unwrap_or_else(|| "value".to_string());
             format!("const {}: {} = {};", name, ty, val)
         }
-    }
-}
-
-/// Emit an error when encountering two or more variants in a transparent enum.
-fn bad_variant_count<'tcx>(tcx: TyCtxt<'tcx>, adt: ty::AdtDef<'tcx>, sp: Span, did: DefId) {
-    let variant_spans: Vec<_> = adt
-        .variants()
-        .iter()
-        .map(|variant| tcx.hir_span_if_local(variant.def_id).unwrap())
-        .collect();
-    let (mut spans, mut many) = (Vec::new(), None);
-    if let [start @ .., end] = &*variant_spans {
-        spans = start.to_vec();
-        many = Some(*end);
-    }
-    tcx.dcx().emit_err(errors::TransparentEnumVariant {
-        span: sp,
-        spans,
-        many,
-        number: adt.variants().len(),
-        path: tcx.def_path_str(did),
-    });
-}
-
-/// Emit an error when encountering two or more non-zero-sized fields in a transparent
-/// enum.
-fn bad_non_zero_sized_fields<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    adt: ty::AdtDef<'tcx>,
-    field_count: usize,
-    field_spans: impl Iterator<Item = Span>,
-    sp: Span,
-) {
-    if adt.is_enum() {
-        tcx.dcx().emit_err(errors::TransparentNonZeroSizedEnum {
-            span: sp,
-            spans: field_spans.collect(),
-            field_count,
-            desc: adt.descr(),
-        });
-    } else {
-        tcx.dcx().emit_err(errors::TransparentNonZeroSized {
-            span: sp,
-            spans: field_spans.collect(),
-            field_count,
-            desc: adt.descr(),
-        });
     }
 }
 

@@ -1,0 +1,22 @@
+warning: fields `x` and `y` are never read
+  --> tests/ui/src/custom_types/repr_transparent.pt:6:5
+   |
+LL | pub struct Point {
+   |            ----- fields in this struct
+LL |     x: int,
+   |     ^
+LL |     y: int,
+   |     ^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: field `value` is never read
+  --> tests/ui/src/custom_types/repr_transparent.pt:12:5
+   |
+LL | pub struct NativeValue {
+   |            ----------- field in this struct
+LL |     value: int,
+   |     ^^^^^
+
+warning: 2 warnings emitted
+

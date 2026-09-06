@@ -1,11 +1,6 @@
 [{attribute,{11,1},file,{"tests/ui/src/custom_types/repr__08.pt",11}},
  {attribute,{11,1},module,'Elixir.Patina.Repr08.TransparentEnum'},
  {attribute,{11,1},compile,[no_auto_import]},
- {attribute,{11,1},export_record,['IntVariant','PointVariant']},
- {attribute,{11,1},export,[]},
- {attribute,{11,1},
-            native_record,
-            {'IntVariant',[{record_field,{12,16},{atom,{12,16},'0'}}]}},
- {attribute,{11,1},
-            native_record,
-            {'PointVariant',[{record_field,{13,18},{atom,{13,18},point}}]}}]
+ {attribute,{11,1},import,{erlang,[{is_record,3}]}},
+ {attribute,{11,1},export_record,[]},
+ {attribute,{11,1},export,[]}]

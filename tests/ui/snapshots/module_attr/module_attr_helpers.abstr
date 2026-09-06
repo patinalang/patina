@@ -1,6 +1,7 @@
 [{attribute,{15,5},file,{"tests/ui/src/module_attr.pt",15}},
  {attribute,{15,5},module,module_attr_helpers},
  {attribute,{15,5},compile,[no_auto_import]},
+ {attribute,{15,5},import,{erlang,[{is_record,3}]}},
  {attribute,{15,5},export_record,[]},
  {attribute,{15,5},export,[{'__info__',1},{answer,0}]},
  {function,

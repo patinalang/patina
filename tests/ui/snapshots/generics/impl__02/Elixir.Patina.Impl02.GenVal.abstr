@@ -1,6 +1,7 @@
 [{attribute,{8,1},file,{"tests/ui/src/generics/impl__02.pt",8}},
  {attribute,{8,1},module,'Elixir.Patina.Impl02.GenVal'},
  {attribute,{8,1},compile,[no_auto_import]},
+ {attribute,{8,1},import,{erlang,[{is_record,3}]}},
  {attribute,{8,1},export_record,[]},
  {attribute,
      {8,1},

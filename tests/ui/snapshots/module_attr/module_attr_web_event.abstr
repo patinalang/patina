@@ -1,6 +1,7 @@
 [{attribute,{9,1},file,{"tests/ui/src/module_attr.pt",9}},
  {attribute,{9,1},module,module_attr_web_event},
  {attribute,{9,1},compile,[no_auto_import]},
+ {attribute,{9,1},import,{erlang,[{is_record,3}]}},
  {attribute,{9,1},export_record,['Click']},
  {attribute,{9,1},export,[]},
  {attribute,{9,1},

@@ -4,6 +4,8 @@
 
 -compile([no_auto_import]).
 
+-import(erlang, [is_record/3]).
+
 -export_record([]).
 
 -export(['__info__'/1, main/0]).
@@ -24,34 +26,82 @@
 main() ->
     begin
         io:put_chars([[io_lib:format("~ktp",
-                                     [#'Elixir.Patina.Repr09.TransparentWithTags':othertag{'0'
-                                                                                               =
-                                                                                               <<"hello">>}])]]),
+                                     [case <<"hello">> of
+                                          _value@1_0
+                                              when
+                                                erlang:is_binary(_value@1_0) ->
+                                              {othertag, _value@1_0};
+                                          _value@1_0 -> _value@1_0
+                                      end])]]),
+        io:nl(),
+        {}
+    end,
+    begin
+        io:put_chars([[io_lib:format("~ktp", [42])]]),
         io:nl(),
         {}
     end,
     begin
         io:put_chars([[io_lib:format("~ktp",
-                                     [#'Elixir.Patina.Repr09.TransparentWithTags':othertag{'0'
-                                                                                               =
-                                                                                               42}])]]),
+                                     [case hi of
+                                          _value@3_0
+                                              when
+                                                erlang:is_binary(_value@3_0) ->
+                                              {othertag, _value@3_0};
+                                          _value@3_0
+                                              when (erlang:is_tuple(_value@3_0)
+                                                        andalso
+                                                        erlang:tuple_size(_value@3_0)
+                                                            =:= 2)
+                                                       andalso
+                                                       erlang:element(1,
+                                                                      _value@3_0)
+                                                           =:= othertag ->
+                                              {othertag, _value@3_0};
+                                          _value@3_0
+                                              when (erlang:is_tuple(_value@3_0)
+                                                        andalso
+                                                        erlang:tuple_size(_value@3_0)
+                                                            =:= 2)
+                                                       andalso
+                                                       erlang:element(1,
+                                                                      _value@3_0)
+                                                           =:= mytag ->
+                                              {othertag, _value@3_0};
+                                          _value@3_0 -> _value@3_0
+                                      end])]]),
         io:nl(),
         {}
     end,
     begin
         io:put_chars([[io_lib:format("~ktp",
-                                     [#'Elixir.Patina.Repr09.TransparentWithTags':othertag{'0'
-                                                                                               =
-                                                                                               hi}])]]),
-        io:nl(),
-        {}
-    end,
-    begin
-        io:put_chars([[io_lib:format("~ktp",
-                                     [#'Elixir.Patina.Repr09.TransparentWithTags':othertag{'0'
-                                                                                               =
-                                                                                               {othertag,
-                                                                                                1}}])]]),
+                                     [case {othertag, 1} of
+                                          _value@5_0
+                                              when
+                                                erlang:is_binary(_value@5_0) ->
+                                              {othertag, _value@5_0};
+                                          _value@5_0
+                                              when (erlang:is_tuple(_value@5_0)
+                                                        andalso
+                                                        erlang:tuple_size(_value@5_0)
+                                                            =:= 2)
+                                                       andalso
+                                                       erlang:element(1,
+                                                                      _value@5_0)
+                                                           =:= othertag ->
+                                              {othertag, _value@5_0};
+                                          _value@5_0
+                                              when (erlang:is_tuple(_value@5_0)
+                                                        andalso
+                                                        erlang:tuple_size(_value@5_0)
+                                                            =:= 2)
+                                                       andalso
+                                                       erlang:element(1,
+                                                                      _value@5_0)
+                                                           =:= mytag ->
+                                              {othertag, _value@5_0};
+                                          _value@5_0 -> _value@5_0
+                                      end])]]),
         io:nl(),
         {}
     end.

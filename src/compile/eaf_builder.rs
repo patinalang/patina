@@ -533,6 +533,21 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         eaf::ModuleForm::ExportAttr(span.into_anno(self.source_map), funs)
     }
 
+    pub(crate) fn import_attr(
+        &self,
+        span: impl IntoAnno,
+        module: Symbol,
+        funs: impl IntoIterator<Item = (Symbol, u32)>,
+    ) -> eaf::ModuleForm<'arena> {
+        let funs = self.arena.alloc_from_iter(
+            funs.into_iter().map(|(name, arity)| eaf::NameArity(name.into(), arity)),
+        );
+        eaf::ModuleForm::ImportAttr(
+            span.into_anno(self.source_map),
+            eaf::ImportModFuns(module.into(), funs),
+        )
+    }
+
     pub(crate) fn native_record_attr(
         &self,
         span: impl IntoAnno,

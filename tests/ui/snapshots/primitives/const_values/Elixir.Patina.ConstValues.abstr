@@ -1,6 +1,7 @@
 [{attribute,{1,1},file,{"tests/ui/src/primitives/const_values.pt",1}},
  {attribute,{1,1},module,'Elixir.Patina.ConstValues'},
  {attribute,{1,1},compile,[no_auto_import]},
+ {attribute,{1,1},import,{erlang,[{is_record,3}]}},
  {attribute,{1,1},export_record,[]},
  {attribute,{1,1},export,[{'__info__',1},{const_values,0}]},
  {function,

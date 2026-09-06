@@ -1,5 +1,6 @@
 [{attribute,{5,1},file,{"tests/ui/src/custom_types/repr__05.pt",5}},
  {attribute,{5,1},module,'Elixir.Patina.Repr05.TaggedEnum'},
  {attribute,{5,1},compile,[no_auto_import]},
+ {attribute,{5,1},import,{erlang,[{is_record,3}]}},
  {attribute,{5,1},export_record,[]},
  {attribute,{5,1},export,[]}]

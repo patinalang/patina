@@ -5,6 +5,8 @@
 
 -compile([no_auto_import]).
 
+-import(erlang, [is_record/3]).
+
 -export_record(['NativeRecordStruct']).
 
 -export(['__info__'/1, sum/1]).

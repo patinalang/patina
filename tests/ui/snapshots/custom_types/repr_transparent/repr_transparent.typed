@@ -1,0 +1,358 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+#[attr = Repr {reprs: [Transparent]}]
+struct Celsius(float);
+
+#[attr = Repr {reprs: [Elixir]}]
+struct Point {
+    x: int,
+    y: int,
+}
+
+#[attr = Repr {reprs: [NativeRecord]}]
+struct NativeValue {
+    value: int,
+}
+
+#[attr = Repr {reprs: [Transparent]}]
+enum Value { Integer(int), Point(Point), }
+
+#[attr = Repr {reprs: [Transparent]}]
+enum OpenValue<T> {
+    #[attr = Repr {reprs: [DynamicWrap,
+    Tag("dynamic")]}]
+    Dynamic(T),
+    Text(str),
+    Record(NativeValue),
+    #[attr = Repr {reprs: [Tagged,
+    Tag("tagged")]}]
+    Tagged(int),
+}
+
+#[attr = Repr {reprs: [Transparent]}]
+enum Inner<T> {
+    #[attr = Repr {reprs: [DynamicWrap,
+    Tag("inner")]}]
+    Inner(T),
+}
+
+#[attr = Repr {reprs: [Transparent]}]
+enum NestedOpen<T> {
+    #[attr = Repr {reprs: [DynamicWrap,
+    Tag("nested")]}]
+    Nested(Inner<T>),
+    Text(str),
+}
+
+#[attr = Repr {reprs: [Transparent]}]
+enum NestedConcrete { Nested(Inner<int>), Text(str), }
+
+#[attr = Repr {reprs: [Transparent]}]
+enum Solo { Only(int), }
+
+#[attr = Repr {reprs: [Transparent]}]
+enum TermOpen {
+    #[attr = Repr {reprs: [DynamicWrap]}]
+    Any(term),
+    Text(str),
+}
+
+fn celsius(value: float)
+    ->
+        Celsius ({
+    ((Celsius as fn(float) -> Celsius {Celsius})((value as float)) as Celsius)
+} as Celsius)
+
+fn degrees(Celsius(value): Celsius) -> float ({ (value as float) } as float)
+
+fn integer(value: int)
+    ->
+        Value ({
+    ((Value::Integer as fn(int) -> Value {Value::Integer})((value as int)) as
+        Value)
+} as Value)
+
+fn point(x: int, y: int)
+    ->
+        Value ({
+    ((Value::Point as
+            fn(Point) -> Value {Value::Point})((Point { (x as int), (y as int)
+            } as Point)) as Value)
+} as Value)
+
+fn classify(value: Value)
+    ->
+        atom ({
+    (match (value as Value) {
+        Value::Integer(_) => (a"integer" as atom),
+        Value::Point(_) => (a"point" as atom),
+    } as atom)
+} as atom)
+
+fn open_dynamic(value: term)
+    ->
+        term ({
+    (((OpenValue::<term>::Dynamic as
+                fn(term) -> OpenValue<term> {OpenValue::<term>::Dynamic})((value
+                as term)) as OpenValue<term>) as term as term)
+} as term)
+
+fn open_text(value: str)
+    ->
+        term ({
+    (((OpenValue::<term>::Text as
+                fn(str) -> OpenValue<term> {OpenValue::<term>::Text})((value
+                as str)) as OpenValue<term>) as term as term)
+} as term)
+
+fn open_tagged(value: int)
+    ->
+        term ({
+    (((OpenValue::<term>::Tagged as
+                fn(int) -> OpenValue<term> {OpenValue::<term>::Tagged})((value
+                as int)) as OpenValue<term>) as term as term)
+} as term)
+
+fn open_record(value: int)
+    ->
+        term ({
+    (((OpenValue::<term>::Record as
+                fn(NativeValue) -> OpenValue<term> {OpenValue::<term>::Record})((NativeValue {
+                (value as int) } as NativeValue)) as OpenValue<term>) as term
+        as term)
+} as term)
+
+fn classify_open(value: OpenValue<term>)
+    ->
+        atom ({
+    (match (value as OpenValue<term>) {
+        OpenValue::Dynamic(_) => (a"dynamic" as atom),
+        OpenValue::Text(_) => (a"text" as atom),
+        OpenValue::Record(_) => (a"record" as atom),
+        OpenValue::Tagged(_) => (a"tagged" as atom),
+    } as atom)
+} as atom)
+
+fn nested_open(value: term)
+    ->
+        term ({
+    (((NestedOpen::<term>::Nested as
+                fn(Inner<term>) -> NestedOpen<term> {NestedOpen::<term>::Nested})(((Inner::<term>::Inner
+                    as
+                    fn(term) -> Inner<term> {Inner::<term>::Inner})((value as
+                    term)) as Inner<term>)) as NestedOpen<term>) as term as
+        term)
+} as term)
+
+fn nested_text(value: str)
+    ->
+        term ({
+    (((NestedOpen::<term>::Text as
+                fn(str) -> NestedOpen<term> {NestedOpen::<term>::Text})((value
+                as str)) as NestedOpen<term>) as term as term)
+} as term)
+
+fn classify_nested(value: NestedOpen<term>)
+    ->
+        atom ({
+    (match (value as NestedOpen<term>) {
+        NestedOpen::Nested(Inner::Inner(_)) => (a"nested" as atom),
+        NestedOpen::Text(_) => (a"text" as atom),
+    } as atom)
+} as atom)
+
+fn concrete_nested(value: int)
+    ->
+        term ({
+    (((NestedConcrete::Nested as
+                fn(Inner<int>) -> NestedConcrete {NestedConcrete::Nested})(((Inner::<int>::Inner
+                    as
+                    fn(int) -> Inner<int> {Inner::<int>::Inner})((value as int))
+                as Inner<int>)) as NestedConcrete) as term as term)
+} as term)
+
+fn concrete_text(value: str)
+    ->
+        term ({
+    (((NestedConcrete::Text as
+                fn(str) -> NestedConcrete {NestedConcrete::Text})((value as
+                str)) as NestedConcrete) as term as term)
+} as term)
+
+fn classify_concrete(value: NestedConcrete)
+    ->
+        atom ({
+    (match (value as NestedConcrete) {
+        NestedConcrete::Nested(Inner::Inner(_)) => (a"nested" as atom),
+        NestedConcrete::Text(_) => (a"text" as atom),
+    } as atom)
+} as atom)
+
+fn term_open(value: term)
+    ->
+        term ({
+    (((TermOpen::Any as fn(term) -> TermOpen {TermOpen::Any})((value as term))
+            as TermOpen) as term as term)
+} as term)
+
+fn term_text(value: str)
+    ->
+        term ({
+    (((TermOpen::Text as fn(str) -> TermOpen {TermOpen::Text})((value as str))
+            as TermOpen) as term as term)
+} as term)
+
+fn classify_term(value: TermOpen)
+    ->
+        atom ({
+    (match (value as TermOpen) {
+        TermOpen::Any(_) => (a"any" as atom),
+        TermOpen::Text(_) => (a"text" as atom),
+    } as atom)
+} as atom)
+
+fn if_let_open(value: OpenValue<term>)
+    ->
+        atom ({
+    (if (let OpenValue::Dynamic(_) = (value as OpenValue<term>) as bool) {
+        (a"dynamic" as atom)
+    } else { (a"other" as atom) } as atom)
+} as atom)
+
+fn while_let_open(value: OpenValue<term>)
+    ->
+        int ({
+    let mut current = (value as OpenValue<term>);
+    let mut count = (0 as int);
+    (loop {
+        (if (let OpenValue::Dynamic(_) = (current as OpenValue<term>) as bool)
+            {
+            ((count as int) += (1 as int) as int);
+            ((current as OpenValue<term>) =
+                ((OpenValue::<term>::Text as
+                        fn(str) -> OpenValue<term> {OpenValue::<term>::Text})(("stop"
+                        as str)) as OpenValue<term>) as OpenValue<term>);
+        } else { (break as !); } as ())
+    } as ())
+    (count as int)
+} as int)
+
+fn let_else_open(value: OpenValue<term>)
+    ->
+        atom ({
+    let OpenValue::Dynamic(_) = (value as OpenValue<term>) else
+        { (return (a"other" as atom) as !); };
+    (a"dynamic" as atom)
+} as atom)
+
+fn inner_open(value: term)
+    ->
+        term ({
+    (((Inner::<term>::Inner as
+                fn(term) -> Inner<term> {Inner::<term>::Inner})((value as
+                term)) as Inner<term>) as term as term)
+} as term)
+
+fn unwrap_inner(Inner::Inner(value): Inner<term>)
+    -> term ({ (value as term) } as term)
+
+fn unwrap_inner_let(value: Inner<term>)
+    ->
+        term ({
+    let Inner::Inner(payload) = (value as Inner<term>);
+    (payload as term)
+} as term)
+
+fn nested_wrapper(value: str)
+    ->
+        term ({
+    (((OpenValue::<OpenValue<str>>::Dynamic as
+                fn(OpenValue<str>) -> OpenValue<OpenValue<str>> {OpenValue::<OpenValue<str>>::Dynamic})(((OpenValue::<str>::Dynamic
+                    as
+                    fn(str) -> OpenValue<str> {OpenValue::<str>::Dynamic})((value
+                    as str)) as OpenValue<str>)) as OpenValue<OpenValue<str>>)
+        as term as term)
+} as term)
+
+fn classify_nested_wrapper(value: OpenValue<OpenValue<str>>)
+    ->
+        atom ({
+    (match (value as OpenValue<OpenValue<str>>) {
+        OpenValue::Dynamic(OpenValue::Dynamic(_)) =>
+            (a"inner_dynamic" as atom),
+        OpenValue::Dynamic(OpenValue::Text(_)) => (a"inner_text" as atom),
+        OpenValue::Dynamic(_) => (a"inner_other" as atom),
+        OpenValue::Text(_) => (a"text" as atom),
+        OpenValue::Record(_) => (a"record" as atom),
+        OpenValue::Tagged(_) => (a"tagged" as atom),
+    } as atom)
+} as atom)
+
+fn typed_atom_option(value: atom)
+    ->
+        term ({
+    (((OpenValue::<atom>::Dynamic as
+                fn(atom) -> OpenValue<atom> {OpenValue::<atom>::Dynamic})((value
+                as atom)) as OpenValue<atom>) as term as term)
+} as term)
+
+fn typed_int_option(value: int)
+    ->
+        term ({
+    (((OpenValue::<int>::Dynamic as
+                fn(int) -> OpenValue<int> {OpenValue::<int>::Dynamic})((value
+                as int)) as OpenValue<int>) as term as term)
+} as term)
+
+fn solo(value: int)
+    ->
+        term ({
+    (((Solo::Only as fn(int) -> Solo {Solo::Only})((value as int)) as Solo) as
+        term as term)
+} as term)
+
+fn unwrap_solo(Solo::Only(value): Solo) -> int ({ (value as int) } as int)
+
+fn unwrap_solo_let(value: Solo)
+    ->
+        int ({ let Solo::Only(payload) = (value as Solo); (payload as int) }
+    as int)

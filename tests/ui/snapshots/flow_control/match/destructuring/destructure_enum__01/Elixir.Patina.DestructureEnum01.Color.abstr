@@ -4,6 +4,7 @@
              7}},
  {attribute,{7,1},module,'Elixir.Patina.DestructureEnum01.Color'},
  {attribute,{7,1},compile,[no_auto_import]},
+ {attribute,{7,1},import,{erlang,[{is_record,3}]}},
  {attribute,{7,1},export_record,['RGB','HSV','HSL','CMY','CMYK']},
  {attribute,{7,1},export,[]},
  {attribute,{7,1},

@@ -164,8 +164,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 Attribute::Parsed(AttributeKind::RustcDumpObjectLifetimeDefaults) => {
                     self.check_dump_object_lifetime_defaults(hir_id);
                 }
-                &Attribute::Parsed(AttributeKind::RustcPubTransparent(attr_span)) => {
-                    self.check_rustc_pub_transparent(attr_span, span, attrs)
+                &Attribute::Parsed(AttributeKind::RustcPubTransparent(_)) => {
                 }
                 Attribute::Parsed(AttributeKind::RustcAlign {..}) => {
 
@@ -1209,22 +1208,8 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             find_attr!(attrs, Repr { reprs, first_span } => (reprs.as_slice(), Some(*first_span)))
                 .unwrap_or((&[], None));
 
-        let mut is_transparent = false;
-
         for (repr, repr_span) in reprs {
             match repr {
-                ReprAttr::ReprTransparent => {
-                    is_transparent = true;
-                    match target {
-                        Target::Struct | Target::Union | Target::Enum => continue,
-                        _ => {
-                            self.dcx().emit_err(errors::AttrApplication::StructEnumUnion {
-                                hint_span: *repr_span,
-                                span,
-                            });
-                        }
-                    }
-                }
                 ReprAttr::ReprInt => {
                     if target != Target::Enum {
                         self.dcx().emit_err(errors::AttrApplication::Enum {
@@ -1250,6 +1235,15 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                         self.dcx().emit_err(errors::RecordModuleRequiresNativeRecord {
                             span: *repr_span,
                             item_span: span,
+                        });
+                    }
+                },
+                ReprAttr::DynamicWrap => match target {
+                    Target::Variant => continue,
+                    _ => {
+                        self.dcx().emit_err(errors::AttrApplication::Variant {
+                            hint_span: *repr_span,
+                            span,
                         });
                     }
                 },
@@ -1315,7 +1309,7 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                         primaries.push((*repr, *repr_span));
                     }
                 }
-                ReprAttr::ReprTransparent
+                ReprAttr::DynamicWrap
                 | ReprAttr::Tag(..)
                 | ReprAttr::TagStyle(..)
                 | ReprAttr::RecordModule(..) => {}
@@ -1325,25 +1319,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         if primaries.len() > 1 {
             let hint_spans = primaries.iter().map(|(_, span)| *span).collect();
             self.dcx().emit_err(errors::ReprConflicting { hint_spans });
-        }
-        // Error on repr(transparent, <anything else>).
-        if is_transparent && reprs.len() > 1 {
-            let hint_spans = hint_spans.clone().collect();
-            self.dcx().emit_err(errors::TransparentIncompatible {
-                hint_spans,
-                target: target.to_string(),
-            });
-        }
-        // Error on `#[repr(transparent)]` in combination with
-        // `#[rustc_pass_indirectly_in_non_rustic_abis]`
-        if is_transparent
-            && let Some(&pass_indirectly_span) =
-                find_attr!(attrs, RustcPassIndirectlyInNonRusticAbis(span) => span)
-        {
-            self.dcx().emit_err(errors::TransparentIncompatible {
-                hint_spans: vec![span, pass_indirectly_span],
-                target: target.to_string(),
-            });
         }
         // Warn on duplicate representation hints, like `#[repr(int, int)]`.
         if primary_hints > primaries.len() {
@@ -1630,14 +1605,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         if !errors.is_empty() {
             infcx.err_ctxt().report_fulfillment_errors(errors);
             self.abort.set(true);
-        }
-    }
-
-    fn check_rustc_pub_transparent(&self, attr_span: Span, span: Span, attrs: &[Attribute]) {
-        if !find_attr!(attrs, Repr { reprs, .. } => reprs.iter().any(|(r, _)| r == &ReprAttr::ReprTransparent))
-            .unwrap_or(false)
-        {
-            self.dcx().emit_err(errors::RustcPubTransparent { span, attr_span });
         }
     }
 

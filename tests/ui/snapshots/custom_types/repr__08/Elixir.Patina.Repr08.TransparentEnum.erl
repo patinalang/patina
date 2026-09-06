@@ -4,10 +4,8 @@
 
 -compile([no_auto_import]).
 
--export_record(['IntVariant', 'PointVariant']).
+-import(erlang, [is_record/3]).
+
+-export_record([]).
 
 -export([]).
-
--record #'IntVariant'{'0'}.
-
--record #'PointVariant'{point}.

@@ -4,7 +4,7 @@
 #[repr(transparent)]
 pub enum Option<T> {
 
-    #[repr(tag = "some")]
+    #[repr(dynamic_wrap, tag = "some")]
     Some(T),
 
     #[repr(atom, tag = "nil")]
@@ -26,9 +26,9 @@ pub fn main() {
 
     // Nested options stay distinguishable: only the values that would be
     // mistaken for `None` are wrapped.
-    println!("{:?}", Option::<Option<int>>::Some(Some(42)) as term);
+    println!("{:?}", Option::<Option<int>>::Some(Option::Some(42)) as term);
     // 42
-    println!("{:?}", Option::<Option<int>>::Some(None) as term);
+    println!("{:?}", Option::<Option<int>>::Some(Option::None) as term);
     // (a"some", a"nil")
     println!("{:?}", Option::<Option<int>>::None as term);
     // a"nil"

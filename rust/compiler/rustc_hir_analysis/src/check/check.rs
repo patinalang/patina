@@ -10,8 +10,9 @@ use rustc_hir::def::{CtorKind, DefKind};
 use rustc_hir::{LangItem, Node, find_attr, intravisit};
 use rustc_infer::infer::{RegionVariableOrigin, TyCtxtInferExt};
 use rustc_infer::traits::{Obligation, ObligationCauseCode, WellFormedLoc};
-use rustc_lint_defs::builtin::{REPR_TRANSPARENT_NON_ZST_FIELDS, UNSUPPORTED_CALLING_CONVENTIONS};
+use rustc_lint_defs::builtin::UNSUPPORTED_CALLING_CONVENTIONS;
 use rustc_middle::erl::ErlRepr;
+use rustc_middle::erl::shape::ErlShape;
 use rustc_middle::hir::nested_filter;
 use rustc_middle::middle::resolve_bound_vars::ResolvedArg;
 use rustc_middle::middle::stability::EvalResult;
@@ -26,6 +27,7 @@ use rustc_target::spec::{AbiMap, AbiMapping};
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
 use rustc_trait_selection::traits;
 use rustc_trait_selection::traits::query::evaluate_obligation::InferCtxtExt;
+use smallvec::SmallVec;
 use tracing::{debug, instrument};
 use ty::TypingMode;
 
@@ -111,7 +113,6 @@ fn check_struct(tcx: TyCtxt<'_>, def_id: LocalDefId) {
         check_simd(tcx, span, def_id);
     }
 
-    check_transparent(tcx, def);
     check_erl_repr(tcx, def);
     check_packed(tcx, span, def);
 }
@@ -120,7 +121,6 @@ fn check_union(tcx: TyCtxt<'_>, def_id: LocalDefId) {
     let def = tcx.adt_def(def_id);
     let span = tcx.def_span(def_id);
     def.destructor(tcx); // force the destructor to be evaluated
-    check_transparent(tcx, def);
     check_union_fields(tcx, span, def_id);
     check_packed(tcx, span, def);
 }
@@ -1622,164 +1622,6 @@ pub(super) fn check_packed_inner(
     None
 }
 
-pub(super) fn check_transparent<'tcx>(tcx: TyCtxt<'tcx>, adt: ty::AdtDef<'tcx>) {
-    struct ZeroSizedFieldReprTransparentIncompatibility<'tcx> {
-        unsuited: UnsuitedInfo<'tcx>,
-    }
-
-    impl<'a, 'tcx> Diagnostic<'a, ()> for ZeroSizedFieldReprTransparentIncompatibility<'tcx> {
-        fn into_diag(self, dcx: DiagCtxtHandle<'a>, level: Level) -> Diag<'a, ()> {
-            let Self { unsuited } = self;
-            let (title, note) = match unsuited.reason {
-                UnsuitedReason::NonExhaustive => (
-                    "external non-exhaustive types",
-                    "is marked with `#[non_exhaustive]`, so it could become non-zero-sized in the future.",
-                ),
-                UnsuitedReason::PrivateField => (
-                    "external types with private fields",
-                    "contains private fields, so it could become non-zero-sized in the future.",
-                ),
-                UnsuitedReason::ReprC => (
-                    "`repr(C)` types",
-                    "is a `#[repr(C)]` type, so it is not guaranteed to be zero-sized on all targets.",
-                ),
-            };
-            Diag::new(
-                dcx,
-                level,
-                format!("zero-sized fields in `repr(transparent)` cannot contain {title}"),
-            )
-            .with_note(format!(
-                "this field contains `{field_ty}`, which {note}",
-                field_ty = unsuited.ty,
-            ))
-        }
-    }
-
-    if !adt.repr().transparent() {
-        return;
-    }
-
-    if adt.is_union() && !tcx.features().transparent_unions() {
-        feature_err(
-            &tcx.sess,
-            sym::transparent_unions,
-            tcx.def_span(adt.did()),
-            "transparent unions are unstable",
-        )
-        .emit();
-    }
-
-    if adt.variants().len() != 1 {
-        bad_variant_count(tcx, adt, tcx.def_span(adt.did()), adt.did());
-        // Don't bother checking the fields.
-        return;
-    }
-
-    let typing_env = ty::TypingEnv::non_body_analysis(tcx, adt.did());
-    // For each field, figure out if it has "trivial" layout (i.e., is a 1-ZST).
-    struct FieldInfo<'tcx> {
-        span: Span,
-        trivial: bool,
-        ty: Ty<'tcx>,
-    }
-
-    let field_infos = adt.all_fields().map(|field| {
-        let ty = field.ty(tcx, GenericArgs::identity_for_item(tcx, field.did));
-        // We are currently checking the type this field came from, so it must be local
-        let span = tcx.hir_span_if_local(field.did).unwrap();
-        let trivial =
-            ty::layout::ty_size_for_frontend(tcx, ty).is_some_and(|size| size.bytes() == 0);
-        FieldInfo { span, trivial, ty }
-    });
-
-    let non_trivial_fields = field_infos
-        .clone()
-        .filter_map(|field| if !field.trivial { Some(field.span) } else { None });
-    let non_trivial_count = non_trivial_fields.clone().count();
-    if non_trivial_count >= 2 {
-        bad_non_zero_sized_fields(
-            tcx,
-            adt,
-            non_trivial_count,
-            non_trivial_fields,
-            tcx.def_span(adt.did()),
-        );
-        return;
-    }
-
-    // Even some 1-ZST fields are not allowed though, if they have `non_exhaustive` or private
-    // fields or `repr(C)`. We call those fields "unsuited".
-    struct UnsuitedInfo<'tcx> {
-        /// The source of the problem, a type that is found somewhere within the field type.
-        ty: Ty<'tcx>,
-        reason: UnsuitedReason,
-    }
-    enum UnsuitedReason {
-        NonExhaustive,
-        PrivateField,
-        ReprC,
-    }
-
-    fn check_unsuited<'tcx>(
-        tcx: TyCtxt<'tcx>,
-        typing_env: ty::TypingEnv<'tcx>,
-        ty: Ty<'tcx>,
-    ) -> ControlFlow<UnsuitedInfo<'tcx>> {
-        // We can encounter projections during traversal, so ensure the type is normalized.
-        let ty =
-            tcx.try_normalize_erasing_regions(typing_env, Unnormalized::new_wip(ty)).unwrap_or(ty);
-        match ty.kind() {
-            ty::Tuple(list) => list.iter().try_for_each(|t| check_unsuited(tcx, typing_env, t)),
-            ty::Array(ty, _) => check_unsuited(tcx, typing_env, *ty),
-            ty::Adt(def, args) => {
-                if !def.did().is_local() && !find_attr!(tcx, def.did(), RustcPubTransparent(_)) {
-                    let non_exhaustive = def.is_variant_list_non_exhaustive()
-                        || def.variants().iter().any(ty::VariantDef::is_field_list_non_exhaustive);
-                    let has_priv = def.all_fields().any(|f| !f.vis.is_public());
-                    if non_exhaustive || has_priv {
-                        return ControlFlow::Break(UnsuitedInfo {
-                            ty,
-                            reason: if non_exhaustive {
-                                UnsuitedReason::NonExhaustive
-                            } else {
-                                UnsuitedReason::PrivateField
-                            },
-                        });
-                    }
-                }
-                if def.repr().c() {
-                    return ControlFlow::Break(UnsuitedInfo { ty, reason: UnsuitedReason::ReprC });
-                }
-                def.all_fields()
-                    .map(|field| field.ty(tcx, args))
-                    .try_for_each(|t| check_unsuited(tcx, typing_env, t))
-            }
-            _ => ControlFlow::Continue(()),
-        }
-    }
-
-    let mut prev_unsuited_1zst = false;
-    for field in field_infos {
-        if field.trivial
-            && let Some(unsuited) = check_unsuited(tcx, typing_env, field.ty).break_value()
-        {
-            // If there are any non-trivial fields, then there can be no non-exhaustive 1-zsts.
-            // Otherwise, it's only an issue if there's >1 non-exhaustive 1-zst.
-            if non_trivial_count > 0 || prev_unsuited_1zst {
-                tcx.emit_node_span_lint(
-                    REPR_TRANSPARENT_NON_ZST_FIELDS,
-                    tcx.local_def_id_to_hir_id(adt.did().expect_local()),
-                    field.span,
-                    ZeroSizedFieldReprTransparentIncompatibility { unsuited },
-                );
-            } else {
-                prev_unsuited_1zst = true;
-            }
-        }
-    }
-}
-
 #[allow(trivial_numeric_casts)]
 fn check_enum(tcx: TyCtxt<'_>, def_id: LocalDefId) {
     let def = tcx.adt_def(def_id);
@@ -1844,15 +1686,61 @@ fn check_enum(tcx: TyCtxt<'_>, def_id: LocalDefId) {
     }
 
     detect_discriminant_duplicate(tcx, def);
-    check_transparent(tcx, def);
     check_erl_repr(tcx, def);
 }
 
 fn check_erl_repr(tcx: TyCtxt<'_>, adt: AdtDef<'_>) {
-    let inherited_repr = tcx.find_primary_erl_repr_attr(adt.did());
+    let args = ty::GenericArgs::identity_for_item(tcx, adt.did());
+    let mut transparent_shapes = SmallVec::<[(&ErlShape, Span); 2]>::new();
+    let mut first_open_transparent: Option<(Ty<'_>, Span)> = None;
 
     for variant in adt.variants() {
-        let repr = tcx.erl_variant_repr(variant.def_id).kind;
+        let variant_repr = tcx.erl_variant_repr(variant.def_id);
+        let variant_span = tcx.def_span(variant.def_id);
+        let repr = variant_repr.kind;
+        let open_shape = tcx.erl_variant_has_open_shape(variant.def_id);
+        let dynamic_wrap = tcx.find_erl_dynamic_wrap_attr(variant.def_id);
+
+        if open_shape {
+            let payload = &variant.fields[FieldIdx::ZERO];
+            let payload_span = tcx.def_span(payload.did);
+            let payload_ty = payload.ty(tcx, args);
+
+            if dynamic_wrap.is_none() && adt.variants().len() > 1 {
+                let indentation =
+                    tcx.sess.source_map().indentation_before(variant_span).unwrap_or_default();
+                tcx.dcx().emit_err(crate::errors::OpenTransparentVariantRequiresDynamicWrap {
+                    payload_span,
+                    payload_ty,
+                    transparent_span: variant_repr
+                        .repr_attribute
+                        .expect("an open transparent variant has an explicit representation"),
+                    suggestion_span: variant_span.shrink_to_lo(),
+                    dynamic_wrap_attribute: format!("#[repr(dynamic_wrap)]\n{indentation}"),
+                });
+            }
+
+            if let Some((other_payload_ty, other_payload_span)) = first_open_transparent {
+                tcx.dcx().emit_err(crate::errors::MultipleOpenTransparentVariants {
+                    payload_span,
+                    payload_ty,
+                    other_payload_span,
+                    other_payload_ty,
+                });
+            } else {
+                first_open_transparent = Some((payload_ty, payload_span));
+            }
+        }
+
+        if !open_shape
+            && adt.is_enum()
+            && let Some(dynamic_wrap_span) = dynamic_wrap
+        {
+            tcx.dcx().emit_err(crate::errors::DynamicWrapRequiresOpenTransparentVariant {
+                span: dynamic_wrap_span,
+                item_span: variant_span,
+            });
+        }
 
         if let Some((_module, attr_span)) = tcx.find_erl_record_module_attr(variant.def_id)
             && repr != ErlRepr::NativeRecord
@@ -1865,13 +1753,43 @@ fn check_erl_repr(tcx: TyCtxt<'_>, adt: AdtDef<'_>) {
 
         if repr == ErlRepr::Atom
             && !variant.fields.is_empty()
-            && let Some((_repr, atom_attr_span)) =
-                tcx.find_primary_erl_repr_attr(variant.def_id).or(inherited_repr)
+            && let Some(atom_attr_span) = variant_repr.repr_attribute
         {
             tcx.dcx().emit_err(crate::errors::AtomReprRequiresNoFields {
                 span: atom_attr_span,
-                item_span: tcx.def_span(variant.def_id),
+                item_span: variant_span,
             });
+        }
+
+        if repr == ErlRepr::Transparent
+            && let Some(transparent_attr_span) = variant_repr.repr_attribute
+        {
+            if variant.fields.len() != 1 {
+                tcx.dcx().emit_err(crate::errors::TransparentReprRequiresNewtype {
+                    span: transparent_attr_span,
+                    item_span: variant_span,
+                });
+                continue;
+            }
+
+            if !open_shape {
+                let field_ty = variant.fields[FieldIdx::ZERO].ty(tcx, args);
+                let shape = tcx.erl_shape_of_ty(field_ty);
+
+                // We need to check for conflicts with all previous transparent shapes.
+                // This may prove to be a strong candidate for later optimization, maybe with some
+                // allocation-free bloom filters.
+                for (other_shape, other_span) in &transparent_shapes {
+                    if shape.overlaps(other_shape) {
+                        tcx.dcx().emit_err(crate::errors::TransparentVariantShapesOverlap {
+                            span: *other_span,
+                            other_span: variant_span,
+                        });
+                    }
+                }
+
+                transparent_shapes.push((shape, variant_span));
+            }
         }
     }
 }

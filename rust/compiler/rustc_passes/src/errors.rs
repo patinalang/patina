@@ -291,15 +291,6 @@ pub(crate) struct RustcAllowConstFnUnstable {
 }
 
 #[derive(Diagnostic)]
-#[diag("attribute should be applied to `#[repr(transparent)]` types")]
-pub(crate) struct RustcPubTransparent {
-    #[primary_span]
-    pub attr_span: Span,
-    #[label("not a `#[repr(transparent)]` type")]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
 #[diag("attribute cannot be applied to a `async`, `gen` or `async gen` function")]
 pub(crate) struct RustcForceInlineCoro {
     #[primary_span]
@@ -689,6 +680,13 @@ pub(crate) struct InlineIgnoredForExported;
 
 #[derive(Diagnostic)]
 pub(crate) enum AttrApplication {
+    #[diag("attribute should be applied to an enum variant", code = E0517)]
+    Variant {
+        #[primary_span]
+        hint_span: Span,
+        #[label("not an enum variant")]
+        span: Span,
+    },
     #[diag("attribute should be applied to an enum", code = E0517)]
     Enum {
         #[primary_span]
@@ -731,14 +729,6 @@ pub(crate) struct RecordModuleRequiresNativeRecord {
     pub span: Span,
     #[label("not a native-record struct or variant")]
     pub item_span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag("transparent {$target} cannot have other repr hints", code = E0692)]
-pub(crate) struct TransparentIncompatible {
-    #[primary_span]
-    pub hint_spans: Vec<Span>,
-    pub target: String,
 }
 
 #[derive(Diagnostic)]

@@ -34,6 +34,9 @@ OpenBracket
 Ident
 OpenParen
 Ident
+Comma
+Whitespace
+Ident
 Whitespace
 Eq
 Whitespace

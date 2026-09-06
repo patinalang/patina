@@ -1,6 +1,7 @@
 [{attribute,{3,1},file,{"tests/ui/src/generics/witness/local_export.pt",3}},
  {attribute,{3,1},module,'Elixir.Patina.LocalExport.S'},
  {attribute,{3,1},compile,[no_auto_import]},
+ {attribute,{3,1},import,{erlang,[{is_record,3}]}},
  {attribute,{3,1},export_record,[]},
  {attribute,{3,1},export,[{'__info__',1},{q,1}]},
  {function,

@@ -1,6 +1,7 @@
 [{attribute,{5,1},file,{"tests/ui/src/generics/witness/bound_generic.pt",5}},
  {attribute,{5,1},module,'Elixir.Patina.BoundGeneric.Number'},
  {attribute,{5,1},compile,[no_auto_import]},
+ {attribute,{5,1},import,{erlang,[{is_record,3}]}},
  {attribute,{5,1},export_record,[]},
  {attribute,
   {5,1},

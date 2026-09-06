@@ -1,6 +1,7 @@
 [{attribute,{4,1},file,{"tests/ui/src/custom_types/repr__05.pt",4}},
  {attribute,{4,1},module,'Elixir.Patina.Repr05'},
  {attribute,{4,1},compile,[no_auto_import]},
+ {attribute,{4,1},import,{erlang,[{is_record,3}]}},
  {attribute,{4,1},export_record,[]},
  {attribute,{4,1},export,[{'__info__',1},{main,0}]},
  {function,

@@ -1,0 +1,140 @@
+error[E0517]: attribute should be applied to an enum variant
+  --> tests/ui/src/custom_types/errors/repr_transparent_errors.pt:70:8
+   |
+LL |   #[repr(dynamic_wrap)]
+   |          ^^^^^^^^^^^^
+LL | / enum DynamicWrapOnEnum {
+LL | |     Value(int),
+LL | | }
+   | |_- not an enum variant
+
+error: the `transparent` repr attribute is only allowed on single-field structs and variants
+  --> tests/ui/src/custom_types/errors/repr_transparent_errors.pt:1:8
+   |
+LL | #[repr(transparent)]
+   |        ^^^^^^^^^^^ invalid `transparent` repr attribute
+LL | struct Unit;
+   | ----------- does not have exactly one field
+
+error: the `transparent` repr attribute is only allowed on single-field structs and variants
+  --> tests/ui/src/custom_types/errors/repr_transparent_errors.pt:4:8
+   |
+LL | #[repr(transparent)]
+   |        ^^^^^^^^^^^ invalid `transparent` repr attribute
+LL | struct Pair(int, int);
+   | ----------- does not have exactly one field
+
+error: the `transparent` repr attribute is only allowed on single-field structs and variants
+  --> tests/ui/src/custom_types/errors/repr_transparent_errors.pt:8:12
+   |
+LL |     #[repr(transparent)]
+   |            ^^^^^^^^^^^ invalid `transparent` repr attribute
+LL |     Unit,
+   |     ---- does not have exactly one field
+
+error: the `transparent` repr attribute is only allowed on single-field structs and variants
+  --> tests/ui/src/custom_types/errors/repr_transparent_errors.pt:10:12
+   |
+LL |     #[repr(transparent)]
+   |            ^^^^^^^^^^^ invalid `transparent` repr attribute
+LL |     Pair(int, int),
+   |     ---- does not have exactly one field
+
+error: the `transparent` repr attribute is only allowed on single-field structs and variants
+  --> tests/ui/src/custom_types/errors/repr_transparent_errors.pt:14:8
+   |
+LL | #[repr(transparent)]
+   |        ^^^^^^^^^^^ invalid `transparent` repr attribute
+LL | enum InvalidInheritedVariants {
+LL |     Unit,
+   |     ---- does not have exactly one field
+
+error: the `transparent` repr attribute is only allowed on single-field structs and variants
+  --> tests/ui/src/custom_types/errors/repr_transparent_errors.pt:14:8
+   |
+LL | #[repr(transparent)]
+   |        ^^^^^^^^^^^ invalid `transparent` repr attribute
+...
+LL |     Pair(int, int),
+   |     ---- does not have exactly one field
+
+error: transparent enum variants have overlapping runtime shapes
+  --> tests/ui/src/custom_types/errors/repr_transparent_errors.pt:22:5
+   |
+LL |     First(int),
+   |     ^^^^^ this transparent variant overlaps another variant
+LL |     Second(int),
+   |     ------ overlapping transparent variant
+   |
+   = note: explicitly transparent variants must be uniquely distinguishable at runtime
+
+error: transparent enum variants have overlapping runtime shapes
+  --> tests/ui/src/custom_types/errors/repr_transparent_errors.pt:28:5
+   |
+LL |     AnyAtom(atom),
+   |     ^^^^^^^ this transparent variant overlaps another variant
+LL |     #[repr(transparent)]
+LL |     Boolean(bool),
+   |     ------- overlapping transparent variant
+   |
+   = note: explicitly transparent variants must be uniquely distinguishable at runtime
+
+error: an enum may have only one open-shape transparent variant
+  --> tests/ui/src/custom_types/errors/repr_transparent_errors.pt:38:12
+   |
+LL |     First(T),
+   |           - `T` also can be any Erlang shape
+LL |     #[repr(dynamic_wrap)]
+LL |     Second(U),
+   |            ^ `U` can be any Erlang shape
+   |
+   = note: multiple open-shape transparent variants cannot be distinguished at runtime
+
+error: an enum may have only one open-shape transparent variant
+  --> tests/ui/src/custom_types/errors/repr_transparent_errors.pt:40:11
+   |
+LL |     First(T),
+   |           - `T` also can be any Erlang shape
+...
+LL |     Third(V),
+   |           ^ `V` can be any Erlang shape
+   |
+   = note: multiple open-shape transparent variants cannot be distinguished at runtime
+
+error: an enum may have only one open-shape transparent variant
+  --> tests/ui/src/custom_types/errors/repr_transparent_errors.pt:54:12
+   |
+LL |     First(Inner<T>),
+   |           -------- `Inner<T>` also can be any Erlang shape
+LL |     #[repr(dynamic_wrap)]
+LL |     Second(Inner<U>),
+   |            ^^^^^^^^ `Inner<U>` can be any Erlang shape
+   |
+   = note: multiple open-shape transparent variants cannot be distinguished at runtime
+
+error: open-shape transparent enum variants require the `dynamic_wrap` repr modifier
+  --> tests/ui/src/custom_types/errors/repr_transparent_errors.pt:59:10
+   |
+LL | #[repr(transparent)]
+   |        ----------- this attribute makes the variant transparent
+LL | enum MissingDynamicWrap {
+LL |     Open(term),
+   |          ^^^^ `term` can be any Erlang shape
+   |
+help: add the `dynamic_wrap` repr modifier
+   |
+LL ~     #[repr(dynamic_wrap)]
+LL ~     Open(term),
+   |
+
+error: the `dynamic_wrap` repr modifier requires an open-shape transparent enum variant
+  --> tests/ui/src/custom_types/errors/repr_transparent_errors.pt:65:12
+   |
+LL |     #[repr(dynamic_wrap)]
+   |            ^^^^^^^^^^^^ invalid `dynamic_wrap` repr modifier
+LL |     Integer(int),
+   |     ------- this variant has a known set of Erlang shapes
+
+error: aborting due to 14 previous errors
+
+For more information about this error, try `rustc --explain E0517`.

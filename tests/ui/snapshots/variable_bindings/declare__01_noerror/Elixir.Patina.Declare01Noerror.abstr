@@ -4,6 +4,7 @@
   {"tests/ui/src/variable_bindings/declare__01_noerror.pt",1}},
  {attribute,{1,1},module,'Elixir.Patina.Declare01Noerror'},
  {attribute,{1,1},compile,[no_auto_import]},
+ {attribute,{1,1},import,{erlang,[{is_record,3}]}},
  {attribute,{1,1},export_record,[]},
  {attribute,{1,1},export,[{'__info__',1},{main,0}]},
  {function,

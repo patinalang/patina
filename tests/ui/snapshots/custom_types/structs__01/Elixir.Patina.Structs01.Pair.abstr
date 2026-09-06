@@ -1,6 +1,7 @@
 [{attribute,{18,1},file,{"tests/ui/src/custom_types/structs__01.pt",18}},
  {attribute,{18,1},module,'Elixir.Patina.Structs01.Pair'},
  {attribute,{18,1},compile,[no_auto_import]},
+ {attribute,{18,1},import,{erlang,[{is_record,3}]}},
  {attribute,{18,1},export_record,[]},
  {attribute,{18,1},export,[{'__info__',1},{'__struct__',0},{'__struct__',1}]},
  {function,

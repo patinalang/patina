@@ -1,5 +1,6 @@
 [{attribute,{21,1},file,{"tests/ui/src/custom_types/repr__03.pt",21}},
  {attribute,{21,1},module,'Elixir.Patina.Repr03.OnlyUnits'},
  {attribute,{21,1},compile,[no_auto_import]},
+ {attribute,{21,1},import,{erlang,[{is_record,3}]}},
  {attribute,{21,1},export_record,[]},
  {attribute,{21,1},export,[]}]

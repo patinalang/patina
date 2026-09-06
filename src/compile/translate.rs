@@ -199,7 +199,13 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         let record_export_attr = self.afb.export_record_attr(span, record_exports);
         let export_attr = self.afb.export_attr(span, parts.exports);
 
-        let attrs = [file_attr, module_attr, compile_attr, record_export_attr, export_attr];
+        // Workaround for https://github.com/erlang/otp/issues/11587 :
+        // `erlang:is_record/3` cannot be used in guards if it's not imported.
+        let import_attr = self.afb.import_attr(span, sym::erlang, [(sym::is_record, 3)]);
+
+        let attrs =
+            [file_attr, module_attr, compile_attr, import_attr, record_export_attr, export_attr];
+
         (mod_name, self.afb.module(attrs.into_iter().chain(parts.forms)))
     }
 
@@ -536,17 +542,11 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             match repr.kind {
                 // fall through to the loop impl
                 ErlRepr::NativeRecord => (),
-                ErlRepr::Atom => continue,
+                // These variants don't implement anything in the enum's module.
+                ErlRepr::Atom | ErlRepr::Tagged | ErlRepr::Transparent => continue,
                 ErlRepr::Elixir => {
                     span_bug!(variant.span, "Elixir repr attribute on enum variant")
                 }
-                ErlRepr::Tagged => continue,
-                ErlRepr::Transparent => not_implemented!(
-                    self.tcx,
-                    variant.span,
-                    "repr attribute on enum variant",
-                    repr.kind
-                ),
             }
 
             if let Some((_, span)) =
@@ -607,11 +607,8 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 parts.forms.push(self.afb.native_record_attr(span, repr.tag, fields));
             }
 
-            ErlRepr::Tagged | ErlRepr::Atom => {}
-
-            ErlRepr::Transparent => {
-                not_implemented!(self.tcx, span, "repr attribute on struct", repr.kind)
-            }
+            // These variants don't implement anything in the struct's module.
+            ErlRepr::Tagged | ErlRepr::Atom | ErlRepr::Transparent => {}
         }
 
         self.collect_impl_fns(ErlModuleId::Adt(def_id.to_def_id()), &mut parts);

@@ -4,6 +4,7 @@
      {"tests/ui/src/custom_types/repr_native_record.pt",16}},
  {attribute,{16,1},module,'Elixir.Patina.ReprNativeRecord.NativeRecordStruct'},
  {attribute,{16,1},compile,[no_auto_import]},
+ {attribute,{16,1},import,{erlang,[{is_record,3}]}},
  {attribute,{16,1},export_record,['NativeRecordStruct']},
  {attribute,{16,1},export,[{'__info__',1},{sum,1}]},
  {function,

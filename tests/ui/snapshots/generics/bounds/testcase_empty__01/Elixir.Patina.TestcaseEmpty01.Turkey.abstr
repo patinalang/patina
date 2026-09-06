@@ -4,6 +4,7 @@
      {"tests/ui/src/generics/bounds/testcase_empty__01.pt",6}},
  {attribute,{6,1},module,'Elixir.Patina.TestcaseEmpty01.Turkey'},
  {attribute,{6,1},compile,[no_auto_import]},
+ {attribute,{6,1},import,{erlang,[{is_record,3}]}},
  {attribute,{6,1},export_record,[]},
  {attribute,{6,1},export,[{'__info__',1}]},
  {function,

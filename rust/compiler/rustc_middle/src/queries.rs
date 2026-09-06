@@ -1226,6 +1226,32 @@ rustc_queries! {
         desc { "computing the Erlang module name for `{module:?}`" }
     }
 
+    /// The simplified runtime Erlang term shape of an instantiated type.
+    query erl_shape_of_ty(ty: Ty<'tcx>) -> &'tcx crate::erl::shape::ErlShape {
+        arena_cache
+        desc { "computing the Erlang term shape of `{ty}`" }
+    }
+
+    /// Whether a transparent enum variant's identity-instantiated payload has an open shape.
+    query erl_variant_has_open_shape(variant_def_id: DefId) -> bool {
+        desc { "computing whether `{}` has an open Erlang term shape", tcx.def_path_str(variant_def_id) }
+    }
+
+    /// For a given variant with given generic args, which other shapes (of other variants, or even
+    /// of this variant assuming that we may have to wrap it) can overlap with its payload?
+    ///
+    /// E.g given `#[repr(transparent)] enum E<T> { String(str), #[repr(dynamic_wrap)] Other(T) }`:
+    /// * if T == `int`, `Other` can't overlap with the `String` variant, so no shapes are returned;
+    /// * if T == `str`, `Other` can overlap with the `String` variant, so we return `[Binary]`
+    /// * if T is not statically known, it could clash with `String` if it's `str`, but it could also
+    ///   clash with a wrapped `Other` if it's `(atom, int)`. We return both shapes:
+    ///   `[Binary, Tuple { arity: 2, tag: Some("other") }]`
+    ///
+    /// If `def_id` is not a transparent, open-shape variant, an empty slice is returned.
+    query erl_open_transparent_guards(key: (DefId, GenericArgsRef<'tcx>)) -> &'tcx [crate::erl::shape::ErlShape] {
+        desc { "computing the Erlang wrapping guards of `{}`", tcx.def_path_str(key.0) }
+    }
+
     /// Checks for uses of unstable APIs in the module.
     query check_mod_unstable_api_usage(key: LocalModDefId) {
         desc { "checking for unstable API usage in {}", describe_as_module(key, tcx) }

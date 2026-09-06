@@ -163,12 +163,12 @@ pub enum ErlTagStyle {
 #[derive(PartialEq, Debug, Encodable, Decodable, Copy, Clone, StableHash, PrintAttribute)]
 pub enum ReprAttr {
     ReprInt,
-    ReprTransparent,
     Patina,
     Elixir,
     Tagged,
     Atom,
     Transparent,
+    DynamicWrap,
     NativeRecord,
     Tag(Symbol),
     TagStyle(ErlTagStyle),

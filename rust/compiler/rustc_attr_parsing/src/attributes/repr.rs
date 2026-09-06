@@ -22,6 +22,7 @@ impl CombineAttributeParser for ReprParser {
         "tagged",
         "atom",
         "transparent",
+        "dynamic_wrap",
         "native_record",
         "tag = \"...\"",
         "tag_style = \"snake_case\"",
@@ -77,6 +78,7 @@ fn parse_repr(cx: &mut AcceptContext<'_, '_>, param: &MetaItemParser) -> Option<
         (Some(sym::tagged), ArgParser::NoArgs) => Some(Tagged),
         (Some(sym::atom), ArgParser::NoArgs) => Some(Atom),
         (Some(sym::transparent), ArgParser::NoArgs) => Some(Transparent),
+        (Some(sym::dynamic_wrap), ArgParser::NoArgs) => Some(DynamicWrap),
         (Some(sym::native_record), ArgParser::NoArgs) => Some(NativeRecord),
         (Some(sym::tag), ArgParser::NameValue(value)) => {
             repr_string_value(cx, value).map(|value| Tag(value))
@@ -101,6 +103,7 @@ fn parse_repr(cx: &mut AcceptContext<'_, '_>, param: &MetaItemParser) -> Option<
                 | name @ sym::tagged
                 | name @ sym::atom
                 | name @ sym::transparent
+                | name @ sym::dynamic_wrap
                 | name @ sym::native_record
                 | name @ sym::int,
             ),
@@ -116,6 +119,7 @@ fn parse_repr(cx: &mut AcceptContext<'_, '_>, param: &MetaItemParser) -> Option<
                 | name @ sym::tagged
                 | name @ sym::atom
                 | name @ sym::transparent
+                | name @ sym::dynamic_wrap
                 | name @ sym::native_record
                 | name @ sym::int,
             ),

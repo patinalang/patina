@@ -4,6 +4,7 @@
   {"tests/ui/src/generics/witness/trait_argument_patterns.pt",2}},
  {attribute,{2,1},module,'Elixir.Patina.TraitArgumentPatterns.BoundContainer'},
  {attribute,{2,1},compile,[no_auto_import]},
+ {attribute,{2,1},import,{erlang,[{is_record,3}]}},
  {attribute,{2,1},export_record,[]},
  {attribute,
   {2,1},

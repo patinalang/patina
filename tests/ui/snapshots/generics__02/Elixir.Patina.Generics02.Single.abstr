@@ -1,6 +1,7 @@
 [{attribute,{9,1},file,{"tests/ui/src/generics__02.pt",9}},
  {attribute,{9,1},module,'Elixir.Patina.Generics02.Single'},
  {attribute,{9,1},compile,[no_auto_import]},
+ {attribute,{9,1},import,{erlang,[{is_record,3}]}},
  {attribute,{9,1},export_record,[]},
  {attribute,{9,1},export,[{'__info__',1},{'__struct__',0},{'__struct__',1}]},
  {function,

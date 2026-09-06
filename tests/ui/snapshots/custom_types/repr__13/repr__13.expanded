@@ -45,7 +45,7 @@ macro_rules! println {
 #[repr(transparent)]
 pub enum Option<T> {
 
-    #[repr(tag = "some")]
+    #[repr(dynamic_wrap, tag = "some")]
     Some(T),
 
     #[repr(atom, tag = "nil")]
@@ -84,13 +84,13 @@ pub fn main() {
 
                                 // Nested options stay distinguishable: only the values that would be
                                 // mistaken for `None` are wrapped.
-                                Option::<Option<int>>::Some(Some(42)) as term)]]);
+                                Option::<Option<int>>::Some(Option::Some(42)) as term)]]);
         io::nl();
     };
     {
         io::put_chars([[patina_fmt::debug(
                                 // 42
-                                Option::<Option<int>>::Some(None) as term)]]);
+                                Option::<Option<int>>::Some(Option::None) as term)]]);
         io::nl();
     };
     {

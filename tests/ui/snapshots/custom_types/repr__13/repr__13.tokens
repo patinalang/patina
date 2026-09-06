@@ -26,6 +26,9 @@ OpenBracket
 Ident
 OpenParen
 Ident
+Comma
+Whitespace
+Ident
 Whitespace
 Eq
 Whitespace
@@ -200,6 +203,9 @@ Colon
 Ident
 OpenParen
 Ident
+Colon
+Colon
+Ident
 OpenParen
 Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 2 }
 CloseParen
@@ -232,6 +238,9 @@ Colon
 Colon
 Ident
 OpenParen
+Ident
+Colon
+Colon
 Ident
 CloseParen
 Whitespace

@@ -5,6 +5,7 @@
       33}},
  {attribute,{33,5},module,'Elixir.Patina.DestructureStructures01.main.Bar'},
  {attribute,{33,5},compile,[no_auto_import]},
+ {attribute,{33,5},import,{erlang,[{is_record,3}]}},
  {attribute,{33,5},export_record,[]},
  {attribute,{33,5},export,[{'__info__',1},{'__struct__',0},{'__struct__',1}]},
  {function,

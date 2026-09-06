@@ -1,6 +1,7 @@
 [{attribute,{2,1},file,{"tests/ui/src/custom_types/repr_native_record.pt",2}},
  {attribute,{2,1},module,'Elixir.Patina.ReprNativeRecord.WholeEnum'},
  {attribute,{2,1},compile,[no_auto_import]},
+ {attribute,{2,1},import,{erlang,[{is_record,3}]}},
  {attribute,{2,1},export_record,['Unit']},
  {attribute,{2,1},export,[]},
  {attribute,{2,1},native_record,{'Unit',[]}}]

@@ -1,6 +1,7 @@
 [{attribute,{10,5},file,{"tests/ui/src/custom_types/repr__01.pt",10}},
  {attribute,{10,5},module,my_other_struct},
  {attribute,{10,5},compile,[no_auto_import]},
+ {attribute,{10,5},import,{erlang,[{is_record,3}]}},
  {attribute,{10,5},export_record,[]},
  {attribute,{10,5},export,[{'__info__',1}]},
  {function,

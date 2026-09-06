@@ -1,0 +1,75 @@
+#[repr(transparent)]
+struct Unit;
+
+#[repr(transparent)]
+struct Pair(int, int);
+
+enum InvalidVariants {
+    #[repr(transparent)]
+    Unit,
+    #[repr(transparent)]
+    Pair(int, int),
+}
+
+#[repr(transparent)]
+enum InvalidInheritedVariants {
+    Unit,
+    Pair(int, int),
+}
+
+#[repr(transparent)]
+enum SamePrimitiveShape {
+    First(int),
+    Second(int),
+}
+
+enum OverlappingAtomShapes {
+    #[repr(transparent)]
+    AnyAtom(atom),
+    #[repr(transparent)]
+    Boolean(bool),
+}
+
+#[repr(transparent)]
+enum MultipleOpenShapes<T, U, V> {
+    #[repr(dynamic_wrap)]
+    First(T),
+    #[repr(dynamic_wrap)]
+    Second(U),
+    #[repr(dynamic_wrap)]
+    Third(V),
+}
+
+#[repr(transparent)]
+enum Inner<T> {
+    #[repr(dynamic_wrap)]
+    Value(T),
+}
+
+#[repr(transparent)]
+enum MultipleNestedOpenShapes<T, U> {
+    #[repr(dynamic_wrap)]
+    First(Inner<T>),
+    #[repr(dynamic_wrap)]
+    Second(Inner<U>),
+}
+
+#[repr(transparent)]
+enum MissingDynamicWrap {
+    Open(term),
+    Text(str),
+}
+
+#[repr(transparent)]
+enum DynamicWrapOnClosed {
+    #[repr(dynamic_wrap)]
+    Integer(int),
+    Text(str),
+}
+
+#[repr(dynamic_wrap)]
+enum DynamicWrapOnEnum {
+    Value(int),
+}
+
+pub fn main() {}

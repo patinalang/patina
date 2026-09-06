@@ -1,0 +1,6 @@
+[{attribute,{45,1},file,{"tests/ui/src/custom_types/repr_transparent.pt",45}},
+ {attribute,{45,1},module,'Elixir.Patina.ReprTransparent.NestedConcrete'},
+ {attribute,{45,1},compile,[no_auto_import]},
+ {attribute,{45,1},import,{erlang,[{is_record,3}]}},
+ {attribute,{45,1},export_record,[]},
+ {attribute,{45,1},export,[]}]

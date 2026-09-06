@@ -1,11 +1,13 @@
 use rustc_data_structures::fx::FxHashSet;
+use rustc_hir::def::DefKind;
 use rustc_hir::def_id::DefId;
+use rustc_macros::StableHash;
 use rustc_span::{Symbol, kw};
 
 use crate::erl::{ErlModuleId, ErlRepr};
 use crate::ty::{self, AdtDef, GenericArgsRef, Ty, TyCtxt, VariantDef};
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, StableHash)]
 pub enum ErlShape {
     Atom(Symbol),
     AnyAtom,
@@ -19,7 +21,7 @@ pub enum ErlShape {
     Map,
     ElixirStruct(Symbol),
     NativeRecord { module: Symbol, name: Symbol },
-    Union(Vec<ErlShape>),
+    Union(Box<[ErlShape]>),
     Any,
 }
 
@@ -49,12 +51,11 @@ impl ErlShape {
     }
 
     /// Simplifies redundant structure in a shape union.
-    /// Call this before emitting guards.
-    pub fn simplify(self) -> ErlShape {
-        let ErlShape::Union(mut shapes) = self else { return self };
+    fn simplify(self) -> ErlShape {
+        let ErlShape::Union(shapes) = self else { return self };
 
-        if shapes.len() == 1 {
-            return shapes.remove(0).simplify();
+        if let [shape] = shapes.as_ref() {
+            return shape.clone().simplify();
         }
 
         let mut alternatives: Vec<ErlShape> = Vec::with_capacity(shapes.len());
@@ -65,7 +66,11 @@ impl ErlShape {
             return ErlShape::Any;
         }
 
-        if alternatives.len() == 1 { alternatives.remove(0) } else { ErlShape::Union(alternatives) }
+        if alternatives.len() == 1 {
+            alternatives.remove(0)
+        } else {
+            ErlShape::Union(alternatives.into())
+        }
     }
 
     /// Adds `shape` to a simplified union, returning whether it contains `Any`.
@@ -105,14 +110,11 @@ impl ErlShape {
 }
 
 impl<'tcx> TyCtxt<'tcx> {
-    /// The runtime shape of `ty`.
-    pub fn erl_shape_of_ty(self, ty: Ty<'tcx>) -> ErlShape {
-        self.erl_shape_of_ty_rec(ty, &mut FxHashSet::default())
-    }
-
     fn erl_shape_of_ty_rec(self, ty: Ty<'tcx>, visiting: &mut FxHashSet<DefId>) -> ErlShape {
         match ty.kind() {
-            ty::Bool => ErlShape::Union(vec![ErlShape::Atom(kw::True), ErlShape::Atom(kw::False)]),
+            ty::Bool => {
+                ErlShape::Union(Box::new([ErlShape::Atom(kw::True), ErlShape::Atom(kw::False)]))
+            }
             ty::Int | ty::Char => ErlShape::Int,
             ty::Float => ErlShape::Float,
             ty::Str => ErlShape::Binary,
@@ -122,7 +124,7 @@ impl<'tcx> TyCtxt<'tcx> {
             ty::Tuple(tys) => ErlShape::Tuple { arity: tys.len(), tag: None },
             ty::FnDef(..) | ty::FnPtr(..) => ErlShape::Fun,
             ty::Adt(def, args) => self.erl_shape_of_adt(*def, args, visiting),
-            ty::Term => ErlShape::Any,
+            ty::Term | ty::Param(_) => ErlShape::Any,
             _ => unreachable!("not a thing in Patina"),
         }
     }
@@ -142,7 +144,7 @@ impl<'tcx> TyCtxt<'tcx> {
             .variants()
             .iter()
             .map(|variant| self.erl_shape_of_variant(def, variant, args, visiting))
-            .collect();
+            .collect::<Box<[_]>>();
 
         visiting.remove(&def.did());
 
@@ -165,9 +167,26 @@ impl<'tcx> TyCtxt<'tcx> {
                 ErlShape::Tuple { arity: variant.fields.len() + 1, tag: Some(repr.tag) }
             }
             ErlRepr::Atom => ErlShape::Atom(repr.tag),
-            ErlRepr::Transparent => variant.fields.iter().next().map_or(ErlShape::Any, |field| {
-                self.erl_shape_of_ty_rec(field.ty(self, args), visiting)
-            }),
+            ErlRepr::Transparent => {
+                let [field] = variant.fields.iter().as_slice() else {
+                    // Any other variant is invalid, and will be reported by the type checker.
+                    // Returning an empty union prevents error cascades from treating this variant
+                    // as open-shape.
+                    return ErlShape::Union(Box::new([]));
+                };
+
+                let payload = self.erl_shape_of_ty_rec(field.ty(self, args), visiting);
+
+                // A variant that wraps is also seen as its `{Tag, Payload}` wrapper.
+                if self.erl_open_transparent_guards((variant.def_id, args)).is_empty() {
+                    payload
+                } else {
+                    ErlShape::Union(Box::new([
+                        payload,
+                        ErlShape::Tuple { arity: 2, tag: Some(repr.tag) },
+                    ]))
+                }
+            }
             ErlRepr::NativeRecord => {
                 ErlShape::NativeRecord { module: repr.record_module, name: repr.tag }
             }
@@ -175,11 +194,68 @@ impl<'tcx> TyCtxt<'tcx> {
     }
 }
 
+pub(super) fn erl_shape_of_ty<'tcx>(tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) -> ErlShape {
+    tcx.erl_shape_of_ty_rec(ty, &mut FxHashSet::default()).simplify()
+}
+
+pub(super) fn erl_variant_has_open_shape(tcx: TyCtxt<'_>, variant_def_id: DefId) -> bool {
+    if tcx.def_kind(variant_def_id) != DefKind::Variant {
+        return false;
+    }
+
+    let def = tcx.adt_def(tcx.parent(variant_def_id));
+    let variant = def.variant_with_id(variant_def_id);
+    let repr = tcx.erl_variant_repr(variant_def_id);
+    if repr.kind != ErlRepr::Transparent {
+        return false;
+    }
+
+    let [payload_field] = variant.fields.iter().as_slice() else { return false };
+
+    let args = ty::GenericArgs::identity_for_item(tcx, def.did());
+    let payload_ty = payload_field.ty(tcx, args);
+
+    matches!(*tcx.erl_shape_of_ty(payload_ty), ErlShape::Any)
+}
+
+pub(super) fn erl_open_transparent_guards<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    (variant_def_id, args): (DefId, GenericArgsRef<'tcx>),
+) -> &'tcx [ErlShape] {
+    if !tcx.erl_variant_has_open_shape(variant_def_id) {
+        return &[];
+    }
+
+    let def = tcx.adt_def(tcx.parent(variant_def_id));
+    if def.variants().len() == 1 {
+        // Nothing to guard against.
+        return &[];
+    }
+
+    let variant = def.variant_with_id(variant_def_id);
+    let [payload_field] = variant.fields.iter().as_slice() else { return &[] };
+    let payload = tcx.erl_shape_of_ty(payload_field.ty(tcx, args));
+
+    tcx.arena.alloc_from_iter(def.variants().iter().filter_map(|sibling| {
+        let shape = if sibling.def_id == variant_def_id {
+            ErlShape::Tuple { arity: 2, tag: Some(tcx.erl_variant_repr(variant_def_id).tag) }
+        } else {
+            tcx.erl_shape_of_variant(def, sibling, args, &mut FxHashSet::default()).simplify()
+        };
+
+        payload.overlaps(&shape).then_some(shape)
+    }))
+}
+
 #[cfg(test)]
 mod tests {
     use rustc_span::{Symbol, create_default_session_globals_then};
 
     use super::ErlShape::*;
+
+    fn union<const N: usize>(shapes: [super::ErlShape; N]) -> super::ErlShape {
+        Union(Box::new(shapes))
+    }
 
     #[test]
     fn primitive_overlap() {
@@ -253,8 +329,8 @@ mod tests {
 
     #[test]
     fn union_overlap() {
-        let scalars = Union(vec![Int, Binary]);
-        let empty = Union(Vec::new());
+        let scalars = union([Int, Binary]);
+        let empty = union([]);
 
         assert!(scalars.overlaps(&Int));
         assert!(Binary.overlaps(&scalars));
@@ -270,7 +346,7 @@ mod tests {
             let some = Atom(Symbol::intern("some"));
             let tagged = Tuple { arity: 2, tag: Some(Symbol::intern("some")) };
             let untagged = Tuple { arity: 2, tag: None };
-            let numbers = Union(vec![Int, Float]);
+            let numbers = union([Int, Float]);
 
             assert!(Any.superset_of(&tagged));
             assert!(AnyAtom.superset_of(&some));
@@ -279,8 +355,8 @@ mod tests {
             assert!(!tagged.superset_of(&untagged));
             assert!(AnyTuple.superset_of(&tagged));
             assert!(numbers.superset_of(&Int));
-            assert!(numbers.superset_of(&Union(vec![Float, Int])));
-            assert!(Int.superset_of(&Union(vec![Int])));
+            assert!(numbers.superset_of(&union([Float, Int])));
+            assert!(Int.superset_of(&union([Int])));
             assert!(!Int.superset_of(&numbers));
         });
     }
@@ -291,34 +367,34 @@ mod tests {
             let yes = Atom(Symbol::intern("yes"));
             let no = Atom(Symbol::intern("no"));
             let some = Symbol::intern("some");
-            let shape = Union(vec![
+            let shape = union([
                 yes.clone(),
-                Union(vec![no, yes]),
+                union([no, yes]),
                 AnyAtom,
                 Tuple { arity: 2, tag: Some(some) },
                 Tuple { arity: 2, tag: None },
                 Int,
             ]);
 
-            assert_eq!(shape.simplify(), Union(vec![AnyAtom, Tuple { arity: 2, tag: None }, Int]));
+            assert_eq!(shape.simplify(), union([AnyAtom, Tuple { arity: 2, tag: None }, Int]));
         });
     }
 
     #[test]
     fn simplify_is_independent_of_nested_union_order() {
         create_default_session_globals_then(|| {
-            let atoms = Union(vec![Atom(Symbol::intern("yes")), Atom(Symbol::intern("no"))]);
+            let atoms = union([Atom(Symbol::intern("yes")), Atom(Symbol::intern("no"))]);
 
-            assert_eq!(Union(vec![AnyAtom, atoms.clone()]).simplify(), AnyAtom);
-            assert_eq!(Union(vec![atoms, AnyAtom]).simplify(), AnyAtom);
+            assert_eq!(union([AnyAtom, atoms.clone()]).simplify(), AnyAtom);
+            assert_eq!(union([atoms, AnyAtom]).simplify(), AnyAtom);
         });
     }
 
     #[test]
     fn simplify_boundary_cases() {
-        assert_eq!(Union(vec![Int, Binary]).simplify(), Union(vec![Int, Binary]));
-        assert_eq!(Union(vec![Int, Union(vec![Any])]).simplify(), Any);
-        assert_eq!(Union(vec![Union(vec![Int, Int])]).simplify(), Int);
-        assert_eq!(Union(Vec::new()).simplify(), Union(Vec::new()));
+        assert_eq!(union([Int, Binary]).simplify(), union([Int, Binary]));
+        assert_eq!(union([Int, union([Any])]).simplify(), Any);
+        assert_eq!(union([union([Int, Int])]).simplify(), Int);
+        assert_eq!(union([]).simplify(), union([]));
     }
 }

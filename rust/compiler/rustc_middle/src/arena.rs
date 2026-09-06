@@ -91,6 +91,7 @@ macro_rules! arena_types {
             [] name_set: rustc_data_structures::unord::UnordSet<rustc_span::Symbol>,
             [] autodiff_item: rustc_hir::attrs::AutoDiffItem,
             [] ordered_name_set: rustc_data_structures::fx::FxIndexSet<rustc_span::Symbol>,
+            [] erl_shape: rustc_middle::erl::shape::ErlShape,
             [] stable_order_of_exportable_impls:
                 rustc_data_structures::fx::FxIndexMap<rustc_hir::def_id::DefId, usize>,
 

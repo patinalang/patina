@@ -4,6 +4,8 @@
 
 -compile([no_auto_import]).
 
+-import(erlang, [is_record/3]).
+
 -export_record([]).
 
 -export(['__info__'/1, main/0]).
@@ -23,23 +25,18 @@
 
 main() ->
     begin
-        io:put_chars([[io_lib:format("~ktp",
-                                     [#'Elixir.Patina.Repr08.TransparentEnum':'IntVariant'{'0'
-                                                                                               =
-                                                                                               200}])]]),
+        io:put_chars([[io_lib:format("~ktp", [200])]]),
         io:nl(),
         {}
     end,
     begin
         io:put_chars([[io_lib:format("~ktp",
-                                     [#'Elixir.Patina.Repr08.TransparentEnum':'PointVariant'{point
-                                                                                                 =
-                                                                                                 ('Elixir.Patina.Repr08.Point':'__struct__'())#{x
-                                                                                                                                                    :=
-                                                                                                                                                    1,
-                                                                                                                                                y
-                                                                                                                                                    :=
-                                                                                                                                                    2}}])]]),
+                                     [('Elixir.Patina.Repr08.Point':'__struct__'())#{x
+                                                                                         :=
+                                                                                         1,
+                                                                                     y
+                                                                                         :=
+                                                                                         2}])]]),
         io:nl(),
         {}
     end.

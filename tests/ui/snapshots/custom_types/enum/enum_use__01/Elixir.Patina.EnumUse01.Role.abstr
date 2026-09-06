@@ -1,5 +1,6 @@
 [{attribute,{12,1},file,{"tests/ui/src/custom_types/enum/enum_use__01.pt",12}},
  {attribute,{12,1},module,'Elixir.Patina.EnumUse01.Role'},
  {attribute,{12,1},compile,[no_auto_import]},
+ {attribute,{12,1},import,{erlang,[{is_record,3}]}},
  {attribute,{12,1},export_record,[]},
  {attribute,{12,1},export,[]}]

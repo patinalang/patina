@@ -48,7 +48,8 @@ enum TransparentWithTags<T> {
 
     // `MaybeUntagged(T)` values are represented as themselves, except
     // for values that could be mistaken for another variant.
-    #[attr = Repr {reprs: [Tag("othertag")]}]
+    #[attr = Repr {reprs: [DynamicWrap,
+    Tag("othertag")]}]
     MaybeUntagged(T),
 
     // Individual enum variants can have their own representation set.

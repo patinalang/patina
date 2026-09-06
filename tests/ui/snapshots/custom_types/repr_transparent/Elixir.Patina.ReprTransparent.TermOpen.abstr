@@ -1,0 +1,6 @@
+[{attribute,{56,1},file,{"tests/ui/src/custom_types/repr_transparent.pt",56}},
+ {attribute,{56,1},module,'Elixir.Patina.ReprTransparent.TermOpen'},
+ {attribute,{56,1},compile,[no_auto_import]},
+ {attribute,{56,1},import,{erlang,[{is_record,3}]}},
+ {attribute,{56,1},export_record,[]},
+ {attribute,{56,1},export,[]}]

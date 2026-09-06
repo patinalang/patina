@@ -4,6 +4,7 @@
      {"tests/ui/src/generics/assoc_items/the_problem__01.pt",4}},
  {attribute,{4,1},module,'Elixir.Patina.TheProblem01.Container'},
  {attribute,{4,1},compile,[no_auto_import]},
+ {attribute,{4,1},import,{erlang,[{is_record,3}]}},
  {attribute,{4,1},export_record,[]},
  {attribute,
      {4,1},

@@ -4,6 +4,8 @@
 
 -compile([no_auto_import]).
 
+-import(erlang, [is_record/3]).
+
 -export_record([]).
 
 -export(['__info__'/1, function/0, indirect_access/0]).

@@ -1,6 +1,7 @@
 [{attribute,{17,1},file,{"tests/ui/src/fn/backtick_ident.pt",17}},
  {attribute,{17,1},module,'Elixir.Patina.BacktickIdent.S'},
  {attribute,{17,1},compile,[no_auto_import]},
+ {attribute,{17,1},import,{erlang,[{is_record,3}]}},
  {attribute,{17,1},export_record,[]},
  {attribute,
      {17,1},

@@ -1497,7 +1497,7 @@ impl<'tcx> TyCtxt<'tcx> {
         if let Some(reprs) = find_attr!(self, did, Repr { reprs, .. } => reprs) {
             for (r, _) in reprs {
                 flags.insert(match *r {
-                    attr::ReprTransparent => ReprFlags::IS_TRANSPARENT,
+                    attr::Transparent => ReprFlags::IS_TRANSPARENT,
                     attr::ReprInt => {
                         size = Some(IntegerType::Fixed(Integer::I128, true));
                         ReprFlags::empty()
@@ -1506,7 +1506,7 @@ impl<'tcx> TyCtxt<'tcx> {
                     | attr::Elixir
                     | attr::Tagged
                     | attr::Atom
-                    | attr::Transparent
+                    | attr::DynamicWrap
                     | attr::NativeRecord
                     | attr::Tag(_)
                     | attr::TagStyle(_)

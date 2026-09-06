@@ -23,7 +23,10 @@ use crate::{not_implemented, span_fatal};
 
 /// Pattern with optional guards needed to match it.
 #[derive(Debug, Clone)]
-pub(super) struct GuardedPattern<'arena>(eaf::Pattern<'arena>, SmallVec<[eaf::Expr<'arena>; 1]>);
+pub(super) struct GuardedPattern<'arena>(
+    pub(super) eaf::Pattern<'arena>,
+    pub(super) SmallVec<[eaf::Expr<'arena>; 1]>,
+);
 pub(super) type Patterns<'arena> = SmallVec<[GuardedPattern<'arena>; 1]>;
 
 impl<'arena> From<eaf::Pattern<'arena>> for GuardedPattern<'arena> {
@@ -1123,7 +1126,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
             PatKind::Variant { adt_def, variant_index, subpatterns, .. } => {
                 let variant = adt_def.variant(*variant_index);
-                self.translate_adt_pattern(pat.span, *adt_def, variant, subpatterns)
+                self.translate_adt_pattern(pat.span, pat.ty, *adt_def, variant, subpatterns)
             }
 
             PatKind::Constant { value } => self.translate_constant_pattern(pat.span, *value).into(),
@@ -1389,7 +1392,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
             ty::TyKind::Adt(adt_def, _) => {
                 let variant = adt_def.non_enum_variant();
-                self.translate_adt_pattern(pat.span, *adt_def, variant, subpatterns)
+                self.translate_adt_pattern(pat.span, pat.ty, *adt_def, variant, subpatterns)
             }
 
             _ => not_implemented!(self.tcx(), pat.span, "leaf pattern type", pat.ty),

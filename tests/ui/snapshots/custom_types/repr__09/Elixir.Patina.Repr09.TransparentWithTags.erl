@@ -4,10 +4,8 @@
 
 -compile([no_auto_import]).
 
--export_record(['Untagged', othertag]).
+-import(erlang, [is_record/3]).
+
+-export_record([]).
 
 -export([]).
-
--record #'Untagged'{'0'}.
-
--record #othertag{'0'}.

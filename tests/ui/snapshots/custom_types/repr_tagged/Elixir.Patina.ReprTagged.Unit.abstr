@@ -1,6 +1,7 @@
 [{attribute,{10,1},file,{"tests/ui/src/custom_types/repr_tagged.pt",10}},
  {attribute,{10,1},module,'Elixir.Patina.ReprTagged.Unit'},
  {attribute,{10,1},compile,[no_auto_import]},
+ {attribute,{10,1},import,{erlang,[{is_record,3}]}},
  {attribute,{10,1},export_record,[]},
  {attribute,{10,1},export,[{'__info__',1}]},
  {function,

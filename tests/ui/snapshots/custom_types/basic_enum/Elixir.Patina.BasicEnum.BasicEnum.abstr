@@ -1,6 +1,7 @@
 [{attribute,{1,1},file,{"tests/ui/src/custom_types/basic_enum.pt",1}},
  {attribute,{1,1},module,'Elixir.Patina.BasicEnum.BasicEnum'},
  {attribute,{1,1},compile,[no_auto_import]},
+ {attribute,{1,1},import,{erlang,[{is_record,3}]}},
  {attribute,{1,1},export_record,['Tuple','Struct']},
  {attribute,{1,1},export,[]},
  {attribute,{1,1},

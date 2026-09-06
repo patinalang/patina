@@ -87,7 +87,11 @@ pub enum ErlRepr {
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, StableHash)]
 pub struct ErlVariantRepr {
     pub kind: ErlRepr,
+    /// The explicit repr attribute which selected `kind` (including an inherited enum attribute).
+    pub repr_attribute: Option<Span>,
     pub tag: Symbol,
+    /// The module of the native record to use for this variant.
+    /// This attribute is set even if the variant is not represented as a native record.
     pub record_module: Symbol,
 }
 
@@ -468,7 +472,7 @@ impl<'tcx> TyCtxt<'tcx> {
     }
 
     pub fn erl_adt_repr(self, def_id: DefId) -> ErlRepr {
-        if let Some(kind) = self.explicit_erl_repr(def_id) {
+        if let Some((kind, _)) = self.explicit_erl_repr(def_id) {
             return kind;
         }
 
@@ -493,29 +497,30 @@ impl<'tcx> TyCtxt<'tcx> {
             adt.non_enum_variant()
         };
 
-        let kind = match self.explicit_erl_repr(variant_def_id) {
-            Some(repr) => repr,
+        let explicit_repr = self.explicit_erl_repr(variant_def_id);
+        let kind = match explicit_repr {
+            Some((repr, _)) => repr,
             None if variant.ctor_kind() == Some(CtorKind::Const) => ErlRepr::Atom,
             None => self.erl_adt_repr(adt.did()),
         };
+        let repr_attribute = explicit_repr.map(|(_, span)| span);
 
         let tag = self.erl_adt_tag(variant_def_id, kind);
         let record_module = self
             .find_erl_record_module_attr(variant_def_id)
             .map(|(module, _)| module)
             .unwrap_or_else(|| self.erl_module_name(ErlModuleId::Adt(adt.did())));
-
-        ErlVariantRepr { kind, tag, record_module }
+        ErlVariantRepr { kind, repr_attribute, tag, record_module }
     }
 
     /// Returns the nearest explicitly selected representation, inheriting from an enum when needed.
-    fn explicit_erl_repr(self, def_id: DefId) -> Option<ErlRepr> {
-        if let Some((repr, _)) = self.find_primary_erl_repr_attr(def_id) {
+    fn explicit_erl_repr(self, def_id: DefId) -> Option<(ErlRepr, Span)> {
+        if let Some(repr) = self.find_primary_erl_repr_attr(def_id) {
             return Some(repr);
         }
 
         if self.def_kind(def_id) == DefKind::Variant
-            && let Some((repr, _)) = self.find_primary_erl_repr_attr(self.parent(def_id))
+            && let Some(repr) = self.find_primary_erl_repr_attr(self.parent(def_id))
         {
             return Some(repr);
         }
@@ -530,6 +535,7 @@ impl<'tcx> TyCtxt<'tcx> {
             ReprAttr::Elixir => Some((ErlRepr::Elixir, *span)),
             ReprAttr::Tagged => Some((ErlRepr::Tagged, *span)),
             ReprAttr::Atom => Some((ErlRepr::Atom, *span)),
+            ReprAttr::Transparent => Some((ErlRepr::Transparent, *span)),
             ReprAttr::NativeRecord => Some((ErlRepr::NativeRecord, *span)),
             _ => None,
         })
@@ -540,6 +546,15 @@ impl<'tcx> TyCtxt<'tcx> {
 
         reprs.iter().find_map(|(repr, span)| match repr {
             ReprAttr::RecordModule(module) => Some((*module, *span)),
+            _ => None,
+        })
+    }
+
+    pub fn find_erl_dynamic_wrap_attr(self, def_id: DefId) -> Option<Span> {
+        let reprs = rustc_hir::find_attr!(self, def_id, Repr { reprs, .. } => reprs)?;
+
+        reprs.iter().find_map(|(repr, span)| match repr {
+            ReprAttr::DynamicWrap => Some(*span),
             _ => None,
         })
     }
@@ -655,5 +670,12 @@ fn erl_module_name(tcx: TyCtxt<'_>, module: ErlModuleId) -> Symbol {
 }
 
 pub fn provide(providers: &mut Providers) {
-    *providers = Providers { erl_fn_name, erl_module_name, ..*providers };
+    *providers = Providers {
+        erl_fn_name,
+        erl_module_name,
+        erl_shape_of_ty: shape::erl_shape_of_ty,
+        erl_variant_has_open_shape: shape::erl_variant_has_open_shape,
+        erl_open_transparent_guards: shape::erl_open_transparent_guards,
+        ..*providers
+    };
 }

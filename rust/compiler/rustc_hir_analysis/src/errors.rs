@@ -26,6 +26,68 @@ pub(crate) struct AtomReprRequiresNoFields {
 }
 
 #[derive(Diagnostic)]
+#[diag("the `transparent` repr attribute is only allowed on single-field structs and variants")]
+pub(crate) struct TransparentReprRequiresNewtype {
+    #[primary_span]
+    #[label("invalid `transparent` repr attribute")]
+    pub span: Span,
+    #[label("does not have exactly one field")]
+    pub item_span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("transparent enum variants have overlapping runtime shapes")]
+#[note("explicitly transparent variants must be uniquely distinguishable at runtime")]
+pub(crate) struct TransparentVariantShapesOverlap {
+    #[primary_span]
+    #[label("this transparent variant overlaps another variant")]
+    pub span: Span,
+    #[label("overlapping transparent variant")]
+    pub other_span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("an enum may have only one open-shape transparent variant")]
+#[note("multiple open-shape transparent variants cannot be distinguished at runtime")]
+pub(crate) struct MultipleOpenTransparentVariants<'tcx> {
+    #[primary_span]
+    #[label("`{$payload_ty}` can be any Erlang shape")]
+    pub payload_span: Span,
+    pub payload_ty: Ty<'tcx>,
+    #[label("`{$other_payload_ty}` also can be any Erlang shape")]
+    pub other_payload_span: Span,
+    pub other_payload_ty: Ty<'tcx>,
+}
+
+#[derive(Diagnostic)]
+#[diag("open-shape transparent enum variants require the `dynamic_wrap` repr modifier")]
+pub(crate) struct OpenTransparentVariantRequiresDynamicWrap<'tcx> {
+    #[primary_span]
+    #[label("`{$payload_ty}` can be any Erlang shape")]
+    pub payload_span: Span,
+    pub payload_ty: Ty<'tcx>,
+    #[label("this attribute makes the variant transparent")]
+    pub transparent_span: Span,
+    #[suggestion(
+        "add the `dynamic_wrap` repr modifier",
+        code = "{dynamic_wrap_attribute}",
+        applicability = "machine-applicable"
+    )]
+    pub suggestion_span: Span,
+    pub dynamic_wrap_attribute: String,
+}
+
+#[derive(Diagnostic)]
+#[diag("the `dynamic_wrap` repr modifier requires an open-shape transparent enum variant")]
+pub(crate) struct DynamicWrapRequiresOpenTransparentVariant {
+    #[primary_span]
+    #[label("invalid `dynamic_wrap` repr modifier")]
+    pub span: Span,
+    #[label("this variant has a known set of Erlang shapes")]
+    pub item_span: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag("the `record_module` repr attribute requires a native-record struct or variant")]
 pub(crate) struct RecordModuleRequiresNativeRecord {
     #[primary_span]
@@ -1011,44 +1073,6 @@ pub(crate) struct MissingTraitItemUnstable {
     pub missing_item_name: Ident,
     pub feature: Symbol,
     pub reason: String,
-}
-
-#[derive(Diagnostic)]
-#[diag("transparent enum needs exactly one variant, but has {$number}", code = E0731)]
-pub(crate) struct TransparentEnumVariant {
-    #[primary_span]
-    #[label("needs exactly one variant, but has {$number}")]
-    pub span: Span,
-    #[label("variant here")]
-    pub spans: Vec<Span>,
-    #[label("too many variants in `{$path}`")]
-    pub many: Option<Span>,
-    pub number: usize,
-    pub path: String,
-}
-
-#[derive(Diagnostic)]
-#[diag("the variant of a transparent {$desc} needs at most one field with non-trivial size or alignment, but has {$field_count}", code = E0690)]
-pub(crate) struct TransparentNonZeroSizedEnum<'a> {
-    #[primary_span]
-    #[label("needs at most one field with non-trivial size or alignment, but has {$field_count}")]
-    pub span: Span,
-    #[label("this field has non-zero size or requires alignment")]
-    pub spans: Vec<Span>,
-    pub field_count: usize,
-    pub desc: &'a str,
-}
-
-#[derive(Diagnostic)]
-#[diag("transparent {$desc} needs at most one field with non-trivial size or alignment, but has {$field_count}", code = E0690)]
-pub(crate) struct TransparentNonZeroSized<'a> {
-    #[primary_span]
-    #[label("needs at most one field with non-trivial size or alignment, but has {$field_count}")]
-    pub span: Span,
-    #[label("this field has non-zero size or requires alignment")]
-    pub spans: Vec<Span>,
-    pub field_count: usize,
-    pub desc: &'a str,
 }
 
 #[derive(Diagnostic)]

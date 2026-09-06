@@ -1,13 +1,14 @@
 use rustc_abi::FieldIdx;
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def_id::DefId;
+use rustc_middle::erl::shape::ErlShape;
 use rustc_middle::erl::{ErlCallKind, ErlCallTarget, ErlModuleResolution, ErlRepr, ErlVariantRepr};
 use rustc_middle::span_bug;
 use rustc_middle::thir::{AdtExpr, AdtExprBase, Expr, FieldPat};
-use rustc_middle::ty::{AdtDef, VariantDef};
+use rustc_middle::ty::{self, AdtDef, Ty, VariantDef};
 use rustc_span::{Ident, Span, Symbol, kw, sym};
 
-use crate::compile::translate::body::{BodyCx, Patterns};
+use crate::compile::translate::body::{BodyCx, GuardedPattern, Patterns};
 use crate::erlang::abstract_format as eaf;
 use crate::{not_implemented, span_fatal};
 
@@ -15,6 +16,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     pub(super) fn translate_adt_pattern(
         &mut self,
         span: Span,
+        adt_ty: Ty<'tcx>,
         adt_def: AdtDef<'tcx>,
         variant: &VariantDef,
         subpatterns: &[FieldPat<'tcx>],
@@ -29,9 +31,14 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             ErlRepr::NativeRecord => {
                 self.translate_native_record_pattern(span, variant, subpatterns, repr)
             }
-            ErlRepr::Transparent => {
-                not_implemented!(self.tcx(), span, "ADT pattern representation", repr.kind)
-            }
+            ErlRepr::Transparent => self.translate_transparent_pattern(
+                span,
+                adt_ty,
+                adt_def,
+                variant,
+                subpatterns,
+                repr,
+            ),
         }
     }
 
@@ -50,10 +57,138 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             ErlRepr::Tagged => self.translate_tagged(expr, adt_expr, variant, repr),
             ErlRepr::Elixir => self.translate_elixir_struct(expr, adt_expr, variant),
             ErlRepr::NativeRecord => self.translate_native_record(expr, adt_expr, variant, repr),
-            ErlRepr::Transparent => {
-                not_implemented!(self.tcx(), expr.span, "ADT representation", repr.kind)
-            }
+            ErlRepr::Transparent => self.translate_transparent(expr, adt_expr, variant, repr),
         }
+    }
+
+    fn translate_transparent(
+        &mut self,
+        expr: &Expr<'tcx>,
+        adt_expr: &AdtExpr<'tcx>,
+        variant: &VariantDef,
+        repr: ErlVariantRepr,
+    ) -> eaf::Expr<'arena> {
+        let afb = &self.translator.afb;
+
+        let value = match &adt_expr.base {
+            AdtExprBase::None => {
+                let [field] = adt_expr.fields.as_ref() else {
+                    span_bug!(
+                        expr.span,
+                        "transparent ADT construction has num of fields other than 1: {:?}",
+                        adt_expr.fields
+                    )
+                };
+                self.translate_expr(field.expr)
+            }
+
+            AdtExprBase::Base(base) => match adt_expr.fields.as_ref() {
+                [] => self.translate_expr(base.base),
+                [field] => self.translate_expr(field.expr),
+                _ => {
+                    span_bug!(
+                        expr.span,
+                        "transparent ADT update has more than one field: {:?}",
+                        adt_expr.fields
+                    )
+                }
+            },
+
+            AdtExprBase::DefaultFields(_) => {
+                not_implemented!(self.tcx(), expr.span, "transparent ADT with default fields")
+            }
+        };
+
+        let guard_shapes = self.tcx().erl_open_transparent_guards((variant.def_id, adt_expr.args));
+        if guard_shapes.is_empty() {
+            // The variant is either not open-shape, or can't be mistaken with any other variant.
+            return value;
+        }
+
+        let value_var = self.scopes.fresh_var(sym::value, true);
+        let value_var_pat = afb.pat_var(expr.span, value_var.erl_name);
+        let value_var_expr = afb.expr_var(expr.span, value_var.erl_name);
+        let wrapped =
+            afb.expr_tuple(expr.span, [afb.expr_atom(expr.span, repr.tag), value_var_expr]);
+
+        let clauses = guard_shapes
+            .iter()
+            .map(|shape| {
+                let guard = self.guards_for_shape(expr.span, value_var_expr, shape);
+                if guard.is_none() {
+                    span_bug!(expr.span, "empty guard clause in open transparent construction")
+                }
+                afb.clause(expr.span, [value_var_pat], guard, wrapped)
+            })
+            .chain(std::iter::once(afb.clause(expr.span, [value_var_pat], None, value_var_expr)));
+
+        afb.expr_case(expr.span, value, clauses)
+    }
+
+    fn translate_transparent_pattern(
+        &mut self,
+        span: Span,
+        adt_ty: Ty<'tcx>,
+        adt_def: AdtDef<'tcx>,
+        variant: &VariantDef,
+        subpatterns: &[FieldPat<'tcx>],
+        repr: ErlVariantRepr,
+    ) -> Patterns<'arena> {
+        let afb = &self.translator.afb;
+
+        let payload_patterns = match subpatterns {
+            [] => afb.pat_var(span, kw::Underscore).into(),
+            [field] => self.translate_pattern(&field.pattern),
+            _ => span_bug!(span, "transparent ADT pattern with more than one field"),
+        };
+
+        // A variant with no siblings is never wrapped.
+        if adt_def.variants().len() == 1 {
+            return payload_patterns;
+        }
+
+        let ty::Adt(_, args) = adt_ty.kind() else {
+            span_bug!(span, "transparent ADT pattern has non-ADT type {adt_ty}")
+        };
+
+        let guard_shapes = self.tcx().erl_open_transparent_guards((variant.def_id, args));
+        let wraps = !guard_shapes.is_empty();
+
+        // If wrapping is a possibility, we need to guard against the wrapped shape as well.
+        let wrapped = wraps
+            .then(|| {
+                payload_patterns.clone().into_iter().map(|GuardedPattern(payload, guards)| {
+                    let tag = afb.pat_atom(span, repr.tag);
+                    GuardedPattern(afb.pat_tuple(span, [tag, payload]), guards)
+                })
+            })
+            .into_iter()
+            .flatten();
+
+        let shape_var = self.scopes.fresh_var(sym::value, true);
+        let shape_pat = afb.pat_var(span, shape_var.erl_name);
+        let shape_expr = afb.expr_var(span, shape_var.erl_name);
+
+        let shape_guards: SmallVec<[eaf::Expr<'arena>; 1]> = if wraps {
+            guard_shapes
+                .iter()
+                .map(|shape| match self.guards_for_shape(span, shape_expr, shape) {
+                    Some(guard) => afb.expr_unary_op(span, eaf::UnaryOp::Not, guard),
+                    None => afb.expr_atom(span, kw::False),
+                })
+                .collect()
+        } else {
+            let payload_ty = variant.fields[FieldIdx::ZERO].ty(self.tcx(), args);
+            let shape = self.tcx().erl_shape_of_ty(payload_ty);
+            self.guards_for_shape(span, shape_expr, shape).into_iter().collect()
+        };
+
+        let unwrapped = payload_patterns.into_iter().map(|GuardedPattern(payload, mut guards)| {
+            guards.extend(shape_guards.iter().copied());
+            GuardedPattern(afb.pat_match(span, shape_pat, payload), guards)
+        });
+
+        wrapped.chain(unwrapped).collect()
     }
 
     fn translate_tagged(
@@ -323,5 +458,78 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         // adt construction is always local if possible
         (call_kind == ErlCallKind::Extern)
             .then(|| self.resolve_module_name(span, adt_def_id, variant_def_id))
+    }
+
+    /// Shallow Erlang guard tests which recognize `shape`.
+    ///
+    /// An empty vector represents an always-true guard (`ErlShape::Any`).
+    fn guards_for_shape(
+        &self,
+        span: Span,
+        value: eaf::Expr<'arena>,
+        shape: &ErlShape,
+    ) -> Option<eaf::Expr<'arena>> {
+        let afb = &self.translator.afb;
+
+        let bif = |name: Symbol, args: &[eaf::Expr<'arena>]| {
+            afb.expr_remote_call(
+                span,
+                afb.expr_atom(span, sym::erlang),
+                afb.expr_atom(span, name),
+                args.iter().copied(),
+            )
+        };
+        let and = |left, right| afb.expr_binary_op(span, eaf::BinaryOp::Andalso, left, right);
+        let or = |left, right| afb.expr_binary_op(span, eaf::BinaryOp::Orelse, left, right);
+        let eq = |left, right| afb.expr_binary_op(span, eaf::BinaryOp::EqExact, left, right);
+
+        let guard_expr = match shape {
+            ErlShape::Atom(atom) => eq(value, afb.expr_atom(span, *atom)),
+            ErlShape::AnyAtom => bif(sym::is_atom, &[value]),
+            ErlShape::Int => bif(sym::is_integer, &[value]),
+            ErlShape::Float => bif(sym::is_float, &[value]),
+            ErlShape::Binary => bif(sym::is_binary, &[value]),
+            ErlShape::List => bif(sym::is_list, &[value]),
+            ErlShape::Fun => bif(sym::is_function, &[value]),
+            ErlShape::Tuple { arity, tag } => {
+                let tuple = bif(sym::is_tuple, &[value]);
+                let size = eq(bif(sym::tuple_size, &[value]), afb.expr_int(span, *arity as u128));
+                let tuple_and_size = and(tuple, size);
+                if let Some(tag) = tag {
+                    let head = bif(sym::element, &[afb.expr_int(span, 1), value]);
+                    let tag_match = eq(head, afb.expr_atom(span, *tag));
+                    and(tuple_and_size, tag_match)
+                } else {
+                    tuple_and_size
+                }
+            }
+            ErlShape::AnyTuple => bif(sym::is_tuple, &[value]),
+            ErlShape::Map => bif(sym::is_map, &[value]),
+            ErlShape::ElixirStruct(module) => and(
+                bif(sym::is_map, &[value]),
+                eq(
+                    bif(sym::map_get, &[afb.expr_atom(span, sym::__struct__), value]),
+                    afb.expr_atom(span, *module),
+                ),
+            ),
+            ErlShape::NativeRecord { module, name } => bif(
+                sym::is_record,
+                &[value, afb.expr_atom(span, *module), afb.expr_atom(span, *name)],
+            ),
+            ErlShape::Union(shapes) => {
+                let mut combined = None;
+                for shape in shapes {
+                    let test = self.guards_for_shape(span, value, shape)?;
+                    combined = Some(match combined {
+                        Some(previous) => or(previous, test),
+                        None => test,
+                    });
+                }
+                combined?
+            }
+            ErlShape::Any => return None,
+        };
+
+        Some(guard_expr)
     }
 }
