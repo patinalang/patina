@@ -2025,6 +2025,12 @@ impl<'a> State<'a> {
                 self.word("^");
                 self.print_expr(e, FixupContext::default());
             }
+            PatKind::TermClass(class, subpattern) => {
+                self.word(class.name().to_string());
+                self.popen();
+                self.print_pat(subpattern);
+                self.pclose();
+            }
             PatKind::Range(begin, end, Spanned { node: end_kind, .. }) => {
                 if let Some(e) = begin {
                     self.print_expr(e, FixupContext::default());

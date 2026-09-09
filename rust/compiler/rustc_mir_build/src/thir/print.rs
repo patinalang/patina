@@ -775,6 +775,17 @@ impl<'a, 'tcx> ThirPrinter<'a, 'tcx> {
                 print_indented!(self, format!("var: {:?}", var), depth_lvl + 2);
                 print_indented!(self, "}", depth_lvl + 1);
             }
+            PatKind::TermClass { class, subpattern } => {
+                print_indented!(self, format!("TermClass({class:?}) {{"), depth_lvl + 1);
+                self.print_pat(subpattern, depth_lvl + 2);
+                print_indented!(self, "}", depth_lvl + 1);
+            }
+            PatKind::TermPat { subpattern, adt_repr_match } => {
+                print_indented!(self, "TermPat {", depth_lvl + 1);
+                print_indented!(self, format!("adt_repr_match: {adt_repr_match}"), depth_lvl + 2);
+                self.print_pat(subpattern, depth_lvl + 2);
+                print_indented!(self, "}", depth_lvl + 1);
+            }
             PatKind::Variant { adt_def, args, variant_index, subpatterns } => {
                 print_indented!(self, "Variant {", depth_lvl + 1);
                 print_indented!(self, "adt_def: ", depth_lvl + 2);

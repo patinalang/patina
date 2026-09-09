@@ -1,0 +1,181 @@
+#![allow(internal_features)]
+
+
+
+
+
+
+
+
+
+
+#![deny(unused_parens)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+#[allow(unused_imports)]
+use Core::*;
+#[allow(unused)]
+extern mod io;
+#[allow(unused)]
+extern mod patina_fmt;
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
+enum Option<T> {
+    #[attr = Repr {reprs: [],
+    modifiers: [DynamicWrap,
+    Tag("some")]}]
+    Some(T),
+    #[attr = Repr {reprs: [Atom],
+    modifiers: [Tag("nil")]}]
+    None,
+}
+
+struct Point {
+    x: int,
+    y: int,
+}
+struct Wrapper<T> {
+    value: T,
+}
+
+fn use_int(value: int)
+    -> int ({ ((value as int) + (1 as int) as int) } as int)
+
+fn adt_path_outside_unsafe(value: term)
+    ->
+        bool ({
+    (match (value as term) {
+        Option::<int>::None => (true as bool),
+        _ => (false as bool),
+    } as bool)
+} as bool)
+
+fn adt_tuple_struct_outside_unsafe(value: term)
+    ->
+        bool ({
+    (match (value as term) {
+        Option::<int>::Some(_) => (true as bool),
+        _ => (false as bool),
+    } as bool)
+} as bool)
+
+fn adt_struct_outside_unsafe(value: term)
+    ->
+        bool ({
+    (match (value as term) {
+        Point { .. } => (true as bool),
+        _ => (false as bool),
+    } as bool)
+} as bool)
+
+fn adt_in_or_pattern_outside_unsafe(value: term)
+    ->
+        bool ({
+    (match (value as term) {
+        0 | Point { .. } => (true as bool),
+        _ => (false as bool),
+    } as bool)
+} as bool)
+
+fn two_adts_outside_unsafe(value: term)
+    ->
+        bool ({
+    (match (value as term) {
+        (Point { .. }, Point { .. }) => (true as bool),
+        _ => (false as bool),
+    } as bool)
+} as bool)
+
+fn generic_adt_without_type(value: term)
+    ->
+        bool ({
+    (unsafe {
+        (match (value as term) {
+            Option::None => (true as bool),
+            _ => (false as bool),
+        } as bool)
+    } as bool)
+} as bool)
+
+fn body_must_not_infer_adt_type(value: term)
+    ->
+        int ({
+    (unsafe {
+        (match (value as term) {
+            Option::Some(inner) =>
+                ((use_int as
+                        fn(int) -> int {use_int})((inner as {type error})) as int),
+            _ => (0 as int),
+        } as int)
+    } as int)
+} as int)
+
+fn body_must_not_infer_struct_type(value: term)
+    ->
+        int ({
+    (unsafe {
+        (match (value as term) {
+            Wrapper {  value: inner } =>
+                ((use_int as
+                        fn(int) -> int {use_int})((inner as {type error})) as int),
+            _ => (0 as int),
+        } as int)
+    } as int)
+} as int)
+
+fn range(value: term)
+    ->
+        bool ({
+    (match (value as term) { 1...5 => (true as bool), _ => (false as bool), }
+        as bool)
+} as bool)
+
+fn tuple_rest(value: term)
+    ->
+        bool ({
+    (match (value as term) {
+        (1, ..) => (true as bool),
+        _ => (false as bool),
+    } as bool)
+} as bool)
+
+fn refutable_let(value: term)
+    -> int ({ let int(found) = (value as term); (found as int) } as int)
+
+fn class_on_non_term(value: int)
+    ->
+        bool ({
+    (match (value as int) { int(_) => (true as bool), _ => (false as bool), }
+        as bool)
+} as bool)
+
+fn unnecessary_parens(value: term)
+    ->
+        bool ({
+    (match (value as term) {
+        int(1 | 2) => (true as bool),
+        _ => (false as bool),
+    } as bool)
+} as bool)

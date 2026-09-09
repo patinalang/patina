@@ -1,0 +1,270 @@
+#![allow(non_camel_case_types)]
+#![deny(unused_unsafe)]
+
+const ANSWER: int = 42;
+
+#[repr(transparent)]
+pub enum Option<T> {
+    #[repr(dynamic_wrap, tag = "some")]
+    Some(T),
+    #[repr(atom, tag = "nil")]
+    None,
+}
+
+pub struct Point { pub x: int, pub y: int }
+pub struct Celsius(float);
+
+#[repr(tagged, tag = "tagged")]
+pub struct Tagged { pub value: int, pub label: str }
+
+#[repr(Elixir)]
+pub struct ElixirPoint { pub x: int, pub y: int }
+
+#[repr(tagged, tag = "wrapper")]
+pub struct Wrapper(term);
+
+pub struct list(int);
+
+fn use_int(value: int) -> int { value + 1 }
+
+pub fn literals(value: term) -> int {
+    match value {
+        a"nil" => 1,
+        1 => 2,
+        1.5 => 3,
+        "hello" => 4,
+        true => 5,
+        ANSWER => 6,
+        _ => 0,
+    }
+}
+
+pub fn tuple(value: term) -> int {
+    match value {
+        (a"some", (1, int(inner))) => inner,
+        _ => 0,
+    }
+}
+
+pub fn list_match(value: term) -> term {
+    match value {
+        [head, tail @ ..] => (head, tail),
+        _ => a"empty",
+    }
+}
+
+pub fn map(value: term) -> term {
+    match value {
+        #{"k" => found, ..} => found,
+        _ => a"missing",
+    }
+}
+
+pub fn pinned(value: term, expected: int) -> bool {
+    match value {
+        ^expected => true,
+        _ => false,
+    }
+}
+
+pub fn guarded(value: term) -> bool {
+    match value {
+        int(found) if found == 42 => true,
+        _ => false,
+    }
+}
+
+pub fn inferred_class_scrutinee() -> bool {
+    let matcher = |value| match value { int(_) => true, _ => false };
+    matcher(1)
+}
+
+pub fn if_let_term(value: term) -> bool {
+    if let (a"ok", _) = value { true } else { false }
+}
+
+pub fn let_else_term(value: term) -> bool {
+    let [_, ..] = value else { return false };
+    true
+}
+
+pub fn closure_term(value: term) -> bool {
+    let matcher = || match value {
+        [_, ..] => true,
+        _ => false,
+    };
+    matcher()
+}
+
+pub fn literal_or(value: term) -> bool {
+    match value {
+        1 | 2 | a"ok" => true,
+        _ => false,
+    }
+}
+
+pub fn nested_or(value: term) -> bool {
+    match value {
+        (a"ok" | a"error", int(1 | 2)) => true,
+        _ => false,
+    }
+}
+
+pub fn int_class(value: term) -> int {
+    match value { int(n) => n + 1, _ => 0 }
+}
+
+pub fn float_class(value: term) -> float {
+    match value { float(n) => n + 1.0, _ => 0.0 }
+}
+
+pub fn atom_class(value: term) -> atom {
+    match value { atom(a) => a, _ => a"no" }
+}
+
+pub fn list_class(value: term) -> bool {
+    match value { list([_, ..]) => true, _ => false }
+}
+
+pub fn map_class(value: term) -> bool {
+    match value { map(#{"k" => _, ..}) => true, _ => false }
+}
+
+pub fn tuple_class(value: term) -> bool {
+    match value { tuple(_) => true, _ => false }
+}
+
+pub fn fn_class(value: term) -> bool {
+    match value { fn(_) => true, _ => false }
+}
+
+pub fn bits_class(value: term) -> bool {
+    match value { bits(_) => true, _ => false }
+}
+
+pub fn bin_class(value: term) -> bool {
+    match value { bin(_) => true, _ => false }
+}
+
+pub fn pid_class(value: term) -> bool {
+    match value { pid(_) => true, _ => false }
+}
+
+pub fn port_class(value: term) -> bool {
+    match value { port(_) => true, _ => false }
+}
+
+pub fn ref_class(value: term) -> bool {
+    match value { ref(_) => true, _ => false }
+}
+
+pub fn number(value: term) -> bool {
+    match value { int(_) | float(_) => true, _ => false }
+}
+
+pub fn alias_list(value: term) -> term {
+    match value { whole @ list([head, tail @ ..]) => (whole, head, tail), _ => a"no" }
+}
+
+pub fn nested(value: term) -> bool {
+    match value { (int(a), atom(b)) if a > 0 && b == a"ok" => true, _ => false }
+}
+
+pub fn nested_list(value: term) -> bool {
+    match value { [int(head), ..] if head > 0 => true, _ => false }
+}
+
+pub fn nested_map(value: term) -> bool {
+    match value { #{"k" => float(found), ..} if found > 0.0 => true, _ => false }
+}
+
+pub fn tuple_terms(value: (term, term)) -> bool {
+    match value { (int(_), atom(_)) => true, _ => false }
+}
+
+pub fn struct_term(value: Wrapper) -> bool {
+    match value { Wrapper(int(_)) => true, _ => false }
+}
+
+pub fn option_none(value: term) -> int {
+    unsafe {
+        match value {
+            Option::<str>::None => 1,
+            Option::<int>::None => 2,
+            _ => 0,
+        }
+    }
+}
+
+pub fn option_some(value: term) -> int {
+    unsafe { match value { Option::<int>::Some(n) => n, _ => 0 } }
+}
+
+pub fn inferred_some(value: term) -> int {
+    unsafe { match value { Option::<int>::Some(n) => use_int(n), _ => 0 } }
+}
+
+pub fn nested_some(value: term) -> int {
+    unsafe {
+        match value {
+            Option::<Option<int>>::Some(Option::<int>::Some(n)) => use_int(n),
+            _ => 0,
+        }
+    }
+}
+
+pub fn point(value: term) -> int {
+    unsafe { match value { Point { x, y } => x + y, _ => 0 } }
+}
+
+pub fn point_rest(value: term) -> int {
+    unsafe { match value { Point { x, .. } => x, _ => 0 } }
+}
+
+pub fn point_range(value: term) -> bool {
+    unsafe { match value { Point { x: 1..=3, .. } => true, _ => false } }
+}
+
+pub fn celsius(value: term) -> float {
+    unsafe { match value { Celsius(c) => c, _ => 0.0 } }
+}
+
+pub fn celsius_any(value: term) -> bool {
+    unsafe { match value { Celsius(..) => true, _ => false } }
+}
+
+pub fn tagged(value: term) -> int {
+    unsafe { match value { Tagged { value, .. } => value, _ => 0 } }
+}
+
+pub fn elixir(value: term) -> int {
+    unsafe { match value { ElixirPoint { x, y } => x + y, _ => 0 } }
+}
+
+pub fn elixir_rest(value: term) -> int {
+    unsafe { match value { ElixirPoint { x, .. } => x, _ => 0 } }
+}
+
+pub fn nested_in_tuple(value: term) -> int {
+    unsafe { match value { (a"point", Point { x, y }) => x + y, _ => 0 } }
+}
+
+pub fn wrapped_term(value: term) -> bool {
+    unsafe { match value { Wrapper((int(_), atom(_))) => true, _ => false } }
+}
+
+pub fn wrapped_int(value: term) -> bool {
+    unsafe { match value { Wrapper(int(_)) => true, _ => false } }
+}
+
+pub fn literal_or_point(value: term) -> bool {
+    unsafe { match value { 0 | Point { x: 0, y: _ } => true, _ => false } }
+}
+
+pub fn raw_constructor(value: list) -> int {
+    match value { r#list(inner) => inner }
+}
+
+pub fn qualified_constructor(value: list) -> int {
+    match value { self::list(inner) => inner }
+}

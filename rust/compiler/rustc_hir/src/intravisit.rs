@@ -765,7 +765,8 @@ pub fn walk_pat<'v, V: Visitor<'v>>(visitor: &mut V, pattern: &'v Pat<'v>) -> V:
         }
         PatKind::Box(ref subpattern)
         | PatKind::Deref(ref subpattern)
-        | PatKind::Ref(ref subpattern, _, _) => {
+        | PatKind::Ref(ref subpattern, _, _)
+        | PatKind::TermClass(_, ref subpattern) => {
             try_visit!(visitor.visit_pat(subpattern));
         }
         PatKind::Binding(_, _hir_id, ident, ref optional_subpattern) => {

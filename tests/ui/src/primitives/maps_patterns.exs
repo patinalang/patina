@@ -10,6 +10,11 @@ defmodule MapsPatternsTest do
     assert MapsPatterns.lookup_name(%{"other" => 9}) == -1
   end
 
+  test "a concrete key can match a term-keyed map" do
+    assert MapsPatterns.lookup_name_in_term_keyed_map(%{"name" => 7, :extra => 9}) == 7
+    assert MapsPatterns.lookup_name_in_term_keyed_map(%{:name => 9}) == -1
+  end
+
   test "map patterns can be nested" do
     map = %{"outer" => %{"inner" => 11, "extra" => 12}, "top_extra" => %{}}
     assert MapsPatterns.nested_lookup(map) == 11

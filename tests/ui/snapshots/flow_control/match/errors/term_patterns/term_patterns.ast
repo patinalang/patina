@@ -1,0 +1,71 @@
+#![deny(unused_parens)]
+
+#[repr(transparent)]
+enum Option<T> {
+
+    #[repr(dynamic_wrap, tag = "some")]
+    Some(T),
+
+    #[repr(atom, tag = "nil")]
+    None,
+}
+
+struct Point {
+    x: int,
+    y: int,
+}
+struct Wrapper<T> {
+    value: T,
+}
+
+fn use_int(value: int) -> int { value + 1 }
+
+fn adt_path_outside_unsafe(value: term) -> bool {
+    match value { Option::<int>::None => true, _ => false, }
+}
+
+fn adt_tuple_struct_outside_unsafe(value: term) -> bool {
+    match value { Option::<int>::Some(_) => true, _ => false, }
+}
+
+fn adt_struct_outside_unsafe(value: term) -> bool {
+    match value { Point { .. } => true, _ => false, }
+}
+
+fn adt_in_or_pattern_outside_unsafe(value: term) -> bool {
+    match value { 0 | Point { .. } => true, _ => false, }
+}
+
+fn two_adts_outside_unsafe(value: term) -> bool {
+    match value { (Point { .. }, Point { .. }) => true, _ => false, }
+}
+
+fn generic_adt_without_type(value: term) -> bool {
+    unsafe { match value { Option::None => true, _ => false, } }
+}
+
+fn body_must_not_infer_adt_type(value: term) -> int {
+    unsafe { match value { Option::Some(inner) => use_int(inner), _ => 0, } }
+}
+
+fn body_must_not_infer_struct_type(value: term) -> int {
+    unsafe {
+        match value { Wrapper { value: inner } => use_int(inner), _ => 0, }
+    }
+}
+
+fn range(value: term) -> bool { match value { 1..=5 => true, _ => false, } }
+
+fn tuple_rest(value: term) -> bool {
+    match value { (1, ..) => true, _ => false, }
+}
+
+fn refutable_let(value: term) -> int { let int(found) = value; found }
+
+fn class_on_non_term(value: int) -> bool {
+    match value { int(_) => true, _ => false, }
+}
+
+fn unnecessary_parens(value: term) -> bool {
+    match value { int((1 | 2)) => true, _ => false, }
+}

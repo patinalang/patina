@@ -775,6 +775,7 @@ impl EarlyLintPass for UnusedParens {
             Map(fps, _) => for f in fps {
                 self.check_unused_parens_pat(cx, &f.pat, false, false, keep_space);
             },
+            TermClass(_, p) => self.check_unused_parens_pat(cx, p, false, false, keep_space),
             // Avoid linting on `i @ (p0 | .. | pn)` and `box (p0 | .. | pn)`, #64106.
             Ident(.., Some(p)) | Box(p) | Deref(p) | Guard(p, _) => self.check_unused_parens_pat(cx, p, true, false, keep_space),
             // Avoid linting on `&(mut x)` as `&mut x` has a different meaning, #55342.

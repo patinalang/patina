@@ -453,7 +453,7 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
                 fields = vec![];
                 arity = 0;
             }
-            PatKind::Pin { .. } => {
+            PatKind::Pin { .. } | PatKind::TermClass { .. } | PatKind::TermPat { .. } => {
                 ctor = Opaque(OpaqueId::new());
                 fields = vec![];
                 arity = 0;

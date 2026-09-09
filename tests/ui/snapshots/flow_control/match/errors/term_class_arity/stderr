@@ -1,0 +1,26 @@
+error: class pattern `int(..)` takes exactly one subpattern
+  --> tests/ui/src/flow_control/match/errors/term_class_arity.pt:2:19
+   |
+LL |     match value { int() => true, _ => false }
+   |                   ^^^^^
+
+error: class pattern `atom(..)` takes exactly one subpattern
+  --> tests/ui/src/flow_control/match/errors/term_class_arity.pt:6:19
+   |
+LL |     match value { atom(_, _) => true, _ => false }
+   |                   ^^^^^^^^^^
+
+error: class pattern `fn(..)` takes exactly one subpattern
+  --> tests/ui/src/flow_control/match/errors/term_class_arity.pt:10:19
+   |
+LL |     match value { fn() => true, _ => false }
+   |                   ^^^^
+
+error: class pattern `ref(..)` takes exactly one subpattern
+  --> tests/ui/src/flow_control/match/errors/term_class_arity.pt:14:19
+   |
+LL |     match value { ref(_, _) => true, _ => false }
+   |                   ^^^^^^^^^
+
+error: aborting due to 4 previous errors
+

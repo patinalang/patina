@@ -1,0 +1,18 @@
+warning[E0133]: matching a `term` by runtime representation is unsafe and requires unsafe block
+  --> tests/ui/src/flow_control/match/unsafe_match_fn.pt:5:9
+   |
+LL |         Point { x, y } => x + y,
+   |         ^^^^^^^^^^^^^^ pattern matched by representation only
+   |
+   = note: different Patina types can share one BEAM representation; this pattern cannot tell them apart
+note: an unsafe function restricts its caller, but its body is safe by default
+  --> tests/ui/src/flow_control/match/unsafe_match_fn.pt:3:1
+   |
+LL | pub unsafe fn match_point(value: term) -> int {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+   = note: `#[warn(unsafe_op_in_unsafe_fn)]` (part of `#[warn(rust_2024_compatibility)]`) on by default
+
+warning: 1 warning emitted
+
+For more information about this error, try `rustc --explain E0133`.

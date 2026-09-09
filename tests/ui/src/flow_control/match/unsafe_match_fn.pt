@@ -1,0 +1,8 @@
+pub struct Point { x: int, y: int }
+
+pub unsafe fn match_point(value: term) -> int {
+    match value {
+        Point { x, y } => x + y,
+        _ => 0,
+    }
+}

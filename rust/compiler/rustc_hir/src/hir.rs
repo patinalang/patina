@@ -14,7 +14,7 @@ use rustc_ast::{
 pub use rustc_ast::{
     AssignOp, AssignOpKind, AttrId, AttrStyle, BinOp, BinOpKind, BindingMode, BorrowKind,
     BoundConstness, BoundPolarity, ByRef, CaptureBy, DelimArgs, FnPtrKind, ImplPolarity, IsAuto,
-    MetaItemInner, MetaItemLit, Movability, Mutability, Pinnedness, UnOp,
+    MetaItemInner, MetaItemLit, Movability, Mutability, Pinnedness, TermClass, UnOp,
 };
 use rustc_data_structures::fingerprint::Fingerprint;
 use rustc_data_structures::sorted_map::SortedMap;
@@ -1767,9 +1767,12 @@ impl<'hir> Pat<'hir> {
         match self.kind {
             Missing => unreachable!(),
             Wild | Never | Expr(_) | Pin(_) | Range(..) | Binding(.., None) | Err(_) => true,
-            Box(s) | Deref(s) | Ref(s, _, _) | Binding(.., Some(s)) | Guard(s, _) => {
-                s.walk_short_(it)
-            }
+            Box(s)
+            | Deref(s)
+            | Ref(s, _, _)
+            | Binding(.., Some(s))
+            | Guard(s, _)
+            | TermClass(_, s) => s.walk_short_(it),
             Struct(_, fields, _) => fields.iter().all(|field| field.pat.walk_short_(it)),
             Map(fields, _) => fields.iter().all(|field| field.pat.walk_short_(it)),
             TupleStruct(_, s, _) | Tuple(s, _) | Or(s) => s.iter().all(|p| p.walk_short_(it)),
@@ -1797,7 +1800,12 @@ impl<'hir> Pat<'hir> {
         use PatKind::*;
         match self.kind {
             Missing | Wild | Never | Expr(_) | Pin(_) | Range(..) | Binding(.., None) | Err(_) => {}
-            Box(s) | Deref(s) | Ref(s, _, _) | Binding(.., Some(s)) | Guard(s, _) => s.walk_(it),
+            Box(s)
+            | Deref(s)
+            | Ref(s, _, _)
+            | Binding(.., Some(s))
+            | Guard(s, _)
+            | TermClass(_, s) => s.walk_(it),
             Struct(_, fields, _) => fields.iter().for_each(|field| field.pat.walk_(it)),
             Map(fields, _) => fields.iter().for_each(|field| field.pat.walk_(it)),
             TupleStruct(_, s, _) | Tuple(s, _) | Or(s) => s.iter().for_each(|p| p.walk_(it)),
@@ -1885,6 +1893,7 @@ impl<'hir> Pat<'hir> {
             | PatKind::Deref(_)
             | PatKind::Expr(_)
             | PatKind::Pin(_)
+            | PatKind::TermClass(_, _)
             | PatKind::Range(_, _, _)
             | PatKind::Slice(_, _, _)
             | PatKind::Map(_, _)
@@ -2053,6 +2062,9 @@ pub enum PatKind<'hir> {
 
     /// A pin pattern that compares against the current value of a local variable.
     Pin(&'hir PatExpr<'hir>),
+
+    /// A BEAM runtime class pattern (e.g., `int(value)`).
+    TermClass(TermClass, &'hir Pat<'hir>),
 
     /// A guard pattern (e.g., `x if guard(x)`).
     Guard(&'hir Pat<'hir>, &'hir Expr<'hir>),

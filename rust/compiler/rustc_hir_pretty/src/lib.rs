@@ -2162,6 +2162,12 @@ impl<'a> State<'a> {
                 self.word("^");
                 self.print_pat_expr(e);
             }
+            PatKind::TermClass(class, subpattern) => {
+                self.word(class.name().to_string());
+                self.popen();
+                self.print_pat(subpattern);
+                self.pclose();
+            }
             PatKind::Range(begin, end, end_kind) => {
                 if let Some(expr) = begin {
                     self.print_pat_expr(expr);

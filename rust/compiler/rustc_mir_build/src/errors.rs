@@ -123,6 +123,21 @@ pub(crate) struct UnsafeOpInUnsafeFnDerefOfRawPointerRequiresUnsafe {
 }
 
 #[derive(Diagnostic)]
+#[diag(
+    "matching a `term` by runtime representation is unsafe and requires unsafe block",
+    code = E0133
+)]
+#[note(
+    "different Patina types can share one BEAM representation; this pattern cannot tell them apart"
+)]
+pub(crate) struct UnsafeOpInUnsafeFnMatchTermByReprRequiresUnsafe {
+    #[label("pattern matched by representation only")]
+    pub(crate) span: Span,
+    #[subdiagnostic]
+    pub(crate) unsafe_not_inherited_note: Option<UnsafeNotInheritedLintNote>,
+}
+
+#[derive(Diagnostic)]
 #[diag("access to union field is unsafe and requires unsafe block", code = E0133)]
 #[note(
     "the field may not be properly initialized: using uninitialized data will cause undefined behavior"
@@ -390,6 +405,38 @@ pub(crate) struct DerefOfRawPointerRequiresUnsafe {
 pub(crate) struct DerefOfRawPointerRequiresUnsafeUnsafeOpInUnsafeFnAllowed {
     #[primary_span]
     #[label("dereference of raw pointer")]
+    pub(crate) span: Span,
+    #[subdiagnostic]
+    pub(crate) unsafe_not_inherited_note: Option<UnsafeNotInheritedNote>,
+}
+
+#[derive(Diagnostic)]
+#[diag(
+    "matching a `term` by runtime representation is unsafe and requires unsafe block",
+    code = E0133
+)]
+#[note(
+    "different Patina types can share one BEAM representation; this pattern cannot tell them apart"
+)]
+pub(crate) struct MatchTermByReprRequiresUnsafe {
+    #[primary_span]
+    #[label("pattern matched by representation only")]
+    pub(crate) span: Span,
+    #[subdiagnostic]
+    pub(crate) unsafe_not_inherited_note: Option<UnsafeNotInheritedNote>,
+}
+
+#[derive(Diagnostic)]
+#[diag(
+    "matching a `term` by runtime representation is unsafe and requires unsafe block",
+    code = E0133
+)]
+#[note(
+    "different Patina types can share one BEAM representation; this pattern cannot tell them apart"
+)]
+pub(crate) struct MatchTermByReprRequiresUnsafeUnsafeOpInUnsafeFnAllowed {
+    #[primary_span]
+    #[label("pattern matched by representation only")]
     pub(crate) span: Span,
     #[subdiagnostic]
     pub(crate) unsafe_not_inherited_note: Option<UnsafeNotInheritedNote>,

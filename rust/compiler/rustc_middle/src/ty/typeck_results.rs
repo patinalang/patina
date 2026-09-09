@@ -105,6 +105,9 @@ pub struct TypeckResults<'tcx> {
     /// (as opposed to against a reference in the scrutinee type).
     skipped_ref_pats: ItemLocalSet,
 
+    /// Patterns matched against a `term` scrutinee whose own type differs from `term`.
+    term_pats: ItemLocalSet,
+
     /// Records the reasons that we picked the kind of each closure;
     /// not all closures are present in the map.
     closure_kind_origins: ItemLocalMap<(Span, HirPlace<'tcx>)>,
@@ -242,6 +245,7 @@ impl<'tcx> TypeckResults<'tcx> {
             pat_adjustments: Default::default(),
             rust_2024_migration_desugared_pats: Default::default(),
             skipped_ref_pats: Default::default(),
+            term_pats: Default::default(),
             closure_kind_origins: Default::default(),
             liberated_fn_sigs: Default::default(),
             fru_field_types: Default::default(),
@@ -463,6 +467,14 @@ impl<'tcx> TypeckResults<'tcx> {
 
     pub fn skipped_ref_pats_mut(&mut self) -> LocalSetInContextMut<'_> {
         LocalSetInContextMut { hir_owner: self.hir_owner, data: &mut self.skipped_ref_pats }
+    }
+
+    pub fn term_pats(&self) -> LocalSetInContext<'_> {
+        LocalSetInContext { hir_owner: self.hir_owner, data: &self.term_pats }
+    }
+
+    pub fn term_pats_mut(&mut self) -> LocalSetInContextMut<'_> {
+        LocalSetInContextMut { hir_owner: self.hir_owner, data: &mut self.term_pats }
     }
 
     /// Does the pattern recursively contain a `ref mut` binding in it?

@@ -933,7 +933,10 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
                         }
                     }
                 }
-                PatKind::Expr(_) | PatKind::Range(..) | PatKind::Pin(_) => {
+                PatKind::Expr(_)
+                | PatKind::Range(..)
+                | PatKind::Pin(_)
+                | PatKind::TermClass(..) => {
                     // When matching against a literal or range, we need to
                     // borrow the place to compare it against the pattern.
                     //
@@ -1794,11 +1797,13 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
             }
 
             PatKind::Slice(before, ref slice, after) => {
-                let Some(element_ty) = self
-                    .cx
-                    .structurally_resolve_type(pat.span, place_with_id.place.ty())
-                    .builtin_index()
-                else {
+                let place_ty =
+                    self.cx.structurally_resolve_type(pat.span, place_with_id.place.ty());
+                let element_ty = if matches!(*place_ty.kind(), ty::Term) {
+                    self.cx.tcx().types.term
+                } else if let Some(element_ty) = place_ty.builtin_index() {
+                    element_ty
+                } else {
                     debug!("explicit index of non-indexable type {:?}", place_with_id);
                     return Err(self
                         .cx
@@ -1839,6 +1844,13 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
                     );
                     self.cat_pattern(value_place, field.pat, op)?;
                 }
+            }
+
+            PatKind::TermClass(_, subpattern) => {
+                let value_ty = self.pat_ty_adjusted(subpattern)?;
+                let value_place =
+                    self.cat_projection(pat.hir_id, place_with_id, value_ty, ProjectionKind::Index);
+                self.cat_pattern(value_place, subpattern, op)?;
             }
 
             PatKind::Pin(expr) => {

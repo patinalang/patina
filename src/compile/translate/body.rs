@@ -1,10 +1,10 @@
-use rustc_abi::{FieldIdx, VariantIdx};
+use rustc_abi::{FIRST_VARIANT, FieldIdx, VariantIdx};
 use rustc_ast::LitKind;
 use rustc_data_structures::fx::FxIndexMap;
-use rustc_data_structures::smallvec::SmallVec;
+use rustc_data_structures::smallvec::{SmallVec, smallvec};
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::LocalDefId;
-use rustc_hir::{BindingMode, HirId, Lit};
+use rustc_hir::{HirId, Lit, TermClass};
 use rustc_middle::erl::{ErlCallKind, ErlCallTarget, ErlModuleResolution, ErlReprKind};
 use rustc_middle::middle::region;
 use rustc_middle::mir::{AssignOp, BinOp, UnOp};
@@ -28,6 +28,14 @@ pub(super) struct GuardedPattern<'arena>(
     pub(super) SmallVec<[eaf::Expr<'arena>; 1]>,
 );
 pub(super) type Patterns<'arena> = SmallVec<[GuardedPattern<'arena>; 1]>;
+
+#[derive(Clone, Copy)]
+pub(super) enum PatternInput {
+    /// Static typing guarantees that the value has the pattern's type.
+    Typed,
+    /// The value came from `term` and each unconstrained leaf must be checked against its type.
+    UntrustedRepresentation,
+}
 
 impl<'arena> From<eaf::Pattern<'arena>> for GuardedPattern<'arena> {
     fn from(pattern: eaf::Pattern<'arena>) -> Self {
@@ -383,7 +391,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
                 let else_span = self.thir[else_block].span;
                 let ((success_patterns, success_body), success_scope) = self.with_scope(|cx| {
-                    let patterns = cx.translate_pattern(pattern);
+                    let patterns = cx.translate_pattern(pattern, PatternInput::Typed);
                     let body = afb.expr_unit(span);
                     (patterns, body)
                 });
@@ -887,7 +895,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             let then_span = self.resolve_expr(then).span;
             let ((then_patterns, then_body, then_always_diverges), then_scope) =
                 self.with_scope(|cx| {
-                    let patterns = cx.translate_pattern(pat);
+                    let patterns = cx.translate_pattern(pat, PatternInput::Typed);
                     let always_diverges = cx.is_always_diverging_expr(then);
                     let body = cx.translate_expr(then);
                     (patterns, body, always_diverges)
@@ -1012,7 +1020,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let thir = self.thir;
         let Arm { span, pattern, guard, body, hir_id: _, scope: _ } = &thir[arm_id];
         let ((patterns, guard, body, always_diverges), scope) = self.with_scope(|cx| {
-            let patterns = cx.translate_pattern(pattern);
+            let patterns = cx.translate_pattern(pattern, PatternInput::Typed);
             let guard = guard.map(|guard| cx.translate_expr(guard));
             let always_diverges = cx.is_always_diverging_expr(*body);
             let body = cx.translate_expr(*body);
@@ -1077,7 +1085,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     }
 
     pub(super) fn translate_single_pattern(&mut self, pat: &Pat<'tcx>) -> eaf::Pattern<'arena> {
-        let patterns = self.translate_pattern(pat);
+        let patterns = self.translate_pattern(pat, PatternInput::Typed);
         if let [GuardedPattern(pattern, guards)] = patterns.as_slice()
             && guards.is_empty()
         {
@@ -1090,21 +1098,23 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         }
     }
 
-    pub(super) fn translate_pattern(&mut self, pat: &Pat<'tcx>) -> Patterns<'arena> {
-        let afb = &self.translator.afb;
-
+    pub(super) fn translate_pattern(
+        &mut self,
+        pat: &Pat<'tcx>,
+        input: PatternInput,
+    ) -> Patterns<'arena> {
         match &pat.kind {
             PatKind::Or { pats } => {
-                pats.iter().flat_map(|pattern| self.translate_pattern(pattern)).collect()
+                pats.iter().flat_map(|pattern| self.translate_pattern(pattern, input)).collect()
             }
 
-            PatKind::Range(range) => self.translate_range_pattern(pat.span, range),
+            PatKind::Range(range) => self.translate_range_pattern(pat.span, range, input),
 
-            PatKind::Wild => afb.pat_var(pat.span, kw::Underscore).into(),
+            PatKind::Wild => self.translate_wild_pattern(pat.span, pat.ty, input),
 
             PatKind::Binding {
                 name,
-                mode,
+                mode: _,
                 var,
                 subpattern,
                 is_primary,
@@ -1113,29 +1123,41 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             } => self.translate_binding_pattern(
                 pat,
                 *name,
-                *mode,
                 *var,
                 subpattern.as_deref(),
                 *is_primary,
+                input,
             ),
 
             PatKind::Pin { var } => self.translate_pin_var_ref(pat.span, *var).into(),
 
-            PatKind::Deref { subpattern, .. } => self.translate_pattern(subpattern),
+            PatKind::TermClass { class, subpattern } => {
+                self.translate_term_class_pattern(pat.span, *class, subpattern)
+            }
 
-            PatKind::Leaf { subpatterns } => self.translate_leaf_pattern(pat, subpatterns),
+            PatKind::TermPat { subpattern, adt_repr_match } => {
+                let input = if *adt_repr_match {
+                    PatternInput::UntrustedRepresentation
+                } else {
+                    PatternInput::Typed
+                };
+                self.translate_pattern(subpattern, input)
+            }
+
+            PatKind::Deref { subpattern, .. } => self.translate_pattern(subpattern, input),
+
+            PatKind::Leaf { subpatterns } => self.translate_leaf_pattern(pat, subpatterns, input),
 
             PatKind::Variant { adt_def, variant_index, subpatterns, .. } => {
-                let variant = adt_def.variant(*variant_index);
-                self.translate_adt_pattern(pat.span, pat.ty, *adt_def, variant, subpatterns)
+                self.translate_adt_pattern(pat, *adt_def, *variant_index, subpatterns, input)
             }
 
             PatKind::Constant { value } => self.translate_constant_pattern(pat.span, *value).into(),
 
-            PatKind::Map { fields } => self.translate_map_pattern(pat.span, fields),
+            PatKind::Map { fields } => self.translate_map_pattern(pat.span, fields, input),
 
             PatKind::Slice { prefix, slice, suffix } => {
-                self.translate_slice_pattern(pat.span, prefix, slice.as_deref(), suffix)
+                self.translate_slice_pattern(pat.span, prefix, slice.as_deref(), suffix, input)
             }
 
             _ => not_implemented!(self.tcx(), pat.span, "THIR pattern kind", pat.kind),
@@ -1146,13 +1168,14 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         &mut self,
         span: Span,
         fields: &[MapFieldPat<'tcx>],
+        input: PatternInput,
     ) -> Patterns<'arena> {
         let afb = &self.translator.afb;
 
         let keys: SmallVec<[_; 4]> =
             fields.iter().map(|field| self.translate_single_pattern(&field.key)).collect();
         let groups: SmallVec<[_; 4]> =
-            fields.iter().map(|field| self.translate_pattern(&field.pattern)).collect();
+            fields.iter().map(|field| self.translate_pattern(&field.pattern, input)).collect();
 
         self.pattern_cartesian_product(span, &groups, |values| {
             afb.pat_map(span, keys.iter().copied().zip(values.iter().copied()))
@@ -1165,6 +1188,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         prefix: &[Pat<'tcx>],
         slice: Option<&Pat<'tcx>>,
         suffix: &[Pat<'tcx>],
+        input: PatternInput,
     ) -> Patterns<'arena> {
         let afb = &self.translator.afb;
 
@@ -1172,9 +1196,12 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             span_bug!(span, "list rest pattern must be trailing")
         }
 
-        let tail = slice.map(|pattern| self.translate_pattern(pattern));
-        let groups: SmallVec<[_; 4]> =
-            prefix.iter().map(|pattern| self.translate_pattern(pattern)).chain(tail).collect();
+        let tail = slice.map(|pattern| self.translate_pattern(pattern, input));
+        let groups: SmallVec<[_; 4]> = prefix
+            .iter()
+            .map(|pattern| self.translate_pattern(pattern, input))
+            .chain(tail)
+            .collect();
 
         self.pattern_cartesian_product(span, &groups, |patterns| {
             let (items, tail) = if slice.is_some() {
@@ -1200,7 +1227,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             }
             PatKind::Deref { subpattern, .. }
             | PatKind::DerefPattern { subpattern, .. }
-            | PatKind::Guard { subpattern, .. } => self.declare_vars_from_pattern(subpattern),
+            | PatKind::Guard { subpattern, .. }
+            | PatKind::TermClass { subpattern, .. }
+            | PatKind::TermPat { subpattern, .. } => self.declare_vars_from_pattern(subpattern),
             PatKind::Leaf { subpatterns } | PatKind::Variant { subpatterns, .. } => {
                 for field in subpatterns {
                     self.declare_vars_from_pattern(&field.pattern);
@@ -1289,6 +1318,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         &mut self,
         span: Span,
         range: &thir::PatRange<'tcx>,
+        input: PatternInput,
     ) -> Patterns<'arena> {
         let afb = &self.translator.afb;
         let range_var = self.scopes.fresh_var(sym::range, true);
@@ -1307,10 +1337,16 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             };
             afb.expr_binary_op(span, op, lhs, rhs)
         });
+        let shape_guard = matches!(input, PatternInput::UntrustedRepresentation)
+            .then(|| {
+                let shape = self.tcx().erl_shape_of_ty(range.ty);
+                self.guards_for_shape(span, afb.expr_var(span, range_var.erl_name), shape)
+            })
+            .flatten();
 
         GuardedPattern(
             afb.pat_var(span, range_var.erl_name),
-            lower.into_iter().chain(upper).collect(),
+            shape_guard.into_iter().chain(lower).chain(upper).collect(),
         )
         .into()
     }
@@ -1341,21 +1377,21 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         &mut self,
         pat: &Pat<'tcx>,
         name: Symbol,
-        _mode: BindingMode,
         var: LocalVarId,
         subpattern: Option<&Pat<'tcx>>,
         is_primary: bool,
+        input: PatternInput,
     ) -> Patterns<'arena> {
-        let var_info = if is_primary {
-            self.scopes.bind_var(var, name, true)
+        let erl_name = if is_primary {
+            self.scopes.bind_var(var, name, true).erl_name
         } else {
-            self.scopes.fetch_var(var)
+            self.scopes.fetch_var(var).erl_name
         };
 
-        let var_pat = self.translator.afb.pat_var(pat.span, var_info.erl_name);
+        let var_pat = self.translator.afb.pat_var(pat.span, erl_name);
 
         if let Some(sub) = subpattern {
-            self.translate_pattern(sub)
+            self.translate_pattern(sub, input)
                 .into_iter()
                 .map(|GuardedPattern(pattern, guards)| {
                     GuardedPattern(
@@ -1364,8 +1400,90 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                     )
                 })
                 .collect()
+        } else if matches!(input, PatternInput::UntrustedRepresentation) {
+            self.guard_pattern_for_type(pat.span, pat.ty, erl_name)
         } else {
             var_pat.into()
+        }
+    }
+
+    fn translate_term_class_pattern(
+        &mut self,
+        span: Span,
+        class: TermClass,
+        subpattern: &Pat<'tcx>,
+    ) -> Patterns<'arena> {
+        self.translate_pattern(subpattern, PatternInput::Typed)
+            .into_iter()
+            .map(|GuardedPattern(pattern, mut guards)| {
+                if let eaf::Pattern::Var(_, name) = pattern
+                    && name.0 != kw::Underscore
+                    && guards.is_empty()
+                {
+                    let value = self.translator.afb.expr_var(span, name.0);
+                    guards.insert(0, self.term_class_guard(span, value, class));
+                    return GuardedPattern(pattern, guards);
+                }
+
+                let value = self.scopes.fresh_var(sym::value, true);
+                let value_pat = self.translator.afb.pat_var(span, value.erl_name);
+                let value_expr = self.translator.afb.expr_var(span, value.erl_name);
+                let class_guard = self.term_class_guard(span, value_expr, class);
+                guards.insert(0, class_guard);
+                GuardedPattern(self.translator.afb.pat_match(span, value_pat, pattern), guards)
+            })
+            .collect()
+    }
+
+    fn term_class_guard(
+        &self,
+        span: Span,
+        value: eaf::Expr<'arena>,
+        class: TermClass,
+    ) -> eaf::Expr<'arena> {
+        let afb = &self.translator.afb;
+        let name = match class {
+            TermClass::Int => sym::is_integer,
+            TermClass::Float => sym::is_float,
+            TermClass::Atom => sym::is_atom,
+            TermClass::Bool => sym::is_boolean,
+            TermClass::Bin => sym::is_binary,
+            TermClass::List => sym::is_list,
+            TermClass::Map => sym::is_map,
+            TermClass::Tuple => sym::is_tuple,
+            TermClass::Fn => sym::is_function,
+            TermClass::Bits => sym::is_bitstring,
+            TermClass::Pid => sym::is_pid,
+            TermClass::Port => sym::is_port,
+            TermClass::Ref => sym::is_reference,
+        };
+        afb.expr_remote_call(
+            span,
+            afb.expr_atom(span, sym::erlang),
+            afb.expr_atom(span, name),
+            [value],
+        )
+    }
+
+    pub(super) fn translate_wild_pattern(
+        &mut self,
+        span: Span,
+        ty: Ty<'tcx>,
+        input: PatternInput,
+    ) -> Patterns<'arena> {
+        if !matches!(input, PatternInput::UntrustedRepresentation) {
+            return self.translator.afb.pat_var(span, kw::Underscore).into();
+        }
+        let var = self.scopes.fresh_var(sym::value, true);
+        self.guard_pattern_for_type(span, ty, var.erl_name)
+    }
+
+    fn guard_pattern_for_type(&self, span: Span, ty: Ty<'tcx>, var: Symbol) -> Patterns<'arena> {
+        let pattern = self.translator.afb.pat_var(span, var);
+        let shape = self.tcx().erl_shape_of_ty(ty);
+        match self.guards_for_shape(span, self.translator.afb.expr_var(span, var), shape) {
+            Some(guard) => GuardedPattern(pattern, smallvec![guard]).into(),
+            None => pattern.into(),
         }
     }
 
@@ -1373,6 +1491,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         &mut self,
         pat: &Pat<'tcx>,
         subpatterns: &[rustc_middle::thir::FieldPat<'tcx>],
+        input: PatternInput,
     ) -> Patterns<'arena> {
         match pat.ty.kind() {
             ty::TyKind::Tuple(_) => {
@@ -1381,8 +1500,10 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
                 let groups: SmallVec<[_; 4]> = (0..field_count)
                     .map(|idx| match subpatterns.iter().find(|field| field.field.index() == idx) {
-                        Some(field) => self.translate_pattern(&field.pattern),
-                        None => afb.pat_var(pat.span, kw::Underscore).into(),
+                        Some(field) => self.translate_pattern(&field.pattern, input),
+                        None => {
+                            self.translate_wild_pattern(pat.span, pat.ty.tuple_fields()[idx], input)
+                        }
                     })
                     .collect();
 
@@ -1392,8 +1513,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             }
 
             ty::TyKind::Adt(adt_def, _) => {
-                let variant = adt_def.non_enum_variant();
-                self.translate_adt_pattern(pat.span, pat.ty, *adt_def, variant, subpatterns)
+                self.translate_adt_pattern(pat, *adt_def, FIRST_VARIANT, subpatterns, input)
             }
 
             _ => not_implemented!(self.tcx(), pat.span, "leaf pattern type", pat.ty),

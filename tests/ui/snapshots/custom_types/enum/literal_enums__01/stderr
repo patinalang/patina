@@ -4,8 +4,6 @@ error[E0308]: mismatched types
 LL |     Foo = a"hello_foo",
    |           ^^^^^^^^^^^^ expected `int`, found `atom`
    |
-   = note: expected type `int`
-              found type `atom`
    = note: enum variant discriminant can only be of a primitive type compatible with the enum's `repr`
 
 error[E0308]: mismatched types
@@ -14,8 +12,6 @@ error[E0308]: mismatched types
 LL |     Bar = a"hello_bar",
    |           ^^^^^^^^^^^^ expected `int`, found `atom`
    |
-   = note: expected type `int`
-              found type `atom`
    = note: enum variant discriminant can only be of a primitive type compatible with the enum's `repr`
 
 error[E0308]: mismatched types

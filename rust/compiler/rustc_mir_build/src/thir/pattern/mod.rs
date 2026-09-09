@@ -157,7 +157,17 @@ impl<'tcx, 'ptcx> PatCtxt<'tcx, 'ptcx> {
             s.leave_ref(opt_old_mode_span);
         }
 
-        adjusted_pat
+        if self.typeck_results.term_pats().contains(pat.hir_id) {
+            let adt_repr_match = adjusted_pat.ty.is_adt();
+            Box::new(Pat {
+                span: adjusted_pat.span,
+                ty: self.tcx.types.term,
+                kind: PatKind::TermPat { subpattern: adjusted_pat, adt_repr_match },
+                extra: None,
+            })
+        } else {
+            adjusted_pat
+        }
     }
 
     fn lower_pattern_range_endpoint(
@@ -311,6 +321,10 @@ impl<'tcx, 'ptcx> PatCtxt<'tcx, 'ptcx> {
                         format!("pin operand unexpectedly resolved to {res:?}"),
                     )),
                 }
+            }
+
+            hir::PatKind::TermClass(class, subpattern) => {
+                PatKind::TermClass { class, subpattern: self.lower_pattern(subpattern) }
             }
 
             hir::PatKind::Range(lo_expr, hi_expr, end) => {

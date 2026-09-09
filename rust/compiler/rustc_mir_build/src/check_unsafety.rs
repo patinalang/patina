@@ -255,6 +255,9 @@ impl<'a, 'tcx> Visitor<'a, 'tcx> for UnsafetyVisitor<'a, 'tcx> {
     }
 
     fn visit_pat(&mut self, pat: &'a Pat<'tcx>) {
+        if matches!(&pat.kind, PatKind::TermPat { adt_repr_match: true, .. }) {
+            self.requires_unsafe(pat.span, MatchTermByRepr);
+        }
         if self.in_union_destructure {
             match pat.kind {
                 PatKind::Missing => unreachable!(),
@@ -263,6 +266,8 @@ impl<'a, 'tcx> Visitor<'a, 'tcx> for UnsafetyVisitor<'a, 'tcx> {
                 // match is conditional on having this value
                 | PatKind::Constant { .. }
                 | PatKind::Pin { .. }
+                | PatKind::TermClass { .. }
+                | PatKind::TermPat { .. }
                 | PatKind::Variant { .. }
                 | PatKind::Leaf { .. }
                 | PatKind::Deref { .. }
@@ -660,6 +665,7 @@ enum UnsafeOpKind {
     UseOfExternStatic,
     UseOfUnsafeField,
     DerefOfRawPointer,
+    MatchTermByRepr,
     AccessToUnionField,
     MutationOfLayoutConstrainedField,
     BorrowOfLayoutConstrainedField,
@@ -782,6 +788,12 @@ impl UnsafeOpKind {
                     span,
                     unsafe_not_inherited_note,
                 },
+            ),
+            MatchTermByRepr => tcx.emit_node_span_lint(
+                UNSAFE_OP_IN_UNSAFE_FN,
+                hir_id,
+                span,
+                UnsafeOpInUnsafeFnMatchTermByReprRequiresUnsafe { span, unsafe_not_inherited_note },
             ),
             AccessToUnionField => tcx.emit_node_span_lint(
                 UNSAFE_OP_IN_UNSAFE_FN,
@@ -959,6 +971,15 @@ impl UnsafeOpKind {
             }
             DerefOfRawPointer => {
                 dcx.emit_err(DerefOfRawPointerRequiresUnsafe { span, unsafe_not_inherited_note });
+            }
+            MatchTermByRepr if unsafe_op_in_unsafe_fn_allowed => {
+                dcx.emit_err(MatchTermByReprRequiresUnsafeUnsafeOpInUnsafeFnAllowed {
+                    span,
+                    unsafe_not_inherited_note,
+                });
+            }
+            MatchTermByRepr => {
+                dcx.emit_err(MatchTermByReprRequiresUnsafe { span, unsafe_not_inherited_note });
             }
             AccessToUnionField if unsafe_op_in_unsafe_fn_allowed => {
                 dcx.emit_err(AccessToUnionFieldRequiresUnsafeUnsafeOpInUnsafeFnAllowed {

@@ -811,6 +811,19 @@ pub enum PatKind<'tcx> {
         var: LocalVarId,
     },
 
+    /// Test the BEAM runtime class of a `term`, then match its value.
+    TermClass {
+        #[type_visitable(ignore)]
+        class: hir::TermClass,
+        subpattern: Box<Pat<'tcx>>,
+    },
+
+    /// A pattern whose scrutinee is `term` but whose inner pattern has its own type.
+    TermPat {
+        subpattern: Box<Pat<'tcx>>,
+        adt_repr_match: bool,
+    },
+
     /// `Foo(...)` or `Foo{...}` or `Foo`, where `Foo` is a variant name from an ADT with
     /// multiple variants.
     Variant {

@@ -493,18 +493,23 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             span_bug!(pat.span, "Pattern mutability cap violated!");
         }
 
+        let resolved_expected = self.resolve_vars_with_obligations(expected);
+        // `resolves_to_term` differs from `resolved_expected.kind() == ty::Term` when
+        // `expected` is an inference variable (that resolves to term).
+        let resolves_to_term = matches!(*resolved_expected.kind(), ty::Term);
+
         // Resolve type if needed.
         let expected = if let AdjustMode::Peel { .. } = adjust_mode
             && pat.default_binding_modes
         {
-            self.resolve_vars_with_obligations(expected)
+            resolved_expected
         } else {
             expected
         };
         let old_pat_info = pat_info;
         let pat_info = PatInfo { current_depth: old_pat_info.current_depth + 1, ..old_pat_info };
 
-        match pat.kind {
+        let ty = match pat.kind {
             // Peel off a `&` or `&mut`from the scrutinee type. See the examples in
             // `tests/ui/rfcs/rfc-2005-default-binding-mode`.
             _ if let AdjustMode::Peel { kind: peel_kind } = adjust_mode
@@ -603,28 +608,58 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             PatKind::Never => expected,
             PatKind::Expr(PatExpr { kind: PatExprKind::Path(_), hir_id, .. }) => {
                 let ty = match opt_path_res.unwrap() {
-                    Ok(ref pr) => {
-                        self.check_pat_path(pat.hir_id, pat.span, pr, expected, &pat_info.top_info)
-                    }
+                    Ok(ref pr) => self.check_pat_path(
+                        pat.hir_id,
+                        pat.span,
+                        pr,
+                        expected,
+                        resolves_to_term,
+                        &pat_info.top_info,
+                    ),
                     Err(guar) => Ty::new_error(self.tcx, guar),
                 };
                 self.write_ty(*hir_id, ty);
                 ty
             }
-            PatKind::Expr(expr @ PatExpr { kind: PatExprKind::Lit { lit, .. }, .. }) => {
-                self.check_pat_lit(pat.span, expr, &lit.node, expected, &pat_info.top_info)
+            PatKind::Expr(expr @ PatExpr { kind: PatExprKind::Lit { lit, .. }, .. }) => self
+                .check_pat_lit(
+                    pat.span,
+                    expr,
+                    &lit.node,
+                    expected,
+                    resolves_to_term,
+                    &pat_info.top_info,
+                ),
+            PatKind::Pin(expr) => {
+                self.check_pat_pin(pat, expr, expected, resolves_to_term, &pat_info.top_info)
             }
-            PatKind::Pin(expr) => self.check_pat_pin(pat, expr, expected, &pat_info.top_info),
-            PatKind::Range(lhs, rhs, _) => {
-                self.check_pat_range(pat.span, lhs, rhs, expected, &pat_info.top_info)
+            PatKind::TermClass(class, subpattern) => {
+                self.check_pat_term_class(pat.span, class, subpattern, expected, pat_info)
             }
+            PatKind::Range(lhs, rhs, _) => self.check_pat_range(
+                pat.span,
+                lhs,
+                rhs,
+                expected,
+                resolves_to_term,
+                &pat_info.top_info,
+            ),
             PatKind::Binding(ba, var_id, ident, sub) => {
                 self.check_pat_ident(pat, ba, var_id, ident, sub, expected, pat_info)
             }
             PatKind::TupleStruct(ref qpath, subpats, ddpos) => match opt_path_res.unwrap() {
                 Ok(ResolvedPat { ty, kind: ResolvedPatKind::TupleStruct { res, variant } }) => self
                     .check_pat_tuple_struct(
-                        pat, qpath, subpats, ddpos, res, ty, variant, expected, pat_info,
+                        pat,
+                        qpath,
+                        subpats,
+                        ddpos,
+                        res,
+                        ty,
+                        variant,
+                        expected,
+                        resolves_to_term,
+                        pat_info,
                     ),
                 Err(guar) => {
                     let ty_err = Ty::new_error(self.tcx, guar);
@@ -644,6 +679,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         ty,
                         variant,
                         expected,
+                        resolves_to_term,
                         pat_info,
                     ),
                 Err(guar) => {
@@ -667,7 +703,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 expected
             }
             PatKind::Tuple(elements, ddpos) => {
-                self.check_pat_tuple(pat.span, elements, ddpos, expected, pat_info)
+                self.check_pat_tuple(pat, elements, ddpos, expected, resolves_to_term, pat_info)
             }
             PatKind::Box(inner) => self.check_pat_box(pat.span, inner, expected, pat_info),
             PatKind::Deref(inner) => self.check_pat_deref(pat.span, inner, expected, pat_info),
@@ -675,10 +711,16 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 self.check_pat_ref(pat, inner, pinned, mutbl, expected, pat_info)
             }
             PatKind::Slice(before, slice, after) => {
-                self.check_pat_slice(pat.span, before, slice, after, expected, pat_info)
+                self.check_pat_slice(pat, before, slice, after, expected, pat_info)
             }
-            PatKind::Map(fields, _) => self.check_pat_map(pat.span, fields, expected, pat_info),
+            PatKind::Map(fields, _) => {
+                self.check_pat_map(pat, fields, expected, resolves_to_term, pat_info)
+            }
+        };
+        if resolves_to_term {
+            self.record_term_pat(pat, ty);
         }
+        ty
     }
 
     fn adjust_pat_info(
@@ -777,7 +819,11 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         match &pat.kind {
             // Type checking these product-like types successfully always require
             // that the expected type be of those types and not reference types.
-            PatKind::Tuple(..) | PatKind::Range(..) | PatKind::Slice(..) | PatKind::Map(..) => {
+            PatKind::Tuple(..)
+            | PatKind::Range(..)
+            | PatKind::Slice(..)
+            | PatKind::Map(..)
+            | PatKind::TermClass(..) => {
                 AdjustMode::peel_all()
             }
             // When checking an explicit deref pattern, only peel reference types.
@@ -991,9 +1037,13 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 }
             }
         };
-        match self.demand_eqtype_pat(expr.span, expected, ty, ti) {
-            Ok(()) => ty,
-            Err(guar) => Ty::new_error(self.tcx, guar),
+        if matches!(*self.resolve_vars_if_possible(expected).kind(), ty::Term) {
+            ty
+        } else {
+            match self.demand_eqtype_pat(expr.span, expected, ty, ti) {
+                Ok(()) => ty,
+                Err(guar) => Ty::new_error(self.tcx, guar),
+            }
         }
     }
 
@@ -1002,6 +1052,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         pat: &'tcx Pat<'tcx>,
         expr: &'tcx PatExpr<'tcx>,
         expected: Ty<'tcx>,
+        resolves_to_term: bool,
         ti: &TopInfo<'tcx>,
     ) -> Ty<'tcx> {
         let ty = match &expr.kind {
@@ -1041,10 +1092,118 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         };
 
         self.write_ty(expr.hir_id, ty);
-        match self.demand_eqtype_pat(pat.span, expected, ty, ti) {
-            Ok(()) => ty,
-            Err(guar) => Ty::new_error(self.tcx, guar),
+        if resolves_to_term {
+            ty
+        } else {
+            match self.demand_eqtype_pat(pat.span, expected, ty, ti) {
+                Ok(()) => ty,
+                Err(guar) => Ty::new_error(self.tcx, guar),
+            }
         }
+    }
+
+    fn record_term_pat(&self, pat: &'tcx Pat<'tcx>, ty: Ty<'tcx>) {
+        if ty.references_error() || matches!(*ty.kind(), ty::Term) {
+            return;
+        }
+
+        match pat.kind {
+            PatKind::Expr(..)
+            | PatKind::TermClass(..)
+            | PatKind::TupleStruct(..)
+            | PatKind::Struct(..)
+            | PatKind::Tuple(..)
+            | PatKind::Slice(..)
+            | PatKind::Map(..) => {
+                self.typeck_results.borrow_mut().term_pats_mut().insert(pat.hir_id);
+            }
+
+            PatKind::Missing
+            | PatKind::Wild
+            | PatKind::Err(..)
+            | PatKind::Never
+            | PatKind::Pin(..)
+            | PatKind::Range(..)
+            | PatKind::Binding(..)
+            | PatKind::Guard(..)
+            | PatKind::Or(..)
+            | PatKind::Box(..)
+            | PatKind::Deref(..)
+            | PatKind::Ref(..) => {}
+        }
+    }
+
+    fn reject_inferred_term_adt_pattern(
+        &self,
+        pat: &'tcx Pat<'tcx>,
+        pat_ty: Ty<'tcx>,
+        resolves_to_term: bool,
+        ti: &TopInfo<'tcx>,
+    ) -> Option<Ty<'tcx>> {
+        if !resolves_to_term || !self.resolve_vars_if_possible(pat_ty).has_infer_types() {
+            return None;
+        }
+
+        let pattern = self
+            .tcx
+            .sess
+            .source_map()
+            .span_to_snippet(pat.span)
+            .unwrap_or_else(|_| "ADT pattern".to_owned());
+
+        let guar = self
+            .dcx()
+            .struct_span_err(
+                pat.span,
+                format!("cannot infer the type of `{pattern}` matched against a `term`"),
+            )
+            .with_help(
+                "specify all generic arguments in the pattern, for example `Type::<int>::Variant(..)`",
+            )
+            .emit();
+
+        let error_ty = Ty::new_error(self.tcx, guar);
+        for ty in pat_ty.walk().filter_map(|arg| arg.as_type()) {
+            if let ty::Infer(ty::TyVar(_)) = *self.resolve_vars_if_possible(ty).kind() {
+                let _ = self.demand_eqtype_pat(pat.span, ty, error_ty, ti);
+            }
+        }
+        Some(error_ty)
+    }
+
+    fn check_pat_term_class(
+        &self,
+        span: Span,
+        class: hir::TermClass,
+        subpattern: &'tcx Pat<'tcx>,
+        expected: Ty<'tcx>,
+        pat_info: PatInfo<'tcx>,
+    ) -> Ty<'tcx> {
+        let binding_ty = match class {
+            hir::TermClass::Int => self.tcx.types.int,
+            hir::TermClass::Float => self.tcx.types.float,
+            hir::TermClass::Atom => self.tcx.types.atom,
+            hir::TermClass::Bool => self.tcx.types.bool,
+            hir::TermClass::List => Ty::new_slice(self.tcx, self.tcx.types.term),
+            hir::TermClass::Map => Ty::new_map(self.tcx, self.tcx.types.term, self.tcx.types.term),
+            hir::TermClass::Tuple
+            | hir::TermClass::Fn
+            | hir::TermClass::Bits
+            | hir::TermClass::Bin
+            | hir::TermClass::Pid
+            | hir::TermClass::Port
+            | hir::TermClass::Ref => self.tcx.types.term,
+        };
+
+        if let Err(guar) =
+            self.demand_eqtype_pat(span, expected, self.tcx.types.term, &pat_info.top_info)
+        {
+            self.check_pat(subpattern, binding_ty, pat_info);
+            return Ty::new_error(self.tcx, guar);
+        }
+
+        self.check_pat(subpattern, binding_ty, pat_info);
+        self.tcx.types.term
     }
 
     fn check_pat_lit(
@@ -1053,6 +1212,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         expr: &hir::PatExpr<'tcx>,
         lit_kind: &ast::LitKind,
         expected: Ty<'tcx>,
+        resolves_to_term: bool,
         ti: &TopInfo<'tcx>,
     ) -> Ty<'tcx> {
         assert_matches!(expr.kind, hir::PatExprKind::Lit { .. });
@@ -1107,9 +1267,11 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         //     &'static str <: expected
         //
         // then that's equivalent to there existing a LUB.
-        let cause = self.pattern_cause(ti, span);
-        if let Err(err) = self.demand_suptype_with_origin(&cause, expected, pat_ty) {
-            err.emit();
+        if !resolves_to_term {
+            let cause = self.pattern_cause(ti, span);
+            if let Err(err) = self.demand_suptype_with_origin(&cause, expected, pat_ty) {
+                err.emit();
+            }
         }
 
         pat_ty
@@ -1121,8 +1283,14 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         lhs: Option<&'tcx hir::PatExpr<'tcx>>,
         rhs: Option<&'tcx hir::PatExpr<'tcx>>,
         expected: Ty<'tcx>,
+        resolves_to_term: bool,
         ti: &TopInfo<'tcx>,
     ) -> Ty<'tcx> {
+        if resolves_to_term {
+            let guar =
+                self.dcx().struct_span_err(span, "range patterns cannot match a `term`").emit();
+            return Ty::new_error(self.tcx, guar);
+        }
         let calc_side = |opt_expr: Option<&'tcx hir::PatExpr<'tcx>>| match opt_expr {
             None => None,
             Some(expr) => {
@@ -1482,6 +1650,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         | PatKind::Or(..)
                         | PatKind::Guard(..)
                         | PatKind::Map(..)
+                        | PatKind::TermClass(..)
                         | PatKind::Tuple(..)
                         | PatKind::Slice(..) => "binding",
 
@@ -1612,17 +1781,35 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         pat_ty: Ty<'tcx>,
         variant: &'tcx VariantDef,
         expected: Ty<'tcx>,
+        resolves_to_term: bool,
         pat_info: PatInfo<'tcx>,
     ) -> Ty<'tcx> {
         // Type-check the path.
-        let had_err = self.demand_eqtype_pat(pat.span, expected, pat_ty, &pat_info.top_info);
+        let had_err = if resolves_to_term {
+            Ok(())
+        } else {
+            self.demand_eqtype_pat(pat.span, expected, pat_ty, &pat_info.top_info)
+        };
 
         // Type-check subpatterns.
-        match self.check_struct_pat_fields(pat_ty, pat, variant, fields, has_rest_pat, pat_info) {
-            Ok(()) => match had_err {
-                Ok(()) => pat_ty,
-                Err(guar) => Ty::new_error(self.tcx, guar),
-            },
+        let fields_result =
+            self.check_struct_pat_fields(pat_ty, pat, variant, fields, has_rest_pat, pat_info);
+        match fields_result {
+            Ok(()) => {
+                if let Some(error_ty) = self.reject_inferred_term_adt_pattern(
+                    pat,
+                    pat_ty,
+                    resolves_to_term,
+                    &pat_info.top_info,
+                ) {
+                    return error_ty;
+                }
+
+                match had_err {
+                    Ok(()) => pat_ty,
+                    Err(guar) => Ty::new_error(self.tcx, guar),
+                }
+            }
             Err(guar) => Ty::new_error(self.tcx, guar),
         }
     }
@@ -1690,8 +1877,12 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         span: Span,
         resolved: &ResolvedPat<'tcx>,
         expected: Ty<'tcx>,
+        resolves_to_term: bool,
         ti: &TopInfo<'tcx>,
     ) -> Ty<'tcx> {
+        if resolves_to_term {
+            return resolved.ty;
+        }
         if let Err(err) =
             self.demand_suptype_with_origin(&self.pattern_cause(ti, span), expected, resolved.ty)
         {
@@ -1870,6 +2061,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         pat_ty: Ty<'tcx>,
         variant: &'tcx VariantDef,
         expected: Ty<'tcx>,
+        resolves_to_term: bool,
         pat_info: PatInfo<'tcx>,
     ) -> Ty<'tcx> {
         let tcx = self.tcx;
@@ -1880,7 +2072,11 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         };
 
         // Type-check the tuple struct pattern against the expected type.
-        let had_err = self.demand_eqtype_pat(pat.span, expected, pat_ty, &pat_info.top_info);
+        let had_err = if resolves_to_term {
+            Ok(())
+        } else {
+            self.demand_eqtype_pat(pat.span, expected, pat_ty, &pat_info.top_info)
+        };
 
         // Type-check subpatterns.
         if subpats.len() == variant.fields.len()
@@ -1900,6 +2096,14 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     subpat.span,
                     None,
                 );
+            }
+            if let Some(error_ty) = self.reject_inferred_term_adt_pattern(
+                pat,
+                pat_ty,
+                resolves_to_term,
+                &pat_info.top_info,
+            ) {
+                return error_ty;
             }
             if let Err(e) = had_err {
                 on_error(e);
@@ -2082,13 +2286,31 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
     fn check_pat_tuple(
         &self,
-        span: Span,
+        pat: &'tcx Pat<'tcx>,
         elements: &'tcx [Pat<'tcx>],
         ddpos: hir::DotDotPos,
         expected: Ty<'tcx>,
+        resolves_to_term: bool,
         pat_info: PatInfo<'tcx>,
     ) -> Ty<'tcx> {
         let tcx = self.tcx;
+        let span = pat.span;
+        if resolves_to_term {
+            for element in elements {
+                self.check_pat(element, tcx.types.term, pat_info);
+            }
+            if ddpos.as_opt_usize().is_some() {
+                let guar = self
+                    .dcx()
+                    .struct_span_err(span, "tuple rest patterns cannot match a `term`")
+                    .emit();
+                return Ty::new_error(tcx, guar);
+            }
+            return Ty::new_tup(
+                tcx,
+                tcx.mk_type_list_from_iter((0..elements.len()).map(|_| tcx.types.term)),
+            );
+        }
         let mut expected_len = elements.len();
         if ddpos.as_opt_usize().is_some() {
             // Require known type only when `..` is present.
@@ -3140,13 +3362,14 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     /// If `slice` is present, it can still represent 0 elements.
     fn check_pat_slice(
         &self,
-        span: Span,
+        pat: &'tcx Pat<'tcx>,
         before: &'tcx [Pat<'tcx>],
         slice: Option<&'tcx Pat<'tcx>>,
         after: &'tcx [Pat<'tcx>],
         expected: Ty<'tcx>,
         pat_info: PatInfo<'tcx>,
     ) -> Ty<'tcx> {
+        let span = pat.span;
         let expected = self.resolve_vars_with_obligations(expected);
 
         // If the pattern is irrefutable and `expected` is an infer ty, we try to equate it
@@ -3164,6 +3387,10 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         debug!(?expected);
 
         let (element_ty, opt_slice_ty, inferred) = match *expected.kind() {
+            ty::Term => {
+                let list_ty = Ty::new_slice(self.tcx, self.tcx.types.term);
+                (self.tcx.types.term, Some(list_ty), list_ty)
+            }
             // An array, so we might have something like `let [a, b, c] = [0, 1, 2];`.
             ty::Array(element_ty, len) => {
                 let min = before.len() as u64 + after.len() as u64;
@@ -3254,15 +3481,24 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
     fn check_pat_map(
         &self,
-        span: Span,
+        pat: &'tcx Pat<'tcx>,
         fields: &'tcx [PatMapField],
         expected: Ty<'tcx>,
+        resolves_to_term: bool,
         pat_info: PatInfo<'tcx>,
     ) -> Ty<'tcx> {
-        let key_ty = self.next_ty_var(span);
-        let value_ty = self.next_ty_var(span);
+        let span = pat.span;
+        let (key_ty, value_ty) = if resolves_to_term {
+            (self.tcx.types.term, self.tcx.types.term)
+        } else {
+            (self.next_ty_var(span), self.next_ty_var(span))
+        };
         let map_ty = Ty::new_map(self.tcx, key_ty, value_ty);
-        let had_err = self.demand_eqtype_pat(span, expected, map_ty, &pat_info.top_info);
+        let had_err = if resolves_to_term {
+            Ok(())
+        } else {
+            self.demand_eqtype_pat(span, expected, map_ty, &pat_info.top_info)
+        };
 
         match self.check_map_pat_fields(fields, key_ty, value_ty, pat_info) {
             Ok(()) => match had_err {

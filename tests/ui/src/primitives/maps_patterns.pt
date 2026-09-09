@@ -5,6 +5,13 @@ pub fn lookup_name(map: #{str => int}) -> int {
     }
 }
 
+pub fn lookup_name_in_term_keyed_map(map: #{term => int}) -> int {
+    match map {
+        #{"name" => name, ..} => name,
+        _ => -1,
+    }
+}
+
 pub fn nested_lookup(map: #{str => #{str => int}}) -> int {
     match map {
         #{"outer" => #{"inner" => value, ..}, ..} => value,

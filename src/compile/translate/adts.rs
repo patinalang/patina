@@ -1,4 +1,4 @@
-use rustc_abi::FieldIdx;
+use rustc_abi::{FieldIdx, VariantIdx};
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def_id::DefId;
 use rustc_middle::erl::shape::ErlShape;
@@ -6,41 +6,53 @@ use rustc_middle::erl::{
     ErlCallKind, ErlCallTarget, ErlModuleResolution, ErlReprKind, ErlVariantRepr,
 };
 use rustc_middle::span_bug;
-use rustc_middle::thir::{AdtExpr, AdtExprBase, Expr, FieldPat};
-use rustc_middle::ty::{self, AdtDef, Ty, VariantDef};
+use rustc_middle::thir::{AdtExpr, AdtExprBase, Expr, FieldPat, Pat};
+use rustc_middle::ty::{self, AdtDef, VariantDef};
 use rustc_span::{Ident, Span, Symbol, kw, sym};
 
-use crate::compile::translate::body::{BodyCx, GuardedPattern, Patterns};
+use crate::compile::translate::body::{BodyCx, GuardedPattern, PatternInput, Patterns};
 use crate::erlang::abstract_format as eaf;
 use crate::{not_implemented, span_fatal};
 
 impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     pub(super) fn translate_adt_pattern(
         &mut self,
-        span: Span,
-        adt_ty: Ty<'tcx>,
+        pat: &Pat<'tcx>,
         adt_def: AdtDef<'tcx>,
-        variant: &VariantDef,
+        variant_index: VariantIdx,
         subpatterns: &[FieldPat<'tcx>],
+        input: PatternInput,
     ) -> Patterns<'arena> {
+        let variant = adt_def.variant(variant_index);
         let repr = self.tcx().erl_variant_repr(variant.def_id);
         match repr.kind {
-            ErlReprKind::Atom => self.translator.afb.pat_atom(span, repr.tag).into(),
-            ErlReprKind::Int => not_implemented!(self.tcx(), span, "int-represented ADT"),
-            ErlReprKind::Tagged => self.translate_tagged_pattern(span, variant, subpatterns, repr),
-            ErlReprKind::Elixir => {
-                self.translate_elixir_struct_pattern(span, adt_def, variant, subpatterns)
+            ErlReprKind::Atom => self.translator.afb.pat_atom(pat.span, repr.tag).into(),
+            ErlReprKind::Int => not_implemented!(self.tcx(), pat.span, "int-represented ADT"),
+            ErlReprKind::Tagged => {
+                self.translate_tagged_pattern(pat, adt_def, variant_index, subpatterns, repr, input)
             }
-            ErlReprKind::NativeRecord => {
-                self.translate_native_record_pattern(span, variant, subpatterns, repr)
-            }
-            ErlReprKind::Transparent { .. } => self.translate_transparent_pattern(
-                span,
-                adt_ty,
+            ErlReprKind::Elixir => self.translate_elixir_struct_pattern(
+                pat,
                 adt_def,
-                variant,
+                variant_index,
+                subpatterns,
+                input,
+            ),
+            ErlReprKind::NativeRecord => self.translate_native_record_pattern(
+                pat,
+                adt_def,
+                variant_index,
                 subpatterns,
                 repr,
+                input,
+            ),
+            ErlReprKind::Transparent { .. } => self.translate_transparent_pattern(
+                pat,
+                adt_def,
+                variant_index,
+                subpatterns,
+                repr,
+                input,
             ),
         }
     }
@@ -135,18 +147,26 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
     fn translate_transparent_pattern(
         &mut self,
-        span: Span,
-        adt_ty: Ty<'tcx>,
+        pat: &Pat<'tcx>,
         adt_def: AdtDef<'tcx>,
-        variant: &VariantDef,
+        variant_index: VariantIdx,
         subpatterns: &[FieldPat<'tcx>],
         repr: ErlVariantRepr,
+        input: PatternInput,
     ) -> Patterns<'arena> {
         let afb = &self.translator.afb;
+        let span = pat.span;
+        let adt_ty = pat.ty;
+        let variant = adt_def.variant(variant_index);
+
+        let ty::Adt(_, args) = adt_ty.kind() else {
+            span_bug!(span, "transparent ADT pattern has non-ADT type {adt_ty}")
+        };
+        let payload_ty = variant.fields[FieldIdx::ZERO].ty(self.tcx(), args);
 
         let payload_patterns = match subpatterns {
-            [] => afb.pat_var(span, kw::Underscore).into(),
-            [field] => self.translate_pattern(&field.pattern),
+            [] => self.translate_wild_pattern(span, payload_ty, input),
+            [field] => self.translate_pattern(&field.pattern, input),
             _ => span_bug!(span, "transparent ADT pattern with more than one field"),
         };
 
@@ -154,10 +174,6 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         if adt_def.variants().len() == 1 {
             return payload_patterns;
         }
-
-        let ty::Adt(_, args) = adt_ty.kind() else {
-            span_bug!(span, "transparent ADT pattern has non-ADT type {adt_ty}")
-        };
 
         let guard_shapes = self.tcx().erl_variant_wrap_guards((variant.def_id, args));
         let wraps = !guard_shapes.is_empty();
@@ -185,8 +201,11 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                     None => afb.expr_atom(span, kw::False),
                 })
                 .collect()
+        } else if matches!(input, PatternInput::UntrustedRepresentation) {
+            // Translating the payload under `UntrustedRepresentation` already establishes its
+            // shape. Another guard is redundant.
+            SmallVec::new()
         } else {
-            let payload_ty = variant.fields[FieldIdx::ZERO].ty(self.tcx(), args);
             let shape = self.tcx().erl_shape_of_ty(payload_ty);
             self.guards_for_shape(span, shape_expr, shape).into_iter().collect()
         };
@@ -333,28 +352,70 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         }
     }
 
-    fn translate_elixir_struct_pattern(
+    fn translate_adt_fields(
         &mut self,
-        span: Span,
-        adt_def: AdtDef<'tcx>,
+        pat: &Pat<'tcx>,
         variant: &VariantDef,
         subpatterns: &[FieldPat<'tcx>],
+        input: PatternInput,
+        fields: impl IntoIterator<Item = FieldIdx>,
+    ) -> SmallVec<[(Ident, Patterns<'arena>); 4]> {
+        let ty::Adt(_, args) = pat.ty.kind() else {
+            span_bug!(pat.span, "ADT pattern has non-ADT type {}", pat.ty)
+        };
+
+        fields
+            .into_iter()
+            .map(|idx| {
+                let field_def = &variant.fields[idx];
+                let field = subpatterns.iter().find(|field| field.field == idx);
+                let span = field.map_or(pat.span, |field| field.pattern.span);
+                let patterns = if let Some(field) = field {
+                    self.translate_pattern(&field.pattern, input)
+                } else {
+                    self.translate_wild_pattern(pat.span, field_def.ty(self.tcx(), args), input)
+                };
+                (Ident::new(field_def.name, span), patterns)
+            })
+            .collect()
+    }
+
+    fn translate_elixir_struct_pattern(
+        &mut self,
+        pat: &Pat<'tcx>,
+        adt_def: AdtDef<'tcx>,
+        variant_index: VariantIdx,
+        subpatterns: &[FieldPat<'tcx>],
+        input: PatternInput,
     ) -> Patterns<'arena> {
         let afb = &self.translator.afb;
+        let span = pat.span;
+        let variant = adt_def.variant(variant_index);
 
         let struct_module = self.resolve_module_name(span, adt_def.did(), variant.def_id);
         let struct_key = afb.pat_atom(span, sym::__struct__);
         let struct_val = afb.pat_atom(span, struct_module);
 
-        let (keys, groups) = subpatterns
-            .iter()
-            .map(|field| {
-                let field_def = &variant.fields[field.field];
-                let key = afb.pat_atom(field.pattern.span, field_def.name);
-                let alternatives = self.translate_pattern(&field.pattern);
-                (key, alternatives)
-            })
-            .collect::<(SmallVec<[_; 4]>, SmallVec<[_; 4]>)>();
+        let fields = match input {
+            PatternInput::UntrustedRepresentation => self.translate_adt_fields(
+                pat,
+                variant,
+                subpatterns,
+                input,
+                variant.fields.indices(),
+            ),
+            PatternInput::Typed => self.translate_adt_fields(
+                pat,
+                variant,
+                subpatterns,
+                input,
+                subpatterns.iter().map(|field| field.field),
+            ),
+        };
+        let (keys, groups): (SmallVec<[_; 4]>, SmallVec<[_; 4]>) = fields
+            .into_iter()
+            .map(|(field, patterns)| (afb.pat_atom(field.span, field.name), patterns))
+            .unzip();
 
         self.pattern_cartesian_product(span, &groups, |values| {
             let fields = std::iter::once((struct_key, struct_val))
@@ -365,26 +426,22 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
     fn translate_native_record_pattern(
         &mut self,
-        span: Span,
-        variant: &VariantDef,
+        pat: &Pat<'tcx>,
+        adt_def: AdtDef<'tcx>,
+        variant_index: VariantIdx,
         subpatterns: &[FieldPat<'tcx>],
         repr: ErlVariantRepr,
+        input: PatternInput,
     ) -> Patterns<'arena> {
+        let span = pat.span;
+        let variant = adt_def.variant(variant_index);
         let module = self.record_module_for_access(repr.record_module);
-        let field_count = variant.fields.len();
 
-        let (groups, fields) = (0..field_count)
-            .map(|idx| {
-                let alternatives = match subpatterns.iter().find(|field| field.field.index() == idx)
-                {
-                    Some(field) => self.translate_pattern(&field.pattern),
-                    None => self.translator.afb.pat_var(span, kw::Underscore).into(),
-                };
-
-                let field = &variant.fields[FieldIdx::from_u32(idx as u32)];
-                (alternatives, Ident::new(field.name, span))
-            })
-            .collect::<(SmallVec<[_; 4]>, SmallVec<[_; 4]>)>();
+        let (fields, groups): (SmallVec<[_; 4]>, SmallVec<[_; 4]>) = self
+            .translate_adt_fields(pat, variant, subpatterns, input, variant.fields.indices())
+            .into_iter()
+            .map(|(field, patterns)| (Ident::new(field.name, span), patterns))
+            .unzip();
 
         self.pattern_cartesian_product(span, &groups, |values| {
             self.translator.afb.pat_record(
@@ -398,17 +455,19 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
     fn translate_tagged_pattern(
         &mut self,
-        span: Span,
-        variant: &VariantDef,
+        pat: &Pat<'tcx>,
+        adt_def: AdtDef<'tcx>,
+        variant_index: VariantIdx,
         subpatterns: &[FieldPat<'tcx>],
         repr: ErlVariantRepr,
+        input: PatternInput,
     ) -> Patterns<'arena> {
-        let field_count = variant.fields.len();
-        let groups = (0..field_count)
-            .map(|idx| match subpatterns.iter().find(|field| field.field.index() == idx) {
-                Some(field) => self.translate_pattern(&field.pattern),
-                None => self.translator.afb.pat_var(span, kw::Underscore).into(),
-            })
+        let span = pat.span;
+        let variant = adt_def.variant(variant_index);
+        let groups = self
+            .translate_adt_fields(pat, variant, subpatterns, input, variant.fields.indices())
+            .into_iter()
+            .map(|(_, patterns)| patterns)
             .collect::<SmallVec<[_; 4]>>();
 
         self.pattern_cartesian_product(span, &groups, |fields| {
@@ -470,8 +529,8 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
     /// Shallow Erlang guard tests which recognize `shape`.
     ///
-    /// An empty vector represents an always-true guard (`ErlShape::Any`).
-    fn guards_for_shape(
+    /// `None` represents an always-true guard (`ErlShape::Any`).
+    pub(super) fn guards_for_shape(
         &self,
         span: Span,
         value: eaf::Expr<'arena>,

@@ -697,7 +697,8 @@ impl Pat {
             | PatKind::Deref(s)
             | PatKind::Ref(s, _, _)
             | PatKind::Paren(s)
-            | PatKind::Guard(s, _) => s.walk(it),
+            | PatKind::Guard(s, _)
+            | PatKind::TermClass(_, s) => s.walk(it),
 
             // These patterns do not contain subpatterns, skip.
             PatKind::Missing
@@ -880,6 +881,63 @@ pub enum RangeSyntax {
     DotDotEq,
 }
 
+/// A runtime class test for a BEAM `term` pattern.
+#[derive(Clone, Copy, Encodable, Decodable, Debug, Eq, PartialEq, StableHash, Walkable)]
+pub enum TermClass {
+    Atom,
+    Bin,
+    Bits,
+    Bool,
+    Float,
+    Fn,
+    Int,
+    List,
+    Map,
+    Pid,
+    Port,
+    Ref,
+    Tuple,
+}
+
+impl TermClass {
+    pub fn from_symbol(name: Symbol) -> Option<Self> {
+        Some(match name {
+            sym::atom => Self::Atom,
+            sym::bin => Self::Bin,
+            sym::bits => Self::Bits,
+            sym::bool => Self::Bool,
+            sym::float => Self::Float,
+            kw::Fn => Self::Fn,
+            sym::int => Self::Int,
+            sym::list => Self::List,
+            sym::map => Self::Map,
+            sym::pid => Self::Pid,
+            sym::port => Self::Port,
+            kw::Ref => Self::Ref,
+            sym::tuple => Self::Tuple,
+            _ => return None,
+        })
+    }
+
+    pub fn name(self) -> Symbol {
+        match self {
+            Self::Atom => sym::atom,
+            Self::Bin => sym::bin,
+            Self::Bits => sym::bits,
+            Self::Bool => sym::bool,
+            Self::Float => sym::float,
+            Self::Fn => kw::Fn,
+            Self::Int => sym::int,
+            Self::List => sym::list,
+            Self::Map => sym::map,
+            Self::Pid => sym::pid,
+            Self::Port => sym::port,
+            Self::Ref => kw::Ref,
+            Self::Tuple => sym::tuple,
+        }
+    }
+}
+
 /// All the different flavors of pattern that Rust recognizes.
 //
 // Adding a new variant? Please update `test_pat` in `tests/ui/macros/stringify.rs`.
@@ -930,6 +988,9 @@ pub enum PatKind {
 
     /// A pin pattern (e.g., `^value`) that matches an existing local variable's value.
     Pin(Box<Expr>),
+
+    /// A BEAM runtime class pattern (e.g., `int(value)`).
+    TermClass(TermClass, Box<Pat>),
 
     /// A range pattern (e.g., `1...2`, `1..2`, `1..`, `..2`, `1..=2`, `..=2`).
     Range(Option<Box<Expr>>, Option<Box<Expr>>, Spanned<RangeEnd>),

@@ -1,0 +1,15 @@
+fn no_fields(value: term) -> bool {
+    match value { (/*ERROR*/) => true, _ => false, }
+}
+
+fn two_fields(value: term) -> bool {
+    match value { (/*ERROR*/) => true, _ => false, }
+}
+
+fn keyword_no_fields(value: term) -> bool {
+    match value { (/*ERROR*/) => true, _ => false, }
+}
+
+fn keyword_two_fields(value: term) -> bool {
+    match value { (/*ERROR*/) => true, _ => false, }
+}

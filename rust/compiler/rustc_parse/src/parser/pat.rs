@@ -8,7 +8,7 @@ use rustc_ast::visit::{self, Visitor};
 use rustc_ast::{
     self as ast, Arm, AttrVec, BinOpKind, BindingMode, ByRef, Expr, ExprKind, Guard, LocalKind,
     MacCall, Mutability, Pat, PatField, PatFieldsRest, PatKind, PatMapFieldsRest, Path, QSelf,
-    RangeEnd, RangeSyntax, Recovered, Stmt, StmtKind,
+    RangeEnd, RangeSyntax, Recovered, Stmt, StmtKind, TermClass,
 };
 use rustc_ast_pretty::pprust;
 use rustc_errors::{Applicability, Diag, DiagArgValue, PResult, StashKey};
@@ -798,6 +798,12 @@ impl<'a> Parser<'a> {
             PatKind::Wild
         } else if self.eat_keyword(exp!(Mut)) {
             self.parse_pat_ident_mut()?
+        } else if let Some((ident, IdentIsRaw::No)) = self.token.ident()
+            && let Some(class) = TermClass::from_symbol(ident.name)
+            && self.look_ahead(1, |tok| tok.kind == token::OpenParen)
+        {
+            self.bump();
+            self.parse_pat_term_class(class)?
         } else if self.eat_keyword(exp!(Ref)) {
             if self.check_keyword(exp!(Box)) {
                 // Suggest `box ref`.
@@ -1636,6 +1642,32 @@ impl<'a> Parser<'a> {
             self.psess.gated_spans.gate(sym::more_qualified_paths, path.span);
         }
         Ok(PatKind::TupleStruct(qself, path, fields))
+    }
+
+    fn parse_pat_term_class(&mut self, class: TermClass) -> PResult<'a, PatKind> {
+        let lo = self.prev_token.span;
+        let (mut fields, _) = self.parse_paren_comma_seq(|p| {
+            p.parse_pat_allow_top_guard(
+                None,
+                RecoverComma::No,
+                RecoverColon::No,
+                CommaRecoveryMode::EitherTupleOrPipe,
+            )
+        })?;
+
+        if fields.len() == 1 {
+            Ok(PatKind::TermClass(class, Box::new(fields.remove(0))))
+        } else {
+            let guar = self
+                .dcx()
+                .struct_span_err(
+                    lo.to(self.prev_token.span),
+                    format!("class pattern `{}(..)` takes exactly one subpattern", class.name()),
+                )
+                .emit();
+
+            Ok(PatKind::Err(guar))
+        }
     }
 
     /// Are we sure this could not possibly be the start of a pattern?
