@@ -39,67 +39,110 @@ macro_rules! println {
     {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
 }
 
-#[attr = Repr {reprs: [Transparent]}]
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
 struct Unit;
 
-#[attr = Repr {reprs: [Transparent]}]
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
 struct Pair(int, int);
 
+#[attr = Repr {reprs: [Patina], modifiers: []}]
 enum InvalidVariants {
-    #[attr = Repr {reprs: [Transparent]}]
+    #[attr = Repr {reprs: [Transparent],
+    modifiers: []}]
     Unit,
-    #[attr = Repr {reprs: [Transparent]}]
+    #[attr = Repr {reprs: [Transparent],
+    modifiers: []}]
     Pair(int, int),
+    Value(int),
 }
 
-#[attr = Repr {reprs: [Transparent]}]
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
 enum InvalidInheritedVariants { Unit, Pair(int, int), }
 
-#[attr = Repr {reprs: [Transparent]}]
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
 enum SamePrimitiveShape { First(int), Second(int), }
 
 enum OverlappingAtomShapes {
-    #[attr = Repr {reprs: [Transparent]}]
+    #[attr = Repr {reprs: [Transparent],
+    modifiers: []}]
     AnyAtom(atom),
-    #[attr = Repr {reprs: [Transparent]}]
+    #[attr = Repr {reprs: [Transparent],
+    modifiers: []}]
     Boolean(bool),
 }
 
-#[attr = Repr {reprs: [Transparent]}]
-enum MultipleOpenShapes<T, U, V> {
-    #[attr = Repr {reprs: [DynamicWrap]}]
+enum DuplicateTaggedShape {
+    #[attr = Repr {reprs: [Tagged],
+    modifiers: [Tag("same")]}]
+    First(int),
+    #[attr = Repr {reprs: [Tagged],
+    modifiers: [Tag("same")]}]
+    Second(str),
+}
+
+enum OpenWrapperOverlap<T> {
+    #[attr = Repr {reprs: [Tagged],
+    modifiers: [Tag("same")]}]
+    Tagged(int),
+    #[attr = Repr {reprs: [Transparent],
+    modifiers: [DynamicWrap,
+    Tag("same")]}]
+    Open(T),
+}
+
+enum DuplicateOpenWrapperShape<T, U> {
+    #[attr = Repr {reprs: [Transparent],
+    modifiers: [DynamicWrap,
+    Tag("same")]}]
     First(T),
-    #[attr = Repr {reprs: [DynamicWrap]}]
+    #[attr = Repr {reprs: [Transparent],
+    modifiers: [DynamicWrap,
+    Tag("same")]}]
     Second(U),
-    #[attr = Repr {reprs: [DynamicWrap]}]
+}
+
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
+enum MultipleOpenShapes<T, U, V> {
+    #[attr = Repr {reprs: [],
+    modifiers: [DynamicWrap]}]
+    First(T),
+    #[attr = Repr {reprs: [],
+    modifiers: [DynamicWrap]}]
+    Second(U),
+    #[attr = Repr {reprs: [],
+    modifiers: [DynamicWrap]}]
     Third(V),
 }
 
-#[attr = Repr {reprs: [Transparent]}]
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
 enum Inner<T> {
-    #[attr = Repr {reprs: [DynamicWrap]}]
+    #[attr = Repr {reprs: [],
+    modifiers: [DynamicWrap]}]
     Value(T),
 }
 
-#[attr = Repr {reprs: [Transparent]}]
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
 enum MultipleNestedOpenShapes<T, U> {
-    #[attr = Repr {reprs: [DynamicWrap]}]
+    #[attr = Repr {reprs: [],
+    modifiers: [DynamicWrap]}]
     First(Inner<T>),
-    #[attr = Repr {reprs: [DynamicWrap]}]
+    #[attr = Repr {reprs: [],
+    modifiers: [DynamicWrap]}]
     Second(Inner<U>),
 }
 
-#[attr = Repr {reprs: [Transparent]}]
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
 enum MissingDynamicWrap { Open(term), Text(str), }
 
-#[attr = Repr {reprs: [Transparent]}]
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
 enum DynamicWrapOnClosed {
-    #[attr = Repr {reprs: [DynamicWrap]}]
+    #[attr = Repr {reprs: [],
+    modifiers: [DynamicWrap]}]
     Integer(int),
     Text(str),
 }
 
-#[attr = Repr {reprs: [DynamicWrap]}]
+#[attr = Repr {reprs: [], modifiers: [DynamicWrap]}]
 enum DynamicWrapOnEnum { Value(int), }
 
 fn main() ({ } as ())

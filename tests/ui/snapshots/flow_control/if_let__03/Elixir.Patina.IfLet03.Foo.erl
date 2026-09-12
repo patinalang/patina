@@ -6,8 +6,6 @@
 
 -import(erlang, [is_record/3]).
 
--export_record(['Qux']).
+-export_record([]).
 
 -export([]).
-
--record #'Qux'{'0'}.

@@ -1,0 +1,11 @@
+[{attribute,{29,1},
+            file,
+            {"tests/ui/src/custom_types/repr_patina_default.pt",29}},
+ {attribute,{29,1},module,'Elixir.Patina.ReprPatinaDefault.Greedy'},
+ {attribute,{29,1},compile,[no_auto_import]},
+ {attribute,{29,1},import,{erlang,[{is_record,3}]}},
+ {attribute,{29,1},export_record,['Second']},
+ {attribute,{29,1},export,[]},
+ {attribute,{29,1},
+            native_record,
+            {'Second',[{record_field,{31,12},{atom,{31,12},'0'}}]}}]

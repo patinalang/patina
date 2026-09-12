@@ -32,15 +32,8 @@ gen_spec_int(__s@0_0) -> {}.
 generic(__s@0_0) -> {}.
 
 main() ->
-    reg_fn(('Elixir.Patina.GenFn01.S':'__struct__'())#{'0'
-                                                           :=
-                                                           'Elixir.Patina.GenFn01.A'}),
-    gen_spec_t(('Elixir.Patina.GenFn01.SGen':'__struct__'())#{'0'
-                                                                  :=
-                                                                  'Elixir.Patina.GenFn01.A'}),
-    gen_spec_int(('Elixir.Patina.GenFn01.SGen':'__struct__'())#{'0'
-                                                                    := 6}),
-    generic(('Elixir.Patina.GenFn01.SGen':'__struct__'())#{'0'
-                                                               := $a}),
-    generic(('Elixir.Patina.GenFn01.SGen':'__struct__'())#{'0'
-                                                               := $c}).
+    reg_fn('Elixir.Patina.GenFn01.A'),
+    gen_spec_t('Elixir.Patina.GenFn01.A'),
+    gen_spec_int(6),
+    generic($a),
+    generic($c).

@@ -5,7 +5,7 @@ use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::LocalDefId;
 use rustc_hir::{BindingMode, HirId, Lit};
-use rustc_middle::erl::{ErlCallKind, ErlCallTarget, ErlModuleResolution, ErlRepr};
+use rustc_middle::erl::{ErlCallKind, ErlCallTarget, ErlModuleResolution, ErlReprKind};
 use rustc_middle::middle::region;
 use rustc_middle::mir::{AssignOp, BinOp, UnOp};
 use rustc_middle::span_bug;
@@ -306,7 +306,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let afb = &self.translator.afb;
 
         match repr.kind {
-            ErlRepr::Elixir => {
+            ErlReprKind::Elixir => {
                 let field_name = afb.expr_atom(lhs_expr.span, variant.fields[name].name);
                 afb.expr_remote_call(
                     expr.span,
@@ -315,21 +315,22 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                     [field_name, subject],
                 )
             }
-            ErlRepr::Tagged => afb.expr_remote_call(
+            ErlReprKind::Tagged => afb.expr_remote_call(
                 expr.span,
                 afb.expr_atom(expr.span, sym::erlang),
                 afb.expr_atom(expr.span, sym::element),
                 [afb.expr_int(expr.span, name.index() as u128 + 2), subject],
             ),
-            ErlRepr::Transparent => subject,
-            ErlRepr::NativeRecord => afb.expr_record_field(
+            ErlReprKind::Int => not_implemented!(self.tcx(), expr.span, "int-represented ADT"),
+            ErlReprKind::Transparent { .. } => subject,
+            ErlReprKind::NativeRecord => afb.expr_record_field(
                 expr.span,
                 subject,
                 self.record_module_for_access(repr.record_module),
                 repr.tag,
                 variant.fields[name].name,
             ),
-            ErlRepr::Atom => span_bug!(expr.span, "field access on atom-represented ADT"),
+            ErlReprKind::Atom => span_bug!(expr.span, "field access on atom-represented ADT"),
         }
     }
 

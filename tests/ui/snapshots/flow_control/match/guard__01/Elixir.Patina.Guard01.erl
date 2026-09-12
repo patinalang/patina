@@ -25,33 +25,30 @@
 '__info__'(Key) -> module_info(Key).
 
 main() ->
-    _temperature@0_0 =
-        #'Elixir.Patina.Guard01.Temperature':'Celsius'{'0' =
-                                                           35},
+    _temperature@0_0 = 35,
     case _temperature@0_0 of
-        #'Elixir.Patina.Guard01.Temperature':'Celsius'{'0' =
-                                                           _t@1_0}
-            when _t@1_0 > 30 ->
+        _value@2_0 = _t@1_0
+            when _t@1_0 > 30, erlang:is_integer(_value@2_0) ->
             io:put_chars([[io_lib:format("~ktp", [_t@1_0]),
                            <<"C is above 30 Celsius">>]]),
             io:nl(),
             {};
-        #'Elixir.Patina.Guard01.Temperature':'Celsius'{'0' =
-                                                           _t@2_0} ->
-            io:put_chars([[io_lib:format("~ktp", [_t@2_0]),
+        _value@4_0 = _t@3_0
+            when erlang:is_integer(_value@4_0) ->
+            io:put_chars([[io_lib:format("~ktp", [_t@3_0]),
                            <<"C is equal to or below 30 Celsius">>]]),
             io:nl(),
             {};
         #'Elixir.Patina.Guard01.Temperature':'Fahrenheit'{'0' =
-                                                              _t@3_0}
-            when _t@3_0 > 86 ->
-            io:put_chars([[io_lib:format("~ktp", [_t@3_0]),
+                                                              _t@5_0}
+            when _t@5_0 > 86 ->
+            io:put_chars([[io_lib:format("~ktp", [_t@5_0]),
                            <<"F is above 86 Fahrenheit">>]]),
             io:nl(),
             {};
         #'Elixir.Patina.Guard01.Temperature':'Fahrenheit'{'0' =
-                                                              _t@4_0} ->
-            io:put_chars([[io_lib:format("~ktp", [_t@4_0]),
+                                                              _t@6_0} ->
+            io:put_chars([[io_lib:format("~ktp", [_t@6_0]),
                            <<"F is equal to or below 86 Fahrenheit">>]]),
             io:nl(),
             {}

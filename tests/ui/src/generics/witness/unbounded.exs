@@ -4,9 +4,14 @@ defmodule UnboundedTest do
   use ExUnit.Case
   import ExUnit.CaptureIO
 
+  setup_all do
+    Code.ensure_loaded!(Patina.Unbounded.Pair)
+    :ok
+  end
+
   test "unbounded inherent generics do not require witnesses" do
     assert ~S"""
-           Pair::len(#{'__struct__' => 'Elixir.Patina.Unbounded.Pair',a => 1,b => 2})
+           Pair::len(#'Elixir.Patina.Unbounded.Pair':'Pair'{a = 1,b = 2})
            2
            """ == capture_io(fn -> Patina.Unbounded.main() end)
   end

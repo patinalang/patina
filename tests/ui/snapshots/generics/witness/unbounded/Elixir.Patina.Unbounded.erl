@@ -24,9 +24,8 @@
 '__info__'(Key) -> module_info(Key).
 
 main() ->
-    _p@0_0 =
-        ('Elixir.Patina.Unbounded.Pair':'__struct__'())#{a := 1,
-                                                         b := 2},
+    _p@0_0 = #'Elixir.Patina.Unbounded.Pair':'Pair'{a = 1,
+                                                    b = 2},
     begin
         io:put_chars([[io_lib:format("~ktp",
                                      ['Elixir.Patina.Unbounded.Pair':len(_p@0_0)])]]),

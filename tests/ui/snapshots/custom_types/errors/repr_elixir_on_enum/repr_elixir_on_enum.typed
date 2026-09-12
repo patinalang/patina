@@ -39,10 +39,11 @@ macro_rules! println {
     {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
 }
 
-#[attr = Repr {reprs: [Elixir]}]
+#[attr = Repr {reprs: [Elixir], modifiers: []}]
 enum ElixirEnum { Variant(int), }
 
 enum ElixirVariant {
-    #[attr = Repr {reprs: [Elixir]}]
+    #[attr = Repr {reprs: [Elixir],
+    modifiers: []}]
     Variant(int),
 }

@@ -2,7 +2,9 @@ use rustc_abi::FieldIdx;
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def_id::DefId;
 use rustc_middle::erl::shape::ErlShape;
-use rustc_middle::erl::{ErlCallKind, ErlCallTarget, ErlModuleResolution, ErlRepr, ErlVariantRepr};
+use rustc_middle::erl::{
+    ErlCallKind, ErlCallTarget, ErlModuleResolution, ErlReprKind, ErlVariantRepr,
+};
 use rustc_middle::span_bug;
 use rustc_middle::thir::{AdtExpr, AdtExprBase, Expr, FieldPat};
 use rustc_middle::ty::{self, AdtDef, Ty, VariantDef};
@@ -23,15 +25,16 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     ) -> Patterns<'arena> {
         let repr = self.tcx().erl_variant_repr(variant.def_id);
         match repr.kind {
-            ErlRepr::Atom => self.translator.afb.pat_atom(span, repr.tag).into(),
-            ErlRepr::Tagged => self.translate_tagged_pattern(span, variant, subpatterns, repr),
-            ErlRepr::Elixir => {
+            ErlReprKind::Atom => self.translator.afb.pat_atom(span, repr.tag).into(),
+            ErlReprKind::Int => not_implemented!(self.tcx(), span, "int-represented ADT"),
+            ErlReprKind::Tagged => self.translate_tagged_pattern(span, variant, subpatterns, repr),
+            ErlReprKind::Elixir => {
                 self.translate_elixir_struct_pattern(span, adt_def, variant, subpatterns)
             }
-            ErlRepr::NativeRecord => {
+            ErlReprKind::NativeRecord => {
                 self.translate_native_record_pattern(span, variant, subpatterns, repr)
             }
-            ErlRepr::Transparent => self.translate_transparent_pattern(
+            ErlReprKind::Transparent { .. } => self.translate_transparent_pattern(
                 span,
                 adt_ty,
                 adt_def,
@@ -53,11 +56,16 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
         let repr = self.tcx().erl_variant_repr(variant.def_id);
         match repr.kind {
-            ErlRepr::Atom => afb.expr_atom(expr.span, repr.tag),
-            ErlRepr::Tagged => self.translate_tagged(expr, adt_expr, variant, repr),
-            ErlRepr::Elixir => self.translate_elixir_struct(expr, adt_expr, variant),
-            ErlRepr::NativeRecord => self.translate_native_record(expr, adt_expr, variant, repr),
-            ErlRepr::Transparent => self.translate_transparent(expr, adt_expr, variant, repr),
+            ErlReprKind::Atom => afb.expr_atom(expr.span, repr.tag),
+            ErlReprKind::Int => not_implemented!(self.tcx(), expr.span, "int-represented ADT"),
+            ErlReprKind::Tagged => self.translate_tagged(expr, adt_expr, variant, repr),
+            ErlReprKind::Elixir => self.translate_elixir_struct(expr, adt_expr, variant),
+            ErlReprKind::NativeRecord => {
+                self.translate_native_record(expr, adt_expr, variant, repr)
+            }
+            ErlReprKind::Transparent { .. } => {
+                self.translate_transparent(expr, adt_expr, variant, repr)
+            }
         }
     }
 
@@ -99,7 +107,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             }
         };
 
-        let guard_shapes = self.tcx().erl_open_transparent_guards((variant.def_id, adt_expr.args));
+        let guard_shapes = self.tcx().erl_variant_wrap_guards((variant.def_id, adt_expr.args));
         if guard_shapes.is_empty() {
             // The variant is either not open-shape, or can't be mistaken with any other variant.
             return value;
@@ -151,7 +159,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             span_bug!(span, "transparent ADT pattern has non-ADT type {adt_ty}")
         };
 
-        let guard_shapes = self.tcx().erl_open_transparent_guards((variant.def_id, args));
+        let guard_shapes = self.tcx().erl_variant_wrap_guards((variant.def_id, args));
         let wraps = !guard_shapes.is_empty();
 
         // If wrapping is a possibility, we need to guard against the wrapped shape as well.

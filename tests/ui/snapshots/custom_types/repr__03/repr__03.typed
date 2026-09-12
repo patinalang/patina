@@ -44,21 +44,22 @@ macro_rules! println {
 
 struct Unit;
 
-#[attr = Repr {reprs: [Atom, Tag("custom_name")]}]
+#[attr = Repr {reprs: [Atom], modifiers: [Tag("custom_name")]}]
 struct CustomNameUnit;
 
 // repr settings on an enum are inherited by variants
-#[attr = Repr {reprs: [TagStyle(SnakeCase)]}]
+#[attr = Repr {reprs: [], modifiers: [TagStyle(SnakeCase)]}]
 enum NotJustUnits {
     VariantA,
-    #[attr = Repr {reprs: [Tag("variantB")]}]
+    #[attr = Repr {reprs: [],
+    modifiers: [Tag("variantB")]}]
     VariantB,
     VariantC(int),
 }
 
 // Explicitly setting `#[repr(atom)]` will ensure that only unit variants
 // are ever added to an enum.
-#[attr = Repr {reprs: [Atom, TagStyle(SnakeCase)]}]
+#[attr = Repr {reprs: [Atom], modifiers: [TagStyle(SnakeCase)]}]
 enum OnlyUnits { VariantA, VariantB, VariantC, }
 
 fn main() ({

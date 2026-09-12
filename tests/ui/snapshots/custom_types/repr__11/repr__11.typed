@@ -42,7 +42,7 @@ macro_rules! println {
 // source: patina-by-example/src/custom_types/repr.md
 // block: 11/14
 
-#[attr = Repr {reprs: [Elixir]}]
+#[attr = Repr {reprs: [Elixir], modifiers: []}]
 struct Point {
     x: float,
     y: float,

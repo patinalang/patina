@@ -1,0 +1,12 @@
+[{attribute,{36,1},
+            file,
+            {"tests/ui/src/custom_types/repr_patina_default.pt",36}},
+ {attribute,{36,1},module,'Elixir.Patina.ReprPatinaDefault.Small'},
+ {attribute,{36,1},compile,[no_auto_import]},
+ {attribute,{36,1},import,{erlang,[{is_record,3}]}},
+ {attribute,{36,1},export_record,['Pair']},
+ {attribute,{36,1},export,[]},
+ {attribute,{36,1},
+            native_record,
+            {'Pair',[{record_field,{40,10},{atom,{40,10},'0'}},
+                     {record_field,{40,15},{atom,{40,15},'1'}}]}}]

@@ -42,13 +42,13 @@ macro_rules! println {
 // source: patina-by-example/src/custom_types/repr.md
 // block: 8/14
 
-#[attr = Repr {reprs: [Elixir]}]
+#[attr = Repr {reprs: [Elixir], modifiers: []}]
 struct Point {
     x: int,
     y: int,
 }
 
-#[attr = Repr {reprs: [Transparent]}]
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
 enum TransparentEnum {
     IntVariant(int),
     PointVariant {

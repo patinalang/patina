@@ -42,20 +42,21 @@ macro_rules! println {
 // source: patina-by-example/src/custom_types/repr.md
 // block: 9/14
 
-#[attr = Repr {reprs: [Transparent]}]
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
 enum TransparentWithTags<T> {
     Untagged(str),
 
     // `MaybeUntagged(T)` values are represented as themselves, except
     // for values that could be mistaken for another variant.
-    #[attr = Repr {reprs: [DynamicWrap,
+    #[attr = Repr {reprs: [],
+    modifiers: [DynamicWrap,
     Tag("othertag")]}]
     MaybeUntagged(T),
 
     // Individual enum variants can have their own representation set.
     // Tagged(int) will always be tagged with `(a"mytag", _)`.
-    #[attr = Repr {reprs: [Tagged,
-    Tag("mytag")]}]
+    #[attr = Repr {reprs: [Tagged],
+    modifiers: [Tag("mytag")]}]
     Tagged(int),
 }
 

@@ -1,0 +1,240 @@
+#![allow(dead_code, private_interfaces)]
+
+#[repr(atom)]
+struct AtomUnit;
+
+#[repr(atom)]
+struct AtomBraced {}
+
+#[repr(atom)]
+struct AtomTuple();
+
+#[repr(atom)]
+enum InheritedAtom {
+    Unit,
+    Braced {},
+    Tuple(),
+}
+
+enum ExplicitAtom {
+    #[repr(atom)]
+    Unit,
+    #[repr(atom)]
+    Braced {},
+    #[repr(atom)]
+    Tuple(),
+}
+
+#[repr(Patina)]
+enum Greedy {
+    First(int),
+    Second(int),
+    Text(str),
+    Nil,
+}
+
+enum Small<T> {
+    Open(T),
+    Text(str),
+    Nil,
+    Pair(int, int),
+}
+
+enum Large<T> {
+    Open(T),
+    Text(str),
+    Number(int),
+    Nil,
+    Pair(int, int),
+}
+
+enum MultipleOpen<T, U> {
+    First(T),
+    Second(U),
+    Text(str),
+}
+
+#[repr(Patina)]
+enum LaterExplicit {
+    Inferred(int),
+    #[repr(transparent)]
+    Explicit(int),
+}
+
+#[repr(Patina)]
+pub enum WrapperConflict<T> {
+    Pair((atom, int)),
+    #[repr(tag = "open")]
+    Open(T),
+}
+
+#[repr(Patina)]
+pub enum ReservedWrapper<T, U> {
+    #[repr(tagged, tag = "open")]
+    Reserved(int),
+    #[repr(tag = "open")]
+    Open(T),
+    #[repr(tag = "later")]
+    Available(U),
+}
+
+#[repr(native_record)]
+enum Override {
+    #[repr(Patina)]
+    Inferred(int),
+    Record(str),
+}
+
+struct Unit;
+struct Newtype(int);
+struct Record {
+    value: int,
+    label: str,
+}
+
+pub fn atom_structs() -> (term, term, term) {
+    (AtomUnit as term, AtomBraced {} as term, AtomTuple() as term)
+}
+
+pub fn inherited_atoms() -> (term, term, term) {
+    (
+        InheritedAtom::Unit as term,
+        InheritedAtom::Braced {} as term,
+        InheritedAtom::Tuple() as term,
+    )
+}
+
+pub fn explicit_atoms() -> (term, term, term) {
+    (
+        ExplicitAtom::Unit as term,
+        ExplicitAtom::Braced {} as term,
+        ExplicitAtom::Tuple() as term,
+    )
+}
+
+pub fn atom_patterns() -> (bool, bool, bool) {
+    let AtomUnit = AtomUnit;
+    let AtomBraced {} = AtomBraced {};
+    let AtomTuple() = AtomTuple();
+    (
+        match InheritedAtom::Unit { InheritedAtom::Unit => true, _ => false },
+        match (InheritedAtom::Braced {}) { InheritedAtom::Braced {} => true, _ => false },
+        match InheritedAtom::Tuple() { InheritedAtom::Tuple() => true, _ => false },
+    )
+}
+
+pub fn greedy_first(value: int) -> term {
+    Greedy::First(value) as term
+}
+
+pub fn greedy_second(value: int) -> term {
+    Greedy::Second(value) as term
+}
+
+pub fn greedy_text(value: str) -> term {
+    Greedy::Text(value) as term
+}
+
+pub fn greedy_nil() -> term {
+    Greedy::Nil as term
+}
+
+pub fn small_open(value: term) -> term {
+    Small::<term>::Open(value) as term
+}
+
+pub fn small_text(value: str) -> term {
+    Small::<term>::Text(value) as term
+}
+
+pub fn small_nil() -> term {
+    Small::<term>::Nil as term
+}
+
+pub fn classify_small(value: Small<term>) -> atom {
+    match value {
+        Small::Open(_) => a"open",
+        Small::Text(_) => a"text",
+        Small::Nil => a"nil",
+        Small::Pair(_, _) => a"pair",
+    }
+}
+
+pub fn large_open(value: term) -> term {
+    Large::<term>::Open(value) as term
+}
+
+pub fn large_text(value: str) -> term {
+    Large::<term>::Text(value) as term
+}
+
+pub fn multiple_first(value: int) -> term {
+    MultipleOpen::<int, str>::First(value) as term
+}
+
+pub fn multiple_second(value: str) -> term {
+    MultipleOpen::<int, str>::Second(value) as term
+}
+
+pub fn multiple_text(value: str) -> term {
+    MultipleOpen::<int, int>::Text(value) as term
+}
+
+pub fn later_inferred(value: int) -> term {
+    LaterExplicit::Inferred(value) as term
+}
+
+pub fn later_explicit(value: int) -> term {
+    LaterExplicit::Explicit(value) as term
+}
+
+pub fn wrapper_pair(value: (atom, int)) -> term {
+    WrapperConflict::<term>::Pair(value) as term
+}
+
+pub fn wrapper_open(value: term) -> term {
+    WrapperConflict::<term>::Open(value) as term
+}
+
+pub fn classify_wrapper(value: WrapperConflict<term>) -> atom {
+    match value {
+        WrapperConflict::Pair(_) => a"pair",
+        WrapperConflict::Open(_) => a"open",
+    }
+}
+
+pub fn reserved_wrapper_reserved(value: int) -> term {
+    ReservedWrapper::<term, term>::Reserved(value) as term
+}
+
+pub fn reserved_wrapper_open(value: term) -> term {
+    ReservedWrapper::<term, term>::Open(value) as term
+}
+
+pub fn reserved_wrapper_available(value: term) -> term {
+    ReservedWrapper::<term, term>::Available(value) as term
+}
+
+pub fn override_inferred(value: int) -> term {
+    Override::Inferred(value) as term
+}
+
+pub fn override_record(value: str) -> term {
+    Override::Record(value) as term
+}
+
+pub fn unit() -> term {
+    Unit as term
+}
+
+pub fn newtype(value: int) -> term {
+    Newtype(value) as term
+}
+
+pub fn record(value: int, label: str) -> term {
+    Record { value, label } as term
+}
+
+pub fn record_value(record: Record) -> int {
+    record.value
+}

@@ -86,12 +86,8 @@ match_nested_ranges(_value@0_0) ->
     end.
 
 match_enum_range(_value@0_0) ->
-    case #'Elixir.Patina.RangePattern.Number':'Value'{'0' =
-                                                          _value@0_0}
-        of
-        #'Elixir.Patina.RangePattern.Number':'Value'{'0' =
-                                                         _bound@1_0 =
-                                                             _range@2_0}
+    case _value@0_0 of
+        _bound@1_0 = _range@2_0
             when _bound@1_0 =/= 41, _range@2_0 >= 40,
                  _range@2_0 =< 44 ->
             true;

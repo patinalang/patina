@@ -6,7 +6,7 @@ defmodule UnboundedSlotTest do
 
   test "unbounded generic witness slots accept concrete types" do
     assert ~S"""
-           Tr::method(#{'__struct__' => 'Elixir.Patina.UnboundedSlot.Holder',value => 1})
+           Tr::method(1)
            """ == capture_io(fn -> Patina.UnboundedSlot.main() end)
   end
 end

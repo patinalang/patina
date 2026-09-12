@@ -6,13 +6,13 @@ use rustc_data_structures::unord::{UnordMap, UnordSet};
 use rustc_errors::codes::*;
 use rustc_errors::{Diag, DiagCtxtHandle, Diagnostic, EmissionGuarantee, Level, MultiSpan};
 use rustc_hir as hir;
+use rustc_hir::attrs::ReprAttr;
 use rustc_hir::def::{CtorKind, DefKind};
 use rustc_hir::{LangItem, Node, find_attr, intravisit};
 use rustc_infer::infer::{RegionVariableOrigin, TyCtxtInferExt};
 use rustc_infer::traits::{Obligation, ObligationCauseCode, WellFormedLoc};
 use rustc_lint_defs::builtin::UNSUPPORTED_CALLING_CONVENTIONS;
-use rustc_middle::erl::ErlRepr;
-use rustc_middle::erl::shape::ErlShape;
+use rustc_middle::erl::ErlReprKind;
 use rustc_middle::hir::nested_filter;
 use rustc_middle::middle::resolve_bound_vars::ResolvedArg;
 use rustc_middle::middle::stability::EvalResult;
@@ -1628,10 +1628,14 @@ fn check_enum(tcx: TyCtxt<'_>, def_id: LocalDefId) {
     def.destructor(tcx); // force the destructor to be evaluated
 
     if def.variants().is_empty() {
-        find_attr!(tcx, def_id, Repr { reprs, first_span } => {
+        find_attr!(tcx, def_id, Repr { reprs, modifiers, first_span } => {
             struct_span_code_err!(
                 tcx.dcx(),
-                reprs.first().map(|repr| repr.1).unwrap_or(*first_span),
+                reprs
+                    .first()
+                    .map(|repr| repr.1)
+                    .or_else(|| modifiers.first().map(|modifier| modifier.1))
+                    .unwrap_or(*first_span),
                 E0084,
                 "unsupported representation for zero-variant enum"
             )
@@ -1689,16 +1693,15 @@ fn check_enum(tcx: TyCtxt<'_>, def_id: LocalDefId) {
     check_erl_repr(tcx, def);
 }
 
-fn check_erl_repr(tcx: TyCtxt<'_>, adt: AdtDef<'_>) {
+fn check_erl_repr<'tcx>(tcx: TyCtxt<'tcx>, adt: AdtDef<'tcx>) {
     let args = ty::GenericArgs::identity_for_item(tcx, adt.did());
-    let mut transparent_shapes = SmallVec::<[(&ErlShape, Span); 2]>::new();
     let mut first_open_transparent: Option<(Ty<'_>, Span)> = None;
 
     for variant in adt.variants() {
         let variant_repr = tcx.erl_variant_repr(variant.def_id);
         let variant_span = tcx.def_span(variant.def_id);
         let repr = variant_repr.kind;
-        let open_shape = tcx.erl_variant_has_open_shape(variant.def_id);
+        let open_shape = matches!(repr, ErlReprKind::Transparent { open_payload: true });
         let dynamic_wrap = tcx.find_erl_dynamic_wrap_attr(variant.def_id);
 
         if open_shape {
@@ -1706,15 +1709,16 @@ fn check_erl_repr(tcx: TyCtxt<'_>, adt: AdtDef<'_>) {
             let payload_span = tcx.def_span(payload.did);
             let payload_ty = payload.ty(tcx, args);
 
-            if dynamic_wrap.is_none() && adt.variants().len() > 1 {
+            if let Some((ReprAttr::Transparent, transparent_span)) = variant_repr.repr_attribute
+                && dynamic_wrap.is_none()
+                && adt.variants().len() > 1
+            {
                 let indentation =
                     tcx.sess.source_map().indentation_before(variant_span).unwrap_or_default();
                 tcx.dcx().emit_err(crate::errors::OpenTransparentVariantRequiresDynamicWrap {
                     payload_span,
                     payload_ty,
-                    transparent_span: variant_repr
-                        .repr_attribute
-                        .expect("an open transparent variant has an explicit representation"),
+                    transparent_span,
                     suggestion_span: variant_span.shrink_to_lo(),
                     dynamic_wrap_attribute: format!("#[repr(dynamic_wrap)]\n{indentation}"),
                 });
@@ -1743,7 +1747,7 @@ fn check_erl_repr(tcx: TyCtxt<'_>, adt: AdtDef<'_>) {
         }
 
         if let Some((_module, attr_span)) = tcx.find_erl_record_module_attr(variant.def_id)
-            && repr != ErlRepr::NativeRecord
+            && repr != ErlReprKind::NativeRecord
         {
             tcx.dcx().emit_err(crate::errors::RecordModuleRequiresNativeRecord {
                 span: attr_span,
@@ -1751,9 +1755,9 @@ fn check_erl_repr(tcx: TyCtxt<'_>, adt: AdtDef<'_>) {
             });
         }
 
-        if repr == ErlRepr::Atom
+        if repr == ErlReprKind::Atom
             && !variant.fields.is_empty()
-            && let Some(atom_attr_span) = variant_repr.repr_attribute
+            && let Some((_, atom_attr_span)) = variant_repr.repr_attribute
         {
             tcx.dcx().emit_err(crate::errors::AtomReprRequiresNoFields {
                 span: atom_attr_span,
@@ -1761,35 +1765,44 @@ fn check_erl_repr(tcx: TyCtxt<'_>, adt: AdtDef<'_>) {
             });
         }
 
-        if repr == ErlRepr::Transparent
-            && let Some(transparent_attr_span) = variant_repr.repr_attribute
+        if matches!(repr, ErlReprKind::Transparent { .. })
+            && let Some((_, transparent_attr_span)) = variant_repr.repr_attribute
+            && variant.fields.len() != 1
         {
-            if variant.fields.len() != 1 {
-                tcx.dcx().emit_err(crate::errors::TransparentReprRequiresNewtype {
-                    span: transparent_attr_span,
-                    item_span: variant_span,
-                });
-                continue;
-            }
+            tcx.dcx().emit_err(crate::errors::TransparentReprRequiresNewtype {
+                span: transparent_attr_span,
+                item_span: variant_span,
+            });
+        }
+    }
 
-            if !open_shape {
-                let field_ty = variant.fields[FieldIdx::ZERO].ty(tcx, args);
-                let shape = tcx.erl_shape_of_ty(field_ty);
+    if !adt.is_enum() {
+        // structs don't need to check for shape overlaps.
+        return;
+    }
 
-                // We need to check for conflicts with all previous transparent shapes.
-                // This may prove to be a strong candidate for later optimization, maybe with some
-                // allocation-free bloom filters.
-                for (other_shape, other_span) in &transparent_shapes {
-                    if shape.overlaps(other_shape) {
-                        tcx.dcx().emit_err(crate::errors::TransparentVariantShapesOverlap {
-                            span: *other_span,
-                            other_span: variant_span,
-                        });
-                    }
-                }
+    let variants = adt
+        .variants()
+        .iter()
+        .map(|variant| {
+            let span = tcx.def_span(variant.def_id);
+            let repr = tcx.erl_variant_repr(variant.def_id);
+            let shape = tcx.erl_variant_reserved_shape(adt, variant, repr);
+            (span, shape)
+        })
+        .collect::<SmallVec<[_; 4]>>();
 
-                transparent_shapes.push((shape, variant_span));
-            }
+    let pairs = variants
+        .iter()
+        .enumerate()
+        .flat_map(|(index, v1)| variants[..index].iter().map(move |v2| (v1, v2)));
+
+    for ((span, shape), (other_span, other_shape)) in pairs {
+        if shape.overlaps(other_shape) {
+            tcx.dcx().emit_err(crate::errors::VariantShapesOverlap {
+                span: *span,
+                other_span: *other_span,
+            });
         }
     }
 }

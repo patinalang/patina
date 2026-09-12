@@ -30,7 +30,5 @@ call(_h@0_0) ->
                                                                      _h@0_0).
 
 main() ->
-    _h@0_0 =
-        ('Elixir.Patina.UnboundedSlot.Holder':'__struct__'())#{value
-                                                                   := 1},
+    _h@0_0 = 1,
     call(_h@0_0).

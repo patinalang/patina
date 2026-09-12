@@ -41,12 +41,12 @@ macro_rules! println {
 
 // A `#[repr(...)]` can only pick a single runtime representation.
 // The `tag` modifier is not at fault, so it is not part of the error span.
-#[attr = Repr {reprs: [Tagged, Tag("my_tag"), Transparent]}]
+#[attr = Repr {reprs: [Tagged, Transparent], modifiers: [Tag("my_tag")]}]
 struct Conflict(int);
 
 // `record_module` references an external native record, so it is only
 // valid together with `native_record`.
-#[attr = Repr {reprs: [Tagged, RecordModule("external_module")]}]
+#[attr = Repr {reprs: [Tagged], modifiers: [RecordModule("external_module")]}]
 struct NotANativeRecord(int);
 
 fn main() ({ } as ())

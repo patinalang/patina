@@ -3,6 +3,7 @@ use std::fmt;
 use std::path::PathBuf;
 
 pub use ReprAttr::*;
+pub use ReprAttrModifier::*;
 use rustc_abi::Align;
 pub use rustc_ast::attr::data_structures::*;
 use rustc_ast::expand::autodiff_attrs::{DiffActivity, DiffMode};
@@ -168,8 +169,12 @@ pub enum ReprAttr {
     Tagged,
     Atom,
     Transparent,
-    DynamicWrap,
     NativeRecord,
+}
+
+#[derive(PartialEq, Debug, Encodable, Decodable, Copy, Clone, StableHash, PrintAttribute)]
+pub enum ReprAttrModifier {
+    DynamicWrap,
     Tag(Symbol),
     TagStyle(ErlTagStyle),
     RecordModule(Symbol),
@@ -1254,6 +1259,7 @@ pub enum AttributeKind {
     /// Represents [`#[repr]`](https://doc.rust-lang.org/stable/reference/type-layout.html#representations).
     Repr {
         reprs: ThinVec<(ReprAttr, Span)>,
+        modifiers: ThinVec<(ReprAttrModifier, Span)>,
         first_span: Span,
     },
 

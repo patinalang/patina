@@ -44,13 +44,15 @@ macro_rules! println {
 
 extern mod erlang;
 
-#[attr = Repr {reprs: [Tagged, TagStyle(SnakeCase)]}]
+#[attr = Repr {reprs: [Tagged], modifiers: [TagStyle(SnakeCase)]}]
 enum TermToBinaryOpts {
     Compressed(int),
-    #[attr = Repr {reprs: [Atom]}]
+    #[attr = Repr {reprs: [Atom],
+    modifiers: []}]
     Deterministic,
     MinorVersion(int),
-    #[attr = Repr {reprs: [Atom]}]
+    #[attr = Repr {reprs: [Atom],
+    modifiers: []}]
     Local,
 }
 

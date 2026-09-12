@@ -2,8 +2,5 @@
  {attribute,{1,1},module,'Elixir.Patina.RangePattern.Number'},
  {attribute,{1,1},compile,[no_auto_import]},
  {attribute,{1,1},import,{erlang,[{is_record,3}]}},
- {attribute,{1,1},export_record,['Value']},
- {attribute,{1,1},export,[]},
- {attribute,{1,1},
-            native_record,
-            {'Value',[{record_field,{2,11},{atom,{2,11},'0'}}]}}]
+ {attribute,{1,1},export_record,[]},
+ {attribute,{1,1},export,[]}]

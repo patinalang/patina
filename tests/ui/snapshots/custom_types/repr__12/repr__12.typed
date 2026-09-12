@@ -42,12 +42,14 @@ macro_rules! println {
 // source: patina-by-example/src/custom_types/repr.md
 // block: 12/14
 
-#[attr = Repr {reprs: [Tagged]}]
+#[attr = Repr {reprs: [Tagged], modifiers: []}]
 enum Result<T, E> {
-    #[attr = Repr {reprs: [Tag("ok")]}]
+    #[attr = Repr {reprs: [],
+    modifiers: [Tag("ok")]}]
     Ok(T),
 
-    #[attr = Repr {reprs: [Tag("error")]}]
+    #[attr = Repr {reprs: [],
+    modifiers: [Tag("error")]}]
     Err(E),
 }
 

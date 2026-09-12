@@ -24,9 +24,7 @@
 '__info__'(Key) -> module_info(Key).
 
 main() ->
-    __person@0_0 =
-        ('Elixir.ModuleAttr.Person':'__struct__'())#{name :=
-                                                         <<"Patina">>},
+    __person@0_0 = <<"Patina">>,
     __event@1_0 = #module_attr_web_event:'Click'{x = 10,
                                                  y = 20},
     {}.

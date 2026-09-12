@@ -3,9 +3,10 @@
 pub mod shape;
 
 use convert_case::{Case, Casing};
+use rustc_abi::FIRST_VARIANT;
 use rustc_data_structures::fx::FxIndexSet;
-use rustc_hir::attrs::{AttributeKind, ErlTagStyle, ReprAttr};
-use rustc_hir::def::{CtorKind, DefKind};
+use rustc_hir::attrs::{AttributeKind, ErlTagStyle, ReprAttr, ReprAttrModifier};
+use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_hir::definitions::DefPathData;
 use rustc_hir::{Attribute, HirId, PrimTy};
@@ -13,8 +14,11 @@ use rustc_macros::StableHash;
 use rustc_span::{Span, Symbol};
 use smallvec::SmallVec;
 
+use self::shape::ErlShape;
 use crate::query::Providers;
-use crate::ty::{self, AdtKind, GenericArgsRef, Ty, TyCtxt, TypingEnv, Unnormalized, Visibility};
+use crate::ty::{
+    self, AdtDef, GenericArgsRef, Ty, TyCtxt, TypingEnv, Unnormalized, VariantDef, Visibility,
+};
 
 /// The identity of a module in the generated Erlang program.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, StableHash)]
@@ -76,19 +80,24 @@ impl ErlCallKind {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, StableHash)]
-pub enum ErlRepr {
+pub enum ErlReprKind {
     Elixir,
     Tagged,
     Atom,
-    Transparent,
+    Int,
     NativeRecord,
+    Transparent {
+        /// Whether the payload's identity-instantiated shape is [`ErlShape::Any`].
+        /// In that case, it may need a wrapper to distinguish it from its siblings.
+        open_payload: bool,
+    },
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, StableHash)]
+#[derive(Copy, Clone, Debug, PartialEq, StableHash)]
 pub struct ErlVariantRepr {
-    pub kind: ErlRepr,
+    pub kind: ErlReprKind,
     /// The explicit repr attribute which selected `kind` (including an inherited enum attribute).
-    pub repr_attribute: Option<Span>,
+    pub repr_attribute: Option<(ReprAttr, Span)>,
     pub tag: Symbol,
     /// The module of the native record to use for this variant.
     /// This attribute is set even if the variant is not represented as a native record.
@@ -471,41 +480,29 @@ impl<'tcx> TyCtxt<'tcx> {
         }
     }
 
-    pub fn erl_adt_repr(self, def_id: DefId) -> ErlRepr {
-        if let Some((kind, _)) = self.explicit_erl_repr(def_id) {
-            return kind;
-        }
-
-        let adt = self.adt_def(def_id);
-        match adt.adt_kind() {
-            AdtKind::Struct => ErlRepr::Elixir,
-            AdtKind::Enum => ErlRepr::NativeRecord,
-            AdtKind::Union => unimplemented!(),
-        }
-    }
-
     /// Resolves the runtime representation of a struct or enum variant.
     pub fn erl_variant_repr(self, variant_def_id: DefId) -> ErlVariantRepr {
-        let adt = match self.def_kind(variant_def_id) {
-            DefKind::Struct => self.adt_def(variant_def_id),
-            DefKind::Variant => self.adt_def(self.parent(variant_def_id)),
+        let (adt_def_id, index) = match self.def_kind(variant_def_id) {
+            DefKind::Struct => (variant_def_id, FIRST_VARIANT),
+            DefKind::Variant => {
+                let adt_def_id = self.parent(variant_def_id);
+                let index = self.adt_def(adt_def_id).variant_index_with_id(variant_def_id);
+                (adt_def_id, index)
+            }
             kind => bug!("expected struct or enum variant, got {kind:?}"),
         };
-        let variant = if adt.is_enum() {
-            adt.variant_with_id(variant_def_id)
-        } else {
-            adt.non_enum_variant()
-        };
 
-        let explicit_repr = self.explicit_erl_repr(variant_def_id);
-        let kind = match explicit_repr {
-            Some((repr, _)) => repr,
-            None if variant.ctor_kind() == Some(CtorKind::Const) => ErlRepr::Atom,
-            None => self.erl_adt_repr(adt.did()),
-        };
-        let repr_attribute = explicit_repr.map(|(_, span)| span);
+        self.erl_adt_reprs(adt_def_id)[index.index()]
+    }
 
-        let tag = self.erl_adt_tag(variant_def_id, kind);
+    fn erl_variant_repr_with_kind(
+        self,
+        adt: AdtDef<'tcx>,
+        variant_def_id: DefId,
+        repr_attribute: Option<(ReprAttr, Span)>,
+        kind: ErlReprKind,
+    ) -> ErlVariantRepr {
+        let tag = self.erl_variant_tag(variant_def_id, kind);
         let record_module = self
             .find_erl_record_module_attr(variant_def_id)
             .map(|(module, _)| module)
@@ -513,68 +510,173 @@ impl<'tcx> TyCtxt<'tcx> {
         ErlVariantRepr { kind, repr_attribute, tag, record_module }
     }
 
-    /// Returns the nearest explicitly selected representation, inheriting from an enum when needed.
-    fn explicit_erl_repr(self, def_id: DefId) -> Option<(ErlRepr, Span)> {
-        if let Some(repr) = self.find_primary_erl_repr_attr(def_id) {
-            return Some(repr);
+    /// Returns the nearest explicit representation attribute, inheriting from an enum when needed.
+    /// An absent attribute and an explicit `Patina` both select inference, but remain distinct here.
+    fn effective_erl_repr_kind_attr(self, def_id: DefId) -> Option<(ReprAttr, Span)> {
+        if let Some(attribute) = self.find_erl_repr_kind_attr(def_id) {
+            Some(attribute)
+        } else if self.def_kind(def_id) == DefKind::Variant {
+            self.find_erl_repr_kind_attr(self.parent(def_id))
+        } else {
+            None
         }
-
-        if self.def_kind(def_id) == DefKind::Variant
-            && let Some(repr) = self.find_primary_erl_repr_attr(self.parent(def_id))
-        {
-            return Some(repr);
-        }
-
-        None
     }
 
-    pub fn find_primary_erl_repr_attr(self, def_id: DefId) -> Option<(ErlRepr, Span)> {
+    fn find_erl_repr_kind_attr(self, def_id: DefId) -> Option<(ReprAttr, Span)> {
         let reprs = rustc_hir::find_attr!(self, def_id, Repr { reprs, .. } => reprs)?;
+        reprs.first().copied()
+    }
 
-        reprs.iter().find_map(|(repr, span)| match repr {
-            ReprAttr::Elixir => Some((ErlRepr::Elixir, *span)),
-            ReprAttr::Tagged => Some((ErlRepr::Tagged, *span)),
-            ReprAttr::Atom => Some((ErlRepr::Atom, *span)),
-            ReprAttr::Transparent => Some((ErlRepr::Transparent, *span)),
-            ReprAttr::NativeRecord => Some((ErlRepr::NativeRecord, *span)),
-            _ => None,
-        })
+    /// Resolves the whole enum: reserve fixed representations first, then assign `transparent`
+    /// to remaining variants in source order.
+    fn resolve_enum_variant_reprs(self, adt: AdtDef<'tcx>) -> SmallVec<[ErlVariantRepr; 4]> {
+        let args = ty::GenericArgs::identity_for_item(self, adt.did());
+
+        let mut decided =
+            SmallVec::<[Option<ErlVariantRepr>; 4]>::with_capacity(adt.variants().len());
+        let mut open_payload_variant_decided = false;
+        let mut reserved_shapes = SmallVec::<[ErlShape; 4]>::new();
+
+        // Decide explicit representations and non-newtypes. They take precedence over inferred
+        // newtypes regardless of declaration order.
+        for variant in adt.variants().iter() {
+            let repr_attribute = self.effective_erl_repr_kind_attr(variant.def_id);
+
+            let repr_attr = match erl_repr_attr(repr_attribute) {
+                Some(repr_attr) => repr_attr,
+                None if variant.fields.is_empty() => ReprAttr::Atom,
+                None if variant.fields.len() != 1 => ReprAttr::NativeRecord,
+                None => {
+                    decided.push(None);
+                    continue;
+                }
+            };
+
+            let (repr, reserved_shape) =
+                self.reserve_erl_variant_repr(adt, variant, repr_attribute, repr_attr);
+
+            if matches!(repr.kind, ErlReprKind::Transparent { open_payload: true }) {
+                open_payload_variant_decided = true;
+            }
+
+            decided.push(Some(repr));
+            reserved_shapes.push(reserved_shape);
+        }
+
+        // Decide every open newtype before closed newtypes can claim wrapper shapes. At most one
+        // can be transparent, and only when its wrapper does not overlap an already fixed shape.
+        for (index, variant) in adt.variants().iter_enumerated() {
+            if decided[index.index()].is_some() {
+                continue;
+            }
+
+            let [field] = variant.fields.iter().as_slice() else {
+                bug!("undecided variant with more than one field: {variant:?}")
+            };
+
+            if !matches!(self.erl_shape_of_ty(field.ty(self, args)), ErlShape::Any) {
+                continue;
+            }
+
+            let (repr, reserved_shape) =
+                if !open_payload_variant_decided && adt.variants().len() <= 4 {
+                    let transparent =
+                        self.reserve_erl_variant_repr(adt, variant, None, ReprAttr::Transparent);
+
+                    if reserved_shapes.iter().any(|shape| transparent.1.overlaps(shape)) {
+                        self.reserve_erl_variant_repr(adt, variant, None, ReprAttr::NativeRecord)
+                    } else {
+                        open_payload_variant_decided = true;
+                        transparent
+                    }
+                } else {
+                    self.reserve_erl_variant_repr(adt, variant, None, ReprAttr::NativeRecord)
+                };
+
+            decided[index.index()] = Some(repr);
+            reserved_shapes.push(reserved_shape);
+        }
+
+        // Only closed newtypes remain. Assign transparent when their payload shape is still free.
+        for (index, variant) in adt.variants().iter_enumerated() {
+            if decided[index.index()].is_some() {
+                continue;
+            }
+
+            let [field] = variant.fields.iter().as_slice() else {
+                bug!("undecided variants must have exactly one field")
+            };
+
+            let payload_shape = self.erl_shape_of_ty(field.ty(self, args));
+            if matches!(payload_shape, ErlShape::Any) {
+                bug!("open payload variant left undecided")
+            }
+            let overlaps = reserved_shapes.iter().any(|shape| payload_shape.overlaps(shape));
+            let repr_attr = if overlaps { ReprAttr::NativeRecord } else { ReprAttr::Transparent };
+            let (repr, reserved_shape) =
+                self.reserve_erl_variant_repr(adt, variant, None, repr_attr);
+            decided[index.index()] = Some(repr);
+            reserved_shapes.push(reserved_shape);
+        }
+
+        decided.into_iter().map(|repr| repr.unwrap_or_else(|| bug!("undecided variant"))).collect()
+    }
+
+    fn reserve_erl_variant_repr(
+        self,
+        adt: AdtDef<'tcx>,
+        variant: &VariantDef,
+        repr_attribute: Option<(ReprAttr, Span)>,
+        repr_attr: ReprAttr,
+    ) -> (ErlVariantRepr, ErlShape) {
+        let kind = match repr_attr {
+            ReprAttr::Elixir => ErlReprKind::Elixir,
+            ReprAttr::Tagged => ErlReprKind::Tagged,
+            ReprAttr::Atom => ErlReprKind::Atom,
+            ReprAttr::ReprInt => ErlReprKind::Int,
+            ReprAttr::NativeRecord => ErlReprKind::NativeRecord,
+            ReprAttr::Transparent => {
+                let open_payload = if let [field] = variant.fields.iter().as_slice() {
+                    let args = ty::GenericArgs::identity_for_item(self, adt.did());
+                    matches!(self.erl_shape_of_ty(field.ty(self, args)), ErlShape::Any)
+                } else {
+                    false
+                };
+                ErlReprKind::Transparent { open_payload }
+            }
+            ReprAttr::Patina => bug!("unmapped Patina repr attribute"),
+        };
+
+        let repr = self.erl_variant_repr_with_kind(adt, variant.def_id, repr_attribute, kind);
+        let reserved_shape = self.erl_variant_reserved_shape(adt, variant, repr);
+        (repr, reserved_shape)
     }
 
     pub fn find_erl_record_module_attr(self, def_id: DefId) -> Option<(Symbol, Span)> {
-        let reprs = rustc_hir::find_attr!(self, def_id, Repr { reprs, .. } => reprs)?;
+        let modifiers = rustc_hir::find_attr!(self, def_id, Repr { modifiers, .. } => modifiers)?;
 
-        reprs.iter().find_map(|(repr, span)| match repr {
-            ReprAttr::RecordModule(module) => Some((*module, *span)),
+        modifiers.iter().find_map(|(modifier, span)| match modifier {
+            ReprAttrModifier::RecordModule(module) => Some((*module, *span)),
             _ => None,
         })
     }
 
     pub fn find_erl_dynamic_wrap_attr(self, def_id: DefId) -> Option<Span> {
-        let reprs = rustc_hir::find_attr!(self, def_id, Repr { reprs, .. } => reprs)?;
+        let modifiers = rustc_hir::find_attr!(self, def_id, Repr { modifiers, .. } => modifiers)?;
 
-        reprs.iter().find_map(|(repr, span)| match repr {
-            ReprAttr::DynamicWrap => Some(*span),
-            _ => None,
-        })
-    }
-
-    pub fn find_erl_tag_attr(self, def_id: DefId) -> Option<(Symbol, Span)> {
-        let reprs = rustc_hir::find_attr!(self, def_id, Repr { reprs, .. } => reprs)?;
-
-        reprs.iter().find_map(|(repr, span)| match repr {
-            ReprAttr::Tag(tag) => Some((*tag, *span)),
+        modifiers.iter().find_map(|(modifier, span)| match modifier {
+            ReprAttrModifier::DynamicWrap => Some(*span),
             _ => None,
         })
     }
 
     /// Returns the atom used to tag a struct or enum variant.
-    pub fn erl_adt_tag(self, variant_def_id: DefId, repr: ErlRepr) -> Symbol {
+    pub fn erl_variant_tag(self, variant_def_id: DefId, repr: ErlReprKind) -> Symbol {
         assert!(matches!(self.def_kind(variant_def_id), DefKind::Struct | DefKind::Variant));
 
-        let own_tag = self.explicit_erl_tag(variant_def_id);
+        let own_tag = self.find_erl_tag_choice(variant_def_id);
         let inherited_tag = (self.def_kind(variant_def_id) == DefKind::Variant)
-            .then(|| self.explicit_erl_tag(self.parent(variant_def_id)))
+            .then(|| self.find_erl_tag_choice(self.parent(variant_def_id)))
             .flatten();
 
         match own_tag.or(inherited_tag) {
@@ -582,7 +684,7 @@ impl<'tcx> TyCtxt<'tcx> {
             Some(ErlTag::Style(ErlTagStyle::SnakeCase)) => {
                 Symbol::intern(&self.item_name(variant_def_id).as_str().to_case(Case::Snake))
             }
-            None if repr == ErlRepr::NativeRecord => self.item_name(variant_def_id),
+            None if repr == ErlReprKind::NativeRecord => self.item_name(variant_def_id),
             None => match self.def_kind(variant_def_id) {
                 DefKind::Struct => self.erl_module_name(ErlModuleId::Adt(variant_def_id)),
                 DefKind::Variant => {
@@ -595,21 +697,40 @@ impl<'tcx> TyCtxt<'tcx> {
         }
     }
 
-    fn explicit_erl_tag(self, def_id: DefId) -> Option<ErlTag> {
-        let reprs = rustc_hir::find_attr!(self, def_id, Repr { reprs, .. } => reprs)?;
+    fn find_erl_tag_choice(self, def_id: DefId) -> Option<ErlTag> {
+        let modifiers = rustc_hir::find_attr!(self, def_id, Repr { modifiers, .. } => modifiers)?;
 
-        if let Some(tag) = reprs.iter().find_map(|(repr, _)| match repr {
-            ReprAttr::Tag(tag) => Some(*tag),
+        if let Some(tag) = modifiers.iter().find_map(|(modifier, _)| match modifier {
+            ReprAttrModifier::Tag(tag) => Some(*tag),
             _ => None,
         }) {
             return Some(ErlTag::Explicit(tag));
         }
 
-        reprs.iter().find_map(|(repr, _)| match repr {
-            ReprAttr::TagStyle(style) => Some(ErlTag::Style(*style)),
+        modifiers.iter().find_map(|(modifier, _)| match modifier {
+            ReprAttrModifier::TagStyle(style) => Some(ErlTag::Style(*style)),
             _ => None,
         })
     }
+}
+
+/// Provider for [`TyCtxt::erl_adt_reprs`].
+fn erl_adt_reprs<'tcx>(tcx: TyCtxt<'tcx>, def_id: DefId) -> &'tcx [ErlVariantRepr] {
+    let adt = tcx.adt_def(def_id);
+
+    if adt.is_enum() {
+        let decided = tcx.resolve_enum_variant_reprs(adt);
+        return tcx.arena.alloc_from_iter(decided);
+    }
+
+    let variant = adt.non_enum_variant();
+    let repr_attribute = tcx.effective_erl_repr_kind_attr(variant.def_id);
+    let repr_attr =
+        erl_repr_attr(repr_attribute).unwrap_or_else(|| struct_repr_from_arity(variant));
+
+    let (repr, _reserved_shape) =
+        tcx.reserve_erl_variant_repr(adt, variant, repr_attribute, repr_attr);
+    tcx.arena.alloc_from_iter([repr])
 }
 
 /// Provider for [`TyCtxt::erl_fn_name`].
@@ -669,13 +790,28 @@ fn erl_module_name(tcx: TyCtxt<'_>, module: ErlModuleId) -> Symbol {
     }
 }
 
+fn erl_repr_attr(attribute: Option<(ReprAttr, Span)>) -> Option<ReprAttr> {
+    match attribute.map(|(attribute, _)| attribute) {
+        None | Some(ReprAttr::Patina) => None,
+        Some(attribute) => Some(attribute),
+    }
+}
+
+fn struct_repr_from_arity(variant: &VariantDef) -> ReprAttr {
+    match variant.fields.len() {
+        0 => ReprAttr::Atom,
+        1 => ReprAttr::Transparent,
+        _ => ReprAttr::NativeRecord,
+    }
+}
+
 pub fn provide(providers: &mut Providers) {
     *providers = Providers {
+        erl_adt_reprs,
         erl_fn_name,
         erl_module_name,
         erl_shape_of_ty: shape::erl_shape_of_ty,
-        erl_variant_has_open_shape: shape::erl_variant_has_open_shape,
-        erl_open_transparent_guards: shape::erl_open_transparent_guards,
+        erl_variant_wrap_guards: shape::erl_variant_wrap_guards,
         ..*providers
     };
 }

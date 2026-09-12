@@ -2,11 +2,8 @@
  {attribute,{5,1},module,'Elixir.Patina.Guard01.Temperature'},
  {attribute,{5,1},compile,[no_auto_import]},
  {attribute,{5,1},import,{erlang,[{is_record,3}]}},
- {attribute,{5,1},export_record,['Celsius','Fahrenheit']},
+ {attribute,{5,1},export_record,['Fahrenheit']},
  {attribute,{5,1},export,[]},
- {attribute,{5,1},
-            native_record,
-            {'Celsius',[{record_field,{6,13},{atom,{6,13},'0'}}]}},
  {attribute,{5,1},
             native_record,
             {'Fahrenheit',[{record_field,{7,16},{atom,{7,16},'0'}}]}}]

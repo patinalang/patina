@@ -38,9 +38,7 @@
 type() -> 2.
 
 main() ->
-    _s@0_0 =
-        ('Elixir.Patina.BacktickIdent.S':'__struct__'())#{value
-                                                              := 1},
+    _s@0_0 = 1,
     _ = type(),
     _value?@1_0 = true,
     _type@2_0 = 2,

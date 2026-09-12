@@ -42,9 +42,10 @@ macro_rules! println {
 // source: patina-by-example/src/custom_types/repr.md
 // block: 6/14
 
-#[attr = Repr {reprs: [Tagged, TagStyle(SnakeCase)]}]
+#[attr = Repr {reprs: [Tagged], modifiers: [TagStyle(SnakeCase)]}]
 enum SnakeCaseEnum {
-    #[attr = Repr {reprs: [Atom]}]
+    #[attr = Repr {reprs: [Atom],
+    modifiers: []}]
     UnitVariant,
     StructHTTPStyle {
             code: int,

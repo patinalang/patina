@@ -30,12 +30,7 @@ call(_T@0_0, _h@1_0) ->
                                                                    _h@1_0).
 
 main() ->
-    _h@0_0 =
-        ('Elixir.Patina.BoundGeneric.Holder':'__struct__'())#{value
-                                                                  :=
-                                                                  ('Elixir.Patina.BoundGeneric.Number':'__struct__'())#{n
-                                                                                                                            :=
-                                                                                                                            5}},
+    _h@0_0 = 5,
     begin
         io:put_chars([[io_lib:format("~ktp",
                                      [call({'Elixir.Patina.BoundGeneric.Number',

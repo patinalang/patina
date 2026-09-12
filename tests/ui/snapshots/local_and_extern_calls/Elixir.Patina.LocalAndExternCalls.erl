@@ -39,8 +39,7 @@ main() ->
     _s@0_0 =
         'Elixir.Patina.LocalAndExternCalls.StructWithNew':new(42),
     begin
-        io:put_chars([[io_lib:format("~ktp",
-                                     [erlang:map_get(value, _s@0_0)])]]),
+        io:put_chars([[io_lib:format("~ktp", [_s@0_0])]]),
         io:nl(),
         {}
     end.

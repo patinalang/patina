@@ -36,13 +36,13 @@ pub(crate) struct TransparentReprRequiresNewtype {
 }
 
 #[derive(Diagnostic)]
-#[diag("transparent enum variants have overlapping runtime shapes")]
-#[note("explicitly transparent variants must be uniquely distinguishable at runtime")]
-pub(crate) struct TransparentVariantShapesOverlap {
+#[diag("enum variants have overlapping runtime shapes")]
+#[note("enum variants must be uniquely distinguishable at runtime")]
+pub(crate) struct VariantShapesOverlap {
     #[primary_span]
-    #[label("this transparent variant overlaps another variant")]
+    #[label("this variant's runtime shape overlaps another variant")]
     pub span: Span,
-    #[label("overlapping transparent variant")]
+    #[label("variant with an overlapping runtime shape")]
     pub other_span: Span,
 }
 

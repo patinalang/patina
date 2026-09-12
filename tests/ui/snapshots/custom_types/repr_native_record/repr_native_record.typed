@@ -39,25 +39,26 @@ macro_rules! println {
     {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
 }
 
-#[attr = Repr {reprs: [NativeRecord]}]
+#[attr = Repr {reprs: [NativeRecord], modifiers: []}]
 enum WholeEnum { Unit, }
 
 enum MixedEnum {
     AtomUnit,
-    #[attr = Repr {reprs: [NativeRecord]}]
+    #[attr = Repr {reprs: [NativeRecord],
+    modifiers: []}]
     RecordUnit,
 }
 
-#[attr = Repr {reprs: [Elixir]}]
+#[attr = Repr {reprs: [Elixir], modifiers: []}]
 struct ElixirUnit;
 
-#[attr = Repr {reprs: [NativeRecord]}]
+#[attr = Repr {reprs: [NativeRecord], modifiers: []}]
 struct NativeRecordStruct {
     x: int,
     y: int,
 }
 
-#[attr = Repr {reprs: [NativeRecord]}]
+#[attr = Repr {reprs: [NativeRecord], modifiers: []}]
 struct NativeRecordPair(int, int);
 
 impl NativeRecordStruct {

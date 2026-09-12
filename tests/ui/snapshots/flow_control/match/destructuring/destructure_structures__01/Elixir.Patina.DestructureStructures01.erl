@@ -27,16 +27,14 @@
 
 main() ->
     _foo@0_0 =
-        ('Elixir.Patina.DestructureStructures01.main.Foo':'__struct__'())#{x
-                                                                               :=
-                                                                               {1,
-                                                                                2},
-                                                                           y :=
-                                                                               3},
+        #'Elixir.Patina.DestructureStructures01.main.Foo':'Foo'{x
+                                                                    = {1, 2},
+                                                                y = 3},
     case _foo@0_0 of
-        #{'__struct__' :=
-              'Elixir.Patina.DestructureStructures01.main.Foo',
-          x := {1, _b@1_0}, y := _y@2_0} ->
+        #'Elixir.Patina.DestructureStructures01.main.Foo':'Foo'{x
+                                                                    =
+                                                                    {1, _b@1_0},
+                                                                y = _y@2_0} ->
             io:put_chars([[<<"First of x is 1, b = ">>,
                            io_lib:format("~ktp", [_b@1_0]),
                            <<",  y = ">>,
@@ -44,16 +42,16 @@ main() ->
                            <<" ">>]]),
             io:nl(),
             {};
-        #{'__struct__' :=
-              'Elixir.Patina.DestructureStructures01.main.Foo',
-          y := 2, x := _i@3_0} ->
+        #'Elixir.Patina.DestructureStructures01.main.Foo':'Foo'{x
+                                                                    = _i@3_0,
+                                                                y = 2} ->
             io:put_chars([[<<"y is 2, i = ">>,
                            io_lib:format("~ktp", [_i@3_0])]]),
             io:nl(),
             {};
-        #{'__struct__' :=
-              'Elixir.Patina.DestructureStructures01.main.Foo',
-          y := _y@4_0} ->
+        #'Elixir.Patina.DestructureStructures01.main.Foo':'Foo'{x
+                                                                    = _,
+                                                                y = _y@4_0} ->
             io:put_chars([[<<"y = ">>,
                            io_lib:format("~ktp", [_y@4_0]),
                            <<", we don't care about x">>]]),
@@ -61,15 +59,12 @@ main() ->
             {}
     end,
     _faa@5_0 =
-        ('Elixir.Patina.DestructureStructures01.main.Foo':'__struct__'())#{x
-                                                                               :=
-                                                                               {1,
-                                                                                2},
-                                                                           y :=
-                                                                               3},
-    #{'__struct__' :=
-          'Elixir.Patina.DestructureStructures01.main.Foo',
-      x := _x0@6_0, y := _y0@7_0} =
+        #'Elixir.Patina.DestructureStructures01.main.Foo':'Foo'{x
+                                                                    = {1, 2},
+                                                                y = 3},
+    #'Elixir.Patina.DestructureStructures01.main.Foo':'Foo'{x
+                                                                = _x0@6_0,
+                                                            y = _y0@7_0} =
         _faa@5_0,
     begin
         io:put_chars([[<<"Outside: x0 = ">>,
@@ -79,16 +74,11 @@ main() ->
         io:nl(),
         {}
     end,
-    _bar@8_0 =
-        ('Elixir.Patina.DestructureStructures01.main.Bar':'__struct__'())#{foo
-                                                                               :=
-                                                                               _faa@5_0},
-    #{'__struct__' :=
-          'Elixir.Patina.DestructureStructures01.main.Bar',
-      foo :=
-          #{'__struct__' :=
-                'Elixir.Patina.DestructureStructures01.main.Foo',
-            x := _nested_x@9_0, y := _nested_y@10_0}} =
+    _bar@8_0 = _faa@5_0,
+    #'Elixir.Patina.DestructureStructures01.main.Foo':'Foo'{x
+                                                                = _nested_x@9_0,
+                                                            y =
+                                                                _nested_y@10_0} =
         _bar@8_0,
     begin
         io:put_chars([[<<"Nested: nested_x = ">>,

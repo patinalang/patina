@@ -4,10 +4,19 @@ defmodule Structs01Test do
   use ExUnit.Case
   import ExUnit.CaptureIO
 
+  alias Patina.Structs01.Person
+  alias Patina.Structs01.Point
+  alias Patina.Structs01.Pair
+  alias Patina.Structs01.Rectangle
+
+  setup_all do
+    Code.ensure_all_loaded!([Person, Point, Pair, Rectangle])
+    :ok
+  end
+
   test "main debug-prints Person struct" do
     assert capture_io(fn -> Patina.Structs01.main() end) =~ ~S"""
-           #{'__struct__' => 'Elixir.Patina.Structs01.Person',age => 27,
-             name => <<"Peter">>}
+           #'Elixir.Patina.Structs01.Person':'Person'{name = <<"Peter">>,age = 27}
            """
   end
 
@@ -20,14 +29,11 @@ defmodule Structs01Test do
            """
   end
 
-  test "compiled structs are valid Elixir structs" do
-    %Patina.Structs01.Person{name: "Peter", age: 27}
-    %Patina.Structs01.Point{x: 5.2, y: 0.4}
-    %Patina.Structs01.Pair{"0": 1, "1": 0.1}
-
-    %Patina.Structs01.Rectangle{
-      top_left: %Patina.Structs01.Point{x: 5.2, y: 0.4},
-      bottom_right: %Patina.Structs01.Point{x: 10.3, y: 0.2}
-    }
+  test "multi-field structs export native record definitions" do
+    assert {%{is_exported: true}, [:name, :age]} = :records.get_definition(Person, :Person)
+    assert {%{is_exported: true}, [:x, :y]} = :records.get_definition(Point, :Point)
+    assert {%{is_exported: true}, [:"0", :"1"]} = :records.get_definition(Pair, :Pair)
+    assert {%{is_exported: true}, [:top_left, :bottom_right]} =
+             :records.get_definition(Rectangle, :Rectangle)
   end
 end

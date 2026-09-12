@@ -1,0 +1,11 @@
+[{attribute,{82,1},
+            file,
+            {"tests/ui/src/custom_types/repr_patina_default.pt",82}},
+ {attribute,{82,1},module,'Elixir.Patina.ReprPatinaDefault.Override'},
+ {attribute,{82,1},compile,[no_auto_import]},
+ {attribute,{82,1},import,{erlang,[{is_record,3}]}},
+ {attribute,{82,1},export_record,['Record']},
+ {attribute,{82,1},export,[]},
+ {attribute,{82,1},
+            native_record,
+            {'Record',[{record_field,{85,12},{atom,{85,12},'0'}}]}}]

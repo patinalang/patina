@@ -39,59 +39,63 @@ macro_rules! println {
     {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
 }
 
-#[attr = Repr {reprs: [Transparent]}]
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
 struct Celsius(float);
 
-#[attr = Repr {reprs: [Elixir]}]
+#[attr = Repr {reprs: [Elixir], modifiers: []}]
 struct Point {
     x: int,
     y: int,
 }
 
-#[attr = Repr {reprs: [NativeRecord]}]
+#[attr = Repr {reprs: [NativeRecord], modifiers: []}]
 struct NativeValue {
     value: int,
 }
 
-#[attr = Repr {reprs: [Transparent]}]
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
 enum Value { Integer(int), Point(Point), }
 
-#[attr = Repr {reprs: [Transparent]}]
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
 enum OpenValue<T> {
-    #[attr = Repr {reprs: [DynamicWrap,
+    #[attr = Repr {reprs: [],
+    modifiers: [DynamicWrap,
     Tag("dynamic")]}]
     Dynamic(T),
     Text(str),
     Record(NativeValue),
-    #[attr = Repr {reprs: [Tagged,
-    Tag("tagged")]}]
+    #[attr = Repr {reprs: [Tagged],
+    modifiers: [Tag("tagged")]}]
     Tagged(int),
 }
 
-#[attr = Repr {reprs: [Transparent]}]
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
 enum Inner<T> {
-    #[attr = Repr {reprs: [DynamicWrap,
+    #[attr = Repr {reprs: [],
+    modifiers: [DynamicWrap,
     Tag("inner")]}]
     Inner(T),
 }
 
-#[attr = Repr {reprs: [Transparent]}]
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
 enum NestedOpen<T> {
-    #[attr = Repr {reprs: [DynamicWrap,
+    #[attr = Repr {reprs: [],
+    modifiers: [DynamicWrap,
     Tag("nested")]}]
     Nested(Inner<T>),
     Text(str),
 }
 
-#[attr = Repr {reprs: [Transparent]}]
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
 enum NestedConcrete { Nested(Inner<int>), Text(str), }
 
-#[attr = Repr {reprs: [Transparent]}]
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
 enum Solo { Only(int), }
 
-#[attr = Repr {reprs: [Transparent]}]
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
 enum TermOpen {
-    #[attr = Repr {reprs: [DynamicWrap]}]
+    #[attr = Repr {reprs: [],
+    modifiers: [DynamicWrap]}]
     Any(term),
     Text(str),
 }

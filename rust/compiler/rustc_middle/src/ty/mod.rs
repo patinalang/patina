@@ -1506,11 +1506,7 @@ impl<'tcx> TyCtxt<'tcx> {
                     | attr::Elixir
                     | attr::Tagged
                     | attr::Atom
-                    | attr::DynamicWrap
-                    | attr::NativeRecord
-                    | attr::Tag(_)
-                    | attr::TagStyle(_)
-                    | attr::RecordModule(_) => ReprFlags::empty(),
+                    | attr::NativeRecord => ReprFlags::empty(),
                 });
             }
         }

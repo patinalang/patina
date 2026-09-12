@@ -24,21 +24,9 @@
 '__info__'(Key) -> module_info(Key).
 
 main() ->
-    __s@0_0 =
-        ('Elixir.Patina.Generics02.Single':'__struct__'())#{'0'
-                                                                :=
-                                                                'Elixir.Patina.Generics02.A'},
-    __char@1_0 =
-        ('Elixir.Patina.Generics02.SingleGen':'__struct__'())#{'0'
-                                                                   := $a},
-    __t@2_0 =
-        ('Elixir.Patina.Generics02.SingleGen':'__struct__'())#{'0'
-                                                                   :=
-                                                                   'Elixir.Patina.Generics02.A'},
-    __int@3_0 =
-        ('Elixir.Patina.Generics02.SingleGen':'__struct__'())#{'0'
-                                                                   := 6},
-    __char@4_0 =
-        ('Elixir.Patina.Generics02.SingleGen':'__struct__'())#{'0'
-                                                                   := $a},
+    __s@0_0 = 'Elixir.Patina.Generics02.A',
+    __char@1_0 = $a,
+    __t@2_0 = 'Elixir.Patina.Generics02.A',
+    __int@3_0 = 6,
+    __char@4_0 = $a,
     {}.

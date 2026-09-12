@@ -37,11 +37,9 @@ main() ->
     _number_1@0_0 = 3,
     _number_2@1_0 = 10,
     _container@2_0 =
-        ('Elixir.Patina.Types03.Container':'__struct__'())#{'0'
-                                                                :=
-                                                                _number_1@0_0,
-                                                            '1' :=
-                                                                _number_2@1_0},
+        #'Elixir.Patina.Types03.Container':'Container'{'0' =
+                                                           _number_1@0_0,
+                                                       '1' = _number_2@1_0},
     begin
         io:put_chars([[<<"Does container contain ">>,
                        io_lib:format("~ktp", [_number_1@0_0]),

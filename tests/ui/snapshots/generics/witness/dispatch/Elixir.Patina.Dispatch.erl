@@ -28,9 +28,8 @@ total_area(_T@0_0, _t@1_0) ->
                     _T@0_0)):'Dispatch::Area::area'(_T@0_0, _t@1_0).
 
 main() ->
-    _p@0_0 =
-        ('Elixir.Patina.Dispatch.Point':'__struct__'())#{x := 3,
-                                                         y := 4},
+    _p@0_0 = #'Elixir.Patina.Dispatch.Point':'Point'{x = 3,
+                                                     y = 4},
     begin
         io:put_chars([[io_lib:format("~ktp",
                                      [total_area({'Elixir.Patina.Dispatch.Point',

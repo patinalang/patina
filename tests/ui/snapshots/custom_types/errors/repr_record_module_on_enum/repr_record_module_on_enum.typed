@@ -39,16 +39,18 @@ macro_rules! println {
     {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
 }
 
-#[attr = Repr {reprs: [NativeRecord, RecordModule("external_records")]}]
+#[attr = Repr {reprs: [NativeRecord],
+modifiers: [RecordModule("external_records")]}]
 enum EnumLevel { Value(int), }
 
 enum InvalidVariant {
-    #[attr = Repr {reprs: [Tagged,
-    RecordModule("external_records")]}]
+    #[attr = Repr {reprs: [Tagged],
+    modifiers: [RecordModule("external_records")]}]
     Value(int),
 }
 
-#[attr = Repr {reprs: [Elixir, RecordModule("external_records")]}]
+#[attr = Repr {reprs: [Elixir],
+modifiers: [RecordModule("external_records")]}]
 struct NotNativeRecord {
     value: int,
 }

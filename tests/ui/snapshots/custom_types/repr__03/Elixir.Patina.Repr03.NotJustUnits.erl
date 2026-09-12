@@ -6,8 +6,6 @@
 
 -import(erlang, [is_record/3]).
 
--export_record([variant_c]).
+-export_record([]).
 
 -export([]).
-
--record #variant_c{'0'}.

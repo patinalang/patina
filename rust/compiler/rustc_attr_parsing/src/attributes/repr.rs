@@ -1,4 +1,4 @@
-use rustc_hir::attrs::{ErlTagStyle, ReprAttr};
+use rustc_hir::attrs::{ErlTagStyle, ReprAttr, ReprAttrModifier};
 
 use super::prelude::*;
 use crate::session_diagnostics;
@@ -10,11 +10,25 @@ use crate::session_diagnostics;
 // FIXME(jdonszelmann): is a vec the right representation here even? isn't it just a struct?
 pub(crate) struct ReprParser;
 
+pub(crate) enum ReprItem {
+    Repr(ReprAttr),
+    Modifier(ReprAttrModifier),
+}
+
 impl CombineAttributeParser for ReprParser {
-    type Item = (ReprAttr, Span);
+    type Item = (ReprItem, Span);
     const PATH: &[Symbol] = &[sym::repr];
-    const CONVERT: ConvertFn<Self::Item> =
-        |items, first_span| AttributeKind::Repr { reprs: items, first_span };
+    const CONVERT: ConvertFn<Self::Item> = |items, first_span| {
+        let mut reprs = ThinVec::new();
+        let mut modifiers = ThinVec::new();
+        for (item, span) in items {
+            match item {
+                ReprItem::Repr(repr) => reprs.push((repr, span)),
+                ReprItem::Modifier(modifier) => modifiers.push((modifier, span)),
+            }
+        }
+        AttributeKind::Repr { reprs, modifiers, first_span }
+    };
     // FIXME(jdonszelmann): never used
     const TEMPLATE: AttributeTemplate = template!(List: &[
         "Patina",
@@ -53,7 +67,10 @@ impl CombineAttributeParser for ReprParser {
             }
 
             reprs.extend(
-                param.meta_item().and_then(|mi| parse_repr(cx, &mi)).map(|r| (r, param.span())),
+                param
+                    .meta_item()
+                    .and_then(|mi| parse_repr(cx, &mi))
+                    .map(|repr| (repr, param.span())),
             );
         }
 
@@ -65,26 +82,27 @@ impl CombineAttributeParser for ReprParser {
     const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(ALL_TARGETS);
 }
 
-fn parse_repr(cx: &mut AcceptContext<'_, '_>, param: &MetaItemParser) -> Option<ReprAttr> {
+fn parse_repr(cx: &mut AcceptContext<'_, '_>, param: &MetaItemParser) -> Option<ReprItem> {
     use ReprAttr::*;
+    use ReprAttrModifier::*;
 
     let name = param.path().word().map(|ident| ident.name);
 
     let args = param.args();
 
     match (name, args) {
-        (Some(sym::Patina), ArgParser::NoArgs) => Some(Patina),
-        (Some(sym::Elixir), ArgParser::NoArgs) => Some(Elixir),
-        (Some(sym::tagged), ArgParser::NoArgs) => Some(Tagged),
-        (Some(sym::atom), ArgParser::NoArgs) => Some(Atom),
-        (Some(sym::transparent), ArgParser::NoArgs) => Some(Transparent),
-        (Some(sym::dynamic_wrap), ArgParser::NoArgs) => Some(DynamicWrap),
-        (Some(sym::native_record), ArgParser::NoArgs) => Some(NativeRecord),
+        (Some(sym::Patina), ArgParser::NoArgs) => Some(ReprItem::Repr(Patina)),
+        (Some(sym::Elixir), ArgParser::NoArgs) => Some(ReprItem::Repr(Elixir)),
+        (Some(sym::tagged), ArgParser::NoArgs) => Some(ReprItem::Repr(Tagged)),
+        (Some(sym::atom), ArgParser::NoArgs) => Some(ReprItem::Repr(Atom)),
+        (Some(sym::transparent), ArgParser::NoArgs) => Some(ReprItem::Repr(Transparent)),
+        (Some(sym::dynamic_wrap), ArgParser::NoArgs) => Some(ReprItem::Modifier(DynamicWrap)),
+        (Some(sym::native_record), ArgParser::NoArgs) => Some(ReprItem::Repr(NativeRecord)),
         (Some(sym::tag), ArgParser::NameValue(value)) => {
-            repr_string_value(cx, value).map(|value| Tag(value))
+            repr_string_value(cx, value).map(|value| ReprItem::Modifier(Tag(value)))
         }
         (Some(sym::tag_style), ArgParser::NameValue(value)) => match repr_string_value(cx, value) {
-            Some(sym::snake_case) => Some(TagStyle(ErlTagStyle::SnakeCase)),
+            Some(sym::snake_case) => Some(ReprItem::Modifier(TagStyle(ErlTagStyle::SnakeCase))),
             Some(_) => {
                 cx.emit_err(session_diagnostics::UnrecognizedReprHint { span: param.span() });
                 None
@@ -92,9 +110,9 @@ fn parse_repr(cx: &mut AcceptContext<'_, '_>, param: &MetaItemParser) -> Option<
             None => None,
         },
         (Some(sym::record_module), ArgParser::NameValue(value)) => {
-            repr_string_value(cx, value).map(|value| RecordModule(value))
+            repr_string_value(cx, value).map(|value| ReprItem::Modifier(RecordModule(value)))
         }
-        (Some(sym::int), ArgParser::NoArgs) => Some(ReprInt),
+        (Some(sym::int), ArgParser::NoArgs) => Some(ReprItem::Repr(ReprInt)),
 
         (
             Some(

@@ -19,7 +19,7 @@ use rustc_feature::BUILTIN_ATTRIBUTE_MAP;
 use rustc_hir::attrs::diagnostic::Directive;
 use rustc_hir::attrs::{
     AttributeKind, DocAttribute, DocInline, EiiDecl, EiiImpl, EiiImplResolution, InlineAttr,
-    ReprAttr, SanitizerSet,
+    ReprAttr, ReprAttrModifier, SanitizerSet,
 };
 use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::LocalModDefId;
@@ -1204,9 +1204,12 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         // #[repr(foo)]
         // #[repr(bar, align(8))]
         // ```
-        let (reprs, first_attr_span) =
-            find_attr!(attrs, Repr { reprs, first_span } => (reprs.as_slice(), Some(*first_span)))
-                .unwrap_or((&[], None));
+        let (reprs, modifiers, first_attr_span) = find_attr!(
+            attrs,
+            Repr { reprs, modifiers, first_span } =>
+                (reprs.as_slice(), modifiers.as_slice(), Some(*first_span))
+        )
+        .unwrap_or((&[], &[], None));
 
         for (repr, repr_span) in reprs {
             match repr {
@@ -1229,31 +1232,11 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                         });
                     }
                 },
-                ReprAttr::RecordModule(..) => match target {
-                    Target::Struct | Target::Variant => continue,
-                    _ => {
-                        self.dcx().emit_err(errors::RecordModuleRequiresNativeRecord {
-                            span: *repr_span,
-                            item_span: span,
-                        });
-                    }
-                },
-                ReprAttr::DynamicWrap => match target {
-                    Target::Variant => continue,
-                    _ => {
-                        self.dcx().emit_err(errors::AttrApplication::Variant {
-                            hint_span: *repr_span,
-                            span,
-                        });
-                    }
-                },
                 ReprAttr::Patina
                 | ReprAttr::Tagged
                 | ReprAttr::Atom
                 | ReprAttr::Transparent
-                | ReprAttr::NativeRecord
-                | ReprAttr::Tag(..)
-                | ReprAttr::TagStyle(..) => match target {
+                | ReprAttr::NativeRecord => match target {
                     Target::Struct | Target::Enum | Target::Variant => continue,
                     _ => {
                         self.dcx().emit_err(errors::AttrApplication::StructEnumVariant {
@@ -1265,9 +1248,42 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             };
         }
 
+        for (modifier, modifier_span) in modifiers {
+            match modifier {
+                ReprAttrModifier::RecordModule(..) => match target {
+                    Target::Struct | Target::Variant => continue,
+                    _ => {
+                        self.dcx().emit_err(errors::RecordModuleRequiresNativeRecord {
+                            span: *modifier_span,
+                            item_span: span,
+                        });
+                    }
+                },
+                ReprAttrModifier::DynamicWrap => match target {
+                    Target::Variant => continue,
+                    _ => {
+                        self.dcx().emit_err(errors::AttrApplication::Variant {
+                            hint_span: *modifier_span,
+                            span,
+                        });
+                    }
+                },
+                ReprAttrModifier::Tag(..) | ReprAttrModifier::TagStyle(..) => match target {
+                    Target::Struct | Target::Enum | Target::Variant => continue,
+                    _ => {
+                        self.dcx().emit_err(errors::AttrApplication::StructEnumVariant {
+                            hint_span: *modifier_span,
+                            span,
+                        });
+                    }
+                },
+            };
+        }
+
         // catch `repr()` with no arguments, applied to an item (i.e. not `#![repr()]`)
         if let Some(first_attr_span) = first_attr_span
             && reprs.is_empty()
+            && modifiers.is_empty()
             && item.is_some()
         {
             match target {
@@ -1290,29 +1306,15 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
 
         // Just point at all repr hints if there are any incompatibilities.
         // This is not ideal, but tracking precisely which ones are at fault is a huge hassle.
-        let hint_spans = reprs.iter().map(|(_, span)| *span);
+        let hint_spans =
+            reprs.iter().map(|(_, span)| *span).chain(modifiers.iter().map(|(_, span)| *span));
 
         // Representation hints that each determine the runtime representation
         let mut primaries: SmallVec<[(ReprAttr, Span); 1]> = SmallVec::new();
-        let mut primary_hints = 0;
+        let primary_hints = reprs.len();
         for (repr, repr_span) in reprs {
-            match repr {
-                ReprAttr::Patina
-                | ReprAttr::Elixir
-                | ReprAttr::Tagged
-                | ReprAttr::Atom
-                | ReprAttr::Transparent
-                | ReprAttr::NativeRecord
-                | ReprAttr::ReprInt => {
-                    primary_hints += 1;
-                    if !primaries.iter().any(|(primary, _)| primary == repr) {
-                        primaries.push((*repr, *repr_span));
-                    }
-                }
-                ReprAttr::DynamicWrap
-                | ReprAttr::Tag(..)
-                | ReprAttr::TagStyle(..)
-                | ReprAttr::RecordModule(..) => {}
+            if !primaries.iter().any(|(primary, _)| primary == repr) {
+                primaries.push((*repr, *repr_span));
             }
         }
 

@@ -26,7 +26,7 @@
 main() ->
     _a@0_0 = 'Elixir.Patina.IfLet03.Foo.Bar',
     _b@1_0 = 'Elixir.Patina.IfLet03.Foo.Baz',
-    _c@2_0 = #'Elixir.Patina.IfLet03.Foo':'Qux'{'0' = 100},
+    _c@2_0 = 100,
     case _a@0_0 of
         'Elixir.Patina.IfLet03.Foo.Bar' ->
             begin
@@ -42,7 +42,8 @@ main() ->
         _ -> {}
     end,
     case _c@2_0 of
-        #'Elixir.Patina.IfLet03.Foo':'Qux'{'0' = _value@3_0} ->
+        _value@4_0 = _value@3_0
+            when erlang:is_integer(_value@4_0) ->
             begin
                 io:put_chars([[<<"c is ">>,
                                io_lib:format("~ktp", [_value@3_0])]]),
@@ -52,8 +53,8 @@ main() ->
         _ -> {}
     end,
     case _c@2_0 of
-        #'Elixir.Patina.IfLet03.Foo':'Qux'{'0' =
-                                               _value@4_0 = 100} ->
+        _value@6_0 = _value@5_0 = 100
+            when erlang:is_integer(_value@6_0) ->
             begin
                 io:put_chars([[<<"c is one hundred">>]]), io:nl(), {}
             end;

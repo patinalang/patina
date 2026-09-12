@@ -7,8 +7,8 @@ defmodule ModuleAttrTest do
     Code.ensure_all_loaded!([ModuleAttr.Person, :module_attr_web_event, :module_attr_helpers])
   end
 
-  test "module overrides apply to structs" do
-    assert %ModuleAttr.Person{}
+  test "module overrides apply to transparent struct modules" do
+    assert ModuleAttr.Person.__info__(:struct) == nil
   end
 
   test "module overrides apply to enums" do

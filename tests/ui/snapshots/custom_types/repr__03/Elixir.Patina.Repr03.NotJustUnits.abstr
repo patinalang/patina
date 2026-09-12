@@ -2,8 +2,5 @@
  {attribute,{11,1},module,'Elixir.Patina.Repr03.NotJustUnits'},
  {attribute,{11,1},compile,[no_auto_import]},
  {attribute,{11,1},import,{erlang,[{is_record,3}]}},
- {attribute,{11,1},export_record,[variant_c]},
- {attribute,{11,1},export,[]},
- {attribute,{11,1},
-            native_record,
-            {variant_c,[{record_field,{15,14},{atom,{15,14},'0'}}]}}]
+ {attribute,{11,1},export_record,[]},
+ {attribute,{11,1},export,[]}]

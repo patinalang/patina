@@ -50,9 +50,7 @@ main() ->
                                                                                                                                         {}},
                                                                                                                                        'Elixir.Patina.TraitArgumentPatterns.BoundContainer',
                                                                                                                                        1,
-                                                                                                                                       ('Elixir.Patina.TraitArgumentPatterns.Marked':'__struct__'())#{value
-                                                                                                                                                                                                          :=
-                                                                                                                                                                                                          2})])]]),
+                                                                                                                                       2)])]]),
         io:nl(),
         {}
     end,
@@ -67,9 +65,7 @@ main() ->
                                                                                                                                            {}}}},
                                                                                                                                         'Elixir.Patina.TraitArgumentPatterns.NestedContainer',
                                                                                                                                         1,
-                                                                                                                                        ('Elixir.Patina.TraitArgumentPatterns.Wrapped':'__struct__'())#{value
-                                                                                                                                                                                                            :=
-                                                                                                                                                                                                            false})])]]),
+                                                                                                                                        false)])]]),
         io:nl(),
         {}
     end.

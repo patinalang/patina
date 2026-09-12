@@ -45,6 +45,7 @@ struct Unit;
 #[repr(transparent)]
 struct Pair(int, int);
 
+#[repr(Patina)]
 enum InvalidVariants {
 
     #[repr(transparent)]
@@ -52,6 +53,7 @@ enum InvalidVariants {
 
     #[repr(transparent)]
     Pair(int, int),
+    Value(int),
 }
 
 #[repr(transparent)]
@@ -67,6 +69,33 @@ enum OverlappingAtomShapes {
 
     #[repr(transparent)]
     Boolean(bool),
+}
+
+enum DuplicateTaggedShape {
+
+    #[repr(tagged, tag = "same")]
+    First(int),
+
+    #[repr(tagged, tag = "same")]
+    Second(str),
+}
+
+enum OpenWrapperOverlap<T> {
+
+    #[repr(tagged, tag = "same")]
+    Tagged(int),
+
+    #[repr(transparent, dynamic_wrap, tag = "same")]
+    Open(T),
+}
+
+enum DuplicateOpenWrapperShape<T, U> {
+
+    #[repr(transparent, dynamic_wrap, tag = "same")]
+    First(T),
+
+    #[repr(transparent, dynamic_wrap, tag = "same")]
+    Second(U),
 }
 
 #[repr(transparent)]

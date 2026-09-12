@@ -25,10 +25,7 @@
 
 main() ->
     begin
-        io:put_chars([[io_lib:format("~ktp",
-                                     [('Elixir.Patina.Repr07.Celsius':'__struct__'())#{'0'
-                                                                                           :=
-                                                                                           2.345}])]]),
+        io:put_chars([[io_lib:format("~ktp", [2.345])]]),
         io:nl(),
         {}
     end.

@@ -7,10 +7,8 @@
 
 -import(erlang, [is_record/3]).
 
--export_record(['Celsius', 'Fahrenheit']).
+-export_record(['Fahrenheit']).
 
 -export([]).
-
--record #'Celsius'{'0'}.
 
 -record #'Fahrenheit'{'0'}.

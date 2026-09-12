@@ -14,7 +14,7 @@ use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LocalDefId, LocalModDefId};
 use rustc_hir::{BodyId, Defaultness, FnSig, Generics, ImplItemKind, ItemKind, Mod, VariantData};
-use rustc_middle::erl::{ErlModuleId, ErlModuleResolution, ErlRepr, ErlVariantRepr};
+use rustc_middle::erl::{ErlModuleId, ErlModuleResolution, ErlReprKind, ErlVariantRepr};
 use rustc_middle::ty::{self, Ty, TyCtxt};
 use rustc_middle::{bug, span_bug};
 use rustc_span::{Ident, Span, Symbol, kw, sym};
@@ -521,7 +521,8 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             not_implemented!(self.tcx, span, "`record_module` attribute", repr.kind)
         }
         let parts = self.collect_struct_fns(item.span, mod_name, def_id, variant_data, repr);
-        let record_exports = (repr.kind == ErlRepr::NativeRecord).then_some(repr.tag).into_iter();
+        let record_exports =
+            (repr.kind == ErlReprKind::NativeRecord).then_some(repr.tag).into_iter();
         self.assemble_module(item.span, mod_name, record_exports, parts)
     }
 
@@ -541,10 +542,15 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             let repr = self.tcx.erl_variant_repr(variant.def_id.to_def_id());
             match repr.kind {
                 // fall through to the loop impl
-                ErlRepr::NativeRecord => (),
+                ErlReprKind::NativeRecord => (),
                 // These variants don't implement anything in the enum's module.
-                ErlRepr::Atom | ErlRepr::Tagged | ErlRepr::Transparent => continue,
-                ErlRepr::Elixir => {
+                ErlReprKind::Atom | ErlReprKind::Tagged | ErlReprKind::Transparent { .. } => {
+                    continue;
+                }
+                ErlReprKind::Int => {
+                    not_implemented!(self.tcx, variant.span, "int-represented enum variant")
+                }
+                ErlReprKind::Elixir => {
                     span_bug!(variant.span, "Elixir repr attribute on enum variant")
                 }
             }
@@ -580,12 +586,12 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
     ) -> ModuleParts<'arena> {
         let mut parts = self.module_parts(span);
 
-        let struct_info = (repr.kind == ErlRepr::Elixir).then_some(variant_data);
+        let struct_info = (repr.kind == ErlReprKind::Elixir).then_some(variant_data);
         parts.forms.push(elixir_compat::info_function(&self.afb, span, struct_info));
         parts.exports.push((sym::__info__, 1));
 
         match repr.kind {
-            ErlRepr::Elixir => {
+            ErlReprKind::Elixir => {
                 parts.forms.push(elixir_compat::struct0_function(
                     &self.afb,
                     span,
@@ -598,7 +604,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 parts.exports.push((sym::__struct__, 1));
             }
 
-            ErlRepr::NativeRecord => {
+            ErlReprKind::NativeRecord => {
                 let fields = variant_data
                     .fields()
                     .iter()
@@ -608,7 +614,8 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             }
 
             // These variants don't implement anything in the struct's module.
-            ErlRepr::Tagged | ErlRepr::Atom | ErlRepr::Transparent => {}
+            ErlReprKind::Tagged | ErlReprKind::Atom | ErlReprKind::Transparent { .. } => {}
+            ErlReprKind::Int => not_implemented!(self.tcx, span, "int-represented struct"),
         }
 
         self.collect_impl_fns(ErlModuleId::Adt(def_id.to_def_id()), &mut parts);

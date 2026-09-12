@@ -39,15 +39,16 @@ macro_rules! println {
     {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
 }
 
-#[attr = Repr {reprs: [Atom]}]
+#[attr = Repr {reprs: [Atom], modifiers: []}]
 struct NonUnitStruct(int);
 
 enum AtomVariant {
-    #[attr = Repr {reprs: [Atom]}]
+    #[attr = Repr {reprs: [Atom],
+    modifiers: []}]
     NonUnit(int),
 }
 
-#[attr = Repr {reprs: [Atom]}]
+#[attr = Repr {reprs: [Atom], modifiers: []}]
 enum InheritedAtom { Unit, NonUnit(int), }
 
 fn main() ({ } as ())

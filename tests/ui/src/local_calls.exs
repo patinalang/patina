@@ -11,8 +11,8 @@ defmodule LocalCallsTest do
     assert output =~ " is 25\n"
   end
 
-  test "associated constructor returns the generated struct" do
-    assert %Patina.LocalCalls.Years{"0": 25} = Patina.LocalCalls.Years.new(25)
+  test "associated constructor returns the transparent payload" do
+    assert 25 = Patina.LocalCalls.Years.new(25)
   end
 
   test "get_age/1 is private" do

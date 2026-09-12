@@ -23,13 +23,10 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-is_adult(_age@0_0) ->
-    erlang:map_get('0', _age@0_0) >= 18.
+is_adult(_age@0_0) -> _age@0_0 >= 18.
 
 main() ->
-    _age@0_0 =
-        ('Elixir.Patina.NewTypes01.Years':'__struct__'())#{'0'
-                                                               := 25},
+    _age@0_0 = 25,
     _age_days@1_0 =
         'Elixir.Patina.NewTypes01.Years':to_days(_age@0_0),
     begin

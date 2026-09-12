@@ -23,7 +23,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-get_age(_age@0_0) -> erlang:map_get('0', _age@0_0).
+get_age(_age@0_0) -> _age@0_0.
 
 main() ->
     _age@0_0 = 'Elixir.Patina.LocalCalls.Years':new(25),

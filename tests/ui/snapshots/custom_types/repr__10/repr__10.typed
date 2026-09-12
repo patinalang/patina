@@ -42,11 +42,12 @@ macro_rules! println {
 // source: patina-by-example/src/custom_types/repr.md
 // block: 10/14
 
-#[attr = Repr {reprs: [NativeRecord]}]
+#[attr = Repr {reprs: [NativeRecord], modifiers: []}]
 enum NativeRecordEnum {
     Point(int, int),
 
-    #[attr = Repr {reprs: [Tag("custom_name")]}]
+    #[attr = Repr {reprs: [],
+    modifiers: [Tag("custom_name")]}]
     WithCustomName(float),
 }
 
@@ -55,8 +56,8 @@ enum NativeRecordEnum {
 // Note that `#[repr(record_module = "...")]` does *not* influence the name of the
 // module that will hold the struct's implementation.
 // For that, use `#[module = "..."]`.
-#[attr = Repr {reprs: [NativeRecord, RecordModule("external_module"),
-Tag("custom_name")]}]
+#[attr = Repr {reprs: [NativeRecord],
+modifiers: [RecordModule("external_module"), Tag("custom_name")]}]
 struct NativeRecordStruct {
     foo: str,
 }

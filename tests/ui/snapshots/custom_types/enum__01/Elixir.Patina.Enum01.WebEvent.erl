@@ -6,12 +6,8 @@
 
 -import(erlang, [is_record/3]).
 
--export_record(['KeyPress', 'Paste', 'Click']).
+-export_record(['Click']).
 
 -export([]).
-
--record #'KeyPress'{'0'}.
-
--record #'Paste'{'0'}.
 
 -record #'Click'{x, y}.

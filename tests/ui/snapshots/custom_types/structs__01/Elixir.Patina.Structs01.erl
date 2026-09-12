@@ -27,74 +27,78 @@ main() ->
     _name@0_0 = <<"Peter">>,
     _age@1_0 = 27,
     _peter@2_0 =
-        ('Elixir.Patina.Structs01.Person':'__struct__'())#{name
-                                                               := _name@0_0,
-                                                           age := _age@1_0},
+        #'Elixir.Patina.Structs01.Person':'Person'{name =
+                                                       _name@0_0,
+                                                   age = _age@1_0},
     begin
         io:put_chars([[io_lib:format("~ktp", [_peter@2_0])]]),
         io:nl(),
         {}
     end,
-    _point@3_0 =
-        ('Elixir.Patina.Structs01.Point':'__struct__'())#{x :=
-                                                              5.2,
-                                                          y := 4.0e-1},
+    _point@3_0 = #'Elixir.Patina.Structs01.Point':'Point'{x
+                                                              = 5.2,
+                                                          y = 4.0e-1},
     _another_point@4_0 =
-        ('Elixir.Patina.Structs01.Point':'__struct__'())#{x :=
-                                                              1.03e+1,
-                                                          y := 2.0e-1},
+        #'Elixir.Patina.Structs01.Point':'Point'{x = 1.03e+1,
+                                                 y = 2.0e-1},
     begin
         io:put_chars([[<<"point coordinates: (">>,
-                       io_lib:format("~ktp", [erlang:map_get(x, _point@3_0)]),
+                       io_lib:format("~ktp",
+                                     [_point@3_0#'Elixir.Patina.Structs01.Point':'Point'.x]),
                        <<", ">>,
-                       io_lib:format("~ktp", [erlang:map_get(y, _point@3_0)]),
+                       io_lib:format("~ktp",
+                                     [_point@3_0#'Elixir.Patina.Structs01.Point':'Point'.y]),
                        <<")">>]]),
         io:nl(),
         {}
     end,
-    _bottom_right@5_0 = _another_point@4_0#{x := 1.03e+1},
+    _bottom_right@5_0 =
+        _another_point@4_0#'Elixir.Patina.Structs01.Point':'Point'{x
+                                                                       =
+                                                                       1.03e+1},
     begin
         io:put_chars([[<<"second point: (">>,
                        io_lib:format("~ktp",
-                                     [erlang:map_get(x, _bottom_right@5_0)]),
+                                     [_bottom_right@5_0#'Elixir.Patina.Structs01.Point':'Point'.x]),
                        <<", ">>,
                        io_lib:format("~ktp",
-                                     [erlang:map_get(y, _bottom_right@5_0)]),
+                                     [_bottom_right@5_0#'Elixir.Patina.Structs01.Point':'Point'.y]),
                        <<")">>]]),
         io:nl(),
         {}
     end,
-    #{'__struct__' := 'Elixir.Patina.Structs01.Point',
-      x := _left_edge@6_0, y := _top_edge@7_0} =
+    #'Elixir.Patina.Structs01.Point':'Point'{x =
+                                                 _left_edge@6_0,
+                                             y = _top_edge@7_0} =
         _point@3_0,
     __rectangle@8_0 =
-        ('Elixir.Patina.Structs01.Rectangle':'__struct__'())#{top_left
-                                                                  :=
-                                                                  ('Elixir.Patina.Structs01.Point':'__struct__'())#{x
-                                                                                                                        :=
-                                                                                                                        _left_edge@6_0,
-                                                                                                                    y
-                                                                                                                        :=
-                                                                                                                        _top_edge@7_0},
-                                                              bottom_right :=
-                                                                  _bottom_right@5_0},
+        #'Elixir.Patina.Structs01.Rectangle':'Rectangle'{top_left
+                                                             =
+                                                             #'Elixir.Patina.Structs01.Point':'Point'{x
+                                                                                                          =
+                                                                                                          _left_edge@6_0,
+                                                                                                      y
+                                                                                                          =
+                                                                                                          _top_edge@7_0},
+                                                         bottom_right =
+                                                             _bottom_right@5_0},
     __unit@9_0 = 'Elixir.Patina.Structs01.Unit',
-    _pair@10_0 =
-        ('Elixir.Patina.Structs01.Pair':'__struct__'())#{'0' :=
-                                                             1,
-                                                         '1' := 1.0e-1},
+    _pair@10_0 = #'Elixir.Patina.Structs01.Pair':'Pair'{'0'
+                                                            = 1,
+                                                        '1' = 1.0e-1},
     begin
         io:put_chars([[<<"pair contains ">>,
                        io_lib:format("~ktp",
-                                     [erlang:map_get('0', _pair@10_0)]),
+                                     [_pair@10_0#'Elixir.Patina.Structs01.Pair':'Pair'.'0']),
                        <<" and ">>,
                        io_lib:format("~ktp",
-                                     [erlang:map_get('1', _pair@10_0)])]]),
+                                     [_pair@10_0#'Elixir.Patina.Structs01.Pair':'Pair'.'1'])]]),
         io:nl(),
         {}
     end,
-    #{'__struct__' := 'Elixir.Patina.Structs01.Pair',
-      '0' := _integer@11_0, '1' := _decimal@12_0} =
+    #'Elixir.Patina.Structs01.Pair':'Pair'{'0' =
+                                               _integer@11_0,
+                                           '1' = _decimal@12_0} =
         _pair@10_0,
     begin
         io:put_chars([[<<"pair contains ">>,

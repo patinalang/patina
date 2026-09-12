@@ -16,16 +16,16 @@ defmodule Guard01Test do
            """ == capture_io(fn -> Patina.Guard01.main() end)
   end
 
-  test "payload variants are exported native records" do
-    assert {%{is_exported: true}, [:"0"]} = :records.get_definition(Temperature, :Celsius)
+  test "conflicting payload variants preserve the first transparent shape" do
+    assert_raise ArgumentError, fn -> :records.get_definition(Temperature, :Celsius) end
     assert {%{is_exported: true}, [:"0"]} = :records.get_definition(Temperature, :Fahrenheit)
 
-    celsius = :records.create(Temperature, :Celsius, [{:"0", 35}], %{is_exported: true})
+    fahrenheit = :records.create(Temperature, :Fahrenheit, [{:"0", 95}], %{is_exported: true})
 
-    assert Temperature = :records.get_module(celsius)
-    assert :Celsius = :records.get_name(celsius)
-    assert [:"0"] = :records.get_field_names(celsius)
-    assert 35 = :records.get(:"0", celsius)
-    assert :records.is_exported(celsius)
+    assert Temperature = :records.get_module(fahrenheit)
+    assert :Fahrenheit = :records.get_name(fahrenheit)
+    assert [:"0"] = :records.get_field_names(fahrenheit)
+    assert 95 = :records.get(:"0", fahrenheit)
+    assert :records.is_exported(fahrenheit)
   end
 end

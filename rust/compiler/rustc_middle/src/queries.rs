@@ -1226,15 +1226,15 @@ rustc_queries! {
         desc { "computing the Erlang module name for `{module:?}`" }
     }
 
+    /// The runtime representation of every variant of an ADT, indexed by `VariantIdx`.
+    query erl_adt_reprs(def_id: DefId) -> &'tcx [crate::erl::ErlVariantRepr] {
+        desc { "computing the Erlang representations of `{}`", tcx.def_path_str(def_id) }
+    }
+
     /// The simplified runtime Erlang term shape of an instantiated type.
     query erl_shape_of_ty(ty: Ty<'tcx>) -> &'tcx crate::erl::shape::ErlShape {
         arena_cache
         desc { "computing the Erlang term shape of `{ty}`" }
-    }
-
-    /// Whether a transparent enum variant's identity-instantiated payload has an open shape.
-    query erl_variant_has_open_shape(variant_def_id: DefId) -> bool {
-        desc { "computing whether `{}` has an open Erlang term shape", tcx.def_path_str(variant_def_id) }
     }
 
     /// For a given variant with given generic args, which other shapes (of other variants, or even
@@ -1248,8 +1248,8 @@ rustc_queries! {
     ///   `[Binary, Tuple { arity: 2, tag: Some("other") }]`
     ///
     /// If `def_id` is not a transparent, open-shape variant, an empty slice is returned.
-    query erl_open_transparent_guards(key: (DefId, GenericArgsRef<'tcx>)) -> &'tcx [crate::erl::shape::ErlShape] {
-        desc { "computing the Erlang wrapping guards of `{}`", tcx.def_path_str(key.0) }
+    query erl_variant_wrap_guards(key: (DefId, GenericArgsRef<'tcx>)) -> &'tcx [crate::erl::shape::ErlShape] {
+        desc { "computing the Erlang wrap guards of `{}`", tcx.def_path_str(key.0) }
     }
 
     /// Checks for uses of unstable APIs in the module.

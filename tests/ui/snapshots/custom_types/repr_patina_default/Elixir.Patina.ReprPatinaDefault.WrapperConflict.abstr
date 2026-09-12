@@ -1,0 +1,11 @@
+[{attribute,{65,1},
+            file,
+            {"tests/ui/src/custom_types/repr_patina_default.pt",65}},
+ {attribute,{65,1},module,'Elixir.Patina.ReprPatinaDefault.WrapperConflict'},
+ {attribute,{65,1},compile,[no_auto_import]},
+ {attribute,{65,1},import,{erlang,[{is_record,3}]}},
+ {attribute,{65,1},export_record,['Pair']},
+ {attribute,{65,1},export,[]},
+ {attribute,{65,1},
+            native_record,
+            {'Pair',[{record_field,{66,10},{atom,{66,10},'0'}}]}}]

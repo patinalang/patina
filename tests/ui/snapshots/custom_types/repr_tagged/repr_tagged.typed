@@ -41,16 +41,16 @@ macro_rules! println {
     {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
 }
 
-#[attr = Repr {reprs: [Tagged, TagStyle(SnakeCase)]}]
+#[attr = Repr {reprs: [Tagged], modifiers: [TagStyle(SnakeCase)]}]
 struct StructHTTPStyle {
     code: int,
     body: str,
 }
 
-#[attr = Repr {reprs: [Tagged, Tag("custom_unit")]}]
+#[attr = Repr {reprs: [Tagged], modifiers: [Tag("custom_unit")]}]
 struct Unit;
 
-#[attr = Repr {reprs: [Tagged]}]
+#[attr = Repr {reprs: [Tagged], modifiers: []}]
 enum TaggedEnum {
     Unit,
     TupleValue(int),
@@ -58,15 +58,18 @@ enum TaggedEnum {
             x: int,
             y: int,
         },
-    #[attr = Repr {reprs: [Atom]}]
+    #[attr = Repr {reprs: [Atom],
+    modifiers: []}]
     AtomOverride,
 }
 
-#[attr = Repr {reprs: [Tagged]}]
+#[attr = Repr {reprs: [Tagged], modifiers: []}]
 enum ResultShape<T, E> {
-    #[attr = Repr {reprs: [Tag("ok")]}]
+    #[attr = Repr {reprs: [],
+    modifiers: [Tag("ok")]}]
     Ok(T),
-    #[attr = Repr {reprs: [Tag("error")]}]
+    #[attr = Repr {reprs: [],
+    modifiers: [Tag("error")]}]
     Err(E),
 }
 

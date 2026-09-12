@@ -20,16 +20,9 @@ defmodule Enum01Test do
            """ == capture_io(fn -> Patina.Enum01.main() end)
   end
 
-  test "enum module exports its variant record definitions" do
-    Enum.each(
-      [
-        {:KeyPress, [:"0"]},
-        {:Paste, [:"0"]},
-        {:Click, [:x, :y]}
-      ],
-      fn {variant, fields} ->
-        assert {%{is_exported: true}, ^fields} = :records.get_definition(WebEvent, variant)
-      end
-    )
+  test "newtype variants are transparent and multi-field variants are records" do
+    assert_raise ArgumentError, fn -> :records.get_definition(WebEvent, :KeyPress) end
+    assert_raise ArgumentError, fn -> :records.get_definition(WebEvent, :Paste) end
+    assert {%{is_exported: true}, [:x, :y]} = :records.get_definition(WebEvent, :Click)
   end
 end

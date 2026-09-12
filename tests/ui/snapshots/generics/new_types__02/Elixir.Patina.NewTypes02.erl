@@ -24,12 +24,7 @@
 '__info__'(Key) -> module_info(Key).
 
 main() ->
-    _years@0_0 =
-        ('Elixir.Patina.NewTypes02.Years':'__struct__'())#{'0'
-                                                               := 42},
-    _years_as_primitive_1@1_0 = erlang:map_get('0',
-                                               _years@0_0),
-    #{'__struct__' := 'Elixir.Patina.NewTypes02.Years',
-      '0' := _years_as_primitive_2@2_0} =
-        _years@0_0,
+    _years@0_0 = 42,
+    _years_as_primitive_1@1_0 = _years@0_0,
+    _years_as_primitive_2@2_0 = _years@0_0,
     {}.

@@ -2,8 +2,5 @@
  {attribute,{5,1},module,'Elixir.Patina.IfLet03.Foo'},
  {attribute,{5,1},compile,[no_auto_import]},
  {attribute,{5,1},import,{erlang,[{is_record,3}]}},
- {attribute,{5,1},export_record,['Qux']},
- {attribute,{5,1},export,[]},
- {attribute,{5,1},
-            native_record,
-            {'Qux',[{record_field,{8,9},{atom,{8,9},'0'}}]}}]
+ {attribute,{5,1},export_record,[]},
+ {attribute,{5,1},export,[]}]

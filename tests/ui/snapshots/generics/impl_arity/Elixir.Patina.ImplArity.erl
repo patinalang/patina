@@ -24,12 +24,8 @@
 '__info__'(Key) -> module_info(Key).
 
 main() ->
-    _a@0_0 =
-        ('Elixir.Patina.ImplArity.GenVal':'__struct__'())#{gen_val
-                                                               := 5},
-    _b@1_0 =
-        ('Elixir.Patina.ImplArity.GenVal':'__struct__'())#{gen_val
-                                                               := <<"hi">>},
+    _a@0_0 = 5,
+    _b@1_0 = <<"hi">>,
     begin
         io:put_chars([[io_lib:format("~ktp",
                                      ['Elixir.Patina.ImplArity.GenVal':value(_a@0_0)]),

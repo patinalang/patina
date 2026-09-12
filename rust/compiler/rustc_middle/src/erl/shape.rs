@@ -4,7 +4,7 @@ use rustc_hir::def_id::DefId;
 use rustc_macros::StableHash;
 use rustc_span::{Symbol, kw};
 
-use crate::erl::{ErlModuleId, ErlRepr};
+use crate::erl::{ErlModuleId, ErlReprKind, ErlVariantRepr};
 use crate::ty::{self, AdtDef, GenericArgsRef, Ty, TyCtxt, VariantDef};
 
 #[derive(Clone, Debug, PartialEq, Eq, StableHash)]
@@ -143,7 +143,7 @@ impl<'tcx> TyCtxt<'tcx> {
         let shapes = def
             .variants()
             .iter()
-            .map(|variant| self.erl_shape_of_variant(def, variant, args, visiting))
+            .map(|variant| self.erl_variant_term_shape(def, variant, args, visiting))
             .collect::<Box<[_]>>();
 
         visiting.remove(&def.did());
@@ -151,7 +151,7 @@ impl<'tcx> TyCtxt<'tcx> {
         ErlShape::Union(shapes)
     }
 
-    fn erl_shape_of_variant(
+    fn erl_variant_term_shape(
         self,
         def: AdtDef<'tcx>,
         variant: &VariantDef,
@@ -160,14 +160,7 @@ impl<'tcx> TyCtxt<'tcx> {
     ) -> ErlShape {
         let repr = self.erl_variant_repr(variant.def_id);
         match repr.kind {
-            ErlRepr::Elixir => {
-                ErlShape::ElixirStruct(self.erl_module_name(ErlModuleId::Adt(def.did())))
-            }
-            ErlRepr::Tagged => {
-                ErlShape::Tuple { arity: variant.fields.len() + 1, tag: Some(repr.tag) }
-            }
-            ErlRepr::Atom => ErlShape::Atom(repr.tag),
-            ErlRepr::Transparent => {
+            ErlReprKind::Transparent { open_payload } => {
                 let [field] = variant.fields.iter().as_slice() else {
                     // Any other variant is invalid, and will be reported by the type checker.
                     // Returning an empty union prevents error cascades from treating this variant
@@ -177,19 +170,74 @@ impl<'tcx> TyCtxt<'tcx> {
 
                 let payload = self.erl_shape_of_ty_rec(field.ty(self, args), visiting);
 
-                // A variant that wraps is also seen as its `{Tag, Payload}` wrapper.
-                if self.erl_open_transparent_guards((variant.def_id, args)).is_empty() {
+                if !open_payload || self.erl_variant_wrap_guards((variant.def_id, args)).is_empty()
+                {
+                    // This variant's shape doesn't overlap with any other variant.
                     payload
                 } else {
+                    // This variant's shape can overlap with other variants, so we also need
+                    // to account for its wrapped shape.
                     ErlShape::Union(Box::new([
                         payload,
                         ErlShape::Tuple { arity: 2, tag: Some(repr.tag) },
                     ]))
                 }
             }
-            ErlRepr::NativeRecord => {
+
+            _ => self.erl_variant_simple_shape(def, variant, repr),
+        }
+    }
+
+    /// Returns the runtime shape which must remain unique for this variant's representation.
+    ///
+    /// For an open transparent variant this is its wrapper shape; overlap of its unwrapped
+    /// payload is handled dynamically.
+    pub fn erl_variant_reserved_shape(
+        self,
+        adt: AdtDef<'tcx>,
+        variant: &VariantDef,
+        repr: ErlVariantRepr,
+    ) -> ErlShape {
+        match repr.kind {
+            ErlReprKind::Transparent { open_payload: true } => {
+                ErlShape::Tuple { arity: 2, tag: Some(repr.tag) }
+            }
+
+            ErlReprKind::Transparent { open_payload: false } => {
+                let [field] = variant.fields.iter().as_slice() else {
+                    // Invalid variant, returned just so later diagnostics can report an error.
+                    return ErlShape::Union(Box::new([]));
+                };
+                let args = ty::GenericArgs::identity_for_item(self, adt.did());
+                self.erl_shape_of_ty(field.ty(self, args)).clone()
+            }
+
+            _ => self.erl_variant_simple_shape(adt, variant, repr),
+        }
+    }
+
+    /// Common between reserved and term shapes.
+    /// Do not call this for transparent variants - they have different shapes depending
+    /// on the context we're checking in.
+    fn erl_variant_simple_shape(
+        self,
+        adt: AdtDef<'tcx>,
+        variant: &VariantDef,
+        repr: ErlVariantRepr,
+    ) -> ErlShape {
+        match repr.kind {
+            ErlReprKind::Elixir => {
+                ErlShape::ElixirStruct(self.erl_module_name(ErlModuleId::Adt(adt.did())))
+            }
+            ErlReprKind::Tagged => {
+                ErlShape::Tuple { arity: variant.fields.len() + 1, tag: Some(repr.tag) }
+            }
+            ErlReprKind::Atom => ErlShape::Atom(repr.tag),
+            ErlReprKind::Int => ErlShape::Int,
+            ErlReprKind::NativeRecord => {
                 ErlShape::NativeRecord { module: repr.record_module, name: repr.tag }
             }
+            ErlReprKind::Transparent { open_payload: _ } => unreachable!(),
         }
     }
 }
@@ -198,31 +246,16 @@ pub(super) fn erl_shape_of_ty<'tcx>(tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) -> ErlShape
     tcx.erl_shape_of_ty_rec(ty, &mut FxHashSet::default()).simplify()
 }
 
-pub(super) fn erl_variant_has_open_shape(tcx: TyCtxt<'_>, variant_def_id: DefId) -> bool {
-    if tcx.def_kind(variant_def_id) != DefKind::Variant {
-        return false;
-    }
-
-    let def = tcx.adt_def(tcx.parent(variant_def_id));
-    let variant = def.variant_with_id(variant_def_id);
-    let repr = tcx.erl_variant_repr(variant_def_id);
-    if repr.kind != ErlRepr::Transparent {
-        return false;
-    }
-
-    let [payload_field] = variant.fields.iter().as_slice() else { return false };
-
-    let args = ty::GenericArgs::identity_for_item(tcx, def.did());
-    let payload_ty = payload_field.ty(tcx, args);
-
-    matches!(*tcx.erl_shape_of_ty(payload_ty), ErlShape::Any)
-}
-
-pub(super) fn erl_open_transparent_guards<'tcx>(
+pub(super) fn erl_variant_wrap_guards<'tcx>(
     tcx: TyCtxt<'tcx>,
     (variant_def_id, args): (DefId, GenericArgsRef<'tcx>),
 ) -> &'tcx [ErlShape] {
-    if !tcx.erl_variant_has_open_shape(variant_def_id) {
+    if tcx.def_kind(variant_def_id) != DefKind::Variant
+        || !matches!(
+            tcx.erl_variant_repr(variant_def_id).kind,
+            ErlReprKind::Transparent { open_payload: true }
+        )
+    {
         return &[];
     }
 
@@ -240,7 +273,7 @@ pub(super) fn erl_open_transparent_guards<'tcx>(
         let shape = if sibling.def_id == variant_def_id {
             ErlShape::Tuple { arity: 2, tag: Some(tcx.erl_variant_repr(variant_def_id).tag) }
         } else {
-            tcx.erl_shape_of_variant(def, sibling, args, &mut FxHashSet::default()).simplify()
+            tcx.erl_variant_term_shape(def, sibling, args, &mut FxHashSet::default()).simplify()
         };
 
         payload.overlaps(&shape).then_some(shape)

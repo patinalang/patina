@@ -42,7 +42,7 @@ macro_rules! println {
 // source: patina-by-example/src/custom_types/repr.md
 // block: 5/14
 
-#[attr = Repr {reprs: [Tagged]}]
+#[attr = Repr {reprs: [Tagged], modifiers: []}]
 enum TaggedEnum {
     Unit,
     TupleStyle(str),
@@ -51,10 +51,12 @@ enum TaggedEnum {
             y: int,
         },
 
-    #[attr = Repr {reprs: [Atom]}]
+    #[attr = Repr {reprs: [Atom],
+    modifiers: []}]
     UnitWithAtomOverride,
 
-    #[attr = Repr {reprs: [Tag("custom_tag")]}]
+    #[attr = Repr {reprs: [],
+    modifiers: [Tag("custom_tag")]}]
     WithCustomTag(int),
 }
 
