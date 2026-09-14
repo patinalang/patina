@@ -44,6 +44,7 @@
 //! is visible.
 
 use rustc_type_ir::TyKind::*;
+use smallvec::{SmallVec, smallvec};
 use tracing::instrument;
 
 use crate::query::Providers;
@@ -60,33 +61,34 @@ pub(crate) fn provide(providers: &mut Providers) {
 /// Returns an `InhabitedPredicate` that is generic over type parameters and
 /// requires calling [`InhabitedPredicate::instantiate`]
 fn inhabited_predicate_adt(tcx: TyCtxt<'_>, def_id: DefId) -> InhabitedPredicate<'_> {
-    if let Some(def_id) = def_id.as_local() {
-        tcx.ensure_ok().check_representability(def_id);
-    }
-
-    let adt = tcx.adt_def(def_id);
-    InhabitedPredicate::any(
-        tcx,
-        adt.variants().iter().map(|variant| variant.inhabited_predicate(tcx, adt)),
-    )
+    let args = ty::GenericArgs::identity_for_item(tcx, def_id);
+    inhabited_predicate_rec(tcx, Ty::new_adt(tcx, tcx.adt_def(def_id), args), &mut smallvec![])
 }
 
 impl<'tcx> VariantDef {
-    /// Calculates the forest of `DefId`s from which this variant is visibly uninhabited.
+    /// Calculates this variant's inhabitedness with one context through its recursive fields.
     pub fn inhabited_predicate(
         &self,
         tcx: TyCtxt<'tcx>,
-        adt: ty::AdtDef<'_>,
+        adt: ty::AdtDef<'tcx>,
+    ) -> InhabitedPredicate<'tcx> {
+        let args = ty::GenericArgs::identity_for_item(tcx, adt.did());
+        let ty = Ty::new_adt(tcx, adt, args);
+        self.inhabited_predicate_rec(tcx, adt, args, &mut smallvec![ty])
+    }
+
+    fn inhabited_predicate_rec(
+        &self,
+        tcx: TyCtxt<'tcx>,
+        adt: ty::AdtDef<'tcx>,
+        args: ty::GenericArgsRef<'tcx>,
+        active: &mut SmallVec<[Ty<'tcx>; 2]>,
     ) -> InhabitedPredicate<'tcx> {
         debug_assert!(!adt.is_union());
         InhabitedPredicate::all(
             tcx,
             self.fields.iter().map(|field| {
-                let pred = tcx
-                    .type_of(field.did)
-                    .instantiate_identity()
-                    .skip_norm_wip()
-                    .inhabited_predicate(tcx);
+                let pred = inhabited_predicate_rec(tcx, field.ty(tcx, args), active);
                 if adt.is_enum() {
                     return pred;
                 }
@@ -98,6 +100,52 @@ impl<'tcx> VariantDef {
                 }
             }),
         )
+    }
+}
+
+fn inhabited_predicate_rec<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    ty: Ty<'tcx>,
+    active: &mut SmallVec<[Ty<'tcx>; 2]>,
+) -> InhabitedPredicate<'tcx> {
+    match *ty.kind() {
+        ty::Adt(adt, _args)
+            if adt.is_union()
+                || adt.variant_list_has_applicable_non_exhaustive()
+                || active.iter().any(|&outer| {
+                    matches!(outer.kind(), ty::Adt(outer_adt, _) if outer_adt.did() == adt.did())
+                        && !outer.walk().skip(1).any(|arg| arg.as_type() == Some(ty))
+                }) =>
+        {
+            InhabitedPredicate::True
+        }
+
+        ty::Adt(adt, args) => {
+            active.push(ty);
+            let result = InhabitedPredicate::any(
+                tcx,
+                adt.variants()
+                    .iter()
+                    .map(|variant| variant.inhabited_predicate_rec(tcx, adt, args, active)),
+            );
+            active.pop();
+            result
+        }
+
+        ty::Tuple(tys) => InhabitedPredicate::all(
+            tcx,
+            tys.iter().map(|ty| inhabited_predicate_rec(tcx, ty, active)),
+        ),
+
+        ty::Array(inner, len) => match len.try_to_target_usize(tcx) {
+            Some(0) => InhabitedPredicate::True,
+            Some(_) => inhabited_predicate_rec(tcx, inner, active),
+            None => inhabited_predicate_rec(tcx, inner, active)
+                .or(tcx, InhabitedPredicate::ConstIsZero(len)),
+        },
+
+        // Preserve generic predicates, opaque types, and ordinary primitive behavior.
+        _ => ty.inhabited_predicate(tcx),
     }
 }
 

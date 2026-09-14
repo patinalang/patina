@@ -423,23 +423,10 @@ fn adt_consider_insignificant_dtor<'tcx>(
 
 fn adt_drop_tys<'tcx>(
     tcx: TyCtxt<'tcx>,
-    def_id: DefId,
+    _: DefId,
 ) -> Result<&'tcx ty::List<Ty<'tcx>>, AlwaysRequiresDrop> {
-    // This is for the "adt_drop_tys" query, that considers all `Drop` impls, therefore all dtors are
-    // significant.
-    let adt_has_dtor =
-        |adt_def: ty::AdtDef<'tcx>| adt_def.destructor(tcx).map(|_| DtorType::Significant);
-    // `tcx.type_of(def_id)` identical to `tcx.make_adt(def, identity_args)`
-    drop_tys_helper(
-        tcx,
-        tcx.type_of(def_id).instantiate_identity().skip_norm_wip(),
-        ty::TypingEnv::non_body_analysis(tcx, def_id),
-        adt_has_dtor,
-        false,
-        false,
-    )
-    .collect::<Result<Vec<_>, _>>()
-    .map(|components| tcx.mk_type_list(&components))
+    // Field values are garbage-collected, not managed by transitive Rust drop glue.
+    Ok(tcx.mk_type_list(&[]))
 }
 
 fn adt_async_drop_tys<'tcx>(

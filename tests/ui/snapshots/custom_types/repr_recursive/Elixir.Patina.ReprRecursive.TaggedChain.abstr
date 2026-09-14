@@ -1,0 +1,6 @@
+[{attribute,{89,1},file,{"tests/ui/src/custom_types/repr_recursive.pt",89}},
+ {attribute,{89,1},module,'Elixir.Patina.ReprRecursive.TaggedChain'},
+ {attribute,{89,1},compile,[no_auto_import]},
+ {attribute,{89,1},import,{erlang,[{is_record,3}]}},
+ {attribute,{89,1},export_record,[]},
+ {attribute,{89,1},export,[]}]

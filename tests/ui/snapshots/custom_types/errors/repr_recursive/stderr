@@ -1,0 +1,174 @@
+error[E0004]: non-exhaustive patterns: type `Endless` is non-empty
+  --> tests/ui/src/custom_types/errors/repr_recursive.pt:63:11
+   |
+LL |     match value {}
+   |           ^^^^^
+   |
+note: `Endless` defined here
+  --> tests/ui/src/custom_types/errors/repr_recursive.pt:57:8
+   |
+LL | struct Endless(Endless);
+   |        ^^^^^^^
+   = note: the matched value is of type `Endless`
+help: ensure that all possible cases are being handled by adding a match arm with a wildcard pattern as shown
+   |
+LL ~     match value {
+LL +         _ => todo!(),
+LL ~     }
+   |
+
+error[E0004]: non-exhaustive patterns: type `EndlessTuple` is non-empty
+  --> tests/ui/src/custom_types/errors/repr_recursive.pt:67:11
+   |
+LL |     match value {}
+   |           ^^^^^
+   |
+note: `EndlessTuple` defined here
+  --> tests/ui/src/custom_types/errors/repr_recursive.pt:59:8
+   |
+LL | struct EndlessTuple((EndlessTuple, int));
+   |        ^^^^^^^^^^^^
+   = note: the matched value is of type `EndlessTuple`
+help: ensure that all possible cases are being handled by adding a match arm with a wildcard pattern as shown
+   |
+LL ~     match value {
+LL +         _ => todo!(),
+LL ~     }
+   |
+
+error: transparent representation creates a recursive representation cycle
+  --> tests/ui/src/custom_types/errors/repr_recursive.pt:3:8
+   |
+LL | #[repr(transparent)]
+   |        ^^^^^^^^^^^
+   |        |
+   |        this attribute requires a transparent representation
+   |        help: use a non-transparent representation to break the cycle: `...`
+LL | struct ExplicitSelf(ExplicitSelf);
+   |                     ------------ can transparently contain itself
+
+error: transparent representation creates a recursive representation cycle
+  --> tests/ui/src/custom_types/errors/repr_recursive.pt:8:12
+   |
+LL |     #[repr(transparent, dynamic_wrap)]
+   |            ^^^^^^^^^^^
+   |            |
+   |            this attribute requires a transparent representation
+   |            help: use a non-transparent representation to break the cycle: `...`
+LL |     Next(ExplicitVariant),
+   |          --------------- can transparently contain itself
+
+error: transparent representation creates a recursive representation cycle
+  --> tests/ui/src/custom_types/errors/repr_recursive.pt:12:8
+   |
+LL | #[repr(transparent)]
+   |        ^^^^^^^^^^^ this attribute requires a transparent representation
+...
+LL |     Next(Inherited),
+   |          --------- can transparently contain itself
+   |
+help: use a non-transparent representation to break the cycle
+   |
+LL ~     #[repr(...)]
+LL ~     Next(Inherited),
+   |
+
+error: transparent representation creates a recursive representation cycle
+  --> tests/ui/src/custom_types/errors/repr_recursive.pt:20:8
+   |
+LL | #[repr(transparent)]
+   |        ^^^^^^^^^^^
+   |        |
+   |        this attribute requires a transparent representation
+   |        help: use a non-transparent representation to break the cycle: `...`
+LL | struct ExplicitLeft(InferredRight);
+   |                     ------------- can transparently contain itself
+
+error: transparent representation creates a recursive representation cycle
+  --> tests/ui/src/custom_types/errors/repr_recursive.pt:27:8
+   |
+LL | #[repr(transparent)]
+   |        ^^^^^^^^^^^
+   |        |
+   |        this attribute requires a transparent representation
+   |        help: use a non-transparent representation to break the cycle: `...`
+LL | struct ThroughWrapper(Wrapper<ThroughWrapper>);
+   |                       ----------------------- can transparently contain itself
+
+error: transparent representation creates a recursive representation cycle
+  --> tests/ui/src/custom_types/errors/repr_recursive.pt:34:12
+   |
+LL |     #[repr(transparent, dynamic_wrap, tag = "same")]
+   |            ^^^^^^^^^^^
+   |            |
+   |            this attribute requires a transparent representation
+   |            help: use a non-transparent representation to break the cycle: `...`
+LL |     Next(RecoveryOverlap),
+   |          --------------- can transparently contain itself
+
+error: transparent representation creates a recursive representation cycle
+  --> tests/ui/src/custom_types/errors/repr_recursive.pt:39:8
+   |
+LL | #[repr(transparent)]
+   |        ^^^^^^^^^^^ this attribute requires a transparent representation
+...
+LL |     Next(InheritedWithSibling),
+   |          -------------------- can transparently contain itself
+   |
+help: use a non-transparent representation to break the cycle
+   |
+LL ~     #[repr(...)]
+LL ~     Next(InheritedWithSibling),
+   |
+
+error: type parameter `T` is only used recursively
+  --> tests/ui/src/custom_types/errors/repr_recursive.pt:46:39
+   |
+LL | struct OnlyRecursive<T>(OnlyRecursive<T>);
+   |                      -                ^
+   |                      |
+   |                      type parameter must be used non-recursively in the definition
+   |
+   = help: consider removing `T` or referring to it in a field
+   = note: all type parameters must be used in a non-recursive way in order to constrain their variance
+
+error[E0277]: the trait bound `int: Required` is not satisfied
+  --> tests/ui/src/custom_types/errors/repr_recursive.pt:52:21
+   |
+LL | struct InvalidField(Bounded<int>, InvalidField);
+   |                     ^^^^^^^^^^^^ the trait `Required` is not implemented for `int`
+   |
+help: this trait has no implementations, consider adding one
+  --> tests/ui/src/custom_types/errors/repr_recursive.pt:48:1
+   |
+LL | trait Required {}
+   | ^^^^^^^^^^^^^^
+note: required by a bound in `Bounded`
+  --> tests/ui/src/custom_types/errors/repr_recursive.pt:50:19
+   |
+LL | struct Bounded<T: Required>(T);
+   |                   ^^^^^^^^ required by this bound in `Bounded`
+
+error: transparent representation creates a recursive representation cycle
+  --> tests/ui/src/custom_types/errors/repr_recursive.pt:54:8
+   |
+LL | #[repr(transparent, record_module = "invalid")]
+   |        ^^^^^^^^^^^
+   |        |
+   |        this attribute requires a transparent representation
+   |        help: use a non-transparent representation to break the cycle: `...`
+LL | struct InvalidModifier(InvalidModifier);
+   |                        --------------- can transparently contain itself
+
+error: the `record_module` repr attribute requires a native-record struct or variant
+  --> tests/ui/src/custom_types/errors/repr_recursive.pt:54:21
+   |
+LL | #[repr(transparent, record_module = "invalid")]
+   |                     ^^^^^^^^^^^^^^^^^^^^^^^^^ invalid `record_module` repr attribute
+LL | struct InvalidModifier(InvalidModifier);
+   | ---------------------- not a native-record struct or variant
+
+error: aborting due to 13 previous errors
+
+Some errors have detailed explanations: E0004, E0277.
+For more information about an error, try `rustc --explain E0004`.

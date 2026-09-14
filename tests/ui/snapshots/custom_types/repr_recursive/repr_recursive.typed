@@ -1,0 +1,485 @@
+#![allow(internal_features)]
+
+
+
+
+
+
+
+
+
+
+#![allow(dead_code, private_interfaces)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+#[allow(unused_imports)]
+use Core::*;
+#[allow(unused)]
+extern mod io;
+#[allow(unused)]
+extern mod patina_fmt;
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+enum List { Nil, Cons(int, List), }
+
+enum Tree { Leaf(int), Branch(Tree, Tree), }
+
+enum Chain { End, Next(Chain), }
+
+enum Left { End, Next(Right), }
+
+enum Right { End, Next(Left), }
+
+// Reverse declaration order must not change the cycle boundaries.
+enum RightFirst { Next(LeftLater), End, }
+
+enum LeftLater { Next(RightFirst), End, }
+
+struct Wrapper<T>(T);
+
+enum Generic<T> { Value(T), Next(Wrapper<Generic<T>>), }
+
+enum Growing<T> { Value(T), Next(Growing<[T]>), }
+
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
+struct ListBoundary([ListBoundary]);
+
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
+struct MapBoundary(#{atom => MapBoundary});
+
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
+struct FunctionBoundary(fn() -> FunctionBoundary);
+
+enum WrappedTuple { End, Next(Wrapper<(int, WrappedTuple)>), }
+
+#[attr = Repr {reprs: [Tagged], modifiers: [Tag("wrapped")]}]
+struct TaggedWrapper<T>(T);
+
+enum FixedGeneric { End, Next(TaggedWrapper<FixedGeneric>), }
+
+#[attr = Repr {reprs: [NativeRecord], modifiers: []}]
+struct NativeWrapper<T>(T);
+
+enum FixedRecordGeneric { End, Next(NativeWrapper<FixedRecordGeneric>), }
+
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
+struct TupleBoundary((int, TupleChain));
+
+enum TupleChain { End, Next(TupleBoundary), }
+
+enum TaggedChain {
+    End,
+    #[attr = Repr {reprs: [Tagged],
+    modifiers: [Tag("next")]}]
+    Next(TaggedChain),
+}
+
+enum RecordChain {
+    End,
+    #[attr = Repr {reprs: [NativeRecord],
+    modifiers: []}]
+    Next(RecordChain),
+}
+
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
+enum OverriddenChain {
+    #[attr = Repr {reprs: [Atom],
+    modifiers: []}]
+    End,
+    #[attr = Repr {reprs: [NativeRecord],
+    modifiers: []}]
+    Next(OverriddenChain),
+}
+
+// Recursion-only definitions are legal, and inhabitedness must not loop through tuples.
+struct Endless(Endless);
+
+struct EndlessTuple((EndlessTuple, int));
+
+fn endless_field(value: Endless)
+    -> Endless ({ ((value as Endless).0 as Endless) } as Endless)
+
+fn endless_tuple_field(value: EndlessTuple)
+    ->
+        EndlessTuple ({
+    let (next, _) = ((value as EndlessTuple).0 as (EndlessTuple, int));
+    (next as EndlessTuple)
+} as EndlessTuple)
+
+struct Outer(Inner);
+
+enum Inner { End, Next(Outer), }
+
+fn struct_cycle()
+    ->
+        Outer ({
+    ((Outer as
+            fn(Inner) -> Outer {Outer})(((Inner::Next as
+                fn(Outer) -> Inner {Inner::Next})(((Outer as
+                    fn(Inner) -> Outer {Outer})((Inner::End as Inner)) as
+                Outer)) as Inner)) as Outer)
+} as Outer)
+
+fn struct_depth(value: Outer)
+    ->
+        int ({
+    (match ((value as Outer).0 as Inner) {
+        Inner::End => (0 as int),
+        Inner::Next(outer) =>
+            ((1 as int) +
+                ((struct_depth as
+                        fn(Outer) -> int {struct_depth})((outer as Outer)) as int)
+                as int),
+    } as int)
+} as int)
+
+// Preserve empty types, even through repeated non-recursive generic wrappers and tuples.
+enum Void { }
+
+fn empty(value: Wrapper<Wrapper<Void>>)
+    -> int ({ (match (value as Wrapper<Wrapper<Void>>) { } as !) } as int)
+
+struct NestedVoid(Wrapper<Wrapper<Void>>);
+
+fn nested_empty(value: NestedVoid)
+    -> int ({ (match (value as NestedVoid) { } as !) } as int)
+
+fn empty_tuple(value: (Void, int))
+    -> int ({ (match (value as (Void, int)) { } as !) } as int)
+
+fn generic_empty<T>(value: Wrapper<T>)
+    -> T ({ ((value as Wrapper<T>).0 as T) } as T)
+
+struct RecursiveVoid(RecursiveVoid, Void);
+
+fn recursive_void(value: RecursiveVoid)
+    -> int ({ (match (value as RecursiveVoid) { } as !) } as int)
+
+fn list()
+    ->
+        List ({
+    ((List::Cons as
+            fn(int, List) -> List {List::Cons})((1 as int),
+        ((List::Cons as
+                fn(int, List) -> List {List::Cons})((2 as int),
+            (List::Nil as List)) as List)) as List)
+} as List)
+
+fn sum(value: List)
+    ->
+        int ({
+    (match (value as List) {
+        List::Nil => (0 as int),
+        List::Cons(head, tail) =>
+            ((head as int) +
+                ((sum as fn(List) -> int {sum})((tail as List)) as int) as
+                int),
+    } as int)
+} as int)
+
+fn tree()
+    ->
+        Tree ({
+    ((Tree::Branch as
+            fn(Tree, Tree) -> Tree {Tree::Branch})(((Tree::Leaf as
+                fn(int) -> Tree {Tree::Leaf})((3 as int)) as Tree),
+        ((Tree::Leaf as fn(int) -> Tree {Tree::Leaf})((4 as int)) as Tree)) as
+        Tree)
+} as Tree)
+
+fn tree_sum(value: Tree)
+    ->
+        int ({
+    (match (value as Tree) {
+        Tree::Leaf(n) => (n as int),
+        Tree::Branch(left, right) =>
+            (((tree_sum as fn(Tree) -> int {tree_sum})((left as Tree)) as int)
+                +
+                ((tree_sum as fn(Tree) -> int {tree_sum})((right as Tree)) as
+                    int) as int),
+    } as int)
+} as int)
+
+fn chain()
+    ->
+        Chain ({
+    ((Chain::Next as
+            fn(Chain) -> Chain {Chain::Next})(((Chain::Next as
+                fn(Chain) -> Chain {Chain::Next})((Chain::End as Chain)) as
+            Chain)) as Chain)
+} as Chain)
+
+fn depth(value: Chain)
+    ->
+        int ({
+    (match (value as Chain) {
+        Chain::End => (0 as int),
+        Chain::Next(tail) =>
+            ((1 as int) +
+                ((depth as fn(Chain) -> int {depth})((tail as Chain)) as int)
+                as int),
+    } as int)
+} as int)
+
+fn mutual()
+    ->
+        Left ({
+    ((Left::Next as
+            fn(Right) -> Left {Left::Next})(((Right::Next as
+                fn(Left) -> Right {Right::Next})((Left::End as Left)) as
+            Right)) as Left)
+} as Left)
+
+fn mutual_depth(value: Left)
+    ->
+        int ({
+    (match (value as Left) {
+        Left::End => (0 as int),
+        Left::Next(right) =>
+            (match (right as Right) {
+                Right::End => (1 as int),
+                Right::Next(left) =>
+                    ((2 as int) +
+                        ((mutual_depth as
+                                fn(Left) -> int {mutual_depth})((left as Left)) as int) as
+                        int),
+            } as int),
+    } as int)
+} as int)
+
+fn reverse_mutual()
+    ->
+        RightFirst ({
+    ((RightFirst::Next as
+            fn(LeftLater) -> RightFirst {RightFirst::Next})(((LeftLater::Next
+                as
+                fn(RightFirst) -> LeftLater {LeftLater::Next})((RightFirst::End
+                as RightFirst)) as LeftLater)) as RightFirst)
+} as RightFirst)
+
+fn generic()
+    ->
+        Generic<int> ({
+    ((Generic::Next as
+            fn(Wrapper<Generic<int>>) -> Generic<int> {Generic::<int>::Next})(((Wrapper
+                as
+                fn(Generic<int>) -> Wrapper<Generic<int>> {Wrapper::<Generic<int>>})(((Generic::Value
+                    as
+                    fn(int) -> Generic<int> {Generic::<int>::Value})((9 as int))
+                as Generic<int>)) as Wrapper<Generic<int>>)) as Generic<int>)
+} as Generic<int>)
+
+fn generic_value(value: Generic<int>)
+    ->
+        int ({
+    (match (value as Generic<int>) {
+        Generic::Value(n) => (n as int),
+        Generic::Next(wrapper) =>
+            ((generic_value as
+                    fn(Generic<int>) -> int {generic_value})(((wrapper as
+                        Wrapper<Generic<int>>).0 as Generic<int>)) as int),
+    } as int)
+} as int)
+
+fn growing()
+    ->
+        Growing<int> ({
+    ((Growing::Next as
+            fn(Growing<[int]>) -> Growing<int> {Growing::<int>::Next})(((Growing::Value
+                as
+                fn([int]) -> Growing<[int]> {Growing::<[int]>::Value})(([(2 as
+                        int)] as [int])) as Growing<[int]>)) as Growing<int>)
+} as Growing<int>)
+
+fn growing_field(value: Growing<int>)
+    ->
+        [int] ({
+    (match (value as Growing<int>) {
+        Growing::Value(_) => ([] as [int]),
+        Growing::Next(inner) =>
+            (match (inner as Growing<[int]>) {
+                Growing::Value(list) => (list as [int]),
+                _ => ([] as [int]),
+            } as [int]),
+    } as [int])
+} as [int])
+
+fn list_boundary()
+    ->
+        ListBoundary ({
+    ((ListBoundary as
+            fn([ListBoundary]) -> ListBoundary {ListBoundary})(([((ListBoundary
+                        as
+                        fn([ListBoundary]) -> ListBoundary {ListBoundary})(([] as
+                        [ListBoundary])) as ListBoundary)] as [ListBoundary])) as
+        ListBoundary)
+} as ListBoundary)
+
+fn map_boundary()
+    ->
+        MapBoundary ({
+    ((MapBoundary as
+            fn(#{atom => MapBoundary}) -> MapBoundary {MapBoundary})((#{(a"child"
+                    as atom) =>
+                ((MapBoundary as
+                        fn(#{atom => MapBoundary}) -> MapBoundary {MapBoundary})((#{}
+                        as #{atom => MapBoundary})) as MapBoundary)} as
+            #{atom => MapBoundary})) as MapBoundary)
+} as MapBoundary)
+
+fn function_boundary()
+    ->
+        FunctionBoundary ({
+    ((FunctionBoundary as
+            fn(fn() -> FunctionBoundary) -> FunctionBoundary {FunctionBoundary})((function_boundary
+            as fn() -> FunctionBoundary {function_boundary})) as
+        FunctionBoundary)
+} as FunctionBoundary)
+
+fn call_boundary(value: FunctionBoundary)
+    ->
+        FunctionBoundary ({
+    ((((value as FunctionBoundary).0 as fn() -> FunctionBoundary))() as
+        FunctionBoundary)
+} as FunctionBoundary)
+
+fn wrapped_tuple()
+    ->
+        WrappedTuple ({
+    ((WrappedTuple::Next as
+            fn(Wrapper<(int, WrappedTuple)>) -> WrappedTuple {WrappedTuple::Next})(((Wrapper
+                as
+                fn((int, WrappedTuple)) -> Wrapper<(int, WrappedTuple)> {Wrapper::<(int, WrappedTuple)>})((((6
+                    as int), (WrappedTuple::End as WrappedTuple)) as
+                (int, WrappedTuple))) as Wrapper<(int, WrappedTuple)>)) as
+        WrappedTuple)
+} as WrappedTuple)
+
+fn fixed_generic()
+    ->
+        FixedGeneric ({
+    ((FixedGeneric::Next as
+            fn(TaggedWrapper<FixedGeneric>) -> FixedGeneric {FixedGeneric::Next})(((TaggedWrapper
+                as
+                fn(FixedGeneric) -> TaggedWrapper<FixedGeneric> {TaggedWrapper::<FixedGeneric>})((FixedGeneric::End
+                as FixedGeneric)) as TaggedWrapper<FixedGeneric>)) as
+        FixedGeneric)
+} as FixedGeneric)
+
+fn fixed_record_generic()
+    ->
+        FixedRecordGeneric ({
+    ((FixedRecordGeneric::Next as
+            fn(NativeWrapper<FixedRecordGeneric>) -> FixedRecordGeneric {FixedRecordGeneric::Next})(((NativeWrapper
+                as
+                fn(FixedRecordGeneric) -> NativeWrapper<FixedRecordGeneric> {NativeWrapper::<FixedRecordGeneric>})((FixedRecordGeneric::End
+                as FixedRecordGeneric)) as NativeWrapper<FixedRecordGeneric>))
+        as FixedRecordGeneric)
+} as FixedRecordGeneric)
+
+fn tuple_boundary()
+    ->
+        TupleChain ({
+    ((TupleChain::Next as
+            fn(TupleBoundary) -> TupleChain {TupleChain::Next})(((TupleBoundary
+                as
+                fn((int, TupleChain)) -> TupleBoundary {TupleBoundary})((((5
+                    as int), (TupleChain::End as TupleChain)) as
+                (int, TupleChain))) as TupleBoundary)) as TupleChain)
+} as TupleChain)
+
+fn tuple_value(value: TupleChain)
+    ->
+        int ({
+    (match (value as TupleChain) {
+        TupleChain::End => (0 as int),
+        TupleChain::Next(wrapper) => {
+            let (n, _) = ((wrapper as TupleBoundary).0 as (int, TupleChain));
+            (n as int)
+        }
+    } as int)
+} as int)
+
+fn tagged()
+    ->
+        TaggedChain ({
+    ((TaggedChain::Next as
+            fn(TaggedChain) -> TaggedChain {TaggedChain::Next})((TaggedChain::End
+            as TaggedChain)) as TaggedChain)
+} as TaggedChain)
+
+fn tagged_depth(value: TaggedChain)
+    ->
+        int ({
+    (match (value as TaggedChain) {
+        TaggedChain::End => (0 as int),
+        TaggedChain::Next(tail) =>
+            ((1 as int) +
+                ((tagged_depth as
+                        fn(TaggedChain) -> int {tagged_depth})((tail as
+                        TaggedChain)) as int) as int),
+    } as int)
+} as int)
+
+fn record()
+    ->
+        RecordChain ({
+    ((RecordChain::Next as
+            fn(RecordChain) -> RecordChain {RecordChain::Next})((RecordChain::End
+            as RecordChain)) as RecordChain)
+} as RecordChain)
+
+fn record_depth(value: RecordChain)
+    ->
+        int ({
+    (match (value as RecordChain) {
+        RecordChain::End => (0 as int),
+        RecordChain::Next(tail) =>
+            ((1 as int) +
+                ((record_depth as
+                        fn(RecordChain) -> int {record_depth})((tail as
+                        RecordChain)) as int) as int),
+    } as int)
+} as int)
+
+fn overridden()
+    ->
+        OverriddenChain ({
+    ((OverriddenChain::Next as
+            fn(OverriddenChain) -> OverriddenChain {OverriddenChain::Next})((OverriddenChain::End
+            as OverriddenChain)) as OverriddenChain)
+} as OverriddenChain)
+
+fn overridden_depth(value: OverriddenChain)
+    ->
+        int ({
+    (match (value as OverriddenChain) {
+        OverriddenChain::End => (0 as int),
+        OverriddenChain::Next(tail) =>
+            ((1 as int) +
+                ((overridden_depth as
+                        fn(OverriddenChain) -> int {overridden_depth})((tail as
+                        OverriddenChain)) as int) as int),
+    } as int)
+} as int)

@@ -1,0 +1,6 @@
+[{attribute,{84,1},file,{"tests/ui/src/custom_types/repr_recursive.pt",84}},
+ {attribute,{84,1},module,'Elixir.Patina.ReprRecursive.TupleChain'},
+ {attribute,{84,1},compile,[no_auto_import]},
+ {attribute,{84,1},import,{erlang,[{is_record,3}]}},
+ {attribute,{84,1},export_record,[]},
+ {attribute,{84,1},export,[]}]

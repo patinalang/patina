@@ -512,7 +512,7 @@ impl<'tcx> TyCtxt<'tcx> {
 
     /// Returns the nearest explicit representation attribute, inheriting from an enum when needed.
     /// An absent attribute and an explicit `Patina` both select inference, but remain distinct here.
-    fn effective_erl_repr_kind_attr(self, def_id: DefId) -> Option<(ReprAttr, Span)> {
+    pub fn effective_erl_repr_kind_attr(self, def_id: DefId) -> Option<(ReprAttr, Span)> {
         if let Some(attribute) = self.find_erl_repr_kind_attr(def_id) {
             Some(attribute)
         } else if self.def_kind(def_id) == DefKind::Variant {
@@ -533,23 +533,33 @@ impl<'tcx> TyCtxt<'tcx> {
         let args = ty::GenericArgs::identity_for_item(self, adt.did());
 
         let mut decided =
-            SmallVec::<[Option<ErlVariantRepr>; 4]>::with_capacity(adt.variants().len());
+            SmallVec::<[Option<ErlVariantRepr>; 4]>::from_elem(None, adt.variants().len());
         let mut open_payload_variant_decided = false;
         let mut reserved_shapes = SmallVec::<[ErlShape; 4]>::new();
 
+        // Prevent cyclic newtypes from becoming transparent before inspecting any payload shapes.
+        for &index in self.recursive_transparent_variants(adt.did()) {
+            let variant = &adt.variants()[index];
+            let repr_attribute = self.effective_erl_repr_kind_attr(variant.def_id);
+            let (repr, shape) =
+                self.reserve_erl_variant_repr(adt, variant, repr_attribute, ReprAttr::NativeRecord);
+            decided[index.index()] = Some(repr);
+            reserved_shapes.push(shape);
+        }
+
         // Decide explicit representations and non-newtypes. They take precedence over inferred
         // newtypes regardless of declaration order.
-        for variant in adt.variants().iter() {
+        for (index, variant) in adt.variants().iter_enumerated() {
+            if decided[index.index()].is_some() {
+                continue;
+            }
             let repr_attribute = self.effective_erl_repr_kind_attr(variant.def_id);
 
             let repr_attr = match erl_repr_attr(repr_attribute) {
                 Some(repr_attr) => repr_attr,
                 None if variant.fields.is_empty() => ReprAttr::Atom,
                 None if variant.fields.len() != 1 => ReprAttr::NativeRecord,
-                None => {
-                    decided.push(None);
-                    continue;
-                }
+                None => continue,
             };
 
             let (repr, reserved_shape) =
@@ -559,7 +569,7 @@ impl<'tcx> TyCtxt<'tcx> {
                 open_payload_variant_decided = true;
             }
 
-            decided.push(Some(repr));
+            decided[index.index()] = Some(repr);
             reserved_shapes.push(reserved_shape);
         }
 
@@ -725,8 +735,11 @@ fn erl_adt_reprs<'tcx>(tcx: TyCtxt<'tcx>, def_id: DefId) -> &'tcx [ErlVariantRep
 
     let variant = adt.non_enum_variant();
     let repr_attribute = tcx.effective_erl_repr_kind_attr(variant.def_id);
-    let repr_attr =
-        erl_repr_attr(repr_attribute).unwrap_or_else(|| struct_repr_from_arity(variant));
+    let repr_attr = if tcx.recursive_transparent_variants(def_id).contains(&FIRST_VARIANT) {
+        ReprAttr::NativeRecord
+    } else {
+        erl_repr_attr(repr_attribute).unwrap_or_else(|| struct_repr_from_arity(variant))
+    };
 
     let (repr, _reserved_shape) =
         tcx.reserve_erl_variant_repr(adt, variant, repr_attribute, repr_attr);

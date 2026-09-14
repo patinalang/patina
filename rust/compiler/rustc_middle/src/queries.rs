@@ -578,30 +578,20 @@ rustc_queries! {
         separate_provide_extern
     }
 
-    /// Checks whether a type is representable or infinitely sized
-    //
-    // Infinitely sized types will cause a cycle. The query's `handle_cycle_error_fn` will print
-    // a custom error about the infinite size and then abort compilation. (In the past we
-    // recovered and continued, but in practice that leads to confusing subsequent error
-    // messages about cycles that then abort.)
-    query check_representability(key: LocalDefId) {
-        desc { "checking if `{}` is representable", tcx.def_path_str(key) }
-        handle_cycle_error
-        // We don't want recursive representability calls to be forced with
-        // incremental compilation because, if a cycle occurs, we need the
-        // entire cycle to be in memory for diagnostics.
+    /// Variants that cannot be transparent because their outer representation would be recursive.
+    query recursive_transparent_variants(key: DefId) -> &'tcx [abi::VariantIdx] {
+        desc { "finding variants of `{}` that would be recursive if transparent", tcx.def_path_str(key) }
         no_force
     }
 
-    /// An implementation detail for the `check_representability` query. See that query for more
-    /// details, particularly on the modifiers.
-    query check_representability_adt_ty(key: Ty<'tcx>) {
-        desc { "checking if `{}` is representable", key }
-        handle_cycle_error
-        no_force
+    /// `params_in_repr` for every ADT of the local crate
+    query crate_params_in_repr(_: ()) -> &'tcx rustc_span::def_id::LocalDefIdMap<rustc_index::bit_set::DenseBitSet<u32>> {
+        arena_cache
+        no_hash
+        desc { "finding type parameters in the representation of the crate's ADTs" }
     }
 
-    /// Set of param indexes for type params that are in the type's representation
+    /// Parameters that can supply a potentially transparent ADT's outer representation.
     query params_in_repr(key: DefId) -> &'tcx rustc_index::bit_set::DenseBitSet<u32> {
         desc { "finding type parameters in the representation" }
         arena_cache

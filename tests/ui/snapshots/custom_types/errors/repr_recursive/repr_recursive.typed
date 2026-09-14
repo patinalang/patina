@@ -1,0 +1,110 @@
+#![allow(internal_features)]
+
+
+
+
+
+
+
+
+
+
+#![allow(dead_code)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+#[allow(unused_imports)]
+use Core::*;
+#[allow(unused)]
+extern mod io;
+#[allow(unused)]
+extern mod patina_fmt;
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
+struct ExplicitSelf(ExplicitSelf);
+
+enum ExplicitVariant {
+    End,
+    #[attr = Repr {reprs: [Transparent],
+    modifiers: [DynamicWrap]}]
+    Next(ExplicitVariant),
+}
+
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
+enum Inherited {
+    #[attr = Repr {reprs: [Atom],
+    modifiers: []}]
+    End,
+    #[attr = Repr {reprs: [],
+    modifiers: [DynamicWrap]}]
+    Next(Inherited),
+}
+
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
+struct ExplicitLeft(InferredRight);
+
+struct InferredRight(ExplicitLeft);
+
+struct Wrapper<T>(T);
+
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
+struct ThroughWrapper(Wrapper<ThroughWrapper>);
+
+// The recovery record collides with Reserved, but that must not produce an overlap cascade.
+enum RecoveryOverlap {
+    #[attr = Repr {reprs: [NativeRecord],
+    modifiers: [Tag("same")]}]
+    Reserved(int),
+    #[attr = Repr {reprs: [Transparent],
+    modifiers: [DynamicWrap,
+    Tag("same")]}]
+    Next(RecoveryOverlap),
+}
+
+// Override only the recursive variant; the enum's transparent repr still applies to Value.
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
+enum InheritedWithSibling { Value(int), Next(InheritedWithSibling), }
+
+// Term layout overrides must not disable ordinary field well-formedness or variance checks.
+struct OnlyRecursive<T>(OnlyRecursive<T>);
+
+trait Required { }
+
+struct Bounded<T>(T) where T: Required;
+
+struct InvalidField(Bounded<int>, InvalidField);
+
+#[attr = Repr {reprs: [Transparent], modifiers: [RecordModule("invalid")]}]
+struct InvalidModifier(InvalidModifier);
+
+struct Endless(Endless);
+
+struct EndlessTuple((EndlessTuple, int));
+
+// A recursion back-edge is conservatively inhabited, not a proof of emptiness.
+fn missing(value: Endless)
+    -> int ({ (match (value as Endless) { } as !) } as int)
+
+fn missing_tuple(value: EndlessTuple)
+    -> int ({ (match (value as EndlessTuple) { } as !) } as int)

@@ -1,0 +1,9 @@
+[{attribute,{102,1},file,{"tests/ui/src/custom_types/repr_recursive.pt",102}},
+ {attribute,{102,1},module,'Elixir.Patina.ReprRecursive.OverriddenChain'},
+ {attribute,{102,1},compile,[no_auto_import]},
+ {attribute,{102,1},import,{erlang,[{is_record,3}]}},
+ {attribute,{102,1},export_record,['Next']},
+ {attribute,{102,1},export,[]},
+ {attribute,{102,1},
+            native_record,
+            {'Next',[{record_field,{106,10},{atom,{106,10},'0'}}]}}]

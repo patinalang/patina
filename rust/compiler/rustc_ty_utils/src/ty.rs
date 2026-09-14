@@ -12,75 +12,6 @@ use rustc_middle::ty::{
 use rustc_span::DUMMY_SP;
 use rustc_span::def_id::{CRATE_DEF_ID, DefId, LocalDefId};
 use rustc_trait_selection::traits;
-use tracing::instrument;
-
-/// If `ty` implements the given `sizedness` trait, returns `None`. Otherwise, returns the type
-/// that must implement the given `sizedness` for `ty` to implement it.
-#[instrument(level = "debug", skip(tcx), ret)]
-fn sizedness_constraint_for_ty<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    sizedness: SizedTraitKind,
-    ty: Ty<'tcx>,
-) -> Option<Ty<'tcx>> {
-    match ty.kind() {
-        // Always `Sized` or `MetaSized`
-        ty::Bool
-        | ty::Char
-        | ty::Int
-        | ty::Float
-        | ty::RawPtr(..)
-        | ty::Ref(..)
-        | ty::FnDef(..)
-        | ty::FnPtr(..)
-        | ty::Array(..)
-        | ty::Closure(..)
-        | ty::CoroutineClosure(..)
-        | ty::Coroutine(..)
-        | ty::CoroutineWitness(..)
-        | ty::Str
-        | ty::Term
-        | ty::Atom
-        | ty::Map(..)
-        | ty::Slice(..)
-        | ty::Never => None,
-
-        ty::Dynamic(_, _) => match sizedness {
-            // Never `Sized`
-            SizedTraitKind::Sized => Some(ty),
-            // Always `MetaSized`
-            SizedTraitKind::MetaSized => None,
-        },
-
-        // Maybe `Sized` or `MetaSized`
-        ty::Param(..) | ty::Alias(..) | ty::Error(_) => Some(ty),
-
-        // We cannot instantiate the binder, so just return the *original* type back,
-        // but only if the inner type has a sized constraint. Thus we skip the binder,
-        // but don't actually use the result from `sized_constraint_for_ty`.
-        ty::UnsafeBinder(inner_ty) => {
-            sizedness_constraint_for_ty(tcx, sizedness, inner_ty.skip_binder()).map(|_| ty)
-        }
-
-        // Never `MetaSized` or `Sized`
-        ty::Foreign(..) => Some(ty),
-
-        // Recursive cases
-        ty::Pat(ty, _) => sizedness_constraint_for_ty(tcx, sizedness, *ty),
-
-        ty::Tuple(tys) => {
-            tys.last().and_then(|&ty| sizedness_constraint_for_ty(tcx, sizedness, ty))
-        }
-
-        ty::Adt(adt, args) => adt.sizedness_constraint(tcx, sizedness).and_then(|intermediate| {
-            let ty = intermediate.instantiate(tcx, args).skip_norm_wip();
-            sizedness_constraint_for_ty(tcx, sizedness, ty)
-        }),
-
-        ty::Placeholder(..) | ty::Bound(..) | ty::Infer(..) => {
-            bug!("unexpected type `{ty:?}` in `sizedness_constraint_for_ty`")
-        }
-    }
-}
 
 fn defaultness(tcx: TyCtxt<'_>, def_id: LocalDefId) -> hir::Defaultness {
     match tcx.hir_node_by_def_id(def_id) {
@@ -103,52 +34,11 @@ fn defaultness(tcx: TyCtxt<'_>, def_id: LocalDefId) -> hir::Defaultness {
     }
 }
 
-/// Returns the type of the last field of a struct ("the constraint") which must implement the
-/// `sizedness` trait for the whole ADT to be considered to implement that `sizedness` trait.
-/// `def_id` is assumed to be the `AdtDef` of a struct and will panic otherwise.
-///
-/// For `Sized`, there are only a few options for the types in the constraint:
-///     - an meta-sized type (str, slices, trait objects, etc)
-///     - an pointee-sized type (extern types)
-///     - a type parameter or projection whose sizedness can't be known
-///
-/// For `MetaSized`, there are only a few options for the types in the constraint:
-///     - an pointee-sized type (extern types)
-///     - a type parameter or projection whose sizedness can't be known
-#[instrument(level = "debug", skip(tcx), ret)]
 fn adt_sizedness_constraint<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    (def_id, sizedness): (DefId, SizedTraitKind),
+    _: TyCtxt<'tcx>,
+    _: (DefId, SizedTraitKind),
 ) -> Option<ty::EarlyBinder<'tcx, Ty<'tcx>>> {
-    if let Some(def_id) = def_id.as_local() {
-        tcx.ensure_ok().check_representability(def_id);
-    }
-
-    let def = tcx.adt_def(def_id);
-
-    if !def.is_struct() {
-        bug!("`adt_sizedness_constraint` called on non-struct type: {def:?}");
-    }
-
-    let tail_def = def.non_enum_variant().tail_opt()?;
-    let tail_ty = tcx.type_of(tail_def.did).instantiate_identity().skip_norm_wip();
-
-    let constraint_ty = sizedness_constraint_for_ty(tcx, sizedness, tail_ty)?;
-
-    // perf hack: if there is a `constraint_ty: {Meta,}Sized` bound, then we know
-    // that the type is sized and do not need to check it on the impl.
-    let sizedness_trait_def_id = sizedness.require_lang_item(tcx);
-    let predicates = tcx.predicates_of(def.did()).predicates;
-    if predicates.iter().any(|(p, _)| {
-        p.as_trait_clause().is_some_and(|trait_pred| {
-            trait_pred.def_id() == sizedness_trait_def_id
-                && trait_pred.self_ty().skip_binder() == constraint_ty
-        })
-    }) {
-        return None;
-    }
-
-    Some(ty::EarlyBinder::bind(constraint_ty))
+    None
 }
 
 /// See `ParamEnv` struct definition for details.

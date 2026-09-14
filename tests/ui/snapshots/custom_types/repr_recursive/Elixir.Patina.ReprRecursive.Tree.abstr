@@ -1,0 +1,10 @@
+[{attribute,{8,1},file,{"tests/ui/src/custom_types/repr_recursive.pt",8}},
+ {attribute,{8,1},module,'Elixir.Patina.ReprRecursive.Tree'},
+ {attribute,{8,1},compile,[no_auto_import]},
+ {attribute,{8,1},import,{erlang,[{is_record,3}]}},
+ {attribute,{8,1},export_record,['Branch']},
+ {attribute,{8,1},export,[]},
+ {attribute,{8,1},
+            native_record,
+            {'Branch',[{record_field,{10,12},{atom,{10,12},'0'}},
+                       {record_field,{10,18},{atom,{10,18},'1'}}]}}]

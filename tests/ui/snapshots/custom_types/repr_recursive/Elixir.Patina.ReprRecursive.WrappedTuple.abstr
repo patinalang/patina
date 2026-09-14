@@ -1,0 +1,6 @@
+[{attribute,{60,1},file,{"tests/ui/src/custom_types/repr_recursive.pt",60}},
+ {attribute,{60,1},module,'Elixir.Patina.ReprRecursive.WrappedTuple'},
+ {attribute,{60,1},compile,[no_auto_import]},
+ {attribute,{60,1},import,{erlang,[{is_record,3}]}},
+ {attribute,{60,1},export_record,[]},
+ {attribute,{60,1},export,[]}]

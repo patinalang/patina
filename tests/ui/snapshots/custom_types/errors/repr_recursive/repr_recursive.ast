@@ -1,0 +1,66 @@
+#![allow(dead_code)]
+
+#[repr(transparent)]
+struct ExplicitSelf(ExplicitSelf);
+
+enum ExplicitVariant {
+    End,
+
+    #[repr(transparent, dynamic_wrap)]
+    Next(ExplicitVariant),
+}
+
+#[repr(transparent)]
+enum Inherited {
+
+    #[repr(atom)]
+    End,
+
+    #[repr(dynamic_wrap)]
+    Next(Inherited),
+}
+
+#[repr(transparent)]
+struct ExplicitLeft(InferredRight);
+
+struct InferredRight(ExplicitLeft);
+
+struct Wrapper<T>(T);
+
+#[repr(transparent)]
+struct ThroughWrapper(Wrapper<ThroughWrapper>);
+
+// The recovery record collides with Reserved, but that must not produce an overlap cascade.
+enum RecoveryOverlap {
+
+    #[repr(native_record, tag = "same")]
+    Reserved(int),
+
+    #[repr(transparent, dynamic_wrap, tag = "same")]
+    Next(RecoveryOverlap),
+}
+
+// Override only the recursive variant; the enum's transparent repr still applies to Value.
+#[repr(transparent)]
+enum InheritedWithSibling { Value(int), Next(InheritedWithSibling), }
+
+// Term layout overrides must not disable ordinary field well-formedness or variance checks.
+struct OnlyRecursive<T>(OnlyRecursive<T>);
+
+trait Required {}
+
+struct Bounded<T: Required>(T);
+
+struct InvalidField(Bounded<int>, InvalidField);
+
+#[repr(transparent, record_module = "invalid")]
+struct InvalidModifier(InvalidModifier);
+
+struct Endless(Endless);
+
+struct EndlessTuple((EndlessTuple, int));
+
+// A recursion back-edge is conservatively inhabited, not a proof of emptiness.
+fn missing(value: Endless) -> int { match value {} }
+
+fn missing_tuple(value: EndlessTuple) -> int { match value {} }

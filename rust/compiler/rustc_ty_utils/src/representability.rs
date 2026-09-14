@@ -1,124 +1,179 @@
+use rustc_abi::VariantIdx;
+use rustc_data_structures::fx::{FxHashSet, FxIndexSet};
+use rustc_data_structures::graph::vec_graph::VecGraph;
+use rustc_data_structures::work_queue::WorkQueue;
+use rustc_hir::attrs::ReprAttr;
 use rustc_hir::def::DefKind;
 use rustc_index::bit_set::DenseBitSet;
-use rustc_middle::bug;
 use rustc_middle::query::Providers;
 use rustc_middle::ty::{self, Ty, TyCtxt};
-use rustc_span::def_id::LocalDefId;
+use rustc_span::def_id::{DefId, LocalDefId, LocalDefIdMap};
+
+struct Solver {
+    ids: FxIndexSet<LocalDefId>,
+    /// The current [`params_in_repr`] summary of each node.
+    sets: Vec<DenseBitSet<u32>>,
+}
 
 pub(crate) fn provide(providers: &mut Providers) {
     *providers = Providers {
-        check_representability,
-        check_representability_adt_ty,
+        recursive_transparent_variants,
+        crate_params_in_repr,
         params_in_repr,
         ..*providers
     };
 }
 
-fn check_representability(tcx: TyCtxt<'_>, def_id: LocalDefId) {
-    match tcx.def_kind(def_id) {
-        DefKind::Struct | DefKind::Union | DefKind::Enum => {
-            for variant in tcx.adt_def(def_id).variants() {
-                for field in variant.fields.iter() {
-                    tcx.ensure_ok().check_representability(field.did.expect_local());
-                }
-            }
-        }
-        DefKind::Field => {
-            check_representability_ty(
-                tcx,
-                tcx.type_of(def_id).instantiate_identity().skip_norm_wip(),
-            );
-        }
-        def_kind => bug!("unexpected {def_kind:?}"),
-    }
+/// Returns the variants of `def_id` whose representation would be recursive if they were
+/// transparent, that is, the ones whose payload leads back to `def_id` itself.
+fn recursive_transparent_variants(tcx: TyCtxt<'_>, def_id: DefId) -> &[VariantIdx] {
+    let mut seen = FxHashSet::default();
+    tcx.arena.alloc_from_iter(potentially_transparent_payloads(tcx, def_id).filter_map(
+        |(variant, payload_ty)| {
+            seen.clear();
+            representation_reaches_adt(tcx, payload_ty, def_id, &mut seen).then_some(variant)
+        },
+    ))
 }
 
-fn check_representability_ty<'tcx>(tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) {
-    match *ty.kind() {
-        // This one must be a query rather than a vanilla `check_representability_adt_ty` call. See
-        // the comment on `check_representability_adt_ty` below for why.
-        ty::Adt(..) => {
-            tcx.ensure_ok().check_representability_adt_ty(ty);
-        }
-        // FIXME(#11924) allow zero-length arrays?
-        ty::Array(ty, _) => {
-            check_representability_ty(tcx, ty);
-        }
-        ty::Tuple(tys) => {
-            for ty in tys {
-                check_representability_ty(tcx, ty);
-            }
-        }
-        _ => {}
+/// Whether the outer representation of `ty` can be `root`'s own, directly or by way of the
+/// payloads and generic arguments it is made of.
+fn representation_reaches_adt<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    ty: Ty<'tcx>,
+    root: DefId,
+    seen: &mut FxHashSet<DefId>,
+) -> bool {
+    let ty::Adt(adt, args) = ty.kind() else { return false };
+    if adt.did() == root {
+        return true;
     }
-}
-
-// The reason for this being a separate query is very subtle. Consider this
-// infinitely sized struct: `struct Foo(Box<Foo>, Bar<Foo>)`. When calling
-// check_representability(Foo), a query cycle will occur:
-//
-//   check_representability(Foo)
-//     -> check_representability_adt_ty(Bar<Foo>)
-//     -> check_representability(Foo)
-//
-// For the diagnostic output (in `check_representability`), we want to detect
-// that the `Foo` in the *second* field of the struct is culpable. This
-// requires traversing the HIR of the struct and calling `params_in_repr(Bar)`.
-// But we can't call params_in_repr for a given type unless it is known to be
-// representable. params_in_repr will cycle/panic on infinitely sized types.
-// Looking at the query cycle above, we know that `Bar` is representable
-// because `check_representability_adt_ty(Bar<..>)` is in the cycle and
-// `check_representability(Bar)` is *not* in the cycle.
-fn check_representability_adt_ty<'tcx>(tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) {
-    let ty::Adt(adt, args) = ty.kind() else { bug!("expected adt") };
-    if let Some(def_id) = adt.did().as_local() {
-        tcx.ensure_ok().check_representability(def_id);
-    }
-    // At this point, we know that the item of the ADT type is representable;
-    // but the type parameters may cause a cycle with an upstream type
     let params_in_repr = tcx.params_in_repr(adt.did());
     for (i, arg) in args.iter().enumerate() {
-        if let ty::GenericArgKind::Type(ty) = arg.kind() {
-            if params_in_repr.contains(i as u32) {
-                check_representability_ty(tcx, ty);
-            }
+        if let ty::GenericArgKind::Type(ty) = arg.kind()
+            && params_in_repr.contains(i as u32)
+            && representation_reaches_adt(tcx, ty, root, seen)
+        {
+            return true;
         }
     }
+
+    if !seen.insert(adt.did()) {
+        return false;
+    }
+
+    potentially_transparent_payloads(tcx, adt.did())
+        .any(|(_, payload_ty)| representation_reaches_adt(tcx, payload_ty, root, seen))
 }
 
 fn params_in_repr(tcx: TyCtxt<'_>, def_id: LocalDefId) -> DenseBitSet<u32> {
-    let adt_def = tcx.adt_def(def_id);
-    let generics = tcx.generics_of(def_id);
-    let mut params_in_repr = DenseBitSet::new_empty(generics.own_params.len());
-    for variant in adt_def.variants() {
-        for field in variant.fields.iter() {
-            params_in_repr_ty(
-                tcx,
-                tcx.type_of(field.did).instantiate_identity().skip_norm_wip(),
-                &mut params_in_repr,
-            );
-        }
-    }
-    params_in_repr
+    tcx.crate_params_in_repr(())[&def_id].clone()
 }
 
-fn params_in_repr_ty<'tcx>(tcx: TyCtxt<'tcx>, ty: Ty<'tcx>, params_in_repr: &mut DenseBitSet<u32>) {
+fn crate_params_in_repr(tcx: TyCtxt<'_>, (): ()) -> LocalDefIdMap<DenseBitSet<u32>> {
+    let ids: FxIndexSet<_> = tcx
+        .hir_crate_items(())
+        .definitions()
+        .filter(|&id| matches!(tcx.def_kind(id), DefKind::Struct | DefKind::Union | DefKind::Enum))
+        .collect();
+
+    let mut edges = Vec::new();
+    for (index, &id) in ids.iter().enumerate() {
+        for (_, payload_ty) in potentially_transparent_payloads(tcx, id.to_def_id()) {
+            add_edges(payload_ty, index, &ids, &mut edges);
+        }
+    }
+
+    let dependents = VecGraph::<usize>::new(ids.len(), edges);
+    let sets = ids
+        .iter()
+        .map(|&id| DenseBitSet::new_empty(tcx.generics_of(id).own_params.len()))
+        .collect();
+    let mut solver = Solver { ids, sets };
+
+    let mut worklist = WorkQueue::with_none(solver.ids.len());
+    for index in 0..solver.ids.len() {
+        worklist.insert(index);
+    }
+    while let Some(index) = worklist.pop() {
+        let mut params_in_repr = DenseBitSet::new_empty(solver.sets[index].domain_size());
+        for (_, payload_ty) in potentially_transparent_payloads(tcx, solver.ids[index].to_def_id())
+        {
+            params_in_repr_ty(tcx, payload_ty, &solver, &mut params_in_repr);
+        }
+
+        if params_in_repr != solver.sets[index] {
+            solver.sets[index] = params_in_repr;
+            for &d in dependents.successors(index) {
+                worklist.insert(d);
+            }
+        }
+    }
+    solver.ids.iter().copied().zip(solver.sets).collect()
+}
+
+fn params_in_repr_ty<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    ty: Ty<'tcx>,
+    solver: &Solver,
+    params_in_repr: &mut DenseBitSet<u32>,
+) {
     match *ty.kind() {
         ty::Adt(adt, args) => {
-            let inner_params_in_repr = tcx.params_in_repr(adt.did());
+            // Summaries of ADTs from dependencies are already final, and cannot lead back here.
+            let inner_params_in_repr = match adt.did().as_local() {
+                Some(local) => &solver.sets[solver.ids.get_index_of(&local).unwrap()],
+                None => tcx.params_in_repr(adt.did()),
+            };
             for (i, arg) in args.iter().enumerate() {
                 if let ty::GenericArgKind::Type(ty) = arg.kind() {
                     if inner_params_in_repr.contains(i as u32) {
-                        params_in_repr_ty(tcx, ty, params_in_repr);
+                        params_in_repr_ty(tcx, ty, solver, params_in_repr);
                     }
                 }
             }
         }
-        ty::Array(ty, _) => params_in_repr_ty(tcx, ty, params_in_repr),
-        ty::Tuple(tys) => tys.iter().for_each(|ty| params_in_repr_ty(tcx, ty, params_in_repr)),
         ty::Param(param) => {
             params_in_repr.insert(param.index);
         }
         _ => {}
     }
+}
+
+/// Add dependencies on local ADTs named by `ty` or its nested generic arguments.
+/// Tuple, list and map contents are not inspected.
+fn add_edges(
+    ty: Ty<'_>,
+    from: usize,
+    ids: &FxIndexSet<LocalDefId>,
+    edges: &mut Vec<(usize, usize)>,
+) {
+    if let ty::Adt(adt, args) = ty.kind() {
+        if let Some(local) = adt.did().as_local()
+            && let Some(target) = ids.get_index_of(&local)
+        {
+            edges.push((target, from));
+        }
+        for arg in args.iter().filter_map(|arg| arg.as_type()) {
+            add_edges(arg, from, ids, edges);
+        }
+    }
+}
+
+/// Variants of `def_id` that have a single field and no conflicting `#[repr(...)]`, and are
+/// therefore free to be transparent. Each is paired with the identity-instantiated payload
+/// type it would then adopt.
+fn potentially_transparent_payloads<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    def_id: DefId,
+) -> impl Iterator<Item = (VariantIdx, Ty<'tcx>)> + 'tcx {
+    tcx.adt_def(def_id).variants().iter_enumerated().filter_map(move |(index, variant)| {
+        let [field] = variant.fields.iter().as_slice() else { return None };
+        match tcx.effective_erl_repr_kind_attr(variant.def_id) {
+            None | Some((ReprAttr::Patina | ReprAttr::Transparent, _)) => {
+                Some((index, tcx.type_of(field.did).instantiate_identity().skip_norm_wip()))
+            }
+            _ => None,
+        }
+    })
 }

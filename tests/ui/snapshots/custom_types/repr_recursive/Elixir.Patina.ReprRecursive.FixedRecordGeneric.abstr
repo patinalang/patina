@@ -1,0 +1,6 @@
+[{attribute,{76,1},file,{"tests/ui/src/custom_types/repr_recursive.pt",76}},
+ {attribute,{76,1},module,'Elixir.Patina.ReprRecursive.FixedRecordGeneric'},
+ {attribute,{76,1},compile,[no_auto_import]},
+ {attribute,{76,1},import,{erlang,[{is_record,3}]}},
+ {attribute,{76,1},export_record,[]},
+ {attribute,{76,1},export,[]}]

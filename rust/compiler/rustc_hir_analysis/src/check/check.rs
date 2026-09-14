@@ -1696,9 +1696,43 @@ fn check_enum(tcx: TyCtxt<'_>, def_id: LocalDefId) {
 fn check_erl_repr<'tcx>(tcx: TyCtxt<'tcx>, adt: AdtDef<'tcx>) {
     let args = ty::GenericArgs::identity_for_item(tcx, adt.did());
     let mut first_open_transparent: Option<(Ty<'_>, Span)> = None;
+    let recursive_variants = tcx.recursive_transparent_variants(adt.did());
 
-    for variant in adt.variants() {
+    for (index, variant) in adt.variants().iter_enumerated() {
         let variant_repr = tcx.erl_variant_repr(variant.def_id);
+        let recovering_transparent = if recursive_variants.contains(&index)
+            && let Some((ReprAttr::Transparent, span)) = variant_repr.repr_attribute
+        {
+            // Resolve the suggestion from the variant's own attributes, so an inherited
+            // enum representation is never replaced.
+            let transparent_span =
+                rustc_hir::find_attr!(tcx, variant.def_id, Repr { reprs, .. } => reprs).and_then(
+                    |reprs| {
+                        reprs.iter().find_map(|&(attr, span)| {
+                            (attr == ReprAttr::Transparent).then_some(span)
+                        })
+                    },
+                );
+            let (suggestion_span, repr_attribute) = if let Some(span) = transparent_span {
+                (span, "...".to_owned())
+            } else {
+                let variant_span = tcx.def_span(variant.def_id);
+                let indentation =
+                    tcx.sess.source_map().indentation_before(variant_span).unwrap_or_default();
+                (variant_span.shrink_to_lo(), format!("#[repr(...)]\n{indentation}"))
+            };
+            tcx.dcx().emit_err(crate::errors::RecursiveTransparentRepr {
+                span,
+                payload_span: tcx.def_span(variant.fields[FieldIdx::ZERO].did),
+                suggestion_span,
+                repr_attribute,
+            });
+
+            true
+        } else {
+            false
+        };
+
         let variant_span = tcx.def_span(variant.def_id);
         let repr = variant_repr.kind;
         let open_shape = matches!(repr, ErlReprKind::Transparent { open_payload: true });
@@ -1738,6 +1772,7 @@ fn check_erl_repr<'tcx>(tcx: TyCtxt<'tcx>, adt: AdtDef<'tcx>) {
 
         if !open_shape
             && adt.is_enum()
+            && !recovering_transparent
             && let Some(dynamic_wrap_span) = dynamic_wrap
         {
             tcx.dcx().emit_err(crate::errors::DynamicWrapRequiresOpenTransparentVariant {
@@ -1747,7 +1782,7 @@ fn check_erl_repr<'tcx>(tcx: TyCtxt<'tcx>, adt: AdtDef<'tcx>) {
         }
 
         if let Some((_module, attr_span)) = tcx.find_erl_record_module_attr(variant.def_id)
-            && repr != ErlReprKind::NativeRecord
+            && (repr != ErlReprKind::NativeRecord || recovering_transparent)
         {
             tcx.dcx().emit_err(crate::errors::RecordModuleRequiresNativeRecord {
                 span: attr_span,
@@ -1783,12 +1818,18 @@ fn check_erl_repr<'tcx>(tcx: TyCtxt<'tcx>, adt: AdtDef<'tcx>) {
 
     let variants = adt
         .variants()
-        .iter()
-        .map(|variant| {
+        .iter_enumerated()
+        .filter_map(|(index, variant)| {
             let span = tcx.def_span(variant.def_id);
             let repr = tcx.erl_variant_repr(variant.def_id);
-            let shape = tcx.erl_variant_reserved_shape(adt, variant, repr);
-            (span, shape)
+            if recursive_variants.contains(&index)
+                && matches!(repr.repr_attribute, Some((ReprAttr::Transparent, _)))
+            {
+                None
+            } else {
+                let shape = tcx.erl_variant_reserved_shape(adt, variant, repr);
+                Some((span, shape))
+            }
         })
         .collect::<SmallVec<[_; 4]>>();
 

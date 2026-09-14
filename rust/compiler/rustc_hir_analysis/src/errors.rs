@@ -36,6 +36,23 @@ pub(crate) struct TransparentReprRequiresNewtype {
 }
 
 #[derive(Diagnostic)]
+#[diag("transparent representation creates a recursive representation cycle")]
+pub(crate) struct RecursiveTransparentRepr {
+    #[primary_span]
+    #[label("this attribute requires a transparent representation")]
+    pub span: Span,
+    #[label("can transparently contain itself")]
+    pub payload_span: Span,
+    #[suggestion(
+        "use a non-transparent representation to break the cycle",
+        code = "{repr_attribute}",
+        applicability = "has-placeholders"
+    )]
+    pub suggestion_span: Span,
+    pub repr_attribute: String,
+}
+
+#[derive(Diagnostic)]
 #[diag("enum variants have overlapping runtime shapes")]
 #[note("enum variants must be uniquely distinguishable at runtime")]
 pub(crate) struct VariantShapesOverlap {
