@@ -370,6 +370,19 @@ impl<'a, 'tcx> ThirPrinter<'a, 'tcx> {
                 print_indented!(self, "]", depth_lvl + 1);
                 print_indented!(self, "}", depth_lvl);
             }
+            Receive { arms, timeout } => {
+                print_indented!(self, "Receive {", depth_lvl);
+                for arm in arms {
+                    self.print_arm(*arm, depth_lvl + 1);
+                }
+                if let Some(timeout) = timeout {
+                    print_indented!(self, "duration:", depth_lvl + 1);
+                    self.print_expr(timeout.expr, depth_lvl + 2);
+                    print_indented!(self, "timeout body:", depth_lvl + 1);
+                    self.print_expr(timeout.body, depth_lvl + 2);
+                }
+                print_indented!(self, "}", depth_lvl);
+            }
             Block { block } => self.print_block(*block, depth_lvl),
             Assign { lhs, rhs } => {
                 print_indented!(self, "Assign {", depth_lvl);

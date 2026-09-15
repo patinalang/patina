@@ -402,6 +402,7 @@ impl<'a, 'tcx> Visitor<'a, 'tcx> for UnsafetyVisitor<'a, 'tcx> {
             | ExprKind::Loop { .. }
             | ExprKind::LoopMatch { .. }
             | ExprKind::Let { .. }
+            | ExprKind::Receive { .. }
             | ExprKind::Match { .. }
             | ExprKind::If { .. }
             | ExprKind::InlineAsm { .. }

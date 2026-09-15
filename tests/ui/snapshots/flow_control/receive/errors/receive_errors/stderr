@@ -1,0 +1,61 @@
+error[E0308]: mismatched types
+  --> tests/ui/src/flow_control/receive/errors/receive_errors.pt:6:35
+   |
+LL |     receive { int(n) => n } after 10 { -1 }
+   |                                   ^^ expected `Timeout`, found `int`
+   |
+help: try wrapping the expression in `Core::Timeout::Millis`
+   |
+LL |     receive { int(n) => n } after Core::Timeout::Millis(10) { -1 }
+   |                                   ++++++++++++++++++++++  +
+
+error[E0133]: matching a `term` by runtime representation is unsafe and requires unsafe block
+  --> tests/ui/src/flow_control/receive/errors/receive_errors.pt:10:15
+   |
+LL |     receive { Value { number } => number }
+   |               ^^^^^^^^^^^^^^^^ pattern matched by representation only
+   |
+   = note: different Patina types can share one BEAM representation; this pattern cannot tell them apart
+
+error[E0308]: `match` arms have incompatible types
+  --> tests/ui/src/flow_control/receive/errors/receive_errors.pt:14:39
+   |
+LL |     receive { int(n) => n, atom(a) => a }
+   |     ----------------------------------^--
+   |     |                   |             |
+   |     |                   |             expected `int`, found `atom`
+   |     |                   this is found to be of type `int`
+   |     `match` arms have incompatible types
+
+error[E0308]: mismatched types
+  --> tests/ui/src/flow_control/receive/errors/receive_errors.pt:18:61
+   |
+LL | fn incompatible_timeout() -> int {
+   |                              --- expected `int` because of return type
+LL |     receive { int(n) => n } after Timeout::from_millis(0) { a"bad" }
+   |                                                             ^^^^^^ expected `int`, found `atom`
+
+error: range patterns cannot match a `term`
+  --> tests/ui/src/flow_control/receive/errors/receive_errors.pt:22:15
+   |
+LL |     receive { 1..=5 => 0 }
+   |               ^^^^^
+
+error: unreachable pattern
+  --> tests/ui/src/flow_control/receive/errors/receive_errors.pt:26:23
+   |
+LL |     receive { _ => 1, int(n) => n }
+   |               -       ^^^^^^ no value can reach this
+   |               |
+   |               matches any value
+   |
+note: the lint level is defined here
+  --> tests/ui/src/flow_control/receive/errors/receive_errors.pt:1:9
+   |
+LL | #![deny(unreachable_patterns)]
+   |         ^^^^^^^^^^^^^^^^^^^^
+
+error: aborting due to 6 previous errors
+
+Some errors have detailed explanations: E0133, E0308.
+For more information about an error, try `rustc --explain E0133`.

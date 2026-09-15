@@ -921,6 +921,13 @@ impl<'tcx> ThirBuildCx<'tcx> {
                 then: self.mirror_expr(then),
                 else_opt: else_opt.map(|el| self.mirror_expr(el)),
             },
+            hir::ExprKind::Receive(arms, timeout) => ExprKind::Receive {
+                arms: arms.iter().map(|arm| self.convert_arm(arm)).collect(),
+                timeout: timeout.map(|timeout| ReceiveTimeout {
+                    expr: self.mirror_expr(timeout.expr),
+                    body: self.mirror_expr(timeout.body),
+                }),
+            },
             hir::ExprKind::Match(discr, arms, match_source) => ExprKind::Match {
                 scrutinee: self.mirror_expr(discr),
                 arms: arms.iter().map(|a| self.convert_arm(a)).collect(),

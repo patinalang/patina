@@ -144,6 +144,7 @@ impl CheckInlineAssembly {
             | ExprKind::Type(..)
             | ExprKind::UnsafeBinderCast(..)
             | ExprKind::Loop(..)
+            | ExprKind::Receive(..)
             | ExprKind::Match(..)
             | ExprKind::If(..)
             | ExprKind::Closure { .. }

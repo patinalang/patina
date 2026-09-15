@@ -60,13 +60,17 @@ pub(crate) struct TranslatedBody<'arena> {
     pub value: eaf::Expr<'arena>,
 }
 
-struct TranslatedArm<'arena> {
+struct Branch<'arena> {
     span: Span,
-    patterns: Patterns<'arena>,
-    guard: Option<eaf::Expr<'arena>>,
     body: eaf::Expr<'arena>,
     scope: Scope,
     always_diverges: bool,
+}
+
+struct TranslatedArm<'arena> {
+    patterns: Patterns<'arena>,
+    guard: Option<eaf::Expr<'arena>>,
+    branch: Branch<'arena>,
 }
 
 pub(super) struct BodyCx<'a, 'tcx, 'arena> {
@@ -143,6 +147,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
             ExprKind::If { if_then_scope: _, cond, then, else_opt } => {
                 self.translate_if(expr, *cond, *then, *else_opt)
+            }
+            ExprKind::Receive { arms, timeout } => {
+                self.translate_receive(expr, arms, timeout.as_ref())
             }
             ExprKind::Match { scrutinee, arms, .. } => self.translate_match(expr, *scrutinee, arms),
 
@@ -399,21 +406,25 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
                 let mut translated = SmallVec::new();
                 translated.push(TranslatedArm {
-                    span,
                     patterns: success_patterns,
                     guard: None,
-                    body: success_body,
-                    scope: success_scope,
-                    always_diverges: false,
+                    branch: Branch {
+                        span,
+                        body: success_body,
+                        scope: success_scope,
+                        always_diverges: false,
+                    },
                 });
                 let else_pattern = afb.pat_var(else_span, kw::Underscore);
                 translated.push(TranslatedArm {
-                    span: else_span,
                     patterns: else_pattern.into(),
                     guard: None,
-                    body: else_body,
-                    scope: else_scope,
-                    always_diverges: true,
+                    branch: Branch {
+                        span: else_span,
+                        body: else_body,
+                        scope: else_scope,
+                        always_diverges: true,
+                    },
                 });
 
                 Some((self.translate_to_case(span, rhs, translated), true))
@@ -913,21 +924,25 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
             let mut translated = SmallVec::new();
             translated.push(TranslatedArm {
-                span: then_span,
                 patterns: then_patterns,
                 guard: None,
-                body: then_body,
-                scope: then_scope,
-                always_diverges: then_always_diverges,
+                branch: Branch {
+                    span: then_span,
+                    body: then_body,
+                    scope: then_scope,
+                    always_diverges: then_always_diverges,
+                },
             });
             let else_pattern = self.translator.afb.pat_var(else_span, kw::Underscore);
             translated.push(TranslatedArm {
-                span: else_span,
                 patterns: else_pattern.into(),
                 guard: None,
-                body: else_body,
-                scope: else_scope,
-                always_diverges: else_always_diverges,
+                branch: Branch {
+                    span: else_span,
+                    body: else_body,
+                    scope: else_scope,
+                    always_diverges: else_always_diverges,
+                },
             });
             return self.translate_to_case(expr.span, scrutinee, translated);
         }
@@ -992,24 +1007,73 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     ) -> eaf::Expr<'arena> {
         let afb = &self.translator.afb;
 
-        let changed_vars = self
-            .scopes
-            .modified_outer_vars(translated.iter().map(|arm| (&arm.scope, arm.always_diverges)));
-
-        for arm in &mut translated {
-            arm.body =
-                self.bind_branch_outer_variables(arm.span, arm.body, &arm.scope, &changed_vars);
-        }
-
-        self.scopes.join_branches(&changed_vars);
+        self.merge_branches(translated.iter_mut().map(|arm| &mut arm.branch));
 
         let clauses = translated.into_iter().flat_map(|arm| {
-            let TranslatedArm { span, patterns, guard, body, .. } = arm;
+            let TranslatedArm { patterns, guard, branch: Branch { span, body, .. } } = arm;
             patterns.into_iter().map(move |GuardedPattern(pattern, pattern_guards)| {
                 afb.clause(span, [pattern], guard.into_iter().chain(pattern_guards), body)
             })
         });
         afb.expr_case(span, scrutinee, clauses)
+    }
+
+    fn merge_branches<'b>(&mut self, branches: impl IntoIterator<Item = &'b mut Branch<'arena>>)
+    where
+        'arena: 'b,
+    {
+        let mut branches: SmallVec<[&mut Branch<'arena>; 4]> = branches.into_iter().collect();
+        let changed_vars = self.scopes.modified_outer_vars(
+            branches.iter().map(|branch| (&branch.scope, branch.always_diverges)),
+        );
+        for branch in &mut branches {
+            branch.body = self.bind_branch_outer_variables(
+                branch.span,
+                branch.body,
+                &branch.scope,
+                &changed_vars,
+            );
+        }
+        self.scopes.join_branches(&changed_vars);
+    }
+
+    fn translate_receive(
+        &mut self,
+        expr: &Expr<'tcx>,
+        arms: &[thir::ArmId],
+        timeout: Option<&thir::ReceiveTimeout>,
+    ) -> eaf::Expr<'arena> {
+        let afb = &self.translator.afb;
+
+        let mut after = timeout.map(|timeout| {
+            let span = self.resolve_expr(timeout.body).span;
+            let always_diverges = self.is_always_diverging_expr(timeout.body);
+            let (body, scope) = self.with_scope(|cx| cx.translate_expr(timeout.body));
+            (self.translate_expr(timeout.expr), Branch { span, body, scope, always_diverges })
+        });
+
+        let mut translated = SmallVec::new();
+        for &arm in arms {
+            self.translate_arm(arm, &mut translated);
+        }
+        self.merge_branches(
+            translated
+                .iter_mut()
+                .map(|arm| &mut arm.branch)
+                .chain(after.iter_mut().map(|(_, branch)| branch)),
+        );
+
+        let clauses = translated.into_iter().flat_map(|arm| {
+            let TranslatedArm { patterns, guard, branch: Branch { span, body, .. } } = arm;
+            patterns.into_iter().map(move |GuardedPattern(pattern, pattern_guards)| {
+                afb.clause(span, [pattern], guard.into_iter().chain(pattern_guards), body)
+            })
+        });
+        afb.expr_receive(
+            expr.span,
+            clauses,
+            after.map(|(timeout_expr, branch)| (timeout_expr, branch.body)),
+        )
     }
 
     fn translate_arm(
@@ -1027,12 +1091,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             (patterns, guard, body, always_diverges)
         });
         translated.push(TranslatedArm {
-            span: *span,
             patterns,
             guard,
-            body,
-            scope,
-            always_diverges,
+            branch: Branch { span: *span, body, scope, always_diverges },
         });
     }
 

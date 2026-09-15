@@ -367,6 +367,7 @@ impl<'v> hir_visit::Visitor<'v> for StatCollector<'v> {
                 If,
                 Loop,
                 Match,
+                Receive,
                 Closure,
                 Block,
                 Assign,
@@ -667,7 +668,7 @@ impl<'v> ast_visit::Visitor<'v> for StatCollector<'v> {
             (self, e, e.kind, None, ast, Expr, ExprKind),
             [
                 Array, Map, ConstBlock, Call, MethodCall, Tup, Binary, Unary, Lit, Cast, Type, Let,
-                If, While, ForLoop, Loop, Match, Closure, Block, Await, Use, TryBlock, Assign,
+                If, While, ForLoop, Loop, Match, Receive, Closure, Block, Await, Use, TryBlock, Assign,
                 AssignOp, Field, Index, Range, Underscore, Path, AddrOf, Break, Continue, Ret,
                 InlineAsm, FormatArgs, OffsetOf, MacCall, Struct, Repeat, Paren, Try, Yield, Yeet,
                 Become, IncludedBytes, Gen, UnsafeBinderCast, Err, Dummy

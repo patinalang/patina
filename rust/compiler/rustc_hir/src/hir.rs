@@ -2136,6 +2136,14 @@ pub struct LetStmt<'hir> {
     pub source: LocalSource,
 }
 
+/// The timeout operand and fallback body of a `receive` expression.
+#[derive(Debug, Clone, Copy, StableHash)]
+pub struct ReceiveTimeout<'hir> {
+    pub expr: &'hir Expr<'hir>,
+    pub body: &'hir Expr<'hir>,
+    pub span: Span,
+}
+
 /// Represents a single arm of a `match` expression, e.g.
 /// `<pat> (if <guard>) => <body>`.
 #[derive(Debug, Clone, Copy, StableHash)]
@@ -2530,6 +2538,7 @@ impl Expr<'_> {
             | ExprKind::InlineAsm(..)
             | ExprKind::Lit(_)
             | ExprKind::Loop(..)
+            | ExprKind::Receive(..)
             | ExprKind::Match(..)
             | ExprKind::MethodCall(..)
             | ExprKind::OffsetOf(..)
@@ -2591,6 +2600,7 @@ impl Expr<'_> {
             | ExprKind::Struct(..)
             | ExprKind::Tup(..)
             | ExprKind::If(..)
+            | ExprKind::Receive(..)
             | ExprKind::Match(..)
             | ExprKind::Closure { .. }
             | ExprKind::Block(..)
@@ -2718,6 +2728,7 @@ impl Expr<'_> {
             }
             ExprKind::Repeat(arg, _) => arg.can_have_side_effects(),
             ExprKind::If(..)
+            | ExprKind::Receive(..)
             | ExprKind::Match(..)
             | ExprKind::MethodCall(..)
             | ExprKind::Call(..)
@@ -2914,6 +2925,8 @@ pub enum ExprKind<'hir> {
     /// A `match` block, with a source that indicates whether or not it is
     /// the result of a desugaring, and if so, which kind.
     Match(&'hir Expr<'hir>, &'hir [Arm<'hir>], MatchSource),
+    /// Selectively waits for a mailbox message, optionally with a timeout.
+    Receive(&'hir [Arm<'hir>], Option<&'hir ReceiveTimeout<'hir>>),
     /// A closure (e.g., `move |a, b, c| {a + b + c}`).
     ///
     /// The `Span` is the argument block `|...|`.

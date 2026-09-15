@@ -454,6 +454,20 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
                 self.walk_local(init, pat, None, || self.borrow_expr(init, BorrowKind::Immutable))?;
             }
 
+            hir::ExprKind::Receive(arms, timeout) => {
+                if let Some(timeout) = timeout {
+                    self.consume_expr(timeout.expr)?;
+                }
+                // Walk the arms as-if they were matching a `term` value.
+                let message_place = self.cat_rvalue(expr.hir_id, self.cx.tcx().types.term);
+                for arm in arms {
+                    self.walk_arm(&message_place, arm)?;
+                }
+                if let Some(timeout) = timeout {
+                    self.consume_expr(timeout.body)?;
+                }
+            }
+
             hir::ExprKind::Match(discr, arms, _) => {
                 let discr_place = self.cat_expr(discr)?;
                 self.fake_read_scrutinee(&discr_place, true)?;
@@ -1398,6 +1412,7 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
             | hir::ExprKind::Block(..)
             | hir::ExprKind::Let(..)
             | hir::ExprKind::Loop(..)
+            | hir::ExprKind::Receive(..)
             | hir::ExprKind::Match(..)
             | hir::ExprKind::Lit(..)
             | hir::ExprKind::ConstBlock(..)

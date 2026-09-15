@@ -337,6 +337,7 @@ impl<'tcx> TyCtxt<'tcx> {
                     | ExprKind::Unary(_, _)
                     | ExprKind::Cast(_, _)
                     | ExprKind::DropTemps(_)
+                    | ExprKind::Receive(..)
                     | ExprKind::If(_, _, _)
                     | ExprKind::Closure(_)
                     | ExprKind::Block(_, _)

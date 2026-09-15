@@ -1262,6 +1262,13 @@ pub(crate) struct MatchArmBodyWithoutBraces {
 }
 
 #[derive(Diagnostic)]
+#[diag("`receive` requires at least one arm or an `after` clause")]
+pub(crate) struct EmptyReceive {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag("unexpected `=` after inclusive range")]
 #[note("inclusive ranges end with a single equals sign (`..=`)")]
 pub(crate) struct InclusiveRangeExtraEquals {

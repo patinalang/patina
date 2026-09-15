@@ -259,6 +259,12 @@ pub struct Expr<'tcx> {
 }
 
 #[derive(Clone, Debug, StableHash)]
+pub struct ReceiveTimeout {
+    pub expr: ExprId,
+    pub body: ExprId,
+}
+
+#[derive(Clone, Debug, StableHash)]
 pub enum ExprKind<'tcx> {
     /// `Scope`s are used to explicitly mark destruction scopes,
     /// and to track the `HirId` of the expressions within the scope.
@@ -377,6 +383,11 @@ pub enum ExprKind<'tcx> {
     Let {
         expr: ExprId,
         pat: Box<Pat<'tcx>>,
+    },
+    /// Selectively waits for a mailbox message, optionally with a timeout.
+    Receive {
+        arms: Box<[ArmId]>,
+        timeout: Option<ReceiveTimeout>,
     },
     /// A `match` expression.
     Match {

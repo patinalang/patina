@@ -1519,6 +1519,11 @@ impl<'a> Parser<'a> {
                     err.span_label(lo, "while parsing this `match` expression");
                     err
                 })
+            } else if this.eat_keyword(exp!(Receive)) {
+                this.parse_expr_receive().map_err(|mut err| {
+                    err.span_label(lo, "while parsing this `receive` expression");
+                    err
+                })
             } else if this.eat_keyword(exp!(Unsafe)) {
                 this.parse_expr_block(None, lo, BlockCheckMode::Unsafe(ast::UserProvided)).map_err(
                     |mut err| {
@@ -3331,19 +3336,22 @@ impl<'a> Parser<'a> {
         }
         let attrs = self.parse_inner_attributes()?;
 
+        let (arms, hi) = self.parse_receive_or_match_arms(lo);
+        Ok(self.mk_expr_with_attrs(lo.to(hi), ExprKind::Match(scrutinee, arms, match_kind), attrs))
+    }
+
+    fn parse_receive_or_match_arms(&mut self, lo: Span) -> (ThinVec<Arm>, Span) {
         let mut arms = ThinVec::new();
         while self.token != token::CloseBrace {
             match self.parse_arm() {
                 Ok(arm) => arms.push(arm),
                 Err(e) => {
-                    // Recover by skipping to the end of the block.
                     let guar = e.emit();
                     self.recover_stmt();
                     let span = lo.to(self.token.span);
                     if self.token == token::CloseBrace {
                         self.bump();
                     }
-                    // Always push at least one arm to make the match non-empty
                     arms.push(Arm {
                         attrs: Default::default(),
                         pat: Box::new(self.mk_pat(span, ast::PatKind::Err(guar))),
@@ -3353,17 +3361,42 @@ impl<'a> Parser<'a> {
                         id: DUMMY_NODE_ID,
                         is_placeholder: false,
                     });
-                    return Ok(self.mk_expr_with_attrs(
-                        span,
-                        ExprKind::Match(scrutinee, arms, match_kind),
-                        attrs,
-                    ));
+                    return (arms, span);
                 }
             }
         }
         let hi = self.token.span;
         self.bump();
-        Ok(self.mk_expr_with_attrs(lo.to(hi), ExprKind::Match(scrutinee, arms, match_kind), attrs))
+        (arms, hi)
+    }
+
+    /// Parses a `receive { ... }` expression (`receive` token already eaten).
+    fn parse_expr_receive(&mut self) -> PResult<'a, Box<Expr>> {
+        let lo = self.prev_token.span;
+        self.expect(exp!(OpenBrace))?;
+        let attrs = self.parse_inner_attributes()?;
+        let (arms, hi) = self.parse_receive_or_match_arms(lo);
+        let timeout = if let Some((ident, IdentIsRaw::No)) = self.token.ident()
+            && ident.name == sym::after
+        {
+            let timeout_lo = self.token.span;
+            self.bump();
+            let (expr, _) =
+                self.parse_expr_res(Restrictions::NO_STRUCT_LITERAL, AttrWrapper::empty())?;
+            let body = self.parse_block()?;
+            Some(ast::ReceiveTimeout { span: timeout_lo.to(body.span), expr, body })
+        } else {
+            None
+        };
+        let span = lo.to(timeout.as_ref().map_or(hi, |timeout| timeout.span));
+        if arms.is_empty() && timeout.is_none() {
+            self.dcx().emit_err(errors::EmptyReceive { span });
+        }
+        Ok(self.mk_expr_with_attrs(
+            span,
+            ExprKind::Receive(Box::new(ast::ReceiveExpr { arms, timeout })),
+            attrs,
+        ))
     }
 
     /// Attempt to recover from match arm body with statements and no surrounding braces.
@@ -4612,6 +4645,7 @@ impl MutVisitor for CondChecker<'_> {
             | ExprKind::While(_, _, _)
             | ExprKind::ForLoop { .. }
             | ExprKind::Loop(_, _, _)
+            | ExprKind::Receive(_)
             | ExprKind::Match(_, _, _)
             | ExprKind::Closure(_)
             | ExprKind::Block(_, _)

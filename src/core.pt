@@ -364,3 +364,23 @@ partial_ord_impl! { bool int float str atom }
 
 #[lang = "structural_peq"]
 pub const trait StructuralPartialEq {}
+
+#[lang = "timeout"]
+pub enum Timeout {
+    #[repr(transparent)]
+    Millis(int),
+    #[repr(atom, tag = "infinity")]
+    Infinity,
+}
+
+impl Timeout {
+    pub const fn from_millis(ms: int) -> Timeout {
+        Timeout::Millis(ms)
+    }
+    pub const fn from_seconds(s: int) -> Timeout {
+        Timeout::Millis(s * 1000)
+    }
+    pub const fn from_minutes(m: int) -> Timeout {
+        Timeout::Millis(m * 60000)
+    }
+}

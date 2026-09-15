@@ -1,0 +1,8 @@
+error: `receive` requires at least one arm or an `after` clause
+  --> tests/ui/src/flow_control/receive/errors/empty_receive.pt:2:5
+   |
+LL |     receive {}
+   |     ^^^^^^^^^^
+
+error: aborting due to 1 previous error
+

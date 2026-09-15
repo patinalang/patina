@@ -1422,6 +1422,19 @@ impl LocalKind {
     }
 }
 
+#[derive(Clone, Encodable, Decodable, Debug, Walkable)]
+pub struct ReceiveExpr {
+    pub arms: ThinVec<Arm>,
+    pub timeout: Option<ReceiveTimeout>,
+}
+
+#[derive(Clone, Encodable, Decodable, Debug, Walkable)]
+pub struct ReceiveTimeout {
+    pub expr: Box<Expr>,
+    pub span: Span,
+    pub body: Box<Block>,
+}
+
 /// An arm of a 'match'.
 ///
 /// E.g., `0..=10 => { println!("match!") }` as in
@@ -1718,6 +1731,7 @@ impl Expr {
             | ExprKind::Lit(_)
             | ExprKind::Loop(..)
             | ExprKind::MacCall(..)
+            | ExprKind::Receive(..)
             | ExprKind::Match(..)
             | ExprKind::MethodCall(..)
             | ExprKind::OffsetOf(..)
@@ -1949,6 +1963,8 @@ pub enum ExprKind {
     Loop(Box<Block>, Option<Label>, Span),
     /// A `match` block.
     Match(Box<Expr>, ThinVec<Arm>, MatchKind),
+    /// Selectively waits for a mailbox message, optionally with a timeout.
+    Receive(Box<ReceiveExpr>),
     /// A closure (e.g., `move |a, b, c| a + b + c`).
     Closure(Box<Closure>),
     /// A block (`'label: { ... }`).

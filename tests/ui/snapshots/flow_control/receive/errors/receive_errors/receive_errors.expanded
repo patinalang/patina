@@ -1,0 +1,60 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs)]
+#![no_std]
+#![no_core]
+
+
+
+
+
+
+
+
+
+
+#![deny(unreachable_patterns)]
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+#[allow(unused_imports)]
+use Core::*;
+#[allow(unused)]
+extern mod io;
+#[allow(unused)]
+extern mod patina_fmt;
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! stringify { () => {}; }
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat { () => {}; }
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args { () => {}; }
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+struct Value {
+    number: int,
+}
+
+fn wrong_timeout() -> int { receive { int(n) => n, } after 10 { -1 } }
+
+fn unsafe_pattern() -> int { receive { Value { number } => number, } }
+
+fn incompatible_arms() -> int { receive { int(n) => n, atom(a) => a, } }
+
+fn incompatible_timeout() -> int {
+    receive { int(n) => n, } after Timeout::from_millis(0) { a"bad" }
+}
+
+fn range_pattern() -> int { receive { 1..=5 => 0, } }
+
+fn unreachable_arm() -> int { receive { _ => 1, int(n) => n, } }

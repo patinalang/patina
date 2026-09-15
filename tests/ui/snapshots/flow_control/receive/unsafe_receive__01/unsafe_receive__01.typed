@@ -1,0 +1,104 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/flow_control/receive/unsafe_receive.md
+// block: 1/1
+
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
+enum Option<T> {
+    #[attr = Repr {reprs: [],
+    modifiers: [DynamicWrap,
+    Tag("some")]}]
+    Some(T),
+    #[attr = Repr {reprs: [Atom],
+    modifiers: [Tag("nil")]}]
+    None,
+}
+
+fn main() ({
+    (unsafe {
+        (receive {
+            int(n) => {
+                ((io::put_chars as
+                        fn(term) -> term)(([([("got integer " as str),
+                                    ((patina_fmt::debug as fn(term) -> term)((n as int)) as
+                                        term)] as [term])] as [[term]])) as term);
+                ((io::nl as fn() -> term)() as term);
+            }
+            atom(a) => {
+                ((io::put_chars as
+                        fn(term) -> term)(([([("got atom " as str),
+                                    ((patina_fmt::debug as fn(term) -> term)((a as atom)) as
+                                        term)] as [term])] as [[term]])) as term);
+                ((io::nl as fn() -> term)() as term);
+            }
+            Option::<str>::None => {
+                ((io::put_chars as
+                        fn(term) -> term)(([([("got an empty string option" as str)]
+                                as [str])] as [[str]])) as term);
+                ((io::nl as fn() -> term)() as term);
+            }
+            Option::<int>::None => {
+                ((io::put_chars as
+                        fn(term) -> term)(([([("got an empty integer option" as
+                                        str)] as [str])] as [[str]])) as term);
+                ((io::nl as fn() -> term)() as term);
+            }
+            _ => {
+                ((io::put_chars as
+                        fn(term) -> term)(([([("got something else" as str)] as
+                                [str])] as [[str]])) as term);
+                ((io::nl as fn() -> term)() as term);
+            }
+        }
+            after ((Timeout::from_seconds as
+                    fn(int) -> Core::Timeout {Core::Timeout::from_seconds})((5
+                    as int)) as Core::Timeout)
+            ({
+                ({
+                    ((io::put_chars as
+                            fn(term) -> term)(([([("timeout" as str)] as [str])] as
+                            [[str]])) as term);
+                    ((io::nl as fn() -> term)() as term);
+                } as ())
+            } as ()) as ())
+    } as ())
+} as ())

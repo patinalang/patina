@@ -152,6 +152,7 @@ impl StableHash for LangItem {
 
 language_item_table! {
 //  Variant name,            Name,                     Getter method name,         Target                  Generic requirements;
+    Timeout,                 sym::timeout,             timeout,                    Target::Enum,           GenericRequirement::None;
     Sized,                   sym::sized,               sized_trait,                Target::Trait,          GenericRequirement::Exact(0);
     MetaSized,               sym::meta_sized,          meta_sized_trait,           Target::Trait,          GenericRequirement::Exact(0);
     PointeeSized,            sym::pointee_sized,       pointee_sized_trait,        Target::Trait,          GenericRequirement::Exact(0);

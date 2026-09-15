@@ -337,6 +337,7 @@ pub fn ident_can_begin_expr(name: Symbol, span: Span, is_raw: IdentIsRaw) -> boo
             kw::Loop,
             kw::Match,
             kw::Move,
+            kw::Receive,
             kw::Return,
             kw::True,
             kw::Try,

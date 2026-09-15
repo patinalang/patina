@@ -279,7 +279,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             | ExprKind::If(..)
             | ExprKind::Let(..)
             | ExprKind::Loop(..)
-            | ExprKind::Match(..) => {}
+            | ExprKind::Match(..)
+            | ExprKind::Receive(..) => {}
             // Do not warn on `as` casts from never to any,
             // they are sometimes required to appeal typeck.
             ExprKind::Cast(_, _) => {}
@@ -364,6 +365,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             ExprKind::Let(let_expr) => self.check_expr_let(let_expr, expr.hir_id),
             ExprKind::Loop(body, _, source, _) => {
                 self.check_expr_loop(body, source, expected, expr)
+            }
+            ExprKind::Receive(arms, timeout) => {
+                self.check_expr_receive(expr, arms, timeout, expected)
             }
             ExprKind::Match(discrim, arms, match_src) => {
                 self.check_expr_match(expr, discrim, arms, expected, match_src)

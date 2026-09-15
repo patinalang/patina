@@ -296,7 +296,11 @@ fn is_temporary_rvalue(expr: &Expr<'_>) -> bool {
         | ExprKind::Binary(..) => true,
 
         // Inner blocks are rvalues.
-        ExprKind::If(..) | ExprKind::Loop(..) | ExprKind::Match(..) | ExprKind::Block(..) => true,
+        ExprKind::If(..)
+        | ExprKind::Loop(..)
+        | ExprKind::Receive(..)
+        | ExprKind::Match(..)
+        | ExprKind::Block(..) => true,
 
         // FIXME: these should probably recurse and typecheck along the way.
         //        Some false negatives are possible for now.

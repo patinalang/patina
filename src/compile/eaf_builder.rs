@@ -465,6 +465,28 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         )
     }
 
+    pub(crate) fn expr_receive(
+        &self,
+        span: impl IntoAnno,
+        clauses: impl IntoIterator<Item = eaf::Clause<'arena>>,
+        after: Option<(eaf::Expr<'arena>, eaf::Expr<'arena>)>,
+    ) -> eaf::Expr<'arena> {
+        if let Some((timeout, body)) = after {
+            let body = match body {
+                eaf::Expr::Block(_, body) => body,
+                other => eaf::Body(self.arena.alloc_slice(&[other])),
+            };
+            eaf::Expr::ReceiveAfter(
+                span.into_anno(self.source_map),
+                self.arena.alloc_from_iter(clauses),
+                self.arena.alloc(timeout),
+                body,
+            )
+        } else {
+            eaf::Expr::Receive(span.into_anno(self.source_map), self.arena.alloc_from_iter(clauses))
+        }
+    }
+
     /// A block expression `begin ... end` over the given expressions.
     pub(crate) fn expr_block(
         &self,

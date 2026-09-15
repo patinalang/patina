@@ -1,0 +1,85 @@
+#![allow(non_camel_case_types)]
+#![deny(unused_unsafe)]
+
+extern mod erlang;
+
+#[repr(tagged, tag = "value")]
+pub struct Value { pub number: int }
+
+pub fn take_int() -> int {
+    receive { int(n) => n }
+}
+
+pub fn take_int_or_timeout() -> int {
+    receive { int(n) => n } after Timeout::from_millis(10) { -1 }
+}
+
+pub fn take_atom() -> atom {
+    receive { atom(a) => a }
+}
+
+pub fn echo() {
+    receive { (a"ping", pid(from)) => { erlang::send(from, a"pong"); } }
+}
+
+pub fn sum_until_stop() -> int {
+    let mut total = 0;
+    loop {
+        receive {
+            int(n) => { total += n; },
+            a"stop" => break,
+        }
+    }
+    total
+}
+
+pub fn unsafe_value() -> int {
+    unsafe {
+        receive { Value { number } => number } after Timeout::from_millis(0) { -1 }
+    }
+}
+
+pub fn only_timeout() -> int {
+    receive {} after Timeout::from_millis(0) { 7 }
+}
+
+pub fn guarded_or() -> int {
+    receive { (a"left" | a"right", int(n)) if n > 0 => n }
+}
+
+pub fn merge_timeout() -> int {
+    let mut value = 1;
+    receive { int(n) => { value = n; } } after Timeout::from_millis(0) { value = 2; }
+    value
+}
+
+pub fn unchanged_timeout() -> int {
+    let mut value = 1;
+    receive { int(n) => { value = n; } } after Timeout::from_millis(0) {}
+    value
+}
+
+pub fn durations() -> (Timeout, Timeout) {
+    (Timeout::from_seconds(2), Timeout::from_minutes(3))
+}
+
+pub fn contextual_after() -> int {
+    let after = 4;
+    after
+}
+
+pub struct `receive` { pub `after`: int }
+
+pub fn raw_identifiers() -> int {
+    let value = `receive` { `after`: 9 };
+    value.`after`
+}
+
+pub fn closure_receive(value: int) -> int {
+    let take = || receive { int(n) => n + value };
+    take()
+}
+
+pub fn diverging_timeout() -> int {
+    receive { int(n) => return n } after Timeout::from_millis(0) { return -1; }
+}

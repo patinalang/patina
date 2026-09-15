@@ -1,0 +1,78 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+// source: patina-by-example/src/flow_control/receive/unsafe_receive.md
+// block: 1/1
+
+#[repr(transparent)]
+pub enum Option<T> {
+
+    #[repr(dynamic_wrap, tag = "some")]
+    Some(T),
+
+    #[repr(atom, tag = "nil")]
+    None,
+}
+
+pub fn main() {
+    unsafe {
+        receive {
+            int(n) => {
+                io::put_chars([["got integer ", patina_fmt::debug(n)]]);
+                io::nl();
+            }
+            atom(a) => {
+                io::put_chars([["got atom ", patina_fmt::debug(a)]]);
+                io::nl();
+            }
+            Option::<str>::None => {
+                io::put_chars([["got an empty string option"]]);
+                io::nl();
+            }
+            Option::<int>::None => {
+                io::put_chars([["got an empty integer option"]]);
+                io::nl();
+            }
+            _ => { io::put_chars([["got something else"]]); io::nl(); }
+        } after Timeout::from_seconds(5)
+            { { io::put_chars([["timeout"]]); io::nl(); } }
+    }
+}

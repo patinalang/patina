@@ -88,6 +88,17 @@ pub fn walk_expr<'thir, 'tcx: 'thir, V: Visitor<'thir, 'tcx>>(
                 visitor.visit_arm(&visitor.thir()[arm]);
             }
         }
+        Receive { ref arms, ref timeout } => {
+            if let Some(timeout) = timeout {
+                visitor.visit_expr(&visitor.thir()[timeout.expr]);
+            }
+            for &arm in &**arms {
+                visitor.visit_arm(&visitor.thir()[arm]);
+            }
+            if let Some(timeout) = timeout {
+                visitor.visit_expr(&visitor.thir()[timeout.body]);
+            }
+        }
         Block { block } => visitor.visit_block(&visitor.thir()[block]),
         Assign { lhs, rhs } | AssignOp { lhs, rhs, op: _ } => {
             visitor.visit_expr(&visitor.thir()[lhs]);

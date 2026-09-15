@@ -598,6 +598,26 @@ impl<'a> State<'a> {
                 self.word_nbsp("loop");
                 self.print_block_with_attrs(blk, attrs, cb, ib);
             }
+            ast::ExprKind::Receive(receive) => {
+                let cb = self.cbox(0);
+                let ib = self.ibox(0);
+                self.word_nbsp("receive");
+                self.bopen(ib);
+                self.print_inner_attributes_no_trailing_hardbreak(attrs);
+                for arm in &receive.arms {
+                    self.print_arm(arm);
+                }
+                self.bclose(expr.span, receive.arms.is_empty() && attrs.is_empty(), cb);
+                if let Some(timeout) = &receive.timeout {
+                    self.space();
+                    self.word_nbsp("after");
+                    self.print_expr_as_cond(&timeout.expr);
+                    self.space();
+                    let cb = self.cbox(0);
+                    let ib = self.ibox(0);
+                    self.print_block(&timeout.body, cb, ib);
+                }
+            }
             ast::ExprKind::Match(expr, arms, match_kind) => {
                 let cb = self.cbox(0);
                 let ib = self.ibox(0);

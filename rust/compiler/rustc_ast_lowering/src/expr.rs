@@ -239,6 +239,16 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 ExprKind::TryBlock(body, opt_ty) => {
                     self.lower_expr_try_block(body, opt_ty.as_deref())
                 }
+                ExprKind::Receive(receive) => hir::ExprKind::Receive(
+                    self.arena.alloc_from_iter(receive.arms.iter().map(|arm| self.lower_arm(arm))),
+                    receive.timeout.as_ref().map(|timeout| {
+                        &*self.arena.alloc(hir::ReceiveTimeout {
+                            expr: self.lower_expr(&timeout.expr),
+                            body: self.arena.alloc(self.lower_block_expr(&timeout.body)),
+                            span: self.lower_span(timeout.span),
+                        })
+                    }),
+                ),
                 ExprKind::Match(expr, arms, kind) => hir::ExprKind::Match(
                     self.lower_expr(expr),
                     self.arena.alloc_from_iter(arms.iter().map(|x| self.lower_arm(x))),

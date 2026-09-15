@@ -774,6 +774,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             | ExprKind::MethodCall(..)
             | ExprKind::Loop(..)
             | ExprKind::If(..)
+            | ExprKind::Receive(..)
             | ExprKind::Match(..)
             | ExprKind::Block(..)
                 if expression.can_have_side_effects()

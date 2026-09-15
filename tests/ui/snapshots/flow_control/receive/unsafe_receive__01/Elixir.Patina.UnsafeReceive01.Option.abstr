@@ -1,0 +1,8 @@
+[{attribute,{5,1},
+            file,
+            {"tests/ui/src/flow_control/receive/unsafe_receive__01.pt",5}},
+ {attribute,{5,1},module,'Elixir.Patina.UnsafeReceive01.Option'},
+ {attribute,{5,1},compile,[no_auto_import]},
+ {attribute,{5,1},import,{erlang,[{is_record,3}]}},
+ {attribute,{5,1},export_record,[]},
+ {attribute,{5,1},export,[]}]

@@ -568,6 +568,8 @@ macro_rules! common_visitor_and_walkers {
             impl_visitable_calling_walkable!(<$($lt)? $($mut)?>
                 fn visit_anon_const(AnonConst);
                 fn visit_arm(Arm);
+                fn visit_receive_expr(ReceiveExpr);
+                fn visit_receive_timeout(ReceiveTimeout);
                 //fn visit_assoc_item(AssocItem, _ctxt: AssocCtxt);
                 fn visit_assoc_item_constraint(AssocItemConstraint);
                 fn visit_attribute(Attribute);
@@ -1017,6 +1019,7 @@ macro_rules! common_visitor_and_walkers {
                     visit_visitable!($($mut)? vis, pat, iter, body, label, kind),
                 ExprKind::Loop(block, opt_label, span) =>
                     visit_visitable!($($mut)? vis, block, opt_label, span),
+                ExprKind::Receive(receive) => visit_visitable!($($mut)? vis, receive),
                 ExprKind::Match(subexpression, arms, kind) =>
                     visit_visitable!($($mut)? vis, subexpression, arms, kind),
                 ExprKind::Closure(box Closure {
@@ -1094,6 +1097,8 @@ macro_rules! common_visitor_and_walkers {
         define_named_walk!($(($mut))? $Visitor$(<$lt>)?
             pub fn walk_anon_const(AnonConst);
             pub fn walk_arm(Arm);
+            pub fn walk_receive_expr(ReceiveExpr);
+            pub fn walk_receive_timeout(ReceiveTimeout);
             //pub fn walk_assoc_item(AssocItem, _ctxt: AssocCtxt);
             pub fn walk_assoc_item_constraint(AssocItemConstraint);
             pub fn walk_attribute(Attribute);

@@ -253,6 +253,11 @@ impl<'cx, 'a> Context<'cx, 'a> {
             ExprKind::Let(_, local_expr, _, _) => {
                 self.manage_cond_expr(local_expr);
             }
+            ExprKind::Receive(receive) => {
+                if let Some(timeout) = &mut receive.timeout {
+                    self.manage_cond_expr(&mut timeout.expr);
+                }
+            }
             ExprKind::Match(local_expr, ..) => {
                 self.manage_cond_expr(local_expr);
             }

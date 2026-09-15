@@ -1,0 +1,15 @@
+Ident
+Whitespace
+Ident
+OpenParen
+CloseParen
+Whitespace
+OpenBrace
+Whitespace
+Ident
+Whitespace
+OpenBrace
+CloseBrace
+Whitespace
+CloseBrace
+Whitespace

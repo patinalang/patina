@@ -15,6 +15,37 @@ use crate::coercion::CoerceMany;
 use crate::{Diverges, Expectation, FnCtxt, GatherLocalsVisitor, Needs};
 
 impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
+    pub(crate) fn check_expr_receive(
+        &self,
+        expr: &'tcx hir::Expr<'tcx>,
+        arms: &'tcx [hir::Arm<'tcx>],
+        timeout: Option<&'tcx hir::ReceiveTimeout<'tcx>>,
+        orig_expected: Expectation<'tcx>,
+    ) -> Ty<'tcx> {
+        let tcx = self.tcx;
+        // #55810: Type check patterns first so we get types for all bindings.
+        for arm in arms {
+            GatherLocalsVisitor::gather_from_arm(self, arm);
+            self.check_pat_top(arm.pat, tcx.types.term, None, None, None);
+        }
+        if let Some(timeout) = timeout {
+            let def_id = tcx.require_lang_item(hir::LangItem::Timeout, timeout.expr.span);
+            let timeout_ty = Ty::new_adt(tcx, tcx.adt_def(def_id), tcx.mk_args(&[]));
+            self.check_expr_has_type_or_error(timeout.expr, timeout_ty, |_| {});
+        }
+        let timeout_diverges = self.diverges.replace(Diverges::Maybe);
+        let (ty, all_diverge) = self.check_arm_bodies(
+            expr,
+            arms,
+            timeout.map(|timeout| timeout.body),
+            orig_expected,
+            hir::MatchSource::Normal,
+            expr.span,
+        );
+        self.diverges.set(timeout_diverges | all_diverge);
+        ty
+    }
+
     #[instrument(skip(self), level = "debug", ret)]
     pub(crate) fn check_expr_match(
         &self,
@@ -49,111 +80,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             self.check_pat_top(arm.pat, scrutinee_ty, Some(scrut_span), Some(scrut), None);
         }
 
-        // Now typecheck the blocks.
-        //
-        // The result of the match is the common supertype of all the
-        // arms. Start out the value as bottom, since it's the, well,
-        // bottom the type lattice, and we'll be moving up the lattice as
-        // we process each arm. (Note that any match with 0 arms is matching
-        // on any empty type and is therefore unreachable; should the flow
-        // of execution reach it, we will panic, so bottom is an appropriate
-        // type in that case)
-        let mut all_arms_diverge = Diverges::WarnedAlways;
-
-        let expected = orig_expected.try_structurally_resolve_and_adjust_for_branches(self);
-        debug!(?expected);
-
-        let mut coercion = {
-            let coerce_first = match expected {
-                // We don't coerce to `()` so that if the match expression is a
-                // statement it's branches can have any consistent type. That allows
-                // us to give better error messages (pointing to a usually better
-                // arm for inconsistent arms or to the whole match when a `()` type
-                // is required).
-                Expectation::ExpectHasType(ety) if ety != tcx.types.unit => ety,
-                _ => self.next_ty_var(expr.span),
-            };
-            CoerceMany::with_capacity(coerce_first, arms.len())
-        };
-
-        let mut prior_non_diverging_arms = vec![]; // Used only for diagnostics.
-        let mut prior_arm = None;
-        for arm in arms {
-            self.diverges.set(Diverges::Maybe);
-
-            if let Some(e) = &arm.guard {
-                self.check_expr_has_type_or_error(e, tcx.types.bool, |_| {});
-
-                // FIXME: If this is the first arm and the pattern is irrefutable,
-                // e.g. `_` or `x`, and the guard diverges, then the whole match
-                // may also be considered to diverge. We should warn on all subsequent
-                // arms, too, just like we do for diverging scrutinees above.
-            }
-
-            // N.B. We don't reset diverges here b/c we want to warn in the arm
-            // if the guard diverges, like: `x if { loop {} } => f()`, and we
-            // also want to consider the arm to diverge itself.
-
-            let arm_ty = self.check_expr_with_expectation(arm.body, expected);
-            all_arms_diverge &= self.diverges.get();
-            let tail_defines_return_position_impl_trait =
-                self.return_position_impl_trait_from_match_expectation(orig_expected);
-
-            let (arm_block_id, arm_span) = if let hir::ExprKind::Block(blk, _) = arm.body.kind {
-                (Some(blk.hir_id), self.find_block_span(blk))
-            } else {
-                (None, arm.body.span)
-            };
-
-            let code = match prior_arm {
-                // The reason for the first arm to fail is not that the match arms diverge,
-                // but rather that there's a prior obligation that doesn't hold.
-                None => ObligationCauseCode::BlockTailExpression(arm.body.hir_id, match_src),
-                Some((prior_arm_block_id, prior_arm_ty, prior_arm_span)) => {
-                    ObligationCauseCode::MatchExpressionArm(Box::new(MatchExpressionArmCause {
-                        arm_block_id,
-                        arm_span,
-                        arm_ty,
-                        prior_arm_block_id,
-                        prior_arm_ty,
-                        prior_arm_span,
-                        scrut_span: scrut.span,
-                        expr_span: expr.span,
-                        source: match_src,
-                        prior_non_diverging_arms: prior_non_diverging_arms.clone(),
-                        tail_defines_return_position_impl_trait,
-                    }))
-                }
-            };
-            let cause = self.cause(arm_span, code);
-
-            // This is the moral equivalent of `coercion.coerce(self, cause, arm.body, arm_ty)`.
-            // We use it this way to be able to expand on the potential error and detect when a
-            // `match` tail statement could be a tail expression instead. If so, we suggest
-            // removing the stray semicolon.
-            coercion.coerce_inner(
-                self,
-                &cause,
-                Some(arm.body),
-                arm_ty,
-                |err| {
-                    self.explain_never_type_coerced_to_unit(err, arm, arm_ty, prior_arm, expr);
-                },
-                false,
-            );
-
-            if !arm_ty.is_never() {
-                // When a match arm has type `!`, then it doesn't influence the expected type for
-                // the following arm. If all of the prior arms are `!`, then the influence comes
-                // from elsewhere and we shouldn't point to any previous arm.
-                prior_arm = Some((arm_block_id, arm_ty, arm_span));
-
-                prior_non_diverging_arms.push(arm_span);
-                if prior_non_diverging_arms.len() > 5 {
-                    prior_non_diverging_arms.remove(0);
-                }
-            }
-        }
+        let (ty, mut all_arms_diverge) =
+            self.check_arm_bodies(expr, arms, None, orig_expected, match_src, scrut.span);
 
         // If all of the arms in the `match` diverge,
         // and we're dealing with an actual `match` block
@@ -173,18 +101,140 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         // We won't diverge unless the scrutinee or all arms diverge.
         self.diverges.set(scrut_diverges | all_arms_diverge);
 
-        coercion.complete(self)
+        ty
+    }
+
+    /// Coerce `match`/`receive` arm bodies (and an optional extra body, e.g. a
+    /// `receive` timeout) to a common type.
+    fn check_arm_bodies(
+        &self,
+        expr: &'tcx hir::Expr<'tcx>,
+        arms: &'tcx [hir::Arm<'tcx>],
+        extra_body: Option<&'tcx hir::Expr<'tcx>>,
+        orig_expected: Expectation<'tcx>,
+        match_src: hir::MatchSource,
+        scrut_span: Span,
+    ) -> (Ty<'tcx>, Diverges) {
+        let tcx = self.tcx;
+
+        // The result of the match is the common supertype of all the
+        // arms. Start out the value as bottom, since it's the, well,
+        // bottom the type lattice, and we'll be moving up the lattice as
+        // we process each arm. (Note that any match with 0 arms is matching
+        // on any empty type and is therefore unreachable; should the flow
+        // of execution reach it, we will panic, so bottom is an appropriate
+        // type in that case)
+        let expected = orig_expected.try_structurally_resolve_and_adjust_for_branches(self);
+        debug!(?expected);
+
+        let mut coercion = {
+            let coerce_first = match expected {
+                // We don't coerce to `()` so that if the match expression is a
+                // statement it's branches can have any consistent type. That allows
+                // us to give better error messages (pointing to a usually better
+                // arm for inconsistent arms or to the whole match when a `()` type
+                // is required).
+                Expectation::ExpectHasType(ety) if ety != tcx.types.unit => ety,
+                _ => self.next_ty_var(expr.span),
+            };
+            CoerceMany::with_capacity(coerce_first, arms.len() + usize::from(extra_body.is_some()))
+        };
+
+        let mut all_arms_diverge = Diverges::WarnedAlways;
+        let mut prior_non_diverging_arms = vec![]; // Used only for diagnostics.
+        let mut prior_arm = None;
+
+        for (body, guard) in
+            arms.iter().map(|arm| (arm.body, arm.guard)).chain(extra_body.map(|body| (body, None)))
+        {
+            self.diverges.set(Diverges::Maybe);
+
+            if let Some(e) = guard {
+                self.check_expr_has_type_or_error(e, tcx.types.bool, |_| {});
+
+                // FIXME: If this is the first arm and the pattern is irrefutable,
+                // e.g. `_` or `x`, and the guard diverges, then the whole match
+                // may also be considered to diverge. We should warn on all subsequent
+                // arms, too, just like we do for diverging scrutinees above.
+            }
+
+            // N.B. We don't reset diverges here b/c we want to warn in the arm
+            // if the guard diverges, like: `x if { loop {} } => f()`, and we
+            // also want to consider the arm to diverge itself.
+
+            let arm_ty = self.check_expr_with_expectation(body, expected);
+            all_arms_diverge &= self.diverges.get();
+            let tail_defines_return_position_impl_trait =
+                self.return_position_impl_trait_from_match_expectation(orig_expected);
+
+            let (arm_block_id, arm_span) = if let hir::ExprKind::Block(blk, _) = body.kind {
+                (Some(blk.hir_id), self.find_block_span(blk))
+            } else {
+                (None, body.span)
+            };
+
+            let code = match prior_arm {
+                // The reason for the first arm to fail is not that the match arms diverge,
+                // but rather that there's a prior obligation that doesn't hold.
+                None => ObligationCauseCode::BlockTailExpression(body.hir_id, match_src),
+                Some((prior_arm_block_id, prior_arm_ty, prior_arm_span)) => {
+                    ObligationCauseCode::MatchExpressionArm(Box::new(MatchExpressionArmCause {
+                        arm_block_id,
+                        arm_span,
+                        arm_ty,
+                        prior_arm_block_id,
+                        prior_arm_ty,
+                        prior_arm_span,
+                        scrut_span,
+                        expr_span: expr.span,
+                        source: match_src,
+                        prior_non_diverging_arms: prior_non_diverging_arms.clone(),
+                        tail_defines_return_position_impl_trait,
+                    }))
+                }
+            };
+            let cause = self.cause(arm_span, code);
+
+            // This is the moral equivalent of `coercion.coerce(self, cause, body, arm_ty)`.
+            // We use it this way to be able to expand on the potential error and detect when a
+            // `match` tail statement could be a tail expression instead. If so, we suggest
+            // removing the stray semicolon.
+            coercion.coerce_inner(
+                self,
+                &cause,
+                Some(body),
+                arm_ty,
+                |err| {
+                    self.explain_never_type_coerced_to_unit(err, body, arm_ty, prior_arm, expr);
+                },
+                false,
+            );
+
+            if !arm_ty.is_never() {
+                // When a match arm has type `!`, then it doesn't influence the expected type for
+                // the following arm. If all of the prior arms are `!`, then the influence comes
+                // from elsewhere and we shouldn't point to any previous arm.
+                prior_arm = Some((arm_block_id, arm_ty, arm_span));
+
+                prior_non_diverging_arms.push(arm_span);
+                if prior_non_diverging_arms.len() > 5 {
+                    prior_non_diverging_arms.remove(0);
+                }
+            }
+        }
+
+        (coercion.complete(self), all_arms_diverge)
     }
 
     fn explain_never_type_coerced_to_unit(
         &self,
         err: &mut Diag<'_>,
-        arm: &hir::Arm<'tcx>,
+        body: &'tcx hir::Expr<'tcx>,
         arm_ty: Ty<'tcx>,
         prior_arm: Option<(Option<hir::HirId>, Ty<'tcx>, Span)>,
         expr: &hir::Expr<'tcx>,
     ) {
-        if let hir::ExprKind::Block(block, _) = arm.body.kind
+        if let hir::ExprKind::Block(block, _) = body.kind
             && let Some(expr) = block.expr
             && let arm_tail_ty = self.node_ty(expr.hir_id)
             && arm_tail_ty.is_never()

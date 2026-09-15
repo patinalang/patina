@@ -1,6 +1,14 @@
 // source: patina-by-example/src/flow_control/receive/unsafe_receive.md
 // block: 1/1
 
+#[repr(transparent)]
+pub enum Option<T> {
+    #[repr(dynamic_wrap, tag = "some")]
+    Some(T),
+    #[repr(atom, tag = "nil")]
+    None,
+}
+
 pub fn main() {
     unsafe {
         receive {
@@ -9,7 +17,7 @@ pub fn main() {
             Option::<str>::None => println!("got an empty string option"),
             Option::<int>::None => println!("got an empty integer option"),
             _ => println!("got something else"),
-        } timeout Duration::from_seconds(5) {
+        } after Timeout::from_seconds(5) {
             println!("timeout")
         }
     }

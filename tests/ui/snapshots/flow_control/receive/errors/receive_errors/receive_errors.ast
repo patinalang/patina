@@ -1,0 +1,19 @@
+#![deny(unreachable_patterns)]
+
+struct Value {
+    number: int,
+}
+
+fn wrong_timeout() -> int { receive { int(n) => n, } after 10 { -1 } }
+
+fn unsafe_pattern() -> int { receive { Value { number } => number, } }
+
+fn incompatible_arms() -> int { receive { int(n) => n, atom(a) => a, } }
+
+fn incompatible_timeout() -> int {
+    receive { int(n) => n, } after Timeout::from_millis(0) { a"bad" }
+}
+
+fn range_pattern() -> int { receive { 1..=5 => 0, } }
+
+fn unreachable_arm() -> int { receive { _ => 1, int(n) => n, } }

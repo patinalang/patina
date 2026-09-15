@@ -149,6 +149,9 @@ impl<'p, 'tcx> Visitor<'p, 'tcx> for MatchVisitor<'p, 'tcx> {
                 }
                 return;
             }
+            ExprKind::Receive { box ref arms, .. } => {
+                self.check_receive(arms, ex.span);
+            }
             ExprKind::Match { scrutinee, box ref arms, match_source } => {
                 self.check_match(scrutinee, arms, match_source, ex.span);
             }
@@ -354,6 +357,7 @@ impl<'p, 'tcx> MatchVisitor<'p, 'tcx> {
             | Loop { .. }
             | LoopMatch { .. }
             | Match { .. }
+            | Receive { .. }
             | NamedConst { .. }
             | NonHirLiteral { .. }
             | Repeat { .. }
@@ -480,6 +484,28 @@ impl<'p, 'tcx> MatchVisitor<'p, 'tcx> {
         } else {
             None
         }
+    }
+
+    fn check_receive(&mut self, arms: &[ArmId], span: Span) {
+        let cx = self.new_cx(Refutable, Some(span), None, span);
+
+        let mut tarms = Vec::with_capacity(arms.len());
+        for &arm in arms {
+            let arm = &self.thir[arm];
+            let got_error = self.with_hir_source(arm.hir_id, |this| {
+                let Ok(pat) = this.lower_pattern(&cx, &arm.pattern) else { return true };
+                let arm =
+                    MatchArm { pat, arm_data: this.hir_source, has_guard: arm.guard.is_some() };
+                tarms.push(arm);
+                false
+            });
+            if got_error {
+                return;
+            }
+        }
+        let Ok(report) = self.analyze_patterns(&cx, &tarms, self.tcx.types.term) else { return };
+        // Unmatched messages stay in the mailbox, so only reachability matters.
+        report_arm_reachability(&cx, &report, true);
     }
 
     fn check_match(

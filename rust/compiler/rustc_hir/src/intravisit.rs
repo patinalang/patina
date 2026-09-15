@@ -909,6 +909,13 @@ pub fn walk_expr<'v, V: Visitor<'v>>(visitor: &mut V, expression: &'v Expr<'v>) 
             visit_opt!(visitor, visit_label, opt_label);
             try_visit!(visitor.visit_block(block));
         }
+        ExprKind::Receive(arms, timeout) => {
+            walk_list!(visitor, visit_arm, arms);
+            if let Some(timeout) = timeout {
+                try_visit!(visitor.visit_expr(timeout.expr));
+                try_visit!(visitor.visit_expr(timeout.body));
+            }
+        }
         ExprKind::Match(ref subexpression, arms, _) => {
             try_visit!(visitor.visit_expr(subexpression));
             walk_list!(visitor, visit_arm, arms);

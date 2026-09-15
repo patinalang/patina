@@ -1669,6 +1669,23 @@ impl<'a> State<'a> {
                 self.word_nbsp("loop");
                 self.print_block(blk, cb, ib);
             }
+            hir::ExprKind::Receive(arms, timeout) => {
+                let cb = self.cbox(0);
+                let ib = self.ibox(0);
+                self.word_nbsp("receive");
+                self.bopen(ib);
+                for arm in arms {
+                    self.print_arm(arm);
+                }
+                self.bclose(expr.span, cb);
+                if let Some(timeout) = timeout {
+                    self.space();
+                    self.word_nbsp("after");
+                    self.print_expr_as_cond(timeout.expr);
+                    self.space();
+                    self.print_expr(timeout.body);
+                }
+            }
             hir::ExprKind::Match(expr, arms, _) => {
                 let cb = self.cbox(0);
                 let ib = self.ibox(0);
@@ -2738,6 +2755,7 @@ fn expr_requires_semi_to_be_stmt(e: &hir::Expr<'_>) -> bool {
     !matches!(
         e.kind,
         hir::ExprKind::If(..)
+            | hir::ExprKind::Receive(..)
             | hir::ExprKind::Match(..)
             | hir::ExprKind::Block(..)
             | hir::ExprKind::Loop(..)
