@@ -105,10 +105,10 @@ only_timeout() ->
 guarded_or() ->
     receive
         {left, _n@0_0}
-            when _n@0_0 > 0, erlang:is_integer(_n@0_0) ->
+            when erlang:is_integer(_n@0_0), _n@0_0 > 0 ->
             _n@0_0;
         {right, _n@0_0}
-            when _n@0_0 > 0, erlang:is_integer(_n@0_0) ->
+            when erlang:is_integer(_n@0_0), _n@0_0 > 0 ->
             _n@0_0
     end.
 

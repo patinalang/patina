@@ -28,7 +28,7 @@ main() ->
     _temperature@0_0 = 35,
     case _temperature@0_0 of
         _value@2_0 = _t@1_0
-            when _t@1_0 > 30, erlang:is_integer(_value@2_0) ->
+            when erlang:is_integer(_value@2_0), _t@1_0 > 30 ->
             io:put_chars([[io_lib:format("~ktp", [_t@1_0]),
                            <<"C is above 30 Celsius">>]]),
             io:nl(),

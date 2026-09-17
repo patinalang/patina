@@ -70,8 +70,8 @@ matches_either_range(_value@0_0) ->
 match_bound_range(_value@0_0) ->
     case _value@0_0 of
         _bound@1_0 = _range@2_0
-            when _bound@1_0 rem 2 =:= 0, _range@2_0 >= -3,
-                 _range@2_0 =< 3 ->
+            when _range@2_0 >= -3, _range@2_0 =< 3,
+                 _bound@1_0 rem 2 =:= 0 ->
             _bound@1_0 * 10;
         _ -> 0
     end.
@@ -88,8 +88,8 @@ match_nested_ranges(_value@0_0) ->
 match_enum_range(_value@0_0) ->
     case _value@0_0 of
         _bound@1_0 = _range@2_0
-            when _bound@1_0 =/= 41, _range@2_0 >= 40,
-                 _range@2_0 =< 44 ->
+            when _range@2_0 >= 40, _range@2_0 =< 44,
+                 _bound@1_0 =/= 41 ->
             true;
         _ -> false
     end.

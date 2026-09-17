@@ -151,14 +151,14 @@ arithmetic_reason(_f@0_0) ->
 guarded_reason(_f@0_0) ->
     try _f@0_0(), none catch
         error:_name@1_0
-            when _name@1_0 =:= wanted, erlang:is_atom(_name@1_0) ->
+            when erlang:is_atom(_name@1_0), _name@1_0 =:= wanted ->
             _name@1_0
     end.
 
 guarded_stack(_f@0_0) ->
     try _f@0_0() catch
         error:_name@2_0:_stacktrace@1_0
-            when _name@2_0 =:= wanted, erlang:is_atom(_name@2_0) ->
+            when erlang:is_atom(_name@2_0), _name@2_0 =:= wanted ->
             _stacktrace@1_0
     end.
 

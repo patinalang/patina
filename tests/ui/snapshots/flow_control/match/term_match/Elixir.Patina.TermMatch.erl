@@ -115,7 +115,7 @@ pinned(_value@0_0, _expected@1_0) ->
 guarded(_value@0_0) ->
     case _value@0_0 of
         _found@1_0
-            when _found@1_0 =:= 42, erlang:is_integer(_found@1_0) ->
+            when erlang:is_integer(_found@1_0), _found@1_0 =:= 42 ->
             true;
         _ -> false
     end.
@@ -123,8 +123,7 @@ guarded(_value@0_0) ->
 inferred_class_scrutinee() ->
     _matcher@2_0 = fun (_value@0_0) ->
                            case _value@0_0 of
-                               _value@1_0 = _
-                                   when erlang:is_integer(_value@1_0) ->
+                               _value@1_0 when erlang:is_integer(_value@1_0) ->
                                    true;
                                _ -> false
                            end
@@ -213,55 +212,50 @@ map_class(_value@0_0) ->
 
 tuple_class(_value@0_0) ->
     case _value@0_0 of
-        _value@1_0 = _ when erlang:is_tuple(_value@1_0) -> true;
+        _value@1_0 when erlang:is_tuple(_value@1_0) -> true;
         _ -> false
     end.
 
 fn_class(_value@0_0) ->
     case _value@0_0 of
-        _value@1_0 = _ when erlang:is_function(_value@1_0) ->
-            true;
+        _value@1_0 when erlang:is_function(_value@1_0) -> true;
         _ -> false
     end.
 
 bits_class(_value@0_0) ->
     case _value@0_0 of
-        _value@1_0 = _ when erlang:is_bitstring(_value@1_0) ->
-            true;
+        _value@1_0 when erlang:is_bitstring(_value@1_0) -> true;
         _ -> false
     end.
 
 bin_class(_value@0_0) ->
     case _value@0_0 of
-        _value@1_0 = _ when erlang:is_binary(_value@1_0) ->
-            true;
+        _value@1_0 when erlang:is_binary(_value@1_0) -> true;
         _ -> false
     end.
 
 pid_class(_value@0_0) ->
     case _value@0_0 of
-        _value@1_0 = _ when erlang:is_pid(_value@1_0) -> true;
+        _value@1_0 when erlang:is_pid(_value@1_0) -> true;
         _ -> false
     end.
 
 port_class(_value@0_0) ->
     case _value@0_0 of
-        _value@1_0 = _ when erlang:is_port(_value@1_0) -> true;
+        _value@1_0 when erlang:is_port(_value@1_0) -> true;
         _ -> false
     end.
 
 ref_class(_value@0_0) ->
     case _value@0_0 of
-        _value@1_0 = _ when erlang:is_reference(_value@1_0) ->
-            true;
+        _value@1_0 when erlang:is_reference(_value@1_0) -> true;
         _ -> false
     end.
 
 number(_value@0_0) ->
     case _value@0_0 of
-        _value@1_0 = _ when erlang:is_integer(_value@1_0) ->
-            true;
-        _value@2_0 = _ when erlang:is_float(_value@2_0) -> true;
+        _value@1_0 when erlang:is_integer(_value@1_0) -> true;
+        _value@2_0 when erlang:is_float(_value@2_0) -> true;
         _ -> false
     end.
 
@@ -276,8 +270,8 @@ alias_list(_value@0_0) ->
 nested(_value@0_0) ->
     case _value@0_0 of
         {_a@1_0, _b@2_0}
-            when _a@1_0 > 0 andalso _b@2_0 =:= ok,
-                 erlang:is_integer(_a@1_0), erlang:is_atom(_b@2_0) ->
+            when erlang:is_integer(_a@1_0), erlang:is_atom(_b@2_0),
+                 _a@1_0 > 0 andalso _b@2_0 =:= ok ->
             true;
         _ -> false
     end.
@@ -285,7 +279,7 @@ nested(_value@0_0) ->
 nested_list(_value@0_0) ->
     case _value@0_0 of
         [_head@1_0 | _]
-            when _head@1_0 > 0, erlang:is_integer(_head@1_0) ->
+            when erlang:is_integer(_head@1_0), _head@1_0 > 0 ->
             true;
         _ -> false
     end.
@@ -293,14 +287,14 @@ nested_list(_value@0_0) ->
 nested_map(_value@0_0) ->
     case _value@0_0 of
         #{<<107>> := _found@1_0}
-            when _found@1_0 > 0.0, erlang:is_float(_found@1_0) ->
+            when erlang:is_float(_found@1_0), _found@1_0 > 0.0 ->
             true;
         _ -> false
     end.
 
 tuple_terms(_value@0_0) ->
     case _value@0_0 of
-        {_value@1_0 = _, _value@2_0 = _}
+        {_value@1_0, _value@2_0}
             when erlang:is_integer(_value@1_0),
                  erlang:is_atom(_value@2_0) ->
             true;
@@ -309,7 +303,7 @@ tuple_terms(_value@0_0) ->
 
 struct_term(_value@0_0) ->
     case _value@0_0 of
-        {wrapper, _value@1_0 = _}
+        {wrapper, _value@1_0}
             when erlang:is_integer(_value@1_0) ->
             true;
         _ -> false
@@ -459,7 +453,7 @@ nested_in_tuple(_value@0_0) ->
 wrapped_term(_value@0_0) ->
     begin
         case _value@0_0 of
-            {wrapper, {_value@1_0 = _, _value@2_0 = _}}
+            {wrapper, {_value@1_0, _value@2_0}}
                 when erlang:is_integer(_value@1_0),
                      erlang:is_atom(_value@2_0) ->
                 true;
@@ -470,7 +464,7 @@ wrapped_term(_value@0_0) ->
 wrapped_int(_value@0_0) ->
     begin
         case _value@0_0 of
-            {wrapper, _value@1_0 = _}
+            {wrapper, _value@1_0}
                 when erlang:is_integer(_value@1_0) ->
                 true;
             _ -> false

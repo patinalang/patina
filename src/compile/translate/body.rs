@@ -974,7 +974,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let clauses = translated.into_iter().flat_map(|arm| {
             let TranslatedArm { patterns, guard, branch: Branch { span, body, .. } } = arm;
             patterns.into_iter().map(move |GuardedPattern(pattern, pattern_guards)| {
-                afb.clause(span, [pattern], guard.into_iter().chain(pattern_guards), body)
+                afb.clause(span, [pattern], pattern_guards.into_iter().chain(guard), body)
             })
         });
         afb.expr_case(span, scrutinee, clauses)
@@ -1024,7 +1024,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let clauses = translated.into_iter().flat_map(|arm| {
             let TranslatedArm { patterns, guard, branch: Branch { span, body, .. } } = arm;
             patterns.into_iter().map(move |GuardedPattern(pattern, pattern_guards)| {
-                afb.clause(span, [pattern], guard.into_iter().chain(pattern_guards), body)
+                afb.clause(span, [pattern], pattern_guards.into_iter().chain(guard), body)
             })
         });
         afb.expr_receive(
@@ -1062,7 +1062,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                     pattern.class,
                     pattern.reason,
                     pattern.stacktrace,
-                    guard.into_iter().chain(pattern.guards),
+                    pattern.guards.into_iter().chain(guard),
                     body,
                 )
             })
@@ -1583,7 +1583,13 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 let value_expr = self.translator.afb.expr_var(span, value.erl_name);
                 let class_guard = self.term_class_guard(span, value_expr, class);
                 guards.insert(0, class_guard);
-                GuardedPattern(self.translator.afb.pat_match(span, value_pat, pattern), guards)
+
+                // Small codegen optimization - skip matching wildcard `_`.
+                let pattern = match subpattern.kind {
+                    PatKind::Wild => value_pat,
+                    _ => self.translator.afb.pat_match(span, value_pat, pattern),
+                };
+                GuardedPattern(pattern, guards)
             })
             .collect()
     }
