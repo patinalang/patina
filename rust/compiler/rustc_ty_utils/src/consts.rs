@@ -198,6 +198,7 @@ fn recurse_build<'tcx>(
         }
         // let expressions imply control flow
         ExprKind::Receive { .. }
+        | ExprKind::TryCatch { .. }
         | ExprKind::Match { .. }
         | ExprKind::If { .. }
         | ExprKind::Let { .. } => {
@@ -283,6 +284,7 @@ impl<'a, 'tcx> IsThirPolymorphic<'a, 'tcx> {
             | thir::ExprKind::LoopMatch { .. }
             | thir::ExprKind::Let { .. }
             | thir::ExprKind::Receive { .. }
+            | thir::ExprKind::TryCatch { .. }
             | thir::ExprKind::Match { .. }
             | thir::ExprKind::Block { .. }
             | thir::ExprKind::Assign { .. }

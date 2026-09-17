@@ -468,6 +468,18 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
                 }
             }
 
+            hir::ExprKind::TryCatch(body, arms, after) => {
+                self.consume_expr(body)?;
+                // Walk the arms as-if they were matching a `term` value.
+                let exception_place = self.cat_rvalue(expr.hir_id, self.cx.tcx().types.term);
+                for arm in arms {
+                    self.walk_arm(&exception_place, arm)?;
+                }
+                if let Some(after) = after {
+                    self.consume_expr(after)?;
+                }
+            }
+
             hir::ExprKind::Match(discr, arms, _) => {
                 let discr_place = self.cat_expr(discr)?;
                 self.fake_read_scrutinee(&discr_place, true)?;
@@ -833,6 +845,13 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
             self.consume_expr(e)?;
         }
 
+        // The stacktrace is a fresh binding produced by the runtime, not a
+        // projection of the matched value.
+        if let Some(stacktrace) = arm.stacktrace {
+            let place = self.cat_rvalue(stacktrace.hir_id, self.cx.tcx().types.term);
+            self.walk_pat(&place, stacktrace, false)?;
+        }
+
         self.consume_expr(arm.body)?;
         Ok(())
     }
@@ -950,7 +969,8 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
                 PatKind::Expr(_)
                 | PatKind::Range(..)
                 | PatKind::Pin(_)
-                | PatKind::TermClass(..) => {
+                | PatKind::TermClass(..)
+                | PatKind::Exception { .. } => {
                     // When matching against a literal or range, we need to
                     // borrow the place to compare it against the pattern.
                     //
@@ -1413,6 +1433,7 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
             | hir::ExprKind::Let(..)
             | hir::ExprKind::Loop(..)
             | hir::ExprKind::Receive(..)
+            | hir::ExprKind::TryCatch(..)
             | hir::ExprKind::Match(..)
             | hir::ExprKind::Lit(..)
             | hir::ExprKind::ConstBlock(..)
@@ -1861,11 +1882,24 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
                 }
             }
 
-            PatKind::TermClass(_, subpattern) => {
+            PatKind::TermClass(subpattern, _) => {
                 let value_ty = self.pat_ty_adjusted(subpattern)?;
                 let value_place =
                     self.cat_projection(pat.hir_id, place_with_id, value_ty, ProjectionKind::Index);
                 self.cat_pattern(value_place, subpattern, op)?;
+            }
+
+            PatKind::Exception { class: _, class_pat, reason_pat } => {
+                for field in [class_pat, reason_pat] {
+                    let value_ty = self.pat_ty_adjusted(field)?;
+                    let value_place = self.cat_projection(
+                        pat.hir_id,
+                        place_with_id.clone(),
+                        value_ty,
+                        ProjectionKind::Index,
+                    );
+                    self.cat_pattern(value_place, field, op)?;
+                }
             }
 
             PatKind::Pin(expr) => {

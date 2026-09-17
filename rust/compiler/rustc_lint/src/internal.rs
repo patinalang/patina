@@ -704,8 +704,13 @@ impl EarlyLintPass for BadUseOfFindAttr {
                 PatKind::Paren(pat) => {
                     find_attr_kind_in_pat(cx, pat);
                 }
-                PatKind::TermClass(_, pat) => {
+                PatKind::TermClass(pat, _) => {
                     find_attr_kind_in_pat(cx, pat);
+                }
+                PatKind::ExceptionClass(args, _) => {
+                    for pat in args {
+                        find_attr_kind_in_pat(cx, pat);
+                    }
                 }
                 PatKind::Expr(..)
                 | PatKind::Pin(..)
@@ -770,6 +775,7 @@ fn pat_is_not_exhaustive_heuristic(pat: &hir::Pat<'_>) -> Option<(Span, &'static
         hir::PatKind::Expr(..) => None,
         hir::PatKind::Pin(..) => None,
         hir::PatKind::TermClass(..) => None,
+        hir::PatKind::Exception { .. } => None,
         hir::PatKind::Guard(..) => None,
         hir::PatKind::Range(..) => None,
         hir::PatKind::Slice(..) => None,

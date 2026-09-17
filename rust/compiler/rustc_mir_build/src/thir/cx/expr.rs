@@ -928,6 +928,11 @@ impl<'tcx> ThirBuildCx<'tcx> {
                     body: self.mirror_expr(timeout.body),
                 }),
             },
+            hir::ExprKind::TryCatch(body, arms, after) => ExprKind::TryCatch {
+                body: self.mirror_expr(body),
+                arms: arms.iter().map(|arm| self.convert_arm(arm)).collect(),
+                after: after.map(|after| self.mirror_expr(after)),
+            },
             hir::ExprKind::Match(discr, arms, match_source) => ExprKind::Match {
                 scrutinee: self.mirror_expr(discr),
                 arms: arms.iter().map(|a| self.convert_arm(a)).collect(),
@@ -1200,6 +1205,7 @@ impl<'tcx> ThirBuildCx<'tcx> {
         let arm = Arm {
             pattern: self.pattern_from_hir(&arm.pat),
             guard: arm.guard.as_ref().map(|g| self.mirror_expr(g)),
+            stacktrace: arm.stacktrace.map(|pat| self.pattern_from_hir(pat)),
             body: self.mirror_expr(arm.body),
             hir_id: arm.hir_id,
             scope: region::Scope { local_id: arm.hir_id.local_id, data: region::ScopeData::Node },

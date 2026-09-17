@@ -1686,6 +1686,26 @@ impl<'a> State<'a> {
                     self.print_expr(timeout.body);
                 }
             }
+            hir::ExprKind::TryCatch(body, arms, after) => {
+                self.word_nbsp("try");
+                self.print_expr(body);
+                if !arms.is_empty() {
+                    self.space();
+                    self.word_nbsp("catch");
+                    let cb = self.cbox(0);
+                    let ib = self.ibox(0);
+                    self.bopen(ib);
+                    for arm in arms {
+                        self.print_arm(arm);
+                    }
+                    self.bclose(expr.span, cb);
+                }
+                if let Some(after) = after {
+                    self.space();
+                    self.word_nbsp("after");
+                    self.print_expr(after);
+                }
+            }
             hir::ExprKind::Match(expr, arms, _) => {
                 let cb = self.cbox(0);
                 let ib = self.ibox(0);
@@ -2179,10 +2199,20 @@ impl<'a> State<'a> {
                 self.word("^");
                 self.print_pat_expr(e);
             }
-            PatKind::TermClass(class, subpattern) => {
+            PatKind::TermClass(subpattern, class) => {
                 self.word(class.name().to_string());
                 self.popen();
                 self.print_pat(subpattern);
+                self.pclose();
+            }
+            PatKind::Exception { class, class_pat, reason_pat } => {
+                self.word(class.name().to_string());
+                self.popen();
+                if let hir::ExceptionClass::Any = class {
+                    self.print_pat(class_pat);
+                    self.word_space(",");
+                }
+                self.print_pat(reason_pat);
                 self.pclose();
             }
             PatKind::Range(begin, end, end_kind) => {
@@ -2298,12 +2328,17 @@ impl<'a> State<'a> {
         let ib = self.ibox(0);
         self.print_attrs(self.attrs(arm.hir_id));
         self.print_pat(arm.pat);
-        self.space();
         if let Some(ref g) = arm.guard {
+            self.space();
             self.word_space("if");
             self.print_expr(g);
-            self.space();
         }
+        if let Some(stacktrace) = arm.stacktrace {
+            self.word(",");
+            self.space();
+            self.print_pat(stacktrace);
+        }
+        self.space();
         self.word_space("=>");
 
         match arm.body.kind {
@@ -2756,6 +2791,7 @@ fn expr_requires_semi_to_be_stmt(e: &hir::Expr<'_>) -> bool {
         e.kind,
         hir::ExprKind::If(..)
             | hir::ExprKind::Receive(..)
+            | hir::ExprKind::TryCatch(..)
             | hir::ExprKind::Match(..)
             | hir::ExprKind::Block(..)
             | hir::ExprKind::Loop(..)

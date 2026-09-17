@@ -887,11 +887,89 @@ pub(crate) struct MissingCommaAfterMatchArm {
 }
 
 #[derive(Diagnostic)]
-#[diag("keyword `catch` cannot follow a `try` block")]
-#[help("try using `match` on the result of the `try` block instead")]
-pub(crate) struct CatchAfterTry {
+#[diag("`try` requires a `catch` or `after` clause")]
+pub(crate) struct EmptyTry {
     #[primary_span]
     pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("`catch` requires at least one arm")]
+pub(crate) struct EmptyCatch {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("a `catch` arm must start with an exception class pattern")]
+#[note("exception classes are `error`, `throw`, `exit`, and `any`")]
+pub(crate) struct InvalidExceptionClassPattern {
+    #[primary_span]
+    #[suggestion(
+        "use an exception class pattern, e.g. `error(reason)`",
+        code = "error(reason)",
+        style = "verbose",
+        applicability = "has-placeholders"
+    )]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("unknown exception class `{$name}`")]
+#[note("exception classes are `error`, `throw`, `exit`, and `any`")]
+pub(crate) struct UnknownExceptionClass {
+    #[primary_span]
+    #[suggestion(
+        "use an exception class pattern, e.g. `error(reason)`",
+        code = "error(reason)",
+        style = "verbose",
+        applicability = "has-placeholders"
+    )]
+    pub span: Span,
+    pub name: Symbol,
+}
+
+#[derive(Diagnostic)]
+#[diag(
+    "expected {$expected} {$expected ->
+        [one] subpattern
+        *[other] subpatterns
+    }, found {$found}"
+)]
+pub(crate) struct WrongNumberOfExceptionClassSubpatterns {
+    #[primary_span]
+    pub span: Span,
+    pub expected: usize,
+    pub found: usize,
+}
+
+#[derive(Diagnostic)]
+#[diag("a stacktrace pattern must be a plain identifier or `_`")]
+pub(crate) struct InvalidStacktracePattern {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("the stacktrace pattern must appear after the guard")]
+pub(crate) struct StacktracePatternMustAppearAfterGuard {
+    #[primary_span]
+    pub span: Span,
+    #[subdiagnostic]
+    pub sugg: Option<StacktracePatternMustAppearAfterGuardSugg>,
+}
+
+#[derive(Subdiagnostic)]
+#[suggestion(
+    "move the stacktrace pattern after the guard",
+    applicability = "machine-applicable",
+    code = "{guard}, {stacktrace}"
+)]
+pub(crate) struct StacktracePatternMustAppearAfterGuardSugg {
+    #[primary_span]
+    pub span: Span,
+    pub stacktrace: String,
+    pub guard: String,
 }
 
 #[derive(Diagnostic)]

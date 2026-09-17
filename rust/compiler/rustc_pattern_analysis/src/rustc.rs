@@ -4,8 +4,8 @@ use std::iter::once;
 
 use rustc_abi::{FIRST_VARIANT, FieldIdx, VariantIdx};
 use rustc_arena::DroplessArena;
-use rustc_hir::HirId;
 use rustc_hir::def_id::DefId;
+use rustc_hir::{HirId, LangItem};
 use rustc_index::{Idx, IndexVec};
 use rustc_middle::middle::stability::EvalResult;
 use rustc_middle::thir::{self, Pat, PatKind, PatRange, PatRangeBoundary};
@@ -15,7 +15,7 @@ use rustc_middle::ty::{
 };
 use rustc_middle::{bug, span_bug};
 use rustc_session::lint;
-use rustc_span::{DUMMY_SP, ErrorGuaranteed, Span};
+use rustc_span::{DUMMY_SP, ErrorGuaranteed, Span, Symbol};
 
 use crate::constructor::Constructor::*;
 use crate::constructor::{
@@ -453,10 +453,17 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
                 fields = vec![];
                 arity = 0;
             }
-            PatKind::Pin { .. } | PatKind::TermClass { .. } | PatKind::TermPat { .. } => {
+            PatKind::Pin { .. } | PatKind::TermClass { .. } => {
                 ctor = Opaque(OpaqueId::new());
                 fields = vec![];
                 arity = 0;
+            }
+            PatKind::TermPat { .. } => return self.lower_term_pat(pat),
+            PatKind::Exception { class_pat, reason_pat, .. } => {
+                let class_def_id = self.tcx.require_lang_item(LangItem::ExceptionClass, pat.span);
+                let class_adt = self.tcx.adt_def(class_def_id);
+                let class_ty = RevealedTy(Ty::new_adt(self.tcx, class_adt, self.tcx.mk_args(&[])));
+                return self.lower_exception_pat(class_pat, reason_pat, class_adt, class_ty, pat);
             }
             PatKind::Deref { pin, subpattern } => {
                 fields = vec![self.lower_pat(subpattern).at_index(0)];
@@ -650,6 +657,116 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
             }
         }
         DeconstructedPat::new(ctor, fields, arity, ty, pat)
+    }
+
+    /// Lower a pattern matched against an exception reason. The reason has type `term`, but
+    /// `TermPat` gives structurally-matchable literals their more precise inner type.
+    fn lower_term_pat(&self, pat: &'p Pat<'tcx>) -> DeconstructedPat<'p, 'tcx> {
+        let term_ty = RevealedTy(self.tcx.types.term);
+        match &pat.kind {
+            PatKind::Binding { subpattern: Some(subpat), .. }
+            | PatKind::Guard { subpattern: subpat, .. }
+            | PatKind::TermPat { subpattern: subpat, .. } => self.lower_term_pat(subpat),
+            PatKind::Missing | PatKind::Wild | PatKind::Binding { subpattern: None, .. } => {
+                DeconstructedPat::new(Wildcard, vec![], 0, term_ty, pat)
+            }
+            PatKind::Constant { value } if value.ty.is_atom() => {
+                DeconstructedPat::new(Str(*value), vec![], 0, term_ty, pat)
+            }
+            PatKind::Or { .. } => {
+                let pats = expand_or_pat(pat);
+                let arity = pats.len();
+                let fields = pats
+                    .into_iter()
+                    .map(|subpat| self.lower_term_pat(subpat))
+                    .enumerate()
+                    .map(|(index, subpat)| subpat.at_index(index))
+                    .collect();
+                DeconstructedPat::new(Or, fields, arity, term_ty, pat)
+            }
+            _ => DeconstructedPat::new(Opaque(OpaqueId::new()), vec![], 0, term_ty, pat),
+        }
+    }
+
+    /// The variant of `ExceptionClass` whose representation tag is `tag`, if any.
+    fn exception_class_variant(
+        &self,
+        class_adt: ty::AdtDef<'tcx>,
+        tag: Symbol,
+    ) -> Option<VariantIdx> {
+        class_adt.variants().iter_enumerated().find_map(|(index, variant)| {
+            (self.tcx.erl_variant_repr(variant.def_id).tag == tag).then_some(index)
+        })
+    }
+
+    fn lower_exception_variant(
+        &self,
+        tag: Symbol,
+        reason: DeconstructedPat<'p, 'tcx>,
+        class_adt: ty::AdtDef<'tcx>,
+        ty: RevealedTy<'tcx>,
+        data: &'p Pat<'tcx>,
+    ) -> DeconstructedPat<'p, 'tcx> {
+        let variant = self
+            .exception_class_variant(class_adt, tag)
+            .unwrap_or_else(|| bug!("`ExceptionClass` has no variant tagged `{tag}`"));
+        DeconstructedPat::new(Variant(variant), vec![reason.at_index(0)], 1, ty, data)
+    }
+
+    /// Model an exception pattern as the corresponding `ExceptionClass` variant.
+    fn lower_exception_pat(
+        &self,
+        class: &'p Pat<'tcx>,
+        reason: &'p Pat<'tcx>,
+        class_adt: ty::AdtDef<'tcx>,
+        ty: RevealedTy<'tcx>,
+        data: &'p Pat<'tcx>,
+    ) -> DeconstructedPat<'p, 'tcx> {
+        match &class.kind {
+            PatKind::Binding { subpattern: Some(subpat), .. }
+            | PatKind::Guard { subpattern: subpat, .. } => {
+                self.lower_exception_pat(subpat, reason, class_adt, ty, data)
+            }
+            PatKind::Missing | PatKind::Wild | PatKind::Binding { subpattern: None, .. } => {
+                let reason = self.lower_term_pat(reason);
+                if matches!(reason.ctor(), Wildcard) {
+                    DeconstructedPat::new(Wildcard, vec![], 0, ty, data)
+                } else {
+                    // TODO: handle `any`'s usefulness with user-supplied patterns
+                    DeconstructedPat::new(Opaque(OpaqueId::new()), vec![], 0, ty, data)
+                }
+            }
+            PatKind::Constant { value } => {
+                let tag = value
+                    .try_to_raw_bytes(self.tcx)
+                    .and_then(|bytes| std::str::from_utf8(bytes).ok())
+                    .map(Symbol::intern);
+                match tag.and_then(|tag| self.exception_class_variant(class_adt, tag).map(|_| tag))
+                {
+                    Some(tag) => self.lower_exception_variant(
+                        tag,
+                        self.lower_term_pat(reason),
+                        class_adt,
+                        ty,
+                        data,
+                    ),
+                    // An unknown atom cannot match any value of the closed `ExceptionClass` enum.
+                    None => DeconstructedPat::new(Or, vec![], 0, ty, data),
+                }
+            }
+            PatKind::Or { .. } => {
+                let pats = expand_or_pat(class);
+                let arity = pats.len();
+                let fields = pats
+                    .into_iter()
+                    .map(|subpat| self.lower_exception_pat(subpat, reason, class_adt, ty, subpat))
+                    .enumerate()
+                    .map(|(index, subpat)| subpat.at_index(index))
+                    .collect();
+                DeconstructedPat::new(Or, fields, arity, ty, data)
+            }
+            _ => DeconstructedPat::new(Opaque(OpaqueId::new()), vec![], 0, ty, data),
+        }
     }
 
     /// Convert back to a `thir::PatRangeBoundary` for diagnostic purposes.

@@ -383,6 +383,19 @@ impl<'a, 'tcx> ThirPrinter<'a, 'tcx> {
                 }
                 print_indented!(self, "}", depth_lvl);
             }
+            TryCatch { body, arms, after } => {
+                print_indented!(self, "TryCatch {", depth_lvl);
+                print_indented!(self, "body:", depth_lvl + 1);
+                self.print_expr(*body, depth_lvl + 2);
+                for arm in arms {
+                    self.print_arm(*arm, depth_lvl + 1);
+                }
+                if let Some(after) = after {
+                    print_indented!(self, "after:", depth_lvl + 1);
+                    self.print_expr(*after, depth_lvl + 2);
+                }
+                print_indented!(self, "}", depth_lvl);
+            }
             Block { block } => self.print_block(*block, depth_lvl),
             Assign { lhs, rhs } => {
                 print_indented!(self, "Assign {", depth_lvl);
@@ -699,7 +712,7 @@ impl<'a, 'tcx> ThirPrinter<'a, 'tcx> {
         print_indented!(self, "Arm {", depth_lvl);
 
         let arm = &self.thir.arms[arm_id];
-        let Arm { pattern, guard, body, hir_id, scope, span } = arm;
+        let Arm { pattern, guard, stacktrace, body, hir_id, scope, span } = arm;
 
         print_indented!(self, "pattern: ", depth_lvl + 1);
         self.print_pat(pattern, depth_lvl + 2);
@@ -709,6 +722,11 @@ impl<'a, 'tcx> ThirPrinter<'a, 'tcx> {
             self.print_expr(guard, depth_lvl + 2);
         } else {
             print_indented!(self, "guard: None", depth_lvl + 1);
+        }
+
+        if let Some(stacktrace) = stacktrace {
+            print_indented!(self, "stacktrace: ", depth_lvl + 1);
+            self.print_pat(stacktrace, depth_lvl + 2);
         }
 
         print_indented!(self, "body: ", depth_lvl + 1);
@@ -791,6 +809,12 @@ impl<'a, 'tcx> ThirPrinter<'a, 'tcx> {
             PatKind::TermClass { class, subpattern } => {
                 print_indented!(self, format!("TermClass({class:?}) {{"), depth_lvl + 1);
                 self.print_pat(subpattern, depth_lvl + 2);
+                print_indented!(self, "}", depth_lvl + 1);
+            }
+            PatKind::Exception { class, class_pat, reason_pat } => {
+                print_indented!(self, format!("Exception({class:?}) {{"), depth_lvl + 1);
+                self.print_pat(class_pat, depth_lvl + 2);
+                self.print_pat(reason_pat, depth_lvl + 2);
                 print_indented!(self, "}", depth_lvl + 1);
             }
             PatKind::TermPat { subpattern, adt_repr_match } => {

@@ -1,0 +1,257 @@
+error: a `catch` arm must start with an exception class pattern
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:1:32
+   |
+LL | fn wildcard() { try {} catch { _ => {} } }
+   |                                ^
+   |
+   = note: exception classes are `error`, `throw`, `exit`, and `any`
+help: use an exception class pattern, e.g. `error(reason)`
+   |
+LL - fn wildcard() { try {} catch { _ => {} } }
+LL + fn wildcard() { try {} catch { error(reason) => {} } }
+   |
+
+error: unknown exception class `caught`
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:2:31
+   |
+LL | fn binding() { try {} catch { caught => {} } }
+   |                               ^^^^^^
+   |
+   = note: exception classes are `error`, `throw`, `exit`, and `any`
+help: use an exception class pattern, e.g. `error(reason)`
+   |
+LL - fn binding() { try {} catch { caught => {} } }
+LL + fn binding() { try {} catch { error(reason) => {} } }
+   |
+
+error: unknown exception class `Panic`
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:3:31
+   |
+LL | fn unknown() { try {} catch { Panic(_) => {} } }
+   |                               ^^^^^^^^
+   |
+   = note: exception classes are `error`, `throw`, `exit`, and `any`
+help: use an exception class pattern, e.g. `error(reason)`
+   |
+LL - fn unknown() { try {} catch { Panic(_) => {} } }
+LL + fn unknown() { try {} catch { error(reason) => {} } }
+   |
+
+error: unknown exception class `foo`
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:4:55
+   |
+LL | fn unknown_with_invalid_stacktrace() { try {} catch { foo(x), 1 => {} } }
+   |                                                       ^^^^^^
+   |
+   = note: exception classes are `error`, `throw`, `exit`, and `any`
+help: use an exception class pattern, e.g. `error(reason)`
+   |
+LL - fn unknown_with_invalid_stacktrace() { try {} catch { foo(x), 1 => {} } }
+LL + fn unknown_with_invalid_stacktrace() { try {} catch { error(reason), 1 => {} } }
+   |
+
+error: a stacktrace pattern must be a plain identifier or `_`
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:4:63
+   |
+LL | fn unknown_with_invalid_stacktrace() { try {} catch { foo(x), 1 => {} } }
+   |                                                               ^
+
+error: unknown exception class `Error`
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:5:36
+   |
+LL | fn pascal_class() { try {} catch { Error(_) => {} } }
+   |                                    ^^^^^^^^
+   |
+   = note: exception classes are `error`, `throw`, `exit`, and `any`
+help: use an exception class pattern, e.g. `error(reason)`
+   |
+LL - fn pascal_class() { try {} catch { Error(_) => {} } }
+LL + fn pascal_class() { try {} catch { error(reason) => {} } }
+   |
+
+error: expected 1 subpattern, found 0
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:6:35
+   |
+LL | fn error_arity() { try {} catch { error() => {} } }
+   |                                   ^^^^^^^
+
+error: expected 2 subpatterns, found 1
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:7:33
+   |
+LL | fn any_arity() { try {} catch { any(_) => {} } }
+   |                                 ^^^^^^
+
+error: expected 1 subpattern, found 2
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:8:35
+   |
+LL | fn throw_arity() { try {} catch { throw(_, _) => {} } }
+   |                                   ^^^^^^^^^^^
+
+error: expected 2 subpatterns, found 3
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:9:39
+   |
+LL | fn any_extra_arity() { try {} catch { any(_, _, _) => {} } }
+   |                                       ^^^^^^^^^^^^
+
+error: unknown exception class `ArgumentError`
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:10:46
+   |
+LL | fn removed_argument_error() { try {} catch { ArgumentError => {} } }
+   |                                              ^^^^^^^^^^^^^
+   |
+   = note: exception classes are `error`, `throw`, `exit`, and `any`
+help: use an exception class pattern, e.g. `error(reason)`
+   |
+LL - fn removed_argument_error() { try {} catch { ArgumentError => {} } }
+LL + fn removed_argument_error() { try {} catch { error(reason) => {} } }
+   |
+
+error: unknown exception class `ElixirError`
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:11:44
+   |
+LL | fn removed_elixir_error() { try {} catch { ElixirError(_, _) => {} } }
+   |                                            ^^^^^^^^^^^^^^^^^
+   |
+   = note: exception classes are `error`, `throw`, `exit`, and `any`
+help: use an exception class pattern, e.g. `error(reason)`
+   |
+LL - fn removed_elixir_error() { try {} catch { ElixirError(_, _) => {} } }
+LL + fn removed_elixir_error() { try {} catch { error(reason) => {} } }
+   |
+
+error: expected 1 subpattern, found 2
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:12:37
+   |
+LL | fn stack_in_args() { try {} catch { error(_, stacktrace) => {} } }
+   |                                     ^^^^^^^^^^^^^^^^^^^^
+
+error: a stacktrace pattern must be a plain identifier or `_`
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:13:47
+   |
+LL | fn stack_pattern() { try {} catch { error(_), a"stack" => {} } }
+   |                                               ^^^^^^^^
+
+error: a stacktrace pattern must be a plain identifier or `_`
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:14:45
+   |
+LL | fn stack_alias() { try {} catch { error(_), stacktrace @ _ => {} } }
+   |                                             ^^^^^^^^^^^^^^
+
+error: a stacktrace pattern must be a plain identifier or `_`
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:15:43
+   |
+LL | fn stack_mut() { try {} catch { error(_), mut stacktrace => {} } }
+   |                                           ^^^^^^^^^^^^^^
+
+error: a stacktrace pattern must be a plain identifier or `_`
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:16:43
+   |
+LL | fn stack_ref() { try {} catch { error(_), ref stacktrace => {} } }
+   |                                           ^^^^^^^^^^^^^^
+
+error: the stacktrace pattern must appear after the guard
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:17:51
+   |
+LL | fn misplaced_stacktrace() { try {} catch { exit(_), stacktrace if true => {} } }
+   |                                                   ^^^^^^^^^^^^--------
+   |                                                   |
+   |                                                   help: move the stacktrace pattern after the guard: `if true, stacktrace`
+
+error: `mut` must be attached to each individual binding
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:18:37
+   |
+LL | fn mutable_class() { try {} catch { mut error(reason) => {} } }
+   |                                     ^^^^^^^^^^^^^^^^^
+   |
+   = note: `mut` may be followed by `variable` and `variable @ pattern`
+help: add `mut` to each binding
+   |
+LL - fn mutable_class() { try {} catch { mut error(reason) => {} } }
+LL + fn mutable_class() { try {} catch { error(mut reason) => {} } }
+   |
+
+error: a `catch` arm must start with an exception class pattern
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:18:37
+   |
+LL | fn mutable_class() { try {} catch { mut error(reason) => {} } }
+   |                                     ^^^^^^^^^^^^^^^^^
+   |
+   = note: exception classes are `error`, `throw`, `exit`, and `any`
+help: use an exception class pattern, e.g. `error(reason)`
+   |
+LL - fn mutable_class() { try {} catch { mut error(reason) => {} } }
+LL + fn mutable_class() { try {} catch { error(reason) => {} } }
+   |
+
+error: expected identifier, found enum pattern
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:19:44
+   |
+LL | fn referenced_class() { try {} catch { ref exit(reason) => {} } }
+   |                                            ^^^^
+
+error: a `catch` arm must start with an exception class pattern
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:20:37
+   |
+LL | fn generic_class() { try {} catch { error::<term>(reason) => {} } }
+   |                                     ^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: exception classes are `error`, `throw`, `exit`, and `any`
+help: use an exception class pattern, e.g. `error(reason)`
+   |
+LL - fn generic_class() { try {} catch { error::<term>(reason) => {} } }
+LL + fn generic_class() { try {} catch { error(reason) => {} } }
+   |
+
+error: a `catch` arm must start with an exception class pattern
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:21:43
+   |
+LL | fn parenthesized_guard() { try {} catch { (error(reason) if true) => {} } }
+   |                                           ^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: exception classes are `error`, `throw`, `exit`, and `any`
+help: use an exception class pattern, e.g. `error(reason)`
+   |
+LL - fn parenthesized_guard() { try {} catch { (error(reason) if true) => {} } }
+LL + fn parenthesized_guard() { try {} catch { error(reason) => {} } }
+   |
+
+error: a `catch` arm must start with an exception class pattern
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:22:54
+   |
+LL | fn parenthesized_guard_stacktrace() { try {} catch { (error(reason) if true), stacktrace => {} } }
+   |                                                      ^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: exception classes are `error`, `throw`, `exit`, and `any`
+help: use an exception class pattern, e.g. `error(reason)`
+   |
+LL - fn parenthesized_guard_stacktrace() { try {} catch { (error(reason) if true), stacktrace => {} } }
+LL + fn parenthesized_guard_stacktrace() { try {} catch { error(reason), stacktrace => {} } }
+   |
+
+error: unknown exception class `second`
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:23:57
+   |
+LL | fn extra_stacktrace() { try {} catch { error(_), first, second => {} } }
+   |                                                         ^^^^^^
+   |
+   = note: exception classes are `error`, `throw`, `exit`, and `any`
+help: use an exception class pattern, e.g. `error(reason)`
+   |
+LL - fn extra_stacktrace() { try {} catch { error(_), first, second => {} } }
+LL + fn extra_stacktrace() { try {} catch { error(_), first, error(reason) => {} } }
+   |
+
+error: `try` requires a `catch` or `after` clause
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:24:18
+   |
+LL | fn empty_try() { try {} }
+   |                  ^^^^^^
+
+error: `catch` requires at least one arm
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:25:27
+   |
+LL | fn empty_catch() { try {} catch {} }
+   |                           ^^^^^^^^
+
+error: aborting due to 27 previous errors
+

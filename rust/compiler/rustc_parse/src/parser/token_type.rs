@@ -73,6 +73,7 @@ pub enum TokenType {
 
     // Keywords
     // tidy-alphabetical-start
+    KwAfter,
     KwAs,
     KwAsync,
     KwAuto,
@@ -216,6 +217,7 @@ impl TokenType {
             Type,
             Const,
 
+            KwAfter,
             KwAs,
             KwAsync,
             KwAuto,
@@ -295,6 +297,7 @@ impl TokenType {
 
     pub(super) fn is_keyword(&self) -> Option<Symbol> {
         match self {
+            TokenType::KwAfter => Some(kw::After),
             TokenType::KwAs => Some(kw::As),
             TokenType::KwAsync => Some(kw::Async),
             TokenType::KwAuto => Some(kw::Auto),
@@ -513,6 +516,7 @@ macro_rules! exp {
     (CloseBrace)     => { exp!(@tok, CloseBrace) };
     (CloseBracket)   => { exp!(@tok, CloseBracket) };
 
+    (After)          => { exp!(@kw, After,      KwAfter) };
     (As)             => { exp!(@kw, As,         KwAs) };
     (Async)          => { exp!(@kw, Async,      KwAsync) };
     (Auto)           => { exp!(@kw, Auto,       KwAuto) };

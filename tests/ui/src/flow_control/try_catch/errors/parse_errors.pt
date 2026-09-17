@@ -1,0 +1,25 @@
+fn wildcard() { try {} catch { _ => {} } }
+fn binding() { try {} catch { caught => {} } }
+fn unknown() { try {} catch { Panic(_) => {} } }
+fn unknown_with_invalid_stacktrace() { try {} catch { foo(x), 1 => {} } }
+fn pascal_class() { try {} catch { Error(_) => {} } }
+fn error_arity() { try {} catch { error() => {} } }
+fn any_arity() { try {} catch { any(_) => {} } }
+fn throw_arity() { try {} catch { throw(_, _) => {} } }
+fn any_extra_arity() { try {} catch { any(_, _, _) => {} } }
+fn removed_argument_error() { try {} catch { ArgumentError => {} } }
+fn removed_elixir_error() { try {} catch { ElixirError(_, _) => {} } }
+fn stack_in_args() { try {} catch { error(_, stacktrace) => {} } }
+fn stack_pattern() { try {} catch { error(_), a"stack" => {} } }
+fn stack_alias() { try {} catch { error(_), stacktrace @ _ => {} } }
+fn stack_mut() { try {} catch { error(_), mut stacktrace => {} } }
+fn stack_ref() { try {} catch { error(_), ref stacktrace => {} } }
+fn misplaced_stacktrace() { try {} catch { exit(_), stacktrace if true => {} } }
+fn mutable_class() { try {} catch { mut error(reason) => {} } }
+fn referenced_class() { try {} catch { ref exit(reason) => {} } }
+fn generic_class() { try {} catch { error::<term>(reason) => {} } }
+fn parenthesized_guard() { try {} catch { (error(reason) if true) => {} } }
+fn parenthesized_guard_stacktrace() { try {} catch { (error(reason) if true), stacktrace => {} } }
+fn extra_stacktrace() { try {} catch { error(_), first, second => {} } }
+fn empty_try() { try {} }
+fn empty_catch() { try {} catch {} }

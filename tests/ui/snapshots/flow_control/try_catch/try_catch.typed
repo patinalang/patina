@@ -1,0 +1,272 @@
+#![allow(internal_features)]
+
+
+
+
+
+
+
+
+
+
+#![deny(unused_unsafe)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+#[allow(unused_imports)]
+use Core::*;
+#[allow(unused)]
+extern mod io;
+#[allow(unused)]
+extern mod patina_fmt;
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+extern mod erlang;
+
+#[attr = Repr {reprs: [Tagged], modifiers: [Tag("my_error")]}]
+struct MyError {
+    code: int,
+}
+
+fn error_reason(f: fn() -> term)
+    ->
+        term ({
+    (try ({ ((f as fn() -> term)() as term) } as term)
+        catch { error(reason) => (reason as term), } as term)
+} as term)
+
+fn error_with_stack(f: fn() -> term)
+    ->
+        term ({
+    (try ({ ((f as fn() -> term)() as term) } as term)
+        catch { error(_), stacktrace => (stacktrace as term), } as term)
+} as term)
+
+fn argument_error(f: fn() -> term)
+    ->
+        bool ({
+    (try ({ ((f as fn() -> term)() as term); (false as bool) } as bool)
+        catch { error(a"badarg") => (true as bool), } as bool)
+} as bool)
+
+fn argument_error_stack(f: fn() -> term)
+    ->
+        term ({
+    (try ({ ((f as fn() -> term)() as term) } as term)
+        catch { error(a"badarg"), stacktrace => (stacktrace as term), } as
+        term)
+} as term)
+
+fn thrown(f: fn() -> term)
+    ->
+        term ({
+    (try ({ ((f as fn() -> term)() as term) } as term)
+        catch { throw(value) => (value as term), } as term)
+} as term)
+
+fn thrown_with_stack(f: fn() -> term)
+    ->
+        term ({
+    (try ({ ((f as fn() -> term)() as term) } as term)
+        catch { throw(value), _ => (value as term), } as term)
+} as term)
+
+fn exited(f: fn() -> term)
+    ->
+        term ({
+    (try ({ ((f as fn() -> term)() as term) } as term)
+        catch { exit(reason) => (reason as term), } as term)
+} as term)
+
+fn elixir_name(f: fn() -> term)
+    ->
+        term ({
+    (try ({ ((f as fn() -> term)() as term); (a"none" as atom) } as term)
+        catch { error(#{a"__struct__" => name, ..}) => (name as term), } as
+        term)
+} as term)
+
+fn elixir_reason(f: fn() -> term)
+    ->
+        term ({
+    (try ({ ((f as fn() -> term)() as term); (a"none" as atom) } as term)
+        catch {
+        error(reason@#{a"__exception__" => true, ..}) => (reason as term),
+    } as term)
+} as term)
+
+fn elixir_stack(f: fn() -> term)
+    ->
+        term ({
+    (try ({ ((f as fn() -> term)() as term) } as term)
+        catch {
+        error(#{a"__exception__" => true, ..}), stacktrace =>
+            (stacktrace as term),
+    } as term)
+} as term)
+
+fn any_class(f: fn() -> term)
+    ->
+        atom ({
+    (try ({ ((f as fn() -> term)() as term); (a"none" as atom) } as atom)
+        catch { any(class, _) => (class as atom), } as atom)
+} as atom)
+
+fn any_with_stack(f: fn() -> term)
+    ->
+        term ({
+    (try ({ ((f as fn() -> term)() as term) } as term)
+        catch { any(_, _), stacktrace => (stacktrace as term), } as term)
+} as term)
+
+fn any_atom_reason(f: fn() -> term)
+    ->
+        (atom,
+        atom) ({
+    (try ({
+            ((f as fn() -> term)() as term);
+            (((a"none" as atom), (a"none" as atom)) as (atom, atom))
+        } as (atom, atom))
+        catch {
+        any(class, atom(value)) =>
+            (((class as atom), (value as atom)) as (atom, atom)),
+    } as (atom, atom))
+} as (atom, atom))
+
+fn any_error_value(f: fn() -> term)
+    ->
+        term ({
+    (try ({ ((f as fn() -> term)() as term) } as term)
+        catch { any(a"error", value) => (value as term), } as term)
+} as term)
+
+fn any_pinned_class(expected: atom, f: fn() -> term)
+    ->
+        term ({
+    (try ({ ((f as fn() -> term)() as term) } as term)
+        catch { any(^expected, value) => (value as term), } as term)
+} as term)
+
+fn any_aliased_class(f: fn() -> term)
+    ->
+        atom ({
+    (try ({ ((f as fn() -> term)() as term); (a"none" as atom) } as atom)
+        catch { any(class@a"error", _) => (class as atom), } as atom)
+} as atom)
+
+fn any_class_alternative(f: fn() -> term)
+    ->
+        term ({
+    (try ({ ((f as fn() -> term)() as term) } as term)
+        catch { any(a"error" | a"throw", value) => (value as term), } as term)
+} as term)
+
+fn atom_reason(f: fn() -> term)
+    ->
+        atom ({
+    (try ({ ((f as fn() -> term)() as term); (a"none" as atom) } as atom)
+        catch { error(atom(name)) => (name as atom), } as atom)
+} as atom)
+
+fn badmatch_value(f: fn() -> term)
+    ->
+        term ({
+    (try ({ ((f as fn() -> term)() as term) } as term)
+        catch { error((a"badmatch", value)) => (value as term), } as term)
+} as term)
+
+fn map_reason(f: fn() -> term)
+    ->
+        term ({
+    (try ({ ((f as fn() -> term)() as term) } as term)
+        catch { error(#{a"kind" => value, ..}) => (value as term), } as term)
+} as term)
+
+fn arithmetic_reason(f: fn() -> term)
+    ->
+        atom ({
+    (try ({ ((f as fn() -> term)() as term); (a"none" as atom) } as atom)
+        catch { error(a"badarg" | a"badarith") => (a"arithmetic" as atom), }
+        as atom)
+} as atom)
+
+fn guarded_reason(f: fn() -> term)
+    ->
+        atom ({
+    (try ({ ((f as fn() -> term)() as term); (a"none" as atom) } as atom)
+        catch {
+        error(atom(name)) if ((name as atom) == (a"wanted" as atom) as bool)
+            => (name as atom),
+    } as atom)
+} as atom)
+
+fn guarded_stack(f: fn() -> term)
+    ->
+        term ({
+    (try ({ ((f as fn() -> term)() as term) } as term)
+        catch {
+        error(atom(name)) if ((name as atom) == (a"wanted" as atom) as bool),
+            stacktrace => (stacktrace as term),
+    } as term)
+} as term)
+
+fn unsafe_reason(f: fn() -> term)
+    ->
+        int ({
+    (unsafe {
+        (try ({ ((f as fn() -> term)() as term); (0 as int) } as int)
+            catch { throw(MyError {  code }) => (code as int), } as int)
+    } as int)
+} as int)
+
+fn catch_only()
+    ->
+        int ({
+    (try ({ (7 as int) } as int) catch { error(_) => (0 as int), } as int)
+} as int)
+
+fn after_only(recipient: term)
+    ->
+        int ({
+    (try ({ (8 as int) } as int)
+        after ({
+            ((erlang::send as
+                    fn(term, term) -> term)((recipient as term),
+                (a"after_success" as atom)) as term);
+        } as ()) as int)
+} as int)
+
+fn after_error(recipient: term, f: fn() -> term)
+    ->
+        term ({
+    (try ({ ((f as fn() -> term)() as term) } as term)
+        catch { error(reason) => (reason as term), }
+        after ({
+            ((erlang::send as
+                    fn(term, term) -> term)((recipient as term),
+                (a"after_error" as atom)) as term);
+        } as ()) as term)
+} as term)
+
+fn contextual_after()
+    -> int ({ let after = (9 as int); (after as int) } as int)

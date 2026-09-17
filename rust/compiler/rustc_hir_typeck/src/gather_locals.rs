@@ -102,6 +102,9 @@ impl<'a, 'tcx> GatherLocalsVisitor<'a, 'tcx> {
     pub(crate) fn gather_from_arm(fcx: &'a FnCtxt<'a, 'tcx>, local: &'tcx hir::Arm<'tcx>) {
         let mut visitor = GatherLocalsVisitor { fcx, outermost_fn_param_pat: None };
         visitor.visit_pat(local.pat);
+        if let Some(stacktrace) = local.stacktrace {
+            visitor.visit_pat(stacktrace);
+        }
     }
 
     fn assign(&mut self, span: Span, nid: HirId, ty_opt: Option<Ty<'tcx>>) -> Ty<'tcx> {

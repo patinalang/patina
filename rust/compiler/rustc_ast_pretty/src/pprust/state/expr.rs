@@ -618,6 +618,30 @@ impl<'a> State<'a> {
                     self.print_block(&timeout.body, cb, ib);
                 }
             }
+            ast::ExprKind::TryCatch(try_expr) => {
+                let cb = self.cbox(0);
+                let ib = self.ibox(0);
+                self.word_nbsp("try");
+                self.print_block_with_attrs(&try_expr.body, attrs, cb, ib);
+                if !try_expr.arms.is_empty() {
+                    self.space();
+                    self.word_nbsp("catch");
+                    let cb = self.cbox(0);
+                    let ib = self.ibox(0);
+                    self.bopen(ib);
+                    for arm in &try_expr.arms {
+                        self.print_arm(arm);
+                    }
+                    self.bclose(expr.span, false, cb);
+                }
+                if let Some(after) = &try_expr.after {
+                    self.space();
+                    self.word_nbsp("after");
+                    let cb = self.cbox(0);
+                    let ib = self.ibox(0);
+                    self.print_block(after, cb, ib);
+                }
+            }
             ast::ExprKind::Match(expr, arms, match_kind) => {
                 let cb = self.cbox(0);
                 let ib = self.ibox(0);
@@ -963,12 +987,17 @@ impl<'a> State<'a> {
         self.maybe_print_comment(arm.pat.span.lo());
         self.print_outer_attributes(&arm.attrs);
         self.print_pat(&arm.pat);
-        self.space();
         if let Some(guard) = &arm.guard {
+            self.space();
             self.word_space("if");
             self.print_expr(&guard.cond, FixupContext::default());
-            self.space();
         }
+        if let Some(stacktrace) = &arm.stacktrace {
+            self.word(",");
+            self.space();
+            self.print_pat(stacktrace);
+        }
+        self.space();
 
         if let Some(body) = &arm.body {
             self.word_space("=>");

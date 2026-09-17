@@ -4118,7 +4118,16 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
         self.with_rib(ValueNS, RibKind::Normal, |this| {
             this.resolve_pattern_top(&arm.pat, PatternSource::Match);
             visit_opt!(this, visit_expr, arm.guard.as_ref().map(|g| &g.cond));
-            visit_opt!(this, visit_expr, &arm.body);
+            // A `catch` arm's stacktrace is written after the guard, so it is only
+            // in scope for the arm body.
+            if let Some(stacktrace) = &arm.stacktrace {
+                this.with_rib(ValueNS, RibKind::Normal, |this| {
+                    this.resolve_pattern_top(stacktrace, PatternSource::Match);
+                    visit_opt!(this, visit_expr, &arm.body);
+                });
+            } else {
+                visit_opt!(this, visit_expr, &arm.body);
+            }
         });
     }
 

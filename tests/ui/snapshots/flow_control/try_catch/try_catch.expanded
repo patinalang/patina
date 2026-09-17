@@ -1,0 +1,169 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs)]
+#![no_std]
+#![no_core]
+
+
+
+
+
+
+
+
+
+
+#![deny(unused_unsafe)]
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+#[allow(unused_imports)]
+use Core::*;
+#[allow(unused)]
+extern mod io;
+#[allow(unused)]
+extern mod patina_fmt;
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! stringify { () => {}; }
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat { () => {}; }
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args { () => {}; }
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+extern mod erlang;
+
+#[repr(tagged, tag = "my_error")]
+pub struct MyError {
+    pub code: int,
+}
+
+pub fn error_reason(f: fn() -> term) -> term {
+    try { f() } catch { error(reason) => reason, }
+}
+
+pub fn error_with_stack(f: fn() -> term) -> term {
+    try { f() } catch { error(_), stacktrace => stacktrace, }
+}
+
+pub fn argument_error(f: fn() -> term) -> bool {
+    try { f(); false } catch { error(a"badarg") => true, }
+}
+
+pub fn argument_error_stack(f: fn() -> term) -> term {
+    try { f() } catch { error(a"badarg"), stacktrace => stacktrace, }
+}
+
+pub fn thrown(f: fn() -> term) -> term {
+    try { f() } catch { throw(value) => value, }
+}
+
+pub fn thrown_with_stack(f: fn() -> term) -> term {
+    try { f() } catch { throw(value), _ => value, }
+}
+
+pub fn exited(f: fn() -> term) -> term {
+    try { f() } catch { exit(reason) => reason, }
+}
+
+pub fn elixir_name(f: fn() -> term) -> term {
+    try { f(); a"none" }
+        catch { error(#{a"__struct__" => name, ..}) => name, }
+}
+
+pub fn elixir_reason(f: fn() -> term) -> term {
+    try { f(); a"none" }
+        catch { error(reason @ #{a"__exception__" => true, ..}) => reason, }
+}
+
+pub fn elixir_stack(f: fn() -> term) -> term {
+    try { f() }
+        catch {
+        error(#{a"__exception__" => true, ..}), stacktrace => stacktrace,
+    }
+}
+
+pub fn any_class(f: fn() -> term) -> atom {
+    try { f(); a"none" } catch { any(class, _) => class, }
+}
+
+pub fn any_with_stack(f: fn() -> term) -> term {
+    try { f() } catch { any(_, _), stacktrace => stacktrace, }
+}
+
+pub fn any_atom_reason(f: fn() -> term) -> (atom, atom) {
+    try { f(); (a"none", a"none") }
+        catch { any(class, atom(value)) => (class, value), }
+}
+
+pub fn any_error_value(f: fn() -> term) -> term {
+    try { f() } catch { any(a"error", value) => value, }
+}
+
+pub fn any_pinned_class(expected: atom, f: fn() -> term) -> term {
+    try { f() } catch { any(^expected, value) => value, }
+}
+
+pub fn any_aliased_class(f: fn() -> term) -> atom {
+    try { f(); a"none" } catch { any(class @ a"error", _) => class, }
+}
+
+pub fn any_class_alternative(f: fn() -> term) -> term {
+    try { f() } catch { any(a"error" | a"throw", value) => value, }
+}
+
+pub fn atom_reason(f: fn() -> term) -> atom {
+    try { f(); a"none" } catch { error(atom(name)) => name, }
+}
+
+pub fn badmatch_value(f: fn() -> term) -> term {
+    try { f() } catch { error((a"badmatch", value)) => value, }
+}
+
+pub fn map_reason(f: fn() -> term) -> term {
+    try { f() } catch { error(#{a"kind" => value, ..}) => value, }
+}
+
+pub fn arithmetic_reason(f: fn() -> term) -> atom {
+    try { f(); a"none" }
+        catch { error(a"badarg" | a"badarith") => a"arithmetic", }
+}
+
+pub fn guarded_reason(f: fn() -> term) -> atom {
+    try { f(); a"none" }
+        catch { error(atom(name)) if name == a"wanted" => name, }
+}
+
+pub fn guarded_stack(f: fn() -> term) -> term {
+    try { f() }
+        catch {
+        error(atom(name)) if name == a"wanted", stacktrace => stacktrace,
+    }
+}
+
+pub fn unsafe_reason(f: fn() -> term) -> int {
+    unsafe { try { f(); 0 } catch { throw(MyError { code }) => code, } }
+}
+
+pub fn catch_only() -> int { try { 7 } catch { error(_) => 0, } }
+
+pub fn after_only(recipient: term) -> int {
+    try { 8 } after { erlang::send(recipient, a"after_success"); }
+}
+
+pub fn after_error(recipient: term, f: fn() -> term) -> term {
+    try { f() } catch { error(reason) => reason, }
+        after { erlang::send(recipient, a"after_error"); }
+}
+
+pub fn contextual_after() -> int { let after = 9; after }

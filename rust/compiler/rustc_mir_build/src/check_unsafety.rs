@@ -268,6 +268,7 @@ impl<'a, 'tcx> Visitor<'a, 'tcx> for UnsafetyVisitor<'a, 'tcx> {
                 | PatKind::Constant { .. }
                 | PatKind::Pin { .. }
                 | PatKind::TermClass { .. }
+                | PatKind::Exception { .. }
                 | PatKind::TermPat { .. }
                 | PatKind::Variant { .. }
                 | PatKind::Leaf { .. }
@@ -404,6 +405,7 @@ impl<'a, 'tcx> Visitor<'a, 'tcx> for UnsafetyVisitor<'a, 'tcx> {
             | ExprKind::LoopMatch { .. }
             | ExprKind::Let { .. }
             | ExprKind::Receive { .. }
+            | ExprKind::TryCatch { .. }
             | ExprKind::Match { .. }
             | ExprKind::If { .. }
             | ExprKind::InlineAsm { .. }

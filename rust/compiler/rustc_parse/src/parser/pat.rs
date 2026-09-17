@@ -6,9 +6,9 @@ use rustc_ast::token::{self, IdentIsRaw, MetaVarKind, Token};
 use rustc_ast::util::parser::ExprPrecedence;
 use rustc_ast::visit::{self, Visitor};
 use rustc_ast::{
-    self as ast, Arm, AttrVec, BinOpKind, BindingMode, ByRef, Expr, ExprKind, Guard, LocalKind,
-    MacCall, Mutability, Pat, PatField, PatFieldsRest, PatKind, PatMapFieldsRest, Path, QSelf,
-    RangeEnd, RangeSyntax, Recovered, Stmt, StmtKind, TermClass,
+    self as ast, Arm, AttrVec, BinOpKind, BindingMode, ByRef, ExceptionClass, Expr, ExprKind,
+    Guard, LocalKind, MacCall, Mutability, Pat, PatField, PatFieldsRest, PatKind, PatMapFieldsRest,
+    Path, QSelf, RangeEnd, RangeSyntax, Recovered, Stmt, StmtKind, TermClass,
 };
 use rustc_ast_pretty::pprust;
 use rustc_errors::{Applicability, Diag, DiagArgValue, PResult, StashKey};
@@ -1220,14 +1220,7 @@ impl<'a> Parser<'a> {
     fn parse_pat_tuple_or_parens(&mut self) -> PResult<'a, PatKind> {
         let open_paren = self.token.span;
 
-        let (fields, trailing_comma) = self.parse_paren_comma_seq(|p| {
-            p.parse_pat_allow_top_guard(
-                None,
-                RecoverComma::No,
-                RecoverColon::No,
-                CommaRecoveryMode::LikelyTuple,
-            )
-        })?;
+        let (fields, trailing_comma) = self.parse_class_pat_fields()?;
 
         // Here, `(pat,)` is a tuple pattern.
         // For backward compatibility, `(..)` is a tuple pattern as well.
@@ -1630,14 +1623,7 @@ impl<'a> Parser<'a> {
         qself: Option<Box<QSelf>>,
         path: Path,
     ) -> PResult<'a, PatKind> {
-        let (fields, _) = self.parse_paren_comma_seq(|p| {
-            p.parse_pat_allow_top_guard(
-                None,
-                RecoverComma::No,
-                RecoverColon::No,
-                CommaRecoveryMode::EitherTupleOrPipe,
-            )
-        })?;
+        let (fields, _) = self.parse_class_pat_fields()?;
         if qself.is_some() {
             self.psess.gated_spans.gate(sym::more_qualified_paths, path.span);
         }
@@ -1646,17 +1632,10 @@ impl<'a> Parser<'a> {
 
     fn parse_pat_term_class(&mut self, class: TermClass) -> PResult<'a, PatKind> {
         let lo = self.prev_token.span;
-        let (mut fields, _) = self.parse_paren_comma_seq(|p| {
-            p.parse_pat_allow_top_guard(
-                None,
-                RecoverComma::No,
-                RecoverColon::No,
-                CommaRecoveryMode::EitherTupleOrPipe,
-            )
-        })?;
+        let (mut fields, _) = self.parse_class_pat_fields()?;
 
         if fields.len() == 1 {
-            Ok(PatKind::TermClass(class, Box::new(fields.remove(0))))
+            Ok(PatKind::TermClass(Box::new(fields.remove(0)), class))
         } else {
             let guar = self
                 .dcx()
@@ -1668,6 +1647,75 @@ impl<'a> Parser<'a> {
 
             Ok(PatKind::Err(guar))
         }
+    }
+
+    pub(super) fn parse_pat_exception_class(&mut self) -> PResult<'a, Pat> {
+        let lo = self.token.span;
+        let Some((ident, IdentIsRaw::No)) = self.token.ident() else {
+            return self.parse_invalid_exception_class_pattern();
+        };
+        if ident.is_reserved() || self.look_ahead(1, |token| token.kind == token::PathSep) {
+            return self.parse_invalid_exception_class_pattern();
+        }
+        self.bump();
+
+        let (fields, _) = if self.check(exp!(OpenParen)) {
+            self.parse_class_pat_fields()?
+        } else {
+            (ThinVec::new(), Trailing::No)
+        };
+        let class_span = lo.to(self.prev_token.span);
+
+        let kind = match ExceptionClass::from_symbol(ident.name) {
+            None => {
+                let guar = self
+                    .dcx()
+                    .emit_err(errors::UnknownExceptionClass { span: class_span, name: ident.name });
+                PatKind::Err(guar)
+            }
+            Some(class) if fields.len() != class.arity() => {
+                let guar = self.dcx().emit_err(errors::WrongNumberOfExceptionClassSubpatterns {
+                    span: class_span,
+                    expected: class.arity(),
+                    found: fields.len(),
+                });
+                PatKind::Err(guar)
+            }
+            Some(class) => PatKind::ExceptionClass(fields, class),
+        };
+
+        Ok(self.mk_pat(class_span, kind))
+    }
+
+    fn parse_invalid_exception_class_pattern(&mut self) -> PResult<'a, Pat> {
+        let lo = self.token.span;
+        let pat = self.parse_pat_no_top_guard(
+            None,
+            RecoverComma::No,
+            RecoverColon::No,
+            CommaRecoveryMode::EitherTupleOrPipe,
+        )?;
+        // `mut error(reason)` is recovered as the binding `mut error`, leaving
+        // the parenthesized arguments for us to consume with the invalid pattern.
+        let invalid_span = if self.check(exp!(OpenParen)) {
+            let _ = self.parse_class_pat_fields()?;
+            lo.to(self.prev_token.span)
+        } else {
+            pat.span
+        };
+        let guar = self.dcx().emit_err(errors::InvalidExceptionClassPattern { span: invalid_span });
+        Ok(self.mk_pat(invalid_span, PatKind::Err(guar)))
+    }
+
+    fn parse_class_pat_fields(&mut self) -> PResult<'a, (ThinVec<Pat>, Trailing)> {
+        self.parse_paren_comma_seq(|p| {
+            p.parse_pat_allow_top_guard(
+                None,
+                RecoverComma::No,
+                RecoverColon::No,
+                CommaRecoveryMode::EitherTupleOrPipe,
+            )
+        })
     }
 
     /// Are we sure this could not possibly be the start of a pattern?

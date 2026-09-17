@@ -1,0 +1,136 @@
+error: unreachable pattern
+  --> tests/ui/src/flow_control/try_catch/errors/semantic_errors.pt:9:9
+   |
+LL |         error(reason) => {},
+   |         ------------- matches all the relevant values
+LL |         error(reason), stacktrace => {},
+   |         ^^^^^^^^^^^^^ no value can reach this
+   |
+note: the lint level is defined here
+  --> tests/ui/src/flow_control/try_catch/errors/semantic_errors.pt:1:9
+   |
+LL | #![deny(unreachable_patterns)]
+   |         ^^^^^^^^^^^^^^^^^^^^
+
+error: unreachable pattern
+  --> tests/ui/src/flow_control/try_catch/errors/semantic_errors.pt:16:9
+   |
+LL |         any(class, value) => {},
+   |         ----------------- matches any value
+LL |         error(reason) => {},
+   |         ^^^^^^^^^^^^^ no value can reach this
+
+error: unreachable pattern
+  --> tests/ui/src/flow_control/try_catch/errors/semantic_errors.pt:25:9
+   |
+LL |         any(class, value) => {},
+   |         ^^^^^^^^^^^^^^^^^ no value can reach this
+   |
+note: multiple earlier patterns match some of the same values
+  --> tests/ui/src/flow_control/try_catch/errors/semantic_errors.pt:25:9
+   |
+LL |         error(_) => {},
+   |         -------- matches some of the same values
+LL |         throw(_) => {},
+   |         -------- matches some of the same values
+LL |         exit(_) => {},
+   |         ------- matches some of the same values
+LL |         any(class, value) => {},
+   |         ^^^^^^^^^^^^^^^^^ collectively making this unreachable
+
+error[E0133]: matching a `term` by runtime representation is unsafe and requires unsafe block
+  --> tests/ui/src/flow_control/try_catch/errors/semantic_errors.pt:37:26
+   |
+LL |     try {} catch { throw(MyError { code }) => {} }
+   |                          ^^^^^^^^^^^^^^^^ pattern matched by representation only
+   |
+   = note: different Patina types can share one BEAM representation; this pattern cannot tell them apart
+
+error: unreachable pattern
+  --> tests/ui/src/flow_control/try_catch/errors/semantic_errors.pt:57:9
+   |
+LL |         any(a"error", value) => {},
+   |         -------------------- matches all the relevant values
+LL |         error(_) => {},
+   |         ^^^^^^^^ no value can reach this
+
+error: unreachable pattern
+  --> tests/ui/src/flow_control/try_catch/errors/semantic_errors.pt:63:24
+   |
+LL |         any(a"error" | a"error", value) => {},
+   |             --------   ^^^^^^^^ no value can reach this
+   |             |
+   |             matches all the relevant values
+
+error: unreachable pattern
+  --> tests/ui/src/flow_control/try_catch/errors/semantic_errors.pt:70:9
+   |
+LL |         error(a"badarg") => {},
+   |         ---------------- matches all the relevant values
+LL |         error(a"badarg") => {},
+   |         ^^^^^^^^^^^^^^^^ no value can reach this
+
+error: unreachable pattern
+  --> tests/ui/src/flow_control/try_catch/errors/semantic_errors.pt:77:9
+   |
+LL |         error(_) => {},
+   |         -------- matches all the relevant values
+LL |         error(a"badarg") => {},
+   |         ^^^^^^^^^^^^^^^^ no value can reach this
+
+error: unreachable pattern
+  --> tests/ui/src/flow_control/try_catch/errors/semantic_errors.pt:78:9
+   |
+LL |         error(_) => {},
+   |         -------- matches all the relevant values
+LL |         error(a"badarg") => {},
+LL |         error(#{a"__struct__" => a"Elixir.ArgumentError", ..}) => {},
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ no value can reach this
+
+error: unreachable pattern
+  --> tests/ui/src/flow_control/try_catch/errors/semantic_errors.pt:84:9
+   |
+LL |         any(a"bogus", _) => {},
+   |         ^^^^^^^^^^^^^^^^-------
+   |         |
+   |         matches no values because `Core::ExceptionClass` is uninhabited
+   |         help: remove the match arm
+   |
+   = note: to learn more about uninhabited types, see https://doc.rust-lang.org/nomicon/exotic-sizes.html#empty-types
+
+error: cannot assign to `value`, as it is declared outside the `try` block
+  --> tests/ui/src/flow_control/try_catch/errors/semantic_errors.pt:91:9
+   |
+LL |     let mut value = 1;
+   |         --------- `value` is declared here
+LL |     try {
+LL |         value = 2;
+   |         ^^^^^^^^^ cannot assign
+   |
+   = note: bindings made inside a `try`, `catch` or `after` block do not escape it
+
+error: cannot assign to `value`, as it is declared outside the `catch` block
+  --> tests/ui/src/flow_control/try_catch/errors/semantic_errors.pt:99:13
+   |
+LL |     let mut value = 1;
+   |         --------- `value` is declared here
+...
+LL |             value = 2;
+   |             ^^^^^^^^^ cannot assign
+   |
+   = note: bindings made inside a `try`, `catch` or `after` block do not escape it
+
+error: cannot assign to `value`, as it is declared outside the `after` block
+  --> tests/ui/src/flow_control/try_catch/errors/semantic_errors.pt:107:9
+   |
+LL |     let mut value = 1;
+   |         --------- `value` is declared here
+LL |     try {} after {
+LL |         value = 2;
+   |         ^^^^^^^^^ cannot assign
+   |
+   = note: bindings made inside a `try`, `catch` or `after` block do not escape it
+
+error: aborting due to 13 previous errors
+
+For more information about this error, try `rustc --explain E0133`.

@@ -338,6 +338,7 @@ impl<'tcx> TyCtxt<'tcx> {
                     | ExprKind::Cast(_, _)
                     | ExprKind::DropTemps(_)
                     | ExprKind::Receive(..)
+                    | ExprKind::TryCatch(..)
                     | ExprKind::If(_, _, _)
                     | ExprKind::Closure(_)
                     | ExprKind::Block(_, _)

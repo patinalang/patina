@@ -99,6 +99,15 @@ pub fn walk_expr<'thir, 'tcx: 'thir, V: Visitor<'thir, 'tcx>>(
                 visitor.visit_expr(&visitor.thir()[timeout.body]);
             }
         }
+        TryCatch { body, ref arms, ref after } => {
+            visitor.visit_expr(&visitor.thir()[body]);
+            for &arm in &**arms {
+                visitor.visit_arm(&visitor.thir()[arm]);
+            }
+            if let Some(after) = after {
+                visitor.visit_expr(&visitor.thir()[*after]);
+            }
+        }
         Block { block } => visitor.visit_block(&visitor.thir()[block]),
         Assign { lhs, rhs } | AssignOp { lhs, rhs, op: _ } => {
             visitor.visit_expr(&visitor.thir()[lhs]);
@@ -264,11 +273,14 @@ pub fn walk_arm<'thir, 'tcx: 'thir, V: Visitor<'thir, 'tcx>>(
     visitor: &mut V,
     arm: &'thir Arm<'tcx>,
 ) {
-    let Arm { guard, pattern, body, hir_id: _, span: _, scope: _ } = arm;
+    let Arm { guard, pattern, stacktrace, body, hir_id: _, span: _, scope: _ } = arm;
     if let Some(expr) = guard {
         visitor.visit_expr(&visitor.thir()[*expr])
     }
     visitor.visit_pat(pattern);
+    if let Some(stacktrace) = stacktrace {
+        visitor.visit_pat(stacktrace);
+    }
     visitor.visit_expr(&visitor.thir()[*body]);
 }
 
@@ -312,6 +324,11 @@ pub(crate) fn for_each_immediate_subpat<'a, 'tcx>(
             for field_pat in subpatterns {
                 callback(&field_pat.pattern);
             }
+        }
+
+        PatKind::Exception { class_pat, reason_pat, .. } => {
+            callback(class_pat);
+            callback(reason_pat);
         }
 
         PatKind::Slice { prefix, slice, suffix } | PatKind::Array { prefix, slice, suffix } => {

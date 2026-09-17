@@ -692,13 +692,16 @@ impl Pat {
             | PatKind::Slice(s)
             | PatKind::Or(s) => s.iter().for_each(|p| p.walk(it)),
 
+            // Walk into each arg.
+            PatKind::ExceptionClass(args, _) => args.iter().for_each(|p| p.walk(it)),
+
             // Trivial wrappers over inner patterns.
             PatKind::Box(s)
             | PatKind::Deref(s)
             | PatKind::Ref(s, _, _)
             | PatKind::Paren(s)
             | PatKind::Guard(s, _)
-            | PatKind::TermClass(_, s) => s.walk(it),
+            | PatKind::TermClass(s, _) => s.walk(it),
 
             // These patterns do not contain subpatterns, skip.
             PatKind::Missing
@@ -938,6 +941,44 @@ impl TermClass {
     }
 }
 
+/// A BEAM exception class accepted in a `catch` arm.
+#[derive(Clone, Copy, Encodable, Decodable, Debug, Eq, PartialEq, StableHash, Walkable)]
+pub enum ExceptionClass {
+    Error,
+    Throw,
+    Exit,
+    Any,
+}
+
+impl ExceptionClass {
+    pub fn from_symbol(name: Symbol) -> Option<Self> {
+        Some(match name {
+            sym::error => Self::Error,
+            sym::throw => Self::Throw,
+            sym::exit => Self::Exit,
+            sym::any => Self::Any,
+            _ => return None,
+        })
+    }
+
+    pub fn name(self) -> Symbol {
+        match self {
+            Self::Error => sym::error,
+            Self::Throw => sym::throw,
+            Self::Exit => sym::exit,
+            Self::Any => sym::any,
+        }
+    }
+
+    /// The number of subpatterns this class pattern accepts.
+    pub fn arity(self) -> usize {
+        match self {
+            Self::Error | Self::Throw | Self::Exit => 1,
+            Self::Any => 2,
+        }
+    }
+}
+
 /// All the different flavors of pattern that Rust recognizes.
 //
 // Adding a new variant? Please update `test_pat` in `tests/ui/macros/stringify.rs`.
@@ -990,7 +1031,10 @@ pub enum PatKind {
     Pin(Box<Expr>),
 
     /// A BEAM runtime class pattern (e.g., `int(value)`).
-    TermClass(TermClass, Box<Pat>),
+    TermClass(Box<Pat>, TermClass),
+
+    /// A BEAM exception class pattern, only produced for `catch` arms.
+    ExceptionClass(ThinVec<Pat>, ExceptionClass),
 
     /// A range pattern (e.g., `1...2`, `1..2`, `1..`, `..2`, `1..=2`, `..=2`).
     Range(Option<Box<Expr>>, Option<Box<Expr>>, Spanned<RangeEnd>),
@@ -1435,6 +1479,13 @@ pub struct ReceiveTimeout {
     pub body: Box<Block>,
 }
 
+#[derive(Clone, Encodable, Decodable, Debug, Walkable)]
+pub struct TryCatchExpr {
+    pub body: Box<Block>,
+    pub arms: ThinVec<Arm>,
+    pub after: Option<Box<Block>>,
+}
+
 /// An arm of a 'match'.
 ///
 /// E.g., `0..=10 => { println!("match!") }` as in
@@ -1452,6 +1503,9 @@ pub struct Arm {
     pub pat: Box<Pat>,
     /// Match arm guard, e.g. `n > 10` in `match foo { n if n > 10 => {}, _ => {} }`.
     pub guard: Option<Box<Guard>>,
+    /// The stacktrace pattern bound by a `catch` arm, e.g. `stacktrace` in
+    /// `catch { exit(reason) if reason > 1, stacktrace => ... }`.
+    pub stacktrace: Option<Box<Pat>>,
     /// Match arm body. Omitted if the pattern is a never pattern.
     pub body: Option<Box<Expr>>,
     pub span: Span,
@@ -1732,6 +1786,7 @@ impl Expr {
             | ExprKind::Loop(..)
             | ExprKind::MacCall(..)
             | ExprKind::Receive(..)
+            | ExprKind::TryCatch(..)
             | ExprKind::Match(..)
             | ExprKind::MethodCall(..)
             | ExprKind::OffsetOf(..)
@@ -1965,6 +2020,8 @@ pub enum ExprKind {
     Match(Box<Expr>, ThinVec<Arm>, MatchKind),
     /// Selectively waits for a mailbox message, optionally with a timeout.
     Receive(Box<ReceiveExpr>),
+    /// A BEAM `try` expression with `catch` arms and/or an `after` block.
+    TryCatch(Box<TryCatchExpr>),
     /// A closure (e.g., `move |a, b, c| a + b + c`).
     Closure(Box<Closure>),
     /// A block (`'label: { ... }`).

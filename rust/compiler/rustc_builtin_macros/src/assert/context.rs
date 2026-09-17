@@ -258,6 +258,7 @@ impl<'cx, 'a> Context<'cx, 'a> {
                     self.manage_cond_expr(&mut timeout.expr);
                 }
             }
+            ExprKind::TryCatch(..) => {}
             ExprKind::Match(local_expr, ..) => {
                 self.manage_cond_expr(local_expr);
             }

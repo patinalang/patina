@@ -389,6 +389,12 @@ pub enum ExprKind<'tcx> {
         arms: Box<[ArmId]>,
         timeout: Option<ReceiveTimeout>,
     },
+    /// A `try` expression with `catch` arms and/or an `after` block.
+    TryCatch {
+        body: ExprId,
+        arms: Box<[ArmId]>,
+        after: Option<ExprId>,
+    },
     /// A `match` expression.
     Match {
         scrutinee: ExprId,
@@ -596,6 +602,7 @@ pub struct FruInfo<'tcx> {
 pub struct Arm<'tcx> {
     pub pattern: Box<Pat<'tcx>>,
     pub guard: Option<ExprId>,
+    pub stacktrace: Option<Box<Pat<'tcx>>>,
     pub body: ExprId,
     pub hir_id: HirId,
     pub scope: region::Scope,
@@ -827,6 +834,14 @@ pub enum PatKind<'tcx> {
         #[type_visitable(ignore)]
         class: hir::TermClass,
         subpattern: Box<Pat<'tcx>>,
+    },
+
+    /// A BEAM exception pattern (e.g., `exit(reason)` or `any(class, reason)`).
+    Exception {
+        #[type_visitable(ignore)]
+        class: hir::ExceptionClass,
+        class_pat: Box<Pat<'tcx>>,
+        reason_pat: Box<Pat<'tcx>>,
     },
 
     /// A pattern whose scrutinee is `term` but whose inner pattern has its own type.

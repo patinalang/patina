@@ -44,8 +44,11 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     PatKind::Pin(e) => {
                         break hir::PatKind::Pin(self.lower_expr_within_pat(e, true));
                     }
-                    PatKind::TermClass(class, subpattern) => {
-                        break hir::PatKind::TermClass(*class, self.lower_pat(subpattern));
+                    PatKind::TermClass(subpattern, class) => {
+                        break hir::PatKind::TermClass(self.lower_pat(subpattern), *class);
+                    }
+                    PatKind::ExceptionClass(args, class) => {
+                        break self.lower_pat_exception(pattern.span, args, *class);
                     }
                     PatKind::TupleStruct(qself, path, pats) => {
                         let qpath = self.lower_qpath(
@@ -177,6 +180,47 @@ impl<'hir> LoweringContext<'_, 'hir> {
             };
 
             self.pat_with_node_id_of(pattern, node, pat_hir_id)
+        })
+    }
+
+    fn lower_pat_exception(
+        &mut self,
+        span: Span,
+        args: &[Pat],
+        class: ExceptionClass,
+    ) -> hir::PatKind<'hir> {
+        let span = self.lower_span(span);
+        let (class_pat, reason_pat) = match (class, args) {
+            (ExceptionClass::Any, [class_pat, reason_pat]) => {
+                (self.lower_pat(class_pat), self.lower_pat(reason_pat))
+            }
+            (
+                ExceptionClass::Error | ExceptionClass::Throw | ExceptionClass::Exit,
+                [reason_pat],
+            ) => (self.pat_exception_class_atom(span, class), self.lower_pat(reason_pat)),
+            // The parser rejects a mismatched arity before we get here.
+            _ => span_bug!(span, "`{}` pattern with {} subpatterns", class.name(), args.len()),
+        };
+        hir::PatKind::Exception { class, class_pat, reason_pat }
+    }
+
+    /// The atom literal pattern matching the class of `class`, e.g. `a"error"` for `error(..)`.
+    fn pat_exception_class_atom(
+        &mut self,
+        span: Span,
+        class: ExceptionClass,
+    ) -> &'hir hir::Pat<'hir> {
+        let lit = respan(span, LitKind::Atom(class.name(), StrStyle::Cooked));
+        let expr = self.arena.alloc(hir::PatExpr {
+            hir_id: self.next_id(),
+            span,
+            kind: hir::PatExprKind::Lit { lit, negated: false },
+        });
+        self.arena.alloc(hir::Pat {
+            hir_id: self.next_id(),
+            kind: hir::PatKind::Expr(expr),
+            span,
+            default_binding_modes: true,
         })
     }
 

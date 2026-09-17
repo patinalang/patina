@@ -369,6 +369,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             ExprKind::Receive(arms, timeout) => {
                 self.check_expr_receive(expr, arms, timeout, expected)
             }
+            ExprKind::TryCatch(body, arms, after) => {
+                self.check_expr_try_catch(expr, body, arms, after, expected)
+            }
             ExprKind::Match(discrim, arms, match_src) => {
                 self.check_expr_match(expr, discrim, arms, expected, match_src)
             }

@@ -323,9 +323,15 @@ impl<'tcx, 'ptcx> PatCtxt<'tcx, 'ptcx> {
                 }
             }
 
-            hir::PatKind::TermClass(class, subpattern) => {
+            hir::PatKind::TermClass(subpattern, class) => {
                 PatKind::TermClass { class, subpattern: self.lower_pattern(subpattern) }
             }
+
+            hir::PatKind::Exception { class, class_pat, reason_pat } => PatKind::Exception {
+                class,
+                class_pat: self.lower_pattern(class_pat),
+                reason_pat: self.lower_pattern(reason_pat),
+            },
 
             hir::PatKind::Range(lo_expr, hi_expr, end) => {
                 match self.lower_pattern_range(pat, lo_expr, hi_expr, end) {

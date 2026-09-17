@@ -50,6 +50,12 @@ pub(super) enum DestructuredFloat {
     Error,
 }
 
+#[derive(Clone, Copy)]
+enum ArmKind {
+    Match,
+    Catch,
+}
+
 impl<'a> Parser<'a> {
     /// Parses an expression.
     #[inline]
@@ -3336,14 +3342,14 @@ impl<'a> Parser<'a> {
         }
         let attrs = self.parse_inner_attributes()?;
 
-        let (arms, hi) = self.parse_receive_or_match_arms(lo);
+        let (arms, hi) = self.parse_arms(lo, ArmKind::Match);
         Ok(self.mk_expr_with_attrs(lo.to(hi), ExprKind::Match(scrutinee, arms, match_kind), attrs))
     }
 
-    fn parse_receive_or_match_arms(&mut self, lo: Span) -> (ThinVec<Arm>, Span) {
+    fn parse_arms(&mut self, lo: Span, arm_kind: ArmKind) -> (ThinVec<Arm>, Span) {
         let mut arms = ThinVec::new();
         while self.token != token::CloseBrace {
-            match self.parse_arm() {
+            match self.parse_arm(arm_kind) {
                 Ok(arm) => arms.push(arm),
                 Err(e) => {
                     let guar = e.emit();
@@ -3356,6 +3362,7 @@ impl<'a> Parser<'a> {
                         attrs: Default::default(),
                         pat: Box::new(self.mk_pat(span, ast::PatKind::Err(guar))),
                         guard: None,
+                        stacktrace: None,
                         body: Some(self.mk_expr_err(span, guar)),
                         span,
                         id: DUMMY_NODE_ID,
@@ -3375,12 +3382,9 @@ impl<'a> Parser<'a> {
         let lo = self.prev_token.span;
         self.expect(exp!(OpenBrace))?;
         let attrs = self.parse_inner_attributes()?;
-        let (arms, hi) = self.parse_receive_or_match_arms(lo);
-        let timeout = if let Some((ident, IdentIsRaw::No)) = self.token.ident()
-            && ident.name == sym::after
-        {
-            let timeout_lo = self.token.span;
-            self.bump();
+        let (arms, hi) = self.parse_arms(lo, ArmKind::Match);
+        let timeout = if self.eat_keyword(exp!(After)) {
+            let timeout_lo = self.prev_token.span;
             let (expr, _) =
                 self.parse_expr_res(Restrictions::NO_STRUCT_LITERAL, AttrWrapper::empty())?;
             let body = self.parse_block()?;
@@ -3479,11 +3483,17 @@ impl<'a> Parser<'a> {
         None
     }
 
-    pub(super) fn parse_arm(&mut self) -> PResult<'a, Arm> {
+    fn parse_arm(&mut self, arm_kind: ArmKind) -> PResult<'a, Arm> {
         let attrs = self.parse_outer_attributes()?;
         self.collect_tokens(None, attrs, ForceCollect::No, |this, attrs| {
             let lo = this.token.span;
-            let (pat, guard) = this.parse_match_arm_pat_and_guard()?;
+            let (pat, guard, stacktrace) = match arm_kind {
+                ArmKind::Match => {
+                    let (pat, guard) = this.parse_match_arm_pat_and_guard()?;
+                    (pat, guard, None)
+                },
+                ArmKind::Catch => this.parse_catch_arm_pat_and_guard()?,
+            };
             let pat = Box::new(pat);
 
             let span_before_body = this.prev_token.span;
@@ -3665,6 +3675,7 @@ impl<'a> Parser<'a> {
                     attrs,
                     pat,
                     guard,
+                    stacktrace,
                     body: arm_body,
                     span: arm_span,
                     id: DUMMY_NODE_ID,
@@ -3767,6 +3778,68 @@ impl<'a> Parser<'a> {
         }
     }
 
+    fn parse_catch_arm_pat_and_guard(
+        &mut self,
+    ) -> PResult<'a, (Pat, Option<Box<Guard>>, Option<Box<Pat>>)> {
+        let pat = self.parse_pat_exception_class()?;
+
+        let before_guard = if self.eat(exp!(Comma)) {
+            Some((self.prev_token.span, self.parse_stacktrace_pat()?))
+        } else {
+            None
+        };
+
+        let guard = self.parse_match_arm_guard()?;
+
+        let stacktrace = match (before_guard, &guard) {
+            // `exit(e), st if e == 1 =>` is misplaced: it belongs after the guard.
+            (Some((comma_span, stacktrace_pat)), Some(guard)) => {
+                let guard_span = guard.span_with_leading_if;
+                let stacktrace_span = comma_span.to(stacktrace_pat.span);
+                let sm = self.psess.source_map();
+                let sugg =
+                    match (sm.span_to_snippet(stacktrace_pat.span), sm.span_to_snippet(guard_span))
+                    {
+                        (Ok(stacktrace), Ok(guard)) => {
+                            Some(errors::StacktracePatternMustAppearAfterGuardSugg {
+                                span: stacktrace_span.to(guard_span),
+                                stacktrace,
+                                guard,
+                            })
+                        }
+                        _ => None,
+                    };
+                self.dcx().emit_err(errors::StacktracePatternMustAppearAfterGuard {
+                    span: stacktrace_span,
+                    sugg,
+                });
+                Some(stacktrace_pat)
+            }
+            (Some((_, stacktrace_pat)), None) => Some(stacktrace_pat),
+            (None, Some(_)) if self.eat(exp!(Comma)) => Some(self.parse_stacktrace_pat()?),
+            (None, _) => None,
+        };
+
+        Ok((pat, guard, stacktrace))
+    }
+
+    fn parse_stacktrace_pat(&mut self) -> PResult<'a, Box<Pat>> {
+        let mut pat = self.parse_pat_no_top_guard(
+            None,
+            RecoverComma::No,
+            RecoverColon::No,
+            CommaRecoveryMode::EitherTupleOrPipe,
+        )?;
+        if !matches!(
+            pat.kind,
+            ast::PatKind::Ident(ast::BindingMode::NONE, _, None) | ast::PatKind::Wild
+        ) {
+            let guar = self.dcx().emit_err(errors::InvalidStacktracePattern { span: pat.span });
+            pat.kind = ast::PatKind::Err(guar);
+        }
+        Ok(Box::new(pat))
+    }
+
     fn parse_match_guard_condition(
         &mut self,
         force_collect: ForceCollect,
@@ -3818,21 +3891,41 @@ impl<'a> Parser<'a> {
         self.token == token::Pound && self.look_ahead(1, |t| *t == token::OpenBrace)
     }
 
-    /// Parses a `try {...}` or `try bikeshed Ty {...}` expression (`try` token already eaten).
+    /// Parses a `try { ... } (catch { ... })? (after { ... })?` expression, or an
+    /// annotated `try bikeshed Ty { ... }` block (`try` token already eaten).
     fn parse_try_block(&mut self, span_lo: Span) -> PResult<'a, Box<Expr>> {
         let annotation =
             if self.eat_keyword(exp!(Bikeshed)) { Some(self.parse_ty()?) } else { None };
 
         let (attrs, body) = self.parse_inner_attrs_and_block(None)?;
-        if self.eat_keyword(exp!(Catch)) {
-            Err(self.dcx().create_err(errors::CatchAfterTry { span: self.prev_token.span }))
-        } else {
+        if annotation.is_some() {
             let span = span_lo.to(body.span);
-            let gate_sym =
-                if annotation.is_none() { sym::try_blocks } else { sym::try_blocks_heterogeneous };
-            self.psess.gated_spans.gate(gate_sym, span);
-            Ok(self.mk_expr_with_attrs(span, ExprKind::TryBlock(body, annotation), attrs))
+            self.psess.gated_spans.gate(sym::try_blocks_heterogeneous, span);
+            return Ok(self.mk_expr_with_attrs(span, ExprKind::TryBlock(body, annotation), attrs));
         }
+
+        let catch_lo = self.eat_keyword(exp!(Catch)).then(|| self.prev_token.span);
+        let (arms, hi) = match catch_lo {
+            Some(lo) => {
+                self.expect(exp!(OpenBrace))?;
+                let (arms, hi) = self.parse_arms(lo, ArmKind::Catch);
+                if arms.is_empty() {
+                    self.dcx().emit_err(errors::EmptyCatch { span: lo.to(hi) });
+                }
+                (arms, hi)
+            }
+            None => (ThinVec::new(), body.span),
+        };
+        let after = if self.eat_keyword(exp!(After)) { Some(self.parse_block()?) } else { None };
+        let span = span_lo.to(after.as_ref().map_or(hi, |body| body.span));
+        if catch_lo.is_none() && after.is_none() {
+            self.dcx().emit_err(errors::EmptyTry { span });
+        }
+        Ok(self.mk_expr_with_attrs(
+            span,
+            ExprKind::TryCatch(Box::new(ast::TryCatchExpr { body, arms, after })),
+            attrs,
+        ))
     }
 
     fn is_do_catch_block(&self) -> bool {
@@ -4646,6 +4739,7 @@ impl MutVisitor for CondChecker<'_> {
             | ExprKind::ForLoop { .. }
             | ExprKind::Loop(_, _, _)
             | ExprKind::Receive(_)
+            | ExprKind::TryCatch(_)
             | ExprKind::Match(_, _, _)
             | ExprKind::Closure(_)
             | ExprKind::Block(_, _)

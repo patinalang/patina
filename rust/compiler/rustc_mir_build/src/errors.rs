@@ -21,6 +21,19 @@ pub(crate) struct AssignToImmutable {
 }
 
 #[derive(Diagnostic)]
+#[diag("cannot assign to `{$name}`, as it is declared outside the `{$boundary}` block")]
+#[note("bindings made inside a `try`, `catch` or `after` block do not escape it")]
+pub(crate) struct AssignAcrossTryBoundary {
+    #[primary_span]
+    #[label("cannot assign")]
+    pub(crate) assignment: Span,
+    #[label("`{$name}` is declared here")]
+    pub(crate) binding: Span,
+    pub(crate) name: Symbol,
+    pub(crate) boundary: &'static str,
+}
+
+#[derive(Diagnostic)]
 #[diag("cannot assign to `{$name}`, as it is captured by the closure")]
 #[note("closures capture by value; assignments inside a closure do not escape it")]
 pub(crate) struct AssignToUpvar {

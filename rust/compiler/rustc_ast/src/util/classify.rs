@@ -42,6 +42,7 @@ pub fn expr_is_complete(e: &ast::Expr) -> bool {
         e.kind,
         If(..)
             | Receive(..)
+            | TryCatch(..)
             | Match(..)
             | Block(..)
             | While(..)
@@ -141,6 +142,7 @@ pub fn leading_labeled_expr(mut expr: &ast::Expr) -> bool {
             | Lit(..)
             | MacCall(..)
             | Receive(..)
+            | TryCatch(..)
             | Match(_, _, MatchKind::Prefix)
             | OffsetOf(..)
             | Paren(..)
@@ -202,6 +204,7 @@ pub fn expr_trailing_brace(mut expr: &ast::Expr) -> Option<TrailingBrace<'_>> {
             | If(..)
             | Loop(..)
             | Receive(..)
+            | TryCatch(..)
             | Match(..)
             | Map(..)
             | Struct(..)

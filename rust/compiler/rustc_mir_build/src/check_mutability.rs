@@ -5,15 +5,15 @@ use rustc_middle::middle::region;
 use rustc_middle::span_bug;
 use rustc_middle::thir::visit::{self, Visitor};
 use rustc_middle::thir::{
-    Arm, Expr, ExprId, ExprKind, LocalVarId, Pat, PatKind, Stmt, StmtKind, Thir,
+    Arm, ArmId, Expr, ExprId, ExprKind, LocalVarId, Pat, PatKind, Stmt, StmtKind, Thir,
 };
 use rustc_middle::ty::TyCtxt;
 use rustc_span::def_id::LocalDefId;
 use rustc_span::{Span, Symbol};
 
 use crate::errors::{
-    AssignToImmutable, AssignToNonVariable, AssignToUpvar, InconsistentDeferredInitialization,
-    UseOfUninitialized,
+    AssignAcrossTryBoundary, AssignToImmutable, AssignToNonVariable, AssignToUpvar,
+    InconsistentDeferredInitialization, UseOfUninitialized,
 };
 
 #[derive(Clone, Copy)]
@@ -34,6 +34,7 @@ enum Initialization {
 #[derive(Clone, Default)]
 struct Frame {
     bound: FxHashMap<LocalVarId, BindingInfo>,
+    boundary: Option<Boundary>,
 }
 
 impl Frame {
@@ -54,25 +55,32 @@ impl Frames {
         self.0.last_mut().unwrap()
     }
 
+    fn push_boundary(&mut self, boundary: Boundary) {
+        self.0.push(Frame { bound: FxHashMap::default(), boundary: Some(boundary) });
+    }
+
+    fn pop_boundary(&mut self) {
+        self.0.pop();
+    }
+
+    fn current_boundary(&self) -> Option<Boundary> {
+        self.0.last().and_then(|frame| frame.boundary)
+    }
+
     fn insert(&mut self, var: LocalVarId, info: BindingInfo) {
         self.current_mut().insert(var, info);
     }
 
-    fn lookup(&self, id: LocalVarId) -> Option<(usize, BindingInfo)> {
-        self.0
-            .iter()
-            .enumerate()
-            .rev()
-            .find_map(|(index, frame)| frame.bound.get(&id).copied().map(|info| (index, info)))
+    fn lookup(&self, id: LocalVarId) -> Option<BindingInfo> {
+        self.0.iter().rev().find_map(|frame| frame.bound.get(&id).copied())
     }
 
-    fn set_initialized(&mut self, frame_index: usize, id: LocalVarId) {
-        self.0[frame_index].bound.get_mut(&id).unwrap().initialization =
-            Initialization::Initialized;
+    fn is_bound_in_current_frame(&self, id: LocalVarId) -> bool {
+        self.0.last().unwrap().bound.contains_key(&id)
     }
 
-    fn get(&self, frame_index: usize) -> Option<&Frame> {
-        self.0.get(frame_index)
+    fn set_initialized(&mut self, id: LocalVarId) {
+        self.current_mut().bound.get_mut(&id).unwrap().initialization = Initialization::Initialized;
     }
 
     fn iter_mut(&mut self) -> impl Iterator<Item = &mut Frame> {
@@ -90,14 +98,31 @@ impl Branch {
         Branch { frames, diverges: false }
     }
 
-    fn binding_in(&self, frame_index: usize, id: LocalVarId) -> Option<BindingInfo> {
-        self.frames.get(frame_index).and_then(|frame| frame.bound.get(&id)).copied()
+    fn binding(&self, id: LocalVarId) -> Option<BindingInfo> {
+        self.frames.lookup(id)
     }
 }
 
 struct LoopFrame {
     label: region::Scope,
     breaks: Vec<Frames>,
+}
+
+#[derive(Clone, Copy)]
+enum Boundary {
+    Try,
+    Catch,
+    After,
+}
+
+impl Boundary {
+    fn name(self) -> &'static str {
+        match self {
+            Boundary::Try => "try",
+            Boundary::Catch => "catch",
+            Boundary::After => "after",
+        }
+    }
 }
 
 pub(crate) fn check_mutability(tcx: TyCtxt<'_>, def: LocalDefId) {
@@ -130,8 +155,30 @@ struct MutabilityVisitor<'thir, 'tcx> {
 }
 
 impl<'thir, 'tcx> MutabilityVisitor<'thir, 'tcx> {
+    fn with_boundary(&mut self, boundary: Boundary, f: impl FnOnce(&mut Self)) {
+        self.frames.push_boundary(boundary);
+        f(self);
+        self.frames.pop_boundary();
+    }
+
+    fn visit_boundary_expr(&mut self, boundary: Boundary, expr: ExprId) {
+        self.with_boundary(boundary, |this| this.visit_expr(&this.thir[expr]));
+    }
+
+    fn visit_catch(&mut self, arms: &[ArmId]) {
+        self.with_boundary(Boundary::Catch, |this| {
+            for arm in arms {
+                let arm = &this.thir[*arm];
+                this.capture_branch(|this| this.visit_arm(arm));
+            }
+        });
+    }
+
     fn visit_arm(&mut self, arm: &'thir Arm<'tcx>) {
         self.visit_pat(&arm.pattern);
+        if let Some(stacktrace) = arm.stacktrace.as_deref() {
+            self.visit_pat(stacktrace);
+        }
         if let Some(guard) = arm.guard {
             self.visit_expr(&self.thir[guard]);
         }
@@ -176,13 +223,13 @@ impl<'thir, 'tcx> MutabilityVisitor<'thir, 'tcx> {
 
         let Some((first_branch, rest_branches)) = reachable.split_first() else { return };
 
-        for (frame_index, frame) in self.frames.iter_mut().enumerate() {
+        for frame in self.frames.iter_mut() {
             for (id, info) in &mut frame.bound {
-                let first = first_branch.binding_in(frame_index, *id).unwrap_or(*info);
+                let first = first_branch.binding(*id).unwrap_or(*info);
 
                 info.initialization = if let Some(error) = reachable.iter().find_map(|branch| {
                     let Initialization::Error(error) =
-                        branch.binding_in(frame_index, *id).unwrap_or(*info).initialization
+                        branch.binding(*id).unwrap_or(*info).initialization
                     else {
                         return None;
                     };
@@ -190,8 +237,7 @@ impl<'thir, 'tcx> MutabilityVisitor<'thir, 'tcx> {
                 }) {
                     Initialization::Error(error)
                 } else if rest_branches.iter().any(|branch| {
-                    branch.binding_in(frame_index, *id).unwrap_or(*info).initialization
-                        != first.initialization
+                    branch.binding(*id).unwrap_or(*info).initialization != first.initialization
                 }) {
                     let error = self.tcx.dcx().emit_err(InconsistentDeferredInitialization {
                         branch: branch_span,
@@ -263,7 +309,7 @@ impl<'thir, 'tcx> MutabilityVisitor<'thir, 'tcx> {
             // Error recovery can leave a closure-local id in its parent's capture list.
             return;
         }
-        let Some((_, info)) = self.frames.lookup(id) else {
+        let Some(info) = self.frames.lookup(id) else {
             span_bug!(usage, "read from unknown THIR local {id:?}")
         };
         if info.initialization == Initialization::Uninitialized {
@@ -276,11 +322,21 @@ impl<'thir, 'tcx> MutabilityVisitor<'thir, 'tcx> {
     }
 
     fn check_var_assignment(&mut self, assignment: Span, id: LocalVarId) {
-        let Some((frame_index, info)) = self.frames.lookup(id) else {
+        let Some(info) = self.frames.lookup(id) else {
             span_bug!(assignment, "assignment to unknown THIR local {id:?}")
         };
 
-        if matches!(info.initialization, Initialization::Error(_)) {
+        if !self.frames.is_bound_in_current_frame(id) {
+            let boundary = self.frames.current_boundary().unwrap_or_else(|| {
+                span_bug!(assignment, "assignment crossed a non-boundary mutability frame")
+            });
+            self.tcx.dcx().emit_err(AssignAcrossTryBoundary {
+                assignment,
+                binding: info.span,
+                name: info.name,
+                boundary: boundary.name(),
+            });
+        } else if matches!(info.initialization, Initialization::Error(_)) {
             // The inconsistent branch diagnostic is enough; avoid cascading errors.
         } else if info.mutability == Mutability::Not
             && info.initialization == Initialization::Initialized
@@ -291,7 +347,7 @@ impl<'thir, 'tcx> MutabilityVisitor<'thir, 'tcx> {
                 name: info.name,
             });
         } else {
-            self.frames.set_initialized(frame_index, id);
+            self.frames.set_initialized(id);
         }
     }
 }
@@ -396,6 +452,13 @@ impl<'thir, 'tcx> Visitor<'thir, 'tcx> for MutabilityVisitor<'thir, 'tcx> {
                     branches.push(self.visit_expr_branch(timeout.body));
                 }
                 self.merge_branches(expr.span, &branches);
+            }
+            ExprKind::TryCatch { body, arms, after } => {
+                self.visit_boundary_expr(Boundary::Try, *body);
+                self.visit_catch(arms);
+                if let Some(after) = after {
+                    self.visit_boundary_expr(Boundary::After, *after);
+                }
             }
             ExprKind::Break { label, value } => {
                 if let Some(value) = value {

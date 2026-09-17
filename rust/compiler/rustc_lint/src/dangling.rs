@@ -299,6 +299,7 @@ fn is_temporary_rvalue(expr: &Expr<'_>) -> bool {
         ExprKind::If(..)
         | ExprKind::Loop(..)
         | ExprKind::Receive(..)
+        | ExprKind::TryCatch(..)
         | ExprKind::Match(..)
         | ExprKind::Block(..) => true,
 

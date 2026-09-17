@@ -136,6 +136,7 @@ pub(crate) fn placeholder(
             attrs: Default::default(),
             body: Some(expr_placeholder()),
             guard: None,
+            stacktrace: None,
             id,
             pat: pat(),
             span,

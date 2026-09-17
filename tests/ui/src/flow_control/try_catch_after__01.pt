@@ -7,35 +7,27 @@ fn open_resource() -> atom {
 
 pub fn main() {
     try {
-        open_resource()
+        open_resource();
     } catch {
-        Panic(message) =>
-            println!("panic! {}", message),
+        error(a"badarg") =>
+            println!("badarg!"),
 
-        ArgumentError(message) =>
-            println("badarg! {}", message),
-
-        ElixirError(a"Elixir.ArithmeticError") =>
+        error(#{a"__struct__" => a"Elixir.ArithmeticError", ..}) =>
             println!("Elixir ArithmeticError"),
 
-        // reason is a #{atom => term} map
-        ElixirError(a"Elixir.ArgumentError", reason) =>
+        // an Elixir exception is just a struct map in the reason position
+        error(reason @ #{a"__struct__" => a"Elixir.ArgumentError", ..}) =>
             println!("Elixir ArgumentError {:?}", reason),
 
-        Error(reason) =>
-            println!("other error: {:?}", reason),
-
-        // the 2nd tuple element (3rd for ElixirError) holds a stacktrace
-        Error(reason, stacktrace) =>
+        // a second pattern after the comma binds the stacktrace
+        error(reason), stacktrace =>
             println!("other error: {:?} from {:?}", reason, stacktrace),
 
-        Throw(value) =>
-            println!("thrown: {:?} from {:?}", value, st),
+        throw(value) =>
+            println!("thrown: {:?}", value),
 
-        Exit(reason) =>
+        exit(reason) =>
             println!("exit: {:?}", reason),
-
-        _ => a"unknown",
     } after {
         println!("cleaning up");
     };

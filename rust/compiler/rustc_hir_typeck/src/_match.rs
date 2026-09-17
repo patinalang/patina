@@ -15,6 +15,37 @@ use crate::coercion::CoerceMany;
 use crate::{Diverges, Expectation, FnCtxt, GatherLocalsVisitor, Needs};
 
 impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
+    pub(crate) fn check_expr_try_catch(
+        &self,
+        expr: &'tcx hir::Expr<'tcx>,
+        body: &'tcx hir::Expr<'tcx>,
+        arms: &'tcx [hir::Arm<'tcx>],
+        after: Option<&'tcx hir::Expr<'tcx>>,
+        orig_expected: Expectation<'tcx>,
+    ) -> Ty<'tcx> {
+        for arm in arms {
+            GatherLocalsVisitor::gather_from_arm(self, arm);
+            self.check_pat_top(arm.pat, self.tcx.types.term, None, None, None);
+            if let Some(stacktrace) = arm.stacktrace {
+                self.check_pat_top(stacktrace, self.tcx.types.term, None, None, None);
+            }
+        }
+        if let Some(after) = after {
+            self.check_expr(after);
+        }
+        let after_diverges = self.diverges.replace(Diverges::Maybe);
+        let (ty, all_diverge) = self.check_arm_bodies(
+            expr,
+            arms,
+            Some(body),
+            orig_expected,
+            hir::MatchSource::Normal,
+            expr.span,
+        );
+        self.diverges.set(after_diverges | all_diverge);
+        ty
+    }
+
     pub(crate) fn check_expr_receive(
         &self,
         expr: &'tcx hir::Expr<'tcx>,

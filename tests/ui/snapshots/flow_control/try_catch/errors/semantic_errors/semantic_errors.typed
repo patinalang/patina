@@ -1,0 +1,134 @@
+#![allow(internal_features)]
+
+
+
+
+
+
+
+
+
+
+#![deny(unreachable_patterns)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+#[allow(unused_imports)]
+use Core::*;
+#[allow(unused)]
+extern mod io;
+#[allow(unused)]
+extern mod patina_fmt;
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+#[attr = Repr {reprs: [Tagged], modifiers: [Tag("my_error")]}]
+struct MyError {
+    code: int,
+}
+
+fn unreachable() ({
+    (try ({ } as ())
+        catch { error(reason) => { } error(reason), stacktrace => { } } as ())
+} as ())
+
+fn unreachable_after_any() ({
+    (try ({ } as ()) catch { any(class, value) => { } error(reason) => { } }
+        as ())
+} as ())
+
+fn unreachable_any_after_all_classes() ({
+    (try ({ } as ())
+        catch {
+        error(_) => { }
+        throw(_) => { }
+        exit(_) => { }
+        any(class, value) => { }
+    } as ())
+} as ())
+
+fn reachable_error_after_guarded_any(condition:
+        bool) ({
+    (try ({ } as ())
+        catch {
+        any(class, value) if (condition as bool) => { }
+        error(reason) => { }
+    } as ())
+} as ())
+
+fn unsafe_reason() ({
+    (try ({ } as ()) catch { throw(MyError {  code }) => { } } as ())
+} as ())
+
+fn reachable_any_after_error() ({
+    (try ({ } as ()) catch { error(_) => { } any(class, value) => { } } as ())
+} as ())
+
+fn reachable_exit_after_any_class_alternative() ({
+    (try ({ } as ())
+        catch { any(a"error" | a"throw", value) => { } exit(_) => { } } as ())
+} as ())
+
+fn unreachable_error_after_any_error() ({
+    (try ({ } as ()) catch { any(a"error", value) => { } error(_) => { } } as
+        ())
+} as ())
+
+fn redundant_any_class_alternative() ({
+    (try ({ } as ()) catch { any(a"error" | a"error", value) => { } } as ())
+} as ())
+
+fn duplicate_literal_reason() ({
+    (try ({ } as ()) catch { error(a"badarg") => { } error(a"badarg") => { } }
+        as ())
+} as ())
+
+fn narrower_reasons_are_errors() ({
+    (try ({ } as ())
+        catch {
+        error(_) => { }
+        error(a"badarg") => { }
+        error(#{a"__struct__" => a"Elixir.ArgumentError", ..}) => { }
+    } as ())
+} as ())
+
+fn impossible_class() ({
+    (try ({ } as ()) catch { any(a"bogus", _) => { } } as ())
+} as ())
+
+fn mutate_try() ({
+    let mut value = (1 as int);
+    (try ({ ((value as int) = (2 as int) as int); } as ()) after ({ } as ())
+        as ())
+} as ())
+
+fn mutate_catch() ({
+    let mut value = (1 as int);
+    (try ({ } as ())
+        catch { error(_) => { ((value as int) = (2 as int) as int); } } as ())
+} as ())
+
+fn mutate_after() ({
+    let mut value = (1 as int);
+    (try ({ } as ()) after ({ ((value as int) = (2 as int) as int); } as ())
+        as ())
+} as ())

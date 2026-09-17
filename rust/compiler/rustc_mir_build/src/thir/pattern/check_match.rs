@@ -6,7 +6,7 @@ use rustc_errors::codes::*;
 use rustc_errors::{Applicability, ErrorGuaranteed, MultiSpan, msg, struct_span_code_err};
 use rustc_hir::def::*;
 use rustc_hir::def_id::{DefId, LocalDefId};
-use rustc_hir::{self as hir, BindingMode, ByRef, HirId, MatchSource};
+use rustc_hir::{self as hir, BindingMode, ByRef, HirId, LangItem, MatchSource};
 use rustc_infer::infer::TyCtxtInferExt;
 use rustc_lint_defs::Level;
 use rustc_middle::bug;
@@ -150,7 +150,16 @@ impl<'p, 'tcx> Visitor<'p, 'tcx> for MatchVisitor<'p, 'tcx> {
                 return;
             }
             ExprKind::Receive { box ref arms, .. } => {
-                self.check_receive(arms, ex.span);
+                self.check_receive_or_catch_arms(arms, self.tcx.types.term, ex.span);
+            }
+            ExprKind::TryCatch { box ref arms, .. } => {
+                let scrut_ty = if arms.is_empty() {
+                    self.tcx.types.term
+                } else {
+                    let def_id = self.tcx.require_lang_item(LangItem::ExceptionClass, ex.span);
+                    Ty::new_adt(self.tcx, self.tcx.adt_def(def_id), self.tcx.mk_args(&[]))
+                };
+                self.check_receive_or_catch_arms(arms, scrut_ty, ex.span);
             }
             ExprKind::Match { scrutinee, box ref arms, match_source } => {
                 self.check_match(scrutinee, arms, match_source, ex.span);
@@ -358,6 +367,7 @@ impl<'p, 'tcx> MatchVisitor<'p, 'tcx> {
             | LoopMatch { .. }
             | Match { .. }
             | Receive { .. }
+            | TryCatch { .. }
             | NamedConst { .. }
             | NonHirLiteral { .. }
             | Repeat { .. }
@@ -486,7 +496,11 @@ impl<'p, 'tcx> MatchVisitor<'p, 'tcx> {
         }
     }
 
-    fn check_receive(&mut self, arms: &[ArmId], span: Span) {
+    fn check_receive_or_catch_arms(&mut self, arms: &[ArmId], scrut_ty: Ty<'tcx>, span: Span) {
+        if arms.is_empty() {
+            return;
+        }
+
         let cx = self.new_cx(Refutable, Some(span), None, span);
 
         let mut tarms = Vec::with_capacity(arms.len());
@@ -503,7 +517,7 @@ impl<'p, 'tcx> MatchVisitor<'p, 'tcx> {
                 return;
             }
         }
-        let Ok(report) = self.analyze_patterns(&cx, &tarms, self.tcx.types.term) else { return };
+        let Ok(report) = self.analyze_patterns(&cx, &tarms, scrut_ty) else { return };
         // Unmatched messages stay in the mailbox, so only reachability matters.
         report_arm_reachability(&cx, &report, true);
     }

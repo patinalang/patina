@@ -249,6 +249,14 @@ impl<'hir> LoweringContext<'_, 'hir> {
                         })
                     }),
                 ),
+                ExprKind::TryCatch(expr) => hir::ExprKind::TryCatch(
+                    self.arena.alloc(self.lower_block_expr(&expr.body)),
+                    self.arena.alloc_from_iter(expr.arms.iter().map(|arm| self.lower_arm(arm))),
+                    match &expr.after {
+                        Some(block) => Some(self.arena.alloc(self.lower_block_expr(block))),
+                        None => None,
+                    },
+                ),
                 ExprKind::Match(expr, arms, kind) => hir::ExprKind::Match(
                     self.lower_expr(expr),
                     self.arena.alloc_from_iter(arms.iter().map(|x| self.lower_arm(x))),
@@ -681,6 +689,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
     fn lower_arm(&mut self, arm: &Arm) -> hir::Arm<'hir> {
         let pat = self.lower_pat(&arm.pat);
         let guard = arm.guard.as_ref().map(|guard| self.lower_expr(&guard.cond));
+        let stacktrace = arm.stacktrace.as_ref().map(|stacktrace| self.lower_pat(stacktrace));
         let hir_id = self.next_id();
         let span = self.lower_span(arm.span);
         self.lower_attrs(hir_id, &arm.attrs, arm.span, Target::Arm);
@@ -722,7 +731,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 span,
             })
         };
-        hir::Arm { hir_id, pat, guard, body, span }
+        hir::Arm { hir_id, pat, guard, stacktrace, body, span }
     }
 
     fn lower_capture_clause(&mut self, capture_clause: CaptureBy) -> CaptureBy {
@@ -2453,6 +2462,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
             hir_id: self.next_id(),
             pat,
             guard: None,
+            stacktrace: None,
             span: self.lower_span(span),
             body: expr,
         }

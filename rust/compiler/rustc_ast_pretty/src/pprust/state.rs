@@ -2025,11 +2025,19 @@ impl<'a> State<'a> {
                 self.word("^");
                 self.print_expr(e, FixupContext::default());
             }
-            PatKind::TermClass(class, subpattern) => {
+            PatKind::TermClass(subpattern, class) => {
                 self.word(class.name().to_string());
                 self.popen();
                 self.print_pat(subpattern);
                 self.pclose();
+            }
+            PatKind::ExceptionClass(args, class) => {
+                self.word(class.name().to_string());
+                if !args.is_empty() {
+                    self.popen();
+                    self.commasep(Inconsistent, args, |s, p| s.print_pat(p));
+                    self.pclose();
+                }
             }
             PatKind::Range(begin, end, Spanned { node: end_kind, .. }) => {
                 if let Some(e) = begin {

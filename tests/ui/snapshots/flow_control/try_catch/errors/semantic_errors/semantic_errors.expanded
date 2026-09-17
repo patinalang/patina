@@ -1,0 +1,111 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs)]
+#![no_std]
+#![no_core]
+
+
+
+
+
+
+
+
+
+
+#![deny(unreachable_patterns)]
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+#[allow(unused_imports)]
+use Core::*;
+#[allow(unused)]
+extern mod io;
+#[allow(unused)]
+extern mod patina_fmt;
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! stringify { () => {}; }
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! concat { () => {}; }
+#[allow(unused_macros)]
+#[rustc_builtin_macro]
+macro_rules! format_args { () => {}; }
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+#[repr(tagged, tag = "my_error")]
+struct MyError {
+    code: int,
+}
+
+fn unreachable() {
+    try {} catch { error(reason) => {} error(reason), stacktrace => {} }
+}
+
+fn unreachable_after_any() {
+    try {} catch { any(class, value) => {} error(reason) => {} }
+}
+
+fn unreachable_any_after_all_classes() {
+    try {}
+        catch {
+        error(_) => {}
+        throw(_) => {}
+        exit(_) => {}
+        any(class, value) => {}
+    }
+}
+
+fn reachable_error_after_guarded_any(condition: bool) {
+    try {} catch { any(class, value) if condition => {} error(reason) => {} }
+}
+
+fn unsafe_reason() { try {} catch { throw(MyError { code }) => {} } }
+
+fn reachable_any_after_error() {
+    try {} catch { error(_) => {} any(class, value) => {} }
+}
+
+fn reachable_exit_after_any_class_alternative() {
+    try {} catch { any(a"error" | a"throw", value) => {} exit(_) => {} }
+}
+
+fn unreachable_error_after_any_error() {
+    try {} catch { any(a"error", value) => {} error(_) => {} }
+}
+
+fn redundant_any_class_alternative() {
+    try {} catch { any(a"error" | a"error", value) => {} }
+}
+
+fn duplicate_literal_reason() {
+    try {} catch { error(a"badarg") => {} error(a"badarg") => {} }
+}
+
+fn narrower_reasons_are_errors() {
+    try {}
+        catch {
+        error(_) => {}
+        error(a"badarg") => {}
+        error(#{a"__struct__" => a"Elixir.ArgumentError", ..}) => {}
+    }
+}
+
+fn impossible_class() { try {} catch { any(a"bogus", _) => {} } }
+
+fn mutate_try() { let mut value = 1; try { value = 2; } after {} }
+
+fn mutate_catch() {
+    let mut value = 1;
+    try {} catch { error(_) => { value = 2; } }
+}
+
+fn mutate_after() { let mut value = 1; try {} after { value = 2; } }

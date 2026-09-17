@@ -13,8 +13,9 @@ use rustc_ast::{
 };
 pub use rustc_ast::{
     AssignOp, AssignOpKind, AttrId, AttrStyle, BinOp, BinOpKind, BindingMode, BorrowKind,
-    BoundConstness, BoundPolarity, ByRef, CaptureBy, DelimArgs, FnPtrKind, ImplPolarity, IsAuto,
-    MetaItemInner, MetaItemLit, Movability, Mutability, Pinnedness, TermClass, UnOp,
+    BoundConstness, BoundPolarity, ByRef, CaptureBy, DelimArgs, ExceptionClass, FnPtrKind,
+    ImplPolarity, IsAuto, MetaItemInner, MetaItemLit, Movability, Mutability, Pinnedness,
+    TermClass, UnOp,
 };
 use rustc_data_structures::fingerprint::Fingerprint;
 use rustc_data_structures::sorted_map::SortedMap;
@@ -1772,7 +1773,10 @@ impl<'hir> Pat<'hir> {
             | Ref(s, _, _)
             | Binding(.., Some(s))
             | Guard(s, _)
-            | TermClass(_, s) => s.walk_short_(it),
+            | TermClass(s, _) => s.walk_short_(it),
+            Exception { class_pat, reason_pat, .. } => {
+                class_pat.walk_short_(it) && reason_pat.walk_short_(it)
+            }
             Struct(_, fields, _) => fields.iter().all(|field| field.pat.walk_short_(it)),
             Map(fields, _) => fields.iter().all(|field| field.pat.walk_short_(it)),
             TupleStruct(_, s, _) | Tuple(s, _) | Or(s) => s.iter().all(|p| p.walk_short_(it)),
@@ -1805,7 +1809,11 @@ impl<'hir> Pat<'hir> {
             | Ref(s, _, _)
             | Binding(.., Some(s))
             | Guard(s, _)
-            | TermClass(_, s) => s.walk_(it),
+            | TermClass(s, _) => s.walk_(it),
+            Exception { class_pat, reason_pat, .. } => {
+                class_pat.walk_(it);
+                reason_pat.walk_(it);
+            }
             Struct(_, fields, _) => fields.iter().for_each(|field| field.pat.walk_(it)),
             Map(fields, _) => fields.iter().for_each(|field| field.pat.walk_(it)),
             TupleStruct(_, s, _) | Tuple(s, _) | Or(s) => s.iter().for_each(|p| p.walk_(it)),
@@ -1894,6 +1902,7 @@ impl<'hir> Pat<'hir> {
             | PatKind::Expr(_)
             | PatKind::Pin(_)
             | PatKind::TermClass(_, _)
+            | PatKind::Exception { .. }
             | PatKind::Range(_, _, _)
             | PatKind::Slice(_, _, _)
             | PatKind::Map(_, _)
@@ -2064,7 +2073,10 @@ pub enum PatKind<'hir> {
     Pin(&'hir PatExpr<'hir>),
 
     /// A BEAM runtime class pattern (e.g., `int(value)`).
-    TermClass(TermClass, &'hir Pat<'hir>),
+    TermClass(&'hir Pat<'hir>, TermClass),
+
+    /// A BEAM exception pattern (e.g., `exit(reason)` or `any(class, reason)`).
+    Exception { class: ExceptionClass, class_pat: &'hir Pat<'hir>, reason_pat: &'hir Pat<'hir> },
 
     /// A guard pattern (e.g., `x if guard(x)`).
     Guard(&'hir Pat<'hir>, &'hir Expr<'hir>),
@@ -2155,6 +2167,8 @@ pub struct Arm<'hir> {
     pub pat: &'hir Pat<'hir>,
     /// Optional guard clause.
     pub guard: Option<&'hir Expr<'hir>>,
+    /// The stacktrace pattern bound by a `catch` arm.
+    pub stacktrace: Option<&'hir Pat<'hir>>,
     /// The expression the arm evaluates to if this arm matches.
     pub body: &'hir Expr<'hir>,
 }
@@ -2539,6 +2553,7 @@ impl Expr<'_> {
             | ExprKind::Lit(_)
             | ExprKind::Loop(..)
             | ExprKind::Receive(..)
+            | ExprKind::TryCatch(..)
             | ExprKind::Match(..)
             | ExprKind::MethodCall(..)
             | ExprKind::OffsetOf(..)
@@ -2601,6 +2616,7 @@ impl Expr<'_> {
             | ExprKind::Tup(..)
             | ExprKind::If(..)
             | ExprKind::Receive(..)
+            | ExprKind::TryCatch(..)
             | ExprKind::Match(..)
             | ExprKind::Closure { .. }
             | ExprKind::Block(..)
@@ -2729,6 +2745,7 @@ impl Expr<'_> {
             ExprKind::Repeat(arg, _) => arg.can_have_side_effects(),
             ExprKind::If(..)
             | ExprKind::Receive(..)
+            | ExprKind::TryCatch(..)
             | ExprKind::Match(..)
             | ExprKind::MethodCall(..)
             | ExprKind::Call(..)
@@ -2927,6 +2944,8 @@ pub enum ExprKind<'hir> {
     Match(&'hir Expr<'hir>, &'hir [Arm<'hir>], MatchSource),
     /// Selectively waits for a mailbox message, optionally with a timeout.
     Receive(&'hir [Arm<'hir>], Option<&'hir ReceiveTimeout<'hir>>),
+    /// A BEAM `try` expression with `catch` arms and/or an `after` block.
+    TryCatch(&'hir Expr<'hir>, &'hir [Arm<'hir>], Option<&'hir Expr<'hir>>),
     /// A closure (e.g., `move |a, b, c| {a + b + c}`).
     ///
     /// The `Span` is the argument block `|...|`.

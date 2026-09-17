@@ -592,7 +592,11 @@ fn resolve_local<'tcx>(
             PatKind::Box(subpat)
             | PatKind::Deref(subpat)
             | PatKind::Guard(subpat, _)
-            | PatKind::TermClass(_, subpat) => is_binding_pat(subpat),
+            | PatKind::TermClass(subpat, _) => is_binding_pat(subpat),
+
+            PatKind::Exception { class: _, class_pat, reason_pat } => {
+                is_binding_pat(class_pat) || is_binding_pat(reason_pat)
+            }
 
             PatKind::Ref(_, _, _)
             | PatKind::Binding(hir::BindingMode(hir::ByRef::No, _), ..)

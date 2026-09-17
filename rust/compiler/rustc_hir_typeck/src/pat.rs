@@ -633,8 +633,11 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             PatKind::Pin(expr) => {
                 self.check_pat_pin(pat, expr, expected, resolves_to_term, &pat_info.top_info)
             }
-            PatKind::TermClass(class, subpattern) => {
+            PatKind::TermClass(subpattern, class) => {
                 self.check_pat_term_class(pat.span, class, subpattern, expected, pat_info)
+            }
+            PatKind::Exception { class: _, class_pat, reason_pat } => {
+                self.check_pat_exception(pat.span, class_pat, reason_pat, expected, pat_info)
             }
             PatKind::Range(lhs, rhs, _) => self.check_pat_range(
                 pat.span,
@@ -823,7 +826,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             | PatKind::Range(..)
             | PatKind::Slice(..)
             | PatKind::Map(..)
-            | PatKind::TermClass(..) => {
+            | PatKind::TermClass(..)
+            | PatKind::Exception { .. } => {
                 AdjustMode::peel_all()
             }
             // When checking an explicit deref pattern, only peel reference types.
@@ -1110,6 +1114,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         match pat.kind {
             PatKind::Expr(..)
             | PatKind::TermClass(..)
+            | PatKind::Exception { .. }
             | PatKind::TupleStruct(..)
             | PatKind::Struct(..)
             | PatKind::Tuple(..)
@@ -1204,6 +1209,23 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
         self.check_pat(subpattern, binding_ty, pat_info);
         self.tcx.types.term
+    }
+
+    fn check_pat_exception(
+        &self,
+        span: Span,
+        class_pat: &'tcx Pat<'tcx>,
+        reason_pat: &'tcx Pat<'tcx>,
+        expected: Ty<'tcx>,
+        pat_info: PatInfo<'tcx>,
+    ) -> Ty<'tcx> {
+        let tcx = self.tcx;
+        self.check_pat(class_pat, tcx.types.atom, pat_info);
+        self.check_pat(reason_pat, tcx.types.term, pat_info);
+        match self.demand_eqtype_pat(span, expected, tcx.types.term, &pat_info.top_info) {
+            Ok(()) => tcx.types.term,
+            Err(guar) => Ty::new_error(tcx, guar),
+        }
     }
 
     fn check_pat_lit(
@@ -1651,6 +1673,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         | PatKind::Guard(..)
                         | PatKind::Map(..)
                         | PatKind::TermClass(..)
+                        | PatKind::Exception { .. }
                         | PatKind::Tuple(..)
                         | PatKind::Slice(..) => "binding",
 

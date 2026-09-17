@@ -472,19 +472,31 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         after: Option<(eaf::Expr<'arena>, eaf::Expr<'arena>)>,
     ) -> eaf::Expr<'arena> {
         if let Some((timeout, body)) = after {
-            let body = match body {
-                eaf::Expr::Block(_, body) => body,
-                other => eaf::Body(self.arena.alloc_slice(&[other])),
-            };
             eaf::Expr::ReceiveAfter(
                 span.into_anno(self.source_map),
                 self.arena.alloc_from_iter(clauses),
                 self.arena.alloc(timeout),
-                body,
+                self.body(body),
             )
         } else {
             eaf::Expr::Receive(span.into_anno(self.source_map), self.arena.alloc_from_iter(clauses))
         }
+    }
+
+    pub(crate) fn expr_try(
+        &self,
+        span: impl IntoAnno,
+        body: eaf::Expr<'arena>,
+        catches: impl IntoIterator<Item = eaf::CatchClause<'arena>>,
+        after: Option<eaf::Expr<'arena>>,
+    ) -> eaf::Expr<'arena> {
+        eaf::Expr::Try(self.arena.alloc(eaf::Try {
+            anno: span.into_anno(self.source_map),
+            body: self.body(body),
+            of: &[],
+            catch: self.arena.alloc_from_iter(catches),
+            after: after.map_or(eaf::Body(&[]), |body| self.body(body)),
+        }))
     }
 
     /// A block expression `begin ... end` over the given expressions.
@@ -504,11 +516,6 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         guards: impl IntoIterator<Item = eaf::Expr<'arena>>,
         body: eaf::Expr<'arena>,
     ) -> eaf::Clause<'arena> {
-        let body = match body {
-            eaf::Expr::Block(_, body) => body,
-            other => eaf::Body(self.arena.alloc_slice(&[other])),
-        };
-
         let guards = eaf::Guard(self.arena.alloc_from_iter(guards));
         let guard_seq = if guards.0.is_empty() {
             eaf::GuardSeq(&[])
@@ -520,7 +527,65 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
             anno: span.into_anno(self.source_map),
             patterns: self.arena.alloc_from_iter(patterns),
             guards: guard_seq,
-            body,
+            body: self.body(body),
+        }
+    }
+
+    pub(crate) fn catch_clause(
+        &self,
+        span: impl IntoAnno,
+        class: eaf::ExceptionKind<'arena>,
+        reason: eaf::Pattern<'arena>,
+        stacktrace: Symbol,
+        guards: impl IntoIterator<Item = eaf::Expr<'arena>>,
+        body: eaf::Expr<'arena>,
+    ) -> eaf::CatchClause<'arena> {
+        let anno = span.into_anno(self.source_map);
+        let guards = eaf::Guard(self.arena.alloc_from_iter(guards));
+        let guard_seq = if guards.0.is_empty() {
+            eaf::GuardSeq(&[])
+        } else {
+            eaf::GuardSeq(self.arena.alloc_slice(&[guards]))
+        };
+        eaf::CatchClause {
+            anno,
+            what: (eaf::CatchWhat(
+                anno,
+                (class, self.arena.alloc(reason), eaf::Var(anno, stacktrace.into())),
+            ),),
+            guards: guard_seq,
+            body: self.body(body),
+        }
+    }
+
+    pub(crate) fn exception_kind_var(
+        &self,
+        span: impl IntoAnno,
+        name: Symbol,
+    ) -> eaf::ExceptionKind<'arena> {
+        eaf::ExceptionKind::Var(eaf::Var(span.into_anno(self.source_map), name.into()))
+    }
+
+    pub(crate) fn exception_kind_from_pattern(
+        &self,
+        pattern: eaf::Pattern<'arena>,
+    ) -> Option<eaf::ExceptionKind<'arena>> {
+        match pattern {
+            eaf::Pattern::AtomicLiteral(literal) => {
+                Some(eaf::ExceptionKind::AtomicLiteral(literal))
+            }
+            eaf::Pattern::Var(anno, name) => Some(eaf::ExceptionKind::Var(eaf::Var(anno, name))),
+            _ => None,
+        }
+    }
+
+    pub(crate) fn exception_kind_as_expr(
+        &self,
+        kind: eaf::ExceptionKind<'arena>,
+    ) -> eaf::Expr<'arena> {
+        match kind {
+            eaf::ExceptionKind::AtomicLiteral(literal) => eaf::Expr::AtomicLiteral(literal),
+            eaf::ExceptionKind::Var(eaf::Var(anno, name)) => eaf::Expr::Var(anno, name),
         }
     }
 
@@ -736,5 +801,12 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
 
     pub(crate) fn expr_unit(&self, span: impl IntoAnno) -> eaf::Expr<'arena> {
         eaf::Expr::Tuple(span.into_anno(self.source_map), &[])
+    }
+
+    fn body(&self, expr: eaf::Expr<'arena>) -> eaf::Body<'arena> {
+        match expr {
+            eaf::Expr::Block(_, body) => body,
+            other => eaf::Body(self.arena.alloc_slice(&[other])),
+        }
     }
 }

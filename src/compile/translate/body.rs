@@ -72,6 +72,18 @@ struct TranslatedArm<'arena> {
     branch: Branch<'arena>,
 }
 
+struct CatchPattern<'arena> {
+    class: eaf::ExceptionKind<'arena>,
+    reason: eaf::Pattern<'arena>,
+    stacktrace: Symbol,
+    guards: SmallVec<[eaf::Expr<'arena>; 1]>,
+}
+
+struct GuardedExceptionKind<'arena> {
+    kind: eaf::ExceptionKind<'arena>,
+    guards: SmallVec<[eaf::Expr<'arena>; 1]>,
+}
+
 pub(super) struct BodyCx<'a, 'tcx, 'arena> {
     pub translator: &'a Translator<'tcx, 'arena>,
     pub owner: LocalDefId,
@@ -149,6 +161,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             }
             ExprKind::Receive { arms, timeout } => {
                 self.translate_receive(expr, arms, timeout.as_ref())
+            }
+            ExprKind::TryCatch { body, arms, after } => {
+                self.translate_try_catch(expr, *body, arms, after.as_ref())
             }
             ExprKind::Match { scrutinee, arms, .. } => self.translate_match(expr, *scrutinee, arms),
 
@@ -940,10 +955,8 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     ) -> eaf::Expr<'arena> {
         let scrutinee = self.translate_expr(scrutinee);
 
-        let mut translated: SmallVec<[TranslatedArm<'arena>; 4]> = SmallVec::new();
-        for &arm_id in arms {
-            self.translate_arm(arm_id, &mut translated);
-        }
+        let translated: SmallVec<[TranslatedArm<'arena>; 4]> =
+            arms.iter().map(|&arm_id| self.translate_arm(arm_id)).collect();
 
         self.translate_to_case(expr.span, scrutinee, translated)
     }
@@ -999,10 +1012,8 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             (self.translate_expr(timeout.expr), Branch { span, body, scope })
         });
 
-        let mut translated = SmallVec::new();
-        for &arm in arms {
-            self.translate_arm(arm, &mut translated);
-        }
+        let mut translated: SmallVec<[TranslatedArm<'arena>; 4]> =
+            arms.iter().map(|&arm| self.translate_arm(arm)).collect();
         self.merge_branches(
             translated
                 .iter_mut()
@@ -1023,24 +1034,138 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         )
     }
 
-    fn translate_arm(
+    fn translate_try_catch(
         &mut self,
-        arm_id: thir::ArmId,
-        translated: &mut SmallVec<[TranslatedArm<'arena>; 4]>,
-    ) {
+        expr: &Expr<'tcx>,
+        body: ExprId,
+        arms: &[thir::ArmId],
+        after: Option<&ExprId>,
+    ) -> eaf::Expr<'arena> {
+        let afb = &self.translator.afb;
+        let (body, _) = self.with_scope(|cx| cx.translate_expr(body));
+        let after = after.map(|after| self.with_scope(|cx| cx.translate_expr(*after)).0);
+
+        let catches = arms.iter().flat_map(|&arm| {
+            let Arm { span, pattern, guard, stacktrace, body, hir_id: _, scope: _ } =
+                &self.thir[arm];
+
+            let ((patterns, guard, body), _scope) = self.with_scope(|cx| {
+                let patterns = cx.translate_exception_pattern(pattern, stacktrace.as_deref());
+                let guard = guard.map(|guard| cx.translate_expr(guard));
+                let body = cx.translate_expr(*body);
+                (patterns, guard, body)
+            });
+
+            patterns.into_iter().map(move |pattern| {
+                afb.catch_clause(
+                    *span,
+                    pattern.class,
+                    pattern.reason,
+                    pattern.stacktrace,
+                    guard.into_iter().chain(pattern.guards),
+                    body,
+                )
+            })
+        });
+        afb.expr_try(expr.span, body, catches, after)
+    }
+
+    fn translate_exception_pattern(
+        &mut self,
+        pat: &Pat<'tcx>,
+        stacktrace: Option<&Pat<'tcx>>,
+    ) -> SmallVec<[CatchPattern<'arena>; 1]> {
+        let PatKind::Exception { class_pat, reason_pat, .. } = &pat.kind else {
+            span_bug!(pat.span, "catch arm without exception pattern")
+        };
+        let stacktrace = match stacktrace {
+            Some(stacktrace @ Pat { kind: PatKind::Binding { name, var, is_primary, .. }, .. }) => {
+                if !is_primary {
+                    span_bug!(stacktrace.span, "non-primary stacktrace binding")
+                }
+                self.scopes.bind_var(*var, *name).erl_name
+            }
+            Some(Pat { kind: PatKind::Wild, .. }) | None => kw::Underscore,
+            Some(stacktrace) => {
+                span_bug!(stacktrace.span, "non-variable stacktrace pattern")
+            }
+        };
+
+        let classes = self.translate_exception_kind_pattern(class_pat);
+        let reasons = self.translate_pattern(reason_pat, PatternInput::Typed);
+        let mut patterns = SmallVec::new();
+
+        for class in classes {
+            for GuardedPattern(reason, reason_guards) in &reasons {
+                patterns.push(CatchPattern {
+                    class: class.kind,
+                    reason: *reason,
+                    stacktrace,
+                    guards: class
+                        .guards
+                        .iter()
+                        .copied()
+                        .chain(reason_guards.iter().copied())
+                        .collect(),
+                });
+            }
+        }
+        patterns
+    }
+
+    /// Translate a `catch` arm's class pattern into Erlang's class slot.
+    fn translate_exception_kind_pattern(
+        &mut self,
+        pat: &Pat<'tcx>,
+    ) -> SmallVec<[GuardedExceptionKind<'arena>; 1]> {
+        let afb = &self.translator.afb;
+
+        // The slot has no room for an alias, so keep the variable and demote the pattern it is
+        // aliasing to a guard on it.
+        if let PatKind::Binding { name, var, subpattern: Some(subpattern), is_primary, .. } =
+            &pat.kind
+        {
+            let class = self.bind_pattern_var(*name, *var, *is_primary).erl_name;
+            return self
+                .translate_exception_kind_pattern(subpattern)
+                .into_iter()
+                .map(|alternative| {
+                    let constraint = afb.expr_binary_op(
+                        pat.span,
+                        eaf::BinaryOp::EqExact,
+                        afb.expr_var(pat.span, class),
+                        afb.exception_kind_as_expr(alternative.kind),
+                    );
+                    GuardedExceptionKind {
+                        kind: afb.exception_kind_var(pat.span, class),
+                        guards: std::iter::once(constraint).chain(alternative.guards).collect(),
+                    }
+                })
+                .collect();
+        }
+
+        self.translate_pattern(pat, PatternInput::Typed)
+            .into_iter()
+            .map(|GuardedPattern(pattern, guards)| GuardedExceptionKind {
+                // The class pattern is typed `atom`, so nothing else can reach here.
+                kind: afb.exception_kind_from_pattern(pattern).unwrap_or_else(|| {
+                    span_bug!(pat.span, "exception class pattern is not an atom or variable")
+                }),
+                guards,
+            })
+            .collect()
+    }
+
+    fn translate_arm(&mut self, arm_id: thir::ArmId) -> TranslatedArm<'arena> {
         let thir = self.thir;
-        let Arm { span, pattern, guard, body, hir_id: _, scope: _ } = &thir[arm_id];
+        let Arm { span, pattern, guard, stacktrace: _, body, hir_id: _, scope: _ } = &thir[arm_id];
         let ((patterns, guard, body), scope) = self.with_scope(|cx| {
             let patterns = cx.translate_pattern(pattern, PatternInput::Typed);
             let guard = guard.map(|guard| cx.translate_expr(guard));
             let body = cx.translate_expr(*body);
             (patterns, guard, body)
         });
-        translated.push(TranslatedArm {
-            patterns,
-            guard,
-            branch: Branch { span: *span, body, scope },
-        });
+        TranslatedArm { patterns, guard, branch: Branch { span: *span, body, scope } }
     }
 
     /// Makes sure the latest version of every modified outer variable is bound by the branch.
@@ -1136,6 +1261,10 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
             PatKind::TermClass { class, subpattern } => {
                 self.translate_term_class_pattern(pat.span, *class, subpattern)
+            }
+
+            PatKind::Exception { .. } => {
+                span_bug!(pat.span, "exception pattern outside catch arm")
             }
 
             PatKind::TermPat { subpattern, adt_repr_match } => {
@@ -1251,6 +1380,10 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             | PatKind::TermPat { subpattern, .. } => {
                 self.declare_vars_from_pattern_into(subpattern, declarations)
             }
+            PatKind::Exception { class_pat, reason_pat, .. } => {
+                self.declare_vars_from_pattern_into(class_pat, declarations);
+                self.declare_vars_from_pattern_into(reason_pat, declarations);
+            }
             PatKind::Leaf { subpatterns } | PatKind::Variant { subpatterns, .. } => {
                 for field in subpatterns {
                     self.declare_vars_from_pattern_into(&field.pattern, declarations);
@@ -1279,6 +1412,10 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             | PatKind::Never
             | PatKind::Error(_) => {}
         }
+    }
+
+    fn bind_pattern_var(&mut self, name: Symbol, var: LocalVarId, is_primary: bool) -> &PatinaVar {
+        if is_primary { self.scopes.bind_var(var, name) } else { self.scopes.fetch_var(var) }
     }
 
     fn translate_constant_pattern(
@@ -1403,12 +1540,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         is_primary: bool,
         input: PatternInput,
     ) -> Patterns<'arena> {
-        let erl_name = if is_primary {
-            self.scopes.bind_var(var, name).erl_name
-        } else {
-            self.scopes.fetch_var(var).erl_name
-        };
-
+        let erl_name = self.bind_pattern_var(name, var, is_primary).erl_name;
         let var_pat = self.translator.afb.pat_var(pat.span, erl_name);
 
         if let Some(sub) = subpattern {

@@ -720,10 +720,11 @@ pub fn walk_stmt<'v, V: Visitor<'v>>(visitor: &mut V, statement: &'v Stmt<'v>) -
 }
 
 pub fn walk_arm<'v, V: Visitor<'v>>(visitor: &mut V, arm: &'v Arm<'v>) -> V::Result {
-    let Arm { hir_id, span: _, pat, guard, body } = arm;
+    let Arm { hir_id, span: _, pat, guard, stacktrace, body } = arm;
     try_visit!(visitor.visit_id(*hir_id));
     try_visit!(visitor.visit_pat(*pat));
     visit_opt!(visitor, visit_expr, *guard);
+    visit_opt!(visitor, visit_pat, *stacktrace);
     visitor.visit_expr(*body)
 }
 
@@ -766,8 +767,12 @@ pub fn walk_pat<'v, V: Visitor<'v>>(visitor: &mut V, pattern: &'v Pat<'v>) -> V:
         PatKind::Box(ref subpattern)
         | PatKind::Deref(ref subpattern)
         | PatKind::Ref(ref subpattern, _, _)
-        | PatKind::TermClass(_, ref subpattern) => {
+        | PatKind::TermClass(ref subpattern, _) => {
             try_visit!(visitor.visit_pat(subpattern));
+        }
+        PatKind::Exception { class: _, class_pat, reason_pat } => {
+            try_visit!(visitor.visit_pat(class_pat));
+            try_visit!(visitor.visit_pat(reason_pat));
         }
         PatKind::Binding(_, _hir_id, ident, ref optional_subpattern) => {
             try_visit!(visitor.visit_ident(ident));
@@ -914,6 +919,13 @@ pub fn walk_expr<'v, V: Visitor<'v>>(visitor: &mut V, expression: &'v Expr<'v>) 
             if let Some(timeout) = timeout {
                 try_visit!(visitor.visit_expr(timeout.expr));
                 try_visit!(visitor.visit_expr(timeout.body));
+            }
+        }
+        ExprKind::TryCatch(body, arms, after) => {
+            try_visit!(visitor.visit_expr(body));
+            walk_list!(visitor, visit_arm, arms);
+            if let Some(after) = after {
+                try_visit!(visitor.visit_expr(after));
             }
         }
         ExprKind::Match(ref subexpression, arms, _) => {
