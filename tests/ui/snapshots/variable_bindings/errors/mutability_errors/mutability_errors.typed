@@ -1,0 +1,103 @@
+#![allow(internal_features)]
+
+
+
+
+
+
+
+
+
+
+#![allow(dead_code)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+#[allow(unused_imports)]
+use Core::*;
+#[allow(unused)]
+extern mod io;
+#[allow(unused)]
+extern mod patina_fmt;
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+fn assign_to_immutable_binding() ({
+    let value = (1 as int);
+    ((value as int) = (2 as int) as int);
+} as ())
+
+fn assign_to_immutable_parameter(value:
+        int) ({ ((value as int) = (2 as int) as int); } as ())
+
+fn assign_to_multiple_bindings() ({
+    let first = (1 as int);
+    let second = (2 as int);
+
+    ((first as int) = (3 as int) as int);
+    ((second as int) = (4 as int) as int);
+} as ())
+
+fn assign_deferred_binding_twice() ({
+    let value;
+    ((value as int) = (1 as int) as int);
+    ((value as int) = (2 as int) as int);
+} as ())
+
+fn assign_after_branches(condition:
+        bool) ({
+    let value;
+
+    (if (condition as bool) {
+        ((value as int) = (1 as int) as int);
+    } else { ((value as int) = (2 as int) as int); } as ())
+
+    ((value as int) = (3 as int) as int);
+} as ())
+
+fn assign_after_partial_branch(condition:
+        bool) ({
+    let value;
+
+    (if (condition as bool) { ((value as int) = (1 as int) as int); } as ())
+} as ())
+
+struct Value {
+    field: int,
+}
+
+fn assign_to_field() ({
+    let value = (Value { field: (1 as int) } as Value);
+    (((value as Value).field as int) = (2 as int) as int);
+} as ())
+
+fn read_in_compound_assignment() ({
+    let mut value: int;
+    ((value as int) += (1 as int) as int);
+} as ())
+
+fn read_in_closure() ({
+    let value: int;
+    let closure =
+        (|| (value as int) as
+            {closure@tests/ui/src/variable_bindings/errors/mutability_errors.pt:62:19: 62:21});
+} as ())

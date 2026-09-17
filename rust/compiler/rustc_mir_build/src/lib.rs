@@ -8,6 +8,7 @@
 // The `builder` module used to be named `build`, but that was causing GitHub's
 // "Go to file" feature to silently ignore all files in the module, probably
 // because it assumes that "build" is a build-output directory. See #134365.
+mod check_mutability;
 mod check_tail_calls;
 mod check_unsafety;
 mod errors;
@@ -21,6 +22,7 @@ pub fn provide(providers: &mut Providers) {
     providers.queries.eval_to_valtree = thir::constant::eval_to_valtree;
     providers.queries.eval_to_const_value_raw = thir::constant::eval_to_const_value_raw;
     providers.queries.valtree_to_const_val = thir::constant::valtree_to_const_value;
+    providers.queries.check_mutability = check_mutability::check_mutability;
     providers.queries.check_unsafety = check_unsafety::check_unsafety;
     providers.queries.check_tail_calls = check_tail_calls::check_tail_calls;
     providers.queries.thir_body = thir::cx::thir_body;

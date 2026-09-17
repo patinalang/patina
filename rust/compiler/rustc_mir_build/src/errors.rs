@@ -10,6 +10,61 @@ use rustc_pattern_analysis::rustc::RustcPatCtxt;
 use rustc_span::{Ident, Span, Symbol};
 
 #[derive(Diagnostic)]
+#[diag("cannot assign to `{$name}`, as it is not declared as mutable", code = E0384)]
+pub(crate) struct AssignToImmutable {
+    #[primary_span]
+    #[label("cannot assign")]
+    pub(crate) assignment: Span,
+    #[label("help: consider making this binding mutable: `mut {$name}`")]
+    pub(crate) binding: Span,
+    pub(crate) name: Symbol,
+}
+
+#[derive(Diagnostic)]
+#[diag("cannot assign to `{$name}`, as it is captured by the closure")]
+#[note("closures capture by value; assignments inside a closure do not escape it")]
+pub(crate) struct AssignToUpvar {
+    #[primary_span]
+    #[label("cannot assign")]
+    pub(crate) assignment: Span,
+    #[label("`{$name}` is declared here")]
+    pub(crate) binding: Span,
+    pub(crate) name: Symbol,
+}
+
+#[derive(Diagnostic)]
+#[diag("cannot assign to this expression")]
+#[note("only variables can be assigned to; Patina values are immutable")]
+pub(crate) struct AssignToNonVariable {
+    #[primary_span]
+    #[label("cannot assign")]
+    pub(crate) assignment: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("cannot initialize `{$name}` in only some non-diverging branches")]
+#[note("all non-diverging branches must either initialize the binding or leave it uninitialized")]
+pub(crate) struct InconsistentDeferredInitialization {
+    #[primary_span]
+    #[label("not all non-diverging branches initialize `{$name}`")]
+    pub(crate) branch: Span,
+    #[label("`{$name}` is declared without an initializer here")]
+    pub(crate) binding: Span,
+    pub(crate) name: Symbol,
+}
+
+#[derive(Diagnostic)]
+#[diag("cannot use `{$name}`, as it is not initialized")]
+pub(crate) struct UseOfUninitialized {
+    #[primary_span]
+    #[label("used here before being initialized")]
+    pub(crate) usage: Span,
+    #[label("`{$name}` is declared without an initializer here")]
+    pub(crate) binding: Span,
+    pub(crate) name: Symbol,
+}
+
+#[derive(Diagnostic)]
 #[diag("call to deprecated safe function `{$function}` is unsafe and requires unsafe block")]
 pub(crate) struct CallToDeprecatedSafeFnRequiresUnsafe {
     #[label("call to unsafe function")]

@@ -64,7 +64,6 @@ struct Branch<'arena> {
     span: Span,
     body: eaf::Expr<'arena>,
     scope: Scope,
-    always_diverges: bool,
 }
 
 struct TranslatedArm<'arena> {
@@ -286,19 +285,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     }
 
     fn var_for_read(&self, span: Span, id: LocalVarId) -> PatinaVar {
-        let ident = self.tcx().hir_ident(id.0);
-
-        *self.scopes.get_var(id).filter(|var| var.initialization_depth.is_some()).unwrap_or_else(
-            || {
-                // TODO: this should be `report_use_of_uninitialized` from rustc
-                span_fatal!(
-                    self.tcx(),
-                    span,
-                    "variable {} is partially initialized",
-                    ident.to_string()
-                )
-            },
-        )
+        *self.scopes.get_var(id).unwrap_or_else(|| span_bug!(span, "variable {id:?} not in scope"))
     }
 
     fn translate_field(
@@ -384,8 +371,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
             thir::StmtKind::Let { ref pattern, initializer, else_block, span, .. } => {
                 let Some(initializer) = initializer else {
-                    self.declare_vars_from_pattern(pattern);
-                    return None;
+                    let declarations = self.declare_vars_from_pattern(pattern);
+                    return (!declarations.is_empty())
+                        .then(|| (afb.expr_block(span, declarations), true));
                 };
                 let rhs = self.translate_expr(initializer);
 
@@ -394,7 +382,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                     return Some((afb.expr_match(span, lhs, rhs), false));
                 };
 
-                self.declare_vars_from_pattern(pattern);
+                let declarations = self.declare_vars_from_pattern(pattern);
 
                 let else_span = self.thir[else_block].span;
                 let ((success_patterns, success_body), success_scope) = self.with_scope(|cx| {
@@ -408,26 +396,22 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 translated.push(TranslatedArm {
                     patterns: success_patterns,
                     guard: None,
-                    branch: Branch {
-                        span,
-                        body: success_body,
-                        scope: success_scope,
-                        always_diverges: false,
-                    },
+                    branch: Branch { span, body: success_body, scope: success_scope },
                 });
                 let else_pattern = afb.pat_var(else_span, kw::Underscore);
                 translated.push(TranslatedArm {
                     patterns: else_pattern.into(),
                     guard: None,
-                    branch: Branch {
-                        span: else_span,
-                        body: else_body,
-                        scope: else_scope,
-                        always_diverges: true,
-                    },
+                    branch: Branch { span: else_span, body: else_body, scope: else_scope },
                 });
 
-                Some((self.translate_to_case(span, rhs, translated), true))
+                let case = self.translate_to_case(span, rhs, translated);
+                let expr = if declarations.is_empty() {
+                    case
+                } else {
+                    afb.expr_block(span, declarations.into_iter().chain([case]))
+                };
+                Some((expr, true))
             }
         }
     }
@@ -498,13 +482,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let left = self.translate_expr(lhs);
 
         let (right, right_scope) = self.with_scope(|cx| cx.translate_expr(rhs));
-        let right_always_diverges = self.is_always_diverging_expr(rhs);
-
         let short_scope = Scope::new();
 
-        let changed_vars = self
-            .scopes
-            .modified_outer_vars([(&right_scope, right_always_diverges), (&short_scope, false)]);
+        let changed_vars = self.scopes.modified_outer_vars([&right_scope, &short_scope]);
 
         if changed_vars.is_empty() {
             self.scopes.join_branches(&changed_vars);
@@ -876,19 +856,14 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             ExprKind::VarRef { id } => *id,
 
             ExprKind::UpvarRef { var_hir_id, .. } => {
-                span_fatal!(
-                    self.tcx(),
-                    expr.span,
-                    "cannot assign to variable {} from parent scope",
-                    self.tcx().hir_ident(var_hir_id.0).to_string()
-                )
+                span_bug!(expr.span, "assignment to upvar {var_hir_id:?} reached translation")
             }
 
             kind => span_bug!(expr.span, "lhs of assign must be a var; got {kind:?}"),
         };
 
         let ident = self.tcx().hir_ident(var_id.0);
-        let var_info = self.scopes.bind_var(var_id, ident.name, true);
+        let var_info = self.scopes.bind_var(var_id, ident.name);
 
         let lhs = afb.pat_var(expr.span, var_info.erl_name);
         afb.expr_match(expr.span, lhs, rhs)
@@ -904,45 +879,28 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         if let ExprKind::Let { expr: scrutinee, pat } = &self.resolve_expr(cond).kind {
             let scrutinee = self.translate_expr(*scrutinee);
             let then_span = self.resolve_expr(then).span;
-            let ((then_patterns, then_body, then_always_diverges), then_scope) =
-                self.with_scope(|cx| {
-                    let patterns = cx.translate_pattern(pat, PatternInput::Typed);
-                    let always_diverges = cx.is_always_diverging_expr(then);
-                    let body = cx.translate_expr(then);
-                    (patterns, body, always_diverges)
-                });
+            let ((then_patterns, then_body), then_scope) = self.with_scope(|cx| {
+                let patterns = cx.translate_pattern(pat, PatternInput::Typed);
+                let body = cx.translate_expr(then);
+                (patterns, body)
+            });
 
-            let ((else_body, else_span, else_always_diverges), else_scope) =
-                self.with_scope(|cx| match else_opt {
-                    Some(else_expr) => (
-                        cx.translate_expr(else_expr),
-                        cx.resolve_expr(else_expr).span,
-                        cx.is_always_diverging_expr(else_expr),
-                    ),
-                    None => (cx.translator.afb.expr_unit(expr.span), expr.span, false),
-                });
+            let ((else_body, else_span), else_scope) = self.with_scope(|cx| match else_opt {
+                Some(else_expr) => (cx.translate_expr(else_expr), cx.resolve_expr(else_expr).span),
+                None => (cx.translator.afb.expr_unit(expr.span), expr.span),
+            });
 
             let mut translated = SmallVec::new();
             translated.push(TranslatedArm {
                 patterns: then_patterns,
                 guard: None,
-                branch: Branch {
-                    span: then_span,
-                    body: then_body,
-                    scope: then_scope,
-                    always_diverges: then_always_diverges,
-                },
+                branch: Branch { span: then_span, body: then_body, scope: then_scope },
             });
             let else_pattern = self.translator.afb.pat_var(else_span, kw::Underscore);
             translated.push(TranslatedArm {
                 patterns: else_pattern.into(),
                 guard: None,
-                branch: Branch {
-                    span: else_span,
-                    body: else_body,
-                    scope: else_scope,
-                    always_diverges: else_always_diverges,
-                },
+                branch: Branch { span: else_span, body: else_body, scope: else_scope },
             });
             return self.translate_to_case(expr.span, scrutinee, translated);
         }
@@ -951,22 +909,13 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
         let (then_body, then_scope) = self.with_scope(|cx| cx.translate_expr(then));
         let then_span = self.resolve_expr(then).span;
-        let then_always_diverges = self.is_always_diverging_expr(then);
 
-        let ((else_body, else_span, else_always_diverges), else_scope) =
-            self.with_scope(|cx| match else_opt {
-                Some(else_expr) => (
-                    cx.translate_expr(else_expr),
-                    cx.resolve_expr(else_expr).span,
-                    cx.is_always_diverging_expr(else_expr),
-                ),
-                None => (cx.translator.afb.expr_unit(expr.span), expr.span, false),
-            });
+        let ((else_body, else_span), else_scope) = self.with_scope(|cx| match else_opt {
+            Some(else_expr) => (cx.translate_expr(else_expr), cx.resolve_expr(else_expr).span),
+            None => (cx.translator.afb.expr_unit(expr.span), expr.span),
+        });
 
-        let changed_vars = self.scopes.modified_outer_vars([
-            (&then_scope, then_always_diverges),
-            (&else_scope, else_always_diverges),
-        ]);
+        let changed_vars = self.scopes.modified_outer_vars([&then_scope, &else_scope]);
         let then_body =
             self.bind_branch_outer_variables(then_span, then_body, &then_scope, &changed_vars);
         let else_body =
@@ -1023,9 +972,8 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         'arena: 'b,
     {
         let mut branches: SmallVec<[&mut Branch<'arena>; 4]> = branches.into_iter().collect();
-        let changed_vars = self.scopes.modified_outer_vars(
-            branches.iter().map(|branch| (&branch.scope, branch.always_diverges)),
-        );
+        let changed_vars =
+            self.scopes.modified_outer_vars(branches.iter().map(|branch| &branch.scope));
         for branch in &mut branches {
             branch.body = self.bind_branch_outer_variables(
                 branch.span,
@@ -1047,9 +995,8 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
         let mut after = timeout.map(|timeout| {
             let span = self.resolve_expr(timeout.body).span;
-            let always_diverges = self.is_always_diverging_expr(timeout.body);
             let (body, scope) = self.with_scope(|cx| cx.translate_expr(timeout.body));
-            (self.translate_expr(timeout.expr), Branch { span, body, scope, always_diverges })
+            (self.translate_expr(timeout.expr), Branch { span, body, scope })
         });
 
         let mut translated = SmallVec::new();
@@ -1083,17 +1030,16 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     ) {
         let thir = self.thir;
         let Arm { span, pattern, guard, body, hir_id: _, scope: _ } = &thir[arm_id];
-        let ((patterns, guard, body, always_diverges), scope) = self.with_scope(|cx| {
+        let ((patterns, guard, body), scope) = self.with_scope(|cx| {
             let patterns = cx.translate_pattern(pattern, PatternInput::Typed);
             let guard = guard.map(|guard| cx.translate_expr(guard));
-            let always_diverges = cx.is_always_diverging_expr(*body);
             let body = cx.translate_expr(*body);
-            (patterns, guard, body, always_diverges)
+            (patterns, guard, body)
         });
         translated.push(TranslatedArm {
             patterns,
             guard,
-            branch: Branch { span: *span, body, scope, always_diverges },
+            branch: Branch { span: *span, body, scope },
         });
     }
 
@@ -1112,7 +1058,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
         let afb = &self.translator.afb;
 
-        let result_var = self.scopes.fresh_var(sym::branch_value, true);
+        let result_var = self.scopes.fresh_var(sym::branch_value);
 
         let result_var_pat = afb.pat_var(span, result_var.erl_name);
         let result_var_expr = afb.expr_var(span, result_var.erl_name);
@@ -1125,11 +1071,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 .unwrap_or_else(|| span_bug!(span, "variable {id:?} not in scope"));
 
             if branch_var.vsn < export_var.vsn {
-                let branch_var_expr = if branch_var.initialized() {
-                    afb.expr_var(span, branch_var.erl_name)
-                } else {
-                    afb.expr_unit(span)
-                };
+                let branch_var_expr = afb.expr_var(span, branch_var.erl_name);
                 let export_var_pat = afb.pat_var(span, export_var.erl_name);
                 Some(afb.expr_match(span, export_var_pat, branch_var_expr))
             } else {
@@ -1275,40 +1217,58 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         })
     }
 
-    fn declare_vars_from_pattern(&mut self, pat: &Pat<'tcx>) {
+    fn declare_vars_from_pattern(&mut self, pat: &Pat<'tcx>) -> SmallVec<[eaf::Expr<'arena>; 4]> {
+        let mut declarations = SmallVec::new();
+        self.declare_vars_from_pattern_into(pat, &mut declarations);
+        declarations
+    }
+
+    fn declare_vars_from_pattern_into(
+        &mut self,
+        pat: &Pat<'tcx>,
+        declarations: &mut SmallVec<[eaf::Expr<'arena>; 4]>,
+    ) {
         match &pat.kind {
             PatKind::Binding { var, subpattern, is_primary, .. } => {
                 if *is_primary {
                     let ident = self.tcx().hir_ident(var.0);
-                    self.scopes.bind_var(*var, ident.name, false);
+                    let erl_name = self.scopes.bind_var(*var, ident.name).erl_name;
+                    let afb = &self.translator.afb;
+                    declarations.push(afb.expr_match(
+                        pat.span,
+                        afb.pat_var(pat.span, erl_name),
+                        afb.expr_unit(pat.span),
+                    ));
                 }
                 if let Some(subpattern) = subpattern {
-                    self.declare_vars_from_pattern(subpattern);
+                    self.declare_vars_from_pattern_into(subpattern, declarations);
                 }
             }
             PatKind::Deref { subpattern, .. }
             | PatKind::DerefPattern { subpattern, .. }
             | PatKind::Guard { subpattern, .. }
             | PatKind::TermClass { subpattern, .. }
-            | PatKind::TermPat { subpattern, .. } => self.declare_vars_from_pattern(subpattern),
+            | PatKind::TermPat { subpattern, .. } => {
+                self.declare_vars_from_pattern_into(subpattern, declarations)
+            }
             PatKind::Leaf { subpatterns } | PatKind::Variant { subpatterns, .. } => {
                 for field in subpatterns {
-                    self.declare_vars_from_pattern(&field.pattern);
+                    self.declare_vars_from_pattern_into(&field.pattern, declarations);
                 }
             }
             PatKind::Slice { prefix, slice, suffix } | PatKind::Array { prefix, slice, suffix } => {
                 for pattern in prefix.iter().chain(slice.as_deref()).chain(suffix.iter()) {
-                    self.declare_vars_from_pattern(pattern);
+                    self.declare_vars_from_pattern_into(pattern, declarations);
                 }
             }
             PatKind::Or { pats } => {
                 for pattern in pats {
-                    self.declare_vars_from_pattern(pattern);
+                    self.declare_vars_from_pattern_into(pattern, declarations);
                 }
             }
             PatKind::Map { fields, .. } => {
                 for field in fields {
-                    self.declare_vars_from_pattern(&field.pattern);
+                    self.declare_vars_from_pattern_into(&field.pattern, declarations);
                 }
             }
             PatKind::Missing
@@ -1382,7 +1342,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         input: PatternInput,
     ) -> Patterns<'arena> {
         let afb = &self.translator.afb;
-        let range_var = self.scopes.fresh_var(sym::range, true);
+        let range_var = self.scopes.fresh_var(sym::range);
 
         let lower = range.lo.as_finite().map(|value| {
             let lhs = afb.expr_var(span, range_var.erl_name);
@@ -1444,7 +1404,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         input: PatternInput,
     ) -> Patterns<'arena> {
         let erl_name = if is_primary {
-            self.scopes.bind_var(var, name, true).erl_name
+            self.scopes.bind_var(var, name).erl_name
         } else {
             self.scopes.fetch_var(var).erl_name
         };
@@ -1486,7 +1446,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                     return GuardedPattern(pattern, guards);
                 }
 
-                let value = self.scopes.fresh_var(sym::value, true);
+                let value = self.scopes.fresh_var(sym::value);
                 let value_pat = self.translator.afb.pat_var(span, value.erl_name);
                 let value_expr = self.translator.afb.expr_var(span, value.erl_name);
                 let class_guard = self.term_class_guard(span, value_expr, class);
@@ -1535,7 +1495,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         if !matches!(input, PatternInput::UntrustedRepresentation) {
             return self.translator.afb.pat_var(span, kw::Underscore).into();
         }
-        let var = self.scopes.fresh_var(sym::value, true);
+        let var = self.scopes.fresh_var(sym::value);
         self.guard_pattern_for_type(span, ty, var.erl_name)
     }
 
@@ -1607,17 +1567,6 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 _ => return (expr, region_scope),
             }
         }
-    }
-
-    fn is_always_diverging_expr(&self, expr_id: ExprId) -> bool {
-        let (_expr, Some((_, hir_id))) = self.resolve_expr_with_scope(expr_id) else {
-            span_bug!(
-                self.thir[expr_id].span,
-                "expected HIR-derived expression to have an outer Scope"
-            );
-        };
-
-        self.tcx().typeck(self.owner).is_always_diverging_expr(hir_id)
     }
 
     pub(super) fn pattern_cartesian_product(

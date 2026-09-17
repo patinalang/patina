@@ -12,7 +12,7 @@ use rustc_span::{Span, Symbol, kw, sym};
 
 use crate::compile::translate::BodyCx;
 use crate::compile::translate::loops::loop_analysis::LoopVariables;
-use crate::compile::translate::scopes::{PatinaVar, Scopes};
+use crate::compile::translate::scopes::PatinaVar;
 use crate::erlang::abstract_format as eaf;
 use crate::{not_implemented, span_fatal};
 
@@ -37,13 +37,9 @@ impl Loops {
         self.loops.len()
     }
 
-    pub(super) fn record_break(&mut self, label: region::Scope, scopes: &Scopes) -> Option<usize> {
+    pub(super) fn record_break(&mut self, label: region::Scope) -> Option<usize> {
         let target = self.loops.iter().position(|loop_cx| loop_cx.label == label)?;
         if let [handler, through @ ..] = &mut self.loops[target..] {
-            let uninitialized_vars =
-                handler.rebound.iter().filter(|id| !scopes.fetch_var(**id).initialized());
-
-            handler.uninitialized_at_break.extend(uninitialized_vars);
             handler.control.breaks_here = true;
             for loop_cx in through {
                 loop_cx.control.breaks_through = true;
@@ -95,9 +91,6 @@ pub(super) struct LoopContext {
     pub params: FxIndexSet<LocalVarId>,
     /// Variables that are rebound in the loop body; a subset of `params`.
     pub rebound: FxIndexSet<LocalVarId>,
-    /// Variables that are uninitialized at at least one `break` call.
-    /// We track them, because they are presumed unitialized by the loop caller.
-    pub uninitialized_at_break: FxIndexSet<LocalVarId>,
     pub control: LoopControl,
 }
 
@@ -113,15 +106,7 @@ impl LoopContext {
         let helper_erl_name =
             Symbol::intern(&format!("$patina_loop_{}_{}", owner.index(), expr_id.index()));
 
-        Self {
-            helper_erl_name,
-            depth,
-            label,
-            params,
-            rebound,
-            uninitialized_at_break: FxIndexSet::default(),
-            control: LoopControl::default(),
-        }
+        Self { helper_erl_name, depth, label, params, rebound, control: LoopControl::default() }
     }
 }
 
@@ -194,19 +179,18 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         );
 
         for id in &loop_cx.rebound {
-            let initialized = !loop_cx.uninitialized_at_break.contains(id);
-            self.scopes.rebind_var(*id, initialized);
+            self.scopes.rebind_var(*id);
         }
 
         let break_clause = loop_cx.control.breaks_here.then(|| {
-            let result_var = self.scopes.fresh_var(sym::loop_value, true);
+            let result_var = self.scopes.fresh_var(sym::loop_value);
             self.break_clause(expr.span, &result_var, &loop_cx)
         });
 
         let propagate_break_clause = loop_cx.control.breaks_through.then(|| {
             let outer_loop = self.loops.current();
-            let target_depth_var = self.scopes.fresh_var(sym::target_loop_depth, true);
-            let result_var = self.scopes.fresh_var(sym::loop_value, true);
+            let target_depth_var = self.scopes.fresh_var(sym::target_loop_depth);
+            let result_var = self.scopes.fresh_var(sym::loop_value);
             self.propagate_break_clause(
                 expr.span,
                 outer_loop,
@@ -223,12 +207,12 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
         let propagate_continue_clause = loop_cx.control.continues_through.then(|| {
             let outer_loop = self.loops.current();
-            let target_depth_var = self.scopes.fresh_var(sym::target_loop_depth, true);
+            let target_depth_var = self.scopes.fresh_var(sym::target_loop_depth);
             self.propagate_continue_clause(expr.span, outer_loop, &target_depth_var, &loop_cx)
         });
 
         let return_clause = loop_cx.control.returns.then(|| {
-            let result_var = self.scopes.fresh_var(sym::loop_value, true);
+            let result_var = self.scopes.fresh_var(sym::loop_value);
             self.propagate_return_clause(
                 expr.span,
                 self.loops.in_loop().then(|| self.loops.current()),
@@ -265,7 +249,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
         let target_depth = self
             .loops
-            .record_break(label, self.scopes)
+            .record_break(label)
             .unwrap_or_else(|| not_implemented!(self.tcx(), span, "break target outside of loop"));
 
         let target_depth = afb.expr_int(span, target_depth as u128);
@@ -478,7 +462,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let afb = &self.translator.afb;
         ids.into_iter().map(move |id| {
             let var = self.scopes.fetch_var(id);
-            if var.initialized() { afb.expr_var(span, var.erl_name) } else { afb.expr_unit(span) }
+            afb.expr_var(span, var.erl_name)
         })
     }
 }

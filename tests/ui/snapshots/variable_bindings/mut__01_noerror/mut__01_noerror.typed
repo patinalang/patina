@@ -67,9 +67,6 @@ fn main() ({
         ((io::nl as fn() -> term)() as term);
     } as ());
 
-    // Error! Cannot assign a new value to an immutable variable
-    ((_immutable_binding as int) += (1 as int) as int);
-
     // Inside closures (lambda functions) and `try` blocks, `let mut` variables
     // defined in outer scopes lose their `mut` modifier
     let my_fun =
@@ -89,5 +86,5 @@ fn main() ({
                     ((io::nl as fn() -> term)() as term);
                 } as ());
             } as ()) as
-            {closure@tests/ui/src/variable_bindings/mut__01_noerror.pt:17:18: 17:20});
+            {closure@tests/ui/src/variable_bindings/mut__01_noerror.pt:14:18: 14:20});
 } as ())

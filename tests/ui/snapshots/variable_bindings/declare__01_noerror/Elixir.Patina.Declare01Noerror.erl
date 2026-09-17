@@ -26,6 +26,7 @@
 '__info__'(Key) -> module_info(Key).
 
 main() ->
+    begin _a_binding@0_0 = {} end,
     begin
         _x@1_0 = 2, _a_binding@0_1 = _x@1_0 * _x@1_0, {}
     end,
@@ -35,6 +36,7 @@ main() ->
         io:nl(),
         {}
     end,
+    begin _another_binding@2_0 = {} end,
     _another_binding@2_1 = 1,
     begin
         io:put_chars([[<<"another binding: ">>,

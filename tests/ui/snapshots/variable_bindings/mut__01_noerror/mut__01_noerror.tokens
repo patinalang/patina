@@ -60,16 +60,6 @@ Semi
 Whitespace
 LineComment { doc_style: None }
 Whitespace
-Ident
-Whitespace
-Plus
-Eq
-Whitespace
-Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
-Semi
-Whitespace
-LineComment { doc_style: None }
-Whitespace
 LineComment { doc_style: None }
 Whitespace
 Ident

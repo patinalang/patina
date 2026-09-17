@@ -1,0 +1,45 @@
+fn initialized_in_branches(condition: bool) -> int {
+    let value;
+
+    if condition {
+        value = 1;
+    } else {
+        value = 2;
+    }
+
+    value
+}
+
+fn initialized_after_diverging_branch(condition: bool) -> int {
+    let value;
+
+    if condition {
+        value = 1;
+        return value;
+    }
+
+    value = 2;
+    value
+}
+
+fn initialized_on_every_loop_exit(condition: bool) -> int {
+    let value;
+
+    loop {
+        if condition {
+            value = 1;
+            break;
+        } else {
+            value = 2;
+            break;
+        }
+    }
+
+    value
+}
+
+pub fn main() {
+    println!("{}", initialized_in_branches(true));
+    println!("{}", initialized_after_diverging_branch(false));
+    println!("{}", initialized_on_every_loop_exit(true));
+}

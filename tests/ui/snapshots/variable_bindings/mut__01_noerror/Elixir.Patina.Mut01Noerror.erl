@@ -41,7 +41,6 @@ main() ->
         io:nl(),
         {}
     end,
-    __immutable_binding@0_1 = __immutable_binding@0_0 + 1,
     _my_fun@3_0 = fun () ->
                           _inner_mutable_binding@2_0 = _mutable_binding@1_1,
                           _inner_mutable_binding@2_1 =

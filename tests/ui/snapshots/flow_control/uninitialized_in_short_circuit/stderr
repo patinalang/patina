@@ -1,8 +1,17 @@
-error: variable value is partially initialized
-  --> tests/ui/src/flow_control/uninitialized_in_short_circuit.pt:9:5
+error: cannot initialize `value` in only some non-diverging branches
+  --> tests/ui/src/flow_control/uninitialized_in_short_circuit.pt:4:13
    |
-LL |     value
-   |     ^^^^^
+LL |       let value;
+   |           ----- `value` is declared without an initializer here
+LL |
+LL |       let _ = run_rhs && {
+   |  _____________^
+LL | |         value = 30;
+LL | |         true
+LL | |     };
+   | |_____^ not all non-diverging branches initialize `value`
+   |
+   = note: all non-diverging branches must either initialize the binding or leave it uninitialized
 
 error: aborting due to 1 previous error
 

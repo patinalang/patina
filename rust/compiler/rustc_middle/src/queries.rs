@@ -1136,6 +1136,11 @@ rustc_queries! {
         desc { "unsafety-checking `{}`", tcx.def_path_str(key) }
     }
 
+    /// Check assignment legality (mutability, scope boundaries) in this `LocalDefId`.
+    query check_mutability(key: LocalDefId) {
+        desc { "mutability-checking `{}`", tcx.def_path_str(key) }
+    }
+
     /// Checks well-formedness of tail calls (`become f()`).
     query check_tail_calls(key: LocalDefId) -> Result<(), ErrorGuaranteed> {
         desc { "tail-call-checking `{}`", tcx.def_path_str(key) }

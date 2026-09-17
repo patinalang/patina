@@ -27,6 +27,7 @@ main() ->
     _logical@0_0 = true,
     _a_float@1_0 = 1.0,
     _an_atom@2_0 = hello,
+    begin _inferred_type@3_0 = {} end,
     _inferred_type@3_1 = add_floats(1.2e+1, 3.14),
     _mutable@4_0 = 12,
     _mutable@4_1 = 21,

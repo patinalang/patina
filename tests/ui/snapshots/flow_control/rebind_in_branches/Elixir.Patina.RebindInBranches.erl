@@ -60,6 +60,7 @@ latest_version_wins(_take_then@0_0) ->
     _value@1_2.
 
 initialize_in_branches(_take_then@0_0) ->
+    begin _value@1_0 = {} end,
     case _take_then@0_0 of
         true ->
             _value@1_1 = 10,
@@ -71,6 +72,7 @@ initialize_in_branches(_take_then@0_0) ->
     _value@1_1.
 
 initialize_or_return(_take_then@0_0) ->
+    begin _value@1_0 = {} end,
     case _take_then@0_0 of
         true ->
             _value@1_1 = 30,
@@ -79,7 +81,7 @@ initialize_or_return(_take_then@0_0) ->
             _branch_value@2_0 = begin
                                     '$patina_marker':return(40), {}
                                 end,
-            _value@1_1 = {},
+            _value@1_1 = _value@1_0,
             _branch_value@2_0
     end,
     _value@1_1.

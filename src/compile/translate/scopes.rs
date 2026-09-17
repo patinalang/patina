@@ -18,40 +18,26 @@ pub(super) struct PatinaVar {
     /// How many scope levels deep are we compared to the var's declaration?
     /// A depth of 0 means we're at the declaration scope.
     pub decl_depth: u32,
-    /// How many scope levels deep are we compared to the var's initialization?
-    /// A depth of 0 means we're at the initialization scope.
-    /// `initialization_depth` is always less than or equal to `decl_depth`.
-    /// `None` means the var is uninitialized.
-    pub initialization_depth: Option<u32>,
 }
 
 impl PatinaVar {
-    fn new(name: Symbol, var_num: u32, initialized: bool) -> Self {
+    fn new(name: Symbol, var_num: u32) -> Self {
         Self {
             name,
             var_num,
             vsn: 0,
             erl_name: Self::make_erl_name(name, var_num, 0),
             decl_depth: 0,
-            initialization_depth: if initialized { Some(0) } else { None },
         }
     }
 
-    fn with_bumped_vsn(&self, from_scope_depth: u32, initialized: bool) -> Self {
+    fn with_bumped_vsn(&self, from_scope_depth: u32) -> Self {
         Self {
             vsn: self.vsn + 1,
             erl_name: Self::make_erl_name(self.name, self.var_num, self.vsn + 1),
             decl_depth: self.decl_depth + from_scope_depth,
-            initialization_depth: self
-                .initialization_depth
-                .map(|depth| depth + from_scope_depth)
-                .or(initialized.then_some(0)),
             ..*self
         }
-    }
-
-    pub(super) fn initialized(&self) -> bool {
-        self.initialization_depth.is_some()
     }
 
     fn make_erl_name(name: Symbol, var_num: u32, vsn: u32) -> Symbol {
@@ -93,18 +79,13 @@ impl Scopes {
         self.get_var(id).unwrap_or_else(|| bug!("variable {:?} is not in scope", id))
     }
 
-    pub(super) fn fresh_var(&mut self, name: Symbol, initialized: bool) -> PatinaVar {
-        let var = PatinaVar::new(name, self.next_var_num, initialized);
+    pub(super) fn fresh_var(&mut self, name: Symbol) -> PatinaVar {
+        let var = PatinaVar::new(name, self.next_var_num);
         self.next_var_num += 1;
         var
     }
 
-    pub(super) fn bind_var(
-        &mut self,
-        id: LocalVarId,
-        name: Symbol,
-        initialized: bool,
-    ) -> &PatinaVar {
+    pub(super) fn bind_var(&mut self, id: LocalVarId, name: Symbol) -> &PatinaVar {
         let var = match self
             .scopes
             .iter()
@@ -112,16 +93,16 @@ impl Scopes {
             .enumerate()
             .find_map(|(idx, scope)| scope.get_var(id).map(|var| (idx, var)))
         {
-            Some((idx, var)) => var.with_bumped_vsn(idx as u32, initialized),
-            None => self.fresh_var(name, initialized),
+            Some((idx, var)) => var.with_bumped_vsn(idx as u32),
+            None => self.fresh_var(name),
         };
 
         self.last_scope_mut().bind_var(id, var)
     }
 
-    pub(super) fn rebind_var(&mut self, id: LocalVarId, initialized: bool) -> &PatinaVar {
+    pub(super) fn rebind_var(&mut self, id: LocalVarId) -> &PatinaVar {
         let name = self.fetch_var(id).name;
-        self.bind_var(id, name, initialized)
+        self.bind_var(id, name)
     }
 
     pub(super) fn push(&mut self) {
@@ -136,35 +117,17 @@ impl Scopes {
     /// The map value is the latest version of the variable between all branches.
     pub(super) fn modified_outer_vars<'a>(
         &mut self,
-        branches: impl IntoIterator<Item = (&'a Scope, bool)>,
+        branches: impl IntoIterator<Item = &'a Scope>,
     ) -> FxIndexMap<LocalVarId, PatinaVar> {
         let mut modified_outer_vars = FxIndexMap::default();
-        let mut num_used = FxIndexMap::default();
-        let mut num_non_diverging_branches = 0;
-
-        for (branch, always_diverges) in branches {
-            if !always_diverges {
-                num_non_diverging_branches += 1;
-            }
-
+        for branch in branches {
             for (id, branch_var) in &branch.0 {
                 if branch_var.decl_depth == 0 {
                     continue;
                 }
 
                 let decl_depth = branch_var.decl_depth - 1;
-                let initialization_depth = match branch_var.initialization_depth {
-                    Some(0) => {
-                        if !always_diverges {
-                            num_used.entry(*id).and_modify(|count| *count += 1).or_insert(1);
-                        }
-                        None
-                    }
-                    Some(depth) => Some(depth - 1),
-                    None => bug!("outer var {:?} is not initialized in branch", id),
-                };
-
-                let branch_var = PatinaVar { decl_depth, initialization_depth, ..*branch_var };
+                let branch_var = PatinaVar { decl_depth, ..*branch_var };
 
                 modified_outer_vars
                     .entry(*id)
@@ -174,19 +137,6 @@ impl Scopes {
                         }
                     })
                     .or_insert(branch_var);
-            }
-        }
-
-        for (id, count) in num_used {
-            if count == num_non_diverging_branches {
-                // Initialized in all non-diverging branches, so it's fully initialized outside of the branches.
-                let var = modified_outer_vars.get_mut(&id).unwrap_or_else(|| {
-                    bug!("variable {id:?} present in num_used but not in modified_outer_vars")
-                });
-                if var.initialization_depth.is_some() {
-                    bug!("variable {id:?} already initialized");
-                }
-                var.initialization_depth = Some(0);
             }
         }
 

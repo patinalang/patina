@@ -1,8 +1,11 @@
-error: variable expected is partially initialized
+error: cannot use `expected`, as it is not initialized
   --> tests/ui/src/flow_control/errors/pin_partial_initialization.pt:4:9
    |
+LL |     let expected;
+   |         -------- `expected` is declared without an initializer here
+LL |     match value {
 LL |         ^expected => true,
-   |         ^^^^^^^^^
+   |         ^^^^^^^^^ used here before being initialized
 
 error: aborting due to 1 previous error
 

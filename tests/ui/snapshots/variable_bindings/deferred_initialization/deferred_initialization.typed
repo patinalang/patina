@@ -1,0 +1,110 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! stringify { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! concat { () => {}; }
+
+#[allow(unused_macros)]
+#[attr = RustcBuiltinMacro {helper_attrs: []}]
+macro_rules! format_args { () => {}; }
+
+#[allow(unused_macros)]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
+}
+
+#[allow(unused_macros)]
+macro_rules! println {
+    () => {{ io::nl(); }}; ($($arg:tt)*) =>
+    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
+}
+
+fn initialized_in_branches(condition: bool)
+    ->
+        int ({
+    let value;
+
+    (if (condition as bool) {
+        ((value as int) = (1 as int) as int);
+    } else { ((value as int) = (2 as int) as int); } as ())
+
+    (value as int)
+} as int)
+
+fn initialized_after_diverging_branch(condition: bool)
+    ->
+        int ({
+    let value;
+
+    (if (condition as bool) {
+        ((value as int) = (1 as int) as int);
+        (return (value as int) as !);
+    } as ())
+
+    ((value as int) = (2 as int) as int);
+    (value as int)
+} as int)
+
+fn initialized_on_every_loop_exit(condition: bool)
+    ->
+        int ({
+    let value;
+
+    (loop {
+        (if (condition as bool) {
+            ((value as int) = (1 as int) as int);
+            (break as !);
+        } else { ((value as int) = (2 as int) as int); (break as !); } as ())
+    } as ())
+
+    (value as int)
+} as int)
+
+fn main() ({
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::display as
+                                    fn(term) -> term)(((initialized_in_branches as
+                                        fn(bool) -> int {initialized_in_branches})((true as bool))
+                                    as int)) as term)] as [term])] as [[term]])) as term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::display as
+                                    fn(term) -> term)(((initialized_after_diverging_branch as
+                                        fn(bool) -> int {initialized_after_diverging_branch})((false
+                                        as bool)) as int)) as term)] as [term])] as [[term]])) as
+            term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::display as
+                                    fn(term) -> term)(((initialized_on_every_loop_exit as
+                                        fn(bool) -> int {initialized_on_every_loop_exit})((true as
+                                        bool)) as int)) as term)] as [term])] as [[term]])) as
+            term);
+        ((io::nl as fn() -> term)() as term);
+    } as ());
+} as ())

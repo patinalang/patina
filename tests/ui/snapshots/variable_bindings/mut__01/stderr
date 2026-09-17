@@ -1,8 +1,23 @@
-error: cannot assign to variable mutable_binding from parent scope
+error[E0384]: cannot assign to `_immutable_binding`, as it is not declared as mutable
+  --> tests/ui/src/variable_bindings/mut__01.pt:16:5
+   |
+LL |     let _immutable_binding = 1;
+   |         ------------------ help: consider making this binding mutable: `mut _immutable_binding`
+...
+LL |     _immutable_binding += 1;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^ cannot assign
+
+error: cannot assign to `mutable_binding`, as it is captured by the closure
   --> tests/ui/src/variable_bindings/mut__01.pt:22:9
    |
+LL |     let mut mutable_binding = 1;
+   |             --------------- `mutable_binding` is declared here
+...
 LL |         mutable_binding += 1;
-   |         ^^^^^^^^^^^^^^^^^^^^
+   |         ^^^^^^^^^^^^^^^^^^^^ cannot assign
+   |
+   = note: closures capture by value; assignments inside a closure do not escape it
 
-error: aborting due to 1 previous error
+error: aborting due to 2 previous errors
 
+For more information about this error, try `rustc --explain E0384`.

@@ -1,0 +1,63 @@
+#![allow(dead_code)]
+
+fn assign_to_immutable_binding() {
+    let value = 1;
+    value = 2;
+}
+
+fn assign_to_immutable_parameter(value: int) {
+    value = 2;
+}
+
+fn assign_to_multiple_bindings() {
+    let first = 1;
+    let second = 2;
+
+    first = 3;
+    second = 4;
+}
+
+fn assign_deferred_binding_twice() {
+    let value;
+    value = 1;
+    value = 2;
+}
+
+fn assign_after_branches(condition: bool) {
+    let value;
+
+    if condition {
+        value = 1;
+    } else {
+        value = 2;
+    }
+
+    value = 3;
+}
+
+fn assign_after_partial_branch(condition: bool) {
+    let value;
+
+    if condition {
+        value = 1;
+    }
+}
+
+struct Value {
+    field: int,
+}
+
+fn assign_to_field() {
+    let value = Value { field: 1 };
+    value.field = 2;
+}
+
+fn read_in_compound_assignment() {
+    let mut value: int;
+    value += 1;
+}
+
+fn read_in_closure() {
+    let value: int;
+    let closure = || value;
+}

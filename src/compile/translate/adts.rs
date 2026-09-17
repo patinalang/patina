@@ -125,7 +125,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             return value;
         }
 
-        let value_var = self.scopes.fresh_var(sym::value, true);
+        let value_var = self.scopes.fresh_var(sym::value);
         let value_var_pat = afb.pat_var(expr.span, value_var.erl_name);
         let value_var_expr = afb.expr_var(expr.span, value_var.erl_name);
         let wrapped =
@@ -189,7 +189,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             .into_iter()
             .flatten();
 
-        let shape_var = self.scopes.fresh_var(sym::value, true);
+        let shape_var = self.scopes.fresh_var(sym::value);
         let shape_pat = afb.pat_var(span, shape_var.erl_name);
         let shape_expr = afb.expr_var(span, shape_var.erl_name);
 

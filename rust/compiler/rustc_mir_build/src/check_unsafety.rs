@@ -183,6 +183,7 @@ impl<'tcx> UnsafetyVisitor<'_, 'tcx> {
         if let Ok((inner_thir, expr)) = self.tcx.thir_body(def) {
             // Run all other queries that depend on THIR.
             self.tcx.ensure_done().check_match(def);
+            self.tcx.ensure_done().check_mutability(def);
             self.tcx.ensure_done().check_tail_calls(def);
             let inner_thir = if self.tcx.sess.opts.unstable_opts.no_steal_thir {
                 &inner_thir.borrow()
@@ -1083,6 +1084,7 @@ pub(crate) fn check_unsafety(tcx: TyCtxt<'_>, def: LocalDefId) {
     let Ok((thir, expr)) = tcx.thir_body(def) else { return };
     // Runs all other queries that depend on THIR.
     tcx.ensure_done().check_match(def);
+    tcx.ensure_done().check_mutability(def);
     tcx.ensure_done().check_tail_calls(def);
     let thir = if tcx.sess.opts.unstable_opts.no_steal_thir {
         &thir.borrow()

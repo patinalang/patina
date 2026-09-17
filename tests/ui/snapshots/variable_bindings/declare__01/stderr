@@ -1,8 +1,11 @@
-error: variable another_binding is partially initialized
+error: cannot use `another_binding`, as it is not initialized
   --> tests/ui/src/variable_bindings/declare__01.pt:20:37
    |
+LL |     let another_binding;
+   |         --------------- `another_binding` is declared without an initializer here
+...
 LL |     println!("another binding: {}", another_binding);
-   |                                     ^^^^^^^^^^^^^^^
+   |                                     ^^^^^^^^^^^^^^^ used here before being initialized
 
 error: aborting due to 1 previous error
 

@@ -26,26 +26,33 @@
 '__info__'(Key) -> module_info(Key).
 
 tuple_pattern() ->
-    case {20, 22} of
-        {20, _second@0_1} -> {};
-        _ ->
-            _branch_value@1_0 = begin
-                                    '$patina_marker':return(0), {}
-                                end,
-            _second@0_1 = {},
-            _branch_value@1_0
+    begin
+        _second@0_0 = {},
+        case {20, 22} of
+            {20, _second@0_1} -> {};
+            _ ->
+                _branch_value@1_0 = begin
+                                        '$patina_marker':return(0), {}
+                                    end,
+                _second@0_1 = _second@0_0,
+                _branch_value@1_0
+        end
     end,
     20 + _second@0_1.
 
 list_pattern(_values@0_0) ->
-    case _values@0_0 of
-        [_first@1_1, _second@2_1 | _] -> {};
-        _ ->
-            _branch_value@3_0 = begin
-                                    '$patina_marker':return(0), {}
-                                end,
-            _first@1_1 = {},
-            _second@2_1 = {},
-            _branch_value@3_0
+    begin
+        _first@1_0 = {},
+        _second@2_0 = {},
+        case _values@0_0 of
+            [_first@1_1, _second@2_1 | _] -> {};
+            _ ->
+                _branch_value@3_0 = begin
+                                        '$patina_marker':return(0), {}
+                                    end,
+                _first@1_1 = _first@1_0,
+                _second@2_1 = _second@2_0,
+                _branch_value@3_0
+        end
     end,
     _first@1_1 + _second@2_1.

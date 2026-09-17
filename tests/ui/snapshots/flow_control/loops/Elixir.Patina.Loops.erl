@@ -136,7 +136,8 @@ zero_parameter_loop() ->
     '$patina_marker':continue(_value@0_1).
 
 initialize_in_loop() ->
-    case '$patina_loop_13_10'({}) of
+    begin _value@0_0 = {} end,
+    case '$patina_loop_13_10'(_value@0_0) of
         {break, 0, _loop_value@1_0, _value@0_1} ->
             _loop_value@1_0
     end,

@@ -1,8 +1,18 @@
-error: variable value is partially initialized
-  --> tests/ui/src/flow_control/loop_partial_initialization.pt:13:5
+error: cannot initialize `value` in only some non-diverging branches
+  --> tests/ui/src/flow_control/loop_partial_initialization.pt:4:5
    |
-LL |     value
-   |     ^^^^^
+LL |       let value;
+   |           ----- `value` is declared without an initializer here
+LL |
+LL | /     loop {
+LL | |         if take_initialized {
+LL | |             value = 10;
+LL | |             break;
+...  |
+LL | |     }
+   | |_____^ not all non-diverging branches initialize `value`
+   |
+   = note: all non-diverging branches must either initialize the binding or leave it uninitialized
 
 error: aborting due to 1 previous error
 

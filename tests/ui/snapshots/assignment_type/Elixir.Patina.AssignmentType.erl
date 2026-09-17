@@ -74,7 +74,8 @@ block_ending_in_let() ->
     __value@0_0 = 42,
     {}.
 
-block_ending_in_uninitialized_let() -> {}.
+block_ending_in_uninitialized_let() ->
+    begin __value@0_0 = {} end.
 
 block_ending_in_let_else(_value@0_0) ->
     case _value@0_0 of

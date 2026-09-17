@@ -129,7 +129,7 @@ break_two_loops() ->
 
 '$patina_loop_12_14'(_value@0_0) ->
     _ = begin
-            case '$patina_loop_12_11'({}) of
+            case '$patina_loop_12_11'(_value@0_0) of
                 {break,
                  _target_loop_depth@1_0,
                  _loop_value@2_0,
@@ -143,7 +143,8 @@ break_two_loops() ->
     '$patina_marker':continue(_value@0_1).
 
 outer_break_initializes() ->
-    case '$patina_loop_12_14'({}) of
+    begin _value@0_0 = {} end,
+    case '$patina_loop_12_14'(_value@0_0) of
         {break, 0, _loop_value@3_0, _value@0_1} ->
             _loop_value@3_0
     end,

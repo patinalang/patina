@@ -288,7 +288,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             .erl_witness_params(def_id)
             .into_iter()
             .map(|param| {
-                let name = scopes.fresh_var(param.name, true).erl_name;
+                let name = scopes.fresh_var(param.name).erl_name;
                 (param, name)
             })
             .collect::<FxIndexMap<_, _>>();
@@ -312,7 +312,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                     &mut self_type_params,
                 )
                 .unwrap_or_else(|| {
-                    let name = scopes.fresh_var(kw::SelfUpper, true).erl_name;
+                    let name = scopes.fresh_var(kw::SelfUpper).erl_name;
                     afb.pat_var(span, name)
                 });
             params.push(self_witness_pat);
@@ -337,11 +337,11 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                         params.push(afb.pat_var(span, name));
                     }
                     ty::Param(_) => {
-                        let name = scopes.fresh_var(trait_param.name, true).erl_name;
+                        let name = scopes.fresh_var(trait_param.name).erl_name;
                         params.push(afb.pat_var(span, name));
                     }
                     _ => {
-                        let name = scopes.fresh_var(trait_param.name, true).erl_name;
+                        let name = scopes.fresh_var(trait_param.name).erl_name;
                         let trait_pat = afb.pat_var(span, name);
                         let witness_pat =
                             self.witness_pat(def_id, span, arg_ty, &witness_vars, scopes);
@@ -383,7 +383,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 Witness::Param(param) => match witness_vars.get(&param) {
                     Some(&name) => afb.pat_var(span, name),
                     None => {
-                        let name = scopes.fresh_var(param.name, true).erl_name;
+                        let name = scopes.fresh_var(param.name).erl_name;
                         afb.pat_var(span, name)
                     }
                 },
