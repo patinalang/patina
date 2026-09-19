@@ -1,0 +1,9 @@
+[package]
+name = "etf"
+version = "0.0.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+num-traits = { version = "0.2.19", features = ["i128"] }
+thiserror = "2.0.18"
