@@ -3281,16 +3281,6 @@ pub(crate) mod dep_tracking {
     }
 }
 
-/// How to run proc-macro code when building this crate
-#[derive(Clone, Copy, PartialEq, Hash, Debug)]
-pub enum ProcMacroExecutionStrategy {
-    /// Run the proc-macro code on the same thread as the server.
-    SameThread,
-
-    /// Run the proc-macro code on a different thread.
-    CrossThread,
-}
-
 /// Which format to use for `-Z dump-mono-stats`
 #[derive(Clone, Copy, PartialEq, Hash, Debug)]
 pub enum DumpMonoStatsFormat {

@@ -1,12 +1,7 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
-
-
-
-
-
 
 
 
@@ -25,28 +20,8 @@ use Core::*;
 extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
-#[derive(Debug)]
 enum Food { CordonBleu, Steak, Sushi, }
-#[derive(Debug)]
 enum Day { Monday, Tuesday, Wednesday, }
 
 // We don't have the ingredients to make Sushi.
@@ -81,7 +56,9 @@ fn cookable_v2(food: Food) -> Option<Food> {
 
 fn eat(food: Food, day: Day) {
     match cookable_v3(food) {
-        Some(food) => {
+        Some(food) =>
+
+            {
             io::put_chars([["Yay! On ", patina_fmt::debug(day),
                                 " we get to eat ", patina_fmt::debug(food), "."]]);
             io::nl();
@@ -93,11 +70,9 @@ fn eat(food: Food, day: Day) {
         }
     }
 }
-
 pub fn main() {
     let (cordon_bleu, steak, sushi) =
         (Food::CordonBleu, Food::Steak, Food::Sushi);
-
     eat(cordon_bleu, Day::Monday);
     eat(steak, Day::Tuesday);
     eat(sushi, Day::Wednesday);

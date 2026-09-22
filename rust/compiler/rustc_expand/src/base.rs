@@ -24,7 +24,7 @@ use rustc_parse::MACRO_ARGUMENTS;
 use rustc_parse::parser::Parser;
 use rustc_session::Session;
 use rustc_session::parse::ParseSess;
-use rustc_span::def_id::{CrateNum, DefId, LocalDefId};
+use rustc_span::def_id::{DefId, LocalDefId};
 use rustc_span::edition::Edition;
 use rustc_span::hygiene::{AstPass, ExpnData, ExpnKind, LocalExpnId, MacroKind};
 use rustc_span::source_map::SourceMap;
@@ -1143,16 +1143,11 @@ pub trait ResolverExpand {
         path: &ast::Path,
     ) -> Result<bool, Indeterminate>;
 
-    /// Decodes the proc-macro quoted span in the specified crate, with the specified id.
-    /// No caching is performed.
-    fn get_proc_macro_quoted_span(&self, krate: CrateNum, id: usize) -> Span;
-
-    /// The order of items in the HIR is unrelated to the order of
-    /// items in the AST. However, we generate proc macro harnesses
-    /// based on the AST order, and later refer to these harnesses
-    /// from the HIR. This field keeps track of the order in which
-    /// we generated proc macros harnesses, so that we can map
-    /// HIR proc macros items back to their harness items.
+    /// Records that `id` is a proc macro exported by this crate.
+    ///
+    /// Calls arrive in AST order, and that order is preserved all the way into
+    /// `CrateRoot::proc_macros`, so a crate's macros appear in metadata in the
+    /// order they were declared.
     fn declare_proc_macro(&mut self, id: NodeId);
 
     fn append_stripped_cfg_item(
@@ -1319,12 +1314,6 @@ impl<'a> ExtCtxt<'a> {
     }
     pub fn call_site(&self) -> Span {
         self.current_expansion.id.expn_data().call_site
-    }
-
-    /// Returns the current expansion kind's description.
-    pub(crate) fn expansion_descr(&self) -> String {
-        let expn_data = self.current_expansion.id.expn_data();
-        expn_data.kind.descr()
     }
 
     /// Equivalent of `Span::def_site` from the proc macro API,

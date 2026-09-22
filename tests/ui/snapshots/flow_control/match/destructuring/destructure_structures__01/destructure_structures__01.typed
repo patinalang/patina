@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -16,29 +16,6 @@ extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
-
 // source: patina-by-example/src/flow_control/match/destructuring/destructure_structures.md
 // block: 1/1
 
@@ -53,7 +30,20 @@ fn main() ({
         (Foo { x: (((1 as int), (2 as int)) as (int, int)), y: (3 as int) } as
             main::Foo);
     (match (foo as main::Foo) {
-        Foo {  x: (1, b),  y } => {
+        Foo {  x: (1, b),  y } =>
+            // you can destructure structs and rename the variables,
+            // the order is not important
+
+            // and you can also ignore some variables:
+            // this will give an error: pattern does not mention field `x`
+            //Foo { y } => println!("y = {}", y),
+
+
+            // You do not need a match block to destructure structs:
+
+            // Destructuring works with nested structs as well:
+
+            {
             ((io::put_chars as
                     fn(term) -> term)(([([("First of x is 1, b = " as str),
                                 ((patina_fmt::display as fn(term) -> term)((b as int)) as
@@ -62,21 +52,14 @@ fn main() ({
                                     term), (" " as str)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
-
-
-            // you can destructure structs and rename the variables,
-            // the order is not important
-            Foo {  y: 2,  x: i } => {
+        Foo {  y: 2,  x: i } => {
             ((io::put_chars as
                     fn(term) -> term)(([([("y is 2, i = " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((i as (int, int)))
                                     as term)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
-
-
-            // and you can also ignore some variables:
-            Foo {  y, .. } => {
+        Foo {  y, .. } => {
             ((io::put_chars as
                     fn(term) -> term)(([([("y = " as str),
                                 ((patina_fmt::display as fn(term) -> term)((y as int)) as
@@ -85,13 +68,9 @@ fn main() ({
             ((io::nl as fn() -> term)() as term);
         }
     } as ())
-    // this will give an error: pattern does not mention field `x`
-    //Foo { y } => println!("y = {}", y),
-
     let faa =
         (Foo { x: (((1 as int), (2 as int)) as (int, int)), y: (3 as int) } as
             main::Foo);
-    // You do not need a match block to destructure structs:
     let Foo {  x: x0,  y: y0 } = (faa as main::Foo);
     ({
         ((io::put_chars as
@@ -102,12 +81,9 @@ fn main() ({
                                 term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
-
-    // Destructuring works with nested structs as well:
     struct Bar {
         foo: Foo,
     }
-
     let bar = (Bar { foo: (faa as main::Foo) } as main::Bar);
     let Bar {  foo: Foo {  x: nested_x,  y: nested_y } } = (bar as main::Bar);
     ({

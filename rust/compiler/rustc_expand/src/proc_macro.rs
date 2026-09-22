@@ -1,65 +1,179 @@
+//! BEAM-backed procedural macros.
+//!
+//! Patina compiles a `proc-macro` package to ordinary BEAM functions. This module connects rustc's
+//! expansion machinery to those functions: it converts token streams to ETF,
+//! asks a [`BeamMacroRunner`] to invoke `module:function`, and converts the result back.
+//! This module owns the token protocol and the driver only owns transport.
+
+mod tokens;
+
+use std::sync::Arc;
+
 use rustc_ast as ast;
 use rustc_ast::tokenstream::TokenStream;
-use rustc_data_structures::profiling::TimingGuard;
+use rustc_data_structures::sync;
 use rustc_errors::ErrorGuaranteed;
 use rustc_middle::ty::{self, TyCtxt};
 use rustc_parse::parser::{AllowConstBlockItems, ForceCollect, Parser};
-use rustc_proc_macro as pm;
-use rustc_session::Session;
-use rustc_session::config::ProcMacroExecutionStrategy;
-use rustc_span::profiling::SpannedEventArgRecorder;
-use rustc_span::{LocalExpnId, Span};
+use rustc_span::hygiene::MacroKind;
+use rustc_span::{LocalExpnId, Span, Symbol};
+use tokens::{
+    DecodeResult, SpanTable, TokenDecodeError, TokenEncodeError, decode_tokens, encode_tokens,
+};
 
 use crate::base::{self, *};
-use crate::{errors, proc_macro_server};
+use crate::errors;
 
-fn exec_strategy(sess: &Session) -> impl pm::bridge::server::ExecutionStrategy + 'static {
-    pm::bridge::server::MaybeCrossThread {
-        cross_thread: sess.opts.unstable_opts.proc_macro_execution_strategy
-            == ProcMacroExecutionStrategy::CrossThread,
+/// A failure reported by the macro runner.
+#[derive(Debug, Clone)]
+pub enum MacroRunError {
+    /// The macro raised an exception in the VM.
+    Raised(String),
+    /// The macro exceeded the runner's execution timeout.
+    Timeout,
+    /// The runner itself failed: setup, I/O, or protocol handling.
+    Transport(String),
+}
+
+/// Why expanding a BEAM proc macro failed.
+enum ExpansionFailure {
+    /// The runner could not produce output.
+    Run(MacroRunError),
+    /// The macro's input could not be put on the wire.
+    Encode(TokenEncodeError),
+    /// The macro's output was not a token stream rustc would accept.
+    Decode(TokenDecodeError),
+}
+
+impl From<MacroRunError> for ExpansionFailure {
+    fn from(error: MacroRunError) -> ExpansionFailure {
+        ExpansionFailure::Run(error)
     }
 }
 
-fn record_expand_proc_macro<'a>(
-    ecx: &ExtCtxt<'a>,
-    name: &'static str,
+impl From<TokenEncodeError> for ExpansionFailure {
+    fn from(error: TokenEncodeError) -> ExpansionFailure {
+        ExpansionFailure::Encode(error)
+    }
+}
+
+impl From<TokenDecodeError> for ExpansionFailure {
+    fn from(error: TokenDecodeError) -> ExpansionFailure {
+        ExpansionFailure::Decode(error)
+    }
+}
+
+/// Reports a failed expansion of a `kind` macro invoked at `span`.
+fn emit_expansion_failure(
+    ecx: &ExtCtxt<'_>,
+    kind: MacroKind,
     span: Span,
-) -> TimingGuard<'a> {
-    ecx.sess.prof.generic_activity_with_arg_recorder(name, |recorder| {
-        recorder.record_arg_with_span(ecx.sess.source_map(), ecx.expansion_descr(), span);
-    })
+    failure: ExpansionFailure,
+) -> ErrorGuaranteed {
+    let raised = |message: String| match kind {
+        MacroKind::Bang => ecx.dcx().emit_err(errors::ProcMacroPanicked {
+            span,
+            message: errors::ProcMacroPanickedHelp { message },
+        }),
+        MacroKind::Attr => ecx.dcx().emit_err(errors::CustomAttributePanicked {
+            span,
+            message: errors::CustomAttributePanickedHelp { message },
+        }),
+        MacroKind::Derive => ecx.dcx().emit_err(errors::ProcMacroDerivePanicked {
+            span,
+            message: errors::ProcMacroDerivePanickedHelp { message },
+        }),
+    };
+    let execution_error =
+        |reason: String| ecx.dcx().emit_err(errors::ProcMacroExecutionError { span, reason });
+    // A lifetime is reported at the offending token, which is not the
+    // invocation `span` every other arm here uses.
+    let lifetime =
+        |token_span| ecx.dcx().emit_err(errors::LifetimeInMacroTokens { span: token_span });
+
+    match failure {
+        ExpansionFailure::Run(MacroRunError::Raised(message)) => raised(message),
+        ExpansionFailure::Run(MacroRunError::Timeout) => {
+            ecx.dcx().emit_err(errors::ProcMacroTimeout { span })
+        }
+        ExpansionFailure::Run(MacroRunError::Transport(reason)) => execution_error(reason),
+        ExpansionFailure::Encode(TokenEncodeError::Lifetime { span }) => lifetime(span),
+        ExpansionFailure::Encode(TokenEncodeError::Etf { details }) => execution_error(details),
+        ExpansionFailure::Decode(TokenDecodeError::Lifetime { span }) => lifetime(span),
+        ExpansionFailure::Decode(error @ TokenDecodeError::Protocol { .. }) => {
+            execution_error(format!("invalid proc-macro token protocol: {error}"))
+        }
+        ExpansionFailure::Decode(error) => raised(error.to_string()),
+    }
 }
 
-pub struct BangProcMacro {
-    pub client: pm::bridge::client::Client<pm::TokenStream, pm::TokenStream>,
+/// Invokes BEAM proc-macro entry points. Installed by the driver.
+pub trait BeamMacroRunner: Send + Sync + sync::DynSend + sync::DynSync {
+    /// Call `module:function(Args...)` in the Erlang VM.
+    fn call(
+        &self,
+        module: &str,
+        function: &str,
+        args: &[Vec<u8>],
+    ) -> Result<Vec<u8>, MacroRunError>;
 }
 
-impl base::BangProcMacro for BangProcMacro {
+/// Converts `args` to terms, invokes the macro, and converts its output.
+fn run(
+    ecx: &mut ExtCtxt<'_>,
+    runner: &dyn BeamMacroRunner,
+    module: Symbol,
+    function: Symbol,
+    args: &[TokenStream],
+    span: Span,
+) -> Result<TokenStream, ExpansionFailure> {
+    let expn_data = ecx.current_expansion.id.expn_data();
+    let def_site = ecx.with_def_site_ctxt(expn_data.def_site);
+    let call_site = ecx.with_call_site_ctxt(expn_data.call_site);
+    let mixed_site = ecx.with_mixed_site_ctxt(expn_data.call_site);
+    let mut table = SpanTable::new(call_site, def_site, mixed_site);
+
+    let args =
+        args.iter().map(|arg| encode_tokens(arg, &mut table)).collect::<Result<Vec<_>, _>>()?;
+
+    let result = runner.call(module.as_str(), function.as_str(), &args)?;
+
+    let stream = match decode_tokens(&result, &table, ecx.psess())? {
+        DecodeResult::Normal(stream) => stream,
+        DecodeResult::HadUnknownSpan(stream) => {
+            ecx.dcx().emit_warn(errors::ProcMacroUnknownSpan { span });
+            stream
+        }
+    };
+
+    Ok(stream)
+}
+
+pub struct BeamBangProcMacro {
+    pub module: Symbol,
+    pub function: Symbol,
+    pub runner: Arc<dyn BeamMacroRunner>,
+}
+
+impl base::BangProcMacro for BeamBangProcMacro {
     fn expand(
         &self,
         ecx: &mut ExtCtxt<'_>,
         span: Span,
         input: TokenStream,
     ) -> Result<TokenStream, ErrorGuaranteed> {
-        let _timer = record_expand_proc_macro(ecx, "expand_proc_macro", span);
-
-        let proc_macro_backtrace = ecx.ecfg.proc_macro_backtrace;
-        let strategy = exec_strategy(ecx.sess);
-        let server = proc_macro_server::Rustc::new(ecx);
-        self.client.run(&strategy, server, input, proc_macro_backtrace).map_err(|e| {
-            ecx.dcx().emit_err(errors::ProcMacroPanicked {
-                span,
-                message: e.into_string().map(|message| errors::ProcMacroPanickedHelp { message }),
-            })
-        })
+        run(ecx, self.runner.as_ref(), self.module, self.function, &[input], span)
+            .map_err(|failure| emit_expansion_failure(ecx, MacroKind::Bang, span, failure))
     }
 }
 
-pub struct AttrProcMacro {
-    pub client: pm::bridge::client::Client<(pm::TokenStream, pm::TokenStream), pm::TokenStream>,
+pub struct BeamAttrProcMacro {
+    pub module: Symbol,
+    pub function: Symbol,
+    pub runner: Arc<dyn BeamMacroRunner>,
 }
 
-impl base::AttrProcMacro for AttrProcMacro {
+impl base::AttrProcMacro for BeamAttrProcMacro {
     fn expand(
         &self,
         ecx: &mut ExtCtxt<'_>,
@@ -67,29 +181,18 @@ impl base::AttrProcMacro for AttrProcMacro {
         annotation: TokenStream,
         annotated: TokenStream,
     ) -> Result<TokenStream, ErrorGuaranteed> {
-        let _timer = record_expand_proc_macro(ecx, "expand_proc_macro", span);
-
-        let proc_macro_backtrace = ecx.ecfg.proc_macro_backtrace;
-        let strategy = exec_strategy(ecx.sess);
-        let server = proc_macro_server::Rustc::new(ecx);
-        self.client.run(&strategy, server, annotation, annotated, proc_macro_backtrace).map_err(
-            |e| {
-                ecx.dcx().emit_err(errors::CustomAttributePanicked {
-                    span,
-                    message: e
-                        .into_string()
-                        .map(|message| errors::CustomAttributePanickedHelp { message }),
-                })
-            },
-        )
+        run(ecx, self.runner.as_ref(), self.module, self.function, &[annotation, annotated], span)
+            .map_err(|failure| emit_expansion_failure(ecx, MacroKind::Attr, span, failure))
     }
 }
 
-pub struct DeriveProcMacro {
-    pub client: DeriveClient,
+pub struct BeamDeriveProcMacro {
+    pub module: Symbol,
+    pub function: Symbol,
+    pub runner: Arc<dyn BeamMacroRunner>,
 }
 
-impl MultiItemModifier for DeriveProcMacro {
+impl MultiItemModifier for BeamDeriveProcMacro {
     fn expand(
         &self,
         ecx: &mut ExtCtxt<'_>,
@@ -98,8 +201,6 @@ impl MultiItemModifier for DeriveProcMacro {
         item: Annotatable,
         _is_derive_const: bool,
     ) -> ExpandResult<Vec<Annotatable>, Annotatable> {
-        let _timer = record_expand_proc_macro(ecx, "expand_derive_proc_macro_outer", span);
-
         // We need special handling for statement items
         // (e.g. `fn foo() { #[derive(Debug)] struct Bar; }`)
         let is_stmt = matches!(item, Annotatable::Stmt(..));
@@ -114,13 +215,17 @@ impl MultiItemModifier for DeriveProcMacro {
             ty::tls::with(|tcx| {
                 let input = &*tcx.arena.alloc(input);
                 let key: (LocalExpnId, &TokenStream) = (invoc_id, input);
-
-                QueryDeriveExpandCtx::enter(ecx, self.client, move || {
-                    tcx.derive_macro_expansion(key).cloned()
-                })
+                QueryDeriveExpandCtx::enter(
+                    ecx,
+                    self.runner.clone(),
+                    self.module,
+                    self.function,
+                    span,
+                    || tcx.derive_macro_expansion(key).cloned(),
+                )
             })
         } else {
-            expand_derive_macro(invoc_id, input, ecx, self.client)
+            expand_derive_macro(ecx, self.runner.as_ref(), self.module, self.function, input, span)
         };
 
         let Ok(output) = res else {
@@ -161,6 +266,21 @@ impl MultiItemModifier for DeriveProcMacro {
     }
 }
 
+fn expand_derive_macro(
+    ecx: &mut ExtCtxt<'_>,
+    runner: &dyn BeamMacroRunner,
+    module: Symbol,
+    function: Symbol,
+    input: TokenStream,
+    span: Span,
+) -> Result<TokenStream, ()> {
+    // The `ErrorGuaranteed` is dropped here so that the result stays a
+    // cacheable key for the `derive_macro_expansion` query.
+    run(ecx, runner, module, function, &[input], span).map_err(|failure| {
+        emit_expansion_failure(ecx, MacroKind::Derive, span, failure);
+    })
+}
+
 /// Provide a query for computing the output of a derive macro.
 pub(super) fn provide_derive_macro_expansion<'tcx>(
     tcx: TyCtxt<'tcx>,
@@ -170,75 +290,38 @@ pub(super) fn provide_derive_macro_expansion<'tcx>(
 
     // Make sure that we invalidate the query when the crate defining the proc macro changes
     let _ = tcx.crate_hash(invoc_id.expn_data().macro_def_id.unwrap().krate);
-
-    QueryDeriveExpandCtx::with(|ecx, client| {
-        expand_derive_macro(invoc_id, input.clone(), ecx, client).map(|ts| &*tcx.arena.alloc(ts))
+    QueryDeriveExpandCtx::with(|ecx, runner, module, function, span| {
+        expand_derive_macro(ecx, runner, module, function, input.clone(), span)
+            .map(|tokens| &*tcx.arena.alloc(tokens))
     })
-}
-
-type DeriveClient = pm::bridge::client::Client<pm::TokenStream, pm::TokenStream>;
-
-fn expand_derive_macro(
-    invoc_id: LocalExpnId,
-    input: TokenStream,
-    ecx: &mut ExtCtxt<'_>,
-    client: DeriveClient,
-) -> Result<TokenStream, ()> {
-    let _timer =
-        ecx.sess.prof.generic_activity_with_arg_recorder("expand_proc_macro", |recorder| {
-            let invoc_expn_data = invoc_id.expn_data();
-            let span = invoc_expn_data.call_site;
-            let event_arg = invoc_expn_data.kind.descr();
-            recorder.record_arg_with_span(ecx.sess.source_map(), event_arg, span);
-        });
-
-    let proc_macro_backtrace = ecx.ecfg.proc_macro_backtrace;
-    let strategy = exec_strategy(ecx.sess);
-    let server = proc_macro_server::Rustc::new(ecx);
-
-    match client.run(&strategy, server, input, proc_macro_backtrace) {
-        Ok(stream) => Ok(stream),
-        Err(e) => {
-            let invoc_expn_data = invoc_id.expn_data();
-            let span = invoc_expn_data.call_site;
-            ecx.dcx().emit_err({
-                errors::ProcMacroDerivePanicked {
-                    span,
-                    message: e
-                        .into_string()
-                        .map(|message| errors::ProcMacroDerivePanickedHelp { message }),
-                }
-            });
-            Err(())
-        }
-    }
 }
 
 /// Stores the context necessary to expand a derive proc macro via a query.
 struct QueryDeriveExpandCtx {
     /// Type-erased version of `&mut ExtCtxt`
     expansion_ctx: *mut (),
-    client: DeriveClient,
+    runner: Arc<dyn BeamMacroRunner>,
+    module: Symbol,
+    function: Symbol,
+    span: Span,
 }
 
 impl QueryDeriveExpandCtx {
-    /// Store the extension context and the client into the thread local value.
-    /// It will be accessible via the `with` method while `f` is active.
-    fn enter<F, R>(ecx: &mut ExtCtxt<'_>, client: DeriveClient, f: F) -> R
-    where
-        F: FnOnce() -> R,
-    {
-        // We need erasure to get rid of the lifetime
-        let ctx = Self { expansion_ctx: ecx as *mut _ as *mut (), client };
+    fn enter<R>(
+        ecx: &mut ExtCtxt<'_>,
+        runner: Arc<dyn BeamMacroRunner>,
+        module: Symbol,
+        function: Symbol,
+        span: Span,
+        f: impl FnOnce() -> R,
+    ) -> R {
+        let ctx = Self { expansion_ctx: ecx as *mut _ as *mut (), runner, module, function, span };
         DERIVE_EXPAND_CTX.set(&ctx, f)
     }
 
-    /// Accesses the thread local value of the derive expansion context.
-    /// Must be called while the `enter` function is active.
-    fn with<F, R>(f: F) -> R
-    where
-        F: for<'a, 'b> FnOnce(&'b mut ExtCtxt<'a>, DeriveClient) -> R,
-    {
+    fn with<R>(
+        f: impl for<'a, 'b> FnOnce(&'b mut ExtCtxt<'a>, &dyn BeamMacroRunner, Symbol, Symbol, Span) -> R,
+    ) -> R {
         DERIVE_EXPAND_CTX.with(|ctx| {
             let ectx = {
                 let casted = ctx.expansion_ctx.cast::<ExtCtxt<'_>>();
@@ -250,11 +333,11 @@ impl QueryDeriveExpandCtx {
                 unsafe { casted.as_mut().unwrap() }
             };
 
-            f(ectx, ctx.client)
+            f(ectx, ctx.runner.as_ref(), ctx.module, ctx.function, ctx.span)
         })
     }
 }
 
 // When we invoke a query to expand a derive proc macro, we need to provide it with the expansion
-// context and derive Client. We do that using a thread-local.
+// context and runner. We do that using a thread-local.
 scoped_tls::scoped_thread_local!(static DERIVE_EXPAND_CTX: QueryDeriveExpandCtx);

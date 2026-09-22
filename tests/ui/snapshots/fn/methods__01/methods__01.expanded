@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
 
@@ -15,29 +15,6 @@ extern mod io;
 
 #[allow(unused)]
 extern mod patina_fmt;
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 // source: patina-by-example/src/fn/methods.md
 // block: 1/1
@@ -103,14 +80,16 @@ pub fn main() {
             p1: Point::origin(),
             p2: Point::new(3.0, 4.0),
         };
+
+    // Methods are called using the dot operator
+    // Note that the first argument `self` is implicitly passed, i.e.
+    // `rectangle.perimeter()` === `Rectangle::perimeter(rectangle)`
+
+    // `mut` keyword lets us rebind the variable in the next statement.
+
     {
         io::put_chars([["Rectangle perimeter: ",
-                            patina_fmt::display(
-
-                                // Methods are called using the dot operator
-                                // Note that the first argument `self` is implicitly passed, i.e.
-                                // `rectangle.perimeter()` === `Rectangle::perimeter(rectangle)`
-                                rectangle.perimeter())]]);
+                            patina_fmt::display(rectangle.perimeter())]]);
         io::nl();
     };
     {
@@ -118,10 +97,7 @@ pub fn main() {
                             patina_fmt::display(rectangle.area())]]);
         io::nl();
     };
-
-    // `mut` keyword lets us rebind the variable in the next statement.
     let mut square =
         Rectangle { p1: Point::origin(), p2: Point::new(1.0, 1.0) };
-
     square = square.translate(1.0, 1.0);
 }

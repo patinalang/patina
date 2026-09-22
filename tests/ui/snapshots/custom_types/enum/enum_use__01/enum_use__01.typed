@@ -4,17 +4,12 @@
 
 
 
-
-
-
-
-
 // source: patina-by-example/src/custom_types/enum/enum_use.md
 // block: 1/1
 
 // An attribute to hide warnings for unused code.
 #![allow(dead_code)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 #[allow(unused_imports)]
@@ -26,24 +21,6 @@ use Core::*;
 extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 enum Stage { Beginner, Advanced, }
 
@@ -66,7 +43,9 @@ fn main() ({
     (match (stage as Stage) {
 
             // Note the lack of scoping because of the explicit `use` above.
-            Beginner => {
+            Beginner =>
+            // Note again the lack of scoping.
+            {
             ((io::put_chars as
                     fn(term) -> term)(([([("Beginners are starting their learning journey!"
                                     as str)] as [str])] as [[str]])) as term);
@@ -79,11 +58,8 @@ fn main() ({
             ((io::nl as fn() -> term)() as term);
         }
     } as ())
-
     (match (role as Role) {
-
-            // Note again the lack of scoping.
-            Student => {
+        Student => {
             ((io::put_chars as
                     fn(term) -> term)(([([("Students are acquiring knowledge!"
                                     as str)] as [str])] as [[str]])) as term);

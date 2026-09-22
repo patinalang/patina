@@ -7,6 +7,7 @@ use rustc_codegen_ssa::traits::CodegenBackend;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_data_structures::jobserver::{self, Proxy};
 use rustc_errors::{DiagCtxtHandle, ErrorGuaranteed};
+use rustc_expand::proc_macro::BeamMacroRunner;
 use rustc_lint::LintStore;
 use rustc_middle::ty;
 use rustc_middle::ty::CurrentGcx;
@@ -37,6 +38,7 @@ pub type Result<T> = result::Result<T, ErrorGuaranteed>;
 pub struct Compiler {
     pub sess: Session,
     pub codegen_backend: Box<dyn CodegenBackend>,
+    pub(crate) beam_macro_runner: Arc<dyn BeamMacroRunner>,
     pub(crate) override_queries: Option<fn(&Session, &mut Providers)>,
 
     /// A reference to the current `GlobalCtxt` which we pass on to `GlobalCtxt`.
@@ -363,6 +365,9 @@ pub struct Config {
     /// (See #102759.)
     pub make_codegen_backend: Option<Box<dyn FnOnce(&Session) -> Box<dyn CodegenBackend> + Send>>,
 
+    /// The runner used by BEAM-backed procedural macros in this compilation.
+    pub beam_macro_runner: Arc<dyn BeamMacroRunner>,
+
     /// The inner atomic value is set to true when a feature marked as `internal` is
     /// enabled. Makes it so that "please report a bug" is hidden, as ICEs with
     /// internal features are wontfix, and they are usually the cause of the ICEs.
@@ -480,6 +485,7 @@ pub fn run_compiler<R: Send>(config: Config, f: impl FnOnce(&Compiler) -> R + Se
             let compiler = Compiler {
                 sess,
                 codegen_backend,
+                beam_macro_runner: config.beam_macro_runner,
                 override_queries: config.override_queries,
                 current_gcx,
                 jobserver_proxy,

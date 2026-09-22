@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
 
@@ -16,33 +16,9 @@ extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
-
 // source: patina-by-example/src/error/option_unwrap/defaults.md
 // block: 4/4
 
-#[derive(Debug)]
 enum Fruit { Apple, Orange, Banana, Kiwi, Lemon, }
 
 pub fn main() {
@@ -50,6 +26,14 @@ pub fn main() {
     let get_lemon_as_fallback =
         ||
             {
+                // Providing lemon as fallback
+                // first_available_fruit is: Lemon
+                // my_fruit is: Some(Lemon)
+
+                // If the Option has a value, it is left unchanged, and the closure is not invoked
+                // The output is a follows. Note that the closure `get_lemon_as_fallback` is not invoked
+                // should_be_apple is: Apple
+                // my_apple is unchanged: Some(Apple)
                 {
                     io::put_chars([["Providing lemon as fallback"]]);
                     io::nl();
@@ -67,11 +51,6 @@ pub fn main() {
         io::put_chars([["my_fruit is: ", patina_fmt::debug(my_fruit)]]);
         io::nl();
     };
-    // Providing lemon as fallback
-    // first_available_fruit is: Lemon
-    // my_fruit is: Some(Lemon)
-
-    // If the Option has a value, it is left unchanged, and the closure is not invoked
     let mut my_apple = Some(Fruit::Apple);
     let should_be_apple = my_apple.get_or_insert_with(get_lemon_as_fallback);
     {
@@ -84,7 +63,4 @@ pub fn main() {
                             patina_fmt::debug(my_apple)]]);
         io::nl();
     };
-    // The output is a follows. Note that the closure `get_lemon_as_fallback` is not invoked
-    // should_be_apple is: Apple
-    // my_apple is unchanged: Some(Apple)
 }

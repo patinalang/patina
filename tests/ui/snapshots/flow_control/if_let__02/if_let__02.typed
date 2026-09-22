@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -16,29 +16,6 @@ extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
-
 // source: patina-by-example/src/flow_control/if_let.md
 // block: 2/4
 
@@ -51,6 +28,15 @@ fn main() ({
     // The `if let` construct reads: "if `let` destructures `number` into
     // `Some(i)`, evaluate the block (`{}`).
     (if (let Some(i) = (number as {type error}) as {type error}) {
+
+        // If you need to specify a failure, use an else:
+        // Destructure failed. Change to the failure case.
+
+        // Provide an altered failing condition.
+
+        // Destructure failed. Evaluate an `else if` condition to see if the
+        // alternate failure branch should be taken:
+        // The condition evaluated false. This branch is the default:
         ({
             ((io::put_chars as
                     fn(term) -> term)(([([("Matched " as str),
@@ -60,8 +46,6 @@ fn main() ({
             ((io::nl as fn() -> term)() as term);
         } as ());
     } as ())
-
-    // If you need to specify a failure, use an else:
     (if (let Some(i) = (letter as {type error}) as {type error}) {
         ({
             ((io::put_chars as
@@ -78,12 +62,8 @@ fn main() ({
                                     as str)] as [str])] as [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
-        // Destructure failed. Change to the failure case.
     } as ())
-
-    // Provide an altered failing condition.
     let i_like_letters = (false as bool);
-
     (if (let Some(i) = (emoticon as {type error}) as {type error}) {
         ({
             ((io::put_chars as
@@ -93,8 +73,6 @@ fn main() ({
                                 ("!" as str)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
-        // Destructure failed. Evaluate an `else if` condition to see if the
-        // alternate failure branch should be taken:
     } else if (i_like_letters as bool) {
         ({
             ((io::put_chars as
@@ -109,6 +87,5 @@ fn main() ({
                                     as str)] as [str])] as [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
-        // The condition evaluated false. This branch is the default:
     } as ())
 } as ())

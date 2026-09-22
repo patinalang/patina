@@ -6,8 +6,6 @@
 #![feature(box_patterns)]
 #![feature(decl_macro)]
 #![feature(iter_order_by)]
-#![feature(proc_macro_internals)]
-#![feature(proc_macro_quote)]
 #![feature(try_blocks)]
 #![recursion_limit = "256"]
 // tidy-alphabetical-end
@@ -15,7 +13,6 @@
 use std::sync::Arc;
 
 use rustc_expand::base::{MacroExpanderFn, ResolverExpand, SyntaxExtensionKind};
-use rustc_expand::proc_macro::BangProcMacro;
 use rustc_span::sym;
 
 use crate::deriving::*;
@@ -137,8 +134,6 @@ pub fn register_builtin_macros(resolver: &mut dyn ResolverExpand) {
         From: from::expand_deriving_from,
     }
 
-    let client = rustc_proc_macro::bridge::client::Client::expand1(rustc_proc_macro::quote);
-    register(sym::quote, SyntaxExtensionKind::Bang(Arc::new(BangProcMacro { client })));
     let requires = SyntaxExtensionKind::Attr(Arc::new(contracts::ExpandRequires));
     register(sym::contracts_requires, requires);
     let ensures = SyntaxExtensionKind::Attr(Arc::new(contracts::ExpandEnsures));

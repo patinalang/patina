@@ -10,11 +10,11 @@ error[E0432]: unresolved import `str`
 LL | use str::FromStr;
    |     ^^^ `str` is a builtin type, not a module
 
-error: cannot find attribute `derive` in this scope
-  --> tests/ui/src/conversion/string__03.pt:7:3
+error: cannot find derive macro `Debug` in this scope
+  --> tests/ui/src/conversion/string__03.pt:7:10
    |
 LL | #[derive(Debug)]
-   |   ^^^^^^
+   |          ^^^^^
 
 error[E0425]: cannot find type `Result` in this scope
   --> tests/ui/src/conversion/string__03.pt:14:28

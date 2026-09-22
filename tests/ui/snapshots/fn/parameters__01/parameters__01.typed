@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -15,29 +15,6 @@ extern mod io;
 
 #[allow(unused)]
 extern mod patina_fmt;
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 // source: patina-by-example/src/fn/parameters.md
 // block: 1/2

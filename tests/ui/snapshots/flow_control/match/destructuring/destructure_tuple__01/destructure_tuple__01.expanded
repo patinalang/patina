@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
 
@@ -16,47 +16,23 @@ extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
-
 // source: patina-by-example/src/flow_control/match/destructuring/destructure_tuple.md
 // block: 1/1
 
 pub fn main() {
     let triple = (0, -2, 3);
-    {
-        io::put_chars([["Tell me about ",
-                            patina_fmt::debug(
-                                // TODO ^ Try different values for `triple`
+    // TODO ^ Try different values for `triple`
 
-                                triple)]]);
+    // Match can be used to destructure a tuple
+    // Destructure the second and third elements
+    // `..` can be used to ignore the rest of the tuple
+    // `_` means don't bind the value to a variable
+    {
+        io::put_chars([["Tell me about ", patina_fmt::debug(triple)]]);
         io::nl();
     };
-    // Match can be used to destructure a tuple
     match triple {
-
-            // Destructure the second and third elements
-            (0, y, z) => {
+        (0, y, z) => {
             io::put_chars([["First is `0`, `y` is ", patina_fmt::debug(y),
                                 ", and `z` is ", patina_fmt::debug(z)]]);
             io::nl();
@@ -73,12 +49,9 @@ pub fn main() {
             io::put_chars([["First is `3`, last is `4`, and the rest doesn\'t matter"]]);
             io::nl();
         }
-
-            // `..` can be used to ignore the rest of the tuple
-            _ => {
+        _ => {
             io::put_chars([["It doesn\'t matter what they are"]]);
             io::nl();
         }
     }
-    // `_` means don't bind the value to a variable
 }

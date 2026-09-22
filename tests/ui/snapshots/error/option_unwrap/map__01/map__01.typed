@@ -4,16 +4,11 @@
 
 
 
-
-
-
-
-
 // source: patina-by-example/src/error/option_unwrap/map.md
 // block: 1/1
 
 #![allow(dead_code)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 #[allow(unused_imports)]
@@ -25,24 +20,6 @@ use Core::*;
 extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 enum Food { Apple, Carrot, Potato, }
 
@@ -55,13 +32,13 @@ struct Cooked(Food);
 fn peel(food: Option<Food>)
     ->
         Option<Peeled> ({
-    (match (food as {type error}) {
+    (match (food as Core::Option<Food>) {
         Some(food) =>
             ((Some as
                     {type error})(((Peeled as
                         fn(Food) -> Peeled {Peeled})((food as {type error})) as
                     Peeled)) as {type error}),
-        None => (None as {type error}),
+        None => (None as Core::Option<Food>),
     } as {type error})
 } as {type error})
 
@@ -70,13 +47,13 @@ fn peel(food: Option<Food>)
 fn chop(peeled: Option<Peeled>)
     ->
         Option<Chopped> ({
-    (match (peeled as {type error}) {
+    (match (peeled as Core::Option<Peeled>) {
         Some(Peeled(food)) =>
             ((Some as
                     {type error})(((Chopped as
                         fn(Food) -> Chopped {Chopped})((food as Food)) as Chopped))
                 as {type error}),
-        None => (None as {type error}),
+        None => (None as Core::Option<Peeled>),
     } as {type error})
 } as {type error})
 
@@ -85,7 +62,7 @@ fn cook(chopped: Option<Chopped>)
     ->
         Option<Cooked> ({
     ((chopped as
-            {type error}).map((|Chopped(food)|
+            Core::Option<Chopped>).map((|Chopped(food)|
             ((Cooked as fn(Food) -> Cooked {Cooked})((food as Food)) as
                 Cooked) as
             {closure@tests/ui/src/error/option_unwrap/map__01.pt:32:17: 32:32}))
@@ -98,7 +75,7 @@ fn process(food: Option<Food>)
     ->
         Option<Cooked> ({
     ((((food as
-                    {type error}).map((|f|
+                    Core::Option<Food>).map((|f|
                     ((Peeled as fn(Food) -> Peeled {Peeled})((f as Food)) as
                         Peeled) as
                     {closure@tests/ui/src/error/option_unwrap/map__01.pt:38:14: 38:17}))
@@ -118,8 +95,12 @@ fn process(food: Option<Food>)
 // Check whether there's food or not before trying to eat it!
 fn eat(food:
         Option<Cooked>) ({
-    (match (food as {type error}) {
-        Some(food) => {
+    (match (food as Core::Option<Cooked>) {
+        Some(food) =>
+
+            // Let's try the simpler looking `process()` now.
+
+            {
             ((io::put_chars as
                     fn(term) -> term)(([([("Mmm. I love " as str),
                                 ((patina_fmt::debug as
@@ -135,35 +116,41 @@ fn eat(food:
         }
     } as ())
 } as ())
-
 fn main() ({
     let apple =
         ((Some as {type error})((Food::Apple as Food)) as {type error});
     let carrot =
         ((Some as {type error})((Food::Carrot as Food)) as {type error});
     let potato = (None as {type error});
-
     let cooked_apple =
         ((cook as
-                fn({type error}) -> {type error} {cook})(((chop as
-                    fn({type error}) -> {type error} {chop})(((peel as
-                        fn({type error}) -> {type error} {peel})((apple as
-                        {type error})) as {type error})) as {type error})) as
-            {type error});
+                fn(Core::Option<Chopped>) -> Core::Option<Cooked> {cook})(((chop
+                    as
+                    fn(Core::Option<Peeled>) -> Core::Option<Chopped> {chop})(((peel
+                        as
+                        fn(Core::Option<Food>) -> Core::Option<Peeled> {peel})((apple
+                        as {type error})) as Core::Option<Peeled>)) as
+                Core::Option<Chopped>)) as Core::Option<Cooked>);
     let cooked_carrot =
         ((cook as
-                fn({type error}) -> {type error} {cook})(((chop as
-                    fn({type error}) -> {type error} {chop})(((peel as
-                        fn({type error}) -> {type error} {peel})((carrot as
-                        {type error})) as {type error})) as {type error})) as
-            {type error});
-    // Let's try the simpler looking `process()` now.
+                fn(Core::Option<Chopped>) -> Core::Option<Cooked> {cook})(((chop
+                    as
+                    fn(Core::Option<Peeled>) -> Core::Option<Chopped> {chop})(((peel
+                        as
+                        fn(Core::Option<Food>) -> Core::Option<Peeled> {peel})((carrot
+                        as {type error})) as Core::Option<Peeled>)) as
+                Core::Option<Chopped>)) as Core::Option<Cooked>);
     let cooked_potato =
         ((process as
-                fn({type error}) -> {type error} {process})((potato as
-                {type error})) as {type error});
-
-    ((eat as fn({type error}) {eat})((cooked_apple as {type error})) as ());
-    ((eat as fn({type error}) {eat})((cooked_carrot as {type error})) as ());
-    ((eat as fn({type error}) {eat})((cooked_potato as {type error})) as ());
+                fn(Core::Option<Food>) -> Core::Option<Cooked> {process})((potato
+                as {type error})) as Core::Option<Cooked>);
+    ((eat as
+            fn(Core::Option<Cooked>) {eat})((cooked_apple as
+            Core::Option<Cooked>)) as ());
+    ((eat as
+            fn(Core::Option<Cooked>) {eat})((cooked_carrot as
+            Core::Option<Cooked>)) as ());
+    ((eat as
+            fn(Core::Option<Cooked>) {eat})((cooked_potato as
+            Core::Option<Cooked>)) as ());
 } as ())

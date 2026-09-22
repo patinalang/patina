@@ -44,7 +44,7 @@ fn reachable_non_generics_provider(tcx: TyCtxt<'_>, _: LocalCrate) -> DefIdMap<S
 
     let is_compiler_builtins = tcx.is_compiler_builtins(LOCAL_CRATE);
 
-    let mut reachable_non_generics: DefIdMap<_> = tcx
+    let reachable_non_generics: DefIdMap<_> = tcx
         .reachable_set(())
         .items()
         .filter_map(|&def_id| {
@@ -126,18 +126,6 @@ fn reachable_non_generics_provider(tcx: TyCtxt<'_>, _: LocalCrate) -> DefIdMap<S
             (def_id.to_def_id(), info)
         })
         .into();
-
-    if let Some(id) = tcx.proc_macro_decls_static(()) {
-        reachable_non_generics.insert(
-            id.to_def_id(),
-            SymbolExportInfo {
-                level: SymbolExportLevel::C,
-                kind: SymbolExportKind::Data,
-                used: false,
-                rustc_std_internal_symbol: false,
-            },
-        );
-    }
 
     reachable_non_generics
 }

@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
 
@@ -15,29 +15,6 @@ extern mod io;
 
 #[allow(unused)]
 extern mod patina_fmt;
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 // source: patina-by-example/src/generics/assoc_items/the_problem.md
 // block: 1/1
@@ -81,11 +58,12 @@ pub fn main() {
     let number_2 = 10;
 
     let container = Container(number_1, number_2);
+
+
     {
         io::put_chars([["Does container contain ",
-                            patina_fmt::display(
-
-                                number_1), " and ", patina_fmt::display(number_2), ": ",
+                            patina_fmt::display(number_1), " and ",
+                            patina_fmt::display(number_2), ": ",
                             patina_fmt::display(container.contains(number_1,
                                     number_2))]]);
         io::nl();
@@ -102,9 +80,7 @@ pub fn main() {
     };
     {
         io::put_chars([["The difference is: ",
-                            patina_fmt::display(
-
-                                difference(container))]]);
+                            patina_fmt::display(difference(container))]]);
         io::nl();
     };
 }

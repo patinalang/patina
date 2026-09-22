@@ -50,7 +50,7 @@ use rustc_trait_selection::{solve, traits};
 use tracing::{info, instrument};
 
 use crate::interface::Compiler;
-use crate::{errors, limits, proc_macro_decls, util};
+use crate::{errors, limits, util};
 
 pub fn parse<'a>(sess: &'a Session) -> ast::Crate {
     let mut krate = sess
@@ -268,32 +268,20 @@ fn configure_and_expand(
 
     let crate_types = tcx.crate_types();
     let is_executable_crate = crate_types.contains(&CrateType::Executable);
-    let is_proc_macro_crate = crate_types.contains(&CrateType::ProcMacro);
 
-    if crate_types.len() > 1 {
-        if is_executable_crate {
-            sess.dcx().emit_err(errors::MixedBinCrate);
-        }
-        if is_proc_macro_crate {
-            sess.dcx().emit_err(errors::MixedProcMacroCrate);
-        }
+    if crate_types.len() > 1 && is_executable_crate {
+        sess.dcx().emit_err(errors::MixedBinCrate);
     }
     if crate_types.contains(&CrateType::Sdylib) && !tcx.features().export_stable() {
         feature_err(sess, sym::export_stable, DUMMY_SP, "`sdylib` crate type is unstable").emit();
     }
 
-    if is_proc_macro_crate && !sess.panic_strategy().unwinds() {
-        sess.dcx().emit_warn(errors::ProcMacroCratePanicAbort);
-    }
-
-    sess.time("maybe_create_a_macro_crate", || {
+    sess.time("register_proc_macros", || {
         let is_test_crate = sess.is_test_crate();
-        rustc_builtin_macros::proc_macro_harness::inject(
-            &mut krate,
+        rustc_builtin_macros::proc_macro_harness::register_proc_macros(
+            &krate,
             sess,
-            features,
             resolver,
-            is_proc_macro_crate,
             has_proc_macro_decls,
             is_test_crate,
             sess.dcx(),
@@ -889,7 +877,6 @@ pub static DEFAULT_QUERY_PROVIDERS: LazyLock<Providers> = LazyLock::new(|| {
     providers.queries.early_lint_checks = early_lint_checks;
     providers.queries.env_var_os = env_var_os;
     limits::provide(&mut providers.queries);
-    proc_macro_decls::provide(&mut providers.queries);
     rustc_expand::provide(&mut providers.queries);
     rustc_middle::hir::provide(&mut providers.queries);
     rustc_middle::erl::provide(&mut providers.queries);
@@ -940,8 +927,10 @@ pub fn create_and_enter_global_ctxt<T, F: for<'tcx> FnOnce(TyCtxt<'tcx>) -> T>(
 
     let dep_graph = setup_dep_graph(sess, crate_name, stable_crate_id);
 
-    let cstore =
-        FreezeLock::new(Box::new(CStore::new(compiler.codegen_backend.metadata_loader())) as _);
+    let cstore = FreezeLock::new(Box::new(CStore::new(
+        compiler.codegen_backend.metadata_loader(),
+        compiler.beam_macro_runner.clone(),
+    )) as _);
     let definitions = FreezeLock::new(Definitions::new(stable_crate_id));
 
     let stable_crate_ids = FreezeLock::new(StableCrateIdMap::default());
@@ -1086,10 +1075,6 @@ fn run_required_analyses(tcx: TyCtxt<'_>) {
                 sess.time("looking_for_entry_point", || tcx.ensure_ok().entry_fn(()));
                 sess.time("check_externally_implementable_items", || {
                     tcx.ensure_ok().check_externally_implementable_items(())
-                });
-
-                sess.time("looking_for_derive_registrar", || {
-                    tcx.ensure_ok().proc_macro_decls_static(())
                 });
 
                 CStore::from_tcx(tcx).report_unused_deps(tcx);

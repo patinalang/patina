@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -16,29 +16,6 @@ extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
-
 // source: patina-by-example/src/error/option_unwrap/defaults.md
 // block: 3/4
 
@@ -50,6 +27,10 @@ fn main() ({
     let first_available_fruit =
         ((my_fruit as {type error}).get_or_insert((apple as Fruit)) as
             {type error});
+    // first_available_fruit is: Apple
+    // my_fruit is: Some(Apple)
+    //println!("Variable named `apple` is moved: {:?}", apple);
+    // TODO: uncomment the line above to see the compiler error
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("first_available_fruit is: " as str),
@@ -66,8 +47,4 @@ fn main() ({
                         [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
-    // first_available_fruit is: Apple
-    // my_fruit is: Some(Apple)
-    //println!("Variable named `apple` is moved: {:?}", apple);
-    // TODO: uncomment the line above to see the compiler error
 } as ())

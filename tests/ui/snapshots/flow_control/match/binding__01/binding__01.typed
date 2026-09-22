@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -16,29 +16,6 @@ extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
-
 // source: patina-by-example/src/flow_control/match/binding.md
 // block: 1/2
 
@@ -46,13 +23,23 @@ macro_rules! println {
 fn age() -> int ({ (15 as int) } as int)
 
 fn main() ({
+
+    // Could `match` 1 ..= 12 directly but then what age
+    // would the child be?
+    // Could `match` n and use an `if` guard, but would
+    // not contribute to exhaustiveness checks.
+    // (Although in this case that would not matter since
+    // a "catch-all" pattern is present at the bottom)
+    // Instead, bind to `n` for the sequence of 1 ..= 12.
+    // Now the age can be reported.
+    // A similar binding can be done when matching several values.
+    // Nothing bound. Return the result.
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("Tell me what type of person you are"
                                 as str)] as [str])] as [[str]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
-
     (match ((age as fn() -> int {age})() as int) {
         0 => {
             ((io::put_chars as
@@ -60,16 +47,7 @@ fn main() ({
                                     as str)] as [str])] as [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
-
-            // Could `match` 1 ..= 12 directly but then what age
-            // would the child be?
-            // Could `match` n and use an `if` guard, but would
-            // not contribute to exhaustiveness checks.
-            // (Although in this case that would not matter since
-            // a "catch-all" pattern is present at the bottom)
-            // Instead, bind to `n` for the sequence of 1 ..= 12.
-            // Now the age can be reported.
-            n@1...12 => {
+        n@1...12 => {
             ((io::put_chars as
                     fn(term) -> term)(([([("I\'m a child of age " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((n as int)) as
@@ -83,18 +61,14 @@ fn main() ({
                                     term)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
-
-            // A similar binding can be done when matching several values.
-            n@1 | 7 | 15 | 13 => {
+        n@1 | 7 | 15 | 13 => {
             ((io::put_chars as
                     fn(term) -> term)(([([("I\'m a teen of age " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((n as int)) as
                                     term)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
-
-            // Nothing bound. Return the result.
-            n => {
+        n => {
             ((io::put_chars as
                     fn(term) -> term)(([([("I\'m an old person of age " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((n as int)) as

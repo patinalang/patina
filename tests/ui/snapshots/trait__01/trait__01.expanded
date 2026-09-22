@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
 
@@ -15,29 +15,6 @@ extern mod io;
 
 #[allow(unused)]
 extern mod patina_fmt;
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 // source: patina-by-example/src/trait.md
 // block: 1/1
@@ -60,6 +37,21 @@ trait Animal {
 
     // Traits can provide default method definitions.
     fn talk(self) {
+
+
+        // Implementor methods can use the implementor's trait methods.
+
+        // Implement the `Animal` trait for `Sheep`.
+        // `Self` is the implementor type: `Sheep`.
+
+
+
+        // Default trait methods can be overridden.
+        // For example, we can add some quiet contemplation.
+
+        // Type annotation is necessary in this case.
+        // TODO ^ Try removing the type annotations.
+
         {
             io::put_chars([[patina_fmt::display(self.name()), " says ",
                                 patina_fmt::display(self.noise())]]);
@@ -67,16 +59,13 @@ trait Animal {
         };
     }
 }
-
 impl Sheep {
     fn is_naked(self) -> bool { self.naked }
-
     fn shear(self) -> Self {
         if self.is_naked() {
             {
-                io::put_chars([[patina_fmt::display(
-                                        // Implementor methods can use the implementor's trait methods.
-                                        self.name()), " is already naked..."]]);
+                io::put_chars([[patina_fmt::display(self.name()),
+                                    " is already naked..."]]);
                 io::nl();
             };
             self
@@ -90,35 +79,22 @@ impl Sheep {
         }
     }
 }
-
-// Implement the `Animal` trait for `Sheep`.
 impl Animal for Sheep {
-    // `Self` is the implementor type: `Sheep`.
     fn new(name: str) -> Sheep { Sheep { name: name, naked: false } }
-
     fn name(self) -> str { self.name }
-
     fn noise(self) -> str {
         if self.is_naked() { "baaaaah?" } else { "baaaaah!" }
     }
-
-    // Default trait methods can be overridden.
     fn talk(self) {
         {
-            io::put_chars([[patina_fmt::display(
-                                    // For example, we can add some quiet contemplation.
-                                    self.name), " pauses briefly... ",
-                                patina_fmt::display(self.noise())]]);
+            io::put_chars([[patina_fmt::display(self.name),
+                                " pauses briefly... ", patina_fmt::display(self.noise())]]);
             io::nl();
         };
     }
 }
-
 pub fn main() {
-    // Type annotation is necessary in this case.
     let dolly: Sheep = Animal::new("Dolly");
-    // TODO ^ Try removing the type annotations.
-
     dolly.talk();
     dolly.shear();
     dolly.talk();

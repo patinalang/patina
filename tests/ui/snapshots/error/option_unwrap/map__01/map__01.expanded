@@ -1,12 +1,7 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
-
-
-
-
-
 
 
 
@@ -25,33 +20,11 @@ use Core::*;
 extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
-#[derive(Debug)]
 enum Food { Apple, Carrot, Potato, }
 
-#[derive(Debug)]
 struct Peeled(Food);
-#[derive(Debug)]
 struct Chopped(Food);
-#[derive(Debug)]
 struct Cooked(Food);
 
 // Peeling food. If there isn't any, then return `None`.
@@ -82,24 +55,24 @@ fn process(food: Option<Food>) -> Option<Cooked> {
 // Check whether there's food or not before trying to eat it!
 fn eat(food: Option<Cooked>) {
     match food {
-        Some(food) => {
+        Some(food) =>
+
+            // Let's try the simpler looking `process()` now.
+
+            {
             io::put_chars([["Mmm. I love ", patina_fmt::debug(food)]]);
             io::nl();
         }
         None => { io::put_chars([["Oh no! It wasn\'t edible."]]); io::nl(); }
     }
 }
-
 pub fn main() {
     let apple = Some(Food::Apple);
     let carrot = Some(Food::Carrot);
     let potato = None;
-
     let cooked_apple = cook(chop(peel(apple)));
     let cooked_carrot = cook(chop(peel(carrot)));
-    // Let's try the simpler looking `process()` now.
     let cooked_potato = process(potato);
-
     eat(cooked_apple);
     eat(cooked_carrot);
     eat(cooked_potato);

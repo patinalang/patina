@@ -1,22 +1,36 @@
 use std::io::{self, Read, Write};
+use std::net::Shutdown;
 use std::os::unix::net::UnixStream;
 use std::path::{Path, PathBuf};
-use std::process::{Child, Command};
+use std::process::{Child, Command, Stdio};
+use std::sync::{Arc, Mutex};
+use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
-use std::{fs, thread};
+use std::{fs, mem, thread};
 
+use rustc_data_structures::marker::IntoDynSyncSend;
 use rustc_errors::DiagCtxtHandle;
+use rustc_expand::proc_macro::{BeamMacroRunner, MacroRunError};
 
 const SERVER_BEAM: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/patina_compile_server.beam"));
 
 const OP_COMPILE: &[u8] = b"compile";
 const OP_ABSTR: &[u8] = b"abstr";
 const OP_ERL: &[u8] = b"erl";
+const OP_CODE_PATH: &[u8] = b"code_path";
+const OP_MACRO: &[u8] = b"macro";
+#[cfg(test)]
+const OP_ECHO: &[u8] = b"echo";
 
-const CONNECT_TIMEOUT: Duration = Duration::from_secs(5);
+const CONNECT_TIMEOUT: Duration = Duration::from_secs(60);
 const CONNECT_RETRY: Duration = Duration::from_millis(5);
 
+/// How long to wait for a reply to a macro invocation.
+/// There's a shorter timeout on the `patina_compile_server` side.
+const MACRO_REPLY_TIMEOUT: Duration = Duration::from_secs(120);
+
 const ERL_INIT: &str = "\
+spawn(fun() -> io:get_line([]), erlang:halt(0) end), \
 [BeamPath, SockPath] = init:get_plain_arguments(), \
 {module, patina_compile_server} = code:load_abs(BeamPath), \
 patina_compile_server:start_link(SockPath)";
@@ -36,13 +50,20 @@ struct TmpDir {
 }
 
 impl TmpDir {
-    pub(self) fn new() -> io::Result<TmpDir> {
+    fn new() -> io::Result<TmpDir> {
         let path = std::env::temp_dir().join(format!("patina-compile-{}", std::process::id()));
-        fs::create_dir_all(&path)?;
+
+        match fs::remove_dir_all(&path) {
+            Ok(()) => {}
+            Err(e) if e.kind() == io::ErrorKind::NotFound => {}
+            Err(e) => return Err(e),
+        }
+        fs::create_dir(&path)?;
+
         Ok(TmpDir { path })
     }
 
-    pub fn path(&self) -> &Path {
+    fn path(&self) -> &Path {
         &self.path
     }
 }
@@ -55,28 +76,57 @@ impl Drop for TmpDir {
     }
 }
 
-pub(super) struct CompileServer<'a> {
-    dcx: DiagCtxtHandle<'a>,
+/// Why a compile server could not be started.
+#[derive(Debug, thiserror::Error)]
+pub(crate) enum SpawnError {
+    #[error("failed to create temp dir: {0}")]
+    TmpDir(#[source] io::Error),
+    #[error("failed to write compile server beam: {0}")]
+    WriteBeam(#[source] io::Error),
+    #[error("failed to spawn erl compile server: {0}")]
+    Erl(#[source] io::Error),
+    #[error("failed to connect to compile server: {0}")]
+    Connect(#[source] io::Error),
+}
+
+/// Why there is no VM to talk to, kept for every caller that asks later.
+#[derive(Debug, thiserror::Error)]
+pub(crate) enum StartupError {
+    #[error("failed to start compile server: {0}")]
+    Spawn(#[from] SpawnError),
+    #[error("the compile server's startup thread panicked")]
+    Panicked,
+    #[error("the compile server's startup was lost")]
+    Lost,
+}
+
+pub(crate) struct CompileServer {
     #[allow(unused)]
     tmpdir: TmpDir,
     child: Child,
     stream: UnixStream,
 }
 
-impl<'a> CompileServer<'a> {
-    pub(super) fn start(dcx: DiagCtxtHandle<'a>) -> CompileServer<'a> {
-        let tmpdir = TmpDir::new().unwrap_or_else(|e| {
-            dcx.fatal(format!("failed to create compile server temp dir: {e}"));
-        });
+pub(crate) struct SyncServer {
+    state: IntoDynSyncSend<Mutex<State>>,
+}
+
+enum State {
+    Starting(JoinHandle<Result<CompileServer, SpawnError>>),
+    Ready(CompileServer),
+    Failed(StartupError),
+}
+
+impl CompileServer {
+    fn spawn() -> Result<CompileServer, SpawnError> {
+        let tmpdir = TmpDir::new().map_err(SpawnError::TmpDir)?;
 
         let beam_path = tmpdir.path().join("patina_compile_server.beam");
-        fs::write(&beam_path, SERVER_BEAM).unwrap_or_else(|e| {
-            dcx.fatal(format!("failed to write compile server beam: {e}"));
-        });
+        fs::write(&beam_path, SERVER_BEAM).map_err(SpawnError::WriteBeam)?;
 
         let sock_path = tmpdir.path().join("srv.sock");
 
-        let child = Command::new("erl")
+        let mut child = Command::new("erl")
             .args([
                 "-noshell",
                 "-eval",
@@ -85,74 +135,285 @@ impl<'a> CompileServer<'a> {
                 &beam_path.with_extension("").to_string_lossy(),
                 &sock_path.to_string_lossy(),
             ])
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
             .spawn()
-            .unwrap_or_else(|e| {
-                dcx.fatal(format!("failed to spawn erl compile server: {e}"));
-            });
+            .map_err(SpawnError::Erl)?;
 
-        let stream = connect_with_retry(dcx, &sock_path);
+        forward_output_to_stderr(child.stdout.take());
+        forward_output_to_stderr(child.stderr.take());
 
-        CompileServer { dcx, tmpdir, child, stream }
+        let stream = match connect_with_retry(&sock_path, &mut child) {
+            Ok(stream) => stream,
+            Err(e) => {
+                // There is no `CompileServer` to drop yet, so reap by hand.
+                reap(&mut child);
+                return Err(SpawnError::Connect(e));
+            }
+        };
+
+        Ok(CompileServer { tmpdir, child, stream })
     }
 
-    pub(super) fn compile(&mut self, eaf: &[u8]) -> Result<CompileOk, CompileErr> {
-        match self.call(OP_COMPILE, eaf).as_slice() {
+    pub(super) fn compile(
+        &mut self,
+        dcx: DiagCtxtHandle<'_>,
+        eaf: &[u8],
+    ) -> Result<CompileOk, CompileErr> {
+        let parts = self.call(dcx, OP_COMPILE, eaf);
+        match parts.as_slice() {
             [status, beam, warnings] if status == b"ok" => {
-                Ok(CompileOk { beam: beam.to_vec(), warnings: self.part_str(warnings) })
+                Ok(CompileOk { beam: beam.to_vec(), warnings: self.part_str(dcx, warnings) })
             }
-            [status, errors, warnings] if status == b"error" => {
-                Err(CompileErr { errors: self.part_str(errors), warnings: self.part_str(warnings) })
-            }
-            parts => self.unexpected(parts),
+            [status, errors, warnings] if status == b"error" => Err(CompileErr {
+                errors: self.part_str(dcx, errors),
+                warnings: self.part_str(dcx, warnings),
+            }),
+            parts => self.unexpected(dcx, parts),
         }
     }
 
-    pub(super) fn render_abstr(&mut self, eaf: &[u8]) -> String {
-        self.render(OP_ABSTR, eaf)
+    pub(super) fn render_abstr(&mut self, dcx: DiagCtxtHandle<'_>, eaf: &[u8]) -> String {
+        self.render(dcx, OP_ABSTR, eaf)
     }
 
-    pub(super) fn render_erl(&mut self, eaf: &[u8]) -> String {
-        self.render(OP_ERL, eaf)
+    pub(super) fn render_erl(&mut self, dcx: DiagCtxtHandle<'_>, eaf: &[u8]) -> String {
+        self.render(dcx, OP_ERL, eaf)
     }
 
-    fn render(&mut self, op: &[u8], eaf: &[u8]) -> String {
-        match self.call(op, eaf).as_slice() {
-            [status, render] if status == b"ok" => self.part_str(render),
-            parts => self.unexpected(parts),
+    fn render(&mut self, dcx: DiagCtxtHandle<'_>, op: &[u8], eaf: &[u8]) -> String {
+        let parts = self.call(dcx, op, eaf);
+        match parts.as_slice() {
+            [status, render] if status == b"ok" => self.part_str(dcx, render),
+            parts => self.unexpected(dcx, parts),
+        }
+    }
+
+    pub(super) fn extend_code_path(
+        &mut self,
+        dcx: DiagCtxtHandle<'_>,
+        dirs: impl Iterator<Item = PathBuf>,
+    ) {
+        let parts =
+            dirs.map(|dir| dir.to_string_lossy().into_owned().into_bytes()).collect::<Vec<_>>();
+
+        let request: Box<[&[u8]]> =
+            std::iter::once(OP_CODE_PATH).chain(parts.iter().map(Vec::as_slice)).collect();
+
+        let response = match self.transact_within(&request, None) {
+            Ok(response) => response,
+            Err(e) => dcx.fatal(format!("compile server communication failed: {e}")),
+        };
+        match response.as_slice() {
+            [status] if status == b"ok" => {}
+            parts => self.unexpected(dcx, parts),
+        }
+    }
+
+    pub(super) fn call_macro(
+        &mut self,
+        module: &str,
+        function: &str,
+        args: &[Vec<u8>],
+    ) -> Result<Vec<u8>, MacroRunError> {
+        let request: Box<[&[u8]]> = [OP_MACRO, module.as_bytes(), function.as_bytes()]
+            .into_iter()
+            .chain(args.iter().map(Vec::as_slice))
+            .collect();
+
+        let parts = self
+            .transact_within(&request, Some(MACRO_REPLY_TIMEOUT))
+            .map_err(|e| MacroRunError::Transport(format!("compile server I/O failed: {e}")))?;
+
+        match parts.as_slice() {
+            [status, result] if status == b"ok" => Ok(result.clone()),
+            [status, class, reason, stack] if status == b"error" => {
+                let class = String::from_utf8_lossy(class);
+                let reason = String::from_utf8_lossy(reason);
+                let stack = String::from_utf8_lossy(stack);
+                Err(MacroRunError::Raised(format!("{class}: {reason}\n{stack}")))
+            }
+            [status, reason] if status == b"down" => Err(MacroRunError::Transport(format!(
+                "the proc macro's process died: {}",
+                String::from_utf8_lossy(reason)
+            ))),
+            [status] if status == b"timeout" => Err(MacroRunError::Timeout),
+            parts => Err(MacroRunError::Transport(format!(
+                "unexpected compile server response: {}",
+                parts.iter().map(|p| String::from_utf8_lossy(p)).collect::<Vec<_>>().join(", ")
+            ))),
+        }
+    }
+
+    #[cfg(test)]
+    pub(crate) fn echo(&mut self, bytes: &[u8]) -> Result<Vec<u8>, String> {
+        let parts = self
+            .transact_within(&[OP_ECHO, bytes], None)
+            .map_err(|e| format!("compile server I/O failed: {e}"))?;
+
+        match parts.as_slice() {
+            [status, result] if status == b"ok" => Ok(result.clone()),
+            parts => Err(format!(
+                "unexpected compile server response: {}",
+                parts.iter().map(|p| String::from_utf8_lossy(p)).collect::<Vec<_>>().join(", ")
+            )),
         }
     }
 
     /// Send a request and read the response, handling server-side exceptions.
-    fn call(&mut self, op: &[u8], eaf: &[u8]) -> Vec<Vec<u8>> {
-        write_msg(&mut self.stream, &[op, eaf])
-            .unwrap_or_else(|e| self.dcx.fatal(format!("failed to write to compile server: {e}")));
-        let parts = read_msg(&mut self.stream)
-            .unwrap_or_else(|e| self.dcx.fatal(format!("failed to read from compile server: {e}")));
+    fn call(&mut self, dcx: DiagCtxtHandle<'_>, op: &[u8], eaf: &[u8]) -> Vec<Vec<u8>> {
+        let parts = match self.transact_within(&[op, eaf], None) {
+            Ok(parts) => parts,
+            Err(e) => dcx.fatal(format!("compile server communication failed: {e}")),
+        };
         if parts.first().map(Vec::as_slice) == Some(b"raise") {
-            let class = parts.get(1).map_or_else(|| "?".into(), |p| self.part_str(p));
-            let reason = parts.get(2).map_or_else(|| "?".into(), |p| self.part_str(p));
-            let stacktrace = parts.get(3).map_or_else(|| "?".into(), |p| self.part_str(p));
-            self.dcx.fatal(format!("compile server raised {class}: {reason}\n{stacktrace}"));
+            let class = parts.get(1).map_or_else(|| "?".into(), |p| self.part_str(dcx, p));
+            let reason = parts.get(2).map_or_else(|| "?".into(), |p| self.part_str(dcx, p));
+            let stacktrace = parts.get(3).map_or_else(|| "?".into(), |p| self.part_str(dcx, p));
+            dcx.fatal(format!("compile server raised {class}: {reason}\n{stacktrace}"));
         }
         parts
     }
 
-    fn part_str(&self, part: &[u8]) -> String {
+    /// Send a request and read the reply, giving up after `timeout` if given.
+    fn transact_within(
+        &mut self,
+        parts: &[&[u8]],
+        timeout: Option<Duration>,
+    ) -> io::Result<Vec<Vec<u8>>> {
+        let result = self.exchange(parts, timeout);
+        if result.is_err() {
+            // Any failure leaves the stream positioned mid-frame
+            let _ = self.stream.shutdown(Shutdown::Both);
+            reap(&mut self.child);
+        }
+        result
+    }
+
+    fn exchange(&mut self, parts: &[&[u8]], timeout: Option<Duration>) -> io::Result<Vec<Vec<u8>>> {
+        write_msg(&mut self.stream, parts)?;
+
+        if timeout.is_none() {
+            return read_msg(&mut self.stream);
+        }
+
+        self.stream.set_read_timeout(timeout)?;
+        let result = read_msg(&mut self.stream);
+        let restored = self.stream.set_read_timeout(None);
+        match result {
+            Ok(parts) => restored.map(|()| parts),
+            Err(e) if matches!(e.kind(), io::ErrorKind::WouldBlock | io::ErrorKind::TimedOut) => {
+                Err(io::Error::new(
+                    io::ErrorKind::TimedOut,
+                    format!(
+                        "compile server stopped responding after {}s",
+                        timeout.expect("timeout is set in this branch").as_secs()
+                    ),
+                ))
+            }
+            Err(e) => Err(e),
+        }
+    }
+
+    fn part_str(&self, dcx: DiagCtxtHandle<'_>, part: &[u8]) -> String {
         String::from_utf8(part.to_vec()).unwrap_or_else(|e| {
-            self.dcx.fatal(format!("compile server returned invalid UTF-8: {e}"));
+            dcx.fatal(format!("compile server returned invalid UTF-8: {e}"));
         })
     }
 
-    fn unexpected(&self, parts: &[Vec<u8>]) -> ! {
+    fn unexpected(&self, dcx: DiagCtxtHandle<'_>, parts: &[Vec<u8>]) -> ! {
         let parts = parts.iter().map(|p| String::from_utf8_lossy(p)).collect::<Vec<_>>().join(", ");
-        self.dcx.fatal(format!("unexpected compile server response: {parts}"));
+        dcx.fatal(format!("unexpected compile server response: {parts}"));
     }
 }
 
-impl Drop for CompileServer<'_> {
+impl Drop for CompileServer {
     fn drop(&mut self) {
-        let _ = self.child.kill();
-        let _ = self.child.wait();
+        reap(&mut self.child);
+    }
+}
+
+/// Stop the VM and wait for it to be gone.
+fn reap(child: &mut Child) {
+    drop(child.stdin.take());
+    let _ = child.kill();
+    let _ = child.wait();
+}
+
+/// Drain one of the VM's output pipes onto our own stderr.
+fn forward_output_to_stderr<R: Read + Send + 'static>(pipe: Option<R>) {
+    let Some(mut pipe) = pipe else { return };
+    thread::spawn(move || {
+        let _ = io::copy(&mut pipe, &mut io::stderr());
+    });
+}
+
+impl BeamMacroRunner for SyncServer {
+    fn call(
+        &self,
+        module: &str,
+        function: &str,
+        args: &[Vec<u8>],
+    ) -> Result<Vec<u8>, MacroRunError> {
+        match self.try_with(|server| server.call_macro(module, function, args)) {
+            Ok(result) => result,
+            Err(error) => Err(MacroRunError::Transport(error)),
+        }
+    }
+}
+
+impl SyncServer {
+    pub(crate) fn start() -> Arc<SyncServer> {
+        let startup = State::Starting(thread::spawn(CompileServer::spawn));
+        Arc::new(SyncServer { state: IntoDynSyncSend(Mutex::new(startup)) })
+    }
+
+    pub(super) fn with<R>(
+        &self,
+        dcx: DiagCtxtHandle<'_>,
+        f: impl FnOnce(&mut CompileServer) -> R,
+    ) -> R {
+        self.try_with(f).unwrap_or_else(|err| dcx.fatal(err))
+    }
+
+    /// Like [`SyncServer::with`], but hands back the startup failure instead of
+    /// raising it. Used by the proc-macro runner, which reports errors through
+    /// rustc's macro machinery.
+    pub(crate) fn try_with<R>(&self, f: impl FnOnce(&mut CompileServer) -> R) -> Result<R, String> {
+        let mut state = self.state.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+        match state.ready() {
+            Ok(server) => Ok(f(server)),
+            Err(err) => Err(err.to_string()),
+        }
+    }
+}
+
+impl State {
+    fn ready(&mut self) -> Result<&mut CompileServer, &StartupError> {
+        match self {
+            State::Starting(_) => {
+                let lost = State::Failed(StartupError::Lost);
+                let State::Starting(startup) = mem::replace(self, lost) else {
+                    unreachable!("just matched")
+                };
+                *self = match startup.join() {
+                    Ok(Ok(server)) => State::Ready(server),
+                    Ok(Err(err)) => State::Failed(err.into()),
+                    Err(_) => State::Failed(StartupError::Panicked),
+                };
+                self.ready()
+            }
+            State::Ready(server) => Ok(server),
+            State::Failed(err) => Err(err),
+        }
+    }
+}
+
+impl Drop for SyncServer {
+    fn drop(&mut self) {
+        let state = self.state.get_mut().unwrap_or_else(|poisoned| poisoned.into_inner());
+        let _ = state.ready();
     }
 }
 
@@ -191,16 +452,25 @@ fn invalid(msg: String) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidInput, msg)
 }
 
-fn connect_with_retry(dcx: DiagCtxtHandle<'_>, sock_path: &Path) -> UnixStream {
+fn connect_with_retry(sock_path: &Path, child: &mut Child) -> io::Result<UnixStream> {
     let deadline = Instant::now() + CONNECT_TIMEOUT;
     loop {
         match UnixStream::connect(sock_path) {
-            Ok(stream) => return stream,
-            Err(_) if Instant::now() < deadline => thread::sleep(CONNECT_RETRY),
-            Err(e) => dcx.fatal(format!(
-                "failed to connect to compile server at {}: {e}",
-                sock_path.display()
-            )),
+            Ok(stream) => return Ok(stream),
+            Err(e) => {
+                if let Ok(Some(status)) = child.try_wait() {
+                    return Err(io::Error::other(format!(
+                        "compile server exited before accepting a connection ({status})"
+                    )));
+                }
+                if Instant::now() >= deadline {
+                    return Err(e);
+                }
+                thread::sleep(CONNECT_RETRY);
+            }
         }
     }
 }
+
+#[cfg(test)]
+mod etf_tests;

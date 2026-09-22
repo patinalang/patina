@@ -596,8 +596,8 @@ impl CStore {
         let _prof_timer = sess.prof.generic_activity("metadata_load_macro");
 
         let cdata = self.get_crate_data(id.krate);
-        if cdata.root.is_proc_macro_crate() {
-            LoadedMacro::ProcMacro(cdata.load_proc_macro(tcx, id.index))
+        if cdata.proc_macro_kind(id.index).is_some() {
+            LoadedMacro::ProcMacro(cdata.load_proc_macro(tcx, id.index, self.proc_macro_runner()))
         } else {
             LoadedMacro::MacroDef {
                 def: cdata.get_macro(tcx, id.index),
@@ -634,15 +634,6 @@ impl CStore {
     /// See <https://github.com/rust-lang/rust/pull/85889> for context.
     pub fn num_def_ids_untracked(&self, cnum: CrateNum) -> usize {
         self.get_crate_data(cnum).num_def_ids()
-    }
-
-    pub fn get_proc_macro_quoted_span_untracked(
-        &self,
-        tcx: TyCtxt<'_>,
-        cnum: CrateNum,
-        id: usize,
-    ) -> Span {
-        self.get_crate_data(cnum).get_proc_macro_quoted_span(tcx, id)
     }
 
     pub fn set_used_recursively(&mut self, cnum: CrateNum) {

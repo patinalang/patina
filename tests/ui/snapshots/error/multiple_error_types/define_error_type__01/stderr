@@ -4,11 +4,11 @@ error[E0432]: unresolved import `Std`
 LL | use Std::Fmt;
    |     ^^^ use of undeclared type `Std`
 
-error: cannot find attribute `derive` in this scope
-  --> tests/ui/src/error/multiple_error_types/define_error_type__01.pt:11:3
+error: cannot find derive macro `Debug` in this scope
+  --> tests/ui/src/error/multiple_error_types/define_error_type__01.pt:11:10
    |
 LL | #[derive(Debug)]
-   |   ^^^^^^
+   |          ^^^^^
 
 error: cannot find macro `write` in this scope
   --> tests/ui/src/error/multiple_error_types/define_error_type__01.pt:21:9

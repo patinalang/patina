@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -16,29 +16,6 @@ extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
-
 // source: patina-by-example/src/variable_bindings/scope.md
 // block: 2/2
 
@@ -46,6 +23,11 @@ fn main() ({
     let shadowed_binding = (1 as int);
 
     ({
+
+        // This binding *shadows* the outer one
+
+
+        // This binding *shadows* the previous binding
         ({
             ((io::put_chars as
                     fn(term) -> term)(([([("before being shadowed: " as str),
@@ -54,17 +36,13 @@ fn main() ({
                             [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
-
-        // This binding *shadows* the outer one
         let shadowed_binding = ("abc" as str);
         ({
             ((io::put_chars as
                     fn(term) -> term)(([([("shadowed in inner block: " as str),
                                 ((patina_fmt::display as
-                                        fn(term) -> term)(
-
-                                    (shadowed_binding as str)) as term)] as [term])] as
-                    [[term]])) as term);
+                                        fn(term) -> term)((shadowed_binding as str)) as term)] as
+                            [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
     } as ())
@@ -76,8 +54,6 @@ fn main() ({
                         [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
-
-    // This binding *shadows* the previous binding
     let shadowed_binding = (2 as int);
     ({
         ((io::put_chars as

@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
 
@@ -15,29 +15,6 @@ extern mod io;
 
 #[allow(unused)]
 extern mod patina_fmt;
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 // source: patina-by-example/src/custom_types/enum.md
 // block: 1/3
@@ -67,14 +44,21 @@ enum WebEvent {
 // returns nothing.
 fn inspect(event: WebEvent) {
     match event {
-        WebEvent::PageLoad => { io::put_chars([["page loaded"]]); io::nl(); }
+        WebEvent::PageLoad =>
+            // Destructure `c` from inside the `enum` variant.
+            // Destructure `Click` into `x` and `y`.
+
+
+
+            {
+            io::put_chars([["page loaded"]]);
+            io::nl();
+        }
         WebEvent::PageUnload => {
             io::put_chars([["page unloaded"]]);
             io::nl();
         }
-
-            // Destructure `c` from inside the `enum` variant.
-            WebEvent::KeyPress(c) => {
+        WebEvent::KeyPress(c) => {
             io::put_chars([["pressed \'", patina_fmt::display(c), "\'."]]);
             io::nl();
         }
@@ -82,9 +66,7 @@ fn inspect(event: WebEvent) {
             io::put_chars([["pasted \"", patina_fmt::display(s), "\"."]]);
             io::nl();
         }
-
-            // Destructure `Click` into `x` and `y`.
-            WebEvent::Click { x, y } => {
+        WebEvent::Click { x, y } => {
             {
                 io::put_chars([["clicked at x=", patina_fmt::display(x),
                                     ", y=", patina_fmt::display(y), "."]]);
@@ -93,18 +75,15 @@ fn inspect(event: WebEvent) {
         }
     }
 }
-
 pub fn main() {
     let pressed = WebEvent::KeyPress('x');
     let pasted = WebEvent::Paste("my text");
     let click = WebEvent::Click { x: 20, y: 80 };
     let load = WebEvent::PageLoad;
     let unload = WebEvent::PageUnload;
-
     inspect(pressed);
     inspect(pasted);
     inspect(click);
     inspect(load);
     inspect(unload);
 }
-

@@ -4,16 +4,11 @@
 
 
 
-
-
-
-
-
 // source: patina-by-example/src/error/option_unwrap/and_then.md
 // block: 1/1
 
 #![allow(dead_code)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 #[allow(unused_imports)]
@@ -25,24 +20,6 @@ use Core::*;
 extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 enum Food { CordonBleu, Steak, Sushi, }
 enum Day { Monday, Tuesday, Wednesday, }
@@ -73,24 +50,26 @@ fn cookable_v1(food: Food)
     ->
         Option<Food> ({
     (match ((have_recipe as
-                fn(Food) -> {type error} {have_recipe})((food as Food)) as
-            {type error}) {
-        None => (None as {type error}),
+                fn(Food) -> Core::Option<Food> {have_recipe})((food as Food))
+            as Core::Option<Food>) {
+        None => (None as Core::Option<Food>),
         Some(food) =>
             ((have_ingredients as
-                    fn(Food) -> {type error} {have_ingredients})((food as
-                    {type error})) as {type error}),
-    } as {type error})
-} as {type error})
+                    fn(Food) -> Core::Option<Food> {have_ingredients})((food as
+                    {type error})) as Core::Option<Food>),
+    } as Core::Option<Food>)
+} as Core::Option<Food>)
 
 // This can conveniently be rewritten more compactly with `and_then()`:
 fn cookable_v3(food: Food)
     ->
         Option<Food> ({
-    (((have_recipe as fn(Food) -> {type error} {have_recipe})((food as Food))
+    (((have_recipe as
+                fn(Food) -> Core::Option<Food> {have_recipe})((food as Food))
             as
-            {type error}).and_then((have_ingredients as
-            fn(Food) -> {type error} {have_ingredients})) as {type error})
+            Core::Option<Food>).and_then((have_ingredients as
+            fn(Food) -> Core::Option<Food> {have_ingredients})) as
+        {type error})
 } as {type error})
 
 // Otherwise we'd need to `flatten()` an `Option<Option<Food>>`
@@ -98,10 +77,11 @@ fn cookable_v3(food: Food)
 fn cookable_v2(food: Food)
     ->
         Option<Food> ({
-    ((((have_recipe as fn(Food) -> {type error} {have_recipe})((food as Food))
-                as
-                {type error}).map((have_ingredients as
-                fn(Food) -> {type error} {have_ingredients})) as
+    ((((have_recipe as
+                    fn(Food) -> Core::Option<Food> {have_recipe})((food as
+                    Food)) as
+                Core::Option<Food>).map((have_ingredients as
+                fn(Food) -> Core::Option<Food> {have_ingredients})) as
             {type error}).flatten() as {type error})
 } as {type error})
 
@@ -109,9 +89,11 @@ fn eat(food: Food,
     day:
         Day) ({
     (match ((cookable_v3 as
-                fn(Food) -> {type error} {cookable_v3})((food as Food)) as
-            {type error}) {
-        Some(food) => {
+                fn(Food) -> Core::Option<Food> {cookable_v3})((food as Food))
+            as Core::Option<Food>) {
+        Some(food) =>
+
+            {
             ((io::put_chars as
                     fn(term) -> term)(([([("Yay! On " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((day as Day)) as
@@ -131,12 +113,10 @@ fn eat(food: Food,
         }
     } as ())
 } as ())
-
 fn main() ({
     let (cordon_bleu, steak, sushi) =
         (((Food::CordonBleu as Food), (Food::Steak as Food),
             (Food::Sushi as Food)) as (Food, Food, Food));
-
     ((eat as fn(Food, Day) {eat})((cordon_bleu as Food), (Day::Monday as Day))
         as ());
     ((eat as fn(Food, Day) {eat})((steak as Food), (Day::Tuesday as Day)) as

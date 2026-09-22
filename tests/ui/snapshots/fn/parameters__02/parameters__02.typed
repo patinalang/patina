@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -15,29 +15,6 @@ extern mod io;
 
 #[allow(unused)]
 extern mod patina_fmt;
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 // source: patina-by-example/src/fn/parameters.md
 // block: 2/2
@@ -73,6 +50,10 @@ fn main() ({
     let fx =
         (||
             ({
+
+
+                // won't print anything
+
                 ({
                     ((io::put_chars as
                             fn(term) -> term)(([([("fx evaluated!" as str)] as [str])]
@@ -94,14 +75,12 @@ fn main() ({
                 (5 as int)
             } as int) as
             {closure@tests/ui/src/fn/parameters__02.pt:34:14: 34:16});
-    // won't print anything
     let lazy_result =
         ((lazy_add as
                 fn(fn() -> int, fn() -> int) -> fn() -> int {lazy_add})((fx as
                 {closure@tests/ui/src/fn/parameters__02.pt:29:14: 29:16}),
             (fy as {closure@tests/ui/src/fn/parameters__02.pt:34:14: 34:16}))
             as fn() -> int);
-
     let op =
         ((choose_op as
                 fn(MathOp) -> fnref(int, int) -> int {choose_op})((MathOp::Add

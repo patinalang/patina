@@ -14,7 +14,9 @@ use rustc_data_structures::owned_slice::OwnedSlice;
 use rustc_data_structures::sync::Lock;
 use rustc_data_structures::unhash::UnhashMap;
 use rustc_expand::base::{SyntaxExtension, SyntaxExtensionKind};
-use rustc_expand::proc_macro::{AttrProcMacro, BangProcMacro, DeriveProcMacro};
+use rustc_expand::proc_macro::{
+    BeamAttrProcMacro, BeamBangProcMacro, BeamDeriveProcMacro, BeamMacroRunner,
+};
 use rustc_hir::Safety;
 use rustc_hir::def::Res;
 use rustc_hir::def_id::{CRATE_DEF_INDEX, LOCAL_CRATE};
@@ -26,13 +28,12 @@ use rustc_middle::mir::interpret::{AllocDecodingSession, AllocDecodingState};
 use rustc_middle::ty::Visibility;
 use rustc_middle::ty::codec::TyDecoder;
 use rustc_middle::{bug, implement_ty_decoder};
-use rustc_proc_macro::bridge::client::ProcMacro;
 use rustc_serialize::opaque::MemDecoder;
 use rustc_serialize::{Decodable, Decoder};
 use rustc_session::config::TargetModifier;
 use rustc_session::config::mitigation_coverage::DeniedPartialMitigation;
 use rustc_session::cstore::{CrateSource, ExternCrate};
-use rustc_span::hygiene::HygieneDecodeContext;
+use rustc_span::hygiene::{HygieneDecodeContext, MacroKind};
 use rustc_span::{
     BlobDecoder, BytePos, ByteSymbol, DUMMY_SP, Pos, RemapPathScopeComponents, SpanData,
     SpanDecoder, Symbol, SyntaxContext, kw,
@@ -104,8 +105,6 @@ pub(crate) struct CrateMetadata {
     /// These can be introduced using either `#![rustc_coherence_is_core]`
     /// or `#[rustc_allow_incoherent_impl]`.
     incoherent_impls: FxIndexMap<SimplifiedType, LazyArray<DefIndex>>,
-    /// Proc macro descriptions for this crate, if it's a proc macro crate.
-    raw_proc_macros: Option<&'static [ProcMacro]>,
     /// Source maps for code from the crate.
     source_map_import_info: Lock<Vec<Option<ImportedSourceFile>>>,
     /// For every definition in this crate, maps its `DefPathHash` to its `DefIndex`.
@@ -612,17 +611,6 @@ impl<'a, 'tcx> Decodable<MetadataDecodeContext<'a, 'tcx>> for SpanData {
         let source_file = if tag.kind() == SpanKind::Local {
             decoder.cdata.imported_source_file(tcx, metadata_index)
         } else {
-            // When we encode a proc-macro crate, all `Span`s should be encoded
-            // with `TAG_VALID_SPAN_LOCAL`
-            if decoder.cdata.root.is_proc_macro_crate() {
-                // Decode `CrateNum` as u32 - using `CrateNum::decode` will ICE
-                // since we don't have `cnum_map` populated.
-                let cnum = u32::decode(decoder);
-                panic!(
-                    "Decoding of crate {:?} tried to access proc-macro dep {:?}",
-                    decoder.cdata.root.header.name, cnum
-                );
-            }
             // tag is TAG_VALID_SPAN_FOREIGN, checked by `debug_assert` above
             let cnum = CrateNum::decode(decoder);
             debug!(
@@ -763,7 +751,7 @@ impl MetadataBlob {
                         root.hash(),
                         root.stable_crate_id
                     )?;
-                    writeln!(out, "proc_macro {:?}", root.proc_macro_data.is_some())?;
+                    writeln!(out, "has_proc_macros {:?}", root.header.has_proc_macros)?;
                     writeln!(out, "triple {}", root.header.triple.tuple())?;
                     writeln!(out, "edition {}", root.edition)?;
                     writeln!(out, "symbol_mangling_version {:?}", root.symbol_mangling_version)?;
@@ -863,7 +851,10 @@ impl MetadataBlob {
                     ) -> io::Result<()> {
                         let root = blob.get_root();
 
-                        let def_kind = root.tables.def_kind.get(blob, item).unwrap();
+                        let def_kind = match root.tables.proc_macro.get(blob, item) {
+                            Some(kind) => DefKind::Macro(kind.into()),
+                            None => root.tables.def_kind.get(blob, item).unwrap(),
+                        };
                         let def_key = root.tables.def_keys.get(blob, item).unwrap().decode(blob);
                         #[allow(rustc::symbol_intern_string_literal)]
                         let def_name = if item == CRATE_DEF_INDEX {
@@ -933,10 +924,6 @@ impl MetadataBlob {
 }
 
 impl CrateRoot {
-    pub(crate) fn is_proc_macro_crate(&self) -> bool {
-        self.proc_macro_data.is_some()
-    }
-
     pub(crate) fn name(&self) -> Symbol {
         self.header.name
     }
@@ -976,19 +963,62 @@ impl CrateMetadata {
         bug!("missing `{descr}` for {:?}", self.local_def_id(id))
     }
 
-    fn raw_proc_macro(&self, tcx: TyCtxt<'_>, id: DefIndex) -> &ProcMacro {
-        // DefIndex's in root.proc_macro_data have a one-to-one correspondence
-        // with items in 'raw_proc_macros'.
-        let pos = self
+    /// The macro `id` is exported as, if it is an exported proc macro.
+    fn proc_macro_export<'tcx>(
+        &self,
+        tcx: TyCtxt<'tcx>,
+        id: DefIndex,
+    ) -> Option<(MacroKind, ProcMacroExport)> {
+        let kind = self.proc_macro_kind(id)?;
+        let export = self
             .root
-            .proc_macro_data
-            .as_ref()
-            .unwrap()
-            .macros
-            .decode((self, tcx))
-            .position(|i| i == id)
-            .unwrap();
-        &self.raw_proc_macros.unwrap()[pos]
+            .tables
+            .proc_macro_export
+            .get(self, id)
+            .unwrap_or_else(|| self.missing("proc_macro_export", id))
+            .decode((self, tcx));
+        Some((kind, export))
+    }
+
+    /// Whether `id` is exported as a proc macro, and of which kind.
+    fn proc_macro_kind(&self, id: DefIndex) -> Option<MacroKind> {
+        self.root.tables.proc_macro.get(self, id)
+    }
+
+    fn load_proc_macro<'tcx>(
+        &self,
+        tcx: TyCtxt<'tcx>,
+        id: DefIndex,
+        runner: Arc<dyn BeamMacroRunner>,
+    ) -> SyntaxExtension {
+        let (kind, ProcMacroExport { name, helper_attrs, module, function }) =
+            self.proc_macro_export(tcx, id).expect("not an exported proc macro");
+
+        let kind = match kind {
+            MacroKind::Bang => {
+                SyntaxExtensionKind::Bang(Arc::new(BeamBangProcMacro { module, function, runner }))
+            }
+            MacroKind::Attr => {
+                SyntaxExtensionKind::Attr(Arc::new(BeamAttrProcMacro { module, function, runner }))
+            }
+            MacroKind::Derive => SyntaxExtensionKind::Derive(Arc::new(BeamDeriveProcMacro {
+                module,
+                function,
+                runner,
+            })),
+        };
+
+        let attrs: Box<[_]> = self.get_item_attrs(tcx, id).collect();
+        SyntaxExtension::new(
+            tcx.sess,
+            kind,
+            self.get_span(tcx, id),
+            helper_attrs,
+            self.root.edition,
+            name.name,
+            &attrs,
+            false,
+        )
     }
 
     fn opt_item_name(&self, item_index: DefIndex) -> Option<Symbol> {
@@ -1029,6 +1059,9 @@ impl CrateMetadata {
     }
 
     fn def_kind(&self, item_id: DefIndex) -> DefKind {
+        if let Some(kind) = self.proc_macro_kind(item_id) {
+            return DefKind::Macro(kind.into());
+        }
         self.root
             .tables
             .def_kind
@@ -1043,39 +1076,6 @@ impl CrateMetadata {
             .get(self, index)
             .unwrap_or_else(|| self.missing("def_span", index))
             .decode((self, tcx))
-    }
-
-    fn load_proc_macro<'tcx>(&self, tcx: TyCtxt<'tcx>, id: DefIndex) -> SyntaxExtension {
-        let (name, kind, helper_attrs) = match *self.raw_proc_macro(tcx, id) {
-            ProcMacro::CustomDerive { trait_name, attributes, client } => {
-                let helper_attrs =
-                    attributes.iter().cloned().map(Symbol::intern).collect::<Vec<_>>();
-                (
-                    trait_name,
-                    SyntaxExtensionKind::Derive(Arc::new(DeriveProcMacro { client })),
-                    helper_attrs,
-                )
-            }
-            ProcMacro::Attr { name, client } => {
-                (name, SyntaxExtensionKind::Attr(Arc::new(AttrProcMacro { client })), Vec::new())
-            }
-            ProcMacro::Bang { name, client } => {
-                (name, SyntaxExtensionKind::Bang(Arc::new(BangProcMacro { client })), Vec::new())
-            }
-        };
-
-        let sess = tcx.sess;
-        let attrs: Vec<_> = self.get_item_attrs(tcx, id).collect();
-        SyntaxExtension::new(
-            sess,
-            kind,
-            self.get_span(tcx, id),
-            helper_attrs,
-            self.root.edition,
-            Symbol::intern(name),
-            &attrs,
-            false,
-        )
     }
 
     fn get_variant(
@@ -1252,7 +1252,10 @@ impl CrateMetadata {
     }
 
     fn get_mod_child(&self, tcx: TyCtxt<'_>, id: DefIndex) -> ModChild {
-        let ident = self.item_ident(tcx, id);
+        let ident = match self.proc_macro_export(tcx, id) {
+            Some((_, export)) => export.name,
+            None => self.item_ident(tcx, id),
+        };
         let res = Res::Def(self.def_kind(id), self.local_def_id(id));
         let vis = self.get_visibility(tcx, id);
 
@@ -1265,26 +1268,16 @@ impl CrateMetadata {
     /// or a crate root, or an enum, or a trait.
     fn get_module_children(&self, tcx: TyCtxt<'_>, id: DefIndex) -> impl Iterator<Item = ModChild> {
         gen move {
-            if let Some(data) = &self.root.proc_macro_data {
-                // If we are loading as a proc macro, we want to return
-                // the view of this crate as a proc macro crate.
-                if id == CRATE_DEF_INDEX {
-                    for child_index in data.macros.decode((self, tcx)) {
-                        yield self.get_mod_child(tcx, child_index);
-                    }
-                }
-            } else {
-                // Iterate over all children.
-                let non_reexports = self.root.tables.module_children_non_reexports.get(self, id);
-                for child_index in non_reexports.unwrap().decode((self, tcx)) {
-                    yield self.get_mod_child(tcx, child_index);
-                }
+            // Iterate over all children.
+            let non_reexports = self.root.tables.module_children_non_reexports.get(self, id);
+            for child_index in non_reexports.unwrap().decode((self, tcx)) {
+                yield self.get_mod_child(tcx, child_index);
+            }
 
-                let reexports = self.root.tables.module_children_reexports.get(self, id);
-                if !reexports.is_default() {
-                    for reexport in reexports.decode((self, tcx)) {
-                        yield reexport;
-                    }
+            let reexports = self.root.tables.module_children_reexports.get(self, id);
+            if !reexports.is_default() {
+                for reexport in reexports.decode((self, tcx)) {
+                    yield reexport;
                 }
             }
         }
@@ -1461,15 +1454,6 @@ impl CrateMetadata {
         self.root.native_libraries.decode((self, tcx))
     }
 
-    fn get_proc_macro_quoted_span(&self, tcx: TyCtxt<'_>, index: usize) -> Span {
-        self.root
-            .tables
-            .proc_macro_quoted_spans
-            .get(self, index)
-            .unwrap_or_else(|| panic!("Missing proc macro quoted span: {index:?}"))
-            .decode((self, tcx))
-    }
-
     fn get_foreign_modules(&self, tcx: TyCtxt<'_>) -> impl Iterator<Item = ForeignModule> {
         self.root.foreign_modules.decode((self, tcx))
     }
@@ -1528,6 +1512,9 @@ impl CrateMetadata {
     }
 
     fn get_macro(&self, tcx: TyCtxt<'_>, id: DefIndex) -> ast::MacroDef {
+        if self.proc_macro_kind(id).is_some() {
+            bug!("`get_macro` on the proc macro {:?}", self.local_def_id(id));
+        }
         match self.def_kind(id) {
             DefKind::Macro(_) => {
                 let macro_rules = self.root.tables.is_macro_rules.get(self, id);
@@ -1872,7 +1859,6 @@ impl CrateMetadata {
         tcx: TyCtxt<'_>,
         blob: MetadataBlob,
         root: CrateRoot,
-        raw_proc_macros: Option<&'static [ProcMacro]>,
         cnum: CrateNum,
         cnum_map: CrateNumMap,
         dep_kind: CrateDepKind,
@@ -1897,7 +1883,6 @@ impl CrateMetadata {
             root,
             trait_impls,
             incoherent_impls: Default::default(),
-            raw_proc_macros,
             source_map_import_info: Lock::new(Vec::new()),
             def_path_hash_map,
             expn_hash_map: Default::default(),
@@ -2011,22 +1996,12 @@ impl CrateMetadata {
         self.root.has_default_lib_allocator
     }
 
-    pub(crate) fn is_proc_macro_crate(&self) -> bool {
-        self.root.is_proc_macro_crate()
-    }
-
     pub(crate) fn proc_macros_for_crate(
         &self,
         tcx: TyCtxt<'_>,
         krate: CrateNum,
     ) -> impl Iterator<Item = DefId> {
-        gen move {
-            for def_id in self.root.proc_macro_data.as_ref().into_iter().flat_map(move |data| {
-                data.macros.decode((self, tcx)).map(move |index| DefId { index, krate })
-            }) {
-                yield def_id;
-            }
-        }
+        self.root.proc_macros.decode((self, tcx)).map(move |index| DefId { index, krate })
     }
 
     pub(crate) fn name(&self) -> Symbol {

@@ -4,17 +4,17 @@ error[E0432]: unresolved import `Std`
 LL | use Std::Ops;
    |     ^^^ use of undeclared type `Std`
 
-error: cannot find attribute `derive` in this scope
-  --> tests/ui/src/trait/ops__01.pt:9:3
+error: cannot find derive macro `Debug` in this scope
+  --> tests/ui/src/trait/ops__01.pt:9:10
    |
 LL | #[derive(Debug)]
-   |   ^^^^^^
+   |          ^^^^^
 
-error: cannot find attribute `derive` in this scope
-  --> tests/ui/src/trait/ops__01.pt:12:3
+error: cannot find derive macro `Debug` in this scope
+  --> tests/ui/src/trait/ops__01.pt:12:10
    |
 LL | #[derive(Debug)]
-   |   ^^^^^^
+   |          ^^^^^
 
 error: aborting due to 3 previous errors
 

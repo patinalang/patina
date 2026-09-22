@@ -162,13 +162,6 @@ fn compute_symbol_name<'tcx>(
 
     debug!("symbol_name(def_id={:?}, args={:?})", def_id, args);
 
-    if let Some(def_id) = def_id.as_local() {
-        if tcx.proc_macro_decls_static(()) == Some(def_id) {
-            let stable_crate_id = tcx.stable_crate_id(LOCAL_CRATE);
-            return tcx.sess.generate_proc_macro_decls_symbol(stable_crate_id);
-        }
-    }
-
     // FIXME(eddyb) Precompute a custom symbol name based on attributes.
     let attrs = if tcx.def_kind(def_id).has_codegen_attrs() {
         &tcx.codegen_instance_attrs(instance.def)

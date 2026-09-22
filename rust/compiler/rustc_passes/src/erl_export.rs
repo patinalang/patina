@@ -1,6 +1,5 @@
-//! Computes which associated functions are called from outside the Erlang module they are
-//! translated into.
-//! See [`TyCtxt::assoc_fns_called_externally`].
+//! Computes which functions are called from outside the Erlang module they are translated into.
+//! See [`TyCtxt::fns_called_externally`].
 
 use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::{DefId, LocalDefIdSet};
@@ -26,7 +25,7 @@ impl<'tcx> ExternalCallVisitor<'_, 'tcx> {
             return;
         };
 
-        if self.tcx.def_kind(def_id) != DefKind::AssocFn {
+        if !matches!(self.tcx.def_kind(def_id), DefKind::Fn | DefKind::AssocFn) {
             return;
         }
 
@@ -108,7 +107,7 @@ impl<'tcx> Visitor<'tcx> for ExternalCallVisitor<'_, 'tcx> {
     fn visit_expr(&mut self, expr: &'tcx Expr<'tcx>) {
         match expr.kind {
             ExprKind::Path(ref qpath) => {
-                if let Res::Def(DefKind::AssocFn, def_id) =
+                if let Res::Def(DefKind::Fn | DefKind::AssocFn, def_id) =
                     self.typeck.qpath_res(qpath, expr.hir_id)
                 {
                     self.record_callee(def_id, self.typeck.node_args(expr.hir_id));
@@ -126,7 +125,7 @@ impl<'tcx> Visitor<'tcx> for ExternalCallVisitor<'_, 'tcx> {
     }
 }
 
-fn assoc_fns_called_externally(tcx: TyCtxt<'_>, (): ()) -> LocalDefIdSet {
+fn fns_called_externally(tcx: TyCtxt<'_>, (): ()) -> LocalDefIdSet {
     let mut called_externally = LocalDefIdSet::default();
 
     for owner in tcx.hir_body_owners() {
@@ -143,5 +142,5 @@ fn assoc_fns_called_externally(tcx: TyCtxt<'_>, (): ()) -> LocalDefIdSet {
 }
 
 pub(crate) fn provide(providers: &mut Providers) {
-    *providers = Providers { assoc_fns_called_externally, ..*providers };
+    *providers = Providers { fns_called_externally, ..*providers };
 }

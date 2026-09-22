@@ -1,0 +1,20 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[proc_macro]
+pub fn entry_point() {}

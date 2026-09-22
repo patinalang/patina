@@ -1,0 +1,644 @@
+// See `rust/compiler/rustc_expand/src/proc_macro/tokens.rs`
+
+extern mod erlang;
+extern mod unicode;
+
+#[repr(transparent)]
+struct Text(str);
+
+fn term_to_str(value: term) -> str {
+    unsafe {
+        match value {
+            Text(text) => text,
+            _ => {
+                erlang::error(a"badarg");
+                ""
+            }
+        }
+    }
+}
+
+fn int_to_str(n: int) -> str {
+    term_to_str(erlang::integer_to_binary(n))
+}
+
+fn float_to_str(n: float) -> str {
+    term_to_str(erlang::float_to_binary(n, [a"short"]))
+}
+
+fn atom_to_str(value: atom) -> str {
+    term_to_str(erlang::atom_to_binary(value))
+}
+
+fn code_point_to_str(code: int) -> str {
+    term_to_str(unicode::characters_to_binary([code]))
+}
+
+fn code_points(text: str) -> [int] {
+    match unicode::characters_to_list(text) {
+        list(items) => ints(items),
+        _ => {
+            erlang::error(a"badarg");
+            []
+        }
+    }
+}
+
+fn ints(items: [term]) -> [int] {
+    match items {
+        [] => [],
+        [int(head), tail @ ..] => [head, ..ints(tail)],
+        _ => {
+            erlang::error(a"badarg");
+            []
+        }
+    }
+}
+
+fn hex_digit(digit: int) -> str {
+    match digit {
+        0 => "0",
+        1 => "1",
+        2 => "2",
+        3 => "3",
+        4 => "4",
+        5 => "5",
+        6 => "6",
+        7 => "7",
+        8 => "8",
+        9 => "9",
+        10 => "a",
+        11 => "b",
+        12 => "c",
+        13 => "d",
+        14 => "e",
+        _ => "f",
+    }
+}
+
+/// Lowercase hex digits of `n`, without leading zeros.
+fn hex(n: int) -> str {
+    if n < 16 { hex_digit(n) } else { hex(n / 16) + hex_digit(n % 16) }
+}
+
+fn repeat(text: str, count: int) -> str {
+    if count <= 0 { "" } else { text + repeat(text, count - 1) }
+}
+
+/// Escapes the backslash, quotes and `\0`, `\t`, `\r`, `\n`, which both
+/// escaping styles below share. Returns `""` for anything else.
+fn escape_common(code: int, single: bool, double: bool) -> str {
+    match code {
+        0 => "\\0",
+        9 => "\\t",
+        13 => "\\r",
+        10 => "\\n",
+        92 => "\\\\",
+        39 => if single { "\\'" } else { "'" },
+        34 => if double { "\\\"" } else { "\"" },
+        _ => "",
+    }
+}
+
+/// Escapes one code point the way `char::escape_debug` does, except that
+/// non-ASCII characters are always kept as they are.
+fn escape_char(code: int, single: bool, double: bool) -> str {
+    let common = escape_common(code, single, double);
+    if common != "" {
+        common
+    } else if code < 32 || code == 127 {
+        "\\u{" + hex(code) + "}"
+    } else {
+        code_point_to_str(code)
+    }
+}
+
+fn escape_chars(codes: [int], single: bool, double: bool) -> str {
+    match codes {
+        [] => "",
+        [head, tail @ ..] => escape_char(head, single, double) + escape_chars(tail, single, double),
+    }
+}
+
+/// Escapes one byte the way `u8::escape_ascii` does: `\xNN` for anything that
+/// is not printable ASCII.
+fn escape_byte(byte: int, single: bool, double: bool) -> str {
+    let common = escape_common(byte, single, double);
+    if common != "" {
+        common
+    } else if byte < 32 || byte > 126 {
+        let digits = hex(byte);
+        if byte < 16 { "\\x0" + digits } else { "\\x" + digits }
+    } else {
+        code_point_to_str(byte)
+    }
+}
+
+fn escape_bytes(bytes: [int], single: bool, double: bool) -> str {
+    match bytes {
+        [] => "",
+        [head, tail @ ..] => {
+            check_byte(head);
+            escape_byte(head, single, double) + escape_bytes(tail, single, double)
+        }
+    }
+}
+
+fn check_byte(byte: int) {
+    if byte < 0 || byte > 255 {
+        erlang::error(a"byte out of range");
+    }
+}
+
+/// An opaque source location. Ids `0`, `1` and `2` are pre-seeded by the
+/// compiler as the call site, definition site and mixed site respectively.
+#[repr(transparent)]
+pub struct Span(int);
+
+impl Span {
+    pub fn call_site() -> Span {
+        Span(0)
+    }
+
+    pub fn def_site() -> Span {
+        Span(1)
+    }
+
+    pub fn mixed_site() -> Span {
+        Span(2)
+    }
+}
+
+#[repr(atom, tag_style = "snake_case")]
+pub enum Delimiter {
+    Parenthesis,
+    Brace,
+    Bracket,
+    None,
+}
+
+#[repr(atom, tag_style = "snake_case")]
+pub enum Spacing {
+    Alone,
+    Joint,
+}
+
+mod Bridge {
+    use super::*;
+
+    /// `{group, Delimiter, nil | [TokenTree], DelimSpan}`
+    #[repr(tagged, tag = "group")]
+    pub struct Group {
+        pub delimiter: Delimiter,
+        pub stream: Option<[TokenTree]>,
+        pub span: DelimSpan,
+    }
+
+    /// `{delim_span, Open, Close, Entire}`
+    #[repr(tagged, tag = "delim_span")]
+    pub struct DelimSpan {
+        pub open: Span,
+        pub close: Span,
+        pub entire: Span,
+    }
+
+    impl DelimSpan {
+        pub fn from_single(span: Span) -> DelimSpan {
+            DelimSpan { open: span, close: span, entire: span }
+        }
+    }
+
+    /// `{punct, Char, Joint, Span}`.
+    #[repr(tagged, tag = "punct")]
+    pub struct Punct {
+        pub ch: char,
+        pub joint: bool,
+        pub span: Span,
+    }
+
+    /// `{ident, Symbol, IsRaw, Span}`
+    #[repr(tagged, tag = "ident")]
+    pub struct Ident {
+        pub sym: str,
+        pub is_raw: bool,
+        pub span: Span,
+    }
+
+    /// `{literal, LitKind, Symbol, nil | Suffix, Span}`. `symbol` is the token
+    /// body as it appears in source: escaped, without quotes or prefix.
+    #[repr(tagged, tag = "literal")]
+    pub struct Literal {
+        pub kind: LitKind,
+        pub symbol: str,
+        pub suffix: Option<str>,
+        pub span: Span,
+    }
+
+    #[allow(dead_code)]
+    #[repr(tagged, tag_style = "snake_case")]
+    pub enum LitKind {
+        Byte,
+        Char,
+        Integer,
+        Float,
+        Str,
+        StrRaw(int),
+        AtomStr,
+        AtomStrRaw(int),
+        ByteStr,
+        ByteStrRaw(int),
+        CStr,
+        CStrRaw(int),
+        #[repr(tag = "err")]
+        ErrWithGuar,
+    }
+}
+
+/// Transparent over an optional list of trees.
+#[repr(transparent)]
+#[rustc_diagnostic_item = "TokenStream"]
+pub struct TokenStream(Option<[TokenTree]>);
+
+impl TokenStream {
+    pub fn new() -> TokenStream {
+        TokenStream(Option::None)
+    }
+
+    pub fn is_empty(self) -> bool {
+        match self.0 {
+            Option::Some([_, ..]) => false,
+            _ => true,
+        }
+    }
+
+    pub fn from_tree(tree: TokenTree) -> TokenStream {
+        TokenStream(Option::Some([tree]))
+    }
+
+    pub fn from_trees(trees: [TokenTree]) -> TokenStream {
+        match trees {
+            [] => TokenStream::new(),
+            _ => TokenStream(Option::Some(trees)),
+        }
+    }
+
+    pub fn into_trees(self) -> [TokenTree] {
+        match self.0 {
+            Option::Some(trees) => trees,
+            Option::None => [],
+        }
+    }
+
+    /// Renders the stream as source text, spaced the way pretty-printer spaces it.
+    pub fn to_string(self) -> str {
+        trees_to_string(self.into_trees())
+    }
+
+    pub fn concat(self, other: TokenStream) -> TokenStream {
+        TokenStream::from_trees(append_trees(self.into_trees(), other.into_trees()))
+    }
+}
+
+fn append_trees(first: [TokenTree], second: [TokenTree]) -> [TokenTree] {
+    match first {
+        [] => second,
+        // TODO: Revisit this once Add is implemented for [T]
+        [head, tail @ ..] => [head, ..append_trees(tail, second)],
+    }
+}
+
+fn trees_to_string(trees: [TokenTree]) -> str {
+    match trees {
+        [] => "",
+        [last] => last.to_string(),
+        [head, next, tail @ ..] => {
+            let alone = match head {
+                TokenTree::Punct(punct) => match punct.spacing() {
+                    Spacing::Joint => false,
+                    Spacing::Alone => true,
+                },
+                _ => true,
+            };
+            let separator = if alone && space_between(head, next) { " " } else { "" };
+            head.to_string() + separator + trees_to_string([next, ..tail])
+        }
+    }
+}
+
+fn punct_char(tree: TokenTree) -> char {
+    match tree {
+        TokenTree::Punct(punct) => punct.as_char(),
+        _ => ' ',
+    }
+}
+
+/// Whether pretty-printer puts a space between two token trees.
+fn space_between(first: TokenTree, second: TokenTree) -> bool {
+    let first_char = punct_char(first);
+    let second_char = punct_char(second);
+    match (first, second) {
+        // `.` + NON-PUNCT: `x.y`, `tup.0`
+        (TokenTree::Punct(_), TokenTree::Ident(_) | TokenTree::Literal(_) | TokenTree::Group(_))
+            if first_char == '.' =>
+        {
+            false
+        }
+        // `$` + IDENT: `$e`
+        (TokenTree::Punct(_), TokenTree::Ident(_)) if first_char == '$' => false,
+        // NON-PUNCT + `,`: `foo,`
+        // NON-PUNCT + `;`: `x = 3;`, `[T; 3]`
+        // NON-PUNCT + `.`: `x.y`, `tup.0`
+        (TokenTree::Ident(_) | TokenTree::Literal(_) | TokenTree::Group(_), TokenTree::Punct(_))
+            if second_char == ',' || second_char == ';' || second_char == '.' =>
+        {
+            false
+        }
+        // IDENT + `!`: `println!()`, but `if !x { ... }` needs a space after the `if`
+        (TokenTree::Ident(ident), TokenTree::Punct(_)) if second_char == '!' => {
+            is_reserved(ident.0.sym) && !ident.0.is_raw
+        }
+        // IDENT|`fn`|`Self`|`pub` + `(`: `f(3)`, `fn(x: int)`, `Self()`, `pub(crate)`,
+        //      but `let (a, b) = (1, 2)` needs a space after the `let`
+        (TokenTree::Ident(ident), TokenTree::Group(group)) => match group.delimiter() {
+            Delimiter::Parenthesis => {
+                let sym = ident.0.sym;
+                is_reserved(sym) && sym != "fn" && sym != "Self" && sym != "pub" && !ident.0.is_raw
+            }
+            _ => true,
+        },
+        // `#` + `[`: `#[attr]`
+        (TokenTree::Punct(_), TokenTree::Group(group)) if first_char == '#' => {
+            match group.delimiter() {
+                Delimiter::Bracket => false,
+                _ => true,
+            }
+        }
+        _ => true,
+    }
+}
+
+fn is_reserved(sym: str) -> bool {
+    match sym {
+        "$crate" | "{{root}}" | "_"
+        | "as" | "break" | "const" | "continue" | "crate" | "else" | "enum" | "extern"
+        | "false" | "fn" | "for" | "if" | "impl" | "in" | "let" | "loop" | "match" | "mod"
+        | "move" | "mut" | "pub" | "receive" | "ref" | "return" | "self" | "Self" | "static"
+        | "struct" | "super" | "trait" | "true" | "type" | "unsafe" | "use" | "where"
+        | "while"
+        | "abstract" | "become" | "box" | "do" | "final" | "fnref" | "macro" | "override"
+        | "priv" | "typeof" | "unsized" | "virtual" | "yield"
+        | "async" | "await" | "dyn" | "gen" | "try" => true,
+        _ => false,
+    }
+}
+
+#[repr(transparent)]
+pub enum TokenTree {
+    Group(Group),
+    Ident(Ident),
+    Punct(Punct),
+    Literal(Literal),
+}
+
+impl TokenTree {
+    pub fn span(self) -> Span {
+        match self {
+            TokenTree::Group(group) => group.span(),
+            TokenTree::Ident(ident) => ident.span(),
+            TokenTree::Punct(punct) => punct.span(),
+            TokenTree::Literal(literal) => literal.span(),
+        }
+    }
+
+    pub fn to_string(self) -> str {
+        match self {
+            TokenTree::Group(group) => group.to_string(),
+            TokenTree::Ident(ident) => ident.to_string(),
+            TokenTree::Punct(punct) => punct.to_string(),
+            TokenTree::Literal(literal) => literal.to_string(),
+        }
+    }
+
+    pub fn set_span(self, span: Span) -> TokenTree {
+        match self {
+            TokenTree::Group(group) => TokenTree::Group(group.set_span(span)),
+            TokenTree::Ident(ident) => TokenTree::Ident(ident.set_span(span)),
+            TokenTree::Punct(punct) => TokenTree::Punct(punct.set_span(span)),
+            TokenTree::Literal(literal) => TokenTree::Literal(literal.set_span(span)),
+        }
+    }
+}
+
+#[repr(transparent)]
+pub struct Group(Bridge::Group);
+
+impl Group {
+    /// A group whose open, close and entire spans are all the call site.
+    pub fn new(delimiter: Delimiter, stream: TokenStream) -> Group {
+        Group(Bridge::Group {
+            delimiter: delimiter,
+            stream: stream.0,
+            span: Bridge::DelimSpan::from_single(Span::call_site()),
+        })
+    }
+
+    pub fn delimiter(self) -> Delimiter {
+        self.0.delimiter
+    }
+
+    pub fn stream(self) -> TokenStream {
+        TokenStream(self.0.stream)
+    }
+
+    pub fn span(self) -> Span {
+        self.0.span.entire
+    }
+
+    pub fn span_open(self) -> Span {
+        self.0.span.open
+    }
+
+    pub fn span_close(self) -> Span {
+        self.0.span.close
+    }
+
+    pub fn to_string(self) -> str {
+        let stream = self.stream().to_string();
+        match self.0.delimiter {
+            Delimiter::Parenthesis => "(" + stream + ")",
+            Delimiter::Brace => "{" + stream + "}",
+            Delimiter::Bracket => "[" + stream + "]",
+            Delimiter::None => stream,
+        }
+    }
+
+    /// Replaces all three spans. Nested tokens keep their own spans.
+    pub fn set_span(self, span: Span) -> Group {
+        Group(Bridge::Group {
+            delimiter: self.0.delimiter,
+            stream: self.0.stream,
+            span: Bridge::DelimSpan::from_single(span),
+        })
+    }
+}
+
+#[repr(transparent)]
+pub struct Ident(Bridge::Ident);
+
+impl Ident {
+    pub fn new(string: str, span: Span) -> Ident {
+        Ident(Bridge::Ident { sym: string, is_raw: false, span: span })
+    }
+
+    pub fn new_raw(string: str, span: Span) -> Ident {
+        Ident(Bridge::Ident { sym: string, is_raw: true, span: span })
+    }
+
+    pub fn to_string(self) -> str {
+        if self.0.is_raw { "`" + self.0.sym + "`" } else { self.0.sym }
+    }
+
+    pub fn span(self) -> Span {
+        self.0.span
+    }
+
+    pub fn set_span(self, span: Span) -> Ident {
+        Ident(Bridge::Ident { sym: self.0.sym, is_raw: self.0.is_raw, span: span })
+    }
+}
+
+#[repr(transparent)]
+pub struct Punct(Bridge::Punct);
+
+impl Punct {
+    pub fn new(ch: char, spacing: Spacing) -> Punct {
+        let supported = match ch {
+            '=' | '<' | '>' | '!' | '~' | '+' | '-' | '*' | '/' | '%' | '^' | '&' | '|' | '@'
+            | '.' | ',' | ';' | ':' | '#' | '$' | '?' | '\'' => true,
+            _ => false,
+        };
+        if !supported {
+            erlang::error(a"unsupported punctuation character");
+        }
+        let joint = match spacing {
+            Spacing::Joint => true,
+            Spacing::Alone => false,
+        };
+        Punct(Bridge::Punct { ch: ch, joint: joint, span: Span::call_site() })
+    }
+
+    pub fn as_char(self) -> char {
+        self.0.ch
+    }
+
+    pub fn spacing(self) -> Spacing {
+        if self.0.joint { Spacing::Joint } else { Spacing::Alone }
+    }
+
+    pub fn span(self) -> Span {
+        self.0.span
+    }
+
+    pub fn to_string(self) -> str {
+        code_point_to_str(self.0.ch as int)
+    }
+
+    pub fn set_span(self, span: Span) -> Punct {
+        Punct(Bridge::Punct { ch: self.0.ch, joint: self.0.joint, span: span })
+    }
+}
+
+#[repr(transparent)]
+pub struct Literal(Bridge::Literal);
+
+impl Literal {
+    fn new(kind: Bridge::LitKind, value: str, suffix: Option<str>) -> Literal {
+        Literal(Bridge::Literal {
+            kind: kind,
+            symbol: value,
+            suffix: suffix,
+            span: Span::call_site(),
+        })
+    }
+
+    /// An integer literal.
+    /// A negative value becomes a minus sign followed by the literal.
+    pub fn int(n: int) -> Literal {
+        Literal::new(Bridge::LitKind::Integer, int_to_str(n), Option::None)
+    }
+
+    /// A float literal.
+    pub fn float(n: float) -> Literal {
+        Literal::new(Bridge::LitKind::Float, float_to_str(n), Option::None)
+    }
+
+    /// A string literal holding `string`, escaped as needed.
+    pub fn string(string: str) -> Literal {
+        Literal::new(Bridge::LitKind::Str, escape_chars(code_points(string), false, true), Option::None)
+    }
+
+    /// A character literal holding `ch`, escaped as needed.
+    pub fn character(ch: char) -> Literal {
+        Literal::new(Bridge::LitKind::Char, escape_char(ch as int, true, false), Option::None)
+    }
+
+    /// A byte character literal. Patina has no `u8`, so `byte` must be in
+    /// `0..=255`, or the macro raises.
+    pub fn byte_character(byte: int) -> Literal {
+        check_byte(byte);
+        Literal::new(Bridge::LitKind::Byte, escape_byte(byte, true, false), Option::None)
+    }
+
+    /// A byte string literal holding `bytes`, each in `0..=255`.
+    pub fn byte_string(bytes: [int]) -> Literal {
+        Literal::new(Bridge::LitKind::ByteStr, escape_bytes(bytes, false, true), Option::None)
+    }
+
+    /// An atom literal, `a"..."`.
+    pub fn atom(value: atom) -> Literal {
+        Literal::new(Bridge::LitKind::AtomStr, escape_chars(code_points(atom_to_str(value)), false, true), Option::None)
+    }
+
+    /// Renders the literal as source text, following rustc's
+    /// `Literal::with_stringify_parts`.
+    pub fn to_string(self) -> str {
+        let symbol = self.0.symbol;
+        let body = match self.0.kind {
+            Bridge::LitKind::Byte => "b'" + symbol + "'",
+            Bridge::LitKind::Char => "'" + symbol + "'",
+            Bridge::LitKind::Str => "\"" + symbol + "\"",
+            Bridge::LitKind::StrRaw(n) => raw_to_string("r", n, symbol),
+            Bridge::LitKind::AtomStr => "a\"" + symbol + "\"",
+            Bridge::LitKind::AtomStrRaw(n) => raw_to_string("ar", n, symbol),
+            Bridge::LitKind::ByteStr => "b\"" + symbol + "\"",
+            Bridge::LitKind::ByteStrRaw(n) => raw_to_string("br", n, symbol),
+            Bridge::LitKind::CStr => "c\"" + symbol + "\"",
+            Bridge::LitKind::CStrRaw(n) => raw_to_string("cr", n, symbol),
+            Bridge::LitKind::Integer | Bridge::LitKind::Float | Bridge::LitKind::ErrWithGuar => {
+                symbol
+            }
+        };
+        match self.0.suffix {
+            Option::Some(suffix) => body + suffix,
+            Option::None => body,
+        }
+    }
+
+    pub fn span(self) -> Span {
+        self.0.span
+    }
+
+    pub fn set_span(self, span: Span) -> Literal {
+        Literal(Bridge::Literal {
+            kind: self.0.kind,
+            symbol: self.0.symbol,
+            suffix: self.0.suffix,
+            span: span,
+        })
+    }
+}
+
+fn raw_to_string(prefix: str, hashes: int, symbol: str) -> str {
+    let hashes = repeat("#", hashes);
+    prefix + hashes + "\"" + symbol + "\"" + hashes
+}

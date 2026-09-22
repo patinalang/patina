@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
 
@@ -16,29 +16,6 @@ extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
-
 // source: patina-by-example/src/custom_types/repr.md
 // block: 6/14
 
@@ -54,18 +31,19 @@ enum SnakeCaseEnum {
 }
 
 pub fn main() {
+    // a"unit_variant"
+
+    // (a"struct_http_style", 200, "hi")
     {
         io::put_chars([[patina_fmt::debug(SnakeCaseEnum::UnitVariant as
                                     term)]]);
         io::nl();
     };
     {
-        io::put_chars([[patina_fmt::debug(
-                                // a"unit_variant"
-
-                                SnakeCaseEnum::StructHTTPStyle { code: 200, body: "hi" } as
-                                    term)]]);
+        io::put_chars([[patina_fmt::debug(SnakeCaseEnum::StructHTTPStyle {
+                                        code: 200,
+                                        body: "hi",
+                                    } as term)]]);
         io::nl();
     };
-    // (a"struct_http_style", 200, "hi")
 }

@@ -4,17 +4,12 @@
 
 
 
-
-
-
-
-
 // source: patina-by-example/src/custom_types/structs.md
 // block: 1/1
 
 // An attribute to hide warnings for unused code.
 #![allow(dead_code)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 #[allow(unused_imports)]
@@ -26,24 +21,6 @@ use Core::*;
 extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 // TODO: Uncomment this once we have a way to derive Debug for structs
 // #[derive(Debug)]
@@ -77,18 +54,38 @@ fn main() ({
     let name = ("Peter" as str);
     let age = (27 as int);
     let peter = (Person { (name as str), (age as int) } as Person);
+
+    // Print debug struct
+
+    // Instantiate a `Point`
+
+    // Access the fields of the point
+
+    // Make a new point by using struct update syntax to use the fields of our
+    // other one
+
+    // `bottom_right.y` will be the same as `another_point.y` because we used that field
+    // from `another_point`
+
+    // Destructure the point using a `let` binding
+
+    // struct instantiation is an expression too
+
+    // Instantiate a unit struct
+
+    // Instantiate a tuple struct
+
+    // Access the fields of a tuple struct
+
+    // Destructure a tuple struct
+
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)(
-
-                                // Print debug struct
-                                (peter as Person)) as term)] as [term])] as [[term]])) as
-            term);
+                                    fn(term) -> term)((peter as Person)) as term)] as [term])]
+                as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
-
-    // Instantiate a `Point`
     let point: Point =
         (Point { x: (5.2 as float), y: (0.4 as float) } as Point);
     let another_point: Point =
@@ -97,52 +94,34 @@ fn main() ({
         ((io::put_chars as
                 fn(term) -> term)(([([("point coordinates: (" as str),
                             ((patina_fmt::display as
-                                    fn(term) -> term)(
-
-                                // Access the fields of the point
-                                ((point as Point).x as float)) as term), (", " as str),
+                                    fn(term) -> term)(((point as Point).x as float)) as term),
+                            (", " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((point as Point).y as float)) as term),
                             (")" as str)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
-
-    // Make a new point by using struct update syntax to use the fields of our
-    // other one
     let bottom_right =
         (Point { x: (10.3 as float), ..(another_point as Point) } as Point);
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("second point: (" as str),
                             ((patina_fmt::display as
-                                    fn(term) -> term)(
-
-                                // `bottom_right.y` will be the same as `another_point.y` because we used that field
-                                // from `another_point`
-                                ((bottom_right as Point).x as float)) as term),
-                            (", " as str),
+                                    fn(term) -> term)(((bottom_right as Point).x as float)) as
+                                term), (", " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((bottom_right as Point).y as float)) as
                                 term), (")" as str)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
-
-    // Destructure the point using a `let` binding
     let Point {  x: left_edge,  y: top_edge } = (point as Point);
-
     let _rectangle =
         (Rectangle {
-
-            // struct instantiation is an expression too
             top_left:
                 (Point { x: (left_edge as float), y: (top_edge as float) } as
                     Point),
             (bottom_right as Point) } as Rectangle);
-
-    // Instantiate a unit struct
     let _unit = (Unit as Unit);
-
-    // Instantiate a tuple struct
     let pair =
         ((Pair as fn(int, float) -> Pair {Pair})((1 as int), (0.1 as float))
             as Pair);
@@ -150,25 +129,19 @@ fn main() ({
         ((io::put_chars as
                 fn(term) -> term)(([([("pair contains " as str),
                             ((patina_fmt::debug as
-                                    fn(term) -> term)(
-
-                                // Access the fields of a tuple struct
-                                ((pair as Pair).0 as int)) as term), (" and " as str),
+                                    fn(term) -> term)(((pair as Pair).0 as int)) as term),
+                            (" and " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)(((pair as Pair).1 as float)) as term)] as
                         [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
-
-    // Destructure a tuple struct
     let Pair(integer, decimal) = (pair as Pair);
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("pair contains " as str),
-                            ((patina_fmt::debug as
-                                    fn(term) -> term)(
-
-                                (integer as int)) as term), (" and " as str),
+                            ((patina_fmt::debug as fn(term) -> term)((integer as int))
+                                as term), (" and " as str),
                             ((patina_fmt::debug as fn(term) -> term)((decimal as float))
                                 as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);

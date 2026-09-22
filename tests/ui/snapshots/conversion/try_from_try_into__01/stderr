@@ -34,11 +34,23 @@ error: cannot find macro `assert_eq` in this scope
 LL |     assert_eq!(EvenNumber::try_from(8), Ok(EvenNumber(8)));
    |     ^^^^^^^^^
 
-error: cannot find attribute `derive` in this scope
-  --> tests/ui/src/conversion/try_from_try_into__01.pt:7:3
+error: cannot find derive macro `Debug` in this scope
+  --> tests/ui/src/conversion/try_from_try_into__01.pt:7:10
    |
 LL | #[derive(Debug, PartialEq)]
-   |   ^^^^^^
+   |          ^^^^^
+
+error: cannot find derive macro `PartialEq` in this scope
+  --> tests/ui/src/conversion/try_from_try_into__01.pt:7:17
+   |
+LL | #[derive(Debug, PartialEq)]
+   |                 ^^^^^^^^^
+   |
+note: `PartialEq` is imported here, but it is only a trait, without a derive macro
+  --> <patina-prelude>:12:5
+   |
+LL | use Core::*;
+   |     ^^^^^^^
 
 error[E0425]: cannot find type `Result` in this scope
   --> tests/ui/src/conversion/try_from_try_into__01.pt:13:32
@@ -70,7 +82,7 @@ error[E0425]: cannot find function, tuple struct or tuple variant `Err` in this 
 LL |             Err(())
    |             ^^^ not found in this scope
 
-error: aborting due to 12 previous errors
+error: aborting due to 13 previous errors
 
 Some errors have detailed explanations: E0425, E0433.
 For more information about an error, try `rustc --explain E0425`.

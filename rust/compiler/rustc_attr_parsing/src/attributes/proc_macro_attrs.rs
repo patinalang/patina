@@ -46,7 +46,10 @@ impl SingleAttributeParser for RustcBuiltinMacroParser {
 
     fn convert(cx: &mut AcceptContext<'_, '_>, args: &ArgParser) -> Option<AttributeKind> {
         let (builtin_name, helper_attrs) = parse_derive_like(cx, args, false)?;
-        Some(AttributeKind::RustcBuiltinMacro { builtin_name, helper_attrs })
+        Some(AttributeKind::RustcBuiltinMacro {
+            builtin_name: builtin_name.map(|ident| ident.name),
+            helper_attrs,
+        })
     }
 }
 
@@ -54,7 +57,7 @@ fn parse_derive_like(
     cx: &mut AcceptContext<'_, '_>,
     args: &ArgParser,
     trait_name_mandatory: bool,
-) -> Option<(Option<Symbol>, ThinVec<Symbol>)> {
+) -> Option<(Option<Ident>, ThinVec<Symbol>)> {
     let Some(list) = args.as_list() else {
         // For #[rustc_builtin_macro], it is permitted to leave out the trait name
         if args.as_no_args().is_ok() && !trait_name_mandatory {
@@ -129,5 +132,5 @@ fn parse_derive_like(
         cx.adcx().expected_no_args(next.span());
     }
 
-    Some((Some(trait_ident.name), attributes))
+    Some((Some(trait_ident), attributes))
 }

@@ -1,4 +1,4 @@
-mod compile_server;
+pub(crate) mod compile_server;
 mod eaf_builder;
 mod impl_collector;
 mod translate;
@@ -8,12 +8,13 @@ use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::Write;
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
 use rustc_arena::DroplessArena;
 use rustc_ast::Crate;
 use rustc_ast_pretty::pprust;
-use rustc_data_structures::fx::FxHashSet;
+use rustc_data_structures::fx::{FxHashSet, FxIndexSet};
 use rustc_feature::UnstableFeatures;
 use rustc_hir_pretty as pprust_hir;
 use rustc_interface::util::DummyCodegenBackend;
@@ -28,14 +29,15 @@ use rustc_span::edition::Edition;
 use rustc_span::source_map::FilePathMapping;
 use rustc_span::{ErrorGuaranteed, FileName, RealFileName};
 
-use crate::package::{CORE_PACKAGE_NAME, PackageDependency};
+use crate::compile::compile_server::SyncServer;
+use crate::package::{CORE_PACKAGE_NAME, PROC_MACRO_PACKAGE_NAME, PackageDependency};
 use crate::{Stage, erlang};
 
 static INTERNAL_FEATURES: AtomicBool = AtomicBool::new(false);
 
 const PRELUDE: &str = r#"
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
 
@@ -51,40 +53,12 @@ extern mod io;
 
 #[allow(unused)]
 extern mod patina_fmt;
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify {
-    () => {};
-}
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat {
-    () => {};
-}
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args {
-    () => {};
-}
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }};
-    ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 "#;
 
 const CORE_SRC: &str = include_str!("core.pt");
+const PROC_MACRO_SRC: &str = include_str!("proc_macro.pt");
 
-fn ensure_core(out_dir: &Path) -> PathBuf {
+fn ensure_core(out_dir: &Path, server: &Arc<SyncServer>) -> PathBuf {
     let rmeta_path = out_dir.join("libCore.rmeta");
     let beam_path = out_dir.join("Elixir.Patina.Core.beam");
 
@@ -99,6 +73,28 @@ fn ensure_core(out_dir: &Path) -> PathBuf {
         out_dir,
         CORE_PACKAGE_NAME,
         &[],
+        server,
+    );
+
+    rmeta_path
+}
+
+fn ensure_proc_macro(out_dir: &Path, server: &Arc<SyncServer>) -> PathBuf {
+    let rmeta_path = out_dir.join("libProcMacro.rmeta");
+    let beam_path = out_dir.join("Elixir.Patina.ProcMacro.beam");
+
+    if rmeta_path.is_file() && beam_path.is_file() {
+        return rmeta_path;
+    }
+
+    compile(
+        &[Stage::Meta, Stage::Beam],
+        Path::new("proc_macro.pt"),
+        PROC_MACRO_SRC,
+        out_dir,
+        PROC_MACRO_PACKAGE_NAME,
+        &[],
+        server,
     );
 
     rmeta_path
@@ -166,6 +162,7 @@ pub(crate) fn compile(
     out_dir: &Path,
     pkg_name: &str,
     externs: &[PackageDependency],
+    server: &Arc<SyncServer>,
 ) {
     let filename_stem = filename
         .file_stem()
@@ -193,7 +190,7 @@ pub(crate) fn compile(
     });
 
     consume_stage!(stages_left, Stage::Ast, {
-        let config = make_config(filename.clone(), src, pkg_name, externs, out_dir);
+        let config = make_config(filename.clone(), src, pkg_name, externs, out_dir, server);
         interface::run_compiler(config, |compiler| {
             let krate = parse_with_prelude(&compiler.sess, "");
 
@@ -214,7 +211,7 @@ pub(crate) fn compile(
         });
     });
 
-    let config = make_config(filename.clone(), src, pkg_name, externs, out_dir);
+    let config = make_config(filename.clone(), src, pkg_name, externs, out_dir, server);
     let prelude = if pkg_name == CORE_PACKAGE_NAME { "" } else { PRELUDE };
 
     interface::run_compiler(config, |compiler| {
@@ -224,6 +221,20 @@ pub(crate) fn compile(
 
         passes::create_and_enter_global_ctxt(compiler, krate, |tcx| {
             let dcx = tcx.sess.dcx();
+
+            // Reading the metadata interns symbols, so this has to happen inside
+            // the compiler session, where `rustc_span`'s globals are set.
+            let mut macro_paths = FxIndexSet::from_iter([out_dir.to_owned()]);
+            for dep in externs {
+                if let Some(path) = dep.path.as_ref()
+                    && rustc_metadata::locator::exports_proc_macros(path)
+                    && let Some(parent) = path.parent()
+                    && !macro_paths.contains(parent)
+                {
+                    macro_paths.insert(parent.to_owned());
+                }
+            }
+            server.with(dcx, |server| server.extend_code_path(dcx, macro_paths.into_iter()));
 
             consume_stage!(stages_left, Stage::Expanded, {
                 let expanded = pprust::print_crate(
@@ -299,47 +310,50 @@ pub(crate) fn compile(
                 }
             });
 
-            let mut server = compile_server::CompileServer::start(dcx);
-
             consume_stage!(stages_left, Stage::Abstr, {
-                for (mod_name, bytes) in &serialized_modules {
-                    let mut rendered = server.render_abstr(bytes);
-                    if !rendered.ends_with('\n') {
-                        rendered.push('\n');
+                server.with(dcx, |server| {
+                    for (mod_name, bytes) in &serialized_modules {
+                        let mut rendered = server.render_abstr(dcx, bytes);
+                        if !rendered.ends_with('\n') {
+                            rendered.push('\n');
+                        }
+                        write_file(out_dir, mod_name.as_str(), "abstr", rendered.as_bytes())
+                            .unwrap_or_else(|e| {
+                                dcx.fatal(format!("failed to write abstr file: {e}"));
+                            });
                     }
-                    write_file(out_dir, mod_name.as_str(), "abstr", rendered.as_bytes())
-                        .unwrap_or_else(|e| {
-                            dcx.fatal(format!("failed to write abstr file: {e}"));
-                        });
-                }
+                });
             });
 
             consume_stage!(stages_left, Stage::Erl, {
-                for (mod_name, bytes) in &serialized_modules {
-                    let rendered = server.render_erl(bytes);
-                    write_file(out_dir, mod_name.as_str(), "erl", rendered.as_bytes())
-                        .unwrap_or_else(|e| {
-                            dcx.fatal(format!("failed to write erl file: {e}"));
-                        });
-                }
+                server.with(dcx, |server| {
+                    for (mod_name, bytes) in &serialized_modules {
+                        let rendered = server.render_erl(dcx, bytes);
+                        write_file(out_dir, mod_name.as_str(), "erl", rendered.as_bytes())
+                            .unwrap_or_else(|e| {
+                                dcx.fatal(format!("failed to write erl file: {e}"));
+                            });
+                    }
+                });
             });
 
             consume_stage!(stages_left, Stage::Beam, {
-                for (mod_name, bytes) in &serialized_modules {
-                    let compile = server.compile(bytes).unwrap_or_else(|e| {
-                        dcx.fatal(format!("erl backend failed: {}\n{}", e.errors, e.warnings));
-                    });
+                server.with(dcx, |server| {
+                    for (mod_name, bytes) in &serialized_modules {
+                        let compile = server.compile(dcx, bytes).unwrap_or_else(|e| {
+                            dcx.fatal(format!("erl backend failed: {}\n{}", e.errors, e.warnings));
+                        });
 
-                    if !compile.warnings.is_empty() && compile.warnings != "[]" {
-                        dcx.warn(compile.warnings);
+                        if !compile.warnings.is_empty() && compile.warnings != "[]" {
+                            dcx.warn(compile.warnings);
+                        }
+
+                        write_file(out_dir, mod_name.as_str(), "beam", &compile.beam)
+                            .unwrap_or_else(|e| {
+                                dcx.fatal(format!("failed to write beam file: {e}"));
+                            });
                     }
-
-                    write_file(out_dir, mod_name.as_str(), "beam", &compile.beam).unwrap_or_else(
-                        |e| {
-                            dcx.fatal(format!("failed to write beam file: {e}"));
-                        },
-                    );
-                }
+                });
             });
         });
     });
@@ -351,17 +365,26 @@ fn make_config(
     pkg_name: &str,
     deps: &[PackageDependency],
     out_dir: &Path,
+    server: &Arc<SyncServer>,
 ) -> interface::Config {
     let has_explicit_core = deps.iter().any(|dep| dep.name == CORE_PACKAGE_NAME);
     let is_core = pkg_name == CORE_PACKAGE_NAME;
 
     let core_dep = (!has_explicit_core && !is_core).then(|| {
-        let core_rmeta = ensure_core(out_dir);
+        let core_rmeta = ensure_core(out_dir, server);
         PackageDependency { name: CORE_PACKAGE_NAME.to_string(), path: Some(core_rmeta) }
     });
 
+    let wants_proc_macro =
+        deps.iter().any(|dep| dep.name == PROC_MACRO_PACKAGE_NAME && dep.path.is_none())
+            && pkg_name != PROC_MACRO_PACKAGE_NAME;
+    let proc_macro_dep = wants_proc_macro.then(|| PackageDependency {
+        name: PROC_MACRO_PACKAGE_NAME.to_string(),
+        path: Some(ensure_proc_macro(out_dir, server)),
+    });
+
     let mut externs = BTreeMap::new();
-    for dep in core_dep.iter().chain(deps.iter()) {
+    for dep in core_dep.iter().chain(deps.iter()).chain(proc_macro_dep.iter()) {
         externs.insert(dep.name.clone(), dep.into());
     }
 
@@ -382,6 +405,7 @@ fn make_config(
         make_codegen_backend: Some(Box::new(|_| {
             Box::new(DummyCodegenBackend { target_config_override: None })
         })),
+        beam_macro_runner: server.clone(),
         using_internal_features: &INTERNAL_FEATURES,
         opts: config::Options {
             edition: Edition::EditionFuture,
@@ -395,7 +419,7 @@ fn make_config(
             cg: config::CodegenOptions { panic: Some(PanicStrategy::Abort), ..Default::default() },
             crate_name: Some(pkg_name.to_string()),
             externs: Externs::new(externs),
-            search_paths: vec![SearchPath::new(PathKind::Crate, out_dir.to_owned())],
+            search_paths: vec![SearchPath::new(PathKind::All, out_dir.to_owned())],
             ..Default::default()
         },
     }

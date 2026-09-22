@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -15,29 +15,6 @@ extern mod io;
 
 #[allow(unused)]
 extern mod patina_fmt;
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 // source: patina-by-example/src/macros/designators.md
 // block: 1/1
@@ -56,6 +33,18 @@ macro_rules! create_function {
     };
 }
 fn foo() ({
+
+    // Create functions named `foo` and `bar` with the above macro.
+
+    // This macro takes an expression of type `expr` and prints
+    // it as a string along with its result.
+    // The `expr` designator is used for expressions.
+    // `stringify!` will convert the expression *as it is* into a string.
+
+
+
+    // Recall that blocks are expressions too!
+
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("You called " as str),
@@ -73,20 +62,10 @@ fn bar() ({
         ((io::nl as fn() -> term)() as term);
     } as ());
 } as ())
-
-// Create functions named `foo` and `bar` with the above macro.
-
 macro_rules! print_result {
     ($expression:expr) =>
-    {
-        println!("{:?} = {:?}", stringify!($expression), $expression);
-        // This macro takes an expression of type `expr` and prints
-        // it as a string along with its result.
-        // The `expr` designator is used for expressions.
-        // `stringify!` will convert the expression *as it is* into a string.
-    };
+    { println!("{:?} = {:?}", stringify!($expression), $expression); };
 }
-
 fn main() ({
     ((foo as fn() {foo})() as ());
     ((bar as fn() {bar})() as ());
@@ -96,10 +75,8 @@ fn main() ({
                                     fn(term) -> term)(("1 + 1" as str)) as term),
                             (" = " as str),
                             ((patina_fmt::debug as
-                                    fn(term) -> term)(
-
-                                ((1 as int) + (1 as int) as int)) as term)] as [term])] as
-                [[term]])) as term);
+                                    fn(term) -> term)(((1 as int) + (1 as int) as int)) as
+                                term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -108,11 +85,7 @@ fn main() ({
                                     fn(term) -> term)(("{ let x = 1; x * x + 2 * x - 1 }" as
                                     str)) as term), (" = " as str),
                             ((patina_fmt::debug as
-                                    fn(term) -> term)(
-
-                                // Recall that blocks are expressions too!
-
-                                ({
+                                    fn(term) -> term)(({
                                     let x = (1 as int);
                                     ((((x as int) * (x as int) as int) +
                                             ((2 as int) * (x as int) as int) as int) - (1 as int) as

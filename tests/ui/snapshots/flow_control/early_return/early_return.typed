@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -16,32 +16,23 @@ extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
-
 fn mark(value: int)
     ->
         int ({
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
@@ -51,9 +42,7 @@ fn mark(value: int)
     } as ());
     (value as int)
 } as int)
-
 enum Choice { Stop, Continue, }
-
 fn match_value(choice: Choice)
     ->
         int ({
@@ -64,7 +53,6 @@ fn match_value(choice: Choice)
         } as int);
     ((value as int) + (1 as int) as int)
 } as int)
-
 fn is_negative(x: int)
     ->
         bool ({
@@ -72,7 +60,6 @@ fn is_negative(x: int)
         as ())
     (return (true as bool) as !);
 } as !)
-
 fn is_negative_implicit(x: int)
     ->
         bool ({
@@ -80,7 +67,6 @@ fn is_negative_implicit(x: int)
         as ())
     (true as bool)
 } as bool)
-
 fn closure_value(stop: bool)
     ->
         int ({
@@ -91,10 +77,8 @@ fn closure_value(stop: bool)
                 (5 as int)
             } as int) as
             {closure@tests/ui/src/flow_control/early_return.pt:34:20: 34:29});
-
     (10 as int)
 } as int)
-
 fn expression_value(stop: bool)
     ->
         int ({
@@ -107,14 +91,12 @@ fn expression_value(stop: bool)
             ((mark as fn(int) -> int {mark})((3 as int)) as int)
         } as int) as int)
 } as int)
-
 fn match_stopped()
     ->
         int ({
     ((match_value as
             fn(Choice) -> int {match_value})((Choice::Stop as Choice)) as int)
 } as int)
-
 fn match_continued()
     ->
         int ({
@@ -122,7 +104,6 @@ fn match_continued()
             fn(Choice) -> int {match_value})((Choice::Continue as Choice)) as
         int)
 } as int)
-
 fn match_scrutinee_value(stop: bool)
     ->
         int ({
@@ -134,7 +115,6 @@ fn match_scrutinee_value(stop: bool)
         Choice::Continue => (60 as int),
     } as int)
 } as int)
-
 fn nested_value(x: int)
     ->
         int ({
@@ -143,7 +123,6 @@ fn nested_value(x: int)
             (if ((x as int) == (0 as int) as bool) {
                 (return (10 as int) as !);
             } as ())
-
             ({
                 (if ((x as int) == (1 as int) as bool) {
                     (return (20 as int) as !);
@@ -151,10 +130,8 @@ fn nested_value(x: int)
                 (30 as int)
             } as int)
         } as int);
-
     ((result as int) + (1 as int) as int)
 } as int)
-
 fn if_condition_value(stop: bool)
     ->
         int ({

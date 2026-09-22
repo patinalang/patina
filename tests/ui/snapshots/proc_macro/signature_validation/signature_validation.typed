@@ -1,0 +1,33 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[attr = RustcDiagnosticItem("TokenStream")]
+type TokenStream = int;
+
+#[attr = ProcMacro]
+fn wrong_argument_count() -> TokenStream ({ (0 as int) } as int)
+
+#[attr = ProcMacro]
+fn wrong_argument_type(_input: bool) -> TokenStream ({ (0 as int) } as int)
+
+#[attr = ProcMacro]
+fn wrong_result_type(_input: TokenStream) -> bool ({ (true as bool) } as bool)
+
+#[attr = ProcMacroAttribute]
+fn wrong_attribute_argument_count(_input: TokenStream)
+    -> TokenStream ({ (0 as int) } as int)

@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -16,29 +16,6 @@ extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
-
 // source: patina-by-example/src/variable_bindings.md
 // block: 1/1
 
@@ -49,14 +26,18 @@ fn main() ({
 
     // copy `an_integer` into `copied_integer`
     let copied_integer = (an_integer as int);
+
+
+    // The compiler warns about unused variable bindings; these warnings can
+    // be silenced by prefixing the variable name with an underscore
+
+    // FIXME ^ Prefix with an underscore to suppress the warning
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("An integer: " as str),
                             ((patina_fmt::debug as
-                                    fn(term) -> term)(
-
-                                (copied_integer as int)) as term)] as [term])] as [[term]]))
-            as term);
+                                    fn(term) -> term)((copied_integer as int)) as term)] as
+                        [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -74,11 +55,6 @@ fn main() ({
                                 term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
-
-    // The compiler warns about unused variable bindings; these warnings can
-    // be silenced by prefixing the variable name with an underscore
     let _unused_variable = (3 as int);
-
     let noisy_unused_variable = (2 as int);
-    // FIXME ^ Prefix with an underscore to suppress the warning
 } as ())

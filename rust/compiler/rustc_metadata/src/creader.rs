@@ -4,6 +4,7 @@ use std::collections::BTreeMap;
 use std::error::Error;
 use std::path::Path;
 use std::str::FromStr;
+use std::sync::Arc;
 use std::time::Duration;
 use std::{cmp, env, iter};
 
@@ -15,24 +16,24 @@ use rustc_data_structures::svh::Svh;
 use rustc_data_structures::sync::{self, FreezeReadGuard, FreezeWriteGuard};
 use rustc_data_structures::unord::UnordMap;
 use rustc_expand::base::SyntaxExtension;
+use rustc_expand::proc_macro::BeamMacroRunner;
 use rustc_fs_util::try_canonicalize;
 use rustc_hir as hir;
-use rustc_hir::def_id::{CrateNum, LOCAL_CRATE, LocalDefId, StableCrateId};
+use rustc_hir::def_id::{CrateNum, LOCAL_CRATE, LocalDefId};
 use rustc_hir::definitions::Definitions;
 use rustc_index::IndexVec;
 use rustc_middle::bug;
 use rustc_middle::ty::data_structures::IndexSet;
 use rustc_middle::ty::{TyCtxt, TyCtxtFeed};
-use rustc_proc_macro::bridge::client::ProcMacro;
 use rustc_session::config::mitigation_coverage::DeniedPartialMitigationLevel;
 use rustc_session::config::{
     CrateType, ExtendedTargetModifierInfo, ExternLocation, Externs, OptionsTargetModifiers,
     TargetModifier,
 };
 use rustc_session::cstore::{CrateDepKind, CrateSource, ExternCrate, ExternCrateSource};
+use rustc_session::lint;
 use rustc_session::output::validate_crate_name;
 use rustc_session::search_paths::PathKind;
-use rustc_session::{Session, lint};
 use rustc_span::def_id::DefId;
 use rustc_span::edition::Edition;
 use rustc_span::{DUMMY_SP, Ident, Span, Symbol, sym};
@@ -58,6 +59,7 @@ pub type MetadataLoaderDyn = dyn MetadataLoader + Send + Sync + sync::DynSend + 
 
 pub struct CStore {
     metadata_loader: Box<MetadataLoaderDyn>,
+    proc_macro_runner: Arc<dyn BeamMacroRunner>,
 
     metas: IndexVec<CrateNum, Option<Box<CrateMetadata>>>,
     injected_panic_runtime: Option<CrateNum>,
@@ -191,6 +193,10 @@ impl<'a> CrateOrigin<'a> {
 }
 
 impl CStore {
+    pub(crate) fn proc_macro_runner(&self) -> Arc<dyn BeamMacroRunner> {
+        Arc::clone(&self.proc_macro_runner)
+    }
+
     pub fn from_tcx(tcx: TyCtxt<'_>) -> FreezeReadGuard<'_, CStore> {
         FreezeReadGuard::map(tcx.untracked().cstore.read(), |cstore| {
             cstore.as_any().downcast_ref::<CStore>().expect("`tcx.cstore` is not a `CStore`")
@@ -463,9 +469,6 @@ impl CStore {
         }
         let mods = tcx.sess.opts.gather_target_modifiers();
         for (_cnum, data) in self.iter_crate_data() {
-            if data.is_proc_macro_crate() {
-                continue;
-            }
             let dep_mods = data.target_modifiers();
             if mods != dep_mods {
                 Self::report_target_modifiers_extended(tcx, krate, &mods, &dep_mods, data);
@@ -483,9 +486,6 @@ impl CStore {
         const MAX_ERRORS_PER_MITIGATION: usize = 5;
         let mut errors_per_mitigation = BTreeMap::new();
         for (_cnum, data) in self.iter_crate_data() {
-            if data.is_proc_macro_crate() {
-                continue;
-            }
             let their_mitigations = data.enabled_denied_partial_mitigations();
             for my_mitigation in my_mitigations.values() {
                 let their_mitigation = their_mitigations
@@ -516,9 +516,6 @@ impl CStore {
             return;
         }
         for (_cnum, data) in self.iter_crate_data() {
-            if data.is_proc_macro_crate() {
-                continue;
-            }
             if data.has_async_drops() {
                 let extern_crate = data.name();
                 let local_crate = tcx.crate_name(LOCAL_CRATE);
@@ -531,9 +528,13 @@ impl CStore {
         }
     }
 
-    pub fn new(metadata_loader: Box<MetadataLoaderDyn>) -> CStore {
+    pub fn new(
+        metadata_loader: Box<MetadataLoaderDyn>,
+        proc_macro_runner: Arc<dyn BeamMacroRunner>,
+    ) -> CStore {
         CStore {
             metadata_loader,
+            proc_macro_runner,
             // We add an empty entry for LOCAL_CRATE (which maps to zero) in
             // order to make array indices in `metas` match with the
             // corresponding `CrateNum`. This first entry will always remain
@@ -640,26 +641,10 @@ impl CStore {
             private_dep,
         )?;
 
-        let raw_proc_macros = if crate_root.is_proc_macro_crate() {
-            let temp_root;
-            let (dlsym_source, dlsym_root) = match &host_lib {
-                Some(host_lib) => (&host_lib.source, {
-                    temp_root = host_lib.metadata.get_root();
-                    &temp_root
-                }),
-                None => (&source, &crate_root),
-            };
-            let dlsym_dylib = dlsym_source.dylib.as_ref().expect("no dylib for a proc-macro crate");
-            Some(self.dlsym_proc_macros(tcx.sess, dlsym_dylib, dlsym_root.stable_crate_id())?)
-        } else {
-            None
-        };
-
         let crate_metadata = CrateMetadata::new(
             tcx,
             metadata,
             crate_root,
-            raw_proc_macros,
             cnum,
             cnum_map,
             dep_kind,
@@ -671,73 +656,6 @@ impl CStore {
         self.set_crate_data(cnum, crate_metadata);
 
         Ok(cnum)
-    }
-
-    fn load_proc_macro<'a, 'b>(
-        &self,
-        sess: &'a Session,
-        locator: &mut CrateLocator<'b>,
-        crate_rejections: &mut CrateRejections,
-        path_kind: PathKind,
-        host_hash: Option<Svh>,
-    ) -> Result<Option<(LoadResult, Option<Library>)>, CrateError>
-    where
-        'a: 'b,
-    {
-        if sess.opts.unstable_opts.dual_proc_macros {
-            // Use a new crate locator and crate rejections so trying to load a proc macro doesn't
-            // affect the error message we emit
-            let mut proc_macro_locator = locator.clone();
-
-            // Try to load a proc macro
-            proc_macro_locator.for_target_proc_macro(sess, path_kind);
-
-            // Load the proc macro crate for the target
-            let target_result =
-                match self.load(&mut proc_macro_locator, &mut CrateRejections::default())? {
-                    Some(LoadResult::Previous(cnum)) => {
-                        return Ok(Some((LoadResult::Previous(cnum), None)));
-                    }
-                    Some(LoadResult::Loaded(library)) => Some(LoadResult::Loaded(library)),
-                    None => return Ok(None),
-                };
-
-            // Use the existing crate_rejections as we want the error message to be affected by
-            // loading the host proc macro.
-            *crate_rejections = CrateRejections::default();
-
-            // Load the proc macro crate for the host
-            locator.for_proc_macro(sess, path_kind);
-
-            locator.hash = host_hash;
-
-            let Some(host_result) = self.load(locator, crate_rejections)? else {
-                return Ok(None);
-            };
-
-            let host_result = match host_result {
-                LoadResult::Previous(..) => {
-                    panic!("host and target proc macros must be loaded in lock-step")
-                }
-                LoadResult::Loaded(library) => library,
-            };
-            Ok(Some((target_result.unwrap(), Some(host_result))))
-        } else {
-            // Use a new crate locator and crate rejections so trying to load a proc macro doesn't
-            // affect the error message we emit
-            let mut proc_macro_locator = locator.clone();
-
-            // Load the proc macro crate for the host
-            proc_macro_locator.for_proc_macro(sess, path_kind);
-
-            let Some(host_result) =
-                self.load(&mut proc_macro_locator, &mut CrateRejections::default())?
-            else {
-                return Ok(None);
-            };
-
-            Ok(Some((host_result, None)))
-        }
     }
 
     fn resolve_crate<'tcx>(
@@ -781,7 +699,7 @@ impl CStore {
         &'b mut self,
         tcx: TyCtxt<'tcx>,
         name: Symbol,
-        mut dep_kind: CrateDepKind,
+        dep_kind: CrateDepKind,
         origin: CrateOrigin<'b>,
     ) -> Result<CrateNum, CrateError> {
         info!("resolving crate `{}`", name);
@@ -792,7 +710,6 @@ impl CStore {
         let dep_root_for_errors = origin.dep_root_for_errors();
         let dep = origin.dep();
         let hash = dep.map(|d| d.hash);
-        let host_hash = dep.map(|d| d.host_hash).flatten();
         let extra_filename = dep.map(|d| &d.extra_filename[..]);
         let path_kind = if dep.is_some() { PathKind::Dependency } else { PathKind::Crate };
         let private_dep = origin.private_dep();
@@ -817,22 +734,7 @@ impl CStore {
             match self.load(&mut locator, &mut crate_rejections)? {
                 Some(res) => (res, None),
                 None => {
-                    info!("falling back to loading proc_macro");
-                    dep_kind = CrateDepKind::MacrosOnly;
-                    match self.load_proc_macro(
-                        tcx.sess,
-                        &mut locator,
-                        &mut crate_rejections,
-                        path_kind,
-                        host_hash,
-                    )? {
-                        Some(res) => res,
-                        None => {
-                            return Err(
-                                locator.into_error(crate_rejections, dep_root_for_errors.cloned())
-                            );
-                        }
-                    }
+                    return Err(locator.into_error(crate_rejections, dep_root_for_errors.cloned()));
                 }
             }
         };
@@ -846,9 +748,6 @@ impl CStore {
                 // `public-dependency` here.
                 let private_dep = self.is_private_dep(&tcx.sess.opts.externs, name, private_dep);
                 let cdata = self.get_crate_data_mut(cnum);
-                if cdata.is_proc_macro_crate() {
-                    dep_kind = CrateDepKind::MacrosOnly;
-                }
                 cdata.set_dep_kind(cmp::max(cdata.dep_kind(), dep_kind));
                 cdata.update_and_private_dep(private_dep);
                 Ok(cnum)
@@ -903,9 +802,6 @@ impl CStore {
             crate_root.name(),
             dep_root_for_errors.name
         );
-        if crate_root.is_proc_macro_crate() {
-            return Ok(CrateNumMap::new());
-        }
 
         // The map from crate numbers in the crate we're resolving to local crate numbers.
         // We map 0 and all other holes in the map to our parent crate. The "additional"
@@ -941,34 +837,6 @@ impl CStore {
 
         debug!("resolve_crate_deps: cnum_map for {:?} is {:?}", krate, crate_num_map);
         Ok(crate_num_map)
-    }
-
-    fn dlsym_proc_macros(
-        &self,
-        sess: &Session,
-        path: &Path,
-        stable_crate_id: StableCrateId,
-    ) -> Result<&'static [ProcMacro], CrateError> {
-        let sym_name = sess.generate_proc_macro_decls_symbol(stable_crate_id);
-        debug!("trying to dlsym proc_macros {} for symbol `{}`", path.display(), sym_name);
-
-        unsafe {
-            let result = load_symbol_from_dylib::<*const &[ProcMacro]>(path, &sym_name);
-            match result {
-                Ok(result) => {
-                    debug!("loaded dlsym proc_macros {} for symbol `{}`", path.display(), sym_name);
-                    Ok(*result)
-                }
-                Err(err) => {
-                    debug!(
-                        "failed to dlsym proc_macros {} for symbol `{}`",
-                        path.display(),
-                        sym_name
-                    );
-                    Err(err.into())
-                }
-            }
-        }
     }
 
     fn inject_panic_runtime(&mut self, tcx: TyCtxt<'_>, krate: &ast::Crate) {

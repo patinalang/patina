@@ -70,6 +70,7 @@ trivially_parameterized_over_tcx! {
     crate::rmeta::CrateHeader,
     crate::rmeta::CrateRoot,
     crate::rmeta::IncoherentImpls,
+    crate::rmeta::ProcMacroExport,
     crate::rmeta::RawDefId,
     crate::rmeta::TraitImpls,
     crate::rmeta::VariantData,
@@ -131,6 +132,7 @@ trivially_parameterized_over_tcx! {
     rustc_span::SourceFile,
     rustc_span::Span,
     rustc_span::Symbol,
+    rustc_span::hygiene::MacroKind,
     rustc_span::hygiene::SyntaxContextKey,
     // tidy-alphabetical-end
 }

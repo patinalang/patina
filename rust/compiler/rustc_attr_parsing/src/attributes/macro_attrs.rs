@@ -194,11 +194,3 @@ impl SingleAttributeParser for CollapseDebugInfoParser {
         Some(AttributeKind::CollapseDebugInfo(info))
     }
 }
-
-pub(crate) struct RustcProcMacroDeclsParser;
-
-impl NoArgsAttributeParser for RustcProcMacroDeclsParser {
-    const PATH: &[Symbol] = &[sym::rustc_proc_macro_decls];
-    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[Allow(Target::Static)]);
-    const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::RustcProcMacroDecls;
-}

@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
 
@@ -16,29 +16,6 @@ extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
-
 // source: patina-by-example/src/flow_control/match/destructuring/destructure_structures.md
 // block: 1/1
 
@@ -52,46 +29,44 @@ pub fn main() {
     let foo = Foo { x: (1, 2), y: 3 };
 
     match foo {
-        Foo { x: (1, b), y } => {
+        Foo { x: (1, b), y } =>
+            // you can destructure structs and rename the variables,
+            // the order is not important
+
+            // and you can also ignore some variables:
+            // this will give an error: pattern does not mention field `x`
+            //Foo { y } => println!("y = {}", y),
+
+
+            // You do not need a match block to destructure structs:
+
+            // Destructuring works with nested structs as well:
+
+            {
             io::put_chars([["First of x is 1, b = ", patina_fmt::display(b),
                                 ",  y = ", patina_fmt::display(y), " "]]);
             io::nl();
         }
-
-
-            // you can destructure structs and rename the variables,
-            // the order is not important
-            Foo { y: 2, x: i } => {
+        Foo { y: 2, x: i } => {
             io::put_chars([["y is 2, i = ", patina_fmt::debug(i)]]);
             io::nl();
         }
-
-
-            // and you can also ignore some variables:
-            Foo { y, .. } => {
+        Foo { y, .. } => {
             io::put_chars([["y = ", patina_fmt::display(y),
                                 ", we don\'t care about x"]]);
             io::nl();
         }
     }
-    // this will give an error: pattern does not mention field `x`
-    //Foo { y } => println!("y = {}", y),
-
     let faa = Foo { x: (1, 2), y: 3 };
-
-    // You do not need a match block to destructure structs:
     let Foo { x: x0, y: y0 } = faa;
     {
         io::put_chars([["Outside: x0 = ", patina_fmt::debug(x0), ", y0 = ",
                             patina_fmt::display(y0)]]);
         io::nl();
     };
-
-    // Destructuring works with nested structs as well:
     struct Bar {
         foo: Foo,
     }
-
     let bar = Bar { foo: faa };
     let Bar { foo: Foo { x: nested_x, y: nested_y } } = bar;
     {

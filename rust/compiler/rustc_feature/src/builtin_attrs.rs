@@ -506,7 +506,6 @@ pub static BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
     // ==========================================================================
 
     rustc_attr!(rustc_builtin_macro),
-    rustc_attr!(rustc_proc_macro_decls),
     rustc_attr!(
         rustc_macro_transparency,
         "used internally for testing macro hygiene",

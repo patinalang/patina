@@ -10,19 +10,13 @@ error[E0425]: cannot find type `Result` in this scope
 LL | fn double_first(list: [str]) -> Result<Option<int>, ParseIntError> {
    |                                 ^^^^^^ not found in this scope
 
-error[E0425]: cannot find type `Option` in this scope
-  --> tests/ui/src/error/multiple_error_types/option_result__02.pt:6:40
-   |
-LL | fn double_first(list: [str]) -> Result<Option<int>, ParseIntError> {
-   |                                        ^^^^^^ not found in this scope
-
 error[E0599]: no method named `first` found for slice `[str]` in the current scope
   --> tests/ui/src/error/multiple_error_types/option_result__02.pt:7:20
    |
 LL |     let opt = list.first().map(|first| {
    |                    ^^^^^ method not found in `[str]`
 
-error: aborting due to 4 previous errors
+error: aborting due to 3 previous errors
 
 Some errors have detailed explanations: E0425, E0433, E0599.
 For more information about an error, try `rustc --explain E0425`.

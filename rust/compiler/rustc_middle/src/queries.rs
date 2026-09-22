@@ -1183,8 +1183,9 @@ rustc_queries! {
         desc { "checking attributes in {}", describe_as_module(key, tcx) }
     }
 
-    /// Returns the set of associated functions in the local crate
-    /// that are called from the outside of the types' associated impls.
+    /// Returns the set of functions in the local crate that are called from outside the Erlang
+    /// module they are translated into: associated functions called from outside their impls,
+    /// and free functions called from an impl (which is translated into its own module).
     ///
     /// For example, for code:
     ///
@@ -1204,9 +1205,9 @@ rustc_queries! {
     ///
     /// `Foo::foo` and `Bar::bar` will be returned by this query, but `Foo::priv_foo` will not,
     /// as it's only called from within `Foo`'s associated function.
-    query assoc_fns_called_externally(_: ()) -> &'tcx LocalDefIdSet {
+    query fns_called_externally(_: ()) -> &'tcx LocalDefIdSet {
         arena_cache
-        desc { "finding externally called associated functions" }
+        desc { "finding externally called functions" }
     }
 
     /// The Erlang function name of a callable item.
@@ -2026,11 +2027,6 @@ rustc_queries! {
     /// crate, returning `None` if there is no entry point (such as for library crates).
     query entry_fn(_: ()) -> Option<(DefId, EntryFnType)> {
         desc { "looking up the entry function of a crate" }
-    }
-
-    /// Finds the `rustc_proc_macro_decls` item of a crate.
-    query proc_macro_decls_static(_: ()) -> Option<LocalDefId> {
-        desc { "looking up the proc macro declarations for a crate" }
     }
 
     // The macro which defines `rustc_metadata::provide_extern` depends on this query's name.

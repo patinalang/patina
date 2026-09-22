@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
 
@@ -15,29 +15,6 @@ extern mod io;
 
 #[allow(unused)]
 extern mod patina_fmt;
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 // source: patina-by-example/src/fn/parameters.md
 // block: 2/2
@@ -57,13 +34,18 @@ fn choose_op(op: MathOp) -> fnref(int, int) -> int {
 }
 
 pub fn main() {
-    let fx = || { { io::put_chars([["fx evaluated!"]]); io::nl(); }; 3 };
+    let fx =
+        ||
+            {
 
+
+                // won't print anything
+
+                { io::put_chars([["fx evaluated!"]]); io::nl(); };
+                3
+            };
     let fy = || { { io::put_chars([["fy evaluated!"]]); io::nl(); }; 5 };
-
-    // won't print anything
     let lazy_result = lazy_add(fx, fy);
-
     let op = choose_op(MathOp::Add);
     {
         io::put_chars([[patina_fmt::display(3), " op ",

@@ -95,7 +95,12 @@ struct Args {
 }
 
 fn main() -> ExitCode {
-    let args = Args::parse();
+    let args = match Args::try_parse() {
+        Ok(args) => args,
+        Err(err) => err.exit(),
+    };
+
+    let server = compile::compile_server::SyncServer::start();
 
     let stages = args
         .dump
@@ -128,7 +133,15 @@ fn main() -> ExitCode {
     }
 
     match catch_fatal_errors(|| {
-        compile::compile(&stages, &args.file, &src, &args.out_dir, &pkg_name, &args.externs)
+        compile::compile(
+            &stages,
+            &args.file,
+            &src,
+            &args.out_dir,
+            &pkg_name,
+            &args.externs,
+            &server,
+        )
     }) {
         Ok(()) => ExitCode::SUCCESS,
         Err(_) => ExitCode::FAILURE,

@@ -10,11 +10,11 @@ error[E0432]: unresolved import `Std`
 LL | use Std::Fmt;
    |     ^^^ use of undeclared type `Std`
 
-error: cannot find attribute `derive` in this scope
-  --> tests/ui/src/error/multiple_error_types/dynamic_errors__01.pt:10:3
+error: cannot find derive macro `Debug` in this scope
+  --> tests/ui/src/error/multiple_error_types/dynamic_errors__01.pt:10:10
    |
 LL | #[derive(Debug)]
-   |   ^^^^^^
+   |          ^^^^^
 
 error: cannot find macro `write` in this scope
   --> tests/ui/src/error/multiple_error_types/dynamic_errors__01.pt:15:9

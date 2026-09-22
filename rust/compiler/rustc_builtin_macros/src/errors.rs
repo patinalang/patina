@@ -122,22 +122,6 @@ pub(crate) struct ConcatCStrLit {
 }
 
 #[derive(Diagnostic)]
-#[diag("cannot export macro_rules! macros from a `proc-macro` crate type currently")]
-pub(crate) struct ExportMacroRules {
-    #[primary_span]
-    pub(crate) span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag(
-    "`proc-macro` crate types currently cannot export any items other than functions tagged with `#[proc_macro]`, `#[proc_macro_derive]`, or `#[proc_macro_attribute]`"
-)]
-pub(crate) struct ProcMacro {
-    #[primary_span]
-    pub(crate) span: Span,
-}
-
-#[derive(Diagnostic)]
 #[diag("trace_macros! accepts only `true` or `false`")]
 pub(crate) struct TraceMacros {
     #[primary_span]
@@ -1026,14 +1010,6 @@ pub(crate) struct TakesNoArguments<'a> {
     #[primary_span]
     pub span: Span,
     pub name: &'a str,
-}
-
-#[derive(Diagnostic)]
-#[diag("the `#[{$path}]` attribute is only usable with crates of the `proc-macro` crate type")]
-pub(crate) struct AttributeOnlyUsableWithCrateType<'a> {
-    #[primary_span]
-    pub span: Span,
-    pub path: &'a str,
 }
 
 #[derive(Diagnostic)]

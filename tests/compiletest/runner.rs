@@ -31,7 +31,17 @@ pub fn run(pt_path: &Path, bless: bool) -> Result<(), Failed> {
 
 pub fn run_exs(pt_path: &Path, exs_path: &Path) -> Result<(), Failed> {
     let out_dir = tempfile::tempdir().expect("create temp out dir");
-    run_compile(&[], &["beam"], pt_path, out_dir.path());
+    let compiled = run_compile(&[], &["beam"], pt_path, out_dir.path());
+
+    if !compiled.status.success() {
+        return Err(Failed::from(format!(
+            "failed to compile {}\nstatus: {}\nstdout:\n{}stderr:\n{}",
+            pt_path.display(),
+            compiled.status,
+            String::from_utf8_lossy(&compiled.stdout),
+            String::from_utf8_lossy(&compiled.stderr),
+        )));
+    }
 
     let output = Command::new("elixir")
         .arg(

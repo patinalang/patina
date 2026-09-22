@@ -828,8 +828,6 @@ mod desc {
     pub(crate) const parse_stack_protector: &str =
         "one of (`none` (default), `basic`, `strong`, or `all`)";
     pub(crate) const parse_branch_protection: &str = "a `,` separated combination of `bti`, `gcs`, `pac-ret`, (optionally with `pc`, `b-key`, `leaf` if `pac-ret` is set)";
-    pub(crate) const parse_proc_macro_execution_strategy: &str =
-        "one of supported execution strategies (`same-thread`, or `cross-thread`)";
     pub(crate) const parse_inlining_threshold: &str =
         "either a boolean (`yes`, `no`, `on`, `off`, etc), or a non-negative number";
     pub(crate) const parse_llvm_module_flag: &str = "<key>:<type>:<value>:<behavior>. Type must currently be `u32`. Behavior should be one of (`error`, `warning`, `require`, `override`, `append`, `appendunique`, `max`, `min`)";
@@ -1918,18 +1916,6 @@ pub mod parse {
         true
     }
 
-    pub(crate) fn parse_proc_macro_execution_strategy(
-        slot: &mut ProcMacroExecutionStrategy,
-        v: Option<&str>,
-    ) -> bool {
-        *slot = match v {
-            Some("same-thread") => ProcMacroExecutionStrategy::SameThread,
-            Some("cross-thread") => ProcMacroExecutionStrategy::CrossThread,
-            _ => return false,
-        };
-        true
-    }
-
     pub(crate) fn parse_inlining_threshold(slot: &mut InliningThreshold, v: Option<&str>) -> bool {
         match v {
             Some("always" | "yes") => {
@@ -2552,9 +2538,6 @@ options! {
         "print layout information for each type encountered (default: no)"),
     proc_macro_backtrace: bool = (false, parse_bool, [UNTRACKED],
          "show backtraces for panics during proc-macro execution (default: no)"),
-    proc_macro_execution_strategy: ProcMacroExecutionStrategy = (ProcMacroExecutionStrategy::SameThread,
-        parse_proc_macro_execution_strategy, [UNTRACKED],
-        "how to run proc-macro code (default: same-thread)"),
     profile_closures: bool = (false, parse_no_value, [UNTRACKED],
         "profile size of closures"),
     profile_sample_use: Option<PathBuf> = (None, parse_opt_pathbuf, [TRACKED],

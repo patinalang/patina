@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -16,29 +16,6 @@ extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
-
 // source: patina-by-example/src/primitives/lists.md
 // block: 1/1
 
@@ -51,7 +28,19 @@ fn main() ({
     // `.get(n)` can be used to traverse to and return the nth element of the list
     // as an `Option`.
     (match ((xs as [int]).get((0 as int)) as {type error}) {
-        Some(xval) => {
+        Some(xval) =>
+            // `len` returns the count of elements in the list.
+            // Internally, it does that by traversing the list and counting all elements.
+
+            // The head and tail of a list can be retrieved with `head` and `tail`
+            // `head` is an `Option`, and is None for empty lists; `tail` always succeeds.
+
+            // Lists can be prepended in constant time using the following syntax:
+            // This creates a new list, but the tail is not duplicated - both `xs`
+            // and `more_xs` are internally the same VM object.
+
+            // Lists can also be destructured using a similar syntax
+            {
             ((io::put_chars as
                     fn(term) -> term)(([([("elem 0: " as str),
                                 ((patina_fmt::display as
@@ -71,24 +60,16 @@ fn main() ({
                 fn(term) -> term)(([([("Number of elements in array: " as
                                 str),
                             ((patina_fmt::display as
-                                    fn(term) -> term)(
-
-                                // `len` returns the count of elements in the list.
-                                // Internally, it does that by traversing the list and counting all elements.
-                                ((xs as [int]).len() as {type error})) as term)] as [term])]
-                as [[term]])) as term);
+                                    fn(term) -> term)(((xs as [int]).len() as {type error})) as
+                                term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("First element of the list: " as str),
                             ((patina_fmt::display as
-                                    fn(term) -> term)(
-
-                                // The head and tail of a list can be retrieved with `head` and `tail`
-                                // `head` is an `Option`, and is None for empty lists; `tail` always succeeds.
-                                ((xs as [int]).head as {type error})) as term)] as [term])]
-                as [[term]])) as term);
+                                    fn(term) -> term)(((xs as [int]).head as {type error})) as
+                                term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -99,8 +80,6 @@ fn main() ({
                                 term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
-
-    // Lists can be prepended in constant time using the following syntax:
     let more_xs =
         ([(-(1 as int) as int), (0 as int), ..(xs as [int])] as [int]);
     ({
@@ -108,15 +87,11 @@ fn main() ({
                 fn(term) -> term)(([([("more_xs tail is equal to xs: " as
                                 str),
                             ((patina_fmt::display as
-                                    fn(term) -> term)(
-                                // This creates a new list, but the tail is not duplicated - both `xs`
-                                // and `more_xs` are internally the same VM object.
-                                (((more_xs as [int]).tail as {type error}) == (xs as [int])
-                                    as bool)) as term)] as [term])] as [[term]])) as term);
+                                    fn(term) -> term)((((more_xs as [int]).tail as {type error})
+                                    == (xs as [int]) as bool)) as term)] as [term])] as
+                [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
-
-    // Lists can also be destructured using a similar syntax
     let [first, second, third, rest@_..] = (more_xs as [int]) else
         { (return as !) };
     ({

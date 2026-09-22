@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
 
@@ -16,29 +16,6 @@ extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
-
 // source: patina-by-example/src/flow_control/while_let.md
 // block: 2/2
 
@@ -50,6 +27,10 @@ pub fn main() {
     // `Some(i)`, evaluate the block (`{}`). Else `break`.
     while let Some(i) = optional {
         if i > 9 {
+            // ^ Less rightward drift and doesn't require
+            // explicitly handling the failing case.
+            // ^ `if let` had additional optional `else`/`else if`
+            // clauses. `while let` does not have these.
             { io::put_chars([["Greater than 9, quit!"]]); io::nl(); };
             optional = None;
         } else {
@@ -60,9 +41,5 @@ pub fn main() {
             };
             optional = Some(i + 1);
         }
-        // ^ Less rightward drift and doesn't require
-        // explicitly handling the failing case.
     }
-    // ^ `if let` had additional optional `else`/`else if`
-    // clauses. `while let` does not have these.
 }

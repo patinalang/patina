@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
 
@@ -16,29 +16,6 @@ extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
-
 // source: patina-by-example/src/error/multiple_error_types/wrap_error.md
 // block: 1/1
 
@@ -49,7 +26,6 @@ use Std::Fmt;
 
 type Result<T> = Std::Result::Result<T, DoubleError>;
 
-#[derive(Debug)]
 enum DoubleError {
     EmptyList,
 
@@ -101,7 +77,9 @@ fn double_first(list: [str]) -> Result<int> {
 
 fn print(result: Result<int>) {
     match result {
-        Ok(n) => {
+        Ok(n) =>
+
+            {
             io::put_chars([["The first doubled is ",
                                 patina_fmt::display(n)]]);
             io::nl();
@@ -121,12 +99,10 @@ fn print(result: Result<int>) {
         }
     }
 }
-
 pub fn main() {
     let numbers = ["42", "93", "18"];
     let empty = [];
     let strings = ["tofu", "93", "18"];
-
     print(double_first(numbers));
     print(double_first(empty));
     print(double_first(strings));

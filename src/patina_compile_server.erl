@@ -5,13 +5,18 @@
 -behaviour(gen_server).
 -export([init/1, handle_call/3, handle_cast/2, handle_continue/2]).
 
+-define(ACCEPT_TIMEOUT, timer:seconds(30)).
+-define(MACRO_TIMEOUT_SECONDS, 30).
+-define(MACRO_TIMEOUT, timer:seconds(?MACRO_TIMEOUT_SECONDS)).
+
+
 start_link(SockPath) ->
     gen_server:start_link(?MODULE, [SockPath], []).
 
 init([SockPath]) ->
     {ok, Socket} = socket:open(local, stream, default, #{}),
-    socket:bind(Socket, #{family => local, path => SockPath}),
-    socket:listen(Socket),
+    ok = socket:bind(Socket, #{family => local, path => SockPath}),
+    ok = socket:listen(Socket),
     {ok, Socket, {continue, accept}}.
 
 handle_call(_Request, _From, Sock) ->
@@ -21,41 +26,130 @@ handle_cast(_Msg, Sock) ->
     {noreply, Sock}.
 
 handle_continue(accept, Sock) ->
-    {ok, ClientSock} = socket:accept(Sock),
-    socket_loop(ClientSock),
-    socket:close(ClientSock),
-    {noreply, Sock, {continue, accept}}.
+    Deadline = erlang:monotonic_time(millisecond) + ?ACCEPT_TIMEOUT,
+    case accept_client(Sock, Deadline) of
+        {ok, ClientSock} ->
+            socket_loop(ClientSock),
+            socket:close(ClientSock);
+        {error, Reason} ->
+            io:format(standard_error, "patina compile server cannot accept: ~tp~n", [Reason])
+    end,
+    erlang:halt(0).
+
+accept_client(Sock, Deadline) ->
+    case Deadline - erlang:monotonic_time(millisecond) of
+        Remaining when Remaining =< 0 ->
+            {error, timeout};
+        Remaining ->
+            case socket:accept(Sock, Remaining) of
+                {ok, ClientSock} ->
+                    {ok, ClientSock};
+                {error, timeout} ->
+                    {error, timeout};
+                {error, Reason} ->
+                    timer:sleep(1),
+                    case Deadline - erlang:monotonic_time(millisecond) =< 0 of
+                        true -> {error, Reason};
+                        false -> accept_client(Sock, Deadline)
+                    end
+            end
+    end.
 
 socket_loop(Sock) ->
     case read_msg(Sock) of
-        {ok, [Op, Eaf]} ->
-            handle_request(Sock, Op, Eaf),
+        {ok, [Op | Args]} ->
+            handle_request(Sock, Op, Args),
             socket_loop(Sock);
         closed ->
             ok
     end.
 
-handle_request(Sock, Op, Eaf) ->
-    Forms = binary_to_term(Eaf),
+handle_request(Sock, Op, Args) ->
     try
-        case Op of
-            ~"compile" ->
-                case compile_forms(Forms) of
-                    {ok, _Mod, Beam, Warnings} ->
-                        write_msg(Sock, [~"ok", Beam, Warnings]);
-                    {error, Errors, Warnings} ->
-                        write_msg(Sock, [~"error", Errors, Warnings])
-                end;
-            ~"abstr" ->
-                Rendered = unicode:characters_to_binary(io_lib:format("~tp", [Forms])),
-                write_msg(Sock, [~"ok", Rendered]);
-            ~"erl" ->
-                Rendered = unicode:characters_to_binary([erl_prettypr:format(erl_syntax:form_list(Forms)), "\n"]),
-                write_msg(Sock, [~"ok", Rendered])
-        end
+        do_request(Sock, Op, Args)
     catch
         Class:Reason:Stacktrace ->
             write_msg(Sock, [~"raise", Class, Reason, Stacktrace])
+    end.
+
+do_request(Sock, ~"compile", [Eaf]) ->
+    case compile_forms(binary_to_term(Eaf)) of
+        {ok, _Mod, Beam, Warnings} ->
+            write_msg(Sock, [~"ok", Beam, Warnings]);
+        {error, Errors, Warnings} ->
+            write_msg(Sock, [~"error", Errors, Warnings])
+    end;
+do_request(Sock, ~"abstr", [Eaf]) ->
+    Rendered = unicode:characters_to_binary(io_lib:format("~tp", [binary_to_term(Eaf)])),
+    write_msg(Sock, [~"ok", Rendered]);
+do_request(Sock, ~"erl", [Eaf]) ->
+    Forms = binary_to_term(Eaf),
+    Rendered = unicode:characters_to_binary([erl_prettypr:format(erl_syntax:form_list(Forms)), "\n"]),
+    write_msg(Sock, [~"ok", Rendered]);
+do_request(Sock, ~"code_path", Dirs) ->
+    lists:foreach(fun(Dir) -> code:add_pathz(binary_to_list(Dir)) end, Dirs),
+    write_msg(Sock, [~"ok"]);
+do_request(Sock, ~"echo", [Bin]) ->
+    write_msg(Sock, [~"ok", term_to_binary(binary_to_term(Bin), [{minor_version, 2}])]);
+do_request(Sock, ~"macro", [Mod, Fun | ArgBins]) ->
+    Args = [binary_to_term(Arg) || Arg <- ArgBins],
+    Module = binary_to_atom(Mod, utf8),
+    Function = binary_to_atom(Fun, utf8),
+    run_macro(Sock, Module, Function, Args).
+
+run_macro(Sock, Module, Function, Args) ->
+    {Pid, Ref} = spawn_opt(fun() ->
+        Parent = receive {reply_to, Parent0} -> Parent0 end,
+
+        Result = try
+            {ok, apply(Module, Function, Args)}
+        catch
+            Class:Reason:Stack ->
+                FilteredStack = lists:takewhile(fun
+                    ({?MODULE, _, _, _}) -> false;
+                    (_) -> true
+                end, Stack),
+                {error, {Class, Reason, FilteredStack}}
+        end,
+        Parent ! {Parent, Result}
+    end, [{monitor, [{alias, reply_demonitor}]}]),
+
+    Pid ! {reply_to, Ref},
+
+    Result =
+        case receive_run_macro_result(Ref) of
+            {error, timeout} ->
+                exit(Pid, kill),
+                case receive_run_macro_result(Ref) of
+                    {error, {down, killed}} -> {error, timeout};
+                    Other -> Other
+                end;
+
+            Other ->
+                Other
+        end,
+
+    case Result of
+        {ok, Tokens} ->
+            write_msg(Sock, [~"ok", term_to_binary(Tokens, [{minor_version, 2}])]);
+        {error, {Class, Reason, Stack}} ->
+            write_msg(Sock, [~"error", Class, Reason, Stack]);
+        {error, {down, Reason}} ->
+            write_msg(Sock, [~"down", Reason]);
+        {error, timeout} ->
+            write_msg(Sock, [~"timeout"])
+    end.
+
+receive_run_macro_result(Ref) ->
+    receive
+        {Ref, {ok, Result}} ->
+            {ok, Result};
+        {Ref, {error, {Class, Reason, Stack}}} ->
+            {error, {Class, Reason, Stack}};
+        {'DOWN', Ref, process, _Pid, Reason} ->
+            {error, {down, Reason}}
+    after ?MACRO_TIMEOUT ->
+        {error, timeout}
     end.
 
 compile_forms(Forms) ->
@@ -95,7 +189,7 @@ read_msg(Sock) ->
     case socket:recv(Sock, 1) of
         {ok, <<Len:8/unsigned-integer>>} ->
             {ok, lists:map(fun(_) -> read_bin(Sock) end, lists:seq(1, Len))};
-        {error, closed} ->
+        {error, _} ->
             closed
     end.
 

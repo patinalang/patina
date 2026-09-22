@@ -397,7 +397,7 @@ impl CodegenBackend for DummyCodegenBackend {
         // can still get the frontend handling for binaries. For all library
         // like crate types cargo will fallback to rlib unless you specifically
         // say that only a different crate type must be used.
-        vec![CrateType::Rlib, CrateType::Executable]
+        vec![CrateType::Rlib, CrateType::ProcMacro, CrateType::Executable]
     }
 
     fn target_cpu(&self, _sess: &Session) -> String {

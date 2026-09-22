@@ -224,11 +224,11 @@ use rustc_data_structures::owned_slice::{OwnedSlice, slice_owned};
 use rustc_data_structures::svh::Svh;
 use rustc_errors::{DiagArgValue, IntoDiagArg};
 use rustc_fs_util::try_canonicalize;
+use rustc_session::Session;
 use rustc_session::cstore::CrateSource;
 use rustc_session::filesearch::FileSearch;
 use rustc_session::search_paths::PathKind;
 use rustc_session::utils::CanonicalizedPath;
-use rustc_session::{Session, config};
 use rustc_span::{Span, Symbol};
 use rustc_target::spec::{Target, TargetTuple};
 use tempfile::Builder as TempFileBuilder;
@@ -253,7 +253,6 @@ pub(crate) struct CrateLocator<'a> {
     target: &'a Target,
     tuple: TargetTuple,
     filesearch: &'a FileSearch,
-    is_proc_macro: bool,
     path_kind: PathKind,
 }
 
@@ -340,24 +339,7 @@ impl<'a> CrateLocator<'a> {
             tuple: sess.opts.target_triple.clone(),
             filesearch: sess.target_filesearch(),
             path_kind,
-            is_proc_macro: false,
         }
-    }
-
-    pub(crate) fn for_proc_macro(&mut self, sess: &'a Session, path_kind: PathKind) {
-        self.is_proc_macro = true;
-        self.target = &sess.host;
-        self.tuple = TargetTuple::from_tuple(config::host_tuple());
-        self.filesearch = sess.host_filesearch();
-        self.path_kind = path_kind;
-    }
-
-    pub(crate) fn for_target_proc_macro(&mut self, sess: &'a Session, path_kind: PathKind) {
-        self.is_proc_macro = true;
-        self.target = &sess.target;
-        self.tuple = sess.opts.target_triple.clone();
-        self.filesearch = sess.target_filesearch();
-        self.path_kind = path_kind;
     }
 
     pub(crate) fn maybe_load_library_crate(
@@ -548,10 +530,6 @@ impl<'a> CrateLocator<'a> {
     }
 
     fn needs_crate_flavor(&self, flavor: CrateFlavor) -> bool {
-        if flavor == CrateFlavor::Dylib && self.is_proc_macro {
-            return true;
-        }
-
         if self.only_needs_metadata {
             flavor == CrateFlavor::Rmeta
         } else {
@@ -702,14 +680,6 @@ impl<'a> CrateLocator<'a> {
         libpath: &Path,
     ) -> Option<Svh> {
         let header = metadata.get_header();
-        if header.is_proc_macro_crate != self.is_proc_macro {
-            info!(
-                "Rejecting via proc macro: expected {} got {}",
-                self.is_proc_macro, header.is_proc_macro_crate,
-            );
-            return None;
-        }
-
         if self.exact_paths.is_empty() && self.crate_name != header.name {
             info!("Rejecting via crate name");
             return None;
@@ -948,6 +918,27 @@ fn get_rmeta_metadata_section<'a, 'p>(filename: &'p Path) -> Result<OwnedSlice, 
     })?;
 
     Ok(slice_owned(mmap, Deref::deref))
+}
+
+/// Whether the package whose metadata is in the rmeta file at `path` exports
+/// any procedural macros.
+///
+/// Returns `false` when the file cannot be read or was produced by a different
+/// metadata version. Callers use this as a hint, so an unreadable dependency is
+/// simply not a macro provider.
+pub fn exports_proc_macros(path: &Path) -> bool {
+    let Ok(slice) = get_rmeta_metadata_section(path) else {
+        return false;
+    };
+    let Ok(blob) = MetadataBlob::new(slice) else {
+        return false;
+    };
+    // The version byte lives in `METADATA_HEADER`, so this guards against
+    // decoding a header whose layout has since changed.
+    if !blob.starts_with(METADATA_HEADER) {
+        return false;
+    }
+    blob.get_header().has_proc_macros
 }
 
 /// A diagnostic function for dumping crate metadata to an output stream.

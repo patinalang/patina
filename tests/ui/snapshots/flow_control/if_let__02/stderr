@@ -1,52 +1,88 @@
-error[E0425]: cannot find type `Option` in this scope
-  --> tests/ui/src/flow_control/if_let__02.pt:7:17
+error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
+  --> tests/ui/src/flow_control/if_let__02.pt:6:18
    |
-LL |     let letter: Option<int> = None;
-   |                 ^^^^^^ not found in this scope
+LL |     let number = Some(7);
+   |                  ^^^^ not found in this scope
+   |
+help: consider importing one of these tuple variants
+  --> <patina-prelude>:11:1
+   |
+LL + use crate::Option::Some;
+   |
+LL + use Core::Option::Some;
+   |
 
 error[E0425]: cannot find value `None` in this scope
   --> tests/ui/src/flow_control/if_let__02.pt:7:31
    |
 LL |     let letter: Option<int> = None;
    |                               ^^^^ not found in this scope
-
-error[E0425]: cannot find type `Option` in this scope
-  --> tests/ui/src/flow_control/if_let__02.pt:8:19
    |
-LL |     let emoticon: Option<int> = None;
-   |                   ^^^^^^ not found in this scope
+help: consider importing one of these unit variants
+  --> <patina-prelude>:11:1
+   |
+LL + use crate::Option::None;
+   |
+LL + use Core::Option::None;
+   |
 
 error[E0425]: cannot find value `None` in this scope
   --> tests/ui/src/flow_control/if_let__02.pt:8:33
    |
 LL |     let emoticon: Option<int> = None;
    |                                 ^^^^ not found in this scope
+   |
+help: consider importing one of these unit variants
+  --> <patina-prelude>:11:1
+   |
+LL + use crate::Option::None;
+   |
+LL + use Core::Option::None;
+   |
 
 error[E0531]: cannot find tuple struct or tuple variant `Some` in this scope
   --> tests/ui/src/flow_control/if_let__02.pt:12:12
    |
 LL |     if let Some(i) = number {
    |            ^^^^ not found in this scope
+   |
+help: consider importing one of these tuple variants
+  --> <patina-prelude>:11:1
+   |
+LL + use crate::Option::Some;
+   |
+LL + use Core::Option::Some;
+   |
 
 error[E0531]: cannot find tuple struct or tuple variant `Some` in this scope
   --> tests/ui/src/flow_control/if_let__02.pt:17:12
    |
 LL |     if let Some(i) = letter {
    |            ^^^^ not found in this scope
+   |
+help: consider importing one of these tuple variants
+  --> <patina-prelude>:11:1
+   |
+LL + use crate::Option::Some;
+   |
+LL + use Core::Option::Some;
+   |
 
 error[E0531]: cannot find tuple struct or tuple variant `Some` in this scope
   --> tests/ui/src/flow_control/if_let__02.pt:27:12
    |
 LL |     if let Some(i) = emoticon {
    |            ^^^^ not found in this scope
-
-error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
-  --> tests/ui/src/flow_control/if_let__02.pt:6:18
    |
-LL |     let number = Some(7);
-   |                  ^^^^ not found in this scope
+help: consider importing one of these tuple variants
+  --> <patina-prelude>:11:1
+   |
+LL + use crate::Option::Some;
+   |
+LL + use Core::Option::Some;
+   |
 
-error: aborting due to 8 previous errors
+error: aborting due to 6 previous errors
 
 Some errors have detailed explanations: E0425, E0531.
 For more information about an error, try `rustc --explain E0425`.

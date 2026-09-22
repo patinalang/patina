@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
 
@@ -15,29 +15,6 @@ extern mod io;
 
 #[allow(unused)]
 extern mod patina_fmt;
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 // source: patina-by-example/src/generics/bounds/testcase_empty.md
 // block: 1/1
@@ -61,13 +38,14 @@ pub fn main() {
     let cardinal = Cardinal;
     let blue_jay = BlueJay;
     let _turkey = Turkey;
+
+    // `red()` won't work on a blue jay nor vice versa
+    // because of the bounds.
+    //println!("A turkey is {}", red(_turkey));
+    // ^ TODO: Try uncommenting this line.
     {
         io::put_chars([["A cardinal is ",
-                            patina_fmt::display(
-
-                                // `red()` won't work on a blue jay nor vice versa
-                                // because of the bounds.
-                                red(cardinal))]]);
+                            patina_fmt::display(red(cardinal))]]);
         io::nl();
     };
     {
@@ -75,6 +53,4 @@ pub fn main() {
                             patina_fmt::display(blue(blue_jay))]]);
         io::nl();
     };
-    //println!("A turkey is {}", red(_turkey));
-    // ^ TODO: Try uncommenting this line.
 }

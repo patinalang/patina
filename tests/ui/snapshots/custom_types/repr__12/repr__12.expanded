@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
 
@@ -16,29 +16,6 @@ extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
-
 // source: patina-by-example/src/custom_types/repr.md
 // block: 12/14
 
@@ -53,27 +30,26 @@ pub enum Result<T, E> {
 }
 
 pub fn main() {
+    // (a"ok", 42)
+
+    // (a"error", "reason")
+
+    // Note that `Result<T, E>` can't represent a bare `:ok` by itself,
+    // but we have helpers for that.
+    // a"ok"
     {
         io::put_chars([[patina_fmt::debug(Result::<int, str>::Ok(42) as
                                     term)]]);
         io::nl();
     };
     {
-        io::put_chars([[patina_fmt::debug(
-                                // (a"ok", 42)
-
-                                Result::<int, str>::Err("reason") as term)]]);
-        io::nl();
-    };
-    {
-        io::put_chars([[patina_fmt::debug(
-                                // (a"error", "reason")
-
-                                // Note that `Result<T, E>` can't represent a bare `:ok` by itself,
-                                // but we have helpers for that.
-                                Result::<(), str>::Ok(()).into::<Compat::BareOkResult>() as
+        io::put_chars([[patina_fmt::debug(Result::<int, str>::Err("reason") as
                                     term)]]);
         io::nl();
     };
-    // a"ok"
+    {
+        io::put_chars([[patina_fmt::debug(Result::<(),
+                                                str>::Ok(()).into::<Compat::BareOkResult>() as term)]]);
+        io::nl();
+    };
 }

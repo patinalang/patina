@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -16,108 +16,75 @@ extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
-
 // source: patina-by-example/src/flow_control/match.md
 // block: 1/1
 
 fn main() ({
     let number = (13 as int);
+    // TODO ^ Try different values for `number`
+
+    // Match a single value
+    // Match several values
+    // TODO ^ Try adding 13 to the list of prime values
+    // Match an inclusive range
+    // Handle the rest of cases
+    // TODO ^ Try commenting out this catch-all arm
+
+    // Match is an expression too
+    // The arms of a match must cover all the possible values
+    // TODO ^ Try commenting out one of these arms
+
+
+    // You can use the pin operator (^) to match against bound variables
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("Tell me about " as str),
-                            ((patina_fmt::display as
-                                    fn(term) -> term)(
-                                // TODO ^ Try different values for `number`
-
-                                (number as int)) as term)] as [term])] as [[term]])) as
-            term);
+                            ((patina_fmt::display as fn(term) -> term)((number as int))
+                                as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     (match (number as int) {
-
-            // Match a single value
-            1 => {
+        1 => {
             ((io::put_chars as
                     fn(term) -> term)(([([("One!" as str)] as [str])] as
                     [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
-
-            // Match several values
-            2 | 3 | 5 | 7 | 11 => {
+        2 | 3 | 5 | 7 | 11 => {
             ((io::put_chars as
                     fn(term) -> term)(([([("This is a prime" as str)] as [str])]
                     as [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
-
-            // TODO ^ Try adding 13 to the list of prime values
-            // Match an inclusive range
-            13...19 => {
+        13...19 => {
             ((io::put_chars as
                     fn(term) -> term)(([([("A teen" as str)] as [str])] as
                     [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
-
-            // Handle the rest of cases
-            _ => {
+        _ => {
             ((io::put_chars as
                     fn(term) -> term)(([([("Ain\'t special" as str)] as [str])]
                     as [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
     } as ())
-    // TODO ^ Try commenting out this catch-all arm
-
     let boolean = (true as bool);
-    // Match is an expression too
     let binary =
-        (match (boolean as bool) {
-
-                // The arms of a match must cover all the possible values
-                false => (0 as int),
-            true => (1 as int),
-        } as int);
+        (match (boolean as bool) { false => (0 as int), true => (1 as int), }
+            as int);
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
-                                    fn(term) -> term)(
-                                // TODO ^ Try commenting out one of these arms
-
-                                (boolean as bool)) as term), (" -> " as str),
+                                    fn(term) -> term)((boolean as bool)) as term),
+                            (" -> " as str),
                             ((patina_fmt::display as fn(term) -> term)((binary as int))
                                 as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
-
     let expected_value = (42 as int);
     (match (123 as int) {
-
-            // You can use the pin operator (^) to match against bound variables
-            ^expected_value => {
+        ^expected_value => {
             ((io::put_chars as
                     fn(term) -> term)(([([("found expected value" as str)] as
                             [str])] as [[str]])) as term);

@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -16,29 +16,6 @@ extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
-
 // source: patina-by-example/src/custom_types/repr.md
 // block: 12/14
 
@@ -54,6 +31,13 @@ enum Result<T, E> {
 }
 
 fn main() ({
+    // (a"ok", 42)
+
+    // (a"error", "reason")
+
+    // Note that `Result<T, E>` can't represent a bare `:ok` by itself,
+    // but we have helpers for that.
+    // a"ok"
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
@@ -66,10 +50,7 @@ fn main() ({
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)(
-                                // (a"ok", 42)
-
-                                (((Result::<int, str>::Err as
+                                    fn(term) -> term)((((Result::<int, str>::Err as
                                             fn(str) -> Result<int, str> {Result::<int, str>::Err})(("reason"
                                             as str)) as Result<int, str>) as term as term)) as term)] as
                         [term])] as [[term]])) as term);
@@ -78,17 +59,11 @@ fn main() ({
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)(
-                                // (a"error", "reason")
-
-                                // Note that `Result<T, E>` can't represent a bare `:ok` by itself,
-                                // but we have helpers for that.
-                                ((((Result::<(), str>::Ok as
+                                    fn(term) -> term)(((((Result::<(), str>::Ok as
                                                 fn(()) -> Result<(), str> {Result::<(), str>::Ok})((() as
                                                 ())) as Result<(), str>).into::<Compat::BareOkResult>() as
                                         {type error}) as term as {type error})) as term)] as
                         [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
-    // a"ok"
 } as ())

@@ -10,15 +10,15 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         '$patina_loop_10_15'/1,
-         '$patina_loop_10_18'/1,
+         '$patina_loop_5_15'/1,
+         '$patina_loop_5_18'/1,
          break_outer_loop/0,
-         '$patina_loop_11_30'/1,
-         '$patina_loop_11_34'/1,
-         '$patina_loop_11_37'/1,
+         '$patina_loop_6_30'/1,
+         '$patina_loop_6_34'/1,
+         '$patina_loop_6_37'/1,
          break_two_loops/0,
-         '$patina_loop_12_11'/1,
-         '$patina_loop_12_14'/1,
+         '$patina_loop_7_11'/1,
+         '$patina_loop_7_14'/1,
          outer_break_initializes/0]).
 
 '__info__'(functions) ->
@@ -34,7 +34,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'$patina_loop_10_15'(_value@0_0) ->
+'$patina_loop_5_15'(_value@0_0) ->
     _ = begin
             _value@0_1 = _value@0_0 + 1,
             '$patina_marker':break({break,
@@ -45,9 +45,9 @@
         end,
     '$patina_marker':continue(_value@0_1).
 
-'$patina_loop_10_18'(_value@0_0) ->
+'$patina_loop_5_18'(_value@0_0) ->
     _ = begin
-            case '$patina_loop_10_15'(_value@0_0) of
+            case '$patina_loop_5_15'(_value@0_0) of
                 {break,
                  _target_loop_depth@1_0,
                  _loop_value@2_0,
@@ -62,12 +62,12 @@
 
 break_outer_loop() ->
     _value@0_0 = 0,
-    case '$patina_loop_10_18'(_value@0_0) of
+    case '$patina_loop_5_18'(_value@0_0) of
         {break, 0, _loop_value@3_0, _value@0_1} ->
             _loop_value@3_0
     end.
 
-'$patina_loop_11_30'(_value@0_0) ->
+'$patina_loop_6_30'(_value@0_0) ->
     _ = begin
             _value@0_1 = _value@0_0 + 1,
             case _value@0_1 =:= 3 of
@@ -82,9 +82,9 @@ break_outer_loop() ->
         end,
     '$patina_marker':continue(_value@0_1).
 
-'$patina_loop_11_34'(_value@0_0) ->
+'$patina_loop_6_34'(_value@0_0) ->
     _ = begin
-            case '$patina_loop_11_30'(_value@0_0) of
+            case '$patina_loop_6_30'(_value@0_0) of
                 {break,
                  _target_loop_depth@1_0,
                  _loop_value@2_0,
@@ -97,9 +97,9 @@ break_outer_loop() ->
         end,
     '$patina_marker':continue(_value@0_1).
 
-'$patina_loop_11_37'(_value@0_0) ->
+'$patina_loop_6_37'(_value@0_0) ->
     _ = begin
-            case '$patina_loop_11_34'(_value@0_0) of
+            case '$patina_loop_6_34'(_value@0_0) of
                 {break,
                  _target_loop_depth@3_0,
                  _loop_value@4_0,
@@ -114,12 +114,12 @@ break_outer_loop() ->
 
 break_two_loops() ->
     _value@0_0 = 0,
-    case '$patina_loop_11_37'(_value@0_0) of
+    case '$patina_loop_6_37'(_value@0_0) of
         {break, 0, _loop_value@5_0, _value@0_1} ->
             _loop_value@5_0
     end.
 
-'$patina_loop_12_11'(_value@0_0) ->
+'$patina_loop_7_11'(_value@0_0) ->
     _ = begin
             _value@0_1 = 7,
             '$patina_marker':break({break, 0, {}, _value@0_1}),
@@ -127,9 +127,9 @@ break_two_loops() ->
         end,
     '$patina_marker':continue(_value@0_1).
 
-'$patina_loop_12_14'(_value@0_0) ->
+'$patina_loop_7_14'(_value@0_0) ->
     _ = begin
-            case '$patina_loop_12_11'(_value@0_0) of
+            case '$patina_loop_7_11'(_value@0_0) of
                 {break,
                  _target_loop_depth@1_0,
                  _loop_value@2_0,
@@ -144,7 +144,7 @@ break_two_loops() ->
 
 outer_break_initializes() ->
     begin _value@0_0 = {} end,
-    case '$patina_loop_12_14'(_value@0_0) of
+    case '$patina_loop_7_14'(_value@0_0) of
         {break, 0, _loop_value@3_0, _value@0_1} ->
             _loop_value@3_0
     end,

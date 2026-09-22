@@ -1026,6 +1026,14 @@ pub(crate) struct ProcMacroBadSig {
 }
 
 #[derive(Diagnostic)]
+#[diag("cannot validate {$kind} signature because the required `TokenStream` type is unavailable")]
+pub(crate) struct ProcMacroTokenStreamUnavailable {
+    #[primary_span]
+    pub span: Span,
+    pub kind: ProcMacroKind,
+}
+
+#[derive(Diagnostic)]
 #[diag("the feature `{$feature}` has already been enabled")]
 pub(crate) struct DuplicateFeature {
     pub feature: Symbol,

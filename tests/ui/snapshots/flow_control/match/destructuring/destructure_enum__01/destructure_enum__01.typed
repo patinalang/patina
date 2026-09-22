@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -15,29 +15,6 @@ extern mod io;
 
 #[allow(unused)]
 extern mod patina_fmt;
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 // source: patina-by-example/src/flow_control/match/destructuring/destructure_enum.md
 // block: 1/1
@@ -65,16 +42,16 @@ fn main() ({
         ((Color::RGB as
                 fn(int, int, int) -> Color {Color::RGB})((122 as int),
             (17 as int), (40 as int)) as Color);
+    // TODO ^ Try different variants for `color`
+
+    // An `enum` can be destructured using a `match`.
+    // Don't need another arm because all variants have been examined
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("What color is it?" as str)] as [str])]
                 as [[str]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
-
-    // TODO ^ Try different variants for `color`
-
-    // An `enum` can be destructured using a `match`.
     (match (color as Color) {
         Color::Red => {
             ((io::put_chars as
@@ -152,5 +129,4 @@ fn main() ({
             ((io::nl as fn() -> term)() as term);
         }
     } as ())
-    // Don't need another arm because all variants have been examined
 } as ())

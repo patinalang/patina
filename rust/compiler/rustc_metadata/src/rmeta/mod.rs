@@ -189,11 +189,14 @@ type SyntaxContextTable = LazyTable<u32, Option<LazyValue<SyntaxContextKey>>>;
 type ExpnDataTable = LazyTable<ExpnIndex, Option<LazyValue<ExpnData>>>;
 type ExpnHashTable = LazyTable<ExpnIndex, Option<LazyValue<ExpnHash>>>;
 
-#[derive(MetadataEncodable, LazyDecodable)]
-pub(crate) struct ProcMacroData {
-    proc_macro_decls_static: DefIndex,
-    stability: Option<hir::Stability>,
-    macros: LazyArray<DefIndex>,
+/// How a procedural macro is exposed to downstream crates.
+#[derive(Encodable, Decodable)]
+pub(crate) struct ProcMacroExport {
+    /// The macro's name; for a derive this is the trait name.
+    pub(crate) name: Ident,
+    pub(crate) helper_attrs: Vec<Symbol>,
+    pub(crate) module: Symbol,
+    pub(crate) function: Symbol,
 }
 
 /// Serialized crate metadata.
@@ -208,11 +211,11 @@ pub(crate) struct CrateHeader {
     pub(crate) triple: TargetTuple,
     pub(crate) hash: Svh,
     pub(crate) name: Symbol,
-    /// Whether this is the header for a proc-macro crate.
+    /// Whether this crate exports any proc macros.
     ///
-    /// This is separate from [`ProcMacroData`] to avoid having to update [`METADATA_VERSION`] every
-    /// time ProcMacroData changes.
-    pub(crate) is_proc_macro_crate: bool,
+    /// This is separate from [`ProcMacroExport`] to avoid having to update `METADATA_VERSION`
+    /// every time that record changes.
+    pub(crate) has_proc_macros: bool,
     /// Whether this crate metadata section is just a stub.
     /// Stubs do not contain the full metadata (it will be typically stored
     /// in a separate rmeta file).
@@ -223,21 +226,23 @@ pub(crate) struct CrateHeader {
 
 /// Serialized `.rmeta` data for a crate.
 ///
-/// When compiling a proc-macro crate, we encode many of
-/// the `LazyArray<T>` fields as `Lazy::empty()`. This serves two purposes:
+/// Historical reasoning for Lazy fields:
 ///
-/// 1. We avoid performing unnecessary work. Proc-macro crates can only
-/// export proc-macros functions, which are compiled into a shared library.
-/// As a result, a large amount of the information we normally store
-/// (e.g. optimized MIR) is unneeded by downstream crates.
-/// 2. We avoid serializing invalid `CrateNum`s. When we deserialize
-/// a proc-macro crate, we don't load any of its dependencies (since we
-/// just need to invoke a native function from the shared library).
-/// This means that any foreign `CrateNum`s that we serialize cannot be
-/// deserialized, since we will not know how to map them into the current
-/// compilation session. If we were to serialize a proc-macro crate like
-/// a normal crate, much of what we serialized would be unusable in addition
-/// to being unused.
+///     When compiling a proc-macro crate, we encode many of
+///     the `LazyArray<T>` fields as `Lazy::empty()`. This serves two purposes:
+///
+///     1. We avoid performing unnecessary work. Proc-macro crates can only
+///     export proc-macros functions, which are compiled into a shared library.
+///     As a result, a large amount of the information we normally store
+///     (e.g. optimized MIR) is unneeded by downstream crates.
+///     2. We avoid serializing invalid `CrateNum`s. When we deserialize
+///     a proc-macro crate, we don't load any of its dependencies (since we
+///     just need to invoke a native function from the shared library).
+///     This means that any foreign `CrateNum`s that we serialize cannot be
+///     deserialized, since we will not know how to map them into the current
+///     compilation session. If we were to serialize a proc-macro crate like
+///     a normal crate, much of what we serialized would be unusable in addition
+///     to being unused.
 #[derive(MetadataEncodable, LazyDecodable)]
 pub(crate) struct CrateRoot {
     /// A header used to detect if this is the right crate to load.
@@ -268,7 +273,7 @@ pub(crate) struct CrateRoot {
     impls: LazyArray<TraitImpls>,
     incoherent_impls: LazyArray<IncoherentImpls>,
     interpret_alloc_index: LazyArray<u64>,
-    proc_macro_data: Option<ProcMacroData>,
+    proc_macros: LazyArray<DefIndex>,
 
     tables: LazyTables,
     debugger_visualizers: LazyArray<DebuggerVisualizerFile>,
@@ -460,11 +465,11 @@ define_tables! {
     // `DefPathTable` up front, since we may only ever use a few
     // definitions from any given crate.
     def_keys: Table<DefIndex, LazyValue<DefKey>>,
-    proc_macro_quoted_spans: Table<usize, LazyValue<Span>>,
     variant_data: Table<DefIndex, LazyValue<VariantData>>,
     assoc_container: Table<DefIndex, LazyValue<ty::AssocContainer>>,
     macro_definition: Table<DefIndex, LazyValue<ast::DelimArgs>>,
     proc_macro: Table<DefIndex, MacroKind>,
+    proc_macro_export: Table<DefIndex, LazyValue<ProcMacroExport>>,
     deduced_param_attrs: Table<DefIndex, LazyArray<DeducedParamAttrs>>,
     trait_impl_trait_tys: Table<DefIndex, LazyValue<DefIdMap<ty::EarlyBinder<'static, Ty<'static>>>>>,
     doc_link_resolutions: Table<DefIndex, LazyValue<DocLinkResMap>>,

@@ -15,9 +15,9 @@ use rustc_session::config::{
     FmtDebug, FunctionReturn, IncrementalStateAssertion, InliningThreshold, Input,
     InstrumentCoverage, InstrumentXRay, LinkSelfContained, LinkerPluginLto, LocationDetail, LtoCli,
     MirIncludeSpans, NextSolverConfig, Offload, Options, OutFileName, OutputType, OutputTypes,
-    PAuthKey, PacRet, Passes, PatchableFunctionEntry, Polonius, ProcMacroExecutionStrategy, Strip,
-    SwitchWithOptPath, SymbolManglingVersion, WasiExecModel, build_configuration,
-    build_session_options, rustc_optgroups,
+    PAuthKey, PacRet, Passes, PatchableFunctionEntry, Polonius, Strip, SwitchWithOptPath,
+    SymbolManglingVersion, WasiExecModel, build_configuration, build_session_options,
+    rustc_optgroups,
 };
 use rustc_session::lint::Level;
 use rustc_session::search_paths::SearchPath;
@@ -725,7 +725,6 @@ fn test_unstable_options_tracking_hash() {
     untracked!(print_mono_items, true);
     untracked!(print_type_sizes, true);
     untracked!(proc_macro_backtrace, true);
-    untracked!(proc_macro_execution_strategy, ProcMacroExecutionStrategy::CrossThread);
     untracked!(profile_closures, true);
     untracked!(query_dep_graph, true);
     untracked!(self_profile, SwitchWithOptPath::Enabled(None));

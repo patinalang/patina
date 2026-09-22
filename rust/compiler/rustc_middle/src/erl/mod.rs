@@ -298,8 +298,8 @@ impl<'tcx> TyCtxt<'tcx> {
         };
 
         visible_outside_rust_module
-            || (self.def_kind(def_id) == DefKind::AssocFn
-                && self.assoc_fns_called_externally(()).contains(&def_id))
+            || (matches!(self.def_kind(def_id), DefKind::Fn | DefKind::AssocFn)
+                && self.fns_called_externally(()).contains(&def_id))
     }
 
     /// Classifies a call target identified by `caller` and `target`.

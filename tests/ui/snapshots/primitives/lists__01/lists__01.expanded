@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
 
@@ -16,29 +16,6 @@ extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
-
 // source: patina-by-example/src/primitives/lists.md
 // block: 1/1
 
@@ -50,7 +27,19 @@ pub fn main() {
     // `.get(n)` can be used to traverse to and return the nth element of the list
     // as an `Option`.
     match xs.get(0) {
-        Some(xval) => {
+        Some(xval) =>
+            // `len` returns the count of elements in the list.
+            // Internally, it does that by traversing the list and counting all elements.
+
+            // The head and tail of a list can be retrieved with `head` and `tail`
+            // `head` is an `Option`, and is None for empty lists; `tail` always succeeds.
+
+            // Lists can be prepended in constant time using the following syntax:
+            // This creates a new list, but the tail is not duplicated - both `xs`
+            // and `more_xs` are internally the same VM object.
+
+            // Lists can also be destructured using a similar syntax
+            {
             io::put_chars([["elem 0: ", patina_fmt::display({})]]);
             io::nl();
         }
@@ -58,39 +47,24 @@ pub fn main() {
     }
     {
         io::put_chars([["Number of elements in array: ",
-                            patina_fmt::display(
-
-                                // `len` returns the count of elements in the list.
-                                // Internally, it does that by traversing the list and counting all elements.
-                                xs.len())]]);
+                            patina_fmt::display(xs.len())]]);
         io::nl();
     };
     {
         io::put_chars([["First element of the list: ",
-                            patina_fmt::display(
-
-                                // The head and tail of a list can be retrieved with `head` and `tail`
-                                // `head` is an `Option`, and is None for empty lists; `tail` always succeeds.
-                                xs.head)]]);
+                            patina_fmt::display(xs.head)]]);
         io::nl();
     };
     {
         io::put_chars([["Rest of the list: ", patina_fmt::debug(xs.tail)]]);
         io::nl();
     };
-
-    // Lists can be prepended in constant time using the following syntax:
     let more_xs = [-1, 0, ..xs];
     {
         io::put_chars([["more_xs tail is equal to xs: ",
-                            patina_fmt::display(
-                                // This creates a new list, but the tail is not duplicated - both `xs`
-                                // and `more_xs` are internally the same VM object.
-                                more_xs.tail == xs)]]);
+                            patina_fmt::display(more_xs.tail == xs)]]);
         io::nl();
     };
-
-    // Lists can also be destructured using a similar syntax
     let [first, second, third, rest @ ..] = more_xs else { return };
     {
         io::put_chars([["Sum of first three elements is ",

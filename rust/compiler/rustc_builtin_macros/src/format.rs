@@ -1141,6 +1141,7 @@ fn lower_format_args_to_patina(ecx: &ExtCtxt<'_>, sp: Span, fmt: &FormatArgs) ->
     let patina_fmt_sym = Symbol::intern("patina_fmt");
     let display_sym = Symbol::intern("display");
     let debug_sym = Symbol::intern("debug");
+    let fmt_sp = ecx.with_call_site_ctxt(sp);
 
     let mut pieces: ThinVec<Box<Expr>> = ThinVec::new();
     for piece in &fmt.template {
@@ -1175,8 +1176,10 @@ fn lower_format_args_to_patina(ecx: &ExtCtxt<'_>, sp: Span, fmt: &FormatArgs) ->
                     None => ecx.expr_str(ph_span, error_sym),
                 };
 
-                let path =
-                    ecx.path(sp, vec![Ident::new(patina_fmt_sym, sp), Ident::new(fn_name, sp)]);
+                let path = ecx.path(
+                    sp,
+                    vec![Ident::new(patina_fmt_sym, fmt_sp), Ident::new(fn_name, fmt_sp)],
+                );
                 let render = ecx.expr_call(sp, ecx.expr_path(path), thin_vec![arg]);
 
                 pieces.push(render);

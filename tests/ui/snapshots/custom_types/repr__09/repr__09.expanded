@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
 
@@ -15,29 +15,6 @@ extern mod io;
 
 #[allow(unused)]
 extern mod patina_fmt;
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 // source: patina-by-example/src/custom_types/repr.md
 // block: 9/14
@@ -59,36 +36,33 @@ enum TransparentWithTags<T> {
 
 pub fn main() {
     use TransparentWithTags::*;
-    {
-        io::put_chars([[patina_fmt::debug(
+    // A `str` payload could be mistaken for Untagged, so it's wrapped.
+    // (a"othertag", "hello")
 
-                                // A `str` payload could be mistaken for Untagged, so it's wrapped.
-                                MaybeUntagged("hello") as term)]]);
-        io::nl();
-    };
-    {
-        io::put_chars([[patina_fmt::debug(
-                                // (a"othertag", "hello")
+    // An int payload cannot be mistaken for anything - it stays transparent.
+    // 42
 
-                                // An int payload cannot be mistaken for anything - it stays transparent.
-                                MaybeUntagged(42) as term)]]);
-        io::nl();
-    };
-    {
-        io::put_chars([[patina_fmt::debug(
-                                // 42
+    // The decision is per-value, not per-type. Most terms stay transparent...
+    // a"hi"
 
-                                // The decision is per-value, not per-type. Most terms stay transparent...
-                                MaybeUntagged(a"hi" as term) as term)]]);
-        io::nl();
-    };
-    {
-        io::put_chars([[patina_fmt::debug(
-                                // a"hi"
-
-                                // ...but a term that looks like another variant is wrapped, too.
-                                MaybeUntagged((a"othertag", 1) as term) as term)]]);
-        io::nl();
-    };
+    // ...but a term that looks like another variant is wrapped, too.
     // (a"othertag", (a"othertag", 1))
+    {
+        io::put_chars([[patina_fmt::debug(MaybeUntagged("hello") as term)]]);
+        io::nl();
+    };
+    {
+        io::put_chars([[patina_fmt::debug(MaybeUntagged(42) as term)]]);
+        io::nl();
+    };
+    {
+        io::put_chars([[patina_fmt::debug(MaybeUntagged(a"hi" as term) as
+                                    term)]]);
+        io::nl();
+    };
+    {
+        io::put_chars([[patina_fmt::debug(MaybeUntagged((a"othertag", 1) as
+                                            term) as term)]]);
+        io::nl();
+    };
 }

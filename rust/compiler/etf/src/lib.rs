@@ -55,6 +55,10 @@ impl Error {
 // Writing
 // ---------------------------------------------------------------------------
 
+pub fn write_bool(output: &mut Vec<u8>, value: bool) -> Result<()> {
+    write_atom(output, if value { "true" } else { "false" })
+}
+
 pub fn write_atom(output: &mut Vec<u8>, atom: &str) -> Result<()> {
     let bytes = atom.as_bytes();
     if let Ok(len) = bytes.len().try_into() {
@@ -206,7 +210,7 @@ pub struct Atom<'a>(pub &'a str);
 /// The header of a list-shaped value.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ListHeader {
-    /// `NIL_EXT` or a zero-length list.
+    /// `NIL_EXT`.
     Empty,
     /// `LIST_EXT n`: `n` elements follow, then a tail.
     Proper(usize),
@@ -304,6 +308,19 @@ impl<'a> Reader<'a> {
         Ok(u32::from_be_bytes(*self.read_array()?))
     }
 
+    /// Returns the type tag of the next term without consuming it.
+    pub fn peek_tag(&self) -> Result<u8> {
+        self.bytes
+            .get(self.cursor)
+            .copied()
+            .ok_or_else(|| self.protocol_error("unexpected end of input"))
+    }
+
+    /// Whether the next term is an atom.
+    pub fn next_is_atom(&self) -> Result<bool> {
+        Ok(matches!(self.peek_tag()?, ATOM_UTF8_EXT | SMALL_ATOM_UTF8_EXT))
+    }
+
     /// Reads a tuple header and returns its arity.
     pub fn read_tuple_header(&mut self) -> Result<usize> {
         match self.read_u8()? {
@@ -319,7 +336,7 @@ impl<'a> Reader<'a> {
             NIL_EXT => Ok(ListHeader::Empty),
             LIST_EXT => {
                 let len = self.read_u32()? as usize;
-                if len == 0 { Ok(ListHeader::Empty) } else { Ok(ListHeader::Proper(len)) }
+                Ok(ListHeader::Proper(len))
             }
             STRING_EXT => {
                 let len = self.read_u16()? as usize;
@@ -360,6 +377,15 @@ impl<'a> Reader<'a> {
                 self.read_exact(len)
             }
             other => Err(self.protocol_error(format!("expected binary, found tag {other}"))),
+        }
+    }
+
+    /// Reads a binary string, borrowing its payload.
+    pub fn read_string(&mut self) -> Result<&'a str> {
+        let bytes = self.read_binary()?;
+        match std::str::from_utf8(bytes) {
+            Ok(s) => Ok(s),
+            Err(_) => Err(self.protocol_error("invalid UTF-8 string")),
         }
     }
 
@@ -657,7 +683,10 @@ mod tests {
             reader(&[LIST_EXT, 0, 0, 0, 2]).read_list_header().unwrap(),
             ListHeader::Proper(2)
         );
-        assert_eq!(reader(&[LIST_EXT, 0, 0, 0, 0]).read_list_header().unwrap(), ListHeader::Empty);
+        assert_eq!(
+            reader(&[LIST_EXT, 0, 0, 0, 0]).read_list_header().unwrap(),
+            ListHeader::Proper(0)
+        );
         assert_eq!(
             reader(&[STRING_EXT, 0, 2, b'a', b'b']).read_list_header().unwrap(),
             ListHeader::String(2)

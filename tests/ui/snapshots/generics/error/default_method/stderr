@@ -1,4 +1,4 @@
-error: default trait method body not yet implemented: DefId(0:12 ~ DefaultMethod[d641]::Tr::defaulted)
+error: default trait method body not yet implemented: DefId(0:7 ~ DefaultMethod[d641]::Tr::defaulted)
   --> tests/ui/src/generics/error/default_method.pt:16:13
    |
 LL | impl Tr for S {

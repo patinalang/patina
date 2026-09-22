@@ -309,7 +309,6 @@ attribute_parsers!(
         Single<WithoutArgs<RustcPassByValueParser>>,
         Single<WithoutArgs<RustcPassIndirectlyInNonRusticAbisParser>>,
         Single<WithoutArgs<RustcPreserveUbChecksParser>>,
-        Single<WithoutArgs<RustcProcMacroDeclsParser>>,
         Single<WithoutArgs<RustcPubTransparentParser>>,
         Single<WithoutArgs<RustcReallocatorParser>>,
         Single<WithoutArgs<RustcRegionsParser>>,

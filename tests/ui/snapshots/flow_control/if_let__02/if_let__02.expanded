@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
 
@@ -16,29 +16,6 @@ extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
-
 // source: patina-by-example/src/flow_control/if_let.md
 // block: 2/4
 
@@ -51,13 +28,20 @@ pub fn main() {
     // The `if let` construct reads: "if `let` destructures `number` into
     // `Some(i)`, evaluate the block (`{}`).
     if let Some(i) = number {
+
+        // If you need to specify a failure, use an else:
+        // Destructure failed. Change to the failure case.
+
+        // Provide an altered failing condition.
+
+        // Destructure failed. Evaluate an `else if` condition to see if the
+        // alternate failure branch should be taken:
+        // The condition evaluated false. This branch is the default:
         {
             io::put_chars([["Matched ", patina_fmt::debug(i), "!"]]);
             io::nl();
         };
     }
-
-    // If you need to specify a failure, use an else:
     if let Some(i) = letter {
         {
             io::put_chars([["Matched ", patina_fmt::debug(i), "!"]]);
@@ -68,18 +52,13 @@ pub fn main() {
             io::put_chars([["Didn\'t match a number. Let\'s go with a letter!"]]);
             io::nl();
         };
-        // Destructure failed. Change to the failure case.
     }
-    // Provide an altered failing condition.
     let i_like_letters = false;
-
     if let Some(i) = emoticon {
         {
             io::put_chars([["Matched ", patina_fmt::debug(i), "!"]]);
             io::nl();
         };
-        // Destructure failed. Evaluate an `else if` condition to see if the
-        // alternate failure branch should be taken:
     } else if i_like_letters {
         {
             io::put_chars([["Didn\'t match a number. Let\'s go with a letter!"]]);
@@ -90,6 +69,5 @@ pub fn main() {
             io::put_chars([["I don\'t like letters. Let\'s go with an emoticon :)!"]]);
             io::nl();
         };
-        // The condition evaluated false. This branch is the default:
     }
 }

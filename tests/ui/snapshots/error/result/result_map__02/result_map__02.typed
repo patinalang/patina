@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -15,29 +15,6 @@ extern mod io;
 
 #[allow(unused)]
 extern mod patina_fmt;
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 // source: patina-by-example/src/error/result/result_map.md
 // block: 2/2
@@ -69,7 +46,11 @@ fn print(result:
         Result<int,
         ParseIntError>) ({
     (match (result as {type error}) {
-        Ok(n) => {
+        Ok(n) =>
+            // This still presents a reasonable answer.
+
+            // The following now provides a much more helpful error message.
+            {
             ((io::put_chars as
                     fn(term) -> term)(([([("n is " as str),
                                 ((patina_fmt::display as
@@ -87,16 +68,12 @@ fn print(result:
         }
     } as ())
 } as ())
-
 fn main() ({
-    // This still presents a reasonable answer.
     let twenty =
         ((multiply as
                 fn(str, str) -> {type error} {multiply})(("10" as str),
             ("2" as str)) as {type error});
     ((print as fn({type error}) {print})((twenty as {type error})) as ());
-
-    // The following now provides a much more helpful error message.
     let tt =
         ((multiply as
                 fn(str, str) -> {type error} {multiply})(("t" as str),

@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
 
@@ -15,29 +15,6 @@ extern mod io;
 
 #[allow(unused)]
 extern mod patina_fmt;
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 // source: patina-by-example/src/custom_types/repr.md
 // block: 5/14
@@ -60,43 +37,39 @@ enum TaggedEnum {
 
 pub fn main() {
     use TaggedEnum::*;
-    {
-        io::put_chars([[patina_fmt::debug(
+    // Unit inherits #[repr(tagged)] from the enum setting.
+    // (a"Elixir.Patina.ByExample.TaggedEnum.Unit")
 
-                                // Unit inherits #[repr(tagged)] from the enum setting.
-                                Unit as term)]]);
-        io::nl();
-    };
-    {
-        io::put_chars([[patina_fmt::debug(
-                                // (a"Elixir.Patina.ByExample.TaggedEnum.Unit")
+    // UnitWithAtomOverride overrides the enum repr.
+    // a"Elixir.Patina.ByExample.TaggedEnum.UnitWithAtomOverride"
 
-                                // UnitWithAtomOverride overrides the enum repr.
-                                UnitWithAtomOverride as term)]]);
-        io::nl();
-    };
-    {
-        io::put_chars([[patina_fmt::debug(
-                                // a"Elixir.Patina.ByExample.TaggedEnum.UnitWithAtomOverride"
+    // Both tuple- and struct-style variants are represented as tagged tuples.
+    // (a"Elixir.Patina.ByExample.TaggedEnum.TupleStyle", "hello")
 
-                                // Both tuple- and struct-style variants are represented as tagged tuples.
-                                TaggedEnum::TupleStyle("hello") as term)]]);
-        io::nl();
-    };
-    {
-        io::put_chars([[patina_fmt::debug(
-                                // (a"Elixir.Patina.ByExample.TaggedEnum.TupleStyle", "hello")
+    // (a"Elixir.Patina.ByExample.TaggedEnum.StructStyle", 1, 2)
 
-                                TaggedEnum::StructStyle { x: 1, y: 2 } as term)]]);
-        io::nl();
-    };
-    {
-        io::put_chars([[patina_fmt::debug(
-                                // (a"Elixir.Patina.ByExample.TaggedEnum.StructStyle", 1, 2)
-
-                                // You can set a custom tag by specifying it with `#[repr(tag = "...")]`.
-                                TaggedEnum::WithCustomTag(42) as term)]]);
-        io::nl();
-    };
+    // You can set a custom tag by specifying it with `#[repr(tag = "...")]`.
     // (a"custom_tag", 42)
+    { io::put_chars([[patina_fmt::debug(Unit as term)]]); io::nl(); };
+    {
+        io::put_chars([[patina_fmt::debug(UnitWithAtomOverride as term)]]);
+        io::nl();
+    };
+    {
+        io::put_chars([[patina_fmt::debug(TaggedEnum::TupleStyle("hello") as
+                                    term)]]);
+        io::nl();
+    };
+    {
+        io::put_chars([[patina_fmt::debug(TaggedEnum::StructStyle {
+                                        x: 1,
+                                        y: 2,
+                                    } as term)]]);
+        io::nl();
+    };
+    {
+        io::put_chars([[patina_fmt::debug(TaggedEnum::WithCustomTag(42) as
+                                    term)]]);
+        io::nl();
+    };
 }

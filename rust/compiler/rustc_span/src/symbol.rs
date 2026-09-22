@@ -1871,7 +1871,6 @@ symbols! {
         rustc_peek_maybe_uninit,
         rustc_preserve_ub_checks,
         rustc_private,
-        rustc_proc_macro_decls,
         rustc_promotable,
         rustc_pub_transparent,
         rustc_reallocator,

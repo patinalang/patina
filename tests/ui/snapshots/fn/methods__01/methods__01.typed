@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -15,29 +15,6 @@ extern mod io;
 
 #[allow(unused)]
 extern mod patina_fmt;
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 // source: patina-by-example/src/fn/methods.md
 // block: 1/1
@@ -138,17 +115,19 @@ fn main() ({
                 ((Point::new as
                         fn(float, float) -> Point {Point::new})((3.0 as float),
                     (4.0 as float)) as Point) } as Rectangle);
+
+    // Methods are called using the dot operator
+    // Note that the first argument `self` is implicitly passed, i.e.
+    // `rectangle.perimeter()` === `Rectangle::perimeter(rectangle)`
+
+    // `mut` keyword lets us rebind the variable in the next statement.
+
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("Rectangle perimeter: " as str),
                             ((patina_fmt::display as
-                                    fn(term) -> term)(
-
-                                // Methods are called using the dot operator
-                                // Note that the first argument `self` is implicitly passed, i.e.
-                                // `rectangle.perimeter()` === `Rectangle::perimeter(rectangle)`
-                                ((rectangle as Rectangle).perimeter() as float)) as term)]
-                        as [term])] as [[term]])) as term);
+                                    fn(term) -> term)(((rectangle as Rectangle).perimeter() as
+                                    float)) as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -159,8 +138,6 @@ fn main() ({
                                     float)) as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
-
-    // `mut` keyword lets us rebind the variable in the next statement.
     let mut square =
         (Rectangle {
             p1: ((Point::origin as fn() -> Point {Point::origin})() as Point),
@@ -168,7 +145,6 @@ fn main() ({
                 ((Point::new as
                         fn(float, float) -> Point {Point::new})((1.0 as float),
                     (1.0 as float)) as Point) } as Rectangle);
-
     ((square as Rectangle) =
         ((square as Rectangle).translate((1.0 as float), (1.0 as float)) as
             Rectangle) as Rectangle);

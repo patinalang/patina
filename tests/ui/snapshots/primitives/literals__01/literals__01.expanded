@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
 
@@ -16,62 +16,31 @@ extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
-
 // source: patina-by-example/src/primitives/literals.md
 // block: 1/1
 
 pub fn main() {
-    {
-        io::put_chars([["1 + 2 = ",
-                            patina_fmt::display(
-                                // Integer addition
-                                1 + 2)]]);
-        io::nl();
-    };
-    {
-        io::put_chars([["1 - 2 = ",
-                            patina_fmt::display(
+    // Integer addition
 
-                                // Integer subtraction
-                                1 - 2)]]);
-        io::nl();
-    };
-    {
-        io::put_chars([["1e4 is ",
-                            patina_fmt::display(
+    // Integer subtraction
 
-                                // Scientific notation
-                                1e4), ", -2.5e-3 is ", patina_fmt::display(-2.5e-3)]]);
+    // Scientific notation
+
+    // Short-circuiting boolean logic
+
+    // Bitwise operations
+
+    // Use underscores to improve readability!
+    { io::put_chars([["1 + 2 = ", patina_fmt::display(1 + 2)]]); io::nl(); };
+    { io::put_chars([["1 - 2 = ", patina_fmt::display(1 - 2)]]); io::nl(); };
+    {
+        io::put_chars([["1e4 is ", patina_fmt::display(1e4), ", -2.5e-3 is ",
+                            patina_fmt::display(-2.5e-3)]]);
         io::nl();
     };
     {
         io::put_chars([["true AND false is ",
-                            patina_fmt::display(
-
-                                // Short-circuiting boolean logic
-                                true && false)]]);
+                            patina_fmt::display(true && false)]]);
         io::nl();
     };
     {
@@ -85,10 +54,7 @@ pub fn main() {
     };
     {
         io::put_chars([["0011 AND 0101 is ",
-                            patina_fmt::debug(
-
-                                // Bitwise operations
-                                0b0011 & 0b0101)]]);
+                            patina_fmt::debug(0b0011 & 0b0101)]]);
         io::nl();
     };
     {
@@ -111,10 +77,7 @@ pub fn main() {
     };
     {
         io::put_chars([["One million is written as ",
-                            patina_fmt::display(
-
-                                // Use underscores to improve readability!
-                                1_000_000)]]);
+                            patina_fmt::display(1_000_000)]]);
         io::nl();
     };
 }

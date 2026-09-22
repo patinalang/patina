@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
 
@@ -15,29 +15,6 @@ extern mod io;
 
 #[allow(unused)]
 extern mod patina_fmt;
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 // source: patina-by-example/src/macros/designators.md
 // block: 1/1
@@ -56,6 +33,18 @@ macro_rules! create_function {
     };
 }
 fn foo() {
+
+    // Create functions named `foo` and `bar` with the above macro.
+
+    // This macro takes an expression of type `expr` and prints
+    // it as a string along with its result.
+    // The `expr` designator is used for expressions.
+    // `stringify!` will convert the expression *as it is* into a string.
+
+
+
+    // Recall that blocks are expressions too!
+
     {
         io::put_chars([["You called ", patina_fmt::debug("foo"), "()"]]);
         io::nl();
@@ -67,39 +56,23 @@ fn bar() {
         io::nl();
     };
 }
-
-// Create functions named `foo` and `bar` with the above macro.
-
 macro_rules! print_result {
     ($expression:expr) =>
-    {
-        println!("{:?} = {:?}", stringify!($expression), $expression);
-        // This macro takes an expression of type `expr` and prints
-        // it as a string along with its result.
-        // The `expr` designator is used for expressions.
-        // `stringify!` will convert the expression *as it is* into a string.
-    };
+    { println!("{:?} = {:?}", stringify!($expression), $expression); };
 }
-
 pub fn main() {
     foo();
     bar();
     {
         io::put_chars([[patina_fmt::debug("1 + 1"), " = ",
-                            patina_fmt::debug(
-
-                                1 + 1)]]);
+                            patina_fmt::debug(1 + 1)]]);
         io::nl();
     };
     ;
     {
         io::put_chars([[patina_fmt::debug("{ let x = 1; x * x + 2 * x - 1 }"),
                             " = ",
-                            patina_fmt::debug(
-
-                                // Recall that blocks are expressions too!
-
-                                { let x = 1; x * x + 2 * x - 1 })]]);
+                            patina_fmt::debug({ let x = 1; x * x + 2 * x - 1 })]]);
         io::nl();
     };
     ;

@@ -8,9 +8,7 @@
 
 -export_record([]).
 
--export(['__info__'/1,
-         '$patina_loop_10_143'/1,
-         main/0]).
+-export(['__info__'/1, '$patina_loop_5_143'/1, main/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,7 +23,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'$patina_loop_10_143'(_n@0_0) ->
+'$patina_loop_5_143'(_n@0_0) ->
     _ = begin
             case _n@0_0 < 101 of
                 true ->
@@ -77,6 +75,6 @@
 
 main() ->
     _n@0_0 = 1,
-    case '$patina_loop_10_143'(_n@0_0) of
+    case '$patina_loop_5_143'(_n@0_0) of
         {break, 0, _loop_value@2_0, _n@0_1} -> _loop_value@2_0
     end.

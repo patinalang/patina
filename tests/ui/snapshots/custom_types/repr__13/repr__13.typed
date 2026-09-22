@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -15,29 +15,6 @@ extern mod io;
 
 #[allow(unused)]
 extern mod patina_fmt;
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 // source: patina-by-example/src/custom_types/repr.md
 // block: 13/14
@@ -55,6 +32,19 @@ enum Option<T> {
 }
 
 fn main() ({
+    // 42
+
+    // a"nil"
+
+    // `Option<atom>` is transparent as long as the atom itself is not `nil`.
+    // a"hi"
+    // (a"some", a"nil")
+
+    // Nested options stay distinguishable: only the values that would be
+    // mistaken for `None` are wrapped.
+    // 42
+    // (a"some", a"nil")
+    // a"nil"
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
@@ -67,21 +57,14 @@ fn main() ({
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)(
-                                // 42
-
-                                ((Option::<int>::None as Option<int>) as term as term)) as
-                                term)] as [term])] as [[term]])) as term);
+                                    fn(term) -> term)(((Option::<int>::None as Option<int>) as
+                                    term as term)) as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)(
-                                // a"nil"
-
-                                // `Option<atom>` is transparent as long as the atom itself is not `nil`.
-                                (((Option::<atom>::Some as
+                                    fn(term) -> term)((((Option::<atom>::Some as
                                             fn(atom) -> Option<atom> {Option::<atom>::Some})((a"hi" as
                                             atom)) as Option<atom>) as term as term)) as term)] as
                         [term])] as [[term]])) as term);
@@ -90,9 +73,7 @@ fn main() ({
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)(
-                                // a"hi"
-                                (((Option::<atom>::Some as
+                                    fn(term) -> term)((((Option::<atom>::Some as
                                             fn(atom) -> Option<atom> {Option::<atom>::Some})((a"nil" as
                                             atom)) as Option<atom>) as term as term)) as term)] as
                         [term])] as [[term]])) as term);
@@ -101,12 +82,7 @@ fn main() ({
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)(
-                                // (a"some", a"nil")
-
-                                // Nested options stay distinguishable: only the values that would be
-                                // mistaken for `None` are wrapped.
-                                (((Option::<Option<int>>::Some as
+                                    fn(term) -> term)((((Option::<Option<int>>::Some as
                                             fn(Option<int>) -> Option<Option<int>> {Option::<Option<int>>::Some})(((Option::Some
                                                 as
                                                 fn(int) -> Option<int> {Option::<int>::Some})((42 as int))
@@ -117,9 +93,7 @@ fn main() ({
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)(
-                                // 42
-                                (((Option::<Option<int>>::Some as
+                                    fn(term) -> term)((((Option::<Option<int>>::Some as
                                             fn(Option<int>) -> Option<Option<int>> {Option::<Option<int>>::Some})((Option::None
                                             as Option<int>)) as Option<Option<int>>) as term as term))
                                 as term)] as [term])] as [[term]])) as term);
@@ -128,11 +102,9 @@ fn main() ({
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
-                                    fn(term) -> term)(
-                                // (a"some", a"nil")
-                                ((Option::<Option<int>>::None as Option<Option<int>>) as
-                                    term as term)) as term)] as [term])] as [[term]])) as term);
+                                    fn(term) -> term)(((Option::<Option<int>>::None as
+                                        Option<Option<int>>) as term as term)) as term)] as [term])]
+                as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
-    // a"nil"
 } as ())

@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -15,29 +15,6 @@ extern mod io;
 
 #[allow(unused)]
 extern mod patina_fmt;
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 // source: patina-by-example/src/trait/derive.md
 // block: 1/1
@@ -77,17 +54,17 @@ fn main() ({
 
     let foot =
         ((Inches as fn(int) -> Inches {Inches})((12 as int)) as Inches);
+
+
+
+
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("One foot equals " as str),
-                            ((patina_fmt::debug as
-                                    fn(term) -> term)(
-
-                                (foot as Inches)) as term)] as [term])] as [[term]])) as
-            term);
+                            ((patina_fmt::debug as fn(term) -> term)((foot as Inches))
+                                as term)] as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
-
     let meter =
         ((Centimeters as
                 fn(float) -> Centimeters {Centimeters})((100.0 as float)) as
@@ -101,9 +78,7 @@ fn main() ({
         ((io::put_chars as
                 fn(term) -> term)(([([("One foot is " as str),
                             ((patina_fmt::display as
-                                    fn(term) -> term)(
-
-                                (cmp as {type error})) as term),
+                                    fn(term) -> term)((cmp as {type error})) as term),
                             (" than one meter." as str)] as [term])] as [[term]])) as
             term);
         ((io::nl as fn() -> term)() as term);

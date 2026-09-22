@@ -1,21 +1,23 @@
-error: cannot find attribute `derive` in this scope
-  --> tests/ui/src/error/option_unwrap/defaults__03.pt:4:3
+error: cannot find derive macro `Debug` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__03.pt:4:10
    |
 LL | #[derive(Debug)]
-   |   ^^^^^^
-
-error[E0425]: cannot find type `Option` in this scope
-  --> tests/ui/src/error/option_unwrap/defaults__03.pt:8:23
-   |
-LL |     let mut my_fruit: Option<Fruit> = None;
-   |                       ^^^^^^ not found in this scope
+   |          ^^^^^
 
 error[E0425]: cannot find value `None` in this scope
   --> tests/ui/src/error/option_unwrap/defaults__03.pt:8:39
    |
 LL |     let mut my_fruit: Option<Fruit> = None;
    |                                       ^^^^ not found in this scope
+   |
+help: consider importing one of these unit variants
+  --> <patina-prelude>:11:1
+   |
+LL + use crate::Option::None;
+   |
+LL + use Core::Option::None;
+   |
 
-error: aborting due to 3 previous errors
+error: aborting due to 2 previous errors
 
 For more information about this error, try `rustc --explain E0425`.

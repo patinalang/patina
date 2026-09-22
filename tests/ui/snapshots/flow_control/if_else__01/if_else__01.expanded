@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
 
@@ -16,29 +16,6 @@ extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
-
 // source: patina-by-example/src/flow_control/if_else.md
 // block: 1/1
 
@@ -46,35 +23,35 @@ pub fn main() {
     let n = 5;
 
     if n < 0 {
+
+
+        // This expression returns an `int`.
+
+        // This expression must return an `int` as well.
+        // TODO ^ Try suppressing this expression with a semicolon.
+        //   ^ Don't forget to put a semicolon here! All `let` bindings need it.
+
         { io::put_chars([patina_fmt::display(n), " is negative"]); };
     } else if n > 0 {
         { io::put_chars([patina_fmt::display(n), " is positive"]); };
     } else { { io::put_chars([patina_fmt::display(n), " is zero"]); }; }
-
     let big_n =
         if n < 10 && n > -10 {
             {
                 io::put_chars([[", and is a small number, increase ten-fold"]]);
                 io::nl();
             };
-
-            // This expression returns an `int`.
             10 * n
         } else {
             {
                 io::put_chars([[", and is a big number, halve the number"]]);
                 io::nl();
             };
-
-            // This expression must return an `int` as well.
             n / 2
-            // TODO ^ Try suppressing this expression with a semicolon.
         };
     {
-        io::put_chars([[patina_fmt::display(
-                                //   ^ Don't forget to put a semicolon here! All `let` bindings need it.
-
-                                n), " -> ", patina_fmt::display(big_n)]]);
+        io::put_chars([[patina_fmt::display(n), " -> ",
+                            patina_fmt::display(big_n)]]);
         io::nl();
     };
 }

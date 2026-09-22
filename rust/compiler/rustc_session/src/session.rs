@@ -10,9 +10,7 @@ use rustc_data_structures::base_n::{CASE_INSENSITIVE, ToBaseN};
 use rustc_data_structures::flock;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet, FxIndexSet};
 use rustc_data_structures::profiling::{SelfProfiler, SelfProfilerRef};
-use rustc_data_structures::sync::{
-    AppendOnlyVec, DynSend, DynSync, Lock, MappedReadGuard, ReadGuard, RwLock,
-};
+use rustc_data_structures::sync::{DynSend, DynSync, Lock, MappedReadGuard, ReadGuard, RwLock};
 use rustc_errors::annotate_snippet_emitter_writer::AnnotateSnippetEmitter;
 use rustc_errors::codes::*;
 use rustc_errors::emitter::{DynEmitter, HumanReadableErrorType, OutputTheme, stderr_destination};
@@ -98,9 +96,6 @@ pub struct Session {
     pub unstable_features: UnstableFeatures,
     pub config: Cfg,
     pub check_config: CheckCfg,
-    /// Spans passed to `proc_macro::quote_span`. Each span has a numerical
-    /// identifier represented by its position in the vector.
-    proc_macro_quoted_spans: AppendOnlyVec<Span>,
 
     /// Input, input file path and output file path to this compilation process.
     pub io: CompilerIO,
@@ -313,16 +308,6 @@ impl Session {
         self.psess.source_map()
     }
 
-    pub fn proc_macro_quoted_spans(&self) -> impl Iterator<Item = (usize, Span)> {
-        // This is equivalent to `.iter().copied().enumerate()`, but that isn't possible for
-        // AppendOnlyVec, so we resort to this scheme.
-        self.proc_macro_quoted_spans.iter_enumerated()
-    }
-
-    pub fn save_proc_macro_span(&self, span: Span) -> usize {
-        self.proc_macro_quoted_spans.push(span)
-    }
-
     /// Returns `true` if internal lints should be added to the lint store - i.e. if
     /// `-Zunstable-options` is provided and this isn't rustdoc (internal lints can trigger errors
     /// to be emitted under rustdoc).
@@ -421,10 +406,6 @@ impl Session {
     /// Returns `true` if the target can use the current split debuginfo configuration.
     pub fn target_can_use_split_dwarf(&self) -> bool {
         self.target.debuginfo_kind == DebuginfoKind::Dwarf
-    }
-
-    pub fn generate_proc_macro_decls_symbol(&self, stable_crate_id: StableCrateId) -> String {
-        format!("__rustc_proc_macro_decls_{:08x}__", stable_crate_id.as_u64())
     }
 
     pub fn target_filesearch(&self) -> &filesearch::FileSearch {
@@ -1113,7 +1094,6 @@ pub fn build_session(
         unstable_features: UnstableFeatures::from_environment(None),
         config: Cfg::default(),
         check_config: CheckCfg::default(),
-        proc_macro_quoted_spans: Default::default(),
         io,
         incr_comp_session: RwLock::new(IncrCompSession::NotInitialized),
         prof,

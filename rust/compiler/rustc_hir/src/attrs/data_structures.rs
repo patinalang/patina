@@ -1238,7 +1238,7 @@ pub enum AttributeKind {
 
     /// Represents `#[proc_macro_derive]`
     ProcMacroDerive {
-        trait_name: Symbol,
+        trait_name: Ident,
         helper_attrs: ThinVec<Symbol>,
     },
 
@@ -1527,9 +1527,6 @@ pub enum AttributeKind {
 
     /// Represents `#[rustc_preserve_ub_checks]`
     RustcPreserveUbChecks,
-
-    /// Represents `#[rustc_proc_macro_decls]`
-    RustcProcMacroDecls,
 
     /// Represents `#[rustc_pub_transparent]` (used by the `repr_transparent_external_private_fields` lint).
     RustcPubTransparent(Span),

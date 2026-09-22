@@ -50,10 +50,6 @@ pub(crate) struct EmojiIdentifier {
 pub(crate) struct MixedBinCrate;
 
 #[derive(Diagnostic)]
-#[diag("cannot mix `proc-macro` crate type with others")]
-pub(crate) struct MixedProcMacroCrate;
-
-#[derive(Diagnostic)]
 #[diag("error writing dependencies to `{$path}`: {$error}")]
 pub(crate) struct ErrorWritingDependencies<'a> {
     pub path: &'a Path,
@@ -89,12 +85,6 @@ pub(crate) struct FailedWritingFile<'a> {
     pub path: &'a Path,
     pub error: io::Error,
 }
-
-#[derive(Diagnostic)]
-#[diag(
-    "building proc macro crate with `panic=abort` or `panic=immediate-abort` may crash the compiler should the proc-macro panic"
-)]
-pub(crate) struct ProcMacroCratePanicAbort;
 
 #[derive(Diagnostic)]
 #[diag(

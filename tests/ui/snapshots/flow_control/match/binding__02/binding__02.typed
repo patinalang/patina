@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -16,29 +16,6 @@ extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
-
 // source: patina-by-example/src/flow_control/match/binding.md
 // block: 2/2
 
@@ -48,8 +25,8 @@ fn some_number()
     as {type error})
 
 fn main() ({
-    (match ((some_number as fn() -> {type error} {some_number})() as
-            {type error}) {
+    (match ((some_number as fn() -> Core::Option<int> {some_number})() as
+            Core::Option<int>) {
 
             // Got `Some` variant, match if its value, bound to `n`,
             // is equal to 42.
@@ -60,7 +37,10 @@ fn main() ({
             // but that would not contribute to exhaustiveness checks.
             // (Although in this case that would not matter since
             // the next arm is a "catch-all" pattern)
-            Some(n@42) => {
+            Some(n@42) =>
+            // Match any other number.
+            // Match anything else (`None` variant).
+            {
             ((io::put_chars as
                     fn(term) -> term)(([([("The Answer: " as str),
                                 ((patina_fmt::display as
@@ -68,9 +48,7 @@ fn main() ({
                                 ("!" as str)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
-
-            // Match any other number.
-            Some(n) => {
+        Some(n) => {
             ((io::put_chars as
                     fn(term) -> term)(([([("Not interesting... " as str),
                                 ((patina_fmt::display as
@@ -78,8 +56,6 @@ fn main() ({
                     as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
-
-            // Match anything else (`None` variant).
-            _ => (() as ()),
+        _ => (() as ()),
     } as ())
 } as ())

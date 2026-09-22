@@ -4,11 +4,11 @@ error[E0433]: cannot find type `Std` in this scope
 LL | use Std::Convert::From;
    |     ^^^ use of undeclared type `Std`
 
-error: cannot find attribute `derive` in this scope
-  --> tests/ui/src/conversion/from_into__04.pt:6:3
+error: cannot find derive macro `Debug` in this scope
+  --> tests/ui/src/conversion/from_into__04.pt:6:10
    |
 LL | #[derive(Debug)]
-   |   ^^^^^^
+   |          ^^^^^
 
 error: aborting due to 2 previous errors
 

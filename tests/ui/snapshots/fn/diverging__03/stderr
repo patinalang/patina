@@ -16,17 +16,12 @@ LL | fn some_fn() -> ! {
            found unit type `()`
 
 warning: unreachable statement
-  --> <patina-prelude>:46:23
-   |
-LL |     ($($arg:tt)*) => {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable statement
-   |
-  ::: tests/ui/src/fn/diverging__03.pt:11:14
+  --> tests/ui/src/fn/diverging__03.pt:12:5
    |
 LL |     let _a = some_fn();
    |              --------- any code following this expression is unreachable
 LL |     println!("You will never see this line!");
-   |     ----------------------------------------- in this macro invocation
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable statement
    |
    = note: `#[warn(unreachable_code)]` (part of `#[warn(unused)]`) on by default
    = note: this warning originates in the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)

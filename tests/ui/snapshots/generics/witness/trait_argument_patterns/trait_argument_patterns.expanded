@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
 
@@ -15,29 +15,6 @@ extern mod io;
 
 #[allow(unused)]
 extern mod patina_fmt;
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 struct UnboundContainer;
 struct BoundContainer;
@@ -56,6 +33,11 @@ trait Marker {
 
 impl Marker for Marked {
     fn value(self) -> int {
+
+
+
+
+
         {
             io::put_chars([["Marker::value(", patina_fmt::debug(self), ")"]]);
             io::nl();
@@ -63,12 +45,10 @@ impl Marker for Marked {
         self.value
     }
 }
-
 trait Contains<A, B> {
     fn contains(self, _: A, _: B)
     -> bool;
 }
-
 impl<T> Contains<int, T> for UnboundContainer {
     fn contains(self, a: int, b: T) -> bool {
         {
@@ -80,7 +60,6 @@ impl<T> Contains<int, T> for UnboundContainer {
         true
     }
 }
-
 impl<T: Marker> Contains<int, T> for BoundContainer {
     fn contains(self, a: int, value: T) -> bool {
         {
@@ -92,7 +71,6 @@ impl<T: Marker> Contains<int, T> for BoundContainer {
         value.value() > 0
     }
 }
-
 impl<T> Contains<int, Wrapped<T>> for NestedContainer {
     fn contains(self, a: int, wrapped: Wrapped<T>) -> bool {
         {
@@ -104,7 +82,6 @@ impl<T> Contains<int, Wrapped<T>> for NestedContainer {
         true
     }
 }
-
 pub fn main() {
     {
         io::put_chars([[patina_fmt::display(UnboundContainer.contains(1,

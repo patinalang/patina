@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
 
@@ -15,29 +15,6 @@ extern mod io;
 
 #[allow(unused)]
 extern mod patina_fmt;
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 // source: patina-by-example/src/primitives/maps.md
 // block: 1/1
@@ -61,17 +38,23 @@ pub fn main() {
 
     // Returns Option<str>
     match contacts.get("Daniel") {
-        Some(number) => {
+        Some(number) =>
+            // `.insert()` returns an updated map.
+            // The value must be used, otherwise it will emit a compilation warning.
+
+
+
+            // Like structs, maps can also be updated using the special `..` syntax
+
+            // `for` will iterate over the (key, value) pairs in arbitrary order.
+            {
             io::put_chars([["Calling Daniel: ",
                                 patina_fmt::display(call(number))]]);
             io::nl();
         }
         _ => { io::put_chars([["Don\'t have Daniel\'s number."]]); io::nl(); }
     }
-    // `.insert()` returns an updated map.
-    // The value must be used, otherwise it will emit a compilation warning.
     contacts = contacts.insert("Daniel", "164-6743");
-
     match contacts.get("Ashley") {
         Some(number) => {
             io::put_chars([["Calling Ashley: ",
@@ -81,11 +64,7 @@ pub fn main() {
         _ => { io::put_chars([["Don\'t have Ashley\'s number."]]); io::nl(); }
     }
     contacts = contacts.remove("Ashley");
-
-    // Like structs, maps can also be updated using the special `..` syntax
     contacts = #{"Laura" => "132-8372", ..contacts};
-
-    // `for` will iterate over the (key, value) pairs in arbitrary order.
     for (contact, number) in contacts {
         {
             io::put_chars([["Calling ", patina_fmt::display(contact), ": ",

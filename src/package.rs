@@ -8,6 +8,7 @@ use rustc_session::utils::CanonicalizedPath;
 
 pub(crate) const CORE_PACKAGE_NAME: &str = "Core";
 pub(crate) const STD_PACKAGE_NAME: &str = "Std";
+pub(crate) const PROC_MACRO_PACKAGE_NAME: &str = "ProcMacro";
 
 #[derive(Debug, Clone)]
 pub(crate) struct PackageDependency {
@@ -61,10 +62,11 @@ pub(crate) fn resolve_package_name(
         stem.to_case(Case::Pascal)
     });
 
-    if name == CORE_PACKAGE_NAME || name == STD_PACKAGE_NAME {
-        Err("package name is reserved")
-    } else {
-        Ok(name)
+    match name.as_str() {
+        CORE_PACKAGE_NAME | STD_PACKAGE_NAME | PROC_MACRO_PACKAGE_NAME => {
+            Err("package name is reserved")
+        }
+        _ => Ok(name),
     }
 }
 

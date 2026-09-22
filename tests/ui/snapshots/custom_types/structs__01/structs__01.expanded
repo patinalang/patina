@@ -1,12 +1,7 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
-
-
-
-
-
 
 
 
@@ -26,24 +21,6 @@ use Core::*;
 extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 // TODO: Uncomment this once we have a way to derive Debug for structs
 // #[derive(Debug)]
@@ -77,71 +54,63 @@ pub fn main() {
     let name = "Peter";
     let age = 27;
     let peter = Person { name, age };
-    {
-        io::put_chars([[patina_fmt::debug(
 
-                                // Print debug struct
-                                peter)]]);
-        io::nl();
-    };
+    // Print debug struct
 
     // Instantiate a `Point`
-    let point: Point = Point { x: 5.2, y: 0.4 };
-    let another_point: Point = Point { x: 10.3, y: 0.2 };
-    {
-        io::put_chars([["point coordinates: (",
-                            patina_fmt::display(
 
-                                // Access the fields of the point
-                                point.x), ", ", patina_fmt::display(point.y), ")"]]);
-        io::nl();
-    };
+    // Access the fields of the point
 
     // Make a new point by using struct update syntax to use the fields of our
     // other one
+
+    // `bottom_right.y` will be the same as `another_point.y` because we used that field
+    // from `another_point`
+
+    // Destructure the point using a `let` binding
+
+    // struct instantiation is an expression too
+
+    // Instantiate a unit struct
+
+    // Instantiate a tuple struct
+
+    // Access the fields of a tuple struct
+
+    // Destructure a tuple struct
+
+    { io::put_chars([[patina_fmt::debug(peter)]]); io::nl(); };
+    let point: Point = Point { x: 5.2, y: 0.4 };
+    let another_point: Point = Point { x: 10.3, y: 0.2 };
+    {
+        io::put_chars([["point coordinates: (", patina_fmt::display(point.x),
+                            ", ", patina_fmt::display(point.y), ")"]]);
+        io::nl();
+    };
     let bottom_right = Point { x: 10.3, ..another_point };
     {
         io::put_chars([["second point: (",
-                            patina_fmt::display(
-
-                                // `bottom_right.y` will be the same as `another_point.y` because we used that field
-                                // from `another_point`
-                                bottom_right.x), ", ", patina_fmt::display(bottom_right.y),
-                            ")"]]);
+                            patina_fmt::display(bottom_right.x), ", ",
+                            patina_fmt::display(bottom_right.y), ")"]]);
         io::nl();
     };
-
-    // Destructure the point using a `let` binding
     let Point { x: left_edge, y: top_edge } = point;
-
     let _rectangle =
         Rectangle {
-            // struct instantiation is an expression too
             top_left: Point { x: left_edge, y: top_edge },
             bottom_right,
         };
-
-    // Instantiate a unit struct
     let _unit = Unit;
-
-    // Instantiate a tuple struct
     let pair = Pair(1, 0.1);
     {
-        io::put_chars([["pair contains ",
-                            patina_fmt::debug(
-
-                                // Access the fields of a tuple struct
-                                pair.0), " and ", patina_fmt::debug(pair.1)]]);
+        io::put_chars([["pair contains ", patina_fmt::debug(pair.0), " and ",
+                            patina_fmt::debug(pair.1)]]);
         io::nl();
     };
-
-    // Destructure a tuple struct
     let Pair(integer, decimal) = pair;
     {
-        io::put_chars([["pair contains ",
-                            patina_fmt::debug(
-
-                                integer), " and ", patina_fmt::debug(decimal)]]);
+        io::put_chars([["pair contains ", patina_fmt::debug(integer), " and ",
+                            patina_fmt::debug(decimal)]]);
         io::nl();
     };
 }

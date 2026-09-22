@@ -5,18 +5,19 @@ use std::io::{Read, Seek, Write};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
-use rustc_data_structures::fx::{FxIndexMap, FxIndexSet};
+use rustc_data_structures::fx::{FxHashSet, FxIndexMap, FxIndexSet};
 use rustc_data_structures::memmap::{Mmap, MmapMut};
 use rustc_data_structures::sync::par_join;
 use rustc_data_structures::temp_dir::MaybeTempDir;
 use rustc_data_structures::thousands::usize_with_underscores;
 use rustc_hir as hir;
 use rustc_hir::attrs::{AttributeKind, EncodeCrossCrate};
-use rustc_hir::def_id::{CRATE_DEF_ID, CRATE_DEF_INDEX, LOCAL_CRATE, LocalDefId};
-use rustc_hir::definitions::DefPathData;
+use rustc_hir::def::Res;
+use rustc_hir::def_id::{CRATE_DEF_ID, DefId, LOCAL_CRATE, LocalDefId};
 use rustc_hir::find_attr;
 use rustc_hir_pretty::id_to_string;
 use rustc_middle::dep_graph::WorkProductId;
+use rustc_middle::erl::ErlModuleId;
 use rustc_middle::middle::dependency_format::Linkage;
 use rustc_middle::mir::interpret;
 use rustc_middle::query::Providers;
@@ -35,6 +36,7 @@ use rustc_span::{
 };
 use tracing::{debug, instrument, trace};
 
+use crate::creader::CStore;
 use crate::eii::EiiMapEncodedKeyValue;
 use crate::errors::{FailCreateFileEncoder, FailWriteFile};
 use crate::rmeta::*;
@@ -63,21 +65,59 @@ pub(super) struct EncodeContext<'a, 'tcx> {
     // The order inside the `FxIndexSet` is used as on-disk
     // order of `SourceFiles`, and encoded inside `Span`s.
     required_source_files: Option<FxIndexSet<usize>>,
-    is_proc_macro: bool,
     hygiene_ctxt: &'a HygieneEncodeContext,
     // Used for both `Symbol`s and `ByteSymbol`s.
     symbol_index_table: FxHashMap<u32, usize>,
+    /// The macro view of each local proc-macro implementation function, in
+    /// declaration order.
+    proc_macro_exports: FxIndexMap<LocalDefId, ProcMacroExportData>,
 }
 
-/// If the current crate is a proc-macro, returns early with `LazyArray::default()`.
-/// This is useful for skipping the encoding of things that aren't needed
-/// for proc-macro crates.
-macro_rules! empty_proc_macro {
-    ($self:ident) => {
-        if $self.is_proc_macro {
-            return LazyArray::default();
-        }
-    };
+/// How a local proc-macro implementation function is exported.
+struct ProcMacroExportData {
+    kind: MacroKind,
+    /// For a derive this is the trait name, not the function's name.
+    name: Ident,
+    helper_attrs: Vec<Symbol>,
+}
+
+/// Computes the macro view of every proc macro declared in this crate.
+fn collect_proc_macro_exports(tcx: TyCtxt<'_>) -> FxIndexMap<LocalDefId, ProcMacroExportData> {
+    tcx.resolutions(())
+        .proc_macros
+        .iter()
+        .map(|&def_id| {
+            let hir_id = tcx.local_def_id_to_hir_id(def_id);
+            let attrs = tcx.hir_attrs(hir_id);
+            let fn_name = || {
+                let span = tcx.def_ident_span(def_id).unwrap_or_else(|| tcx.def_span(def_id));
+                Ident::new(tcx.hir_name(hir_id), span)
+            };
+            let export = if find_attr!(attrs, ProcMacro) {
+                ProcMacroExportData {
+                    kind: MacroKind::Bang,
+                    name: fn_name(),
+                    helper_attrs: Vec::new(),
+                }
+            } else if find_attr!(attrs, ProcMacroAttribute) {
+                ProcMacroExportData {
+                    kind: MacroKind::Attr,
+                    name: fn_name(),
+                    helper_attrs: Vec::new(),
+                }
+            } else if let Some((name, helper_attrs)) = find_attr!(attrs, ProcMacroDerive { trait_name, helper_attrs } => (*trait_name, helper_attrs))
+            {
+                ProcMacroExportData {
+                    kind: MacroKind::Derive,
+                    name,
+                    helper_attrs: helper_attrs.to_vec(),
+                }
+            } else {
+                bug!("Unknown proc-macro type for item {def_id:?}");
+            };
+            (def_id, export)
+        })
+        .collect()
 }
 
 macro_rules! encoder_methods {
@@ -138,9 +178,6 @@ impl<'a, 'tcx> Encodable<EncodeContext<'a, 'tcx>> for ExpnIndex {
 
 impl<'a, 'tcx> SpanEncoder for EncodeContext<'a, 'tcx> {
     fn encode_crate_num(&mut self, crate_num: CrateNum) {
-        if crate_num != LOCAL_CRATE && self.is_proc_macro {
-            panic!("Attempted to encode non-local CrateNum {crate_num:?} for proc-macro crate");
-        }
         self.emit_u32(crate_num.as_u32());
     }
 
@@ -218,40 +255,50 @@ fn bytes_needed(n: usize) -> usize {
     (usize::BITS - n.leading_zeros()).div_ceil(u8::BITS) as usize
 }
 
+/// Whether this crate makes a procedural macro available through its public API.
+fn crate_exports_proc_macros(
+    tcx: TyCtxt<'_>,
+    proc_macro_exports: &FxIndexMap<LocalDefId, ProcMacroExportData>,
+) -> bool {
+    let mut proc_macros: FxHashSet<DefId> = {
+        let cstore = CStore::from_tcx(tcx);
+        cstore.all_proc_macro_def_ids(tcx).collect()
+    };
+    proc_macros.extend(proc_macro_exports.keys().map(|local_def_id| local_def_id.to_def_id()));
+
+    let mut modules = vec![CRATE_DEF_ID.to_def_id()];
+    let mut visited = FxHashSet::default();
+    while let Some(module) = modules.pop() {
+        if !visited.insert(module) {
+            continue;
+        }
+
+        let children = if let Some(module) = module.as_local() {
+            tcx.module_children_local(module)
+        } else {
+            tcx.module_children(module)
+        };
+        for child in children {
+            if !child.vis.is_public() {
+                continue;
+            }
+            let Res::Def(kind, def_id) = child.res else {
+                continue;
+            };
+            match kind {
+                DefKind::Macro(_) if proc_macros.contains(&def_id) => return true,
+                DefKind::Mod => modules.push(def_id),
+                _ => {}
+            }
+        }
+    }
+
+    false
+}
+
 impl<'a, 'tcx> Encodable<EncodeContext<'a, 'tcx>> for SpanData {
     fn encode(&self, s: &mut EncodeContext<'a, 'tcx>) {
-        // Don't serialize any `SyntaxContext`s from a proc-macro crate,
-        // since we don't load proc-macro dependencies during serialization.
-        // This means that any hygiene information from macros used *within*
-        // a proc-macro crate (e.g. invoking a macro that expands to a proc-macro
-        // definition) will be lost.
-        //
-        // This can show up in two ways:
-        //
-        // 1. Any hygiene information associated with identifier of
-        // a proc macro (e.g. `#[proc_macro] pub fn $name`) will be lost.
-        // Since proc-macros can only be invoked from a different crate,
-        // real code should never need to care about this.
-        //
-        // 2. Using `Span::def_site` or `Span::mixed_site` will not
-        // include any hygiene information associated with the definition
-        // site. This means that a proc-macro cannot emit a `$crate`
-        // identifier which resolves to one of its dependencies,
-        // which also should never come up in practice.
-        //
-        // Additionally, this affects `Span::parent`, and any other
-        // span inspection APIs that would otherwise allow traversing
-        // the `SyntaxContexts` associated with a span.
-        //
-        // None of these user-visible effects should result in any
-        // cross-crate inconsistencies (getting one behavior in the same
-        // crate, and a different behavior in another crate) due to the
-        // limited surface that proc-macros can expose.
-        //
-        // IMPORTANT: If this is ever changed, be sure to update
-        // `rustc_span::hygiene::raw_encode_expn_id` to handle
-        // encoding `ExpnData` for proc-macro crates.
-        let ctxt = if s.is_proc_macro { SyntaxContext::root() } else { self.ctxt };
+        let ctxt = self.ctxt;
 
         if self.is_dummy() {
             let tag = SpanTag::new(SpanKind::Partial, ctxt, 0);
@@ -296,12 +343,7 @@ impl<'a, 'tcx> Encodable<EncodeContext<'a, 'tcx>> for SpanData {
         // write `TAG_VALID_SPAN_LOCAL` to let the deserializer know that it should use
         // our own source map information.
         //
-        // If we're a proc-macro crate, we always treat this as a local `Span`.
-        // In `encode_source_map`, we serialize foreign `SourceFile`s into our metadata
-        // if we're a proc-macro crate.
-        // This allows us to avoid loading the dependencies of proc-macro crates: all of
-        // the information we need to decode `Span`s is stored in the proc-macro crate.
-        let (kind, metadata_index) = if source_file.is_imported() && !s.is_proc_macro {
+        let (kind, metadata_index) = if source_file.is_imported() {
             // To simplify deserialization, we 'rebase' this span onto the crate it originally came
             // from (the crate that 'owns' the file it references. These rebased 'lo' and 'hi'
             // values are relative to the source map information for the 'foreign' crate whose
@@ -511,21 +553,10 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
 
     fn encode_def_path_table(&mut self) {
         let table = self.tcx.def_path_table();
-        if self.is_proc_macro {
-            for def_index in std::iter::once(CRATE_DEF_INDEX)
-                .chain(self.tcx.resolutions(()).proc_macros.iter().map(|p| p.local_def_index))
-            {
-                let def_key = self.lazy(table.def_key(def_index));
-                let def_path_hash = table.def_path_hash(def_index);
-                self.tables.def_keys.set_some(def_index, def_key);
-                self.tables.def_path_hashes.set(def_index, def_path_hash.local_hash().as_u64());
-            }
-        } else {
-            for (def_index, def_key, def_path_hash) in table.enumerated_keys_and_path_hashes() {
-                let def_key = self.lazy(def_key);
-                self.tables.def_keys.set_some(def_index, def_key);
-                self.tables.def_path_hashes.set(def_index, def_path_hash.local_hash().as_u64());
-            }
+        for (def_index, def_key, def_path_hash) in table.enumerated_keys_and_path_hashes() {
+            let def_key = self.lazy(def_key);
+            self.tables.def_keys.set_some(def_index, def_key);
+            self.tables.def_path_hashes.set(def_index, def_path_hash.local_hash().as_u64());
         }
     }
 
@@ -552,8 +583,8 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
         // `Span` contains the index of the corresponding `SourceFile`.
         for (on_disk_index, &source_file_index) in required_source_files.iter().enumerate() {
             let source_file = &all_source_files[source_file_index];
-            // Don't serialize imported `SourceFile`s, unless we're in a proc-macro crate.
-            assert!(!source_file.is_imported() || self.is_proc_macro);
+            // Don't serialize imported `SourceFile`s.
+            assert!(!source_file.is_imported());
 
             // At export time we expand all source file paths to absolute paths because
             // downstream compilation sessions can have a different compiler working
@@ -574,16 +605,6 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
                     // expanded code, not from a file
                 }
             };
-
-            // We're serializing this `SourceFile` into our crate metadata,
-            // so mark it as coming from this crate.
-            // This also ensures that we don't try to deserialize the
-            // `CrateNum` for a proc-macro dependency - since proc macro
-            // dependencies aren't loaded when we deserialize a proc-macro,
-            // trying to remap the `CrateNum` would fail.
-            if self.is_proc_macro {
-                adapted_source_file.cnum = LOCAL_CRATE;
-            }
 
             // Update the `StableSourceFileId` to make sure it incorporates the
             // id of the current crate. This way it will be unique within the
@@ -675,10 +696,14 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
             self.lazy_array(interpret_alloc_index)
         });
 
+        // This reads the export view, which `encode_proc_macros` then consumes,
+        // so it has to come first.
+        let has_proc_macros = stat!("exported-proc-macros", || {
+            crate_exports_proc_macros(tcx, &self.proc_macro_exports)
+        });
         // Encode the proc macro data. This affects `tables`, so we need to do this before we
-        // encode the tables. This overwrites def_keys, so it must happen after
-        // encode_def_path_table.
-        let proc_macro_data = stat!("proc-macro-data", || self.encode_proc_macros());
+        // encode the tables.
+        let proc_macros = stat!("proc-macro-data", || self.encode_proc_macros());
 
         let tables = stat!("tables", || self.tables.encode(&mut self.opaque));
 
@@ -723,7 +748,7 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
                     name: tcx.crate_name(LOCAL_CRATE),
                     triple: tcx.sess.opts.target_triple.clone(),
                     hash: tcx.crate_hash(LOCAL_CRATE),
-                    is_proc_macro_crate: proc_macro_data.is_some(),
+                    has_proc_macros,
                     is_stub: false,
                 },
                 extra_filename: tcx.sess.opts.cg.extra_filename.clone(),
@@ -736,7 +761,7 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
                 has_panic_handler: tcx.has_panic_handler(LOCAL_CRATE),
                 has_default_lib_allocator: find_attr!(attrs, DefaultLibAllocator),
                 externally_implementable_items,
-                proc_macro_data,
+                proc_macros,
                 debugger_visualizers,
                 compiler_builtins: find_attr!(attrs, CompilerBuiltins),
                 needs_allocator: find_attr!(attrs, NeedsAllocator),
@@ -1344,12 +1369,6 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
     fn encode_def_ids(&mut self) {
         self.encode_info_for_mod(CRATE_DEF_ID);
 
-        // Proc-macro crates only export proc-macro items, which are looked
-        // up using `proc_macro_data`
-        if self.is_proc_macro {
-            return;
-        }
-
         let tcx = self.tcx;
 
         for local_id in tcx.iter_local_def_id() {
@@ -1575,7 +1594,6 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
     }
 
     fn encode_externally_implementable_items(&mut self) -> LazyArray<EiiMapEncodedKeyValue> {
-        empty_proc_macro!(self);
         let externally_implementable_items = self.tcx.externally_implementable_items(LOCAL_CRATE);
 
         self.lazy_array(externally_implementable_items.iter().map(
@@ -1648,32 +1666,48 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
         let tcx = self.tcx;
         let def_id = local_def_id.to_def_id();
 
-        // If we are encoding a proc-macro crates, `encode_info_for_mod` will
-        // only ever get called for the crate root. We still want to encode
-        // the crate root for consistency with other crates (some of the resolver
-        // code uses it). However, we skip encoding anything relating to child
-        // items - we encode information about proc-macros later on.
-        if self.is_proc_macro {
-            // Encode this here because we don't do it in encode_def_ids.
-            record!(self.tables.expn_that_defined[def_id] <- tcx.expn_that_defined(local_def_id));
-        } else {
-            let module_children = tcx.module_children_local(local_def_id);
+        let module_children = tcx.module_children_local(local_def_id);
 
-            record_array!(self.tables.module_children_non_reexports[def_id] <-
-                module_children.iter().filter(|child| child.reexport_chain.is_empty())
-                    .map(|child| child.res.def_id().index));
+        let non_reexports: Vec<_> = module_children
+            .iter()
+            .filter(|child| child.reexport_chain.is_empty() && !self.is_hidden_child(child))
+            .map(|child| child.res.def_id().index)
+            .collect();
+        record_array!(self.tables.module_children_non_reexports[def_id] <- non_reexports);
 
-            record_defaulted_array!(self.tables.module_children_reexports[def_id] <-
-                module_children.iter().filter(|child| !child.reexport_chain.is_empty()));
+        let reexports: Vec<_> = module_children
+            .iter()
+            .filter(|child| !child.reexport_chain.is_empty() && !self.is_hidden_child(child))
+            .collect();
+        record_defaulted_array!(self.tables.module_children_reexports[def_id] <- reexports);
 
-            let ambig_module_children = tcx
-                .resolutions(())
-                .ambig_module_children
-                .get(&local_def_id)
-                .map_or_default(|v| &v[..]);
-            record_defaulted_array!(self.tables.ambig_module_children[def_id] <-
-                ambig_module_children);
-        }
+        let ambig_module_children: Vec<_> = tcx
+            .resolutions(())
+            .ambig_module_children
+            .get(&local_def_id)
+            .map_or_default(|v| &v[..])
+            .iter()
+            .filter(|child| {
+                !self.is_hidden_child(&child.main) && !self.is_hidden_child(&child.second)
+            })
+            .collect();
+        record_defaulted_array!(self.tables.ambig_module_children[def_id] <-
+            ambig_module_children);
+    }
+
+    /// The macro `def_id` is exported as, if it is a local proc macro.
+    fn proc_macro_export(&self, def_id: DefId) -> Option<&ProcMacroExportData> {
+        def_id.as_local().and_then(|def_id| self.proc_macro_exports.get(&def_id))
+    }
+
+    fn is_hidden_child(&self, child: &ModChild) -> bool {
+        matches!(child.res, Res::Def(DefKind::ExternMod, _)) || self.is_proc_macro_shadow(child)
+    }
+
+    /// Whether this module child is the non-macro half of a proc macro.
+    fn is_proc_macro_shadow(&self, child: &ModChild) -> bool {
+        let Res::Def(kind, def_id) = child.res else { return false };
+        !matches!(kind, DefKind::Macro(_)) && self.proc_macro_export(def_id).is_some()
     }
 
     fn encode_explicit_item_bounds(&mut self, def_id: DefId) {
@@ -1779,13 +1813,11 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
     }
 
     fn encode_native_libraries(&mut self) -> LazyArray<NativeLib> {
-        empty_proc_macro!(self);
         let used_libraries = self.tcx.native_libraries(LOCAL_CRATE);
         self.lazy_array(used_libraries.iter())
     }
 
     fn encode_foreign_modules(&mut self) -> LazyArray<ForeignModule> {
-        empty_proc_macro!(self);
         let foreign_modules = self.tcx.foreign_modules(LOCAL_CRATE);
         self.lazy_array(foreign_modules.iter().map(|(_, m)| m).cloned())
     }
@@ -1815,83 +1847,33 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
         )
     }
 
-    fn encode_proc_macros(&mut self) -> Option<ProcMacroData> {
-        let is_proc_macro = self.tcx.crate_types().contains(&CrateType::ProcMacro);
-        if is_proc_macro {
-            let tcx = self.tcx;
-            let proc_macro_decls_static = tcx.proc_macro_decls_static(()).unwrap().local_def_index;
-            let stability = tcx.lookup_stability(CRATE_DEF_ID);
-            let macros =
-                self.lazy_array(tcx.resolutions(()).proc_macros.iter().map(|p| p.local_def_index));
-            for (i, span) in self.tcx.sess.proc_macro_quoted_spans() {
-                let span = self.lazy(span);
-                self.tables.proc_macro_quoted_spans.set_some(i, span);
-            }
+    /// Records how each local proc macro is exported, alongside the ordinary
+    /// encoding of its implementation function.
+    fn encode_proc_macros(&mut self) -> LazyArray<DefIndex> {
+        let tcx = self.tcx;
 
-            self.tables.def_kind.set_some(LOCAL_CRATE.as_def_id().index, DefKind::Mod);
-            record!(self.tables.def_span[LOCAL_CRATE.as_def_id()] <- tcx.def_span(LOCAL_CRATE.as_def_id()));
-            self.encode_attrs(LOCAL_CRATE.as_def_id().expect_local());
-            let vis = tcx.local_visibility(CRATE_DEF_ID).map_id(|def_id| def_id.local_def_index);
-            record!(self.tables.visibility[LOCAL_CRATE.as_def_id()] <- vis);
-            if let Some(stability) = stability {
-                record!(self.tables.lookup_stability[LOCAL_CRATE.as_def_id()] <- stability);
-            }
-            self.encode_deprecation(LOCAL_CRATE.as_def_id());
-            if let Some(res_map) = tcx.resolutions(()).doc_link_resolutions.get(&CRATE_DEF_ID) {
-                record!(self.tables.doc_link_resolutions[LOCAL_CRATE.as_def_id()] <- res_map);
-            }
-            if let Some(traits) = tcx.resolutions(()).doc_link_traits_in_scope.get(&CRATE_DEF_ID) {
-                record_array!(self.tables.doc_link_traits_in_scope[LOCAL_CRATE.as_def_id()] <- traits);
-            }
+        let exports = std::mem::take(&mut self.proc_macro_exports);
+        let mut indices = Vec::with_capacity(exports.len());
 
-            // Normally, this information is encoded when we walk the items
-            // defined in this crate. However, we skip doing that for proc-macro crates,
-            // so we manually encode just the information that we need
-            for &proc_macro in &tcx.resolutions(()).proc_macros {
-                let id = proc_macro;
-                let proc_macro = tcx.local_def_id_to_hir_id(proc_macro);
-                let mut name = tcx.hir_name(proc_macro);
-                let span = tcx.hir_span(proc_macro);
-                // Proc-macros may have attributes like `#[allow_internal_unstable]`,
-                // so downstream crates need access to them.
-                let attrs = tcx.hir_attrs(proc_macro);
-                let macro_kind = if find_attr!(attrs, ProcMacro) {
-                    MacroKind::Bang
-                } else if find_attr!(attrs, ProcMacroAttribute) {
-                    MacroKind::Attr
-                } else if let Some(trait_name) =
-                    find_attr!(attrs, ProcMacroDerive { trait_name, ..} => trait_name)
-                {
-                    name = *trait_name;
-                    MacroKind::Derive
-                } else {
-                    bug!("Unknown proc-macro type for item {:?}", id);
-                };
+        for (local_def_id, export) in exports {
+            let def_id = local_def_id.to_def_id();
+            let module = tcx.erl_module_name(ErlModuleId::Mod(CRATE_DEF_ID.into()));
+            let function = tcx.erl_fn_name(def_id);
 
-                let mut def_key = self.tcx.hir_def_key(id);
-                def_key.disambiguated_data.data = DefPathData::MacroNs(name);
-
-                let def_id = id.to_def_id();
-                self.tables.def_kind.set_some(def_id.index, DefKind::Macro(macro_kind.into()));
-                self.tables.proc_macro.set_some(def_id.index, macro_kind);
-                self.encode_attrs(id);
-                record!(self.tables.def_keys[def_id] <- def_key);
-                record!(self.tables.def_ident_span[def_id] <- span);
-                record!(self.tables.def_span[def_id] <- span);
-                record!(self.tables.visibility[def_id] <- ty::Visibility::Public);
-                if let Some(stability) = stability {
-                    record!(self.tables.lookup_stability[def_id] <- stability);
-                }
-            }
-
-            Some(ProcMacroData { proc_macro_decls_static, stability, macros })
-        } else {
-            None
+            indices.push(local_def_id.local_def_index);
+            self.tables.proc_macro.set_some(def_id.index, export.kind);
+            record!(self.tables.proc_macro_export[def_id] <- ProcMacroExport {
+                name: export.name,
+                helper_attrs: export.helper_attrs,
+                module,
+                function,
+            });
         }
+
+        self.lazy_array(indices)
     }
 
     fn encode_debugger_visualizers(&mut self) -> LazyArray<DebuggerVisualizerFile> {
-        empty_proc_macro!(self);
         self.lazy_array(
             self.tcx
                 .debugger_visualizers(LOCAL_CRATE)
@@ -1905,8 +1887,6 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
     }
 
     fn encode_crate_deps(&mut self) -> LazyArray<CrateDep> {
-        empty_proc_macro!(self);
-
         let deps = self
             .tcx
             .crates(())
@@ -1941,26 +1921,22 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
     }
 
     fn encode_target_modifiers(&mut self) -> LazyArray<TargetModifier> {
-        empty_proc_macro!(self);
         let tcx = self.tcx;
         self.lazy_array(tcx.sess.opts.gather_target_modifiers())
     }
 
     fn encode_enabled_denied_partial_mitigations(&mut self) -> LazyArray<DeniedPartialMitigation> {
-        empty_proc_macro!(self);
         let tcx = self.tcx;
         self.lazy_array(tcx.sess.gather_enabled_denied_partial_mitigations())
     }
 
     fn encode_lib_features(&mut self) -> LazyArray<(Symbol, FeatureStability)> {
-        empty_proc_macro!(self);
         let tcx = self.tcx;
         let lib_features = tcx.lib_features(LOCAL_CRATE);
         self.lazy_array(lib_features.to_sorted_vec())
     }
 
     fn encode_stability_implications(&mut self) -> LazyArray<(Symbol, Symbol)> {
-        empty_proc_macro!(self);
         let tcx = self.tcx;
         let implications = tcx.stability_implications(LOCAL_CRATE);
         let sorted = implications.to_sorted_stable_ord();
@@ -1968,14 +1944,12 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
     }
 
     fn encode_diagnostic_items(&mut self) -> LazyArray<(Symbol, DefIndex)> {
-        empty_proc_macro!(self);
         let tcx = self.tcx;
         let diagnostic_items = &tcx.diagnostic_items(LOCAL_CRATE).name_to_id;
         self.lazy_array(diagnostic_items.iter().map(|(&name, def_id)| (name, def_id.index)))
     }
 
     fn encode_lang_items(&mut self) -> LazyArray<(DefIndex, LangItem)> {
-        empty_proc_macro!(self);
         let lang_items = self.tcx.lang_items().iter();
         self.lazy_array(lang_items.filter_map(|(lang_item, def_id)| {
             def_id.as_local().map(|id| (id.local_def_index, lang_item))
@@ -1983,7 +1957,6 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
     }
 
     fn encode_lang_items_missing(&mut self) -> LazyArray<LangItem> {
-        empty_proc_macro!(self);
         let tcx = self.tcx;
         self.lazy_array(&tcx.lang_items().missing)
     }
@@ -1998,14 +1971,12 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
     }
 
     fn encode_traits(&mut self) -> LazyArray<DefIndex> {
-        empty_proc_macro!(self);
         self.lazy_array(self.tcx.traits(LOCAL_CRATE).iter().map(|def_id| def_id.index))
     }
 
     /// Encodes an index, mapping each trait to its (local) implementations.
     #[instrument(level = "debug", skip(self))]
     fn encode_impls(&mut self) -> LazyArray<TraitImpls> {
-        empty_proc_macro!(self);
         let tcx = self.tcx;
         let mut trait_impls: FxIndexMap<DefId, Vec<(DefIndex, Option<SimplifiedType>)>> =
             FxIndexMap::default();
@@ -2062,7 +2033,6 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
 
     #[instrument(level = "debug", skip(self))]
     fn encode_incoherent_impls(&mut self) -> LazyArray<IncoherentImpls> {
-        empty_proc_macro!(self);
         let tcx = self.tcx;
 
         let all_impls: Vec<_> = tcx
@@ -2080,12 +2050,10 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
     }
 
     fn encode_exportable_items(&mut self) -> LazyArray<DefIndex> {
-        empty_proc_macro!(self);
         self.lazy_array(self.tcx.exportable_items(LOCAL_CRATE).iter().map(|def_id| def_id.index))
     }
 
     fn encode_stable_order_of_exportable_impls(&mut self) -> LazyArray<(DefIndex, usize)> {
-        empty_proc_macro!(self);
         let stable_order_of_exportable_impls =
             self.tcx.stable_order_of_exportable_impls(LOCAL_CRATE);
         self.lazy_array(
@@ -2103,13 +2071,10 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
         &mut self,
         exported_symbols: &[(ExportedSymbol<'tcx>, SymbolExportInfo)],
     ) -> LazyArray<(ExportedSymbol<'static>, SymbolExportInfo)> {
-        empty_proc_macro!(self);
-
         self.lazy_array(exported_symbols.iter().cloned())
     }
 
     fn encode_dylib_dependency_formats(&mut self) -> LazyArray<Option<LinkagePreference>> {
-        empty_proc_macro!(self);
         let formats = self.tcx.dependency_formats(());
         if let Some(arr) = formats.get(&CrateType::Dylib) {
             return self.lazy_array(arr.iter().skip(1 /* skip LOCAL_CRATE */).map(
@@ -2253,7 +2218,7 @@ pub fn encode_metadata(tcx: TyCtxt<'_>, path: &Path, ref_path: Option<&Path>) {
                 name: tcx.crate_name(LOCAL_CRATE),
                 triple: tcx.sess.opts.target_triple.clone(),
                 hash: tcx.crate_hash(LOCAL_CRATE),
-                is_proc_macro_crate: false,
+                has_proc_macros: false,
                 is_stub: true,
             });
             header.position.get()
@@ -2352,9 +2317,9 @@ fn with_encode_metadata_header(
         source_file_cache,
         interpret_allocs: Default::default(),
         required_source_files,
-        is_proc_macro: tcx.crate_types().contains(&CrateType::ProcMacro),
         hygiene_ctxt: &hygiene_ctxt,
         symbol_index_table: Default::default(),
+        proc_macro_exports: collect_proc_macro_exports(tcx),
     };
 
     // Encode the rustc version string in a predictable location.

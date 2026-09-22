@@ -343,7 +343,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::RustcPassByValue
                     | AttributeKind::RustcPassIndirectlyInNonRusticAbis(..)
                     | AttributeKind::RustcPreserveUbChecks
-                    | AttributeKind::RustcProcMacroDecls
                     | AttributeKind::RustcReallocator
                     | AttributeKind::RustcRegions
                     | AttributeKind::RustcReservationImpl(..)
@@ -1503,29 +1502,29 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         );
     }
 
-    /// A best effort attempt to create an error for a mismatching proc macro signature.
-    ///
-    /// If this best effort goes wrong, it will just emit a worse error later (see #102923)
+    /// Checks that a proc-macro entry point has the signature required by its kind.
     fn check_proc_macro(&self, hir_id: HirId, target: Target, kind: ProcMacroKind) {
         if target != Target::Fn {
             return;
         }
 
         let tcx = self.tcx;
-        let Some(token_stream_def_id) = tcx.get_diagnostic_item(sym::TokenStream) else {
-            return;
-        };
-        let Some(token_stream) = tcx.type_of(token_stream_def_id).no_bound_vars() else {
+        let def_id = hir_id.expect_owner().def_id;
+        let span = tcx.def_span(def_id);
+        let Some(token_stream) = tcx
+            .get_diagnostic_item(sym::TokenStream)
+            .and_then(|def_id| tcx.type_of(def_id).no_bound_vars())
+        else {
+            tcx.dcx().emit_err(errors::ProcMacroTokenStreamUnavailable { span, kind });
+            self.abort.set(true);
             return;
         };
 
-        let def_id = hir_id.expect_owner().def_id;
         let param_env = ty::ParamEnv::empty();
 
         let infcx = tcx.infer_ctxt().build(TypingMode::non_body_analysis());
         let ocx = ObligationCtxt::new_with_diagnostics(&infcx);
 
-        let span = tcx.def_span(def_id);
         let fresh_args = infcx.fresh_args_for_item(span, def_id.to_def_id());
         let sig = tcx.liberate_late_bound_regions(
             def_id.to_def_id(),

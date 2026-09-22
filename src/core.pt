@@ -6,10 +6,44 @@
     unboxed_closures,
     fundamental,
     const_trait_impl,
-    arbitrary_self_types
+    arbitrary_self_types,
+    decl_macro
 )]
 #![no_std]
 #![no_core]
+
+#[macro_export]
+#[rustc_builtin_macro]
+macro_rules! stringify {
+    () => {};
+}
+
+#[macro_export]
+#[rustc_builtin_macro]
+macro_rules! concat {
+    () => {};
+}
+
+#[macro_export]
+#[rustc_builtin_macro]
+macro_rules! format_args {
+    () => {};
+}
+
+#[rustc_builtin_macro]
+pub macro derive($item:item) {}
+
+// `io` is resolved where the macro is used; `extern mod io` is defined in prelude.
+#[macro_export]
+macro_rules! print {
+    ($($arg:tt)*) => {{ io::put_chars($crate::format_args!($($arg)*)); }};
+}
+
+#[macro_export]
+macro_rules! println {
+    () => {{ io::nl(); }};
+    ($($arg:tt)*) => {{ io::put_chars([$crate::format_args!($($arg)*)]); io::nl(); }};
+}
 
 #[lang = "pointee_sized"]
 pub trait PointeeSized {}
@@ -335,7 +369,7 @@ macro_rules! partial_eq_impl {
     )*)
 }
 
-partial_eq_impl! { bool int float str atom }
+partial_eq_impl! { bool int float str atom char }
 
 #[lang = "partial_ord"]
 pub const trait PartialOrd<Rhs = Self> {
@@ -364,6 +398,14 @@ partial_ord_impl! { bool int float str atom }
 
 #[lang = "structural_peq"]
 pub const trait StructuralPartialEq {}
+
+#[repr(transparent)]
+pub enum Option<T> {
+    #[repr(atom, tag = "nil")]
+    None,
+    #[repr(dynamic_wrap, tag = "some")]
+    Some(T),
+}
 
 #[lang = "timeout"]
 pub enum Timeout {

@@ -1,33 +1,51 @@
-error: cannot find attribute `derive` in this scope
-  --> tests/ui/src/error/option_unwrap/defaults__02.pt:4:3
+error: cannot find derive macro `Debug` in this scope
+  --> tests/ui/src/error/option_unwrap/defaults__02.pt:4:10
    |
 LL | #[derive(Debug)]
-   |   ^^^^^^
-
-error[E0425]: cannot find type `Option` in this scope
-  --> tests/ui/src/error/option_unwrap/defaults__02.pt:8:19
-   |
-LL |     let no_fruit: Option<Fruit> = None;
-   |                   ^^^^^^ not found in this scope
+   |          ^^^^^
 
 error[E0425]: cannot find value `None` in this scope
   --> tests/ui/src/error/option_unwrap/defaults__02.pt:8:35
    |
 LL |     let no_fruit: Option<Fruit> = None;
    |                                   ^^^^ not found in this scope
+   |
+help: consider importing one of these unit variants
+  --> <patina-prelude>:11:1
+   |
+LL + use crate::Option::None;
+   |
+LL + use Core::Option::None;
+   |
 
 error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
   --> tests/ui/src/error/option_unwrap/defaults__02.pt:11:9
    |
 LL |         Some(Fruit::Kiwi)
    |         ^^^^ not found in this scope
+   |
+help: consider importing one of these tuple variants
+  --> <patina-prelude>:11:1
+   |
+LL + use crate::Option::Some;
+   |
+LL + use Core::Option::Some;
+   |
 
 error[E0425]: cannot find function, tuple struct or tuple variant `Some` in this scope
   --> tests/ui/src/error/option_unwrap/defaults__02.pt:15:9
    |
 LL |         Some(Fruit::Lemon)
    |         ^^^^ not found in this scope
+   |
+help: consider importing one of these tuple variants
+  --> <patina-prelude>:11:1
+   |
+LL + use crate::Option::Some;
+   |
+LL + use Core::Option::Some;
+   |
 
-error: aborting due to 5 previous errors
+error: aborting due to 4 previous errors
 
 For more information about this error, try `rustc --explain E0425`.

@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -15,29 +15,6 @@ extern mod io;
 
 #[allow(unused)]
 extern mod patina_fmt;
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 // source: patina-by-example/src/generics/assoc_items/types.md
 // block: 3/3
@@ -103,13 +80,14 @@ fn main() ({
         ((Container as
                 fn(int, int) -> Container {Container})((number_1 as int),
             (number_2 as int)) as Container);
+
+
     ({
         ((io::put_chars as
                 fn(term) -> term)(([([("Does container contain " as str),
                             ((patina_fmt::display as
-                                    fn(term) -> term)(
-
-                                (number_1 as int)) as term), (" and " as str),
+                                    fn(term) -> term)((number_1 as int)) as term),
+                            (" and " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)((number_2 as int)) as term),
                             (": " as str),
@@ -139,9 +117,7 @@ fn main() ({
         ((io::put_chars as
                 fn(term) -> term)(([([("The difference is: " as str),
                             ((patina_fmt::display as
-                                    fn(term) -> term)(
-
-                                ((difference as
+                                    fn(term) -> term)(((difference as
                                         fn(Container) -> int {difference::<Container>})((container
                                         as Container)) as int)) as term)] as [term])] as [[term]]))
             as term);

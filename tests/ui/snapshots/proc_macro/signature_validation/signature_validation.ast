@@ -1,0 +1,16 @@
+#[rustc_diagnostic_item = "TokenStream"]
+type TokenStream = int;
+
+#[proc_macro]
+pub fn wrong_argument_count() -> TokenStream { 0 }
+
+#[proc_macro]
+pub fn wrong_argument_type(_input: bool) -> TokenStream { 0 }
+
+#[proc_macro]
+pub fn wrong_result_type(_input: TokenStream) -> bool { true }
+
+#[proc_macro_attribute]
+pub fn wrong_attribute_argument_count(_input: TokenStream) -> TokenStream {
+    0
+}

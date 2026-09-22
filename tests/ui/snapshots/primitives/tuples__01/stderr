@@ -1,8 +1,8 @@
-error: cannot find attribute `derive` in this scope
-  --> tests/ui/src/primitives/tuples__01.pt:13:3
+error: cannot find derive macro `Debug` in this scope
+  --> tests/ui/src/primitives/tuples__01.pt:13:10
    |
 LL | #[derive(Debug)]
-   |   ^^^^^^
+   |          ^^^^^
 
 error: aborting due to 1 previous error
 

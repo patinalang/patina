@@ -1,0 +1,34 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[rustc_diagnostic_item = "TokenStream"]
+type TokenStream = int;
+
+#[proc_macro]
+pub fn wrong_argument_count() -> TokenStream { 0 }
+
+#[proc_macro]
+pub fn wrong_argument_type(_input: bool) -> TokenStream { 0 }
+
+#[proc_macro]
+pub fn wrong_result_type(_input: TokenStream) -> bool { true }
+
+#[proc_macro_attribute]
+pub fn wrong_attribute_argument_count(_input: TokenStream) -> TokenStream {
+    0
+}

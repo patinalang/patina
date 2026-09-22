@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs)]
+#![feature(no_core, rustc_attrs, decl_macro)]
 #![no_std]
 #![no_core]
 
@@ -15,29 +15,6 @@ extern mod io;
 
 #[allow(unused)]
 extern mod patina_fmt;
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[rustc_builtin_macro]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 // source: patina-by-example/src/fn.md
 // block: 1/1
@@ -60,6 +37,9 @@ fn is_divisible_by(lhs: int, rhs: int) -> bool {
 // Functions that "don't" return a value, actually return the unit type `()`
 fn fizzbuzz(n: int) -> () {
     if is_divisible_by(n, 15) {
+
+        // When a function returns `()`, the return type can be omitted from the
+        // signature
         { io::put_chars([["fizzbuzz"]]); io::nl(); };
     } else if is_divisible_by(n, 3) {
         { io::put_chars([["fizz"]]); io::nl(); };
@@ -67,7 +47,4 @@ fn fizzbuzz(n: int) -> () {
         { io::put_chars([["buzz"]]); io::nl(); };
     } else { { io::put_chars([[patina_fmt::display(n)]]); io::nl(); }; }
 }
-
-// When a function returns `()`, the return type can be omitted from the
-// signature
 fn fizzbuzz_to(n: int) { for n in 1..=n { fizzbuzz(n); } }

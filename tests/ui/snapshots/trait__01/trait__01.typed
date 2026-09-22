@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -15,29 +15,6 @@ extern mod io;
 
 #[allow(unused)]
 extern mod patina_fmt;
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
 
 // source: patina-by-example/src/trait.md
 // block: 1/1
@@ -60,6 +37,21 @@ trait Animal {
 
     // Traits can provide default method definitions.
     fn talk(self) ({
+
+
+        // Implementor methods can use the implementor's trait methods.
+
+        // Implement the `Animal` trait for `Sheep`.
+        // `Self` is the implementor type: `Sheep`.
+
+
+
+        // Default trait methods can be overridden.
+        // For example, we can add some quiet contemplation.
+
+        // Type annotation is necessary in this case.
+        // TODO ^ Try removing the type annotations.
+
         ({
             ((io::put_chars as
                     fn(term) -> term)(([([((patina_fmt::display as
@@ -72,10 +64,8 @@ trait Animal {
         } as ());
     } as ())
 }
-
 impl Sheep {
     fn is_naked(self) -> bool ({ ((self as Sheep).naked as bool) } as bool)
-
     fn shear(self)
         ->
             Self ({
@@ -83,9 +73,7 @@ impl Sheep {
             ({
                 ((io::put_chars as
                         fn(term) -> term)(([([((patina_fmt::display as
-                                            fn(term) -> term)(
-                                        // Implementor methods can use the implementor's trait methods.
-                                        ((self as Sheep).name() as str)) as term),
+                                            fn(term) -> term)(((self as Sheep).name() as str)) as term),
                                     (" is already naked..." as str)] as [term])] as [[term]]))
                     as term);
                 ((io::nl as fn() -> term)() as term);
@@ -104,18 +92,13 @@ impl Sheep {
         } as Sheep)
     } as Sheep)
 }
-
-// Implement the `Animal` trait for `Sheep`.
 impl Animal for Sheep {
-    // `Self` is the implementor type: `Sheep`.
     fn new(name: str)
         ->
             Sheep ({
         (Sheep { name: (name as str), naked: (false as bool) } as Sheep)
     } as Sheep)
-
     fn name(self) -> str ({ ((self as Sheep).name as str) } as str)
-
     fn noise(self)
         ->
             str ({
@@ -123,15 +106,11 @@ impl Animal for Sheep {
             ("baaaaah?" as str)
         } else { ("baaaaah!" as str) } as str)
     } as str)
-
-    // Default trait methods can be overridden.
     fn talk(self) ({
         ({
             ((io::put_chars as
                     fn(term) -> term)(([([((patina_fmt::display as
-                                        fn(term) -> term)(
-                                    // For example, we can add some quiet contemplation.
-                                    ((self as Sheep).name as str)) as term),
+                                        fn(term) -> term)(((self as Sheep).name as str)) as term),
                                 (" pauses briefly... " as str),
                                 ((patina_fmt::display as
                                         fn(term) -> term)(((self as Sheep).noise() as str)) as
@@ -140,15 +119,11 @@ impl Animal for Sheep {
         } as ());
     } as ())
 }
-
 fn main() ({
-    // Type annotation is necessary in this case.
     let dolly: Sheep =
         ((Animal::new as
                 fn(str) -> Sheep {<Sheep as Animal>::new})(("Dolly" as str))
             as Sheep);
-    // TODO ^ Try removing the type annotations.
-
     ((dolly as Sheep).talk() as ());
     ((dolly as Sheep).shear() as Sheep);
     ((dolly as Sheep).talk() as ());

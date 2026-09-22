@@ -322,7 +322,7 @@ pub(crate) struct ProcMacroPanicked {
     #[primary_span]
     pub span: Span,
     #[subdiagnostic]
-    pub message: Option<ProcMacroPanickedHelp>,
+    pub message: ProcMacroPanickedHelp,
 }
 
 #[derive(Subdiagnostic)]
@@ -337,7 +337,7 @@ pub(crate) struct ProcMacroDerivePanicked {
     #[primary_span]
     pub span: Span,
     #[subdiagnostic]
-    pub message: Option<ProcMacroDerivePanickedHelp>,
+    pub message: ProcMacroDerivePanickedHelp,
 }
 
 #[derive(Subdiagnostic)]
@@ -352,7 +352,7 @@ pub(crate) struct CustomAttributePanicked {
     #[primary_span]
     pub span: Span,
     #[subdiagnostic]
-    pub message: Option<CustomAttributePanickedHelp>,
+    pub message: CustomAttributePanickedHelp,
 }
 
 #[derive(Subdiagnostic)]
@@ -364,6 +364,37 @@ pub(crate) struct CustomAttributePanickedHelp {
 #[derive(Diagnostic)]
 #[diag("proc-macro derive produced unparsable tokens")]
 pub(crate) struct ProcMacroDeriveTokens {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("proc macro timed out")]
+pub(crate) struct ProcMacroTimeout {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("lifetimes are not supported in Patina")]
+pub(crate) struct LifetimeInMacroTokens {
+    #[primary_span]
+    #[suggestion("remove the lifetime", code = "", applicability = "machine-applicable")]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("failed to execute proc macro: {$reason}")]
+pub(crate) struct ProcMacroExecutionError {
+    #[primary_span]
+    pub span: Span,
+    pub reason: String,
+}
+
+#[derive(Diagnostic)]
+#[diag("proc macro returned a token with a span that is not part of its input")]
+#[note("the token is reported at the macro invocation instead")]
+pub(crate) struct ProcMacroUnknownSpan {
     #[primary_span]
     pub span: Span,
 }

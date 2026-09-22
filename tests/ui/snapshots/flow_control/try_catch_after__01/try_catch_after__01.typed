@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -16,29 +16,6 @@ extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! stringify { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! concat { () => {}; }
-
-#[allow(unused_macros)]
-#[attr = RustcBuiltinMacro {helper_attrs: []}]
-macro_rules! format_args { () => {}; }
-
-#[allow(unused_macros)]
-macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars(format_args!($($arg)*)); }};
-}
-
-#[allow(unused_macros)]
-macro_rules! println {
-    () => {{ io::nl(); }}; ($($arg:tt)*) =>
-    {{ io::put_chars([format_args!($($arg)*)]); io::nl(); }};
-}
-
 // source: patina-by-example/src/flow_control/try_catch_after.md
 // block: 1/1
 
@@ -48,34 +25,33 @@ fn main() ({
     (try ({ ((open_resource as fn() -> atom {open_resource})() as atom); } as
             ())
         catch {
-        error(a"badarg") => {
+        error(a"badarg") =>
+
+            // an Elixir exception is just a struct map in the reason position
+
+            // a second pattern after the comma binds the stacktrace
+
+
+            {
             ((io::put_chars as
                     fn(term) -> term)(([([("badarg!" as str)] as [str])] as
                     [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
-
-
-            error(#{a"__struct__" => a"Elixir.ArithmeticError", ..}) => {
+        error(#{a"__struct__" => a"Elixir.ArithmeticError", ..}) => {
             ((io::put_chars as
                     fn(term) -> term)(([([("Elixir ArithmeticError" as str)] as
                             [str])] as [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
-
-
-            // an Elixir exception is just a struct map in the reason position
-            error(reason@#{a"__struct__" => a"Elixir.ArgumentError", ..}) => {
+        error(reason@#{a"__struct__" => a"Elixir.ArgumentError", ..}) => {
             ((io::put_chars as
                     fn(term) -> term)(([([("Elixir ArgumentError " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((reason as term))
                                     as term)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
-
-
-            // a second pattern after the comma binds the stacktrace
-            error(reason), stacktrace => {
+        error(reason), stacktrace => {
             ((io::put_chars as
                     fn(term) -> term)(([([("other error: " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((reason as term))
@@ -85,18 +61,14 @@ fn main() ({
                             [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
-
-
-            throw(value) => {
+        throw(value) => {
             ((io::put_chars as
                     fn(term) -> term)(([([("thrown: " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((value as term)) as
                                     term)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
-
-
-            exit(reason) => {
+        exit(reason) => {
             ((io::put_chars as
                     fn(term) -> term)(([([("exit: " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((reason as term))
