@@ -188,6 +188,8 @@ pub trait Ty<I: Interner<Ty = Self>>:
             | ty::Str
             | ty::Term
             | ty::Atom
+            | ty::Bin
+            | ty::Bits
             | ty::Map(_, _)
             | ty::Slice(_)
             | ty::Never

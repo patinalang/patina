@@ -337,6 +337,8 @@ where
             | ty::Str
             | ty::Term
             | ty::Atom
+            | ty::Bin
+            | ty::Bits
             | ty::Map(_, _)
             | ty::Pat(..)
             | ty::FnPtr(..)

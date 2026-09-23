@@ -1151,6 +1151,18 @@ impl<'tcx> Ty<'tcx> {
         *self.kind() == Atom
     }
 
+    /// Returns `true` if this type is a `bin`.
+    #[inline]
+    pub fn is_bin(self) -> bool {
+        *self.kind() == Bin
+    }
+
+    /// Returns `true` if this type is a `bits`.
+    #[inline]
+    pub fn is_bits(self) -> bool {
+        *self.kind() == Bits
+    }
+
     /// Returns true if this type is `&str`. The reference's lifetime is ignored.
     #[inline]
     pub fn is_imm_ref_str(self) -> bool {
@@ -1635,6 +1647,8 @@ impl<'tcx> Ty<'tcx> {
             | ty::Str
             | ty::Term
             | ty::Atom
+            | ty::Bin
+            | ty::Bits
             | ty::Map(_, _)
             | ty::Array(..)
             | ty::Slice(_)
@@ -1685,6 +1699,8 @@ impl<'tcx> Ty<'tcx> {
             | ty::Error(_)
             | ty::Term
             | ty::Atom
+            | ty::Bin
+            | ty::Bits
             | ty::Map(_, _)
             // Extern types have metadata = ().
             | ty::Foreign(..)
@@ -1869,6 +1885,8 @@ impl<'tcx> Ty<'tcx> {
             | ty::Str
             | ty::Term
             | ty::Atom
+            | ty::Bin
+            | ty::Bits
             | ty::Map(_, _)
             | ty::Slice(_)
             | ty::Never
@@ -1916,6 +1934,8 @@ impl<'tcx> Ty<'tcx> {
             | ty::Str
             | ty::Term
             | ty::Atom
+            | ty::Bin
+            | ty::Bits
             | ty::Map(..)
             | ty::Slice(..) => true,
 
@@ -1972,6 +1992,8 @@ impl<'tcx> Ty<'tcx> {
             | ty::Str
             | ty::Term
             | ty::Atom
+            | ty::Bin
+            | ty::Bits
             | ty::Never
             | ty::Param(_)
             | ty::Placeholder(_)
@@ -2022,6 +2044,8 @@ impl<'tcx> Ty<'tcx> {
             ty::Str => Some(sym::str),
             ty::Term => Some(sym::term),
             ty::Atom => Some(sym::atom),
+            ty::Bin => Some(sym::bin),
+            ty::Bits => Some(sym::bits),
             _ => None,
         }
     }

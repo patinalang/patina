@@ -128,6 +128,8 @@ pub fn ty_dtor_span<'tcx>(tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) -> Option<Span> {
         | ty::Str
         | ty::Term
         | ty::Atom
+        | ty::Bin
+        | ty::Bits
         | ty::Never
         | ty::RawPtr(_, _)
         | ty::Ref(_, _, _)

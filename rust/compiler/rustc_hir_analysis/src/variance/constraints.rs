@@ -232,6 +232,8 @@ impl<'a, 'tcx> ConstraintContext<'a, 'tcx> {
             | ty::Str
             | ty::Term
             | ty::Atom
+            | ty::Bin
+            | ty::Bits
             | ty::Never
             | ty::Foreign(..) => {
                 // leaf type -- noop

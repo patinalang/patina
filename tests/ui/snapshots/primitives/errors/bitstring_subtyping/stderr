@@ -1,0 +1,60 @@
+error[E0308]: mismatched types
+  --> tests/ui/src/primitives/errors/bitstring_subtyping.pt:4:5
+   |
+LL | pub fn bin_to_str(value: bin) -> str {
+   |                                  --- expected `str` because of return type
+LL |     value
+   |     ^^^^^ expected `str`, found `bin`
+
+error[E0308]: mismatched types
+  --> tests/ui/src/primitives/errors/bitstring_subtyping.pt:8:5
+   |
+LL | pub fn bits_to_bin(value: bits) -> bin {
+   |                                    --- expected `bin` because of return type
+LL |     value
+   |     ^^^^^ expected `bin`, found `bits`
+
+error[E0308]: mismatched types
+  --> tests/ui/src/primitives/errors/bitstring_subtyping.pt:12:5
+   |
+LL | pub fn bits_to_str(value: bits) -> str {
+   |                                    --- expected `str` because of return type
+LL |     value
+   |     ^^^^^ expected `str`, found `bits`
+
+error[E0308]: mismatched types
+  --> tests/ui/src/primitives/errors/bitstring_subtyping.pt:16:5
+   |
+LL | pub fn literal_to_str() -> str {
+   |                            --- expected `str` because of return type
+LL |     b"bytes"
+   |     ^^^^^^^^ expected `str`, found `bin`
+
+error[E0308]: mismatched types
+  --> tests/ui/src/primitives/errors/bitstring_subtyping.pt:20:5
+   |
+LL | pub fn slice_to_str(values: [bin]) -> [str] {
+   |                                       ----- expected `[str]` because of return type
+LL |     values
+   |     ^^^^^^ expected `[str]`, found `[bin]`
+   |
+   = note: expected slice `[str]`
+              found slice `[bin]`
+
+error[E0308]: mismatched types
+  --> tests/ui/src/primitives/errors/bitstring_subtyping.pt:25:9
+   |
+LL |     match value {
+   |           ----- this expression has type `str`
+LL |         b"bytes" => 1,
+   |         ^^^^^^^^ expected `str`, found `bin`
+
+error[E0308]: mismatched types
+  --> tests/ui/src/primitives/errors/bitstring_subtyping.pt:32:15
+   |
+LL |     values = [b"\xff"];
+   |               ^^^^^^^ expected `str`, found `bin`
+
+error: aborting due to 7 previous errors
+
+For more information about this error, try `rustc --explain E0308`.

@@ -89,9 +89,14 @@ impl MappingFlags {
         use rustc_ast::Mutability::*;
 
         match ty.kind() {
-            ty::Bool | ty::Char | ty::Int | ty::Float | ty::Term | ty::Atom => {
-                MappingFlags::LITERAL | MappingFlags::IMPLICIT
-            }
+            ty::Bool
+            | ty::Char
+            | ty::Int
+            | ty::Float
+            | ty::Term
+            | ty::Atom
+            | ty::Bin
+            | ty::Bits => MappingFlags::LITERAL | MappingFlags::IMPLICIT,
 
             ty::Adt(_, _) | ty::Tuple(_) | ty::Array(_, _) | ty::Alias(_) | ty::Param(_) => {
                 MappingFlags::TO

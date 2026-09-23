@@ -27,19 +27,10 @@ pub fn const_lit_matches_ty<'tcx>(
 ) -> bool {
     match (*kind, ty.kind()) {
         (LitKind::Str(..), ty::Ref(_, inner_ty, _)) if inner_ty.is_str() => true,
-        (LitKind::Str(..), ty::Str) => true,
+        // `str <: bin <: bits`
+        (LitKind::Str(..), ty::Str | ty::Bin | ty::Bits) => true,
         (LitKind::Atom(..), ty::Atom) => true,
-        (LitKind::ByteStr(..), ty::Ref(_, inner_ty, _))
-            if let ty::Slice(ty) | ty::Array(ty, _) = inner_ty.kind()
-                && matches!(ty.kind(), ty::Int) =>
-        {
-            true
-        }
-        (LitKind::ByteStr(..), ty::Slice(inner_ty) | ty::Array(inner_ty, _))
-            if tcx.features().deref_patterns() && matches!(inner_ty.kind(), ty::Int) =>
-        {
-            true
-        }
+        (LitKind::ByteStr(..), ty::Bin | ty::Bits) => true,
         (LitKind::Byte(..), ty::Int) => true,
         (LitKind::CStr(..), ty::Ref(_, inner_ty, _))
             if matches!(inner_ty.kind(), ty::Adt(def, _)

@@ -37,6 +37,8 @@ where
         | ty::Str
         | ty::Term
         | ty::Atom
+        | ty::Bin
+        | ty::Bits
         | ty::Never
         | ty::Char
         | ty::Int => Ok(ty::Binder::dummy(vec![])),
@@ -143,6 +145,8 @@ where
         | ty::Str
         | ty::Term
         | ty::Atom
+        | ty::Bin
+        | ty::Bits
         | ty::Map(..)
         | ty::Slice(_)
         | ty::Never
@@ -225,6 +229,8 @@ where
         ty::Dynamic(..)
         | ty::Str
         | ty::Atom
+        | ty::Bin
+        | ty::Bits
         | ty::Slice(_)
         | ty::Foreign(..)
         | ty::Ref(_, _, Mutability::Mut)
@@ -392,6 +398,8 @@ pub(in crate::solve) fn extract_tupled_inputs_and_output_from_callable<I: Intern
         | ty::Str
         | ty::Term
         | ty::Atom
+        | ty::Bin
+        | ty::Bits
         | ty::Map(_, _)
         | ty::Array(_, _)
         | ty::Slice(_)
@@ -565,6 +573,8 @@ pub(in crate::solve) fn extract_tupled_inputs_and_output_from_async_callable<I: 
         | ty::Str
         | ty::Term
         | ty::Atom
+        | ty::Bin
+        | ty::Bits
         | ty::Map(_, _)
         | ty::Array(_, _)
         | ty::Pat(_, _)
@@ -728,6 +738,8 @@ pub(in crate::solve) fn extract_fn_def_from_const_callable<I: Interner>(
         | ty::Str
         | ty::Term
         | ty::Atom
+        | ty::Bin
+        | ty::Bits
         | ty::Map(_, _)
         | ty::Array(_, _)
         | ty::Slice(_)
@@ -809,6 +821,8 @@ pub(in crate::solve) fn const_conditions_for_destruct<I: Interner>(
         | ty::Str
         | ty::Term
         | ty::Atom
+        | ty::Bin
+        | ty::Bits
         | ty::RawPtr(..)
         | ty::Ref(..)
         | ty::FnDef(..)

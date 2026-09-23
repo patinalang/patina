@@ -639,11 +639,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         match lit.node {
             ast::LitKind::Str(..) => tcx.types.str_,
             ast::LitKind::Atom(..) => tcx.types.atom,
-            ast::LitKind::ByteStr(ref v, _) => Ty::new_imm_ref(
-                tcx,
-                tcx.lifetimes.re_static,
-                Ty::new_array(tcx, tcx.types.int, v.as_byte_str().len() as u64),
-            ),
+            ast::LitKind::ByteStr(..) => tcx.types.bin,
             ast::LitKind::Byte(_) => tcx.types.int,
             ast::LitKind::Char(_) => tcx.types.char,
             ast::LitKind::Int(_i) => {

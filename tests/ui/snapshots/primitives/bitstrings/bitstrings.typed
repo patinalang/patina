@@ -1,0 +1,212 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// `bin` and `bits` are Erlang binaries and bitstrings, with `str <: bin <: bits`.
+
+const NAMED: bin = (b"named" as bin);
+
+// `bin` literals.
+
+fn annotated()
+    -> bin ({ let value: bin = (b"qwerty" as bin); (value as bin) } as bin)
+
+fn named() -> bin ({ (NAMED as bin) } as bin)
+
+fn escaped() -> bin ({ (b"\x00\xff\n" as bin) } as bin)
+
+fn raw() -> bin ({ (br#"no \escapes"# as bin) } as bin)
+
+// Operators.
+
+fn bin_equal(left: bin, right: bin)
+    -> bool ({ ((left as bin) == (right as bin) as bool) } as bool)
+
+fn bin_less_than(left: bin, right: bin)
+    -> bool ({ ((left as bin) < (right as bin) as bool) } as bool)
+
+fn bin_concat(left: bin, right: bin)
+    -> bin ({ ((left as bin) + (right as bin) as bin) } as bin)
+
+fn bits_identity(value: bits) -> bits ({ (value as bits) } as bits)
+
+fn bits_equal(left: bits, right: bits)
+    -> bool ({ ((left as bits) == (right as bits) as bool) } as bool)
+
+fn bits_less_than(left: bits, right: bits)
+    -> bool ({ ((left as bits) < (right as bits) as bool) } as bool)
+
+fn bits_concat(left: bits, right: bits)
+    -> bits ({ ((left as bits) + (right as bits) as bits) } as bits)
+
+// Literal patterns. Narrower literals match wider scrutinees.
+
+fn bin_classify(value: bin)
+    ->
+        atom ({
+    (match (value as bin) {
+        b"\x89PNG" => (a"png" as atom),
+        "GIF8" => (a"gif" as atom),
+        _ => (a"unknown" as atom),
+    } as atom)
+} as atom)
+
+fn bits_classify(value: bits)
+    ->
+        atom ({
+    (match (value as bits) {
+        b"\xff" => (a"ff" as atom),
+        "text" => (a"text" as atom),
+        _ => (a"unknown" as atom),
+    } as atom)
+} as atom)
+
+fn term_classes(value: term)
+    ->
+        atom ({
+    (match (value as term) {
+        bin(b"x") => (a"bin_x" as atom),
+        bits("y") => (a"bits_y" as atom),
+        bin(_) => (a"bin" as atom),
+        bits(_) => (a"bits" as atom),
+        _ => (a"other" as atom),
+    } as atom)
+} as atom)
+
+// `str <: bin <: bits`.
+
+fn str_to_bin(value: str) -> bin ({ (value as str) } as bin)
+
+fn str_to_bits(value: str) -> bits ({ (value as str) } as bits)
+
+fn bin_to_bits(value: bin) -> bits ({ (value as bin) } as bits)
+
+fn literal_to_bits() -> bits ({ (b"\x01\x02" as bin) } as bits)
+
+fn pass_str()
+    ->
+        bool ({
+    ((bin_equal as
+            fn(bin, bin) -> bool {bin_equal})(("same" as str),
+        (b"same" as bin)) as bool)
+} as bool)
+
+fn bin_branches(flag: bool)
+    ->
+        bin ({
+    (if (flag as bool) { ("text" as str) } else { (b"\xff" as bin) } as bin)
+} as bin)
+
+fn bin_match_arms(flag: bool)
+    ->
+        bin ({
+    (match (flag as bool) {
+        true => (b"\xff" as bin),
+        false => ("text" as str),
+    } as bin)
+} as bin)
+
+fn bits_branches(flag: bool, value: bits)
+    ->
+        bits ({
+    (if (flag as bool) { ("text" as str) } else { (value as bits) } as bits)
+} as bits)
+
+fn str_slice(values: [str]) -> [bin] ({ (values as [str]) } as [bin])
+
+fn bin_slice(values: [bin]) -> [bits] ({ (values as [bin]) } as [bits])
+
+fn tuple(value: (str, int))
+    -> (bin, int) ({ (value as (str, int)) } as (bin, int))
+
+fn str_map(values: #{str => str})
+    -> #{bin => bin} ({ (values as #{str => str}) } as #{bin => bin})
+
+fn bin_map(values: #{str => bin})
+    -> #{bits => bits} ({ (values as #{str => bin}) } as #{bits => bits})
+
+fn str_to_term(value: str)
+    -> term ({ let widened: bin = (value as str); (widened as bin) } as term)
+
+fn bits_to_term(value: bits) -> term ({ (value as bits) } as term)
+
+// `str`, `bin` and `bits` literals with the same bytes are the same BEAM term, so later
+// duplicates are unreachable regardless of which literal form they use.
+
+fn term_str_then_bin(value: term)
+    ->
+        int ({
+    (match (value as term) {
+        "a" => (1 as int),
+        b"a" => (2 as int),
+        _ => (0 as int),
+    } as int)
+} as int)
+
+fn term_duplicate_str(value: term)
+    ->
+        int ({
+    (match (value as term) {
+        "a" => (1 as int),
+        "a" => (2 as int),
+        _ => (0 as int),
+    } as int)
+} as int)
+
+fn bin_str_then_bin(value: bin)
+    ->
+        int ({
+    (match (value as bin) {
+        "a" => (1 as int),
+        b"a" => (2 as int),
+        _ => (0 as int),
+    } as int)
+} as int)
+
+fn bits_bin_then_str(value: bits)
+    ->
+        int ({
+    (match (value as bits) {
+        b"a" => (1 as int),
+        "a" => (2 as int),
+        _ => (0 as int),
+    } as int)
+} as int)
+
+// None of these arms are unreachable.
+
+fn term_atom_and_str(value: term)
+    ->
+        int ({
+    (match (value as term) {
+        a"a" => (1 as int),
+        "a" => (2 as int),
+        b"\xff" => (3 as int),
+        _ => (0 as int),
+    } as int)
+} as int)
+
+fn bin_distinct(value: bin)
+    ->
+        int ({
+    (match (value as bin) {
+        b"a" => (1 as int),
+        "ab" => (2 as int),
+        b"\xff" => (3 as int),
+        _ => (0 as int),
+    } as int)
+} as int)

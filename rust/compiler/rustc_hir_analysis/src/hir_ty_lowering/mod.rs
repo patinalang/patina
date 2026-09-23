@@ -2371,6 +2371,8 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                     hir::PrimTy::Str => tcx.types.str_,
                     hir::PrimTy::Term => tcx.types.term,
                     hir::PrimTy::Atom => tcx.types.atom,
+                    hir::PrimTy::Bin => tcx.types.bin,
+                    hir::PrimTy::Bits => tcx.types.bits,
                     hir::PrimTy::Int => tcx.types.int,
                 }
             }
@@ -3521,6 +3523,8 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             | ty::Str
             | ty::Term
             | ty::Atom
+            | ty::Bin
+            | ty::Bits
             | ty::RawPtr(_, _)
             | ty::Ref(_, _, _)
             | ty::FnDef(_, _)

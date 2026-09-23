@@ -647,6 +647,8 @@ where
             | ty::CoroutineWitness(..)
             | ty::Term
             | ty::Atom
+            | ty::Bin
+            | ty::Bits
             | ty::Map(_, _)
             | ty::Never
             | ty::Str
@@ -915,6 +917,8 @@ where
             | ty::Str
             | ty::Term
             | ty::Atom
+            | ty::Bin
+            | ty::Bits
             | ty::Map(_, _)
             | ty::Slice(_)
             | ty::Dynamic(_, _)

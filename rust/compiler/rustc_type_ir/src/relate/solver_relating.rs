@@ -242,6 +242,15 @@ where
                 )?;
             }
 
+            // `str <: bin <: bits`.
+            _ if let (Some(a_rank), Some(b_rank)) =
+                (a.kind().bitstring_rank(), b.kind().bitstring_rank())
+                && match self.ambient_variance {
+                    ty::Covariant => a_rank < b_rank,
+                    ty::Contravariant => a_rank > b_rank,
+                    ty::Invariant | ty::Bivariant => false,
+                } => {}
+
             _ => {
                 super_combine_tys(self.infcx, self, a, b)?;
             }

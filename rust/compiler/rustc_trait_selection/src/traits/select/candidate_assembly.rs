@@ -697,6 +697,8 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 | ty::Str
                 | ty::Term
                 | ty::Atom
+                | ty::Bin
+                | ty::Bits
                 | ty::Map(..)
                 | ty::Array(_, _)
                 | ty::Pat(_, _)
@@ -876,6 +878,8 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 | ty::Str
                 | ty::Term
                 | ty::Atom
+                | ty::Bin
+                | ty::Bits
                 | ty::Map(..)
                 | ty::Array(_, _)
                 | ty::Pat(_, _)
@@ -1161,6 +1165,8 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::Str
             | ty::Term
             | ty::Atom
+            | ty::Bin
+            | ty::Bits
             | ty::Slice(..)
             | ty::Map(..)
             | ty::Never
@@ -1266,6 +1272,8 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::Str
             | ty::Term
             | ty::Atom
+            | ty::Bin
+            | ty::Bits
             | ty::Map(_, _)
             | ty::Slice(_)
             | ty::Never
@@ -1346,6 +1354,8 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::Str
             | ty::Term
             | ty::Atom
+            | ty::Bin
+            | ty::Bits
             | ty::Map(_, _)
             | ty::Array(_, _)
             | ty::Slice(_)
@@ -1388,6 +1398,8 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::Str
             | ty::Term
             | ty::Atom
+            | ty::Bin
+            | ty::Bits
             | ty::Map(_, _)
             | ty::Array(..)
             | ty::Pat(..)
@@ -1438,6 +1450,8 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::Str
             | ty::Term
             | ty::Atom
+            | ty::Bin
+            | ty::Bits
             | ty::Map(_, _)
             | ty::Slice(_)
             | ty::Foreign(..)

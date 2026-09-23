@@ -672,6 +672,8 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
                 | ty::Str
                 | ty::Term
                 | ty::Atom
+                | ty::Bin
+                | ty::Bits
                 | ty::Float => {
                     return self_ty.print(self);
                 }
@@ -877,6 +879,8 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
             ty::Str => write!(self, "str")?,
             ty::Term => write!(self, "term")?,
             ty::Atom => write!(self, "atom")?,
+            ty::Bin => write!(self, "bin")?,
+            ty::Bits => write!(self, "bits")?,
             ty::Coroutine(did, args) => {
                 write!(self, "{{")?;
                 let coroutine_kind = self.tcx().coroutine_kind(did).unwrap();
@@ -1926,6 +1930,12 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
                         cv.valtree,
                         t
                     )
+                });
+                return self.pretty_print_byte_str(bytes);
+            }
+            (ty::ValTreeKind::Branch(_), ty::Bin | ty::Bits) => {
+                let bytes = cv.try_to_raw_bytes(self.tcx()).unwrap_or_else(|| {
+                    bug!("expected to convert valtree to raw bytes for type {:?}", cv.ty)
                 });
                 return self.pretty_print_byte_str(bytes);
             }

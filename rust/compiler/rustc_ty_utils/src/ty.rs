@@ -295,6 +295,8 @@ fn impl_self_is_guaranteed_unsized<'tcx>(tcx: TyCtxt<'tcx>, impl_def_id: DefId) 
         | ty::Str
         | ty::Term
         | ty::Atom
+        | ty::Bin
+        | ty::Bits
         | ty::Map(_, _)
         | ty::Slice(_)
         | ty::Error(_) => false,

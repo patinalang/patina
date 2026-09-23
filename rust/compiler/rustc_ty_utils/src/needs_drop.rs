@@ -290,6 +290,8 @@ where
                     | ty::Str
                     | ty::Term
                     | ty::Atom
+                    | ty::Bin
+                    | ty::Bits
                     | ty::Map(..)
                     | ty::Slice(_)
                     | ty::Ref(..)

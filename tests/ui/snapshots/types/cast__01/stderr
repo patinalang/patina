@@ -1,21 +1,3 @@
-error[E0425]: cannot find type `bin` in this scope
-  --> tests/ui/src/types/cast__01.pt:23:28
-   |
-LL |     let binary = string as bin;
-   |                            ^^^ not found in this scope
-
-error[E0425]: cannot find type `bits` in this scope
-  --> tests/ui/src/types/cast__01.pt:24:31
-   |
-LL |     let bitstring = string as bits;
-   |                               ^^^^ not found in this scope
-
-error[E0425]: cannot find type `bits` in this scope
-  --> tests/ui/src/types/cast__01.pt:27:31
-   |
-LL |     let bitstring = binary as bits;
-   |                               ^^^^ not found in this scope
-
 error[E0425]: cannot find value `byte_val` in this scope
   --> tests/ui/src/types/cast__01.pt:34:29
    |
@@ -63,7 +45,7 @@ help: consider using `char::from_u32` instead (via a `u32`)
 LL |     let character = decimal as char;
    |                     ^^^^^^^^^^^^^^^
 
-error: aborting due to 8 previous errors
+error: aborting due to 5 previous errors
 
 Some errors have detailed explanations: E0308, E0425, E0604.
 For more information about an error, try `rustc --explain E0308`.

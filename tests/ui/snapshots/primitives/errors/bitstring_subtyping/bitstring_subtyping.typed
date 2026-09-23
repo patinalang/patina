@@ -1,0 +1,45 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// `str <: bin <: bits`; none of these narrow.
+
+fn bin_to_str(value: bin) -> str ({ (value as bin) } as {type error})
+
+fn bits_to_bin(value: bits) -> bin ({ (value as bits) } as {type error})
+
+fn bits_to_str(value: bits) -> str ({ (value as bits) } as {type error})
+
+fn literal_to_str() -> str ({ (b"bytes" as bin) } as {type error})
+
+fn slice_to_str(values: [bin])
+    -> [str] ({ (values as [bin]) } as {type error})
+
+fn bin_pattern_on_str(value: str)
+    ->
+        int ({
+    (match (value as str) { b"bytes" => (1 as int), _ => (0 as int), } as int)
+} as int)
+
+fn first_type_wins()
+    ->
+        [str] ({
+    let mut values = ([("text" as str)] as [str]);
+    ((values as [str]) = ([(b"\xff" as bin)] as [{type error}]) as
+        {type error});
+    (values as [str])
+} as [str])

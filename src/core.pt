@@ -100,7 +100,7 @@ macro_rules! add_impl {
     )*)
 }
 
-add_impl! { int float str }
+add_impl! { int float str bin bits }
 
 #[lang = "mul"]
 pub const trait Mul<Rhs = Self> {
@@ -369,7 +369,7 @@ macro_rules! partial_eq_impl {
     )*)
 }
 
-partial_eq_impl! { bool int float str atom char }
+partial_eq_impl! { bool int float str atom bin bits char }
 
 #[lang = "partial_ord"]
 pub const trait PartialOrd<Rhs = Self> {
@@ -394,7 +394,7 @@ macro_rules! partial_ord_impl {
     )*)
 }
 
-partial_ord_impl! { bool int float str atom }
+partial_ord_impl! { bool int float str atom bin bits }
 
 #[lang = "structural_peq"]
 pub const trait StructuralPartialEq {}

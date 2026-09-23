@@ -444,12 +444,13 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let left = self.translate_expr(lhs);
         let right = self.translate_expr(rhs);
 
-        // String concatenation lowers to binary concatenation.
-        if op == BinOp::Add && lhs_ty.is_str() {
+        // String, binary and bitstring concatenation lowers to binary construction.
+        if op == BinOp::Add && lhs_ty.kind().bitstring_rank().is_some() {
+            let tsl = if lhs_ty.is_bits() { eaf::Tsl::Bitstring } else { eaf::Tsl::Binary };
             let left_bin_elem =
-                afb.expr_binary_element(self.thir[lhs].span, left, None, Some([eaf::Tsl::Binary]));
+                afb.expr_binary_element(self.thir[lhs].span, left, None, Some([tsl]));
             let right_bin_elem =
-                afb.expr_binary_element(self.thir[rhs].span, right, None, Some([eaf::Tsl::Binary]));
+                afb.expr_binary_element(self.thir[rhs].span, right, None, Some([tsl]));
 
             return afb.expr_binary(expr.span, [left_bin_elem, right_bin_elem]);
         }
@@ -1452,9 +1453,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 }
             }
             ty::TyKind::Float => afb.pat_float(span, f64::from_bits(value.to_leaf().to_u64())),
-            ty::TyKind::Str => {
+            ty::TyKind::Str | ty::TyKind::Bin | ty::TyKind::Bits => {
                 let bytes = value.try_to_raw_bytes(self.tcx()).unwrap_or_else(|| {
-                    span_bug!(span, "string pattern did not lower to raw bytes")
+                    span_bug!(span, "binary pattern did not lower to raw bytes")
                 });
                 afb.pat_binary_bytes(span, bytes)
             }

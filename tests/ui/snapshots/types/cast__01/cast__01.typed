@@ -61,9 +61,9 @@ fn main() ({
         ((io::nl as fn() -> term)() as term);
     } as ());
     let string = ("hello" as str);
-    let binary = ((string as str) as bin as {type error});
-    let bitstring = ((string as str) as bits as {type error});
-    let bitstring = ((binary as {type error}) as bits as {type error});
+    let binary = ((string as str) as bin as bin);
+    let bitstring = ((string as str) as bits as bits);
+    let bitstring = ((binary as bin) as bits as bits);
     let integer_from_byte =
         ((byte_val as {type error}) as int as {type error});
     let byte_from_integer =

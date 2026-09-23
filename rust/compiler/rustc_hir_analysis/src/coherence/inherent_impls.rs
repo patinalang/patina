@@ -188,6 +188,8 @@ impl<'tcx> InherentCollect<'tcx> {
             | ty::Str
             | ty::Term
             | ty::Atom
+            | ty::Bin
+            | ty::Bits
             | ty::Map(..)
             | ty::Array(..)
             | ty::Slice(_)

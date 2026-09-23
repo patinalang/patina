@@ -1,0 +1,36 @@
+warning: unreachable pattern
+  --> tests/ui/src/primitives/bitstrings.pt:154:9
+   |
+LL |         "a" => 1,
+   |         --- matches all the relevant values
+LL |         b"a" => 2,
+   |         ^^^^ no value can reach this
+   |
+   = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
+
+warning: unreachable pattern
+  --> tests/ui/src/primitives/bitstrings.pt:162:9
+   |
+LL |         "a" => 1,
+   |         --- matches all the relevant values
+LL |         "a" => 2,
+   |         ^^^ no value can reach this
+
+warning: unreachable pattern
+  --> tests/ui/src/primitives/bitstrings.pt:170:9
+   |
+LL |         "a" => 1,
+   |         --- matches all the relevant values
+LL |         b"a" => 2,
+   |         ^^^^ no value can reach this
+
+warning: unreachable pattern
+  --> tests/ui/src/primitives/bitstrings.pt:178:9
+   |
+LL |         b"a" => 1,
+   |         ---- matches all the relevant values
+LL |         "a" => 2,
+   |         ^^^ no value can reach this
+
+warning: 4 warnings emitted
+

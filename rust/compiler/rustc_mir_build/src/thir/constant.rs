@@ -61,37 +61,31 @@ pub(crate) fn lit_to_const<'tcx>(
             .unwrap_or_else(|| bug!("expected to create ScalarInt from uint {:?}", result))
     };
 
+    // A `str` or `bin` literal is also a constant of any wider bitstring type (`str <: bin <: bits`),
+    // with the same bytes.
+    let bitstring_ty = |lit_ty: Ty<'tcx>| match expected_ty {
+        Some(ty)
+            if let (Some(expected_rank), Some(lit_rank)) =
+                (ty.kind().bitstring_rank(), lit_ty.kind().bitstring_rank())
+                && expected_rank >= lit_rank =>
+        {
+            ty
+        }
+        _ => lit_ty,
+    };
+
     let (valtree, valtree_ty) = match (lit, expected_ty.map(|ty| ty.kind())) {
         (ast::LitKind::Str(s, _), _) => {
             let str_bytes = s.as_str().as_bytes();
-            let valtree_ty = tcx.types.str_;
-            (ty::ValTree::from_raw_bytes(tcx, str_bytes), valtree_ty)
+            (ty::ValTree::from_raw_bytes(tcx, str_bytes), bitstring_ty(tcx.types.str_))
         }
         (ast::LitKind::Atom(s, _), _) => {
             let atom_bytes = s.as_str().as_bytes();
             let valtree_ty = tcx.types.atom;
             (ty::ValTree::from_raw_bytes(tcx, atom_bytes), valtree_ty)
         }
-        (ast::LitKind::ByteStr(byte_sym, _), Some(ty::Ref(_, inner_ty, _)))
-            if let ty::Slice(ty) | ty::Array(ty, _) = inner_ty.kind()
-                && let ty::Int = ty.kind() =>
-        {
-            (ty::ValTree::from_raw_bytes(tcx, byte_sym.as_byte_str()), expected_ty.unwrap())
-        }
-        (
-            ast::LitKind::ByteStr(byte_sym, _),
-            Some(ty::Slice(inner_ty) | ty::Array(inner_ty, _)),
-        ) if tcx.features().deref_patterns()
-            && let ty::Int = inner_ty.kind() =>
-        {
-            // Byte string literal patterns may have type `[u8]` or `[u8; N]` if `deref_patterns` is
-            // enabled, in order to allow, e.g., `deref!(b"..."): Vec<u8>`.
-            (ty::ValTree::from_raw_bytes(tcx, byte_sym.as_byte_str()), expected_ty.unwrap())
-        }
         (ast::LitKind::ByteStr(byte_sym, _), _) => {
-            let valtree = ty::ValTree::from_raw_bytes(tcx, byte_sym.as_byte_str());
-            let valtree_ty = Ty::new_array(tcx, tcx.types.int, byte_sym.as_byte_str().len() as u64);
-            (valtree, valtree_ty)
+            (ty::ValTree::from_raw_bytes(tcx, byte_sym.as_byte_str()), bitstring_ty(tcx.types.bin))
         }
         (ast::LitKind::Byte(n), _) => {
             (ty::ValTree::from_scalar_int(tcx, trunc(n.into())), tcx.types.int)
@@ -231,8 +225,8 @@ fn try_valtree_to_const_value<'tcx>(tcx: TyCtxt<'tcx>, cv: ty::Value<'tcx>) -> O
         }
         ty::FnDef(..) => Some(ConstValue::ZeroSized),
         ty::Tuple(fields) if fields.is_empty() => Some(ConstValue::ZeroSized),
-        ty::Str | ty::Atom | ty::Ref(..)
-            if cv.ty.peel_refs().is_str() || cv.ty.peel_refs().is_atom() =>
+        ty::Str | ty::Atom | ty::Bin | ty::Bits | ty::Ref(..)
+            if matches!(cv.ty.peel_refs().kind(), ty::Str | ty::Atom | ty::Bin | ty::Bits) =>
         {
             let bytes = cv.try_to_raw_bytes(tcx)?;
             let alloc_id = tcx.allocate_bytes_dedup(bytes, /* salt */ 0);

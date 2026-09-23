@@ -30,6 +30,8 @@ pub enum SimplifiedType<DefId> {
     Str,
     Term,
     Atom,
+    Bin,
+    Bits,
     Map,
     Array,
     Slice,
@@ -125,6 +127,8 @@ pub fn simplify_type<I: Interner>(
         ty::Str => Some(SimplifiedType::Str),
         ty::Term => Some(SimplifiedType::Term),
         ty::Atom => Some(SimplifiedType::Atom),
+        ty::Bin => Some(SimplifiedType::Bin),
+        ty::Bits => Some(SimplifiedType::Bits),
         ty::Map(..) => Some(SimplifiedType::Map),
         ty::Array(..) => Some(SimplifiedType::Array),
         ty::Slice(..) => Some(SimplifiedType::Slice),
@@ -296,6 +300,8 @@ impl<I: Interner, const INSTANTIATE_LHS_WITH_INFER: bool, const INSTANTIATE_RHS_
             | ty::Str
             | ty::Term
             | ty::Atom
+            | ty::Bin
+            | ty::Bits
             | ty::Map(..)
             | ty::Array(..)
             | ty::Slice(..)
@@ -374,6 +380,8 @@ impl<I: Interner, const INSTANTIATE_LHS_WITH_INFER: bool, const INSTANTIATE_RHS_
             | ty::Str
             | ty::Term
             | ty::Atom
+            | ty::Bin
+            | ty::Bits
             | ty::Bool
             | ty::Char
             | ty::Never

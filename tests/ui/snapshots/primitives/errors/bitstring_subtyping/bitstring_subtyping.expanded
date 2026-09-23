@@ -1,0 +1,39 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// `str <: bin <: bits`; none of these narrow.
+
+pub fn bin_to_str(value: bin) -> str { value }
+
+pub fn bits_to_bin(value: bits) -> bin { value }
+
+pub fn bits_to_str(value: bits) -> str { value }
+
+pub fn literal_to_str() -> str { b"bytes" }
+
+pub fn slice_to_str(values: [bin]) -> [str] { values }
+
+pub fn bin_pattern_on_str(value: str) -> int {
+    match value { b"bytes" => 1, _ => 0, }
+}
+
+pub fn first_type_wins() -> [str] {
+    let mut values = ["text"];
+    values = [b"\xff"];
+    values
+}

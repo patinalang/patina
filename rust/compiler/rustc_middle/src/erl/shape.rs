@@ -14,6 +14,7 @@ pub enum ErlShape {
     Int,
     Float,
     Binary,
+    Bitstring,
     List,
     Fun,
     Tuple { arity: usize, tag: Option<Symbol> },
@@ -45,7 +46,8 @@ impl ErlShape {
             (NativeRecord { module: m, name: n }, NativeRecord { module: p, name: q }) => {
                 (m, n) == (p, q)
             }
-            (Int, Int) | (Float, Float) | (Binary, Binary) | (List, List) | (Fun, Fun) => true,
+            (Binary | Bitstring, Binary | Bitstring) => true,
+            (Int, Int) | (Float, Float) | (List, List) | (Fun, Fun) => true,
             _ => false,
         }
     }
@@ -102,6 +104,7 @@ impl ErlShape {
             (other, Union(shapes)) => shapes.iter().all(|shape| other.superset_of(shape)),
             (AnyAtom, Atom(_)) => true,
             (AnyTuple, Tuple { .. }) => true,
+            (Bitstring, Binary) => true,
             (Map, ElixirStruct(_)) => true,
             (Tuple { arity: a, tag: None }, Tuple { arity: b, .. }) => a == b,
             _ => self == other,
@@ -117,7 +120,8 @@ impl<'tcx> TyCtxt<'tcx> {
             }
             ty::Int | ty::Char => ErlShape::Int,
             ty::Float => ErlShape::Float,
-            ty::Str => ErlShape::Binary,
+            ty::Str | ty::Bin => ErlShape::Binary,
+            ty::Bits => ErlShape::Bitstring,
             ty::Atom => ErlShape::AnyAtom,
             ty::Slice(_) => ErlShape::List,
             ty::Map(..) => ErlShape::Map,

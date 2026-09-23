@@ -37,8 +37,8 @@ fn main() ({
     // A tuple with a bunch of different types.
     let long_tuple =
         (((1 as int), (0.1 as float), ('a' as char), (true as bool),
-            ("hello" as str), (b"world" as &[int; 5])) as
-            (int, float, char, bool, str, &[int; 5]));
+            ("hello" as str), (b"world" as bin)) as
+            (int, float, char, bool, str, bin));
     // Values can be extracted from the tuple using tuple indexing.
 
     // Tuples can be tuple members.
@@ -58,8 +58,8 @@ fn main() ({
                 fn(term) -> term)(([([("Long tuple first value: " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((long_tuple as
-                                        (int, float, char, bool, str, &[int; 5])).0 as int)) as
-                                term)] as [term])] as [[term]])) as term);
+                                        (int, float, char, bool, str, bin)).0 as int)) as term)] as
+                        [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -67,8 +67,8 @@ fn main() ({
                 fn(term) -> term)(([([("Long tuple second value: " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((long_tuple as
-                                        (int, float, char, bool, str, &[int; 5])).1 as float)) as
-                                term)] as [term])] as [[term]])) as term);
+                                        (int, float, char, bool, str, bin)).1 as float)) as term)]
+                        as [term])] as [[term]])) as term);
         ((io::nl as fn() -> term)() as term);
     } as ());
     let tuple_of_tuples =

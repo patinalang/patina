@@ -556,6 +556,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             ErlShape::Int => bif(sym::is_integer, &[value]),
             ErlShape::Float => bif(sym::is_float, &[value]),
             ErlShape::Binary => bif(sym::is_binary, &[value]),
+            ErlShape::Bitstring => bif(sym::is_bitstring, &[value]),
             ErlShape::List => bif(sym::is_list, &[value]),
             ErlShape::Fun => bif(sym::is_function, &[value]),
             ErlShape::Tuple { arity, tag } => {

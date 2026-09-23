@@ -449,6 +449,8 @@ impl<'tcx> Printer<'tcx> for V0SymbolMangler<'tcx> {
             ty::Str => "e",
             ty::Term => "t",
             ty::Atom => "a",
+            ty::Bin => "h",
+            ty::Bits => "j",
             ty::Int => "g",
             ty::Float => "f",
             ty::Never => "z",
@@ -479,6 +481,8 @@ impl<'tcx> Printer<'tcx> for V0SymbolMangler<'tcx> {
             | ty::Str
             | ty::Term
             | ty::Atom
+            | ty::Bin
+            | ty::Bits
             | ty::Float
             | ty::Never => {
                 unreachable!()

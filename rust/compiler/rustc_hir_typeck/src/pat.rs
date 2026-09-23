@@ -2,7 +2,6 @@ use std::collections::hash_map::Entry::{Occupied, Vacant};
 use std::{assert_matches, cmp};
 
 use rustc_abi::FieldIdx;
-use rustc_ast as ast;
 use rustc_data_structures::fx::FxHashMap;
 use rustc_errors::codes::*;
 use rustc_errors::{
@@ -28,7 +27,7 @@ use rustc_span::edition::Edition;
 use rustc_span::{BytePos, DUMMY_SP, Ident, Span, kw, sym};
 use rustc_trait_selection::infer::InferCtxtExt;
 use rustc_trait_selection::traits::{ObligationCause, ObligationCauseCode};
-use tracing::{debug, instrument, trace};
+use tracing::{debug, instrument};
 use ty::VariantDef;
 use ty::adjustment::{PatAdjust, PatAdjustment};
 
@@ -621,15 +620,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 self.write_ty(*hir_id, ty);
                 ty
             }
-            PatKind::Expr(expr @ PatExpr { kind: PatExprKind::Lit { lit, .. }, .. }) => self
-                .check_pat_lit(
-                    pat.span,
-                    expr,
-                    &lit.node,
-                    expected,
-                    resolves_to_term,
-                    &pat_info.top_info,
-                ),
+            PatKind::Expr(expr @ PatExpr { kind: PatExprKind::Lit { .. }, .. }) => {
+                self.check_pat_lit(pat.span, expr, expected, resolves_to_term, &pat_info.top_info)
+            }
             PatKind::Pin(expr) => {
                 self.check_pat_pin(pat, expr, expected, resolves_to_term, &pat_info.top_info)
             }
@@ -1191,10 +1184,10 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             hir::TermClass::Bool => self.tcx.types.bool,
             hir::TermClass::List => Ty::new_slice(self.tcx, self.tcx.types.term),
             hir::TermClass::Map => Ty::new_map(self.tcx, self.tcx.types.term, self.tcx.types.term),
+            hir::TermClass::Bin => self.tcx.types.bin,
+            hir::TermClass::Bits => self.tcx.types.bits,
             hir::TermClass::Tuple
             | hir::TermClass::Fn
-            | hir::TermClass::Bits
-            | hir::TermClass::Bin
             | hir::TermClass::Pid
             | hir::TermClass::Port
             | hir::TermClass::Ref => self.tcx.types.term,
@@ -1232,7 +1225,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         &self,
         span: Span,
         expr: &hir::PatExpr<'tcx>,
-        lit_kind: &ast::LitKind,
         expected: Ty<'tcx>,
         resolves_to_term: bool,
         ti: &TopInfo<'tcx>,
@@ -1241,43 +1233,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
         // We've already computed the type above (when checking for a non-ref pat),
         // so avoid computing it again.
-        let ty = self.node_ty(expr.hir_id);
-
-        // Byte string patterns behave the same way as array patterns
-        // They can denote both statically and dynamically-sized byte arrays.
-        // Additionally, when `deref_patterns` is enabled, byte string literal patterns may have
-        // types `[u8]` or `[u8; N]`, in order to type, e.g., `deref!(b"..."): Vec<u8>`.
-        let mut pat_ty = ty;
-        if matches!(lit_kind, ast::LitKind::ByteStr(..)) {
-            let tcx = self.tcx;
-            let expected = self.structurally_resolve_type(span, expected);
-            match *expected.kind() {
-                // Allow `b"...": &[u8]`
-                ty::Ref(_, inner_ty, _)
-                    if self.resolve_vars_with_obligations(inner_ty).is_slice() =>
-                {
-                    trace!(?expr.hir_id.local_id, "polymorphic byte string lit");
-                    pat_ty = Ty::new_imm_ref(
-                        tcx,
-                        tcx.lifetimes.re_static,
-                        Ty::new_slice(tcx, tcx.types.int),
-                    );
-                }
-                // Allow `b"...": [u8; 3]` for `deref_patterns`
-                ty::Array(..) if tcx.features().deref_patterns() => {
-                    pat_ty = match *ty.kind() {
-                        ty::Ref(_, inner_ty, _) => inner_ty,
-                        _ => span_bug!(span, "found byte string literal with non-ref type {ty:?}"),
-                    }
-                }
-                // Allow `b"...": [u8]` for `deref_patterns`
-                ty::Slice(..) if tcx.features().deref_patterns() => {
-                    pat_ty = Ty::new_slice(tcx, tcx.types.int);
-                }
-                // Otherwise, `b"...": &[u8; 3]`
-                _ => {}
-            }
-        }
+        let pat_ty = self.node_ty(expr.hir_id);
 
         // Somewhat surprising: in this case, the subtyping relation goes the
         // opposite way as the other cases. Actually what we really want is not

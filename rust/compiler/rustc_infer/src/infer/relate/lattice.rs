@@ -178,6 +178,18 @@ impl<'tcx> TypeRelation<TyCtxt<'tcx>> for LatticeOp<'_, 'tcx> {
                 Ok(a)
             }
 
+            // `str <: bin <: bits`.
+            _ if let (Some(a_rank), Some(b_rank)) =
+                (a.kind().bitstring_rank(), b.kind().bitstring_rank()) =>
+            {
+                Ok(match self.kind {
+                    LatticeOpKind::Glb if a_rank <= b_rank => a,
+                    LatticeOpKind::Glb => b,
+                    LatticeOpKind::Lub if a_rank <= b_rank => b,
+                    LatticeOpKind::Lub => a,
+                })
+            }
+
             _ => super_combine_tys(infcx, self, a, b),
         }
     }

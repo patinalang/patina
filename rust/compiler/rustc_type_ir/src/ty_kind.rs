@@ -133,6 +133,12 @@ pub enum TyKind<I: Interner> {
     /// An Erlang atom. Written as `atom`, with literals `a"…"`.
     Atom,
 
+    /// An Erlang binary. Written as `bin`, with literals `b"…"`. A supertype of `str`.
+    Bin,
+
+    /// An Erlang bitstring. Written as `bits`. A supertype of `bin`.
+    Bits,
+
     /// A homogeneous map. Written as `#{K => V}`.
     Map(I::Ty, I::Ty),
 
@@ -326,6 +332,16 @@ impl<I: Interner> TyKind<I> {
         }
     }
 
+    /// The position of an Erlang binary type in the subtyping chain `str <: bin <: bits`.
+    pub fn bitstring_rank(self) -> Option<u8> {
+        match self {
+            ty::Str => Some(0),
+            ty::Bin => Some(1),
+            ty::Bits => Some(2),
+            _ => None,
+        }
+    }
+
     /// Returns `true` when the outermost type cannot be further normalized,
     /// resolved, or instantiated.
     ///
@@ -344,6 +360,8 @@ impl<I: Interner> TyKind<I> {
             | ty::Str
             | ty::Term
             | ty::Atom
+            | ty::Bin
+            | ty::Bits
             | ty::Map(_, _)
             | ty::Array(_, _)
             | ty::Pat(_, _)
@@ -398,6 +416,8 @@ impl<I: Interner> fmt::Debug for TyKind<I> {
             Str => write!(f, "str"),
             Term => write!(f, "term"),
             Atom => write!(f, "atom"),
+            Bin => write!(f, "bin"),
+            Bits => write!(f, "bits"),
             Map(k, v) => write!(f, "#{{{k:?} => {v:?}}}"),
             Array(t, c) => write!(f, "[{t:?}; {c:?}]"),
             Pat(t, p) => write!(f, "pattern_type!({t:?} is {p:?})"),

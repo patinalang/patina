@@ -300,6 +300,8 @@ pub struct CommonTypes<'tcx> {
     pub str_: Ty<'tcx>,
     pub term: Ty<'tcx>,
     pub atom: Ty<'tcx>,
+    pub bin: Ty<'tcx>,
+    pub bits: Ty<'tcx>,
     pub int: Ty<'tcx>,
     pub never: Ty<'tcx>,
     pub self_param: Ty<'tcx>,
@@ -396,6 +398,8 @@ impl<'tcx> CommonTypes<'tcx> {
             str_: mk(Str),
             term: mk(Term),
             atom: mk(Atom),
+            bin: mk(Bin),
+            bits: mk(Bits),
             int: mk(Int),
             self_param: mk(ty::Param(ty::ParamTy { index: 0, name: kw::SelfUpper })),
 
@@ -1713,7 +1717,7 @@ macro_rules! sty_debug_print {
                     for &(InternedInSet(t), ()) in types {
                         let variant = match t.internee {
                             ty::Bool | ty::Char | ty::Int |
-                                ty::Float | ty::Str | ty::Term | ty::Atom | ty::Never => continue,
+                                ty::Float | ty::Str | ty::Term | ty::Atom | ty::Bin | ty::Bits | ty::Never => continue,
                             ty::Error(_) => /* unimportant */ continue,
                             $(ty::$variant(..) => &mut $variant,)*
                         };

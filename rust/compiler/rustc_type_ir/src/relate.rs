@@ -354,6 +354,8 @@ pub fn structurally_relate_tys<I: Interner, R: TypeRelation<I>>(
         | (ty::Str, _)
         | (ty::Term, _)
         | (ty::Atom, _)
+        | (ty::Bin, _)
+        | (ty::Bits, _)
             if a == b =>
         {
             Ok(a)

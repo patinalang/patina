@@ -1823,6 +1823,8 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 ty::UnsafeBinder(..) => Some(23),
                 ty::Map(..) => Some(24),
                 ty::Atom => Some(25),
+                ty::Bin => Some(26),
+                ty::Bits => Some(27),
                 ty::Placeholder(..) | ty::Bound(..) | ty::Infer(..) | ty::Error(_) => None,
             }
         }

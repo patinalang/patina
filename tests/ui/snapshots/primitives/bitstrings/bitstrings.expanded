@@ -1,0 +1,132 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// `bin` and `bits` are Erlang binaries and bitstrings, with `str <: bin <: bits`.
+
+const NAMED: bin = b"named";
+
+// `bin` literals.
+
+pub fn annotated() -> bin { let value: bin = b"qwerty"; value }
+
+pub fn named() -> bin { NAMED }
+
+pub fn escaped() -> bin { b"\x00\xff\n" }
+
+pub fn raw() -> bin { br#"no \escapes"# }
+
+// Operators.
+
+pub fn bin_equal(left: bin, right: bin) -> bool { left == right }
+
+pub fn bin_less_than(left: bin, right: bin) -> bool { left < right }
+
+pub fn bin_concat(left: bin, right: bin) -> bin { left + right }
+
+pub fn bits_identity(value: bits) -> bits { value }
+
+pub fn bits_equal(left: bits, right: bits) -> bool { left == right }
+
+pub fn bits_less_than(left: bits, right: bits) -> bool { left < right }
+
+pub fn bits_concat(left: bits, right: bits) -> bits { left + right }
+
+// Literal patterns. Narrower literals match wider scrutinees.
+
+pub fn bin_classify(value: bin) -> atom {
+    match value { b"\x89PNG" => a"png", "GIF8" => a"gif", _ => a"unknown", }
+}
+
+pub fn bits_classify(value: bits) -> atom {
+    match value { b"\xff" => a"ff", "text" => a"text", _ => a"unknown", }
+}
+
+pub fn term_classes(value: term) -> atom {
+    match value {
+        bin(b"x") => a"bin_x",
+        bits("y") => a"bits_y",
+        bin(_) => a"bin",
+        bits(_) => a"bits",
+        _ => a"other",
+    }
+}
+
+// `str <: bin <: bits`.
+
+pub fn str_to_bin(value: str) -> bin { value }
+
+pub fn str_to_bits(value: str) -> bits { value }
+
+pub fn bin_to_bits(value: bin) -> bits { value }
+
+pub fn literal_to_bits() -> bits { b"\x01\x02" }
+
+pub fn pass_str() -> bool { bin_equal("same", b"same") }
+
+pub fn bin_branches(flag: bool) -> bin { if flag { "text" } else { b"\xff" } }
+
+pub fn bin_match_arms(flag: bool) -> bin {
+    match flag { true => b"\xff", false => "text", }
+}
+
+pub fn bits_branches(flag: bool, value: bits) -> bits {
+    if flag { "text" } else { value }
+}
+
+pub fn str_slice(values: [str]) -> [bin] { values }
+
+pub fn bin_slice(values: [bin]) -> [bits] { values }
+
+pub fn tuple(value: (str, int)) -> (bin, int) { value }
+
+pub fn str_map(values: #{str => str}) -> #{bin => bin} { values }
+
+pub fn bin_map(values: #{str => bin}) -> #{bits => bits} { values }
+
+pub fn str_to_term(value: str) -> term { let widened: bin = value; widened }
+
+pub fn bits_to_term(value: bits) -> term { value }
+
+// `str`, `bin` and `bits` literals with the same bytes are the same BEAM term, so later
+// duplicates are unreachable regardless of which literal form they use.
+
+pub fn term_str_then_bin(value: term) -> int {
+    match value { "a" => 1, b"a" => 2, _ => 0, }
+}
+
+pub fn term_duplicate_str(value: term) -> int {
+    match value { "a" => 1, "a" => 2, _ => 0, }
+}
+
+pub fn bin_str_then_bin(value: bin) -> int {
+    match value { "a" => 1, b"a" => 2, _ => 0, }
+}
+
+pub fn bits_bin_then_str(value: bits) -> int {
+    match value { b"a" => 1, "a" => 2, _ => 0, }
+}
+
+// None of these arms are unreachable.
+
+pub fn term_atom_and_str(value: term) -> int {
+    match value { a"a" => 1, "a" => 2, b"\xff" => 3, _ => 0, }
+}
+
+pub fn bin_distinct(value: bin) -> int {
+    match value { b"a" => 1, "ab" => 2, b"\xff" => 3, _ => 0, }
+}

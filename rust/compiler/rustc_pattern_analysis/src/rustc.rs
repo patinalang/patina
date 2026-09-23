@@ -396,6 +396,8 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
             | ty::Str
             | ty::Term
             | ty::Atom
+            | ty::Bin
+            | ty::Bits
             | ty::Map(_, _)
             | ty::Foreign(_)
             | ty::RawPtr(_, _)
@@ -556,11 +558,16 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
                         fields = vec![];
                         arity = 0;
                     }
-                    ty::Str | ty::Atom => {
-                        // For constant/literal patterns of type `&str`, the THIR
-                        // pattern is a `PatKind::Deref` of type `&str` wrapping a
-                        // `PatKind::Const` of type `str`.
+                    ty::Atom => {
                         ctor = Str(*value);
+                        fields = vec![];
+                        arity = 0;
+                    }
+                    ty::Str | ty::Bin | ty::Bits => {
+                        // For constant/literal patterns of bits-derived types, the THIR
+                        // pattern is a `PatKind::Deref` of type `&str` wrapping a
+                        // `PatKind::Const` of the `bitst` type
+                        ctor = Str(ty::Value { ty: self.tcx.types.bits, ..*value });
                         fields = vec![];
                         arity = 0;
                     }
@@ -672,6 +679,15 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
             }
             PatKind::Constant { value } if value.ty.is_atom() => {
                 DeconstructedPat::new(Str(*value), vec![], 0, term_ty, pat)
+            }
+            PatKind::Constant { value } if value.ty.kind().bitstring_rank().is_some() => {
+                DeconstructedPat::new(
+                    Str(ty::Value { ty: self.tcx.types.bits, ..*value }),
+                    vec![],
+                    0,
+                    term_ty,
+                    pat,
+                )
             }
             PatKind::Or { .. } => {
                 let pats = expand_or_pat(pat);
