@@ -26,42 +26,42 @@
 main() ->
     _number@0_0 = 13,
     begin
-        io:put_chars([[<<"Tell me about ">>,
+        io:put_chars([[<<"Tell me about "/utf8>>,
                        io_lib:format("~ktp", [_number@0_0])]]),
         io:nl(),
         {}
     end,
     case _number@0_0 of
         1 ->
-            io:put_chars([[<<"One!">>]]),
+            io:put_chars([[<<"One!"/utf8>>]]),
             io:nl(),
             {};
         2 ->
-            io:put_chars([[<<"This is a prime">>]]),
+            io:put_chars([[<<"This is a prime"/utf8>>]]),
             io:nl(),
             {};
         3 ->
-            io:put_chars([[<<"This is a prime">>]]),
+            io:put_chars([[<<"This is a prime"/utf8>>]]),
             io:nl(),
             {};
         5 ->
-            io:put_chars([[<<"This is a prime">>]]),
+            io:put_chars([[<<"This is a prime"/utf8>>]]),
             io:nl(),
             {};
         7 ->
-            io:put_chars([[<<"This is a prime">>]]),
+            io:put_chars([[<<"This is a prime"/utf8>>]]),
             io:nl(),
             {};
         11 ->
-            io:put_chars([[<<"This is a prime">>]]),
+            io:put_chars([[<<"This is a prime"/utf8>>]]),
             io:nl(),
             {};
         _range@1_0 when _range@1_0 >= 13, _range@1_0 =< 19 ->
-            io:put_chars([[<<"A teen">>]]),
+            io:put_chars([[<<"A teen"/utf8>>]]),
             io:nl(),
             {};
         _ ->
-            io:put_chars([[<<"Ain't special">>]]),
+            io:put_chars([[<<"Ain't special"/utf8>>]]),
             io:nl(),
             {}
     end,
@@ -72,7 +72,7 @@ main() ->
                   end,
     begin
         io:put_chars([[io_lib:format("~ktp", [_boolean@2_0]),
-                       <<" -> ">>,
+                       <<" -> "/utf8>>,
                        io_lib:format("~ktp", [_binary@3_0])]]),
         io:nl(),
         {}
@@ -80,11 +80,11 @@ main() ->
     _expected_value@4_0 = 42,
     case 123 of
         _expected_value@4_0 ->
-            io:put_chars([[<<"found expected value">>]]),
+            io:put_chars([[<<"found expected value"/utf8>>]]),
             io:nl(),
             {};
         _value@5_0 ->
-            io:put_chars([[<<"found unexpected value ">>,
+            io:put_chars([[<<"found unexpected value "/utf8>>,
                            io_lib:format("~ktp", [_value@5_0])]]),
             io:nl(),
             {}

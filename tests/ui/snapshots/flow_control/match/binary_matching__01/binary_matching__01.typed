@@ -1,0 +1,47 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// source: patina-by-example/src/flow_control/match/binary_matching.md
+// block: 1/6
+
+fn main() ({
+    let payload =
+        (<<(1 as int), (17 as int), (42 as int), (99 as int)>> as str);
+
+    (match (payload as str) {
+        <<prefix: int(size = (16 as int)), tag: int(size = (8 as int)), rest @
+            ..>> =>
+            {
+            ((io::put_chars as
+                    fn(term) -> term)(([([("prefix = " as str),
+                                ((patina_fmt::display as fn(term) -> term)((prefix as int))
+                                    as term), (", tag = " as str),
+                                ((patina_fmt::display as fn(term) -> term)((tag as int)) as
+                                    term), (", rest = " as str),
+                                ((patina_fmt::debug as fn(term) -> term)((rest as bin)) as
+                                    term)] as [term])] as [[term]])) as term);
+            ((io::nl as fn() -> term)() as term);
+        }
+        _ => {
+            ((io::put_chars as
+                    fn(term) -> term)(([([("did not match" as str)] as [str])]
+                    as [[str]])) as term);
+            ((io::nl as fn() -> term)() as term);
+        }
+    } as ())
+} as ())

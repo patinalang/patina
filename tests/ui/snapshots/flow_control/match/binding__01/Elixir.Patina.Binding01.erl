@@ -28,50 +28,50 @@ age() -> 15.
 
 main() ->
     begin
-        io:put_chars([[<<"Tell me what type of person you are">>]]),
+        io:put_chars([[<<"Tell me what type of person you are"/utf8>>]]),
         io:nl(),
         {}
     end,
     case age() of
         0 ->
             io:put_chars([[<<"I haven't celebrated my first birthday "
-                             "yet">>]]),
+                             "yet"/utf8>>]]),
             io:nl(),
             {};
         _n@0_0 = _range@1_0
             when _range@1_0 >= 1, _range@1_0 =< 12 ->
-            io:put_chars([[<<"I'm a child of age ">>,
+            io:put_chars([[<<"I'm a child of age "/utf8>>,
                            io_lib:format("~ktp", [_n@0_0])]]),
             io:nl(),
             {};
         _n@2_0 = _range@3_0
             when _range@3_0 >= 13, _range@3_0 =< 19 ->
-            io:put_chars([[<<"I'm a teen of age ">>,
+            io:put_chars([[<<"I'm a teen of age "/utf8>>,
                            io_lib:format("~ktp", [_n@2_0])]]),
             io:nl(),
             {};
         _n@4_0 = 1 ->
-            io:put_chars([[<<"I'm a teen of age ">>,
+            io:put_chars([[<<"I'm a teen of age "/utf8>>,
                            io_lib:format("~ktp", [_n@4_0])]]),
             io:nl(),
             {};
         _n@4_0 = 7 ->
-            io:put_chars([[<<"I'm a teen of age ">>,
+            io:put_chars([[<<"I'm a teen of age "/utf8>>,
                            io_lib:format("~ktp", [_n@4_0])]]),
             io:nl(),
             {};
         _n@4_0 = 15 ->
-            io:put_chars([[<<"I'm a teen of age ">>,
+            io:put_chars([[<<"I'm a teen of age "/utf8>>,
                            io_lib:format("~ktp", [_n@4_0])]]),
             io:nl(),
             {};
         _n@4_0 = 13 ->
-            io:put_chars([[<<"I'm a teen of age ">>,
+            io:put_chars([[<<"I'm a teen of age "/utf8>>,
                            io_lib:format("~ktp", [_n@4_0])]]),
             io:nl(),
             {};
         _n@5_0 ->
-            io:put_chars([[<<"I'm an old person of age ">>,
+            io:put_chars([[<<"I'm an old person of age "/utf8>>,
                            io_lib:format("~ktp", [_n@5_0])]]),
             io:nl(),
             {}

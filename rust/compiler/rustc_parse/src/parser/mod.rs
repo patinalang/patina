@@ -1,5 +1,6 @@
 pub mod attr;
 mod attr_wrapper;
+mod binary_pattern;
 mod diagnostics;
 mod expr;
 mod generics;
@@ -124,6 +125,10 @@ bitflags::bitflags! {
         /// expression, but halts parsing the expression when reaching certain
         /// tokens like `=`.
         const IS_PAT            = 1 << 5;
+        /// Parsing the value of a binary pattern segment, which can be followed
+        /// by `:` and the segment's type: `<<x: int(16)>>`. A single colon
+        /// after a path is not a typo of `::`.
+        const BINARY_SEGMENT    = 1 << 6;
     }
 }
 
@@ -216,6 +221,11 @@ pub struct Parser<'a> {
     // This value is always 0, 1, or 2. It can only reach 2 when splitting
     // `>>=` or `<<=`.
     break_last_token: u32 = 0,
+    // Set when the rest of the broken last token was glued to the token after
+    // it, e.g. the `=` of `>>=` to a `>` to form `=>`. The parser was then
+    // bumped past that next token, so the broken token is the last bumped
+    // token rather than the current one. See `eat_binary_pattern_close`.
+    break_last_token_glued: bool = false,
     /// This field is used to keep track of how many left angle brackets we have seen. This is
     /// required in order to detect extra leading left angle brackets (`<` characters) and error
     /// appropriately.
@@ -1120,6 +1130,7 @@ impl<'a> Parser<'a> {
         // We got a token from the underlying cursor and no longer need to
         // worry about an unglued token. See `break_and_eat` for more details.
         self.break_last_token = 0;
+        self.break_last_token_glued = false;
         if next.0.span.is_dummy() {
             // Tweak the location for better diagnostics, but keep syntactic context intact.
             let fallback_span = self.token.span;

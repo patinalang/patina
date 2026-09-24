@@ -1,0 +1,34 @@
+// Syntax errors in binary patterns.
+
+fn unknown_type(b: bin) { match b { (/*ERROR*/) => (/*ERROR*/), } }
+
+fn segment_value(b: bin) { match b { (/*ERROR*/) => (/*ERROR*/), } }
+
+fn rest_type(b: bin) {
+    match b { (/*ERROR*/) => (/*ERROR*/), }
+    // The rest's type is inferred.
+}
+
+fn rest_not_last(b: bin) {
+    match b {
+
+            // Only the last segment can be the rest.
+            <<.., x: int(size = 8)>> => {}
+        <<rest @ .., x: int(size = 8)>> => {}
+        _ => {}
+    }
+}
+
+fn short_size(b: bin, n: int) {
+    match b {
+
+            // The short form only takes an integer literal.
+            <<x: int(size = (/*ERROR*/)), y: int(size = (n + 1)), z:
+            int(size = 16), w: int(size = 8), v: int(size = (/*ERROR*/))>> =>
+            {}
+        _ => {}
+    }
+    let _ = <<n: int(size = (/*ERROR*/))>>;
+}
+
+pub fn main() {}

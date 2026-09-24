@@ -261,6 +261,7 @@ impl<'a> Parser<'a> {
                 // contexts, a path may be followed by a list of bounds. E.g., `where ty:bound`.
                 if self.may_recover()
                     && style == PathStyle::Expr // (!)
+                    && !self.restrictions.contains(Restrictions::BINARY_SEGMENT)
                     && self.token == token::Colon
                     && self.look_ahead(1, |token| token.is_non_reserved_ident())
                 {

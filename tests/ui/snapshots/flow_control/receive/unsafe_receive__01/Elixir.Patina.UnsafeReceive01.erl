@@ -29,28 +29,30 @@ main() ->
     begin
         receive
             _n@0_0 when erlang:is_integer(_n@0_0) ->
-                io:put_chars([[<<"got integer ">>,
+                io:put_chars([[<<"got integer "/utf8>>,
                                io_lib:format("~ktp", [_n@0_0])]]),
                 io:nl(),
                 {};
             _a@1_0 when erlang:is_atom(_a@1_0) ->
-                io:put_chars([[<<"got atom ">>,
+                io:put_chars([[<<"got atom "/utf8>>,
                                io_lib:format("~ktp", [_a@1_0])]]),
                 io:nl(),
                 {};
             nil ->
-                io:put_chars([[<<"got an empty string option">>]]),
+                io:put_chars([[<<"got an empty string option"/utf8>>]]),
                 io:nl(),
                 {};
             nil ->
-                io:put_chars([[<<"got an empty integer option">>]]),
+                io:put_chars([[<<"got an empty integer option"/utf8>>]]),
                 io:nl(),
                 {};
             _ ->
-                io:put_chars([[<<"got something else">>]]),
+                io:put_chars([[<<"got something else"/utf8>>]]),
                 io:nl(),
                 {}
             after 'Elixir.Patina.Core.Timeout':from_seconds(5) ->
-                      begin io:put_chars([[<<"timeout">>]]), io:nl(), {} end
+                      begin
+                          io:put_chars([[<<"timeout"/utf8>>]]), io:nl(), {}
+                      end
         end
     end.

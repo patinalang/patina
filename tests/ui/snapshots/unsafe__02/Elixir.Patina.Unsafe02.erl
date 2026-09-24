@@ -26,21 +26,22 @@
 main() ->
     _v@0_0 = nil,
     _safe_description@3_0 = case _v@0_0 of
-                                nil -> <<"the atom nil">>;
-                                {some, _val@1_0} -> <<"some value (tagged?)">>;
-                                _val@2_0 -> <<"some value (untagged?)">>
+                                nil -> <<"the atom nil"/utf8>>;
+                                {some, _val@1_0} ->
+                                    <<"some value (tagged?)"/utf8>>;
+                                _val@2_0 -> <<"some value (untagged?)"/utf8>>
                             end,
     _unsafe_description@4_0 = begin
                                   case _v@0_0 of
-                                      nil -> <<"an empty string option">>;
-                                      nil -> <<"an empty integer option">>;
-                                      nil -> <<"the atom nil">>;
-                                      _ -> <<"something else">>
+                                      nil -> <<"an empty string option"/utf8>>;
+                                      nil -> <<"an empty integer option"/utf8>>;
+                                      nil -> <<"the atom nil"/utf8>>;
+                                      _ -> <<"something else"/utf8>>
                                   end
                               end,
     begin
         io:put_chars([[_safe_description@3_0,
-                       <<", ">>,
+                       <<", "/utf8>>,
                        _unsafe_description@4_0]]),
         io:nl(),
         {}

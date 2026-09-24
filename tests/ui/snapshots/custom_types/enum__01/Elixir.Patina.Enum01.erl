@@ -26,32 +26,34 @@
 inspect(_event@0_0) ->
     case _event@0_0 of
         'Elixir.Patina.Enum01.WebEvent.PageLoad' ->
-            io:put_chars([[<<"page loaded">>]]),
+            io:put_chars([[<<"page loaded"/utf8>>]]),
             io:nl(),
             {};
         'Elixir.Patina.Enum01.WebEvent.PageUnload' ->
-            io:put_chars([[<<"page unloaded">>]]),
+            io:put_chars([[<<"page unloaded"/utf8>>]]),
             io:nl(),
             {};
         _value@2_0 = _c@1_0
             when erlang:is_integer(_value@2_0) ->
-            io:put_chars([[<<"pressed '">>,
+            io:put_chars([[<<"pressed '"/utf8>>,
                            io_lib:format("~ktp", [_c@1_0]),
-                           <<"'.">>]]),
+                           <<"'."/utf8>>]]),
             io:nl(),
             {};
         _value@4_0 = _s@3_0 when erlang:is_binary(_value@4_0) ->
-            io:put_chars([[<<"pasted \"">>, _s@3_0, <<"\".">>]]),
+            io:put_chars([[<<"pasted \""/utf8>>,
+                           _s@3_0,
+                           <<"\"."/utf8>>]]),
             io:nl(),
             {};
         #'Elixir.Patina.Enum01.WebEvent':'Click'{x = _x@5_0,
                                                  y = _y@6_0} ->
             begin
-                io:put_chars([[<<"clicked at x=">>,
+                io:put_chars([[<<"clicked at x="/utf8>>,
                                io_lib:format("~ktp", [_x@5_0]),
-                               <<", y=">>,
+                               <<", y="/utf8>>,
                                io_lib:format("~ktp", [_y@6_0]),
-                               <<".">>]]),
+                               <<"."/utf8>>]]),
                 io:nl(),
                 {}
             end
@@ -59,7 +61,7 @@ inspect(_event@0_0) ->
 
 main() ->
     _pressed@0_0 = $x,
-    _pasted@1_0 = <<"my text">>,
+    _pasted@1_0 = <<"my text"/utf8>>,
     _click@2_0 = #'Elixir.Patina.Enum01.WebEvent':'Click'{x
                                                               = 20,
                                                           y = 80},

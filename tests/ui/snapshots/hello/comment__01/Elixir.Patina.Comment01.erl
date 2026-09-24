@@ -26,7 +26,7 @@
 main() ->
     _x@0_0 = 5 + 5,
     begin
-        io:put_chars([[<<"Is `x` 10 or 100? x = ">>,
+        io:put_chars([[<<"Is `x` 10 or 100? x = "/utf8>>,
                        io_lib:format("~ktp", [_x@0_0])]]),
         io:nl(),
         {}

@@ -272,8 +272,10 @@ impl<'a> Parser<'a> {
             // captured tokens to include it, because the parser was not actually bumped past it.
             // (Even if we broke twice, it was still just one token originally, hence the `1`.)
             // When the `LazyAttrTokenStream` gets converted into an `AttrTokenStream`, we will
-            // rebreak that final token once or twice.
-            + if self.break_last_token == 0 { 0 } else { 1 };
+            // rebreak that final token once or twice. If the rest of the broken token was glued to
+            // the token after it, the parser was bumped past that token instead, so the range
+            // already ends with the broken token.
+            + if self.break_last_token == 0 || self.break_last_token_glued { 0 } else { 1 };
 
         let num_calls = end_pos - collect_pos.start_pos;
 

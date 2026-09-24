@@ -1,4 +1,5 @@
 mod adts;
+mod binary_pattern;
 mod body;
 mod elixir_compat;
 mod loops;

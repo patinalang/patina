@@ -71,8 +71,7 @@ Literal { kind: Str { terminated: true }, suffix_start: 4 }
 Comma
 Whitespace
 Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
-Whitespace
-Ident
+Colon
 Whitespace
 Ident
 OpenParen
@@ -88,6 +87,8 @@ Ident
 Whitespace
 OpenBrace
 Whitespace
+LineComment { doc_style: None }
+Whitespace
 Lt
 Lt
 Literal { kind: Str { terminated: true }, suffix_start: 4 }
@@ -100,9 +101,8 @@ Ident
 Whitespace
 At
 Whitespace
-Ident
-OpenParen
-CloseParen
+Dot
+Dot
 Gt
 Gt
 Whitespace
@@ -151,9 +151,8 @@ Ident
 Whitespace
 At
 Whitespace
-Ident
-OpenParen
-CloseParen
+Dot
+Dot
 Gt
 Gt
 Whitespace
@@ -209,11 +208,11 @@ Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
 Comma
 Whitespace
 Ident
-Colon
 Whitespace
-Ident
-OpenParen
-CloseParen
+At
+Whitespace
+Dot
+Dot
 Gt
 Gt
 Whitespace

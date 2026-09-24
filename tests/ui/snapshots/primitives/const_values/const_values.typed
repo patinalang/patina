@@ -28,3 +28,21 @@ fn const_values()
         ([int],
         #{str => int}) ({ (ALIAS as ([int], #{str => int})) } as
     ([int], #{str => int}))
+
+const VERSION: int = (2 as int);
+const HEADER: bin =
+    (<<(b"PT" as bin), (VERSION as int): int(size = (16 as int)),
+            ('\u{142}' as char): char(utf16), (1.5 as float):
+            float(size = (32 as int))>> as bin);
+const FLAGS: bits =
+    (<<(1 as int): int(size = (1 as int)), (0 as int):
+            int(size = (2 as int))>> as bits);
+
+fn binary_pattern_values()
+    ->
+        (bin,
+        [bits]) ({
+    (((HEADER as bin),
+        ([(FLAGS as bits), (<<(1 as int): int(size = (3 as int))>> as bits)]
+            as [bits])) as (bin, [bits]))
+} as (bin, [bits]))

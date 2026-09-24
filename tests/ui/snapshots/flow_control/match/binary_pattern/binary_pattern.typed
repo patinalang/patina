@@ -1,0 +1,261 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+fn utf8_segments_make_str(name: str, c: char)
+    ->
+        str ({
+    (<<("Hi, " as str), (name as str), (c as char), (33 as int)>> as str)
+} as str)
+
+fn whole_bytes_make_bin(n: int, c: char)
+    ->
+        bin ({
+    (<<(n as int): int(size = (16 as int)), (c as char): char(utf16),
+            (c as char): char(utf32, little), (1.5 as float):
+            float(size = (32 as int)), (b"\xff" as bin)>> as bin)
+} as bin)
+
+fn partial_bytes_make_bits(n: int)
+    ->
+        bits ({
+    (<<(1 as int): int(size = (3 as int)), (((n as int) + (1 as int) as int)):
+            int(size = (2 as int), unit = (4 as int))>> as bits)
+} as bits)
+
+fn numbers()
+    ->
+        bin ({
+    (<<(-(1 as int) as int): int(size = (8 as int), signed), (1.5 as float):
+            float(size = (16 as int)), (2.5 as float):
+            float(size = (32 as int), little), (1000 as int):
+            int(size = (16 as int), little)>> as bin)
+} as bin)
+
+fn nested()
+    ->
+        bin ({
+    (<<(<<(1 as int), (2 as int)>> as str): bin, (<<>> as str), (3 as int)>>
+        as str)
+} as bin)
+
+// `<<` only opens a binary pattern where an operand starts; elsewhere it is a shift.
+fn shifts(a: int)
+    ->
+        (int, bits,
+        bool) ({
+    let shifted = ((a as int) << (2 as int) as int);
+    let b =
+        (<<(((a as int) >> (2 as int) as int)): int(size = (8 as int)),
+                (((a as int) << (3 as int) as int)): int(size = (8 as int))>>
+            as bin);
+    (((shifted as int), (b as bin),
+        ((<<(1 as int)>> as str) == (<<(1 as int)>> as str) as bool)) as
+        (int, bits, bool))
+} as (int, bits, bool))
+
+fn first_byte(b: bin)
+    ->
+        int ({
+    (match (b as bin) {
+        <<x>> => (x as int),
+        <<x, _>> => ((x as int) + (1 as int) as int),
+        _ => (0 as int),
+    } as int)
+} as int)
+
+macro_rules! match_or {
+    ($p:pat = $e:expr, $x:ident) => { match $e { $p => $x, _ => -1, } };
+    ($e:expr, $p:pat => $x:ident) => { match $e { $p => $x, _ => -1, } };
+}
+
+macro_rules! pair { ($k:expr => $v:expr) => { ($k, $v) }; }
+
+// A pattern or expression captured by a macro ends at `>>`, even when it's glued to `=` or `=>`.
+fn captured(b: bin)
+    ->
+        (int, int,
+        (bin,
+        int)) ({
+    (((match (b as bin) { <<x>> => (x as int), _ => (-(1 as int) as int), } as
+            int),
+        (match (b as bin) {
+            <<_, x>> => (x as int),
+            _ => (-(1 as int) as int),
+        } as int), (((<<(1 as int)>> as str), (2 as int)) as (bin, int))) as
+        (int, int, (bin, int)))
+} as (int, int, (bin, int)))
+
+fn term_matches_like_bits(t: term)
+    ->
+        (int,
+        bits) ({
+    (match (t as term) {
+        <<a: int(size = (8 as int)), rest: bin>> =>
+            (((a as int), (rest as bin)) as (int, bits)),
+        <<a: int(size = (3 as int)), rest: bits>> =>
+            ((((a as int) + (100 as int) as int), (rest as bits)) as
+                (int, bits)),
+        _ => (((-(1 as int) as int), (<<>> as str)) as (int, bits)),
+    } as (int, bits))
+} as (int, bits))
+
+fn decode(b: bin)
+    ->
+        (int, float,
+        bin) ({
+    (match (b as bin) {
+        <<x: int(size = (8 as int), signed), f: float(size = (16 as int)),
+            rest: bin(unit = (16 as int))>> =>
+            (((x as int), (f as float), (rest as bin)) as (int, float, bin)),
+        _ =>
+            (((0 as int), (0.0 as float), (<<>> as str)) as
+                (int, float, bin)),
+    } as (int, float, bin))
+} as (int, float, bin))
+
+fn chars(b: bin)
+    ->
+        (char, char,
+        bin) ({
+    (match (b as bin) {
+        <<a: char(utf16), b: char(utf32, little), rest: bin>> =>
+            (((a as char), (b as char), (rest as bin)) as (char, char, bin)),
+        _ =>
+            ((('?' as char), ('?' as char), (<<>> as str)) as
+                (char, char, bin)),
+    } as (char, char, bin))
+} as (char, char, bin))
+
+fn encoded_strings_make_bin()
+    ->
+        bin ({
+    (<<("\u{142}\u{105}cko" as str): str(utf16), ("ok" as str):
+            str(utf32, little)>> as bin)
+} as bin)
+
+fn encoded_prefix(b: bin)
+    ->
+        bin ({
+    (match (b as bin) {
+        <<"\u{142}\u{105}": str(utf16), rest: bin>> => (rest as bin),
+        _ => (<<>> as str),
+    } as bin)
+} as bin)
+
+fn pinned_bitstring_matches_exactly(b: bin, tag: str)
+    ->
+        bool ({
+    (match (b as bin) { <<1, ^tag>> => (true as bool), _ => (false as bool), }
+        as bool)
+} as bool)
+
+fn bits_unit_is_binary_unit(b: bits)
+    ->
+        (bits,
+        bits) ({
+    (match (b as bits) {
+        <<first: bits(size = (1 as int), unit = (4 as int)), rest:
+            bits(unit = (4 as int))>> =>
+            (((first as bits), (rest as bits)) as (bits, bits)),
+        _ => (((<<>> as str), (<<>> as str)) as (bits, bits)),
+    } as (bits, bits))
+} as (bits, bits))
+
+// `rest @ ..` binds the rest of a binary pattern, with the narrowest type it's guaranteed to have.
+
+fn str_rest(s: str)
+    ->
+        str ({
+    (match (s as str) {
+
+            // Every segment before the rest is valid UTF-8 on its own, so the rest is a `str`.
+            <<"\u{e9}", _: char, rest @ ..>> => (rest as str),
+        _ => ("" as str),
+    } as str)
+} as str)
+
+fn bin_rest(s: str)
+    ->
+        bin ({
+    (match (s as str) {
+
+            // An 8-bit integer might split a character, but the rest is still whole bytes.
+            <<_: int(size = (8 as int)), rest @ ..>> => (rest as bin),
+        _ => (b"" as bin),
+    } as bin)
+} as bin)
+
+fn bits_rest(b: bin)
+    ->
+        bits ({
+    (match (b as bin) {
+
+            // After 4 bits, the rest isn't whole bytes.
+            <<_: int(size = (4 as int)), rest @ ..>> => (rest as bits),
+        _ => (<<>> as str),
+    } as bits)
+} as bits)
+
+fn term_rest(t: term)
+    ->
+        bits ({
+    (match (t as term) {
+
+            // A `term` might be any bitstring.
+            <<_: int(size = (8 as int)), rest @ ..>> => (rest as bits),
+        _ => (<<>> as str),
+    } as bits)
+} as bits)
+
+fn split(b: bin)
+    ->
+        (bin,
+        bin) ({
+    (match (b as bin) {
+        <<len: int(size = (8 as int)), payload: bin(size = (len as int)), rest
+            @ ..>> => (((payload as bin), (rest as bin)) as (bin, bin)),
+        _ => (((b"" as bin), (b"" as bin)) as (bin, bin)),
+    } as (bin, bin))
+} as (bin, bin))
+
+fn rotate(b: bin)
+    ->
+        bin ({
+    (match (b as bin) {
+        <<first: int(size = (8 as int)), mut rest @ ..>> => {
+            ((rest as bin) =
+                (<<(rest as bin), (first as int): int(size = (8 as int))>> as
+                    bin) as bin);
+            (rest as bin)
+        }
+        _ => (b as bin),
+    } as bin)
+} as bin)
+
+fn has_magic(b: bin)
+    ->
+        bool ({
+    (match (b as bin) {
+
+            // `..` ignores the rest.
+            <<"PT", ..>> => (true as bool),
+        _ => (false as bool),
+    } as bool)
+} as bool)
+
+fn main() ({ } as ())

@@ -46,9 +46,8 @@ Ident
 Whitespace
 At
 Whitespace
-Ident
-OpenParen
-CloseParen
+Dot
+Dot
 Gt
 Gt
 Whitespace
@@ -75,9 +74,8 @@ Ident
 Whitespace
 At
 Whitespace
-Ident
-OpenParen
-CloseParen
+Dot
+Dot
 Gt
 Gt
 Whitespace
@@ -133,8 +131,7 @@ Lt
 Lt
 Caret
 Ident
-Whitespace
-Ident
+Colon
 Whitespace
 Ident
 OpenParen
@@ -149,9 +146,8 @@ Ident
 Whitespace
 At
 Whitespace
-Ident
-OpenParen
-CloseParen
+Dot
+Dot
 Gt
 Gt
 Whitespace
@@ -182,9 +178,8 @@ Ident
 Whitespace
 At
 Whitespace
-Ident
-OpenParen
-CloseParen
+Dot
+Dot
 Gt
 Gt
 Whitespace

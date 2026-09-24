@@ -1,8 +1,8 @@
 // source: patina-by-example/src/flow_control/match/binary_matching.md
-// block: 2/5
+// block: 2/6
 
 // For matched variables, the type is assumed to be `int`.
-// This line is equivalent to `<<x @ int(16)>>`.
+// This line is equivalent to `<<x: int(16)>>`.
 if let <<x:16>> = data {
     println!("data is a two-byte integer {}", x);
 }

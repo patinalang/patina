@@ -12,10 +12,10 @@ use rustc_ast::{
     UnsafeBinderCastKind, join_path_idents,
 };
 pub use rustc_ast::{
-    AssignOp, AssignOpKind, AttrId, AttrStyle, BinOp, BinOpKind, BindingMode, BorrowKind,
-    BoundConstness, BoundPolarity, ByRef, CaptureBy, DelimArgs, ExceptionClass, FnPtrKind,
-    ImplPolarity, IsAuto, MetaItemInner, MetaItemLit, Movability, Mutability, Pinnedness,
-    TermClass, UnOp,
+    AssignOp, AssignOpKind, AttrId, AttrStyle, BinOp, BinOpKind, BinarySegmentFlag,
+    BinarySegmentTy, BindingMode, BorrowKind, BoundConstness, BoundPolarity, ByRef, CaptureBy,
+    DelimArgs, ExceptionClass, FnPtrKind, ImplPolarity, IsAuto, MetaItemInner, MetaItemLit,
+    Movability, Mutability, Pinnedness, TermClass, UnOp,
 };
 use rustc_data_structures::fingerprint::Fingerprint;
 use rustc_data_structures::sorted_map::SortedMap;
@@ -1779,6 +1779,7 @@ impl<'hir> Pat<'hir> {
             }
             Struct(_, fields, _) => fields.iter().all(|field| field.pat.walk_short_(it)),
             Map(fields, _) => fields.iter().all(|field| field.pat.walk_short_(it)),
+            BinaryPattern(segments) => segments.iter().all(|segment| segment.pat.walk_short_(it)),
             TupleStruct(_, s, _) | Tuple(s, _) | Or(s) => s.iter().all(|p| p.walk_short_(it)),
             Slice(before, slice, after) => {
                 before.iter().chain(slice).chain(after.iter()).all(|p| p.walk_short_(it))
@@ -1816,6 +1817,7 @@ impl<'hir> Pat<'hir> {
             }
             Struct(_, fields, _) => fields.iter().for_each(|field| field.pat.walk_(it)),
             Map(fields, _) => fields.iter().for_each(|field| field.pat.walk_(it)),
+            BinaryPattern(segments) => segments.iter().for_each(|segment| segment.pat.walk_(it)),
             TupleStruct(_, s, _) | Tuple(s, _) | Or(s) => s.iter().for_each(|p| p.walk_(it)),
             Slice(before, slice, after) => {
                 before.iter().chain(slice).chain(after.iter()).for_each(|p| p.walk_(it))
@@ -1906,6 +1908,7 @@ impl<'hir> Pat<'hir> {
             | PatKind::Range(_, _, _)
             | PatKind::Slice(_, _, _)
             | PatKind::Map(_, _)
+            | PatKind::BinaryPattern(_)
             | PatKind::Err(_) => true,
         }
     }
@@ -1938,6 +1941,65 @@ pub struct PatMapField<'hir> {
 
 #[derive(Debug, Clone, Copy, StableHash)]
 pub struct PatMapKey<'hir>(pub PatExpr<'hir>);
+
+/// The type of a binary pattern segment with its arguments (e.g., `int(16, little)`).
+#[derive(Debug, Clone, Copy, StableHash)]
+pub struct BinarySegmentSpec<'hir> {
+    pub ty: BinarySegmentTy,
+    /// The type's name, or an empty span after the `:` in the short form.
+    pub ty_span: Span,
+    pub args: &'hir [BinarySegmentArg<'hir>],
+    pub span: Span,
+}
+
+/// An argument of a binary pattern segment type.
+#[derive(Debug, Clone, Copy, StableHash)]
+pub struct BinarySegmentArg<'hir> {
+    pub kind: BinarySegmentArgKind<'hir>,
+    pub span: Span,
+}
+
+#[derive(Debug, Clone, Copy, StableHash)]
+pub enum BinarySegmentArgKind<'hir> {
+    /// `size = expr`, or a bare `expr`.
+    Size(&'hir Expr<'hir>),
+    /// `unit = expr`.
+    Unit(&'hir Expr<'hir>),
+    /// A flag such as `signed` or `little`.
+    Flag(BinarySegmentFlag),
+}
+
+/// What gives a binary pattern segment its type.
+#[derive(Debug, Clone, Copy, StableHash)]
+pub enum PatBinarySegmentKind<'hir> {
+    /// `x`: the type comes from the value, `int(8)` for a binding.
+    Default,
+    /// `x: int(16)`, or its short form `x:16`.
+    Spec(&'hir BinarySegmentSpec<'hir>),
+    /// `rest @ ..`, or `..` with a `_` pattern: the rest of the matched value, type inferred.
+    Rest,
+    /// `rest @ ..` or `..` that isn't the last segment.
+    Recovered(ErrorGuaranteed),
+}
+
+impl<'hir> PatBinarySegmentKind<'hir> {
+    pub fn spec(self) -> Option<&'hir BinarySegmentSpec<'hir>> {
+        match self {
+            PatBinarySegmentKind::Spec(spec) => Some(spec),
+            PatBinarySegmentKind::Default
+            | PatBinarySegmentKind::Rest
+            | PatBinarySegmentKind::Recovered(_) => None,
+        }
+    }
+}
+
+/// A segment of a binary pattern (e.g., `len:8`, `rest: bin()` or `rest @ ..`).
+#[derive(Debug, Clone, Copy, StableHash)]
+pub struct PatBinarySegment<'hir> {
+    pub pat: &'hir Pat<'hir>,
+    pub kind: PatBinarySegmentKind<'hir>,
+    pub span: Span,
+}
 
 #[derive(Copy, Clone, PartialEq, Debug, StableHash, Hash, Eq, Encodable, Decodable)]
 pub enum RangeEnd {
@@ -2098,6 +2160,9 @@ pub enum PatKind<'hir> {
     /// A partial map pattern. The `Span` contains the span of the required `..`.
     Map(&'hir [PatMapField<'hir>], Span),
 
+    /// A binary pattern (e.g., `<<len:8, rest @ ..>>`).
+    BinaryPattern(&'hir [PatBinarySegment<'hir>]),
+
     /// A placeholder for a pattern that wasn't well formed in some way.
     Err(ErrorGuaranteed),
 }
@@ -2203,6 +2268,14 @@ pub struct ExprField<'hir> {
 pub struct ExprMapField<'hir> {
     pub key: &'hir Expr<'hir>,
     pub value: &'hir Expr<'hir>,
+    pub span: Span,
+}
+
+/// A segment of a binary pattern expression (e.g., `len:8` or `payload: bin`).
+#[derive(Debug, Clone, Copy, StableHash)]
+pub struct BinarySegment<'hir> {
+    pub expr: &'hir Expr<'hir>,
+    pub spec: Option<&'hir BinarySegmentSpec<'hir>>,
     pub span: Span,
 }
 
@@ -2542,6 +2615,7 @@ impl Expr<'_> {
             // Need parens if and only if there are prefix attributes.
             ExprKind::Array(..)
             | ExprKind::Map(..)
+            | ExprKind::BinaryPattern(..)
             | ExprKind::Block(..)
             | ExprKind::Call(..)
             | ExprKind::ConstBlock(_)
@@ -2623,6 +2697,7 @@ impl Expr<'_> {
             | ExprKind::Repeat(..)
             | ExprKind::Array(..)
             | ExprKind::Map(..)
+            | ExprKind::BinaryPattern(..)
             | ExprKind::Break(..)
             | ExprKind::Continue(..)
             | ExprKind::Ret(..)
@@ -2763,6 +2838,8 @@ impl Expr<'_> {
             | ExprKind::ConstBlock(..)
             | ExprKind::Yield(..)
             | ExprKind::DropTemps(..)
+            // A binary pattern expression raises on values that don't fit their segments.
+            | ExprKind::BinaryPattern(..)
             | ExprKind::Err(_) => true,
         }
     }
@@ -2875,6 +2952,8 @@ pub enum ExprKind<'hir> {
     Array(&'hir [Expr<'hir>], ArrayTailExpr<'hir>),
     /// A map expression (e.g., `#{"a" => 1, ..base}`).
     Map(&'hir [ExprMapField<'hir>], MapTailExpr<'hir>),
+    /// A binary pattern expression (e.g., `<<len:8, payload: bin>>`).
+    BinaryPattern(&'hir [BinarySegment<'hir>]),
     /// A function call.
     ///
     /// The first field resolves to the function itself (usually an `ExprKind::Path`),

@@ -157,7 +157,8 @@
                                   [{bin_element,
                                        {14,39},
                                        {string,{14,39},"hi"},
-                                       default,default}]},
+                                       default,
+                                       [utf8]}]},
                               {var,{14,47},'_value@1_0'}}]}]},
                 {clause,
                     {15,9},
@@ -172,5 +173,6 @@
                                   [{bin_element,
                                        {1,23},
                                        {string,{1,23},"name"},
-                                       default,default}]},
+                                       default,
+                                       [utf8]}]},
                               {integer,{3,42},1}}]}]}]}]}]}]

@@ -278,6 +278,7 @@ impl<'a, 'tcx> Visitor<'a, 'tcx> for UnsafetyVisitor<'a, 'tcx> {
                 | PatKind::Slice { .. }
                 | PatKind::Array { .. }
                 | PatKind::Map { .. }
+                | PatKind::BinaryPattern { .. }
                 | PatKind::Guard { .. }
                 // Never constitutes a witness of uninhabitedness.
                 | PatKind::Never => {
@@ -367,6 +368,7 @@ impl<'a, 'tcx> Visitor<'a, 'tcx> for UnsafetyVisitor<'a, 'tcx> {
             | ExprKind::Adt { .. }
             | ExprKind::Array { .. }
             | ExprKind::Map { .. }
+            | ExprKind::BinaryPattern { .. }
             | ExprKind::Binary { .. }
             | ExprKind::Block { .. }
             | ExprKind::Borrow { .. }

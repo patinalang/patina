@@ -53,6 +53,31 @@ impl<'v> rustc_ast::visit::Visitor<'v> for WillCreateDefIdsVisitor {
 }
 
 impl<'hir> LoweringContext<'_, 'hir> {
+    /// Lowers the type of a binary segment, e.g. `int(size = n, little)`.
+    pub(crate) fn lower_binary_segment_spec(
+        &mut self,
+        spec: &ast::BinarySegmentSpec,
+    ) -> &'hir hir::BinarySegmentSpec<'hir> {
+        let args = self.arena.alloc_from_iter(spec.args.iter().map(|arg| {
+            let kind = match &arg.kind {
+                ast::BinarySegmentArgKind::Size(expr) => {
+                    hir::BinarySegmentArgKind::Size(self.lower_expr(expr))
+                }
+                ast::BinarySegmentArgKind::Unit(expr) => {
+                    hir::BinarySegmentArgKind::Unit(self.lower_expr(expr))
+                }
+                ast::BinarySegmentArgKind::Flag(flag) => hir::BinarySegmentArgKind::Flag(*flag),
+            };
+            hir::BinarySegmentArg { kind, span: self.lower_span(arg.span) }
+        }));
+        self.arena.alloc(hir::BinarySegmentSpec {
+            ty: spec.ty,
+            ty_span: self.lower_span(spec.ty_span),
+            args,
+            span: self.lower_span(spec.span),
+        })
+    }
+
     fn lower_exprs(&mut self, exprs: &[Box<Expr>]) -> &'hir [hir::Expr<'hir>] {
         self.arena.alloc_from_iter(exprs.iter().map(|x| self.lower_expr_mut(x)))
     }
@@ -138,6 +163,19 @@ impl<'hir> LoweringContext<'_, 'hir> {
                         MapRest::NoneWithError(guar) => hir::MapTailExpr::NoneWithError(*guar),
                     };
                     hir::ExprKind::Map(fields, rest)
+                }
+                ExprKind::BinaryPattern(segments) => {
+                    let segments = self.arena.alloc_from_iter(segments.iter().map(|segment| {
+                        hir::BinarySegment {
+                            expr: self.lower_expr(&segment.expr),
+                            spec: segment
+                                .spec
+                                .as_ref()
+                                .map(|spec| self.lower_binary_segment_spec(spec)),
+                            span: self.lower_span(segment.span),
+                        }
+                    }));
+                    hir::ExprKind::BinaryPattern(segments)
                 }
                 ExprKind::ConstBlock(c) => hir::ExprKind::ConstBlock(self.lower_const_block(c)),
                 ExprKind::Repeat(expr, count) => {

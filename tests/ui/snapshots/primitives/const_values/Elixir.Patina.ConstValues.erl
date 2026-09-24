@@ -8,7 +8,9 @@
 
 -export_record([]).
 
--export(['__info__'/1, const_values/0]).
+-export(['__info__'/1,
+         const_values/0,
+         binary_pattern_values/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -23,4 +25,10 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-const_values() -> {[1, 2, 3], #{<<"answer">> => 42}}.
+const_values() ->
+    {[1, 2, 3], #{<<"answer"/utf8>> => 42}}.
+
+binary_pattern_values() ->
+    {<<<<80, 84>>:2/binary, 2:16/integer, $ł/utf16,
+       1.5:32/float>>,
+     [<<1:1/integer, 0:2/integer>>, <<1:3/integer>>]}.

@@ -50,8 +50,7 @@ Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
 Comma
 Whitespace
 Ident
-Whitespace
-At
+Colon
 Whitespace
 Ident
 OpenParen
@@ -60,8 +59,7 @@ CloseParen
 Comma
 Whitespace
 Ident
-Whitespace
-At
+Colon
 Whitespace
 Ident
 OpenParen
@@ -73,9 +71,8 @@ Ident
 Whitespace
 At
 Whitespace
-Ident
-OpenParen
-CloseParen
+Dot
+Dot
 Gt
 Gt
 Whitespace
@@ -108,8 +105,7 @@ Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
 Comma
 Whitespace
 Ident
-Whitespace
-At
+Colon
 Whitespace
 Ident
 OpenParen
@@ -118,8 +114,7 @@ CloseParen
 Comma
 Whitespace
 Ident
-Whitespace
-At
+Colon
 Whitespace
 Ident
 OpenParen
@@ -135,9 +130,8 @@ Ident
 Whitespace
 At
 Whitespace
-Ident
-OpenParen
-CloseParen
+Dot
+Dot
 Gt
 Gt
 Whitespace
@@ -210,11 +204,14 @@ OpenBrace
 Whitespace
 LineComment { doc_style: None }
 Whitespace
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
 Lt
 Lt
 Ident
-Whitespace
-At
+Colon
 Whitespace
 Ident
 OpenParen
@@ -226,9 +223,8 @@ Ident
 Whitespace
 At
 Whitespace
-Ident
-OpenParen
-CloseParen
+Dot
+Dot
 Gt
 Gt
 Whitespace
@@ -243,52 +239,6 @@ Comma
 Whitespace
 Ident
 Comma
-Whitespace
-Ident
-CloseParen
-Comma
-Whitespace
-LineComment { doc_style: None }
-Whitespace
-LineComment { doc_style: None }
-Whitespace
-Lt
-Lt
-Ident
-Comma
-Whitespace
-Ident
-Whitespace
-At
-Whitespace
-Ident
-OpenParen
-CloseParen
-Comma
-Whitespace
-Ident
-Whitespace
-At
-Whitespace
-Ident
-OpenParen
-CloseParen
-Gt
-Gt
-Whitespace
-Eq
-Gt
-Whitespace
-Ident
-Bang
-OpenParen
-Literal { kind: Str { terminated: true }, suffix_start: 38 }
-Comma
-Whitespace
-Ident
-Comma
-Whitespace
-Ident
 Whitespace
 Ident
 CloseParen

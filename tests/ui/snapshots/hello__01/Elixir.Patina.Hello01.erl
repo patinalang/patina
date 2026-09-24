@@ -25,5 +25,5 @@
 
 main() ->
     begin
-        io:put_chars([[<<"Hello World!">>]]), io:nl(), {}
+        io:put_chars([[<<"Hello World!"/utf8>>]]), io:nl(), {}
     end.

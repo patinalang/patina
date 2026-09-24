@@ -32,13 +32,13 @@
                                             _B@2_0, _self@3_0, _a@4_0,
                                             _b@5_0) ->
     begin
-        io:put_chars([[<<"UnboundContainer::contains(">>,
+        io:put_chars([[<<"UnboundContainer::contains("/utf8>>,
                        io_lib:format("~ktp", [_self@3_0]),
-                       <<", ">>,
+                       <<", "/utf8>>,
                        io_lib:format("~ktp", [_a@4_0]),
-                       <<", ">>,
+                       <<", "/utf8>>,
                        io_lib:format("~ktp", [_b@5_0]),
-                       <<")">>]]),
+                       <<")"/utf8>>]]),
         io:nl(),
         {}
     end,

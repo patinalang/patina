@@ -1,0 +1,153 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// Errors in binary patterns, in pattern and expression position.
+
+fn unsized_segments(b: bin,
+    s:
+        str) ({
+    (match (b as bin) {
+
+            // Only the last segment can be unsized.
+            <<rest: bin, x: int(size = (8 as int))>> => {
+        }
+        <<rest: bits(unit = (4 as int)), x: int(size = (8 as int))>> => { }
+        _ => { }
+    } as ())
+    (match (s as str) {
+
+            // Reported once, not also as splitting a character before `str`.
+            <<x: bin, rest: str>> => {
+        }
+        <<x: str, rest @ ..>> => { }
+        _ => { }
+    } as ())
+} as ())
+
+fn str_tails(s: str, b: bin,
+    t:
+        term) ({
+    (match (b as bin) {
+
+            // The rest of a `bin` might not be valid UTF-8.
+            <<x: int(size = (8 as int)), rest: str>> => {
+        }
+        _ => { }
+    } as ())
+    (match (t as term) { <<rest: str>> => { } _ => { } } as ())
+    (match (s as str) {
+
+            // An 8-bit integer might end inside a UTF-8 character.
+            <<x: int(size = (8 as int)), rest: str>> => {
+        }
+
+            // Every segment before the rest is valid UTF-8 on its own.
+            <<"\u{e9}", c: char, 65, b"ok", rest: str>> => {
+        }
+
+            // UTF-16 isn't UTF-8, even for a string literal.
+            <<"\u{142}": str(utf16), rest: str>> => {
+        }
+        _ => { }
+    } as ())
+} as ())
+
+fn arguments(b:
+        bin) ({
+    (match (b as bin) {
+
+            // Size on `str` and `char`, unit on `float`.
+            <<x: str(size = (3 as int)), c: char(size = (8 as int)), f:
+            float(unit = (8 as int))>> => {
+        }
+        <<n: int(size = (8 as int)), x: str(size = (n as int)), rest @ ..>> =>
+            {
+        }
+
+            // A literal has the size of its bytes.
+            <<"ab": str(size = (2 as int))>> => {
+        }
+        <<"\u{142}": str(utf16, size = (2 as int)), "\u{142}":
+            str(size = (2 as int), utf16)>> => {
+        }
+
+            // Bad float size, bad units.
+            <<f: float(size = (8 as int)), y: bits(unit = (0 as int)), z:
+            bin(size = (3 as int), unit = (4 as int))>> => {
+        }
+
+            // Flags on the wrong type, repeated arguments, endianness of UTF-8.
+            <<a: bin(little), c: char(signed), d:
+            int(size = (8 as int), big, little), e: char(utf8, big)>> => {
+        }
+
+            // A string or binary literal takes the size of its bytes.
+            <<"abc": str, b"ab": bin(size = (2 as int))>> => {
+        }
+        _ => { }
+    } as ())
+} as ())
+
+fn types(b: bin,
+    n:
+        int) ({
+    (match (n as int) {
+
+            // A binary pattern needs a `str`, `bin`, `bits` or `term` scrutinee.
+            <<x: int(size = (8 as int))>> => {
+        }
+        _ => { }
+    } as ())
+    (match (b as bin) {
+
+            // A pin or literal must have the segment's type.
+            <<^n: float, 5: float, true>> => {
+        }
+        _ => { }
+    } as ())
+} as ())
+
+fn construction(b: bits, x: bool,
+    s:
+        str) ({
+    let _ = (<<(b as bits): bin>> as bin);
+    let _ = (<<(x as bool)>> as {type error});
+    let _ = (<<(1 as int): bin>> as bin);
+    // Only a string literal can be re-encoded; a `str` value is UTF-8 bytes.
+    let _ =
+        (<<(s as str): str(utf8), (s as str): str(utf16)>> as {type error});
+    let _ =
+        (<<("a" as str): str(utf8, little), ("a" as str): bin(utf16)>> as
+            {type error});
+    // A UTF-16 string is a `bin`, not a `str`.
+    let _: str = (<<("\u{142}" as str): str(utf16)>> as bin);
+} as ())
+
+fn rest_segments(b:
+        bin) ({
+    (match (b as bin) {
+
+            // After 4 bits, the rest isn't a `bin`.
+            <<_: int(size = (4 as int)), rest @ ..>> => {
+            let _: bin = (rest as bits);
+        }
+        _ => { }
+    } as ())
+} as ())
+
+fn main() ({ } as ())

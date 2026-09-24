@@ -166,6 +166,29 @@ impl<'hir> LoweringContext<'_, 'hir> {
                         };
                         break hir::PatKind::Map(fields, rest);
                     }
+                    PatKind::BinaryPattern(segments) => {
+                        let segments = self.arena.alloc_from_iter(segments.iter().map(|segment| {
+                            hir::PatBinarySegment {
+                                pat: self.lower_pat(&segment.pat),
+                                kind: match &segment.kind {
+                                    PatBinarySegmentKind::Default => {
+                                        hir::PatBinarySegmentKind::Default
+                                    }
+                                    PatBinarySegmentKind::Spec(spec) => {
+                                        hir::PatBinarySegmentKind::Spec(
+                                            self.lower_binary_segment_spec(spec),
+                                        )
+                                    }
+                                    PatBinarySegmentKind::Rest => hir::PatBinarySegmentKind::Rest,
+                                    PatBinarySegmentKind::Recovered(guar) => {
+                                        hir::PatBinarySegmentKind::Recovered(*guar)
+                                    }
+                                },
+                                span: self.lower_span(segment.span),
+                            }
+                        }));
+                        break hir::PatKind::BinaryPattern(segments);
+                    }
                     PatKind::Rest => {
                         // If we reach here the `..` pattern is not semantically allowed.
                         break self.ban_illegal_rest_pat(pattern.span);

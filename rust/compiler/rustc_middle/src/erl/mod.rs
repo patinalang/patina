@@ -1,5 +1,6 @@
 //! Erlang call resolution and module placement.
 
+pub mod binary_pattern;
 pub mod shape;
 
 use convert_case::{Case, Casing};

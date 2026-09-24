@@ -27,9 +27,9 @@
 
 'Dispatch::Area::area'(_Self@0_0, _self@1_0) ->
     begin
-        io:put_chars([[<<"Area::area(">>,
+        io:put_chars([[<<"Area::area("/utf8>>,
                        io_lib:format("~ktp", [_self@1_0]),
-                       <<")">>]]),
+                       <<")"/utf8>>]]),
         io:nl(),
         {}
     end,

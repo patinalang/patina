@@ -29,38 +29,38 @@ open_resource() -> ok.
 main() ->
     try open_resource(), {} catch
         error:badarg ->
-            io:put_chars([[<<"badarg!">>]]),
+            io:put_chars([[<<"badarg!"/utf8>>]]),
             io:nl(),
             {};
         error:(#{'__struct__' := 'Elixir.ArithmeticError'}) ->
-            io:put_chars([[<<"Elixir ArithmeticError">>]]),
+            io:put_chars([[<<"Elixir ArithmeticError"/utf8>>]]),
             io:nl(),
             {};
         error:(_reason@0_0 = #{'__struct__' :=
                                    'Elixir.ArgumentError'}) ->
-            io:put_chars([[<<"Elixir ArgumentError ">>,
+            io:put_chars([[<<"Elixir ArgumentError "/utf8>>,
                            io_lib:format("~ktp", [_reason@0_0])]]),
             io:nl(),
             {};
         error:_reason@2_0:_stacktrace@1_0 ->
-            io:put_chars([[<<"other error: ">>,
+            io:put_chars([[<<"other error: "/utf8>>,
                            io_lib:format("~ktp", [_reason@2_0]),
-                           <<" from ">>,
+                           <<" from "/utf8>>,
                            io_lib:format("~ktp", [_stacktrace@1_0])]]),
             io:nl(),
             {};
         _value@3_0 ->
-            io:put_chars([[<<"thrown: ">>,
+            io:put_chars([[<<"thrown: "/utf8>>,
                            io_lib:format("~ktp", [_value@3_0])]]),
             io:nl(),
             {};
         exit:_reason@4_0 ->
-            io:put_chars([[<<"exit: ">>,
+            io:put_chars([[<<"exit: "/utf8>>,
                            io_lib:format("~ktp", [_reason@4_0])]]),
             io:nl(),
             {}
     after
         begin
-            io:put_chars([[<<"cleaning up">>]]), io:nl(), {}
+            io:put_chars([[<<"cleaning up"/utf8>>]]), io:nl(), {}
         end
     end.

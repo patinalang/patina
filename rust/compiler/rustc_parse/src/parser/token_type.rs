@@ -23,6 +23,7 @@ pub enum TokenType {
     Le,
     EqEq,
     Gt,
+    Shr,
     AndAnd,
     OrOr,
     Bang,
@@ -178,6 +179,7 @@ impl TokenType {
             Le,
             EqEq,
             Gt,
+            Shr,
             AndAnd,
             OrOr,
             Bang,
@@ -384,6 +386,7 @@ impl TokenType {
             TokenType::Le => "`<=`",
             TokenType::EqEq => "`==`",
             TokenType::Gt => "`>`",
+            TokenType::Shr => "`>>`",
             TokenType::AndAnd => "`&&`",
             TokenType::OrOr => "`||`",
             TokenType::Bang => "`!`",
@@ -485,6 +488,7 @@ macro_rules! exp {
     (Le)             => { exp!(@tok, Le) };
     (EqEq)           => { exp!(@tok, EqEq) };
     (Gt)             => { exp!(@tok, Gt) };
+    (Shr)            => { exp!(@tok, Shr) };
     (AndAnd)         => { exp!(@tok, AndAnd) };
     (OrOr)           => { exp!(@tok, OrOr) };
     (Bang)           => { exp!(@tok, Bang) };

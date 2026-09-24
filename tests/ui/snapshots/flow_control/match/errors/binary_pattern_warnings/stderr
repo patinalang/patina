@@ -1,0 +1,99 @@
+warning: literal out of range for its binary pattern segment
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_warnings.pt:8:11
+   |
+LL |         <<256:8, -1:8>> => println!("never"),
+   |           ^^^^^
+   |
+   = note: `256` doesn't fit into 8 bits as an unsigned integer
+   = note: this segment can never match
+   = note: `#[warn(overflowing_binary_pattern_literals)]` on by default
+
+warning: literal out of range for its binary pattern segment
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_warnings.pt:8:18
+   |
+LL |         <<256:8, -1:8>> => println!("never"),
+   |                  ^^^^
+   |
+   = note: `-1` doesn't fit into 8 bits as an unsigned integer
+   = note: this segment can never match
+
+warning: literal out of range for its binary pattern segment
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_warnings.pt:9:31
+   |
+LL |         <<-1: int(8, signed), 128: int(8, signed), -129: int(8, signed)>> => {}
+   |                               ^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `128` doesn't fit into 8 bits as a signed integer
+   = note: this segment can never match
+
+warning: literal out of range for its binary pattern segment
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_warnings.pt:9:52
+   |
+LL |         <<-1: int(8, signed), 128: int(8, signed), -129: int(8, signed)>> => {}
+   |                                                    ^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `-129` doesn't fit into 8 bits as a signed integer
+   = note: this segment can never match
+
+warning: literal out of range for its binary pattern segment
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_warnings.pt:10:11
+   |
+LL |         <<1.0e10: float(16), 1.0e39: float(32), 1.0e39: float>> => {}
+   |           ^^^^^^^^^^^^^^^^^
+   |
+   = note: `1.0e10` doesn't fit into 16 bits as a float
+   = note: this segment can never match
+
+warning: literal out of range for its binary pattern segment
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_warnings.pt:10:30
+   |
+LL |         <<1.0e10: float(16), 1.0e39: float(32), 1.0e39: float>> => {}
+   |                              ^^^^^^^^^^^^^^^^^
+   |
+   = note: `1.0e39` doesn't fit into 32 bits as a float
+   = note: this segment can never match
+
+warning: literal out of range for its binary pattern segment
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_warnings.pt:14:24
+   |
+LL |     println!("{:?}", <<300:8, -1:8, 255:8, 1.0e10: float(16), b'\x80': int(8, signed)>>);
+   |                        ^^^^^
+   |
+   = note: `300` doesn't fit into 8 bits as an unsigned integer
+   = note: the value is truncated to its lowest bits
+
+warning: literal out of range for its binary pattern segment
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_warnings.pt:14:31
+   |
+LL |     println!("{:?}", <<300:8, -1:8, 255:8, 1.0e10: float(16), b'\x80': int(8, signed)>>);
+   |                               ^^^^
+   |
+   = note: `-1` doesn't fit into 8 bits as an unsigned integer
+   = note: the value is truncated to its lowest bits
+
+warning: literal out of range for its binary pattern segment
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_warnings.pt:14:44
+   |
+LL |     println!("{:?}", <<300:8, -1:8, 255:8, 1.0e10: float(16), b'\x80': int(8, signed)>>);
+   |                                            ^^^^^^^^^^^^^^^^^
+   |
+   = note: `1.0e10` doesn't fit into 16 bits as a float
+   = note: the value is encoded as infinity
+
+warning: literal out of range for its binary pattern segment
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_warnings.pt:14:63
+   |
+LL |     println!("{:?}", <<300:8, -1:8, 255:8, 1.0e10: float(16), b'\x80': int(8, signed)>>);
+   |                                                               ^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `b'\x80'` doesn't fit into 8 bits as a signed integer
+   = note: the value is truncated to its lowest bits
+
+error: literal kind not supported: b'\x80'
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_warnings.pt:14:63
+   |
+LL |     println!("{:?}", <<300:8, -1:8, 255:8, 1.0e10: float(16), b'\x80': int(8, signed)>>);
+   |                                                               ^^^^^^^
+
+error: aborting due to 1 previous error; 10 warnings emitted
+

@@ -33,6 +33,8 @@ pub(crate) enum GenericConstantTooComplexSub {
     ArrayNotSupported(#[primary_span] Span),
     #[label("map construction is not supported in generic constants")]
     MapNotSupported(#[primary_span] Span),
+    #[label("binary pattern expressions are not supported in generic constants")]
+    BinaryPatternNotSupported(#[primary_span] Span),
     #[label("blocks are not supported in generic constants")]
     BlockNotSupported(#[primary_span] Span),
     #[label("coercing the `never` type is not supported in generic constants")]

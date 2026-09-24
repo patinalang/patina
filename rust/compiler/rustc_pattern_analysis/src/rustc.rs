@@ -455,7 +455,7 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
                 fields = vec![];
                 arity = 0;
             }
-            PatKind::Pin { .. } | PatKind::TermClass { .. } => {
+            PatKind::Pin { .. } | PatKind::TermClass { .. } | PatKind::BinaryPattern { .. } => {
                 ctor = Opaque(OpaqueId::new());
                 fields = vec![];
                 arity = 0;

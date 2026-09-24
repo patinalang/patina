@@ -1,0 +1,32 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// `str` literals are UTF-8 encoded, in expressions and in patterns alike.
+
+fn greeting() -> str ({ ("h\u{e9}llo, w\u{f6}rld \u{221e}" as str) } as str)
+
+fn is_greeting(s: str)
+    ->
+        bool ({
+    (match (s as str) {
+        "h\u{e9}llo, w\u{f6}rld \u{221e}" => (true as bool),
+        _ => (false as bool),
+    } as bool)
+} as bool)
+
+fn main() ({ } as ())

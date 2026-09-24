@@ -1,0 +1,45 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// Literals that don't fit their binary pattern segments.
+
+pub fn main() {
+    let b: bin = <<1, 2>>;
+
+    match b {
+
+            // These segments can never match.
+            <<256: int(size = 8), -1: int(size = 8)>> =>
+            // These are truncated, or encoded as infinity.
+            {
+            io::put_chars([["never"]]);
+            io::nl();
+        }
+        <<-1: int(size = 8, signed), 128: int(size = 8, signed), -129:
+            int(size = 8, signed)>> => {}
+        <<1.0e10: float(size = 16), 1.0e39: float(size = 32), 1.0e39: float>>
+            => {}
+        _ => {}
+    }
+    {
+        io::put_chars([[patina_fmt::debug(<<300: int(size = 8), -1:
+                                        int(size = 8), 255: int(size = 8), 1.0e10: float(size = 16),
+                                        b'\x80': int(size = 8, signed)>>)]]);
+        io::nl();
+    };
+}

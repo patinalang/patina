@@ -858,6 +858,12 @@ impl<'ast, 'ra, 'tcx> Visitor<'ast> for LateResolutionVisitor<'_, 'ast, 'ra, 'tc
         if let PatKind::Guard(subpat, _) = &p.kind {
             // We walk the guard expression in `resolve_pattern_inner`. Don't resolve it twice.
             self.visit_pat(subpat);
+        } else if let PatKind::BinaryPattern(segments) = &p.kind {
+            // Segment sizes can use bindings of earlier segments, so we resolve them in
+            // `resolve_pattern_inner`, once those bindings are known.
+            for segment in segments {
+                self.visit_pat(&segment.pat);
+            }
         } else {
             visit::walk_pat(self, p);
         }
@@ -4278,6 +4284,37 @@ impl<'a, 'ast, 'ra, 'tcx> LateResolutionVisitor<'a, 'ast, 'ra, 'tcx> {
                     // from `subpat_bindings`, we can introduce a fresh rib for the guard.
                     bindings.last_mut().unwrap().1.extend(subpat_bindings);
                     // Prevent visiting `subpat` as we've already done so above.
+                    return false;
+                }
+                PatKind::BinaryPattern(ref segments) => {
+                    // Collect the bindings of this binary pattern's segments on their own.
+                    bindings.push((PatBoundCtx::Product, Default::default()));
+                    for segment in segments {
+                        // A segment's size can use the bindings of earlier segments, but none
+                        // from the surrounding pattern, nor its own binding.
+                        if let ast::PatBinarySegmentKind::Spec(spec) = &segment.kind {
+                            let earlier_bindings = bindings.last().unwrap().1.clone();
+                            self.with_rib(ValueNS, RibKind::Normal, |this| {
+                                *this.innermost_rib_bindings(ValueNS) = earlier_bindings;
+                                for arg in &spec.args {
+                                    match &arg.kind {
+                                        ast::BinarySegmentArgKind::Size(expr)
+                                        | ast::BinarySegmentArgKind::Unit(expr) => {
+                                            this.resolve_expr(expr, None)
+                                        }
+                                        ast::BinarySegmentArgKind::Flag(_) => {}
+                                    }
+                                }
+                            });
+                        }
+                        let binding_ctx_stack_len = bindings.len();
+                        self.resolve_pattern_inner(&segment.pat, pat_src, bindings);
+                        assert_eq!(bindings.len(), binding_ctx_stack_len);
+                    }
+                    // Propagate the segments' bindings upwards.
+                    let segment_bindings = bindings.pop().unwrap().1;
+                    bindings.last_mut().unwrap().1.extend(segment_bindings);
+                    // Prevent visiting the segments as we've already done so above.
                     return false;
                 }
                 _ => {}

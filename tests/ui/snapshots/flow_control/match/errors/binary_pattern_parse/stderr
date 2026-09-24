@@ -1,0 +1,84 @@
+error: unknown binary pattern segment type `byte`
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_parse.pt:5:14
+   |
+LL |         <<x: byte()>> => {}
+   |              ^^^^
+   |
+   = help: expected one of `int`, `float`, `char`, `str`, `bin` or `bits`
+
+error: expected a binding, a literal or a pinned variable, found `(`
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_parse.pt:12:11
+   |
+LL |         <<(a, b)>> => {}
+   |           ^
+   |
+   = note: a binary pattern segment is `name`, `_`, a literal like `1` or `"abc"`, or `^name`
+
+error: expected one of `,` or `>>`, found `:`
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_parse.pt:20:21
+   |
+LL |         <<rest @ .. : bin>> => {}
+   |                     ^ expected one of `,` or `>>`
+
+error: `..` can only be the last segment of a binary pattern
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_parse.pt:28:11
+   |
+LL |         <<.., x:8>> => {}
+   |           ^^
+
+error: `..` can only be the last segment of a binary pattern
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_parse.pt:29:11
+   |
+LL |         <<rest @ .., x:8>> => {}
+   |           ^^^^^^^^^
+
+error: expected a literal size or segment type
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_parse.pt:37:13
+   |
+LL |         <<x:n, y: (n + 1), z:16, w: 8, v: binary>> => {}
+   |             ^
+   |
+   = help: segment types are `int`, `float`, `char`, `str`, `bin` or `bits`
+help: a size that isn't a literal needs a segment type
+   |
+LL |         <<x: int(n), y: (n + 1), z:16, w: 8, v: binary>> => {}
+   |              ++++ +
+
+error: expected a literal size or segment type
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_parse.pt:37:19
+   |
+LL |         <<x:n, y: (n + 1), z:16, w: 8, v: binary>> => {}
+   |                   ^^^^^^^
+   |
+   = help: segment types are `int`, `float`, `char`, `str`, `bin` or `bits`
+help: a size that isn't a literal needs a segment type
+   |
+LL |         <<x:n, y: int((n + 1)), z:16, w: 8, v: binary>> => {}
+   |                   ++++       +
+
+error: expected a literal size or segment type
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_parse.pt:37:43
+   |
+LL |         <<x:n, y: (n + 1), z:16, w: 8, v: binary>> => {}
+   |                                           ^^^^^^
+   |
+   = help: segment types are `int`, `float`, `char`, `str`, `bin` or `bits`
+help: a size that isn't a literal needs a segment type
+   |
+LL |         <<x:n, y: (n + 1), z:16, w: 8, v: int(binary)>> => {}
+   |                                           ++++      +
+
+error: expected a literal size or segment type
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_parse.pt:40:17
+   |
+LL |     let _ = <<n:n>>;
+   |                 ^
+   |
+   = help: segment types are `int`, `float`, `char`, `str`, `bin` or `bits`
+help: a size that isn't a literal needs a segment type
+   |
+LL |     let _ = <<n: int(n)>>;
+   |                  ++++ +
+
+error: aborting due to 9 previous errors
+

@@ -147,6 +147,18 @@ fn unsupported_const_value_expr(tcx: TyCtxt<'_>, expr: &hir::Expr<'_>) -> Option
                 hir::MapTailExpr::Base(base) => unsupported_const_value_expr(tcx, base),
             }),
 
+        hir::ExprKind::BinaryPattern(segments) => segments.iter().find_map(|segment| {
+            unsupported_const_value_expr(tcx, segment.expr).or_else(|| {
+                segment.spec?.args.iter().find_map(|arg| match arg.kind {
+                    hir::BinarySegmentArgKind::Size(expr)
+                    | hir::BinarySegmentArgKind::Unit(expr) => {
+                        unsupported_const_value_expr(tcx, expr)
+                    }
+                    hir::BinarySegmentArgKind::Flag(_) => None,
+                })
+            })
+        }),
+
         hir::ExprKind::Path(ref qpath) => {
             let typeck_results = tcx.typeck(expr.hir_id.owner.def_id);
             (!matches!(

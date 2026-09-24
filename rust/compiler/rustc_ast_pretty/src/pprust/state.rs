@@ -1894,6 +1894,29 @@ impl<'a> State<'a> {
         }
     }
 
+    pub(crate) fn print_binary_segment_spec(&mut self, spec: &ast::BinarySegmentSpec) {
+        self.word_space(":");
+        self.word(spec.ty.name().to_string());
+        if spec.args.is_empty() {
+            return;
+        }
+        self.popen();
+        self.commasep(Inconsistent, &spec.args, |s, arg| match &arg.kind {
+            ast::BinarySegmentArgKind::Size(expr) => {
+                s.word_space("size");
+                s.word_space("=");
+                s.print_expr(expr, FixupContext::default());
+            }
+            ast::BinarySegmentArgKind::Unit(expr) => {
+                s.word_space("unit");
+                s.word_space("=");
+                s.print_expr(expr, FixupContext::default());
+            }
+            ast::BinarySegmentArgKind::Flag(flag) => s.word(flag.name().to_string()),
+        });
+        self.pclose();
+    }
+
     fn print_pat(&mut self, pat: &ast::Pat) {
         self.maybe_print_comment(pat.span.lo());
         self.ann.pre(self, AnnNode::Pat(pat));
@@ -2083,6 +2106,25 @@ impl<'a> State<'a> {
                     }
                 }
                 self.word("}");
+            }
+            PatKind::BinaryPattern(segments) => {
+                self.word("<<");
+                self.commasep(Inconsistent, segments, |s, segment| match &segment.kind {
+                    ast::PatBinarySegmentKind::Default => s.print_pat(&segment.pat),
+                    ast::PatBinarySegmentKind::Spec(spec) => {
+                        s.print_pat(&segment.pat);
+                        s.print_binary_segment_spec(spec);
+                    }
+                    ast::PatBinarySegmentKind::Rest | ast::PatBinarySegmentKind::Recovered(_) => {
+                        if !matches!(segment.pat.kind, ast::PatKind::Wild) {
+                            s.print_pat(&segment.pat);
+                            s.space();
+                            s.word_space("@");
+                        }
+                        s.word("..");
+                    }
+                });
+                self.word(">>");
             }
             PatKind::Rest => self.word(".."),
             PatKind::Paren(inner) => {

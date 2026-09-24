@@ -1,0 +1,63 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// source: patina-by-example/src/flow_control/match/binary_matching.md
+// block: 3/6
+
+pub fn main() {
+    let bin = <<16, 5, 6, 7>>;
+
+    match bin {
+
+            // Bind `len`, then use it as the size of `payload`
+            <<kind: int(size = 8), len: int(size = 8), payload:
+            bin(size = len), rest @ ..>> =>
+            // The size can also be a guard expression
+
+
+
+            // The tail expands to match the whole rest of the binary.
+            // Only the last segment can be unsized.
+            // After an 8-bit header, the rest of a `bits` is a `bits`.
+
+            {
+            io::put_chars([["kind = ", patina_fmt::display(kind),
+                                ", payload = ", patina_fmt::debug(payload), ", rest = ",
+                                patina_fmt::debug(rest)]]);
+            io::nl();
+        }
+        <<kind: int(size = 8), len: int(size = 8), payload:
+            bin(size = len / 2), rest @ ..>> => {
+            io::put_chars([["kind = ", patina_fmt::display(kind),
+                                ", payload = ", patina_fmt::debug(payload), ", rest = ",
+                                patina_fmt::debug(rest)]]);
+            io::nl();
+        }
+        _ => { io::put_chars([["invalid packet"]]); io::nl(); }
+    }
+    let packet: bits =
+        <<3: int(size = 4), 5: int(size = 4), 7: int(size = 3)>>;
+    match packet {
+        <<header: int(size = 8), tail @ ..>> => {
+            io::put_chars([["header = ", patina_fmt::display(header),
+                                ", tail = ", patina_fmt::debug(tail)]]);
+            io::nl();
+        }
+        _ => { io::put_chars([["did not match"]]); io::nl(); }
+    }
+}

@@ -1,0 +1,15 @@
+// Literals that don't fit their binary pattern segments.
+
+pub fn main() {
+    let b: bin = <<1, 2>>;
+
+    match b {
+        // These segments can never match.
+        <<256:8, -1:8>> => println!("never"),
+        <<-1: int(8, signed), 128: int(8, signed), -129: int(8, signed)>> => {}
+        <<1.0e10: float(16), 1.0e39: float(32), 1.0e39: float>> => {}
+        _ => {}
+    }
+    // These are truncated, or encoded as infinity.
+    println!("{:?}", <<300:8, -1:8, 255:8, 1.0e10: float(16), b'\x80': int(8, signed)>>);
+}

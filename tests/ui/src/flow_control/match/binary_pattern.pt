@@ -1,0 +1,168 @@
+pub fn utf8_segments_make_str(name: str, c: char) -> str {
+    <<"Hi, ", name, c, 33>>
+}
+
+pub fn whole_bytes_make_bin(n: int, c: char) -> bin {
+    <<n:16, c: char(utf16), c: char(utf32, little), 1.5: float(32), b"\xff">>
+}
+
+pub fn partial_bytes_make_bits(n: int) -> bits {
+    <<1:3, (n + 1): int(size = 2, unit = 4)>>
+}
+
+pub fn numbers() -> bin {
+    <<-1: int(8, signed), 1.5: float(16), 2.5: float(32, little), 1000: int(16, little)>>
+}
+
+pub fn nested() -> bin {
+    <<<<1, 2>>: bin, <<>>, 3,>>
+}
+
+// `<<` only opens a binary pattern where an operand starts; elsewhere it is a shift.
+pub fn shifts(a: int) -> (int, bits, bool) {
+    let shifted = a << 2;
+    let b = <<(a >> 2):8, (a << 3):8>>;
+    (shifted, b, <<1>>==<<1>>)
+}
+
+pub fn first_byte(b: bin) -> int {
+    match b {
+        <<x>>=> x,
+        <<x, _>>=>x + 1,
+        _ => 0,
+    }
+}
+
+macro_rules! match_or {
+    ($p:pat = $e:expr, $x:ident) => {
+        match $e {
+            $p => $x,
+            _ => -1,
+        }
+    };
+    ($e:expr, $p:pat => $x:ident) => {
+        match $e {
+            $p => $x,
+            _ => -1,
+        }
+    };
+}
+
+macro_rules! pair {
+    ($k:expr => $v:expr) => {
+        ($k, $v)
+    };
+}
+
+// A pattern or expression captured by a macro ends at `>>`, even when it's glued to `=` or `=>`.
+pub fn captured(b: bin) -> (int, int, (bin, int)) {
+    (match_or!(<<x>>= b, x), match_or!(b, <<_, x>>=> x), pair!(<<1>>=> 2))
+}
+
+pub fn term_matches_like_bits(t: term) -> (int, bits) {
+    match t {
+        <<a:8, rest: bin>> => (a, rest),
+        <<a:3, rest: bits>> => (a + 100, rest),
+        _ => (-1, <<>>),
+    }
+}
+
+pub fn decode(b: bin) -> (int, float, bin) {
+    match b {
+        <<x: int(8, signed), f: float(16), rest: bin(unit = 16)>> => (x, f, rest),
+        _ => (0, 0.0, <<>>),
+    }
+}
+
+pub fn chars(b: bin) -> (char, char, bin) {
+    match b {
+        <<a: char(utf16), b: char(utf32, little), rest: bin>> => (a, b, rest),
+        _ => ('?', '?', <<>>),
+    }
+}
+
+pub fn encoded_strings_make_bin() -> bin {
+    <<"łącko": str(utf16), "ok": str(utf32, little)>>
+}
+
+pub fn encoded_prefix(b: bin) -> bin {
+    match b {
+        <<"łą": str(utf16), rest: bin>> => rest,
+        _ => <<>>,
+    }
+}
+
+pub fn pinned_bitstring_matches_exactly(b: bin, tag: str) -> bool {
+    match b {
+        <<1, ^tag>> => true,
+        _ => false,
+    }
+}
+
+pub fn bits_unit_is_binary_unit(b: bits) -> (bits, bits) {
+    match b {
+        <<first: bits(size = 1, unit = 4), rest: bits(unit = 4)>> => (first, rest),
+        _ => (<<>>, <<>>),
+    }
+}
+
+// `rest @ ..` binds the rest of a binary pattern, with the narrowest type it's guaranteed to have.
+
+pub fn str_rest(s: str) -> str {
+    match s {
+        // Every segment before the rest is valid UTF-8 on its own, so the rest is a `str`.
+        <<"é", _: char, rest @ ..>> => rest,
+        _ => "",
+    }
+}
+
+pub fn bin_rest(s: str) -> bin {
+    match s {
+        // An 8-bit integer might split a character, but the rest is still whole bytes.
+        <<_:8, rest @ ..>> => rest,
+        _ => b"",
+    }
+}
+
+pub fn bits_rest(b: bin) -> bits {
+    match b {
+        // After 4 bits, the rest isn't whole bytes.
+        <<_:4, rest @ ..>> => rest,
+        _ => <<>>,
+    }
+}
+
+pub fn term_rest(t: term) -> bits {
+    match t {
+        // A `term` might be any bitstring.
+        <<_:8, rest @ ..>> => rest,
+        _ => <<>>,
+    }
+}
+
+pub fn split(b: bin) -> (bin, bin) {
+    match b {
+        <<len:8, payload: bin(len), rest @ ..>> => (payload, rest),
+        _ => (b"", b""),
+    }
+}
+
+pub fn rotate(b: bin) -> bin {
+    match b {
+        <<first:8, mut rest @ ..,>> => {
+            rest = <<rest, first:8>>;
+            rest
+        }
+        _ => b,
+    }
+}
+
+pub fn has_magic(b: bin) -> bool {
+    match b {
+        // `..` ignores the rest.
+        <<"PT", ..>> => true,
+        _ => false,
+    }
+}
+
+pub fn main() {}

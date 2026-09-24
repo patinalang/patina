@@ -146,6 +146,9 @@ fn recurse_build<'tcx>(
         ExprKind::Map { .. } => {
             maybe_supported_error(GenericConstantTooComplexSub::MapNotSupported(node.span))?
         }
+        ExprKind::BinaryPattern { .. } => maybe_supported_error(
+            GenericConstantTooComplexSub::BinaryPatternNotSupported(node.span),
+        )?,
         ExprKind::NeverToAny { .. } => {
             maybe_supported_error(GenericConstantTooComplexSub::NeverToAnyNotSupported(node.span))?
         }
@@ -302,6 +305,7 @@ impl<'a, 'tcx> IsThirPolymorphic<'a, 'tcx> {
             | thir::ExprKind::Become { .. }
             | thir::ExprKind::Array { .. }
             | thir::ExprKind::Map { .. }
+            | thir::ExprKind::BinaryPattern { .. }
             | thir::ExprKind::Tuple { .. }
             | thir::ExprKind::Adt(_)
             | thir::ExprKind::PlaceTypeAscription { .. }

@@ -27,8 +27,8 @@ main() ->
     begin
         _val@0_0 = 1 + 2,
         begin
-            io:put_chars([[<<"1 + 2">>,
-                           <<" = ">>,
+            io:put_chars([[<<"1 + 2"/utf8>>,
+                           <<" = "/utf8>>,
                            io_lib:format("~ktp", [_val@0_0])]]),
             io:nl(),
             {}
@@ -37,8 +37,8 @@ main() ->
     begin
         _val@1_0 = (1 + 2) * (3 div 4),
         begin
-            io:put_chars([[<<"(1 + 2) * (3 / 4)">>,
-                           <<" = ">>,
+            io:put_chars([[<<"(1 + 2) * (3 / 4)"/utf8>>,
+                           <<" = "/utf8>>,
                            io_lib:format("~ktp", [_val@1_0])]]),
             io:nl(),
             {}

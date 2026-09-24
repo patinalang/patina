@@ -130,6 +130,23 @@ impl<'a> State<'a> {
         self.end(ib);
     }
 
+    fn print_expr_binary_pattern(&mut self, segments: &[ast::BinarySegment]) {
+        let ib = self.ibox(INDENT_UNIT);
+        self.word("<<");
+        self.commasep(Inconsistent, segments, |s, segment| {
+            s.print_expr_cond_paren(
+                &segment.expr,
+                segment.expr.precedence() < ExprPrecedence::Prefix,
+                FixupContext::default(),
+            );
+            if let Some(spec) = &segment.spec {
+                s.print_binary_segment_spec(spec);
+            }
+        });
+        self.word(">>");
+        self.end(ib);
+    }
+
     fn print_expr_map(&mut self, fields: &[ast::MapField], rest: &ast::MapRest) {
         let ib = self.ibox(INDENT_UNIT);
         self.word("#{");
@@ -492,6 +509,9 @@ impl<'a> State<'a> {
             }
             ast::ExprKind::Map(map) => {
                 self.print_expr_map(&map.fields, &map.rest);
+            }
+            ast::ExprKind::BinaryPattern(segments) => {
+                self.print_expr_binary_pattern(segments);
             }
             ast::ExprKind::ConstBlock(anon_const) => {
                 self.print_expr_anon_const(anon_const, attrs);

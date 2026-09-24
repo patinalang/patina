@@ -1113,6 +1113,30 @@ impl<'tcx> ThirBuildCx<'tcx> {
             }
             hir::ExprKind::Tup(fields) => ExprKind::Tuple { fields: self.mirror_exprs(fields) },
 
+            hir::ExprKind::BinaryPattern(segments) => {
+                let segments = segments
+                    .iter()
+                    .filter_map(|segment| {
+                        let Some(&layout) =
+                            self.typeck_results.binary_segment_layouts().get(segment.expr.hir_id)
+                        else {
+                            self.tcx.dcx().span_delayed_bug(
+                                segment.span,
+                                "binary pattern segment without a type",
+                            );
+                            return None;
+                        };
+                        let layout = layout
+                            .map_size_expr(|size| self.mirror_expr(self.tcx.hir_expect_expr(size)));
+                        Some(BinarySegmentExpr {
+                            value: self.mirror_expr(segment.expr),
+                            layout,
+                            span: segment.span,
+                        })
+                    })
+                    .collect();
+                ExprKind::BinaryPattern { segments }
+            }
             hir::ExprKind::Map(fields, rest) => {
                 let fields = fields
                     .iter()

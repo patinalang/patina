@@ -1313,6 +1313,45 @@ impl<'a> State<'a> {
         self.end(ib);
     }
 
+    fn print_expr_binary_pattern(&mut self, segments: &[hir::BinarySegment<'_>]) {
+        let ib = self.ibox(INDENT_UNIT);
+        self.word("<<");
+        self.commasep(Inconsistent, segments, |s, segment| {
+            s.print_expr_cond_paren(
+                segment.expr,
+                s.precedence(segment.expr) < ExprPrecedence::Prefix,
+            );
+            if let Some(spec) = segment.spec {
+                s.print_binary_segment_spec(spec);
+            }
+        });
+        self.word(">>");
+        self.end(ib);
+    }
+
+    fn print_binary_segment_spec(&mut self, spec: &hir::BinarySegmentSpec<'_>) {
+        self.word_space(":");
+        self.word(spec.ty.name().to_string());
+        if spec.args.is_empty() {
+            return;
+        }
+        self.popen();
+        self.commasep(Inconsistent, spec.args, |s, arg| match arg.kind {
+            hir::BinarySegmentArgKind::Size(expr) => {
+                s.word_space("size");
+                s.word_space("=");
+                s.print_expr(expr);
+            }
+            hir::BinarySegmentArgKind::Unit(expr) => {
+                s.word_space("unit");
+                s.word_space("=");
+                s.print_expr(expr);
+            }
+            hir::BinarySegmentArgKind::Flag(flag) => s.word(flag.name().to_string()),
+        });
+        self.pclose();
+    }
+
     fn print_inline_const(&mut self, constant: &hir::ConstBlock) {
         let ib = self.ibox(INDENT_UNIT);
         self.word_space("const");
@@ -1582,6 +1621,9 @@ impl<'a> State<'a> {
             }
             hir::ExprKind::Map(fields, rest) => {
                 self.print_expr_map(fields, rest);
+            }
+            hir::ExprKind::BinaryPattern(segments) => {
+                self.print_expr_binary_pattern(segments);
             }
             hir::ExprKind::ConstBlock(ref anon_const) => {
                 self.print_inline_const(anon_const);
@@ -2260,6 +2302,25 @@ impl<'a> State<'a> {
                 }
                 self.word("..");
                 self.word("}");
+            }
+            PatKind::BinaryPattern(segments) => {
+                self.word("<<");
+                self.commasep(Inconsistent, segments, |s, segment| match segment.kind {
+                    hir::PatBinarySegmentKind::Default => s.print_pat(segment.pat),
+                    hir::PatBinarySegmentKind::Spec(spec) => {
+                        s.print_pat(segment.pat);
+                        s.print_binary_segment_spec(spec);
+                    }
+                    hir::PatBinarySegmentKind::Rest | hir::PatBinarySegmentKind::Recovered(_) => {
+                        if !matches!(segment.pat.kind, PatKind::Wild) {
+                            s.print_pat(segment.pat);
+                            s.space();
+                            s.word_space("@");
+                        }
+                        s.word("..");
+                    }
+                });
+                self.word(">>");
             }
             PatKind::Guard(inner, cond) => {
                 self.print_pat(inner);

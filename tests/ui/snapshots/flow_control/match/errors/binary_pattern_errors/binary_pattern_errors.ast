@@ -1,0 +1,104 @@
+// Errors in binary patterns, in pattern and expression position.
+
+fn unsized_segments(b: bin, s: str) {
+    match b {
+
+            // Only the last segment can be unsized.
+            <<rest: bin, x: int(size = 8)>> => {}
+        <<rest: bits(unit = 4), x: int(size = 8)>> => {}
+        _ => {}
+    }
+    match s {
+
+            // Reported once, not also as splitting a character before `str`.
+            <<x: bin, rest: str>> => {}
+        <<x: str, rest @ ..>> => {}
+        _ => {}
+    }
+}
+
+fn str_tails(s: str, b: bin, t: term) {
+    match b {
+
+            // The rest of a `bin` might not be valid UTF-8.
+            <<x: int(size = 8), rest: str>> => {}
+        _ => {}
+    }
+    match t { <<rest: str>> => {} _ => {} }
+    match s {
+
+            // An 8-bit integer might end inside a UTF-8 character.
+            <<x: int(size = 8), rest: str>> => {}
+
+            // Every segment before the rest is valid UTF-8 on its own.
+            <<"é", c: char, 65, b"ok", rest: str>> => {}
+
+            // UTF-16 isn't UTF-8, even for a string literal.
+            <<"ł": str(utf16), rest: str>> => {}
+        _ => {}
+    }
+}
+
+fn arguments(b: bin) {
+    match b {
+
+            // Size on `str` and `char`, unit on `float`.
+            <<x: str(size = 3), c: char(size = 8), f: float(unit = 8)>> => {}
+        <<n: int(size = 8), x: str(size = n), rest @ ..>> => {}
+
+            // A literal has the size of its bytes.
+            <<"ab": str(size = 2)>> => {}
+        <<"ł": str(utf16, size = 2), "ł": str(size = 2, utf16)>> => {}
+
+            // Bad float size, bad units.
+            <<f: float(size = 8), y: bits(unit = 0), z:
+            bin(size = 3, unit = 4)>> => {}
+
+            // Flags on the wrong type, repeated arguments, endianness of UTF-8.
+            <<a: bin(little), c: char(signed), d: int(size = 8, big, little),
+            e: char(utf8, big)>> => {}
+
+            // A string or binary literal takes the size of its bytes.
+            <<"abc": str, b"ab": bin(size = 2)>> => {}
+        _ => {}
+    }
+}
+
+fn types(b: bin, n: int) {
+    match n {
+
+            // A binary pattern needs a `str`, `bin`, `bits` or `term` scrutinee.
+            <<x: int(size = 8)>> => {}
+        _ => {}
+    }
+    match b {
+
+            // A pin or literal must have the segment's type.
+            <<^n: float, 5: float, true>> => {}
+        _ => {}
+    }
+}
+
+fn construction(b: bits, x: bool, s: str) {
+    let _ = <<b: bin>>;
+    let _ = <<x>>;
+    let _ = <<1: bin>>;
+    // Only a string literal can be re-encoded; a `str` value is UTF-8 bytes.
+    let _ = <<s: str(utf8), s: str(utf16)>>;
+    let _ = <<"a": str(utf8, little), "a": bin(utf16)>>;
+    // A UTF-16 string is a `bin`, not a `str`.
+    let _: str = <<"ł": str(utf16)>>;
+}
+
+fn rest_segments(b: bin) {
+    match b {
+
+            // After 4 bits, the rest isn't a `bin`.
+            <<_: int(size = 4), rest @ ..>> => {
+            let _: bin = rest;
+        }
+        _ => {}
+    }
+}
+
+pub fn main() {}

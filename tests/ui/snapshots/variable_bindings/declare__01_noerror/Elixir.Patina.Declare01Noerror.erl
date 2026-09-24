@@ -31,7 +31,7 @@ main() ->
         _x@1_0 = 2, _a_binding@0_1 = _x@1_0 * _x@1_0, {}
     end,
     begin
-        io:put_chars([[<<"a binding: ">>,
+        io:put_chars([[<<"a binding: "/utf8>>,
                        io_lib:format("~ktp", [_a_binding@0_1])]]),
         io:nl(),
         {}
@@ -39,7 +39,7 @@ main() ->
     begin _another_binding@2_0 = {} end,
     _another_binding@2_1 = 1,
     begin
-        io:put_chars([[<<"another binding: ">>,
+        io:put_chars([[<<"another binding: "/utf8>>,
                        io_lib:format("~ktp", [_another_binding@2_1])]]),
         io:nl(),
         {}

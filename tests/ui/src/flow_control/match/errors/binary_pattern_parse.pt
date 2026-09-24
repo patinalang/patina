@@ -1,0 +1,43 @@
+// Syntax errors in binary patterns.
+
+fn unknown_type(b: bin) {
+    match b {
+        <<x: byte()>> => {}
+        _ => {}
+    }
+}
+
+fn segment_value(b: bin) {
+    match b {
+        <<(a, b)>> => {}
+        _ => {}
+    }
+}
+
+fn rest_type(b: bin) {
+    match b {
+        // The rest's type is inferred.
+        <<rest @ .. : bin>> => {}
+        _ => {}
+    }
+}
+
+fn rest_not_last(b: bin) {
+    match b {
+        // Only the last segment can be the rest.
+        <<.., x:8>> => {}
+        <<rest @ .., x:8>> => {}
+        _ => {}
+    }
+}
+
+fn short_size(b: bin, n: int) {
+    match b {
+        // The short form only takes an integer literal.
+        <<x:n, y: (n + 1), z:16, w: 8, v: binary>> => {}
+        _ => {}
+    }
+    let _ = <<n:n>>;
+}
+
+pub fn main() {}

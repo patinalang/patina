@@ -17,6 +17,7 @@ use rustc_macros::{StableHash, TyDecodable, TyEncodable, TypeFoldable, TypeVisit
 use rustc_session::Session;
 use rustc_span::Span;
 
+use crate::erl::binary_pattern::BinarySegmentLayout;
 use crate::hir::place::Place as HirPlace;
 use crate::infer::canonical::Canonical;
 use crate::mir::FakeReadCause;
@@ -107,6 +108,10 @@ pub struct TypeckResults<'tcx> {
 
     /// Patterns matched against a `term` scrutinee whose own type differs from `term`.
     term_pats: ItemLocalSet,
+
+    /// The resolved type of each binary pattern segment, keyed by the segment's pattern or value
+    /// expression.
+    binary_segment_layouts: ItemLocalMap<BinarySegmentLayout<HirId>>,
 
     /// Records the reasons that we picked the kind of each closure;
     /// not all closures are present in the map.
@@ -246,6 +251,7 @@ impl<'tcx> TypeckResults<'tcx> {
             rust_2024_migration_desugared_pats: Default::default(),
             skipped_ref_pats: Default::default(),
             term_pats: Default::default(),
+            binary_segment_layouts: Default::default(),
             closure_kind_origins: Default::default(),
             liberated_fn_sigs: Default::default(),
             fru_field_types: Default::default(),
@@ -421,6 +427,16 @@ impl<'tcx> TypeckResults<'tcx> {
         self.pat_binding_modes().get(id).copied().unwrap_or_else(|| {
             s.dcx().span_bug(sp, "missing binding mode");
         })
+    }
+
+    pub fn binary_segment_layouts(&self) -> LocalTableInContext<'_, BinarySegmentLayout<HirId>> {
+        LocalTableInContext { hir_owner: self.hir_owner, data: &self.binary_segment_layouts }
+    }
+
+    pub fn binary_segment_layouts_mut(
+        &mut self,
+    ) -> LocalTableInContextMut<'_, BinarySegmentLayout<HirId>> {
+        LocalTableInContextMut { hir_owner: self.hir_owner, data: &mut self.binary_segment_layouts }
     }
 
     pub fn pat_binding_modes(&self) -> LocalTableInContext<'_, BindingMode> {

@@ -90,7 +90,7 @@
             {30,5},
             {bin,
              {30,5},
-             [{bin_element,{30,5},{string,{30,5},", "},default,default}]},
+             [{bin_element,{30,5},{string,{30,5},", "},default,[utf8]}]},
             {cons,
              {30,5},
              {call,

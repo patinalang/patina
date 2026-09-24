@@ -39,13 +39,17 @@ choose_op(_op@0_0) ->
 main() ->
     _fx@0_0 = fun () ->
                       begin
-                          io:put_chars([[<<"fx evaluated!">>]]), io:nl(), {}
+                          io:put_chars([[<<"fx evaluated!"/utf8>>]]),
+                          io:nl(),
+                          {}
                       end,
                       3
               end,
     _fy@1_0 = fun () ->
                       begin
-                          io:put_chars([[<<"fy evaluated!">>]]), io:nl(), {}
+                          io:put_chars([[<<"fy evaluated!"/utf8>>]]),
+                          io:nl(),
+                          {}
                       end,
                       5
               end,
@@ -54,9 +58,9 @@ main() ->
         choose_op('Elixir.Patina.Parameters02.MathOp.Add'),
     begin
         io:put_chars([[io_lib:format("~ktp", [3]),
-                       <<" op ">>,
+                       <<" op "/utf8>>,
                        io_lib:format("~ktp", [5]),
-                       <<" = ">>,
+                       <<" = "/utf8>>,
                        io_lib:format("~ktp", [_op@3_0(3, 5)])]]),
         io:nl(),
         {}

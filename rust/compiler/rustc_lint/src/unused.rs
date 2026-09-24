@@ -775,6 +775,9 @@ impl EarlyLintPass for UnusedParens {
             Map(fps, _) => for f in fps {
                 self.check_unused_parens_pat(cx, &f.pat, false, false, keep_space);
             },
+            BinaryPattern(segments) => for segment in segments {
+                self.check_unused_parens_pat(cx, &segment.pat, false, false, keep_space);
+            },
             TermClass(p, _) => self.check_unused_parens_pat(cx, p, false, false, keep_space),
             ExceptionClass(args, _) => {
                 for p in args {

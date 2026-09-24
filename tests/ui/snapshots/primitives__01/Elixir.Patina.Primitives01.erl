@@ -34,7 +34,8 @@ main() ->
     _mutable@5_0 = true,
     _my_list@6_0 = [1, 2, 3, 4, 5],
     _my_tuple@7_0 = {5, true, -5.04},
-    _my_map@8_0 = #{3.14 => <<"pi">>, 0.0 => <<"zero">>},
+    _my_map@8_0 = #{3.14 => <<"pi"/utf8>>,
+                    0.0 => <<"zero"/utf8>>},
     _add_ref@9_0 = fun add_floats/2,
     _add_fn@10_0 = _add_ref@9_0,
     {}.

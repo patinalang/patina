@@ -133,6 +133,7 @@ impl CheckInlineAssembly {
             ExprKind::ConstBlock(..)
             | ExprKind::Array(..)
             | ExprKind::Map(..)
+            | ExprKind::BinaryPattern(..)
             | ExprKind::Call(..)
             | ExprKind::MethodCall(..)
             | ExprKind::Use(..)

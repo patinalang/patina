@@ -31,7 +31,9 @@ main() ->
     end,
     begin
         io:put_chars([[io_lib:format("~ktp",
-                                     [{struct_http_style, 200, <<"hi">>}])]]),
+                                     [{struct_http_style,
+                                       200,
+                                       <<"hi"/utf8>>}])]]),
         io:nl(),
         {}
     end.

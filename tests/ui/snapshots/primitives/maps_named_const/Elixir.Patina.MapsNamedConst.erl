@@ -32,6 +32,6 @@ const_key(_map@0_0) ->
 named_const(_map@0_0) ->
     case _map@0_0 of
         #{<<110, 97, 109, 101>> := _value@1_0} ->
-            #{<<"hi">> => _value@1_0};
-        _ -> #{<<"name">> => 1}
+            #{<<"hi"/utf8>> => _value@1_0};
+        _ -> #{<<"name"/utf8>> => 1}
     end.

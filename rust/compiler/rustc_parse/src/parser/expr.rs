@@ -503,7 +503,7 @@ impl<'a> Parser<'a> {
     }
 
     /// Parses a prefix-unary-operator expr.
-    fn parse_expr_prefix(&mut self, attrs: AttrWrapper) -> PResult<'a, Box<Expr>> {
+    pub(super) fn parse_expr_prefix(&mut self, attrs: AttrWrapper) -> PResult<'a, Box<Expr>> {
         let lo = self.token.span;
 
         macro_rules! make_it {
@@ -1490,6 +1490,8 @@ impl<'a> Parser<'a> {
                 })
             } else if this.check(exp!(OpenBracket)) {
                 this.parse_expr_array_or_repeat(exp!(CloseBracket))
+            } else if this.is_binary_pattern() {
+                this.parse_expr_binary_pattern()
             } else if this.is_map() {
                 this.parse_expr_map()
             } else if this.is_builtin() {
@@ -4732,6 +4734,7 @@ impl MutVisitor for CondChecker<'_> {
             ExprKind::Let(_, _, _, Recovered::Yes(_))
             | ExprKind::Array(_)
             | ExprKind::Map(_)
+            | ExprKind::BinaryPattern(_)
             | ExprKind::ConstBlock(_)
             | ExprKind::Lit(_)
             | ExprKind::If(_, _, _)

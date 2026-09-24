@@ -26,7 +26,7 @@
 main() ->
     begin
         io:put_chars([[io_lib:format("~ktp",
-                                     [case <<"hello">> of
+                                     [case <<"hello"/utf8>> of
                                           _value@1_0
                                               when
                                                 erlang:is_binary(_value@1_0) ->

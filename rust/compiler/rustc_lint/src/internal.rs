@@ -697,6 +697,11 @@ impl EarlyLintPass for BadUseOfFindAttr {
                         find_attr_kind_in_pat(cx, &field.pat);
                     }
                 }
+                PatKind::BinaryPattern(segments) => {
+                    for segment in segments {
+                        find_attr_kind_in_pat(cx, &segment.pat);
+                    }
+                }
 
                 PatKind::Guard(pat, ..) => {
                     find_attr_kind_in_pat(cx, pat);
@@ -780,6 +785,7 @@ fn pat_is_not_exhaustive_heuristic(pat: &hir::Pat<'_>) -> Option<(Span, &'static
         hir::PatKind::Range(..) => None,
         hir::PatKind::Slice(..) => None,
         hir::PatKind::Map(..) => None,
+        hir::PatKind::BinaryPattern(..) => None,
         hir::PatKind::Err(..) => None,
     }
 }

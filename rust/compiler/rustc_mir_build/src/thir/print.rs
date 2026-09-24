@@ -1,5 +1,6 @@
 use std::fmt::{self, Write};
 
+use rustc_middle::erl::binary_pattern::BinarySegmentSize;
 use rustc_middle::thir::*;
 use rustc_middle::ty;
 use rustc_middle::ty::TyCtxt;
@@ -542,6 +543,23 @@ impl<'a, 'tcx> ThirPrinter<'a, 'tcx> {
                 }
                 print_indented!(self, "}", depth_lvl);
             }
+            BinaryPattern { segments } => {
+                print_indented!(self, "BinaryPattern {", depth_lvl);
+                print_indented!(self, "segments: [", depth_lvl + 1);
+                for segment in segments.iter() {
+                    print_indented!(self, "BinarySegmentExpr {", depth_lvl + 2);
+                    print_indented!(self, format!("layout: {:?}", segment.layout), depth_lvl + 3);
+                    print_indented!(self, "value:", depth_lvl + 3);
+                    self.print_expr(segment.value, depth_lvl + 4);
+                    if let BinarySegmentSize::Dynamic(size) = segment.layout.size {
+                        print_indented!(self, "size:", depth_lvl + 3);
+                        self.print_expr(size, depth_lvl + 4);
+                    }
+                    print_indented!(self, "}", depth_lvl + 2);
+                }
+                print_indented!(self, "]", depth_lvl + 1);
+                print_indented!(self, "}", depth_lvl);
+            }
             Tuple { fields } => {
                 print_indented!(self, "Tuple {", depth_lvl);
                 print_indented!(self, "fields: [", depth_lvl + 1);
@@ -924,6 +942,23 @@ impl<'a, 'tcx> ThirPrinter<'a, 'tcx> {
                     self.print_pat(&field.key, depth_lvl + 4);
                     print_indented!(self, "pattern:", depth_lvl + 3);
                     self.print_pat(&field.pattern, depth_lvl + 4);
+                }
+                print_indented!(self, "]", depth_lvl + 2);
+                print_indented!(self, "}", depth_lvl + 1);
+            }
+            PatKind::BinaryPattern { segments } => {
+                print_indented!(self, "BinaryPattern {", depth_lvl + 1);
+                print_indented!(self, "segments: [", depth_lvl + 2);
+                for segment in segments.iter() {
+                    print_indented!(self, "BinarySegmentPat {", depth_lvl + 3);
+                    print_indented!(self, format!("layout: {:?}", segment.layout), depth_lvl + 4);
+                    print_indented!(self, "pattern:", depth_lvl + 4);
+                    self.print_pat(&segment.pattern, depth_lvl + 5);
+                    if let BinarySegmentSize::Dynamic(size) = segment.layout.size {
+                        print_indented!(self, "size:", depth_lvl + 4);
+                        self.print_expr(size, depth_lvl + 5);
+                    }
+                    print_indented!(self, "}", depth_lvl + 3);
                 }
                 print_indented!(self, "]", depth_lvl + 2);
                 print_indented!(self, "}", depth_lvl + 1);

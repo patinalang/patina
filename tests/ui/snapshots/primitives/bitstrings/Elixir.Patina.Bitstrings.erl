@@ -125,23 +125,23 @@ bin_to_bits(_value@0_0) -> _value@0_0.
 literal_to_bits() -> <<1, 2>>.
 
 pass_str() ->
-    bin_equal(<<"same">>, <<115, 97, 109, 101>>).
+    bin_equal(<<"same"/utf8>>, <<115, 97, 109, 101>>).
 
 bin_branches(_flag@0_0) ->
     case _flag@0_0 of
-        true -> <<"text">>;
+        true -> <<"text"/utf8>>;
         false -> <<255>>
     end.
 
 bin_match_arms(_flag@0_0) ->
     case _flag@0_0 of
         true -> <<255>>;
-        false -> <<"text">>
+        false -> <<"text"/utf8>>
     end.
 
 bits_branches(_flag@0_0, _value@1_0) ->
     case _flag@0_0 of
-        true -> <<"text">>;
+        true -> <<"text"/utf8>>;
         false -> _value@1_0
     end.
 

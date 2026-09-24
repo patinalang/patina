@@ -29,9 +29,9 @@
 'TraitArgumentPatterns::Marker::value'(_Self@0_0,
                                        _self@1_0) ->
     begin
-        io:put_chars([[<<"Marker::value(">>,
+        io:put_chars([[<<"Marker::value("/utf8>>,
                        io_lib:format("~ktp", [_self@1_0]),
-                       <<")">>]]),
+                       <<")"/utf8>>]]),
         io:nl(),
         {}
     end,

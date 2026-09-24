@@ -1,0 +1,27 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// `str` literals are UTF-8 encoded, in expressions and in patterns alike.
+
+pub fn greeting() -> str { "héllo, wörld ∞" }
+
+pub fn is_greeting(s: str) -> bool {
+    match s { "héllo, wörld ∞" => true, _ => false, }
+}
+
+pub fn main() {}

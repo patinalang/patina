@@ -117,7 +117,7 @@ pub(crate) struct RecordModuleRequiresNativeRecord {
 #[derive(Diagnostic)]
 #[diag("unsupported expression in constant value")]
 #[note(
-    "constant values may only contain literals, local named constants, arrays, tuples, and maps"
+    "constant values may only contain literals, local named constants, arrays, tuples, maps, and binary patterns"
 )]
 pub(crate) struct UnsupportedConstValueExpr {
     #[primary_span]

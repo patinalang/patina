@@ -777,6 +777,8 @@ impl<'a> Parser<'a> {
                 }
             }
             PatKind::Slice(pats)
+        } else if self.is_binary_pattern() {
+            self.parse_pat_binary_pattern()?
         } else if self.is_map() {
             self.parse_pat_map()?
         } else if self.eat_noexpect(&token::Caret) {
@@ -927,7 +929,7 @@ impl<'a> Parser<'a> {
     }
 
     /// Parses a pin pattern: `^ident`.
-    fn parse_pat_pin(&mut self) -> PResult<'a, PatKind> {
+    pub(super) fn parse_pat_pin(&mut self) -> PResult<'a, PatKind> {
         if self.token.is_non_reserved_ident() {
             if self.look_ahead(1, |token| token.kind == token::PathSep) {
                 let path = self.parse_path(PathStyle::Pat)?;

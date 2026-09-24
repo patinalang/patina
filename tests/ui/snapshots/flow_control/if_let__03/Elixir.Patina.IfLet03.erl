@@ -30,14 +30,14 @@ main() ->
     case _a@0_0 of
         'Elixir.Patina.IfLet03.Foo.Bar' ->
             begin
-                io:put_chars([[<<"a is foobar">>]]), io:nl(), {}
+                io:put_chars([[<<"a is foobar"/utf8>>]]), io:nl(), {}
             end;
         _ -> {}
     end,
     case _b@1_0 of
         'Elixir.Patina.IfLet03.Foo.Bar' ->
             begin
-                io:put_chars([[<<"b is foobar">>]]), io:nl(), {}
+                io:put_chars([[<<"b is foobar"/utf8>>]]), io:nl(), {}
             end;
         _ -> {}
     end,
@@ -45,7 +45,7 @@ main() ->
         _value@4_0 = _value@3_0
             when erlang:is_integer(_value@4_0) ->
             begin
-                io:put_chars([[<<"c is ">>,
+                io:put_chars([[<<"c is "/utf8>>,
                                io_lib:format("~ktp", [_value@3_0])]]),
                 io:nl(),
                 {}
@@ -56,7 +56,9 @@ main() ->
         _value@6_0 = _value@5_0 = 100
             when erlang:is_integer(_value@6_0) ->
             begin
-                io:put_chars([[<<"c is one hundred">>]]), io:nl(), {}
+                io:put_chars([[<<"c is one hundred"/utf8>>]]),
+                io:nl(),
+                {}
             end;
         _ -> {}
     end.

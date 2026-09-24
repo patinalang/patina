@@ -31,7 +31,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-create() -> #{<<"a">> => 1, <<"b">> => 2}.
+create() -> #{<<"a"/utf8>> => 1, <<"b"/utf8>> => 2}.
 
 empty() -> #{}.
 
@@ -46,8 +46,8 @@ infer_empty_by_usage() ->
 infer_from_base(_base@0_0) -> _base@0_0#{}.
 
 update(_base@0_0) ->
-    _base@0_0#{<<"a">> => 10, <<"c">> => 3}.
+    _base@0_0#{<<"a"/utf8>> => 10, <<"c"/utf8>> => 3}.
 
 update_identity(_base@0_0) -> _base@0_0#{}.
 
-duplicate() -> #{<<"a">> => 1, <<"a">> => 2}.
+duplicate() -> #{<<"a"/utf8>> => 1, <<"a"/utf8>> => 2}.

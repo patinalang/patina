@@ -6,3 +6,11 @@ const ALIAS: ([int], #{str => int}) = PAIR;
 pub fn const_values() -> ([int], #{str => int}) {
     ALIAS
 }
+
+const VERSION: int = 2;
+const HEADER: bin = <<b"PT", VERSION:16, 'ł': char(utf16), 1.5: float(32)>>;
+const FLAGS: bits = <<1:1, 0:2>>;
+
+pub fn binary_pattern_values() -> (bin, [bits]) {
+    (HEADER, [FLAGS, <<1:3>>])
+}

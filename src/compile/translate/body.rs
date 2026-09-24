@@ -125,6 +125,10 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
             ExprKind::Map { fields, base } => self.translate_map(expr.span, fields, *base),
 
+            ExprKind::BinaryPattern { segments } => {
+                self.translate_expr_binary_pattern(expr.span, segments)
+            }
+
             ExprKind::Tuple { fields } => self.translate_tuple(expr.span, fields),
 
             ExprKind::Field { lhs, variant_index, name } => {
@@ -294,7 +298,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         self.translator.afb.pat_var(span, var.erl_name)
     }
 
-    fn translate_var_ref(&self, span: Span, id: LocalVarId) -> eaf::Expr<'arena> {
+    pub(super) fn translate_var_ref(&self, span: Span, id: LocalVarId) -> eaf::Expr<'arena> {
         let var = self.var_for_read(span, id);
         self.translator.afb.expr_var(span, var.erl_name)
     }
@@ -1289,6 +1293,10 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
             PatKind::Map { fields } => self.translate_map_pattern(pat.span, fields, input),
 
+            PatKind::BinaryPattern { segments } => {
+                self.translate_pat_binary_pattern(pat.span, segments)
+            }
+
             PatKind::Slice { prefix, slice, suffix } => {
                 self.translate_slice_pattern(pat.span, prefix, slice.as_deref(), suffix, input)
             }
@@ -1403,6 +1411,11 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             PatKind::Map { fields, .. } => {
                 for field in fields {
                     self.declare_vars_from_pattern_into(&field.pattern, declarations);
+                }
+            }
+            PatKind::BinaryPattern { segments } => {
+                for segment in segments {
+                    self.declare_vars_from_pattern_into(&segment.pattern, declarations);
                 }
             }
             PatKind::Missing
@@ -1680,7 +1693,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         }
     }
 
-    fn resolve_expr(&self, expr: ExprId) -> &'a Expr<'tcx> {
+    pub(super) fn resolve_expr(&self, expr: ExprId) -> &'a Expr<'tcx> {
         self.resolve_expr_with_scope(expr).0
     }
 

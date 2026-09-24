@@ -32,19 +32,19 @@ main() ->
              end,
     _z@4_0 = begin 2 * _x@0_0, {} end,
     begin
-        io:put_chars([[<<"x is ">>,
+        io:put_chars([[<<"x is "/utf8>>,
                        io_lib:format("~ktp", [_x@0_0])]]),
         io:nl(),
         {}
     end,
     begin
-        io:put_chars([[<<"y is ">>,
+        io:put_chars([[<<"y is "/utf8>>,
                        io_lib:format("~ktp", [_y@3_0])]]),
         io:nl(),
         {}
     end,
     begin
-        io:put_chars([[<<"z is ">>,
+        io:put_chars([[<<"z is "/utf8>>,
                        io_lib:format("~ktp", [_z@4_0])]]),
         io:nl(),
         {}

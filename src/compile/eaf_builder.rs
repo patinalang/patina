@@ -56,6 +56,14 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         ))
     }
 
+    pub(crate) fn pat_string(&self, span: impl IntoAnno, s: &str) -> eaf::Pattern<'arena> {
+        let chars = self.arena.alloc_from_iter(s.chars());
+        eaf::Pattern::AtomicLiteral(eaf::AtomicLiteral::String(
+            span.into_anno(self.source_map),
+            chars,
+        ))
+    }
+
     pub(crate) fn pat_float(&self, span: impl IntoAnno, value: f64) -> eaf::Pattern<'arena> {
         eaf::Pattern::AtomicLiteral(eaf::AtomicLiteral::Float(
             span.into_anno(self.source_map),
@@ -79,6 +87,34 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
             }
         });
         eaf::Pattern::Bin(anno, self.arena.alloc_from_iter(elements))
+    }
+
+    pub(crate) fn pat_binary_element(
+        &self,
+        span: impl IntoAnno,
+        value: eaf::Pattern<'arena>,
+        size: Option<eaf::BinElemSize<'arena>>,
+        tsl: Option<impl IntoIterator<Item = eaf::Tsl>>,
+    ) -> eaf::BinElement<'arena, eaf::Pattern<'arena>> {
+        let anno = span.into_anno(self.source_map);
+        let size = size.unwrap_or(eaf::BinElemSize::Default);
+        let tsl = tsl
+            .map(|tsl| eaf::BinElemTsl::Tsl(self.arena.alloc_from_iter(tsl)))
+            .unwrap_or(eaf::BinElemTsl::Default);
+        eaf::BinElement { anno, value: self.arena.alloc(value), size, tsl }
+    }
+
+    pub(crate) fn pat_binary(
+        &self,
+        span: impl IntoAnno,
+        elements: impl IntoIterator<Item = eaf::BinElement<'arena, eaf::Pattern<'arena>>>,
+    ) -> eaf::Pattern<'arena> {
+        let anno = span.into_anno(self.source_map);
+        eaf::Pattern::Bin(anno, self.arena.alloc_from_iter(elements))
+    }
+
+    pub(crate) fn bin_elem_size(&self, size: eaf::Expr<'arena>) -> eaf::BinElemSize<'arena> {
+        eaf::BinElemSize::Size(self.arena.alloc(size))
     }
 
     pub(crate) fn pat_unary_op(
@@ -136,11 +172,11 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::String(span.into_anno(self.source_map), chars))
     }
 
-    /// Binary string literal.
+    /// UTF-8 encoded binary string literal.
     pub(crate) fn expr_binary_string(&self, span: impl IntoAnno, s: Symbol) -> eaf::Expr<'arena> {
         let anno = span.into_anno(self.source_map);
         let value = self.expr_string(anno, s);
-        let elem = self.expr_binary_element(anno, value, None, None::<[eaf::Tsl; 0]>);
+        let elem = self.expr_binary_element(anno, value, None, Some([eaf::Tsl::Utf8]));
         self.expr_binary(anno, [elem])
     }
 

@@ -1356,3 +1356,194 @@ pub(crate) struct CannotCallExternMod {
     #[primary_span]
     pub span: Span,
 }
+
+#[derive(Diagnostic)]
+#[diag("{$kind} literals can't be binary pattern segments")]
+pub(crate) struct BinarySegmentUnsupportedLiteral {
+    #[primary_span]
+    pub span: Span,
+    pub kind: &'static str,
+}
+
+#[derive(Diagnostic)]
+#[diag("a value of type `{$ty}` can't be a binary pattern segment")]
+#[note("binary pattern segments hold `int`, `float`, `char`, `str`, `bin` or `bits` values")]
+pub(crate) struct BinarySegmentUnsupportedType<'tcx> {
+    #[primary_span]
+    pub span: Span,
+    pub ty: Ty<'tcx>,
+}
+
+#[derive(Diagnostic)]
+#[diag("`{$arg}` isn't allowed on a `{$ty}` segment")]
+pub(crate) struct BinarySegmentArgNotAllowed {
+    #[primary_span]
+    pub span: Span,
+    pub arg: String,
+    pub ty: Symbol,
+}
+
+#[derive(Diagnostic)]
+#[diag("`size` isn't allowed on a `str` segment")]
+pub(crate) struct BinarySegmentStrSize {
+    #[primary_span]
+    pub span: Span,
+    #[subdiagnostic]
+    pub sugg: BinarySegmentStrSizeSugg,
+}
+
+#[derive(Subdiagnostic)]
+pub(crate) enum BinarySegmentStrSizeSugg {
+    #[suggestion(
+        "use `bin` instead",
+        code = "bin",
+        applicability = "maybe-incorrect",
+        style = "verbose"
+    )]
+    Bin(#[primary_span] Span),
+    #[suggestion(
+        "remove the size",
+        code = "",
+        applicability = "machine-applicable",
+        style = "verbose"
+    )]
+    Remove(#[primary_span] Span),
+}
+
+#[derive(Diagnostic)]
+#[diag("the segment's {$arg} is specified more than once")]
+pub(crate) struct BinarySegmentRepeatedArg {
+    #[primary_span]
+    pub span: Span,
+    #[label("first specified here")]
+    pub prev_span: Span,
+    pub arg: &'static str,
+}
+
+#[derive(Diagnostic)]
+#[diag("only string literals can be encoded as `utf16` or `utf32`")]
+pub(crate) struct BinarySegmentStrEncoding {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("endianness isn't allowed on a `utf8` segment")]
+#[help("endianness only applies to the `utf16` and `utf32` encodings")]
+pub(crate) struct BinarySegmentUtf8Endianness {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("`unit` must be an integer literal between 1 and 256")]
+pub(crate) struct BinarySegmentUnit {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("the unit of a `bin` segment must be a multiple of 8")]
+#[help("use `bits` for a bitstring whose size isn't a whole number of bytes")]
+pub(crate) struct BinarySegmentBinUnit {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("a `float` segment's size must be a literal 16, 32 or 64")]
+pub(crate) struct BinarySegmentFloatSize {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("a string or binary literal segment can't have a size")]
+#[note("the size of the segment is the length of the literal")]
+pub(crate) struct BinarySegmentLiteralSize {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("the literal's size isn't a multiple of the segment's unit")]
+pub(crate) struct BinarySegmentLiteralUnit {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("only the last segment of a binary pattern can be unsized")]
+pub(crate) struct BinarySegmentUnsizedNotLast {
+    #[primary_span]
+    pub span: Span,
+    #[subdiagnostic]
+    pub sugg: Option<BinarySegmentSizeSugg>,
+}
+
+#[derive(Subdiagnostic)]
+pub(crate) enum BinarySegmentSizeSugg {
+    #[suggestion(
+        "specify a size for this segment",
+        code = "(/* size */)",
+        applicability = "has-placeholders",
+        style = "verbose"
+    )]
+    AddArgs(#[primary_span] Span),
+    #[suggestion(
+        "specify a size for this segment",
+        code = ", /* size */",
+        applicability = "has-placeholders",
+        style = "verbose"
+    )]
+    AppendArg(#[primary_span] Span),
+}
+
+#[derive(Diagnostic)]
+#[diag("only the last segment of a binary pattern can bind a `str`")]
+pub(crate) struct BinarySegmentStrNotLast {
+    #[primary_span]
+    pub span: Span,
+    #[suggestion(
+        "match it with a sized `bin` instead",
+        code = ": bin(/* size */)",
+        applicability = "has-placeholders",
+        style = "verbose"
+    )]
+    pub sugg: Option<Span>,
+}
+
+#[derive(Diagnostic)]
+#[diag("`str` can't match the rest of a `{$ty}`")]
+#[note("the rest of a `{$ty}` might not be valid UTF-8")]
+pub(crate) struct BinarySegmentStrTailNotStr<'tcx> {
+    #[primary_span]
+    pub span: Span,
+    pub ty: Ty<'tcx>,
+    #[suggestion(
+        "match it with `bin` instead",
+        code = ": bin",
+        applicability = "maybe-incorrect",
+        style = "verbose"
+    )]
+    pub sugg: Option<Span>,
+}
+
+#[derive(Diagnostic)]
+#[diag("`str` can't match the rest of a `str` after a segment that might split a character")]
+#[note(
+    "the rest of a `str` is valid UTF-8 only if every earlier segment is valid UTF-8 on its own"
+)]
+pub(crate) struct BinarySegmentStrTailBoundary {
+    #[primary_span]
+    pub span: Span,
+    #[label("this segment might end inside a UTF-8 character")]
+    pub segment_span: Span,
+    #[suggestion(
+        "match the rest with `bin` instead",
+        code = ": bin",
+        applicability = "maybe-incorrect",
+        style = "verbose"
+    )]
+    pub sugg: Option<Span>,
+}

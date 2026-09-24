@@ -25,7 +25,9 @@
 
 function() ->
     begin
-        io:put_chars([[<<"called `function()`">>]]), io:nl(), {}
+        io:put_chars([[<<"called `function()`"/utf8>>]]),
+        io:nl(),
+        {}
     end.
 
 main() ->

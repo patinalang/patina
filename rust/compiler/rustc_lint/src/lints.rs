@@ -1851,6 +1851,17 @@ pub(crate) struct OverflowingLiteral<'a> {
 }
 
 #[derive(Diagnostic)]
+#[diag("literal out of range for its binary pattern segment")]
+#[note("`{$lit}` doesn't fit into {$bits} bits as {$ty}")]
+#[note("{$consequence}")]
+pub(crate) struct OverflowingBitSegment {
+    pub lit: String,
+    pub ty: &'static str,
+    pub bits: u128,
+    pub consequence: &'static str,
+}
+
+#[derive(Diagnostic)]
 #[diag("comparison is useless due to type limits")]
 pub(crate) struct UnusedComparisons;
 

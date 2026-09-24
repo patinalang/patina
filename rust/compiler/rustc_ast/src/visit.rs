@@ -396,6 +396,9 @@ macro_rules! common_visitor_and_walkers {
             ThinVec<EiiImpl>,
             ThinVec<MapField>,
             ThinVec<PatMapField>,
+            ThinVec<PatBinarySegment>,
+            ThinVec<BinarySegment>,
+            ThinVec<BinarySegmentArg>,
         );
 
         // This macro generates `impl Visitable` and `impl MutVisitable` that forward to `Walkable`
@@ -406,6 +409,12 @@ macro_rules! common_visitor_and_walkers {
             AngleBracketedArgs,
             ArrayExpr,
             ArrayTail,
+            BinarySegmentArg,
+            BinarySegmentArgKind,
+            BinarySegmentFlag,
+            BinarySegment,
+            BinarySegmentSpec,
+            BinarySegmentTy,
             AsmMacro,
             AssignOpKind,
             AssocItemConstraintKind,
@@ -471,6 +480,8 @@ macro_rules! common_visitor_and_walkers {
             AttrItemKind,
             Parens,
             ParenthesizedArgs,
+            PatBinarySegment,
+            PatBinarySegmentKind,
             PatMapField,
             PatMapFieldsRest,
             PatFieldsRest,
@@ -991,6 +1002,8 @@ macro_rules! common_visitor_and_walkers {
                     visit_visitable!($($mut)? vis, array),
                 ExprKind::Map(map) =>
                     visit_visitable!($($mut)? vis, map),
+                ExprKind::BinaryPattern(segments) =>
+                    visit_visitable!($($mut)? vis, segments),
                 ExprKind::ConstBlock(anon_const) =>
                     visit_visitable!($($mut)? vis, anon_const),
                 ExprKind::Repeat(element, count) =>

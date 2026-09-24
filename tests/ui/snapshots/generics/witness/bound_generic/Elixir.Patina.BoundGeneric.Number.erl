@@ -26,9 +26,9 @@
 
 'BoundGeneric::Bound::b'(_Self@0_0, _self@1_0) ->
     begin
-        io:put_chars([[<<"Bound::b(">>,
+        io:put_chars([[<<"Bound::b("/utf8>>,
                        io_lib:format("~ktp", [_self@1_0]),
-                       <<")">>]]),
+                       <<")"/utf8>>]]),
         io:nl(),
         {}
     end,

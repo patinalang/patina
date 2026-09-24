@@ -314,6 +314,8 @@ fn is_temporary_rvalue(expr: &Expr<'_>) -> bool {
 
         ExprKind::Map(..) => false,
 
+        ExprKind::BinaryPattern(..) => false,
+
         // These typecheck to `!`
         ExprKind::Break(..) | ExprKind::Continue(..) | ExprKind::Ret(..) | ExprKind::Become(..) => {
             false

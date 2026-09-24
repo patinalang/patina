@@ -12,11 +12,14 @@ use rustc_hir::def::{CtorKind, DefKind, Res};
 use rustc_hir::def_id::DefId;
 use rustc_hir::pat_util::EnumerateAndAdjustIterator;
 use rustc_hir::{
-    self as hir, BindingMode, ByRef, ExprKind, HirId, LangItem, Mutability, Pat, PatExpr,
-    PatExprKind, PatKind, PatMapField, PatMapKey, expr_needs_parens,
+    self as hir, BinarySegmentTy, BindingMode, ByRef, ExprKind, HirId, LangItem, Mutability, Pat,
+    PatExpr, PatExprKind, PatKind, PatMapField, PatMapKey, expr_needs_parens,
 };
 use rustc_hir_analysis::autoderef::report_autoderef_recursion_limit_error;
 use rustc_infer::infer::RegionVariableOrigin;
+use rustc_middle::erl::binary_pattern::{
+    BinaryEndianness, BinarySegmentLayout, BinarySegmentSize, BinarySizeClass,
+};
 use rustc_middle::traits::PatternOriginExpr;
 use rustc_middle::ty::{self, Pinnedness, Ty, TypeVisitableExt, Unnormalized};
 use rustc_middle::{bug, span_bug};
@@ -32,6 +35,7 @@ use ty::VariantDef;
 use ty::adjustment::{PatAdjust, PatAdjustment};
 
 use super::report_unexpected_variant_res;
+use crate::binary_pattern::{SegmentValue, binary_segment_value_ty, is_str_like};
 use crate::expectation::Expectation;
 use crate::gather_locals::DeclOrigin;
 use crate::{FnCtxt, errors};
@@ -712,6 +716,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             PatKind::Map(fields, _) => {
                 self.check_pat_map(pat, fields, expected, resolves_to_term, pat_info)
             }
+            PatKind::BinaryPattern(segments) => {
+                self.check_pat_binary_pattern(pat, segments, expected, resolves_to_term, pat_info)
+            }
         };
         if resolves_to_term {
             self.record_term_pat(pat, ty);
@@ -819,6 +826,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             | PatKind::Range(..)
             | PatKind::Slice(..)
             | PatKind::Map(..)
+            | PatKind::BinaryPattern(..)
             | PatKind::TermClass(..)
             | PatKind::Exception { .. } => {
                 AdjustMode::peel_all()
@@ -1112,7 +1120,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             | PatKind::Struct(..)
             | PatKind::Tuple(..)
             | PatKind::Slice(..)
-            | PatKind::Map(..) => {
+            | PatKind::Map(..)
+            | PatKind::BinaryPattern(..) => {
                 self.typeck_results.borrow_mut().term_pats_mut().insert(pat.hir_id);
             }
 
@@ -1628,6 +1637,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         | PatKind::Or(..)
                         | PatKind::Guard(..)
                         | PatKind::Map(..)
+                        | PatKind::BinaryPattern(..)
                         | PatKind::TermClass(..)
                         | PatKind::Exception { .. }
                         | PatKind::Tuple(..)
@@ -3486,6 +3496,153 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             },
             Err(guar) => Ty::new_error(self.tcx, guar),
         }
+    }
+
+    /// Checks a binary pattern, like `<<len:8, payload: bin(len), rest @ ..>>`.
+    ///
+    /// Segments are checked left to right, so that a size expression can use
+    /// a binding from an earlier segment.
+    fn check_pat_binary_pattern(
+        &self,
+        pat: &'tcx Pat<'tcx>,
+        segments: &'tcx [hir::PatBinarySegment<'tcx>],
+        expected: Ty<'tcx>,
+        resolves_to_term: bool,
+        pat_info: PatInfo<'tcx>,
+    ) -> Ty<'tcx> {
+        let tcx = self.tcx;
+        let scrutinee_ty = if resolves_to_term {
+            tcx.types.bits
+        } else {
+            let expected = self.structurally_resolve_type(pat.span, expected);
+            match *expected.kind() {
+                ty::Str | ty::Bin | ty::Bits | ty::Error(_) => expected,
+                _ => {
+                    let result = self.demand_eqtype_pat(
+                        pat.span,
+                        expected,
+                        tcx.types.bits,
+                        &pat_info.top_info,
+                    );
+                    match result {
+                        Ok(()) => tcx.types.bits,
+                        Err(guar) => Ty::new_error(tcx, guar),
+                    }
+                }
+            }
+        };
+
+        // The last segment so far whose bytes might not be valid UTF-8 on their own.
+        let mut non_str_segment = None;
+        // The possible sizes of the segments so far, or `None` after an ill-typed segment.
+        let mut prefix_size = Some(BinarySizeClass::ZERO);
+
+        for (index, segment) in segments.iter().enumerate() {
+            let (value, layout) = if let hir::PatBinarySegmentKind::Rest = segment.kind {
+                let ty = match (*scrutinee_ty.kind(), prefix_size) {
+                    (ty::Str, Some(_)) if non_str_segment.is_none() => BinarySegmentTy::Str,
+                    (ty::Str | ty::Bin, Some(size)) if size.is_multiple_of(8) => {
+                        BinarySegmentTy::Bin
+                    }
+                    _ => BinarySegmentTy::Bits,
+                };
+                self.check_pat(segment.pat, binary_segment_value_ty(tcx, ty), pat_info);
+                let layout = BinarySegmentLayout {
+                    ty,
+                    size: BinarySegmentSize::Unsized,
+                    unit: if ty == BinarySegmentTy::Bits { 1 } else { 8 },
+                    signed: false,
+                    endianness: BinaryEndianness::Big,
+                };
+                (SegmentValue::Binding, Ok(layout))
+            } else if let hir::PatBinarySegmentKind::Recovered(guar) = segment.kind {
+                self.check_pat(segment.pat, Ty::new_error(tcx, guar), pat_info);
+                (SegmentValue::Binding, Err(guar))
+            } else if let PatKind::Binding(..) | PatKind::Wild = segment.pat.kind {
+                // A binding takes the type of its segment.
+                let value = SegmentValue::Binding;
+                let spec = segment.kind.spec();
+                let layout = self.resolve_binary_segment_layout(segment.span, spec, value);
+                let value_ty = match layout {
+                    Ok(layout) => binary_segment_value_ty(tcx, layout.ty),
+                    Err(guar) => Ty::new_error(tcx, guar),
+                };
+                self.check_pat(segment.pat, value_ty, pat_info);
+                (value, layout)
+            } else {
+                // A literal, pin or constant has a type of its own, which must fit the segment.
+                self.check_pat(segment.pat, self.next_ty_var(segment.pat.span), pat_info);
+                let ty = self.node_ty(segment.pat.hir_id);
+                let ty = self.structurally_resolve_type(segment.pat.span, ty);
+                let value = SegmentValue::from_pat(segment.pat, ty);
+                let spec = segment.kind.spec();
+                let layout = self.resolve_binary_segment_layout(segment.span, spec, value);
+                if let Ok(layout) = layout {
+                    self.demand_suptype(
+                        segment.pat.span,
+                        binary_segment_value_ty(tcx, layout.ty),
+                        ty,
+                    );
+                }
+                (value, layout)
+            };
+            let Ok(layout) = layout else {
+                prefix_size = None;
+                continue;
+            };
+            prefix_size = prefix_size.zip(layout.size_class()).map(|(a, b)| a.add(b));
+
+            let unsized_not_last =
+                layout.size == BinarySegmentSize::Unsized && index + 1 != segments.len();
+
+            if unsized_not_last && layout.ty == BinarySegmentTy::Str {
+                self.dcx().emit_err(errors::BinarySegmentStrNotLast {
+                    span: segment.span,
+                    sugg: segment.kind.spec().map(|spec| spec.span),
+                });
+            } else if unsized_not_last {
+                let sugg = segment.kind.spec().map(|spec| {
+                    if spec.args.is_empty() {
+                        errors::BinarySegmentSizeSugg::AddArgs(spec.span.shrink_to_hi())
+                    } else {
+                        // Before the closing `)`.
+                        let close = spec.span.hi() - BytePos(1);
+                        let span = spec.span.with_lo(close).with_hi(close);
+                        errors::BinarySegmentSizeSugg::AppendArg(span)
+                    }
+                });
+                self.dcx()
+                    .emit_err(errors::BinarySegmentUnsizedNotLast { span: segment.span, sugg });
+            } else if layout.size == BinarySegmentSize::Unsized
+                && layout.ty == BinarySegmentTy::Str
+                && !scrutinee_ty.references_error()
+            {
+                let sugg = segment.kind.spec().map(|spec| spec.span);
+                if !scrutinee_ty.is_str() {
+                    let ty = if resolves_to_term { tcx.types.term } else { scrutinee_ty };
+                    self.dcx().emit_err(errors::BinarySegmentStrTailNotStr {
+                        span: segment.span,
+                        ty,
+                        sugg,
+                    });
+                } else if let Some(segment_span) = non_str_segment {
+                    self.dcx().emit_err(errors::BinarySegmentStrTailBoundary {
+                        span: segment.span,
+                        segment_span,
+                        sugg,
+                    });
+                }
+            }
+            // A misplaced unsized segment was already reported.
+            if !is_str_like(value, &layout) && !unsized_not_last {
+                non_str_segment = Some(segment.span);
+            }
+            self.typeck_results
+                .borrow_mut()
+                .binary_segment_layouts_mut()
+                .insert(segment.pat.hir_id, layout);
+        }
+        scrutinee_ty
     }
 
     fn check_map_pat_fields(

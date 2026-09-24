@@ -26,20 +26,20 @@
 main() ->
     begin
         io:put_chars([[io_lib:format("~ktp",
-                                     [<<"1 + 1 == 2">>]),
-                       <<" and ">>,
-                       io_lib:format("~ktp", [<<"2 * 2 == 4">>]),
-                       <<" is ">>,
+                                     [<<"1 + 1 == 2"/utf8>>]),
+                       <<" and "/utf8>>,
+                       io_lib:format("~ktp", [<<"2 * 2 == 4"/utf8>>]),
+                       <<" is "/utf8>>,
                        io_lib:format("~ktp",
                                      [1 + 1 =:= 2 andalso 2 * 2 =:= 4])]]),
         io:nl(),
         {}
     end,
     begin
-        io:put_chars([[io_lib:format("~ktp", [<<"true">>]),
-                       <<" or ">>,
-                       io_lib:format("~ktp", [<<"false">>]),
-                       <<" is ">>,
+        io:put_chars([[io_lib:format("~ktp", [<<"true"/utf8>>]),
+                       <<" or "/utf8>>,
+                       io_lib:format("~ktp", [<<"false"/utf8>>]),
+                       <<" is "/utf8>>,
                        io_lib:format("~ktp", [true orelse false])]]),
         io:nl(),
         {}

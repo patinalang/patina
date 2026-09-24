@@ -26,6 +26,7 @@ use rustc_hir_analysis::errors::NoFieldOnType;
 use rustc_hir_analysis::hir_ty_lowering::HirTyLowerer as _;
 use rustc_infer::infer::{self, DefineOpaqueTypes, InferOk, RegionVariableOrigin};
 use rustc_infer::traits::query::NoSolution;
+use rustc_middle::erl::binary_pattern::BinarySizeClass;
 use rustc_middle::ty::adjustment::{Adjust, Adjustment, AllowTwoPhase};
 use rustc_middle::ty::error::{ExpectedFound, TypeError};
 use rustc_middle::ty::{self, AdtKind, GenericArgsRef, Ty, TypeVisitableExt, Unnormalized};
@@ -39,6 +40,7 @@ use rustc_trait_selection::traits::{self, ObligationCauseCode, ObligationCtxt};
 use tracing::{debug, instrument, trace};
 
 use crate::Expectation::{self, ExpectCastableToType, ExpectHasType, NoExpectation};
+use crate::binary_pattern::{SegmentValue, binary_segment_value_ty, is_str_like};
 use crate::coercion::CoerceMany;
 use crate::errors::{
     AddressOfTemporaryTaken, BaseExpressionDoubleDot, BaseExpressionDoubleDotAddExpr,
@@ -395,6 +397,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             ExprKind::DropTemps(e) => self.check_expr_with_expectation(e, expected),
             ExprKind::Array(args, tail) => self.check_expr_array(args, tail, expected, expr),
             ExprKind::Map(fields, rest) => self.check_expr_map(fields, rest, expected, expr),
+            ExprKind::BinaryPattern(segments) => self.check_expr_binary_pattern(segments),
             ExprKind::ConstBlock(ref block) => self.check_expr_const_block(block, expected),
             ExprKind::Repeat(element, ref count) => {
                 self.check_expr_repeat(element, count, expected, expr)
@@ -1710,6 +1713,55 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             hir::ArrayTailExpr::None => {}
         }
         list_ty
+    }
+
+    /// Checks a binary pattern expression, like `<<len:8, payload: bin>>`.
+    ///
+    /// Its type is the narrowest one it is guaranteed to have: `str` when every segment is valid
+    /// UTF-8 on its own, `bin` when its size is a multiple of 8, and `bits` otherwise.
+    fn check_expr_binary_pattern(&self, segments: &'tcx [hir::BinarySegment<'tcx>]) -> Ty<'tcx> {
+        let tcx = self.tcx;
+        let mut is_str = true;
+        let mut size = BinarySizeClass::ZERO;
+        let mut error = None;
+        for segment in segments {
+            let ty = match segment.spec {
+                Some(spec) => {
+                    let value_ty = binary_segment_value_ty(tcx, spec.ty);
+                    let ty = self.check_expr_with_hint(segment.expr, value_ty);
+                    self.demand_coerce(segment.expr, ty, value_ty, None, AllowTwoPhase::No);
+                    self.resolve_vars_with_obligations(ty)
+                }
+                None => {
+                    let ty = self.check_expr(segment.expr);
+                    self.structurally_resolve_type(segment.expr.span, ty)
+                }
+            };
+            let value = SegmentValue::from_expr(segment.expr, ty);
+            match self.resolve_binary_segment_layout(segment.span, segment.spec, value) {
+                Ok(layout) => {
+                    is_str &= is_str_like(value, &layout);
+                    size = size.add(layout.size_class().unwrap_or_else(|| {
+                        span_bug!(segment.span, "unsized segment in a binary pattern expression")
+                    }));
+                    self.typeck_results
+                        .borrow_mut()
+                        .binary_segment_layouts_mut()
+                        .insert(segment.expr.hir_id, layout);
+                }
+                Err(guar) => error = Some(guar),
+            }
+        }
+
+        if let Some(guar) = error {
+            Ty::new_error(tcx, guar)
+        } else if is_str {
+            tcx.types.str_
+        } else if size.is_multiple_of(8) {
+            tcx.types.bin
+        } else {
+            tcx.types.bits
+        }
     }
 
     fn check_expr_map(

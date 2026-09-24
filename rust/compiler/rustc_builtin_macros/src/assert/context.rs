@@ -212,6 +212,11 @@ impl<'cx, 'a> Context<'cx, 'a> {
                     self.manage_cond_expr(base);
                 }
             }
+            ExprKind::BinaryPattern(segments) => {
+                for segment in segments {
+                    self.manage_cond_expr(&mut segment.expr);
+                }
+            }
             ExprKind::Binary(op, lhs, rhs) => {
                 self.with_is_consumed_management(
                     matches!(

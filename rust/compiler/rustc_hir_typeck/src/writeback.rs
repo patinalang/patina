@@ -283,6 +283,7 @@ impl<'cx, 'tcx> Visitor<'tcx> for WritebackCx<'cx, 'tcx> {
             _ => {}
         }
 
+        self.visit_binary_segment_layout(e.hir_id);
         self.visit_node_id(e.span, e.hir_id);
         intravisit::walk_expr(self, e);
 
@@ -338,6 +339,7 @@ impl<'cx, 'tcx> Visitor<'tcx> for WritebackCx<'cx, 'tcx> {
         self.visit_rust_2024_migration_desugared_pats(p.hir_id);
         self.visit_skipped_ref_pats(p.hir_id);
         self.visit_term_pats(p.hir_id);
+        self.visit_binary_segment_layout(p.hir_id);
         self.visit_pat_adjustments(p.span, p.hir_id);
 
         self.visit_node_id(p.span, p.hir_id);
@@ -752,6 +754,13 @@ impl<'cx, 'tcx> WritebackCx<'cx, 'tcx> {
         if self.fcx.typeck_results.borrow_mut().skipped_ref_pats_mut().remove(hir_id) {
             debug!("node is a skipped ref pat");
             self.typeck_results.skipped_ref_pats_mut().insert(hir_id);
+        }
+    }
+
+    fn visit_binary_segment_layout(&mut self, hir_id: hir::HirId) {
+        let mut fcx_results = self.fcx.typeck_results.borrow_mut();
+        if let Some(spec) = fcx_results.binary_segment_layouts_mut().remove(hir_id) {
+            self.typeck_results.binary_segment_layouts_mut().insert(hir_id, spec);
         }
     }
 

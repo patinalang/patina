@@ -25,6 +25,7 @@ use rustc_span::{ErrorGuaranteed, Span, Symbol};
 use rustc_target::asm::InlineAsmRegOrRegClass;
 use tracing::instrument;
 
+use crate::erl::binary_pattern::BinarySegmentLayout;
 use crate::middle::region;
 use crate::mir::interpret::AllocId;
 use crate::mir::{self, AssignOp, BinOp, BorrowKind, FakeReadCause, UnOp};
@@ -493,6 +494,10 @@ pub enum ExprKind<'tcx> {
         fields: Box<[MapFieldExpr]>,
         base: Option<ExprId>,
     },
+    /// A binary pattern expression, e.g. `<<len:8, payload: bin()>>`.
+    BinaryPattern {
+        segments: Box<[BinarySegmentExpr]>,
+    },
     /// A tuple, e.g. `(a, b, c, d)`.
     Tuple {
         fields: Box<[ExprId]>,
@@ -589,6 +594,14 @@ pub struct FieldExpr {
 pub struct MapFieldExpr {
     pub key: ExprId,
     pub value: ExprId,
+}
+
+/// A segment of a binary pattern expression.
+#[derive(Clone, Debug, StableHash)]
+pub struct BinarySegmentExpr {
+    pub value: ExprId,
+    pub layout: BinarySegmentLayout<ExprId>,
+    pub span: Span,
 }
 
 #[derive(Clone, Debug, StableHash)]
@@ -927,6 +940,11 @@ pub enum PatKind<'tcx> {
         fields: Box<[MapFieldPat<'tcx>]>,
     },
 
+    /// A binary pattern, e.g. `<<len:8, payload: bin(len), rest: bin()>>`.
+    BinaryPattern {
+        segments: Box<[BinarySegmentPat<'tcx>]>,
+    },
+
     /// An or-pattern, e.g. `p | q`.
     /// Invariant: `pats.len() >= 2`.
     Or {
@@ -952,6 +970,16 @@ pub enum PatKind<'tcx> {
 pub struct MapFieldPat<'tcx> {
     pub key: Pat<'tcx>,
     pub pattern: Pat<'tcx>,
+}
+
+/// A segment of a binary pattern.
+#[derive(Clone, Debug, StableHash, TypeVisitable)]
+pub struct BinarySegmentPat<'tcx> {
+    pub pattern: Pat<'tcx>,
+    #[type_visitable(ignore)]
+    pub layout: BinarySegmentLayout<ExprId>,
+    #[type_visitable(ignore)]
+    pub span: Span,
 }
 
 #[derive(Copy, Clone, Debug, StableHash)]

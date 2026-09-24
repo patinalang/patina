@@ -34,7 +34,8 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-struct_value() -> {struct_http_style, 200, <<"ok">>}.
+struct_value() ->
+    {struct_http_style, 200, <<"ok"/utf8>>}.
 
 struct_code(_value@0_0) ->
     erlang:element(2, _value@0_0).
@@ -44,7 +45,7 @@ update_code(_value@0_0) ->
 
 update_fields(_value@0_0) ->
     erlang:setelement(2,
-                      erlang:setelement(3, _value@0_0, <<"updated">>),
+                      erlang:setelement(3, _value@0_0, <<"updated"/utf8>>),
                       202).
 
 destructure_struct(_value@0_0) ->
@@ -74,7 +75,8 @@ enum_payload(_value@0_0) ->
         'Elixir.Patina.ReprTagged.TaggedEnum.AtomOverride' -> -1
     end.
 
-result_values() -> [{ok, 42}, {error, <<"reason">>}].
+result_values() ->
+    [{ok, 42}, {error, <<"reason"/utf8>>}].
 
 result_payload(_value@0_0) ->
     case _value@0_0 of

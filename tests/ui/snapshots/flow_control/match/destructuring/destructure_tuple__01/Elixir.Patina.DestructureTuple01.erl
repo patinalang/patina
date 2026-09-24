@@ -28,34 +28,34 @@
 main() ->
     _triple@0_0 = {0, -2, 3},
     begin
-        io:put_chars([[<<"Tell me about ">>,
+        io:put_chars([[<<"Tell me about "/utf8>>,
                        io_lib:format("~ktp", [_triple@0_0])]]),
         io:nl(),
         {}
     end,
     case _triple@0_0 of
         {0, _y@1_0, _z@2_0} ->
-            io:put_chars([[<<"First is `0`, `y` is ">>,
+            io:put_chars([[<<"First is `0`, `y` is "/utf8>>,
                            io_lib:format("~ktp", [_y@1_0]),
-                           <<", and `z` is ">>,
+                           <<", and `z` is "/utf8>>,
                            io_lib:format("~ktp", [_z@2_0])]]),
             io:nl(),
             {};
         {1, _, _} ->
-            io:put_chars([[<<"First is `1` and the rest doesn't matter">>]]),
+            io:put_chars([[<<"First is `1` and the rest doesn't matter"/utf8>>]]),
             io:nl(),
             {};
         {_, _, 2} ->
-            io:put_chars([[<<"last is `2` and the rest doesn't matter">>]]),
+            io:put_chars([[<<"last is `2` and the rest doesn't matter"/utf8>>]]),
             io:nl(),
             {};
         {3, _, 4} ->
             io:put_chars([[<<"First is `3`, last is `4`, and the rest "
-                             "doesn't matter">>]]),
+                             "doesn't matter"/utf8>>]]),
             io:nl(),
             {};
         _ ->
-            io:put_chars([[<<"It doesn't matter what they are">>]]),
+            io:put_chars([[<<"It doesn't matter what they are"/utf8>>]]),
             io:nl(),
             {}
     end.

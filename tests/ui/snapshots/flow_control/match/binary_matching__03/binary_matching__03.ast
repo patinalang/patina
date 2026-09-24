@@ -1,18 +1,40 @@
 // source: patina-by-example/src/flow_control/match/binary_matching.md
-// block: 3/5
+// block: 3/6
 
 pub fn main() {
+    let bin = <<16, 5, 6, 7>>;
 
-    // Bind `len`, then use it as the size of `payload`
+    match bin {
 
-    // The size can also be a guard expression
+            // Bind `len`, then use it as the size of `payload`
+            <<kind: int(size = 8), len: int(size = 8), payload:
+            bin(size = len), rest @ ..>> =>
+            println!("kind = {}, payload = {:?}, rest = {:?}", kind, payload,
+                rest),
 
 
+            // The size can also be a guard expression
+            <<kind: int(size = 8), len: int(size = 8), payload:
+            bin(size = len / 2), rest @ ..>> =>
+            println!("kind = {}, payload = {:?}, rest = {:?}", kind, payload,
+                rest),
 
-    // The tail expands to match the whole rest of the binary.
 
-    // The unsized segment can be in the middle, as long as both the prefix
-    // and suffix sizes are known at compilation time.
+            _ => println!("invalid packet"),
+    }
 
-    (/*ERROR*/)
+    let packet: bits =
+        <<3: int(size = 4), 5: int(size = 4), 7: int(size = 3)>>;
+
+    match packet {
+
+            // The tail expands to match the whole rest of the binary.
+            // Only the last segment can be unsized.
+            // After an 8-bit header, the rest of a `bits` is a `bits`.
+            <<header: int(size = 8), tail @ ..>> =>
+            println!("header = {}, tail = {:?}", header, tail),
+
+
+            _ => println!("did not match"),
+    }
 }

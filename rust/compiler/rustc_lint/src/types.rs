@@ -20,7 +20,7 @@ use crate::lints::{
 use crate::{LateContext, LateLintPass, LintContext};
 
 mod literal;
-use literal::lint_literal;
+use literal::{lint_binary_segment_literal, lint_literal};
 
 declare_lint! {
     /// The `unused_comparisons` lint detects comparisons made useless by
@@ -43,6 +43,28 @@ declare_lint! {
     UNUSED_COMPARISONS,
     Warn,
     "comparisons made useless by limits of the types involved"
+}
+
+declare_lint! {
+    /// The `overflowing_binary_pattern_literals` lint detects literals out of range for their
+    /// binary pattern segment.
+    ///
+    /// ### Example
+    ///
+    /// ```rust,ignore (patina)
+    /// let b = <<256:8>>;
+    /// ```
+    ///
+    /// {{produces}}
+    ///
+    /// ### Explanation
+    ///
+    /// A binary pattern expression keeps only the lowest bits of an integer that doesn't fit its
+    /// segment, and encodes such a float as infinity. A pattern with such a segment never
+    /// matches. Change either the literal or the size of its segment.
+    pub OVERFLOWING_BINARY_PATTERN_LITERALS,
+    Warn,
+    "literal out of range for its binary pattern segment"
 }
 
 declare_lint! {
@@ -197,6 +219,7 @@ pub(crate) struct TypeLimits {
 impl_lint_pass!(TypeLimits => [
     UNUSED_COMPARISONS,
     OVERFLOWING_LITERALS,
+    OVERFLOWING_BINARY_PATTERN_LITERALS,
     INVALID_NAN_COMPARISONS,
     AMBIGUOUS_WIDE_POINTER_COMPARISONS,
     UNPREDICTABLE_FUNCTION_POINTER_COMPARISONS
@@ -533,6 +556,22 @@ fn lint_fn_pointer<'tcx>(
 }
 
 impl<'tcx> LateLintPass<'tcx> for TypeLimits {
+    fn check_pat(&mut self, cx: &LateContext<'tcx>, pat: &'tcx hir::Pat<'tcx>) {
+        if let hir::PatKind::BinaryPattern(segments) = pat.kind {
+            for segment in segments {
+                if let hir::PatKind::Expr(hir::PatExpr {
+                    kind: hir::PatExprKind::Lit { lit, negated },
+                    ..
+                }) = segment.pat.kind
+                    && let Some(layout) =
+                        cx.typeck_results().binary_segment_layouts().get(segment.pat.hir_id)
+                {
+                    lint_binary_segment_literal(cx, layout, lit, *negated, segment.span, true);
+                }
+            }
+        }
+    }
+
     fn check_lit(&mut self, cx: &LateContext<'tcx>, hir_id: HirId, lit: hir::Lit, negated: bool) {
         if negated {
             self.negated_expr_id = Some(hir_id);
@@ -543,6 +582,23 @@ impl<'tcx> LateLintPass<'tcx> for TypeLimits {
 
     fn check_expr(&mut self, cx: &LateContext<'tcx>, e: &'tcx hir::Expr<'tcx>) {
         match e.kind {
+            hir::ExprKind::BinaryPattern(segments) => {
+                for segment in segments {
+                    let (lit, negated) = match &segment.expr.kind {
+                        hir::ExprKind::Lit(lit) => (lit, false),
+                        hir::ExprKind::Unary(
+                            hir::UnOp::Neg,
+                            hir::Expr { kind: hir::ExprKind::Lit(lit), .. },
+                        ) => (lit, true),
+                        _ => continue,
+                    };
+                    if let Some(layout) =
+                        cx.typeck_results().binary_segment_layouts().get(segment.expr.hir_id)
+                    {
+                        lint_binary_segment_literal(cx, layout, lit, negated, segment.span, false);
+                    }
+                }
+            }
             hir::ExprKind::Unary(hir::UnOp::Neg, expr) => {
                 // Propagate negation, if the negation itself isn't negated
                 if self.negated_expr_id != Some(e.hir_id) {

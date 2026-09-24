@@ -26,30 +26,30 @@
 main() ->
     receive
         _n@0_0 when erlang:is_integer(_n@0_0) ->
-            io:put_chars([[<<"received integer ">>,
+            io:put_chars([[<<"received integer "/utf8>>,
                            io_lib:format("~ktp", [_n@0_0])]]),
             io:nl(),
             {};
         ping ->
-            io:put_chars([[<<"received ping">>]]),
+            io:put_chars([[<<"received ping"/utf8>>]]),
             io:nl(),
             {};
         _a@1_0 when erlang:is_atom(_a@1_0) ->
-            io:put_chars([[<<"received atom ">>,
+            io:put_chars([[<<"received atom "/utf8>>,
                            io_lib:format("~ktp", [_a@1_0])]]),
             io:nl(),
             {}
         after 'Elixir.Patina.Core.Timeout':from_seconds(5) ->
                   begin
                       io:put_chars([[<<"timeout (5 seconds with no matching "
-                                       "message)">>]]),
+                                       "message)"/utf8>>]]),
                       io:nl(),
                       {}
                   end
     end,
     receive
         _val@2_0 ->
-            io:put_chars([[<<"received any message ">>,
+            io:put_chars([[<<"received any message "/utf8>>,
                            io_lib:format("~ktp", [_val@2_0])]]),
             io:nl(),
             {}

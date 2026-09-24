@@ -29,14 +29,14 @@ main() ->
     __immutable_binding@0_0 = 1,
     _mutable_binding@1_0 = 1,
     begin
-        io:put_chars([[<<"Before mutating the binding: ">>,
+        io:put_chars([[<<"Before mutating the binding: "/utf8>>,
                        io_lib:format("~ktp", [_mutable_binding@1_0])]]),
         io:nl(),
         {}
     end,
     _mutable_binding@1_1 = _mutable_binding@1_0 + 1,
     begin
-        io:put_chars([[<<"After mutating the binding: ">>,
+        io:put_chars([[<<"After mutating the binding: "/utf8>>,
                        io_lib:format("~ktp", [_mutable_binding@1_1])]]),
         io:nl(),
         {}
@@ -48,10 +48,10 @@ main() ->
                           begin
                               io:put_chars([[io_lib:format("~ktp",
                                                            [_inner_mutable_binding@2_1]),
-                                             <<" == ">>,
+                                             <<" == "/utf8>>,
                                              io_lib:format("~ktp",
                                                            [_mutable_binding@1_1]),
-                                             <<" + 1">>]]),
+                                             <<" + 1"/utf8>>]]),
                               io:nl(),
                               {}
                           end

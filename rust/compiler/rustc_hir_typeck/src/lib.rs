@@ -7,6 +7,7 @@
 
 mod _match;
 mod autoderef;
+mod binary_pattern;
 mod callee;
 // Used by clippy;
 pub mod cast;

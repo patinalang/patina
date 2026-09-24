@@ -30,26 +30,26 @@ main() ->
         _value@2_0 = _t@1_0
             when erlang:is_integer(_value@2_0), _t@1_0 > 30 ->
             io:put_chars([[io_lib:format("~ktp", [_t@1_0]),
-                           <<"C is above 30 Celsius">>]]),
+                           <<"C is above 30 Celsius"/utf8>>]]),
             io:nl(),
             {};
         _value@4_0 = _t@3_0
             when erlang:is_integer(_value@4_0) ->
             io:put_chars([[io_lib:format("~ktp", [_t@3_0]),
-                           <<"C is equal to or below 30 Celsius">>]]),
+                           <<"C is equal to or below 30 Celsius"/utf8>>]]),
             io:nl(),
             {};
         #'Elixir.Patina.Guard01.Temperature':'Fahrenheit'{'0' =
                                                               _t@5_0}
             when _t@5_0 > 86 ->
             io:put_chars([[io_lib:format("~ktp", [_t@5_0]),
-                           <<"F is above 86 Fahrenheit">>]]),
+                           <<"F is above 86 Fahrenheit"/utf8>>]]),
             io:nl(),
             {};
         #'Elixir.Patina.Guard01.Temperature':'Fahrenheit'{'0' =
                                                               _t@6_0} ->
             io:put_chars([[io_lib:format("~ktp", [_t@6_0]),
-                           <<"F is equal to or below 86 Fahrenheit">>]]),
+                           <<"F is equal to or below 86 Fahrenheit"/utf8>>]]),
             io:nl(),
             {}
     end.

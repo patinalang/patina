@@ -507,6 +507,15 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
                 }
             }
 
+            hir::ExprKind::BinaryPattern(segments) => {
+                for segment in segments {
+                    self.consume_expr(segment.expr)?;
+                    if let Some(spec) = segment.spec {
+                        self.consume_binary_segment_spec(spec)?;
+                    }
+                }
+            }
+
             hir::ExprKind::AddrOf(_, m, base) => {
                 // &base
                 // make sure that the thing we are pointing out stays valid
@@ -856,6 +865,22 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
         Ok(())
     }
 
+    /// Consumes the size and unit expressions of a binary pattern segment.
+    fn consume_binary_segment_spec(
+        &self,
+        spec: &hir::BinarySegmentSpec<'_>,
+    ) -> Result<(), Cx::Error> {
+        for arg in spec.args {
+            match arg.kind {
+                hir::BinarySegmentArgKind::Size(expr) | hir::BinarySegmentArgKind::Unit(expr) => {
+                    self.consume_expr(expr)?
+                }
+                hir::BinarySegmentArgKind::Flag(_) => {}
+            }
+        }
+        Ok(())
+    }
+
     /// The core driver for walking a pattern
     ///
     /// This should mirror how pattern-matching gets lowered to MIR, as
@@ -1002,6 +1027,15 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
                 PatKind::Map(fields, _) => {
                     if !fields.is_empty() {
                         read_discriminant();
+                    }
+                }
+                PatKind::BinaryPattern(segments) => {
+                    read_discriminant();
+                    // Size expressions read the variables they mention.
+                    for segment in segments {
+                        if let Some(spec) = segment.kind.spec() {
+                            self.consume_binary_segment_spec(spec)?;
+                        }
                     }
                 }
                 PatKind::Or(_)
@@ -1426,6 +1460,7 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
             | hir::ExprKind::DropTemps(..)
             | hir::ExprKind::Array(..)
             | hir::ExprKind::Map(..)
+            | hir::ExprKind::BinaryPattern(..)
             | hir::ExprKind::If(..)
             | hir::ExprKind::Tup(..)
             | hir::ExprKind::Binary(..)
@@ -1879,6 +1914,19 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
                         ProjectionKind::Index,
                     );
                     self.cat_pattern(value_place, field.pat, op)?;
+                }
+            }
+
+            PatKind::BinaryPattern(segments) => {
+                for segment in segments {
+                    let segment_ty = self.pat_ty_adjusted(segment.pat)?;
+                    let segment_place = self.cat_projection(
+                        pat.hir_id,
+                        place_with_id.clone(),
+                        segment_ty,
+                        ProjectionKind::Index,
+                    );
+                    self.cat_pattern(segment_place, segment.pat, op)?;
                 }
             }
 

@@ -31,7 +31,9 @@
 'exists?'(_x@0_0) -> _x@0_0 > 0.
 
 'save!'() ->
-    begin io:put_chars([[<<"saved!">>]]), io:nl(), {} end.
+    begin
+        io:put_chars([[<<"saved!"/utf8>>]]), io:nl(), {}
+    end.
 
 'a{b}'() -> 1.
 
@@ -74,7 +76,9 @@ main() ->
     end,
     'exists?'(1),
     'save!'(),
-    begin io:put_chars([[<<"`a{b}`">>]]), io:nl(), {} end,
+    begin
+        io:put_chars([[<<"`a{b}`"/utf8>>]]), io:nl(), {}
+    end,
     begin
         io:put_chars([[io_lib:format("~ktp", [_value?@1_0])]]),
         io:nl(),

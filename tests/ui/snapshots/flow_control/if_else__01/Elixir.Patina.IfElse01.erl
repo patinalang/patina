@@ -29,7 +29,7 @@ main() ->
         true ->
             begin
                 io:put_chars([io_lib:format("~ktp", [_n@0_0]),
-                              <<" is negative">>]),
+                              <<" is negative"/utf8>>]),
                 {}
             end;
         false ->
@@ -37,13 +37,13 @@ main() ->
                 true ->
                     begin
                         io:put_chars([io_lib:format("~ktp", [_n@0_0]),
-                                      <<" is positive">>]),
+                                      <<" is positive"/utf8>>]),
                         {}
                     end;
                 false ->
                     begin
                         io:put_chars([io_lib:format("~ktp", [_n@0_0]),
-                                      <<" is zero">>]),
+                                      <<" is zero"/utf8>>]),
                         {}
                     end
             end
@@ -51,14 +51,14 @@ main() ->
     _big_n@1_0 = case _n@0_0 < 10 andalso _n@0_0 > -10 of
                      true ->
                          begin
-                             io:put_chars([[<<", and is a small number, increase ten-fold">>]]),
+                             io:put_chars([[<<", and is a small number, increase ten-fold"/utf8>>]]),
                              io:nl(),
                              {}
                          end,
                          10 * _n@0_0;
                      false ->
                          begin
-                             io:put_chars([[<<", and is a big number, halve the number">>]]),
+                             io:put_chars([[<<", and is a big number, halve the number"/utf8>>]]),
                              io:nl(),
                              {}
                          end,
@@ -66,7 +66,7 @@ main() ->
                  end,
     begin
         io:put_chars([[io_lib:format("~ktp", [_n@0_0]),
-                       <<" -> ">>,
+                       <<" -> "/utf8>>,
                        io_lib:format("~ktp", [_big_n@1_0])]]),
         io:nl(),
         {}

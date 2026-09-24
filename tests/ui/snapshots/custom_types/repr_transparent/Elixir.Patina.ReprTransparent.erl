@@ -236,7 +236,7 @@ if_let_open(_value@0_0) ->
             case _current@1_0 of
                 {dynamic, _} ->
                     _count@2_1 = _count@2_0 + 1,
-                    _current@1_1 = <<"stop">>,
+                    _current@1_1 = <<"stop"/utf8>>,
                     {};
                 _value@3_0 = _
                     when not
@@ -255,7 +255,7 @@ if_let_open(_value@0_0) ->
                                   andalso
                                   erlang:element(1, _value@3_0) =:= tagged) ->
                     _count@2_1 = _count@2_0 + 1,
-                    _current@1_1 = <<"stop">>,
+                    _current@1_1 = <<"stop"/utf8>>,
                     {};
                 _ ->
                     _branch_value@4_0 = begin

@@ -29,19 +29,19 @@ main() ->
     _unit@2_0 = {},
     _copied_integer@3_0 = _an_integer@0_0,
     begin
-        io:put_chars([[<<"An integer: ">>,
+        io:put_chars([[<<"An integer: "/utf8>>,
                        io_lib:format("~ktp", [_copied_integer@3_0])]]),
         io:nl(),
         {}
     end,
     begin
-        io:put_chars([[<<"A boolean: ">>,
+        io:put_chars([[<<"A boolean: "/utf8>>,
                        io_lib:format("~ktp", [_a_boolean@1_0])]]),
         io:nl(),
         {}
     end,
     begin
-        io:put_chars([[<<"Meet the unit value: ">>,
+        io:put_chars([[<<"Meet the unit value: "/utf8>>,
                        io_lib:format("~ktp", [_unit@2_0])]]),
         io:nl(),
         {}

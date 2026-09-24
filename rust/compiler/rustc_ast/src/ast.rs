@@ -686,6 +686,11 @@ impl Pat {
                 fields.iter().for_each(|field| field.pat.walk(it));
             }
 
+            // Walk into each segment pattern. Segment sizes are expressions, not patterns.
+            PatKind::BinaryPattern(segments) => {
+                segments.iter().for_each(|segment| segment.pat.walk(it));
+            }
+
             // Sequence of patterns.
             PatKind::TupleStruct(_, _, s)
             | PatKind::Tuple(s)
@@ -979,6 +984,142 @@ impl ExceptionClass {
     }
 }
 
+/// The type of a binary pattern segment (e.g., `int` in `x: int(16)`).
+#[derive(Clone, Copy, Encodable, Decodable, Debug, Eq, PartialEq, Hash, StableHash, Walkable)]
+pub enum BinarySegmentTy {
+    Int,
+    Float,
+    Char,
+    Str,
+    Bin,
+    Bits,
+}
+
+impl BinarySegmentTy {
+    pub fn from_symbol(name: Symbol) -> Option<Self> {
+        Some(match name {
+            sym::int => Self::Int,
+            sym::float => Self::Float,
+            sym::char => Self::Char,
+            sym::str => Self::Str,
+            sym::bin => Self::Bin,
+            sym::bits => Self::Bits,
+            _ => return None,
+        })
+    }
+
+    pub fn name(self) -> Symbol {
+        match self {
+            Self::Int => sym::int,
+            Self::Float => sym::float,
+            Self::Char => sym::char,
+            Self::Str => sym::str,
+            Self::Bin => sym::bin,
+            Self::Bits => sym::bits,
+        }
+    }
+}
+
+/// A flag in a binary pattern segment type (e.g., `little` in `x: int(16, little)`).
+#[derive(Clone, Copy, Encodable, Decodable, Debug, Eq, PartialEq, Hash, StableHash, Walkable)]
+pub enum BinarySegmentFlag {
+    Signed,
+    Unsigned,
+    Big,
+    Little,
+    Native,
+    Utf8,
+    Utf16,
+    Utf32,
+}
+
+impl BinarySegmentFlag {
+    pub fn from_symbol(name: Symbol) -> Option<Self> {
+        Some(match name {
+            sym::signed => Self::Signed,
+            sym::unsigned => Self::Unsigned,
+            sym::big => Self::Big,
+            sym::little => Self::Little,
+            sym::native => Self::Native,
+            sym::utf8 => Self::Utf8,
+            sym::utf16 => Self::Utf16,
+            sym::utf32 => Self::Utf32,
+            _ => return None,
+        })
+    }
+
+    pub fn name(self) -> Symbol {
+        match self {
+            Self::Signed => sym::signed,
+            Self::Unsigned => sym::unsigned,
+            Self::Big => sym::big,
+            Self::Little => sym::little,
+            Self::Native => sym::native,
+            Self::Utf8 => sym::utf8,
+            Self::Utf16 => sym::utf16,
+            Self::Utf32 => sym::utf32,
+        }
+    }
+}
+
+/// An argument of a binary pattern segment type (e.g., `size = n` in `x: bin(size = n)`).
+#[derive(Clone, Encodable, Decodable, Debug, Walkable)]
+pub struct BinarySegmentArg {
+    pub kind: BinarySegmentArgKind,
+    pub span: Span,
+}
+
+#[derive(Clone, Encodable, Decodable, Debug, Walkable)]
+pub enum BinarySegmentArgKind {
+    /// `size = expr`, or a bare `expr`.
+    Size(Box<Expr>),
+    /// `unit = expr`.
+    Unit(Box<Expr>),
+    /// A flag such as `signed` or `little`.
+    Flag(BinarySegmentFlag),
+}
+
+/// The type of a binary pattern segment with its arguments (e.g., `int(16, little)`).
+///
+/// The short form `x:n`, with an integer literal `n`, is parsed as `x: int(n)`.
+#[derive(Clone, Encodable, Decodable, Debug, Walkable)]
+pub struct BinarySegmentSpec {
+    pub ty: BinarySegmentTy,
+    /// The type's name, or an empty span after the `:` in the short form.
+    pub ty_span: Span,
+    pub args: ThinVec<BinarySegmentArg>,
+    pub span: Span,
+}
+
+/// What gives a binary pattern segment its type.
+#[derive(Clone, Encodable, Decodable, Debug, Walkable)]
+pub enum PatBinarySegmentKind {
+    /// `x`: the type comes from the value, `int(8)` for a binding.
+    Default,
+    /// `x: int(16)`, or its short form `x:16`.
+    Spec(BinarySegmentSpec),
+    /// `rest @ ..`, or `..` with a `_` pattern: the rest of the matched value.
+    Rest,
+    /// `rest @ ..` or `..` that isn't the last segment.
+    Recovered(ErrorGuaranteed),
+}
+
+/// A segment of a binary pattern (e.g., `len:8`, `rest: bin` or `rest @ ..`).
+#[derive(Clone, Encodable, Decodable, Debug, Walkable)]
+pub struct PatBinarySegment {
+    pub pat: Box<Pat>,
+    pub kind: PatBinarySegmentKind,
+    pub span: Span,
+}
+
+/// A segment of a binary pattern expression (e.g., `len:8` or `payload: bin`).
+#[derive(Clone, Encodable, Decodable, Debug, Walkable)]
+pub struct BinarySegment {
+    pub expr: Box<Expr>,
+    pub spec: Option<BinarySegmentSpec>,
+    pub span: Span,
+}
+
 /// All the different flavors of pattern that Rust recognizes.
 //
 // Adding a new variant? Please update `test_pat` in `tests/ui/macros/stringify.rs`.
@@ -1044,6 +1185,9 @@ pub enum PatKind {
 
     /// A map pattern (e.g., `#{"name" => name, ..}`).
     Map(ThinVec<PatMapField>, PatMapFieldsRest),
+
+    /// A binary pattern (e.g., `<<len:8, rest @ ..>>`).
+    BinaryPattern(ThinVec<PatBinarySegment>),
 
     /// A rest pattern `..`.
     ///
@@ -1768,6 +1912,7 @@ impl Expr {
             // Need parens if and only if there are prefix attributes.
             ExprKind::Array(_)
             | ExprKind::Map(_)
+            | ExprKind::BinaryPattern(_)
             | ExprKind::Await(..)
             | ExprKind::Use(..)
             | ExprKind::Block(..)
@@ -1958,6 +2103,8 @@ pub enum ExprKind {
     Array(Box<ArrayExpr>),
     /// A map expression (e.g., `#{"a" => 1, ..base}`).
     Map(Box<MapExpr>),
+    /// A binary pattern expression (e.g., `<<len:8, payload: bin()>>`).
+    BinaryPattern(ThinVec<BinarySegment>),
     /// Allow anonymous constants from an inline `const` block.
     ConstBlock(AnonConst),
     /// A function call.

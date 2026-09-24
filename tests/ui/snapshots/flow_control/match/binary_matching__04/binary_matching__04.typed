@@ -1,0 +1,82 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// source: patina-by-example/src/flow_control/match/binary_matching.md
+// block: 4/6
+
+fn main() ({
+    let text: str = ("Patina!" as str);
+    let bytes: bin =
+        (<<(b"PNG" as bin), ('!' as char), ("rest" as str)>> as str);
+    // For literals, types are optional unless you want to override a default.
+    // Like with bindings, you set the type after a colon.
+    let packet: bits =
+        (<<(b"PT" as bin), ('!' as char), ("ok" as str), (5 as int):
+                int(size = (3 as int))>> as bits);
+
+    (match (text as str) {
+
+            // Every segment before the rest is valid UTF-8, so `rest` is a `str`.
+            <<"Pa", 't', rest @ ..>> =>
+
+            // The shorthand form can also be used with literals. 
+            {
+            ((io::put_chars as
+                    fn(term) -> term)(([([("text rest " as str),
+                                ((patina_fmt::debug as fn(term) -> term)((rest as str)) as
+                                    term)] as [term])] as [[term]])) as term);
+            ((io::nl as fn() -> term)() as term);
+        }
+        _ => {
+            ((io::put_chars as
+                    fn(term) -> term)(([([("unknown text" as str)] as [str])] as
+                    [[str]])) as term);
+            ((io::nl as fn() -> term)() as term);
+        }
+    } as ())
+    (match (bytes as bin) {
+        <<b"PNG", '!', rest @ ..>> => {
+            ((io::put_chars as
+                    fn(term) -> term)(([([("png data " as str),
+                                ((patina_fmt::debug as fn(term) -> term)((rest as bin)) as
+                                    term)] as [term])] as [[term]])) as term);
+            ((io::nl as fn() -> term)() as term);
+        }
+        _ => {
+            ((io::put_chars as
+                    fn(term) -> term)(([([("unknown binary" as str)] as [str])]
+                    as [[str]])) as term);
+            ((io::nl as fn() -> term)() as term);
+        }
+    } as ())
+    (match (packet as bits) {
+        <<b"PT", '!', "ok", 5: int(size = (3 as int)), rest @ ..>> => {
+            ((io::put_chars as
+                    fn(term) -> term)(([([("packet tail " as str),
+                                ((patina_fmt::debug as fn(term) -> term)((rest as bits)) as
+                                    term)] as [term])] as [[term]])) as term);
+            ((io::nl as fn() -> term)() as term);
+        }
+        _ => {
+            ((io::put_chars as
+                    fn(term) -> term)(([([("unknown packet" as str)] as [str])]
+                    as [[str]])) as term);
+            ((io::nl as fn() -> term)() as term);
+        }
+    } as ())
+} as ())

@@ -28,7 +28,9 @@
             _count@0_1 = _count@0_0 + 1,
             case _count@0_1 =:= 3 of
                 true ->
-                    begin io:put_chars([[<<"three">>]]), io:nl(), {} end,
+                    begin
+                        io:put_chars([[<<"three"/utf8>>]]), io:nl(), {}
+                    end,
                     '$patina_marker':continue(_count@0_1),
                     {};
                 false -> {}
@@ -41,7 +43,9 @@
             case _count@0_1 =:= 5 of
                 true ->
                     begin
-                        io:put_chars([[<<"OK, that's enough">>]]), io:nl(), {}
+                        io:put_chars([[<<"OK, that's enough"/utf8>>]]),
+                        io:nl(),
+                        {}
                     end,
                     '$patina_marker':break({break, 0, {}, _count@0_1}),
                     {};
@@ -53,7 +57,7 @@
 main() ->
     _count@0_0 = 0,
     begin
-        io:put_chars([[<<"Let's count until infinity!">>]]),
+        io:put_chars([[<<"Let's count until infinity!"/utf8>>]]),
         io:nl(),
         {}
     end,

@@ -29,7 +29,7 @@ main() ->
     __a@0_0 = some_fn(),
     begin
         io:put_chars([[<<"This function returns and you can see "
-                         "this line.">>]]),
+                         "this line."/utf8>>]]),
         io:nl(),
         {}
     end.

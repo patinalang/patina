@@ -25,14 +25,14 @@
 
 function() ->
     begin
-        io:put_chars([[<<"called `MyMod::Nested::function()`">>]]),
+        io:put_chars([[<<"called `MyMod::Nested::function()`"/utf8>>]]),
         io:nl(),
         {}
     end.
 
 private_function() ->
     begin
-        io:put_chars([[<<"called `MyMod::Nested::private_function()`">>]]),
+        io:put_chars([[<<"called `MyMod::Nested::private_function()`"/utf8>>]]),
         io:nl(),
         {}
     end.

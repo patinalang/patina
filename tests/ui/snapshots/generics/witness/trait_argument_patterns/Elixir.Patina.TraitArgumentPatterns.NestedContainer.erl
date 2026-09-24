@@ -34,13 +34,13 @@
                                                  {_T@3_0}},
                                             _self@4_0, _a@5_0, _wrapped@6_0) ->
     begin
-        io:put_chars([[<<"NestedContainer::contains(">>,
+        io:put_chars([[<<"NestedContainer::contains("/utf8>>,
                        io_lib:format("~ktp", [_self@4_0]),
-                       <<", ">>,
+                       <<", "/utf8>>,
                        io_lib:format("~ktp", [_a@5_0]),
-                       <<", ">>,
+                       <<", "/utf8>>,
                        io_lib:format("~ktp", [_wrapped@6_0]),
-                       <<")">>]]),
+                       <<")"/utf8>>]]),
         io:nl(),
         {}
     end,

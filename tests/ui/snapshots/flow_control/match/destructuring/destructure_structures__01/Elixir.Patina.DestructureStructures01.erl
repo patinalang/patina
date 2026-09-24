@@ -35,26 +35,26 @@ main() ->
                                                                     =
                                                                     {1, _b@1_0},
                                                                 y = _y@2_0} ->
-            io:put_chars([[<<"First of x is 1, b = ">>,
+            io:put_chars([[<<"First of x is 1, b = "/utf8>>,
                            io_lib:format("~ktp", [_b@1_0]),
-                           <<",  y = ">>,
+                           <<",  y = "/utf8>>,
                            io_lib:format("~ktp", [_y@2_0]),
-                           <<" ">>]]),
+                           <<" "/utf8>>]]),
             io:nl(),
             {};
         #'Elixir.Patina.DestructureStructures01.main.Foo':'Foo'{x
                                                                     = _i@3_0,
                                                                 y = 2} ->
-            io:put_chars([[<<"y is 2, i = ">>,
+            io:put_chars([[<<"y is 2, i = "/utf8>>,
                            io_lib:format("~ktp", [_i@3_0])]]),
             io:nl(),
             {};
         #'Elixir.Patina.DestructureStructures01.main.Foo':'Foo'{x
                                                                     = _,
                                                                 y = _y@4_0} ->
-            io:put_chars([[<<"y = ">>,
+            io:put_chars([[<<"y = "/utf8>>,
                            io_lib:format("~ktp", [_y@4_0]),
-                           <<", we don't care about x">>]]),
+                           <<", we don't care about x"/utf8>>]]),
             io:nl(),
             {}
     end,
@@ -67,9 +67,9 @@ main() ->
                                                             y = _y0@7_0} =
         _faa@5_0,
     begin
-        io:put_chars([[<<"Outside: x0 = ">>,
+        io:put_chars([[<<"Outside: x0 = "/utf8>>,
                        io_lib:format("~ktp", [_x0@6_0]),
-                       <<", y0 = ">>,
+                       <<", y0 = "/utf8>>,
                        io_lib:format("~ktp", [_y0@7_0])]]),
         io:nl(),
         {}
@@ -81,9 +81,9 @@ main() ->
                                                                 _nested_y@10_0} =
         _bar@8_0,
     begin
-        io:put_chars([[<<"Nested: nested_x = ">>,
+        io:put_chars([[<<"Nested: nested_x = "/utf8>>,
                        io_lib:format("~ktp", [_nested_x@9_0]),
-                       <<", nested_y = ">>,
+                       <<", nested_y = "/utf8>>,
                        io_lib:format("~ktp", [_nested_y@10_0])]]),
         io:nl(),
         {}

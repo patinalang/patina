@@ -24,4 +24,6 @@
 '__info__'(Key) -> module_info(Key).
 
 main() ->
-    begin io:put_chars([[<<"Hello!">>]]), io:nl(), {} end.
+    begin
+        io:put_chars([[<<"Hello!"/utf8>>]]), io:nl(), {}
+    end.

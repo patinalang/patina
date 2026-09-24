@@ -32,13 +32,13 @@
                                             _T@0_0, _self@3_0, _a@4_0,
                                             _value@5_0) ->
     begin
-        io:put_chars([[<<"BoundContainer::contains(">>,
+        io:put_chars([[<<"BoundContainer::contains("/utf8>>,
                        io_lib:format("~ktp", [_self@3_0]),
-                       <<", ">>,
+                       <<", "/utf8>>,
                        io_lib:format("~ktp", [_a@4_0]),
-                       <<", ">>,
+                       <<", "/utf8>>,
                        io_lib:format("~ktp", [_value@5_0]),
-                       <<")">>]]),
+                       <<")"/utf8>>]]),
         io:nl(),
         {}
     end,

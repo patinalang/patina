@@ -1,0 +1,33 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// Every segment of a constant binary pattern, and its size, must be a constant value.
+
+fn size() -> int ({ (8 as int) } as int)
+
+const CALL_SIZE: bits =
+    (<<(1 as int): int(size = ((size as fn() -> int {size})() as int))>> as
+        bits);
+const ARITHMETIC: bin =
+    (<<(((1 as int) + (1 as int) as int)): int(size = (8 as int))>> as bin);
+
+fn values()
+    ->
+        (bits,
+        bin) ({ (((CALL_SIZE as bits), (ARITHMETIC as bin)) as (bits, bin)) }
+    as (bits, bin))

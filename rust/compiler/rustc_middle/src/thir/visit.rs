@@ -2,6 +2,7 @@ use super::{
     AdtExpr, AdtExprBase, Arm, Block, ClosureExpr, Expr, ExprKind, InlineAsmExpr, InlineAsmOperand,
     Pat, PatKind, Stmt, StmtKind, Thir,
 };
+use crate::erl::binary_pattern::BinarySegmentSize;
 use crate::thir::LoopMatchMatchData;
 
 /// Every `walk_*` method uses deconstruction to access fields of structs and
@@ -160,6 +161,14 @@ pub fn walk_expr<'thir, 'tcx: 'thir, V: Visitor<'thir, 'tcx>>(
                 visitor.visit_expr(&visitor.thir()[field.value]);
             }
         }
+        BinaryPattern { ref segments } => {
+            for segment in &**segments {
+                visitor.visit_expr(&visitor.thir()[segment.value]);
+                if let BinarySegmentSize::Dynamic(size) = segment.layout.size {
+                    visitor.visit_expr(&visitor.thir()[size]);
+                }
+            }
+        }
         Adt(box AdtExpr {
             ref fields,
             ref base,
@@ -294,6 +303,17 @@ pub fn walk_pat<'thir, 'tcx: 'thir, V: Visitor<'thir, 'tcx>>(
         return;
     };
 
+    // Size expressions may refer to bindings of earlier segments, so visit them in order.
+    if let PatKind::BinaryPattern { segments } = &pat.kind {
+        for segment in segments {
+            visitor.visit_pat(&segment.pattern);
+            if let BinarySegmentSize::Dynamic(size) = segment.layout.size {
+                visitor.visit_expr(&visitor.thir()[size]);
+            }
+        }
+        return;
+    }
+
     for_each_immediate_subpat(pat, |p| visitor.visit_pat(p));
 }
 
@@ -341,6 +361,12 @@ pub(crate) fn for_each_immediate_subpat<'a, 'tcx>(
             for field in fields {
                 callback(&field.key);
                 callback(&field.pattern);
+            }
+        }
+
+        PatKind::BinaryPattern { segments } => {
+            for segment in segments {
+                callback(&segment.pattern);
             }
         }
 

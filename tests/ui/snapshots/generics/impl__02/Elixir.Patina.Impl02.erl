@@ -29,7 +29,7 @@ main() ->
     begin
         io:put_chars([[io_lib:format("~ktp",
                                      ['Elixir.Patina.Impl02.Val':value(_x@0_0)]),
-                       <<", ">>,
+                       <<", "/utf8>>,
                        io_lib:format("~ktp",
                                      ['Elixir.Patina.Impl02.GenVal':value(_y@1_0)])]]),
         io:nl(),

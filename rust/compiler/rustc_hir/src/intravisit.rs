@@ -742,6 +742,21 @@ pub fn walk_ty_pat<'v, V: Visitor<'v>>(visitor: &mut V, pattern: &'v TyPat<'v>) 
     V::Result::output()
 }
 
+pub fn walk_binary_segment_spec<'v, V: Visitor<'v>>(
+    visitor: &mut V,
+    spec: &'v BinarySegmentSpec<'v>,
+) -> V::Result {
+    for arg in spec.args {
+        match arg.kind {
+            BinarySegmentArgKind::Size(expr) | BinarySegmentArgKind::Unit(expr) => {
+                try_visit!(visitor.visit_expr(expr))
+            }
+            BinarySegmentArgKind::Flag(_) => {}
+        }
+    }
+    V::Result::output()
+}
+
 pub fn walk_pat<'v, V: Visitor<'v>>(visitor: &mut V, pattern: &'v Pat<'v>) -> V::Result {
     let Pat { hir_id, kind, span, default_binding_modes: _ } = pattern;
     try_visit!(visitor.visit_id(*hir_id));
@@ -758,6 +773,14 @@ pub fn walk_pat<'v, V: Visitor<'v>>(visitor: &mut V, pattern: &'v Pat<'v>) -> V:
             for field in fields {
                 try_visit!(visitor.visit_pat_map_key(field.key));
                 try_visit!(visitor.visit_pat(field.pat));
+            }
+        }
+        PatKind::BinaryPattern(segments) => {
+            for segment in segments {
+                try_visit!(visitor.visit_pat(segment.pat));
+                if let Some(spec) = segment.kind.spec() {
+                    try_visit!(walk_binary_segment_spec(visitor, spec));
+                }
             }
         }
         PatKind::Or(pats) => walk_list!(visitor, visit_pat, pats),
@@ -851,6 +874,14 @@ pub fn walk_expr<'v, V: Visitor<'v>>(visitor: &mut V, expression: &'v Expr<'v>) 
             match rest {
                 MapTailExpr::Base(base) => try_visit!(visitor.visit_expr(base)),
                 MapTailExpr::None | MapTailExpr::NoneWithError(_) => {}
+            }
+        }
+        ExprKind::BinaryPattern(segments) => {
+            for segment in segments {
+                try_visit!(visitor.visit_expr(segment.expr));
+                if let Some(spec) = segment.spec {
+                    try_visit!(walk_binary_segment_spec(visitor, spec));
+                }
             }
         }
         ExprKind::ConstBlock(ref const_block) => {

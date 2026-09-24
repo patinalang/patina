@@ -24,7 +24,7 @@
 '__info__'(Key) -> module_info(Key).
 
 main() ->
-    _name@0_0 = <<"Peter">>,
+    _name@0_0 = <<"Peter"/utf8>>,
     _age@1_0 = 27,
     _peter@2_0 =
         #'Elixir.Patina.Structs01.Person':'Person'{name =
@@ -42,13 +42,13 @@ main() ->
         #'Elixir.Patina.Structs01.Point':'Point'{x = 1.03e+1,
                                                  y = 2.0e-1},
     begin
-        io:put_chars([[<<"point coordinates: (">>,
+        io:put_chars([[<<"point coordinates: ("/utf8>>,
                        io_lib:format("~ktp",
                                      [_point@3_0#'Elixir.Patina.Structs01.Point':'Point'.x]),
-                       <<", ">>,
+                       <<", "/utf8>>,
                        io_lib:format("~ktp",
                                      [_point@3_0#'Elixir.Patina.Structs01.Point':'Point'.y]),
-                       <<")">>]]),
+                       <<")"/utf8>>]]),
         io:nl(),
         {}
     end,
@@ -57,13 +57,13 @@ main() ->
                                                                        =
                                                                        1.03e+1},
     begin
-        io:put_chars([[<<"second point: (">>,
+        io:put_chars([[<<"second point: ("/utf8>>,
                        io_lib:format("~ktp",
                                      [_bottom_right@5_0#'Elixir.Patina.Structs01.Point':'Point'.x]),
-                       <<", ">>,
+                       <<", "/utf8>>,
                        io_lib:format("~ktp",
                                      [_bottom_right@5_0#'Elixir.Patina.Structs01.Point':'Point'.y]),
-                       <<")">>]]),
+                       <<")"/utf8>>]]),
         io:nl(),
         {}
     end,
@@ -87,10 +87,10 @@ main() ->
                                                             = 1,
                                                         '1' = 1.0e-1},
     begin
-        io:put_chars([[<<"pair contains ">>,
+        io:put_chars([[<<"pair contains "/utf8>>,
                        io_lib:format("~ktp",
                                      [_pair@10_0#'Elixir.Patina.Structs01.Pair':'Pair'.'0']),
-                       <<" and ">>,
+                       <<" and "/utf8>>,
                        io_lib:format("~ktp",
                                      [_pair@10_0#'Elixir.Patina.Structs01.Pair':'Pair'.'1'])]]),
         io:nl(),
@@ -101,9 +101,9 @@ main() ->
                                            '1' = _decimal@12_0} =
         _pair@10_0,
     begin
-        io:put_chars([[<<"pair contains ">>,
+        io:put_chars([[<<"pair contains "/utf8>>,
                        io_lib:format("~ktp", [_integer@11_0]),
-                       <<" and ">>,
+                       <<" and "/utf8>>,
                        io_lib:format("~ktp", [_decimal@12_0])]]),
         io:nl(),
         {}

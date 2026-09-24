@@ -1,15 +1,27 @@
 // source: patina-by-example/src/flow_control/match/binary_matching.md
-// block: 5/5
+// block: 5/6
 
 pub fn main() {
     let png_prefix = "PNG";
     let jpg_prefix = "JPG";
 
-    match "PNG!rest" { (/*ERROR*/) => (/*ERROR*/), }
+    match "PNG!rest" {
+        <<^png_prefix, rest @ ..>> => println!("png data {:?}", rest),
+        <<^jpg_prefix, rest @ ..>> => println!("jpg data {:?}", rest),
+        _ => println!("unknown data"),
+    }
 
     let bit_prefix = 7;
 
-    // Like with literals, you can use `as` to specify parameters.
-    // Or use the shorthand syntax.
-    (/*ERROR*/)
+    match <<119>> {
+
+            // Like with literals, you can give the segment a type.
+            <<^bit_prefix: int(size = 16, little), rest @ ..>> =>
+            println!("expected {:?}", rest),
+
+            // Or use the shorthand syntax.
+            <<^bit_prefix: int(size = 4), rest @ ..>> =>
+            println!("expected {:?}", rest),
+        _ => println!("unexpected prefix"),
+    }
 }

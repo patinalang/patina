@@ -43,8 +43,7 @@ Whitespace
 Lt
 Lt
 Ident
-Whitespace
-At
+Colon
 Whitespace
 Ident
 OpenParen
@@ -53,8 +52,7 @@ CloseParen
 Comma
 Whitespace
 Ident
-Whitespace
-At
+Colon
 Whitespace
 Ident
 OpenParen
@@ -66,9 +64,8 @@ Ident
 Whitespace
 At
 Whitespace
-Ident
-OpenParen
-CloseParen
+Dot
+Dot
 Gt
 Gt
 Whitespace

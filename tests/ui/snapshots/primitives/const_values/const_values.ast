@@ -4,3 +4,13 @@ const PAIR: ([int], #{str => int}) = (NUMBERS, #{KEY => 42});
 const ALIAS: ([int], #{str => int}) = PAIR;
 
 pub fn const_values() -> ([int], #{str => int}) { ALIAS }
+
+const VERSION: int = 2;
+const HEADER: bin =
+    <<b"PT", VERSION: int(size = 16), 'ł': char(utf16), 1.5:
+            float(size = 32)>>;
+const FLAGS: bits = <<1: int(size = 1), 0: int(size = 2)>>;
+
+pub fn binary_pattern_values() -> (bin, [bits]) {
+    (HEADER, [FLAGS, <<1: int(size = 3)>>])
+}

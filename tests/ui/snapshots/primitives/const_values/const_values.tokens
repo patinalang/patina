@@ -133,3 +133,119 @@ Ident
 Whitespace
 CloseBrace
 Whitespace
+Ident
+Whitespace
+Ident
+Colon
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Semi
+Whitespace
+Ident
+Whitespace
+Ident
+Colon
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Lt
+Lt
+Literal { kind: ByteStr { terminated: true }, suffix_start: 5 }
+Comma
+Whitespace
+Ident
+Colon
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 2 }
+Comma
+Whitespace
+Literal { kind: Char { terminated: true }, suffix_start: 4 }
+Colon
+Whitespace
+Ident
+OpenParen
+Ident
+CloseParen
+Comma
+Whitespace
+Literal { kind: Float { base: Decimal, empty_exponent: false }, suffix_start: 3 }
+Colon
+Whitespace
+Ident
+OpenParen
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 2 }
+CloseParen
+Gt
+Gt
+Semi
+Whitespace
+Ident
+Whitespace
+Ident
+Colon
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Lt
+Lt
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Colon
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Comma
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Colon
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Gt
+Gt
+Semi
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+CloseParen
+Whitespace
+Minus
+Gt
+Whitespace
+OpenParen
+Ident
+Comma
+Whitespace
+OpenBracket
+Ident
+CloseBracket
+CloseParen
+Whitespace
+OpenBrace
+Whitespace
+OpenParen
+Ident
+Comma
+Whitespace
+OpenBracket
+Ident
+Comma
+Whitespace
+Lt
+Lt
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Colon
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Gt
+Gt
+CloseBracket
+CloseParen
+Whitespace
+CloseBrace
+Whitespace

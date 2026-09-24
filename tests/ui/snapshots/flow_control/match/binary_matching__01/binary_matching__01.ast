@@ -1,8 +1,14 @@
 // source: patina-by-example/src/flow_control/match/binary_matching.md
-// block: 1/5
+// block: 1/6
 
 pub fn main() {
+    let payload = <<1, 17, 42, 99>>;
+
+    match payload {
+        <<prefix: int(size = 16), tag: int(size = 8), rest @ ..>> =>
+            println!("prefix = {}, tag = {}, rest = {:?}", prefix, tag, rest),
 
 
-    (/*ERROR*/)
+            _ => println!("did not match"),
+    }
 }

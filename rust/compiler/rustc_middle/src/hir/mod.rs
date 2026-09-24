@@ -329,6 +329,7 @@ impl<'tcx> TyCtxt<'tcx> {
                     // Any expression child of these expressions constitute reads.
                     ExprKind::Array(..)
                     | ExprKind::Map(_, _)
+                    | ExprKind::BinaryPattern(_)
                     | ExprKind::Call(_, _)
                     | ExprKind::Use(_, _)
                     | ExprKind::MethodCall(_, _, _, _)

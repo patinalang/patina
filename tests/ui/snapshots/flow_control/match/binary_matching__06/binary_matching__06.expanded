@@ -1,0 +1,43 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// source: patina-by-example/src/flow_control/match/binary_matching.md
+// block: 6/6
+
+pub fn main() {
+    let name = "Patina";
+    let version = 3;
+
+    // Every segment is valid UTF-8, so this is a `str`.
+    let greeting: str = <<"Hello, ", name, '!'>>;
+
+    // The size is a whole number of bytes, so this is a `bin`.
+    let header: bin =
+        <<b"PT", version: int(size = 16), 1.5: float(size = 32), 'é':
+                char(utf16)>>;
+
+    // Anything else is a `bits`.
+    let flags: bits =
+        <<1: int(size = 1), 0: int(size = 1), (version + 1): int(size = 3)>>;
+
+    {
+        io::put_chars([[patina_fmt::debug(greeting), " ",
+                            patina_fmt::debug(header), " ", patina_fmt::debug(flags)]]);
+        io::nl();
+    };
+}

@@ -24,27 +24,29 @@
 '__info__'(Key) -> module_info(Key).
 
 main() ->
-    _name@0_0 = <<"world">>,
+    _name@0_0 = <<"world"/utf8>>,
     _n@1_0 = 42,
     begin
-        io:put_chars([[<<"hello, ">>, _name@0_0, <<"!">>]]),
+        io:put_chars([[<<"hello, "/utf8>>,
+                       _name@0_0,
+                       <<"!"/utf8>>]]),
         io:nl(),
         {}
     end,
     begin
         io:put_chars([[_name@0_0,
-                       <<" = ">>,
+                       <<" = "/utf8>>,
                        io_lib:format("~ktp", [_n@1_0])]]),
         io:nl(),
         {}
     end,
     begin
         io:put_chars([[_name@0_0,
-                       <<" and ">>,
+                       <<" and "/utf8>>,
                        io_lib:format("~ktp", [_n@1_0])]]),
         io:nl(),
         {}
     end,
-    begin io:put_chars([<<"no ">>]), {} end,
-    begin io:put_chars([<<"newline">>]), {} end,
+    begin io:put_chars([<<"no "/utf8>>]), {} end,
+    begin io:put_chars([<<"newline"/utf8>>]), {} end,
     begin io:nl(), {} end.

@@ -579,6 +579,10 @@ fn resolve_local<'tcx>(
 
             PatKind::Map(fields, _) => fields.iter().any(|field| is_binding_pat(field.pat)),
 
+            PatKind::BinaryPattern(segments) => {
+                segments.iter().any(|segment| is_binding_pat(segment.pat))
+            }
+
             PatKind::Slice(pats1, pats2, pats3) => {
                 pats1.iter().any(|p| is_binding_pat(p))
                     || pats2.iter().any(|p| is_binding_pat(p))

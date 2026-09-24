@@ -25,18 +25,18 @@
 
 foo() ->
     begin
-        io:put_chars([[<<"You called ">>,
-                       io_lib:format("~ktp", [<<"foo">>]),
-                       <<"()">>]]),
+        io:put_chars([[<<"You called "/utf8>>,
+                       io_lib:format("~ktp", [<<"foo"/utf8>>]),
+                       <<"()"/utf8>>]]),
         io:nl(),
         {}
     end.
 
 bar() ->
     begin
-        io:put_chars([[<<"You called ">>,
-                       io_lib:format("~ktp", [<<"bar">>]),
-                       <<"()">>]]),
+        io:put_chars([[<<"You called "/utf8>>,
+                       io_lib:format("~ktp", [<<"bar"/utf8>>]),
+                       <<"()"/utf8>>]]),
         io:nl(),
         {}
     end.
@@ -45,16 +45,17 @@ main() ->
     foo(),
     bar(),
     begin
-        io:put_chars([[io_lib:format("~ktp", [<<"1 + 1">>]),
-                       <<" = ">>,
+        io:put_chars([[io_lib:format("~ktp",
+                                     [<<"1 + 1"/utf8>>]),
+                       <<" = "/utf8>>,
                        io_lib:format("~ktp", [1 + 1])]]),
         io:nl(),
         {}
     end,
     begin
         io:put_chars([[io_lib:format("~ktp",
-                                     [<<"{ let x = 1; x * x + 2 * x - 1 }">>]),
-                       <<" = ">>,
+                                     [<<"{ let x = 1; x * x + 2 * x - 1 }"/utf8>>]),
+                       <<" = "/utf8>>,
                        io_lib:format("~ktp",
                                      [begin
                                           _x@0_1 = 1,

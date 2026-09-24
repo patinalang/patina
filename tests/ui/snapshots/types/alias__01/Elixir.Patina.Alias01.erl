@@ -29,11 +29,11 @@ main() ->
     begin
         io:put_chars([[io_lib:format("~ktp",
                                      [_nanoseconds@0_0]),
-                       <<" nanoseconds + ">>,
+                       <<" nanoseconds + "/utf8>>,
                        io_lib:format("~ktp", [_inches@1_0]),
-                       <<" inches = ">>,
+                       <<" inches = "/utf8>>,
                        io_lib:format("~ktp", [_nanoseconds@0_0 + _inches@1_0]),
-                       <<" unit?">>]]),
+                       <<" unit?"/utf8>>]]),
         io:nl(),
         {}
     end.

@@ -30,13 +30,15 @@
                     case _n@0_0 rem 15 =:= 0 of
                         true ->
                             begin
-                                io:put_chars([[<<"fizzbuzz">>]]), io:nl(), {}
+                                io:put_chars([[<<"fizzbuzz"/utf8>>]]),
+                                io:nl(),
+                                {}
                             end;
                         false ->
                             case _n@0_0 rem 3 =:= 0 of
                                 true ->
                                     begin
-                                        io:put_chars([[<<"fizz">>]]),
+                                        io:put_chars([[<<"fizz"/utf8>>]]),
                                         io:nl(),
                                         {}
                                     end;
@@ -44,7 +46,7 @@
                                     case _n@0_0 rem 5 =:= 0 of
                                         true ->
                                             begin
-                                                io:put_chars([[<<"buzz">>]]),
+                                                io:put_chars([[<<"buzz"/utf8>>]]),
                                                 io:nl(),
                                                 {}
                                             end;

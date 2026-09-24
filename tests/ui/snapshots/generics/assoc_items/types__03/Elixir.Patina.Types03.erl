@@ -41,11 +41,11 @@ main() ->
                                                            _number_1@0_0,
                                                        '1' = _number_2@1_0},
     begin
-        io:put_chars([[<<"Does container contain ">>,
+        io:put_chars([[<<"Does container contain "/utf8>>,
                        io_lib:format("~ktp", [_number_1@0_0]),
-                       <<" and ">>,
+                       <<" and "/utf8>>,
                        io_lib:format("~ktp", [_number_2@1_0]),
-                       <<": ">>,
+                       <<": "/utf8>>,
                        io_lib:format("~ktp",
                                      ['Elixir.Patina.Types03.Container':'Types03::Contains::contains'({'Elixir.Patina.Types03.Container',
                                                                                                        {}},
@@ -56,7 +56,7 @@ main() ->
         {}
     end,
     begin
-        io:put_chars([[<<"First number: ">>,
+        io:put_chars([[<<"First number: "/utf8>>,
                        io_lib:format("~ktp",
                                      ['Elixir.Patina.Types03.Container':'Types03::Contains::first'({'Elixir.Patina.Types03.Container',
                                                                                                     {}},
@@ -65,7 +65,7 @@ main() ->
         {}
     end,
     begin
-        io:put_chars([[<<"Last number: ">>,
+        io:put_chars([[<<"Last number: "/utf8>>,
                        io_lib:format("~ktp",
                                      ['Elixir.Patina.Types03.Container':'Types03::Contains::last'({'Elixir.Patina.Types03.Container',
                                                                                                    {}},
@@ -74,7 +74,7 @@ main() ->
         {}
     end,
     begin
-        io:put_chars([[<<"The difference is: ">>,
+        io:put_chars([[<<"The difference is: "/utf8>>,
                        io_lib:format("~ktp",
                                      [difference({'Elixir.Patina.Types03.Container',
                                                   {}},

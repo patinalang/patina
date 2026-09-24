@@ -492,6 +492,52 @@ pub(crate) struct InvalidMapKeySeparator {
 }
 
 #[derive(Diagnostic)]
+#[diag("expected a binding, a literal or a pinned variable, found {$token}")]
+#[note("a binary pattern segment is `name`, `_`, a literal like `1` or `\"abc\"`, or `^name`")]
+pub(crate) struct BinarySegmentExpectedPattern {
+    #[primary_span]
+    pub span: Span,
+    pub token: String,
+}
+
+#[derive(Diagnostic)]
+#[diag("`..` can only be the last segment of a binary pattern")]
+pub(crate) struct BinarySegmentRestNotLast {
+    #[primary_span]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("expected a literal size or segment type")]
+#[help("segment types are `int`, `float`, `char`, `str`, `bin` or `bits`")]
+pub(crate) struct BinarySegmentExpectedSizeOrType {
+    #[primary_span]
+    pub span: Span,
+    #[subdiagnostic]
+    pub suggestion: BinarySegmentSizeSugg,
+}
+
+#[derive(Subdiagnostic)]
+#[multipart_suggestion("a size that isn't a literal needs a segment type", style = "verbose")]
+pub(crate) struct BinarySegmentSizeSugg {
+    #[suggestion_part(code = " int(")]
+    pub open: Span,
+    #[suggestion_part(code = ")")]
+    pub close: Span,
+    #[applicability]
+    pub applicability: Applicability,
+}
+
+#[derive(Diagnostic)]
+#[diag("unknown binary pattern segment type `{$ty}`")]
+#[help("expected one of `int`, `float`, `char`, `str`, `bin` or `bits`")]
+pub(crate) struct BinarySegmentUnknownType {
+    #[primary_span]
+    pub span: Span,
+    pub ty: Ident,
+}
+
+#[derive(Diagnostic)]
 #[diag("map rest `..` must be the final entry")]
 pub(crate) struct MapRestNotFinal {
     #[primary_span]

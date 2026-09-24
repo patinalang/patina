@@ -39,7 +39,7 @@ main() ->
     begin
         io:put_chars([[io_lib:format("~ktp",
                                      [{'Elixir.Patina.Repr05.TaggedEnum.TupleStyle',
-                                       <<"hello">>}])]]),
+                                       <<"hello"/utf8>>}])]]),
         io:nl(),
         {}
     end,

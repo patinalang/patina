@@ -1,0 +1,320 @@
+error: only the last segment of a binary pattern can be unsized
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:6:11
+   |
+LL |         <<rest: bin, x:8>> => {}
+   |           ^^^^^^^^^
+   |
+help: specify a size for this segment
+   |
+LL |         <<rest: bin(/* size */), x:8>> => {}
+   |                    ++++++++++++
+
+error: only the last segment of a binary pattern can be unsized
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:7:11
+   |
+LL |         <<rest: bits(unit = 4), x:8>> => {}
+   |           ^^^^^^^^^^^^^^^^^^^^
+   |
+help: specify a size for this segment
+   |
+LL |         <<rest: bits(unit = 4, /* size */), x:8>> => {}
+   |                              ++++++++++++
+
+error: only the last segment of a binary pattern can be unsized
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:12:11
+   |
+LL |         <<x: bin, rest: str>> => {}
+   |           ^^^^^^
+   |
+help: specify a size for this segment
+   |
+LL |         <<x: bin(/* size */), rest: str>> => {}
+   |                 ++++++++++++
+
+error: only the last segment of a binary pattern can bind a `str`
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:13:11
+   |
+LL |         <<x: str, rest @ ..>> => {}
+   |           ^^^^^^
+   |
+help: match it with a sized `bin` instead
+   |
+LL -         <<x: str, rest @ ..>> => {}
+LL +         <<x: bin(/* size */), rest @ ..>> => {}
+   |
+
+error: `str` can't match the rest of a `bin`
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:21:16
+   |
+LL |         <<x:8, rest: str>> => {}
+   |                ^^^^^^^^^
+   |
+   = note: the rest of a `bin` might not be valid UTF-8
+help: match it with `bin` instead
+   |
+LL -         <<x:8, rest: str>> => {}
+LL +         <<x:8, rest: bin>> => {}
+   |
+
+error: `str` can't match the rest of a `term`
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:25:11
+   |
+LL |         <<rest: str>> => {}
+   |           ^^^^^^^^^
+   |
+   = note: the rest of a `term` might not be valid UTF-8
+help: match it with `bin` instead
+   |
+LL -         <<rest: str>> => {}
+LL +         <<rest: bin>> => {}
+   |
+
+error: `str` can't match the rest of a `str` after a segment that might split a character
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:30:16
+   |
+LL |         <<x:8, rest: str>> => {}
+   |           ---  ^^^^^^^^^
+   |           |
+   |           this segment might end inside a UTF-8 character
+   |
+   = note: the rest of a `str` is valid UTF-8 only if every earlier segment is valid UTF-8 on its own
+help: match the rest with `bin` instead
+   |
+LL -         <<x:8, rest: str>> => {}
+LL +         <<x:8, rest: bin>> => {}
+   |
+
+error: `str` can't match the rest of a `str` after a segment that might split a character
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:34:28
+   |
+LL |         <<"ł": str(utf16), rest: str>> => {}
+   |           ---------------  ^^^^^^^^^
+   |           |
+   |           this segment might end inside a UTF-8 character
+   |
+   = note: the rest of a `str` is valid UTF-8 only if every earlier segment is valid UTF-8 on its own
+help: match the rest with `bin` instead
+   |
+LL -         <<"ł": str(utf16), rest: str>> => {}
+LL +         <<"ł": str(utf16), rest: bin>> => {}
+   |
+
+error: `size` isn't allowed on a `str` segment
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:42:18
+   |
+LL |         <<x: str(3), c: char(size = 8), f: float(unit = 8)>> => {}
+   |                  ^
+   |
+help: use `bin` instead
+   |
+LL -         <<x: str(3), c: char(size = 8), f: float(unit = 8)>> => {}
+LL +         <<x: bin(3), c: char(size = 8), f: float(unit = 8)>> => {}
+   |
+
+error: `size` isn't allowed on a `char` segment
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:42:37
+   |
+LL |         <<x: str(3), c: char(size = 8), f: float(unit = 8)>> => {}
+   |                                     ^
+
+error: `unit` isn't allowed on a `float` segment
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:42:57
+   |
+LL |         <<x: str(3), c: char(size = 8), f: float(unit = 8)>> => {}
+   |                                                         ^
+
+error: `size` isn't allowed on a `str` segment
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:43:30
+   |
+LL |         <<n:8, x: str(size = n), rest @ ..>> => {}
+   |                              ^
+   |
+help: use `bin` instead
+   |
+LL -         <<n:8, x: str(size = n), rest @ ..>> => {}
+LL +         <<n:8, x: bin(size = n), rest @ ..>> => {}
+   |
+
+error: `size` isn't allowed on a `str` segment
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:45:21
+   |
+LL |         <<"ab": str(2)>> => {}
+   |                     ^
+   |
+help: remove the size
+   |
+LL -         <<"ab": str(2)>> => {}
+LL +         <<"ab": str>> => {}
+   |
+
+error: `size` isn't allowed on a `str` segment
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:46:27
+   |
+LL |         <<"ł": str(utf16, 2), "ł": str(size = 2, utf16)>> => {}
+   |                           ^
+   |
+help: remove the size
+   |
+LL -         <<"ł": str(utf16, 2), "ł": str(size = 2, utf16)>> => {}
+LL +         <<"ł": str(utf16), "ł": str(size = 2, utf16)>> => {}
+   |
+
+error: `size` isn't allowed on a `str` segment
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:46:47
+   |
+LL |         <<"ł": str(utf16, 2), "ł": str(size = 2, utf16)>> => {}
+   |                                               ^
+   |
+help: remove the size
+   |
+LL -         <<"ł": str(utf16, 2), "ł": str(size = 2, utf16)>> => {}
+LL +         <<"ł": str(utf16, 2), "ł": str(utf16)>> => {}
+   |
+
+error: a `float` segment's size must be a literal 16, 32 or 64
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:48:20
+   |
+LL |         <<f: float(8), y: bits(unit = 0), z: bin(3, unit = 4)>> => {}
+   |                    ^
+
+error: `unit` must be an integer literal between 1 and 256
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:48:39
+   |
+LL |         <<f: float(8), y: bits(unit = 0), z: bin(3, unit = 4)>> => {}
+   |                                       ^
+
+error: the unit of a `bin` segment must be a multiple of 8
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:48:60
+   |
+LL |         <<f: float(8), y: bits(unit = 0), z: bin(3, unit = 4)>> => {}
+   |                                                            ^
+   |
+   = help: use `bits` for a bitstring whose size isn't a whole number of bytes
+
+error: `little` isn't allowed on a `bin` segment
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:50:18
+   |
+LL |         <<a: bin(little), c: char(signed), d: int(8, big, little), e: char(utf8, big)>> => {}
+   |                  ^^^^^^
+
+error: `signed` isn't allowed on a `char` segment
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:50:35
+   |
+LL |         <<a: bin(little), c: char(signed), d: int(8, big, little), e: char(utf8, big)>> => {}
+   |                                   ^^^^^^
+
+error: the segment's endianness is specified more than once
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:50:59
+   |
+LL |         <<a: bin(little), c: char(signed), d: int(8, big, little), e: char(utf8, big)>> => {}
+   |                                                      ---  ^^^^^^
+   |                                                      |
+   |                                                      first specified here
+
+error: endianness isn't allowed on a `utf8` segment
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:50:82
+   |
+LL |         <<a: bin(little), c: char(signed), d: int(8, big, little), e: char(utf8, big)>> => {}
+   |                                                                                  ^^^
+   |
+   = help: endianness only applies to the `utf16` and `utf32` encodings
+
+error: a string or binary literal segment can't have a size
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:52:34
+   |
+LL |         <<"abc": str, b"ab": bin(2)>> => {}
+   |                                  ^
+   |
+   = note: the size of the segment is the length of the literal
+
+error[E0308]: mismatched types
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:60:9
+   |
+LL |     match n {
+   |           - this expression has type `int`
+LL |         // A binary pattern needs a `str`, `bin`, `bits` or `term` scrutinee.
+LL |         <<x:8>> => {}
+   |         ^^^^^^^ expected `int`, found `bits`
+
+error[E0308]: mismatched types
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:65:11
+   |
+LL |         <<^n: float, 5: float(), true>> => {}
+   |           ^^ expected `float`, found `int`
+
+error[E0308]: mismatched types
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:65:22
+   |
+LL |         <<^n: float, 5: float(), true>> => {}
+   |                      ^ expected `float`, found `int`
+   |
+help: use a float literal
+   |
+LL |         <<^n: float, 5.0: float(), true>> => {}
+   |                       ++
+
+error: boolean literals can't be binary pattern segments
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:65:34
+   |
+LL |         <<^n: float, 5: float(), true>> => {}
+   |                                  ^^^^
+
+error[E0308]: mismatched types
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:71:15
+   |
+LL |     let _ = <<b: bin>>;
+   |               ^ expected `bin`, found `bits`
+
+error: a value of type `bool` can't be a binary pattern segment
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:72:15
+   |
+LL |     let _ = <<x>>;
+   |               ^
+   |
+   = note: binary pattern segments hold `int`, `float`, `char`, `str`, `bin` or `bits` values
+
+error[E0308]: mismatched types
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:73:15
+   |
+LL |     let _ = <<1: bin()>>;
+   |               ^ expected `bin`, found `int`
+
+error: only string literals can be encoded as `utf16` or `utf32`
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:75:36
+   |
+LL |     let _ = <<s: str(utf8), s: str(utf16)>>;
+   |                                    ^^^^^
+
+error: endianness isn't allowed on a `utf8` segment
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:76:30
+   |
+LL |     let _ = <<"a": str(utf8, little), "a": bin(utf16)>>;
+   |                              ^^^^^^
+   |
+   = help: endianness only applies to the `utf16` and `utf32` encodings
+
+error: `utf16` isn't allowed on a `bin` segment
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:76:48
+   |
+LL |     let _ = <<"a": str(utf8, little), "a": bin(utf16)>>;
+   |                                                ^^^^^
+
+error[E0308]: mismatched types
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:78:18
+   |
+LL |     let _: str = <<"ł": str(utf16)>>;
+   |            ---   ^^^^^^^^^^^^^^^^^^^ expected `str`, found `bin`
+   |            |
+   |            expected due to this
+
+error[E0308]: mismatched types
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:85:26
+   |
+LL |             let _: bin = rest;
+   |                    ---   ^^^^ expected `bin`, found `bits`
+   |                    |
+   |                    expected due to this
+
+error: aborting due to 35 previous errors
+
+For more information about this error, try `rustc --explain E0308`.

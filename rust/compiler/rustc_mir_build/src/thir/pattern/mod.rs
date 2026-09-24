@@ -15,8 +15,8 @@ use rustc_hir::pat_util::EnumerateAndAdjustIterator;
 use rustc_hir::{self as hir, RangeEnd};
 use rustc_index::Idx;
 use rustc_middle::thir::{
-    Ascription, DerefPatBorrowMode, FieldPat, LocalVarId, MapFieldPat, Pat, PatKind, PatRange,
-    PatRangeBoundary,
+    Ascription, BinarySegmentPat, DerefPatBorrowMode, FieldPat, LocalVarId, MapFieldPat, Pat,
+    PatKind, PatRange, PatRangeBoundary,
 };
 use rustc_middle::ty::adjustment::{PatAdjust, PatAdjustment};
 use rustc_middle::ty::{
@@ -458,6 +458,13 @@ impl<'tcx, 'ptcx> PatCtxt<'tcx, 'ptcx> {
                 PatKind::Map { fields }
             }
 
+            hir::PatKind::BinaryPattern(segments) => {
+                match segments.iter().map(|segment| self.lower_binary_segment(segment)).collect() {
+                    Ok(segments) => PatKind::BinaryPattern { segments },
+                    Err(e) => PatKind::Error(e),
+                }
+            }
+
             hir::PatKind::Or(pats) => PatKind::Or { pats: self.lower_patterns(pats) },
 
             hir::PatKind::Guard(pat, condition) => PatKind::Guard {
@@ -471,6 +478,24 @@ impl<'tcx, 'ptcx> PatCtxt<'tcx, 'ptcx> {
         // For pattern kinds that haven't already returned, create a `thir::Pat`
         // with the HIR pattern node's type and span.
         Box::new(Pat { span, ty, kind, extra: None })
+    }
+
+    fn lower_binary_segment(
+        &mut self,
+        segment: &'tcx hir::PatBinarySegment<'tcx>,
+    ) -> Result<BinarySegmentPat<'tcx>, ErrorGuaranteed> {
+        let Some(&layout) = self.typeck_results.binary_segment_layouts().get(segment.pat.hir_id)
+        else {
+            let guar = self
+                .tcx
+                .dcx()
+                .span_delayed_bug(segment.span, "binary pattern segment without a type");
+            return Err(guar);
+        };
+        let pattern = *self.lower_pattern(segment.pat);
+        let layout =
+            layout.map_size_expr(|size| self.upper.mirror_expr(self.tcx.hir_expect_expr(size)));
+        Ok(BinarySegmentPat { pattern, layout, span: segment.span })
     }
 
     fn lower_tuple_subpats(

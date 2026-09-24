@@ -1,8 +1,0 @@
-error: expected type, found `1`
-  --> tests/ui/src/flow_control/match/binary_matching__01.pt:5:21
-   |
-LL |     let payload = <<1, 17, 42, 99>>;
-   |                     ^ expected type
-
-error: aborting due to 1 previous error
-

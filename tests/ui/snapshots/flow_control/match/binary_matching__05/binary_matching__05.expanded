@@ -1,0 +1,53 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// source: patina-by-example/src/flow_control/match/binary_matching.md
+// block: 5/6
+
+pub fn main() {
+    let png_prefix = "PNG";
+    let jpg_prefix = "JPG";
+
+    match "PNG!rest" {
+        <<^png_prefix, rest @ ..>> =>
+
+            // Like with literals, you can give the segment a type.
+            // Or use the shorthand syntax.
+            {
+            io::put_chars([["png data ", patina_fmt::debug(rest)]]);
+            io::nl();
+        }
+        <<^jpg_prefix, rest @ ..>> => {
+            io::put_chars([["jpg data ", patina_fmt::debug(rest)]]);
+            io::nl();
+        }
+        _ => { io::put_chars([["unknown data"]]); io::nl(); }
+    }
+    let bit_prefix = 7;
+    match <<119>> {
+        <<^bit_prefix: int(size = 16, little), rest @ ..>> => {
+            io::put_chars([["expected ", patina_fmt::debug(rest)]]);
+            io::nl();
+        }
+        <<^bit_prefix: int(size = 4), rest @ ..>> => {
+            io::put_chars([["expected ", patina_fmt::debug(rest)]]);
+            io::nl();
+        }
+        _ => { io::put_chars([["unexpected prefix"]]); io::nl(); }
+    }
+}
