@@ -150,18 +150,12 @@ where
         | ty::Map(..)
         | ty::Slice(_)
         | ty::Never
-        | ty::Error(_) => Ok(ty::Binder::dummy(vec![])),
-
-        // impl {Meta,}Sized for dyn Trait
-        ty::Dynamic(..) => match sizedness {
-            SizedTraitKind::Sized => Err(NoSolution),
-            SizedTraitKind::MetaSized => Ok(ty::Binder::dummy(vec![])),
-        },
-
-        // impl {} for extern type
-        ty::Foreign(..) => Err(NoSolution),
-
-        ty::Alias(..) | ty::Param(_) | ty::Placeholder(..) => Err(NoSolution),
+        | ty::Error(_)
+        | ty::Dynamic(..)
+        | ty::Foreign(..)
+        | ty::Alias(..)
+        | ty::Param(_)
+        | ty::Placeholder(..) => Ok(ty::Binder::dummy(vec![])),
 
         ty::Bound(..) | ty::Infer(ty::TyVar(_) | ty::FreshTy(_)) => {
             panic!("unexpected type `{ty:?}`")
@@ -920,12 +914,6 @@ where
     // FIXME(mgca): Also add associated consts to
     // the requirements here.
     for associated_type_def_id in cx.associated_type_def_ids(trait_ref.def_id) {
-        // associated types that require `Self: Sized` do not show up in the built-in
-        // implementation of `Trait for dyn Trait`, and can be dropped here.
-        if cx.generics_require_sized_self(associated_type_def_id) {
-            continue;
-        }
-
         requirements.extend(
             cx.item_bounds(associated_type_def_id)
                 .iter_instantiated(cx, trait_ref.args)

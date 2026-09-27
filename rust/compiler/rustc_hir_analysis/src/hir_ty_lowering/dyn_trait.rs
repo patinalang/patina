@@ -8,7 +8,7 @@ use rustc_errors::{
 use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::DefId;
 use rustc_hir::{self as hir, HirId, LangItem};
-use rustc_lint_defs::builtin::{BARE_TRAIT_OBJECTS, UNUSED_ASSOCIATED_TYPE_BOUNDS};
+use rustc_lint_defs::builtin::BARE_TRAIT_OBJECTS;
 use rustc_middle::ty::elaborate::ClauseWithSupertraitSpan;
 use rustc_middle::ty::{
     self, BottomUpFolder, ExistentialPredicateStableCmpExt as _, Ty, TyCtxt, TypeFoldable,
@@ -286,43 +286,19 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             }
         }
 
-        // Flag assoc item bindings that didn't really need to be specified.
-        for &(projection_bound, span) in projection_bounds.values() {
-            let def_id = projection_bound.item_def_id();
-            if tcx.generics_require_sized_self(def_id) {
-                // FIXME(mgca): Ideally we would generalize the name of this lint to sth. like
-                // `unused_associated_item_bindings` since this can now also trigger on *const*
-                // projections / assoc *const* bindings.
-                tcx.emit_node_span_lint(
-                    UNUSED_ASSOCIATED_TYPE_BOUNDS,
-                    hir_id,
-                    span,
-                    crate::errors::UnusedAssociatedTypeBounds { span },
-                );
-            }
-        }
-
-        // The user has to constrain all associated types & consts via bindings unless the
-        // corresponding associated item has a `where Self: Sized` clause. This can be done
+        // The user has to constrain all associated types & consts via bindings. This can be done
         // in the `dyn Trait` directly, in the supertrait bounds or behind trait aliases.
         //
         // Collect all associated items that weren't specified and compute the list of
         // projection bounds which we'll later turn into existential ones.
-        //
-        // We intentionally keep around projections whose associated item has a `Self: Sized`
-        // bound in order to be able to wfcheck the RHS, allow the RHS to constrain generic
-        // parameters and to imply bounds.
-        // See also <https://github.com/rust-lang/rust/pull/140684>.
         let mut missing_assoc_items = FxIndexSet::default();
         let projection_bounds: Vec<_> = ordered_associated_items
             .into_iter()
-            .filter_map(|key @ (def_id, _)| {
+            .filter_map(|key| {
                 if let Some(&assoc) = projection_bounds.get(&key) {
                     return Some(assoc);
                 }
-                if !tcx.generics_require_sized_self(def_id) {
-                    missing_assoc_items.insert(key);
-                }
+                missing_assoc_items.insert(key);
                 None
             })
             .collect();

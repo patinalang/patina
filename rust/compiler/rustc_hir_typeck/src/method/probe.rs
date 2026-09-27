@@ -17,8 +17,8 @@ use rustc_middle::middle::stability;
 use rustc_middle::ty::elaborate::supertrait_def_ids;
 use rustc_middle::ty::fast_reject::{DeepRejectCtxt, TreatParams, simplify_type};
 use rustc_middle::ty::{
-    self, AssocContainer, AssocItem, GenericArgs, GenericArgsRef, GenericParamDefKind, ParamEnvAnd,
-    Ty, TyCtxt, TypeVisitableExt, Unnormalized, Upcast,
+    self, AssocContainer, GenericArgs, GenericArgsRef, GenericParamDefKind, ParamEnvAnd, Ty,
+    TyCtxt, TypeVisitableExt, Unnormalized, Upcast,
 };
 use rustc_middle::{bug, span_bug};
 use rustc_session::lint;
@@ -1793,25 +1793,6 @@ impl<'a, 'tcx> ProbeContext<'a, 'tcx> {
 }
 
 impl<'tcx> Pick<'tcx> {
-    /// In case there were unstable name collisions, emit them as a lint.
-    /// Checks whether two picks do not refer to the same trait item for the same `Self` type.
-    /// Only useful for comparisons of picks in order to improve diagnostics.
-    /// Do not use for type checking.
-    pub(crate) fn differs_from(&self, other: &Self) -> bool {
-        let Self {
-            item: AssocItem { def_id, kind: _, container: _ },
-            kind: _,
-            import_ids: _,
-            autoderefs: _,
-            autoref_or_ptr_adjustment: _,
-            self_ty,
-            unstable_candidates: _,
-            receiver_steps: _,
-            shadowed_candidates: _,
-        } = *self;
-        self_ty != other.self_ty || def_id != other.item.def_id
-    }
-
     /// In case there were unstable name collisions, emit them as a lint.
     pub(crate) fn maybe_emit_unstable_name_collision_hint(
         &self,

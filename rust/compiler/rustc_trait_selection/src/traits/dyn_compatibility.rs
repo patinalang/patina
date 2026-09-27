@@ -6,7 +6,6 @@
 
 use std::ops::ControlFlow;
 
-use rustc_errors::FatalError;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::DefId;
 use rustc_hir::{self as hir, LangItem};
@@ -20,13 +19,11 @@ use rustc_span::{DUMMY_SP, Span};
 use smallvec::SmallVec;
 use tracing::{debug, instrument};
 
-use super::elaborate;
 use crate::infer::TyCtxtInferExt;
 pub use crate::traits::DynCompatibilityViolation;
 use crate::traits::query::evaluate_obligation::InferCtxtExt;
 use crate::traits::{
-    AssocConstViolation, MethodViolation, Obligation, ObligationCause,
-    normalize_param_env_or_error, util,
+    MethodViolation, Obligation, ObligationCause, normalize_param_env_or_error, util,
 };
 
 /// Returns the dyn-compatibility violations that affect HIR ty lowering.
@@ -63,18 +60,10 @@ fn is_dyn_compatible(tcx: TyCtxt<'_>, trait_def_id: DefId) -> bool {
     tcx.dyn_compatibility_violations(trait_def_id).is_empty()
 }
 
-/// We say a method is *vtable safe* if it can be invoked on a trait
-/// object. Note that dyn-compatible traits can have some
-/// non-vtable-safe methods, so long as they require `Self: Sized` or
-/// otherwise ensure that they cannot be used when `Self = Trait`.
+/// We say a method is *vtable safe* if it can be invoked on a trait object.
 pub fn is_vtable_safe_method(tcx: TyCtxt<'_>, trait_def_id: DefId, method: ty::AssocItem) -> bool {
     debug_assert!(tcx.generics_of(trait_def_id).has_self);
     debug!("is_vtable_safe_method({:?}, {:?})", trait_def_id, method);
-    // Any method that has a `Self: Sized` bound cannot be called.
-    if tcx.generics_require_sized_self(method.def_id) {
-        return false;
-    }
-
     virtual_call_violations_for_method(tcx, trait_def_id, method).is_empty()
 }
 
@@ -91,11 +80,7 @@ fn dyn_compatibility_violations_for_trait(
         .collect();
 
     // Check the trait itself.
-    if trait_has_sized_self(tcx, trait_def_id) {
-        // We don't want to include the requirement from `Sized` itself to be `Sized` in the list.
-        let spans = get_sized_bounds(tcx, trait_def_id);
-        violations.push(DynCompatibilityViolation::SizedSelf(spans));
-    } else if let Some(span) = tcx.trait_def(trait_def_id).force_dyn_incompatible {
+    if let Some(span) = tcx.trait_def(trait_def_id).force_dyn_incompatible {
         violations.push(DynCompatibilityViolation::ExplicitlyDynIncompatible([span].into()));
     }
 
@@ -119,56 +104,6 @@ fn dyn_compatibility_violations_for_trait(
     violations
 }
 
-fn sized_trait_bound_spans<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    bounds: hir::GenericBounds<'tcx>,
-) -> impl 'tcx + Iterator<Item = Span> {
-    bounds.iter().filter_map(move |b| match b {
-        hir::GenericBound::Trait(trait_ref)
-            if trait_has_sized_self(
-                tcx,
-                trait_ref.trait_ref.trait_def_id().unwrap_or_else(|| FatalError.raise()),
-            ) =>
-        {
-            // Fetch spans for supertraits that are `Sized`: `trait T: Super`
-            Some(trait_ref.span)
-        }
-        _ => None,
-    })
-}
-
-fn get_sized_bounds(tcx: TyCtxt<'_>, trait_def_id: DefId) -> SmallVec<[Span; 1]> {
-    tcx.hir_get_if_local(trait_def_id)
-        .and_then(|node| match node {
-            hir::Node::Item(hir::Item {
-                kind: hir::ItemKind::Trait { generics, bounds, .. },
-                ..
-            }) => Some(
-                generics
-                    .predicates
-                    .iter()
-                    .filter_map(|pred| {
-                        match pred.kind {
-                            hir::WherePredicateKind::BoundPredicate(pred)
-                                if pred.bounded_ty.hir_id.owner.to_def_id() == trait_def_id =>
-                            {
-                                // Fetch spans for trait bounds that are Sized:
-                                // `trait T where Self: Pred`
-                                Some(sized_trait_bound_spans(tcx, pred.bounds))
-                            }
-                            _ => None,
-                        }
-                    })
-                    .flatten()
-                    // Fetch spans for supertraits that are `Sized`: `trait T: Super`.
-                    .chain(sized_trait_bound_spans(tcx, bounds))
-                    .collect::<SmallVec<[Span; 1]>>(),
-            ),
-            _ => None,
-        })
-        .unwrap_or_else(SmallVec::new)
-}
-
 fn predicates_reference_self(
     tcx: TyCtxt<'_>,
     trait_def_id: DefId,
@@ -183,6 +118,14 @@ fn predicates_reference_self(
     predicates
         .iter()
         .map(|&(predicate, sp)| (predicate.instantiate_supertrait(tcx, trait_ref), sp))
+        // Patina dispatches through the witness carried by the trait object, so a supertrait
+        // mentioning `Self` (`trait Tr: PartialEq<Self>`) is fine, as long as it has no
+        // associated types: those would need an existential projection whose trait args still
+        // mention the erased `Self`.
+        .filter(|(clause, _)| match clause.kind().skip_binder() {
+            ty::ClauseKind::Trait(pred) => trait_has_associated_types(tcx, pred.def_id()),
+            _ => true,
+        })
         .filter_map(|(clause, sp)| {
             // Super predicates cannot allow self projections, since they're
             // impossible to make into existential bounds without eager resolution
@@ -193,13 +136,21 @@ fn predicates_reference_self(
         .collect()
 }
 
+/// Whether `trait_def_id` or any of its supertraits declares an associated type or type const,
+/// i.e. something a trait object type has to name through an existential projection.
+fn trait_has_associated_types(tcx: TyCtxt<'_>, trait_def_id: DefId) -> bool {
+    elaborate::supertrait_def_ids(tcx, trait_def_id).any(|def_id| {
+        tcx.associated_items(def_id)
+            .in_definition_order()
+            .any(|item| item.is_type() || item.is_type_const())
+    })
+}
+
 fn bounds_reference_self(tcx: TyCtxt<'_>, trait_def_id: DefId) -> SmallVec<[Span; 1]> {
     tcx.associated_items(trait_def_id)
         .in_definition_order()
         // We're only looking at associated type bounds
         .filter(|item| item.is_type())
-        // Ignore GATs with `Self: Sized`
-        .filter(|item| !tcx.generics_require_sized_self(item.def_id))
         .flat_map(|item| {
             tcx.explicit_item_bounds(item.def_id)
                 .iter_identity_copied()
@@ -287,38 +238,6 @@ fn super_predicates_are_unconditionally_const(
         .collect()
 }
 
-fn trait_has_sized_self(tcx: TyCtxt<'_>, trait_def_id: DefId) -> bool {
-    tcx.generics_require_sized_self(trait_def_id)
-}
-
-fn generics_require_sized_self(tcx: TyCtxt<'_>, def_id: DefId) -> bool {
-    let Some(sized_def_id) = tcx.lang_items().sized_trait() else {
-        return false; /* No Sized trait, can't require it! */
-    };
-
-    // Search for a predicate like `Self: Sized` amongst the trait bounds.
-    let predicates: Vec<_> = tcx
-        .predicates_of(def_id)
-        .instantiate_identity(tcx)
-        .predicates
-        .into_iter()
-        .map(Unnormalized::skip_norm_wip)
-        .collect();
-    elaborate(tcx, predicates).any(|pred| match pred.kind().skip_binder() {
-        ty::ClauseKind::Trait(ref trait_pred) => {
-            trait_pred.def_id() == sized_def_id && trait_pred.self_ty().is_param(0)
-        }
-        ty::ClauseKind::RegionOutlives(_)
-        | ty::ClauseKind::TypeOutlives(_)
-        | ty::ClauseKind::Projection(_)
-        | ty::ClauseKind::ConstArgHasType(_, _)
-        | ty::ClauseKind::WellFormed(_)
-        | ty::ClauseKind::ConstEvaluatable(_)
-        | ty::ClauseKind::UnstableFeature(_)
-        | ty::ClauseKind::HostEffect(..) => false,
-    })
-}
-
 #[instrument(level = "debug", skip(tcx), ret)]
 pub fn dyn_compatibility_violations_for_assoc_item(
     tcx: TyCtxt<'_>,
@@ -330,48 +249,13 @@ pub fn dyn_compatibility_violations_for_assoc_item(
         return Vec::new();
     }
 
-    // Any item that has a `Self: Sized` requisite is otherwise exempt from the regulations.
-    if tcx.generics_require_sized_self(item.def_id) {
-        return Vec::new();
-    }
-
     let span = || item.ident(tcx).span;
 
     match item.kind {
-        ty::AssocKind::Const { name, is_type_const } => {
-            // We will permit type associated consts if they are explicitly mentioned in the
-            // trait object type. We can't check this here, as here we only check if it is
-            // guaranteed to not be possible.
-
-            let mut errors = Vec::new();
-
-            if tcx.features().min_generic_const_args() {
-                if !tcx.generics_of(item.def_id).is_own_empty() {
-                    errors.push(AssocConstViolation::Generic);
-                } else if !is_type_const {
-                    errors.push(AssocConstViolation::NonType);
-                }
-
-                let ty = ty::Binder::dummy(
-                    tcx.type_of(item.def_id).instantiate_identity().skip_norm_wip(),
-                );
-                if contains_illegal_self_type_reference(
-                    tcx,
-                    trait_def_id,
-                    ty,
-                    AllowSelfProjections::Yes,
-                ) {
-                    errors.push(AssocConstViolation::TypeReferencesSelf);
-                }
-            } else {
-                errors.push(AssocConstViolation::FeatureNotEnabled);
-            }
-
-            errors
-                .into_iter()
-                .map(|error| DynCompatibilityViolation::AssocConst(name, error, span()))
-                .collect()
-        }
+        // Patina reads associated consts through the `dyn` value's witness, so they never
+        // prevent a trait from being dyn-compatible. Only naming one on `dyn Trait` itself
+        // (`<dyn Trait>::CONST`) is rejected, during typeck.
+        ty::AssocKind::Const { .. } => Vec::new(),
         ty::AssocKind::Fn { name, .. } => {
             virtual_call_violations_for_method(tcx, trait_def_id, item)
                 .into_iter()
@@ -407,10 +291,7 @@ pub fn dyn_compatibility_violations_for_assoc_item(
     }
 }
 
-/// Returns `Some(_)` if this method cannot be called on a trait
-/// object; this does not necessarily imply that the enclosing trait
-/// is dyn-incompatible, because the method might have a where clause
-/// `Self: Sized`.
+/// Returns `Some(_)` if this method cannot be called on a trait object.
 fn virtual_call_violations_for_method<'tcx>(
     tcx: TyCtxt<'tcx>,
     trait_def_id: DefId,
@@ -418,80 +299,20 @@ fn virtual_call_violations_for_method<'tcx>(
 ) -> Vec<MethodViolation> {
     let sig = tcx.fn_sig(method.def_id).instantiate_identity().skip_norm_wip();
 
-    // The method's first parameter must be named `self`
-    if !method.is_method() {
-        let sugg = if let Some(hir::Node::TraitItem(hir::TraitItem {
-            generics,
-            kind: hir::TraitItemKind::Fn(sig, _),
-            ..
-        })) = tcx.hir_get_if_local(method.def_id).as_ref()
-        {
-            let sm = tcx.sess.source_map();
-            Some((
-                (
-                    format!("&self{}", if sig.decl.inputs.is_empty() { "" } else { ", " }),
-                    sm.span_through_char(sig.span, '(').shrink_to_hi(),
-                ),
-                (
-                    format!("{} Self: Sized", generics.add_where_or_trailing_comma()),
-                    generics.tail_span_for_predicate_suggestion(),
-                ),
-            ))
-        } else {
-            None
-        };
-
-        // Not having `self` parameter messes up the later checks,
-        // so we need to return instead of pushing
-        return vec![MethodViolation::StaticMethod(sugg)];
-    }
-
     let mut errors = Vec::new();
 
-    for (i, &input_ty) in sig.skip_binder().inputs().iter().enumerate().skip(1) {
-        if contains_illegal_self_type_reference(
-            tcx,
-            trait_def_id,
-            sig.rebind(input_ty),
-            AllowSelfProjections::Yes,
-        ) {
-            let span = if let Some(hir::Node::TraitItem(hir::TraitItem {
-                kind: hir::TraitItemKind::Fn(sig, _),
-                ..
-            })) = tcx.hir_get_if_local(method.def_id).as_ref()
-            {
-                Some(sig.decl.inputs[i].span)
-            } else {
-                None
-            };
-            errors.push(MethodViolation::ReferencesSelfInput(span));
-        }
-    }
-    if contains_illegal_self_type_reference(
-        tcx,
-        trait_def_id,
-        sig.output(),
-        AllowSelfProjections::Yes,
-    ) {
-        errors.push(MethodViolation::ReferencesSelfOutput);
-    }
     if let Some(error) = contains_illegal_impl_trait_in_trait(tcx, method.def_id, sig.output()) {
         errors.push(error);
     }
-
-    // We can't monomorphize things like `fn foo<A>(...)`.
-    let own_counts = tcx.generics_of(method.def_id).own_counts();
-    if own_counts.types > 0 || own_counts.consts > 0 {
-        errors.push(MethodViolation::Generic);
-    }
-
-    let receiver_ty = tcx.liberate_late_bound_regions(method.def_id, sig.input(0));
 
     // `self: Self` can't be dispatched on.
     // However, this is considered dyn compatible. We allow it as a special case here.
     // FIXME(mikeyhew) get rid of this `if` statement once `receiver_is_dispatchable` allows
     // `Receiver: Unsize<Receiver[Self => dyn Trait]>`.
-    if receiver_ty != tcx.types.self_param {
+    if method.is_method()
+        && let receiver_ty = tcx.liberate_late_bound_regions(method.def_id, sig.input(0))
+        && receiver_ty != tcx.types.self_param
+    {
         if !receiver_is_dispatchable(tcx, method, receiver_ty) {
             let span = if let Some(hir::Node::TraitItem(hir::TraitItem {
                 kind: hir::TraitItemKind::Fn(sig, _),
@@ -953,10 +774,5 @@ impl<'tcx> TypeVisitor<TyCtxt<'tcx>> for IllegalRpititVisitor<'tcx> {
 }
 
 pub(crate) fn provide(providers: &mut Providers) {
-    *providers = Providers {
-        dyn_compatibility_violations,
-        is_dyn_compatible,
-        generics_require_sized_self,
-        ..*providers
-    };
+    *providers = Providers { dyn_compatibility_violations, is_dyn_compatible, ..*providers };
 }

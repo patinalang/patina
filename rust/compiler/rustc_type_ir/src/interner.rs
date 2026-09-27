@@ -261,8 +261,6 @@ pub trait Interner:
 
     fn coroutine_for_closure(self, def_id: Self::CoroutineClosureId) -> Self::CoroutineId;
 
-    fn generics_require_sized_self(self, def_id: Self::DefId) -> bool;
-
     fn item_bounds(
         self,
         def_id: Self::DefId,
@@ -317,8 +315,6 @@ pub trait Interner:
         self,
         def_id: Self::DefId,
     ) -> ty::EarlyBinder<Self, impl IntoIterator<Item = ty::Binder<Self, ty::TraitRef<Self>>>>;
-
-    fn impl_self_is_guaranteed_unsized(self, def_id: Self::ImplId) -> bool;
 
     fn has_target_features(self, def_id: Self::FunctionId) -> bool;
 

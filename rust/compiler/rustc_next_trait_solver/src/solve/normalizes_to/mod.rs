@@ -212,7 +212,7 @@ where
         ecx: &mut EvalCtxt<'_, D>,
         goal: Goal<I, NormalizesTo<I>>,
         impl_def_id: I::ImplId,
-        then: impl FnOnce(&mut EvalCtxt<'_, D>, Certainty) -> QueryResult<I>,
+        _then: impl FnOnce(&mut EvalCtxt<'_, D>, Certainty) -> QueryResult<I>,
     ) -> Result<Candidate<I>, NoSolution> {
         let cx = ecx.cx();
 
@@ -317,41 +317,7 @@ where
             };
 
             if !cx.has_item_definition(target_item_def_id) {
-                // If the impl is missing an item, it's either because the user forgot to
-                // provide it, or the user is not *obligated* to provide it (because it
-                // has a trivially false `Sized` predicate). If it's the latter, we cannot
-                // delay a bug because we can have trivially false where clauses, so we
-                // treat it as rigid.
-                if cx.impl_self_is_guaranteed_unsized(impl_def_id) {
-                    match ecx.typing_mode() {
-                        // Trying to normalize such associated items is always ambiguous
-                        // during coherence to avoid cyclic reasoning. See the example in
-                        // tests/ui/traits/trivial-unsized-projection-in-coherence.rs.
-                        //
-                        // As this ambiguity is unavoidable we emit a nested ambiguous
-                        // goal instead of using `Certainty::AMBIGUOUS`. This allows us to
-                        // return the nested goals to the parent `AliasRelate` goal. This
-                        // would be relevant if any of the nested goals refer to the `term`.
-                        // This is not the case here and we only prefer adding an ambiguous
-                        // nested goal for consistency.
-                        ty::TypingMode::Coherence => {
-                            ecx.add_goal(GoalSource::Misc, goal.with(cx, PredicateKind::Ambiguous));
-                            return then(ecx, Certainty::Yes);
-                        }
-                        ty::TypingMode::Analysis { .. }
-                        | ty::TypingMode::Borrowck { .. }
-                        | ty::TypingMode::PostBorrowckAnalysis { .. }
-                        | ty::TypingMode::PostAnalysis => {
-                            ecx.structurally_instantiate_normalizes_to_term(
-                                goal,
-                                goal.predicate.alias,
-                            );
-                            return then(ecx, Certainty::Yes);
-                        }
-                    }
-                } else {
-                    return error_response(ecx, cx.delay_bug("missing item"));
-                }
+                return error_response(ecx, cx.delay_bug("missing item"));
             }
 
             let target_container_def_id = cx.parent(target_item_def_id);

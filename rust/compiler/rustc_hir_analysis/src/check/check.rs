@@ -1221,8 +1221,6 @@ fn check_impl_items_against_trait<'tcx>(
 
     let trait_def = tcx.trait_def(trait_ref.def_id);
 
-    let self_is_guaranteed_unsize_self = tcx.impl_self_is_guaranteed_unsized(impl_id);
-
     for &impl_item in impl_item_refs {
         let ty_impl_item = tcx.associated_item(impl_item);
         let ty_trait_item = match ty_impl_item.expect_trait_impl() {
@@ -1246,15 +1244,6 @@ fn check_impl_items_against_trait<'tcx>(
                 ty::AssocKind::Const { .. } => {}
                 ty::AssocKind::Type { .. } => {}
             }
-        }
-
-        if self_is_guaranteed_unsize_self && tcx.generics_require_sized_self(ty_trait_item.def_id) {
-            tcx.emit_node_span_lint(
-                rustc_lint_defs::builtin::DEAD_CODE,
-                tcx.local_def_id_to_hir_id(ty_impl_item.def_id.expect_local()),
-                tcx.def_span(ty_impl_item.def_id),
-                errors::UselessImplItem,
-            )
         }
 
         check_specialization_validity(
@@ -1282,11 +1271,7 @@ fn check_impl_items_against_trait<'tcx>(
                 .as_ref()
                 .is_some_and(|node_item| node_item.item.defaultness(tcx).has_value());
 
-            if !is_implemented
-                && tcx.defaultness(impl_id).is_final()
-                // unsized types don't need to implement methods that have `Self: Sized` bounds.
-                && !(self_is_guaranteed_unsize_self && tcx.generics_require_sized_self(trait_item_id))
-            {
+            if !is_implemented && tcx.defaultness(impl_id).is_final() {
                 missing_items.push(tcx.associated_item(trait_item_id));
             }
 

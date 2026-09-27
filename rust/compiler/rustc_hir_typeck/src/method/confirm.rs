@@ -1,4 +1,3 @@
-use std::fmt::Debug;
 use std::ops::Deref;
 
 use rustc_hir as hir;
@@ -49,12 +48,6 @@ impl<'a, 'tcx> Deref for ConfirmContext<'a, 'tcx> {
     }
 }
 
-#[derive(Debug)]
-pub(crate) struct ConfirmResult<'tcx> {
-    pub callee: MethodCallee<'tcx>,
-    pub illegal_sized_bound: Option<Span>,
-}
-
 impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     pub(crate) fn confirm_method(
         &self,
@@ -64,7 +57,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         unadjusted_self_ty: Ty<'tcx>,
         pick: &probe::Pick<'tcx>,
         segment: &'tcx hir::PathSegment<'tcx>,
-    ) -> ConfirmResult<'tcx> {
+    ) -> MethodCallee<'tcx> {
         debug!(
             "confirm(unadjusted_self_ty={:?}, pick={:?}, generic_args={:?})",
             unadjusted_self_ty, pick, segment.args,
@@ -82,7 +75,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         unadjusted_self_ty: Ty<'tcx>,
         pick: &probe::Pick<'tcx>,
         segment: &hir::PathSegment<'tcx>,
-    ) -> ConfirmResult<'tcx> {
+    ) -> MethodCallee<'tcx> {
         let mut confirm_cx = ConfirmContext::new(self, span, self_expr, call_expr);
         confirm_cx.skip_record_for_diagnostics = true;
         confirm_cx.confirm(unadjusted_self_ty, pick, segment)
@@ -104,7 +97,7 @@ impl<'a, 'tcx> ConfirmContext<'a, 'tcx> {
         unadjusted_self_ty: Ty<'tcx>,
         pick: &probe::Pick<'tcx>,
         segment: &hir::PathSegment<'tcx>,
-    ) -> ConfirmResult<'tcx> {
+    ) -> MethodCallee<'tcx> {
         // Adjust the self expression the user provided and obtain the adjusted type.
         let self_ty = self.adjust_self_ty(unadjusted_self_ty, pick);
 
@@ -116,20 +109,6 @@ impl<'a, 'tcx> ConfirmContext<'a, 'tcx> {
 
         // Create the final signature for the method, replacing late-bound regions.
         let (method_sig, method_predicates) = self.instantiate_method_sig(pick, all_args);
-
-        // If there is a `Self: Sized` bound and `Self` is a trait object, it is possible that
-        // something which derefs to `Self` actually implements the trait and the caller
-        // wanted to make a static dispatch on it but forgot to import the trait.
-        // See test `tests/ui/issues/issue-35976.rs`.
-        //
-        // In that case, we'll error anyway, but we'll also re-run the search with all traits
-        // in scope, and if we find another method which can be used, we'll output an
-        // appropriate hint suggesting to import the trait.
-        let filler_args = rcvr_args
-            .extend_to(self.tcx, pick.item.def_id, |def, _| self.tcx.mk_param_from_def(def));
-        let illegal_sized_bound = self.predicates_require_illegal_sized_bound(
-            self.tcx.predicates_of(pick.item.def_id).instantiate(self.tcx, filler_args),
-        );
 
         // Unify the (adjusted) self type with what the method expects.
         //
@@ -157,15 +136,10 @@ impl<'a, 'tcx> ConfirmContext<'a, 'tcx> {
         self.lint_ambiguously_glob_imported_traits(pick, segment);
 
         // Add any trait/regions obligations specified on the method's type parameters.
-        // We won't add these if we encountered an illegal sized bound, so that we can use
-        // a custom error in that case.
-        if illegal_sized_bound.is_none() {
-            self.add_obligations(method_sig, all_args, method_predicates, pick.item.def_id);
-        }
+        self.add_obligations(method_sig, all_args, method_predicates, pick.item.def_id);
 
         // Create the final `MethodCallee`.
-        let callee = MethodCallee { def_id: pick.item.def_id, args: all_args, sig: method_sig };
-        ConfirmResult { callee, illegal_sized_bound }
+        MethodCallee { def_id: pick.item.def_id, args: all_args, sig: method_sig }
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -652,33 +626,6 @@ impl<'a, 'tcx> ConfirmContext<'a, 'tcx> {
 
     ///////////////////////////////////////////////////////////////////////////
     // MISCELLANY
-
-    fn predicates_require_illegal_sized_bound(
-        &self,
-        predicates: ty::InstantiatedPredicates<'tcx>,
-    ) -> Option<Span> {
-        let sized_def_id = self.tcx.lang_items().sized_trait()?;
-
-        traits::elaborate(
-            self.tcx,
-            predicates.predicates.iter().copied().map(Unnormalized::skip_norm_wip),
-        )
-        // We don't care about regions here.
-        .filter_map(|pred| match pred.kind().skip_binder() {
-            ty::ClauseKind::Trait(trait_pred) if trait_pred.def_id() == sized_def_id => {
-                let span = predicates
-                    .iter()
-                    .find_map(|(p, span)| if p.skip_norm_wip() == pred { Some(span) } else { None })
-                    .unwrap_or(DUMMY_SP);
-                Some((trait_pred, span))
-            }
-            _ => None,
-        })
-        .find_map(|(trait_pred, span)| match trait_pred.self_ty().kind() {
-            ty::Dynamic(..) => Some(span),
-            _ => None,
-        })
-    }
 
     fn check_for_illegal_method_calls(&self, pick: &probe::Pick<'_>) {
         // Disallow calls to the method `drop` defined in the `Drop` trait.

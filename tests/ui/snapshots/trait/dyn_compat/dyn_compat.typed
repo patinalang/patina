@@ -1,0 +1,68 @@
+#![allow(internal_features)]
+
+
+
+
+
+#![allow(dead_code)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+#[allow(unused_imports)]
+use Core::*;
+#[allow(unused)]
+extern mod io;
+#[allow(unused)]
+extern mod patina_fmt;
+
+trait Same<Rhs> {
+    fn same(self, other: Rhs)
+    -> bool;
+}
+
+trait Scale {
+    fn factor(self)
+    -> int;
+}
+
+trait Shape: Same<Self> {
+    const
+    SIDES:
+    int;
+
+    fn new(size: int)
+    -> Self;
+    fn grow(self)
+    -> Self;
+    fn scaled<T>(self, by: T)
+    -> int
+    where
+    T: Scale;
+}
+
+struct Two;
+
+impl Scale for Two {
+    fn factor(self) -> int ({ (2 as int) } as int)
+}
+
+fn use_dyn(shape: dyn Shape, other: dyn Shape)
+    ->
+        bool ({
+    let bigger = ((shape as dyn Shape).grow() as dyn Shape);
+    let _ = ((bigger as dyn Shape).scaled((Two as Two)) as int);
+    ((bigger as dyn Shape).same((other as dyn Shape)) as bool)
+} as bool)
+
+fn receiver_method_path(shape: dyn Shape)
+    ->
+        dyn Shape ({
+    ((Shape::grow as
+            fn(dyn Shape) -> dyn Shape {<dyn Shape as Shape>::grow})((shape as
+            dyn Shape)) as dyn Shape)
+} as dyn Shape)
+
+fn main() ({ } as ())

@@ -1,0 +1,37 @@
+#![allow(dead_code)]
+
+pub trait Same<Rhs> {
+    fn same(self, other: Rhs) -> bool;
+}
+
+pub trait Scale {
+    fn factor(self) -> int;
+}
+
+pub trait Shape: Same<Self> {
+    const SIDES: int;
+
+    fn new(size: int) -> Self;
+    fn grow(self) -> Self;
+    fn scaled<T: Scale>(self, by: T) -> int;
+}
+
+pub struct Two;
+
+impl Scale for Two {
+    fn factor(self) -> int {
+        2
+    }
+}
+
+pub fn use_dyn(shape: dyn Shape, other: dyn Shape) -> bool {
+    let bigger = shape.grow();
+    let _ = bigger.scaled(Two);
+    bigger.same(other)
+}
+
+pub fn receiver_method_path(shape: dyn Shape) -> dyn Shape {
+    Shape::grow(shape)
+}
+
+pub fn main() {}

@@ -46,13 +46,13 @@ macro_rules! println {
 }
 
 #[lang = "pointee_sized"]
-pub trait PointeeSized {}
+trait PointeeSized {}
 
 #[lang = "meta_sized"]
-pub trait MetaSized: PointeeSized {}
+trait MetaSized: PointeeSized {}
 
 #[lang = "sized"]
-pub trait Sized: MetaSized {}
+trait Sized: MetaSized {}
 
 #[lang = "copy"]
 pub trait Copy {}

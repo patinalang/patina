@@ -109,6 +109,11 @@ where
 {
     fn visit_trait(&mut self, trait_ref: TraitRef<'tcx>) -> V::Result {
         let TraitRef { def_id, args, .. } = trait_ref;
+        // The sizedness traits are private to `Core`, but the compiler adds implicit sizedness
+        // bounds to every generic item. They always hold, so they're not part of any interface.
+        if self.def_id_visitor.tcx().is_sizedness_trait(def_id) {
+            return V::Result::output();
+        }
         try_visit!(self.def_id_visitor.visit_def_id(
             def_id,
             "trait",

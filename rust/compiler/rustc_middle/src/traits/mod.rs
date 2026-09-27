@@ -764,9 +764,6 @@ pub enum DynCompatibilityViolation {
     /// Trait is marked `#[rustc_dyn_incompatible_trait]`.
     ExplicitlyDynIncompatible(SmallVec<[Span; 1]>),
 
-    /// `Self: Sized` declared on the trait.
-    SizedSelf(SmallVec<[Span; 1]>),
-
     /// Supertrait reference references `Self` an in illegal location
     /// (e.g., `trait Foo : Bar<Self>`).
     SupertraitSelf(SmallVec<[Span; 1]>),
@@ -794,7 +791,6 @@ impl DynCompatibilityViolation {
 
         match self {
             Self::ExplicitlyDynIncompatible(_) => "it opted out of dyn-compatibility".into(),
-            Self::SizedSelf(_) => "it requires `Self: Sized`".into(),
             Self::SupertraitSelf(spans) => {
                 if spans.iter().any(|sp| *sp != DUMMY_SP) {
                     "it uses `Self` as a type parameter".into()
@@ -857,7 +853,6 @@ impl DynCompatibilityViolation {
     pub fn solution(&self) -> DynCompatibilityViolationSolution {
         match self {
             Self::ExplicitlyDynIncompatible(_)
-            | Self::SizedSelf(_)
             | Self::SupertraitSelf(_)
             | Self::SupertraitNonLifetimeBinder(..)
             | Self::SupertraitConst(_) => DynCompatibilityViolationSolution::None,
@@ -884,7 +879,6 @@ impl DynCompatibilityViolation {
         // diagnostics use a `note` instead of a `span_label`.
         match self {
             Self::ExplicitlyDynIncompatible(spans)
-            | Self::SizedSelf(spans)
             | Self::SupertraitSelf(spans)
             | Self::SupertraitNonLifetimeBinder(spans)
             | Self::SupertraitConst(spans) => spans.clone(),

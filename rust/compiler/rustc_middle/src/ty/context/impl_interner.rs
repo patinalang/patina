@@ -318,10 +318,6 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
         self.coroutine_for_closure(def_id)
     }
 
-    fn generics_require_sized_self(self, def_id: DefId) -> bool {
-        self.generics_require_sized_self(def_id)
-    }
-
     fn item_bounds(
         self,
         def_id: DefId,
@@ -433,10 +429,6 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
                 .map(Unnormalized::skip_normalization)
                 .map(|(c, _)| c),
         )
-    }
-
-    fn impl_self_is_guaranteed_unsized(self, impl_def_id: DefId) -> bool {
-        self.impl_self_is_guaranteed_unsized(impl_def_id)
     }
 
     fn has_target_features(self, def_id: DefId) -> bool {

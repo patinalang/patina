@@ -1002,10 +1002,6 @@ pub(crate) enum ImplNotMarkedDefault {
 }
 
 #[derive(Diagnostic)]
-#[diag("this item cannot be used as its where bounds are not satisfied for the `Self` type")]
-pub(crate) struct UselessImplItem;
-
-#[derive(Diagnostic)]
 #[diag("cannot override `{$ident}` because it already has a `final` definition in the trait")]
 pub(crate) struct OverridingFinalTraitFunction {
     #[primary_span]
@@ -1190,16 +1186,6 @@ pub(crate) enum LateBoundInApit {
         #[label("lifetime declared here")]
         param_span: Span,
     },
-}
-
-#[derive(Diagnostic)]
-#[diag("unnecessary associated type bound for dyn-incompatible associated type")]
-#[note(
-    "this associated type has a `where Self: Sized` bound, and while the associated type can be specified, it cannot be used because trait objects are never `Sized`"
-)]
-pub(crate) struct UnusedAssociatedTypeBounds {
-    #[suggestion("remove this bound", code = "")]
-    pub span: Span,
 }
 
 #[derive(Diagnostic)]

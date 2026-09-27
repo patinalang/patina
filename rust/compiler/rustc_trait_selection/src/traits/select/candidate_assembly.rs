@@ -1254,7 +1254,7 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
         &mut self,
         self_ty: Ty<'tcx>,
         candidates: &mut SelectionCandidateSet<'tcx>,
-        sizedness: SizedTraitKind,
+        _sizedness: SizedTraitKind,
     ) {
         match *self_ty.kind() {
             // Always sized.
@@ -1277,7 +1277,13 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::Map(_, _)
             | ty::Slice(_)
             | ty::Never
-            | ty::Error(_) => {
+            | ty::Error(_)
+            | ty::Dynamic(..)
+            | ty::Foreign(..)
+            | ty::Alias(..)
+            | ty::Param(_)
+            | ty::Placeholder(..)
+            | ty::Bound(..) => {
                 candidates.vec.push(SizedCandidate);
             }
 
@@ -1298,25 +1304,9 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
                 candidates.vec.push(SizedCandidate);
             }
 
-            // `MetaSized` but not `Sized`.
-            ty::Dynamic(..) => match sizedness {
-                SizedTraitKind::Sized => {}
-                SizedTraitKind::MetaSized => {
-                    candidates.vec.push(SizedCandidate);
-                }
-            },
-
-            // Not `MetaSized` or `Sized`.
-            ty::Foreign(..) => {}
-
-            ty::Alias(..) | ty::Param(_) | ty::Placeholder(..) => {}
-
             ty::Infer(ty::TyVar(_)) => {
                 candidates.ambiguous = true;
             }
-
-            // Only appears when assembling higher-ranked `for<T> T: Sized`.
-            ty::Bound(..) => {}
 
             ty::Infer(ty::FreshTy(_)) => {
                 bug!("asked to assemble builtin bounds of unexpected type: {:?}", self_ty);

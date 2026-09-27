@@ -22,7 +22,7 @@ trait Tr {
     fn required(self)
     -> int;
 
-    fn defaulted(self) -> int where Self: Sized { 1 }
+    fn defaulted(self) -> int { 1 }
 }
 
 struct S;

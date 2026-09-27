@@ -14,6 +14,7 @@ use std::ops::ControlFlow;
 use rustc_data_structures::fx::{FxHashSet, FxIndexMap};
 use rustc_data_structures::unord::ExtendUnord;
 use rustc_errors::{E0720, ErrorGuaranteed};
+use rustc_hir::def::{DefKind, Res};
 use rustc_hir::def_id::LocalDefId;
 use rustc_hir::intravisit::{self, InferKind, Visitor};
 use rustc_hir::{self as hir, AmbigArg, HirId, find_attr};
@@ -285,6 +286,7 @@ impl<'cx, 'tcx> Visitor<'tcx> for WritebackCx<'cx, 'tcx> {
 
         self.visit_binary_segment_layout(e.hir_id);
         self.visit_node_id(e.span, e.hir_id);
+        self.check_static_trait_item_on_dyn(e);
         intravisit::walk_expr(self, e);
 
         self.fix_scalar_builtin_expr(e);
@@ -670,6 +672,36 @@ impl<'cx, 'tcx> WritebackCx<'cx, 'tcx> {
         {
             self.typeck_results.field_indices_mut().insert(hir_id, index);
         }
+    }
+
+    /// Rejects naming a trait item without a receiver (an associated fn without `self`, or an
+    /// associated const) with `Self = dyn Trait`, e.g. `<dyn Animal>::new("x")`.
+    fn check_static_trait_item_on_dyn(&mut self, e: &'tcx hir::Expr<'tcx>) {
+        let hir::ExprKind::Path(ref qpath) = e.kind else { return };
+        let tcx = self.tcx();
+
+        let Res::Def(DefKind::AssocFn | DefKind::AssocConst { .. }, def_id) =
+            self.typeck_results.qpath_res(qpath, e.hir_id)
+        else {
+            return;
+        };
+        let item = tcx.associated_item(def_id);
+        if item.trait_container(tcx).is_none() || item.is_method() {
+            return;
+        }
+
+        let Some(args) = self.typeck_results.node_args_opt(e.hir_id) else { return };
+        let self_ty = args.type_at(0);
+        if !matches!(self_ty.kind(), ty::Dynamic(..)) {
+            return;
+        }
+
+        let path = tcx.def_path_str(def_id);
+        let what = if item.is_fn() { "has no `self`" } else { "is a constant" };
+        tcx.dcx()
+            .struct_span_err(e.span, format!("`{path}` {what}, so it can't be used on `{self_ty}`"))
+            .with_note("a `self` value is necessary to infer the concrete type")
+            .emit();
     }
 
     #[instrument(skip(self, span), level = "debug")]

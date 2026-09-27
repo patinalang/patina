@@ -2006,22 +2006,14 @@ fn confirm_impl_candidate<'cx, 'tcx>(
             assoc_term.item.name(),
             obligation.predicate
         );
-        if tcx.impl_self_is_guaranteed_unsized(impl_def_id) {
-            // We treat this projection as rigid here, which is represented via
-            // `Projected::NoProgress`. This will ensure that the projection is
-            // checked for well-formedness, and it's either satisfied by a trivial
-            // where clause in its env or it results in an error.
-            return Ok(Projected::NoProgress(obligation.predicate.to_term(tcx)));
-        } else {
-            return Ok(Projected::Progress(Progress {
-                term: if obligation.predicate.kind(tcx).is_type() {
-                    Ty::new_misc_error(tcx).into()
-                } else {
-                    ty::Const::new_misc_error(tcx).into()
-                },
-                obligations: nested,
-            }));
-        }
+        return Ok(Projected::Progress(Progress {
+            term: if obligation.predicate.kind(tcx).is_type() {
+                Ty::new_misc_error(tcx).into()
+            } else {
+                ty::Const::new_misc_error(tcx).into()
+            },
+            obligations: nested,
+        }));
     }
 
     // If we're trying to normalize `<Vec<u32> as X>::A<S>` using

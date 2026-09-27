@@ -653,10 +653,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 &pick,
                 segment,
             );
-            if pick.illegal_sized_bound.is_some() {
-                return;
-            }
-
             let Some(callee_expr_span) = callee_expr.span.find_ancestor_inside(call_expr.span)
             else {
                 return;
@@ -684,12 +680,12 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         (rest_span, format!(").{}({rest_snippet}", segment.ident)),
                     ]
                 };
-                let self_ty = self.resolve_vars_if_possible(pick.callee.sig.inputs()[0]);
+                let self_ty = self.resolve_vars_if_possible(pick.sig.inputs()[0]);
                 diag.multipart_suggestion(
                     format!(
                         "use the `.` operator to call the method `{}{}` on `{self_ty}`",
                         self.tcx
-                            .associated_item(pick.callee.def_id)
+                            .associated_item(pick.def_id)
                             .trait_container(self.tcx)
                             .map_or_else(
                                 || String::new(),

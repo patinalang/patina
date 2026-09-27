@@ -1,0 +1,8 @@
+error: witness for a dynamic type not yet implemented: dyn [Binder { value: Trait(Shape), bound_vars: [] }] + '{erased}
+  --> tests/ui/src/trait/dyn_compat.pt:28:18
+   |
+LL |     let bigger = shape.grow();
+   |                  ^^^^^^^^^^^^
+
+error: aborting due to 1 previous error
+

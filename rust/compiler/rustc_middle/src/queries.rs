@@ -1106,13 +1106,6 @@ rustc_queries! {
         separate_provide_extern
     }
 
-    /// Given an `impl_def_id`, return true if the self type is guaranteed to be unsized due
-    /// to either being one of the built-in unsized types (str/slice/dyn) or to be a struct
-    /// whose tail is one of those types.
-    query impl_self_is_guaranteed_unsized(impl_def_id: DefId) -> bool {
-        desc { "computing whether `{}` has a guaranteed unsized self type", tcx.def_path_str(impl_def_id) }
-    }
-
     /// Maps a `DefId` of a type to a list of its inherent impls.
     /// Contains implementations of methods that are inherent to a type.
     /// Methods in these implementations don't need to be exported.
@@ -2688,10 +2681,6 @@ rustc_queries! {
     query stripped_cfg_items(cnum: CrateNum) -> &'tcx [StrippedCfgItem] {
         desc { "getting cfg-ed out item names" }
         separate_provide_extern
-    }
-
-    query generics_require_sized_self(def_id: DefId) -> bool {
-        desc { "check whether the item has a `where Self: Sized` bound" }
     }
 
     query cross_crate_inlinable(def_id: DefId) -> bool {

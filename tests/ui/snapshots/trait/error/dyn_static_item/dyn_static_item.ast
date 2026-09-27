@@ -1,0 +1,17 @@
+trait Shape {
+    const SIDES: int;
+
+    fn new(size: int)
+    -> Self;
+}
+
+pub fn make() -> dyn Shape { <dyn Shape>::new(1) }
+
+pub fn make_inferred() -> dyn Shape {
+    let shape: dyn Shape = Shape::new(2);
+    shape
+}
+
+pub fn sides() -> int { <dyn Shape>::SIDES }
+
+pub fn main() {}

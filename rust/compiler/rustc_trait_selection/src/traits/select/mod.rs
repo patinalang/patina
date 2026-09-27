@@ -2182,14 +2182,13 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
             | ty::Map(_, _)
             | ty::Slice(_)
             | ty::Never
-            | ty::Error(_) => ty::Binder::dummy(vec![]),
-
-            ty::Dynamic(..) => match sizedness {
-                SizedTraitKind::Sized => unreachable!("tried to assemble `Sized` for unsized type"),
-                SizedTraitKind::MetaSized => ty::Binder::dummy(vec![]),
-            },
-
-            ty::Foreign(..) => unreachable!("tried to assemble `Sized` for unsized type"),
+            | ty::Error(_)
+            | ty::Dynamic(..)
+            | ty::Foreign(..)
+            | ty::Alias(..)
+            | ty::Param(_)
+            | ty::Placeholder(..)
+            | ty::Bound(..) => ty::Binder::dummy(vec![]),
 
             ty::Tuple(tys) => {
                 ty::Binder::dummy(tys.last().map_or_else(Vec::new, |&last| vec![last]))
@@ -2207,11 +2206,7 @@ impl<'tcx> SelectionContext<'_, 'tcx> {
 
             ty::UnsafeBinder(binder_ty) => binder_ty.map_bound(|ty| vec![ty]),
 
-            ty::Alias(..)
-            | ty::Param(_)
-            | ty::Placeholder(..)
-            | ty::Infer(ty::TyVar(_) | ty::FreshTy(_))
-            | ty::Bound(..) => {
+            ty::Infer(ty::TyVar(_) | ty::FreshTy(_)) => {
                 bug!("asked to assemble `Sized` of unexpected type: {:?}", self_ty);
             }
         }

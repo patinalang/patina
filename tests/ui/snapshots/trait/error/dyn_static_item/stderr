@@ -1,0 +1,26 @@
+error: `Shape::new` has no `self`, so it can't be used on `dyn Shape`
+  --> tests/ui/src/trait/error/dyn_static_item.pt:8:5
+   |
+LL |     <dyn Shape>::new(1)
+   |     ^^^^^^^^^^^^^^^^
+   |
+   = note: a `self` value is necessary to infer the concrete type
+
+error: `Shape::new` has no `self`, so it can't be used on `dyn Shape`
+  --> tests/ui/src/trait/error/dyn_static_item.pt:12:28
+   |
+LL |     let shape: dyn Shape = Shape::new(2);
+   |                            ^^^^^^^^^^
+   |
+   = note: a `self` value is necessary to infer the concrete type
+
+error: `Shape::SIDES` is a constant, so it can't be used on `dyn Shape`
+  --> tests/ui/src/trait/error/dyn_static_item.pt:17:5
+   |
+LL |     <dyn Shape>::SIDES
+   |     ^^^^^^^^^^^^^^^^^^
+   |
+   = note: a `self` value is necessary to infer the concrete type
+
+error: aborting due to 3 previous errors
+

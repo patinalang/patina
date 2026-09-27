@@ -601,13 +601,6 @@ pub fn report_dyn_incompatibility<'tcx>(
     let mut multi_span = vec![];
     let mut messages = vec![];
     for violation in violations {
-        if let DynCompatibilityViolation::SizedSelf(sp) = &violation
-            && !sp.is_empty()
-        {
-            // Do not report `SizedSelf` without spans pointing at `SizedSelf` obligations
-            // with a `Span`.
-            reported_violations.insert(DynCompatibilityViolation::SizedSelf(vec![].into()));
-        }
         if reported_violations.insert(violation.clone()) {
             let spans = violation.spans();
             let msg = if trait_span.is_none() || spans.is_empty() {

@@ -688,10 +688,7 @@ impl<'tcx> Ty<'tcx> {
         reg: ty::Region<'tcx>,
     ) -> Ty<'tcx> {
         if cfg!(debug_assertions) {
-            let projection_count = obj
-                .projection_bounds()
-                .filter(|item| !tcx.generics_require_sized_self(item.item_def_id()))
-                .count();
+            let projection_count = obj.projection_bounds().count();
             let expected_count: usize = obj
                 .principal_def_id()
                 .into_iter()
@@ -706,7 +703,6 @@ impl<'tcx> Ty<'tcx> {
                             .in_definition_order()
                             .filter(|item| item.is_type() || item.is_type_const())
                             .filter(|item| !item.is_impl_trait_in_trait())
-                            .filter(|item| !tcx.generics_require_sized_self(item.def_id))
                             .count()
                     })
                 })
@@ -1890,24 +1886,19 @@ impl<'tcx> Ty<'tcx> {
             | ty::Map(_, _)
             | ty::Slice(_)
             | ty::Never
-            | ty::Error(_) => true,
-
-            ty::Dynamic(_, _) => match sizedness {
-                SizedTraitKind::Sized => false,
-                SizedTraitKind::MetaSized => true,
-            },
-
-            ty::Foreign(..) => match sizedness {
-                SizedTraitKind::Sized | SizedTraitKind::MetaSized => false,
-            },
+            | ty::Error(_)
+            | ty::Dynamic(_, _)
+            | ty::Foreign(..)
+            | ty::Alias(..)
+            | ty::Param(_)
+            | ty::Placeholder(..)
+            | ty::Bound(..) => true,
 
             ty::Tuple(tys) => tys.last().is_none_or(|ty| ty.has_trivial_sizedness(tcx, sizedness)),
 
             ty::Adt(def, args) => def.sizedness_constraint(tcx, sizedness).is_none_or(|ty| {
                 ty.instantiate(tcx, args).skip_norm_wip().has_trivial_sizedness(tcx, sizedness)
             }),
-
-            ty::Alias(..) | ty::Param(_) | ty::Placeholder(..) | ty::Bound(..) => false,
 
             ty::Infer(ty::TyVar(_)) => false,
 

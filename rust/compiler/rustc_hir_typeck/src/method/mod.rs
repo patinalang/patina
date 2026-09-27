@@ -52,14 +52,6 @@ pub(crate) enum MethodError<'tcx> {
     /// not-in-scope traits which may work.
     PrivateMatch(DefKind, DefId, Vec<DefId>),
 
-    /// Found a `Self: Sized` bound where `Self` is a trait object.
-    IllegalSizedBound {
-        candidates: Vec<DefId>,
-        needs_mut: bool,
-        bound_span: Span,
-        self_expr: &'tcx hir::Expr<'tcx>,
-    },
-
     /// Found a match, but the return type is wrong
     BadReturnType,
 
@@ -116,7 +108,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             Err(NoMatch(..)) => false,
             Err(Ambiguity(..)) => true,
             Err(PrivateMatch(..)) => false,
-            Err(IllegalSizedBound { .. }) => true,
             Err(BadReturnType) => true,
             Err(ErrorReported(_)) => false,
         }
@@ -206,54 +197,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         let result = self.confirm_method(span, self_expr, call_expr, self_ty, &pick, segment);
         debug!("result = {:?}", result);
 
-        if let Some(span) = result.illegal_sized_bound {
-            let mut needs_mut = false;
-            if let ty::Ref(region, t_type, mutability) = self_ty.kind() {
-                let trait_type = Ty::new_ref(self.tcx, *region, *t_type, mutability.invert());
-                // We probe again to see if there might be a borrow mutability discrepancy.
-                match self.lookup_probe(
-                    segment.ident,
-                    trait_type,
-                    call_expr,
-                    ProbeScope::TraitsInScope,
-                ) {
-                    Ok(ref new_pick) if pick.differs_from(new_pick) => {
-                        needs_mut = new_pick.self_ty.ref_mutability() != self_ty.ref_mutability();
-                    }
-                    _ => {}
-                }
-            }
-
-            // We probe again, taking all traits into account (not only those in scope).
-            let candidates = match self.lookup_probe_for_diagnostic(
-                segment.ident,
-                self_ty,
-                call_expr,
-                ProbeScope::AllTraits,
-                None,
-            ) {
-                // If we find a different result the caller probably forgot to import a trait.
-                Ok(ref new_pick) if pick.differs_from(new_pick) => {
-                    vec![new_pick.item.container_id(self.tcx)]
-                }
-                Err(Ambiguity(ref sources)) => sources
-                    .iter()
-                    .filter_map(|source| {
-                        match *source {
-                            // Note: this cannot come from an inherent impl,
-                            // because the first probing succeeded.
-                            CandidateSource::Impl(def) => Some(self.tcx.impl_trait_id(def)),
-                            CandidateSource::Trait(_) => None,
-                        }
-                    })
-                    .collect(),
-                _ => Vec::new(),
-            };
-
-            return Err(IllegalSizedBound { candidates, needs_mut, bound_span: span, self_expr });
-        }
-
-        Ok(result.callee)
+        Ok(result)
     }
 
     pub(crate) fn lookup_method_for_diagnostic(
@@ -272,9 +216,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             None,
         )?;
 
-        Ok(self
-            .confirm_method_for_diagnostic(span, self_expr, call_expr, self_ty, &pick, segment)
-            .callee)
+        Ok(self.confirm_method_for_diagnostic(span, self_expr, call_expr, self_ty, &pick, segment))
     }
 
     #[instrument(level = "debug", skip(self, call_expr))]

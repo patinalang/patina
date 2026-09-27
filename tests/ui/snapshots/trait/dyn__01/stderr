@@ -1,40 +1,29 @@
-error[E0277]: the trait bound `dyn Animal: Core::Sized` is not satisfied
-  --> tests/ui/src/trait/dyn__01.pt:37:9
-   |
-LL |     let animal = random_animal(random_number);
-   |         ^^^^^^ the trait `Core::Sized` is not implemented for `dyn Animal`
-   |
-   = note: all local variables must have a statically known size
-
-error[E0277]: the trait bound `(dyn Animal + 'static): Core::Sized` is not satisfied
-  --> tests/ui/src/trait/dyn__01.pt:37:18
-   |
-LL |     let animal = random_animal(random_number);
-   |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Core::Sized` is not implemented for `(dyn Animal + 'static)`
-   |
-   = note: the return type of a function must have a statically known size
-
-error[E0746]: return type cannot be a trait object without pointer indirection
-  --> tests/ui/src/trait/dyn__01.pt:27:43
+error[E0308]: mismatched types
+  --> tests/ui/src/trait/dyn__01.pt:29:9
    |
 LL | fn random_animal(random_number: float) -> dyn Animal {
-   |                                           ^^^^^^^^^^ the trait `Core::Sized` is not implemented for `(dyn Animal + 'static)`
-   |
-help: consider returning an `impl Trait` instead of a `dyn Trait`
-   |
-LL - fn random_animal(random_number: float) -> dyn Animal {
-LL + fn random_animal(random_number: float) -> impl Animal {
-   |
-help: alternatively, box the return type, and wrap all of the returned values in `Box::new`
-   |
-LL ~ fn random_animal(random_number: float) -> Box<dyn Animal> {
+   |                                           ---------- expected `(dyn Animal + 'static)` because of return type
 LL |     if random_number < 0.5 {
-LL ~         Box::new(Sheep {})
-LL |     } else {
-LL ~         Box::new(Cow {})
+LL |         Sheep {}
+   |         ^^^^^^^^ expected `dyn Animal`, found `Sheep`
    |
+   = note: expected trait object `(dyn Animal + 'static)`
+                    found struct `Sheep`
+   = help: `Sheep` implements `Animal` so you could box the found value and coerce it to the trait object `Box<dyn Animal>`, you will have to change the expected type as well
 
-error: aborting due to 3 previous errors
+error[E0308]: mismatched types
+  --> tests/ui/src/trait/dyn__01.pt:31:9
+   |
+LL | fn random_animal(random_number: float) -> dyn Animal {
+   |                                           ---------- expected `(dyn Animal + 'static)` because of return type
+...
+LL |         Cow {}
+   |         ^^^^^^ expected `dyn Animal`, found `Cow`
+   |
+   = note: expected trait object `(dyn Animal + 'static)`
+                    found struct `Cow`
+   = help: `Cow` implements `Animal` so you could box the found value and coerce it to the trait object `Box<dyn Animal>`, you will have to change the expected type as well
 
-Some errors have detailed explanations: E0277, E0746.
-For more information about an error, try `rustc --explain E0277`.
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0308`.

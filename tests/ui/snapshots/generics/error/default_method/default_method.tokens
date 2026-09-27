@@ -38,14 +38,6 @@ Gt
 Whitespace
 Ident
 Whitespace
-Ident
-Whitespace
-Ident
-Colon
-Whitespace
-Ident
-Comma
-Whitespace
 OpenBrace
 Whitespace
 Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
