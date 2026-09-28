@@ -1,0 +1,19 @@
+#![allow(dead_code)]
+
+trait Container {
+    type Item;
+    fn get(self)
+    -> Self::Item;
+}
+
+trait Wraps<T> {
+    fn wrapped(self)
+    -> int;
+}
+
+struct W<C>(C);
+
+// The trait argument `C::Item` is only known at runtime, so it has no witness pattern.
+impl<C: Container> Wraps<C::Item> for W<C> {
+    fn wrapped(self) -> int { 0 }
+}

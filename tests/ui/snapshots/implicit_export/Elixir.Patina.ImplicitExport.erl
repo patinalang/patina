@@ -8,7 +8,9 @@
 
 -export_record([]).
 
--export(['__info__'/1, main/0]).
+-export(['__info__'/1,
+         'ImplicitExport::FooTrait::bar'/1,
+         main/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -22,5 +24,7 @@
                                      [deterministic]));
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
+
+'ImplicitExport::FooTrait::bar'(_Self@0_0) -> {}.
 
 main() -> 'Elixir.Patina.ImplicitExport.Bar':bar().

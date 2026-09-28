@@ -1,0 +1,5 @@
+warning: [{"tests/ui/src/trait/defaults.pt",
+           [{{57,17},erl_lint,{unused_function,{'Defaults::Animal::whisper',2}}}]}]
+
+warning: 1 warning emitted
+

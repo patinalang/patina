@@ -5,7 +5,9 @@ use rustc_data_structures::smallvec::{SmallVec, smallvec};
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::LocalDefId;
 use rustc_hir::{HirId, Lit, TermClass};
-use rustc_middle::erl::{ErlCallKind, ErlCallTarget, ErlModuleResolution, ErlReprKind};
+use rustc_middle::erl::{
+    ErlCallKind, ErlCallTarget, ErlModuleId, ErlModuleResolution, ErlReprKind,
+};
 use rustc_middle::middle::region;
 use rustc_middle::mir::{AssignOp, BinOp, UnOp};
 use rustc_middle::span_bug;
@@ -17,7 +19,7 @@ use rustc_span::{Span, Symbol, kw, sym};
 
 use crate::compile::translate::loops::Loops;
 use crate::compile::translate::scopes::{PatinaVar, Scope, Scopes};
-use crate::compile::translate::{ModuleParts, Translator, Witness};
+use crate::compile::translate::{ModuleParts, Translator};
 use crate::erlang::abstract_format as eaf;
 use crate::{not_implemented, span_fatal};
 
@@ -247,6 +249,16 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         def_id: rustc_hir::def_id::DefId,
         args: ty::GenericArgsRef<'tcx>,
     ) -> eaf::Expr<'arena> {
+        // An associated const of a trait is a function of the witnesses of its impl.
+        if matches!(self.tcx().def_kind(def_id), DefKind::AssocConst { .. })
+            && self.tcx().erl_entry_trait(def_id).is_some()
+        {
+            let target = self.tcx().erl_call_target_for_def(def_id, args);
+            let arg_exprs = self.call_witness_exprs(span, target);
+            let callee_expr = self.translator.afb.expr_atom(span, self.tcx().erl_fn_name(def_id));
+            return self.emit_item_call(span, target, callee_expr, arg_exprs, false);
+        }
+
         if !args.is_empty() {
             not_implemented!(self.tcx(), span, "generic named constants", args);
         }
@@ -625,17 +637,36 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             (ErlCallTarget::Dynamic, self.translate_expr(fun))
         };
 
+        // Temporary before we actually ship runtime modules (like `patina_fmt` could've been)
+        if let ErlCallTarget::Extern { module, function } = erl_call_target {
+            let mod_name = self.tcx().erl_module_name(ErlModuleId::Extern(module));
+            let fn_name = self.tcx().item_name(function);
+            if let (sym::patina_fmt, sym::display | sym::debug) = (mod_name, fn_name) {
+                return self.translate_format_render(span, fn_name, args[0]);
+            }
+        }
+
         let mut arg_exprs = self.call_witness_exprs(span, erl_call_target);
         arg_exprs.extend(args.iter().map(|&id| self.translate_expr(id)));
 
+        self.emit_item_call(span, erl_call_target, callee_expr, arg_exprs, forced_extern)
+    }
+
+    fn emit_item_call(
+        &mut self,
+        span: Span,
+        target: ErlCallTarget<'tcx>,
+        callee_expr: eaf::Expr<'arena>,
+        arg_exprs: SmallVec<[eaf::Expr<'arena>; 8]>,
+        forced_extern: bool,
+    ) -> eaf::Expr<'arena> {
+        let afb = &self.translator.afb;
+
         let Some(call_kind) =
-            self.tcx().erl_call_kind(self.owner.to_def_id(), erl_call_target, Some(forced_extern))
+            self.tcx().erl_call_kind(self.owner.to_def_id(), target, Some(forced_extern))
         else {
-            return self.translate_call_via_dispatch_through_type_parameter(
-                span,
-                erl_call_target,
-                arg_exprs,
-            );
+            return self
+                .translate_call_via_dispatch_through_type_parameter(span, target, arg_exprs);
         };
 
         if matches!(call_kind, ErlCallKind::Local | ErlCallKind::Dynamic) {
@@ -644,24 +675,14 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
         let module_resolution = self
             .tcx()
-            .erl_module_for_target(self.owner.to_def_id(), erl_call_target)
+            .erl_module_for_target(self.owner.to_def_id(), target)
             .unwrap_or_else(|| span_bug!(span, "item call must have module resolution"));
 
         let ErlModuleResolution::Static(module_id) = module_resolution else {
             span_bug!(span, "dynamic target in static call path");
         };
 
-        let mod_name = self.tcx().erl_module_name(module_id);
-
-        // Temporary before we actually ship runtime modules (like `patina_fmt` could've been)
-        if let ErlCallTarget::Extern { function, .. } = erl_call_target {
-            let fn_name = self.tcx().item_name(function);
-            if let (sym::patina_fmt, sym::display | sym::debug) = (mod_name, fn_name) {
-                return self.translate_format_render(span, fn_name, args[0]);
-            }
-        }
-
-        let mod_expr = afb.expr_atom(span, mod_name);
+        let mod_expr = afb.expr_atom(span, self.tcx().erl_module_name(module_id));
 
         afb.expr_remote_call(span, mod_expr, callee_expr, arg_exprs)
     }
@@ -672,34 +693,22 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         erl_call_target: ErlCallTarget<'tcx>,
         arg_exprs: SmallVec<[eaf::Expr<'arena>; 8]>,
     ) -> eaf::Expr<'arena> {
-        let afb = &self.translator.afb;
-
         let ErlCallTarget::Item { def_id, .. } = erl_call_target else {
             span_bug!(span, "dispatch through a type parameter must have an item target");
         };
 
+        let mut arg_exprs = arg_exprs.into_iter();
         let self_witness = arg_exprs
-            .first()
+            .next()
             .unwrap_or_else(|| span_bug!(span, "dispatch must have a receiver witness"));
 
-        let element_call = afb.expr_remote_call(
-            span,
-            afb.expr_atom(span, sym::erlang),
-            afb.expr_atom(span, sym::element),
-            [afb.expr_int(span, 1), *self_witness],
-        );
-
-        afb.expr_remote_call(
-            span,
-            element_call,
-            afb.expr_atom(span, self.tcx().erl_fn_name(def_id)),
-            arg_exprs,
-        )
+        let fn_name = self.tcx().erl_fn_name(def_id);
+        self.translator.dispatch_call(span, fn_name, self_witness, arg_exprs, self.scopes)
     }
 
     /// The witness arguments a call site must pass to `target`, in order.
     fn call_witness_exprs(
-        &self,
+        &mut self,
         span: Span,
         target: ErlCallTarget<'tcx>,
     ) -> SmallVec<[eaf::Expr<'arena>; 8]> {
@@ -711,25 +720,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             .into_iter()
             .map(|ty| {
                 let witness = self.translator.build_witness(self.owner.to_def_id(), span, ty);
-                self.materialize_witness(span, witness)
+                self.translator.materialize_witness(span, witness, self.witness_vars, self.scopes)
             })
             .collect()
-    }
-
-    fn materialize_witness(&self, span: Span, witness: Witness) -> eaf::Expr<'arena> {
-        let afb = &self.translator.afb;
-        match witness {
-            Witness::Param(param) => match self.witness_vars.get(&param) {
-                Some(&var) => afb.expr_var(span, var),
-                None => afb.expr_atom(span, sym::dollar_patina_unbounded_type),
-            },
-            Witness::ModuleWithSubtypes { module, subtypes } => {
-                let subtype_exprs =
-                    subtypes.into_iter().map(|subtype| self.materialize_witness(span, subtype));
-                let subtypes_expr_tuple = afb.expr_tuple(span, subtype_exprs);
-                afb.expr_tuple(span, [afb.expr_atom(span, module), subtypes_expr_tuple])
-            }
-        }
     }
 
     fn translate_fn_trait_call(&mut self, span: Span, args: &[ExprId]) -> eaf::Expr<'arena> {
@@ -777,6 +770,33 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         )
     }
 
+    /// `fun(A1, ..., An) -> Name(Witnesses..., A1, ..., An) end`
+    fn witnessed_fun(
+        &mut self,
+        span: Span,
+        def_id: rustc_hir::def_id::DefId,
+        target: ErlCallTarget<'tcx>,
+        fn_name: Symbol,
+        witness_exprs: SmallVec<[eaf::Expr<'arena>; 8]>,
+    ) -> eaf::Expr<'arena> {
+        let arity = self.tcx().fn_sig(def_id).skip_binder().inputs().skip_binder().len();
+        let vars = (0..arity)
+            .map(|_| self.scopes.fresh_var(sym::arg).erl_name)
+            .collect::<SmallVec<[_; 4]>>();
+
+        let afb = &self.translator.afb;
+        let arg_exprs = witness_exprs
+            .into_iter()
+            .chain(vars.iter().map(|&var| afb.expr_var(span, var)))
+            .collect();
+        let callee_expr = afb.expr_atom(span, fn_name);
+        let body = self.emit_item_call(span, target, callee_expr, arg_exprs, false);
+
+        let afb = &self.translator.afb;
+        let params = vars.iter().map(|&var| afb.pat_var(span, var));
+        afb.expr_fun(span, [afb.clause(span, params, None, body)])
+    }
+
     fn translate_closure(
         &mut self,
         expr: &Expr<'tcx>,
@@ -806,16 +826,20 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             && matches!(tcx.def_kind(*def_id), DefKind::Fn | DefKind::AssocFn)
         {
             let target = tcx.erl_call_target_for_def(*def_id, args);
+            let fn_name = tcx.erl_fn_name(*def_id);
+
+            // A function with witness parameters becomes a closure that passes this call site's
+            // witnesses along.
+            let witness_exprs = self.call_witness_exprs(expr.span, target);
+            if !witness_exprs.is_empty() {
+                return self.witnessed_fun(expr.span, *def_id, target, fn_name, witness_exprs);
+            }
 
             let Some(call_kind) = tcx.erl_call_kind(self.owner.to_def_id(), target, None) else {
-                let receiver = tcx.erl_call_target_self_ty(target).unwrap_or_else(|| {
-                    span_bug!(expr.span, "dispatch through a type parameter must have a receiver")
-                });
-                not_implemented!(tcx, expr.span, "dispatch through a type parameter", receiver);
+                span_bug!(expr.span, "`{fn_name}` dispatches through a witness it doesn't have")
             };
 
-            let fn_name = tcx.erl_fn_name(*def_id);
-            let arity = tcx.fn_arg_idents(*def_id).len() as u32;
+            let arity = tcx.erl_fn_arity(*def_id) as u32;
 
             match call_kind {
                 ErlCallKind::Local | ErlCallKind::LocalOrExtern => {

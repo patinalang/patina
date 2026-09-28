@@ -419,6 +419,7 @@ symbols! {
         arbitrary_self_types,
         arbitrary_self_types_pointers,
         areg,
+        arg,
         args,
         arith_offset,
         arm,

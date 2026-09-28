@@ -10,6 +10,8 @@
 -export_record(['Container']).
 
 -export(['__info__'/1,
+         'Types03::Contains::type::A'/1,
+         'Types03::Contains::type::B'/1,
          'Types03::Contains::contains'/4,
          'Types03::Contains::first'/2,
          'Types03::Contains::last'/2]).
@@ -28,6 +30,12 @@
 '__info__'(Key) -> module_info(Key).
 
 -record #'Container'{'0', '1'}.
+
+'Types03::Contains::type::A'(_Self@0_0) ->
+    {'Elixir.Patina.Core.int', {}}.
+
+'Types03::Contains::type::B'(_Self@0_0) ->
+    {'Elixir.Patina.Core.int', {}}.
 
 'Types03::Contains::contains'(_Self@0_0, _self@1_0,
                               _number_1@2_0, _number_2@3_0) ->

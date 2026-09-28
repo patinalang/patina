@@ -1,0 +1,38 @@
+-file("tests/ui/src/trait/defaults.pt", 284).
+
+-module('Elixir.Patina.Defaults.Wrapped').
+
+-compile([no_auto_import]).
+
+-import(erlang, [is_record/3]).
+
+-export_record([]).
+
+-export(['__info__'/1,
+         'Defaults::Container::type::Item'/1,
+         'Defaults::Container::get'/2,
+         'Defaults::Container::needs_item_witness'/2]).
+
+'__info__'(functions) ->
+    ordsets:subtract(lists:sort(module_info(exports)),
+                     [{'__info__', 1}, {module_info, 0}, {module_info, 1}]);
+'__info__'(macros) -> [];
+'__info__'(struct) -> nil;
+'__info__'(exports_md5) ->
+    erlang:md5(erlang:term_to_binary({lists:sort(module_info(exports)),
+                                      [],
+                                      '__info__'(struct)},
+                                     [deterministic]));
+'__info__'(deprecated) -> [];
+'__info__'(Key) -> module_info(Key).
+
+'Defaults::Container::type::Item'({_, {_T@0_0}}) ->
+    _T@0_0.
+
+'Defaults::Container::get'({_, {_T@0_0}}, _self@1_0) ->
+    _self@1_0.
+
+'Defaults::Container::needs_item_witness'(_arg@0_0,
+                                          _arg@1_0) ->
+    'Elixir.Patina.Defaults':'Defaults::Container::needs_item_witness'(_arg@0_0,
+                                                                       _arg@1_0).

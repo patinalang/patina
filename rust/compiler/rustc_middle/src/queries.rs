@@ -1176,9 +1176,13 @@ rustc_queries! {
         desc { "checking attributes in {}", describe_as_module(key, tcx) }
     }
 
-    /// Returns the set of functions in the local crate that are called from outside the Erlang
-    /// module they are translated into: associated functions called from outside their impls,
-    /// and free functions called from an impl (which is translated into its own module).
+    /// Returns the set of functions in the local crate's modules that are called from outside
+    /// the Erlang module they are translated into: associated functions and consts called from
+    /// outside their impls, and free functions called from an impl (which is translated into its
+    /// own module).
+    ///
+    /// Each function is identified by its module and [`TyCtxt::erl_fn_item`]. For an impl of
+    /// a trait from another crate, that item is the foreign trait item.
     ///
     /// For example, for code:
     ///
@@ -1198,7 +1202,7 @@ rustc_queries! {
     ///
     /// `Foo::foo` and `Bar::bar` will be returned by this query, but `Foo::priv_foo` will not,
     /// as it's only called from within `Foo`'s associated function.
-    query fns_called_externally(_: ()) -> &'tcx LocalDefIdSet {
+    query fns_called_externally(_: ()) -> &'tcx UnordSet<(crate::erl::ErlModuleId, DefId)> {
         arena_cache
         desc { "finding externally called functions" }
     }

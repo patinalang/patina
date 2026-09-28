@@ -8,7 +8,7 @@ use rustc_abi::FIRST_VARIANT;
 use rustc_data_structures::fx::FxIndexSet;
 use rustc_hir::attrs::{AttributeKind, ErlTagStyle, ReprAttr, ReprAttrModifier};
 use rustc_hir::def::DefKind;
-use rustc_hir::def_id::{DefId, LocalDefId};
+use rustc_hir::def_id::DefId;
 use rustc_hir::definitions::DefPathData;
 use rustc_hir::{Attribute, HirId, PrimTy};
 use rustc_macros::StableHash;
@@ -37,7 +37,7 @@ pub enum ErlModuleId {
 /// The semantic target of an Erlang call.
 #[derive(Copy, Clone, Debug)]
 pub enum ErlCallTarget<'tcx> {
-    /// A free function, inherent method, or trait method.
+    /// A free function, inherent method, trait method, or trait associated const.
     Item { def_id: DefId, args: GenericArgsRef<'tcx> },
     /// Construction of a struct or enum variant.
     Constructor { nominal_type: DefId, variant: DefId },
@@ -105,6 +105,23 @@ pub struct ErlVariantRepr {
     pub record_module: Symbol,
 }
 
+#[derive(Copy, Clone, Debug)]
+pub enum ErlWitnessSlot {
+    TraitSelf(ty::ParamTy),
+    TraitParam(ty::ParamTy),
+    ItemParam(ty::ParamTy),
+}
+
+impl ErlWitnessSlot {
+    pub fn param(self) -> ty::ParamTy {
+        match self {
+            ErlWitnessSlot::TraitSelf(param)
+            | ErlWitnessSlot::TraitParam(param)
+            | ErlWitnessSlot::ItemParam(param) => param,
+        }
+    }
+}
+
 #[derive(Copy, Clone)]
 enum ErlTag {
     Explicit(Symbol),
@@ -150,28 +167,12 @@ impl<'tcx> TyCtxt<'tcx> {
         self.impl_opt_trait_id(impl_def_id)
     }
 
-    /// The trait's own generic arguments for a trait impl item, excluding the
-    /// leading `Self` argument. Empty for inherent impl items and free items.
-    pub fn erl_trait_args(self, def_id: impl Into<DefId>) -> &'tcx [ty::GenericArg<'tcx>] {
-        let def_id = def_id.into();
-        let Some(impl_def_id) = self.trait_impl_of_assoc(def_id) else {
-            return &[];
-        };
-        let Some(trait_ref) = self.impl_opt_trait_ref(impl_def_id) else {
-            return &[];
-        };
-        let trait_ref = trait_ref.skip_binder();
-        &trait_ref.args[1..]
-    }
-
     /// The type parameters (in `def_id`'s own generic space) that appear in a
     /// trait bound, and therefore need a witness at runtime.
     ///
     /// For associated items, the parent impl's predicates are also walked, so
     /// an inherent method's enclosing `impl<T: Bound>` marks `T`. Unbounded
     /// parameters get no witness.
-    ///
-    /// This is callable for foreign items: predicates are encoded in rmeta.
     pub fn erl_witness_params(self, def_id: impl Into<DefId>) -> SmallVec<[ty::ParamTy; 6]> {
         let def_id = def_id.into();
         let mut params = FxIndexSet::default();
@@ -218,47 +219,75 @@ impl<'tcx> TyCtxt<'tcx> {
         }
     }
 
-    /// The witness types a call site must pass for `def_id`, in order: the
-    /// receiver witness (Self-type; needed for trait entries only, so only materialized for them),
-    /// the trait-argument witnesses (for trait's generic params; trait entries only), then the
-    /// witnesses for the callee's own generic parameters that appear in a trait bound.
+    /// The witness parameters of the Erlang function generated for `def_id`, in order. They
+    /// come before the regular parameters.
+    pub fn erl_witness_layout(self, def_id: DefId) -> SmallVec<[ErlWitnessSlot; 6]> {
+        let def_id = self.erl_fn_item(def_id);
+        let mut slots = SmallVec::new();
+
+        let trait_def_id = self.trait_of_assoc(def_id);
+        if let Some(trait_def_id) = trait_def_id {
+            // `Self` is the trait's first type parameter.
+            let mut trait_params = self
+                .generics_of(trait_def_id)
+                .own_params
+                .iter()
+                .filter(|param| matches!(param.kind, ty::GenericParamDefKind::Type { .. }))
+                .map(ty::ParamTy::for_def);
+            slots.extend(trait_params.next().map(ErlWitnessSlot::TraitSelf));
+            slots.extend(trait_params.map(ErlWitnessSlot::TraitParam));
+        }
+
+        // A trait item's own parameters follow the trait's.
+        let parent_count = self.generics_of(def_id).parent_count as u32;
+        slots.extend(
+            self.erl_witness_params(def_id)
+                .into_iter()
+                .filter(|param| trait_def_id.is_none() || param.index >= parent_count)
+                .map(ErlWitnessSlot::ItemParam),
+        );
+
+        slots
+    }
+
+    /// The witness types a call site must pass for `def_id`, in the order of
+    /// [`TyCtxt::erl_witness_layout`].
     pub fn erl_call_witness_tys(
         self,
         def_id: DefId,
         args: GenericArgsRef<'tcx>,
     ) -> SmallVec<[Ty<'tcx>; 6]> {
-        let mut tys = SmallVec::new();
-        let is_trait_entry = self.erl_entry_trait(def_id).is_some();
-
-        if is_trait_entry {
-            let Some(receiver) = self.erl_call_target_self_ty(ErlCallTarget::Item { def_id, args })
-            else {
-                bug!("trait entry call must have a receiver");
-            };
-            tys.push(receiver);
-
-            let trait_args = match self.def_kind(def_id) {
-                DefKind::AssocFn if self.def_kind(self.parent(def_id)) == DefKind::Trait => {
-                    // A trait method's args are `[Self, trait args..., method args...]`.
-                    let parent_count = self.generics_of(def_id).parent_count;
-                    &args[1..parent_count]
-                }
-                _ => bug!("trait entry call resolved to impl item `{}`", self.def_path_str(def_id)),
-            };
-            tys.extend(trait_args.iter().filter_map(|arg| arg.as_type()));
+        if self.trait_item_of(def_id).is_some() {
+            bug!("trait entry call resolved to impl item `{}`", self.def_path_str(def_id));
         }
 
-        let parent_count = self.generics_of(def_id).parent_count;
-        for param in self.erl_witness_params(def_id) {
-            // Trait entries recover the receiver and trait arguments via the self-type witness
-            // and the leading trait-argument witnesses, so only the callee's *own* generics
-            // need a witness here.
-            if !is_trait_entry || param.index as usize >= parent_count {
-                tys.push(args.type_at(param.index as usize));
+        self.erl_witness_layout(def_id)
+            .into_iter()
+            .map(|slot| args.type_at(slot.param().index as usize))
+            .collect()
+    }
+
+    /// The arity of the Erlang function generated for `def_id`.
+    pub fn erl_fn_arity(self, def_id: DefId) -> usize {
+        let def_id = self.erl_fn_item(def_id);
+
+        let params = match self.def_kind(def_id) {
+            DefKind::Fn | DefKind::AssocFn => {
+                self.fn_sig(def_id).skip_binder().inputs().skip_binder().len()
             }
-        }
+            DefKind::AssocConst { .. } | DefKind::AssocTy => 0,
+            kind => bug!("no Erlang function arity for {kind:?}"),
+        };
 
-        tys
+        self.erl_witness_layout(def_id).len() + params
+    }
+
+    /// Normalizes `ty` in `owner`'s environment. A projection whose self type is a type
+    /// parameter, like `<T as Iterator>::Item`, has no impl to resolve to, and stays as it is.
+    /// If normalization fails, returns `ty` unchanged.
+    pub fn erl_normalize(self, owner: DefId, ty: Ty<'tcx>) -> Ty<'tcx> {
+        self.try_normalize_erasing_regions(self.erl_typing_env(owner), Unnormalized::new_wip(ty))
+            .unwrap_or(ty)
     }
 
     /// Resolves which Erlang module implements `ty`.
@@ -283,24 +312,54 @@ impl<'tcx> TyCtxt<'tcx> {
             .any(|attr| matches!(attr, Attribute::Parsed(AttributeKind::ExternCall(..))))
     }
 
-    /// Returns whether a function must be exported from its generated module.
+    /// The item that identifies the Erlang function generated for `def_id` in its module.
+    pub fn erl_fn_item(self, def_id: DefId) -> DefId {
+        self.trait_item_of(def_id).unwrap_or(def_id)
+    }
+
+    /// Returns whether the function generated for `def_id` must be exported from `module`.
     ///
     /// All `pub(x)` where `x != self` are always exported.
     /// The only complication is with associated functions, as `pub(self)` associated functions
     /// can be called from the parent module of the `impl` block, or from local `impl`s for other
     /// types. In that case, we additionally export those private associated functions that
     /// are actually called externally.
-    pub fn is_erl_exported_fn(self, def_id: LocalDefId) -> bool {
-        let visible_outside_rust_module = match self.visibility(def_id) {
-            Visibility::Public => true,
-            Visibility::Restricted(restricted) => {
-                restricted != self.parent_module_from_def_id(def_id).to_def_id()
-            }
+    pub fn is_erl_exported_fn(self, module: ErlModuleId, def_id: DefId) -> bool {
+        let def_id = self.erl_fn_item(def_id);
+
+        // In the trait's own module, a trait item is its default body. The delegation stubs
+        // of the impls that use the default body call it from other (external) modules and crates.
+        if self.trait_of_assoc(def_id).is_some()
+            && self.erl_definition_module(def_id) == Some(module)
+        {
+            return true;
+        }
+
+        let visible_outside_rust_module = match def_id.as_local() {
+            // A foreign item here is a trait item that this crate implements. Other crates
+            // can dispatch to its override or delegation stub.
+            None => true,
+            Some(local_def_id) => match self.visibility(local_def_id) {
+                Visibility::Public => true,
+                Visibility::Restricted(restricted) => {
+                    restricted != self.parent_module_from_def_id(local_def_id).to_def_id()
+                }
+            },
         };
 
-        visible_outside_rust_module
-            || (matches!(self.def_kind(def_id), DefKind::Fn | DefKind::AssocFn)
-                && self.fns_called_externally(()).contains(&def_id))
+        visible_outside_rust_module || self.fns_called_externally(()).contains(&(module, def_id))
+    }
+
+    /// Returns whether `def_id` is, or is nested in, a constant whose value is inlined at each
+    /// use. Such a value can land in any module. Consts of traits and trait impls are
+    /// functions instead.
+    pub fn is_in_erl_inlined_const(self, def_id: DefId) -> bool {
+        let def_id = self.typeck_root_def_id(def_id);
+        match self.def_kind(def_id) {
+            DefKind::Const { .. } => true,
+            DefKind::AssocConst { .. } => self.erl_entry_trait(def_id).is_none(),
+            _ => false,
+        }
     }
 
     /// Classifies a call target identified by `caller` and `target`.
@@ -314,9 +373,12 @@ impl<'tcx> TyCtxt<'tcx> {
 
         let kind = match callee {
             ErlModuleResolution::Static(callee) => {
-                if callee != self.erl_definition_module(caller)? {
+                // An inlined constant's calls land in whichever module uses its value.
+                if self.is_in_erl_inlined_const(caller)
+                    || callee != self.erl_definition_module(caller)?
+                {
                     ErlCallKind::Extern
-                } else if self.erl_call_target_is_exported(target) {
+                } else if self.erl_call_target_is_exported(callee, target) {
                     match forced_extern {
                         Some(true) => ErlCallKind::Extern,
                         Some(false) => ErlCallKind::Local,
@@ -339,7 +401,9 @@ impl<'tcx> TyCtxt<'tcx> {
         args: GenericArgsRef<'tcx>,
     ) -> ErlCallTarget<'tcx> {
         match self.def_kind(def_id) {
-            DefKind::Fn | DefKind::AssocFn => ErlCallTarget::Item { def_id, args },
+            DefKind::Fn | DefKind::AssocFn | DefKind::AssocConst { .. } => {
+                ErlCallTarget::Item { def_id, args }
+            }
 
             // Patina models a foreign function as the leaf `ExternMod`;
             // its parent identifies the named foreign module.
@@ -358,14 +422,12 @@ impl<'tcx> TyCtxt<'tcx> {
         TypingEnv::new(self.param_env(owner), ty::TypingMode::non_body_analysis())
     }
 
-    fn erl_call_target_is_exported(self, target: ErlCallTarget<'tcx>) -> bool {
-        let def_id = match target {
-            ErlCallTarget::Item { def_id, args: _ } => def_id,
-            ErlCallTarget::Constructor { variant, .. } => variant,
-            ErlCallTarget::Extern { .. } | ErlCallTarget::Dynamic => return false,
-        };
-
-        def_id.as_local().is_some_and(|local_def_id| self.is_erl_exported_fn(local_def_id))
+    fn erl_call_target_is_exported(self, module: ErlModuleId, target: ErlCallTarget<'tcx>) -> bool {
+        match target {
+            ErlCallTarget::Item { def_id, args: _ } => self.is_erl_exported_fn(module, def_id),
+            ErlCallTarget::Constructor { variant, .. } => self.is_erl_exported_fn(module, variant),
+            ErlCallTarget::Extern { .. } | ErlCallTarget::Dynamic => false,
+        }
     }
 
     pub fn erl_module_for_target(
@@ -402,7 +464,7 @@ impl<'tcx> TyCtxt<'tcx> {
                 Some(ErlModuleResolution::Static(ErlModuleId::Mod(self.lexical_erl_module(def_id))))
             }
 
-            DefKind::AssocFn => {
+            DefKind::AssocFn | DefKind::AssocConst { .. } | DefKind::AssocTy => {
                 let parent = self.parent(def_id);
 
                 match self.def_kind(parent) {
@@ -419,24 +481,6 @@ impl<'tcx> TyCtxt<'tcx> {
             }
 
             kind => bug!("non-callable item passed to erl_module_for_target_item: {kind:?}"),
-        }
-    }
-
-    /// The receiver type for a method call.
-    ///
-    /// Returns `Some` for a trait method (`args.type_at(0)`) or an inherent
-    /// method (the impl's self type), and `None` for non-associated items.
-    pub fn erl_call_target_self_ty(self, target: ErlCallTarget<'tcx>) -> Option<Ty<'tcx>> {
-        let ErlCallTarget::Item { def_id, args } = target else { return None };
-        let DefKind::AssocFn = self.def_kind(def_id) else { return None };
-
-        let parent = self.parent(def_id);
-        match self.def_kind(parent) {
-            DefKind::Impl { .. } => {
-                Some(self.type_of(parent).instantiate(self, args).skip_normalization())
-            }
-            DefKind::Trait => Some(args.type_at(0)),
-            _ => None,
         }
     }
 
@@ -754,16 +798,32 @@ fn erl_fn_name(tcx: TyCtxt<'_>, def_id: DefId) -> Symbol {
     let item_name = tcx.item_name(def_id);
 
     let Some(trait_def_id) = tcx.erl_entry_trait(def_id) else { return item_name };
+    let mut segments = erl_def_path_segments(tcx, trait_def_id);
 
-    let path = tcx.def_path_str(trait_def_id);
-    let qualified = if trait_def_id.is_local() {
-        let crate_name = tcx.crate_name(trait_def_id.krate);
-        format!("{crate_name}::{path}")
-    } else {
-        path
-    };
+    match tcx.def_kind(def_id) {
+        DefKind::AssocTy => segments.push("type".to_owned()),
+        DefKind::AssocConst { .. } => segments.push("const".to_owned()),
+        _ => {}
+    }
 
-    Symbol::intern(&format!("{qualified}::{item_name}"))
+    segments.push(item_name.as_str().to_owned());
+    Symbol::intern(&segments.join("::"))
+}
+
+/// The crate name followed by the definition path segments of `def_id`.
+fn erl_def_path_segments(tcx: TyCtxt<'_>, def_id: DefId) -> SmallVec<[String; 6]> {
+    let path = tcx.def_path(def_id);
+
+    let mut segments =
+        SmallVec::<[String; 6]>::from_iter([tcx.crate_name(path.krate).as_str().to_owned()]);
+
+    for data in &path.data {
+        if data.data != DefPathData::Ctor {
+            segments.push(data.as_sym(true).as_str().to_owned());
+        }
+    }
+
+    segments
 }
 
 /// Provider for [`TyCtxt::erl_module_name`].
@@ -774,20 +834,8 @@ fn erl_module_name(tcx: TyCtxt<'_>, module: ErlModuleId) -> Symbol {
                 return name;
             }
 
-            let path = tcx.def_path(def_id);
-
-            let mut segments = SmallVec::<[String; 6]>::from_iter([
-                "Elixir.Patina".to_owned(),
-                tcx.crate_name(path.krate).as_str().to_owned(),
-            ]);
-
-            for data in &path.data {
-                if data.data != DefPathData::Ctor {
-                    segments.push(data.as_sym(true).as_str().to_owned());
-                }
-            }
-
-            Symbol::intern(&segments.join("."))
+            let segments = erl_def_path_segments(tcx, def_id);
+            Symbol::intern(&format!("Elixir.Patina.{}", segments.join(".")))
         }
         ErlModuleId::Extern(mut def_id) => {
             let mut segments = SmallVec::<[String; 6]>::new();

@@ -1,0 +1,19 @@
+#![allow(dead_code)]
+
+trait Describe {
+    fn describe(self)
+    -> str;
+}
+
+struct Name(str);
+
+impl Describe for Name {
+    fn describe(self) -> str { self.0 }
+}
+
+fn make() -> impl Describe { Name("a") }
+
+fn show<T: Describe>(t: T) -> str { t.describe() }
+
+// Calling `show` needs the witness of the opaque return type of `make`.
+fn show_made() -> str { show(make()) }

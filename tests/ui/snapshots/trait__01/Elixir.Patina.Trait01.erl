@@ -8,7 +8,9 @@
 
 -export_record([]).
 
--export(['__info__'/1, main/0]).
+-export(['__info__'/1,
+         'Trait01::Animal::talk'/2,
+         main/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -22,6 +24,19 @@
                                      [deterministic]));
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
+
+'Trait01::Animal::talk'(_Self@0_0, _self@1_0) ->
+    begin
+        io:put_chars([[(erlang:element(1,
+                                       _Self@0_0)):'Trait01::Animal::name'(_Self@0_0,
+                                                                           _self@1_0),
+                       <<" says "/utf8>>,
+                       (erlang:element(1,
+                                       _Self@0_0)):'Trait01::Animal::noise'(_Self@0_0,
+                                                                            _self@1_0)]]),
+        io:nl(),
+        {}
+    end.
 
 main() ->
     _dolly@0_0 =

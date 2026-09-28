@@ -10,15 +10,17 @@ use std::path::PathBuf;
 
 use body::{BodyCx, TranslatedBody};
 use rustc_arena::DroplessArena;
-use rustc_data_structures::fx::{FxHashMap, FxHashSet, FxIndexMap};
+use rustc_data_structures::fx::{FxHashMap, FxHashSet, FxIndexMap, FxIndexSet};
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LocalDefId, LocalModDefId};
-use rustc_hir::{BodyId, Defaultness, FnSig, Generics, ImplItemKind, ItemKind, Mod, VariantData};
-use rustc_middle::erl::{ErlModuleId, ErlModuleResolution, ErlReprKind, ErlVariantRepr};
+use rustc_hir::{BodyId, ItemKind, Mod, VariantData};
+use rustc_middle::erl::{
+    ErlCallTarget, ErlModuleId, ErlModuleResolution, ErlReprKind, ErlVariantRepr, ErlWitnessSlot,
+};
 use rustc_middle::ty::{self, Ty, TyCtxt};
 use rustc_middle::{bug, span_bug};
-use rustc_span::{Ident, Span, Symbol, kw, sym};
+use rustc_span::{Span, Symbol, kw, sym};
 use scopes::Scopes;
 
 use crate::compile::eaf_builder::EafBuilder;
@@ -58,6 +60,7 @@ enum TranslatedConst<'arena> {
 enum Witness {
     Param(ty::ParamTy),
     ModuleWithSubtypes { module: Symbol, subtypes: Vec<Witness> },
+    Projection { name: Symbol, module: Option<Symbol>, witnesses: Vec<Witness> },
 }
 
 pub(super) struct Translator<'tcx, 'arena> {
@@ -181,8 +184,9 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
     fn translate_module(&self, def_id: LocalDefId) -> (Symbol, eaf::Module<'arena>) {
         let module_id = LocalModDefId::new_unchecked(def_id);
         let (module, _span, _hir_id) = self.tcx.hir_get_module(module_id);
-        let parts = self.collect_module_fns(module);
-        let mod_name = self.tcx.erl_module_name(ErlModuleId::Mod(def_id.to_def_id()));
+        let erl_module_id = ErlModuleId::Mod(def_id.to_def_id());
+        let parts = self.collect_module_fns(erl_module_id, module);
+        let mod_name = self.tcx.erl_module_name(erl_module_id);
         self.assemble_module(module.spans.inner_span, mod_name, [], parts)
     }
 
@@ -241,12 +245,11 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         parts.forms.push(function);
     }
 
-    fn translate_fun(
+    fn translate_callable(
         &self,
+        module_id: ErlModuleId,
         def_id: LocalDefId,
-        sig: &FnSig<'tcx>,
-        _generics: &Generics<'tcx>,
-        _ident: Ident,
+        span: Span,
         body: BodyId,
         parts: &mut ModuleParts<'arena>,
     ) {
@@ -254,7 +257,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         let mut scope = Scopes::new();
 
         let (mut params, witness_vars) =
-            self.translate_witness_params(def_id, sig.span, &mut scope);
+            self.translate_witness_params(def_id, span, [], &mut scope);
 
         let translated = self.translate_body(owner, parts, &mut scope, &witness_vars);
         params.extend(translated.params);
@@ -262,10 +265,10 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         let name = self.tcx.erl_fn_name(def_id);
         let arity = params.len() as u32;
 
-        let form = self.afb.simple_function(sig.span, name, params, translated.value);
+        let form = self.afb.simple_function(span, name, params, translated.value);
 
-        self.push_function(parts, sig.span, form);
-        if self.tcx.is_erl_exported_fn(def_id) {
+        self.push_function(parts, span, form);
+        if self.tcx.is_erl_exported_fn(module_id, def_id.to_def_id()) {
             parts.exports.push((name, arity));
         }
     }
@@ -275,94 +278,150 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         &self,
         def_id: LocalDefId,
         span: Span,
+        extra_params: impl IntoIterator<Item = ty::ParamTy>,
         scopes: &mut Scopes,
     ) -> (SmallVec<[eaf::Pattern<'arena>; 8]>, FxIndexMap<ty::ParamTy, Symbol>) {
         let tcx = self.tcx;
         let def_id = def_id.to_def_id();
         let afb = &self.afb;
 
-        let mut params = SmallVec::new();
-        let entry_trait = tcx.erl_entry_trait(def_id);
-        let parent_generic_count = tcx.generics_of(def_id).parent_count as u32;
-
         let witness_vars = tcx
             .erl_witness_params(def_id)
             .into_iter()
-            .map(|param| {
-                let name = scopes.fresh_var(param.name).erl_name;
-                (param, name)
-            })
+            // Also give variables to `extra_params`, if the witness parameters can bind them.
+            // The witness function of an associated type needs these variables. The value of
+            // the type can use unbounded parameters.
+            .chain(extra_params)
+            .collect::<FxIndexSet<_>>()
+            .into_iter()
+            .map(|param| (param, scopes.fresh_var(param.name).erl_name))
             .collect::<FxIndexMap<_, _>>();
 
-        if let Some(entry_trait) = entry_trait {
-            let impl_def_id = tcx.trait_impl_of_assoc(def_id).unwrap_or_else(|| {
-                bug!("trait entry without a trait impl: {}", tcx.item_name(def_id))
-            });
-
-            // The self_type (self-type) witness, destructured to recover the impl's own generics
-            // that are fixed by the self type.
-            // E.g. `impl<T: Debug> Debug for Vec<T>` binds `T` from `{_, {TMod}}`.
-            let self_ty = tcx.type_of(impl_def_id).instantiate_identity().skip_normalization();
-            let mut self_type_params = FxHashSet::default();
-            let self_witness_pat = self
-                .witness_subtypes_pat(
-                    self_ty,
-                    &witness_vars,
-                    parent_generic_count,
-                    span,
-                    &mut self_type_params,
-                )
-                .unwrap_or_else(|| {
-                    let name = scopes.fresh_var(kw::SelfUpper).erl_name;
-                    afb.pat_var(span, name)
-                });
-            params.push(self_witness_pat);
-
-            let trait_generics = tcx.generics_of(entry_trait);
-            let trait_params =
-                trait_generics.own_params.iter().skip(trait_generics.has_self as usize);
-            for (arg, trait_param) in tcx.erl_trait_args(def_id).iter().zip(trait_params) {
-                let arg_ty = arg.expect_ty();
-                match arg_ty.kind() {
-                    // Already recovered from the self-type witness.
-                    // They are still part of the function arity because dynamic callers
-                    // (calling through a trait) can't know beforehand which params are repeated
-                    // on the self-type.
-                    ty::Param(param) if self_type_params.contains(param) => {
-                        params.push(afb.pat_var(span, kw::Underscore));
-                    }
-                    ty::Param(param)
-                        if param.index < parent_generic_count
-                            && let Some(&name) = witness_vars.get(param) =>
-                    {
-                        params.push(afb.pat_var(span, name));
-                    }
-                    ty::Param(_) => {
-                        let name = scopes.fresh_var(trait_param.name).erl_name;
-                        params.push(afb.pat_var(span, name));
-                    }
-                    _ => {
-                        let name = scopes.fresh_var(trait_param.name).erl_name;
-                        let trait_pat = afb.pat_var(span, name);
-                        let witness_pat =
-                            self.witness_pat(def_id, span, arg_ty, &witness_vars, scopes);
-                        params.push(afb.pat_match(span, trait_pat, witness_pat));
-                    }
-                }
+        let params = match tcx.trait_impl_of_assoc(def_id) {
+            Some(impl_def_id) => {
+                self.impl_item_witness_pats(def_id, impl_def_id, span, &witness_vars, scopes)
             }
-        }
-
-        // Witness parameters for the item's own generic parameters that appear in a trait bound.
-        // For trait entries, the impl's generics are recovered from the self-type witness above,
-        // so only the method's own generics take a parameter.
-        for (param, &name) in &witness_vars {
-            if entry_trait.is_some() && param.index < parent_generic_count {
-                continue;
-            }
-            params.push(afb.pat_var(span, name));
-        }
+            // Elsewhere, including in a default body, each witness binds to the variable of
+            // its type parameter.
+            None => tcx
+                .erl_witness_layout(def_id)
+                .into_iter()
+                .map(|slot| {
+                    let name = witness_vars.get(&slot.param()).unwrap_or_else(|| {
+                        bug!("no witness variable for `{}` of {def_id:?}", slot.param())
+                    });
+                    afb.pat_var(span, *name)
+                })
+                .collect(),
+        };
 
         (params, witness_vars)
+    }
+
+    /// The witness parameter patterns of the trait impl item `def_id`. Callers pass the
+    /// witnesses of the trait item it implements. The patterns recover the impl's generics
+    /// from them.
+    fn impl_item_witness_pats(
+        &self,
+        def_id: DefId,
+        impl_def_id: DefId,
+        span: Span,
+        witness_vars: &FxIndexMap<ty::ParamTy, Symbol>,
+        scopes: &mut Scopes,
+    ) -> SmallVec<[eaf::Pattern<'arena>; 8]> {
+        let tcx = self.tcx;
+        let afb = &self.afb;
+        let parent_generic_count = tcx.generics_of(def_id).parent_count as u32;
+
+        let trait_args = tcx
+            .impl_opt_trait_ref(impl_def_id)
+            .unwrap_or_else(|| bug!("trait impl item {def_id:?} without a trait ref"))
+            .skip_binder()
+            .args;
+
+        // The trait item's own type parameters match the impl item's by position.
+        fn own_type_params(tcx: TyCtxt<'_>, def_id: DefId) -> impl Iterator<Item = ty::ParamTy> {
+            tcx.generics_of(def_id)
+                .own_params
+                .iter()
+                .filter(|param| matches!(param.kind, ty::GenericParamDefKind::Type { .. }))
+                .map(ty::ParamTy::for_def)
+        }
+        let trait_item = tcx.erl_fn_item(def_id);
+        let impl_params = own_type_params(tcx, trait_item)
+            .zip(own_type_params(tcx, def_id))
+            .collect::<FxHashMap<_, _>>();
+
+        let mut params = SmallVec::new();
+        let mut self_type_params = FxHashSet::default();
+
+        for slot in tcx.erl_witness_layout(def_id) {
+            let pat = match slot {
+                // The self-type witness, destructured to recover the impl's own generics that
+                // are fixed by the self type.
+                // E.g. `impl<T: Debug> Debug for Vec<T>` binds `T` from `{_, {TMod}}`.
+                ErlWitnessSlot::TraitSelf(_) => {
+                    let self_ty =
+                        tcx.type_of(impl_def_id).instantiate_identity().skip_normalization();
+                    self.witness_subtypes_pat(
+                        self_ty,
+                        witness_vars,
+                        parent_generic_count,
+                        span,
+                        &mut self_type_params,
+                    )
+                    .unwrap_or_else(|| {
+                        let name = scopes.fresh_var(kw::SelfUpper).erl_name;
+                        afb.pat_var(span, name)
+                    })
+                }
+
+                ErlWitnessSlot::TraitParam(trait_param) => {
+                    let arg_ty = trait_args.type_at(trait_param.index as usize);
+                    match arg_ty.kind() {
+                        // Already recovered from the self-type witness.
+                        // They are still part of the function arity because dynamic callers
+                        // (calling through a trait) can't know beforehand which params are
+                        // repeated on the self-type.
+                        ty::Param(param) if self_type_params.contains(param) => {
+                            afb.pat_var(span, kw::Underscore)
+                        }
+                        ty::Param(param)
+                            if param.index < parent_generic_count
+                                && let Some(&name) = witness_vars.get(param) =>
+                        {
+                            afb.pat_var(span, name)
+                        }
+                        ty::Param(_) => {
+                            let name = scopes.fresh_var(trait_param.name).erl_name;
+                            afb.pat_var(span, name)
+                        }
+                        _ => {
+                            let name = scopes.fresh_var(trait_param.name).erl_name;
+                            let trait_pat = afb.pat_var(span, name);
+                            let witness_pat =
+                                self.witness_pat(def_id, span, arg_ty, witness_vars, scopes);
+                            afb.pat_match(span, trait_pat, witness_pat)
+                        }
+                    }
+                }
+
+                // Callers pass witnesses for the trait item's bounds. An impl item with fewer
+                // bounds ignores the extra witnesses.
+                ErlWitnessSlot::ItemParam(trait_item_param) => {
+                    let param = impl_params.get(&trait_item_param).unwrap_or_else(|| {
+                        bug!("{def_id:?} has no type parameter for `{trait_item_param}`")
+                    });
+                    match witness_vars.get(param) {
+                        Some(&name) => afb.pat_var(span, name),
+                        None => afb.pat_var(span, kw::Underscore),
+                    }
+                }
+            };
+            params.push(pat);
+        }
+
+        params
     }
 
     fn witness_pat(
@@ -375,6 +434,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
     ) -> eaf::Pattern<'arena> {
         fn render<'tcx, 'arena>(
             witness: Witness,
+            tcx: TyCtxt<'tcx>,
             afb: &EafBuilder<'tcx, 'arena>,
             span: Span,
             witness_vars: &FxIndexMap<ty::ParamTy, Symbol>,
@@ -391,38 +451,157 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 Witness::ModuleWithSubtypes { module, subtypes } => {
                     let subtype_pats = subtypes
                         .into_iter()
-                        .map(|subtype| render(subtype, afb, span, witness_vars, scopes));
+                        .map(|subtype| render(subtype, tcx, afb, span, witness_vars, scopes));
                     let subtypes_pat = afb.pat_tuple(span, subtype_pats);
                     afb.pat_tuple(span, [afb.pat_atom(span, module), subtypes_pat])
+                }
+                Witness::Projection { name, .. } => {
+                    not_implemented!(tcx, span, "associated type in a witness pattern", name)
                 }
             }
         }
 
-        render(self.build_witness(owner, span, ty), &self.afb, span, witness_vars, scopes)
+        let witness = self.build_witness(owner, span, ty);
+        render(witness, self.tcx, &self.afb, span, witness_vars, scopes)
     }
 
     fn build_witness(&self, owner: DefId, span: Span, ty: Ty<'tcx>) -> Witness {
-        if let ty::Param(param_ty) = ty.kind() {
-            return Witness::Param(*param_ty);
-        }
+        let tcx = self.tcx;
+        // A concrete projection becomes its type here, so it needs no call at runtime.
+        let ty = tcx.erl_normalize(owner, ty);
+        match ty.kind() {
+            ty::Param(param_ty) => Witness::Param(*param_ty),
 
-        let module_id = match self.tcx.erl_module_for_type(owner, ty) {
-            Some(ErlModuleResolution::Static(module_id)) => module_id,
-            Some(ErlModuleResolution::Dynamic) => {
-                not_implemented!(self.tcx, span, "witness for a dynamic type", ty)
+            ty::Alias(alias) if let ty::AliasTyKind::Projection { def_id } = alias.kind => {
+                if !alias.trait_ref_and_own_args(tcx).1.is_empty() {
+                    not_implemented!(tcx, span, "witness for a generic associated type", ty);
+                }
+
+                let witnesses = tcx
+                    .erl_call_witness_tys(def_id, alias.args)
+                    .into_iter()
+                    .map(|witness_ty| self.build_witness(owner, span, witness_ty))
+                    .collect();
+
+                // `None` dispatches through the receiver's witness at runtime.
+                let target = ErlCallTarget::Item { def_id, args: alias.args };
+                let module = match tcx.erl_module_for_target(owner, target) {
+                    Some(ErlModuleResolution::Static(module_id)) => {
+                        Some(tcx.erl_module_name(module_id))
+                    }
+                    Some(ErlModuleResolution::Dynamic) => {
+                        not_implemented!(tcx, span, "witness for a dynamic type", ty)
+                    }
+                    None => None,
+                };
+
+                Witness::Projection { name: tcx.erl_fn_name(def_id), module, witnesses }
             }
-            None => not_implemented!(self.tcx, span, "witness for a type with no module", ty),
+
+            _ => {
+                let module_id = match tcx.erl_module_for_type(owner, ty) {
+                    Some(ErlModuleResolution::Static(module_id)) => module_id,
+                    Some(ErlModuleResolution::Dynamic) => {
+                        not_implemented!(tcx, span, "witness for a dynamic type", ty)
+                    }
+                    None => not_implemented!(tcx, span, "witness for a type with no module", ty),
+                };
+
+                let subtypes = tcx
+                    .subtypes_of(ty)
+                    .into_iter()
+                    .map(|subty| self.build_witness(owner, span, subty))
+                    .collect();
+
+                Witness::ModuleWithSubtypes { module: tcx.erl_module_name(module_id), subtypes }
+            }
+        }
+    }
+
+    /// The expression that constructs `witness` at runtime.
+    fn materialize_witness(
+        &self,
+        span: Span,
+        witness: Witness,
+        witness_vars: &FxIndexMap<ty::ParamTy, Symbol>,
+        scopes: &mut Scopes,
+    ) -> eaf::Expr<'arena> {
+        let afb = &self.afb;
+        match witness {
+            Witness::Param(param) => match witness_vars.get(&param) {
+                Some(&var) => afb.expr_var(span, var),
+                None => afb.expr_atom(span, sym::dollar_patina_unbounded_type),
+            },
+            Witness::ModuleWithSubtypes { module, subtypes } => {
+                let subtype_exprs = subtypes
+                    .into_iter()
+                    .map(|subtype| self.materialize_witness(span, subtype, witness_vars, scopes))
+                    .collect::<SmallVec<[_; 4]>>();
+                let subtypes_expr_tuple = afb.expr_tuple(span, subtype_exprs);
+                afb.expr_tuple(span, [afb.expr_atom(span, module), subtypes_expr_tuple])
+            }
+            Witness::Projection { name, module, witnesses } => {
+                let mut exprs = witnesses
+                    .into_iter()
+                    .map(|witness| self.materialize_witness(span, witness, witness_vars, scopes))
+                    .collect::<SmallVec<[_; 4]>>()
+                    .into_iter();
+
+                match module {
+                    Some(module) => afb.expr_remote_call(
+                        span,
+                        afb.expr_atom(span, module),
+                        afb.expr_atom(span, name),
+                        exprs,
+                    ),
+                    None => {
+                        let receiver = exprs.next().unwrap_or_else(|| {
+                            span_bug!(span, "associated type `{name}` has no receiver witness")
+                        });
+                        self.dispatch_call(span, name, receiver, exprs, scopes)
+                    }
+                }
+            }
+        }
+    }
+
+    /// Call `name` through `receiver_witness`.
+    fn dispatch_call(
+        &self,
+        span: Span,
+        name: Symbol,
+        receiver_witness: eaf::Expr<'arena>,
+        args: impl IntoIterator<Item = eaf::Expr<'arena>>,
+        scopes: &mut Scopes,
+    ) -> eaf::Expr<'arena> {
+        let afb = &self.afb;
+
+        let (binding, receiver_witness) = match receiver_witness {
+            eaf::Expr::Var(..) => (None, receiver_witness),
+            _ => {
+                let var = scopes.fresh_var(sym::witness).erl_name;
+                let binding = afb.expr_match(span, afb.pat_var(span, var), receiver_witness);
+                (Some(binding), afb.expr_var(span, var))
+            }
         };
 
-        let mod_name = self.tcx.erl_module_name(module_id);
-        let subtypes = self
-            .tcx
-            .subtypes_of(ty)
-            .into_iter()
-            .map(|subty| self.build_witness(owner, span, subty))
-            .collect();
+        let module = afb.expr_remote_call(
+            span,
+            afb.expr_atom(span, sym::erlang),
+            afb.expr_atom(span, sym::element),
+            [afb.expr_int(span, 1), receiver_witness],
+        );
+        let call = afb.expr_remote_call(
+            span,
+            module,
+            afb.expr_atom(span, name),
+            [receiver_witness].into_iter().chain(args),
+        );
 
-        Witness::ModuleWithSubtypes { module: mod_name, subtypes }
+        match binding {
+            Some(binding) => afb.expr_block(span, [binding, call]),
+            None => call,
+        }
     }
 
     /// The pattern for a single witness subtype slot, or `None` when the slot binds nothing
@@ -492,7 +671,11 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             .then(|| afb.pat_tuple(span, [afb.pat_var(span, kw::Underscore), subtype_tuple_pat]))
     }
 
-    fn collect_module_fns(&self, module: &Mod<'tcx>) -> ModuleParts<'arena> {
+    fn collect_module_fns(
+        &self,
+        module_id: ErlModuleId,
+        module: &Mod<'tcx>,
+    ) -> ModuleParts<'arena> {
         let mut parts = self.module_parts(module.spans.inner_span);
 
         parts.forms.push(elixir_compat::info_function(&self.afb, module.spans.inner_span, None));
@@ -500,14 +683,57 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
 
         for item_id in module.item_ids {
             let item = self.tcx.hir_item(*item_id);
-            if let ItemKind::Fn { ref sig, ident, generics, body, has_body } = item.kind
-                && has_body
-            {
-                self.translate_fun(item.owner_id.def_id, sig, generics, ident, body, &mut parts);
+            let def_id = item.owner_id.def_id;
+            match item.kind {
+                ItemKind::Fn { ref sig, body, has_body: true, .. } => {
+                    self.translate_callable(module_id, def_id, sig.span, body, &mut parts);
+                }
+                ItemKind::Trait { .. } => {
+                    let tcx = self.tcx;
+                    for assoc_item in tcx.associated_items(def_id).in_definition_order() {
+                        if assoc_item.defaultness(tcx).has_value()
+                            && !assoc_item.is_impl_trait_in_trait()
+                        {
+                            self.translate_assoc_item(module_id, assoc_item, &mut parts);
+                        }
+                    }
+                }
+                _ => {}
             }
         }
 
         parts
+    }
+
+    /// Translates an associated item that has a value into an Erlang function.
+    fn translate_assoc_item(
+        &self,
+        module_id: ErlModuleId,
+        item: &ty::AssocItem,
+        parts: &mut ModuleParts<'arena>,
+    ) {
+        let tcx = self.tcx;
+        let def_id = item.def_id.expect_local();
+
+        // A method's function starts at its signature, any other item's at its definition.
+        let span = match tcx.hir_node_by_def_id(def_id).fn_sig() {
+            Some(sig) => sig.span,
+            None => tcx.def_span(def_id),
+        };
+
+        match item.kind {
+            _ if item.is_type_const() => {
+                not_implemented!(tcx, span, "associated type const");
+            }
+            ty::AssocKind::Fn { .. } | ty::AssocKind::Const { .. } => {
+                let body = tcx.hir_body_owned_by(def_id).id();
+                self.translate_callable(module_id, def_id, span, body, parts);
+            }
+            ty::AssocKind::Type { .. } if item.trait_container(tcx).is_some() => {
+                not_implemented!(tcx, span, "associated type default");
+            }
+            ty::AssocKind::Type { .. } => self.translate_assoc_type_witness(def_id, span, parts),
+        }
     }
 
     fn translate_struct(&self, def_id: LocalDefId) -> (Symbol, eaf::Module<'arena>) {
@@ -629,7 +855,8 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
 
         let mut seen_traits = FxHashSet::default();
         for (impl_def_id, imp) in impls {
-            if let Some(trait_def_id) = self.tcx.impl_opt_trait_id(*impl_def_id)
+            let trait_def_id = self.tcx.impl_opt_trait_id(*impl_def_id);
+            if let Some(trait_def_id) = trait_def_id
                 && !seen_traits.insert(trait_def_id)
             {
                 not_implemented!(
@@ -639,52 +866,113 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 );
             }
 
-            if self.tcx.impl_opt_trait_id(*impl_def_id).is_some() {
-                self.check_trait_default_methods(*impl_def_id, imp.self_ty.span);
+            // Inherent consts and types don't become functions.
+            for item in self.tcx.associated_items(*impl_def_id).in_definition_order() {
+                if (trait_def_id.is_some() || item.is_fn()) && !item.is_impl_trait_in_trait() {
+                    self.translate_assoc_item(module_id, item, parts);
+                }
             }
 
-            for impl_item_id in imp.items {
-                let impl_item = self.tcx.hir_impl_item(*impl_item_id);
-                let ImplItemKind::Fn(sig, body) = impl_item.kind else {
-                    continue;
-                };
-
-                self.translate_fun(
-                    impl_item.owner_id.def_id,
-                    &sig,
-                    impl_item.generics,
-                    impl_item.ident,
-                    body,
+            if let Some(trait_def_id) = trait_def_id {
+                self.emit_default_stubs(
+                    module_id,
+                    *impl_def_id,
+                    trait_def_id,
+                    imp.self_ty.span,
                     parts,
                 );
             }
         }
     }
 
-    /// Rejects trait impls that omit a method with a default body, since default
-    /// method bodies are not implemented yet (see `handoff.md`).
-    fn check_trait_default_methods(&self, impl_def_id: DefId, span: Span) {
+    /// Emits the function that returns the witness of an associated type in a trait impl.
+    /// For example: `'Crate::Trait::type::Item'(SelfWitness) -> {'Elixir.Patina.Crate.Foo', {}}`.
+    fn translate_assoc_type_witness(
+        &self,
+        def_id: LocalDefId,
+        span: Span,
+        parts: &mut ModuleParts<'arena>,
+    ) {
         let tcx = self.tcx;
-        let Some(trait_def_id) = tcx.impl_opt_trait_id(impl_def_id) else {
-            return;
-        };
+        if !tcx.generics_of(def_id).own_params.is_empty() {
+            not_implemented!(tcx, span, "generic associated type");
+        }
 
-        let impl_items = tcx.associated_items(impl_def_id);
+        let value_ty = tcx.type_of(def_id).instantiate_identity().skip_normalization();
+        let value_params = value_ty.walk().filter_map(|arg| match arg.as_type()?.kind() {
+            ty::Param(param) => Some(*param),
+            _ => None,
+        });
+
+        let mut scopes = Scopes::new();
+        let (params, witness_vars) =
+            self.translate_witness_params(def_id, span, value_params, &mut scopes);
+
+        let witness = self.build_witness(def_id.to_def_id(), span, value_ty);
+        let value = self.materialize_witness(span, witness, &witness_vars, &mut scopes);
+
+        let name = tcx.erl_fn_name(def_id);
+        let arity = params.len() as u32;
+
+        self.push_function(parts, span, self.afb.simple_function(span, name, params, value));
+        parts.exports.push((name, arity));
+    }
+
+    /// Emits a delegation stub for each default body (method or const) that the trait impl does
+    /// not override: `Name(V1, ..., Vn) -> TraitMod:Name(V1, ..., Vn)`. With the stubs, the
+    /// impl's module provides every function of the trait.
+    fn emit_default_stubs(
+        &self,
+        module_id: ErlModuleId,
+        impl_def_id: DefId,
+        trait_def_id: DefId,
+        span: Span,
+        parts: &mut ModuleParts<'arena>,
+    ) {
+        let tcx = self.tcx;
+        let afb = &self.afb;
+        let implemented = tcx.impl_item_implementor_ids(impl_def_id);
 
         for trait_item in tcx.associated_items(trait_def_id).in_definition_order() {
-            if !matches!(trait_item.kind, ty::AssocKind::Fn { .. }) {
-                continue;
-            }
-            if !matches!(trait_item.defaultness(tcx), Defaultness::Default { has_value: true }) {
+            if !trait_item.defaultness(tcx).has_value()
+                || trait_item.is_impl_trait_in_trait()
+                || implemented.contains_key(&trait_item.def_id)
+            {
                 continue;
             }
 
-            let provided = impl_items
-                .in_definition_order()
-                .any(|item| item.trait_item_def_id() == Some(trait_item.def_id));
+            match trait_item.kind {
+                ty::AssocKind::Fn { .. } | ty::AssocKind::Const { .. } => {}
+                ty::AssocKind::Type { .. } => {
+                    not_implemented!(tcx, span, "associated type default", trait_item.def_id)
+                }
+            }
 
-            if !provided {
-                not_implemented!(tcx, span, "default trait method body", trait_item.def_id);
+            let name = tcx.erl_fn_name(trait_item.def_id);
+            let arity = tcx.erl_fn_arity(trait_item.def_id);
+            let default_module_id =
+                tcx.erl_definition_module(trait_item.def_id).unwrap_or_else(|| {
+                    span_bug!(span, "default body `{name}` has no definition module")
+                });
+            let default_module = tcx.erl_module_name(default_module_id);
+
+            let mut scopes = Scopes::new();
+            let vars = (0..arity)
+                .map(|_| scopes.fresh_var(sym::arg).erl_name)
+                .collect::<SmallVec<[_; 8]>>();
+
+            let body = afb.expr_remote_call(
+                span,
+                afb.expr_atom(span, default_module),
+                afb.expr_atom(span, name),
+                vars.iter().map(|&var| afb.expr_var(span, var)),
+            );
+            let params = vars.iter().map(|&var| afb.pat_var(span, var));
+
+            self.push_function(parts, span, afb.simple_function(span, name, params, body));
+
+            if tcx.is_erl_exported_fn(module_id, trait_item.def_id) {
+                parts.exports.push((name, arity as u32));
             }
         }
     }

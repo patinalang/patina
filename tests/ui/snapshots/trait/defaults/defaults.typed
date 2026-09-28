@@ -1,0 +1,755 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+struct Sheep {
+    name: str,
+}
+
+struct Dog {
+    name: str,
+}
+
+struct Bell;
+
+trait Tag {
+    fn tag(self)
+    -> str;
+}
+
+impl Tag for Bell {
+    fn tag(self) -> str ({ ("a bell" as str) } as str)
+}
+
+trait Animal {
+    fn name(self)
+    -> str;
+    fn noise(self)
+    -> str;
+
+    fn calls_required(self)
+        ->
+            (str,
+            str) ({
+        ((((self as Self).name() as str), ((self as Self).noise() as str)) as
+            (str, str))
+    } as (str, str))
+
+    fn calls_default(self)
+        ->
+            ((str, str),
+            (str,
+            str)) ({
+        ((((self as Self).calls_required() as (str, str)),
+            ((self as Self).calls_required() as (str, str))) as
+            ((str, str), (str, str)))
+    } as ((str, str), (str, str)))
+
+    fn with_bounded_param<T>(self, tag: T) -> (str, str, str) where
+        T: Tag ({
+        ((((self as Self).name() as str), ((self as Self).noise() as str),
+            ((tag as T).tag() as str)) as (str, str, str))
+    } as (str, str, str))
+
+    fn returns_self(self)
+        -> Self ({ let this = (self as Self); (this as Self) } as Self)
+
+    // Only called from within `Sheep`'s module, so its stubs aren't exported.
+    fn whisper(self) -> str ({ ((self as Self).name() as str) } as str)
+}
+
+impl Animal for Sheep {
+    fn name(self) -> str ({ ((self as Sheep).name as str) } as str)
+    fn noise(self) -> str ({ ("baaaaah" as str) } as str)
+}
+
+impl Animal for Dog {
+    fn name(self) -> str ({ ((self as Dog).name as str) } as str)
+    fn noise(self) -> str ({ ("woof" as str) } as str)
+
+    fn calls_required(self)
+        ->
+            (str,
+            str) ({
+        ((((self as Dog).name as str), ("barks" as str)) as (str, str))
+    } as (str, str))
+}
+
+impl Sheep {
+    fn calls_stubs_locally(self)
+        ->
+            ((str, str),
+            str) ({
+        ((((self as Sheep).calls_required() as (str, str)),
+            ((self as Sheep).whisper() as str)) as ((str, str), str))
+    } as ((str, str), str))
+}
+
+fn via<T>(animal: T) -> ((str, str), ((str, str), (str, str))) where
+    T: Animal ({
+    ((((animal as T).calls_required() as (str, str)),
+        ((animal as T).calls_default() as ((str, str), (str, str)))) as
+        ((str, str), ((str, str), (str, str))))
+} as ((str, str), ((str, str), (str, str))))
+
+fn sheep_calls_required(name: str)
+    ->
+        (str,
+        str) ({
+    ((Sheep { (name as str) } as Sheep).calls_required() as (str, str))
+} as (str, str))
+
+fn dog_calls_required(name: str)
+    ->
+        (str,
+        str) ({
+    ((Dog { (name as str) } as Dog).calls_required() as (str, str))
+} as (str, str))
+
+fn sheep_with_bounded_param(name: str)
+    ->
+        (str, str,
+        str) ({
+    ((Sheep { (name as str) } as Sheep).with_bounded_param((Bell as Bell)) as
+        (str, str, str))
+} as (str, str, str))
+
+fn dog_with_bounded_param(name: str)
+    ->
+        (str, str,
+        str) ({
+    ((Dog { (name as str) } as Dog).with_bounded_param((Bell as Bell)) as
+        (str, str, str))
+} as (str, str, str))
+
+fn sheep_calls_stubs_locally(name: str)
+    ->
+        ((str, str),
+        str) ({
+    ((Sheep { (name as str) } as Sheep).calls_stubs_locally() as
+        ((str, str), str))
+} as ((str, str), str))
+
+fn sheep_via(name: str)
+    ->
+        ((str, str),
+        ((str, str),
+        (str,
+        str))) ({
+    ((via as
+            fn(Sheep) -> ((str, str), ((str, str), (str, str))) {via::<Sheep>})((Sheep {
+            (name as str) } as Sheep)) as
+        ((str, str), ((str, str), (str, str))))
+} as ((str, str), ((str, str), (str, str))))
+
+fn dog_via(name: str)
+    ->
+        ((str, str),
+        ((str, str),
+        (str,
+        str))) ({
+    ((via as
+            fn(Dog) -> ((str, str), ((str, str), (str, str))) {via::<Dog>})((Dog {
+            (name as str) } as Dog)) as
+        ((str, str), ((str, str), (str, str))))
+} as ((str, str), ((str, str), (str, str))))
+
+fn sheep_returns_self(name: str)
+    ->
+        str ({
+    (((Sheep { (name as str) } as Sheep).returns_self() as Sheep).name() as
+        str)
+} as str)
+
+fn dog_returns_self(name: str)
+    ->
+        str ({
+    (((Dog { (name as str) } as Dog).returns_self() as Dog).name() as str)
+} as str)
+
+// Defaults of a generic trait
+
+trait Value {
+    fn value(self)
+    -> int;
+}
+
+trait Combine<Rhs = Self>: Value where Rhs: Value {
+    fn uses_rhs_witness(self, other: Rhs)
+        ->
+            int ({
+        (((self as Self).value() as int) + ((other as Rhs).value() as int) as
+            int)
+    } as int)
+}
+
+struct Coin(int);
+
+struct Note(int);
+
+struct Pile<T>(T);
+
+impl Value for Coin {
+    fn value(self) -> int ({ ((self as Coin).0 as int) } as int)
+}
+
+impl Value for Note {
+    fn value(self)
+        -> int ({ (((self as Note).0 as int) * (10 as int) as int) } as int)
+}
+
+impl <T> Value for Pile<T> where T: Value {
+    fn value(self)
+        ->
+            int ({
+        ((((self as Pile<T>).0 as T).value() as int) + (1 as int) as int)
+    } as int)
+}
+
+impl <T> Combine for Pile<T> where T: Value { }
+
+impl Combine<Note> for Coin { }
+
+fn combine_via<A, B>(a: A, b: B) -> int where A: Combine<B>,
+    B: Value ({ ((a as A).uses_rhs_witness((b as B)) as int) } as int)
+
+fn combine_coin_piles(a: int, b: int)
+    ->
+        int ({
+    (((Pile as
+                fn(Coin) -> Pile<Coin> {Pile::<Coin>})(((Coin as
+                    fn(int) -> Coin {Coin})((a as int)) as Coin)) as
+            Pile<Coin>).uses_rhs_witness(((Pile as
+                fn(Coin) -> Pile<Coin> {Pile::<Coin>})(((Coin as
+                    fn(int) -> Coin {Coin})((b as int)) as Coin)) as
+            Pile<Coin>)) as int)
+} as int)
+
+fn combine_coin_with_note(a: int, b: int)
+    ->
+        int ({
+    (((Coin as fn(int) -> Coin {Coin})((a as int)) as
+            Coin).uses_rhs_witness(((Note as
+                fn(int) -> Note {Note})((b as int)) as Note)) as int)
+} as int)
+
+fn combine_note_piles_via(a: int, b: int)
+    ->
+        int ({
+    ((combine_via as
+            fn(Pile<Note>, Pile<Note>) -> int {combine_via::<Pile<Note>, Pile<Note>>})(((Pile
+                as
+                fn(Note) -> Pile<Note> {Pile::<Note>})(((Note as
+                    fn(int) -> Note {Note})((a as int)) as Note)) as
+            Pile<Note>),
+        ((Pile as
+                fn(Note) -> Pile<Note> {Pile::<Note>})(((Note as
+                    fn(int) -> Note {Note})((b as int)) as Note)) as
+            Pile<Note>)) as int)
+} as int)
+
+fn combine_coin_with_note_via(a: int, b: int)
+    ->
+        int ({
+    ((combine_via as
+            fn(Coin, Note) -> int {combine_via::<Coin, Note>})(((Coin as
+                fn(int) -> Coin {Coin})((a as int)) as Coin),
+        ((Note as fn(int) -> Note {Note})((b as int)) as Note)) as int)
+} as int)
+
+// A default calling a helper that's private to the trait's module
+
+mod Inner {
+    fn helper(x: int) -> int ({ ((x as int) * (2 as int) as int) } as int)
+
+    trait Doubler {
+        fn base(self)
+        -> int;
+
+        fn doubled(self)
+            ->
+                int ({
+            ((helper as
+                    fn(int) -> int {Inner::helper})(((self as Self).base() as
+                    int)) as int)
+        } as int)
+    }
+}
+
+use Inner::Doubler;
+
+struct N(int);
+
+impl Doubler for N {
+    fn base(self) -> int ({ ((self as N).0 as int) } as int)
+}
+
+fn double(x: int)
+    ->
+        int ({ (((N as fn(int) -> N {N})((x as int)) as N).doubled() as int) }
+    as int)
+
+// A default calling a supertrait method
+
+trait Named {
+    fn name(self)
+    -> str;
+}
+
+trait Greeter: Named {
+    fn greet(self)
+        ->
+            (str,
+            str) ({
+        ((("Hello" as str), ((self as Self).name() as str)) as (str, str))
+    } as (str, str))
+}
+
+struct Person(str);
+
+impl Named for Person {
+    fn name(self) -> str ({ ((self as Person).0 as str) } as str)
+}
+
+impl Greeter for Person { }
+
+fn greet_via<G>(greeter: G) -> (str, str) where
+    G: Greeter ({ ((greeter as G).greet() as (str, str)) } as (str, str))
+
+fn greet(name: str)
+    ->
+        (str,
+        str) ({
+    (((Person as fn(str) -> Person {Person})((name as str)) as Person).greet()
+        as (str, str))
+} as (str, str))
+
+fn greet_through_witness(name: str)
+    ->
+        (str,
+        str) ({
+    ((greet_via as
+            fn(Person) -> (str, str) {greet_via::<Person>})(((Person as
+                fn(str) -> Person {Person})((name as str)) as Person)) as
+        (str, str))
+} as (str, str))
+
+// Associated types
+
+trait Describe {
+    fn describe(self)
+    -> str;
+}
+
+trait Container {
+    type
+    Item;
+
+    fn get(self)
+    -> Self::Item;
+
+    fn needs_item_witness(self) -> str where
+        Self::Item: Describe ({
+        (((self as Self).get() as <Self as Container>::Item).describe() as
+            str)
+    } as str)
+}
+
+struct Name(str);
+
+impl Describe for Name {
+    fn describe(self) -> str ({ ((self as Name).0 as str) } as str)
+}
+
+// `Item` is a concrete type.
+struct Boxed(Name);
+
+impl Container for Boxed {
+    type
+    Item
+    =
+    Name;
+    fn get(self) -> Name ({ ((self as Boxed).0 as Name) } as Name)
+}
+
+impl Describe for Boxed {
+    fn describe(self) -> str ({ ("boxed" as str) } as str)
+}
+
+// `Item` is a bounded parameter.
+struct Wrapped<T>(T);
+
+impl <T> Container for Wrapped<T> where T: Describe {
+    type
+    Item
+    =
+    T;
+    fn get(self) -> T ({ ((self as Wrapped<T>).0 as T) } as T)
+}
+
+// `Item` is a concrete projection. It normalizes to `Name` at compile time.
+struct Rewrapped(Boxed);
+
+impl Container for Rewrapped {
+    type
+    Item
+    =
+    <Boxed as Container>::Item;
+    fn get(self)
+        -> Name ({ (((self as Rewrapped).0 as Boxed).get() as Name) } as Name)
+}
+
+// `Item` is an unbounded parameter.
+struct Loose<T>(T);
+
+impl <T> Container for Loose<T> {
+    type
+    Item
+    =
+    T;
+    fn get(self) -> T ({ ((self as Loose<T>).0 as T) } as T)
+}
+
+fn first<C>(container: C) -> str where C: Container,
+    C::Item: Describe ({
+    (((container as C).get() as <C as Container>::Item).describe() as str)
+} as str)
+
+fn nested<C>(container: C) -> str where C: Container, C::Item: Container,
+    <C::Item as
+    Container>::Item: Describe ({
+    ((((container as C).get() as <C as Container>::Item).get() as
+            <<C as Container>::Item as Container>::Item).describe() as str)
+} as str)
+
+fn describe_boxed(name: str)
+    ->
+        str ({
+    (((Boxed as
+                fn(Name) -> Boxed {Boxed})(((Name as
+                    fn(str) -> Name {Name})((name as str)) as Name)) as
+            Boxed).needs_item_witness() as str)
+} as str)
+
+fn describe_wrapped(name: str)
+    ->
+        str ({
+    (((Wrapped as
+                fn(Name) -> Wrapped<Name> {Wrapped::<Name>})(((Name as
+                    fn(str) -> Name {Name})((name as str)) as Name)) as
+            Wrapped<Name>).needs_item_witness() as str)
+} as str)
+
+fn describe_rewrapped(name: str)
+    ->
+        str ({
+    (((Rewrapped as
+                fn(Boxed) -> Rewrapped {Rewrapped})(((Boxed as
+                    fn(Name) -> Boxed {Boxed})(((Name as
+                        fn(str) -> Name {Name})((name as str)) as Name)) as Boxed))
+            as Rewrapped).needs_item_witness() as str)
+} as str)
+
+fn describe_loose(name: str)
+    ->
+        str ({
+    (((Loose as
+                fn(Name) -> Loose<Name> {Loose::<Name>})(((Name as
+                    fn(str) -> Name {Name})((name as str)) as Name)) as
+            Loose<Name>).needs_item_witness() as str)
+} as str)
+
+fn describe_first_loose(name: str)
+    ->
+        str ({
+    ((first as
+            fn(Loose<Name>) -> str {first::<Loose<Name>>})(((Loose as
+                fn(Name) -> Loose<Name> {Loose::<Name>})(((Name as
+                    fn(str) -> Name {Name})((name as str)) as Name)) as
+            Loose<Name>)) as str)
+} as str)
+
+fn describe_nested(name: str)
+    ->
+        str ({
+    ((nested as
+            fn(Wrapped<Boxed>) -> str {nested::<Wrapped<Boxed>>})(((Wrapped as
+                fn(Boxed) -> Wrapped<Boxed> {Wrapped::<Boxed>})(((Boxed as
+                    fn(Name) -> Boxed {Boxed})(((Name as
+                        fn(str) -> Name {Name})((name as str)) as Name)) as Boxed))
+            as Wrapped<Boxed>)) as str)
+} as str)
+
+// A default returning `impl Trait`. The impl uses the default.
+
+trait Maker {
+    fn make(self)
+        ->
+            /*impl Trait*/ ({
+        ((Name as fn(str) -> Name {Name})(("made" as str)) as Name)
+    } as Name)
+}
+
+impl Maker for Boxed { }
+
+fn make() ({
+    let _ =
+        (((Boxed as
+                    fn(Name) -> Boxed {Boxed})(((Name as
+                        fn(str) -> Name {Name})(("unused" as str)) as Name)) as
+                Boxed).make() as impl Describe);
+} as ())
+
+// Associated consts
+
+trait Numbered {
+    const
+    C:
+    int;
+    const
+    D:
+    int
+    =
+    (100 as int);
+
+    fn consts(self)
+        ->
+            (int,
+            int) ({ (((Self::C as int), (Self::D as int)) as (int, int)) } as
+        (int, int))
+}
+
+struct One;
+
+struct Two;
+
+struct Plus<T>(T);
+
+impl Numbered for One {
+    const
+    C:
+    int
+    =
+    (1 as int);
+}
+
+impl Numbered for Two {
+    const
+    C:
+    int
+    =
+    (2 as int);
+    const
+    D:
+    int
+    =
+    (200 as int);
+}
+
+// A const depending on the impl's parameter.
+impl <T> Numbered for Plus<T> where T: Numbered {
+    const
+    C:
+    int
+    =
+    ((T::C as int) + (10 as int) as int);
+}
+
+fn sum<T>(_t: T) -> int where
+    T: Numbered ({ ((T::C as int) + (T::D as int) as int) } as int)
+
+fn one_consts()
+    -> (int, int) ({ ((One as One).consts() as (int, int)) } as (int, int))
+
+fn two_consts()
+    -> (int, int) ({ ((Two as Two).consts() as (int, int)) } as (int, int))
+
+fn plus_one_consts()
+    ->
+        (int,
+        int) ({
+    (((Plus as fn(One) -> Plus<One> {Plus::<One>})((One as One)) as
+            Plus<One>).consts() as (int, int))
+} as (int, int))
+
+fn sum_two()
+    ->
+        int ({ ((sum as fn(Two) -> int {sum::<Two>})((Two as Two)) as int) }
+    as int)
+
+fn one_c() -> int ({ (<One as Numbered>::C as int) } as int)
+
+fn plus_two_d() -> int ({ (<Plus<Two> as Numbered>::D as int) } as int)
+
+// An inherent const wrapping a trait const, used from another module. The value of an
+// inherent const is inlined where it's used.
+
+trait Konst {
+    const
+    K:
+    int;
+}
+
+struct Holder;
+
+impl Konst for Holder {
+    const
+    K:
+    int
+    =
+    (7 as int);
+}
+
+impl Holder {
+    const
+    DOUBLED:
+    int
+    =
+    ((Self::K as int) * (2 as int) as int);
+}
+
+fn doubled_k() -> int ({ (Holder::DOUBLED as int) } as int)
+
+// `PartialEq::ne` defaults to the negation of `eq`
+
+struct P(int);
+
+impl PartialEq for P {
+    fn eq(self, other: P)
+        ->
+            bool ({
+        (((self as P).0 as int) == ((other as P).0 as int) as bool)
+    } as bool)
+}
+
+fn differ<T>(a: T, b: T) -> bool where
+    T: PartialEq ({ ((a as T) != (b as T) as bool) } as bool)
+
+fn int_ne(a: int, b: int)
+    -> bool ({ ((a as int).ne((b as int)) as bool) } as bool)
+
+fn str_ne(a: str, b: str)
+    -> bool ({ ((a as str).ne((b as str)) as bool) } as bool)
+
+fn p_ne(a: int, b: int)
+    ->
+        bool ({
+    (((P as fn(int) -> P {P})((a as int)) as P) !=
+        ((P as fn(int) -> P {P})((b as int)) as P) as bool)
+} as bool)
+
+fn p_differ(a: int, b: int)
+    ->
+        bool ({
+    ((differ as
+            fn(P, P) -> bool {differ::<P>})(((P as
+                fn(int) -> P {P})((a as int)) as P),
+        ((P as fn(int) -> P {P})((b as int)) as P)) as bool)
+} as bool)
+
+fn int_differ(a: int, b: int)
+    ->
+        bool ({
+    ((differ as fn(int, int) -> bool {differ::<int>})((a as int), (b as int))
+        as bool)
+} as bool)
+
+// An override with fewer bounds than the trait method
+
+trait Ring {
+    fn ring<T>(self, t: T)
+    -> str
+    where
+    T: Tag;
+}
+
+struct Loud;
+
+struct Quiet;
+
+impl Ring for Loud {
+    fn ring<T>(self, t: T) -> str where
+        T: Tag ({ ((t as T).tag() as str) } as str)
+}
+
+// Callers still pass a witness for `T`.
+impl Ring for Quiet {
+    fn ring<T>(self, _t: T) -> str ({ ("..." as str) } as str)
+}
+
+fn ring_via<R>(ringer: R) -> str where
+    R: Ring ({ ((ringer as R).ring((Bell as Bell)) as str) } as str)
+
+fn ring_loud()
+    ->
+        str ({
+    ((ring_via as fn(Loud) -> str {ring_via::<Loud>})((Loud as Loud)) as str)
+} as str)
+
+fn ring_quiet()
+    ->
+        str ({
+    ((ring_via as fn(Quiet) -> str {ring_via::<Quiet>})((Quiet as Quiet)) as
+        str)
+} as str)
+
+fn ring_quiet_directly()
+    -> str ({ ((Quiet as Quiet).ring((Bell as Bell)) as str) } as str)
+
+// Function items as values. A function with witness parameters becomes a closure that passes
+// them along.
+
+fn calls_required_through_pointer<T>(animal: T) -> (str, str) where
+    T: Animal ({
+    let calls_required: fn(T) -> (str, str) =
+        (T::calls_required as
+            fn(T) -> (str, str) {<T as Animal>::calls_required});
+    ((calls_required as fn(T) -> (str, str))((animal as T)) as (str, str))
+} as (str, str))
+
+fn describe_through_pointer(name: str)
+    ->
+        str ({
+    let describe: fn(Loose<Name>) -> str =
+        (first::<Loose<Name>> as
+            fn(Loose<Name>) -> str {first::<Loose<Name>>});
+    ((describe as
+            fn(Loose<Name>) -> str)(((Loose as
+                fn(Name) -> Loose<Name> {Loose::<Name>})(((Name as
+                    fn(str) -> Name {Name})((name as str)) as Name)) as
+            Loose<Name>)) as str)
+} as str)
+
+fn ne_through_pointer(a: int, b: int)
+    ->
+        bool ({
+    let ne: fn(P, P) -> bool =
+        (<P as PartialEq>::ne as
+            fn(P, P) -> bool {<P as Core::PartialEq>::ne});
+    ((ne as
+            fn(P, P) -> bool)(((P as fn(int) -> P {P})((a as int)) as P),
+        ((P as fn(int) -> P {P})((b as int)) as P)) as bool)
+} as bool)
+
+fn sheep_calls_required_through_pointer(name: str)
+    ->
+        (str,
+        str) ({
+    ((calls_required_through_pointer as
+            fn(Sheep) -> (str, str) {calls_required_through_pointer::<Sheep>})((Sheep {
+            (name as str) } as Sheep)) as (str, str))
+} as (str, str))

@@ -18,15 +18,20 @@ extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
-trait Tr {
-    fn required(self)
-    -> int;
-
-    fn defaulted(self) -> int ({ (1 as int) } as int)
+trait Describe {
+    fn describe(self)
+    -> str;
 }
 
-struct S;
-
-impl Tr for S {
-    fn required(self) -> int ({ (2 as int) } as int)
+trait Family {
+    type
+    Member<T>;
+    fn member<T>(self, t: T)
+    -> Self::Member<T>;
 }
+
+fn describe_member<F>(family: F) -> str where F: Family,
+    F::Member<int>: Describe ({
+    (((family as F).member((1 as int)) as
+            <F as Family>::Member<int>).describe() as str)
+} as str)

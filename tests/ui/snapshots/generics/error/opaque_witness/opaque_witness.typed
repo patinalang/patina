@@ -1,0 +1,48 @@
+#![allow(internal_features)]
+
+
+
+
+
+#![allow(dead_code)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+#[allow(unused_imports)]
+use Core::*;
+#[allow(unused)]
+extern mod io;
+#[allow(unused)]
+extern mod patina_fmt;
+
+trait Describe {
+    fn describe(self)
+    -> str;
+}
+
+struct Name(str);
+
+impl Describe for Name {
+    fn describe(self) -> str ({ ((self as Name).0 as str) } as str)
+}
+
+fn make()
+    ->
+        /*impl Trait*/ ({
+    ((Name as fn(str) -> Name {Name})(("a" as str)) as Name)
+} as Name)
+
+fn show<T>(t: T) -> str where
+    T: Describe ({ ((t as T).describe() as str) } as str)
+
+// Calling `show` needs the witness of the opaque return type of `make`.
+fn show_made()
+    ->
+        str ({
+    ((show as
+            fn(impl Describe) -> str {show::<impl Describe>})(((make as
+                fn() -> impl Describe {make})() as impl Describe)) as str)
+} as str)

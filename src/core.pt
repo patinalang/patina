@@ -348,7 +348,6 @@ macro_rules! shr_impl {
         }
     )*)
 }
-
 shr_impl! { int }
 
 #[lang = "eq"]
@@ -357,7 +356,9 @@ pub const trait PartialEq<Rhs = Self> {
     fn eq(self, other: Rhs) -> bool;
 
     #[must_use]
-    fn ne(self, other: Rhs) -> bool;
+    fn ne(self, other: Rhs) -> bool {
+        !self.eq(other)
+    }
 }
 
 macro_rules! partial_eq_impl {
@@ -368,7 +369,6 @@ macro_rules! partial_eq_impl {
         }
     )*)
 }
-
 partial_eq_impl! { bool int float str atom bin bits char }
 
 #[lang = "partial_ord"]

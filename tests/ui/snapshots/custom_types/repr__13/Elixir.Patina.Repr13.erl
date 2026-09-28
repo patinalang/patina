@@ -37,9 +37,29 @@ main() ->
     begin
         io:put_chars([[io_lib:format("~ktp",
                                      [case hi of
+                                          _value@0_0 when _value@0_0 =:= nil ->
+                                              {some, _value@0_0};
+                                          _value@0_0 -> _value@0_0
+                                      end])]]),
+        io:nl(),
+        {}
+    end,
+    begin
+        io:put_chars([[io_lib:format("~ktp",
+                                     [case nil of
                                           _value@1_0 when _value@1_0 =:= nil ->
                                               {some, _value@1_0};
                                           _value@1_0 -> _value@1_0
+                                      end])]]),
+        io:nl(),
+        {}
+    end,
+    begin
+        io:put_chars([[io_lib:format("~ktp",
+                                     [case 42 of
+                                          _value@2_0 when _value@2_0 =:= nil ->
+                                              {some, _value@2_0};
+                                          _value@2_0 -> _value@2_0
                                       end])]]),
         io:nl(),
         {}
@@ -50,26 +70,6 @@ main() ->
                                           _value@3_0 when _value@3_0 =:= nil ->
                                               {some, _value@3_0};
                                           _value@3_0 -> _value@3_0
-                                      end])]]),
-        io:nl(),
-        {}
-    end,
-    begin
-        io:put_chars([[io_lib:format("~ktp",
-                                     [case 42 of
-                                          _value@5_0 when _value@5_0 =:= nil ->
-                                              {some, _value@5_0};
-                                          _value@5_0 -> _value@5_0
-                                      end])]]),
-        io:nl(),
-        {}
-    end,
-    begin
-        io:put_chars([[io_lib:format("~ktp",
-                                     [case nil of
-                                          _value@7_0 when _value@7_0 =:= nil ->
-                                              {some, _value@7_0};
-                                          _value@7_0 -> _value@7_0
                                       end])]]),
         io:nl(),
         {}

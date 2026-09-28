@@ -1,0 +1,38 @@
+#![allow(internal_features)]
+
+
+
+
+
+#![allow(dead_code)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+#[allow(unused_imports)]
+use Core::*;
+#[allow(unused)]
+extern mod io;
+#[allow(unused)]
+extern mod patina_fmt;
+
+trait Container {
+    type
+    Item;
+    fn get(self)
+    -> Self::Item;
+}
+
+trait Wraps<T> {
+    fn wrapped(self)
+    -> int;
+}
+
+struct W<C>(C);
+
+// The trait argument `C::Item` is only known at runtime, so it has no witness pattern.
+impl <C> Wraps<C::Item> for W<C> where C: Container {
+    fn wrapped(self) -> int ({ (0 as int) } as int)
+}
