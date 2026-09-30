@@ -1,0 +1,28 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+fn without_unsafe(value: term)
+    -> int ({ ((value as term).cast_unchecked() as int) } as int)
+
+fn uninferred(value:
+        term) ({
+    let _ =
+        (unsafe { ((value as term).cast_unchecked() as {type error}) } as
+            {type error});
+} as ())

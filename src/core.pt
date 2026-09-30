@@ -7,10 +7,12 @@
     fundamental,
     const_trait_impl,
     arbitrary_self_types,
-    decl_macro
+    decl_macro,
+    intrinsics
 )]
 #![no_std]
 #![no_core]
+#![rustc_coherence_is_core]
 
 #[macro_export]
 #[rustc_builtin_macro]
@@ -429,6 +431,17 @@ impl<Idx> RangeInclusive<Idx> {
     pub const fn new(start: Idx, end: Idx) -> RangeInclusive<Idx> {
         RangeInclusive { start, end }
     }
+}
+
+impl term {
+    /// Asserts, without checking, that this term is a value of type `T`.
+    ///
+    /// # Safety
+    ///
+    /// The term must be a value of type `T`, e.g. the result of an external function known to
+    /// return one. Otherwise, the program misbehaves where the value is used.
+    #[rustc_intrinsic]
+    pub unsafe fn cast_unchecked<T>(self) -> T;
 }
 
 #[lang = "timeout"]

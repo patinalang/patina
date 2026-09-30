@@ -1,0 +1,25 @@
+extern mod erlang;
+extern mod maps;
+
+pub struct Point {
+    pub x: int,
+    pub y: int,
+}
+
+pub fn inferred_target<K, V>(map: #{K => V}) -> [K] {
+    unsafe { maps::keys(map).cast_unchecked() }
+}
+
+pub fn explicit_target<T>(xs: [T]) -> int {
+    let len = unsafe { erlang::length(xs).cast_unchecked::<int>() };
+    len * 2
+}
+
+pub fn term_into_struct(point: term) -> int {
+    let Point { x, y } = unsafe { point.cast_unchecked::<Point>() };
+    x + y
+}
+
+pub fn round_trip() -> int {
+    term_into_struct(Point { x: 1, y: 2 } as term)
+}

@@ -576,6 +576,7 @@ symbols! {
         capture_disjoint_fields,
         carrying_mul_add,
         carryless_mul,
+        cast_unchecked,
         catch_unwind,
         cause,
         cdylib,

@@ -630,6 +630,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             if matches!(self.tcx().def_kind(*callee_def_id), DefKind::Ctor(..)) {
                 not_implemented!(self.tcx(), span, "calling a constructor through a variable");
             }
+            if let Some(intrinsic) = self.tcx().intrinsic(*callee_def_id) {
+                return self.translate_intrinsic_call(span, intrinsic.name, args);
+            }
 
             let erl_call_target = self.tcx().erl_call_target_for_def(*callee_def_id, generic_args);
             (erl_call_target, afb.expr_atom(span, self.tcx().erl_fn_name(*callee_def_id)))
@@ -654,6 +657,18 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         arg_exprs.extend(args.iter().map(|&id| self.translate_expr(id)));
 
         self.emit_item_call(span, erl_call_target, callee_expr, arg_exprs, forced_extern)
+    }
+
+    fn translate_intrinsic_call(
+        &mut self,
+        span: Span,
+        name: Symbol,
+        args: &[ExprId],
+    ) -> eaf::Expr<'arena> {
+        match (name, args) {
+            (sym::cast_unchecked, &[value]) => self.translate_expr(value),
+            _ => not_implemented!(self.tcx(), span, "intrinsic", name),
+        }
     }
 
     fn emit_item_call(
@@ -829,6 +844,10 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         if let ty::TyKind::FnDef(def_id, args) = expr.ty.kind()
             && matches!(tcx.def_kind(*def_id), DefKind::Fn | DefKind::AssocFn)
         {
+            if let Some(intrinsic) = tcx.intrinsic(*def_id) {
+                not_implemented!(tcx, expr.span, "intrinsic as a value", intrinsic.name);
+            }
+
             let target = tcx.erl_call_target_for_def(*def_id, args);
             let fn_name = tcx.erl_fn_name(*def_id);
 

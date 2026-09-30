@@ -1,0 +1,23 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro, prelude_import)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[prelude_import]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+pub fn as_value(value: term) -> int {
+    let cast = term::cast_unchecked::<int>;
+    unsafe { cast(value) }
+}

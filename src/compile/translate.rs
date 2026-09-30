@@ -523,9 +523,12 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 }
             }
 
-            // Inherent consts and types don't become functions.
+            // Inherent consts and types don't become functions, and neither do intrinsics.
             for item in tcx.associated_items(*impl_def_id).in_definition_order() {
-                if (trait_def_id.is_some() || item.is_fn()) && !item.is_impl_trait_in_trait() {
+                if (trait_def_id.is_some() || item.is_fn())
+                    && !item.is_impl_trait_in_trait()
+                    && tcx.intrinsic(item.def_id).is_none()
+                {
                     clauses.push(self.translate_assoc_item(module_id, item, parts));
                 }
             }

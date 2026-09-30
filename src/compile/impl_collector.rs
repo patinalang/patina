@@ -38,6 +38,16 @@ impl<'tcx> ImplCollector<'tcx> {
                 continue;
             }
 
+            // Likewise an inherent impl whose only methods are intrinsics.
+            if tcx.impl_opt_trait_id(def_id).is_none()
+                && tcx
+                    .associated_items(def_id)
+                    .in_definition_order()
+                    .all(|item| !item.is_fn() || tcx.intrinsic(item.def_id).is_some())
+            {
+                continue;
+            }
+
             match tcx.erl_definition_module(def_id) {
                 Some(module_id) => {
                     impls.entry(module_id).or_default().push((def_id.to_def_id(), impl_item));

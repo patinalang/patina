@@ -1,0 +1,3 @@
+pub fn without_unsafe(value: term) -> int { value.cast_unchecked() }
+
+pub fn uninferred(value: term) { let _ = unsafe { value.cast_unchecked() }; }

@@ -1,0 +1,64 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+extern mod erlang;
+extern mod maps;
+
+struct Point {
+    x: int,
+    y: int,
+}
+
+fn inferred_target<K, V>(map: #{K => V})
+    ->
+        [K] ({
+    (unsafe {
+        (((maps::keys as fn(term) -> term)((map as #{K => V})) as
+                term).cast_unchecked() as [K])
+    } as [K])
+} as [K])
+
+fn explicit_target<T>(xs: [T])
+    ->
+        int ({
+    let len =
+        (unsafe {
+            (((erlang::length as fn(term) -> term)((xs as [T])) as
+                    term).cast_unchecked::<int>() as int)
+        } as int);
+    ((len as int) * (2 as int) as int)
+} as int)
+
+fn term_into_struct(point: term)
+    ->
+        int ({
+    let Point {  x,  y } =
+        (unsafe { ((point as term).cast_unchecked::<Point>() as Point) } as
+            Point);
+    ((x as int) + (y as int) as int)
+} as int)
+
+fn round_trip()
+    ->
+        int ({
+    ((term_into_struct as
+            fn(term) -> int {term_into_struct})(((Point {
+                x: (1 as int), y: (2 as int) } as Point) as term as term)) as
+        int)
+} as int)

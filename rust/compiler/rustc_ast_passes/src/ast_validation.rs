@@ -1675,7 +1675,8 @@ impl Visitor<'_> for AstValidator<'_> {
                     }
                 }
                 AssocItemKind::Fn(box Fn { body, .. }) => {
-                    if body.is_none() && !self.is_sdylib_interface {
+                    let is_intrinsic = item.attrs.iter().any(|a| a.has_name(sym::rustc_intrinsic));
+                    if body.is_none() && !is_intrinsic && !self.is_sdylib_interface {
                         self.dcx().emit_err(errors::AssocFnWithoutBody {
                             span: item.span,
                             replace_span: self.ending_semi_or_hi(item.span),

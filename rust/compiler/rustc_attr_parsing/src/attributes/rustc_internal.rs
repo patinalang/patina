@@ -1077,7 +1077,10 @@ pub(crate) struct RustcIntrinsicParser;
 
 impl NoArgsAttributeParser for RustcIntrinsicParser {
     const PATH: &[Symbol] = &[sym::rustc_intrinsic];
-    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[Allow(Target::Fn)]);
+    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[
+        Allow(Target::Fn),
+        Allow(Target::Method(MethodKind::Inherent)),
+    ]);
     const CREATE: fn(Span) -> AttributeKind = |_| AttributeKind::RustcIntrinsic;
 }
 

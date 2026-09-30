@@ -1,0 +1,8 @@
+error: intrinsic as a value not yet implemented: "cast_unchecked"
+  --> tests/ui/src/primitives/errors/cast_unchecked_value.pt:2:16
+   |
+LL |     let cast = term::cast_unchecked::<int>;
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: aborting due to 1 previous error
+
