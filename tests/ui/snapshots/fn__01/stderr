@@ -1,4 +1,4 @@
-error: requires `range_inclusive_new` lang_item
+error: requires `next` lang_item
   --> tests/ui/src/fn__01.pt:37:14
    |
 LL |     for n in 1..=n {

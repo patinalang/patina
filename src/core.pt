@@ -410,6 +410,27 @@ pub enum Option<T> {
     Some(T),
 }
 
+/// A half-open range `start..end`.
+#[lang = "Range"]
+pub struct Range<Idx> {
+    pub start: Idx,
+    pub end: Idx,
+}
+
+/// A closed range `start..=end`.
+#[lang = "RangeInclusive"]
+pub struct RangeInclusive<Idx> {
+    pub start: Idx,
+    pub end: Idx,
+}
+
+impl<Idx> RangeInclusive<Idx> {
+    #[lang = "range_inclusive_new"]
+    pub const fn new(start: Idx, end: Idx) -> RangeInclusive<Idx> {
+        RangeInclusive { start, end }
+    }
+}
+
 #[lang = "timeout"]
 pub enum Timeout {
     #[repr(transparent)]

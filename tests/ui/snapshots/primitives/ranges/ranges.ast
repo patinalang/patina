@@ -1,0 +1,22 @@
+use Core::{Range, RangeInclusive};
+
+pub fn half_open(start: int, end: int) -> Range<int> { start..end }
+
+pub fn closed(start: int, end: int) -> RangeInclusive<int> { start..=end }
+
+pub fn half_open_bounds() -> (int, int) {
+    let range = 1..101;
+    (range.start, range.end)
+}
+
+pub fn closed_bounds() -> (int, int) {
+    let range = 1..=100;
+    (range.start, range.end)
+}
+
+pub fn char_range() -> RangeInclusive<char> { 'a'..='z' }
+
+pub fn destructure(range: Range<int>) -> int {
+    let Range { start, end } = range;
+    end - start
+}
