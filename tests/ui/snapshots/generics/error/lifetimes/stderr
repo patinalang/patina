@@ -1,0 +1,50 @@
+error: lifetimes are not supported in Patina
+  --> tests/ui/src/generics/error/lifetimes.pt:5:10
+   |
+LL | trait Tr<'a> {
+   |          ^^ help: remove the lifetime
+   |
+   = note: values on the BEAM VM are garbage collected
+
+error: lifetimes are not supported in Patina
+  --> tests/ui/src/generics/error/lifetimes.pt:11:6
+   |
+LL | impl<'a> Tr<'a> for S {
+   |      ^^ help: remove the lifetime
+   |
+   = note: values on the BEAM VM are garbage collected
+
+error: lifetimes are not supported in Patina
+  --> tests/ui/src/generics/error/lifetimes.pt:11:13
+   |
+LL | impl<'a> Tr<'a> for S {
+   |             ^^ help: remove the lifetime
+   |
+   = note: values on the BEAM VM are garbage collected
+
+error: lifetimes are not supported in Patina
+  --> tests/ui/src/generics/error/lifetimes.pt:15:39
+   |
+LL | fn bound<T>(x: T) -> int where T: for<'a> Tr<'a> + 'static {
+   |                                       ^^ help: remove the lifetime
+   |
+   = note: values on the BEAM VM are garbage collected
+
+error: lifetimes are not supported in Patina
+  --> tests/ui/src/generics/error/lifetimes.pt:15:46
+   |
+LL | fn bound<T>(x: T) -> int where T: for<'a> Tr<'a> + 'static {
+   |                                              ^^ help: remove the lifetime
+   |
+   = note: values on the BEAM VM are garbage collected
+
+error: lifetimes are not supported in Patina
+  --> tests/ui/src/generics/error/lifetimes.pt:15:52
+   |
+LL | fn bound<T>(x: T) -> int where T: for<'a> Tr<'a> + 'static {
+   |                                                    ^^^^^^^ help: remove the lifetime
+   |
+   = note: values on the BEAM VM are garbage collected
+
+error: aborting due to 6 previous errors
+

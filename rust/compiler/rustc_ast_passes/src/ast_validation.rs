@@ -1463,6 +1463,17 @@ impl Visitor<'_> for AstValidator<'_> {
         }
     }
 
+    fn visit_generic_param(&mut self, param: &GenericParam) {
+        if let GenericParamKind::Lifetime = param.kind {
+            self.dcx().emit_err(errors::LifetimeNotSupported { span: param.ident.span });
+        }
+        visit::walk_generic_param(self, param);
+    }
+
+    fn visit_lifetime(&mut self, lifetime: &Lifetime, _: visit::LifetimeCtxt) {
+        self.dcx().emit_err(errors::LifetimeNotSupported { span: lifetime.ident.span });
+    }
+
     fn visit_param_bound(&mut self, bound: &GenericBound, ctxt: BoundKind) {
         match bound {
             GenericBound::Trait(trait_ref) => {

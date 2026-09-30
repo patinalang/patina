@@ -28,6 +28,16 @@ pub(crate) enum VisibilityNotPermittedNote {
     #[note("place qualifiers on individual foreign items instead")]
     IndividualForeignItems,
 }
+
+#[derive(Diagnostic)]
+#[diag("lifetimes are not supported in Patina")]
+#[note("values on the BEAM VM are garbage collected")]
+pub(crate) struct LifetimeNotSupported {
+    #[primary_span]
+    #[suggestion("remove the lifetime", code = "", applicability = "maybe-incorrect")]
+    pub span: Span,
+}
+
 #[derive(Diagnostic)]
 #[diag("redundant `const` fn marker in const impl")]
 pub(crate) struct ImplFnConst {

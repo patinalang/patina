@@ -1,0 +1,23 @@
+#![allow(dead_code)]
+
+// Lifetimes are not part of Patina. Loop labels look like lifetimes, but stay allowed.
+
+trait Tr<'a> {
+    fn m(self) -> int;
+}
+
+struct S;
+
+impl<'a> Tr<'a> for S {
+    fn m(self) -> int { 1 }
+}
+
+fn bound<T>(x: T) -> int where T: for<'a> Tr<'a> + 'static {
+    x.m()
+}
+
+fn label() -> int {
+    'outer: loop {
+        break 'outer 1;
+    }
+}

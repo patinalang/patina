@@ -1,0 +1,36 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro)]
+#![no_std]
+#![no_core]
+
+
+
+
+
+#![allow(dead_code)]
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+#[allow(unused_imports)]
+use Core::*;
+#[allow(unused)]
+extern mod io;
+#[allow(unused)]
+extern mod patina_fmt;
+
+// Lifetimes are not part of Patina. Loop labels look like lifetimes, but stay allowed.
+
+trait Tr<'a> {
+    fn m(self)
+    -> int;
+}
+
+struct S;
+
+impl<'a> Tr<'a> for S {
+    fn m(self) -> int { 1 }
+}
+
+fn bound<T>(x: T) -> int where T: for<'a> Tr<'a> + 'static { x.m() }
+
+fn label() -> int { 'outer: loop { break 'outer 1; } }
