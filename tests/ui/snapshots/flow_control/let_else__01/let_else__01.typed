@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -8,7 +8,8 @@
 extern crate Core;
 
 #[allow(unused_imports)]
-use Core::*;
+#[attr = PreludeImport]
+use Core::Prelude::*;
 
 #[allow(unused)]
 extern mod io;
@@ -30,13 +31,14 @@ fn get_count_item(s: str)
     let (it, second) = ((it as {type error}).next() as {type error});
 
     let (Some(count_str), Some(item)) =
-        (((first as {type error}), (second as {type error})) as
-            ({type error}, {type error})) else
+        (((first as Core::Option<{type error}>),
+            (second as Core::Option<str>)) as
+            (Core::Option<{type error}>, Core::Option<str>)) else
         { ((/*ERROR*/) as {type error}); };
     let Ok(count) =
         ((int::from_str as {type error})((count_str as {type error})) as
             {type error}) else { ((/*ERROR*/) as {type error}); };
-    (((count as {type error}), (item as {type error})) as (int, str))
+    (((count as {type error}), (item as str)) as (int, str))
 } as (int, str))
 
 fn main() ({ ((/*ERROR*/) as {type error}); } as ())

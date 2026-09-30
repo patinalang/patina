@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -8,7 +8,8 @@
 extern crate Core;
 
 #[allow(unused_imports)]
-use Core::*;
+#[attr = PreludeImport]
+use Core::Prelude::*;
 
 #[allow(unused)]
 extern mod io;
@@ -22,7 +23,7 @@ extern mod patina_fmt;
 enum Fruit { Apple, Orange, Banana, Kiwi, Lemon, }
 
 fn main() ({
-    let no_fruit: Option<Fruit> = (None as {type error});
+    let no_fruit: Option<Fruit> = (None as Core::Option<Fruit>);
     let get_kiwi_as_fallback =
         (||
             ({
@@ -35,9 +36,10 @@ fn main() ({
                                     as [str])] as [[str]])) as term);
                     ((io::nl as fn() -> term)() as term);
                 } as ());
-                ((Some as {type error})((Fruit::Kiwi as Fruit)) as
-                    {type error})
-            } as {type error}) as
+                ((Some as
+                        fn(Fruit) -> Core::Option<Fruit> {Core::Option::<Fruit>::Some})((Fruit::Kiwi
+                        as Fruit)) as Core::Option<Fruit>)
+            } as Core::Option<Fruit>) as
             {closure@tests/ui/src/error/option_unwrap/defaults__02.pt:9:32: 9:34});
     let get_lemon_as_fallback =
         (||
@@ -48,15 +50,18 @@ fn main() ({
                                             str)] as [str])] as [[str]])) as term);
                     ((io::nl as fn() -> term)() as term);
                 } as ());
-                ((Some as {type error})((Fruit::Lemon as Fruit)) as
-                    {type error})
-            } as {type error}) as
+                ((Some as
+                        fn(Fruit) -> Core::Option<Fruit> {Core::Option::<Fruit>::Some})((Fruit::Lemon
+                        as Fruit)) as Core::Option<Fruit>)
+            } as Core::Option<Fruit>) as
             {closure@tests/ui/src/error/option_unwrap/defaults__02.pt:13:33: 13:35});
     let first_available_fruit =
         (((no_fruit as
-                    {type error}).or_else((get_kiwi_as_fallback as
-                    {type error})) as
-                {type error}).or_else((get_lemon_as_fallback as {type error}))
+                    Core::Option<Fruit>).or_else((get_kiwi_as_fallback as
+                    {closure@tests/ui/src/error/option_unwrap/defaults__02.pt:9:32: 9:34}))
+                as
+                {type error}).or_else((get_lemon_as_fallback as
+                {closure@tests/ui/src/error/option_unwrap/defaults__02.pt:13:33: 13:35}))
             as {type error});
     ({
         ((io::put_chars as

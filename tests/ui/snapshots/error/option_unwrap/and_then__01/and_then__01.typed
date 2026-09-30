@@ -8,14 +8,15 @@
 // block: 1/1
 
 #![allow(dead_code)]
-#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
 extern crate Core;
 #[allow(unused_imports)]
-use Core::*;
+#[attr = PreludeImport]
+use Core::Prelude::*;
 #[allow(unused)]
 extern mod io;
 #[allow(unused)]
@@ -29,20 +30,26 @@ fn have_ingredients(food: Food)
     ->
         Option<Food> ({
     (match (food as Food) {
-        Food::Sushi => (None as {type error}),
-        _ => ((Some as {type error})((food as Food)) as {type error}),
-    } as {type error})
-} as {type error})
+        Food::Sushi => (None as Core::Option<Food>),
+        _ =>
+            ((Some as
+                    fn(Food) -> Core::Option<Food> {Core::Option::<Food>::Some})((food
+                    as Food)) as Core::Option<Food>),
+    } as Core::Option<Food>)
+} as Core::Option<Food>)
 
 // We have the recipe for everything except Cordon Bleu.
 fn have_recipe(food: Food)
     ->
         Option<Food> ({
     (match (food as Food) {
-        Food::CordonBleu => (None as {type error}),
-        _ => ((Some as {type error})((food as Food)) as {type error}),
-    } as {type error})
-} as {type error})
+        Food::CordonBleu => (None as Core::Option<Food>),
+        _ =>
+            ((Some as
+                    fn(Food) -> Core::Option<Food> {Core::Option::<Food>::Some})((food
+                    as Food)) as Core::Option<Food>),
+    } as Core::Option<Food>)
+} as Core::Option<Food>)
 
 // To make a dish, we need both the recipe and the ingredients.
 // We can represent the logic with a chain of `match`es:
@@ -56,7 +63,7 @@ fn cookable_v1(food: Food)
         Some(food) =>
             ((have_ingredients as
                     fn(Food) -> Core::Option<Food> {have_ingredients})((food as
-                    {type error})) as Core::Option<Food>),
+                    Food)) as Core::Option<Food>),
     } as Core::Option<Food>)
 } as Core::Option<Food>)
 
@@ -98,9 +105,8 @@ fn eat(food: Food,
                     fn(term) -> term)(([([("Yay! On " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((day as Day)) as
                                     term), (" we get to eat " as str),
-                                ((patina_fmt::debug as
-                                        fn(term) -> term)((food as {type error})) as term),
-                                ("." as str)] as [term])] as [[term]])) as term);
+                                ((patina_fmt::debug as fn(term) -> term)((food as Food)) as
+                                    term), ("." as str)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
         None => {

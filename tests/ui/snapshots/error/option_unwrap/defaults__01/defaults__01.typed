@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -8,7 +8,8 @@
 extern crate Core;
 
 #[allow(unused_imports)]
-use Core::*;
+#[attr = PreludeImport]
+use Core::Prelude::*;
 
 #[allow(unused)]
 extern mod io;
@@ -23,14 +24,20 @@ enum Fruit { Apple, Orange, Banana, Kiwi, Lemon, }
 
 fn main() ({
     let apple =
-        ((Some as {type error})((Fruit::Apple as Fruit)) as {type error});
+        ((Some as
+                fn(Fruit) -> Core::Option<Fruit> {Core::Option::<Fruit>::Some})((Fruit::Apple
+                as Fruit)) as Core::Option<Fruit>);
     let orange =
-        ((Some as {type error})((Fruit::Orange as Fruit)) as {type error});
-    let no_fruit: Option<Fruit> = (None as {type error});
+        ((Some as
+                fn(Fruit) -> Core::Option<Fruit> {Core::Option::<Fruit>::Some})((Fruit::Orange
+                as Fruit)) as Core::Option<Fruit>);
+    let no_fruit: Option<Fruit> = (None as Core::Option<Fruit>);
 
     let first_available_fruit =
-        (((no_fruit as {type error}).or((orange as {type error})) as
-                {type error}).or((apple as {type error})) as {type error});
+        (((no_fruit as
+                    Core::Option<Fruit>).or((orange as Core::Option<Fruit>)) as
+                {type error}).or((apple as Core::Option<Fruit>)) as
+            {type error});
     // first_available_fruit: Some(Orange)
 
     // `or` moves its argument.

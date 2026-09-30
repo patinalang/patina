@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -8,7 +8,8 @@
 extern crate Core;
 
 #[allow(unused_imports)]
-use Core::*;
+#[attr = PreludeImport]
+use Core::Prelude::*;
 
 #[allow(unused)]
 extern mod io;
@@ -21,8 +22,11 @@ extern mod patina_fmt;
 
 fn some_number()
     ->
-        Option<int> ({ ((Some as {type error})((42 as int)) as {type error}) }
-    as {type error})
+        Option<int> ({
+    ((Some as
+            fn(int) -> Core::Option<int> {Core::Option::<int>::Some})((42 as
+            int)) as Core::Option<int>)
+} as Core::Option<int>)
 
 fn main() ({
     (match ((some_number as fn() -> Core::Option<int> {some_number})() as
@@ -43,17 +47,15 @@ fn main() ({
             {
             ((io::put_chars as
                     fn(term) -> term)(([([("The Answer: " as str),
-                                ((patina_fmt::display as
-                                        fn(term) -> term)((n as {type error})) as term),
-                                ("!" as str)] as [term])] as [[term]])) as term);
+                                ((patina_fmt::display as fn(term) -> term)((n as int)) as
+                                    term), ("!" as str)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
         Some(n) => {
             ((io::put_chars as
                     fn(term) -> term)(([([("Not interesting... " as str),
-                                ((patina_fmt::display as
-                                        fn(term) -> term)((n as {type error})) as term)] as [term])]
-                    as [[term]])) as term);
+                                ((patina_fmt::display as fn(term) -> term)((n as int)) as
+                                    term)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
         _ => (() as ()),

@@ -37,7 +37,7 @@ static INTERNAL_FEATURES: AtomicBool = AtomicBool::new(false);
 
 const PRELUDE: &str = r#"
 #![allow(internal_features)]
-#![feature(no_core, rustc_attrs, decl_macro)]
+#![feature(no_core, rustc_attrs, decl_macro, prelude_import)]
 #![no_std]
 #![no_core]
 
@@ -46,7 +46,8 @@ const PRELUDE: &str = r#"
 extern crate Core;
 
 #[allow(unused_imports)]
-use Core::*;
+#[prelude_import]
+use Core::Prelude::*;
 
 #[allow(unused)]
 extern mod io;

@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -8,7 +8,8 @@
 extern crate Core;
 
 #[allow(unused_imports)]
-use Core::*;
+#[attr = PreludeImport]
+use Core::Prelude::*;
 
 #[allow(unused)]
 extern mod io;
@@ -44,7 +45,7 @@ fn give_adult(drink:
         Some(inner) => {
             ((io::put_chars as
                     fn(term) -> term)(([([((patina_fmt::display as
-                                        fn(term) -> term)((inner as {type error})) as term),
+                                        fn(term) -> term)((inner as str)) as term),
                                 ("? How nice." as str)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
@@ -72,23 +73,31 @@ fn drink(drink:
     } as ());
 } as ())
 fn main() ({
-    let water = ((Some as {type error})(("water" as str)) as {type error});
+    let water =
+        ((Some as
+                fn(str) -> Core::Option<str> {Core::Option::<str>::Some})(("water"
+                as str)) as Core::Option<str>);
     let lemonade =
-        ((Some as {type error})(("lemonade" as str)) as {type error});
-    let void = (None as {type error});
+        ((Some as
+                fn(str) -> Core::Option<str> {Core::Option::<str>::Some})(("lemonade"
+                as str)) as Core::Option<str>);
+    let void = (None as Core::Option<str>);
     ((give_adult as
-            fn(Core::Option<str>) {give_adult})((water as {type error})) as
-        ());
+            fn(Core::Option<str>) {give_adult})((water as Core::Option<str>))
+        as ());
     ((give_adult as
-            fn(Core::Option<str>) {give_adult})((lemonade as {type error})) as
-        ());
+            fn(Core::Option<str>) {give_adult})((lemonade as
+            Core::Option<str>)) as ());
     ((give_adult as
-            fn(Core::Option<str>) {give_adult})((void as {type error})) as
-        ());
-    let coffee = ((Some as {type error})(("coffee" as str)) as {type error});
-    let nothing = (None as {type error});
-    ((drink as fn(Core::Option<str>) {drink})((coffee as {type error})) as
-        ());
-    ((drink as fn(Core::Option<str>) {drink})((nothing as {type error})) as
-        ());
+            fn(Core::Option<str>) {give_adult})((void as Core::Option<str>))
+        as ());
+    let coffee =
+        ((Some as
+                fn(str) -> Core::Option<str> {Core::Option::<str>::Some})(("coffee"
+                as str)) as Core::Option<str>);
+    let nothing = (None as Core::Option<str>);
+    ((drink as fn(Core::Option<str>) {drink})((coffee as Core::Option<str>))
+        as ());
+    ((drink as fn(Core::Option<str>) {drink})((nothing as Core::Option<str>))
+        as ());
 } as ())

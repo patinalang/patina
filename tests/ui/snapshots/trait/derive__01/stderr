@@ -4,11 +4,7 @@ error: cannot find derive macro `PartialEq` in this scope
 LL | #[derive(PartialEq, PartialOrd)]
    |          ^^^^^^^^^
    |
-note: `PartialEq` is imported here, but it is only a trait, without a derive macro
-  --> <patina-prelude>:12:5
-   |
-LL | use Core::*;
-   |     ^^^^^^^
+   = note: `PartialEq` is in scope, but it is only a trait, without a derive macro
 
 error: cannot find derive macro `PartialOrd` in this scope
   --> tests/ui/src/trait/derive__01.pt:5:21
@@ -16,11 +12,7 @@ error: cannot find derive macro `PartialOrd` in this scope
 LL | #[derive(PartialEq, PartialOrd)]
    |                     ^^^^^^^^^^
    |
-note: `PartialOrd` is imported here, but it is only a trait, without a derive macro
-  --> <patina-prelude>:12:5
-   |
-LL | use Core::*;
-   |     ^^^^^^^
+   = note: `PartialOrd` is in scope, but it is only a trait, without a derive macro
 
 error: cannot find derive macro `Debug` in this scope
   --> tests/ui/src/trait/derive__01.pt:9:10

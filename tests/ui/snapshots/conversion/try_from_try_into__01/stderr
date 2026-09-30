@@ -46,11 +46,7 @@ error: cannot find derive macro `PartialEq` in this scope
 LL | #[derive(Debug, PartialEq)]
    |                 ^^^^^^^^^
    |
-note: `PartialEq` is imported here, but it is only a trait, without a derive macro
-  --> <patina-prelude>:12:5
-   |
-LL | use Core::*;
-   |     ^^^^^^^
+   = note: `PartialEq` is in scope, but it is only a trait, without a derive macro
 
 error[E0425]: cannot find type `Result` in this scope
   --> tests/ui/src/conversion/try_from_try_into__01.pt:13:32

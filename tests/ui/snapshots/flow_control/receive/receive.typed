@@ -6,14 +6,15 @@
 
 #![allow(non_camel_case_types)]
 #![deny(unused_unsafe)]
-#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
 extern crate Core;
 #[allow(unused_imports)]
-use Core::*;
+#[attr = PreludeImport]
+use Core::Prelude::*;
 #[allow(unused)]
 extern mod io;
 #[allow(unused)]

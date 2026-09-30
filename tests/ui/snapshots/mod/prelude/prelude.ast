@@ -1,0 +1,13 @@
+// Prelude items are in scope in every module, not only at the crate root.
+
+pub fn top(n: int) -> Option<int> { if n > 0 { Some(n) } else { None } }
+
+pub mod Outer {
+    pub fn outer(n: int) -> Option<int> { if n > 0 { Some(n) } else { None } }
+
+    pub mod Inner {
+        pub fn inner(value: Option<int>) -> int {
+            match value { Some(n) => n, None => 0, }
+        }
+    }
+}

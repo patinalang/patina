@@ -4,20 +4,12 @@ error: cannot find derive macro `Debug` in this scope
 LL | #[derive(Debug)]
    |          ^^^^^
 
-error[E0425]: cannot find value `None` in this scope
-  --> tests/ui/src/error/option_unwrap/defaults__03.pt:8:39
+error[E0599]: no method named `get_or_insert` found for enum `Core::Option<T>` in the current scope
+  --> tests/ui/src/error/option_unwrap/defaults__03.pt:10:42
    |
-LL |     let mut my_fruit: Option<Fruit> = None;
-   |                                       ^^^^ not found in this scope
-   |
-help: consider importing one of these unit variants
-  --> <patina-prelude>:11:1
-   |
-LL + use crate::Option::None;
-   |
-LL + use Core::Option::None;
-   |
+LL |     let first_available_fruit = my_fruit.get_or_insert(apple);
+   |                                          ^^^^^^^^^^^^^ method not found in `Core::Option<Fruit>`
 
 error: aborting due to 2 previous errors
 
-For more information about this error, try `rustc --explain E0425`.
+For more information about this error, try `rustc --explain E0599`.

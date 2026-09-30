@@ -1,5 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -8,7 +8,8 @@
 extern crate Core;
 
 #[allow(unused_imports)]
-use Core::*;
+#[attr = PreludeImport]
+use Core::Prelude::*;
 
 #[allow(unused)]
 extern mod io;
@@ -21,13 +22,16 @@ extern mod patina_fmt;
 
 fn main() ({
     // All have type `Option<int>`
-    let number = ((Some as {type error})((7 as int)) as {type error});
-    let letter: Option<int> = (None as {type error});
-    let emoticon: Option<int> = (None as {type error});
+    let number =
+        ((Some as
+                fn(int) -> Core::Option<int> {Core::Option::<int>::Some})((7
+                as int)) as Core::Option<int>);
+    let letter: Option<int> = (None as Core::Option<int>);
+    let emoticon: Option<int> = (None as Core::Option<int>);
 
     // The `if let` construct reads: "if `let` destructures `number` into
     // `Some(i)`, evaluate the block (`{}`).
-    (if (let Some(i) = (number as {type error}) as {type error}) {
+    (if (let Some(i) = (number as Core::Option<int>) as bool) {
 
         // If you need to specify a failure, use an else:
         // Destructure failed. Change to the failure case.
@@ -40,19 +44,17 @@ fn main() ({
         ({
             ((io::put_chars as
                     fn(term) -> term)(([([("Matched " as str),
-                                ((patina_fmt::debug as
-                                        fn(term) -> term)((i as {type error})) as term),
-                                ("!" as str)] as [term])] as [[term]])) as term);
+                                ((patina_fmt::debug as fn(term) -> term)((i as int)) as
+                                    term), ("!" as str)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
     } as ())
-    (if (let Some(i) = (letter as {type error}) as {type error}) {
+    (if (let Some(i) = (letter as Core::Option<int>) as bool) {
         ({
             ((io::put_chars as
                     fn(term) -> term)(([([("Matched " as str),
-                                ((patina_fmt::debug as
-                                        fn(term) -> term)((i as {type error})) as term),
-                                ("!" as str)] as [term])] as [[term]])) as term);
+                                ((patina_fmt::debug as fn(term) -> term)((i as int)) as
+                                    term), ("!" as str)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
     } else {
@@ -64,13 +66,12 @@ fn main() ({
         } as ());
     } as ())
     let i_like_letters = (false as bool);
-    (if (let Some(i) = (emoticon as {type error}) as {type error}) {
+    (if (let Some(i) = (emoticon as Core::Option<int>) as bool) {
         ({
             ((io::put_chars as
                     fn(term) -> term)(([([("Matched " as str),
-                                ((patina_fmt::debug as
-                                        fn(term) -> term)((i as {type error})) as term),
-                                ("!" as str)] as [term])] as [[term]])) as term);
+                                ((patina_fmt::debug as fn(term) -> term)((i as int)) as
+                                    term), ("!" as str)] as [term])] as [[term]])) as term);
             ((io::nl as fn() -> term)() as term);
         } as ());
     } else if (i_like_letters as bool) {

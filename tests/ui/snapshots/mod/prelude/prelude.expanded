@@ -1,0 +1,32 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro, prelude_import)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[prelude_import]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// Prelude items are in scope in every module, not only at the crate root.
+
+pub fn top(n: int) -> Option<int> { if n > 0 { Some(n) } else { None } }
+
+pub mod Outer {
+    pub fn outer(n: int) -> Option<int> { if n > 0 { Some(n) } else { None } }
+
+    pub mod Inner {
+        pub fn inner(value: Option<int>) -> int {
+            match value { Some(n) => n, None => 0, }
+        }
+    }
+}

@@ -399,10 +399,13 @@ partial_ord_impl! { bool int float str atom bin bits }
 #[lang = "structural_peq"]
 pub const trait StructuralPartialEq {}
 
+#[lang = "Option"]
 #[repr(transparent)]
 pub enum Option<T> {
+    #[lang = "None"]
     #[repr(atom, tag = "nil")]
     None,
+    #[lang = "Some"]
     #[repr(dynamic_wrap, tag = "some")]
     Some(T),
 }
@@ -433,4 +436,10 @@ impl Timeout {
     pub const fn from_minutes(m: int) -> Timeout {
         Timeout::Millis(m * 60000)
     }
+}
+
+/// Imported with `#[prelude_import]`.
+pub mod Prelude {
+    pub use crate::Option::{None, Some};
+    pub use crate::{Copy, Fn, FnOnce, Option, PartialEq, PartialOrd, Timeout, derive};
 }
