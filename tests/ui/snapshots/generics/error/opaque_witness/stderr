@@ -1,4 +1,4 @@
-error: witness for a type with no module not yet implemented: Alias(AliasTy { args: [], kind: Opaque { def_id: DefId(0:13 ~ OpaqueWitness[33bd]::make::{opaque#0}) }, .. })
+error: witness for the bound not yet implemented: <impl Describe as Describe>
   --> tests/ui/src/generics/error/opaque_witness.pt:25:5
    |
 LL |     show(make())

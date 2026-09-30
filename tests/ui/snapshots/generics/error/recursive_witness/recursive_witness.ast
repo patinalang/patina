@@ -1,0 +1,30 @@
+#![allow(dead_code)]
+
+// The witness of `Wrap<int>: Derived` holds the witness of `Wrap<int>: Base`, whose impl needs
+// the witness of `Wrap<int>: Derived` again.
+
+trait Base {
+    fn base(self)
+    -> int;
+}
+
+trait Derived: Base {
+    fn derived(self)
+    -> int;
+}
+
+struct Wrap<T> {
+    t: T,
+}
+
+impl<T> Derived for Wrap<T> {
+    fn derived(self) -> int { 1 }
+}
+
+impl<T> Base for Wrap<T> where Wrap<T>: Derived {
+    fn base(self) -> int { self.derived() }
+}
+
+fn call<T: Derived>(t: T) -> int { t.base() }
+
+pub fn main() -> int { call(Wrap { t: 1 }) }

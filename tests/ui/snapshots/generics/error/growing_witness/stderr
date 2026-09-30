@@ -1,0 +1,8 @@
+error: the impl witness of `<S<int> as Derived>` nests deeper than the recursion limit (128)
+  --> tests/ui/src/generics/error/growing_witness.pt:29:5
+   |
+LL |     call(S { t: 1 })
+   |     ^^^^^^^^^^^^^^^^
+
+error: aborting due to 1 previous error
+

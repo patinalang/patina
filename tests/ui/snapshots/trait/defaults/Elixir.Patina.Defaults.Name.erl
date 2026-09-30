@@ -24,5 +24,8 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Describe::describe'(_Self@0_0, _self@1_0) ->
+'Defaults::Describe::describe'(_witness@0_0 =
+                                   {'impl Defaults::Describe for Defaults::Name',
+                                    _},
+                               _self@1_0) ->
     _self@1_0.

@@ -26,8 +26,8 @@
 
 helper(_x@0_0) -> _x@0_0 * 2.
 
-'Defaults::Inner::Doubler::doubled'(_Self@0_0,
+'Defaults::Inner::Doubler::doubled'(_witness@0_0,
                                     _self@1_0) ->
-    helper((erlang:element(1,
-                           _Self@0_0)):'Defaults::Inner::Doubler::base'(_Self@0_0,
-                                                                        _self@1_0)).
+    helper((erlang:element(2,
+                           _witness@0_0)):'Defaults::Inner::Doubler::base'(_witness@0_0,
+                                                                           _self@1_0)).

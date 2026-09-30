@@ -1,0 +1,54 @@
+#![allow(internal_features)]
+
+
+
+
+
+#![allow(dead_code)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+#[allow(unused_imports)]
+use Core::*;
+#[allow(unused)]
+extern mod io;
+#[allow(unused)]
+extern mod patina_fmt;
+
+// The witness of `Wrap<int>: Derived` holds the witness of `Wrap<int>: Base`, whose impl needs
+// the witness of `Wrap<int>: Derived` again.
+
+trait Base {
+    fn base(self)
+    -> int;
+}
+
+trait Derived: Base {
+    fn derived(self)
+    -> int;
+}
+
+struct Wrap<T> {
+    t: T,
+}
+
+impl <T> Derived for Wrap<T> {
+    fn derived(self) -> int ({ (1 as int) } as int)
+}
+
+impl <T> Base for Wrap<T> where Wrap<T>: Derived {
+    fn base(self) -> int ({ ((self as Wrap<T>).derived() as int) } as int)
+}
+
+fn call<T>(t: T) -> int where T: Derived ({ ((t as T).base() as int) } as int)
+
+fn main()
+    ->
+        int ({
+    ((call as
+            fn(Wrap<int>) -> int {call::<Wrap<int>>})((Wrap { t: (1 as int) }
+            as Wrap<int>)) as int)
+} as int)

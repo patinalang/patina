@@ -1,0 +1,60 @@
+#![allow(dead_code)]
+
+// Inherent impls on different arguments of one type can have methods of the same name. The
+// Erlang names of these methods hold the arguments: `'value<int>'` and `'value<str>'`.
+
+struct GenVal<T> {
+    gen_val: T,
+}
+
+impl GenVal<int> {
+    fn value(self) -> int {
+        self.gen_val
+    }
+}
+
+impl GenVal<str> {
+    fn value(self) -> str {
+        self.gen_val
+    }
+}
+
+trait Show {
+    fn show(self) -> str;
+}
+
+struct Name;
+
+impl Show for Name {
+    fn show(self) -> str { "a name" }
+}
+
+// A fully generic impl keeps plain names. With the bounds tuple, this `f` is `f/2` in Erlang, as
+// the `'f<int>'/2` below is.
+impl<T: Show> GenVal<T> {
+    fn f(self) -> str {
+        self.gen_val.show()
+    }
+}
+
+impl GenVal<int> {
+    fn f(self, x: int) -> int {
+        self.gen_val + x
+    }
+}
+
+pub fn int_value(n: int) -> int {
+    GenVal { gen_val: n }.value()
+}
+
+pub fn str_value(s: str) -> str {
+    GenVal { gen_val: s }.value()
+}
+
+pub fn name_f() -> str {
+    GenVal { gen_val: Name }.f()
+}
+
+pub fn int_f(n: int, x: int) -> int {
+    GenVal { gen_val: n }.f(x)
+}

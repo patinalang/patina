@@ -1,0 +1,54 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+trait Base {
+    fn base(self)
+    -> int;
+}
+
+trait Derived: Base {
+    fn derived(self)
+    -> int;
+}
+
+struct S;
+
+impl Derived for S {
+    fn derived(self) -> int ({ (1 as int) } as int)
+}
+
+impl Base for S where S: Derived {
+    fn base(self)
+        ->
+            int ({ (((self as S).derived() as int) + (1 as int) as int) } as
+        int)
+}
+
+fn call<T>(t: T) -> int where T: Derived ({ ((t as T).base() as int) } as int)
+
+fn only_global_bound() -> int where
+    S: Derived ({ ((S as S).derived() as int) } as int)
+
+fn base()
+    -> int ({ ((call as fn(S) -> int {call::<S>})((S as S)) as int) } as int)
+
+fn global()
+    ->
+        int ({
+    ((only_global_bound as fn() -> int {only_global_bound})() as int)
+} as int)

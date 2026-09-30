@@ -1,0 +1,85 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// The bounds on the associated types of `Self` in a supertrait list, like `Item: Label` in
+// `HasItem<Item: Label>`, have witnesses like supertraits.
+
+trait Label {
+    fn label(self)
+    -> str;
+}
+
+trait HasItem {
+    type
+    Item;
+
+    fn item(self)
+    -> Self::Item;
+}
+
+// No items: `T: Labelled` stands for `T: HasItem` and `<T as HasItem>::Item: Label`.
+trait Labelled: HasItem<Item : Label> { }
+
+// With items: the impl witness holds the witnesses of both bounds.
+trait LabelledWithItems: HasItem<Item : Label> {
+    fn other(self)
+    -> int;
+}
+
+struct Tag;
+struct Crate;
+
+impl Label for Tag {
+    fn label(self) -> str ({ ("tag" as str) } as str)
+}
+
+impl HasItem for Crate {
+    type
+    Item
+    =
+    Tag;
+
+    fn item(self) -> Tag ({ (Tag as Tag) } as Tag)
+}
+
+impl Labelled for Crate { }
+
+impl LabelledWithItems for Crate {
+    fn other(self) -> int ({ (1 as int) } as int)
+}
+
+fn labelled<T>(t: T) -> str where
+    T: Labelled ({
+    (((t as T).item() as <T as HasItem>::Item).label() as str)
+} as str)
+
+fn labelled_with_items<T>(t: T) -> str where
+    T: LabelledWithItems ({
+    (((t as T).item() as <T as HasItem>::Item).label() as str)
+} as str)
+
+fn crate_labels()
+    ->
+        (str,
+        str) ({
+    ((((labelled as fn(Crate) -> str {labelled::<Crate>})((Crate as Crate)) as
+            str),
+        ((labelled_with_items as
+                fn(Crate) -> str {labelled_with_items::<Crate>})((Crate as
+                Crate)) as str)) as (str, str))
+} as (str, str))

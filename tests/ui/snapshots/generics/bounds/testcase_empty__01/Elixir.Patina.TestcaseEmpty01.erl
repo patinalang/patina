@@ -25,9 +25,9 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-red(_T@0_0, _) -> <<"red"/utf8>>.
+red(_) -> <<"red"/utf8>>.
 
-blue(_T@0_0, _) -> <<"blue"/utf8>>.
+blue(_) -> <<"blue"/utf8>>.
 
 main() ->
     _cardinal@0_0 =
@@ -36,15 +36,13 @@ main() ->
     __turkey@2_0 = 'Elixir.Patina.TestcaseEmpty01.Turkey',
     begin
         io:put_chars([[<<"A cardinal is "/utf8>>,
-                       red({'Elixir.Patina.TestcaseEmpty01.Cardinal', {}},
-                           _cardinal@0_0)]]),
+                       red(_cardinal@0_0)]]),
         io:nl(),
         {}
     end,
     begin
         io:put_chars([[<<"A blue jay is "/utf8>>,
-                       blue({'Elixir.Patina.TestcaseEmpty01.BlueJay', {}},
-                            _blue_jay@1_0)]]),
+                       blue(_blue_jay@1_0)]]),
         io:nl(),
         {}
     end.

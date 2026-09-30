@@ -25,11 +25,15 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Inner::Doubler::base'(_Self@0_0,
+'Defaults::Inner::Doubler::base'(_witness@0_0 =
+                                     {'impl Defaults::Inner::Doubler for Defaults::N',
+                                      _},
                                  _self@1_0) ->
     _self@1_0.
 
-'Defaults::Inner::Doubler::doubled'(_arg@0_0,
+'Defaults::Inner::Doubler::doubled'(_witness@0_0 =
+                                        {'impl Defaults::Inner::Doubler for Defaults::N',
+                                         _},
                                     _arg@1_0) ->
-    'Elixir.Patina.Defaults.Inner':'Defaults::Inner::Doubler::doubled'(_arg@0_0,
+    'Elixir.Patina.Defaults.Inner':'Defaults::Inner::Doubler::doubled'(_witness@0_0,
                                                                        _arg@1_0).

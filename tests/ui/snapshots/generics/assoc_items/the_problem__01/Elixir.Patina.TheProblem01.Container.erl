@@ -11,9 +11,9 @@
 -export_record(['Container']).
 
 -export(['__info__'/1,
-         'TheProblem01::Contains::contains'/6,
-         'TheProblem01::Contains::first'/4,
-         'TheProblem01::Contains::last'/4]).
+         'TheProblem01::Contains::contains'/4,
+         'TheProblem01::Contains::first'/2,
+         'TheProblem01::Contains::last'/2]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -30,21 +30,21 @@
 
 -record #'Container'{'0', '1'}.
 
-'TheProblem01::Contains::contains'(_Self@0_0,
-                                   _A@1_0 = {'Elixir.Patina.Core.int', {}},
-                                   _B@2_0 = {'Elixir.Patina.Core.int', {}},
-                                   _self@3_0, _number_1@4_0, _number_2@5_0) ->
-    _self@3_0#'Container'.'0' =:= _number_1@4_0 andalso
-        _self@3_0#'Container'.'1' =:= _number_2@5_0.
+'TheProblem01::Contains::contains'(_witness@0_0 =
+                                       {'impl TheProblem01::Contains<int, int> for TheProblem01::Container',
+                                        _},
+                                   _self@1_0, _number_1@2_0, _number_2@3_0) ->
+    _self@1_0#'Container'.'0' =:= _number_1@2_0 andalso
+        _self@1_0#'Container'.'1' =:= _number_2@3_0.
 
-'TheProblem01::Contains::first'(_Self@0_0,
-                                _A@1_0 = {'Elixir.Patina.Core.int', {}},
-                                _B@2_0 = {'Elixir.Patina.Core.int', {}},
-                                _self@3_0) ->
-    _self@3_0#'Container'.'0'.
+'TheProblem01::Contains::first'(_witness@0_0 =
+                                    {'impl TheProblem01::Contains<int, int> for TheProblem01::Container',
+                                     _},
+                                _self@1_0) ->
+    _self@1_0#'Container'.'0'.
 
-'TheProblem01::Contains::last'(_Self@0_0,
-                               _A@1_0 = {'Elixir.Patina.Core.int', {}},
-                               _B@2_0 = {'Elixir.Patina.Core.int', {}},
-                               _self@3_0) ->
-    _self@3_0#'Container'.'1'.
+'TheProblem01::Contains::last'(_witness@0_0 =
+                                   {'impl TheProblem01::Contains<int, int> for TheProblem01::Container',
+                                    _},
+                               _self@1_0) ->
+    _self@1_0#'Container'.'1'.

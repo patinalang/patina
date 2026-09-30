@@ -23,7 +23,9 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Ring::ring'(_Self@1_0, _T@0_0, _self@2_0,
-                       _t@3_0) ->
-    (erlang:element(1, _T@0_0)):'Defaults::Tag::tag'(_T@0_0,
-                                                     _t@3_0).
+'Defaults::Ring::ring'(_witness@0_0 =
+                           {'impl Defaults::Ring for Defaults::Loud', _},
+                       {_witness@1_0}, _self@2_0, _t@3_0) ->
+    (erlang:element(2,
+                    _witness@1_0)):'Defaults::Tag::tag'(_witness@1_0,
+                                                        _t@3_0).

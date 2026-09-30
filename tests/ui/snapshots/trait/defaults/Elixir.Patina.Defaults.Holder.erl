@@ -23,4 +23,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Konst::const::K'(_Self@0_0) -> 7.
+'Defaults::Konst::const::K'(_witness@0_0 =
+                                {'impl Defaults::Konst for Defaults::Holder',
+                                 _}) ->
+    7.

@@ -31,19 +31,31 @@
 
 -record #'Container'{'0', '1'}.
 
-'Types03::Contains::type::A'(_Self@0_0) ->
-    {'Elixir.Patina.Core.int', {}}.
+'Types03::Contains::type::A'(_witness@0_0 =
+                                 {'impl Types03::Contains for Types03::Container',
+                                  _}) ->
+    {}.
 
-'Types03::Contains::type::B'(_Self@0_0) ->
-    {'Elixir.Patina.Core.int', {}}.
+'Types03::Contains::type::B'(_witness@0_0 =
+                                 {'impl Types03::Contains for Types03::Container',
+                                  _}) ->
+    {}.
 
-'Types03::Contains::contains'(_Self@0_0, _self@1_0,
-                              _number_1@2_0, _number_2@3_0) ->
+'Types03::Contains::contains'(_witness@0_0 =
+                                  {'impl Types03::Contains for Types03::Container',
+                                   _},
+                              _self@1_0, _number_1@2_0, _number_2@3_0) ->
     _self@1_0#'Container'.'0' =:= _number_1@2_0 andalso
         _self@1_0#'Container'.'1' =:= _number_2@3_0.
 
-'Types03::Contains::first'(_Self@0_0, _self@1_0) ->
+'Types03::Contains::first'(_witness@0_0 =
+                               {'impl Types03::Contains for Types03::Container',
+                                _},
+                           _self@1_0) ->
     _self@1_0#'Container'.'0'.
 
-'Types03::Contains::last'(_Self@0_0, _self@1_0) ->
+'Types03::Contains::last'(_witness@0_0 =
+                              {'impl Types03::Contains for Types03::Container',
+                               _},
+                          _self@1_0) ->
     _self@1_0#'Container'.'1'.

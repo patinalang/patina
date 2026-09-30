@@ -24,7 +24,9 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'LocalExport::Priv::p'(_Self@0_0, _self@1_0) ->
+'LocalExport::Priv::p'(_witness@0_0 =
+                           {'impl LocalExport::Priv for LocalExport::S', _},
+                       _self@1_0) ->
     begin
         io:put_chars([[<<"Priv::p("/utf8>>,
                        io_lib:format("~ktp", [_self@1_0]),
@@ -34,6 +36,6 @@
     end.
 
 q(_self@0_0) ->
-    'LocalExport::Priv::p'({'Elixir.Patina.LocalExport.S',
-                            {}},
+    'LocalExport::Priv::p'({'impl LocalExport::Priv for LocalExport::S',
+                            'Elixir.Patina.LocalExport.S'},
                            _self@0_0).

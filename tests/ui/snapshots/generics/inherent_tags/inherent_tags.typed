@@ -1,0 +1,84 @@
+#![allow(internal_features)]
+
+
+
+
+
+#![allow(dead_code)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+#[allow(unused_imports)]
+use Core::*;
+#[allow(unused)]
+extern mod io;
+#[allow(unused)]
+extern mod patina_fmt;
+
+// Inherent impls on different arguments of one type can have methods of the same name. The
+// Erlang names of these methods hold the arguments: `'value<int>'` and `'value<str>'`.
+
+struct GenVal<T> {
+    gen_val: T,
+}
+
+impl GenVal<int> {
+    fn value(self) -> int ({ ((self as GenVal<int>).gen_val as int) } as int)
+}
+
+impl GenVal<str> {
+    fn value(self) -> str ({ ((self as GenVal<str>).gen_val as str) } as str)
+}
+
+trait Show {
+    fn show(self)
+    -> str;
+}
+
+struct Name;
+
+impl Show for Name {
+    fn show(self) -> str ({ ("a name" as str) } as str)
+}
+
+// A fully generic impl keeps plain names. With the bounds tuple, this `f` is `f/2` in Erlang, as
+// the `'f<int>'/2` below is.
+impl <T> GenVal<T> where T: Show {
+    fn f(self)
+        -> str ({ (((self as GenVal<T>).gen_val as T).show() as str) } as str)
+}
+
+impl GenVal<int> {
+    fn f(self, x: int)
+        ->
+            int ({
+        (((self as GenVal<int>).gen_val as int) + (x as int) as int)
+    } as int)
+}
+
+fn int_value(n: int)
+    ->
+        int ({
+    ((GenVal { gen_val: (n as int) } as GenVal<int>).value() as int)
+} as int)
+
+fn str_value(s: str)
+    ->
+        str ({
+    ((GenVal { gen_val: (s as str) } as GenVal<str>).value() as str)
+} as str)
+
+fn name_f()
+    ->
+        str ({
+    ((GenVal { gen_val: (Name as Name) } as GenVal<Name>).f() as str)
+} as str)
+
+fn int_f(n: int, x: int)
+    ->
+        int ({
+    ((GenVal { gen_val: (n as int) } as GenVal<int>).f((x as int)) as int)
+} as int)

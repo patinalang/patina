@@ -1,12 +1,10 @@
 use rustc_data_structures::fx::FxHashMap;
 use rustc_hir::def::DefKind;
-use rustc_hir::def_id::{DefId, LOCAL_CRATE};
+use rustc_hir::def_id::DefId;
 use rustc_hir::{Impl, ItemKind};
 use rustc_middle::erl::ErlModuleId;
 use rustc_middle::ty::TyCtxt;
-use rustc_span::Symbol;
 
-use crate::package::CORE_PACKAGE_NAME;
 use crate::{not_implemented, span_fatal};
 
 pub(crate) struct ImplCollector<'tcx> {
@@ -17,8 +15,6 @@ impl<'tcx> ImplCollector<'tcx> {
     pub fn new(tcx: TyCtxt<'tcx>) -> ImplCollector<'tcx> {
         let mut impls: FxHashMap<ErlModuleId, Vec<(DefId, &'tcx Impl<'tcx>)>> =
             FxHashMap::default();
-
-        let bootstrap = tcx.crate_name(LOCAL_CRATE) == Symbol::intern(CORE_PACKAGE_NAME);
 
         for item_id in tcx.hir_free_items() {
             if !matches!(tcx.def_kind(item_id.owner_id), DefKind::Impl { .. }) {
@@ -33,16 +29,16 @@ impl<'tcx> ImplCollector<'tcx> {
                 _ => unreachable!(),
             };
 
+            // An impl of a trait that needs no witness has no functions.
+            // Skip it to avoid creating a module for it later down the line.
+            if tcx
+                .impl_opt_trait_id(def_id)
+                .is_some_and(|trait_def_id| !tcx.erl_trait_needs_witness(trait_def_id))
+            {
+                continue;
+            }
+
             match tcx.erl_definition_module(def_id) {
-                Some(ErlModuleId::Prim(prim_ty)) => {
-                    if !bootstrap {
-                        not_implemented!(tcx, impl_item.self_ty.span, "impl for a primitive type");
-                    }
-                    impls
-                        .entry(ErlModuleId::Prim(prim_ty))
-                        .or_default()
-                        .push((def_id.to_def_id(), impl_item));
-                }
                 Some(module_id) => {
                     impls.entry(module_id).or_default().push((def_id.to_def_id(), impl_item));
                 }
@@ -59,7 +55,13 @@ impl<'tcx> ImplCollector<'tcx> {
         self.impls.get(&module)
     }
 
-    pub fn prim_modules(&self) -> impl Iterator<Item = &ErlModuleId> + '_ {
-        self.impls.keys().filter(|&module| matches!(module, ErlModuleId::Prim(_)))
+    /// The primitive modules in Core, and the host modules of impls on types of other crates.
+    pub fn impl_only_modules(&self) -> impl Iterator<Item = &ErlModuleId> + '_ {
+        self.impls.keys().filter(|&module| {
+            matches!(
+                module,
+                ErlModuleId::Prim(_) | ErlModuleId::AdtImplHost(..) | ErlModuleId::PrimImplHost(..)
+            )
+        })
     }
 }

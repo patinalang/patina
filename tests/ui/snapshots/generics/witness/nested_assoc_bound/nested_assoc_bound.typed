@@ -1,0 +1,81 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// The witness function of `Outer::Inner` also returns the witness of the nested bound
+// `Item: Label`. A generic body gets that witness through its `T: Outer` witness.
+
+trait Label {
+    fn label(self)
+    -> str;
+}
+
+trait HasItem {
+    type
+    Item;
+
+    fn item(self)
+    -> Self::Item;
+}
+
+trait Outer {
+    type
+    Inner: HasItem<Item
+    : Label>;
+
+    fn inner(self)
+    -> Self::Inner;
+}
+
+struct Tag;
+struct Leaf;
+struct Root;
+
+impl Label for Tag {
+    fn label(self) -> str ({ ("tag" as str) } as str)
+}
+
+impl HasItem for Leaf {
+    type
+    Item
+    =
+    Tag;
+
+    fn item(self) -> Tag ({ (Tag as Tag) } as Tag)
+}
+
+impl Outer for Root {
+    type
+    Inner
+    =
+    Leaf;
+
+    fn inner(self) -> Leaf ({ (Leaf as Leaf) } as Leaf)
+}
+
+fn nested_label<T>(t: T) -> str where
+    T: Outer ({
+    ((((t as T).inner() as <T as Outer>::Inner).item() as
+            <<T as Outer>::Inner as HasItem>::Item).label() as str)
+} as str)
+
+fn root_label()
+    ->
+        str ({
+    ((nested_label as fn(Root) -> str {nested_label::<Root>})((Root as Root))
+        as str)
+} as str)

@@ -158,7 +158,6 @@ symbols! {
     Symbols {
         // tidy-alphabetical-start
         dollar_patina_marker: "$patina_marker",
-        dollar_patina_unbounded_type: "$patina_unbounded_type",
         __info__,
         __struct__,
         Abi,

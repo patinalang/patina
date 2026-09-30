@@ -24,13 +24,18 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'BoundGeneric::Tr::method'({_, {_T@0_0}}, _self@1_0) ->
+'BoundGeneric::Tr::method'(_witness@0_0 =
+                               {'impl BoundGeneric::Tr for BoundGeneric::Holder<_>',
+                                _,
+                                _witness@1_0},
+                           _self@2_0) ->
     begin
         io:put_chars([[<<"Tr::method("/utf8>>,
-                       io_lib:format("~ktp", [_self@1_0]),
+                       io_lib:format("~ktp", [_self@2_0]),
                        <<")"/utf8>>]]),
         io:nl(),
         {}
     end,
-    (erlang:element(1,
-                    _T@0_0)):'BoundGeneric::Bound::b'(_T@0_0, _self@1_0).
+    (erlang:element(2,
+                    _witness@1_0)):'BoundGeneric::Bound::b'(_witness@1_0,
+                                                            _self@2_0).

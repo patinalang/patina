@@ -1,0 +1,30 @@
+pub trait Show {
+    fn show(self)
+    -> str;
+}
+
+pub trait Marker {}
+
+pub trait Both: Show + Marker {}
+
+pub trait EmptyBlanketImpl {}
+
+impl<T> EmptyBlanketImpl for T {}
+
+struct A;
+
+impl Show for A {
+    fn show(self) -> str { "a" }
+}
+
+impl Marker for A {}
+
+impl Both for A {}
+
+pub fn marker_bounds_only<T: Marker + EmptyBlanketImpl>(t: T) -> T { t }
+
+pub fn subtrait_of_marker<T: Both>(t: T) -> str { t.show() }
+
+pub fn a_both() -> str { subtrait_of_marker(A) }
+
+pub fn a_marked() -> str { marker_bounds_only(A).show() }

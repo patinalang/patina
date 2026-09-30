@@ -27,5 +27,7 @@ foo() -> priv_foo().
 
 priv_foo() -> {}.
 
-'ImplicitExport::FooTrait::bar'(_Self@0_0) ->
+'ImplicitExport::FooTrait::bar'(_witness@0_0 =
+                                    {'impl ImplicitExport::FooTrait for ImplicitExport::Foo',
+                                     _}) ->
     priv_foo().

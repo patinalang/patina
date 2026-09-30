@@ -1,8 +1,0 @@
-error: associated type in a witness pattern not yet implemented: "AssocTypeTraitArg::Container::type::Item"
-  --> tests/ui/src/generics/error/assoc_type_trait_arg.pt:16:5
-   |
-LL |     fn wrapped(self) -> int {
-   |     ^^^^^^^^^^^^^^^^^^^^^^^
-
-error: aborting due to 1 previous error
-

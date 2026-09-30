@@ -11,7 +11,7 @@
 -export(['__info__'/1,
          'Defaults::Container::type::Item'/1,
          'Defaults::Container::get'/2,
-         'Defaults::Container::needs_item_witness'/2,
+         'Defaults::Container::needs_item_witness'/3,
          'Defaults::Describe::describe'/2,
          'Defaults::Maker::make'/2]).
 
@@ -28,20 +28,33 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Container::type::Item'(_Self@0_0) ->
-    {'Elixir.Patina.Defaults.Name', {}}.
+'Defaults::Container::type::Item'(_witness@0_0 =
+                                      {'impl Defaults::Container for Defaults::Boxed',
+                                       _}) ->
+    {}.
 
-'Defaults::Container::get'(_Self@0_0, _self@1_0) ->
+'Defaults::Container::get'(_witness@0_0 =
+                               {'impl Defaults::Container for Defaults::Boxed',
+                                _},
+                           _self@1_0) ->
     _self@1_0.
 
-'Defaults::Container::needs_item_witness'(_arg@0_0,
-                                          _arg@1_0) ->
-    'Elixir.Patina.Defaults':'Defaults::Container::needs_item_witness'(_arg@0_0,
-                                                                       _arg@1_0).
+'Defaults::Container::needs_item_witness'(_witness@0_0 =
+                                              {'impl Defaults::Container for Defaults::Boxed',
+                                               _},
+                                          _arg@1_0, _arg@2_0) ->
+    'Elixir.Patina.Defaults':'Defaults::Container::needs_item_witness'(_witness@0_0,
+                                                                       _arg@1_0,
+                                                                       _arg@2_0).
 
-'Defaults::Describe::describe'(_Self@0_0, _self@1_0) ->
+'Defaults::Describe::describe'(_witness@0_0 =
+                                   {'impl Defaults::Describe for Defaults::Boxed',
+                                    _},
+                               _self@1_0) ->
     <<"boxed"/utf8>>.
 
-'Defaults::Maker::make'(_arg@0_0, _arg@1_0) ->
-    'Elixir.Patina.Defaults':'Defaults::Maker::make'(_arg@0_0,
+'Defaults::Maker::make'(_witness@0_0 =
+                            {'impl Defaults::Maker for Defaults::Boxed', _},
+                        _arg@1_0) ->
+    'Elixir.Patina.Defaults':'Defaults::Maker::make'(_witness@0_0,
                                                      _arg@1_0).

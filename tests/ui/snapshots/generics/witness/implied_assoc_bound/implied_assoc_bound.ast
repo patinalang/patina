@@ -1,0 +1,52 @@
+// The bounds on the associated types of `Self` in a supertrait list, like `Item: Label` in
+// `HasItem<Item: Label>`, have witnesses like supertraits.
+
+pub trait Label {
+    fn label(self)
+    -> str;
+}
+
+pub trait HasItem {
+    type Item;
+
+    fn item(self)
+    -> Self::Item;
+}
+
+// No items: `T: Labelled` stands for `T: HasItem` and `<T as HasItem>::Item: Label`.
+pub trait Labelled: HasItem<Item : Label> {}
+
+// With items: the impl witness holds the witnesses of both bounds.
+pub trait LabelledWithItems: HasItem<Item : Label> {
+    fn other(self)
+    -> int;
+}
+
+pub struct Tag;
+pub struct Crate;
+
+impl Label for Tag {
+    fn label(self) -> str { "tag" }
+}
+
+impl HasItem for Crate {
+    type Item = Tag;
+
+    fn item(self) -> Tag { Tag }
+}
+
+impl Labelled for Crate {}
+
+impl LabelledWithItems for Crate {
+    fn other(self) -> int { 1 }
+}
+
+pub fn labelled<T: Labelled>(t: T) -> str { t.item().label() }
+
+pub fn labelled_with_items<T: LabelledWithItems>(t: T) -> str {
+    t.item().label()
+}
+
+pub fn crate_labels() -> (str, str) {
+    (labelled(Crate), labelled_with_items(Crate))
+}

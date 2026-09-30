@@ -3,22 +3,29 @@
 pub mod binary_pattern;
 pub mod shape;
 
+use std::hash::Hash as _;
+
 use convert_case::{Case, Casing};
 use rustc_abi::FIRST_VARIANT;
 use rustc_data_structures::fx::FxIndexSet;
+use rustc_data_structures::stable_hasher::StableHasher;
+use rustc_hashes::Hash128;
 use rustc_hir::attrs::{AttributeKind, ErlTagStyle, ReprAttr, ReprAttrModifier};
 use rustc_hir::def::DefKind;
-use rustc_hir::def_id::DefId;
+use rustc_hir::def_id::{CrateNum, DefId, LocalDefId};
 use rustc_hir::definitions::DefPathData;
 use rustc_hir::{Attribute, HirId, PrimTy};
 use rustc_macros::StableHash;
-use rustc_span::{Span, Symbol};
+use rustc_span::{Span, Symbol, kw};
 use smallvec::SmallVec;
 
 use self::shape::ErlShape;
 use crate::query::Providers;
+use crate::traits::ImplSource;
+use crate::ty::print::PrintTraitRefExt as _;
 use crate::ty::{
-    self, AdtDef, GenericArgsRef, Ty, TyCtxt, TypingEnv, Unnormalized, VariantDef, Visibility,
+    self, AdtDef, GenericArgsRef, Ty, TyCtxt, TypeFoldable, TypeVisitableExt, TypingEnv,
+    Unnormalized, VariantDef, Visibility,
 };
 
 /// The identity of a module in the generated Erlang program.
@@ -32,6 +39,10 @@ pub enum ErlModuleId {
     Extern(DefId),
     /// The runtime module implementing a primitive type.
     Prim(PrimTy),
+    /// The trait impls of a crate on an ADT of another crate.
+    AdtImplHost(CrateNum, DefId),
+    /// The trait impls of a crate other than Core on a primitive type.
+    PrimImplHost(CrateNum, PrimTy),
 }
 
 /// The semantic target of an Erlang call.
@@ -105,23 +116,6 @@ pub struct ErlVariantRepr {
     pub record_module: Symbol,
 }
 
-#[derive(Copy, Clone, Debug)]
-pub enum ErlWitnessSlot {
-    TraitSelf(ty::ParamTy),
-    TraitParam(ty::ParamTy),
-    ItemParam(ty::ParamTy),
-}
-
-impl ErlWitnessSlot {
-    pub fn param(self) -> ty::ParamTy {
-        match self {
-            ErlWitnessSlot::TraitSelf(param)
-            | ErlWitnessSlot::TraitParam(param)
-            | ErlWitnessSlot::ItemParam(param) => param,
-        }
-    }
-}
-
 #[derive(Copy, Clone)]
 enum ErlTag {
     Explicit(Symbol),
@@ -145,17 +139,50 @@ impl<'tcx> TyCtxt<'tcx> {
 
                 DefKind::Impl { .. } => {
                     let self_ty = self.type_of(def_id).instantiate_identity().skip_normalization();
-                    return match self
-                        .resolve_erl_receiver_module(self_ty, self.erl_typing_env(def_id))?
-                    {
-                        ErlModuleResolution::Static(module) => Some(module),
-                        ErlModuleResolution::Dynamic => None,
+                    let ErlModuleResolution::Static(module) =
+                        self.resolve_erl_receiver_module(self_ty, self.erl_typing_env(def_id))?
+                    else {
+                        return None;
                     };
+
+                    if self.impl_opt_trait_id(def_id).is_none() {
+                        return Some(module);
+                    }
+
+                    return Some(match module {
+                        ErlModuleId::Adt(adt) if adt.krate != def_id.krate => {
+                            ErlModuleId::AdtImplHost(def_id.krate, adt)
+                        }
+                        ErlModuleId::Prim(prim) if !self.is_erl_core_crate(def_id.krate) => {
+                            ErlModuleId::PrimImplHost(def_id.krate, prim)
+                        }
+                        ErlModuleId::Adt(_) | ErlModuleId::Prim(_) => module,
+                        ErlModuleId::Mod(_)
+                        | ErlModuleId::Extern(_)
+                        | ErlModuleId::AdtImplHost(..)
+                        | ErlModuleId::PrimImplHost(..) => {
+                            bug!("self type of {def_id:?} resolves to module {module:?}")
+                        }
+                    });
                 }
 
                 _ => def_id = self.parent(def_id),
             }
         }
+    }
+
+    /// Whether `def_id` has an Erlang function name (`erl_fn_name`): the items that become
+    /// Erlang functions.
+    pub fn erl_has_fn_name(self, def_id: DefId) -> bool {
+        matches!(
+            self.def_kind(def_id),
+            DefKind::Fn | DefKind::AssocFn | DefKind::AssocConst { .. } | DefKind::AssocTy
+        ) && !self.is_impl_trait_in_trait(def_id)
+    }
+
+    /// Whether `krate` is Core. Core is the crate that defines the lang items.
+    pub fn is_erl_core_crate(self, krate: CrateNum) -> bool {
+        self.lang_items().sized_trait().is_some_and(|sized| sized.krate == krate)
     }
 
     /// The trait `def_id` is a method of, for a trait method or a trait impl item.
@@ -167,104 +194,131 @@ impl<'tcx> TyCtxt<'tcx> {
         self.impl_opt_trait_id(impl_def_id)
     }
 
-    /// The type parameters (in `def_id`'s own generic space) that appear in a
-    /// trait bound, and therefore need a witness at runtime.
-    ///
-    /// For associated items, the parent impl's predicates are also walked, so
-    /// an inherent method's enclosing `impl<T: Bound>` marks `T`. Unbounded
-    /// parameters get no witness.
-    pub fn erl_witness_params(self, def_id: impl Into<DefId>) -> SmallVec<[ty::ParamTy; 6]> {
-        let def_id = def_id.into();
-        let mut params = FxIndexSet::default();
-
-        self.collect_witness_params(def_id, &mut params);
-
-        if let Some(parent) = self.predicates_of(def_id).parent {
-            self.collect_witness_params(parent, &mut params);
-        }
-
-        let mut params = params.into_iter().collect::<SmallVec<[ty::ParamTy; 6]>>();
-        params.sort_unstable();
-        params
-    }
-
-    fn collect_witness_params(self, def_id: DefId, params: &mut FxIndexSet<ty::ParamTy>) {
-        for &(clause, _span) in self.predicates_of(def_id).predicates {
-            let ty::ClauseKind::Trait(trait_pred) = clause.kind().skip_binder() else {
-                continue;
-            };
-
-            // Skip implicit rustc traits from determining whether T is bounded or not.
-            let lang_items = self.lang_items();
-            if lang_items.sized_trait() == Some(trait_pred.def_id())
-                || lang_items.meta_sized_trait() == Some(trait_pred.def_id())
-                || lang_items.pointee_sized_trait() == Some(trait_pred.def_id())
-            {
-                continue;
-            }
-
-            for arg in trait_pred.trait_ref.args.iter() {
-                let ty::GenericArgKind::Type(ty) = arg.kind() else { continue };
-
-                // for each type parameter in the trait argument (outer loop), recursively collect
-                // it and its sub-type parameters (inner loop)
-                for arg in ty.walk() {
-                    if let ty::GenericArgKind::Type(ty) = arg.kind()
-                        && let ty::TyKind::Param(param) = ty.kind()
-                    {
-                        params.insert(*param);
-                    }
-                }
-            }
-        }
-    }
-
-    /// The witness parameters of the Erlang function generated for `def_id`, in order. They
-    /// come before the regular parameters.
-    pub fn erl_witness_layout(self, def_id: DefId) -> SmallVec<[ErlWitnessSlot; 6]> {
-        let def_id = self.erl_fn_item(def_id);
-        let mut slots = SmallVec::new();
-
-        let trait_def_id = self.trait_of_assoc(def_id);
-        if let Some(trait_def_id) = trait_def_id {
-            // `Self` is the trait's first type parameter.
-            let mut trait_params = self
-                .generics_of(trait_def_id)
-                .own_params
-                .iter()
-                .filter(|param| matches!(param.kind, ty::GenericParamDefKind::Type { .. }))
-                .map(ty::ParamTy::for_def);
-            slots.extend(trait_params.next().map(ErlWitnessSlot::TraitSelf));
-            slots.extend(trait_params.map(ErlWitnessSlot::TraitParam));
-        }
-
-        // A trait item's own parameters follow the trait's.
-        let parent_count = self.generics_of(def_id).parent_count as u32;
-        slots.extend(
-            self.erl_witness_params(def_id)
-                .into_iter()
-                .filter(|param| trait_def_id.is_none() || param.index >= parent_count)
-                .map(ErlWitnessSlot::ItemParam),
-        );
-
-        slots
-    }
-
-    /// The witness types a call site must pass for `def_id`, in the order of
-    /// [`TyCtxt::erl_witness_layout`].
-    pub fn erl_call_witness_tys(
+    /// The bounds in `clauses` that need a runtime witness, in order and without duplicates.
+    fn erl_witnessed_trait_refs(
         self,
-        def_id: DefId,
-        args: GenericArgsRef<'tcx>,
-    ) -> SmallVec<[Ty<'tcx>; 6]> {
-        if self.trait_item_of(def_id).is_some() {
-            bug!("trait entry call resolved to impl item `{}`", self.def_path_str(def_id));
+        clauses: impl IntoIterator<Item = &'tcx (ty::Clause<'tcx>, Span)>,
+    ) -> FxIndexSet<ty::TraitRef<'tcx>> {
+        let mut trait_refs = FxIndexSet::default();
+        for &(clause, _) in clauses {
+            let Some(trait_pred) = clause.as_trait_clause() else { continue };
+            let trait_pred = self.instantiate_bound_regions_with_erased(trait_pred);
+            // A bound without type parameters, like `where S: Derived`, needs no runtime
+            // witness: code that uses it selects the impl itself.
+            if trait_pred.polarity == ty::PredicatePolarity::Positive
+                && trait_pred.trait_ref.has_non_region_param()
+            {
+                self.insert_witnessed_trait_ref(trait_pred.trait_ref, &mut trait_refs);
+            }
+        }
+        trait_refs
+    }
+
+    /// A bound on a trait without a witness stands for the bounds on its supertraits.
+    fn insert_witnessed_trait_ref(
+        self,
+        trait_ref: ty::TraitRef<'tcx>,
+        trait_refs: &mut FxIndexSet<ty::TraitRef<'tcx>>,
+    ) {
+        if self.erl_trait_needs_witness(trait_ref.def_id) {
+            trait_refs.insert(trait_ref);
+            return;
         }
 
-        self.erl_witness_layout(def_id)
-            .into_iter()
-            .map(|slot| args.type_at(slot.param().index as usize))
-            .collect()
+        for &(clause, _) in self.explicit_implied_predicates_of(trait_ref.def_id).skip_binder() {
+            if let Some(supertrait) = clause.as_trait_clause() {
+                let supertrait = self.instantiate_bound_regions_with_erased(supertrait);
+                let supertrait = ty::EarlyBinder::bind(supertrait.trait_ref)
+                    .instantiate(self, trait_ref.args)
+                    .skip_normalization();
+                self.insert_witnessed_trait_ref(supertrait, trait_refs);
+            }
+        }
+    }
+
+    /// The generic arguments of the trait item that the trait impl item `def_id` implements, in
+    /// `def_id`'s generics: the trait arguments of the impl, then the item's own parameters.
+    pub fn erl_trait_item_args_for_impl_item(self, def_id: DefId) -> GenericArgsRef<'tcx> {
+        let impl_def_id = self.parent(def_id);
+        let trait_ref = self
+            .impl_opt_trait_ref(impl_def_id)
+            .unwrap_or_else(|| bug!("{def_id:?} is not in a trait impl"))
+            .instantiate_identity()
+            .skip_normalization();
+        ty::GenericArgs::identity_for_item(self, def_id).rebase_onto(
+            self,
+            impl_def_id,
+            trait_ref.args,
+        )
+    }
+
+    /// The generic arguments of the self type of the inherent impl `impl_def_id`, as in
+    /// `erl_impl_tag`. `None` if the arguments are all parameters, like `impl<T> S<T>` or
+    /// `impl<T> S<T, T>`: any two such impls overlap, so their method names need no tag.
+    fn erl_inherent_impl_tag(self, impl_def_id: DefId) -> Option<String> {
+        let self_ty = self.type_of(impl_def_id);
+        let ty::Adt(_, args) = self_ty.instantiate_identity().skip_normalization().kind() else {
+            return None;
+        };
+
+        let fully_generic = args.iter().all(|arg| match arg.kind() {
+            ty::GenericArgKind::Lifetime(_) => true,
+            ty::GenericArgKind::Type(ty) => matches!(ty.kind(), ty::Param(_)),
+            ty::GenericArgKind::Const(ct) => matches!(ct.kind(), ty::ConstKind::Param(_)),
+        });
+        if fully_generic {
+            return None;
+        }
+
+        let self_ty =
+            self_ty.instantiate(self, self.erl_tag_args(impl_def_id)).skip_normalization();
+        let ty::Adt(_, args) = self_ty.kind() else { unreachable!() };
+        Some(self.erl_tag_text(args.iter()))
+    }
+
+    /// The identity arguments of `impl_def_id`, with type and const parameters named `_`.
+    fn erl_tag_args(self, impl_def_id: DefId) -> GenericArgsRef<'tcx> {
+        ty::GenericArgs::for_item(self, impl_def_id, |param, _| match param.kind {
+            ty::GenericParamDefKind::Lifetime => bug!("lifetime parameter {param:?}"),
+            ty::GenericParamDefKind::Type { .. } => {
+                Ty::new_param(self, param.index, kw::Underscore).into()
+            }
+            ty::GenericParamDefKind::Const { .. } => {
+                ty::Const::new_param(self, ty::ParamConst::new(param.index, kw::Underscore)).into()
+            }
+        })
+    }
+
+    /// `args`, separated by `, `.
+    fn erl_tag_text(self, args: impl IntoIterator<Item = ty::GenericArg<'tcx>>) -> String {
+        with_erl_paths(|| {
+            args.into_iter().map(|arg| arg.to_string()).collect::<Vec<_>>().join(", ")
+        })
+    }
+
+    /// The impl that proves `trait_ref` in `owner`'s environment, if an impl proves it.
+    pub fn erl_select_impl(
+        self,
+        owner: DefId,
+        trait_ref: ty::TraitRef<'tcx>,
+    ) -> Option<(DefId, GenericArgsRef<'tcx>)> {
+        match self.erl_select(self.erl_typing_env(owner), trait_ref)? {
+            ImplSource::UserDefined(data) => Some((data.impl_def_id, data.args)),
+            ImplSource::Param(_) | ImplSource::Builtin(..) => None,
+        }
+    }
+
+    /// What proves `trait_ref` in `typing_env`: an impl, a where-clause (`Param`), or a builtin
+    /// impl. `None` if nothing proves it or the choice is ambiguous.
+    fn erl_select(
+        self,
+        typing_env: TypingEnv<'tcx>,
+        trait_ref: ty::TraitRef<'tcx>,
+    ) -> Option<&'tcx ImplSource<'tcx, ()>> {
+        let trait_ref = self
+            .try_normalize_erasing_regions(typing_env, Unnormalized::new_wip(trait_ref))
+            .ok()?;
+        self.codegen_select_candidate(typing_env.as_query_input(trait_ref)).ok()
     }
 
     /// The arity of the Erlang function generated for `def_id`.
@@ -279,31 +333,17 @@ impl<'tcx> TyCtxt<'tcx> {
             kind => bug!("no Erlang function arity for {kind:?}"),
         };
 
-        self.erl_witness_layout(def_id).len() + params
+        params
+            + usize::from(self.erl_entry_trait(def_id).is_some())
+            + usize::from(!self.erl_bounds(def_id).is_empty())
     }
 
-    /// Normalizes `ty` in `owner`'s environment. A projection whose self type is a type
+    /// Normalizes `value` in `owner`'s environment. A projection whose self type is a type
     /// parameter, like `<T as Iterator>::Item`, has no impl to resolve to, and stays as it is.
-    /// If normalization fails, returns `ty` unchanged.
-    pub fn erl_normalize(self, owner: DefId, ty: Ty<'tcx>) -> Ty<'tcx> {
-        self.try_normalize_erasing_regions(self.erl_typing_env(owner), Unnormalized::new_wip(ty))
-            .unwrap_or(ty)
-    }
-
-    /// Resolves which Erlang module implements `ty`.
-    pub fn erl_module_for_type(self, owner: DefId, ty: Ty<'tcx>) -> Option<ErlModuleResolution> {
-        self.resolve_erl_receiver_module(ty, self.erl_typing_env(owner))
-    }
-
-    /// For a given adt or tuple type, list its subtypes.
-    /// For example, `Result<T, E>` has subtypes `T` and `E`.
-    pub fn subtypes_of(self, ty: Ty<'tcx>) -> SmallVec<[Ty<'tcx>; 3]> {
-        match ty.kind() {
-            ty::Adt(_, args) => args.iter().filter_map(|arg| arg.as_type()).collect(),
-            ty::Tuple(types) => types.iter().collect(),
-            ty::Slice(element) => SmallVec::from_iter([*element]),
-            _ => SmallVec::new(),
-        }
+    /// If normalization fails, returns `value` unchanged.
+    pub fn erl_normalize<T: TypeFoldable<TyCtxt<'tcx>> + Copy>(self, owner: DefId, value: T) -> T {
+        self.try_normalize_erasing_regions(self.erl_typing_env(owner), Unnormalized::new_wip(value))
+            .unwrap_or(value)
     }
 
     pub fn is_forced_extern(self, hir_id: HirId) -> bool {
@@ -468,13 +508,33 @@ impl<'tcx> TyCtxt<'tcx> {
                 let parent = self.parent(def_id);
 
                 match self.def_kind(parent) {
+                    // The host module is not always the module of the self type.
+                    DefKind::Impl { .. } if self.impl_opt_trait_id(parent).is_some() => {
+                        self.erl_definition_module(parent).map(ErlModuleResolution::Static)
+                    }
+
                     DefKind::Impl { .. } => {
                         let self_ty =
                             self.type_of(parent).instantiate(self, args).skip_normalization();
                         self.resolve_erl_receiver_module(self_ty, typing_env)
                     }
 
-                    DefKind::Trait => self.resolve_erl_receiver_module(args.type_at(0), typing_env),
+                    DefKind::Trait => {
+                        let trait_ref = ty::TraitRef::from_assoc(self, parent, args);
+                        match self.erl_select(typing_env, trait_ref) {
+                            Some(ImplSource::UserDefined(data)) => self
+                                .erl_definition_module(data.impl_def_id)
+                                .map(ErlModuleResolution::Static),
+                            // Dispatch, also for a concrete self type: in `where Celsius:
+                            // From<T>`, `T` picks the impl, and so the host, which can be in
+                            // another crate. A failed selection also dispatches, so that
+                            // `resolve_witness` reports it.
+                            Some(ImplSource::Param(_)) | None => None,
+                            Some(ImplSource::Builtin(..)) => {
+                                self.resolve_erl_receiver_module(args.type_at(0), typing_env)
+                            }
+                        }
+                    }
 
                     _ => bug!("associated function has unexpected parent: {parent:?}"),
                 }
@@ -794,10 +854,25 @@ fn erl_adt_reprs<'tcx>(tcx: TyCtxt<'tcx>, def_id: DefId) -> &'tcx [ErlVariantRep
 }
 
 /// Provider for [`TyCtxt::erl_fn_name`].
-fn erl_fn_name(tcx: TyCtxt<'_>, def_id: DefId) -> Symbol {
+fn erl_fn_name(tcx: TyCtxt<'_>, def_id: LocalDefId) -> Symbol {
+    let def_id = def_id.to_def_id();
+    if !tcx.erl_has_fn_name(def_id) {
+        bug!("`{}` has no Erlang function name", tcx.def_path_str(def_id));
+    }
     let item_name = tcx.item_name(def_id);
 
-    let Some(trait_def_id) = tcx.erl_entry_trait(def_id) else { return item_name };
+    let Some(trait_def_id) = tcx.erl_entry_trait(def_id) else {
+        // Inherent impls on different arguments of one type can have methods of the same name,
+        // like `impl S<int> { fn f() }` and `impl S<str> { fn f() }`. We disambiguate by including
+        // the generic arguments in the functtion name.
+        if let Some(parent) = tcx.opt_parent(def_id)
+            && matches!(tcx.def_kind(parent), DefKind::Impl { .. })
+            && let Some(tag) = tcx.erl_inherent_impl_tag(parent)
+        {
+            return Symbol::intern(&erl_fit_atom(format!("{item_name}<{tag}>")));
+        }
+        return item_name;
+    };
     let mut segments = erl_def_path_segments(tcx, trait_def_id);
 
     match tcx.def_kind(def_id) {
@@ -808,6 +883,29 @@ fn erl_fn_name(tcx: TyCtxt<'_>, def_id: DefId) -> Symbol {
 
     segments.push(item_name.as_str().to_owned());
     Symbol::intern(&segments.join("::"))
+}
+
+/// Prints paths from the crate name, so that every crate prints the same text.
+fn with_erl_paths<R>(print: impl FnOnce() -> R) -> R {
+    ty::print::with_resolve_crate_name!(ty::print::with_no_visible_paths!(
+        ty::print::with_no_trimmed_paths!(print())
+    ))
+}
+
+/// `text`, shortened with a hash suffix if it is longer than the longest atom.
+fn erl_fit_atom(mut text: String) -> String {
+    const MAX_ATOM_CHARS: usize = 255;
+    if text.chars().count() <= MAX_ATOM_CHARS {
+        return text;
+    }
+
+    let mut hasher = StableHasher::new();
+    text.hash(&mut hasher);
+    let hash: Hash128 = hasher.finish();
+    let suffix = format!("#{:016x}", hash.as_u128() as u64);
+    let (end, _) = text.char_indices().nth(MAX_ATOM_CHARS - suffix.len()).unwrap();
+    text.truncate(end);
+    text + &suffix
 }
 
 /// The crate name followed by the definition path segments of `def_id`.
@@ -851,7 +949,20 @@ fn erl_module_name(tcx: TyCtxt<'_>, module: ErlModuleId) -> Symbol {
         ErlModuleId::Prim(prim_ty) => {
             Symbol::intern(&format!("Elixir.Patina.Core.{}", prim_ty.name()))
         }
+        ErlModuleId::AdtImplHost(krate, adt) => {
+            erl_impl_host_name(tcx, krate, tcx.erl_module_name(ErlModuleId::Adt(adt)))
+        }
+        ErlModuleId::PrimImplHost(krate, prim_ty) => {
+            erl_impl_host_name(tcx, krate, tcx.erl_module_name(ErlModuleId::Prim(prim_ty)))
+        }
     }
+}
+
+/// `Elixir.Patina.<Crate>.$impl.<SelfTypePath>`
+fn erl_impl_host_name(tcx: TyCtxt<'_>, krate: CrateNum, self_module: Symbol) -> Symbol {
+    let self_module = self_module.as_str();
+    let self_path = self_module.strip_prefix("Elixir.Patina.").unwrap_or(self_module);
+    Symbol::intern(&format!("Elixir.Patina.{}.$impl.{self_path}", tcx.crate_name(krate)))
 }
 
 fn erl_repr_attr(attribute: Option<(ReprAttr, Span)>) -> Option<ReprAttr> {
@@ -869,10 +980,112 @@ fn struct_repr_from_arity(variant: &VariantDef) -> ReprAttr {
     }
 }
 
+/// Provider for [`TyCtxt::erl_trait_supertraits`].
+fn erl_trait_supertraits<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    trait_def_id: DefId,
+) -> &'tcx [ty::TraitRef<'tcx>] {
+    // The implied predicates also hold the bounds on the associated types of `Self`, like
+    // `<Self as HasItem>::Item: Label` in `trait Labelled: HasItem<Item: Label>`.
+    let clauses = tcx.explicit_implied_predicates_of(trait_def_id).skip_binder();
+    let supertraits = tcx.erl_witnessed_trait_refs(clauses).into_iter().filter(|trait_ref| {
+        let mut ty = trait_ref.self_ty();
+        while let ty::Alias(alias) = ty.kind()
+            && let ty::AliasTyKind::Projection { .. } = alias.kind
+        {
+            ty = alias.self_ty();
+        }
+        ty == tcx.types.self_param
+    });
+    tcx.arena.alloc_from_iter(supertraits)
+}
+
+/// Provider for [`TyCtxt::erl_assoc_type_bounds`].
+fn erl_assoc_type_bounds<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    assoc_def_id: DefId,
+) -> &'tcx [ty::TraitRef<'tcx>] {
+    let clauses = tcx.explicit_item_bounds(assoc_def_id).skip_binder();
+    let bounds = tcx.erl_witnessed_trait_refs(clauses).into_iter().filter(|trait_ref| {
+        let mut ty = trait_ref.self_ty();
+        while let ty::Alias(alias) = ty.kind()
+            && let ty::AliasTyKind::Projection { def_id } = alias.kind
+        {
+            if def_id == assoc_def_id {
+                return true;
+            }
+            ty = alias.self_ty();
+        }
+        false
+    });
+    tcx.arena.alloc_from_iter(bounds)
+}
+
+/// Provider for [`TyCtxt::erl_bounds`].
+fn erl_bounds<'tcx>(tcx: TyCtxt<'tcx>, def_id: DefId) -> &'tcx [ty::TraitRef<'tcx>] {
+    if let Some(trait_def_id) = tcx.trait_of_assoc(def_id) {
+        let self_trait_ref = ty::TraitRef::identity(tcx, trait_def_id);
+        let supertraits = tcx.erl_trait_supertraits(trait_def_id);
+        let clauses = tcx
+            .predicates_of(trait_def_id)
+            .predicates
+            .iter()
+            .chain(tcx.predicates_of(def_id).predicates);
+        let bounds = tcx
+            .erl_witnessed_trait_refs(clauses)
+            .into_iter()
+            .filter(|trait_ref| *trait_ref != self_trait_ref && !supertraits.contains(trait_ref));
+        return tcx.arena.alloc_from_iter(bounds);
+    }
+
+    if let Some(trait_item_def_id) = tcx.trait_item_of(def_id) {
+        let args = tcx.erl_trait_item_args_for_impl_item(def_id);
+        return tcx.arena.alloc_from_iter(tcx.erl_bounds(trait_item_def_id).iter().map(|&bound| {
+            ty::EarlyBinder::bind(bound).instantiate(tcx, args).skip_normalization()
+        }));
+    }
+
+    let predicates = tcx.predicates_of(def_id);
+    let parent_clauses = predicates
+        .parent
+        .filter(|&parent| matches!(tcx.def_kind(parent), DefKind::Impl { .. }))
+        .into_iter()
+        .flat_map(|parent| tcx.predicates_of(parent).predicates);
+    tcx.arena
+        .alloc_from_iter(tcx.erl_witnessed_trait_refs(parent_clauses.chain(predicates.predicates)))
+}
+
+/// Provider for [`TyCtxt::erl_impl_tag`].
+fn erl_impl_tag(tcx: TyCtxt<'_>, impl_def_id: LocalDefId) -> Symbol {
+    let impl_def_id = impl_def_id.to_def_id();
+    let trait_ref = tcx
+        .impl_opt_trait_ref(impl_def_id)
+        .unwrap_or_else(|| bug!("{impl_def_id:?} is not a trait impl"))
+        .instantiate(tcx, tcx.erl_tag_args(impl_def_id))
+        .skip_normalization();
+
+    let text = with_erl_paths(|| {
+        format!("impl {} for {}", trait_ref.print_only_trait_path(), trait_ref.self_ty())
+    });
+    Symbol::intern(&erl_fit_atom(text))
+}
+
+/// Provider for [`TyCtxt::erl_trait_needs_witness`].
+fn erl_trait_needs_witness(tcx: TyCtxt<'_>, trait_def_id: DefId) -> bool {
+    // A closure is an Erlang fun, so a call through `Fn*` needs no witness.
+    !tcx.is_fn_trait(trait_def_id)
+        && tcx.associated_items(trait_def_id).in_definition_order().next().is_some()
+}
+
 pub fn provide(providers: &mut Providers) {
     *providers = Providers {
         erl_adt_reprs,
         erl_fn_name,
+        erl_trait_needs_witness,
+        erl_trait_supertraits,
+        erl_assoc_type_bounds,
+        erl_bounds,
+        erl_impl_tag,
         erl_module_name,
         erl_shape_of_ty: shape::erl_shape_of_ty,
         erl_variant_wrap_guards: shape::erl_variant_wrap_guards,

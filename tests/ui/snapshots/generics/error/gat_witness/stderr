@@ -1,8 +1,0 @@
-error: witness for a generic associated type not yet implemented: Alias(AliasTy { args: [F/#0, int], kind: Projection { def_id: DefId(0:8 ~ GatWitness[5ab7]::Family::Member) }, .. })
-  --> tests/ui/src/generics/error/gat_witness.pt:17:5
-   |
-LL |     family.member(1).describe()
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-error: aborting due to 1 previous error
-

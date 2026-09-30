@@ -1,0 +1,27 @@
+trait Base {
+    fn base(self)
+    -> int;
+}
+
+trait Derived: Base {
+    fn derived(self)
+    -> int;
+}
+
+struct S;
+
+impl Derived for S {
+    fn derived(self) -> int { 1 }
+}
+
+impl Base for S where S: Derived {
+    fn base(self) -> int { self.derived() + 1 }
+}
+
+fn call<T: Derived>(t: T) -> int { t.base() }
+
+fn only_global_bound() -> int where S: Derived { S.derived() }
+
+pub fn base() -> int { call(S) }
+
+pub fn global() -> int { only_global_bound() }

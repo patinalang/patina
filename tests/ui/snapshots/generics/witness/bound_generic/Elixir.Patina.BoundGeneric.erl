@@ -24,17 +24,18 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-call(_T@0_0, _h@1_0) ->
-    'Elixir.Patina.BoundGeneric.Holder':'BoundGeneric::Tr::method'({'Elixir.Patina.BoundGeneric.Holder',
-                                                                    {_T@0_0}},
+call({_witness@0_0}, _h@1_0) ->
+    'Elixir.Patina.BoundGeneric.Holder':'BoundGeneric::Tr::method'({'impl BoundGeneric::Tr for BoundGeneric::Holder<_>',
+                                                                    'Elixir.Patina.BoundGeneric.Holder',
+                                                                    _witness@0_0},
                                                                    _h@1_0).
 
 main() ->
     _h@0_0 = 5,
     begin
         io:put_chars([[io_lib:format("~ktp",
-                                     [call({'Elixir.Patina.BoundGeneric.Number',
-                                            {}},
+                                     [call({{'impl BoundGeneric::Bound for BoundGeneric::Number',
+                                             'Elixir.Patina.BoundGeneric.Number'}},
                                            _h@0_0)])]]),
         io:nl(),
         {}

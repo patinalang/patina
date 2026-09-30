@@ -1,0 +1,44 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// Two impls of one generic trait for one type share one function, with a clause for each tag.
+
+trait From<T> {
+    fn from(t: T)
+    -> Self;
+}
+
+struct Celsius(int);
+struct Fahrenheit(int);
+struct Kelvin(int);
+
+impl From<Fahrenheit> for Celsius {
+    fn from(f: Fahrenheit) -> Celsius { Celsius((f.0 - 32) * 5 / 9) }
+}
+
+impl From<Kelvin> for Celsius {
+    fn from(k: Kelvin) -> Celsius { Celsius(k.0 - 273) }
+}
+
+fn to_celsius<T>(t: T) -> Celsius where Celsius: From<T> { Celsius::from(t) }
+
+pub fn from_fahrenheit(f: int) -> int { to_celsius(Fahrenheit(f)).0 }
+
+pub fn from_kelvin(k: int) -> int { to_celsius(Kelvin(k)).0 }
+
+pub fn from_kelvin_static(k: int) -> int { Celsius::from(Kelvin(k)).0 }

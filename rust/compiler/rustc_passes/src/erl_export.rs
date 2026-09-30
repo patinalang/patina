@@ -42,8 +42,8 @@ impl<'tcx> ExternalCallVisitor<'_, 'tcx> {
         let Some(ErlModuleResolution::Static(callee_module)) =
             self.tcx.erl_module_for_target(self.owner, target)
         else {
-            // Dispatch through a type parameter: the call site names a trait rather than an impl,
-            // so this method must be exported from every local impl of that trait.
+            // Dispatch through a witness: the call site names a trait rather than an impl, so
+            // this method must be exported from every local impl of that trait.
             if is_trait_item {
                 self.record_trait_impls(def_id);
             }

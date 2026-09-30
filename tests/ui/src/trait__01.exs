@@ -6,7 +6,7 @@ defmodule Trait01Test do
 
   alias Patina.Trait01.Sheep
 
-  @sheep_witness {Sheep, {}}
+  @sheep_witness {:"impl Trait01::Animal for Trait01::Sheep", Sheep}
 
   setup_all do
     Code.ensure_loaded!(Sheep)

@@ -23,12 +23,14 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-b(_T@0_0, _x@1_0) ->
-    (erlang:element(1,
-                    _T@0_0)):'Forward::Tr::method'(_T@0_0, _x@1_0).
+b({_witness@0_0}, _x@1_0) ->
+    (erlang:element(2,
+                    _witness@0_0)):'Forward::Tr::method'(_witness@0_0,
+                                                         _x@1_0).
 
-a(_T@0_0, _x@1_0) -> b(_T@0_0, _x@1_0).
+a({_witness@0_0}, _x@1_0) -> b({_witness@0_0}, _x@1_0).
 
 main() ->
-    a({'Elixir.Patina.Forward.S', {}},
+    a({{'impl Forward::Tr for Forward::S',
+        'Elixir.Patina.Forward.S'}},
       'Elixir.Patina.Forward.S').

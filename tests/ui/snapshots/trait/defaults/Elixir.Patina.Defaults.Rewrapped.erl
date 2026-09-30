@@ -11,7 +11,7 @@
 -export(['__info__'/1,
          'Defaults::Container::type::Item'/1,
          'Defaults::Container::get'/2,
-         'Defaults::Container::needs_item_witness'/2]).
+         'Defaults::Container::needs_item_witness'/3]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -26,15 +26,23 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Container::type::Item'(_Self@0_0) ->
-    {'Elixir.Patina.Defaults.Name', {}}.
+'Defaults::Container::type::Item'(_witness@0_0 =
+                                      {'impl Defaults::Container for Defaults::Rewrapped',
+                                       _}) ->
+    {}.
 
-'Defaults::Container::get'(_Self@0_0, _self@1_0) ->
-    'Elixir.Patina.Defaults.Boxed':'Defaults::Container::get'({'Elixir.Patina.Defaults.Boxed',
-                                                               {}},
+'Defaults::Container::get'(_witness@0_0 =
+                               {'impl Defaults::Container for Defaults::Rewrapped',
+                                _},
+                           _self@1_0) ->
+    'Elixir.Patina.Defaults.Boxed':'Defaults::Container::get'({'impl Defaults::Container for Defaults::Boxed',
+                                                               'Elixir.Patina.Defaults.Boxed'},
                                                               _self@1_0).
 
-'Defaults::Container::needs_item_witness'(_arg@0_0,
-                                          _arg@1_0) ->
-    'Elixir.Patina.Defaults':'Defaults::Container::needs_item_witness'(_arg@0_0,
-                                                                       _arg@1_0).
+'Defaults::Container::needs_item_witness'(_witness@0_0 =
+                                              {'impl Defaults::Container for Defaults::Rewrapped',
+                                               _},
+                                          _arg@1_0, _arg@2_0) ->
+    'Elixir.Patina.Defaults':'Defaults::Container::needs_item_witness'(_witness@0_0,
+                                                                       _arg@1_0,
+                                                                       _arg@2_0).

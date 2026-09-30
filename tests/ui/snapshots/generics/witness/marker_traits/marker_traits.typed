@@ -1,0 +1,60 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+trait Show {
+    fn show(self)
+    -> str;
+}
+
+trait Marker { }
+
+trait Both: Show + Marker { }
+
+trait EmptyBlanketImpl { }
+
+impl <T> EmptyBlanketImpl for T { }
+
+struct A;
+
+impl Show for A {
+    fn show(self) -> str ({ ("a" as str) } as str)
+}
+
+impl Marker for A { }
+
+impl Both for A { }
+
+fn marker_bounds_only<T>(t: T) -> T where T: Marker +
+    EmptyBlanketImpl ({ (t as T) } as T)
+
+fn subtrait_of_marker<T>(t: T) -> str where
+    T: Both ({ ((t as T).show() as str) } as str)
+
+fn a_both()
+    ->
+        str ({
+    ((subtrait_of_marker as fn(A) -> str {subtrait_of_marker::<A>})((A as A))
+        as str)
+} as str)
+
+fn a_marked()
+    ->
+        str ({
+    (((marker_bounds_only as fn(A) -> A {marker_bounds_only::<A>})((A as A))
+            as A).show() as str)
+} as str)

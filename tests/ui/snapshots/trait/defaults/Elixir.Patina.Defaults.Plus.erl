@@ -26,14 +26,24 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Numbered::const::C'({_, {_T@0_0}}) ->
-    (erlang:element(1,
-                    _T@0_0)):'Defaults::Numbered::const::C'(_T@0_0)
+'Defaults::Numbered::const::C'(_witness@0_0 =
+                                   {'impl Defaults::Numbered for Defaults::Plus<_>',
+                                    _,
+                                    _witness@1_0}) ->
+    (erlang:element(2,
+                    _witness@1_0)):'Defaults::Numbered::const::C'(_witness@1_0)
         + 10.
 
-'Defaults::Numbered::const::D'(_arg@0_0) ->
-    'Elixir.Patina.Defaults':'Defaults::Numbered::const::D'(_arg@0_0).
+'Defaults::Numbered::const::D'(_witness@0_0 =
+                                   {'impl Defaults::Numbered for Defaults::Plus<_>',
+                                    _,
+                                    _}) ->
+    'Elixir.Patina.Defaults':'Defaults::Numbered::const::D'(_witness@0_0).
 
-'Defaults::Numbered::consts'(_arg@0_0, _arg@1_0) ->
-    'Elixir.Patina.Defaults':'Defaults::Numbered::consts'(_arg@0_0,
+'Defaults::Numbered::consts'(_witness@0_0 =
+                                 {'impl Defaults::Numbered for Defaults::Plus<_>',
+                                  _,
+                                  _},
+                             _arg@1_0) ->
+    'Elixir.Patina.Defaults':'Defaults::Numbered::consts'(_witness@0_0,
                                                           _arg@1_0).

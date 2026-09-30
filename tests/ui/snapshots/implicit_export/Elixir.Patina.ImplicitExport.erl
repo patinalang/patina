@@ -25,6 +25,6 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'ImplicitExport::FooTrait::bar'(_Self@0_0) -> {}.
+'ImplicitExport::FooTrait::bar'(_witness@0_0) -> {}.
 
 main() -> 'Elixir.Patina.ImplicitExport.Bar':bar().

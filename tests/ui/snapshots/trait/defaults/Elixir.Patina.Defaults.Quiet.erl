@@ -23,6 +23,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Ring::ring'(_Self@0_0, _, _self@1_0,
-                       __t@2_0) ->
+'Defaults::Ring::ring'(_witness@0_0 =
+                           {'impl Defaults::Ring for Defaults::Quiet', _},
+                       {_witness@1_0}, _self@2_0, __t@3_0) ->
     <<"..."/utf8>>.

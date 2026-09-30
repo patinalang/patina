@@ -23,7 +23,9 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Forward::Tr::method'(_Self@0_0, _self@1_0) ->
+'Forward::Tr::method'(_witness@0_0 =
+                          {'impl Forward::Tr for Forward::S', _},
+                      _self@1_0) ->
     begin
         io:put_chars([[<<"Tr::method("/utf8>>,
                        io_lib:format("~ktp", [_self@1_0]),

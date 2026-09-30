@@ -30,40 +30,57 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Animal::name'(_Self@0_0, _self@1_0) ->
+'Defaults::Animal::name'(_witness@0_0 =
+                             {'impl Defaults::Animal for Defaults::Sheep', _},
+                         _self@1_0) ->
     _self@1_0.
 
-'Defaults::Animal::noise'(_Self@0_0, _self@1_0) ->
+'Defaults::Animal::noise'(_witness@0_0 =
+                              {'impl Defaults::Animal for Defaults::Sheep', _},
+                          _self@1_0) ->
     <<"baaaaah"/utf8>>.
 
-'Defaults::Animal::calls_required'(_arg@0_0,
+'Defaults::Animal::calls_required'(_witness@0_0 =
+                                       {'impl Defaults::Animal for Defaults::Sheep',
+                                        _},
                                    _arg@1_0) ->
-    'Elixir.Patina.Defaults':'Defaults::Animal::calls_required'(_arg@0_0,
+    'Elixir.Patina.Defaults':'Defaults::Animal::calls_required'(_witness@0_0,
                                                                 _arg@1_0).
 
-'Defaults::Animal::calls_default'(_arg@0_0, _arg@1_0) ->
-    'Elixir.Patina.Defaults':'Defaults::Animal::calls_default'(_arg@0_0,
+'Defaults::Animal::calls_default'(_witness@0_0 =
+                                      {'impl Defaults::Animal for Defaults::Sheep',
+                                       _},
+                                  _arg@1_0) ->
+    'Elixir.Patina.Defaults':'Defaults::Animal::calls_default'(_witness@0_0,
                                                                _arg@1_0).
 
-'Defaults::Animal::with_bounded_param'(_arg@0_0,
+'Defaults::Animal::with_bounded_param'(_witness@0_0 =
+                                           {'impl Defaults::Animal for Defaults::Sheep',
+                                            _},
                                        _arg@1_0, _arg@2_0, _arg@3_0) ->
-    'Elixir.Patina.Defaults':'Defaults::Animal::with_bounded_param'(_arg@0_0,
+    'Elixir.Patina.Defaults':'Defaults::Animal::with_bounded_param'(_witness@0_0,
                                                                     _arg@1_0,
                                                                     _arg@2_0,
                                                                     _arg@3_0).
 
-'Defaults::Animal::returns_self'(_arg@0_0, _arg@1_0) ->
-    'Elixir.Patina.Defaults':'Defaults::Animal::returns_self'(_arg@0_0,
+'Defaults::Animal::returns_self'(_witness@0_0 =
+                                     {'impl Defaults::Animal for Defaults::Sheep',
+                                      _},
+                                 _arg@1_0) ->
+    'Elixir.Patina.Defaults':'Defaults::Animal::returns_self'(_witness@0_0,
                                                               _arg@1_0).
 
-'Defaults::Animal::whisper'(_arg@0_0, _arg@1_0) ->
-    'Elixir.Patina.Defaults':'Defaults::Animal::whisper'(_arg@0_0,
+'Defaults::Animal::whisper'(_witness@0_0 =
+                                {'impl Defaults::Animal for Defaults::Sheep',
+                                 _},
+                            _arg@1_0) ->
+    'Elixir.Patina.Defaults':'Defaults::Animal::whisper'(_witness@0_0,
                                                          _arg@1_0).
 
 calls_stubs_locally(_self@0_0) ->
-    {'Defaults::Animal::calls_required'({'Elixir.Patina.Defaults.Sheep',
-                                         {}},
+    {'Defaults::Animal::calls_required'({'impl Defaults::Animal for Defaults::Sheep',
+                                         'Elixir.Patina.Defaults.Sheep'},
                                         _self@0_0),
-     'Defaults::Animal::whisper'({'Elixir.Patina.Defaults.Sheep',
-                                  {}},
+     'Defaults::Animal::whisper'({'impl Defaults::Animal for Defaults::Sheep',
+                                  'Elixir.Patina.Defaults.Sheep'},
                                  _self@0_0)}.

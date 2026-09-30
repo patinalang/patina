@@ -19,6 +19,7 @@ use rustc_span::{Span, Symbol, kw, sym};
 
 use crate::compile::translate::loops::Loops;
 use crate::compile::translate::scopes::{PatinaVar, Scope, Scopes};
+use crate::compile::translate::witness::WitnessEnv;
 use crate::compile::translate::{ModuleParts, Translator};
 use crate::erlang::abstract_format as eaf;
 use crate::{not_implemented, span_fatal};
@@ -93,7 +94,7 @@ pub(super) struct BodyCx<'a, 'tcx, 'arena> {
     pub parts: &'a mut ModuleParts<'arena>,
     pub scopes: &'a mut Scopes,
     pub loops: Loops,
-    pub witness_vars: &'a FxIndexMap<ty::ParamTy, Symbol>,
+    pub witness_env: &'a WitnessEnv<'tcx, 'arena>,
 }
 
 impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
@@ -103,9 +104,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         thir: &'a thir::Thir<'tcx>,
         parts: &'a mut ModuleParts<'arena>,
         scopes: &'a mut Scopes,
-        witness_vars: &'a FxIndexMap<ty::ParamTy, Symbol>,
+        witness_env: &'a WitnessEnv<'tcx, 'arena>,
     ) -> Self {
-        BodyCx { translator, owner, thir, parts, scopes, witness_vars, loops: Loops::new() }
+        BodyCx { translator, owner, thir, parts, scopes, witness_env, loops: Loops::new() }
     }
 
     pub(super) fn tcx(&self) -> TyCtxt<'tcx> {
@@ -626,6 +627,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             if self.tcx().is_fn_trait(self.tcx().parent(*callee_def_id)) {
                 return self.translate_fn_trait_call(span, args);
             }
+            if matches!(self.tcx().def_kind(*callee_def_id), DefKind::Ctor(..)) {
+                not_implemented!(self.tcx(), span, "calling a constructor through a variable");
+            }
 
             let erl_call_target = self.tcx().erl_call_target_for_def(*callee_def_id, generic_args);
             (erl_call_target, afb.expr_atom(span, self.tcx().erl_fn_name(*callee_def_id)))
@@ -715,14 +719,14 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let ErlCallTarget::Item { def_id, args } = target else {
             return SmallVec::new();
         };
-        self.tcx()
-            .erl_call_witness_tys(def_id, args)
-            .into_iter()
-            .map(|ty| {
-                let witness = self.translator.build_witness(self.owner.to_def_id(), span, ty);
-                self.translator.materialize_witness(span, witness, self.witness_vars, self.scopes)
-            })
-            .collect()
+        self.translator.call_witness_exprs(
+            self.owner.to_def_id(),
+            span,
+            def_id,
+            args,
+            self.witness_env,
+            self.scopes,
+        )
     }
 
     fn translate_fn_trait_call(&mut self, span: Span, args: &[ExprId]) -> eaf::Expr<'arena> {
@@ -808,7 +812,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                     closure.closure_id,
                     cx.parts,
                     cx.scopes,
-                    cx.witness_vars,
+                    cx.witness_env,
                 )
             })
             .0;

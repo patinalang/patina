@@ -1,0 +1,62 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// The witness function of an associated type gives the witnesses of its declared bounds.
+// `Show for int` is an impl for a primitive type outside Core.
+
+trait Show {
+    fn show(self)
+    -> str;
+}
+
+impl Show for int {
+    fn show(self) -> str ({ ("an int" as str) } as str)
+}
+
+trait Iter {
+    type
+    Item: Show;
+
+    fn next(self)
+    -> Self::Item;
+}
+
+struct Counter {
+    n: int,
+}
+
+impl Iter for Counter {
+    type
+    Item
+    =
+    int;
+
+    fn next(self) -> int ({ ((self as Counter).n as int) } as int)
+}
+
+fn first<I>(i: I) -> str where
+    I: Iter ({ (((i as I).next() as <I as Iter>::Item).show() as str) } as
+    str)
+
+fn counter_first(n: int)
+    ->
+        str ({
+    ((first as
+            fn(Counter) -> str {first::<Counter>})((Counter { n: (n as int) }
+            as Counter)) as str)
+} as str)

@@ -1446,6 +1446,9 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
             if should_encode_fn_sig(def_kind) {
                 record!(self.tables.fn_sig[def_id] <- tcx.fn_sig(def_id));
             }
+            if tcx.erl_has_fn_name(def_id) {
+                record!(self.tables.erl_fn_name[def_id] <- tcx.erl_fn_name(def_id));
+            }
             if should_encode_generics(def_kind) {
                 let g = tcx.generics_of(def_id);
                 record!(self.tables.generics_of[def_id] <- g);
@@ -1990,6 +1993,7 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
             if of_trait {
                 let header = tcx.impl_trait_header(def_id);
                 record!(self.tables.impl_trait_header[def_id] <- header);
+                record!(self.tables.erl_impl_tag[def_id] <- tcx.erl_impl_tag(def_id));
 
                 self.tables.defaultness.set(def_id.index, tcx.defaultness(def_id));
 

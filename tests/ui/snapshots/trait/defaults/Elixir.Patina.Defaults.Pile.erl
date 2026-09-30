@@ -25,14 +25,23 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Value::value'({_, {_T@0_0}}, _self@1_0) ->
-    (erlang:element(1,
-                    _T@0_0)):'Defaults::Value::value'(_T@0_0, _self@1_0)
+'Defaults::Value::value'(_witness@0_0 =
+                             {'impl Defaults::Value for Defaults::Pile<_>',
+                              _,
+                              _witness@1_0},
+                         _self@2_0) ->
+    (erlang:element(2,
+                    _witness@1_0)):'Defaults::Value::value'(_witness@1_0,
+                                                            _self@2_0)
         + 1.
 
-'Defaults::Combine::uses_rhs_witness'(_arg@0_0,
+'Defaults::Combine::uses_rhs_witness'(_witness@0_0 =
+                                          {'impl Defaults::Combine for Defaults::Pile<_>',
+                                           _,
+                                           _,
+                                           _},
                                       _arg@1_0, _arg@2_0, _arg@3_0) ->
-    'Elixir.Patina.Defaults':'Defaults::Combine::uses_rhs_witness'(_arg@0_0,
+    'Elixir.Patina.Defaults':'Defaults::Combine::uses_rhs_witness'(_witness@0_0,
                                                                    _arg@1_0,
                                                                    _arg@2_0,
                                                                    _arg@3_0).

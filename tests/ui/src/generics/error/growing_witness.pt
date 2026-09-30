@@ -1,0 +1,30 @@
+#![allow(dead_code)]
+
+// The witness of `S<int>: Base` needs the witness of `S<S<int>>: Derived`, which needs the witness
+// of `S<S<int>>: Base`, and so on. Each bound is larger than the one before.
+
+trait Base {
+    fn base(self) -> int;
+}
+
+trait Derived: Base {
+    fn derived(self) -> int;
+}
+
+struct S<T> { t: T }
+
+impl<T> Derived for S<T> {
+    fn derived(self) -> int { 1 }
+}
+
+impl<T> Base for S<T> where S<S<T>>: Derived {
+    fn base(self) -> int { 2 }
+}
+
+fn call<T: Derived>(t: T) -> int {
+    t.base()
+}
+
+pub fn main() -> int {
+    call(S { t: 1 })
+}

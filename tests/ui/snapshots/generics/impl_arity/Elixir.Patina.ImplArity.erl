@@ -28,9 +28,10 @@ main() ->
     _b@1_0 = <<"hi"/utf8>>,
     begin
         io:put_chars([[io_lib:format("~ktp",
-                                     ['Elixir.Patina.ImplArity.GenVal':value(_a@0_0)]),
+                                     ['Elixir.Patina.ImplArity.GenVal':'value<int>'(_a@0_0)]),
                        <<" "/utf8>>,
-                       'Elixir.Patina.ImplArity.GenVal':value(_b@1_0, 0)]]),
+                       'Elixir.Patina.ImplArity.GenVal':'value<str>'(_b@1_0,
+                                                                     0)]]),
         io:nl(),
         {}
     end.

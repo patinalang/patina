@@ -26,7 +26,9 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'TraitArgumentPatterns::Marker::value'(_Self@0_0,
+'TraitArgumentPatterns::Marker::value'(_witness@0_0 =
+                                           {'impl TraitArgumentPatterns::Marker for TraitArgumentPatterns::Marked',
+                                            _},
                                        _self@1_0) ->
     begin
         io:put_chars([[<<"Marker::value("/utf8>>,

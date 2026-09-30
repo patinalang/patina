@@ -23,17 +23,17 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-compare(_T@0_0, _a@1_0, _b@2_0) ->
-    (erlang:element(1,
-                    _T@0_0)):'Core::PartialEq::eq'(_T@0_0,
-                                                   _T@0_0,
-                                                   _a@1_0,
-                                                   _b@2_0).
+compare({_witness@0_0}, _a@1_0, _b@2_0) ->
+    (erlang:element(2,
+                    _witness@0_0)):'Core::PartialEq::eq'(_witness@0_0,
+                                                         _a@1_0,
+                                                         _b@2_0).
 
 main() ->
     begin
         io:put_chars([[io_lib:format("~ktp",
-                                     [compare({'Elixir.Patina.Core.int', {}},
+                                     [compare({{'impl Core::PartialEq for int',
+                                                'Elixir.Patina.Core.int'}},
                                               1,
                                               1)])]]),
         io:nl(),

@@ -23,17 +23,18 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-total_area(_T@0_0, _t@1_0) ->
-    (erlang:element(1,
-                    _T@0_0)):'Dispatch::Area::area'(_T@0_0, _t@1_0).
+total_area({_witness@0_0}, _t@1_0) ->
+    (erlang:element(2,
+                    _witness@0_0)):'Dispatch::Area::area'(_witness@0_0,
+                                                          _t@1_0).
 
 main() ->
     _p@0_0 = #'Elixir.Patina.Dispatch.Point':'Point'{x = 3,
                                                      y = 4},
     begin
         io:put_chars([[io_lib:format("~ktp",
-                                     [total_area({'Elixir.Patina.Dispatch.Point',
-                                                  {}},
+                                     [total_area({{'impl Dispatch::Area for Dispatch::Point',
+                                                   'Elixir.Patina.Dispatch.Point'}},
                                                  _p@0_0)])]]),
         io:nl(),
         {}

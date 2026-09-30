@@ -23,5 +23,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Tag::tag'(_Self@0_0, _self@1_0) ->
+'Defaults::Tag::tag'(_witness@0_0 =
+                         {'impl Defaults::Tag for Defaults::Bell', _},
+                     _self@1_0) ->
     <<"a bell"/utf8>>.

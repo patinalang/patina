@@ -1,0 +1,5 @@
+warning: [{"tests/ui/src/generics/witness/gat_witness.pt",
+           [{{12,1},erl_lint,{unused_function,{describe_member,2}}}]}]
+
+warning: 1 warning emitted
+

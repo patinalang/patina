@@ -11,7 +11,7 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'TraitArgumentPatterns::Contains::contains'/6]).
+         'TraitArgumentPatterns::Contains::contains'/4]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -26,23 +26,23 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'TraitArgumentPatterns::Contains::contains'(_Self@1_0,
-                                            _A@2_0 = {'Elixir.Patina.Core.int',
-                                                      {}},
-                                            _T@0_0, _self@3_0, _a@4_0,
-                                            _value@5_0) ->
+'TraitArgumentPatterns::Contains::contains'(_witness@0_0 =
+                                                {'impl TraitArgumentPatterns::Contains<int, _> for TraitArgumentPatterns::BoundContainer',
+                                                 _,
+                                                 _witness@1_0},
+                                            _self@2_0, _a@3_0, _value@4_0) ->
     begin
         io:put_chars([[<<"BoundContainer::contains("/utf8>>,
-                       io_lib:format("~ktp", [_self@3_0]),
+                       io_lib:format("~ktp", [_self@2_0]),
                        <<", "/utf8>>,
-                       io_lib:format("~ktp", [_a@4_0]),
+                       io_lib:format("~ktp", [_a@3_0]),
                        <<", "/utf8>>,
-                       io_lib:format("~ktp", [_value@5_0]),
+                       io_lib:format("~ktp", [_value@4_0]),
                        <<")"/utf8>>]]),
         io:nl(),
         {}
     end,
-    (erlang:element(1,
-                    _T@0_0)):'TraitArgumentPatterns::Marker::value'(_T@0_0,
-                                                                    _value@5_0)
+    (erlang:element(2,
+                    _witness@1_0)):'TraitArgumentPatterns::Marker::value'(_witness@1_0,
+                                                                          _value@4_0)
         > 0.

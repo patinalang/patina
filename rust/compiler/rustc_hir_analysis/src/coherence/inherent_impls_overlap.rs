@@ -101,7 +101,8 @@ impl<'tcx> InherentOverlapChecker<'tcx> {
         res
     }
 
-    /// Checks for duplicate name/arity pairs within the same inherent impl.
+    /// Checks that two inherent impls that don't overlap don't compile a method each to the
+    /// same Erlang function of the type's module.
     fn check_for_name_arity_collision(
         &self,
         impl1: DefId,
@@ -115,16 +116,20 @@ impl<'tcx> InherentOverlapChecker<'tcx> {
             let ty::AssocKind::Fn { .. } = item1.kind else {
                 continue;
             };
-            let arity = self.tcx.fn_arg_idents(item1.def_id).len();
+            // The Erlang arity also counts witness parameters.
+            let arity = self.tcx.erl_fn_arity(item1.def_id);
 
             let collision = impl_items2.filter_by_name_unhygienic(item1.name()).find(|&&item2| {
                 matches!(item2.kind, ty::AssocKind::Fn { .. })
                     && self.compare_hygienically(item1, item2)
-                    && self.tcx.fn_arg_idents(item2.def_id).len() == arity
+                    && self.tcx.erl_fn_name(item1.def_id) == self.tcx.erl_fn_name(item2.def_id)
+                    && self.tcx.erl_fn_arity(item2.def_id) == arity
             });
 
             if let Some(item2) = collision {
                 let name = item1.ident(self.tcx).normalize_to_macros_2_0();
+                let erl_name = self.tcx.erl_fn_name(item1.def_id);
+                let rust_arity = self.tcx.fn_arg_idents(item1.def_id).len();
                 let mut err = struct_span_code_err!(
                     self.tcx.dcx(),
                     self.tcx.def_span(item1.def_id),
@@ -140,9 +145,14 @@ impl<'tcx> InherentOverlapChecker<'tcx> {
                     self.tcx.def_span(item2.def_id),
                     format!("other definition for `{name}`"),
                 );
+                let witnesses = match arity - rust_arity {
+                    0 => String::new(),
+                    1 => " (the arity counts 1 witness argument)".to_owned(),
+                    n => format!(" (the arity counts {n} witness arguments)"),
+                };
                 err.note(format!(
-                    "a Patina type compiles to a single generics-erased Erlang module, so \
-                     `{name}/{arity}` may only be defined once"
+                    "both methods compile to the Erlang function `{erl_name}/{arity}` of the \
+                     type's module{witnesses}"
                 ));
                 res = Err(err.emit());
             }

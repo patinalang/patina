@@ -85,6 +85,12 @@
      'Defaults::Konst::const::K',1,
      [{clause,
           {435,5},
-          [{var,{435,5},'_Self@0_0'}],
+          [{match,
+               {435,5},
+               {var,{435,5},'_witness@0_0'},
+               {tuple,
+                   {435,5},
+                   [{atom,{435,5},'impl Defaults::Konst for Defaults::Holder'},
+                    {var,{435,5},'_'}]}}],
           [],
           [{integer,{435,20},7}]}]}]

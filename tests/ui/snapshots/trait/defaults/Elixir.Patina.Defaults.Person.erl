@@ -25,9 +25,15 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Named::name'(_Self@0_0, _self@1_0) ->
+'Defaults::Named::name'(_witness@0_0 =
+                            {'impl Defaults::Named for Defaults::Person', _},
+                        _self@1_0) ->
     _self@1_0.
 
-'Defaults::Greeter::greet'(_arg@0_0, _arg@1_0) ->
-    'Elixir.Patina.Defaults':'Defaults::Greeter::greet'(_arg@0_0,
+'Defaults::Greeter::greet'(_witness@0_0 =
+                               {'impl Defaults::Greeter for Defaults::Person',
+                                _,
+                                _},
+                           _arg@1_0) ->
+    'Elixir.Patina.Defaults':'Defaults::Greeter::greet'(_witness@0_0,
                                                         _arg@1_0).

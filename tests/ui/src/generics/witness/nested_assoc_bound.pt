@@ -1,0 +1,46 @@
+// The witness function of `Outer::Inner` also returns the witness of the nested bound
+// `Item: Label`. A generic body gets that witness through its `T: Outer` witness.
+
+trait Label {
+    fn label(self) -> str;
+}
+
+trait HasItem {
+    type Item;
+
+    fn item(self) -> Self::Item;
+}
+
+trait Outer {
+    type Inner: HasItem<Item: Label>;
+
+    fn inner(self) -> Self::Inner;
+}
+
+struct Tag;
+struct Leaf;
+struct Root;
+
+impl Label for Tag {
+    fn label(self) -> str { "tag" }
+}
+
+impl HasItem for Leaf {
+    type Item = Tag;
+
+    fn item(self) -> Tag { Tag }
+}
+
+impl Outer for Root {
+    type Inner = Leaf;
+
+    fn inner(self) -> Leaf { Leaf }
+}
+
+fn nested_label<T: Outer>(t: T) -> str {
+    t.inner().item().label()
+}
+
+pub fn root_label() -> str {
+    nested_label(Root)
+}

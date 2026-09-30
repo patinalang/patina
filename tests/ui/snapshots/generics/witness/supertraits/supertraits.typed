@@ -1,0 +1,167 @@
+#![allow(internal_features)]
+
+
+
+
+
+#![allow(dead_code)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+#[allow(unused_imports)]
+use Core::*;
+#[allow(unused)]
+extern mod io;
+#[allow(unused)]
+extern mod patina_fmt;
+
+struct Bob;
+struct Robot {
+    id: int,
+}
+
+trait Named {
+    fn name(self)
+    -> str;
+}
+
+trait Greet: Named {
+    fn greeting(self)
+    -> str;
+
+    fn calls_supertrait(self)
+        ->
+            (str,
+            str) ({
+        ((((self as Self).greeting() as str), ((self as Self).name() as str))
+            as (str, str))
+    } as (str, str))
+}
+
+// Two levels of supertraits: `Loud: Greet: Named`.
+trait Loud: Greet {
+    fn shout(self)
+        ->
+            (str,
+            (str,
+            str)) ({
+        ((((self as Self).name() as str),
+            ((self as Self).calls_supertrait() as (str, str))) as
+            (str, (str, str)))
+    } as (str, (str, str)))
+}
+
+impl Named for Bob {
+    fn name(self) -> str ({ ("Bob" as str) } as str)
+}
+
+impl Greet for Bob {
+    fn greeting(self) -> str ({ ("Hi" as str) } as str)
+}
+
+impl Loud for Bob { }
+
+impl Named for Robot {
+    fn name(self) -> str ({ ("Robot" as str) } as str)
+}
+
+impl Greet for Robot {
+    fn greeting(self) -> str ({ ("Beep" as str) } as str)
+}
+
+fn via_subtrait_bound<T>(x: T) -> (str, (str, str)) where
+    T: Greet ({
+    ((((x as T).name() as str), ((x as T).calls_supertrait() as (str, str)))
+        as (str, (str, str)))
+} as (str, (str, str)))
+
+fn via_indirect_supertrait<T>(x: T) -> (str, (str, (str, str))) where
+    T: Loud ({
+    ((((x as T).name() as str), ((x as T).shout() as (str, (str, str)))) as
+        (str, (str, (str, str))))
+} as (str, (str, (str, str))))
+
+// The self witness holds `Self: Shelf`. The bounds tuple holds `P: Pred`.
+trait Pred {
+    fn test(self, n: int)
+    -> bool;
+}
+
+trait Shelf {
+    fn size(self)
+    -> int;
+}
+
+trait Library: Shelf {
+    fn count<P>(self, p: P) -> (int, bool) where
+        P: Pred ({
+        ((((self as Self).size() as int),
+            ((p as P).test(((self as Self).size() as int)) as bool)) as
+            (int, bool))
+    } as (int, bool))
+}
+
+struct IsEven;
+struct Books {
+    n: int,
+}
+
+impl Pred for IsEven {
+    fn test(self, n: int)
+        ->
+            bool ({ (((n as int) % (2 as int) as int) == (0 as int) as bool) }
+        as bool)
+}
+
+impl Shelf for Books {
+    fn size(self) -> int ({ ((self as Books).n as int) } as int)
+}
+
+impl Library for Books { }
+
+fn count_in<L>(l: L) -> (int, bool) where
+    L: Library ({ ((l as L).count((IsEven as IsEven)) as (int, bool)) } as
+    (int, bool))
+
+fn bob_intro()
+    ->
+        (str,
+        (str,
+        str)) ({
+    ((via_subtrait_bound as
+            fn(Bob) -> (str, (str, str)) {via_subtrait_bound::<Bob>})((Bob as
+            Bob)) as (str, (str, str)))
+} as (str, (str, str)))
+
+fn robot_intro()
+    ->
+        (str,
+        (str,
+        str)) ({
+    ((via_subtrait_bound as
+            fn(Robot) -> (str, (str, str)) {via_subtrait_bound::<Robot>})((Robot {
+            id: (1 as int) } as Robot)) as (str, (str, str)))
+} as (str, (str, str)))
+
+fn bob_intro_loud()
+    ->
+        (str,
+        (str,
+        (str,
+        str))) ({
+    ((via_indirect_supertrait as
+            fn(Bob) -> (str, (str, (str, str))) {via_indirect_supertrait::<Bob>})((Bob
+            as Bob)) as (str, (str, (str, str))))
+} as (str, (str, (str, str))))
+
+fn books_count(n: int)
+    ->
+        (int,
+        bool) ({
+    ((count_in as
+            fn(Books) -> (int, bool) {count_in::<Books>})((Books { (n as int)
+            } as Books)) as (int, bool))
+} as (int, bool))

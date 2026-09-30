@@ -1,0 +1,83 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+use Core::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// Two impls of one generic trait for one type share one function, with a clause for each tag.
+
+trait From<T> {
+    fn from(t: T)
+    -> Self;
+}
+
+struct Celsius(int);
+struct Fahrenheit(int);
+struct Kelvin(int);
+
+impl From<Fahrenheit> for Celsius {
+    fn from(f: Fahrenheit)
+        ->
+            Celsius ({
+        ((Celsius as
+                fn(int) -> Celsius {Celsius})(((((((f as Fahrenheit).0 as int)
+                        - (32 as int) as int)) * (5 as int) as int) / (9 as int) as
+                int)) as Celsius)
+    } as Celsius)
+}
+
+impl From<Kelvin> for Celsius {
+    fn from(k: Kelvin)
+        ->
+            Celsius ({
+        ((Celsius as
+                fn(int) -> Celsius {Celsius})((((k as Kelvin).0 as int) -
+                (273 as int) as int)) as Celsius)
+    } as Celsius)
+}
+
+fn to_celsius<T>(t: T) -> Celsius where
+    Celsius: From<T> ({
+    ((Celsius::from as
+            fn(T) -> Celsius {<Celsius as From<T>>::from})((t as T)) as
+        Celsius)
+} as Celsius)
+
+fn from_fahrenheit(f: int)
+    ->
+        int ({
+    (((to_celsius as
+                fn(Fahrenheit) -> Celsius {to_celsius::<Fahrenheit>})(((Fahrenheit
+                    as fn(int) -> Fahrenheit {Fahrenheit})((f as int)) as
+                Fahrenheit)) as Celsius).0 as int)
+} as int)
+
+fn from_kelvin(k: int)
+    ->
+        int ({
+    (((to_celsius as
+                fn(Kelvin) -> Celsius {to_celsius::<Kelvin>})(((Kelvin as
+                    fn(int) -> Kelvin {Kelvin})((k as int)) as Kelvin)) as
+            Celsius).0 as int)
+} as int)
+
+fn from_kelvin_static(k: int)
+    ->
+        int ({
+    (((Celsius::from as
+                fn(Kelvin) -> Celsius {<Celsius as From<Kelvin>>::from})(((Kelvin
+                    as fn(int) -> Kelvin {Kelvin})((k as int)) as Kelvin)) as
+            Celsius).0 as int)
+} as int)

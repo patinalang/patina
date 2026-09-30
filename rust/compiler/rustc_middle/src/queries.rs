@@ -1207,11 +1207,55 @@ rustc_queries! {
         desc { "finding externally called functions" }
     }
 
-    /// The Erlang function name of a callable item.
+    /// Whether a bound on the trait needs a runtime witness: the trait has items. The `Fn*`
+    /// traits need none. A bound on a trait without a witness stands for the bounds on its
+    /// supertraits.
+    query erl_trait_needs_witness(trait_def_id: DefId) -> bool {
+        desc { "checking whether bounds on `{}` need a witness", tcx.def_path_str(trait_def_id) }
+    }
+
+    /// The direct supertraits of the trait, in the trait's generics.
+    query erl_trait_supertraits(trait_def_id: DefId) -> &'tcx [ty::TraitRef<'tcx>] {
+        desc { "computing the witnessed supertraits of `{}`", tcx.def_path_str(trait_def_id) }
+    }
+
+    /// The declared bounds of the associated type, in the trait's generics. They include the
+    /// bounds of its nested projections, like `Item: Label` in `type Inner: HasItem<Item: Label>`.
+    query erl_assoc_type_bounds(assoc_def_id: DefId) -> &'tcx [ty::TraitRef<'tcx>] {
+        desc { "computing the witnessed bounds of `{}`", tcx.def_path_str(assoc_def_id) }
+    }
+
+    /// The bounds that a use of the item must witness, in the item's generics. For a function,
+    /// they are its `Bounds` argument; for a trait item, the self witness holds `Self: Trait` and
+    /// its supertraits instead. For a trait impl, they are its where-clauses, which its witness
+    /// holds after the supertraits.
+    query erl_bounds(def_id: DefId) -> &'tcx [ty::TraitRef<'tcx>] {
+        desc { "computing the witnessed bounds of `{}`", tcx.def_path_str(def_id) }
+    }
+
+    /// The tag of the trait impl. The tag is an atom. It identifies the impl among the impls of
+    /// its trait in the same host. These impls share one function for each trait item. Each impl
+    /// gives one clause of the function. The tag is the header of the impl, with full paths and
+    /// without lifetimes. Type and const parameters show as `_`. For example, the impl
+    /// `impl<T> From<int> for Pair<T>` has the tag `'impl Temps::From<int> for Temps::Pair<_>'`.
+    /// If two impls have the same tag, they overlap. Other crates read the tag from the metadata
+    /// of the impl's crate.
+    query erl_impl_tag(impl_def_id: DefId) -> Symbol {
+        desc { "computing the impl tag of `{}`", tcx.def_path_str(impl_def_id) }
+        separate_provide_extern
+    }
+
+    /// The Erlang function name of a callable item. See `TyCtxt::erl_has_fn_name`.
     ///
-    /// Trait impl items names are mangled with the full trait path, e.g. `Std::Ops::Add::add`.
+    /// - Trait items and trait impl items get the full trait path, e.g. `Std::Ops::Add::add`.
+    /// - Methods of an inherent impl on specific generic arguments get these arguments, e.g.
+    ///   `'value<int>'` for `impl S<int> { fn value() }`. A fully generic impl, like
+    ///   `impl<T> S<T>`, keeps plain names.
+    ///
+    /// Other crates read the name from the metadata of the item's crate.
     query erl_fn_name(def_id: DefId) -> Symbol {
         desc { "computing the Erlang function name of `{}`", tcx.def_path_str(def_id) }
+        separate_provide_extern
     }
 
     /// The Erlang module name for a generated, external, or primitive module.

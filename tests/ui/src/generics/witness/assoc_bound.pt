@@ -1,0 +1,32 @@
+// The witness function of an associated type gives the witnesses of its declared bounds.
+// `Show for int` is an impl for a primitive type outside Core.
+
+trait Show {
+    fn show(self) -> str;
+}
+
+impl Show for int {
+    fn show(self) -> str { "an int" }
+}
+
+trait Iter {
+    type Item: Show;
+
+    fn next(self) -> Self::Item;
+}
+
+struct Counter { n: int }
+
+impl Iter for Counter {
+    type Item = int;
+
+    fn next(self) -> int { self.n }
+}
+
+fn first<I: Iter>(i: I) -> str {
+    i.next().show()
+}
+
+pub fn counter_first(n: int) -> str {
+    first(Counter { n: n })
+}

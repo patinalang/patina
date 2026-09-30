@@ -8,7 +8,7 @@
 
 -export_record([]).
 
--export(['__info__'/1, value/1, value/2]).
+-export(['__info__'/1, 'value<int>'/1, 'value<str>'/2]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -23,6 +23,6 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-value(_self@0_0) -> _self@0_0.
+'value<int>'(_self@0_0) -> _self@0_0.
 
-value(_self@0_0, __extra@1_0) -> _self@0_0.
+'value<str>'(_self@0_0, __extra@1_0) -> _self@0_0.

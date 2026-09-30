@@ -26,10 +26,19 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Numbered::const::C'(_Self@0_0) -> 2.
+'Defaults::Numbered::const::C'(_witness@0_0 =
+                                   {'impl Defaults::Numbered for Defaults::Two',
+                                    _}) ->
+    2.
 
-'Defaults::Numbered::const::D'(_Self@0_0) -> 200.
+'Defaults::Numbered::const::D'(_witness@0_0 =
+                                   {'impl Defaults::Numbered for Defaults::Two',
+                                    _}) ->
+    200.
 
-'Defaults::Numbered::consts'(_arg@0_0, _arg@1_0) ->
-    'Elixir.Patina.Defaults':'Defaults::Numbered::consts'(_arg@0_0,
+'Defaults::Numbered::consts'(_witness@0_0 =
+                                 {'impl Defaults::Numbered for Defaults::Two',
+                                  _},
+                             _arg@1_0) ->
+    'Elixir.Patina.Defaults':'Defaults::Numbered::consts'(_witness@0_0,
                                                           _arg@1_0).

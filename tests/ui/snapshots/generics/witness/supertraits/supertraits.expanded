@@ -1,0 +1,115 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro)]
+#![no_std]
+#![no_core]
+
+
+
+
+
+#![allow(dead_code)]
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+#[allow(unused_imports)]
+use Core::*;
+#[allow(unused)]
+extern mod io;
+#[allow(unused)]
+extern mod patina_fmt;
+
+struct Bob;
+struct Robot {
+    id: int,
+}
+
+trait Named {
+    fn name(self)
+    -> str;
+}
+
+trait Greet: Named {
+    fn greeting(self)
+    -> str;
+
+    fn calls_supertrait(self) -> (str, str) { (self.greeting(), self.name()) }
+}
+
+// Two levels of supertraits: `Loud: Greet: Named`.
+trait Loud: Greet {
+    fn shout(self) -> (str, (str, str)) {
+        (self.name(), self.calls_supertrait())
+    }
+}
+
+impl Named for Bob {
+    fn name(self) -> str { "Bob" }
+}
+
+impl Greet for Bob {
+    fn greeting(self) -> str { "Hi" }
+}
+
+impl Loud for Bob {}
+
+impl Named for Robot {
+    fn name(self) -> str { "Robot" }
+}
+
+impl Greet for Robot {
+    fn greeting(self) -> str { "Beep" }
+}
+
+fn via_subtrait_bound<T: Greet>(x: T) -> (str, (str, str)) {
+    (x.name(), x.calls_supertrait())
+}
+
+fn via_indirect_supertrait<T: Loud>(x: T) -> (str, (str, (str, str))) {
+    (x.name(), x.shout())
+}
+
+// The self witness holds `Self: Shelf`. The bounds tuple holds `P: Pred`.
+trait Pred {
+    fn test(self, n: int)
+    -> bool;
+}
+
+trait Shelf {
+    fn size(self)
+    -> int;
+}
+
+trait Library: Shelf {
+    fn count<P: Pred>(self, p: P) -> (int, bool) {
+        (self.size(), p.test(self.size()))
+    }
+}
+
+struct IsEven;
+struct Books {
+    n: int,
+}
+
+impl Pred for IsEven {
+    fn test(self, n: int) -> bool { n % 2 == 0 }
+}
+
+impl Shelf for Books {
+    fn size(self) -> int { self.n }
+}
+
+impl Library for Books {}
+
+fn count_in<L: Library>(l: L) -> (int, bool) { l.count(IsEven) }
+
+pub fn bob_intro() -> (str, (str, str)) { via_subtrait_bound(Bob) }
+
+pub fn robot_intro() -> (str, (str, str)) {
+    via_subtrait_bound(Robot { id: 1 })
+}
+
+pub fn bob_intro_loud() -> (str, (str, (str, str))) {
+    via_indirect_supertrait(Bob)
+}
+
+pub fn books_count(n: int) -> (int, bool) { count_in(Books { n }) }

@@ -25,7 +25,9 @@
 
 -record #'Point'{x, y}.
 
-'Dispatch::Area::area'(_Self@0_0, _self@1_0) ->
+'Dispatch::Area::area'(_witness@0_0 =
+                           {'impl Dispatch::Area for Dispatch::Point', _},
+                       _self@1_0) ->
     begin
         io:put_chars([[<<"Area::area("/utf8>>,
                        io_lib:format("~ktp", [_self@1_0]),
