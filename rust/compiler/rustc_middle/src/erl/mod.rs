@@ -566,6 +566,8 @@ impl<'tcx> TyCtxt<'tcx> {
             ty::Atom => Some(Static(ErlModuleId::Prim(PrimTy::Atom))),
             ty::Bin => Some(Static(ErlModuleId::Prim(PrimTy::Bin))),
             ty::Bits => Some(Static(ErlModuleId::Prim(PrimTy::Bits))),
+            ty::Slice(_) => Some(Static(ErlModuleId::Prim(PrimTy::List))),
+            ty::Map(..) => Some(Static(ErlModuleId::Prim(PrimTy::Map))),
 
             // An alias or parameter which survived normalization has not selected a
             // static dispatch owner. In particular, an opaque does not acquire a

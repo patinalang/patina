@@ -1,0 +1,45 @@
+pub fn list_param(xs: list) -> int { 0 }
+
+pub fn list_args(xs: list<int>) -> int { 0 }
+
+pub fn map_return() -> map<str, int> { #{} }
+
+pub fn map_let() { let m: map = #{}; }
+
+pub fn tuple_return() -> tuple<int, str> { (1, "one") }
+
+pub fn tuple_single(t: tuple<int>) -> int { 0 }
+
+pub fn tuple_bare(t: tuple) -> int { 0 }
+
+pub struct Fields {
+    pub xs: list,
+    pub pair: tuple<int, int>,
+}
+
+pub fn list_path(xs: [int]) -> int { list::len(xs) }
+
+pub fn list_path_args(xs: [int]) -> int { list::<int>::len(xs) }
+
+pub fn list_qualified(xs: [int]) -> Option<int> { <list>::get(xs, 0) }
+
+pub fn map_path(m: #{str => int}) -> Option<int> { map::get(m, "key") }
+
+pub fn map_path_args(m: #{str => int}) -> Option<int> {
+    map::<str, int>::get(m, "key")
+}
+
+pub fn list_function_value() -> int { let len = list::len; 0 }
+
+macro_rules! len_of { ($t:ident, $e:expr) => { $t::len($e) }; }
+
+pub fn list_through_macro(xs: [int]) -> int { len_of!(list, xs) }
+
+pub fn typo_not_suggested(xs: lis) -> int { 0 }
+
+#[allow(non_camel_case_types)]
+pub mod shadowed {
+    pub struct list(pub int);
+
+    pub fn wrap(n: int) -> list { list(n) }
+}

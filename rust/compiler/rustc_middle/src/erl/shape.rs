@@ -128,7 +128,7 @@ impl<'tcx> TyCtxt<'tcx> {
             ty::Tuple(tys) => ErlShape::Tuple { arity: tys.len(), tag: None },
             ty::FnDef(..) | ty::FnPtr(..) => ErlShape::Fun,
             ty::Adt(def, args) => self.erl_shape_of_adt(*def, args, visiting),
-            ty::Term | ty::Param(_) => ErlShape::Any,
+            ty::Term | ty::Param(_) | ty::Error(_) => ErlShape::Any,
             _ => unreachable!("not a thing in Patina"),
         }
     }

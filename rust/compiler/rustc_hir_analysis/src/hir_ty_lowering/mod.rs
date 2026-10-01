@@ -2057,6 +2057,108 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
         Ok((item_def_id, item_args))
     }
 
+    /// `list`, `map`, and `tuple` are reserved names. Suggest the list, map, or tuple type
+    /// syntax instead, with the type arguments written as in `list<int>`.
+    fn report_reserved_type_name(
+        &self,
+        prim_ty: hir::PrimTy,
+        path: &hir::Path<'tcx>,
+        hir_id: HirId,
+    ) -> ErrorGuaranteed {
+        let source_map = self.tcx().sess.source_map();
+        let args =
+            path.segments.last().and_then(|segment| segment.args).map_or(&[][..], |a| a.args);
+
+        let snippets: Option<Vec<String>> = args
+            .iter()
+            .map(|arg| match arg {
+                hir::GenericArg::Type(_) | hir::GenericArg::Infer(_) => {
+                    source_map.span_to_snippet(arg.span()).ok()
+                }
+                _ => None,
+            })
+            .collect();
+
+        // In a path, as in `list::len`, the types not given by the arguments are inferred,
+        // and the type needs angle brackets unless it has them already.
+        let qualified = self.value_path_qself(hir_id);
+        let in_path = qualified.is_some();
+        let needs_brackets = match qualified {
+            _ if path.span.from_expansion() => None,
+            Some((path_span, _)) if path_span.from_expansion() => None,
+            Some((path_span, qself_span)) => Some(path_span.lo() == qself_span.lo()),
+            None => Some(false),
+        };
+        let missing = |name: &'static str| if in_path { "_" } else { name };
+        let exact = Applicability::MachineApplicable;
+        let inferred =
+            if in_path && args.is_empty() { exact } else { Applicability::HasPlaceholders };
+
+        let (code, applicability) = match (prim_ty, snippets.as_deref()) {
+            (hir::PrimTy::List, Some([elem])) => (format!("[{elem}]"), exact),
+            (hir::PrimTy::Map, Some([key, value])) => (format!("#{{{key} => {value}}}"), exact),
+            (hir::PrimTy::Tuple, Some([elem])) => (format!("({elem},)"), exact),
+            (hir::PrimTy::Tuple, Some(elems)) if !elems.is_empty() => {
+                (format!("({})", elems.join(", ")), exact)
+            }
+            (hir::PrimTy::List, _) => (format!("[{}]", missing("T")), inferred),
+            (hir::PrimTy::Map, _) => {
+                (format!("#{{{} => {}}}", missing("K"), missing("V")), inferred)
+            }
+            (_, _) => ("(A, B)".to_owned(), Applicability::HasPlaceholders),
+        };
+
+        let syntax = match prim_ty {
+            hir::PrimTy::List => "[T]",
+            hir::PrimTy::Map => "#{K => V}",
+            _ => "(A, B)",
+        };
+
+        let name = prim_ty.name();
+        let suggestion_msg = format!("use the {name} type syntax");
+
+        let mut diag =
+            self.dcx().struct_span_err(path.span, format!("`{name}` is a reserved name"));
+        diag.note(format!("{name} types are written as `{syntax}`"));
+
+        match needs_brackets {
+            Some(true) => {
+                diag.span_suggestion_verbose(
+                    path.span,
+                    suggestion_msg,
+                    format!("<{code}>"),
+                    applicability,
+                );
+            }
+
+            Some(false) => {
+                diag.span_suggestion_verbose(path.span, suggestion_msg, code, applicability);
+            }
+
+            None => {}
+        }
+        diag.emit()
+    }
+
+    /// Some(span of the path, span of the type) if the type `hir_id` qualifies a path
+    /// in an expression or pattern.
+    fn value_path_qself(&self, hir_id: HirId) -> Option<(Span, Span)> {
+        let (qpath, span) = match self.tcx().parent_hir_node(hir_id) {
+            hir::Node::Expr(hir::Expr { kind: hir::ExprKind::Path(qpath), span, .. })
+            | hir::Node::PatExpr(hir::PatExpr {
+                kind: hir::PatExprKind::Path(qpath), span, ..
+            })
+            | hir::Node::Pat(hir::Pat {
+                kind: hir::PatKind::Struct(qpath, ..) | hir::PatKind::TupleStruct(qpath, ..),
+                span,
+                ..
+            }) => (qpath, *span),
+            _ => return None,
+        };
+        let hir::QPath::TypeRelative(qself, _) = qpath else { return None };
+        (qself.hir_id == hir_id).then_some((span, qself.span))
+    }
+
     pub fn prohibit_generic_args<'a>(
         &self,
         segments: impl Iterator<Item = &'a hir::PathSegment<'a>> + Clone,
@@ -2358,6 +2460,10 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                     path.segments.last().unwrap(),
                 )
             }
+            Res::PrimTy(prim_ty) if prim_ty.is_reserved() => {
+                assert_eq!(opt_self_ty, None);
+                Ty::new_error(tcx, self.report_reserved_type_name(prim_ty, path, hir_id))
+            }
             Res::PrimTy(prim_ty) => {
                 assert_eq!(opt_self_ty, None);
                 let _ = self.prohibit_generic_args(
@@ -2374,6 +2480,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                     hir::PrimTy::Bin => tcx.types.bin,
                     hir::PrimTy::Bits => tcx.types.bits,
                     hir::PrimTy::Int => tcx.types.int,
+                    hir::PrimTy::List | hir::PrimTy::Map | hir::PrimTy::Tuple => unreachable!(),
                 }
             }
             Res::Err => {

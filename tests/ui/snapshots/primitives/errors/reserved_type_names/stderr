@@ -1,0 +1,216 @@
+error[E0425]: cannot find type `lis` in this scope
+  --> tests/ui/src/primitives/errors/reserved_type_names.pt:69:31
+   |
+LL | pub fn typo_not_suggested(xs: lis) -> int {
+   |                               ^^^ not found in this scope
+
+error: `list` is a reserved name
+  --> tests/ui/src/primitives/errors/reserved_type_names.pt:1:23
+   |
+LL | pub fn list_param(xs: list) -> int {
+   |                       ^^^^
+   |
+   = note: list types are written as `[T]`
+help: use the list type syntax
+   |
+LL - pub fn list_param(xs: list) -> int {
+LL + pub fn list_param(xs: [T]) -> int {
+   |
+
+error: `list` is a reserved name
+  --> tests/ui/src/primitives/errors/reserved_type_names.pt:5:22
+   |
+LL | pub fn list_args(xs: list<int>) -> int {
+   |                      ^^^^^^^^^
+   |
+   = note: list types are written as `[T]`
+help: use the list type syntax
+   |
+LL - pub fn list_args(xs: list<int>) -> int {
+LL + pub fn list_args(xs: [int]) -> int {
+   |
+
+error: `map` is a reserved name
+  --> tests/ui/src/primitives/errors/reserved_type_names.pt:9:24
+   |
+LL | pub fn map_return() -> map<str, int> {
+   |                        ^^^^^^^^^^^^^
+   |
+   = note: map types are written as `#{K => V}`
+help: use the map type syntax
+   |
+LL - pub fn map_return() -> map<str, int> {
+LL + pub fn map_return() -> #{str => int} {
+   |
+
+error: `map` is a reserved name
+  --> tests/ui/src/primitives/errors/reserved_type_names.pt:14:12
+   |
+LL |     let m: map = #{};
+   |            ^^^
+   |
+   = note: map types are written as `#{K => V}`
+help: use the map type syntax
+   |
+LL -     let m: map = #{};
+LL +     let m: #{K => V} = #{};
+   |
+
+error: `tuple` is a reserved name
+  --> tests/ui/src/primitives/errors/reserved_type_names.pt:17:26
+   |
+LL | pub fn tuple_return() -> tuple<int, str> {
+   |                          ^^^^^^^^^^^^^^^
+   |
+   = note: tuple types are written as `(A, B)`
+help: use the tuple type syntax
+   |
+LL - pub fn tuple_return() -> tuple<int, str> {
+LL + pub fn tuple_return() -> (int, str) {
+   |
+
+error: `tuple` is a reserved name
+  --> tests/ui/src/primitives/errors/reserved_type_names.pt:21:24
+   |
+LL | pub fn tuple_single(t: tuple<int>) -> int {
+   |                        ^^^^^^^^^^
+   |
+   = note: tuple types are written as `(A, B)`
+help: use the tuple type syntax
+   |
+LL - pub fn tuple_single(t: tuple<int>) -> int {
+LL + pub fn tuple_single(t: (int,)) -> int {
+   |
+
+error: `tuple` is a reserved name
+  --> tests/ui/src/primitives/errors/reserved_type_names.pt:25:22
+   |
+LL | pub fn tuple_bare(t: tuple) -> int {
+   |                      ^^^^^
+   |
+   = note: tuple types are written as `(A, B)`
+help: use the tuple type syntax
+   |
+LL - pub fn tuple_bare(t: tuple) -> int {
+LL + pub fn tuple_bare(t: (A, B)) -> int {
+   |
+
+error: `list` is a reserved name
+  --> tests/ui/src/primitives/errors/reserved_type_names.pt:35:5
+   |
+LL |     list::len(xs)
+   |     ^^^^
+   |
+   = note: list types are written as `[T]`
+help: use the list type syntax
+   |
+LL -     list::len(xs)
+LL +     <[_]>::len(xs)
+   |
+
+error: `list` is a reserved name
+  --> tests/ui/src/primitives/errors/reserved_type_names.pt:39:5
+   |
+LL |     list::<int>::len(xs)
+   |     ^^^^^^^^^^^
+   |
+   = note: list types are written as `[T]`
+help: use the list type syntax
+   |
+LL -     list::<int>::len(xs)
+LL +     <[int]>::len(xs)
+   |
+
+error: `list` is a reserved name
+  --> tests/ui/src/primitives/errors/reserved_type_names.pt:43:6
+   |
+LL |     <list>::get(xs, 0)
+   |      ^^^^
+   |
+   = note: list types are written as `[T]`
+help: use the list type syntax
+   |
+LL -     <list>::get(xs, 0)
+LL +     <[_]>::get(xs, 0)
+   |
+
+error: `map` is a reserved name
+  --> tests/ui/src/primitives/errors/reserved_type_names.pt:47:5
+   |
+LL |     map::get(m, "key")
+   |     ^^^
+   |
+   = note: map types are written as `#{K => V}`
+help: use the map type syntax
+   |
+LL -     map::get(m, "key")
+LL +     <#{_ => _}>::get(m, "key")
+   |
+
+error: `map` is a reserved name
+  --> tests/ui/src/primitives/errors/reserved_type_names.pt:51:5
+   |
+LL |     map::<str, int>::get(m, "key")
+   |     ^^^^^^^^^^^^^^^
+   |
+   = note: map types are written as `#{K => V}`
+help: use the map type syntax
+   |
+LL -     map::<str, int>::get(m, "key")
+LL +     <#{str => int}>::get(m, "key")
+   |
+
+error: `list` is a reserved name
+  --> tests/ui/src/primitives/errors/reserved_type_names.pt:55:15
+   |
+LL |     let len = list::len;
+   |               ^^^^
+   |
+   = note: list types are written as `[T]`
+help: use the list type syntax
+   |
+LL -     let len = list::len;
+LL +     let len = <[_]>::len;
+   |
+
+error: `list` is a reserved name
+  --> tests/ui/src/primitives/errors/reserved_type_names.pt:61:9
+   |
+LL |         $t::len($e)
+   |         ^^
+...
+LL |     len_of!(list, xs)
+   |     ----------------- in this macro invocation
+   |
+   = note: list types are written as `[T]`
+   = note: this error originates in the macro `len_of` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: `list` is a reserved name
+  --> tests/ui/src/primitives/errors/reserved_type_names.pt:30:13
+   |
+LL |     pub xs: list,
+   |             ^^^^
+   |
+   = note: list types are written as `[T]`
+help: use the list type syntax
+   |
+LL -     pub xs: list,
+LL +     pub xs: [T],
+   |
+
+error: `tuple` is a reserved name
+  --> tests/ui/src/primitives/errors/reserved_type_names.pt:31:15
+   |
+LL |     pub pair: tuple<int, int>,
+   |               ^^^^^^^^^^^^^^^
+   |
+   = note: tuple types are written as `(A, B)`
+help: use the tuple type syntax
+   |
+LL -     pub pair: tuple<int, int>,
+LL +     pub pair: (int, int),
+   |
+
+error: aborting due to 17 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

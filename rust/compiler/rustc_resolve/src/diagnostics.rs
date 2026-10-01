@@ -1317,7 +1317,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 Scope::BuiltinTypes => {
                     suggestions.extend(PrimTy::ALL.iter().filter_map(|prim_ty| {
                         let res = Res::PrimTy(*prim_ty);
-                        filter_fn(res)
+                        (!prim_ty.is_reserved() && filter_fn(res))
                             .then_some(TypoSuggestion::typo_from_name(prim_ty.name(), res))
                     }))
                 }

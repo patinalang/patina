@@ -1,0 +1,101 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+fn list_param(xs: list) -> int ({ (0 as int) } as int)
+
+fn list_args(xs: list<int>) -> int ({ (0 as int) } as int)
+
+fn map_return()
+    ->
+        map<str,
+        int> ({ (#{} as #{{type error} => {type error}}) } as {type error})
+
+fn map_let() ({ let m: map = (#{} as #{{type error} => {type error}}); } as
+    ())
+
+fn tuple_return()
+    ->
+        tuple<int,
+        str> ({ (((1 as int), ("one" as str)) as (int, str)) } as
+    {type error})
+
+fn tuple_single(t: tuple<int>) -> int ({ (0 as int) } as int)
+
+fn tuple_bare(t: tuple) -> int ({ (0 as int) } as int)
+
+struct Fields {
+    xs: list,
+    pair: tuple<int, int>,
+}
+
+fn list_path(xs: [int])
+    ->
+        int ({ ((list::len as {type error})((xs as [int])) as {type error}) }
+    as {type error})
+
+fn list_path_args(xs: [int])
+    ->
+        int ({
+    ((list<int>::len as {type error})((xs as [int])) as {type error})
+} as {type error})
+
+fn list_qualified(xs: [int])
+    ->
+        Option<int> ({
+    ((list::get as {type error})((xs as [int]), (0 as int)) as {type error})
+} as {type error})
+
+fn map_path(m: #{str => int})
+    ->
+        Option<int> ({
+    ((map::get as {type error})((m as #{str => int}), ("key" as str)) as
+        {type error})
+} as {type error})
+
+fn map_path_args(m: #{str => int})
+    ->
+        Option<int> ({
+    ((map<str, int>::get as
+            {type error})((m as #{str => int}), ("key" as str)) as
+        {type error})
+} as {type error})
+
+fn list_function_value()
+    -> int ({ let len = (list::len as {type error}); (0 as int) } as int)
+
+macro_rules! len_of { ($t:ident, $e:expr) => { $t::len($e) }; }
+
+fn list_through_macro(xs: [int])
+    ->
+        int ({ ((list::len as {type error})((xs as [int])) as {type error}) }
+    as {type error})
+
+fn typo_not_suggested(xs: lis) -> int ({ (0 as int) } as int)
+
+#[allow(non_camel_case_types)]
+mod shadowed {
+    struct list(int);
+
+    fn wrap(n: int)
+        ->
+            list ({
+        ((list as fn(int) -> shadowed::list {shadowed::list})((n as int)) as
+            shadowed::list)
+    } as shadowed::list)
+}

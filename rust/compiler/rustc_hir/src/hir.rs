@@ -3760,11 +3760,14 @@ pub enum PrimTy {
     Bin,
     Bits,
     Int,
+    List,
+    Map,
+    Tuple,
 }
 
 impl PrimTy {
     /// All of the primitive types
-    pub const ALL: [Self; 9] = [
+    pub const ALL: [Self; 12] = [
         // any changes here should also be reflected in `PrimTy::from_name`
         Self::Float,
         Self::Bool,
@@ -3775,6 +3778,9 @@ impl PrimTy {
         Self::Bin,
         Self::Bits,
         Self::Int,
+        Self::List,
+        Self::Map,
+        Self::Tuple,
     ];
 
     /// Like [`PrimTy::name`], but returns a &str instead of a symbol.
@@ -3791,6 +3797,9 @@ impl PrimTy {
             PrimTy::Bin => "bin",
             PrimTy::Bits => "bits",
             PrimTy::Int => "int",
+            PrimTy::List => "list",
+            PrimTy::Map => "map",
+            PrimTy::Tuple => "tuple",
         }
     }
 
@@ -3805,7 +3814,15 @@ impl PrimTy {
             PrimTy::Bin => sym::bin,
             PrimTy::Bits => sym::bits,
             PrimTy::Int => sym::int,
+            PrimTy::List => sym::list,
+            PrimTy::Map => sym::map,
+            PrimTy::Tuple => sym::tuple,
         }
+    }
+
+    /// Whether the name is reserved: it resolves only to report its use as an error.
+    pub fn is_reserved(self) -> bool {
+        matches!(self, PrimTy::List | PrimTy::Map | PrimTy::Tuple)
     }
 
     /// Returns the matching `PrimTy` for a `Symbol` such as "str" or "int".
@@ -3822,6 +3839,9 @@ impl PrimTy {
             sym::bin => Self::Bin,
             sym::bits => Self::Bits,
             sym::int => Self::Int,
+            sym::list => Self::List,
+            sym::map => Self::Map,
+            sym::tuple => Self::Tuple,
             _ => return None,
         };
         Some(ty)
