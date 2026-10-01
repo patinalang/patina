@@ -7,10 +7,6 @@ defmodule EnumUse01Test do
   alias Patina.EnumUse01.Role
   alias Patina.EnumUse01.Stage
 
-  setup_all do
-    Code.ensure_all_loaded!([Stage, Role])
-  end
-
   test "main matches imported enum variants" do
     assert """
            Beginners are starting their learning journey!
@@ -19,6 +15,8 @@ defmodule EnumUse01Test do
   end
 
   test "unit variants do not emit record definitions" do
+    Code.ensure_all_loaded!([Stage, Role])
+
     Enum.each(
       [{Stage, :Beginner}, {Stage, :Advanced}, {Role, :Student}, {Role, :Teacher}],
       fn {module, variant} ->

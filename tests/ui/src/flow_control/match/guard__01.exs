@@ -6,10 +6,6 @@ defmodule Guard01Test do
 
   alias Patina.Guard01.Temperature
 
-  setup_all do
-    Code.ensure_all_loaded!([Temperature])
-  end
-
   test "main selects the guarded enum arm" do
     assert """
            35C is above 30 Celsius
@@ -17,6 +13,8 @@ defmodule Guard01Test do
   end
 
   test "conflicting payload variants preserve the first transparent shape" do
+    Code.ensure_loaded!(Temperature)
+
     assert_raise ArgumentError, fn -> :records.get_definition(Temperature, :Celsius) end
     assert {%{is_exported: true}, [:"0"]} = :records.get_definition(Temperature, :Fahrenheit)
 

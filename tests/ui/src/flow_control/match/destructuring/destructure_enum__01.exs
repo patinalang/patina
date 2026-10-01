@@ -6,10 +6,6 @@ defmodule DestructureEnum01Test do
 
   alias Patina.DestructureEnum01.Color
 
-  setup_all do
-    Code.ensure_all_loaded!([Color])
-  end
-
   test "main destructures the RGB enum variant" do
     assert """
            What color is it?
@@ -18,6 +14,8 @@ defmodule DestructureEnum01Test do
   end
 
   test "enum module exports its variant record definitions" do
+    Code.ensure_loaded!(Color)
+
     Enum.each(
       [
         {:RGB, [:"0", :"1", :"2"]},

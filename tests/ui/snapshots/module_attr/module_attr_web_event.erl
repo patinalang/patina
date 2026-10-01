@@ -8,6 +8,9 @@
 
 -export_record(['Click']).
 
--export([]).
+-export(['$patina_constructor__Click'/2]).
 
 -record #'Click'{x, y}.
+
+'$patina_constructor__Click'(_x@0_0, _y@1_0) ->
+    #'Click'{x = _x@0_0, y = _y@1_0}.

@@ -8,6 +8,9 @@
 
 -export_record(['Cons']).
 
--export([]).
+-export(['$patina_constructor__Cons'/2]).
 
 -record #'Cons'{'0', '1'}.
+
+'$patina_constructor__Cons'(_0@0_0, _1@1_0) ->
+    #'Cons'{'0' = _0@0_0, '1' = _1@1_0}.

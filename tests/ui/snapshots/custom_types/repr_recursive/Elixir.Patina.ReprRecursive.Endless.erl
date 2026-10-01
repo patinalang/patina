@@ -9,7 +9,8 @@
 
 -export_record(['Endless']).
 
--export(['__info__'/1]).
+-export(['__info__'/1,
+         '$patina_constructor__Endless'/1]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,3 +26,6 @@
 '__info__'(Key) -> module_info(Key).
 
 -record #'Endless'{'0'}.
+
+'$patina_constructor__Endless'(_0@0_0) ->
+    #'Endless'{'0' = _0@0_0}.

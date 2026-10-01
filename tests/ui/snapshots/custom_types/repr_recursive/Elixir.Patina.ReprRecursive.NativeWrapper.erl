@@ -9,7 +9,8 @@
 
 -export_record(['NativeWrapper']).
 
--export(['__info__'/1]).
+-export(['__info__'/1,
+         '$patina_constructor__NativeWrapper'/1]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,3 +26,6 @@
 '__info__'(Key) -> module_info(Key).
 
 -record #'NativeWrapper'{'0'}.
+
+'$patina_constructor__NativeWrapper'(_0@0_0) ->
+    #'NativeWrapper'{'0' = _0@0_0}.

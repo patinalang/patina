@@ -27,9 +27,9 @@
 
 main() ->
     _color@0_0 =
-        #'Elixir.Patina.DestructureEnum01.Color':'RGB'{'0' =
-                                                           122,
-                                                       '1' = 17, '2' = 40},
+        'Elixir.Patina.DestructureEnum01.Color':'$patina_constructor__RGB'(122,
+                                                                           17,
+                                                                           40),
     begin
         io:put_chars([[<<"What color is it?"/utf8>>]]),
         io:nl(),

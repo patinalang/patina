@@ -9,11 +9,6 @@ defmodule Structs01Test do
   alias Patina.Structs01.Pair
   alias Patina.Structs01.Rectangle
 
-  setup_all do
-    Code.ensure_all_loaded!([Person, Point, Pair, Rectangle])
-    :ok
-  end
-
   test "main debug-prints Person struct" do
     assert capture_io(fn -> Patina.Structs01.main() end) =~ ~S"""
            #'Elixir.Patina.Structs01.Person':'Person'{name = <<"Peter">>,age = 27}
@@ -30,9 +25,12 @@ defmodule Structs01Test do
   end
 
   test "multi-field structs export native record definitions" do
+    Code.ensure_all_loaded!([Person, Point, Pair, Rectangle])
+
     assert {%{is_exported: true}, [:name, :age]} = :records.get_definition(Person, :Person)
     assert {%{is_exported: true}, [:x, :y]} = :records.get_definition(Point, :Point)
     assert {%{is_exported: true}, [:"0", :"1"]} = :records.get_definition(Pair, :Pair)
+
     assert {%{is_exported: true}, [:top_left, :bottom_right]} =
              :records.get_definition(Rectangle, :Rectangle)
   end

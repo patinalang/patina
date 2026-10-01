@@ -4,26 +4,6 @@ defmodule ReprRecursiveTest do
   use ExUnit.Case
   alias Patina.ReprRecursive
 
-  setup_all do
-    Code.ensure_all_loaded!([
-      ReprRecursive.List,
-      ReprRecursive.Tree,
-      ReprRecursive.Chain,
-      ReprRecursive.Left,
-      ReprRecursive.Right,
-      ReprRecursive.RightFirst,
-      ReprRecursive.LeftLater,
-      ReprRecursive.Generic,
-      ReprRecursive.Growing,
-      ReprRecursive.RecordChain,
-      ReprRecursive.OverriddenChain,
-      ReprRecursive.Outer,
-      ReprRecursive.Inner,
-      ReprRecursive.NativeWrapper
-    ])
-
-    :ok
-  end
 
   test "direct recursive constructors support construction and matching" do
     assert 3 == ReprRecursive.sum(ReprRecursive.list())

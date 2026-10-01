@@ -9,7 +9,7 @@
 
 -export_record(['Outer']).
 
--export(['__info__'/1]).
+-export(['__info__'/1, '$patina_constructor__Outer'/1]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,3 +25,6 @@
 '__info__'(Key) -> module_info(Key).
 
 -record #'Outer'{'0'}.
+
+'$patina_constructor__Outer'(_0@0_0) ->
+    #'Outer'{'0' = _0@0_0}.

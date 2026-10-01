@@ -6,11 +6,9 @@ defmodule Parameters02Test do
 
   alias Patina.Parameters02.MathOp
 
-  setup_all do
-    Code.ensure_all_loaded!([MathOp])
-  end
-
   test "unit variants do not emit record definitions" do
+    Code.ensure_loaded!(MathOp)
+
     Enum.each([:Add, :Mul], fn variant ->
       assert_raise ArgumentError, fn -> :records.get_definition(MathOp, variant) end
     end)

@@ -106,9 +106,7 @@ open_text(_value@0_0) -> _value@0_0.
 open_tagged(_value@0_0) -> {tagged, _value@0_0}.
 
 open_record(_value@0_0) ->
-    #'Elixir.Patina.ReprTransparent.NativeValue':'NativeValue'{value
-                                                                   =
-                                                                   _value@0_0}.
+    'Elixir.Patina.ReprTransparent.NativeValue':'$patina_constructor__NativeValue'(_value@0_0).
 
 classify_open(_value@0_0) ->
     case _value@0_0 of

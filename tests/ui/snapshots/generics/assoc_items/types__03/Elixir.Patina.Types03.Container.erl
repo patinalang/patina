@@ -10,6 +10,7 @@
 -export_record(['Container']).
 
 -export(['__info__'/1,
+         '$patina_constructor__Container'/2,
          'Types03::Contains::type::A'/1,
          'Types03::Contains::type::B'/1,
          'Types03::Contains::contains'/4,
@@ -30,6 +31,9 @@
 '__info__'(Key) -> module_info(Key).
 
 -record #'Container'{'0', '1'}.
+
+'$patina_constructor__Container'(_0@0_0, _1@1_0) ->
+    #'Container'{'0' = _0@0_0, '1' = _1@1_0}.
 
 'Types03::Contains::type::A'(_witness@0_0 =
                                  {'impl Types03::Contains for Types03::Container',

@@ -38,10 +38,8 @@ main() ->
     _number_1@0_0 = 3,
     _number_2@1_0 = 10,
     _container@2_0 =
-        #'Elixir.Patina.TheProblem01.Container':'Container'{'0'
-                                                                = _number_1@0_0,
-                                                            '1' =
-                                                                _number_2@1_0},
+        'Elixir.Patina.TheProblem01.Container':'$patina_constructor__Container'(_number_1@0_0,
+                                                                                _number_2@1_0),
     begin
         io:put_chars([[<<"Does container contain "/utf8>>,
                        io_lib:format("~ktp", [_number_1@0_0]),

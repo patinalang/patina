@@ -29,8 +29,9 @@ total_area({_witness@0_0}, _t@1_0) ->
                                                           _t@1_0).
 
 main() ->
-    _p@0_0 = #'Elixir.Patina.Dispatch.Point':'Point'{x = 3,
-                                                     y = 4},
+    _p@0_0 =
+        'Elixir.Patina.Dispatch.Point':'$patina_constructor__Point'(3,
+                                                                    4),
     begin
         io:put_chars([[io_lib:format("~ktp",
                                      [total_area({{'impl Dispatch::Area for Dispatch::Point',

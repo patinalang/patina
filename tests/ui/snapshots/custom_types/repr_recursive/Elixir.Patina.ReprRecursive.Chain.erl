@@ -9,6 +9,9 @@
 
 -export_record(['Next']).
 
--export([]).
+-export(['$patina_constructor__Next'/1]).
 
 -record #'Next'{'0'}.
+
+'$patina_constructor__Next'(_0@0_0) ->
+    #'Next'{'0' = _0@0_0}.

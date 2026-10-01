@@ -41,6 +41,5 @@ term_into_struct(_point@0_0) ->
     _x@1_0 + _y@2_0.
 
 round_trip() ->
-    term_into_struct(#'Elixir.Patina.CastUnchecked.Point':'Point'{x
-                                                                      = 1,
-                                                                  y = 2}).
+    term_into_struct('Elixir.Patina.CastUnchecked.Point':'$patina_constructor__Point'(1,
+                                                                                      2)).

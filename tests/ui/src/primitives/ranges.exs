@@ -5,11 +5,6 @@ defmodule RangesTest do
 
   alias Patina.Ranges
 
-  setup_all do
-    Code.ensure_all_loaded!([Patina.Core.Range, Patina.Core.RangeInclusive])
-    :ok
-  end
-
   test "range bounds are stored as given" do
     assert Ranges.half_open_bounds() == {1, 101}
     assert Ranges.closed_bounds() == {1, 100}

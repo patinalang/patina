@@ -4,11 +4,6 @@ defmodule DestructureStructures01Test do
   use ExUnit.Case
   import ExUnit.CaptureIO
 
-  setup_all do
-    Code.ensure_loaded!(:"Elixir.Patina.DestructureStructures01.main.Foo")
-    :ok
-  end
-
   test "main destructures structs in match and let patterns" do
     assert """
            First of x is 1, b = 2,  y = 3 

@@ -1,5 +1,6 @@
 use rustc_abi::{FieldIdx, VariantIdx};
 use rustc_data_structures::smallvec::SmallVec;
+use rustc_hir::def::DefKind;
 use rustc_hir::def_id::DefId;
 use rustc_middle::erl::shape::ErlShape;
 use rustc_middle::erl::{
@@ -11,6 +12,7 @@ use rustc_middle::ty::{self, AdtDef, VariantDef};
 use rustc_span::{Ident, Span, Symbol, kw, sym};
 
 use crate::compile::translate::body::{BodyCx, GuardedPattern, PatternInput, Patterns};
+use crate::compile::translate::record_constructor_name;
 use crate::erlang::abstract_format as eaf;
 use crate::{not_implemented, span_fatal};
 
@@ -343,12 +345,37 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             let field_def = &variant.fields[field.name];
             let value = self.translate_expr(field.expr);
             let ident = Ident::new(field_def.name, self.thir[field.expr].span);
-            (ident, value)
+            (field.name, ident, value)
         });
 
-        match base {
-            None => afb.expr_record_create(expr.span, module, record_name, fields),
-            Some(base) => afb.expr_record_update(expr.span, base, module, record_name, fields),
+        match (base, module) {
+            (None, Some(module)) => {
+                // Use a generated remote constructor function.
+                // We do this because crating a record requires the defining module to be loaded,
+                // and unlike functions, it does not autoload on use.
+                // The constructor takes every field, in declaration order.
+                let mut fields = fields.into_iter().collect::<SmallVec<[_; 8]>>();
+                fields.sort_by_key(|&(index, ..)| index);
+                afb.expr_remote_call(
+                    expr.span,
+                    afb.expr_atom(expr.span, module),
+                    afb.expr_atom(expr.span, record_constructor_name(record_name)),
+                    fields.into_iter().map(|(_, _, value)| value),
+                )
+            }
+            (None, None) => afb.expr_record_create(
+                expr.span,
+                None,
+                record_name,
+                fields.map(|(_, ident, value)| (ident, value)),
+            ),
+            (Some(base), module) => afb.expr_record_update(
+                expr.span,
+                base,
+                module,
+                record_name,
+                fields.map(|(_, ident, value)| (ident, value)),
+            ),
         }
     }
 
@@ -500,6 +527,11 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
     pub(super) fn record_module_for_access(&self, record_module: Symbol) -> Option<Symbol> {
         let tcx = self.tcx();
+
+        if matches!(tcx.def_kind(self.owner), DefKind::Const { .. } | DefKind::AssocConst { .. }) {
+            return Some(record_module);
+        }
+
         let current_module = tcx
             .erl_definition_module(self.owner.to_def_id())
             .map(|module_id| tcx.erl_module_name(module_id));

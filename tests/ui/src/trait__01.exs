@@ -8,11 +8,6 @@ defmodule Trait01Test do
 
   @sheep_witness {:"impl Trait01::Animal for Trait01::Sheep", Sheep}
 
-  setup_all do
-    Code.ensure_loaded!(Sheep)
-    :ok
-  end
-
   defp dolly, do: Sheep."Trait01::Animal::new"(@sheep_witness, "Dolly")
 
   defp sheared_dolly do

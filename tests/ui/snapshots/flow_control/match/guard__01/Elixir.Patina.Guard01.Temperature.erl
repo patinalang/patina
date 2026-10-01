@@ -9,6 +9,9 @@
 
 -export_record(['Fahrenheit']).
 
--export([]).
+-export(['$patina_constructor__Fahrenheit'/1]).
 
 -record #'Fahrenheit'{'0'}.
+
+'$patina_constructor__Fahrenheit'(_0@0_0) ->
+    #'Fahrenheit'{'0' = _0@0_0}.

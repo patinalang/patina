@@ -8,7 +8,9 @@
 
 -export_record(['Pair']).
 
--export(['__info__'/1, len/1]).
+-export(['__info__'/1,
+         '$patina_constructor__Pair'/2,
+         len/1]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -24,6 +26,9 @@
 '__info__'(Key) -> module_info(Key).
 
 -record #'Pair'{a, b}.
+
+'$patina_constructor__Pair'(_a@0_0, _b@1_0) ->
+    #'Pair'{a = _a@0_0, b = _b@1_0}.
 
 len(_self@0_0) ->
     begin

@@ -9,6 +9,7 @@
 -export_record(['Sheep']).
 
 -export(['__info__'/1,
+         '$patina_constructor__Sheep'/2,
          shear/1,
          'Trait01::Animal::new'/2,
          'Trait01::Animal::name'/2,
@@ -29,6 +30,9 @@
 '__info__'(Key) -> module_info(Key).
 
 -record #'Sheep'{naked, name}.
+
+'$patina_constructor__Sheep'(_naked@0_0, _name@1_0) ->
+    #'Sheep'{naked = _naked@0_0, name = _name@1_0}.
 
 is_naked(_self@0_0) -> _self@0_0#'Sheep'.naked.
 

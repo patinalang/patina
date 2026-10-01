@@ -11,6 +11,7 @@
 -export_record(['Container']).
 
 -export(['__info__'/1,
+         '$patina_constructor__Container'/2,
          'TheProblem01::Contains::contains'/4,
          'TheProblem01::Contains::first'/2,
          'TheProblem01::Contains::last'/2]).
@@ -29,6 +30,9 @@
 '__info__'(Key) -> module_info(Key).
 
 -record #'Container'{'0', '1'}.
+
+'$patina_constructor__Container'(_0@0_0, _1@1_0) ->
+    #'Container'{'0' = _0@0_0, '1' = _1@1_0}.
 
 'TheProblem01::Contains::contains'(_witness@0_0 =
                                        {'impl TheProblem01::Contains<int, int> for TheProblem01::Container',

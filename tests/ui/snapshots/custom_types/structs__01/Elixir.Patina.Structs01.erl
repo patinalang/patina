@@ -27,20 +27,19 @@ main() ->
     _name@0_0 = <<"Peter"/utf8>>,
     _age@1_0 = 27,
     _peter@2_0 =
-        #'Elixir.Patina.Structs01.Person':'Person'{name =
-                                                       _name@0_0,
-                                                   age = _age@1_0},
+        'Elixir.Patina.Structs01.Person':'$patina_constructor__Person'(_name@0_0,
+                                                                       _age@1_0),
     begin
         io:put_chars([[io_lib:format("~ktp", [_peter@2_0])]]),
         io:nl(),
         {}
     end,
-    _point@3_0 = #'Elixir.Patina.Structs01.Point':'Point'{x
-                                                              = 5.2,
-                                                          y = 4.0e-1},
+    _point@3_0 =
+        'Elixir.Patina.Structs01.Point':'$patina_constructor__Point'(5.2,
+                                                                     4.0e-1),
     _another_point@4_0 =
-        #'Elixir.Patina.Structs01.Point':'Point'{x = 1.03e+1,
-                                                 y = 2.0e-1},
+        'Elixir.Patina.Structs01.Point':'$patina_constructor__Point'(1.03e+1,
+                                                                     2.0e-1),
     begin
         io:put_chars([[<<"point coordinates: ("/utf8>>,
                        io_lib:format("~ktp",
@@ -72,20 +71,13 @@ main() ->
                                              y = _top_edge@7_0} =
         _point@3_0,
     __rectangle@8_0 =
-        #'Elixir.Patina.Structs01.Rectangle':'Rectangle'{top_left
-                                                             =
-                                                             #'Elixir.Patina.Structs01.Point':'Point'{x
-                                                                                                          =
-                                                                                                          _left_edge@6_0,
-                                                                                                      y
-                                                                                                          =
-                                                                                                          _top_edge@7_0},
-                                                         bottom_right =
-                                                             _bottom_right@5_0},
+        'Elixir.Patina.Structs01.Rectangle':'$patina_constructor__Rectangle'('Elixir.Patina.Structs01.Point':'$patina_constructor__Point'(_left_edge@6_0,
+                                                                                                                                          _top_edge@7_0),
+                                                                             _bottom_right@5_0),
     __unit@9_0 = 'Elixir.Patina.Structs01.Unit',
-    _pair@10_0 = #'Elixir.Patina.Structs01.Pair':'Pair'{'0'
-                                                            = 1,
-                                                        '1' = 1.0e-1},
+    _pair@10_0 =
+        'Elixir.Patina.Structs01.Pair':'$patina_constructor__Pair'(1,
+                                                                   1.0e-1),
     begin
         io:put_chars([[<<"pair contains "/utf8>>,
                        io_lib:format("~ktp",

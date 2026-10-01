@@ -9,7 +9,8 @@
 
 -export_record(['Record']).
 
--export(['__info__'/1]).
+-export(['__info__'/1,
+         '$patina_constructor__Record'/2]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,3 +26,6 @@
 '__info__'(Key) -> module_info(Key).
 
 -record #'Record'{value, label}.
+
+'$patina_constructor__Record'(_value@0_0, _label@1_0) ->
+    #'Record'{value = _value@0_0, label = _label@1_0}.

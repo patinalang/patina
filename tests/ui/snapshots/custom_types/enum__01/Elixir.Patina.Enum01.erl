@@ -62,9 +62,9 @@ inspect(_event@0_0) ->
 main() ->
     _pressed@0_0 = $x,
     _pasted@1_0 = <<"my text"/utf8>>,
-    _click@2_0 = #'Elixir.Patina.Enum01.WebEvent':'Click'{x
-                                                              = 20,
-                                                          y = 80},
+    _click@2_0 =
+        'Elixir.Patina.Enum01.WebEvent':'$patina_constructor__Click'(20,
+                                                                     80),
     _load@3_0 = 'Elixir.Patina.Enum01.WebEvent.PageLoad',
     _unload@4_0 =
         'Elixir.Patina.Enum01.WebEvent.PageUnload',

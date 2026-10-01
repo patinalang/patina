@@ -10,23 +10,17 @@ defmodule ReprNativeRecordTest do
   alias Patina.ReprNativeRecord.NativeRecordStruct
   alias Patina.ReprNativeRecord.WholeEnum
 
-  setup_all do
-    Code.ensure_all_loaded!([
-      ElixirUnit,
-      MixedEnum,
-      NativeRecordPair,
-      NativeRecordStruct,
-      WholeEnum
-    ])
-  end
-
   test "native_record is inherited by unit variants" do
+    Code.ensure_loaded!(WholeEnum)
+
     assert {%{is_exported: true}, []} = :records.get_definition(WholeEnum, :Unit)
 
     assert [] = :records.get_field_names(ReprNativeRecord.inherited_unit())
   end
 
   test "a variant-level native_record overrides the default atom representation" do
+    Code.ensure_loaded!(MixedEnum)
+
     assert_raise ArgumentError, fn -> :records.get_definition(MixedEnum, :AtomUnit) end
     assert {%{is_exported: true}, []} = :records.get_definition(MixedEnum, :RecordUnit)
 

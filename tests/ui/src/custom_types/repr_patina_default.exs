@@ -18,21 +18,6 @@ defmodule ReprPatinaDefaultTest do
     WrapperConflict
   }
 
-  setup_all do
-    Code.ensure_all_loaded!([
-      Greedy,
-      Large,
-      LaterExplicit,
-      MultipleOpen,
-      Override,
-      Record,
-      ReservedWrapper,
-      Small,
-      WrapperConflict
-    ])
-
-    :ok
-  end
 
   test "fieldless structs support atom representation" do
     assert {ReprPatinaDefault.AtomUnit, ReprPatinaDefault.AtomBraced,

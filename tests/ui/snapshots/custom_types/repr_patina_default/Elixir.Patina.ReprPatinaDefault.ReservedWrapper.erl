@@ -9,6 +9,9 @@
 
 -export_record([open]).
 
--export([]).
+-export(['$patina_constructor__open'/1]).
 
 -record #open{'0'}.
+
+'$patina_constructor__open'(_0@0_0) ->
+    #open{'0' = _0@0_0}.

@@ -27,9 +27,9 @@
 
 main() ->
     _foo@0_0 =
-        #'Elixir.Patina.DestructureStructures01.main.Foo':'Foo'{x
-                                                                    = {1, 2},
-                                                                y = 3},
+        'Elixir.Patina.DestructureStructures01.main.Foo':'$patina_constructor__Foo'({1,
+                                                                                     2},
+                                                                                    3),
     case _foo@0_0 of
         #'Elixir.Patina.DestructureStructures01.main.Foo':'Foo'{x
                                                                     =
@@ -59,9 +59,9 @@ main() ->
             {}
     end,
     _faa@5_0 =
-        #'Elixir.Patina.DestructureStructures01.main.Foo':'Foo'{x
-                                                                    = {1, 2},
-                                                                y = 3},
+        'Elixir.Patina.DestructureStructures01.main.Foo':'$patina_constructor__Foo'({1,
+                                                                                     2},
+                                                                                    3),
     #'Elixir.Patina.DestructureStructures01.main.Foo':'Foo'{x
                                                                 = _x0@6_0,
                                                             y = _y0@7_0} =

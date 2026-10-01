@@ -7,10 +7,6 @@ defmodule TermMatchTest do
   alias Patina.TermMatch.ElixirPoint
   alias Patina.TermMatch.Point
 
-  setup_all do
-    Code.ensure_all_loaded!([Point, ElixirPoint])
-  end
-
   test "safe term patterns destructure BEAM values" do
     assert TermMatch.literals(nil) == 1
     assert TermMatch.literals(1) == 2

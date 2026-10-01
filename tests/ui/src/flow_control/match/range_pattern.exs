@@ -6,10 +6,6 @@ defmodule RangePatternTest do
   alias Patina.RangePattern
   alias Patina.RangePattern.Number
 
-  setup_all do
-    Code.ensure_all_loaded!([Number])
-  end
-
   test "integer ranges honor inclusive, exclusive, negative, and open bounds" do
     assert RangePattern.classify_int(-11) == 1
     assert RangePattern.classify_int(-10) == 2

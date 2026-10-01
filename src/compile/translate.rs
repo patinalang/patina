@@ -451,6 +451,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
 
             parts.forms.push(self.afb.native_record_attr(item.span, repr.tag, variant_fields));
             record_exports.push(repr.tag);
+            self.push_record_constructor(&mut parts, variant.span, repr.tag, variant.data);
         }
 
         self.collect_impl_fns(ErlModuleId::Adt(def_id.to_def_id()), &mut parts);
@@ -493,6 +494,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                     .map(|field| self.afb.record_field_decl(field.span, field.ident, None));
 
                 parts.forms.push(self.afb.native_record_attr(span, repr.tag, fields));
+                self.push_record_constructor(&mut parts, span, repr.tag, variant_data);
             }
 
             // These variants don't implement anything in the struct's module.
@@ -503,6 +505,38 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         self.collect_impl_fns(ErlModuleId::Adt(def_id.to_def_id()), &mut parts);
 
         parts
+    }
+
+    /// Emits the exported constructor of a native record declared in this module:
+    /// `'$patina_constructor__Tag'(F_1, ..., F_k) -> #'Tag'{f_1 = F_1, ..., f_k = F_k}`.
+    fn push_record_constructor(
+        &self,
+        parts: &mut ModuleParts<'arena>,
+        span: Span,
+        tag: Symbol,
+        variant_data: VariantData<'tcx>,
+    ) {
+        let mut scopes = Scopes::new();
+
+        let vars = variant_data
+            .fields()
+            .iter()
+            .map(|field| (field, scopes.fresh_var(field.ident.name).erl_name))
+            .collect::<SmallVec<[_; 4]>>();
+
+        let params = vars.iter().map(|&(field, var)| self.afb.pat_var(field.span, var));
+        let record = self.afb.expr_record_create(
+            span,
+            None,
+            tag,
+            vars.iter().map(|&(field, var)| (field.ident, self.afb.expr_var(field.span, var))),
+        );
+
+        let name = record_constructor_name(tag);
+        let arity = vars.len() as u32;
+        let clause = self.afb.clause(span, params, None, record);
+        self.push_function(parts, span, self.afb.function(span, name, arity, [clause]));
+        parts.exports.push((name, arity));
     }
 
     fn collect_impl_fns(&self, module_id: ErlModuleId, parts: &mut ModuleParts<'arena>) {
@@ -673,4 +707,8 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         self.collect_impl_fns(module_id, &mut parts);
         self.assemble_module(span, mod_name, [], parts)
     }
+}
+
+fn record_constructor_name(tag: Symbol) -> Symbol {
+    Symbol::intern(&format!("$patina_constructor__{tag}"))
 }

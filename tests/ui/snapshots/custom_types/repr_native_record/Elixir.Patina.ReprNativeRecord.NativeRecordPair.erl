@@ -9,7 +9,8 @@
 
 -export_record(['NativeRecordPair']).
 
--export(['__info__'/1]).
+-export(['__info__'/1,
+         '$patina_constructor__NativeRecordPair'/2]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,3 +26,7 @@
 '__info__'(Key) -> module_info(Key).
 
 -record #'NativeRecordPair'{'0', '1'}.
+
+'$patina_constructor__NativeRecordPair'(_0@0_0,
+                                        _1@1_0) ->
+    #'NativeRecordPair'{'0' = _0@0_0, '1' = _1@1_0}.

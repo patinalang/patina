@@ -9,6 +9,9 @@
 
 -export_record(['Inferred']).
 
--export([]).
+-export(['$patina_constructor__Inferred'/1]).
 
 -record #'Inferred'{'0'}.
+
+'$patina_constructor__Inferred'(_0@0_0) ->
+    #'Inferred'{'0' = _0@0_0}.

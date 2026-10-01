@@ -7,11 +7,6 @@ defmodule ReprTransparentTest do
   alias Patina.ReprTransparent.NativeValue
   alias Patina.ReprTransparent.Point
 
-  setup_all do
-    Code.ensure_loaded!(NativeValue)
-    :ok
-  end
-
   test "transparent structs are represented by their payload" do
     assert 2.345 = ReprTransparent.celsius(2.345)
     assert 2.345 = ReprTransparent.degrees(2.345)

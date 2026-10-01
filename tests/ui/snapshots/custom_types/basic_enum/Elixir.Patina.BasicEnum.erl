@@ -26,12 +26,11 @@
 main() ->
     _x@0_0 = 'Elixir.Patina.BasicEnum.BasicEnum.Unit',
     _y@1_0 =
-        #'Elixir.Patina.BasicEnum.BasicEnum':'Tuple'{'0' = 1,
-                                                     '1' = <<"hello"/utf8>>},
-    _z@2_0 = #'Elixir.Patina.BasicEnum.BasicEnum':'Struct'{x
-                                                               = 1,
-                                                           y =
-                                                               <<"hello"/utf8>>},
+        'Elixir.Patina.BasicEnum.BasicEnum':'$patina_constructor__Tuple'(1,
+                                                                         <<"hello"/utf8>>),
+    _z@2_0 =
+        'Elixir.Patina.BasicEnum.BasicEnum':'$patina_constructor__Struct'(1,
+                                                                          <<"hello"/utf8>>),
     begin
         io:put_chars([[io_lib:format("~ktp", [_x@0_0]),
                        <<"\n"/utf8>>,

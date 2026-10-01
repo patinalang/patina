@@ -9,6 +9,8 @@
 
 -export_record(['Unit']).
 
--export([]).
+-export(['$patina_constructor__Unit'/0]).
 
 -record #'Unit'{}.
+
+'$patina_constructor__Unit'() -> #'Unit'{}.

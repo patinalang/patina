@@ -5,11 +5,6 @@ defmodule CastUncheckedTest do
 
   alias Patina.CastUnchecked
 
-  setup_all do
-    Code.ensure_all_loaded!([Patina.CastUnchecked.Point])
-    :ok
-  end
-
   test "the cast result is the value itself" do
     assert Enum.sort(CastUnchecked.inferred_target(%{a: 1, b: 2})) == [:a, :b]
     assert CastUnchecked.explicit_target([1, 2, 3]) == 6

@@ -6,10 +6,6 @@ defmodule Enum01Test do
 
   alias Patina.Enum01.WebEvent
 
-  setup_all do
-    Code.ensure_all_loaded!([WebEvent])
-  end
-
   test "main destructures every enum variant" do
     assert """
            pressed '120'.
@@ -21,6 +17,8 @@ defmodule Enum01Test do
   end
 
   test "newtype variants are transparent and multi-field variants are records" do
+    Code.ensure_loaded!(WebEvent)
+
     assert_raise ArgumentError, fn -> :records.get_definition(WebEvent, :KeyPress) end
     assert_raise ArgumentError, fn -> :records.get_definition(WebEvent, :Paste) end
     assert {%{is_exported: true}, [:x, :y]} = :records.get_definition(WebEvent, :Click)

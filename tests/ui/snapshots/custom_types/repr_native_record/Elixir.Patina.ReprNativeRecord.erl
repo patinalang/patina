@@ -32,31 +32,24 @@
 '__info__'(Key) -> module_info(Key).
 
 inherited_unit() ->
-    #'Elixir.Patina.ReprNativeRecord.WholeEnum':'Unit'{}.
+    'Elixir.Patina.ReprNativeRecord.WholeEnum':'$patina_constructor__Unit'().
 
 overridden_unit() ->
-    #'Elixir.Patina.ReprNativeRecord.MixedEnum':'RecordUnit'{}.
+    'Elixir.Patina.ReprNativeRecord.MixedEnum':'$patina_constructor__RecordUnit'().
 
 elixir_unit() ->
     ('Elixir.Patina.ReprNativeRecord.ElixirUnit':'__struct__'())#{}.
 
 record_struct() ->
-    #'Elixir.Patina.ReprNativeRecord.NativeRecordStruct':'NativeRecordStruct'{x
-                                                                                  =
-                                                                                  10,
-                                                                              y
-                                                                                  =
-                                                                                  20}.
+    'Elixir.Patina.ReprNativeRecord.NativeRecordStruct':'$patina_constructor__NativeRecordStruct'(10,
+                                                                                                  20).
 
 struct_x(_value@0_0) ->
     _value@0_0#'Elixir.Patina.ReprNativeRecord.NativeRecordStruct':'NativeRecordStruct'.x.
 
 record_pair() ->
-    #'Elixir.Patina.ReprNativeRecord.NativeRecordPair':'NativeRecordPair'{'0'
-                                                                              =
-                                                                              30,
-                                                                          '1' =
-                                                                              40}.
+    'Elixir.Patina.ReprNativeRecord.NativeRecordPair':'$patina_constructor__NativeRecordPair'(30,
+                                                                                              40).
 
 pair_second(_value@0_0) ->
     _value@0_0#'Elixir.Patina.ReprNativeRecord.NativeRecordPair':'NativeRecordPair'.'1'.

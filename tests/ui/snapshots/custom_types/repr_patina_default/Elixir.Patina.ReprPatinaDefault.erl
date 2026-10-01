@@ -102,8 +102,7 @@ atom_patterns() ->
 greedy_first(_value@0_0) -> _value@0_0.
 
 greedy_second(_value@0_0) ->
-    #'Elixir.Patina.ReprPatinaDefault.Greedy':'Second'{'0' =
-                                                           _value@0_0}.
+    'Elixir.Patina.ReprPatinaDefault.Greedy':'$patina_constructor__Second'(_value@0_0).
 
 greedy_text(_value@0_0) -> _value@0_0.
 
@@ -171,29 +170,24 @@ classify_small(_value@0_0) ->
     end.
 
 large_open(_value@0_0) ->
-    #'Elixir.Patina.ReprPatinaDefault.Large':'Open'{'0' =
-                                                        _value@0_0}.
+    'Elixir.Patina.ReprPatinaDefault.Large':'$patina_constructor__Open'(_value@0_0).
 
 large_text(_value@0_0) -> _value@0_0.
 
 multiple_first(_value@0_0) -> _value@0_0.
 
 multiple_second(_value@0_0) ->
-    #'Elixir.Patina.ReprPatinaDefault.MultipleOpen':'Second'{'0'
-                                                                 = _value@0_0}.
+    'Elixir.Patina.ReprPatinaDefault.MultipleOpen':'$patina_constructor__Second'(_value@0_0).
 
 multiple_text(_value@0_0) -> _value@0_0.
 
 later_inferred(_value@0_0) ->
-    #'Elixir.Patina.ReprPatinaDefault.LaterExplicit':'Inferred'{'0'
-                                                                    =
-                                                                    _value@0_0}.
+    'Elixir.Patina.ReprPatinaDefault.LaterExplicit':'$patina_constructor__Inferred'(_value@0_0).
 
 later_explicit(_value@0_0) -> _value@0_0.
 
 wrapper_pair(_value@0_0) ->
-    #'Elixir.Patina.ReprPatinaDefault.WrapperConflict':'Pair'{'0'
-                                                                  = _value@0_0}.
+    'Elixir.Patina.ReprPatinaDefault.WrapperConflict':'$patina_constructor__Pair'(_value@0_0).
 
 wrapper_open(_value@0_0) ->
     case _value@0_0 of
@@ -232,8 +226,7 @@ reserved_wrapper_reserved(_value@0_0) ->
     {open, _value@0_0}.
 
 reserved_wrapper_open(_value@0_0) ->
-    #'Elixir.Patina.ReprPatinaDefault.ReservedWrapper':open{'0'
-                                                                = _value@0_0}.
+    'Elixir.Patina.ReprPatinaDefault.ReservedWrapper':'$patina_constructor__open'(_value@0_0).
 
 reserved_wrapper_available(_value@0_0) ->
     case _value@0_0 of
@@ -258,17 +251,15 @@ reserved_wrapper_available(_value@0_0) ->
 override_inferred(_value@0_0) -> _value@0_0.
 
 override_record(_value@0_0) ->
-    #'Elixir.Patina.ReprPatinaDefault.Override':'Record'{'0'
-                                                             = _value@0_0}.
+    'Elixir.Patina.ReprPatinaDefault.Override':'$patina_constructor__Record'(_value@0_0).
 
 unit() -> 'Elixir.Patina.ReprPatinaDefault.Unit'.
 
 newtype(_value@0_0) -> _value@0_0.
 
 record(_value@0_0, _label@1_0) ->
-    #'Elixir.Patina.ReprPatinaDefault.Record':'Record'{value
-                                                           = _value@0_0,
-                                                       label = _label@1_0}.
+    'Elixir.Patina.ReprPatinaDefault.Record':'$patina_constructor__Record'(_value@0_0,
+                                                                           _label@1_0).
 
 record_value(_record@0_0) ->
     _record@0_0#'Elixir.Patina.ReprPatinaDefault.Record':'Record'.value.
