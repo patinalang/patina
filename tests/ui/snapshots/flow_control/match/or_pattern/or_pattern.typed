@@ -40,7 +40,8 @@ fn classify_nested_map(map: #{str => int})
     ->
         int ({
     (match (map as #{str => int}) {
-        #{"first" => 0 | 1, "second" => 2 | 3, ..} => (10 as int),
+        #{("first" as str) => 0 | 1, ("second" as str) => 2 | 3, ..} =>
+            (10 as int),
         _ => (0 as int),
     } as int)
 } as int)

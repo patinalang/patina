@@ -1,0 +1,148 @@
+error: local variable `key` in a map pattern key must be pinned
+  --> tests/ui/src/primitives/errors/map_pattern_keys.pt:9:11
+   |
+LL |         #{key => value, ..} => value,
+   |           ^^^
+   |
+   = note: a variable in a map pattern key never binds
+help: pin the variable
+   |
+LL |         #{^key => value, ..} => value,
+   |           +
+
+error: local variable `key` in a map pattern key must be pinned
+  --> tests/ui/src/primitives/errors/map_pattern_keys.pt:16:15
+   |
+LL |         #{(1, key) => value, ..} => value,
+   |               ^^^
+   |
+   = note: a variable in a map pattern key never binds
+help: pin the variable
+   |
+LL |         #{(1, ^key) => value, ..} => value,
+   |               +
+
+error: local variable `key` in a map pattern key must be pinned
+  --> tests/ui/src/primitives/errors/map_pattern_keys.pt:23:18
+   |
+LL |         #{#{1 => key} => value, ..} => value,
+   |                  ^^^
+   |
+   = note: a variable in a map pattern key never binds
+help: pin the variable
+   |
+LL |         #{#{1 => ^key} => value, ..} => value,
+   |                  +
+
+error: cannot pin `NAME_KEY`: expected a local variable, found constant
+  --> tests/ui/src/primitives/errors/map_pattern_keys.pt:30:12
+   |
+LL |         #{^NAME_KEY => value, ..} => value,
+   |            ^^^^^^^^
+   |
+help: constants are matched by value without a pin
+   |
+LL -         #{^NAME_KEY => value, ..} => value,
+LL +         #{NAME_KEY => value, ..} => value,
+   |
+
+error: invalid map pattern key
+  --> tests/ui/src/primitives/errors/map_pattern_keys.pt:37:11
+   |
+LL |         #{1 + 1 => value, ..} => value,
+   |           ^^^^^
+   |
+   = note: a map pattern key can only be built from literals, constants and pinned variables
+   = help: bind the key to a variable before matching, then pin it with `^`
+
+error: invalid map pattern key
+  --> tests/ui/src/primitives/errors/map_pattern_keys.pt:44:11
+   |
+LL |         #{length("a") => value, ..} => value,
+   |           ^^^^^^^^^^^
+   |
+   = note: a map pattern key can only be built from literals, constants and pinned variables
+   = help: bind the key to a variable before matching, then pin it with `^`
+
+error: invalid map pattern key
+  --> tests/ui/src/primitives/errors/map_pattern_keys.pt:51:11
+   |
+LL |         #{1..3 => value, ..} => value,
+   |           ^^^^
+   |
+   = note: a map pattern key can only be built from literals, constants and pinned variables
+
+error: invalid map pattern key
+  --> tests/ui/src/primitives/errors/map_pattern_keys.pt:58:15
+   |
+LL |         #{[1, ..^tail] => value, ..} => value,
+   |               ^^^^^^^
+   |
+   = note: a map pattern key can only be built from literals, constants and pinned variables
+
+error: invalid map pattern key
+  --> tests/ui/src/primitives/errors/map_pattern_keys.pt:65:21
+   |
+LL |         #{#{1 => 2, ..^base} => value, ..} => value,
+   |                     ^^^^^^^
+   |
+   = note: a map pattern key can only be built from literals, constants and pinned variables
+
+error: invalid map pattern key
+  --> tests/ui/src/primitives/errors/map_pattern_keys.pt:72:11
+   |
+LL |         #{_ => value, ..} => value,
+   |           ^
+   |
+   = note: a map pattern key can only be built from literals, constants and pinned variables
+   = help: a map pattern can't match an arbitrary key
+
+error: invalid map pattern key
+  --> tests/ui/src/primitives/errors/map_pattern_keys.pt:78:7
+   |
+LL |     #{_ => _, ..} = map;
+   |       ^
+   |
+   = note: a map pattern key can only be built from literals, constants and pinned variables
+   = help: a map pattern can't match an arbitrary key
+
+error: invalid map pattern key
+  --> tests/ui/src/primitives/errors/map_pattern_keys.pt:83:11
+   |
+LL |         #{1 | 2 | 3 => value, ..} => value,
+   |           ^^^^^^^^^
+   |
+   = note: a map pattern key can only be built from literals, constants and pinned variables
+   = help: to match either key, use an or-pattern of maps, e.g. `#{1 => v, ..} | #{2 => v, ..}`
+
+error: invalid map pattern key
+  --> tests/ui/src/primitives/errors/map_pattern_keys.pt:90:15
+   |
+LL |         #{(0, (1 | 2)) => value, ..} => value,
+   |               ^^^^^^^
+   |
+   = note: a map pattern key can only be built from literals, constants and pinned variables
+   = help: to match either key, use an or-pattern of maps, e.g. `#{1 => v, ..} | #{2 => v, ..}`
+
+error: invalid map pattern key
+  --> tests/ui/src/primitives/errors/map_pattern_keys.pt:96:7
+   |
+LL |     #{1 | 2 => _, ..} = map;
+   |       ^^^^^
+   |
+   = note: a map pattern key can only be built from literals, constants and pinned variables
+
+error: a variable cannot be pinned in this expression
+  --> tests/ui/src/primitives/errors/map_pattern_keys.pt:100:5
+   |
+LL |     ^value
+   |     ^^^^^^
+   |
+help: use the variable directly
+   |
+LL -     ^value
+LL +     value
+   |
+
+error: aborting due to 15 previous errors
+

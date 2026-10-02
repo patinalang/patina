@@ -12,7 +12,10 @@ use rustc_hir::{HirId, Target, find_attr};
 use rustc_middle::span_bug;
 use rustc_middle::ty::TyCtxt;
 use rustc_session::errors::report_lit_error;
-use rustc_span::{ByteSymbol, DUMMY_SP, DesugaringKind, Ident, Span, Spanned, Symbol, respan, sym};
+use rustc_span::{
+    ByteSymbol, DUMMY_SP, DesugaringKind, ErrorGuaranteed, Ident, Span, Spanned, Symbol, respan,
+    sym,
+};
 use thin_vec::{ThinVec, thin_vec};
 use visit::{Visitor, walk_expr};
 
@@ -21,8 +24,10 @@ use super::errors::{
     CoroutineTooManyParameters, FunctionalMapUpdateDestructuringAssignment,
     FunctionalRecordUpdateDestructuringAssignment, InclusiveRangeWithNoEnd,
     ListTailDestructuringAssignment, MapPatternMissingRest, MatchArmWithNoBody,
-    NeverPatternWithBody, NeverPatternWithGuard, UnderscoreExprLhsAssign,
+    NeverPatternWithBody, NeverPatternWithGuard, PinNotAllowedInExpr, PinNotLocal,
+    UnderscoreExprLhsAssign,
 };
+use super::pat::MapKeyContext;
 use super::{
     GenericArgsMode, ImplTraitContext, LoweringContext, ParamMode, ResolverAstLoweringExt,
 };
@@ -86,6 +91,33 @@ impl<'hir> LoweringContext<'_, 'hir> {
         self.arena.alloc(self.lower_expr_mut(e))
     }
 
+    fn check_pin(&self, pin: &Expr, operand: &Expr) -> Option<ErrorGuaranteed> {
+        let unpin = pin.span.until(operand.span);
+        if !self.is_in_map_key {
+            return Some(self.dcx().emit_err(PinNotAllowedInExpr { span: pin.span, unpin }));
+        }
+
+        match self.get_partial_res(operand.id).and_then(|res| res.full_res())? {
+            Res::Local(_) | Res::Err => None,
+            res @ Res::Def(
+                DefKind::Const { .. } | DefKind::AssocConst { .. } | DefKind::Ctor(..),
+                _,
+            ) => Some(self.dcx().emit_err(PinNotLocal {
+                span: operand.span,
+                path: expr_to_string(operand),
+                descr: res.descr(),
+                unpin: Some(unpin),
+            })),
+
+            res => Some(self.dcx().emit_err(PinNotLocal {
+                span: operand.span,
+                path: expr_to_string(operand),
+                descr: res.descr(),
+                unpin: None,
+            })),
+        }
+    }
+
     pub(super) fn lower_expr_mut(&mut self, e: &Expr) -> hir::Expr<'hir> {
         ensure_sufficient_stack(|| {
             let mut span = self.lower_span(e.span);
@@ -112,6 +144,14 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     }
                     return ex;
                 }
+
+                ExprKind::Pin(operand) => {
+                    return match self.check_pin(e, operand) {
+                        Some(guar) => self.expr_err(span, guar),
+                        None => self.lower_expr_mut(operand),
+                    };
+                }
+
                 // Desugar `ExprForLoop`
                 // from: `[opt_ident]: for await? <pat> in <iter> <body>`
                 //
@@ -392,6 +432,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     let guar = self.dcx().emit_err(UnderscoreExprLhsAssign { span: e.span });
                     hir::ExprKind::Err(guar)
                 }
+                ExprKind::Pin(_) => unreachable!("pins are lowered as their variable"),
                 ExprKind::Path(qself, path) => {
                     let qpath = self.lower_qpath(
                         e.id,
@@ -1540,7 +1581,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
             ExprKind::Map(map) => {
                 let field_pats =
                     self.arena.alloc_from_iter(map.fields.iter().map(|field| hir::PatMapField {
-                        key: self.lower_pat_map_key(&field.key),
+                        key: self.lower_map_key(&field.key, MapKeyContext::Assignment),
                         pat: self.destructure_assign(&field.value, eq_sign_span, assignments),
                         span: self.lower_span(field.span),
                     }));

@@ -1071,6 +1071,7 @@ macro_rules! common_visitor_and_walkers {
                 ExprKind::Range(start, end, limit) =>
                     visit_visitable!($($mut)? vis, start, end, limit),
                 ExprKind::Underscore => {}
+                ExprKind::Pin(expr) => visit_visitable!($($mut)? vis, expr),
                 ExprKind::Path(maybe_qself, path) =>
                     visit_visitable!($($mut)? vis, maybe_qself, path),
                 ExprKind::Break(opt_label, opt_expr) =>

@@ -631,14 +631,6 @@ pub(crate) struct MapPatternMissingRest {
 }
 
 #[derive(Diagnostic)]
-#[diag("`|` in a map pattern key is a bitwise-or expression, not a pattern alternative")]
-#[help("write separate map patterns on each side of `|` to match alternative keys")]
-pub(crate) struct BitOrInMapPatternKey {
-    #[primary_span]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
 #[diag("cannot use a `block` macro fragment here")]
 pub(crate) struct InvalidBlockMacroSegment {
     #[primary_span]

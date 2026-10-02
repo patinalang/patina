@@ -968,7 +968,8 @@ pub enum PatKind<'tcx> {
 
 #[derive(Clone, Debug, StableHash, TypeVisitable)]
 pub struct MapFieldPat<'tcx> {
-    pub key: Pat<'tcx>,
+    #[type_visitable(ignore)]
+    pub key: ExprId,
     pub pattern: Pat<'tcx>,
 }
 

@@ -102,7 +102,7 @@ list_match(_value@0_0) ->
 
 map(_value@0_0) ->
     case _value@0_0 of
-        #{<<107>> := _found@1_0} -> _found@1_0;
+        #{<<"k"/utf8>> := _found@1_0} -> _found@1_0;
         _ -> missing
     end.
 
@@ -204,7 +204,7 @@ list_class(_value@0_0) ->
 
 map_class(_value@0_0) ->
     case _value@0_0 of
-        _value@1_0 = #{<<107>> := _}
+        _value@1_0 = #{<<"k"/utf8>> := _}
             when erlang:is_map(_value@1_0) ->
             true;
         _ -> false
@@ -286,7 +286,7 @@ nested_list(_value@0_0) ->
 
 nested_map(_value@0_0) ->
     case _value@0_0 of
-        #{<<107>> := _found@1_0}
+        #{<<"k"/utf8>> := _found@1_0}
             when erlang:is_float(_found@1_0), _found@1_0 > 0.0 ->
             true;
         _ -> false

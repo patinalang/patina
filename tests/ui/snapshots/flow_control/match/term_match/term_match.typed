@@ -96,7 +96,7 @@ fn map(value: term)
     ->
         term ({
     (match (value as term) {
-        #{"k" => found, ..} => (found as term),
+        #{("k" as str) => found, ..} => (found as term),
         _ => (a"missing" as atom),
     } as term)
 } as term)
@@ -221,7 +221,7 @@ fn map_class(value: term)
     ->
         bool ({
     (match (value as term) {
-        map(#{"k" => _, ..}) => (true as bool),
+        map(#{("k" as str) => _, ..}) => (true as bool),
         _ => (false as bool),
     } as bool)
 } as bool)
@@ -327,7 +327,7 @@ fn nested_map(value: term)
     ->
         bool ({
     (match (value as term) {
-        #{"k" => float(found), ..} if
+        #{("k" as str) => float(found), ..} if
             ((found as float) > (0.0 as float) as bool) => (true as bool),
         _ => (false as bool),
     } as bool)

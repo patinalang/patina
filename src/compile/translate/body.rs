@@ -1361,7 +1361,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let afb = &self.translator.afb;
 
         let keys: SmallVec<[_; 4]> =
-            fields.iter().map(|field| self.translate_single_pattern(&field.key)).collect();
+            fields.iter().map(|field| self.translate_expr(field.key)).collect();
         let groups: SmallVec<[_; 4]> =
             fields.iter().map(|field| self.translate_pattern(&field.pattern, input)).collect();
 

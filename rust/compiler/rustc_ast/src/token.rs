@@ -684,6 +684,7 @@ impl Token {
             OpenBracket                       | // array
             Literal(..)                       | // literal
             Bang                              | // operator not
+            Caret                             | // pin
             Minus                             | // unary minus
             Star                              | // dereference
             Or | OrOr                         | // closure

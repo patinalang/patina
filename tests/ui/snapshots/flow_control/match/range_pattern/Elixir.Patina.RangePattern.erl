@@ -96,7 +96,7 @@ match_enum_range(_value@0_0) ->
 
 match_map_range(_value@0_0) ->
     case _value@0_0 of
-        #{<<115, 99, 111, 114, 101>> := _range@1_0}
+        #{<<"score"/utf8>> := _range@1_0}
             when _range@1_0 >= 10, _range@1_0 < 20 ->
             true;
         _ -> false

@@ -1,0 +1,9 @@
+pub struct Point {
+    pub x: int,
+    pub y: int,
+}
+
+// A native record isn't constructed with an Erlang guard expression.
+pub fn record_key(map: #{Point => int}) -> int {
+    match map { #{Point { x: 1, y: 2 } => value, ..} => value, _ => -1, }
+}

@@ -289,11 +289,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 span,
                 ..
             })
-            | hir::Node::PatMapKey(&hir::PatMapKey(hir::PatExpr {
-                kind: hir::PatExprKind::Path(QPath::TypeRelative(rcvr, segment)),
-                span,
-                ..
-            }))
             | hir::Node::Pat(&hir::Pat {
                 kind:
                     hir::PatKind::Struct(QPath::TypeRelative(rcvr, segment), ..)

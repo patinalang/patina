@@ -342,9 +342,6 @@ pub trait Visitor<'v>: Sized {
     fn visit_pat_expr(&mut self, expr: &'v PatExpr<'v>) -> Self::Result {
         walk_pat_expr(self, expr)
     }
-    fn visit_pat_map_key(&mut self, key: &'v PatMapKey<'v>) -> Self::Result {
-        self.visit_pat_expr(&key.0)
-    }
     fn visit_lit(&mut self, _hir_id: HirId, _lit: Lit, _negated: bool) -> Self::Result {
         Self::Result::output()
     }
@@ -771,7 +768,7 @@ pub fn walk_pat<'v, V: Visitor<'v>>(visitor: &mut V, pattern: &'v Pat<'v>) -> V:
         }
         PatKind::Map(fields, _) => {
             for field in fields {
-                try_visit!(visitor.visit_pat_map_key(field.key));
+                try_visit!(visitor.visit_expr(field.key));
                 try_visit!(visitor.visit_pat(field.pat));
             }
         }
@@ -835,10 +832,6 @@ pub fn walk_pat_expr<'v, V: Visitor<'v>>(visitor: &mut V, expr: &'v PatExpr<'v>)
         PatExprKind::Lit { lit, negated } => visitor.visit_lit(*hir_id, *lit, *negated),
         PatExprKind::Path(qpath) => visitor.visit_qpath(qpath, *hir_id, *span),
     }
-}
-
-pub fn walk_pat_map_key<'v, V: Visitor<'v>>(visitor: &mut V, key: &'v PatMapKey<'v>) -> V::Result {
-    walk_pat_expr(visitor, &key.0)
 }
 
 pub fn walk_anon_const<'v, V: Visitor<'v>>(visitor: &mut V, constant: &'v AnonConst) -> V::Result {

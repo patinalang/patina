@@ -810,7 +810,7 @@ fn pattern_map() {
         anno(),
         svec![MapFieldExact(
             anno(),
-            r!(Pattern::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k")))),
+            r!(Expr::AtomicLiteral(AtomicLiteral::Atom(anno(), sym("k")))),
             r!(Pattern::Var(anno(), sym("V"))),
         )],
     );

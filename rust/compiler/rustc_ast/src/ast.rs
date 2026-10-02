@@ -1907,7 +1907,8 @@ impl Expr {
             // need parens sometimes. E.g. we can print `(let _ = a) && b` as `let _ = a && b`
             // but we need to print `(let _ = a) < b` as-is with parens.
             | ExprKind::Let(..)
-            | ExprKind::Unary(..) => ExprPrecedence::Prefix,
+            | ExprKind::Unary(..)
+            | ExprKind::Pin(..) => ExprPrecedence::Prefix,
 
             // Need parens if and only if there are prefix attributes.
             ExprKind::Array(_)
@@ -2209,6 +2210,8 @@ pub enum ExprKind {
     Range(Option<Box<Expr>>, Option<Box<Expr>>, RangeLimits),
     /// An underscore, used in destructuring assignment to ignore a value.
     Underscore,
+    /// Pinned variable (e.g., `^x`), the variable's value in a map pattern key.
+    Pin(Box<Expr>),
 
     /// Variable reference, possibly containing `::` and/or type
     /// parameters (e.g., `foo::bar::<baz>`).

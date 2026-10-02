@@ -1934,13 +1934,10 @@ pub struct PatField<'hir> {
 /// A single `k => v` field in a map pattern.
 #[derive(Debug, Clone, Copy, StableHash)]
 pub struct PatMapField<'hir> {
-    pub key: &'hir PatMapKey<'hir>,
+    pub key: &'hir Expr<'hir>,
     pub pat: &'hir Pat<'hir>,
     pub span: Span,
 }
-
-#[derive(Debug, Clone, Copy, StableHash)]
-pub struct PatMapKey<'hir>(pub PatExpr<'hir>);
 
 /// The type of a binary pattern segment with its arguments (e.g., `int(16, little)`).
 #[derive(Debug, Clone, Copy, StableHash)]
@@ -5162,7 +5159,6 @@ pub enum Node<'hir> {
     TyPat(&'hir TyPat<'hir>),
     Pat(&'hir Pat<'hir>),
     PatField(&'hir PatField<'hir>),
-    PatMapKey(&'hir PatMapKey<'hir>),
     /// Needed as its own node with its own HirId for tracking
     /// the unadjusted type of literals within patterns
     /// (e.g. byte str literals not being of slice type).
@@ -5226,7 +5222,6 @@ impl<'hir> Node<'hir> {
             | Node::Pat(..)
             | Node::TyPat(..)
             | Node::PatExpr(..)
-            | Node::PatMapKey(..)
             | Node::Arm(..)
             | Node::LetStmt(..)
             | Node::Crate(..)

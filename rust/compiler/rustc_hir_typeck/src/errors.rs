@@ -1547,3 +1547,19 @@ pub(crate) struct BinarySegmentStrTailBoundary {
     )]
     pub sugg: Option<Span>,
 }
+
+#[derive(Diagnostic)]
+#[diag("cannot pin `{$path}`: expected a local variable, found {$descr}")]
+pub(crate) struct PinNotLocal {
+    #[primary_span]
+    pub span: Span,
+    pub path: String,
+    pub descr: &'static str,
+    #[suggestion(
+        "constants are matched by value without a pin",
+        code = "",
+        applicability = "machine-applicable",
+        style = "verbose"
+    )]
+    pub unpin: Option<Span>,
+}

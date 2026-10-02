@@ -1028,6 +1028,10 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
                     if !fields.is_empty() {
                         read_discriminant();
                     }
+                    // Keys read the variables they mention.
+                    for field in fields {
+                        self.consume_expr(field.key)?;
+                    }
                 }
                 PatKind::BinaryPattern(segments) => {
                     read_discriminant();

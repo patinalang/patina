@@ -123,6 +123,7 @@ struct LoweringContext<'a, 'hir> {
     try_block_scope: TryBlockScope,
     loop_scope: Option<HirId>,
     is_in_loop_condition: bool,
+    is_in_map_key: bool,
     is_in_dyn_type: bool,
 
     current_hir_id_owner: hir::OwnerId,
@@ -190,6 +191,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
             try_block_scope: TryBlockScope::Function,
             loop_scope: None,
             is_in_loop_condition: false,
+            is_in_map_key: false,
             is_in_dyn_type: false,
             coroutine_kind: None,
             task_context: None,

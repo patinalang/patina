@@ -420,7 +420,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let variant = adt_def.variant(variant_index);
 
         let struct_module = self.resolve_module_name(span, adt_def.did(), variant.def_id);
-        let struct_key = afb.pat_atom(span, sym::__struct__);
+        let struct_key = afb.expr_atom(span, sym::__struct__);
         let struct_val = afb.pat_atom(span, struct_module);
 
         let fields = match input {
@@ -441,7 +441,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         };
         let (keys, groups): (SmallVec<[_; 4]>, SmallVec<[_; 4]>) = fields
             .into_iter()
-            .map(|(field, patterns)| (afb.pat_atom(field.span, field.name), patterns))
+            .map(|(field, patterns)| (afb.expr_atom(field.span, field.name), patterns))
             .unzip();
 
         self.pattern_cartesian_product(span, &groups, |values| {

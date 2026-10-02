@@ -6,9 +6,9 @@ use rustc_ast::token::{self, IdentIsRaw, MetaVarKind, Token};
 use rustc_ast::util::parser::ExprPrecedence;
 use rustc_ast::visit::{self, Visitor};
 use rustc_ast::{
-    self as ast, Arm, AttrVec, BinOpKind, BindingMode, ByRef, ExceptionClass, Expr, ExprKind,
-    Guard, LocalKind, MacCall, Mutability, Pat, PatField, PatFieldsRest, PatKind, PatMapFieldsRest,
-    Path, QSelf, RangeEnd, RangeSyntax, Recovered, Stmt, StmtKind, TermClass,
+    self as ast, Arm, AttrVec, BindingMode, ByRef, ExceptionClass, Expr, ExprKind, Guard,
+    LocalKind, MacCall, Mutability, Pat, PatField, PatFieldsRest, PatKind, PatMapFieldsRest, Path,
+    QSelf, RangeEnd, RangeSyntax, Recovered, Stmt, StmtKind, TermClass,
 };
 use rustc_ast_pretty::pprust;
 use rustc_errors::{Applicability, Diag, DiagArgValue, PResult, StashKey};
@@ -962,9 +962,11 @@ impl<'a> Parser<'a> {
         let mut delayed_rest_err: Option<(Diag<'a>, Span, Span)> = None;
 
         while self.token != token::CloseBrace {
+            // A lone `_` is recovered as a misspelled `..`, but `_ => ...` is a (rejected) key.
             if self.check(exp!(DotDot))
                 || self.check_noexpect(&token::DotDotDot)
-                || self.check_keyword(exp!(Underscore))
+                || (self.check_keyword(exp!(Underscore))
+                    && self.look_ahead(1, |t| matches!(t.kind, token::Comma | token::CloseBrace)))
             {
                 self.recover_bad_dot_dot();
                 self.bump(); // `..` || `...` || `_`
@@ -1085,13 +1087,8 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_pat_map_field(&mut self) -> PResult<'a, (ast::PatMapField, Recovered)> {
-        let mut key = self.parse_map_key()?;
+        let key = self.parse_map_key()?;
         let mut recovered = Recovered::No;
-        if let ExprKind::Binary(Spanned { node: BinOpKind::BitOr, span }, ..) = &key.kind {
-            let guar = self.dcx().emit_err(errors::BitOrInMapPatternKey { span: *span });
-            key = self.mk_expr_err(key.span, guar);
-            recovered = Recovered::Yes(guar);
-        }
         let arrow_recovered = self.expect_map_fat_arrow();
         if let Recovered::Yes(guar) = arrow_recovered {
             recovered = Recovered::Yes(guar);

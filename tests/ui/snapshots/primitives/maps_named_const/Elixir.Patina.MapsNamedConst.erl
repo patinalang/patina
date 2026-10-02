@@ -25,13 +25,13 @@
 
 const_key(_map@0_0) ->
     case _map@0_0 of
-        #{<<110, 97, 109, 101>> := _value@1_0} -> _value@1_0;
+        #{<<"name"/utf8>> := _value@1_0} -> _value@1_0;
         _ -> 0
     end.
 
 named_const(_map@0_0) ->
     case _map@0_0 of
-        #{<<110, 97, 109, 101>> := _value@1_0} ->
+        #{<<"name"/utf8>> := _value@1_0} ->
             #{<<"hi"/utf8>> => _value@1_0};
         _ -> #{<<"name"/utf8>> => 1}
     end.

@@ -832,6 +832,10 @@ impl<'a> State<'a> {
                 }
             }
             ast::ExprKind::Underscore => self.word("_"),
+            ast::ExprKind::Pin(expr) => {
+                self.word("^");
+                self.print_expr(expr, FixupContext::default());
+            }
             ast::ExprKind::Path(None, path) => self.print_path(path, true, 0),
             ast::ExprKind::Path(Some(qself), path) => self.print_qpath(path, qself, true),
             ast::ExprKind::Break(opt_label, opt_expr) => {

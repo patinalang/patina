@@ -13,7 +13,7 @@ use rustc_hir::def_id::DefId;
 use rustc_hir::pat_util::EnumerateAndAdjustIterator;
 use rustc_hir::{
     self as hir, BinarySegmentTy, BindingMode, ByRef, ExprKind, HirId, LangItem, Mutability, Pat,
-    PatExpr, PatExprKind, PatKind, PatMapField, PatMapKey, expr_needs_parens,
+    PatExpr, PatExprKind, PatKind, PatMapField, expr_needs_parens,
 };
 use rustc_hir_analysis::autoderef::report_autoderef_recursion_limit_error;
 use rustc_infer::infer::RegionVariableOrigin;
@@ -999,59 +999,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         ty
     }
 
-    fn check_map_key(
-        &self,
-        key: &'tcx PatMapKey<'tcx>,
-        expected: Ty<'tcx>,
-        ti: &TopInfo<'tcx>,
-    ) -> Ty<'tcx> {
-        let PatMapKey(expr) = key;
-        let ty = match &expr.kind {
-            PatExprKind::Lit { .. } => self.do_check_pat_expr_unadjusted(expr),
-            PatExprKind::Path(qpath) => {
-                let (res, opt_ty, segments) =
-                    self.resolve_ty_and_res_fully_qualified_call(qpath, expr.hir_id, expr.span);
-                match res {
-                    Res::Def(DefKind::Const { .. } | DefKind::AssocConst { .. }, _) => {
-                        self.instantiate_value_path(
-                            segments,
-                            opt_ty,
-                            res,
-                            expr.span,
-                            expr.span,
-                            expr.hir_id,
-                        )
-                        .0
-                    }
-                    Res::Err => Ty::new_error(
-                        self.tcx,
-                        self.dcx().span_delayed_bug(
-                            expr.span,
-                            "map key path resolved to `Res::Err` without an error",
-                        ),
-                    ),
-                    _ => Ty::new_error(
-                        self.tcx,
-                        self.dcx()
-                            .struct_span_err(
-                                expr.span,
-                                "map pattern key must resolve to a constant",
-                            )
-                            .emit(),
-                    ),
-                }
-            }
-        };
-        if matches!(*self.resolve_vars_if_possible(expected).kind(), ty::Term) {
-            ty
-        } else {
-            match self.demand_eqtype_pat(expr.span, expected, ty, ti) {
-                Ok(()) => ty,
-                Err(guar) => Ty::new_error(self.tcx, guar),
-            }
-        }
-    }
-
     fn check_pat_pin(
         &self,
         pat: &'tcx Pat<'tcx>,
@@ -1073,19 +1020,20 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         ),
                     ),
                     _ => {
-                        let path = rustc_hir_pretty::qpath_to_string(&self.tcx, qpath);
-                        Ty::new_error(
-                            self.tcx,
-                            self.dcx()
-                                .struct_span_err(
-                                    expr.span,
-                                    format!(
-                                        "cannot pin `{path}`: expected a local variable, found {}",
-                                        res.descr()
-                                    ),
-                                )
-                                .emit(),
-                        )
+                        // A constant matches its value without a pin.
+                        let unpin = match res {
+                            Res::Def(DefKind::Const { .. } | DefKind::AssocConst { .. }, _) => {
+                                Some(pat.span.until(expr.span))
+                            }
+                            _ => None,
+                        };
+                        let guar = self.dcx().emit_err(errors::PinNotLocal {
+                            span: expr.span,
+                            path: rustc_hir_pretty::qpath_to_string(&self.tcx, qpath),
+                            descr: res.descr(),
+                            unpin,
+                        });
+                        Ty::new_error(self.tcx, guar)
                     }
                 }
             }
@@ -3654,8 +3602,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     ) -> Result<(), ErrorGuaranteed> {
         let mut result = Ok(());
         for field in fields {
-            let ty = self.check_map_key(field.key, key_ty, &pat_info.top_info);
-            self.write_ty(field.key.0.hir_id, ty);
+            let ty = self.check_expr_coercible_to_type(field.key, key_ty, None);
             if let Err(guar) = ty.error_reported() {
                 result = Err(guar);
             }

@@ -26,7 +26,7 @@ fn const_key(map: #{str => int})
     ->
         int ({
     (match (map as #{str => int}) {
-        #{NAME_KEY => value, ..} => (value as int),
+        #{(NAME_KEY as str) => value, ..} => (value as int),
         _ => (0 as int),
     } as int)
 } as int)
@@ -35,7 +35,7 @@ fn named_const(map: #{str => int})
     ->
         #{str => int} ({
     (match (map as #{str => int}) {
-        #{NAME_KEY => value, ..} =>
+        #{(NAME_KEY as str) => value, ..} =>
             (#{("hi" as str) => (value as int)} as #{str => int}),
         _ => (MAP as #{str => int}),
     } as #{str => int})

@@ -39,13 +39,15 @@ fn main() ({
                     [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
-        error(#{a"__struct__" => a"Elixir.ArithmeticError", ..}) => {
+        error(#{(a"__struct__" as atom) => a"Elixir.ArithmeticError", ..}) =>
+            {
             ((io::put_chars as
                     fn(term) -> term)(([([("Elixir ArithmeticError" as str)] as
                             [str])] as [[str]])) as term);
             ((io::nl as fn() -> term)() as term);
         }
-        error(reason@#{a"__struct__" => a"Elixir.ArgumentError", ..}) => {
+        error(reason@#{(a"__struct__" as atom) => a"Elixir.ArgumentError",
+            ..}) => {
             ((io::put_chars as
                     fn(term) -> term)(([([("Elixir ArgumentError " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((reason as term))

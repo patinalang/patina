@@ -184,6 +184,73 @@ pub(crate) struct MapPatternMissingRest {
 }
 
 #[derive(Diagnostic)]
+#[diag("invalid map pattern key")]
+#[note("a map pattern key can only be built from literals, constants and pinned variables")]
+pub(crate) struct InvalidMapPatternKey {
+    #[primary_span]
+    pub span: Span,
+    #[subdiagnostic]
+    pub help: Option<InvalidMapPatternKeyHelp>,
+}
+
+#[derive(Subdiagnostic)]
+pub(crate) enum InvalidMapPatternKeyHelp {
+    #[help("bind the key to a variable before matching, then pin it with `^`")]
+    Compute,
+    #[help("a map pattern can't match an arbitrary key")]
+    Wildcard,
+    #[help(
+        r#"to match either key, use an or-pattern of maps, e.g. `#{"{"}1 => v, ..{"}"} | #{"{"}2 => v, ..{"}"}`"#
+    )]
+    OrPattern,
+}
+
+#[derive(Diagnostic)]
+#[diag("local variable `{$ident}` in a map pattern key must be pinned")]
+#[note("a variable in a map pattern key never binds")]
+pub(crate) struct UnpinnedLocalInMapPatternKey {
+    #[primary_span]
+    #[suggestion(
+        "pin the variable",
+        code = "^{ident}",
+        applicability = "machine-applicable",
+        style = "verbose"
+    )]
+    pub span: Span,
+    pub ident: Ident,
+}
+
+#[derive(Diagnostic)]
+#[diag("a variable cannot be pinned in this expression")]
+pub(crate) struct PinNotAllowedInExpr {
+    #[primary_span]
+    pub span: Span,
+    #[suggestion(
+        "use the variable directly",
+        code = "",
+        applicability = "machine-applicable",
+        style = "verbose"
+    )]
+    pub unpin: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("cannot pin `{$path}`: expected a local variable, found {$descr}")]
+pub(crate) struct PinNotLocal {
+    #[primary_span]
+    pub span: Span,
+    pub path: String,
+    pub descr: &'static str,
+    #[suggestion(
+        "constants are matched by value without a pin",
+        code = "",
+        applicability = "machine-applicable",
+        style = "verbose"
+    )]
+    pub unpin: Option<Span>,
+}
+
+#[derive(Diagnostic)]
 #[diag("`async` coroutines are not yet supported", code = E0727)]
 pub(crate) struct AsyncCoroutinesNotSupported {
     #[primary_span]

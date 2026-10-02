@@ -117,22 +117,14 @@ help: consider adding `..` to the pattern
 LL |         #{ .. } => true,
    |            ++
 
-error: `|` in a map pattern key is a bitwise-or expression, not a pattern alternative
-  --> tests/ui/src/primitives/errors/parsing_errors.pt:64:13
-   |
-LL |         #{1 | 2 => value, ..} => value,
-   |             ^
-   |
-   = help: write separate map patterns on each side of `|` to match alternative keys
-
 error: cannot bind the rest of a map
-  --> tests/ui/src/primitives/errors/parsing_errors.pt:71:28
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:64:28
    |
 LL |         #{"name" => value, ..rest} => value,
    |                            ^^^^^^ help: consider removing the trailing pattern: `..`
 
 error: expected field pattern, found `...`
-  --> tests/ui/src/primitives/errors/parsing_errors.pt:78:11
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:71:11
    |
 LL |         #{...} => true,
    |           ^^^
@@ -144,7 +136,7 @@ LL +         #{..} => true,
    |
 
 error: expected field pattern, found `_`
-  --> tests/ui/src/primitives/errors/parsing_errors.pt:85:11
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:78:11
    |
 LL |         #{_} => true,
    |           ^
@@ -156,7 +148,7 @@ LL +         #{..} => true,
    |
 
 error: cannot use a comma after the base map
-  --> tests/ui/src/primitives/errors/parsing_errors.pt:91:7
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:84:7
    |
 LL |     #{..a, ..b}
    |       ^^^
@@ -169,13 +161,13 @@ LL +     #{..a ..b}
    |
 
 error: map rest `..` must be the final entry
-  --> tests/ui/src/primitives/errors/parsing_errors.pt:95:10
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:88:10
    |
 LL |     #{.. ..}
    |          ^^
 
 error: expected `}`, found `,`
-  --> tests/ui/src/primitives/errors/parsing_errors.pt:100:13
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:93:13
    |
 LL |         #{.., ..} => true,
    |           --^
@@ -190,13 +182,13 @@ LL +         #{ ..} => true,
    |
 
 error: expected expression, found `,`
-  --> tests/ui/src/primitives/errors/parsing_errors.pt:106:9
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:99:9
    |
 LL |     #{..,} = map;
    |         ^ expected expression
 
 error: expected `}`, found `,`
-  --> tests/ui/src/primitives/errors/parsing_errors.pt:111:13
+  --> tests/ui/src/primitives/errors/parsing_errors.pt:104:13
    |
 LL |         #{..,} => true,
    |           --^
@@ -205,5 +197,5 @@ LL |         #{..,} => true,
    |           | help: remove this comma
    |           `..` must be at the end and cannot have a trailing comma
 
-error: aborting due to 22 previous errors
+error: aborting due to 21 previous errors
 

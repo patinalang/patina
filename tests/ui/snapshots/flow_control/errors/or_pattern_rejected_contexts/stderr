@@ -1,10 +1,11 @@
-error: arbitrary expressions aren't allowed in patterns
+error: invalid map pattern key
   --> tests/ui/src/flow_control/errors/or_pattern_rejected_contexts.pt:9:11
    |
 LL |         #{(1 | 2) => value, ..} => value,
    |           ^^^^^^^
    |
-   = note: the `expr` fragment specifier forces the metavariable's content to be an expression
+   = note: a map pattern key can only be built from literals, constants and pinned variables
+   = help: to match either key, use an or-pattern of maps, e.g. `#{1 => v, ..} | #{2 => v, ..}`
 
 error[E0005]: refutable pattern in function argument
   --> tests/ui/src/flow_control/errors/or_pattern_rejected_contexts.pt:1:46

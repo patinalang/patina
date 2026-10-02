@@ -1,0 +1,4 @@
+// Whether `Some` wraps its value depends on the value, so it isn't an Erlang guard expression.
+pub fn generic_option_key<T>(map: #{Option<T> => int}, value: T) -> int {
+    match map { #{Some(^value) => found, ..} => found, _ => -1, }
+}

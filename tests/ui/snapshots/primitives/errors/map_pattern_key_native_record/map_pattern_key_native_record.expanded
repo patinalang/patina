@@ -1,0 +1,28 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro, prelude_import)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[prelude_import]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+pub struct Point {
+    pub x: int,
+    pub y: int,
+}
+
+// A native record isn't constructed with an Erlang guard expression.
+pub fn record_key(map: #{Point => int}) -> int {
+    match map { #{Point { x: 1, y: 2 } => value, ..} => value, _ => -1, }
+}

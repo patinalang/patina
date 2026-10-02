@@ -353,11 +353,6 @@ impl<'cx, 'tcx> Visitor<'tcx> for WritebackCx<'cx, 'tcx> {
         intravisit::walk_pat_expr(self, expr);
     }
 
-    fn visit_pat_map_key(&mut self, key: &'tcx hir::PatMapKey<'tcx>) {
-        self.visit_node_id(key.0.span, key.0.hir_id);
-        intravisit::walk_pat_map_key(self, key);
-    }
-
     fn visit_local(&mut self, l: &'tcx hir::LetStmt<'tcx>) {
         intravisit::walk_local(self, l);
         let var_ty = self.fcx.local_ty(l.span, l.hir_id);

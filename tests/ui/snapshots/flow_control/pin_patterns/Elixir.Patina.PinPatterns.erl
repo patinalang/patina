@@ -105,7 +105,7 @@ or_pin(_value@0_0, _first@1_0, _second@2_0) ->
 
 map_value_pin(_map@0_0, _expected@1_0) ->
     case _map@0_0 of
-        #{<<107, 101, 121>> := _expected@1_0} -> true;
+        #{<<"key"/utf8>> := _expected@1_0} -> true;
         _ -> false
     end.
 

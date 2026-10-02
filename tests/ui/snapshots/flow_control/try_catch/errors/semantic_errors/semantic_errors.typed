@@ -85,7 +85,8 @@ fn narrower_reasons_are_errors() ({
         catch {
         error(_) => { }
         error(a"badarg") => { }
-        error(#{a"__struct__" => a"Elixir.ArgumentError", ..}) => { }
+        error(#{(a"__struct__" as atom) => a"Elixir.ArgumentError", ..}) => {
+        }
     } as ())
 } as ())
 

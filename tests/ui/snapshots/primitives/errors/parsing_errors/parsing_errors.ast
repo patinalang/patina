@@ -42,13 +42,6 @@ pub fn empty_pattern_missing_rest(map: #{str => int}) -> bool {
     match map { #{../* recovered parse error */} => true, _ => false, }
 }
 
-pub fn bit_or_key(map: #{int => int}) -> int {
-    match map {
-        #{(/*ERROR*/) => value, ../* recovered parse error */} => value,
-        _ => 0,
-    }
-}
-
 pub fn rest_binding(map: #{str => int}) -> int {
     match map {
         #{"name" => value, ../* recovered parse error */} => value,

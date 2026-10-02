@@ -1,0 +1,149 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+const NAME_KEY: str = ("name" as str);
+
+fn length(s: str) -> int ({ (0 as int) } as int)
+
+fn unpinned_local(map: #{str => int}, key: str)
+    ->
+        int ({
+    (match (map as #{str => int}) {
+        #{((/*ERROR*/) as {type error}) => value, ..} => (value as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)
+
+fn nested_local(map: #{(int, str) => int}, key: str)
+    ->
+        int ({
+    (match (map as #{(int, str) => int}) {
+        #{((/*ERROR*/) as {type error}) => value, ..} => (value as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)
+
+fn local_in_map(map: #{#{int => str} => int}, key: str)
+    ->
+        int ({
+    (match (map as #{#{int => str} => int}) {
+        #{((/*ERROR*/) as {type error}) => value, ..} => (value as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)
+
+fn pinned_constant(map: #{str => int})
+    ->
+        int ({
+    (match (map as #{str => int}) {
+        #{((/*ERROR*/) as {type error}) => value, ..} => (value as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)
+
+fn arithmetic(map: #{int => int})
+    ->
+        int ({
+    (match (map as #{int => int}) {
+        #{((/*ERROR*/) as {type error}) => value, ..} => (value as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)
+
+fn call(map: #{int => int})
+    ->
+        int ({
+    (match (map as #{int => int}) {
+        #{((/*ERROR*/) as {type error}) => value, ..} => (value as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)
+
+fn range(map: #{int => int})
+    ->
+        int ({
+    (match (map as #{int => int}) {
+        #{((/*ERROR*/) as {type error}) => value, ..} => (value as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)
+
+fn list_tail(map: #{[int] => int}, tail: [int])
+    ->
+        int ({
+    (match (map as #{[int] => int}) {
+        #{((/*ERROR*/) as {type error}) => value, ..} => (value as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)
+
+fn map_update(map: #{#{int => int} => int}, base: #{int => int})
+    ->
+        int ({
+    (match (map as #{#{int => int} => int}) {
+        #{((/*ERROR*/) as {type error}) => value, ..} => (value as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)
+
+fn wildcard(map: #{int => int})
+    ->
+        int ({
+    (match (map as #{int => int}) {
+        #{((/*ERROR*/) as {type error}) => value, ..} => (value as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)
+
+fn wildcard_in_assignment(map:
+        #{int => int}) ({
+    ({
+        let #{((/*ERROR*/) as {type error}) => _, ..} =
+            (map as #{int => int});
+    } as ());
+} as ())
+
+fn splittable_or_key(map: #{int => int})
+    ->
+        int ({
+    (match (map as #{int => int}) {
+        #{((/*ERROR*/) as {type error}) => value, ..} => (value as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)
+
+fn nested_or_key(map: #{(int, int) => int})
+    ->
+        int ({
+    (match (map as #{(int, int) => int}) {
+        #{((/*ERROR*/) as {type error}) => value, ..} => (value as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)
+
+fn or_key_in_assignment(map:
+        #{int => int}) ({
+    ({
+        let #{((/*ERROR*/) as {type error}) => _, ..} =
+            (map as #{int => int});
+    } as ());
+} as ())
+
+fn pin_outside_key(value: int)
+    -> int ({ ((/*ERROR*/) as {type error}) } as {type error})

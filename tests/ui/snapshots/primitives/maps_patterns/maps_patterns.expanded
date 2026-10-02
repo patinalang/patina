@@ -30,3 +30,55 @@ pub fn nested_lookup(map: #{str => #{str => int}}) -> int {
 }
 
 pub fn is_map(map: #{str => int}) -> bool { match map { #{..} => true, } }
+
+const NAME_KEY: str = "name";
+
+pub fn lookup_constant_key(map: #{str => int}) -> int {
+    match map { #{NAME_KEY => name, ..} => name, _ => -1, }
+}
+
+pub fn lookup_pinned_key(map: #{str => int}, key: str) -> int {
+    match map { #{^key => value, ..} => value, _ => -1, }
+}
+
+pub fn lookup_pinned_key_in_closure(map: #{str => int}, key: str) -> int {
+    let lookup =
+        |map: #{str => int}|
+            match map { #{^key => value, ..} => value, _ => -1, };
+    lookup(map)
+}
+
+pub fn lookup_tuple_key(map: #{(int, int) => int}, k: int) -> int {
+    match map { #{(^k, 1) => value, ..} => value, _ => -1, }
+}
+
+pub fn lookup_list_key(map: #{[int] => int}) -> int {
+    match map { #{[1, 2] => value, ..} => value, _ => -1, }
+}
+
+pub fn lookup_binary_key(map: #{bin => int}) -> int {
+    match map { #{<<1, 2>> => value, ..} => value, _ => -1, }
+}
+
+pub fn lookup_exact_map_key(map: #{#{int => int} => int}, k: int) -> int {
+    match map { #{#{1 => ^k} => value, ..} => value, _ => -1, }
+}
+
+#[repr(tagged)]
+pub enum Shape { Square(int), Point, }
+
+pub fn lookup_enum_key(map: #{Shape => int}, side: int) -> int {
+    match map {
+        #{Shape::Square(^side) => value, ..} => value,
+        #{Shape::Point => value, ..} => value,
+        _ => -1,
+    }
+}
+
+pub fn lookup_option_key(map: #{Option<int> => int}) -> int {
+    match map {
+        #{Some(1) => value, ..} => value,
+        #{None => value, ..} => value,
+        _ => -1,
+    }
+}

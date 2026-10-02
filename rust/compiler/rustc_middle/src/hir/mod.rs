@@ -383,6 +383,9 @@ impl<'tcx> TyCtxt<'tcx> {
             | Node::TraitItem(TraitItem { kind: TraitItemKind::Const(..), .. })
             | Node::ImplItem(ImplItem { kind: ImplItemKind::Const(..), .. }) => true,
 
+            // A map pattern key is read to match it.
+            Node::Pat(Pat { kind: PatKind::Map(..), .. }) => true,
+
             Node::TyPat(_) | Node::Pat(_) => {
                 self.dcx().span_delayed_bug(expr.span, "place expr not allowed in pattern");
                 true
@@ -402,7 +405,6 @@ impl<'tcx> TyCtxt<'tcx> {
             | Node::TraitRef(_)
             | Node::PatField(_)
             | Node::PatExpr(_)
-            | Node::PatMapKey(_)
             | Node::LetStmt(_)
             | Node::Synthetic
             | Node::Err(_)

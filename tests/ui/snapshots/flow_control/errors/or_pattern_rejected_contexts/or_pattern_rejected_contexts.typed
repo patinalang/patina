@@ -26,7 +26,7 @@ fn reject_or_pattern_map_key(map: #{int => int})
     ->
         int ({
     (match (map as #{int => int}) {
-        #{<bad-literal> => value, ..} => (value as int),
+        #{((/*ERROR*/) as {type error}) => value, ..} => (value as int),
         _ => (0 as int),
     } as int)
 } as int)

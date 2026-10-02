@@ -5,10 +5,11 @@ use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_hir::def::{DefKind, Res};
 use rustc_hir::{self as hir, LangItem, Target};
 use rustc_middle::span_bug;
-use rustc_span::{DesugaringKind, Ident, Span, Spanned, respan};
+use rustc_span::{DesugaringKind, ErrorGuaranteed, Ident, Span, Spanned, respan};
 
 use super::errors::{
-    ArbitraryExpressionInPattern, ExtraDoubleDot, MisplacedDoubleDot, SubTupleBinding,
+    ArbitraryExpressionInPattern, ExtraDoubleDot, InvalidMapPatternKey, InvalidMapPatternKeyHelp,
+    MisplacedDoubleDot, SubTupleBinding, UnpinnedLocalInMapPatternKey,
 };
 use super::{
     AllowReturnTypeNotation, ImplTraitContext, ImplTraitPosition, LoweringContext, ParamMode,
@@ -152,7 +153,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     PatKind::Map(map_fields, rest) => {
                         let fields = self.arena.alloc_from_iter(map_fields.iter().map(|field| {
                             hir::PatMapField {
-                                key: self.lower_pat_map_key(&field.key),
+                                key: self.lower_map_key(&field.key, MapKeyContext::Pattern),
                                 pat: self.lower_pat(&field.pat),
                                 span: self.lower_span(field.span),
                             }
@@ -527,9 +528,118 @@ impl<'hir> LoweringContext<'_, 'hir> {
         hir::PatExpr { hir_id: self.lower_node_id(expr.id), span, kind }
     }
 
-    pub(super) fn lower_pat_map_key(&mut self, expr: &Expr) -> &'hir hir::PatMapKey<'hir> {
-        let expr = self.do_lower_expr_within_pat(expr, true);
-        self.arena.alloc(hir::PatMapKey(expr))
+    pub(super) fn lower_map_key(
+        &mut self,
+        key: &Expr,
+        ctx: MapKeyContext,
+    ) -> &'hir hir::Expr<'hir> {
+        if let Err(guar) = self.check_map_key(key, ctx) {
+            return self.arena.alloc(self.expr_err(self.lower_span(key.span), guar));
+        }
+        let was_in_map_key = std::mem::replace(&mut self.is_in_map_key, true);
+        let key = self.lower_expr(key);
+        self.is_in_map_key = was_in_map_key;
+        key
+    }
+
+    fn check_map_key(&self, expr: &Expr, ctx: MapKeyContext) -> Result<(), ErrorGuaranteed> {
+        let (span, help) = match &expr.kind {
+            // `|` reads as an or-pattern here, even though it parses as an operator.
+            _ if let ExprKind::Binary(Spanned { node: BinOpKind::BitOr, .. }, ..) =
+                expr.peel_parens().kind =>
+            {
+                let help = match ctx {
+                    MapKeyContext::Pattern => Some(InvalidMapPatternKeyHelp::OrPattern),
+                    MapKeyContext::Assignment => None,
+                };
+                (expr.span, help)
+            }
+            ExprKind::Lit(_)
+            | ExprKind::IncludedBytes(_)
+            | ExprKind::Pin(_)
+            | ExprKind::Err(_)
+            | ExprKind::Unary(UnOp::Neg, box Expr { kind: ExprKind::Lit(_), .. }) => {
+                return Ok(());
+            }
+            ExprKind::Paren(inner) => return self.check_map_key(inner, ctx),
+            ExprKind::Path(_, path) => {
+                if let Some(Res::Local(_)) =
+                    self.get_partial_res(expr.id).and_then(|res| res.full_res())
+                {
+                    let ident = path.segments[0].ident;
+                    let error = UnpinnedLocalInMapPatternKey { span: expr.span, ident };
+                    return Err(self.dcx().emit_err(error));
+                }
+                return Ok(());
+            }
+            ExprKind::Tup(exprs) => {
+                return self.check_map_keys(exprs.iter().map(|expr| &**expr), ctx);
+            }
+            ExprKind::Array(box ArrayExpr { tail: ArrayTail::Tail(tail), .. }) => {
+                (self.span_with_dot_dot(tail.span), None)
+            }
+            ExprKind::Array(array) => {
+                return self.check_map_keys(array.elements.iter().map(|expr| &**expr), ctx);
+            }
+            ExprKind::Map(box MapExpr { rest: MapRest::Base(base), .. }) => {
+                (self.span_with_dot_dot(base.span), None)
+            }
+            ExprKind::Map(map) => {
+                return self.check_map_keys(
+                    map.fields.iter().flat_map(|field| [&*field.key, &*field.value]),
+                    ctx,
+                );
+            }
+            ExprKind::BinaryPattern(segments) => {
+                return self.check_map_keys(segments.iter().map(|segment| &*segment.expr), ctx);
+            }
+            ExprKind::Call(callee, args) if self.is_ctor_path(callee) => {
+                return self.check_map_keys(args.iter().map(|arg| &**arg), ctx);
+            }
+            ExprKind::Struct(box StructExpr { rest: StructRest::Base(base), .. }) => {
+                (self.span_with_dot_dot(base.span), None)
+            }
+            ExprKind::Struct(struct_expr) => {
+                return self
+                    .check_map_keys(struct_expr.fields.iter().map(|field| &*field.expr), ctx);
+            }
+            ExprKind::Call(..)
+            | ExprKind::MethodCall(..)
+            | ExprKind::Binary(..)
+            | ExprKind::Unary(..) => (expr.span, Some(InvalidMapPatternKeyHelp::Compute)),
+            ExprKind::Underscore => (expr.span, Some(InvalidMapPatternKeyHelp::Wildcard)),
+            _ => (expr.span, None),
+        };
+        Err(self.dcx().emit_err(InvalidMapPatternKey { span, help }))
+    }
+
+    fn check_map_keys<'a>(
+        &self,
+        exprs: impl IntoIterator<Item = &'a Expr>,
+        ctx: MapKeyContext,
+    ) -> Result<(), ErrorGuaranteed> {
+        let mut result = Ok(());
+        for expr in exprs {
+            result = result.and(self.check_map_key(expr, ctx));
+        }
+        result
+    }
+
+    /// Extends the span of a list tail or an update base to cover the `..` before it.
+    fn span_with_dot_dot(&self, span: Span) -> Span {
+        let source_map = self.tcx.sess.source_map();
+        source_map
+            .span_extend_prev_while(span, char::is_whitespace)
+            .and_then(|span| source_map.span_extend_prev_while(span, |c| c == '.'))
+            .unwrap_or(span)
+    }
+
+    fn is_ctor_path(&self, expr: &Expr) -> bool {
+        matches!(expr.kind, ExprKind::Path(..))
+            && matches!(
+                self.get_partial_res(expr.id).and_then(|res| res.full_res()),
+                Some(Res::Def(DefKind::Ctor(..), _) | Res::Err)
+            )
     }
 
     pub(crate) fn lower_ty_pat(
@@ -660,4 +770,10 @@ impl<'hir> LoweringContext<'_, 'hir> {
         let hir_id = self.next_id();
         self.arena.alloc(hir::ConstArg { kind: hir::ConstArgKind::Anon(ct), hir_id, span })
     }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub(super) enum MapKeyContext {
+    Pattern,
+    Assignment,
 }

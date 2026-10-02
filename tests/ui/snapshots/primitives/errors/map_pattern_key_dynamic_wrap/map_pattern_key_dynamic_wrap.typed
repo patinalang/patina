@@ -1,0 +1,30 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// Whether `Some` wraps its value depends on the value, so it isn't an Erlang guard expression.
+fn generic_option_key<T>(map: #{Option<T> => int}, value: T)
+    ->
+        int ({
+    (match (map as #{Core::Option<T> => int}) {
+        #{((Some as
+                    fn(T) -> Core::Option<T> {Core::Option::<T>::Some})((value
+                    as T)) as Core::Option<T>) => found, ..} => (found as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)

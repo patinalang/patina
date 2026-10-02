@@ -68,7 +68,7 @@ fn map_value_pin(map: #{str => int}, expected: int)
     ->
         bool ({
     (match (map as #{str => int}) {
-        #{"key" => ^expected, ..} => (true as bool),
+        #{("key" as str) => ^expected, ..} => (true as bool),
         _ => (false as bool),
     } as bool)
 } as bool)

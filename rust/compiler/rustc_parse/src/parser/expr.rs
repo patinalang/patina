@@ -523,6 +523,8 @@ impl<'a> Parser<'a> {
             token::Bang => make_it!(this, attrs, |this, _| this.parse_expr_unary(lo, UnOp::Not)),
             // `~expr`
             token::Tilde => make_it!(this, attrs, |this, _| this.recover_tilde_expr(lo)),
+            // `^name`
+            token::Caret => make_it!(this, attrs, |this, _| this.parse_expr_pin(lo)),
             // `-expr`
             token::Minus => {
                 make_it!(this, attrs, |this, _| this.parse_expr_unary(lo, UnOp::Neg))
@@ -592,6 +594,16 @@ impl<'a> Parser<'a> {
     fn parse_expr_unary(&mut self, lo: Span, op: UnOp) -> PResult<'a, (Span, ExprKind)> {
         let (span, expr) = self.parse_expr_prefix_common(lo)?;
         Ok((span, self.mk_unary(op, expr)))
+    }
+
+    fn parse_expr_pin(&mut self, lo: Span) -> PResult<'a, (Span, ExprKind)> {
+        self.bump(); // `^`
+        let kind = match self.parse_pat_pin()? {
+            ast::PatKind::Pin(expr) => ExprKind::Pin(expr),
+            ast::PatKind::Err(guar) => ExprKind::Err(guar),
+            kind => unreachable!("pin parsed as {kind:?}"),
+        };
+        Ok((lo.to(self.prev_token.span), kind))
     }
 
     /// Recover on `~expr` in favor of `!expr`.
@@ -4705,6 +4717,7 @@ impl MutVisitor for CondChecker<'_> {
                 self.comparison = comparison;
             }
             ExprKind::Unary(_, _)
+            | ExprKind::Pin(_)
             | ExprKind::Await(_, _)
             | ExprKind::Use(_, _)
             | ExprKind::AssignOp(_, _, _)

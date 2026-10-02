@@ -1,0 +1,34 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod io;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+struct Point {
+    x: int,
+    y: int,
+}
+
+// A native record isn't constructed with an Erlang guard expression.
+fn record_key(map: #{Point => int})
+    ->
+        int ({
+    (match (map as #{Point => int}) {
+        #{(Point { x: (1 as int), y: (2 as int) } as Point) => value, ..} =>
+            (value as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)

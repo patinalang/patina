@@ -21,7 +21,7 @@ fn lookup_name(map: #{str => int})
     ->
         int ({
     (match (map as #{str => int}) {
-        #{"name" => name, ..} => (name as int),
+        #{("name" as str) => name, ..} => (name as int),
         _ => (-(1 as int) as int),
     } as int)
 } as int)
@@ -30,7 +30,7 @@ fn lookup_name_in_term_keyed_map(map: #{term => int})
     ->
         int ({
     (match (map as #{term => int}) {
-        #{"name" => name, ..} => (name as int),
+        #{("name" as str) => name, ..} => (name as int),
         _ => (-(1 as int) as int),
     } as int)
 } as int)
@@ -39,7 +39,8 @@ fn nested_lookup(map: #{str => #{str => int}})
     ->
         int ({
     (match (map as #{str => #{str => int}}) {
-        #{"outer" => #{"inner" => value, ..}, ..} => (value as int),
+        #{("outer" as str) => #{("inner" as str) => value, ..}, ..} =>
+            (value as int),
         _ => (-(1 as int) as int),
     } as int)
 } as int)
@@ -49,3 +50,103 @@ fn is_map(map: #{str => int})
         bool ({
     (match (map as #{str => int}) { #{..} => (true as bool), } as bool)
 } as bool)
+
+const NAME_KEY: str = ("name" as str);
+
+fn lookup_constant_key(map: #{str => int})
+    ->
+        int ({
+    (match (map as #{str => int}) {
+        #{(NAME_KEY as str) => name, ..} => (name as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)
+
+fn lookup_pinned_key(map: #{str => int}, key: str)
+    ->
+        int ({
+    (match (map as #{str => int}) {
+        #{(key as str) => value, ..} => (value as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)
+
+fn lookup_pinned_key_in_closure(map: #{str => int}, key: str)
+    ->
+        int ({
+    let lookup =
+        (|map: #{str => int}|
+            (match (map as #{str => int}) {
+                #{(key as str) => value, ..} => (value as int),
+                _ => (-(1 as int) as int),
+            } as int) as
+            {closure@tests/ui/src/primitives/maps_patterns.pt:45:18: 45:38});
+    ((lookup as
+            {closure@tests/ui/src/primitives/maps_patterns.pt:45:18: 45:38})((map
+            as #{str => int})) as int)
+} as int)
+
+fn lookup_tuple_key(map: #{(int, int) => int}, k: int)
+    ->
+        int ({
+    (match (map as #{(int, int) => int}) {
+        #{(((k as int), (1 as int)) as (int, int)) => value, ..} =>
+            (value as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)
+
+fn lookup_list_key(map: #{[int] => int})
+    ->
+        int ({
+    (match (map as #{[int] => int}) {
+        #{([(1 as int), (2 as int)] as [int]) => value, ..} => (value as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)
+
+fn lookup_binary_key(map: #{bin => int})
+    ->
+        int ({
+    (match (map as #{bin => int}) {
+        #{(<<(1 as int), (2 as int)>> as str) => value, ..} => (value as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)
+
+fn lookup_exact_map_key(map: #{#{int => int} => int}, k: int)
+    ->
+        int ({
+    (match (map as #{#{int => int} => int}) {
+        #{(#{(1 as int) => (k as int)} as #{int => int}) => value, ..} =>
+            (value as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)
+
+#[attr = Repr {reprs: [Tagged], modifiers: []}]
+enum Shape { Square(int), Point, }
+
+fn lookup_enum_key(map: #{Shape => int}, side: int)
+    ->
+        int ({
+    (match (map as #{Shape => int}) {
+        #{((Shape::Square as fn(int) -> Shape {Shape::Square})((side as int))
+                as Shape) => value, ..} => (value as int),
+        #{(Shape::Point as Shape) => value, ..} => (value as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)
+
+fn lookup_option_key(map: #{Option<int> => int})
+    ->
+        int ({
+    (match (map as #{Core::Option<int> => int}) {
+        #{((Some as
+                    fn(int) -> Core::Option<int> {Core::Option::<int>::Some})((1
+                    as int)) as Core::Option<int>) => value, ..} =>
+            (value as int),
+        #{(None as Core::Option<int>) => value, ..} => (value as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)

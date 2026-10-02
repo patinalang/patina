@@ -277,7 +277,7 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
     pub(crate) fn pat_map(
         &self,
         span: impl IntoAnno,
-        assocs: impl IntoIterator<Item = (eaf::Pattern<'arena>, eaf::Pattern<'arena>)>,
+        assocs: impl IntoIterator<Item = (eaf::Expr<'arena>, eaf::Pattern<'arena>)>,
     ) -> eaf::Pattern<'arena> {
         let anno = span.into_anno(self.source_map);
 

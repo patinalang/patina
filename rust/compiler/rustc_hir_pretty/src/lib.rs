@@ -197,7 +197,6 @@ impl<'a> State<'a> {
             Node::TyPat(a) => self.print_ty_pat(a),
             Node::PatField(a) => self.print_patfield(a),
             Node::PatExpr(a) => self.print_pat_expr(a),
-            Node::PatMapKey(a) => self.print_pat_expr(&a.0),
             Node::Arm(a) => self.print_arm(a),
             Node::Infer(_) => self.word("_"),
             Node::PreciseCapturingNonLifetimeArg(param) => self.print_ident(param.ident),
@@ -2292,7 +2291,7 @@ impl<'a> State<'a> {
             PatKind::Map(fields, _) => {
                 self.word("#{");
                 self.commasep(Inconsistent, fields, |s, field| {
-                    s.print_pat_expr(&field.key.0);
+                    s.print_expr(field.key);
                     s.space();
                     s.word_space("=>");
                     s.print_pat(field.pat);

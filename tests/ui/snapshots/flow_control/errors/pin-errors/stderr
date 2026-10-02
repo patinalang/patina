@@ -15,6 +15,12 @@ error: cannot pin `EXPECTED`: expected a local variable, found constant
    |
 LL |         ^EXPECTED => true,
    |          ^^^^^^^^
+   |
+help: constants are matched by value without a pin
+   |
+LL -         ^EXPECTED => true,
+LL +         EXPECTED => true,
+   |
 
 error[E0308]: mismatched types
   --> tests/ui/src/flow_control/errors/pin-errors.pt:26:9

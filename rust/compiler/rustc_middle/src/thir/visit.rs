@@ -303,6 +303,14 @@ pub fn walk_pat<'thir, 'tcx: 'thir, V: Visitor<'thir, 'tcx>>(
         return;
     };
 
+    if let PatKind::Map { fields } = &pat.kind {
+        for field in fields {
+            visitor.visit_expr(&visitor.thir()[field.key]);
+            visitor.visit_pat(&field.pattern);
+        }
+        return;
+    }
+
     // Size expressions may refer to bindings of earlier segments, so visit them in order.
     if let PatKind::BinaryPattern { segments } = &pat.kind {
         for segment in segments {
@@ -359,7 +367,6 @@ pub(crate) fn for_each_immediate_subpat<'a, 'tcx>(
 
         PatKind::Map { fields, .. } => {
             for field in fields {
-                callback(&field.key);
                 callback(&field.pattern);
             }
         }

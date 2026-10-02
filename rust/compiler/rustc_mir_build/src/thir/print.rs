@@ -939,7 +939,7 @@ impl<'a, 'tcx> ThirPrinter<'a, 'tcx> {
                 print_indented!(self, "fields: [", depth_lvl + 2);
                 for field in fields {
                     print_indented!(self, "key:", depth_lvl + 3);
-                    self.print_pat(&field.key, depth_lvl + 4);
+                    self.print_expr(field.key, depth_lvl + 4);
                     print_indented!(self, "pattern:", depth_lvl + 3);
                     self.print_pat(&field.pattern, depth_lvl + 4);
                 }

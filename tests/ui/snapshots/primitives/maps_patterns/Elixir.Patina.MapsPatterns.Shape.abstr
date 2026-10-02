@@ -1,0 +1,6 @@
+[{attribute,{81,1},file,{"tests/ui/src/primitives/maps_patterns.pt",81}},
+ {attribute,{81,1},module,'Elixir.Patina.MapsPatterns.Shape'},
+ {attribute,{81,1},compile,[no_auto_import]},
+ {attribute,{81,1},import,{erlang,[{is_record,3}]}},
+ {attribute,{81,1},export_record,[]},
+ {attribute,{81,1},export,[]}]

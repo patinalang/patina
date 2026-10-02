@@ -80,8 +80,9 @@ fn elixir_name(f: fn() -> term)
     ->
         term ({
     (try ({ ((f as fn() -> term)() as term); (a"none" as atom) } as term)
-        catch { error(#{a"__struct__" => name, ..}) => (name as term), } as
-        term)
+        catch {
+        error(#{(a"__struct__" as atom) => name, ..}) => (name as term),
+    } as term)
 } as term)
 
 fn elixir_reason(f: fn() -> term)
@@ -89,7 +90,8 @@ fn elixir_reason(f: fn() -> term)
         term ({
     (try ({ ((f as fn() -> term)() as term); (a"none" as atom) } as term)
         catch {
-        error(reason@#{a"__exception__" => true, ..}) => (reason as term),
+        error(reason@#{(a"__exception__" as atom) => true, ..}) =>
+            (reason as term),
     } as term)
 } as term)
 
@@ -98,7 +100,7 @@ fn elixir_stack(f: fn() -> term)
         term ({
     (try ({ ((f as fn() -> term)() as term) } as term)
         catch {
-        error(#{a"__exception__" => true, ..}), stacktrace =>
+        error(#{(a"__exception__" as atom) => true, ..}), stacktrace =>
             (stacktrace as term),
     } as term)
 } as term)
@@ -177,7 +179,8 @@ fn map_reason(f: fn() -> term)
     ->
         term ({
     (try ({ ((f as fn() -> term)() as term) } as term)
-        catch { error(#{a"kind" => value, ..}) => (value as term), } as term)
+        catch { error(#{(a"kind" as atom) => value, ..}) => (value as term), }
+        as term)
 } as term)
 
 fn arithmetic_reason(f: fn() -> term)

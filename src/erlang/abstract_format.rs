@@ -250,7 +250,7 @@ pub(crate) enum Pattern<'a> {
     /// If P is a map pattern `#{A_1, ..., A_k}`, where each `A_i` is an association
     /// `P_i_1 := P_i_2`, then Rep(P) = `{map,ANNO,[Rep(A_1), ..., Rep(A_k)]}`. For
     /// Rep(A), see below.
-    Map(Anno, &'a [MapFieldExact<'a, Pattern<'a>, Pattern<'a>>]),
+    Map(Anno, &'a [MapFieldExact<'a, Expr<'a>, Pattern<'a>>]),
     /// If P is a nil pattern `[]`, then Rep(P) = `{nil,ANNO}`.
     #[rustfmt::skip]
     Nil { anno: Anno },

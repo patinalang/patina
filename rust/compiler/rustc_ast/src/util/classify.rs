@@ -156,6 +156,7 @@ pub fn leading_labeled_expr(mut expr: &ast::Expr) -> bool {
             | Tup(..)
             | Type(..)
             | Unary(..)
+            | Pin(..)
             | Underscore
             | Yeet(..)
             | Yield(..)
@@ -188,6 +189,7 @@ pub fn expr_trailing_brace(mut expr: &ast::Expr) -> Option<TrailingBrace<'_>> {
             | Range(_, Some(e), _)
             | Ret(Some(e))
             | Unary(_, e)
+            | Pin(e)
             | Yeet(Some(e))
             | Become(e) => {
                 expr = e;

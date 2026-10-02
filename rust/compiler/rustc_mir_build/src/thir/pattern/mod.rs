@@ -451,7 +451,7 @@ impl<'tcx, 'ptcx> PatCtxt<'tcx, 'ptcx> {
                 let fields = fields
                     .iter()
                     .map(|field| MapFieldPat {
-                        key: *self.lower_map_key(field.key),
+                        key: self.upper.mirror_expr(field.key),
                         pattern: *self.lower_pattern(field.pat),
                     })
                     .collect();
@@ -775,27 +775,5 @@ impl<'tcx, 'ptcx> PatCtxt<'tcx, 'ptcx> {
                 )
             });
         self.const_to_pat(constant, pat_ty, expr.hir_id, lit.span)
-    }
-
-    /// Lowers a map key using the type stored directly on the key's HIR node.
-    fn lower_map_key(&mut self, key: &'tcx hir::PatMapKey<'tcx>) -> Box<Pat<'tcx>> {
-        let hir::PatMapKey(expr) = key;
-        let ty = self.typeck_results.node_type(expr.hir_id);
-        match &expr.kind {
-            hir::PatExprKind::Lit { lit, negated } => {
-                self.lower_pat_expr_lit(expr, lit, negated, ty)
-            }
-            hir::PatExprKind::Path(qpath) => {
-                let res = self.typeck_results.qpath_res(qpath, expr.hir_id);
-                self.lower_const_pat_expr(expr.hir_id, expr.span, ty, res).unwrap_or_else(|| {
-                    let constant = ty::Const::new_error_with_message(
-                        self.tcx,
-                        expr.span,
-                        "map pattern key did not resolve to a constant",
-                    );
-                    self.const_to_pat(constant, ty, expr.hir_id, expr.span)
-                })
-            }
-        }
     }
 }

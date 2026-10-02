@@ -340,6 +340,7 @@ impl<'cx, 'a> Context<'cx, 'a> {
             | ExprKind::TryBlock(_, _)
             | ExprKind::Type(_, _)
             | ExprKind::Underscore
+            | ExprKind::Pin(_)
             | ExprKind::While(_, _, _)
             | ExprKind::Yeet(_)
             | ExprKind::Become(_)

@@ -96,7 +96,7 @@ fn match_map_range(value: #{str => int})
     ->
         bool ({
     (match (value as #{str => int}) {
-        #{"score" => 10..20, ..} => (true as bool),
+        #{("score" as str) => 10..20, ..} => (true as bool),
         _ => (false as bool),
     } as bool)
 } as bool)
