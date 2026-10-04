@@ -11,7 +11,7 @@
 -export(['__info__'/1,
          match_pin/2,
          if_let_pin/2,
-         '$patina_loop_6_32'/3,
+         'while_let_pin$patina_loop_1'/3,
          while_let_pin/2,
          let_else_pin/2,
          or_pin/3,
@@ -19,7 +19,7 @@
          alias_pin/2,
          closure_pin/2,
          mutable_closure_pin/2,
-         '$patina_loop_15_19'/2,
+         'loop_rebound_pin$patina_loop_1'/2,
          loop_rebound_pin/1,
          sibling_shadow_pin/3,
          guarded_pin/3,
@@ -50,8 +50,8 @@ if_let_pin(_actual@0_0, _expected@1_0) ->
         _ -> false
     end.
 
-'$patina_loop_6_32'(_current@2_0, _expected@1_0,
-                    _count@3_0) ->
+'while_let_pin$patina_loop_1'(_current@2_0,
+                              _expected@1_0, _count@3_0) ->
     _ = begin
             case _current@2_0 of
                 _expected@1_0 ->
@@ -78,9 +78,9 @@ if_let_pin(_actual@0_0, _expected@1_0) ->
 while_let_pin(_start@0_0, _expected@1_0) ->
     _current@2_0 = _start@0_0,
     _count@3_0 = 0,
-    case '$patina_loop_6_32'(_current@2_0,
-                             _expected@1_0,
-                             _count@3_0)
+    case 'while_let_pin$patina_loop_1'(_current@2_0,
+                                       _expected@1_0,
+                                       _count@3_0)
         of
         {break, 0, _loop_value@5_0, _count@3_1, _current@2_1} ->
             _loop_value@5_0
@@ -135,7 +135,8 @@ mutable_closure_pin(_actual@0_0, _initial@1_0) ->
                    end,
     _matcher@3_0().
 
-'$patina_loop_15_19'(_target@0_0, _expected@1_0) ->
+'loop_rebound_pin$patina_loop_1'(_target@0_0,
+                                 _expected@1_0) ->
     _ = begin
             case _target@0_0 of
                 _expected@1_0 ->
@@ -153,7 +154,9 @@ mutable_closure_pin(_actual@0_0, _initial@1_0) ->
 
 loop_rebound_pin(_target@0_0) ->
     _expected@1_0 = 1,
-    case '$patina_loop_15_19'(_target@0_0, _expected@1_0) of
+    case 'loop_rebound_pin$patina_loop_1'(_target@0_0,
+                                          _expected@1_0)
+        of
         {break, 0, _loop_value@3_0, _expected@1_1} ->
             _loop_value@3_0
     end.

@@ -10,7 +10,9 @@
 
 -export_record([]).
 
--export(['__info__'/1, '$patina_loop_6_28'/2, main/0]).
+-export(['__info__'/1,
+         'initialized_on_every_loop_exit$patina_loop_1'/2,
+         main/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -52,7 +54,8 @@ initialized_after_diverging_branch(_condition@0_0) ->
     _value@1_2 = 2,
     _value@1_2.
 
-'$patina_loop_6_28'(_condition@0_0, _value@1_0) ->
+'initialized_on_every_loop_exit$patina_loop_1'(_condition@0_0,
+                                               _value@1_0) ->
     _ = begin
             case _condition@0_0 of
                 true ->
@@ -69,7 +72,10 @@ initialized_after_diverging_branch(_condition@0_0) ->
 
 initialized_on_every_loop_exit(_condition@0_0) ->
     begin _value@1_0 = {} end,
-    case '$patina_loop_6_28'(_condition@0_0, _value@1_0) of
+    case
+        'initialized_on_every_loop_exit$patina_loop_1'(_condition@0_0,
+                                                       _value@1_0)
+        of
         {break, 0, _loop_value@2_0, _value@1_1} ->
             _loop_value@2_0
     end,

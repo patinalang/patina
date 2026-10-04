@@ -3,8 +3,7 @@ mod loop_analysis;
 use rustc_data_structures::fx::FxIndexSet;
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::HirId;
-use rustc_hir::def_id::LocalDefId;
-use rustc_index::Idx;
+use rustc_middle::erl::erl_fit_atom;
 use rustc_middle::middle::region;
 use rustc_middle::thir::{Expr, ExprId, LocalVarId};
 use rustc_middle::{bug, span_bug};
@@ -96,16 +95,12 @@ pub(super) struct LoopContext {
 
 impl LoopContext {
     fn new(
-        owner: LocalDefId,
-        expr_id: ExprId,
+        helper_erl_name: Symbol,
         depth: usize,
         label: region::Scope,
         params: FxIndexSet<LocalVarId>,
         rebound: FxIndexSet<LocalVarId>,
     ) -> Self {
-        let helper_erl_name =
-            Symbol::intern(&format!("$patina_loop_{}_{}", owner.index(), expr_id.index()));
-
         Self { helper_erl_name, depth, label, params, rebound, control: LoopControl::default() }
     }
 }
@@ -120,13 +115,26 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let LoopVariables { params, rebound } =
             loop_analysis::analyze(self.thir, expr_id, self.scopes);
 
-        let loop_cx =
-            LoopContext::new(self.owner, expr_id, self.loops.depth(), label, params, rebound);
+        let helper_erl_name = self.loop_helper_erl_name();
+        let loop_cx = LoopContext::new(helper_erl_name, self.loops.depth(), label, params, rebound);
 
         self.loops.push(loop_cx);
         let result = f(self);
         let loop_cx = self.loops.pop();
         (result, loop_cx)
+    }
+
+    fn loop_helper_erl_name(&mut self) -> Symbol {
+        let tcx = self.tcx();
+        let root = tcx.typeck_root_def_id_local(self.owner);
+        let num = self.scopes.next_loop_num();
+        let name = if let Some(impl_def_id) = tcx.trait_impl_of_assoc(root.to_def_id()) {
+            let tag = tcx.erl_impl_tag(impl_def_id.expect_local());
+            format!("<{tag}>::{}$patina_loop_{num}", tcx.item_name(root.to_def_id()))
+        } else {
+            format!("{}$patina_loop_{num}", tcx.erl_fn_name(root))
+        };
+        Symbol::intern(&erl_fit_atom(name))
     }
 
     pub(super) fn translate_loop(

@@ -62,13 +62,14 @@ impl Scope {
 pub(crate) struct Scopes {
     scopes: SmallVec<[Scope; 8]>,
     next_var_num: u32,
+    loop_count: u32,
 }
 
 impl Scopes {
     pub(super) fn new() -> Self {
         let mut scopes = SmallVec::new();
         scopes.push(Scope::new());
-        Self { scopes, next_var_num: 0 }
+        Self { scopes, next_var_num: 0, loop_count: 0 }
     }
 
     pub(super) fn get_var(&self, id: LocalVarId) -> Option<&PatinaVar> {
@@ -83,6 +84,12 @@ impl Scopes {
         let var = PatinaVar::new(name, self.next_var_num);
         self.next_var_num += 1;
         var
+    }
+
+    /// The number of the next loop, counting from 1.
+    pub(super) fn next_loop_num(&mut self) -> u32 {
+        self.loop_count += 1;
+        self.loop_count
     }
 
     pub(super) fn bind_var(&mut self, id: LocalVarId, name: Symbol) -> &PatinaVar {

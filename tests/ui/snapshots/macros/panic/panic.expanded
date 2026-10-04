@@ -1,0 +1,117 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro, prelude_import)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[prelude_import]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+pub fn explicit_panic() -> int {
+
+
+
+
+
+
+
+    unsafe {
+        ::Core::erlang::error(::Core::Panic::new("explicit panic"), a"none",
+                [(a"error_info",
+                            #{a"module" =>
+                                    a"Elixir.Patina.Core.Panic"})]).cast_unchecked::<!>()
+    }
+}
+pub fn panic_with_message() -> int {
+    unsafe {
+        ::Core::erlang::error(::Core::Panic::new("unexpected value"), a"none",
+                [(a"error_info",
+                            #{a"module" =>
+                                    a"Elixir.Patina.Core.Panic"})]).cast_unchecked::<!>()
+    }
+}
+pub fn todo_without_message() -> int {
+    unsafe {
+        ::Core::erlang::error(::Core::Panic::new("not yet implemented"),
+                a"none",
+                [(a"error_info",
+                            #{a"module" =>
+                                    a"Elixir.Patina.Core.Panic"})]).cast_unchecked::<!>()
+    }
+}
+pub fn todo_with_message() -> int {
+    unsafe {
+        ::Core::erlang::error(::Core::Panic::new("not yet implemented: handle the value"),
+                a"none",
+                [(a"error_info",
+                            #{a"module" =>
+                                    a"Elixir.Patina.Core.Panic"})]).cast_unchecked::<!>()
+    }
+}
+pub fn panic_in_let_else(map: #{int => int}) -> int {
+    let #{1 => value, ..} =
+        map else {
+            unsafe {
+                ::Core::erlang::error(::Core::Panic::new("missing key"),
+                        a"none",
+                        [(a"error_info",
+                                    #{a"module" =>
+                                            a"Elixir.Patina.Core.Panic"})]).cast_unchecked::<!>()
+            }
+        };
+    value
+}
+pub fn todo_in_let_else(map: #{int => int}) -> int {
+    let #{1 => value, ..} =
+        map else {
+            unsafe {
+                ::Core::erlang::error(::Core::Panic::new("not yet implemented"),
+                        a"none",
+                        [(a"error_info",
+                                    #{a"module" =>
+                                            a"Elixir.Patina.Core.Panic"})]).cast_unchecked::<!>()
+            }
+        };
+    value
+}
+pub fn panic_in_loop(limit: int) -> int {
+    let mut i = 0;
+    loop {
+        if i == limit {
+            unsafe {
+                ::Core::erlang::error(::Core::Panic::new("reached the limit"),
+                        a"none",
+                        [(a"error_info",
+                                    #{a"module" =>
+                                            a"Elixir.Patina.Core.Panic"})]).cast_unchecked::<!>()
+            }
+        }
+        i += 1;
+    }
+}
+pub fn panic_in_nested_loop(limit: int) -> int {
+    let mut i = 0;
+    loop {
+        let mut j = 0;
+        while j < limit {
+            if i == limit {
+                unsafe {
+                    ::Core::erlang::error(::Core::Panic::new("reached the limit"),
+                            a"none",
+                            [(a"error_info",
+                                        #{a"module" =>
+                                                a"Elixir.Patina.Core.Panic"})]).cast_unchecked::<!>()
+                }
+            }
+            j += 1;
+        }
+        i += 1;
+    }
+}

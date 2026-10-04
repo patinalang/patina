@@ -30,7 +30,7 @@
          term_text/1,
          classify_term/1,
          if_let_open/1,
-         '$patina_loop_84_34'/2,
+         'while_let_open$patina_loop_1'/2,
          while_let_open/1,
          let_else_open/1,
          inner_open/1,
@@ -229,7 +229,8 @@ if_let_open(_value@0_0) ->
         _ -> other
     end.
 
-'$patina_loop_84_34'(_current@1_0, _count@2_0) ->
+'while_let_open$patina_loop_1'(_current@1_0,
+                               _count@2_0) ->
     _ = begin
             case _current@1_0 of
                 {dynamic, _} ->
@@ -273,7 +274,9 @@ if_let_open(_value@0_0) ->
 while_let_open(_value@0_0) ->
     _current@1_0 = _value@0_0,
     _count@2_0 = 0,
-    case '$patina_loop_84_34'(_current@1_0, _count@2_0) of
+    case 'while_let_open$patina_loop_1'(_current@1_0,
+                                        _count@2_0)
+        of
         {break, 0, _loop_value@5_0, _count@2_1, _current@1_1} ->
             _loop_value@5_0
     end,

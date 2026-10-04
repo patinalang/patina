@@ -895,7 +895,7 @@ fn with_erl_paths<R>(print: impl FnOnce() -> R) -> R {
 }
 
 /// `text`, shortened with a hash suffix if it is longer than the longest atom.
-fn erl_fit_atom(mut text: String) -> String {
+pub fn erl_fit_atom(mut text: String) -> String {
     const MAX_ATOM_CHARS: usize = 255;
     if text.chars().count() <= MAX_ATOM_CHARS {
         return text;

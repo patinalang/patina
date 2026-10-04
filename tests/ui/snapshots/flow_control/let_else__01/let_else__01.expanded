@@ -24,9 +24,28 @@ fn get_count_item(s: str) -> (int, str) {
     let (it, first) = it.next();
     let (it, second) = it.next();
 
-    let (Some(count_str), Some(item)) = (first, second) else { (/*ERROR*/); };
-    let Ok(count) = int::from_str(count_str) else { (/*ERROR*/); };
+    let (Some(count_str), Some(item)) =
+        (first,
+            second) else {
+
+            unsafe {
+                ::Core::erlang::error(::Core::Panic::new("Can't segment count item pair: '{s}'"),
+                        a"none",
+                        [(a"error_info",
+                                    #{a"module" =>
+                                            a"Elixir.Patina.Core.Panic"})]).cast_unchecked::<!>()
+            };
+        };
+    let Ok(count) =
+        int::from_str(count_str) else {
+            unsafe {
+                ::Core::erlang::error(::Core::Panic::new("Can't parse integer: '{count_str}'"),
+                        a"none",
+                        [(a"error_info",
+                                    #{a"module" =>
+                                            a"Elixir.Patina.Core.Panic"})]).cast_unchecked::<!>()
+            };
+        };
     (count, item)
 }
-
 pub fn main() { (/*ERROR*/); }

@@ -48,7 +48,14 @@ fn give_adult(drink: Option<str>) {
 }
 fn drink(drink: Option<str>) {
     let inside = drink.unwrap();
-    if inside == "lemonade" { (/*ERROR*/); }
+    if inside == "lemonade" {
+        unsafe {
+            ::Core::erlang::error(::Core::Panic::new("AAAaaaaa!!!!"), a"none",
+                    [(a"error_info",
+                                #{a"module" =>
+                                        a"Elixir.Patina.Core.Panic"})]).cast_unchecked::<!>()
+        };
+    }
     {
         ::Core::io::put_chars([["I love ", patina_fmt::display(inside),
                             "s!!!!!"]]);

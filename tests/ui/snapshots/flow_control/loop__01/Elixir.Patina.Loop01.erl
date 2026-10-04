@@ -8,7 +8,7 @@
 
 -export_record([]).
 
--export(['__info__'/1, '$patina_loop_4_109'/1, main/0]).
+-export(['__info__'/1, 'main$patina_loop_1'/1, main/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -23,7 +23,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'$patina_loop_4_109'(_count@0_0) ->
+'main$patina_loop_1'(_count@0_0) ->
     _ = begin
             _count@0_1 = _count@0_0 + 1,
             case _count@0_1 =:= 3 of
@@ -61,7 +61,7 @@ main() ->
         io:nl(),
         {}
     end,
-    case '$patina_loop_4_109'(_count@0_0) of
+    case 'main$patina_loop_1'(_count@0_0) of
         {break, 0, _loop_value@1_0, _count@0_1} ->
             _loop_value@1_0
     end.

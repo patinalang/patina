@@ -176,7 +176,7 @@ rewrite_asm({Module, Exports0, Attributes, Meta, Functions0, LabelCount}) ->
 %% Loop helpers are exported only as an optimizer fence to prevent them from being specialized.
 drop_loop_helper_exports(Exports) ->
     lists:filter(fun({Name, _Arity}) ->
-        not lists:prefix("$patina_loop_", atom_to_list(Name))
+        string:find(atom_to_list(Name), "$patina_loop_") =:= nomatch
     end, Exports).
 
 rewrite_function({function, Name, Arity, Entry, Instrs} = Function) ->

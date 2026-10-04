@@ -1,0 +1,45 @@
+pub fn explicit_panic() -> int {
+    panic!()
+}
+
+pub fn panic_with_message() -> int {
+    panic!("unexpected value")
+}
+
+pub fn todo_without_message() -> int {
+    todo!()
+}
+
+pub fn todo_with_message() -> int {
+    todo!("handle the value")
+}
+
+pub fn panic_in_let_else(map: #{int => int}) -> int {
+    let #{1 => value, ..} = map else { panic!("missing key") };
+    value
+}
+
+pub fn todo_in_let_else(map: #{int => int}) -> int {
+    let #{1 => value, ..} = map else { todo!() };
+    value
+}
+
+pub fn panic_in_loop(limit: int) -> int {
+    let mut i = 0;
+    loop {
+        if i == limit { panic!("reached the limit") }
+        i += 1;
+    }
+}
+
+pub fn panic_in_nested_loop(limit: int) -> int {
+    let mut i = 0;
+    loop {
+        let mut j = 0;
+        while j < limit {
+            if i == limit { panic!("reached the limit") }
+            j += 1;
+        }
+        i += 1;
+    }
+}

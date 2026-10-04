@@ -17,4 +17,12 @@ extern mod patina_fmt;
 // source: patina-by-example/src/fn/diverging.md
 // block: 1/4
 
-fn foo() -> ! { (/*ERROR*/); }
+fn foo() -> ! {
+    unsafe {
+        ::Core::erlang::error(::Core::Panic::new("This call never returns."),
+                a"none",
+                [(a"error_info",
+                            #{a"module" =>
+                                    a"Elixir.Patina.Core.Panic"})]).cast_unchecked::<!>()
+    };
+}

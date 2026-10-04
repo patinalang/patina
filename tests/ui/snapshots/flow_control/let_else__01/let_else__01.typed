@@ -31,11 +31,36 @@ fn get_count_item(s: str)
         (((first as Core::Option<{type error}>),
             (second as Core::Option<str>)) as
             (Core::Option<{type error}>, Core::Option<str>)) else
-        { ((/*ERROR*/) as {type error}); };
+        {
+
+        (unsafe {
+            (((::Core::erlang::error as
+                        fn(term, term, term) -> term)(((::Core::Panic::new as
+                            fn(str) -> Core::Panic {Core::Panic::new})(("Can\'t segment count item pair: \'{s}\'"
+                            as str)) as Core::Panic), (a"none" as atom),
+                    ([(((a"error_info" as atom),
+                                (#{(a"module" as atom) =>
+                                        (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
+                                as (atom, #{atom => atom}))] as [(atom, #{atom => atom})]))
+                    as term).cast_unchecked::<!>() as !)
+        } as {type error});
+    };
     let Ok(count) =
         ((int::from_str as {type error})((count_str as {type error})) as
-            {type error}) else { ((/*ERROR*/) as {type error}); };
+            {type error}) else
+        {
+        (unsafe {
+            (((::Core::erlang::error as
+                        fn(term, term, term) -> term)(((::Core::Panic::new as
+                            fn(str) -> Core::Panic {Core::Panic::new})(("Can\'t parse integer: \'{count_str}\'"
+                            as str)) as Core::Panic), (a"none" as atom),
+                    ([(((a"error_info" as atom),
+                                (#{(a"module" as atom) =>
+                                        (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
+                                as (atom, #{atom => atom}))] as [(atom, #{atom => atom})]))
+                    as term).cast_unchecked::<!>() as !)
+        } as {type error});
+    };
     (((count as {type error}), (item as str)) as (int, str))
 } as (int, str))
-
 fn main() ({ ((/*ERROR*/) as {type error}); } as ())

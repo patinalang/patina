@@ -7,7 +7,7 @@ defmodule LoopsTest do
 
   test "generated loop helpers are private in the final BEAM" do
     refute Enum.any?(Loops.module_info(:exports), fn {name, _arity} ->
-             String.starts_with?(Atom.to_string(name), "$patina_loop_")
+             String.contains?(Atom.to_string(name), "$patina_loop_")
            end)
   end
 
@@ -49,5 +49,26 @@ defmodule LoopsTest do
 
   test "a cast around a loop preserves the loop's break target" do
     assert Loops.cast_loop_value() == 1
+  end
+
+  defp loop_helpers(module, fun_name) do
+    for {name, _arity} <- module.module_info(:functions),
+        name = Atom.to_string(name),
+        String.contains?(name, fun_name <> "$patina_loop_"),
+        into: MapSet.new(),
+        do: name
+  end
+
+  test "loop helpers are numbered from the top of the function, including nested and closure loops" do
+    assert loop_helpers(Loops, "helper_names") ==
+             MapSet.new(for n <- 1..5, do: "helper_names$patina_loop_#{n}")
+  end
+
+  test "loop helpers in trait impls are named after the impl" do
+    assert loop_helpers(Loops.Counter, "count") ==
+             MapSet.new([
+               "<impl Loops::Count for Loops::Counter<int>>::count$patina_loop_1",
+               "<impl Loops::Count for Loops::Counter<str>>::count$patina_loop_1"
+             ])
   end
 end

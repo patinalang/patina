@@ -19,8 +19,16 @@ use Core::Prelude::*;
 #[allow(unused)]
 extern mod patina_fmt;
 
-fn some_fn() -> ! { (/*ERROR*/); }
+fn some_fn() -> ! {
 
+    unsafe {
+        ::Core::erlang::error(::Core::Panic::new("This call never returns."),
+                a"none",
+                [(a"error_info",
+                            #{a"module" =>
+                                    a"Elixir.Patina.Core.Panic"})]).cast_unchecked::<!>()
+    };
+}
 pub fn main() {
     let _a = some_fn();
     {

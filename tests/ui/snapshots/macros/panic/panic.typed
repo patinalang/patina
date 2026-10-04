@@ -1,0 +1,169 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+fn explicit_panic()
+    ->
+        int ({
+
+
+
+
+
+
+
+    (unsafe {
+        (((::Core::erlang::error as
+                    fn(term, term, term) -> term)(((::Core::Panic::new as
+                        fn(str) -> Core::Panic {Core::Panic::new})(("explicit panic"
+                        as str)) as Core::Panic), (a"none" as atom),
+                ([(((a"error_info" as atom),
+                            (#{(a"module" as atom) =>
+                                    (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
+                            as (atom, #{atom => atom}))] as [(atom, #{atom => atom})]))
+                as term).cast_unchecked::<!>() as !)
+    } as int)
+} as int)
+fn panic_with_message()
+    ->
+        int ({
+    (unsafe {
+        (((::Core::erlang::error as
+                    fn(term, term, term) -> term)(((::Core::Panic::new as
+                        fn(str) -> Core::Panic {Core::Panic::new})(("unexpected value"
+                        as str)) as Core::Panic), (a"none" as atom),
+                ([(((a"error_info" as atom),
+                            (#{(a"module" as atom) =>
+                                    (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
+                            as (atom, #{atom => atom}))] as [(atom, #{atom => atom})]))
+                as term).cast_unchecked::<!>() as !)
+    } as int)
+} as int)
+fn todo_without_message()
+    ->
+        int ({
+    (unsafe {
+        (((::Core::erlang::error as
+                    fn(term, term, term) -> term)(((::Core::Panic::new as
+                        fn(str) -> Core::Panic {Core::Panic::new})(("not yet implemented"
+                        as str)) as Core::Panic), (a"none" as atom),
+                ([(((a"error_info" as atom),
+                            (#{(a"module" as atom) =>
+                                    (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
+                            as (atom, #{atom => atom}))] as [(atom, #{atom => atom})]))
+                as term).cast_unchecked::<!>() as !)
+    } as int)
+} as int)
+fn todo_with_message()
+    ->
+        int ({
+    (unsafe {
+        (((::Core::erlang::error as
+                    fn(term, term, term) -> term)(((::Core::Panic::new as
+                        fn(str) -> Core::Panic {Core::Panic::new})(("not yet implemented: handle the value"
+                        as str)) as Core::Panic), (a"none" as atom),
+                ([(((a"error_info" as atom),
+                            (#{(a"module" as atom) =>
+                                    (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
+                            as (atom, #{atom => atom}))] as [(atom, #{atom => atom})]))
+                as term).cast_unchecked::<!>() as !)
+    } as int)
+} as int)
+fn panic_in_let_else(map: #{int => int})
+    ->
+        int ({
+    let #{(1 as int) => value, ..} = (map as #{int => int}) else
+        {
+        (unsafe {
+            (((::Core::erlang::error as
+                        fn(term, term, term) -> term)(((::Core::Panic::new as
+                            fn(str) -> Core::Panic {Core::Panic::new})(("missing key" as
+                            str)) as Core::Panic), (a"none" as atom),
+                    ([(((a"error_info" as atom),
+                                (#{(a"module" as atom) =>
+                                        (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
+                                as (atom, #{atom => atom}))] as [(atom, #{atom => atom})]))
+                    as term).cast_unchecked::<!>() as !)
+        } as !)
+    };
+    (value as int)
+} as int)
+fn todo_in_let_else(map: #{int => int})
+    ->
+        int ({
+    let #{(1 as int) => value, ..} = (map as #{int => int}) else
+        {
+        (unsafe {
+            (((::Core::erlang::error as
+                        fn(term, term, term) -> term)(((::Core::Panic::new as
+                            fn(str) -> Core::Panic {Core::Panic::new})(("not yet implemented"
+                            as str)) as Core::Panic), (a"none" as atom),
+                    ([(((a"error_info" as atom),
+                                (#{(a"module" as atom) =>
+                                        (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
+                                as (atom, #{atom => atom}))] as [(atom, #{atom => atom})]))
+                    as term).cast_unchecked::<!>() as !)
+        } as !)
+    };
+    (value as int)
+} as int)
+fn panic_in_loop(limit: int)
+    ->
+        int ({
+    let mut i = (0 as int);
+    (loop {
+        (if ((i as int) == (limit as int) as bool) {
+            (unsafe {
+                (((::Core::erlang::error as
+                            fn(term, term, term) -> term)(((::Core::Panic::new as
+                                fn(str) -> Core::Panic {Core::Panic::new})(("reached the limit"
+                                as str)) as Core::Panic), (a"none" as atom),
+                        ([(((a"error_info" as atom),
+                                    (#{(a"module" as atom) =>
+                                            (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
+                                    as (atom, #{atom => atom}))] as [(atom, #{atom => atom})]))
+                        as term).cast_unchecked::<!>() as !)
+            } as ())
+        } as ())
+        ((i as int) += (1 as int) as int);
+    } as !)
+} as int)
+fn panic_in_nested_loop(limit: int)
+    ->
+        int ({
+    let mut i = (0 as int);
+    (loop {
+        let mut j = (0 as int);
+        (loop {
+            (if ((j as int) < (limit as int) as bool) {
+                (if ((i as int) == (limit as int) as bool) {
+                    (unsafe {
+                        (((::Core::erlang::error as
+                                    fn(term, term, term) -> term)(((::Core::Panic::new as
+                                        fn(str) -> Core::Panic {Core::Panic::new})(("reached the limit"
+                                        as str)) as Core::Panic), (a"none" as atom),
+                                ([(((a"error_info" as atom),
+                                            (#{(a"module" as atom) =>
+                                                    (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
+                                            as (atom, #{atom => atom}))] as [(atom, #{atom => atom})]))
+                                as term).cast_unchecked::<!>() as !)
+                    } as ())
+                } as ())
+                ((j as int) += (1 as int) as int);
+            } else { (break as !); } as ())
+        } as ())
+        ((i as int) += (1 as int) as int);
+    } as !)
+} as int)

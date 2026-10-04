@@ -194,3 +194,53 @@ pub fn cast_loop_value() -> int {
 
     value
 }
+
+// Loop helpers are named after the function, numbering its loops from its top, nested or not.
+pub fn helper_names(limit: int) -> int {
+    let mut total = 0;
+    let mut i = 0;
+    while i < limit { total += 1; i += 1; }
+
+    let mut j = 0;
+    while j < limit {
+        let mut k = 0;
+        while k < limit { total += 10; k += 1; }
+        let mut l = 0;
+        while l < limit { total += 100; l += 1; }
+        j += 1;
+    }
+
+    // A closure's loops are numbered among the function's loops.
+    let f =
+        |n: int| -> int { let mut m = 0; while m < n { m += 1; } m * 1000 };
+    total + f(limit)
+}
+
+trait Count {
+    fn count(self, limit: int)
+    -> int;
+}
+
+struct Counter<T>(T);
+
+// Impls of one trait method on the same type share an Erlang function, so their loop helpers
+// include the impl's tag.
+impl Count for Counter<int> {
+    fn count(self, limit: int) -> int {
+        let mut n = 0;
+        while n < limit { n += 1; }
+        n
+    }
+}
+
+impl Count for Counter<str> {
+    fn count(self, limit: int) -> int {
+        let mut n = 0;
+        while n < limit { n += 2; }
+        n
+    }
+}
+
+pub fn trait_helper_names(limit: int) -> int {
+    Counter(0).count(limit) + Counter("a").count(limit)
+}

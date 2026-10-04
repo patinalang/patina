@@ -19,8 +19,22 @@ extern mod patina_fmt;
 // block: 3/4
 
 
-fn some_fn() -> ! ({ ((/*ERROR*/) as {type error}); } as {type error})
+fn some_fn()
+    ->
+        ! ({
 
+    (unsafe {
+        (((::Core::erlang::error as
+                    fn(term, term, term) -> term)(((::Core::Panic::new as
+                        fn(str) -> Core::Panic {Core::Panic::new})(("This call never returns."
+                        as str)) as Core::Panic), (a"none" as atom),
+                ([(((a"error_info" as atom),
+                            (#{(a"module" as atom) =>
+                                    (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
+                            as (atom, #{atom => atom}))] as [(atom, #{atom => atom})]))
+                as term).cast_unchecked::<!>() as !)
+    } as !);
+} as !)
 fn main() ({
     let _a = ((some_fn as fn() -> ! {some_fn})() as !);
     ({

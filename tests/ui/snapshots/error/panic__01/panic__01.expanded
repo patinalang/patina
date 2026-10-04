@@ -19,9 +19,16 @@ extern mod patina_fmt;
 
 fn drink(beverage: str) {
     // You shouldn't drink too many sugary beverages.
-    if beverage == "lemonade" { (/*ERROR*/); }
+    if beverage == "lemonade" {
 
 
+        unsafe {
+            ::Core::erlang::error(::Core::Panic::new("AAAaaaaa!!!!"), a"none",
+                    [(a"error_info",
+                                #{a"module" =>
+                                        a"Elixir.Patina.Core.Panic"})]).cast_unchecked::<!>()
+        };
+    }
     {
         ::Core::io::put_chars([["Some refreshing ",
                             patina_fmt::display(beverage), " is all I need."]]);

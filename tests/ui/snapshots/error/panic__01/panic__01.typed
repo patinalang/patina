@@ -21,10 +21,20 @@ fn drink(beverage:
         str) ({
     // You shouldn't drink too many sugary beverages.
     (if ((beverage as str) == ("lemonade" as str) as bool) {
-        ((/*ERROR*/) as {type error});
+
+
+        (unsafe {
+            (((::Core::erlang::error as
+                        fn(term, term, term) -> term)(((::Core::Panic::new as
+                            fn(str) -> Core::Panic {Core::Panic::new})(("AAAaaaaa!!!!"
+                            as str)) as Core::Panic), (a"none" as atom),
+                    ([(((a"error_info" as atom),
+                                (#{(a"module" as atom) =>
+                                        (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
+                                as (atom, #{atom => atom}))] as [(atom, #{atom => atom})]))
+                    as term).cast_unchecked::<!>() as !)
+        } as !);
     } as ())
-
-
     ({
         ((::Core::io::put_chars as
                 fn(term) -> term)(([([("Some refreshing " as str),

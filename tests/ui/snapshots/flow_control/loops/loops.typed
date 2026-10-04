@@ -244,3 +244,102 @@ fn cast_loop_value()
 
     (value as int)
 } as int)
+
+// Loop helpers are named after the function, numbering its loops from its top, nested or not.
+fn helper_names(limit: int)
+    ->
+        int ({
+    let mut total = (0 as int);
+    let mut i = (0 as int);
+    (loop {
+        (if ((i as int) < (limit as int) as bool) {
+            ((total as int) += (1 as int) as int);
+            ((i as int) += (1 as int) as int);
+        } else { (break as !); } as ())
+    } as ())
+
+    let mut j = (0 as int);
+    (loop {
+        (if ((j as int) < (limit as int) as bool) {
+            let mut k = (0 as int);
+            (loop {
+                (if ((k as int) < (limit as int) as bool) {
+                    ((total as int) += (10 as int) as int);
+                    ((k as int) += (1 as int) as int);
+                } else { (break as !); } as ())
+            } as ())
+            let mut l = (0 as int);
+            (loop {
+                (if ((l as int) < (limit as int) as bool) {
+                    ((total as int) += (100 as int) as int);
+                    ((l as int) += (1 as int) as int);
+                } else { (break as !); } as ())
+            } as ())
+            ((j as int) += (1 as int) as int);
+        } else { (break as !); } as ())
+    } as ())
+
+    // A closure's loops are numbered among the function's loops.
+    let f =
+        (|n: int| -> int
+            ({
+                let mut m = (0 as int);
+                (loop {
+                    (if ((m as int) < (n as int) as bool) {
+                        ((m as int) += (1 as int) as int);
+                    } else { (break as !); } as ())
+                } as ())
+                ((m as int) * (1000 as int) as int)
+            } as int) as
+            {closure@tests/ui/src/flow_control/loops.pt:243:13: 243:28});
+    ((total as int) +
+        ((f as
+                {closure@tests/ui/src/flow_control/loops.pt:243:13: 243:28})((limit
+                as int)) as int) as int)
+} as int)
+
+trait Count {
+    fn count(self, limit: int)
+    -> int;
+}
+
+struct Counter<T>(T);
+
+// Impls of one trait method on the same type share an Erlang function, so their loop helpers
+// include the impl's tag.
+impl Count for Counter<int> {
+    fn count(self, limit: int)
+        ->
+            int ({
+        let mut n = (0 as int);
+        (loop {
+            (if ((n as int) < (limit as int) as bool) {
+                ((n as int) += (1 as int) as int);
+            } else { (break as !); } as ())
+        } as ())
+        (n as int)
+    } as int)
+}
+
+impl Count for Counter<str> {
+    fn count(self, limit: int)
+        ->
+            int ({
+        let mut n = (0 as int);
+        (loop {
+            (if ((n as int) < (limit as int) as bool) {
+                ((n as int) += (2 as int) as int);
+            } else { (break as !); } as ())
+        } as ())
+        (n as int)
+    } as int)
+}
+
+fn trait_helper_names(limit: int)
+    ->
+        int ({
+    ((((Counter as fn(int) -> Counter<int> {Counter::<int>})((0 as int)) as
+                Counter<int>).count((limit as int)) as int) +
+        (((Counter as fn(str) -> Counter<str> {Counter::<str>})(("a" as str))
+                as Counter<str>).count((limit as int)) as int) as int)
+} as int)

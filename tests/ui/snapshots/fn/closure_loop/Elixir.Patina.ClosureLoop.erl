@@ -9,7 +9,7 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         '$patina_loop_5_23'/2,
+         'closure_loop$patina_loop_1'/2,
          closure_loop/0]).
 
 '__info__'(functions) ->
@@ -25,7 +25,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'$patina_loop_5_23'(_i@2_0, _y@1_0) ->
+'closure_loop$patina_loop_1'(_i@2_0, _y@1_0) ->
     _ = begin
             _i@2_1 = _i@2_0 + _y@1_0,
             case _i@2_1 > 3 of
@@ -40,7 +40,7 @@
 closure_loop() ->
     _count@4_0 = fun (_x@0_0, _y@1_0) ->
                          _i@2_0 = _x@0_0,
-                         case '$patina_loop_5_23'(_i@2_0, _y@1_0) of
+                         case 'closure_loop$patina_loop_1'(_i@2_0, _y@1_0) of
                              {break, 0, _loop_value@3_0, _i@2_1} ->
                                  _loop_value@3_0
                          end,
