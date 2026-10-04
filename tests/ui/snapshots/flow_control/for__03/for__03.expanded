@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/for.md
@@ -27,14 +24,18 @@ pub fn main() {
         match name {
             "Ferris" =>
                 {
-                io::put_chars([["There is a rustacean among us!"]]);
-                io::nl();
+                ::Core::io::put_chars([["There is a rustacean among us!"]]);
+                ::Core::io::nl();
             }
             _ => {
-                io::put_chars([["Hello ", patina_fmt::display(name)]]);
-                io::nl();
+                ::Core::io::put_chars([["Hello ",
+                                    patina_fmt::display(name)]]);
+                ::Core::io::nl();
             }
         }
     }
-    { io::put_chars([["names: ", patina_fmt::debug(names)]]); io::nl(); };
+    {
+        ::Core::io::put_chars([["names: ", patina_fmt::debug(names)]]);
+        ::Core::io::nl();
+    };
 }

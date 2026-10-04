@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/variable_bindings/scope.md
@@ -30,38 +27,38 @@ fn main() ({
 
         // This binding *shadows* the previous binding
         ({
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("before being shadowed: " as str),
                                 ((patina_fmt::display as
                                         fn(term) -> term)((shadowed_binding as int)) as term)] as
                             [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         } as ());
         let shadowed_binding = ("abc" as str);
         ({
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("shadowed in inner block: " as str),
                                 ((patina_fmt::display as
                                         fn(term) -> term)((shadowed_binding as str)) as term)] as
                             [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         } as ());
     } as ())
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("outside inner block: " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)((shadowed_binding as int)) as term)] as
                         [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     let shadowed_binding = (2 as int);
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("shadowed in outer block: " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)((shadowed_binding as int)) as term)] as
                         [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

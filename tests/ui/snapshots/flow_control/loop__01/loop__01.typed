@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/loop.md
@@ -33,35 +30,35 @@ fn main() ({
 
     // Exit this loop
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("Let\'s count until infinity!" as str)]
                         as [str])] as [[str]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     (loop {
         ((count as int) += (1 as int) as int);
         (if ((count as int) == (3 as int) as bool) {
             ({
-                ((io::put_chars as
+                ((::Core::io::put_chars as
                         fn(term) -> term)(([([("three" as str)] as [str])] as
                         [[str]])) as term);
-                ((io::nl as fn() -> term)() as term);
+                ((::Core::io::nl as fn() -> term)() as term);
             } as ());
             (continue as !);
         } as ())
         ({
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([((patina_fmt::display as
                                         fn(term) -> term)((count as int)) as term)] as [term])] as
                     [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         } as ());
         (if ((count as int) == (5 as int) as bool) {
             ({
-                ((io::put_chars as
+                ((::Core::io::put_chars as
                         fn(term) -> term)(([([("OK, that\'s enough" as str)] as
                                 [str])] as [[str]])) as term);
-                ((io::nl as fn() -> term)() as term);
+                ((::Core::io::nl as fn() -> term)() as term);
             } as ());
             (break as !);
         } as ())

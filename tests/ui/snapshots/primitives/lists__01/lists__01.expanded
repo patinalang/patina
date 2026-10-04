@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/primitives/lists.md
@@ -41,39 +38,44 @@ pub fn main() {
 
             // Lists can also be destructured using a similar syntax
             {
-            io::put_chars([["elem 0: ", patina_fmt::display({})]]);
-            io::nl();
+            ::Core::io::put_chars([["elem 0: ", patina_fmt::display({})]]);
+            ::Core::io::nl();
         }
-        None => { io::put_chars([["the list is empty!"]]); io::nl(); }
+        None => {
+            ::Core::io::put_chars([["the list is empty!"]]);
+            ::Core::io::nl();
+        }
     }
     {
-        io::put_chars([["Number of elements in array: ",
+        ::Core::io::put_chars([["Number of elements in array: ",
                             patina_fmt::display(xs.len())]]);
-        io::nl();
+        ::Core::io::nl();
     };
     {
-        io::put_chars([["First element of the list: ",
+        ::Core::io::put_chars([["First element of the list: ",
                             patina_fmt::display(xs.head)]]);
-        io::nl();
+        ::Core::io::nl();
     };
     {
-        io::put_chars([["Rest of the list: ", patina_fmt::debug(xs.tail)]]);
-        io::nl();
+        ::Core::io::put_chars([["Rest of the list: ",
+                            patina_fmt::debug(xs.tail)]]);
+        ::Core::io::nl();
     };
     let more_xs = [-1, 0, ..xs];
     {
-        io::put_chars([["more_xs tail is equal to xs: ",
+        ::Core::io::put_chars([["more_xs tail is equal to xs: ",
                             patina_fmt::display(more_xs.tail == xs)]]);
-        io::nl();
+        ::Core::io::nl();
     };
     let [first, second, third, rest @ ..] = more_xs else { return };
     {
-        io::put_chars([["Sum of first three elements is ",
+        ::Core::io::put_chars([["Sum of first three elements is ",
                             patina_fmt::display(first + second + third)]]);
-        io::nl();
+        ::Core::io::nl();
     };
     {
-        io::put_chars([["...and the rest: ", patina_fmt::debug(rest)]]);
-        io::nl();
+        ::Core::io::put_chars([["...and the rest: ",
+                            patina_fmt::debug(rest)]]);
+        ::Core::io::nl();
     };
 }

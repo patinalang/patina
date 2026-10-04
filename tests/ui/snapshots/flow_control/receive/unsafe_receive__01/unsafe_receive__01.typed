@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/receive/unsafe_receive.md
@@ -35,36 +32,36 @@ fn main() ({
     (unsafe {
         (receive {
             int(n) => {
-                ((io::put_chars as
+                ((::Core::io::put_chars as
                         fn(term) -> term)(([([("got integer " as str),
                                     ((patina_fmt::debug as fn(term) -> term)((n as int)) as
                                         term)] as [term])] as [[term]])) as term);
-                ((io::nl as fn() -> term)() as term);
+                ((::Core::io::nl as fn() -> term)() as term);
             }
             atom(a) => {
-                ((io::put_chars as
+                ((::Core::io::put_chars as
                         fn(term) -> term)(([([("got atom " as str),
                                     ((patina_fmt::debug as fn(term) -> term)((a as atom)) as
                                         term)] as [term])] as [[term]])) as term);
-                ((io::nl as fn() -> term)() as term);
+                ((::Core::io::nl as fn() -> term)() as term);
             }
             Option::<str>::None => {
-                ((io::put_chars as
+                ((::Core::io::put_chars as
                         fn(term) -> term)(([([("got an empty string option" as str)]
                                 as [str])] as [[str]])) as term);
-                ((io::nl as fn() -> term)() as term);
+                ((::Core::io::nl as fn() -> term)() as term);
             }
             Option::<int>::None => {
-                ((io::put_chars as
+                ((::Core::io::put_chars as
                         fn(term) -> term)(([([("got an empty integer option" as
                                         str)] as [str])] as [[str]])) as term);
-                ((io::nl as fn() -> term)() as term);
+                ((::Core::io::nl as fn() -> term)() as term);
             }
             _ => {
-                ((io::put_chars as
+                ((::Core::io::put_chars as
                         fn(term) -> term)(([([("got something else" as str)] as
                                 [str])] as [[str]])) as term);
-                ((io::nl as fn() -> term)() as term);
+                ((::Core::io::nl as fn() -> term)() as term);
             }
         }
             after ((Timeout::from_seconds as
@@ -72,10 +69,10 @@ fn main() ({
                     as int)) as Core::Timeout)
             ({
                 ({
-                    ((io::put_chars as
+                    ((::Core::io::put_chars as
                             fn(term) -> term)(([([("timeout" as str)] as [str])] as
                             [[str]])) as term);
-                    ((io::nl as fn() -> term)() as term);
+                    ((::Core::io::nl as fn() -> term)() as term);
                 } as ())
             } as ()) as ())
     } as ())

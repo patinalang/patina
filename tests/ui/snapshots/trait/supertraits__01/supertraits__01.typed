@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/trait/supertraits.md
@@ -86,10 +83,10 @@ fn main() ({
                 fn((dyn CompSciStudent + 'static)) -> str {comp_sci_student_greeting})((student
                 as CSStudent)) as str);
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)((greeting as str)) as term)] as [term])]
                 as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

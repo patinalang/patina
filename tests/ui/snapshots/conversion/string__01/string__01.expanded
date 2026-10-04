@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/conversion/string.md
@@ -32,5 +29,8 @@ impl Fmt::Display for Circle {
 
 pub fn main() {
     let circle = Circle { radius: 6 };
-    { io::put_chars([[patina_fmt::display(circle.to_str())]]); io::nl(); };
+    {
+        ::Core::io::put_chars([[patina_fmt::display(circle.to_str())]]);
+        ::Core::io::nl();
+    };
 }

@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/generics/multi_bounds.md
@@ -29,15 +26,24 @@ fn compare_prints<T: Debug + Display>(t: T) {
     //compare_prints(list);
     // TODO ^ Try uncommenting this.
 
-    { io::put_chars([["Debug: `", patina_fmt::debug(t), "`"]]); io::nl(); };
     {
-        io::put_chars([["Display: `", patina_fmt::display(t), "`"]]);
-        io::nl();
+        ::Core::io::put_chars([["Debug: `", patina_fmt::debug(t), "`"]]);
+        ::Core::io::nl();
+    };
+    {
+        ::Core::io::put_chars([["Display: `", patina_fmt::display(t), "`"]]);
+        ::Core::io::nl();
     };
 }
 fn compare_types<T: Debug, U: Debug>(t: T, u: U) {
-    { io::put_chars([["t: `", patina_fmt::debug(t), "`"]]); io::nl(); };
-    { io::put_chars([["u: `", patina_fmt::debug(u), "`"]]); io::nl(); };
+    {
+        ::Core::io::put_chars([["t: `", patina_fmt::debug(t), "`"]]);
+        ::Core::io::nl();
+    };
+    {
+        ::Core::io::put_chars([["u: `", patina_fmt::debug(u), "`"]]);
+        ::Core::io::nl();
+    };
 }
 pub fn main() {
     let string = "words";

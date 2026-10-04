@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/trait/derive.md
@@ -54,15 +51,16 @@ pub fn main() {
 
 
     {
-        io::put_chars([["One foot equals ", patina_fmt::debug(foot)]]);
-        io::nl();
+        ::Core::io::put_chars([["One foot equals ",
+                            patina_fmt::debug(foot)]]);
+        ::Core::io::nl();
     };
     let meter = Centimeters(100.0);
     let cmp =
         if foot.to_centimeters() < meter { "smaller" } else { "bigger" };
     {
-        io::put_chars([["One foot is ", patina_fmt::display(cmp),
+        ::Core::io::put_chars([["One foot is ", patina_fmt::display(cmp),
                             " than one meter."]]);
-        io::nl();
+        ::Core::io::nl();
     };
 }

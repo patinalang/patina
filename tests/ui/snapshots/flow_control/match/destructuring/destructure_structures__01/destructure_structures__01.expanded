@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/match/destructuring/destructure_structures.md
@@ -44,26 +41,27 @@ pub fn main() {
             // Destructuring works with nested structs as well:
 
             {
-            io::put_chars([["First of x is 1, b = ", patina_fmt::display(b),
-                                ",  y = ", patina_fmt::display(y), " "]]);
-            io::nl();
+            ::Core::io::put_chars([["First of x is 1, b = ",
+                                patina_fmt::display(b), ",  y = ", patina_fmt::display(y),
+                                " "]]);
+            ::Core::io::nl();
         }
         Foo { y: 2, x: i } => {
-            io::put_chars([["y is 2, i = ", patina_fmt::debug(i)]]);
-            io::nl();
+            ::Core::io::put_chars([["y is 2, i = ", patina_fmt::debug(i)]]);
+            ::Core::io::nl();
         }
         Foo { y, .. } => {
-            io::put_chars([["y = ", patina_fmt::display(y),
+            ::Core::io::put_chars([["y = ", patina_fmt::display(y),
                                 ", we don\'t care about x"]]);
-            io::nl();
+            ::Core::io::nl();
         }
     }
     let faa = Foo { x: (1, 2), y: 3 };
     let Foo { x: x0, y: y0 } = faa;
     {
-        io::put_chars([["Outside: x0 = ", patina_fmt::debug(x0), ", y0 = ",
-                            patina_fmt::display(y0)]]);
-        io::nl();
+        ::Core::io::put_chars([["Outside: x0 = ", patina_fmt::debug(x0),
+                            ", y0 = ", patina_fmt::display(y0)]]);
+        ::Core::io::nl();
     };
     struct Bar {
         foo: Foo,
@@ -71,8 +69,9 @@ pub fn main() {
     let bar = Bar { foo: faa };
     let Bar { foo: Foo { x: nested_x, y: nested_y } } = bar;
     {
-        io::put_chars([["Nested: nested_x = ", patina_fmt::debug(nested_x),
-                            ", nested_y = ", patina_fmt::debug(nested_y)]]);
-        io::nl();
+        ::Core::io::put_chars([["Nested: nested_x = ",
+                            patina_fmt::debug(nested_x), ", nested_y = ",
+                            patina_fmt::debug(nested_y)]]);
+        ::Core::io::nl();
     };
 }

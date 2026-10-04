@@ -1,5 +1,5 @@
 error: cannot call an extern module
-  --> tests/ui/src/mod/extern_mod_call_root.pt:2:5
+  --> tests/ui/src/mod/extern_mod_call_root.pt:4:5
    |
 LL |     io();
    |     ^^

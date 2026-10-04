@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 fn initialized_in_branches(condition: bool) -> int {
@@ -44,15 +41,15 @@ fn initialized_on_every_loop_exit(condition: bool) -> int {
 
 pub fn main() {
     {
-        io::put_chars([[patina_fmt::display(initialized_in_branches(true))]]);
-        io::nl();
+        ::Core::io::put_chars([[patina_fmt::display(initialized_in_branches(true))]]);
+        ::Core::io::nl();
     };
     {
-        io::put_chars([[patina_fmt::display(initialized_after_diverging_branch(false))]]);
-        io::nl();
+        ::Core::io::put_chars([[patina_fmt::display(initialized_after_diverging_branch(false))]]);
+        ::Core::io::nl();
     };
     {
-        io::put_chars([[patina_fmt::display(initialized_on_every_loop_exit(true))]]);
-        io::nl();
+        ::Core::io::put_chars([[patina_fmt::display(initialized_on_every_loop_exit(true))]]);
+        ::Core::io::nl();
     };
 }

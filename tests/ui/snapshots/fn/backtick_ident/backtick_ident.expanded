@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 pub fn `exists?`(x: int) -> bool { x > 0 }
@@ -27,7 +24,7 @@ pub fn `save!`() {
 
 
 
-    { io::put_chars([["saved!"]]); io::nl(); };
+    { ::Core::io::put_chars([["saved!"]]); ::Core::io::nl(); };
 }
 pub fn `a{b}`() -> int { 1 }
 pub fn `type`() -> int { 2 }
@@ -50,8 +47,17 @@ pub fn main() {
     if !self::`exists?`(1) { return; }
     `exists?`(1);
     `save!`();
-    { io::put_chars([[patina_fmt::display("`a{b}`")]]); io::nl(); };
-    { io::put_chars([[patina_fmt::display(`value?`)]]); io::nl(); };
-    { io::put_chars([[patina_fmt::display(`type`)]]); io::nl(); };
+    {
+        ::Core::io::put_chars([[patina_fmt::display("`a{b}`")]]);
+        ::Core::io::nl();
+    };
+    {
+        ::Core::io::put_chars([[patina_fmt::display(`value?`)]]);
+        ::Core::io::nl();
+    };
+    {
+        ::Core::io::put_chars([[patina_fmt::display(`type`)]]);
+        ::Core::io::nl();
+    };
     let _ = `a{b}`();
 }

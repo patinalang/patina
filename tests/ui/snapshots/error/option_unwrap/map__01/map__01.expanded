@@ -6,7 +6,6 @@
 
 
 
-
 // source: patina-by-example/src/error/option_unwrap/map.md
 // block: 1/1
 
@@ -17,8 +16,6 @@ extern crate Core;
 #[allow(unused_imports)]
 #[prelude_import]
 use Core::Prelude::*;
-#[allow(unused)]
-extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
@@ -61,10 +58,14 @@ fn eat(food: Option<Cooked>) {
             // Let's try the simpler looking `process()` now.
 
             {
-            io::put_chars([["Mmm. I love ", patina_fmt::debug(food)]]);
-            io::nl();
+            ::Core::io::put_chars([["Mmm. I love ",
+                                patina_fmt::debug(food)]]);
+            ::Core::io::nl();
         }
-        None => { io::put_chars([["Oh no! It wasn\'t edible."]]); io::nl(); }
+        None => {
+            ::Core::io::put_chars([["Oh no! It wasn\'t edible."]]);
+            ::Core::io::nl();
+        }
     }
 }
 pub fn main() {

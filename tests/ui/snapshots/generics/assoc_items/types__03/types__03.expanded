@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/generics/assoc_items/types.md
@@ -67,26 +64,26 @@ pub fn main() {
 
 
     {
-        io::put_chars([["Does container contain ",
+        ::Core::io::put_chars([["Does container contain ",
                             patina_fmt::display(number_1), " and ",
                             patina_fmt::display(number_2), ": ",
                             patina_fmt::display(container.contains(number_1,
                                     number_2))]]);
-        io::nl();
+        ::Core::io::nl();
     };
     {
-        io::put_chars([["First number: ",
+        ::Core::io::put_chars([["First number: ",
                             patina_fmt::display(container.first())]]);
-        io::nl();
+        ::Core::io::nl();
     };
     {
-        io::put_chars([["Last number: ",
+        ::Core::io::put_chars([["Last number: ",
                             patina_fmt::display(container.last())]]);
-        io::nl();
+        ::Core::io::nl();
     };
     {
-        io::put_chars([["The difference is: ",
+        ::Core::io::put_chars([["The difference is: ",
                             patina_fmt::display(difference(container))]]);
-        io::nl();
+        ::Core::io::nl();
     };
 }

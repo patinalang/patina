@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 fn initialized_in_branches(condition: bool)
@@ -60,29 +57,29 @@ fn initialized_on_every_loop_exit(condition: bool)
 
 fn main() ({
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)(((initialized_in_branches as
                                         fn(bool) -> int {initialized_in_branches})((true as bool))
                                     as int)) as term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)(((initialized_after_diverging_branch as
                                         fn(bool) -> int {initialized_after_diverging_branch})((false
                                         as bool)) as int)) as term)] as [term])] as [[term]])) as
             term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)(((initialized_on_every_loop_exit as
                                         fn(bool) -> int {initialized_on_every_loop_exit})((true as
                                         bool)) as int)) as term)] as [term])] as [[term]])) as
             term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

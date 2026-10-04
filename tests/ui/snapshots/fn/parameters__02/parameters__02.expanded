@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/fn/parameters.md
@@ -42,16 +39,27 @@ pub fn main() {
 
                 // won't print anything
 
-                { io::put_chars([["fx evaluated!"]]); io::nl(); };
+                {
+                    ::Core::io::put_chars([["fx evaluated!"]]);
+                    ::Core::io::nl();
+                };
                 3
             };
-    let fy = || { { io::put_chars([["fy evaluated!"]]); io::nl(); }; 5 };
+    let fy =
+        ||
+            {
+                {
+                    ::Core::io::put_chars([["fy evaluated!"]]);
+                    ::Core::io::nl();
+                };
+                5
+            };
     let lazy_result = lazy_add(fx, fy);
     let op = choose_op(MathOp::Add);
     {
-        io::put_chars([[patina_fmt::display(3), " op ",
+        ::Core::io::put_chars([[patina_fmt::display(3), " op ",
                             patina_fmt::display(5), " = ",
                             patina_fmt::display(op(3, 5))]]);
-        io::nl();
+        ::Core::io::nl();
     }
 }

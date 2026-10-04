@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 struct GenVal<T> {
@@ -34,8 +31,8 @@ pub fn main() {
     let b = GenVal { gen_val: "hi" };
 
     {
-        io::put_chars([[patina_fmt::display(a.value()), " ",
+        ::Core::io::put_chars([[patina_fmt::display(a.value()), " ",
                             patina_fmt::display(b.value(0))]]);
-        io::nl();
+        ::Core::io::nl();
     };
 }

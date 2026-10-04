@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 trait Tr {
@@ -29,8 +26,9 @@ impl Tr for S {
 
 
         {
-            io::put_chars([["Tr::method(", patina_fmt::debug(self), ")"]]);
-            io::nl();
+            ::Core::io::put_chars([["Tr::method(", patina_fmt::debug(self),
+                                ")"]]);
+            ::Core::io::nl();
         };
     }
 }

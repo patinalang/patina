@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/match/guard.md
@@ -28,9 +25,12 @@ pub fn main() {
             // _ => unreachable!("Should never happen."),
             // TODO ^ uncomment to fix compilation
             {
-            io::put_chars([["Zero"]]);
-            io::nl();
+            ::Core::io::put_chars([["Zero"]]);
+            ::Core::io::nl();
         }
-        i if i > 0 => { io::put_chars([["Greater than zero"]]); io::nl(); }
+        i if i > 0 => {
+            ::Core::io::put_chars([["Greater than zero"]]);
+            ::Core::io::nl();
+        }
     }
 }

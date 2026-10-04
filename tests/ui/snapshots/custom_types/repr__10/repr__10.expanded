@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/custom_types/repr.md
@@ -46,12 +43,12 @@ pub fn main() {
 
     // [a"foo"]
     {
-        io::put_chars([[patina_fmt::debug(records::get_field_names(point))]]);
-        io::nl();
+        ::Core::io::put_chars([[patina_fmt::debug(records::get_field_names(point))]]);
+        ::Core::io::nl();
     };
     let rect = NativeRecordStruct { foo: "bar" };
     {
-        io::put_chars([[patina_fmt::debug(records::get_field_names(rect))]]);
-        io::nl();
+        ::Core::io::put_chars([[patina_fmt::debug(records::get_field_names(rect))]]);
+        ::Core::io::nl();
     };
 }

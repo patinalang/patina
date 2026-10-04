@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/match/destructuring/destructure_tuple.md
@@ -29,30 +26,32 @@ pub fn main() {
     // `..` can be used to ignore the rest of the tuple
     // `_` means don't bind the value to a variable
     {
-        io::put_chars([["Tell me about ", patina_fmt::debug(triple)]]);
-        io::nl();
+        ::Core::io::put_chars([["Tell me about ",
+                            patina_fmt::debug(triple)]]);
+        ::Core::io::nl();
     };
     match triple {
         (0, y, z) => {
-            io::put_chars([["First is `0`, `y` is ", patina_fmt::debug(y),
-                                ", and `z` is ", patina_fmt::debug(z)]]);
-            io::nl();
+            ::Core::io::put_chars([["First is `0`, `y` is ",
+                                patina_fmt::debug(y), ", and `z` is ",
+                                patina_fmt::debug(z)]]);
+            ::Core::io::nl();
         }
         (1, ..) => {
-            io::put_chars([["First is `1` and the rest doesn\'t matter"]]);
-            io::nl();
+            ::Core::io::put_chars([["First is `1` and the rest doesn\'t matter"]]);
+            ::Core::io::nl();
         }
         (.., 2) => {
-            io::put_chars([["last is `2` and the rest doesn\'t matter"]]);
-            io::nl();
+            ::Core::io::put_chars([["last is `2` and the rest doesn\'t matter"]]);
+            ::Core::io::nl();
         }
         (3, .., 4) => {
-            io::put_chars([["First is `3`, last is `4`, and the rest doesn\'t matter"]]);
-            io::nl();
+            ::Core::io::put_chars([["First is `3`, last is `4`, and the rest doesn\'t matter"]]);
+            ::Core::io::nl();
         }
         _ => {
-            io::put_chars([["It doesn\'t matter what they are"]]);
-            io::nl();
+            ::Core::io::put_chars([["It doesn\'t matter what they are"]]);
+            ::Core::io::nl();
         }
     }
 }

@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/error/result.md
@@ -31,9 +28,12 @@ pub fn main() {
     let twenty = multiply("10", "2");
 
     {
-        io::put_chars([["double is ", patina_fmt::display(twenty)]]);
-        io::nl();
+        ::Core::io::put_chars([["double is ", patina_fmt::display(twenty)]]);
+        ::Core::io::nl();
     };
     let tt = multiply("t", "2");
-    { io::put_chars([["double is ", patina_fmt::display(tt)]]); io::nl(); };
+    {
+        ::Core::io::put_chars([["double is ", patina_fmt::display(tt)]]);
+        ::Core::io::nl();
+    };
 }

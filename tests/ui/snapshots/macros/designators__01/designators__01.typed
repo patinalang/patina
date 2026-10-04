@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/macros/designators.md
@@ -47,20 +44,20 @@ fn foo() ({
     // Recall that blocks are expressions too!
 
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("You called " as str),
                             ((patina_fmt::debug as fn(term) -> term)(("foo" as str)) as
                                 term), ("()" as str)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())
 fn bar() ({
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("You called " as str),
                             ((patina_fmt::debug as fn(term) -> term)(("bar" as str)) as
                                 term), ("()" as str)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())
 macro_rules! print_result {
@@ -71,17 +68,17 @@ fn main() ({
     ((foo as fn() {foo})() as ());
     ((bar as fn() {bar})() as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)(("1 + 1" as str)) as term),
                             (" = " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)(((1 as int) + (1 as int) as int)) as
                                 term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)(("{ let x = 1; x * x + 2 * x - 1 }" as
                                     str)) as term), (" = " as str),
@@ -92,6 +89,6 @@ fn main() ({
                                             ((2 as int) * (x as int) as int) as int) - (1 as int) as
                                         int)
                                 } as term)) as term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

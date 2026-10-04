@@ -12,14 +12,12 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 extern mod used;
 extern mod unused;
 extern mod erlang;
+extern mod io;
 
 mod inner {
     pub fn use_it() { let _hash = erlang::phash2(()); }
@@ -27,7 +25,10 @@ mod inner {
 
 pub fn main() {
     used::ping();
-    { io::put_chars([[patina_fmt::debug(used::foo::bar)]]); io::nl(); };
+    {
+        ::Core::io::put_chars([[patina_fmt::debug(used::foo::bar)]]);
+        ::Core::io::nl();
+    };
     io::foo::bar(1, 2);
     io::a::b::c::d(1);
     io::a::b::c::d(2);

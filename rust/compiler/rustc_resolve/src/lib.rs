@@ -2019,6 +2019,26 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         child
     }
 
+    /// The local module for `extern mod`, so we have something to tie chidren
+    /// to. A foreign `extern mod` gets a local mirror, since local definitions
+    /// need a local parent.
+    pub(crate) fn local_extern_mod(&mut self, module: Module<'ra>, span: Span) -> LocalModule<'ra> {
+        if module.def_id().is_local() {
+            return module.expect_local();
+        }
+
+        let parent = match module.parent {
+            Some(parent) if let Some(Res::Def(DefKind::ExternMod, _)) = parent.res() => {
+                self.local_extern_mod(parent, span)
+            }
+            _ => self.graph_root,
+        };
+
+        let name = module.kind.name().unwrap();
+        let mirror = self.get_or_create_extern_mod_child(parent, Ident::new(name, span));
+        self.local_module_map[&mirror]
+    }
+
     pub(crate) fn plant_extern_mod_child_binding(
         &mut self,
         parent: LocalModule<'ra>,
@@ -2035,7 +2055,13 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             LocalExpnId::ROOT,
             Some(parent.to_module()),
         );
-        self.plant_decl_into_local_module(ident_key, ident_span, ns, decl);
+        // Lookups in a foreign `extern mod` miss the children of its local mirror, so they plant
+        // the same child again.
+        if let Err(old_decl) =
+            self.try_plant_decl_into_local_module(ident_key, ident_span, ns, decl, false)
+        {
+            assert_eq!(old_decl.res(), res);
+        }
     }
 
     fn cstore(&self) -> FreezeReadGuard<'_, CStore> {

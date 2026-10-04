@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/custom_types/repr.md
@@ -39,18 +36,18 @@ pub fn main() {
     // but we have helpers for that.
     // a"ok"
     {
-        io::put_chars([[patina_fmt::debug(Result::<int, str>::Ok(42) as
-                                    term)]]);
-        io::nl();
+        ::Core::io::put_chars([[patina_fmt::debug(Result::<int, str>::Ok(42)
+                                    as term)]]);
+        ::Core::io::nl();
     };
     {
-        io::put_chars([[patina_fmt::debug(Result::<int, str>::Err("reason") as
-                                    term)]]);
-        io::nl();
+        ::Core::io::put_chars([[patina_fmt::debug(Result::<int,
+                                            str>::Err("reason") as term)]]);
+        ::Core::io::nl();
     };
     {
-        io::put_chars([[patina_fmt::debug(Result::<(),
+        ::Core::io::put_chars([[patina_fmt::debug(Result::<(),
                                                 str>::Ok(()).into::<Compat::BareOkResult>() as term)]]);
-        io::nl();
+        ::Core::io::nl();
     };
 }

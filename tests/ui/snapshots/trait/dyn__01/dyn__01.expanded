@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/trait/dyn.md
@@ -48,8 +45,8 @@ pub fn main() {
     let random_number = 0.234;
     let animal = random_animal(random_number);
     {
-        io::put_chars([["You\'ve randomly chosen an animal, and it says ",
+        ::Core::io::put_chars([["You\'ve randomly chosen an animal, and it says ",
                             patina_fmt::display(animal.noise())]]);
-        io::nl();
+        ::Core::io::nl();
     };
 }

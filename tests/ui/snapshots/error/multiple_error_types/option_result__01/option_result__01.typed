@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/error/multiple_error_types/option_result.md
@@ -48,33 +45,33 @@ fn main() ({
 
     // Error 2: the element doesn't parse to a number
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("The first doubled is " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)(((double_first as
                                         fn([str]) -> Core::Option<{type error}> {double_first})((numbers
                                         as [str])) as Core::Option<{type error}>)) as term)] as
                         [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("The first doubled is " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)(((double_first as
                                         fn([str]) -> Core::Option<{type error}> {double_first})((empty
                                         as [str])) as Core::Option<{type error}>)) as term)] as
                         [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("The first doubled is " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)(((double_first as
                                         fn([str]) -> Core::Option<{type error}> {double_first})((strings
                                         as [str])) as Core::Option<{type error}>)) as term)] as
                         [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

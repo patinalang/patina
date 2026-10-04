@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/conversion/from_into.md
@@ -32,5 +29,8 @@ impl From<int> for Number {
 
 pub fn main() {
     let num = Number::from(30);
-    { io::put_chars([["My number is ", patina_fmt::debug(num)]]); io::nl(); };
+    {
+        ::Core::io::put_chars([["My number is ", patina_fmt::debug(num)]]);
+        ::Core::io::nl();
+    };
 }

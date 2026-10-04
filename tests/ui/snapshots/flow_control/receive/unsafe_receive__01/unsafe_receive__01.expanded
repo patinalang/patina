@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/receive/unsafe_receive.md
@@ -34,23 +31,27 @@ pub fn main() {
     unsafe {
         receive {
             int(n) => {
-                io::put_chars([["got integer ", patina_fmt::debug(n)]]);
-                io::nl();
+                ::Core::io::put_chars([["got integer ",
+                                    patina_fmt::debug(n)]]);
+                ::Core::io::nl();
             }
             atom(a) => {
-                io::put_chars([["got atom ", patina_fmt::debug(a)]]);
-                io::nl();
+                ::Core::io::put_chars([["got atom ", patina_fmt::debug(a)]]);
+                ::Core::io::nl();
             }
             Option::<str>::None => {
-                io::put_chars([["got an empty string option"]]);
-                io::nl();
+                ::Core::io::put_chars([["got an empty string option"]]);
+                ::Core::io::nl();
             }
             Option::<int>::None => {
-                io::put_chars([["got an empty integer option"]]);
-                io::nl();
+                ::Core::io::put_chars([["got an empty integer option"]]);
+                ::Core::io::nl();
             }
-            _ => { io::put_chars([["got something else"]]); io::nl(); }
+            _ => {
+                ::Core::io::put_chars([["got something else"]]);
+                ::Core::io::nl();
+            }
         } after Timeout::from_seconds(5)
-            { { io::put_chars([["timeout"]]); io::nl(); } }
+            { { ::Core::io::put_chars([["timeout"]]); ::Core::io::nl(); } }
     }
 }

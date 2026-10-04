@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/while_let.md
@@ -37,21 +34,21 @@ fn main() ({
                 // ^ `if let` had additional optional `else`/`else if`
                 // clauses. `while let` does not have these.
                 ({
-                    ((io::put_chars as
+                    ((::Core::io::put_chars as
                             fn(term) -> term)(([([("Greater than 9, quit!" as str)] as
                                     [str])] as [[str]])) as term);
-                    ((io::nl as fn() -> term)() as term);
+                    ((::Core::io::nl as fn() -> term)() as term);
                 } as ());
                 ((optional as Core::Option<int>) = (None as Core::Option<int>)
                     as Core::Option<int>);
             } else {
                 ({
-                    ((io::put_chars as
+                    ((::Core::io::put_chars as
                             fn(term) -> term)(([([("`i` is `" as str),
                                         ((patina_fmt::debug as fn(term) -> term)((i as int)) as
                                             term), ("`. Try again." as str)] as [term])] as [[term]]))
                         as term);
-                    ((io::nl as fn() -> term)() as term);
+                    ((::Core::io::nl as fn() -> term)() as term);
                 } as ());
                 ((optional as Core::Option<int>) =
                     ((Some as

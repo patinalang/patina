@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/mod/split.md
@@ -42,7 +39,9 @@ mod MyMod {
     fn private_function() -> int { 2 }
     pub fn indirect_access() -> int { private_function() }
 }
-fn function() { { io::put_chars([["called `function()`"]]); io::nl(); }; }
+fn function() {
+    { ::Core::io::put_chars([["called `function()`"]]); ::Core::io::nl(); };
+}
 pub fn main() {
     MyMod::function();
     function();

@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/types/cast.md
@@ -49,10 +46,10 @@ pub fn main() {
     // byte can be cast to an integer, but not the other way around!
     // Error! Byte cannot be cast from an arbitrary integer
     {
-        io::put_chars([["Casting: ", patina_fmt::display(decimal), " -> ",
-                            patina_fmt::display(integer), " -> ",
+        ::Core::io::put_chars([["Casting: ", patina_fmt::display(decimal),
+                            " -> ", patina_fmt::display(integer), " -> ",
                             patina_fmt::display(character)]]);
-        io::nl();
+        ::Core::io::nl();
     };
     let string = "hello";
     let binary = string as bin;

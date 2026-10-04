@@ -6,7 +6,6 @@
 
 
 
-
 #![deny(unused_parens)]
 #[allow(unused_imports)]
 #[macro_use]
@@ -14,8 +13,6 @@ extern crate Core;
 #[allow(unused_imports)]
 #[prelude_import]
 use Core::Prelude::*;
-#[allow(unused)]
-extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 

@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 struct Years(int);
@@ -35,13 +32,13 @@ fn main() ({
     let age_value =
         ((get_age as fn(Years) -> int {get_age})((age as Years)) as int);
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("Age " as str),
                             ((patina_fmt::debug as fn(term) -> term)((age as Years)) as
                                 term), (" is " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)((age_value as int)) as term)] as [term])]
                 as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

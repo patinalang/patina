@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/generics/new_types.md
@@ -40,13 +37,13 @@ pub fn main() {
     let age_days = age.to_days();
     // println!("Is an adult? {}", is_adult(age_days));
     {
-        io::put_chars([["Is an adult? ",
+        ::Core::io::put_chars([["Is an adult? ",
                             patina_fmt::display(is_adult(age))]]);
-        io::nl();
+        ::Core::io::nl();
     };
     {
-        io::put_chars([["Is an adult? ",
+        ::Core::io::put_chars([["Is an adult? ",
                             patina_fmt::display(is_adult(age_days.to_years()))]]);
-        io::nl();
+        ::Core::io::nl();
     };
 }

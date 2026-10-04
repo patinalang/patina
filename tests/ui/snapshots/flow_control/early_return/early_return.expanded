@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 fn mark(value: int) -> int {
@@ -32,7 +29,10 @@ fn mark(value: int) -> int {
 
 
 
-    { io::put_chars([[patina_fmt::display(value)]]); io::nl(); };
+    {
+        ::Core::io::put_chars([[patina_fmt::display(value)]]);
+        ::Core::io::nl();
+    };
     value
 }
 enum Choice { Stop, Continue, }

@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/custom_types/enum/literal_enums.md
@@ -34,15 +31,16 @@ pub fn main() {
 
     // "Peter"
     {
-        io::put_chars([[patina_fmt::debug(AtomEnum::Foo as atom)]]);
-        io::nl();
+        ::Core::io::put_chars([[patina_fmt::debug(AtomEnum::Foo as atom)]]);
+        ::Core::io::nl();
     };
     {
-        io::put_chars([[patina_fmt::debug(IntEnum::NotFound as int)]]);
-        io::nl();
+        ::Core::io::put_chars([[patina_fmt::debug(IntEnum::NotFound as
+                                    int)]]);
+        ::Core::io::nl();
     };
     {
-        io::put_chars([[patina_fmt::debug(StrEnum::Peter as str)]]);
-        io::nl();
+        ::Core::io::put_chars([[patina_fmt::debug(StrEnum::Peter as str)]]);
+        ::Core::io::nl();
     };
 }

@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/fn.md
@@ -41,11 +38,16 @@ fn fizzbuzz(n: int) -> () {
 
         // When a function returns `()`, the return type can be omitted from the
         // signature
-        { io::put_chars([["fizzbuzz"]]); io::nl(); };
+        { ::Core::io::put_chars([["fizzbuzz"]]); ::Core::io::nl(); };
     } else if is_divisible_by(n, 3) {
-        { io::put_chars([["fizz"]]); io::nl(); };
+        { ::Core::io::put_chars([["fizz"]]); ::Core::io::nl(); };
     } else if is_divisible_by(n, 5) {
-        { io::put_chars([["buzz"]]); io::nl(); };
-    } else { { io::put_chars([[patina_fmt::display(n)]]); io::nl(); }; }
+        { ::Core::io::put_chars([["buzz"]]); ::Core::io::nl(); };
+    } else {
+        {
+            ::Core::io::put_chars([[patina_fmt::display(n)]]);
+            ::Core::io::nl();
+        };
+    }
 }
 fn fizzbuzz_to(n: int) { for n in 1..=n { fizzbuzz(n); } }

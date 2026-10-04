@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/for.md
@@ -24,11 +21,16 @@ pub fn main() {
     // `n` will take the values: 1, 2, ..., 100 in each iteration
     for n in 1..=100 {
         if n % 15 == 0 {
-            { io::put_chars([["fizzbuzz"]]); io::nl(); };
+            { ::Core::io::put_chars([["fizzbuzz"]]); ::Core::io::nl(); };
         } else if n % 3 == 0 {
-            { io::put_chars([["fizz"]]); io::nl(); };
+            { ::Core::io::put_chars([["fizz"]]); ::Core::io::nl(); };
         } else if n % 5 == 0 {
-            { io::put_chars([["buzz"]]); io::nl(); };
-        } else { { io::put_chars([[patina_fmt::display(n)]]); io::nl(); }; }
+            { ::Core::io::put_chars([["buzz"]]); ::Core::io::nl(); };
+        } else {
+            {
+                ::Core::io::put_chars([[patina_fmt::display(n)]]);
+                ::Core::io::nl();
+            };
+        }
     }
 }

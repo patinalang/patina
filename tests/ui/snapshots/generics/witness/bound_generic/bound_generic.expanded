@@ -6,7 +6,6 @@
 
 
 
-
 #![allow(dead_code)]
 #[allow(unused_imports)]
 #[macro_use]
@@ -14,8 +13,6 @@ extern crate Core;
 #[allow(unused_imports)]
 #[prelude_import]
 use Core::Prelude::*;
-#[allow(unused)]
-extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
@@ -39,8 +36,9 @@ impl Bound for Number {
 
 
         {
-            io::put_chars([["Bound::b(", patina_fmt::debug(self), ")"]]);
-            io::nl();
+            ::Core::io::put_chars([["Bound::b(", patina_fmt::debug(self),
+                                ")"]]);
+            ::Core::io::nl();
         };
         self.n
     }
@@ -52,8 +50,9 @@ trait Tr {
 impl<T: Bound> Tr for Holder<T> {
     fn method(self) -> int {
         {
-            io::put_chars([["Tr::method(", patina_fmt::debug(self), ")"]]);
-            io::nl();
+            ::Core::io::put_chars([["Tr::method(", patina_fmt::debug(self),
+                                ")"]]);
+            ::Core::io::nl();
         };
         self.value.b()
     }
@@ -61,5 +60,8 @@ impl<T: Bound> Tr for Holder<T> {
 fn call<T: Bound>(h: Holder<T>) -> int { h.method() }
 pub fn main() {
     let h = Holder { value: Number { n: 5 } };
-    { io::put_chars([[patina_fmt::display(call(h))]]); io::nl(); };
+    {
+        ::Core::io::put_chars([[patina_fmt::display(call(h))]]);
+        ::Core::io::nl();
+    };
 }

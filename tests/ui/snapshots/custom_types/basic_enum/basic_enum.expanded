@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 enum BasicEnum {
@@ -32,8 +29,8 @@ pub fn main() {
     let z = BasicEnum::Struct { x: 1, y: "hello" };
 
     {
-        io::put_chars([[patina_fmt::debug(x), "\n", patina_fmt::debug(y),
-                            "\n", patina_fmt::debug(z)]]);
-        io::nl();
+        ::Core::io::put_chars([[patina_fmt::debug(x), "\n",
+                            patina_fmt::debug(y), "\n", patina_fmt::debug(z)]]);
+        ::Core::io::nl();
     };
 }

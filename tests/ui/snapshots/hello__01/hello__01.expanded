@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/hello.md
@@ -35,5 +32,5 @@ pub fn main() {
     // Statements here are executed when the compiled binary is called.
 
     // Print text to the console.
-    { io::put_chars([["Hello World!"]]); io::nl(); };
+    { ::Core::io::put_chars([["Hello World!"]]); ::Core::io::nl(); };
 }

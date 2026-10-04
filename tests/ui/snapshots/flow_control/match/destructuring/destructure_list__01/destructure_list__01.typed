@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/match/destructuring/destructure_list.md
@@ -39,44 +36,44 @@ fn main() ({
 
             // We have to include a catch-all for match exhaustiveness.
             {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("list[0] = 0, list[1] = " as str),
                                 ((patina_fmt::display as fn(term) -> term)((second as int))
                                     as term), (", list[2] = " as str),
                                 ((patina_fmt::display as fn(term) -> term)((third as int))
                                     as term)] as [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
         [1, _, third] => {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("list[0] = 1, list[2] = " as str),
                                 ((patina_fmt::display as fn(term) -> term)((third as int))
                                     as term), (" and list[1] was ignored" as str)] as [term])]
                     as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
         [-1, second, ..] => {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("list[0] = -1, list[1] = " as str),
                                 ((patina_fmt::display as fn(term) -> term)((second as int))
                                     as term), (" and all the other ones were ignored" as str)]
                             as [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
         [3, second, tail@_..] => {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("list[0] = 3, list[1] = " as str),
                                 ((patina_fmt::display as fn(term) -> term)((second as int))
                                     as term), (" and the other elements were " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((tail as [int])) as
                                     term)] as [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
         _ => {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("no list pattern matched" as str)] as
                             [str])] as [[str]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
     } as ())
 } as ())

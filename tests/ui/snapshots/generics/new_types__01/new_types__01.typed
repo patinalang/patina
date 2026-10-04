@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/generics/new_types.md
@@ -53,22 +50,22 @@ fn main() ({
     let age_days = ((age as Years).to_days() as Days);
     // println!("Is an adult? {}", is_adult(age_days));
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("Is an adult? " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((is_adult as
                                         fn(Years) -> bool {is_adult})((age as Years)) as bool)) as
                                 term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("Is an adult? " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((is_adult as
                                         fn(Years) -> bool {is_adult})(((age_days as Days).to_years()
                                         as Years)) as bool)) as term)] as [term])] as [[term]])) as
             term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

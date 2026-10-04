@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/if_let.md
@@ -39,13 +36,18 @@ pub fn main() {
         // Similar to Some() in the previous example
 
         // Binding also works with `if let`
-        { io::put_chars([["a is foobar"]]); io::nl(); };
+        { ::Core::io::put_chars([["a is foobar"]]); ::Core::io::nl(); };
     }
-    if let Foo::Bar = b { { io::put_chars([["b is foobar"]]); io::nl(); }; }
+    if let Foo::Bar = b {
+        { ::Core::io::put_chars([["b is foobar"]]); ::Core::io::nl(); };
+    }
     if let Foo::Qux(value) = c {
-        { io::put_chars([["c is ", patina_fmt::display(value)]]); io::nl(); };
+        {
+            ::Core::io::put_chars([["c is ", patina_fmt::display(value)]]);
+            ::Core::io::nl();
+        };
     }
     if let Foo::Qux(value @ 100) = c {
-        { io::put_chars([["c is one hundred"]]); io::nl(); };
+        { ::Core::io::put_chars([["c is one hundred"]]); ::Core::io::nl(); };
     }
 }

@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/match/unsafe_match.md
@@ -45,13 +42,13 @@ fn main() ({
 
     // "the atom nil, an empty string option"
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)((safe_description as str)) as term),
                             (", " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)((unsafe_description as str)) as term)] as
                         [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

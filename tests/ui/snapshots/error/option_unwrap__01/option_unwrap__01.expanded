@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/error/option_unwrap.md
@@ -35,22 +32,27 @@ fn give_adult(drink: Option<str>) {
 
 
             {
-            io::put_chars([["Yuck! Too sugary."]]);
-            io::nl();
+            ::Core::io::put_chars([["Yuck! Too sugary."]]);
+            ::Core::io::nl();
         }
         Some(inner) => {
-            io::put_chars([[patina_fmt::display(inner), "? How nice."]]);
-            io::nl();
+            ::Core::io::put_chars([[patina_fmt::display(inner),
+                                "? How nice."]]);
+            ::Core::io::nl();
         }
-        None => { io::put_chars([["No drink? Oh well."]]); io::nl(); }
+        None => {
+            ::Core::io::put_chars([["No drink? Oh well."]]);
+            ::Core::io::nl();
+        }
     }
 }
 fn drink(drink: Option<str>) {
     let inside = drink.unwrap();
     if inside == "lemonade" { (/*ERROR*/); }
     {
-        io::put_chars([["I love ", patina_fmt::display(inside), "s!!!!!"]]);
-        io::nl();
+        ::Core::io::put_chars([["I love ", patina_fmt::display(inside),
+                            "s!!!!!"]]);
+        ::Core::io::nl();
     };
 }
 pub fn main() {

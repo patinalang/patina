@@ -13,7 +13,7 @@ LL | extern mod erlang;
    |            ^^^^^^
 
 error[E0433]: cannot find module or crate `erlang` in this scope
-  --> tests/ui/src/mod/extern_mod.pt:7:21
+  --> tests/ui/src/mod/extern_mod.pt:8:21
    |
 LL |         let _hash = erlang::phash2(());
    |                     ^^^^^^ use of unresolved module or unlinked crate `erlang`

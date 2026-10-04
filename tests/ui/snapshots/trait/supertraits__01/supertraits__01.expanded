@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/trait/supertraits.md
@@ -81,5 +78,8 @@ pub fn main() {
         };
 
     let greeting = comp_sci_student_greeting(student);
-    { io::put_chars([[patina_fmt::display(greeting)]]); io::nl(); };
+    {
+        ::Core::io::put_chars([[patina_fmt::display(greeting)]]);
+        ::Core::io::nl();
+    };
 }

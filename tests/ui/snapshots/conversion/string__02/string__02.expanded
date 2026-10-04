@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/conversion/string.md
@@ -25,5 +22,8 @@ pub fn main() {
     let turbo_parsed = "10".parse::<int>().unwrap();
 
     let sum = parsed + turbo_parsed;
-    { io::put_chars([["Sum: ", patina_fmt::debug(sum)]]); io::nl(); };
+    {
+        ::Core::io::put_chars([["Sum: ", patina_fmt::debug(sum)]]);
+        ::Core::io::nl();
+    };
 }

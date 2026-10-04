@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/custom_types/repr.md
@@ -27,7 +24,7 @@ struct Celsius(float);
 pub fn main() {
     // 2.345
     {
-        io::put_chars([[patina_fmt::debug(Celsius(2.345) as term)]]);
-        io::nl();
+        ::Core::io::put_chars([[patina_fmt::debug(Celsius(2.345) as term)]]);
+        ::Core::io::nl();
     };
 }

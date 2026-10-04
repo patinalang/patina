@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/variable_bindings/scope.md
@@ -35,28 +32,28 @@ fn main() ({
         // FIXME ^ Comment out this line
 
         ({
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("inner short: " as str),
                                 ((patina_fmt::display as
                                         fn(term) -> term)((short_lived_binding as int)) as term)] as
                             [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         } as ());
     } as ())
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("outer short: " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)((short_lived_binding as {type error})) as
                                 term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("outer long: " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)((long_lived_binding as int)) as term)] as
                         [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

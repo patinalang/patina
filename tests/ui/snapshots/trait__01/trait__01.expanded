@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/trait.md
@@ -54,9 +51,9 @@ trait Animal {
         // TODO ^ Try removing the type annotations.
 
         {
-            io::put_chars([[patina_fmt::display(self.name()), " says ",
-                                patina_fmt::display(self.noise())]]);
-            io::nl();
+            ::Core::io::put_chars([[patina_fmt::display(self.name()),
+                                " says ", patina_fmt::display(self.noise())]]);
+            ::Core::io::nl();
         };
     }
 }
@@ -65,16 +62,16 @@ impl Sheep {
     fn shear(self) -> Self {
         if self.is_naked() {
             {
-                io::put_chars([[patina_fmt::display(self.name()),
+                ::Core::io::put_chars([[patina_fmt::display(self.name()),
                                     " is already naked..."]]);
-                io::nl();
+                ::Core::io::nl();
             };
             self
         } else {
             {
-                io::put_chars([[patina_fmt::display(self.name),
+                ::Core::io::put_chars([[patina_fmt::display(self.name),
                                     " gets a haircut!"]]);
-                io::nl();
+                ::Core::io::nl();
             };
             Sheep { naked: true, ..self }
         }
@@ -88,9 +85,9 @@ impl Animal for Sheep {
     }
     fn talk(self) {
         {
-            io::put_chars([[patina_fmt::display(self.name),
+            ::Core::io::put_chars([[patina_fmt::display(self.name),
                                 " pauses briefly... ", patina_fmt::display(self.noise())]]);
-            io::nl();
+            ::Core::io::nl();
         };
     }
 }

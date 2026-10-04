@@ -417,6 +417,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     suggested_name,
                 ))
             }
+            ImportKind::ExternMod { .. } => {}
             _ => unreachable!(),
         }
 

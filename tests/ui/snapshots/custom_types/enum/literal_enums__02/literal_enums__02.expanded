@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/custom_types/enum/literal_enums.md
@@ -25,7 +22,7 @@ enum AllUnits { Foo, Bar, Baz, }
 pub fn main() {
     // a"Elixir.Patina.ByExample.AllUnits.Foo"
     {
-        io::put_chars([[patina_fmt::debug(AllUnits::Foo as atom)]]);
-        io::nl();
+        ::Core::io::put_chars([[patina_fmt::debug(AllUnits::Foo as atom)]]);
+        ::Core::io::nl();
     };
 }

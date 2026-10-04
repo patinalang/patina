@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/error/multiple_error_types/option_result.md
@@ -35,18 +32,18 @@ pub fn main() {
     let strings = ["tofu", "93", "18"];
 
     {
-        io::put_chars([["The first doubled is ",
+        ::Core::io::put_chars([["The first doubled is ",
                             patina_fmt::debug(double_first(numbers))]]);
-        io::nl();
+        ::Core::io::nl();
     };
     {
-        io::put_chars([["The first doubled is ",
+        ::Core::io::put_chars([["The first doubled is ",
                             patina_fmt::debug(double_first(empty))]]);
-        io::nl();
+        ::Core::io::nl();
     };
     {
-        io::put_chars([["The first doubled is ",
+        ::Core::io::put_chars([["The first doubled is ",
                             patina_fmt::debug(double_first(strings))]]);
-        io::nl();
+        ::Core::io::nl();
     };
 }

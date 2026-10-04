@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/if_let.md
@@ -39,36 +36,36 @@ pub fn main() {
         // alternate failure branch should be taken:
         // The condition evaluated false. This branch is the default:
         {
-            io::put_chars([["Matched ", patina_fmt::debug(i), "!"]]);
-            io::nl();
+            ::Core::io::put_chars([["Matched ", patina_fmt::debug(i), "!"]]);
+            ::Core::io::nl();
         };
     }
     if let Some(i) = letter {
         {
-            io::put_chars([["Matched ", patina_fmt::debug(i), "!"]]);
-            io::nl();
+            ::Core::io::put_chars([["Matched ", patina_fmt::debug(i), "!"]]);
+            ::Core::io::nl();
         };
     } else {
         {
-            io::put_chars([["Didn\'t match a number. Let\'s go with a letter!"]]);
-            io::nl();
+            ::Core::io::put_chars([["Didn\'t match a number. Let\'s go with a letter!"]]);
+            ::Core::io::nl();
         };
     }
     let i_like_letters = false;
     if let Some(i) = emoticon {
         {
-            io::put_chars([["Matched ", patina_fmt::debug(i), "!"]]);
-            io::nl();
+            ::Core::io::put_chars([["Matched ", patina_fmt::debug(i), "!"]]);
+            ::Core::io::nl();
         };
     } else if i_like_letters {
         {
-            io::put_chars([["Didn\'t match a number. Let\'s go with a letter!"]]);
-            io::nl();
+            ::Core::io::put_chars([["Didn\'t match a number. Let\'s go with a letter!"]]);
+            ::Core::io::nl();
         };
     } else {
         {
-            io::put_chars([["I don\'t like letters. Let\'s go with an emoticon :)!"]]);
-            io::nl();
+            ::Core::io::put_chars([["I don\'t like letters. Let\'s go with an emoticon :)!"]]);
+            ::Core::io::nl();
         };
     }
 }

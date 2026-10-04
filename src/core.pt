@@ -14,6 +14,9 @@
 #![no_core]
 #![rustc_coherence_is_core]
 
+pub extern mod erlang;
+pub extern mod io;
+
 #[macro_export]
 #[rustc_builtin_macro]
 macro_rules! stringify {
@@ -35,16 +38,15 @@ macro_rules! format_args {
 #[rustc_builtin_macro]
 pub macro derive($item:item) {}
 
-// `io` is resolved where the macro is used; `extern mod io` is defined in prelude.
 #[macro_export]
 macro_rules! print {
-    ($($arg:tt)*) => {{ io::put_chars($crate::format_args!($($arg)*)); }};
+    ($($arg:tt)*) => {{ $crate::io::put_chars($crate::format_args!($($arg)*)); }};
 }
 
 #[macro_export]
 macro_rules! println {
-    () => {{ io::nl(); }};
-    ($($arg:tt)*) => {{ io::put_chars([$crate::format_args!($($arg)*)]); io::nl(); }};
+    () => {{ $crate::io::nl(); }};
+    ($($arg:tt)*) => {{ $crate::io::put_chars([$crate::format_args!($($arg)*)]); $crate::io::nl(); }};
 }
 
 #[lang = "pointee_sized"]

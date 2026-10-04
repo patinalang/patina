@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/custom_types/constants.md
@@ -34,16 +31,16 @@ pub fn main() {
 
     // Error! Cannot modify a `const`.
     {
-        io::put_chars([["The threshold is ",
+        ::Core::io::put_chars([["The threshold is ",
                             patina_fmt::display(THRESHOLD)]]);
-        io::nl();
+        ::Core::io::nl();
     };
     {
-        io::put_chars([[patina_fmt::display(n), " is ",
+        ::Core::io::put_chars([[patina_fmt::display(n), " is ",
                             patina_fmt::display(if is_big(n) {
                                     "big"
                                 } else { "small" })]]);
-        io::nl();
+        ::Core::io::nl();
     };
     THRESHOLD = 5;
 }

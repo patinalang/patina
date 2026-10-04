@@ -3,7 +3,6 @@
 
 
 
-
 #![allow(dead_code)]
 #![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
 #![attr = NoStd]
@@ -14,8 +13,6 @@ extern crate Core;
 #[allow(unused_imports)]
 #[attr = PreludeImport]
 use Core::Prelude::*;
-#[allow(unused)]
-extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
@@ -41,11 +38,11 @@ impl Bound for Number {
 
 
         ({
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("Bound::b(" as str),
                                 ((patina_fmt::debug as fn(term) -> term)((self as Number))
                                     as term), (")" as str)] as [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         } as ());
         ((self as Number).n as int)
     } as int)
@@ -59,12 +56,12 @@ impl <T> Tr for Holder<T> where T: Bound {
         ->
             int ({
         ({
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("Tr::method(" as str),
                                 ((patina_fmt::debug as
                                         fn(term) -> term)((self as Holder<T>)) as term),
                                 (")" as str)] as [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         } as ());
         (((self as Holder<T>).value as T).b() as int)
     } as int)
@@ -76,12 +73,12 @@ fn main() ({
         (Holder { value: (Number { n: (5 as int) } as Number) } as
             Holder<Number>);
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)(((call as
                                         fn(Holder<Number>) -> int {call::<Number>})((h as
                                         Holder<Number>)) as int)) as term)] as [term])] as
                 [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

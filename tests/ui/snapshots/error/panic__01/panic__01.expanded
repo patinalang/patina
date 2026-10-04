@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/error/panic.md
@@ -26,9 +23,9 @@ fn drink(beverage: str) {
 
 
     {
-        io::put_chars([["Some refreshing ", patina_fmt::display(beverage),
-                            " is all I need."]]);
-        io::nl();
+        ::Core::io::put_chars([["Some refreshing ",
+                            patina_fmt::display(beverage), " is all I need."]]);
+        ::Core::io::nl();
     };
 }
 pub fn main() { drink("water"); drink("lemonade"); drink("still water"); }

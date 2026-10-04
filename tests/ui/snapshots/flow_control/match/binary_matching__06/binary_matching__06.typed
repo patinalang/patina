@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/match/binary_matching.md
@@ -42,13 +39,13 @@ fn main() ({
                 int(size = (3 as int))>> as bits);
 
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)((greeting as str)) as term), (" " as str),
                             ((patina_fmt::debug as fn(term) -> term)((header as bin)) as
                                 term), (" " as str),
                             ((patina_fmt::debug as fn(term) -> term)((flags as bits)) as
                                 term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/error/multiple_error_types/define_error_type.md
@@ -51,13 +48,13 @@ fn print(result: Result<int>) {
         Ok(n) =>
 
             {
-            io::put_chars([["The first doubled is ",
+            ::Core::io::put_chars([["The first doubled is ",
                                 patina_fmt::display(n)]]);
-            io::nl();
+            ::Core::io::nl();
         }
         Err(e) => {
-            io::put_chars([["Error: ", patina_fmt::display(e)]]);
-            io::nl();
+            ::Core::io::put_chars([["Error: ", patina_fmt::display(e)]]);
+            ::Core::io::nl();
         }
     }
 }

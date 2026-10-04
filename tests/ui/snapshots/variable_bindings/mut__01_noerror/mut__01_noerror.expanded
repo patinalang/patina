@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 pub fn main() {
@@ -29,15 +26,15 @@ pub fn main() {
     // defined in outer scopes lose their `mut` modifier
     // You must define a new variable to modify it inside your closure
     {
-        io::put_chars([["Before mutating the binding: ",
+        ::Core::io::put_chars([["Before mutating the binding: ",
                             patina_fmt::display(mutable_binding)]]);
-        io::nl();
+        ::Core::io::nl();
     };
     mutable_binding += 1;
     {
-        io::put_chars([["After mutating the binding: ",
+        ::Core::io::put_chars([["After mutating the binding: ",
                             patina_fmt::display(mutable_binding)]]);
-        io::nl();
+        ::Core::io::nl();
     };
     let my_fun =
         ||
@@ -45,9 +42,9 @@ pub fn main() {
                 let mut inner_mutable_binding = mutable_binding;
                 inner_mutable_binding += 1;
                 {
-                    io::put_chars([[patina_fmt::display(inner_mutable_binding),
+                    ::Core::io::put_chars([[patina_fmt::display(inner_mutable_binding),
                                         " == ", patina_fmt::display(mutable_binding), " + 1"]]);
-                    io::nl();
+                    ::Core::io::nl();
                 };
             };
 }

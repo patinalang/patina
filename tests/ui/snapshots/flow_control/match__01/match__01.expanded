@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/match.md
@@ -38,35 +35,39 @@ pub fn main() {
 
     // You can use the pin operator (^) to match against bound variables
     {
-        io::put_chars([["Tell me about ", patina_fmt::display(number)]]);
-        io::nl();
+        ::Core::io::put_chars([["Tell me about ",
+                            patina_fmt::display(number)]]);
+        ::Core::io::nl();
     };
     match number {
-        1 => { io::put_chars([["One!"]]); io::nl(); }
+        1 => { ::Core::io::put_chars([["One!"]]); ::Core::io::nl(); }
         2 | 3 | 5 | 7 | 11 => {
-            io::put_chars([["This is a prime"]]);
-            io::nl();
+            ::Core::io::put_chars([["This is a prime"]]);
+            ::Core::io::nl();
         }
-        13..=19 => { io::put_chars([["A teen"]]); io::nl(); }
-        _ => { io::put_chars([["Ain\'t special"]]); io::nl(); }
+        13..=19 => { ::Core::io::put_chars([["A teen"]]); ::Core::io::nl(); }
+        _ => {
+            ::Core::io::put_chars([["Ain\'t special"]]);
+            ::Core::io::nl();
+        }
     }
     let boolean = true;
     let binary = match boolean { false => 0, true => 1, };
     {
-        io::put_chars([[patina_fmt::display(boolean), " -> ",
+        ::Core::io::put_chars([[patina_fmt::display(boolean), " -> ",
                             patina_fmt::display(binary)]]);
-        io::nl();
+        ::Core::io::nl();
     };
     let expected_value = 42;
     match 123 {
         ^expected_value => {
-            io::put_chars([["found expected value"]]);
-            io::nl();
+            ::Core::io::put_chars([["found expected value"]]);
+            ::Core::io::nl();
         }
         value => {
-            io::put_chars([["found unexpected value ",
+            ::Core::io::put_chars([["found unexpected value ",
                                 patina_fmt::display(value)]]);
-            io::nl();
+            ::Core::io::nl();
         }
     }
 }

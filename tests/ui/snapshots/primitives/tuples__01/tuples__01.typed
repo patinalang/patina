@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/primitives/tuples.md
@@ -55,76 +52,76 @@ fn main() ({
 
 
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("Long tuple first value: " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((long_tuple as
                                         (int, float, char, bool, str, bin)).0 as int)) as term)] as
                         [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("Long tuple second value: " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((long_tuple as
                                         (int, float, char, bool, str, bin)).1 as float)) as term)]
                         as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     let tuple_of_tuples =
         (((((1 as int), (2 as int), (3 as int)) as (int, int, int)),
             (((4.0 as float), (-(1 as int) as int)) as (float, int)),
             (-(2 as int) as int)) as ((int, int, int), (float, int), int));
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("tuple of tuples: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((tuple_of_tuples as
                                     ((int, int, int), (float, int), int))) as term)] as [term])]
                 as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     let pair = (((1 as int), (true as bool)) as (int, bool));
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("Pair is " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((pair as (int, bool))) as term)] as
                         [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("The reversed pair is " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)(((reverse as
                                         fn((int, bool)) -> (bool, int) {reverse})((pair as
                                         (int, bool))) as (bool, int))) as term)] as [term])] as
                 [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("One element tuple: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((((5 as int),) as (int,))) as term)] as
                         [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("Just an integer: " as str),
                             ((patina_fmt::debug as fn(term) -> term)((5 as int)) as
                                 term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     let tuple =
         (((1 as int), ("hello" as str), (4.5 as float), (true as bool)) as
             (int, str, float, bool));
     let (a, b, c, d) = (tuple as (int, str, float, bool));
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)((a as int)) as term), (", " as str),
                             ((patina_fmt::debug as fn(term) -> term)((b as str)) as
@@ -133,7 +130,7 @@ fn main() ({
                                 term), (", " as str),
                             ((patina_fmt::debug as fn(term) -> term)((d as bool)) as
                                 term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     let matrix =
         ((Matrix as
@@ -141,10 +138,10 @@ fn main() ({
                 float), (1.2 as float), (2.1 as float), (2.2 as float)) as
             Matrix);
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)((matrix as Matrix)) as term)] as [term])]
                 as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

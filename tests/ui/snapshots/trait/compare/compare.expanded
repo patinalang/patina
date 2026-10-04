@@ -12,13 +12,13 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 fn compare<T: PartialEq>(a: T, b: T) -> bool { a == b }
 
 pub fn main() {
-    { io::put_chars([[patina_fmt::display(compare(1, 1))]]); io::nl(); };
+    {
+        ::Core::io::put_chars([[patina_fmt::display(compare(1, 1))]]);
+        ::Core::io::nl();
+    };
 }

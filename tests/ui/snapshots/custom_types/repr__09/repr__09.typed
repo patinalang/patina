@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/custom_types/repr.md
@@ -53,40 +50,40 @@ fn main() ({
     // ...but a term that looks like another variant is wrapped, too.
     // (a"othertag", (a"othertag", 1))
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)((((MaybeUntagged as
                                             fn(str) -> TransparentWithTags<str> {TransparentWithTags::<str>::MaybeUntagged})(("hello"
                                             as str)) as TransparentWithTags<str>) as term as term)) as
                                 term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)((((MaybeUntagged as
                                             fn(int) -> TransparentWithTags<int> {TransparentWithTags::<int>::MaybeUntagged})((42
                                             as int)) as TransparentWithTags<int>) as term as term)) as
                                 term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)((((MaybeUntagged as
                                             fn(term) -> TransparentWithTags<term> {TransparentWithTags::<term>::MaybeUntagged})(((a"hi"
                                                 as atom) as term as term)) as TransparentWithTags<term>) as
                                     term as term)) as term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)((((MaybeUntagged as
                                             fn(term) -> TransparentWithTags<term> {TransparentWithTags::<term>::MaybeUntagged})(((((a"othertag"
                                                     as atom), (1 as int)) as (atom, int)) as term as term)) as
                                         TransparentWithTags<term>) as term as term)) as term)] as
                         [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

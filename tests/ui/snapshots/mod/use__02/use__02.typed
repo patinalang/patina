@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/mod/use.md
@@ -36,20 +33,20 @@ fn function() ({
 
 
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("called `function()`" as str)] as
                         [str])] as [[str]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())
 mod Deeply {
     mod Nested {
         fn function() ({
             ({
-                ((io::put_chars as
-                        {type error})(([([("called `Deeply::Nested::function()`" as
-                                        str)] as [str])] as [[str]])) as {type error});
-                ((io::nl as {type error})() as {type error});
+                ((::Core::io::put_chars as
+                        fn(term) -> term)(([([("called `Deeply::Nested::function()`"
+                                        as str)] as [str])] as [[str]])) as term);
+                ((::Core::io::nl as fn() -> term)() as term);
             } as ());
         } as ())
     }
@@ -57,19 +54,19 @@ mod Deeply {
 fn main() ({
     ((other_function as fn() {Deeply::Nested::function})() as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("Entering block" as str)] as [str])] as
                 [[str]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
         use pkg::Deeply::Nested::function;
         ((function as {type error})() as {type error});
         ({
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("Leaving block" as str)] as [str])]
                     as [[str]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         } as ());
     } as ())
     ((function as fn() {function})() as ());

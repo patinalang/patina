@@ -3,7 +3,6 @@
 
 
 
-
 // source: patina-by-example/src/error/option_unwrap/and_then.md
 // block: 1/1
 
@@ -17,8 +16,6 @@ extern crate Core;
 #[allow(unused_imports)]
 #[attr = PreludeImport]
 use Core::Prelude::*;
-#[allow(unused)]
-extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
@@ -101,21 +98,21 @@ fn eat(food: Food,
         Some(food) =>
 
             {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("Yay! On " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((day as Day)) as
                                     term), (" we get to eat " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((food as Food)) as
                                     term), ("." as str)] as [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
         None => {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("Oh no. We don\'t get to eat on " as
                                     str),
                                 ((patina_fmt::debug as fn(term) -> term)((day as Day)) as
                                     term), ("?" as str)] as [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
     } as ())
 } as ())

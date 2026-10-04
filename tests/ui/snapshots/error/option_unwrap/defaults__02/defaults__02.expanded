@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/error/option_unwrap/defaults.md
@@ -31,8 +28,8 @@ pub fn main() {
                 // Providing kiwi as fallback
                 // first_available_fruit: Some(Kiwi)
                 {
-                    io::put_chars([["Providing kiwi as fallback"]]);
-                    io::nl();
+                    ::Core::io::put_chars([["Providing kiwi as fallback"]]);
+                    ::Core::io::nl();
                 };
                 Some(Fruit::Kiwi)
             };
@@ -40,16 +37,16 @@ pub fn main() {
         ||
             {
                 {
-                    io::put_chars([["Providing lemon as fallback"]]);
-                    io::nl();
+                    ::Core::io::put_chars([["Providing lemon as fallback"]]);
+                    ::Core::io::nl();
                 };
                 Some(Fruit::Lemon)
             };
     let first_available_fruit =
         no_fruit.or_else(get_kiwi_as_fallback).or_else(get_lemon_as_fallback);
     {
-        io::put_chars([["first_available_fruit: ",
+        ::Core::io::put_chars([["first_available_fruit: ",
                             patina_fmt::debug(first_available_fruit)]]);
-        io::nl();
+        ::Core::io::nl();
     };
 }

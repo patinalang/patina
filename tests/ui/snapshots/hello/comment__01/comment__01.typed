@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/hello/comment.md
@@ -55,10 +52,10 @@ fn main() ({
     // Block comments can also be used within expressions:
     let x = ((5 as int) + /* 90 + */ (5 as int) as int);
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("Is `x` 10 or 100? x = " as str),
                             ((patina_fmt::display as fn(term) -> term)((x as int)) as
                                 term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

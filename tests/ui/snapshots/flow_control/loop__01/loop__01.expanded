@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/loop.md
@@ -32,13 +29,25 @@ pub fn main() {
 
 
     // Exit this loop
-    { io::put_chars([["Let\'s count until infinity!"]]); io::nl(); };
+    {
+        ::Core::io::put_chars([["Let\'s count until infinity!"]]);
+        ::Core::io::nl();
+    };
     loop {
         count += 1;
-        if count == 3 { { io::put_chars([["three"]]); io::nl(); }; continue; }
-        { io::put_chars([[patina_fmt::display(count)]]); io::nl(); };
+        if count == 3 {
+            { ::Core::io::put_chars([["three"]]); ::Core::io::nl(); };
+            continue;
+        }
+        {
+            ::Core::io::put_chars([[patina_fmt::display(count)]]);
+            ::Core::io::nl();
+        };
         if count == 5 {
-            { io::put_chars([["OK, that\'s enough"]]); io::nl(); };
+            {
+                ::Core::io::put_chars([["OK, that\'s enough"]]);
+                ::Core::io::nl();
+            };
             break;
         }
     }

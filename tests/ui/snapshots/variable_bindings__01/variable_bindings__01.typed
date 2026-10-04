@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/variable_bindings.md
@@ -34,27 +31,27 @@ fn main() ({
 
     // FIXME ^ Prefix with an underscore to suppress the warning
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("An integer: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((copied_integer as int)) as term)] as
                         [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("A boolean: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((a_boolean as bool)) as term)] as [term])]
                 as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("Meet the unit value: " as str),
                             ((patina_fmt::debug as fn(term) -> term)((unit as ())) as
                                 term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     let _unused_variable = (3 as int);
     let noisy_unused_variable = (2 as int);

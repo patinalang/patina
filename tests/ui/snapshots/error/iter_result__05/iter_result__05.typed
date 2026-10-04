@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/error/iter_result.md
@@ -38,19 +35,19 @@ fn main() ({
                     {type error}).map((Result::unwrap_err as {type error})) as
                 {type error}).collect() as {type error});
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("Numbers: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((numbers as {type error})) as term)] as
                         [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("Errors: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((errors as {type error})) as term)] as
                         [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/receive.md
@@ -26,26 +23,30 @@ pub fn main() {
             // like in `match`, literals can also be used
 
             {
-            io::put_chars([["received integer ", patina_fmt::debug(n)]]);
-            io::nl();
+            ::Core::io::put_chars([["received integer ",
+                                patina_fmt::debug(n)]]);
+            ::Core::io::nl();
         }
-        a"ping" => { io::put_chars([["received ping"]]); io::nl(); }
+        a"ping" => {
+            ::Core::io::put_chars([["received ping"]]);
+            ::Core::io::nl();
+        }
         atom(a) => {
-            io::put_chars([["received atom ", patina_fmt::debug(a)]]);
-            io::nl();
+            ::Core::io::put_chars([["received atom ", patina_fmt::debug(a)]]);
+            ::Core::io::nl();
         }
     } after Timeout::from_seconds(5)
         {
         {
-            io::put_chars([["timeout (5 seconds with no matching message)"]]);
-            io::nl();
+            ::Core::io::put_chars([["timeout (5 seconds with no matching message)"]]);
+            ::Core::io::nl();
         }
     }
     receive {
         val => {
-            io::put_chars([["received any message ",
+            ::Core::io::put_chars([["received any message ",
                                 patina_fmt::debug(val)]]);
-            io::nl();
+            ::Core::io::nl();
         }
     }
 }

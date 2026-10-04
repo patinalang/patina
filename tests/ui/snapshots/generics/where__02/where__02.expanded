@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/generics/where.md
@@ -34,7 +31,10 @@ impl<T> PrintInOption for T where Option<T>: Debug {
     fn print_in_option(self) {
 
 
-        { io::put_chars([[patina_fmt::debug(Some(self))]]); io::nl(); };
+        {
+            ::Core::io::put_chars([[patina_fmt::debug(Some(self))]]);
+            ::Core::io::nl();
+        };
     }
 }
 pub fn main() { let list = [1, 2, 3]; list.print_in_option(); }

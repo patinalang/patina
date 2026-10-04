@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/receive.md
@@ -26,24 +23,24 @@ fn main() ({
             // like in `match`, literals can also be used
 
             {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("received integer " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((n as int)) as
                                     term)] as [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
         a"ping" => {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("received ping" as str)] as [str])]
                     as [[str]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
         atom(a) => {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("received atom " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((a as atom)) as
                                     term)] as [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
     }
         after ((Timeout::from_seconds as
@@ -51,19 +48,19 @@ fn main() ({
                 int)) as Core::Timeout)
         ({
             ({
-                ((io::put_chars as
+                ((::Core::io::put_chars as
                         fn(term) -> term)(([([("timeout (5 seconds with no matching message)"
                                         as str)] as [str])] as [[str]])) as term);
-                ((io::nl as fn() -> term)() as term);
+                ((::Core::io::nl as fn() -> term)() as term);
             } as ())
         } as ()) as ())
     (receive {
         val => {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("received any message " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((val as term)) as
                                     term)] as [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
     } as ())
 } as ())

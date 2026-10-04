@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/macros/overload.md
@@ -39,15 +36,15 @@ macro_rules! test {
 
 pub fn main() {
     {
-        io::put_chars([[patina_fmt::debug("1 + 1 == 2"), " and ",
+        ::Core::io::put_chars([[patina_fmt::debug("1 + 1 == 2"), " and ",
                             patina_fmt::debug("2 * 2 == 4"), " is ",
                             patina_fmt::debug(1 + 1 == 2 && 2 * 2 == 4)]]);
-        io::nl();
+        ::Core::io::nl();
     };
     {
-        io::put_chars([[patina_fmt::debug("true"), " or ",
+        ::Core::io::put_chars([[patina_fmt::debug("true"), " or ",
                             patina_fmt::debug("false"), " is ",
                             patina_fmt::debug(true || false)]]);
-        io::nl();
+        ::Core::io::nl();
     };
 }

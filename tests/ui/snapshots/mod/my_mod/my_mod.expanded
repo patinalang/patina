@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 mod Inaccessible {
@@ -24,23 +21,23 @@ mod Inaccessible {
     #[allow(dead_code)]
     pub fn public_function() {
         {
-            io::put_chars([["called `MyMod::Inaccessible::public_function()`"]]);
-            io::nl();
+            ::Core::io::put_chars([["called `MyMod::Inaccessible::public_function()`"]]);
+            ::Core::io::nl();
         };
     }
 }
 pub mod Nested {
     pub fn function() {
         {
-            io::put_chars([["called `MyMod::Nested::function()`"]]);
-            io::nl();
+            ::Core::io::put_chars([["called `MyMod::Nested::function()`"]]);
+            ::Core::io::nl();
         };
     }
     #[allow(dead_code)]
     fn private_function() {
         {
-            io::put_chars([["called `MyMod::Nested::private_function()`"]]);
-            io::nl();
+            ::Core::io::put_chars([["called `MyMod::Nested::private_function()`"]]);
+            ::Core::io::nl();
         };
     }
 }

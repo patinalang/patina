@@ -3,7 +3,6 @@
 
 
 
-
 // source: patina-by-example/src/error/option_unwrap/map.md
 // block: 1/1
 
@@ -17,8 +16,6 @@ extern crate Core;
 #[allow(unused_imports)]
 #[attr = PreludeImport]
 use Core::Prelude::*;
-#[allow(unused)]
-extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
@@ -102,17 +99,17 @@ fn eat(food:
             // Let's try the simpler looking `process()` now.
 
             {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("Mmm. I love " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((food as Cooked))
                                     as term)] as [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
         None => {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("Oh no! It wasn\'t edible." as str)]
                             as [str])] as [[str]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
     } as ())
 } as ())

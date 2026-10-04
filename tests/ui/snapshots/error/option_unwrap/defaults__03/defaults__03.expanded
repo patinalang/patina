@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/error/option_unwrap/defaults.md
@@ -31,12 +28,13 @@ pub fn main() {
     //println!("Variable named `apple` is moved: {:?}", apple);
     // TODO: uncomment the line above to see the compiler error
     {
-        io::put_chars([["first_available_fruit is: ",
+        ::Core::io::put_chars([["first_available_fruit is: ",
                             patina_fmt::debug(first_available_fruit)]]);
-        io::nl();
+        ::Core::io::nl();
     };
     {
-        io::put_chars([["my_fruit is: ", patina_fmt::debug(my_fruit)]]);
-        io::nl();
+        ::Core::io::put_chars([["my_fruit is: ",
+                            patina_fmt::debug(my_fruit)]]);
+        ::Core::io::nl();
     };
 }

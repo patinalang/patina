@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/fn/methods.md
@@ -124,20 +121,20 @@ fn main() ({
     // `mut` keyword lets us rebind the variable in the next statement.
 
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("Rectangle perimeter: " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((rectangle as Rectangle).perimeter() as
                                     float)) as term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("Rectangle area: " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((rectangle as Rectangle).area() as
                                     float)) as term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     let mut square =
         (Rectangle {

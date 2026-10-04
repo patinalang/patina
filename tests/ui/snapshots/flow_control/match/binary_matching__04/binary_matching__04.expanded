@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/match/binary_matching.md
@@ -34,23 +31,30 @@ pub fn main() {
 
             // The shorthand form can also be used with literals. 
             {
-            io::put_chars([["text rest ", patina_fmt::debug(rest)]]);
-            io::nl();
+            ::Core::io::put_chars([["text rest ", patina_fmt::debug(rest)]]);
+            ::Core::io::nl();
         }
-        _ => { io::put_chars([["unknown text"]]); io::nl(); }
+        _ => { ::Core::io::put_chars([["unknown text"]]); ::Core::io::nl(); }
     }
     match bytes {
         <<b"PNG", '!', rest @ ..>> => {
-            io::put_chars([["png data ", patina_fmt::debug(rest)]]);
-            io::nl();
+            ::Core::io::put_chars([["png data ", patina_fmt::debug(rest)]]);
+            ::Core::io::nl();
         }
-        _ => { io::put_chars([["unknown binary"]]); io::nl(); }
+        _ => {
+            ::Core::io::put_chars([["unknown binary"]]);
+            ::Core::io::nl();
+        }
     }
     match packet {
         <<b"PT", '!', "ok", 5: int(size = 3), rest @ ..>> => {
-            io::put_chars([["packet tail ", patina_fmt::debug(rest)]]);
-            io::nl();
+            ::Core::io::put_chars([["packet tail ",
+                                patina_fmt::debug(rest)]]);
+            ::Core::io::nl();
         }
-        _ => { io::put_chars([["unknown packet"]]); io::nl(); }
+        _ => {
+            ::Core::io::put_chars([["unknown packet"]]);
+            ::Core::io::nl();
+        }
     }
 }

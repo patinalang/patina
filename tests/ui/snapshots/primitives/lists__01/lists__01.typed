@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/primitives/lists.md
@@ -42,74 +39,74 @@ fn main() ({
 
             // Lists can also be destructured using a similar syntax
             {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("elem 0: " as str),
                                 ((patina_fmt::display as
                                         fn(term) -> term)(({ } as {type error})) as term)] as
                             [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
         None => {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("the list is empty!" as str)] as
                             [str])] as [[str]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
     } as ())
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("Number of elements in array: " as
                                 str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((xs as [int]).len() as {type error})) as
                                 term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("First element of the list: " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((xs as [int]).head as {type error})) as
                                 term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("Rest of the list: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)(((xs as [int]).tail as {type error})) as
                                 term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     let more_xs =
         ([(-(1 as int) as int), (0 as int), ..(xs as [int])] as [int]);
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("more_xs tail is equal to xs: " as
                                 str),
                             ((patina_fmt::display as
                                     fn(term) -> term)((((more_xs as [int]).tail as {type error})
                                     == (xs as [int]) as bool)) as term)] as [term])] as
                 [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     let [first, second, third, rest@_..] = (more_xs as [int]) else
         { (return as !) };
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("Sum of first three elements is " as
                                 str),
                             ((patina_fmt::display as
                                     fn(term) -> term)((((first as int) + (second as int) as int)
                                     + (third as int) as int)) as term)] as [term])] as
                 [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("...and the rest: " as str),
                             ((patina_fmt::debug as fn(term) -> term)((rest as [int])) as
                                 term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

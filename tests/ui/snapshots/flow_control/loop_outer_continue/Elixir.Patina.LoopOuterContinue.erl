@@ -10,12 +10,12 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         '$patina_loop_5_44'/3,
-         '$patina_loop_5_47'/3,
+         '$patina_loop_4_44'/3,
+         '$patina_loop_4_47'/3,
          continue_outer_loop/1,
-         '$patina_loop_6_44'/3,
-         '$patina_loop_6_48'/3,
-         '$patina_loop_6_51'/3,
+         '$patina_loop_5_44'/3,
+         '$patina_loop_5_48'/3,
+         '$patina_loop_5_51'/3,
          continue_two_loops/1]).
 
 '__info__'(functions) ->
@@ -31,7 +31,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'$patina_loop_5_44'(_visits@2_0, _outer@1_1,
+'$patina_loop_4_44'(_visits@2_0, _outer@1_1,
                     _limit@0_0) ->
     _ = begin
             _visits@2_1 = _visits@2_0 + 1,
@@ -51,11 +51,11 @@
                               _outer@1_1,
                               _limit@0_0).
 
-'$patina_loop_5_47'(_outer@1_0, _visits@2_0,
+'$patina_loop_4_47'(_outer@1_0, _visits@2_0,
                     _limit@0_0) ->
     _ = begin
             _outer@1_1 = _outer@1_0 + 1,
-            case '$patina_loop_5_44'(_visits@2_0,
+            case '$patina_loop_4_44'(_visits@2_0,
                                      _outer@1_1,
                                      _limit@0_0)
                 of
@@ -81,7 +81,7 @@
 continue_outer_loop(_limit@0_0) ->
     _outer@1_0 = 0,
     _visits@2_0 = 0,
-    case '$patina_loop_5_47'(_outer@1_0,
+    case '$patina_loop_4_47'(_outer@1_0,
                              _visits@2_0,
                              _limit@0_0)
         of
@@ -89,7 +89,7 @@ continue_outer_loop(_limit@0_0) ->
             _loop_value@5_0
     end.
 
-'$patina_loop_6_44'(_visits@2_0, _outer@1_1,
+'$patina_loop_5_44'(_visits@2_0, _outer@1_1,
                     _limit@0_0) ->
     _ = begin
             _visits@2_1 = _visits@2_0 + 1,
@@ -109,10 +109,10 @@ continue_outer_loop(_limit@0_0) ->
                               _outer@1_1,
                               _limit@0_0).
 
-'$patina_loop_6_48'(_visits@2_0, _outer@1_1,
+'$patina_loop_5_48'(_visits@2_0, _outer@1_1,
                     _limit@0_0) ->
     _ = begin
-            case '$patina_loop_6_44'(_visits@2_0,
+            case '$patina_loop_5_44'(_visits@2_0,
                                      _outer@1_1,
                                      _limit@0_0)
                 of
@@ -134,11 +134,11 @@ continue_outer_loop(_limit@0_0) ->
                               _outer@1_1,
                               _limit@0_0).
 
-'$patina_loop_6_51'(_outer@1_0, _visits@2_0,
+'$patina_loop_5_51'(_outer@1_0, _visits@2_0,
                     _limit@0_0) ->
     _ = begin
             _outer@1_1 = _outer@1_0 + 1,
-            case '$patina_loop_6_48'(_visits@2_0,
+            case '$patina_loop_5_48'(_visits@2_0,
                                      _outer@1_1,
                                      _limit@0_0)
                 of
@@ -164,7 +164,7 @@ continue_outer_loop(_limit@0_0) ->
 continue_two_loops(_limit@0_0) ->
     _outer@1_0 = 0,
     _visits@2_0 = 0,
-    case '$patina_loop_6_51'(_outer@1_0,
+    case '$patina_loop_5_51'(_outer@1_0,
                              _visits@2_0,
                              _limit@0_0)
         of

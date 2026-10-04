@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/error/result.md
@@ -29,6 +26,9 @@ pub fn main() -> Result<(), ParseIntError> {
             Ok(number) => number,
             Err(e) => return Err(e),
         };
-    { io::put_chars([[patina_fmt::display(number)]]); io::nl(); };
+    {
+        ::Core::io::put_chars([[patina_fmt::display(number)]]);
+        ::Core::io::nl();
+    };
     Ok(())
 }

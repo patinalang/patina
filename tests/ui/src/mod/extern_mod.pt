@@ -1,6 +1,7 @@
 extern mod used;
 extern mod unused;
 extern mod erlang;
+extern mod io;
 
 mod inner {
     pub fn use_it() {

@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/if_let.md
@@ -31,10 +28,10 @@ fn main() ({
     (if ((Foo::Bar as Foo) == (a as Foo) as {type error}) {
         // ^-- this causes a compile-time error. Use `if let` instead.
         ({
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("a is foobar" as str)] as [str])] as
                     [[str]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         } as ());
     } as {type error})
 } as {type error})

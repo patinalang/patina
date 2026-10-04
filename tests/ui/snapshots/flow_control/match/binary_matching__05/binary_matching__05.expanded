@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/match/binary_matching.md
@@ -30,25 +27,28 @@ pub fn main() {
             // Like with literals, you can give the segment a type.
             // Or use the shorthand syntax.
             {
-            io::put_chars([["png data ", patina_fmt::debug(rest)]]);
-            io::nl();
+            ::Core::io::put_chars([["png data ", patina_fmt::debug(rest)]]);
+            ::Core::io::nl();
         }
         <<^jpg_prefix, rest @ ..>> => {
-            io::put_chars([["jpg data ", patina_fmt::debug(rest)]]);
-            io::nl();
+            ::Core::io::put_chars([["jpg data ", patina_fmt::debug(rest)]]);
+            ::Core::io::nl();
         }
-        _ => { io::put_chars([["unknown data"]]); io::nl(); }
+        _ => { ::Core::io::put_chars([["unknown data"]]); ::Core::io::nl(); }
     }
     let bit_prefix = 7;
     match <<119>> {
         <<^bit_prefix: int(size = 16, little), rest @ ..>> => {
-            io::put_chars([["expected ", patina_fmt::debug(rest)]]);
-            io::nl();
+            ::Core::io::put_chars([["expected ", patina_fmt::debug(rest)]]);
+            ::Core::io::nl();
         }
         <<^bit_prefix: int(size = 4), rest @ ..>> => {
-            io::put_chars([["expected ", patina_fmt::debug(rest)]]);
-            io::nl();
+            ::Core::io::put_chars([["expected ", patina_fmt::debug(rest)]]);
+            ::Core::io::nl();
         }
-        _ => { io::put_chars([["unexpected prefix"]]); io::nl(); }
+        _ => {
+            ::Core::io::put_chars([["unexpected prefix"]]);
+            ::Core::io::nl();
+        }
     }
 }

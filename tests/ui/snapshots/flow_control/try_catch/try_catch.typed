@@ -3,7 +3,6 @@
 
 
 
-
 #![deny(unused_unsafe)]
 #![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
 #![attr = NoStd]
@@ -14,8 +13,6 @@ extern crate Core;
 #[allow(unused_imports)]
 #[attr = PreludeImport]
 use Core::Prelude::*;
-#[allow(unused)]
-extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 

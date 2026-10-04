@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/generics/impl.md
@@ -43,13 +40,13 @@ fn main() ({
     let y = (GenVal { gen_val: (42 as int) } as GenVal<int>);
 
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)(((x as Val).value() as int)) as term),
                             (", " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((y as GenVal<int>).value() as int)) as
                                 term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

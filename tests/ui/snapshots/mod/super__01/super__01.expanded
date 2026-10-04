@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/mod/super.md
@@ -38,24 +35,35 @@ fn function() {
     // This will bind to the `Cool::function` in the *pkg* scope.
     // In this case the pkg scope is the outermost scope.
 
-    { io::put_chars([["called `function()`"]]); io::nl(); };
+    { ::Core::io::put_chars([["called `function()`"]]); ::Core::io::nl(); };
 }
 mod Cool {
     pub fn function() {
-        { io::put_chars([["called `Cool::function()`"]]); io::nl(); };
+        {
+            ::Core::io::put_chars([["called `Cool::function()`"]]);
+            ::Core::io::nl();
+        };
     }
 }
 mod My {
     fn function() {
-        { io::put_chars([["called `My::function()`"]]); io::nl(); };
+        {
+            ::Core::io::put_chars([["called `My::function()`"]]);
+            ::Core::io::nl();
+        };
     }
     mod Cool {
         pub fn function() {
-            { io::put_chars([["called `My::Cool::function()`"]]); io::nl(); };
+            {
+                ::Core::io::put_chars([["called `My::Cool::function()`"]]);
+                ::Core::io::nl();
+            };
         }
     }
     pub fn indirect_call() {
-        { io::put_chars(["called `My::indirect_call()`, that\n> "]); };
+        {
+            ::Core::io::put_chars(["called `My::indirect_call()`, that\n> "]);
+        };
         self::function();
         function();
         self::Cool::function();

@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/trait/dyn.md
@@ -57,12 +54,12 @@ fn main() ({
                 fn(float) -> (dyn Animal + 'static) {random_animal})((random_number
                 as float)) as dyn Animal);
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("You\'ve randomly chosen an animal, and it says "
                                 as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((animal as dyn Animal).noise() as str))
                                 as term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/error/option_unwrap/defaults.md
@@ -36,10 +33,10 @@ fn main() ({
                 // should_be_apple is: Apple
                 // my_apple is unchanged: Some(Apple)
                 ({
-                    ((io::put_chars as
+                    ((::Core::io::put_chars as
                             fn(term) -> term)(([([("Providing lemon as fallback" as
                                             str)] as [str])] as [[str]])) as term);
-                    ((io::nl as fn() -> term)() as term);
+                    ((::Core::io::nl as fn() -> term)() as term);
                 } as ());
                 (Fruit::Lemon as Fruit)
             } as Fruit) as
@@ -51,20 +48,20 @@ fn main() ({
                 {closure@tests/ui/src/error/option_unwrap/defaults__04.pt:9:33: 9:35}))
             as {type error});
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("first_available_fruit is: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((first_available_fruit as {type error}))
                                 as term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("my_fruit is: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((my_fruit as Core::Option<Fruit>)) as
                                 term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     let mut my_apple =
         ((Some as
@@ -77,19 +74,19 @@ fn main() ({
                 {closure@tests/ui/src/error/option_unwrap/defaults__04.pt:9:33: 9:35}))
             as {type error});
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("should_be_apple is: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((should_be_apple as {type error})) as
                                 term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("my_apple is unchanged: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((my_apple as Core::Option<Fruit>)) as
                                 term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

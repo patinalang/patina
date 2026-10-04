@@ -3,7 +3,6 @@
 
 
 
-
 // source: patina-by-example/src/custom_types/enum/enum_use.md
 // block: 1/1
 
@@ -18,8 +17,6 @@ extern crate Core;
 #[allow(unused_imports)]
 #[attr = PreludeImport]
 use Core::Prelude::*;
-#[allow(unused)]
-extern mod io;
 #[allow(unused)]
 extern mod patina_fmt;
 
@@ -47,30 +44,30 @@ fn main() ({
             Beginner =>
             // Note again the lack of scoping.
             {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("Beginners are starting their learning journey!"
                                     as str)] as [str])] as [[str]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
         Advanced => {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("Advanced learners are mastering their subjects..."
                                     as str)] as [str])] as [[str]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
     } as ())
     (match (role as Role) {
         Student => {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("Students are acquiring knowledge!"
                                     as str)] as [str])] as [[str]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
         Teacher => {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("Teachers are spreading knowledge!"
                                     as str)] as [str])] as [[str]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
     } as ())
 } as ())

@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/match/binary_matching.md
@@ -37,28 +34,31 @@ pub fn main() {
             // After an 8-bit header, the rest of a `bits` is a `bits`.
 
             {
-            io::put_chars([["kind = ", patina_fmt::display(kind),
+            ::Core::io::put_chars([["kind = ", patina_fmt::display(kind),
                                 ", payload = ", patina_fmt::debug(payload), ", rest = ",
                                 patina_fmt::debug(rest)]]);
-            io::nl();
+            ::Core::io::nl();
         }
         <<kind: int(size = 8), len: int(size = 8), payload:
             bin(size = len / 2), rest @ ..>> => {
-            io::put_chars([["kind = ", patina_fmt::display(kind),
+            ::Core::io::put_chars([["kind = ", patina_fmt::display(kind),
                                 ", payload = ", patina_fmt::debug(payload), ", rest = ",
                                 patina_fmt::debug(rest)]]);
-            io::nl();
+            ::Core::io::nl();
         }
-        _ => { io::put_chars([["invalid packet"]]); io::nl(); }
+        _ => {
+            ::Core::io::put_chars([["invalid packet"]]);
+            ::Core::io::nl();
+        }
     }
     let packet: bits =
         <<3: int(size = 4), 5: int(size = 4), 7: int(size = 3)>>;
     match packet {
         <<header: int(size = 8), tail @ ..>> => {
-            io::put_chars([["header = ", patina_fmt::display(header),
+            ::Core::io::put_chars([["header = ", patina_fmt::display(header),
                                 ", tail = ", patina_fmt::debug(tail)]]);
-            io::nl();
+            ::Core::io::nl();
         }
-        _ => { io::put_chars([["did not match"]]); io::nl(); }
+        _ => { ::Core::io::put_chars([["did not match"]]); ::Core::io::nl(); }
     }
 }

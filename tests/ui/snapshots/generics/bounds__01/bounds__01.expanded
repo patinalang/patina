@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/generics/bounds.md
@@ -23,5 +20,5 @@ extern mod patina_fmt;
 // Define a function `printer` that takes a generic type `T` which
 // must implement trait `Display`.
 fn printer<T: Display>(t: T) {
-    { io::put_chars([[patina_fmt::display(t)]]); io::nl(); };
+    { ::Core::io::put_chars([[patina_fmt::display(t)]]); ::Core::io::nl(); };
 }

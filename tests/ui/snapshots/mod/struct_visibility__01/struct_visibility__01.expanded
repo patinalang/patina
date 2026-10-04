@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/mod/struct_visibility.md
@@ -64,9 +61,9 @@ pub fn main() {
     //println!("The closed box contains: {}", _closed_box.contents);
     // TODO ^ Try uncommenting this line
     {
-        io::put_chars([["The open box contains: ",
+        ::Core::io::put_chars([["The open box contains: ",
                             patina_fmt::display(open_box.contents)]]);
-        io::nl();
+        ::Core::io::nl();
     };
     let _closed_box = My::ClosedBox::new("classified information");
 }

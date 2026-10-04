@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 pub struct StructWithNew {
@@ -81,5 +78,8 @@ pub fn main() {
     let _ = self::priv_main();
     // remote call (redundant `#[extern_call]` warning)
     let s = #[extern_call] StructWithNew::new(42);
-    { io::put_chars([[patina_fmt::display(s.value)]]); io::nl(); };
+    {
+        ::Core::io::put_chars([[patina_fmt::display(s.value)]]);
+        ::Core::io::nl();
+    };
 }

@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/error/iter_result.md
@@ -25,6 +22,12 @@ pub fn main() {
     let (numbers, errors): ([_], [_]) =
         strings.into_iter().map(|s|
                     s.parse::<int>()).partition(Result::is_ok);
-    { io::put_chars([["Numbers: ", patina_fmt::debug(numbers)]]); io::nl(); };
-    { io::put_chars([["Errors: ", patina_fmt::debug(errors)]]); io::nl(); };
+    {
+        ::Core::io::put_chars([["Numbers: ", patina_fmt::debug(numbers)]]);
+        ::Core::io::nl();
+    };
+    {
+        ::Core::io::put_chars([["Errors: ", patina_fmt::debug(errors)]]);
+        ::Core::io::nl();
+    };
 }

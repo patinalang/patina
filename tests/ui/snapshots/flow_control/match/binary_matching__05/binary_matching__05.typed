@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/match/binary_matching.md
@@ -30,47 +27,47 @@ fn main() ({
             // Like with literals, you can give the segment a type.
             // Or use the shorthand syntax.
             {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("png data " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((rest as str)) as
                                     term)] as [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
         <<^jpg_prefix, rest @ ..>> => {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("jpg data " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((rest as str)) as
                                     term)] as [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
         _ => {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("unknown data" as str)] as [str])] as
                     [[str]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
     } as ())
     let bit_prefix = (7 as int);
     (match (<<(119 as int)>> as str) {
         <<^bit_prefix: int(size = (16 as int), little), rest @ ..>> => {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("expected " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((rest as bin)) as
                                     term)] as [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
         <<^bit_prefix: int(size = (4 as int)), rest @ ..>> => {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("expected " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((rest as bits)) as
                                     term)] as [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
         _ => {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("unexpected prefix" as str)] as
                             [str])] as [[str]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
     } as ())
 } as ())

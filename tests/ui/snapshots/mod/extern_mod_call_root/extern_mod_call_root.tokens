@@ -3,6 +3,13 @@ Whitespace
 Ident
 Whitespace
 Ident
+Semi
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
 OpenParen
 CloseParen
 Whitespace

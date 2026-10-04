@@ -12,9 +12,8 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
+
+extern mod io;
 
 fn main() ({ ((io as {type error})() as {type error}); } as ())

@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/conversion/string.md
@@ -40,5 +37,8 @@ impl FromStr for Circle {
 pub fn main() {
     let radius = "    3 ";
     let circle: Circle = radius.parse().unwrap();
-    { io::put_chars([[patina_fmt::debug(circle)]]); io::nl(); };
+    {
+        ::Core::io::put_chars([[patina_fmt::debug(circle)]]);
+        ::Core::io::nl();
+    };
 }

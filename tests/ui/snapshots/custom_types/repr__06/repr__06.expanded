@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/custom_types/repr.md
@@ -36,15 +33,15 @@ pub fn main() {
 
     // (a"struct_http_style", 200, "hi")
     {
-        io::put_chars([[patina_fmt::debug(SnakeCaseEnum::UnitVariant as
-                                    term)]]);
-        io::nl();
+        ::Core::io::put_chars([[patina_fmt::debug(SnakeCaseEnum::UnitVariant
+                                    as term)]]);
+        ::Core::io::nl();
     };
     {
-        io::put_chars([[patina_fmt::debug(SnakeCaseEnum::StructHTTPStyle {
+        ::Core::io::put_chars([[patina_fmt::debug(SnakeCaseEnum::StructHTTPStyle {
                                         code: 200,
                                         body: "hi",
                                     } as term)]]);
-        io::nl();
+        ::Core::io::nl();
     };
 }

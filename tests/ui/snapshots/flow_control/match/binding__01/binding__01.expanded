@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/match/binding.md
@@ -35,28 +32,34 @@ pub fn main() {
     // Now the age can be reported.
     // A similar binding can be done when matching several values.
     // Nothing bound. Return the result.
-    { io::put_chars([["Tell me what type of person you are"]]); io::nl(); };
+    {
+        ::Core::io::put_chars([["Tell me what type of person you are"]]);
+        ::Core::io::nl();
+    };
     match age() {
         0 => {
-            io::put_chars([["I haven\'t celebrated my first birthday yet"]]);
-            io::nl();
+            ::Core::io::put_chars([["I haven\'t celebrated my first birthday yet"]]);
+            ::Core::io::nl();
         }
         n @ 1..=12 => {
-            io::put_chars([["I\'m a child of age ", patina_fmt::debug(n)]]);
-            io::nl();
+            ::Core::io::put_chars([["I\'m a child of age ",
+                                patina_fmt::debug(n)]]);
+            ::Core::io::nl();
         }
         n @ 13..=19 => {
-            io::put_chars([["I\'m a teen of age ", patina_fmt::debug(n)]]);
-            io::nl();
+            ::Core::io::put_chars([["I\'m a teen of age ",
+                                patina_fmt::debug(n)]]);
+            ::Core::io::nl();
         }
         n @ (1 | 7 | 15 | 13) => {
-            io::put_chars([["I\'m a teen of age ", patina_fmt::debug(n)]]);
-            io::nl();
+            ::Core::io::put_chars([["I\'m a teen of age ",
+                                patina_fmt::debug(n)]]);
+            ::Core::io::nl();
         }
         n => {
-            io::put_chars([["I\'m an old person of age ",
+            ::Core::io::put_chars([["I\'m an old person of age ",
                                 patina_fmt::debug(n)]]);
-            io::nl();
+            ::Core::io::nl();
         }
     }
 }

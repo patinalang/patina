@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/match/destructuring/destructure_list.md
@@ -39,28 +36,31 @@ pub fn main() {
 
             // We have to include a catch-all for match exhaustiveness.
             {
-            io::put_chars([["list[0] = 0, list[1] = ",
+            ::Core::io::put_chars([["list[0] = 0, list[1] = ",
                                 patina_fmt::display(second), ", list[2] = ",
                                 patina_fmt::display(third)]]);
-            io::nl();
+            ::Core::io::nl();
         }
         [1, _, third] => {
-            io::put_chars([["list[0] = 1, list[2] = ",
+            ::Core::io::put_chars([["list[0] = 1, list[2] = ",
                                 patina_fmt::display(third), " and list[1] was ignored"]]);
-            io::nl();
+            ::Core::io::nl();
         }
         [-1, second, ..] => {
-            io::put_chars([["list[0] = -1, list[1] = ",
+            ::Core::io::put_chars([["list[0] = -1, list[1] = ",
                                 patina_fmt::display(second),
                                 " and all the other ones were ignored"]]);
-            io::nl();
+            ::Core::io::nl();
         }
         [3, second, tail @ ..] => {
-            io::put_chars([["list[0] = 3, list[1] = ",
+            ::Core::io::put_chars([["list[0] = 3, list[1] = ",
                                 patina_fmt::display(second),
                                 " and the other elements were ", patina_fmt::debug(tail)]]);
-            io::nl();
+            ::Core::io::nl();
         }
-        _ => { io::put_chars([["no list pattern matched"]]); io::nl(); }
+        _ => {
+            ::Core::io::put_chars([["no list pattern matched"]]);
+            ::Core::io::nl();
+        }
     }
 }

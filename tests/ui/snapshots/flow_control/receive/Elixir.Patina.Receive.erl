@@ -13,7 +13,7 @@
          take_int_or_timeout/0,
          take_atom/0,
          echo/0,
-         '$patina_loop_12_17'/1,
+         '$patina_loop_11_17'/1,
          sum_until_stop/0,
          unsafe_value/0,
          only_timeout/0,
@@ -62,7 +62,7 @@ echo() ->
             {}
     end.
 
-'$patina_loop_12_17'(_total@0_0) ->
+'$patina_loop_11_17'(_total@0_0) ->
     _ = begin
             receive
                 _n@1_0 when erlang:is_integer(_n@1_0) ->
@@ -81,7 +81,7 @@ echo() ->
 
 sum_until_stop() ->
     _total@0_0 = 0,
-    case '$patina_loop_12_17'(_total@0_0) of
+    case '$patina_loop_11_17'(_total@0_0) of
         {break, 0, _loop_value@3_0, _total@0_1} ->
             _loop_value@3_0
     end,

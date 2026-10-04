@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // Exercises the partial `format_args!` implementation: literal text, `{}` (Display)
@@ -25,20 +22,20 @@ pub fn main() {
     let n: int = 42;
 
     {
-        io::put_chars([["hello, ", patina_fmt::display(name), "!"]]);
-        io::nl();
+        ::Core::io::put_chars([["hello, ", patina_fmt::display(name), "!"]]);
+        ::Core::io::nl();
     };
     {
-        io::put_chars([[patina_fmt::display(name), " = ",
+        ::Core::io::put_chars([[patina_fmt::display(name), " = ",
                             patina_fmt::debug(n)]]);
-        io::nl();
+        ::Core::io::nl();
     };
     {
-        io::put_chars([[patina_fmt::display(name), " and ",
+        ::Core::io::put_chars([[patina_fmt::display(name), " and ",
                             patina_fmt::debug(n)]]);
-        io::nl();
+        ::Core::io::nl();
     };
-    { io::put_chars(["no "]); };
-    { io::put_chars(["newline"]); };
-    { io::nl(); };
+    { ::Core::io::put_chars(["no "]); };
+    { ::Core::io::put_chars(["newline"]); };
+    { ::Core::io::nl(); };
 }

@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/try_catch_after.md
@@ -33,30 +30,34 @@ pub fn main() {
 
 
             {
-            io::put_chars([["badarg!"]]);
-            io::nl();
+            ::Core::io::put_chars([["badarg!"]]);
+            ::Core::io::nl();
         }
         error(#{a"__struct__" => a"Elixir.ArithmeticError", ..}) => {
-            io::put_chars([["Elixir ArithmeticError"]]);
-            io::nl();
+            ::Core::io::put_chars([["Elixir ArithmeticError"]]);
+            ::Core::io::nl();
         }
         error(reason @ #{a"__struct__" => a"Elixir.ArgumentError", ..}) => {
-            io::put_chars([["Elixir ArgumentError ",
+            ::Core::io::put_chars([["Elixir ArgumentError ",
                                 patina_fmt::debug(reason)]]);
-            io::nl();
+            ::Core::io::nl();
         }
         error(reason), stacktrace => {
-            io::put_chars([["other error: ", patina_fmt::debug(reason),
-                                " from ", patina_fmt::debug(stacktrace)]]);
-            io::nl();
+            ::Core::io::put_chars([["other error: ",
+                                patina_fmt::debug(reason), " from ",
+                                patina_fmt::debug(stacktrace)]]);
+            ::Core::io::nl();
         }
         throw(value) => {
-            io::put_chars([["thrown: ", patina_fmt::debug(value)]]);
-            io::nl();
+            ::Core::io::put_chars([["thrown: ", patina_fmt::debug(value)]]);
+            ::Core::io::nl();
         }
         exit(reason) => {
-            io::put_chars([["exit: ", patina_fmt::debug(reason)]]);
-            io::nl();
+            ::Core::io::put_chars([["exit: ", patina_fmt::debug(reason)]]);
+            ::Core::io::nl();
         }
-    } after { { io::put_chars([["cleaning up"]]); io::nl(); }; };
+    }
+        after {
+        { ::Core::io::put_chars([["cleaning up"]]); ::Core::io::nl(); };
+    };
 }

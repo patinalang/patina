@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 fn main() ({
@@ -29,22 +26,22 @@ fn main() ({
     // defined in outer scopes lose their `mut` modifier
     // You must define a new variable to modify it inside your closure
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("Before mutating the binding: " as
                                 str),
                             ((patina_fmt::display as
                                     fn(term) -> term)((mutable_binding as int)) as term)] as
                         [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ((mutable_binding as int) += (1 as int) as int);
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("After mutating the binding: " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)((mutable_binding as int)) as term)] as
                         [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     let my_fun =
         (||
@@ -52,14 +49,14 @@ fn main() ({
                 let mut inner_mutable_binding = (mutable_binding as int);
                 ((inner_mutable_binding as int) += (1 as int) as int);
                 ({
-                    ((io::put_chars as
+                    ((::Core::io::put_chars as
                             fn(term) -> term)(([([((patina_fmt::display as
                                                 fn(term) -> term)((inner_mutable_binding as int)) as term),
                                         (" == " as str),
                                         ((patina_fmt::display as
                                                 fn(term) -> term)((mutable_binding as int)) as term),
                                         (" + 1" as str)] as [term])] as [[term]])) as term);
-                    ((io::nl as fn() -> term)() as term);
+                    ((::Core::io::nl as fn() -> term)() as term);
                 } as ());
             } as ()) as
             {closure@tests/ui/src/variable_bindings/mut__01_noerror.pt:14:18: 14:20});

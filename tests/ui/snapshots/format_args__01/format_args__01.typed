@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // Exercises the partial `format_args!` implementation: literal text, `{}` (Display)
@@ -25,35 +22,35 @@ fn main() ({
     let n: int = (42 as int);
 
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("hello, " as str),
                             ((patina_fmt::display as fn(term) -> term)((name as str)) as
                                 term), ("!" as str)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)((name as str)) as term), (" = " as str),
                             ((patina_fmt::debug as fn(term) -> term)((n as int)) as
                                 term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)((name as str)) as term), (" and " as str),
                             ((patina_fmt::debug as fn(term) -> term)((n as int)) as
                                 term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((io::put_chars as fn(term) -> term)(([("no " as str)] as [str])) as
-            term);
+        ((::Core::io::put_chars as
+                fn(term) -> term)(([("no " as str)] as [str])) as term);
     } as ());
     ({
-        ((io::put_chars as fn(term) -> term)(([("newline" as str)] as [str]))
-            as term);
+        ((::Core::io::put_chars as
+                fn(term) -> term)(([("newline" as str)] as [str])) as term);
     } as ());
-    ({ ((io::nl as fn() -> term)() as term); } as ());
+    ({ ((::Core::io::nl as fn() -> term)() as term); } as ());
 } as ())

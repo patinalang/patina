@@ -989,22 +989,17 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 if let Err(Determinacy::Determined) = result
                     && let Some(Res::Def(DefKind::ExternMod, _)) = module.res()
                 {
-                    let child = self
-                        .get_mut_unchecked()
-                        .get_or_create_extern_mod_child(module.expect_local(), ident);
+                    let local = self.get_mut_unchecked().local_extern_mod(module, ident.span);
+                    let child =
+                        self.get_mut_unchecked().get_or_create_extern_mod_child(local, ident);
 
-                    self.get_mut_unchecked().plant_extern_mod_child_binding(
-                        module.expect_local(),
-                        ident_key,
-                        ident.span,
-                        ns,
-                        child,
-                    );
+                    self.get_mut_unchecked()
+                        .plant_extern_mod_child_binding(local, ident_key, ident.span, ns, child);
 
                     self.reborrow().resolve_ident_in_scope_set_inner(
                         ident_key,
                         ident.span,
-                        ScopeSet::Module(ns, module),
+                        ScopeSet::Module(ns, local.to_module()),
                         &adjusted_parent_scope,
                         finalize,
                         ignore_decl,

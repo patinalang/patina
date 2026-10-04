@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/trait/ops.md
@@ -44,24 +41,32 @@ impl Ops::Add<Bar> for Foo {
 
 
 
-        { io::put_chars([["> Foo.add(Bar) was called"]]); io::nl(); };
+        {
+            ::Core::io::put_chars([["> Foo.add(Bar) was called"]]);
+            ::Core::io::nl();
+        };
         FooBar
     }
 }
 impl Ops::Add<Foo> for Bar {
     type Output = BarFoo;
     fn add(self, _rhs: Foo) -> BarFoo {
-        { io::put_chars([["> Bar.add(Foo) was called"]]); io::nl(); };
+        {
+            ::Core::io::put_chars([["> Bar.add(Foo) was called"]]);
+            ::Core::io::nl();
+        };
         BarFoo
     }
 }
 pub fn main() {
     {
-        io::put_chars([["Foo + Bar = ", patina_fmt::debug(Foo + Bar)]]);
-        io::nl();
+        ::Core::io::put_chars([["Foo + Bar = ",
+                            patina_fmt::debug(Foo + Bar)]]);
+        ::Core::io::nl();
     };
     {
-        io::put_chars([["Bar + Foo = ", patina_fmt::debug(Bar + Foo)]]);
-        io::nl();
+        ::Core::io::put_chars([["Bar + Foo = ",
+                            patina_fmt::debug(Bar + Foo)]]);
+        ::Core::io::nl();
     };
 }

@@ -23,6 +23,13 @@ Ident
 Whitespace
 Ident
 Whitespace
+Ident
+Semi
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
 OpenBrace
 Whitespace
 Ident

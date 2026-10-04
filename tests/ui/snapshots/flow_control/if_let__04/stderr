@@ -12,7 +12,7 @@ note: an implementation of `Core::PartialEq` might be missing for `Foo`
 LL | enum Foo {Bar}
    | ^^^^^^^^ must implement `Core::PartialEq`
 note: the trait `Core::PartialEq` must be implemented
-  --> core.pt:356:0
+  --> core.pt:358:0
 
 error: aborting due to 1 previous error
 

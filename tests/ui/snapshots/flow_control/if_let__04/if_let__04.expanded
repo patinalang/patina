@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/if_let.md
@@ -30,6 +27,6 @@ pub fn main() {
     // Variable a matches Foo::Bar
     if Foo::Bar == a {
         // ^-- this causes a compile-time error. Use `if let` instead.
-        { io::put_chars([["a is foobar"]]); io::nl(); };
+        { ::Core::io::put_chars([["a is foobar"]]); ::Core::io::nl(); };
     }
 }

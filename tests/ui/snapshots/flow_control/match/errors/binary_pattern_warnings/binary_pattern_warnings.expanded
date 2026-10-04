@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // Literals that don't fit their binary pattern segments.
@@ -28,8 +25,8 @@ pub fn main() {
             <<256: int(size = 8), -1: int(size = 8)>> =>
             // These are truncated, or encoded as infinity.
             {
-            io::put_chars([["never"]]);
-            io::nl();
+            ::Core::io::put_chars([["never"]]);
+            ::Core::io::nl();
         }
         <<-1: int(size = 8, signed), 128: int(size = 8, signed), -129:
             int(size = 8, signed)>> => {}
@@ -38,9 +35,9 @@ pub fn main() {
         _ => {}
     }
     {
-        io::put_chars([[patina_fmt::debug(<<300: int(size = 8), -1:
+        ::Core::io::put_chars([[patina_fmt::debug(<<300: int(size = 8), -1:
                                         int(size = 8), 255: int(size = 8), 1.0e10: float(size = 16),
                                         b'\x80': int(size = 8, signed)>>)]]);
-        io::nl();
+        ::Core::io::nl();
     };
 }

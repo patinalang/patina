@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/match/binding.md
@@ -45,18 +42,18 @@ fn main() ({
             // Match any other number.
             // Match anything else (`None` variant).
             {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("The Answer: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((n as int)) as
                                     term), ("!" as str)] as [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
         Some(n) => {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("Not interesting... " as str),
                                 ((patina_fmt::display as fn(term) -> term)((n as int)) as
                                     term)] as [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
         _ => (() as ()),
     } as ())

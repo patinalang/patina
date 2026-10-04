@@ -1,3 +1,5 @@
+extern mod io;
+
 pub fn main() {
     io();
 }

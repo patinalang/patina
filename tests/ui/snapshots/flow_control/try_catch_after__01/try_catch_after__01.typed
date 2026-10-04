@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/try_catch_after.md
@@ -34,57 +31,57 @@ fn main() ({
 
 
             {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("badarg!" as str)] as [str])] as
                     [[str]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
         error(#{(a"__struct__" as atom) => a"Elixir.ArithmeticError", ..}) =>
             {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("Elixir ArithmeticError" as str)] as
                             [str])] as [[str]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
         error(reason@#{(a"__struct__" as atom) => a"Elixir.ArgumentError",
             ..}) => {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("Elixir ArgumentError " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((reason as term))
                                     as term)] as [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
         error(reason), stacktrace => {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("other error: " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((reason as term))
                                     as term), (" from " as str),
                                 ((patina_fmt::debug as
                                         fn(term) -> term)((stacktrace as term)) as term)] as
                             [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
         throw(value) => {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("thrown: " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((value as term)) as
                                     term)] as [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
         exit(reason) => {
-            ((io::put_chars as
+            ((::Core::io::put_chars as
                     fn(term) -> term)(([([("exit: " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((reason as term))
                                     as term)] as [term])] as [[term]])) as term);
-            ((io::nl as fn() -> term)() as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         }
     }
         after ({
             ({
-                ((io::put_chars as
+                ((::Core::io::put_chars as
                         fn(term) -> term)(([([("cleaning up" as str)] as [str])] as
                         [[str]])) as term);
-                ((io::nl as fn() -> term)() as term);
+                ((::Core::io::nl as fn() -> term)() as term);
             } as ());
         } as ()) as ());
 } as ())

@@ -951,6 +951,7 @@ fn should_encode_span(def_kind: DefKind) -> bool {
 fn should_encode_attrs(def_kind: DefKind) -> bool {
     match def_kind {
         DefKind::Mod
+        | DefKind::ExternMod
         | DefKind::Struct
         | DefKind::Union
         | DefKind::Enum
@@ -983,7 +984,6 @@ fn should_encode_attrs(def_kind: DefKind) -> bool {
         | DefKind::Ctor(..)
         | DefKind::ExternCrate
         | DefKind::ForeignMod
-        | DefKind::ExternMod
         | DefKind::AnonConst
         | DefKind::InlineConst
         | DefKind::OpaqueTy
@@ -996,6 +996,7 @@ fn should_encode_attrs(def_kind: DefKind) -> bool {
 fn should_encode_expn_that_defined(def_kind: DefKind) -> bool {
     match def_kind {
         DefKind::Mod
+        | DefKind::ExternMod
         | DefKind::Struct
         | DefKind::Union
         | DefKind::Enum
@@ -1018,7 +1019,6 @@ fn should_encode_expn_that_defined(def_kind: DefKind) -> bool {
         | DefKind::ExternCrate
         | DefKind::Use
         | DefKind::ForeignMod
-        | DefKind::ExternMod
         | DefKind::AnonConst
         | DefKind::InlineConst
         | DefKind::OpaqueTy
@@ -1033,6 +1033,7 @@ fn should_encode_expn_that_defined(def_kind: DefKind) -> bool {
 fn should_encode_visibility(def_kind: DefKind) -> bool {
     match def_kind {
         DefKind::Mod
+        | DefKind::ExternMod
         | DefKind::Struct
         | DefKind::Union
         | DefKind::Enum
@@ -1052,7 +1053,6 @@ fn should_encode_visibility(def_kind: DefKind) -> bool {
         | DefKind::Field => true,
         DefKind::Use
         | DefKind::ForeignMod
-        | DefKind::ExternMod
         | DefKind::TyParam
         | DefKind::ConstParam
         | DefKind::LifetimeParam
@@ -1542,7 +1542,7 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
             if let DefKind::Enum | DefKind::Struct | DefKind::Union = def_kind {
                 self.encode_info_for_adt(local_id);
             }
-            if let DefKind::Mod = def_kind {
+            if let DefKind::Mod | DefKind::ExternMod = def_kind {
                 self.encode_info_for_mod(local_id);
             }
             if let DefKind::Macro(_) = def_kind {
@@ -1673,14 +1673,14 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
 
         let non_reexports: Vec<_> = module_children
             .iter()
-            .filter(|child| child.reexport_chain.is_empty() && !self.is_hidden_child(child))
+            .filter(|child| child.reexport_chain.is_empty() && !self.is_proc_macro_shadow(child))
             .map(|child| child.res.def_id().index)
             .collect();
         record_array!(self.tables.module_children_non_reexports[def_id] <- non_reexports);
 
         let reexports: Vec<_> = module_children
             .iter()
-            .filter(|child| !child.reexport_chain.is_empty() && !self.is_hidden_child(child))
+            .filter(|child| !child.reexport_chain.is_empty() && !self.is_proc_macro_shadow(child))
             .collect();
         record_defaulted_array!(self.tables.module_children_reexports[def_id] <- reexports);
 
@@ -1691,7 +1691,7 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
             .map_or_default(|v| &v[..])
             .iter()
             .filter(|child| {
-                !self.is_hidden_child(&child.main) && !self.is_hidden_child(&child.second)
+                !self.is_proc_macro_shadow(&child.main) && !self.is_proc_macro_shadow(&child.second)
             })
             .collect();
         record_defaulted_array!(self.tables.ambig_module_children[def_id] <-
@@ -1701,10 +1701,6 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
     /// The macro `def_id` is exported as, if it is a local proc macro.
     fn proc_macro_export(&self, def_id: DefId) -> Option<&ProcMacroExportData> {
         def_id.as_local().and_then(|def_id| self.proc_macro_exports.get(&def_id))
-    }
-
-    fn is_hidden_child(&self, child: &ModChild) -> bool {
-        matches!(child.res, Res::Def(DefKind::ExternMod, _)) || self.is_proc_macro_shadow(child)
     }
 
     /// Whether this module child is the non-macro half of a proc macro.

@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/custom_types/repr.md
@@ -31,8 +28,11 @@ pub fn main() {
 
     // (a"Elixir.BarBar")
     {
-        io::put_chars([[patina_fmt::debug(Pair(42, 3.14) as term)]]);
-        io::nl();
+        ::Core::io::put_chars([[patina_fmt::debug(Pair(42, 3.14) as term)]]);
+        ::Core::io::nl();
     };
-    { io::put_chars([[patina_fmt::debug(Bar as term)]]); io::nl(); };
+    {
+        ::Core::io::put_chars([[patina_fmt::debug(Bar as term)]]);
+        ::Core::io::nl();
+    };
 }

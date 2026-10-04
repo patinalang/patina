@@ -12,12 +12,12 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 pub fn main() {
     let [first, ..] = [1] else {};
-    { io::put_chars([[patina_fmt::display(first)]]); io::nl(); };
+    {
+        ::Core::io::put_chars([[patina_fmt::display(first)]]);
+        ::Core::io::nl();
+    };
 }

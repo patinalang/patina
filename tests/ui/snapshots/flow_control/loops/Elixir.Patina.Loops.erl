@@ -9,35 +9,35 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         '$patina_loop_5_48'/3,
+         '$patina_loop_4_48'/3,
          normal_continue/1,
-         '$patina_loop_6_29'/2,
+         '$patina_loop_5_29'/2,
          loop_value/1,
-         '$patina_loop_7_6'/0,
+         '$patina_loop_6_6'/0,
          zero_parameter_loop/0,
-         '$patina_loop_8_10'/1,
+         '$patina_loop_7_10'/1,
          initialize_in_loop/0,
-         '$patina_loop_9_34'/3,
+         '$patina_loop_8_34'/3,
          while_sum/2,
-         '$patina_loop_10_49'/4,
-         '$patina_loop_10_65'/4,
+         '$patina_loop_9_49'/4,
+         '$patina_loop_9_65'/4,
          nested/2,
-         '$patina_loop_11_42'/2,
+         '$patina_loop_10_42'/2,
          return_from_loop/1,
-         '$patina_loop_12_62'/4,
-         '$patina_loop_12_78'/3,
+         '$patina_loop_11_62'/4,
+         '$patina_loop_11_78'/3,
          return_from_nested/2,
-         '$patina_loop_13_78'/5,
-         '$patina_loop_13_94'/4,
+         '$patina_loop_12_78'/5,
+         '$patina_loop_12_94'/4,
          return_from_nested_uneven_rebinds/2,
-         '$patina_loop_14_34'/3,
-         '$patina_loop_14_37'/3,
+         '$patina_loop_13_34'/3,
+         '$patina_loop_13_37'/3,
          continue_outer/1,
-         '$patina_loop_15_34'/3,
-         '$patina_loop_15_38'/3,
-         '$patina_loop_15_41'/3,
+         '$patina_loop_14_34'/3,
+         '$patina_loop_14_38'/3,
+         '$patina_loop_14_41'/3,
          continue_through_middle/1,
-         '$patina_loop_16_8'/0,
+         '$patina_loop_15_8'/0,
          cast_loop_value/0]).
 
 '__info__'(functions) ->
@@ -53,7 +53,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'$patina_loop_5_48'(_count@1_0, _total@2_0,
+'$patina_loop_4_48'(_count@1_0, _total@2_0,
                     _limit@0_0) ->
     _ = begin
             _count@1_1 = _count@1_0 + 1,
@@ -84,7 +84,7 @@
 normal_continue(_limit@0_0) ->
     _count@1_0 = 0,
     _total@2_0 = 0,
-    case '$patina_loop_5_48'(_count@1_0,
+    case '$patina_loop_4_48'(_count@1_0,
                              _total@2_0,
                              _limit@0_0)
         of
@@ -93,7 +93,7 @@ normal_continue(_limit@0_0) ->
     end,
     _total@2_1 * 100 + _count@1_1.
 
-'$patina_loop_6_29'(_counter@1_0, _target@0_0) ->
+'$patina_loop_5_29'(_counter@1_0, _target@0_0) ->
     _ = begin
             _counter@1_1 = _counter@1_0 + 1,
             case _counter@1_1 =:= _target@0_0 of
@@ -110,7 +110,7 @@ normal_continue(_limit@0_0) ->
 
 loop_value(_target@0_0) ->
     _counter@1_0 = 0,
-    _result@3_0 = case '$patina_loop_6_29'(_counter@1_0,
+    _result@3_0 = case '$patina_loop_5_29'(_counter@1_0,
                                            _target@0_0)
                       of
                       {break, 0, _loop_value@2_0, _counter@1_1} ->
@@ -118,16 +118,16 @@ loop_value(_target@0_0) ->
                   end,
     _result@3_0 * 10 + _counter@1_1.
 
-'$patina_loop_7_6'() ->
+'$patina_loop_6_6'() ->
     _ = begin '$patina_marker':break({break, 0, 7}), {} end,
     '$patina_marker':continue().
 
 zero_parameter_loop() ->
-    case '$patina_loop_7_6'() of
+    case '$patina_loop_6_6'() of
         {break, 0, _loop_value@0_0} -> _loop_value@0_0
     end.
 
-'$patina_loop_8_10'(_value@0_0) ->
+'$patina_loop_7_10'(_value@0_0) ->
     _ = begin
             _value@0_1 = 7,
             '$patina_marker':break({break, 0, {}, _value@0_1}),
@@ -137,13 +137,13 @@ zero_parameter_loop() ->
 
 initialize_in_loop() ->
     begin _value@0_0 = {} end,
-    case '$patina_loop_8_10'(_value@0_0) of
+    case '$patina_loop_7_10'(_value@0_0) of
         {break, 0, _loop_value@1_0, _value@0_1} ->
             _loop_value@1_0
     end,
     _value@0_1.
 
-'$patina_loop_9_34'(_n@2_0, _limit@1_0, _total@3_0) ->
+'$patina_loop_8_34'(_n@2_0, _limit@1_0, _total@3_0) ->
     _ = begin
             case _n@2_0 < _limit@1_0 of
                 true ->
@@ -170,15 +170,15 @@ initialize_in_loop() ->
 while_sum(_start@0_0, _limit@1_0) ->
     _n@2_0 = _start@0_0,
     _total@3_0 = 0,
-    case '$patina_loop_9_34'(_n@2_0, _limit@1_0, _total@3_0)
+    case '$patina_loop_8_34'(_n@2_0, _limit@1_0, _total@3_0)
         of
         {break, 0, _loop_value@5_0, _total@3_1, _n@2_1} ->
             _loop_value@5_0
     end,
     _total@3_1 * 100 + _n@2_1.
 
-'$patina_loop_10_49'(_inner@4_0, _inner_limit@1_0,
-                     _visits@3_0, _outer@2_1) ->
+'$patina_loop_9_49'(_inner@4_0, _inner_limit@1_0,
+                    _visits@3_0, _outer@2_1) ->
     _ = begin
             _inner@4_1 = _inner@4_0 + 1,
             case _inner@4_1 < _inner_limit@1_0 of
@@ -204,15 +204,15 @@ while_sum(_start@0_0, _limit@1_0) ->
                               _visits@3_1,
                               _outer@2_1).
 
-'$patina_loop_10_65'(_outer@2_0, _inner_limit@1_0,
-                     _visits@3_0, _outer_limit@0_0) ->
+'$patina_loop_9_65'(_outer@2_0, _inner_limit@1_0,
+                    _visits@3_0, _outer_limit@0_0) ->
     _ = begin
             _outer@2_1 = _outer@2_0 + 1,
             _inner@4_0 = 0,
-            case '$patina_loop_10_49'(_inner@4_0,
-                                      _inner_limit@1_0,
-                                      _visits@3_0,
-                                      _outer@2_1)
+            case '$patina_loop_9_49'(_inner@4_0,
+                                     _inner_limit@1_0,
+                                     _visits@3_0,
+                                     _outer@2_1)
                 of
                 {break, 1, _loop_value@5_0, _inner@4_1, _visits@3_1} ->
                     _loop_value@5_0
@@ -236,17 +236,17 @@ while_sum(_start@0_0, _limit@1_0) ->
 nested(_outer_limit@0_0, _inner_limit@1_0) ->
     _outer@2_0 = 0,
     _visits@3_0 = 0,
-    case '$patina_loop_10_65'(_outer@2_0,
-                              _inner_limit@1_0,
-                              _visits@3_0,
-                              _outer_limit@0_0)
+    case '$patina_loop_9_65'(_outer@2_0,
+                             _inner_limit@1_0,
+                             _visits@3_0,
+                             _outer_limit@0_0)
         of
         {break, 0, _loop_value@6_0, _outer@2_1, _visits@3_1} ->
             _loop_value@6_0
     end,
     _visits@3_1 * 100 + _outer@2_1.
 
-'$patina_loop_11_42'(_n@1_0, _stop_at@0_0) ->
+'$patina_loop_10_42'(_n@1_0, _stop_at@0_0) ->
     _ = begin
             _n@1_1 = _n@1_0 + 1,
             case _n@1_1 =:= _stop_at@0_0 of
@@ -266,14 +266,14 @@ nested(_outer_limit@0_0, _inner_limit@1_0) ->
 
 return_from_loop(_stop_at@0_0) ->
     _n@1_0 = 0,
-    case '$patina_loop_11_42'(_n@1_0, _stop_at@0_0) of
+    case '$patina_loop_10_42'(_n@1_0, _stop_at@0_0) of
         {break, 0, _loop_value@2_0, _n@1_1} -> _loop_value@2_0;
         {return, _loop_value@3_0, _n@1_1} ->
             '$patina_marker':return(_loop_value@3_0)
     end,
     -1.
 
-'$patina_loop_12_62'(_inner@3_0, _outer@2_1,
+'$patina_loop_11_62'(_inner@3_0, _outer@2_1,
                      _outer_stop@0_0, _inner_stop@1_0) ->
     _ = begin
             _inner@3_1 = _inner@3_0 + 1,
@@ -299,12 +299,12 @@ return_from_loop(_stop_at@0_0) ->
                               _outer_stop@0_0,
                               _inner_stop@1_0).
 
-'$patina_loop_12_78'(_outer@2_0, _outer_stop@0_0,
+'$patina_loop_11_78'(_outer@2_0, _outer_stop@0_0,
                      _inner_stop@1_0) ->
     _ = begin
             _outer@2_1 = _outer@2_0 + 1,
             _inner@3_0 = 0,
-            case '$patina_loop_12_62'(_inner@3_0,
+            case '$patina_loop_11_62'(_inner@3_0,
                                       _outer@2_1,
                                       _outer_stop@0_0,
                                       _inner_stop@1_0)
@@ -329,7 +329,7 @@ return_from_loop(_stop_at@0_0) ->
 
 return_from_nested(_outer_stop@0_0, _inner_stop@1_0) ->
     _outer@2_0 = 0,
-    case '$patina_loop_12_78'(_outer@2_0,
+    case '$patina_loop_11_78'(_outer@2_0,
                               _outer_stop@0_0,
                               _inner_stop@1_0)
         of
@@ -340,7 +340,7 @@ return_from_nested(_outer_stop@0_0, _inner_stop@1_0) ->
     end,
     -1.
 
-'$patina_loop_13_78'(_inner@4_0, _a@2_1,
+'$patina_loop_12_78'(_inner@4_0, _a@2_1,
                      _outer_stop@0_0, _inner_stop@1_0, _b@3_1) ->
     _ = begin
             _inner@4_1 = _inner@4_0 + 1,
@@ -368,13 +368,13 @@ return_from_nested(_outer_stop@0_0, _inner_stop@1_0) ->
                               _inner_stop@1_0,
                               _b@3_1).
 
-'$patina_loop_13_94'(_a@2_0, _b@3_0, _outer_stop@0_0,
+'$patina_loop_12_94'(_a@2_0, _b@3_0, _outer_stop@0_0,
                      _inner_stop@1_0) ->
     _ = begin
             _a@2_1 = _a@2_0 + 1,
             _b@3_1 = _b@3_0 + 10,
             _inner@4_0 = 0,
-            case '$patina_loop_13_78'(_inner@4_0,
+            case '$patina_loop_12_78'(_inner@4_0,
                                       _a@2_1,
                                       _outer_stop@0_0,
                                       _inner_stop@1_0,
@@ -404,7 +404,7 @@ return_from_nested_uneven_rebinds(_outer_stop@0_0,
                                   _inner_stop@1_0) ->
     _a@2_0 = 0,
     _b@3_0 = 0,
-    case '$patina_loop_13_94'(_a@2_0,
+    case '$patina_loop_12_94'(_a@2_0,
                               _b@3_0,
                               _outer_stop@0_0,
                               _inner_stop@1_0)
@@ -416,7 +416,7 @@ return_from_nested_uneven_rebinds(_outer_stop@0_0,
     end,
     -1.
 
-'$patina_loop_14_34'(_visits@2_0, _outer@1_1,
+'$patina_loop_13_34'(_visits@2_0, _outer@1_1,
                      _limit@0_0) ->
     _ = begin
             _visits@2_1 = _visits@2_0 + 1,
@@ -433,11 +433,11 @@ return_from_nested_uneven_rebinds(_outer_stop@0_0,
                               _outer@1_1,
                               _limit@0_0).
 
-'$patina_loop_14_37'(_outer@1_0, _visits@2_0,
+'$patina_loop_13_37'(_outer@1_0, _visits@2_0,
                      _limit@0_0) ->
     _ = begin
             _outer@1_1 = _outer@1_0 + 1,
-            case '$patina_loop_14_34'(_visits@2_0,
+            case '$patina_loop_13_34'(_visits@2_0,
                                       _outer@1_1,
                                       _limit@0_0)
                 of
@@ -463,7 +463,7 @@ return_from_nested_uneven_rebinds(_outer_stop@0_0,
 continue_outer(_limit@0_0) ->
     _outer@1_0 = 0,
     _visits@2_0 = 0,
-    case '$patina_loop_14_37'(_outer@1_0,
+    case '$patina_loop_13_37'(_outer@1_0,
                               _visits@2_0,
                               _limit@0_0)
         of
@@ -472,7 +472,7 @@ continue_outer(_limit@0_0) ->
     end,
     _visits@2_1 * 100 + _outer@1_1.
 
-'$patina_loop_15_34'(_visits@2_0, _outer@1_1,
+'$patina_loop_14_34'(_visits@2_0, _outer@1_1,
                      _limit@0_0) ->
     _ = begin
             _visits@2_1 = _visits@2_0 + 1,
@@ -489,10 +489,10 @@ continue_outer(_limit@0_0) ->
                               _outer@1_1,
                               _limit@0_0).
 
-'$patina_loop_15_38'(_visits@2_0, _outer@1_1,
+'$patina_loop_14_38'(_visits@2_0, _outer@1_1,
                      _limit@0_0) ->
     _ = begin
-            case '$patina_loop_15_34'(_visits@2_0,
+            case '$patina_loop_14_34'(_visits@2_0,
                                       _outer@1_1,
                                       _limit@0_0)
                 of
@@ -514,11 +514,11 @@ continue_outer(_limit@0_0) ->
                               _outer@1_1,
                               _limit@0_0).
 
-'$patina_loop_15_41'(_outer@1_0, _visits@2_0,
+'$patina_loop_14_41'(_outer@1_0, _visits@2_0,
                      _limit@0_0) ->
     _ = begin
             _outer@1_1 = _outer@1_0 + 1,
-            case '$patina_loop_15_38'(_visits@2_0,
+            case '$patina_loop_14_38'(_visits@2_0,
                                       _outer@1_1,
                                       _limit@0_0)
                 of
@@ -544,7 +544,7 @@ continue_outer(_limit@0_0) ->
 continue_through_middle(_limit@0_0) ->
     _outer@1_0 = 0,
     _visits@2_0 = 0,
-    case '$patina_loop_15_41'(_outer@1_0,
+    case '$patina_loop_14_41'(_outer@1_0,
                               _visits@2_0,
                               _limit@0_0)
         of
@@ -553,12 +553,12 @@ continue_through_middle(_limit@0_0) ->
     end,
     _visits@2_1 * 100 + _outer@1_1.
 
-'$patina_loop_16_8'() ->
+'$patina_loop_15_8'() ->
     _ = begin '$patina_marker':break({break, 0, 1}), {} end,
     '$patina_marker':continue().
 
 cast_loop_value() ->
-    _value@1_0 = case '$patina_loop_16_8'() of
+    _value@1_0 = case '$patina_loop_15_8'() of
                      {break, 0, _loop_value@0_0} -> _loop_value@0_0
                  end,
     _value@1_0.

@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/mod/split.md
@@ -31,51 +28,51 @@ mod Inaccessible {
     #[allow(dead_code)]
     fn public_function() ({
         ({
-            ((io::put_chars as
-                    {type error})(([([("called `MyMod::Inaccessible::public_function()`"
-                                    as str)] as [str])] as [[str]])) as {type error});
-            ((io::nl as {type error})() as {type error});
+            ((::Core::io::put_chars as
+                    fn(term) -> term)(([([("called `MyMod::Inaccessible::public_function()`"
+                                    as str)] as [str])] as [[str]])) as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         } as ());
     } as ())
 }
 mod Nested {
     fn function() ({
         ({
-            ((io::put_chars as
-                    {type error})(([([("called `MyMod::Nested::function()`" as
-                                    str)] as [str])] as [[str]])) as {type error});
-            ((io::nl as {type error})() as {type error});
+            ((::Core::io::put_chars as
+                    fn(term) -> term)(([([("called `MyMod::Nested::function()`"
+                                    as str)] as [str])] as [[str]])) as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         } as ());
     } as ())
     #[allow(dead_code)]
     fn private_function() ({
         ({
-            ((io::put_chars as
-                    {type error})(([([("called `MyMod::Nested::private_function()`"
-                                    as str)] as [str])] as [[str]])) as {type error});
-            ((io::nl as {type error})() as {type error});
+            ((::Core::io::put_chars as
+                    fn(term) -> term)(([([("called `MyMod::Nested::private_function()`"
+                                    as str)] as [str])] as [[str]])) as term);
+            ((::Core::io::nl as fn() -> term)() as term);
         } as ());
     } as ())
 }
 fn function() ({
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("called `MyMod::function()`" as str)]
                         as [str])] as [[str]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())
 fn private_function() ({
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("called `MyMod::private_function()`" as
                                 str)] as [str])] as [[str]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())
 fn indirect_access() ({
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([("called `MyMod::indirect_access()`, that\n> "
                         as str)] as [str])) as term);
     } as ());

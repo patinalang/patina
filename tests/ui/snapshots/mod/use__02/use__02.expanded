@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/mod/use.md
@@ -35,25 +32,25 @@ fn function() {
     // shadowing of `function()` is only in this block.
 
 
-    { io::put_chars([["called `function()`"]]); io::nl(); };
+    { ::Core::io::put_chars([["called `function()`"]]); ::Core::io::nl(); };
 }
 mod Deeply {
     pub mod Nested {
         pub fn function() {
             {
-                io::put_chars([["called `Deeply::Nested::function()`"]]);
-                io::nl();
+                ::Core::io::put_chars([["called `Deeply::Nested::function()`"]]);
+                ::Core::io::nl();
             };
         }
     }
 }
 pub fn main() {
     other_function();
-    { io::put_chars([["Entering block"]]); io::nl(); };
+    { ::Core::io::put_chars([["Entering block"]]); ::Core::io::nl(); };
     {
         use pkg::Deeply::Nested::function;
         function();
-        { io::put_chars([["Leaving block"]]); io::nl(); };
+        { ::Core::io::put_chars([["Leaving block"]]); ::Core::io::nl(); };
     }
     function();
 }

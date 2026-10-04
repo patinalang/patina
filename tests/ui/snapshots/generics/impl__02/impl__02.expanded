@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/generics/impl.md
@@ -43,8 +40,8 @@ pub fn main() {
     let y = GenVal { gen_val: 42 };
 
     {
-        io::put_chars([[patina_fmt::display(x.value()), ", ",
+        ::Core::io::put_chars([[patina_fmt::display(x.value()), ", ",
                             patina_fmt::display(y.value())]]);
-        io::nl();
+        ::Core::io::nl();
     };
 }

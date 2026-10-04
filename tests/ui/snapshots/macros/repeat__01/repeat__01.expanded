@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/macros/repeat.md
@@ -30,14 +27,15 @@ macro_rules! find_min {
 }
 
 pub fn main() {
-    { io::put_chars([[patina_fmt::display(1)]]); io::nl(); };
+    { ::Core::io::put_chars([[patina_fmt::display(1)]]); ::Core::io::nl(); };
     {
-        io::put_chars([[patina_fmt::display(Std::Cmp::min(1 + 2, 2))]]);
-        io::nl();
+        ::Core::io::put_chars([[patina_fmt::display(Std::Cmp::min(1 + 2,
+                                    2))]]);
+        ::Core::io::nl();
     };
     {
-        io::put_chars([[patina_fmt::display(Std::Cmp::min(5,
+        ::Core::io::put_chars([[patina_fmt::display(Std::Cmp::min(5,
                                     Std::Cmp::min(2 * 3, 4)))]]);
-        io::nl();
+        ::Core::io::nl();
     };
 }

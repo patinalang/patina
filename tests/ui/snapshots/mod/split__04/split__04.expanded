@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/mod/split.md
@@ -23,7 +20,7 @@ extern mod patina_fmt;
 #[allow(dead_code)]
 pub fn public_function() {
     {
-        io::put_chars([["called `MyMod::Inaccessible::public_function()`"]]);
-        io::nl();
+        ::Core::io::put_chars([["called `MyMod::Inaccessible::public_function()`"]]);
+        ::Core::io::nl();
     };
 }

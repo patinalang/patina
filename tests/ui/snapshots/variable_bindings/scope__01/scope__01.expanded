@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/variable_bindings/scope.md
@@ -35,19 +32,19 @@ pub fn main() {
         // FIXME ^ Comment out this line
 
         {
-            io::put_chars([["inner short: ",
+            ::Core::io::put_chars([["inner short: ",
                                 patina_fmt::display(short_lived_binding)]]);
-            io::nl();
+            ::Core::io::nl();
         };
     }
     {
-        io::put_chars([["outer short: ",
+        ::Core::io::put_chars([["outer short: ",
                             patina_fmt::display(short_lived_binding)]]);
-        io::nl();
+        ::Core::io::nl();
     };
     {
-        io::put_chars([["outer long: ",
+        ::Core::io::put_chars([["outer long: ",
                             patina_fmt::display(long_lived_binding)]]);
-        io::nl();
+        ::Core::io::nl();
     };
 }

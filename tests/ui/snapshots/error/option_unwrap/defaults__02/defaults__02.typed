@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/error/option_unwrap/defaults.md
@@ -31,10 +28,10 @@ fn main() ({
                 // Providing kiwi as fallback
                 // first_available_fruit: Some(Kiwi)
                 ({
-                    ((io::put_chars as
+                    ((::Core::io::put_chars as
                             fn(term) -> term)(([([("Providing kiwi as fallback" as str)]
                                     as [str])] as [[str]])) as term);
-                    ((io::nl as fn() -> term)() as term);
+                    ((::Core::io::nl as fn() -> term)() as term);
                 } as ());
                 ((Some as
                         fn(Fruit) -> Core::Option<Fruit> {Core::Option::<Fruit>::Some})((Fruit::Kiwi
@@ -45,10 +42,10 @@ fn main() ({
         (||
             ({
                 ({
-                    ((io::put_chars as
+                    ((::Core::io::put_chars as
                             fn(term) -> term)(([([("Providing lemon as fallback" as
                                             str)] as [str])] as [[str]])) as term);
-                    ((io::nl as fn() -> term)() as term);
+                    ((::Core::io::nl as fn() -> term)() as term);
                 } as ());
                 ((Some as
                         fn(Fruit) -> Core::Option<Fruit> {Core::Option::<Fruit>::Some})((Fruit::Lemon
@@ -64,11 +61,11 @@ fn main() ({
                 {closure@tests/ui/src/error/option_unwrap/defaults__02.pt:13:33: 13:35}))
             as {type error});
     ({
-        ((io::put_chars as
+        ((::Core::io::put_chars as
                 fn(term) -> term)(([([("first_available_fruit: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((first_available_fruit as {type error}))
                                 as term)] as [term])] as [[term]])) as term);
-        ((io::nl as fn() -> term)() as term);
+        ((::Core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

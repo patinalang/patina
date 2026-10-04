@@ -12,9 +12,6 @@ extern crate Core;
 use Core::Prelude::*;
 
 #[allow(unused)]
-extern mod io;
-
-#[allow(unused)]
 extern mod patina_fmt;
 
 // source: patina-by-example/src/macros/dsl.md
@@ -37,17 +34,17 @@ pub fn main() {
         let val: int = 1 + 2; // hehehe `eval` is _not_ a Patina keyword!
 
         {
-            io::put_chars([[patina_fmt::display("1 + 2"), " = ",
+            ::Core::io::put_chars([[patina_fmt::display("1 + 2"), " = ",
                                 patina_fmt::display(val)]]);
-            io::nl();
+            ::Core::io::nl();
         };
     }
     {
         let val: int = (1 + 2) * (3 / 4);
         {
-            io::put_chars([[patina_fmt::display("(1 + 2) * (3 / 4)"), " = ",
-                                patina_fmt::display(val)]]);
-            io::nl();
+            ::Core::io::put_chars([[patina_fmt::display("(1 + 2) * (3 / 4)"),
+                                " = ", patina_fmt::display(val)]]);
+            ::Core::io::nl();
         };
     }
 }
