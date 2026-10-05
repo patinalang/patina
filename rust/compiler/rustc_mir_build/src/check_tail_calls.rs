@@ -76,10 +76,7 @@ impl<'tcx> TailCallCkVisitor<'_, 'tcx> {
 
         if matches!(
             value.kind,
-            ExprKind::Binary { .. }
-                | ExprKind::Unary { .. }
-                | ExprKind::AssignOp { .. }
-                | ExprKind::Index { .. }
+            ExprKind::Binary { .. } | ExprKind::Unary { .. } | ExprKind::Index { .. }
         ) {
             self.report_builtin_op(call, expr);
             return;

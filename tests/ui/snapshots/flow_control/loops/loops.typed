@@ -61,7 +61,7 @@ fn initialize_in_loop()
         int ({
     let value;
 
-    (loop { ((value as int) = (7 as int) as int); (break as !); } as ())
+    (loop { (value = (7 as int) as int); (break as !); } as ())
 
     (value as int)
 } as int)

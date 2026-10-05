@@ -161,6 +161,42 @@ pub(crate) struct FunctionalMapUpdateDestructuringAssignment {
 }
 
 #[derive(Diagnostic)]
+#[diag("cannot assign to this expression")]
+#[help("only `mut` variables can be assigned to")]
+#[note("Patina values are immutable")]
+pub(crate) struct AssignToNonVariable {
+    #[primary_span]
+    #[label("cannot assign")]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("invalid left-hand side of assignment", code = E0070)]
+pub(crate) struct InvalidAssignee {
+    #[primary_span]
+    pub eq_sign_span: Span,
+    #[subdiagnostic]
+    pub reason: InvalidAssigneeReason,
+}
+
+#[derive(Subdiagnostic)]
+pub(crate) enum InvalidAssigneeReason {
+    #[label("cannot assign to `{$path}`, as it is {$article} {$descr}, not a variable")]
+    Path {
+        #[primary_span]
+        span: Span,
+        path: String,
+        article: &'static str,
+        descr: &'static str,
+    },
+    #[label("cannot assign to this expression, as it is not a variable")]
+    Expr {
+        #[primary_span]
+        span: Span,
+    },
+}
+
+#[derive(Diagnostic)]
 #[diag("list tails are not allowed in destructuring assignments")]
 pub(crate) struct ListTailDestructuringAssignment {
     #[primary_span]

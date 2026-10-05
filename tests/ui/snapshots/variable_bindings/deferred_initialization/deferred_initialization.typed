@@ -20,8 +20,8 @@ fn initialized_in_branches(condition: bool)
     let value;
 
     (if (condition as bool) {
-        ((value as int) = (1 as int) as int);
-    } else { ((value as int) = (2 as int) as int); } as ())
+        (value = (1 as int) as int);
+    } else { (value = (2 as int) as int); } as ())
 
     (value as int)
 } as int)
@@ -32,11 +32,11 @@ fn initialized_after_diverging_branch(condition: bool)
     let value;
 
     (if (condition as bool) {
-        ((value as int) = (1 as int) as int);
+        (value = (1 as int) as int);
         (return (value as int) as !);
     } as ())
 
-    ((value as int) = (2 as int) as int);
+    (value = (2 as int) as int);
     (value as int)
 } as int)
 
@@ -47,9 +47,9 @@ fn initialized_on_every_loop_exit(condition: bool)
 
     (loop {
         (if (condition as bool) {
-            ((value as int) = (1 as int) as int);
+            (value = (1 as int) as int);
             (break as !);
-        } else { ((value as int) = (2 as int) as int); (break as !); } as ())
+        } else { (value = (2 as int) as int); (break as !); } as ())
     } as ())
 
     (value as int)

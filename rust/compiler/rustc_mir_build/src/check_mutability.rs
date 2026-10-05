@@ -12,8 +12,8 @@ use rustc_span::def_id::LocalDefId;
 use rustc_span::{Span, Symbol};
 
 use crate::errors::{
-    AssignAcrossTryBoundary, AssignToImmutable, AssignToNonVariable, AssignToUpvar,
-    InconsistentDeferredInitialization, UseOfUninitialized,
+    AssignAcrossTryBoundary, AssignToImmutable, AssignToUpvar, InconsistentDeferredInitialization,
+    UseOfUninitialized,
 };
 
 #[derive(Clone, Copy)]
@@ -274,33 +274,16 @@ impl<'thir, 'tcx> MutabilityVisitor<'thir, 'tcx> {
         hir_id.is_some_and(|hir_id| self.tcx.typeck(self.owner).is_always_diverging_expr(hir_id))
     }
 
-    fn peeled_lhs(&self, mut lhs: ExprId) -> &'thir Expr<'tcx> {
-        loop {
-            let expr = &self.thir[lhs];
-            lhs = match expr.kind {
-                ExprKind::Scope { value, .. } => value,
-                ExprKind::Use { source }
-                | ExprKind::ByUse { expr: source, .. }
-                | ExprKind::NeverToAny { source } => source,
-                _ => return expr,
-            };
-        }
-    }
-
-    fn check_assignment(&mut self, assignment: &Expr<'tcx>, lhs: ExprId) {
-        match self.peeled_lhs(lhs).kind {
-            ExprKind::VarRef { id } => self.check_var_assignment(assignment.span, id),
-            ExprKind::UpvarRef { var_hir_id, .. } => {
-                let ident = self.tcx.hir_ident(var_hir_id.0);
-                self.tcx.dcx().emit_err(AssignToUpvar {
-                    assignment: assignment.span,
-                    binding: ident.span,
-                    name: ident.name,
-                });
-            }
-            _ => {
-                self.tcx.dcx().emit_err(AssignToNonVariable { assignment: assignment.span });
-            }
+    fn check_assignee(&mut self, assignment: Span, var: LocalVarId) {
+        if self.tcx.upvars_mentioned(self.owner).is_some_and(|upvars| upvars.contains_key(&var.0)) {
+            let ident = self.tcx.hir_ident(var.0);
+            self.tcx.dcx().emit_err(AssignToUpvar {
+                assignment,
+                binding: ident.span,
+                name: ident.name,
+            });
+        } else {
+            self.check_var_assignment(assignment, var);
         }
     }
 
@@ -375,6 +358,8 @@ impl<'thir, 'tcx> Visitor<'thir, 'tcx> for MutabilityVisitor<'thir, 'tcx> {
             self.frames.insert(var, info);
         } else if let PatKind::Pin { var } = pat.kind {
             self.check_read(pat.span, var);
+        } else if let PatKind::Assignee { var } = pat.kind {
+            self.check_assignee(pat.span, var);
         }
         visit::walk_pat(self, pat);
     }
@@ -472,12 +457,7 @@ impl<'thir, 'tcx> Visitor<'thir, 'tcx> for MutabilityVisitor<'thir, 'tcx> {
             }
             ExprKind::Assign { lhs, rhs } => {
                 self.visit_expr(&self.thir[*rhs]);
-                self.check_assignment(expr, *lhs);
-            }
-            ExprKind::AssignOp { lhs, rhs, .. } => {
-                self.visit_expr(&self.thir[*lhs]);
-                self.visit_expr(&self.thir[*rhs]);
-                self.check_assignment(expr, *lhs);
+                self.visit_pat(lhs);
             }
             ExprKind::VarRef { id } => self.check_read(expr.span, *id),
             ExprKind::Closure(closure) => {

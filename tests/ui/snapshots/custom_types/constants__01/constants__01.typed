@@ -53,5 +53,5 @@ fn main() ({
                 as [[term]])) as term);
         ((::Core::io::nl as fn() -> term)() as term);
     } as ());
-    ((THRESHOLD as int) = (5 as int) as int);
+    ((/*ERROR*/) = (5 as int) as int);
 } as ())

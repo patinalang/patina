@@ -9,7 +9,7 @@ use rustc_middle::erl::{
     ErlCallKind, ErlCallTarget, ErlModuleId, ErlModuleResolution, ErlReprKind,
 };
 use rustc_middle::middle::region;
-use rustc_middle::mir::{AssignOp, BinOp, UnOp};
+use rustc_middle::mir::{BinOp, UnOp};
 use rustc_middle::span_bug;
 use rustc_middle::thir::{
     self, Arm, BlockId, Expr, ExprId, ExprKind, LocalVarId, MapFieldPat, Pat, PatKind, StmtId,
@@ -160,8 +160,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 self.translate_named_const(expr.span, *def_id, args)
             }
 
-            ExprKind::Assign { lhs, rhs } => self.translate_assign(expr, *lhs, *rhs),
-            ExprKind::AssignOp { op, lhs, rhs } => self.translate_assign_op(expr, *op, *lhs, *rhs),
+            ExprKind::Assign { lhs, rhs } => self.translate_assign(expr, lhs, *rhs),
 
             ExprKind::If { if_then_scope: _, cond, then, else_opt } => {
                 self.translate_if(expr, *cond, *then, *else_opt)
@@ -891,49 +890,18 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     fn translate_assign(
         &mut self,
         expr: &Expr<'tcx>,
-        lhs: ExprId,
+        lhs: &Pat<'tcx>,
         rhs: ExprId,
     ) -> eaf::Expr<'arena> {
         let rhs = self.translate_expr(rhs);
-        self.do_translate_assign(expr, lhs, rhs)
+        let lhs = self.translate_single_pattern(lhs);
+        self.translator.afb.expr_match(expr.span, lhs, rhs)
     }
 
-    fn translate_assign_op(
-        &mut self,
-        expr: &Expr<'tcx>,
-        op: AssignOp,
-        lhs: ExprId,
-        rhs: ExprId,
-    ) -> eaf::Expr<'arena> {
-        let rhs = self.translate_binary(expr, op.into(), lhs, rhs);
-        self.do_translate_assign(expr, lhs, rhs)
-    }
-
-    fn do_translate_assign(
-        &mut self,
-        expr: &Expr<'tcx>,
-        lhs: ExprId,
-        rhs: eaf::Expr<'arena>,
-    ) -> eaf::Expr<'arena> {
-        let afb = &self.translator.afb;
-        let lhs = self.resolve_expr(lhs);
-
-        // In Patina, lhs of ExprKind::Assign can only ever be a var
-        let var_id = match &lhs.kind {
-            ExprKind::VarRef { id } => *id,
-
-            ExprKind::UpvarRef { var_hir_id, .. } => {
-                span_bug!(expr.span, "assignment to upvar {var_hir_id:?} reached translation")
-            }
-
-            kind => span_bug!(expr.span, "lhs of assign must be a var; got {kind:?}"),
-        };
-
-        let ident = self.tcx().hir_ident(var_id.0);
-        let var_info = self.scopes.bind_var(var_id, ident.name);
-
-        let lhs = afb.pat_var(expr.span, var_info.erl_name);
-        afb.expr_match(expr.span, lhs, rhs)
+    fn translate_assignee(&mut self, span: Span, var: LocalVarId) -> eaf::Pattern<'arena> {
+        let ident = self.tcx().hir_ident(var.0);
+        let erl_name = self.scopes.bind_var(var, ident.name).erl_name;
+        self.translator.afb.pat_var(span, erl_name)
     }
 
     fn translate_if(
@@ -1311,6 +1279,8 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
             PatKind::Pin { var } => self.translate_pin_var_ref(pat.span, *var).into(),
 
+            PatKind::Assignee { var } => self.translate_assignee(pat.span, *var).into(),
+
             PatKind::TermClass { class, subpattern } => {
                 self.translate_term_class_pattern(pat.span, *class, subpattern)
             }
@@ -1468,6 +1438,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             PatKind::Missing
             | PatKind::Wild
             | PatKind::Pin { .. }
+            | PatKind::Assignee { .. }
             | PatKind::Constant { .. }
             | PatKind::Range(_)
             | PatKind::Never

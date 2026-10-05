@@ -475,7 +475,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
     // }
     // m!(S);
     // ```
-    fn lower_expr_within_pat(
+    pub(super) fn lower_expr_within_pat(
         &mut self,
         expr: &Expr,
         allow_paths: bool,

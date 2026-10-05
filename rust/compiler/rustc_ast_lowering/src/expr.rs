@@ -20,12 +20,12 @@ use thin_vec::{ThinVec, thin_vec};
 use visit::{Visitor, walk_expr};
 
 use super::errors::{
-    AsyncCoroutinesNotSupported, AwaitOnlyInAsyncFnAndBlocks, ClosureCannotBeStatic,
-    CoroutineTooManyParameters, FunctionalMapUpdateDestructuringAssignment,
-    FunctionalRecordUpdateDestructuringAssignment, InclusiveRangeWithNoEnd,
-    ListTailDestructuringAssignment, MapPatternMissingRest, MatchArmWithNoBody,
-    NeverPatternWithBody, NeverPatternWithGuard, PinNotAllowedInExpr, PinNotLocal,
-    UnderscoreExprLhsAssign,
+    AssignToNonVariable, AsyncCoroutinesNotSupported, AwaitOnlyInAsyncFnAndBlocks,
+    ClosureCannotBeStatic, CoroutineTooManyParameters, FunctionalMapUpdateDestructuringAssignment,
+    FunctionalRecordUpdateDestructuringAssignment, InclusiveRangeWithNoEnd, InvalidAssignee,
+    InvalidAssigneeReason, ListTailDestructuringAssignment, MapPatternMissingRest,
+    MatchArmWithNoBody, NeverPatternWithBody, NeverPatternWithGuard, PinNotAllowedInExpr,
+    PinNotLocal, UnderscoreExprLhsAssign,
 };
 use super::pat::MapKeyContext;
 use super::{
@@ -410,7 +410,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     ));
                     hir::ExprKind::Block(hir_block, opt_label)
                 }
-                ExprKind::Assign(el, er, span) => self.lower_expr_assign(el, er, *span, e.span),
+                ExprKind::Assign(el, er, span) => self.lower_expr_assign(el, er, *span),
                 ExprKind::AssignOp(op, el, er) => hir::ExprKind::AssignOp(
                     self.lower_assign_op(*op),
                     self.lower_expr(el),
@@ -1132,7 +1132,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 unreachable!("use of `await` outside of an async context.");
             };
 
-            let lhs = self.expr_ident(span, task_context_ident, task_context_hid);
+            let lhs = self.pat_assignee(span, task_context_ident, task_context_hid);
             let assign =
                 self.expr(span, hir::ExprKind::Assign(lhs, yield_expr, self.lower_span(span)));
             self.stmt_expr(span, assign)
@@ -1354,60 +1354,16 @@ impl<'hir> LoweringContext<'_, 'hir> {
         hir::ExprKind::Closure(c)
     }
 
-    /// Destructure the LHS of complex assignments.
-    /// For instance, lower `(a, b) = t` to `{ let (lhs1, lhs2) = t; a = lhs1; b = lhs2; }`.
+    /// Lower an assignment, turning its assigned-to side into a `PatKind::Assignee`.
     fn lower_expr_assign(
         &mut self,
         lhs: &Expr,
         rhs: &Expr,
         eq_sign_span: Span,
-        whole_span: Span,
     ) -> hir::ExprKind<'hir> {
-        // Return early in case of an ordinary assignment.
-        fn is_ordinary(lower_ctx: &mut LoweringContext<'_, '_>, lhs: &Expr) -> bool {
-            match &lhs.kind {
-                ExprKind::Array(..)
-                | ExprKind::Map(..)
-                | ExprKind::Struct(..)
-                | ExprKind::Tup(..)
-                | ExprKind::Underscore => false,
-                // Check for unit struct constructor.
-                ExprKind::Path(..) => lower_ctx.extract_unit_struct_path(lhs).is_none(),
-                // Check for tuple struct constructor.
-                ExprKind::Call(callee, ..) => lower_ctx.extract_tuple_struct_path(callee).is_none(),
-                ExprKind::Paren(e) => {
-                    match e.kind {
-                        // We special-case `(..)` for consistency with patterns.
-                        ExprKind::Range(None, None, RangeLimits::HalfOpen) => false,
-                        _ => is_ordinary(lower_ctx, e),
-                    }
-                }
-                _ => true,
-            }
-        }
-        if is_ordinary(self, lhs) {
-            return hir::ExprKind::Assign(
-                self.lower_expr(lhs),
-                self.lower_expr(rhs),
-                self.lower_span(eq_sign_span),
-            );
-        }
-
-        let mut assignments = vec![];
-
-        // The LHS becomes a pattern: `(lhs1, lhs2)`.
-        let pat = self.destructure_assign(lhs, eq_sign_span, &mut assignments);
+        let pat = self.destructure_assign(lhs, eq_sign_span);
         let rhs = self.lower_expr(rhs);
-
-        // Introduce a `let` for destructuring: `let (lhs1, lhs2) = t`.
-        let destructure_let =
-            self.stmt_let_pat(None, whole_span, Some(rhs), pat, hir::LocalSource::AssignDesugar);
-
-        // `a = lhs1; b = lhs2;`.
-        let stmts = self.arena.alloc_from_iter(std::iter::once(destructure_let).chain(assignments));
-
-        // Wrap everything in a block.
-        hir::ExprKind::Block(self.block_all(whole_span, stmts, None), None)
+        hir::ExprKind::Assign(pat, rhs, self.lower_span(eq_sign_span))
     }
 
     /// If the given expression is a path to a tuple struct, returns that path.
@@ -1454,23 +1410,12 @@ impl<'hir> LoweringContext<'_, 'hir> {
         None
     }
 
-    /// Convert the LHS of a destructuring assignment to a pattern.
-    /// Each sub-assignment is recorded in `assignments`.
-    fn destructure_assign(
-        &mut self,
-        lhs: &Expr,
-        eq_sign_span: Span,
-        assignments: &mut Vec<hir::Stmt<'hir>>,
-    ) -> &'hir hir::Pat<'hir> {
-        self.arena.alloc(self.destructure_assign_mut(lhs, eq_sign_span, assignments))
+    /// Convert the LHS of an assignment to a pattern.
+    fn destructure_assign(&mut self, lhs: &Expr, eq_sign_span: Span) -> &'hir hir::Pat<'hir> {
+        self.arena.alloc(self.destructure_assign_mut(lhs, eq_sign_span))
     }
 
-    fn destructure_assign_mut(
-        &mut self,
-        lhs: &Expr,
-        eq_sign_span: Span,
-        assignments: &mut Vec<hir::Stmt<'hir>>,
-    ) -> hir::Pat<'hir> {
+    fn destructure_assign_mut(&mut self, lhs: &Expr, eq_sign_span: Span) -> hir::Pat<'hir> {
         match &lhs.kind {
             // Underscore pattern.
             ExprKind::Underscore => {
@@ -1478,9 +1423,12 @@ impl<'hir> LoweringContext<'_, 'hir> {
             }
             // Slice patterns.
             ExprKind::Array(array) => {
-                let pats = self.arena.alloc_from_iter(array.elements.iter().map(|element| {
-                    self.destructure_assign_mut(element, eq_sign_span, assignments)
-                }));
+                let pats = self.arena.alloc_from_iter(
+                    array
+                        .elements
+                        .iter()
+                        .map(|element| self.destructure_assign_mut(element, eq_sign_span)),
+                );
 
                 if let ArrayTail::Tail(tail) = &array.tail {
                     self.dcx().emit_err(ListTailDestructuringAssignment { span: tail.span });
@@ -1498,12 +1446,8 @@ impl<'hir> LoweringContext<'_, 'hir> {
             // Tuple structs.
             ExprKind::Call(callee, args) => {
                 if let Some((qself, path)) = self.extract_tuple_struct_path(callee) {
-                    let (pats, rest) = self.destructure_sequence(
-                        args,
-                        "tuple struct or variant",
-                        eq_sign_span,
-                        assignments,
-                    );
+                    let (pats, rest) =
+                        self.destructure_sequence(args, "tuple struct or variant", eq_sign_span);
                     let qpath = self.lower_qpath(
                         callee.id,
                         qself,
@@ -1546,7 +1490,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
             // Structs.
             ExprKind::Struct(se) => {
                 let field_pats = self.arena.alloc_from_iter(se.fields.iter().map(|f| {
-                    let pat = self.destructure_assign(&f.expr, eq_sign_span, assignments);
+                    let pat = self.destructure_assign(&f.expr, eq_sign_span);
                     hir::PatField {
                         hir_id: self.next_id(),
                         ident: self.lower_ident(f.ident),
@@ -1582,7 +1526,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 let field_pats =
                     self.arena.alloc_from_iter(map.fields.iter().map(|field| hir::PatMapField {
                         key: self.lower_map_key(&field.key, MapKeyContext::Assignment),
-                        pat: self.destructure_assign(&field.value, eq_sign_span, assignments),
+                        pat: self.destructure_assign(&field.value, eq_sign_span),
                         span: self.lower_span(field.span),
                     }));
                 let rest = match &map.rest {
@@ -1611,8 +1555,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
             }
             // Tuples.
             ExprKind::Tup(elements) => {
-                let (pats, rest) =
-                    self.destructure_sequence(elements, "tuple", eq_sign_span, assignments);
+                let (pats, rest) = self.destructure_sequence(elements, "tuple", eq_sign_span);
                 let tuple_pat = hir::PatKind::Tuple(pats, hir::DotDotPos::new(rest.map(|r| r.0)));
                 return self.pat_without_dbm(lhs.span, tuple_pat);
             }
@@ -1622,33 +1565,59 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     let tuple_pat = hir::PatKind::Tuple(&[], hir::DotDotPos::new(Some(0)));
                     return self.pat_without_dbm(lhs.span, tuple_pat);
                 } else {
-                    return self.destructure_assign_mut(e, eq_sign_span, assignments);
+                    return self.destructure_assign_mut(e, eq_sign_span);
                 }
             }
             _ => {}
         }
-        // Treat all other cases as normal lvalue.
-        let ident = Ident::new(sym::lhs, self.lower_span(lhs.span));
-        let (pat, binding) = self.pat_ident_mut(lhs.span, ident);
-        let ident = self.expr_ident(lhs.span, ident, binding);
-        let assign =
-            hir::ExprKind::Assign(self.lower_expr(lhs), ident, self.lower_span(eq_sign_span));
-        let expr = self.expr(lhs.span, assign);
-        assignments.push(self.stmt_expr(lhs.span, expr));
-        pat
+        // Treat all other cases as an assignee, which can only be a local variable.
+        let span = self.lower_span(lhs.span);
+        let kind = match &lhs.kind {
+            ExprKind::Pin(operand) => {
+                Ok(hir::PatKind::Pin(self.lower_expr_within_pat(operand, true)))
+            }
+            ExprKind::Err(guar) => Ok(hir::PatKind::Err(*guar)),
+            ExprKind::Path(None, _) => {
+                match self.get_partial_res(lhs.id).and_then(|r| r.full_res()) {
+                    Some(Res::Local(_)) => {
+                        Ok(hir::PatKind::Assignee(self.lower_expr_within_pat(lhs, true)))
+                    }
+                    Some(Res::Err) => Ok(hir::PatKind::Err(
+                        self.dcx().span_delayed_bug(span, "unresolved assignee"),
+                    )),
+                    Some(Res::Def(DefKind::Static { .. }, _)) => {
+                        Ok(hir::PatKind::Err(self.dcx().emit_err(AssignToNonVariable { span })))
+                    }
+                    Some(res) => Err(InvalidAssigneeReason::Path {
+                        span,
+                        path: expr_to_string(lhs),
+                        article: res.article(),
+                        descr: res.descr(),
+                    }),
+                    None => Err(InvalidAssigneeReason::Expr { span }),
+                }
+            }
+            ExprKind::Field(..) | ExprKind::Index(..) | ExprKind::Unary(UnOp::Deref, _) => {
+                Ok(hir::PatKind::Err(self.dcx().emit_err(AssignToNonVariable { span })))
+            }
+            _ => Err(InvalidAssigneeReason::Expr { span }),
+        };
+        let kind = kind.unwrap_or_else(|reason| {
+            let eq_sign_span = self.lower_span(eq_sign_span);
+            hir::PatKind::Err(self.dcx().emit_err(InvalidAssignee { eq_sign_span, reason }))
+        });
+        self.pat_without_dbm(lhs.span, kind)
     }
 
     /// Destructure a sequence of expressions occurring on the LHS of an assignment.
     /// Such a sequence occurs in a tuple (struct)/slice.
     /// Return a sequence of corresponding patterns, and the index and the span of `..` if it
     /// exists.
-    /// Each sub-assignment is recorded in `assignments`.
     fn destructure_sequence(
         &mut self,
         elements: &[Box<Expr>],
         ctx: &str,
         eq_sign_span: Span,
-        assignments: &mut Vec<hir::Stmt<'hir>>,
     ) -> (&'hir [hir::Pat<'hir>], Option<(usize, Span)>) {
         let mut rest = None;
         let elements =
@@ -1662,7 +1631,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                     }
                     None
                 } else {
-                    Some(self.destructure_assign_mut(e, eq_sign_span, assignments))
+                    Some(self.destructure_assign_mut(e, eq_sign_span))
                 }
             }));
         (elements, rest)
@@ -1930,7 +1899,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
                 unreachable!("use of `await` outside of an async context.");
             };
             let task_context_ident = Ident::with_dummy_span(sym::_task_context);
-            let lhs = self.expr_ident(desugar_span, task_context_ident, task_context_hid);
+            let lhs = self.pat_assignee(desugar_span, task_context_ident, task_context_hid);
 
             hir::ExprKind::Assign(lhs, yield_expr, self.lower_span(span))
         } else {
@@ -2458,6 +2427,23 @@ impl<'hir> LoweringContext<'_, 'hir> {
         ));
 
         self.expr(span, expr_path)
+    }
+
+    fn pat_assignee(&mut self, span: Span, ident: Ident, binding: HirId) -> &'hir hir::Pat<'hir> {
+        let res = Res::Local(binding);
+        let segment = hir::PathSegment::new(self.lower_ident(ident), self.next_id(), res);
+        let path = self.arena.alloc(hir::Path {
+            span: self.lower_span(span),
+            res,
+            segments: arena_vec![self; segment],
+        });
+        let expr = self.arena.alloc(hir::PatExpr {
+            hir_id: self.next_id(),
+            span: self.lower_span(span),
+            kind: hir::PatExprKind::Path(hir::QPath::Resolved(None, path)),
+        });
+
+        self.arena.alloc(self.pat_without_dbm(span, hir::PatKind::Assignee(expr)))
     }
 
     pub(super) fn expr_unsafe(

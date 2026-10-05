@@ -1563,7 +1563,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
         while let hir::Node::Expr(parent_expr) = self.tcx.parent_hir_node(expr_id) {
             match &parent_expr.kind {
-                hir::ExprKind::Assign(lhs, ..) | hir::ExprKind::AssignOp(_, lhs, ..) => {
+                hir::ExprKind::AssignOp(_, lhs, ..) => {
                     if lhs.hir_id == expr_id {
                         contained_in_place = true;
                         break;

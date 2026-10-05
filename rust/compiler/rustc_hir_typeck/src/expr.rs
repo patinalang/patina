@@ -115,7 +115,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 ty,
                 expected_ty,
                 None,
-                None,
             );
             extend_err(&mut err);
             err.emit();
@@ -1276,51 +1275,23 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         &self,
         expr: &'tcx hir::Expr<'tcx>,
         expected: Expectation<'tcx>,
-        lhs: &'tcx hir::Expr<'tcx>,
+        lhs: &'tcx hir::Pat<'tcx>,
         rhs: &'tcx hir::Expr<'tcx>,
         span: Span,
     ) -> Ty<'tcx> {
         let expected_ty = expected.only_has_type(self);
-        let lhs_ty = self.check_expr_with_needs(lhs, Needs::MutPlace);
 
-        let suggest_deref_binop = |err: &mut Diag<'_>, rhs_ty: Ty<'tcx>| {
-            if let Some(lhs_deref_ty) = self.deref_once_mutably_for_diagnostic(lhs_ty) {
-                // Can only assign if the type is sized, so if `DerefMut` yields a type that is
-                // unsized, do not suggest dereferencing it.
-                let lhs_deref_ty_is_sized = self
-                    .infcx
-                    .type_implements_trait(
-                        self.tcx.require_lang_item(LangItem::Sized, span),
-                        [lhs_deref_ty],
-                        self.param_env,
-                    )
-                    .may_apply();
-                if lhs_deref_ty_is_sized && self.may_coerce(rhs_ty, lhs_deref_ty) {
-                    err.span_suggestion_verbose(
-                        lhs.span.shrink_to_lo(),
-                        "consider dereferencing here to assign to the mutably borrowed value",
-                        "*",
-                        Applicability::MachineApplicable,
-                    );
-                }
-            }
+        let (lhs_ty, rhs_ty) = if let hir::PatKind::Assignee(assignee) = lhs.kind {
+            // Assigning to a single variable coerces the RHS to the variable's type.
+            let lhs_ty = self.assignee_ty(assignee);
+            let rhs_ty = self.check_expr_coercible_to_type(rhs, lhs_ty, None);
+            (lhs_ty, rhs_ty)
+        } else {
+            // Otherwise, the pattern is checked against the RHS, like in a `let`.
+            let rhs_ty = self.check_expr(rhs);
+            (rhs_ty, rhs_ty)
         };
-
-        // This is (basically) inlined `check_expr_coercible_to_type`, but we want
-        // to suggest an additional fixup here in `suggest_deref_binop`.
-        let rhs_ty = self.check_expr_with_hint(rhs, lhs_ty);
-        if let Err(mut diag) =
-            self.demand_coerce_diag(rhs, rhs_ty, lhs_ty, Some(lhs), AllowTwoPhase::No)
-        {
-            suggest_deref_binop(&mut diag, rhs_ty);
-            diag.emit();
-        }
-
-        self.check_lhs_assignable(lhs, E0070, span, |err| {
-            if let Some(rhs_ty) = self.typeck_results.borrow().expr_ty_opt(rhs) {
-                suggest_deref_binop(err, rhs_ty);
-            }
-        });
+        self.check_pat_top(lhs, lhs_ty, Some(rhs.span), Some(rhs), None);
 
         self.require_type_is_sized(lhs_ty, lhs.span, ObligationCauseCode::AssignmentLhsSized);
 
@@ -1340,7 +1311,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
     fn expr_assign_expected_bool_warning(
         &self,
         expr: &'tcx hir::Expr<'tcx>,
-        lhs: &'tcx hir::Expr<'tcx>,
+        lhs: &'tcx hir::Pat<'tcx>,
         rhs: &'tcx hir::Expr<'tcx>,
         span: Span,
         lhs_ty: Ty<'tcx>,
@@ -1361,17 +1332,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             (Applicability::MaybeIncorrect, true)
         } else if let ExprKind::Binary(
             Spanned { node: hir::BinOpKind::And | hir::BinOpKind::Or, .. },
-            _,
-            rhs_expr,
-        ) = lhs.kind
-        {
-            // if x == 1 && y == 2 { .. }
-            //                 +
-            let actual_lhs = self.check_expr(rhs_expr);
-            let may_eq = self.may_coerce(rhs_ty, actual_lhs) || refs_can_coerce(rhs_ty, actual_lhs);
-            (Applicability::MaybeIncorrect, may_eq)
-        } else if let ExprKind::Binary(
-            Spanned { node: hir::BinOpKind::And | hir::BinOpKind::Or, .. },
             lhs_expr,
             _,
         ) = rhs.kind
@@ -1385,10 +1345,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             (Applicability::MaybeIncorrect, false)
         };
 
-        if !lhs.is_syntactic_place_expr()
-            && lhs.is_approximately_pattern()
-            && !matches!(lhs.kind, hir::ExprKind::Lit(_))
-        {
+        if !matches!(lhs.kind, hir::PatKind::Assignee(_)) {
             // Do not suggest `if let x = y` as `==` is way more likely to be the intention.
             if let hir::Node::Expr(hir::Expr { kind: ExprKind::If { .. }, .. }) =
                 self.tcx.parent_hir_node(expr.hir_id)

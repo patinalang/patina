@@ -18,24 +18,24 @@ extern mod patina_fmt;
 
 fn assign_to_immutable_binding() ({
     let value = (1 as int);
-    ((value as int) = (2 as int) as int);
+    (value = (2 as int) as int);
 } as ())
 
 fn assign_to_immutable_parameter(value:
-        int) ({ ((value as int) = (2 as int) as int); } as ())
+        int) ({ (value = (2 as int) as int); } as ())
 
 fn assign_to_multiple_bindings() ({
     let first = (1 as int);
     let second = (2 as int);
 
-    ((first as int) = (3 as int) as int);
-    ((second as int) = (4 as int) as int);
+    (first = (3 as int) as int);
+    (second = (4 as int) as int);
 } as ())
 
 fn assign_deferred_binding_twice() ({
     let value;
-    ((value as int) = (1 as int) as int);
-    ((value as int) = (2 as int) as int);
+    (value = (1 as int) as int);
+    (value = (2 as int) as int);
 } as ())
 
 fn assign_after_branches(condition:
@@ -43,17 +43,17 @@ fn assign_after_branches(condition:
     let value;
 
     (if (condition as bool) {
-        ((value as int) = (1 as int) as int);
-    } else { ((value as int) = (2 as int) as int); } as ())
+        (value = (1 as int) as int);
+    } else { (value = (2 as int) as int); } as ())
 
-    ((value as int) = (3 as int) as int);
+    (value = (3 as int) as int);
 } as ())
 
 fn assign_after_partial_branch(condition:
         bool) ({
     let value;
 
-    (if (condition as bool) { ((value as int) = (1 as int) as int); } as ())
+    (if (condition as bool) { (value = (1 as int) as int); } as ())
 } as ())
 
 struct Value {
@@ -62,7 +62,7 @@ struct Value {
 
 fn assign_to_field() ({
     let value = (Value { field: (1 as int) } as Value);
-    (((value as Value).field as int) = (2 as int) as int);
+    ((/*ERROR*/) = (2 as int) as int);
 } as ())
 
 fn read_in_compound_assignment() ({

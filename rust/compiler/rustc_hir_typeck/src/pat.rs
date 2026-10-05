@@ -630,6 +630,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             PatKind::Pin(expr) => {
                 self.check_pat_pin(pat, expr, expected, resolves_to_term, &pat_info.top_info)
             }
+            PatKind::Assignee(expr) => {
+                self.check_pat_assignee(pat, expr, expected, &pat_info.top_info)
+            }
             PatKind::TermClass(subpattern, class) => {
                 self.check_pat_term_class(pat.span, class, subpattern, expected, pat_info)
             }
@@ -841,6 +844,8 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             PatKind::Never => AdjustMode::peel_all(),
             // We don't really care about refs and derefs for pin patterns.
             PatKind::Pin(_) => AdjustMode::peel_all(),
+            // An assignee assigns the value it matches, like a by-value binding.
+            PatKind::Assignee(_) => AdjustMode::Pass,
             // For patterns with paths, how we peel the scrutinee depends on the path's resolution.
             PatKind::Struct(..)
             | PatKind::TupleStruct(..)
@@ -1055,6 +1060,37 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         }
     }
 
+    pub(crate) fn assignee_ty(&self, expr: &'tcx PatExpr<'tcx>) -> Ty<'tcx> {
+        match expr.kind {
+            PatExprKind::Path(hir::QPath::Resolved(
+                None,
+                hir::Path { res: Res::Local(id), .. },
+            )) => self.local_ty(expr.span, *id),
+            _ => Ty::new_error(
+                self.tcx,
+                self.dcx().span_delayed_bug(expr.span, "assignee is not a local variable"),
+            ),
+        }
+    }
+
+    fn check_pat_assignee(
+        &self,
+        pat: &'tcx Pat<'tcx>,
+        expr: &'tcx PatExpr<'tcx>,
+        expected: Ty<'tcx>,
+        ti: &TopInfo<'tcx>,
+    ) -> Ty<'tcx> {
+        let local_ty = self.assignee_ty(expr);
+        self.write_ty(expr.hir_id, local_ty);
+        if !self.can_eq(self.param_env, expected, local_ty) && self.may_coerce(expected, local_ty) {
+            return expected;
+        }
+        match self.demand_eqtype_pat(pat.span, expected, local_ty, ti) {
+            Ok(()) => expected,
+            Err(guar) => Ty::new_error(self.tcx, guar),
+        }
+    }
+
     fn record_term_pat(&self, pat: &'tcx Pat<'tcx>, ty: Ty<'tcx>) {
         if ty.references_error() || matches!(*ty.kind(), ty::Term) {
             return;
@@ -1078,6 +1114,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             | PatKind::Err(..)
             | PatKind::Never
             | PatKind::Pin(..)
+            | PatKind::Assignee(..)
             | PatKind::Range(..)
             | PatKind::Binding(..)
             | PatKind::Guard(..)
@@ -1600,6 +1637,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                         | PatKind::Ref(..)
                         | PatKind::Expr(..)
                         | PatKind::Pin(..)
+                        | PatKind::Assignee(..)
                         | PatKind::Range(..)
                         | PatKind::Err(_) => break 'block None,
                     },

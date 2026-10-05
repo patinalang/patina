@@ -9,7 +9,19 @@ defmodule AssignmentTypeTest do
     assert 21 == Patina.AssignmentType.chained_assign()
     assert 42 == Patina.AssignmentType.assign_as_argument()
     assert 42 == Patina.AssignmentType.assign_as_match_scrutinee()
+    assert 42 == Patina.AssignmentType.destructuring_assign()
+    assert {40, 2} == Patina.AssignmentType.destructuring_assign_value()
+    assert 42 == Patina.AssignmentType.discard()
+    assert 3 == Patina.AssignmentType.parenthesized_struct_in_scrutinee()
     assert true == Patina.AssignmentType.assign_in_boolean_context()
+  end
+
+  test "destructuring assignments assign to existing variables" do
+    assert {2, 1} == Patina.AssignmentType.swap()
+    assert 6 == Patina.AssignmentType.nested({{1, 2}, {3, 4}})
+    assert 42 == Patina.AssignmentType.struct_fields()
+    assert {40, 2} == Patina.AssignmentType.assign_coerces_to_var_type()
+    assert 55 == Patina.AssignmentType.fibonacci(10)
   end
 
   test "blocks without tail expressions evaluate to unit" do
@@ -20,5 +32,6 @@ defmodule AssignmentTypeTest do
     assert {} == Patina.AssignmentType.block_ending_in_let_else(0)
     assert {} == Patina.AssignmentType.block_ending_in_unit_expr()
     assert {} == Patina.AssignmentType.block_ending_in_assignment()
+    assert {} == Patina.AssignmentType.block_ending_in_destructuring_assignment()
   end
 end

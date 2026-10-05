@@ -28,7 +28,7 @@ use tracing::instrument;
 use crate::erl::binary_pattern::BinarySegmentLayout;
 use crate::middle::region;
 use crate::mir::interpret::AllocId;
-use crate::mir::{self, AssignOp, BinOp, BorrowKind, FakeReadCause, UnOp};
+use crate::mir::{self, BinOp, BorrowKind, FakeReadCause, UnOp};
 use crate::thir::visit::for_each_immediate_subpat;
 use crate::ty::adjustment::PointerCoercion;
 use crate::ty::{
@@ -408,13 +408,7 @@ pub enum ExprKind<'tcx> {
     },
     /// An assignment: `lhs = rhs`.
     Assign {
-        lhs: ExprId,
-        rhs: ExprId,
-    },
-    /// A *non-overloaded* operation assignment, e.g. `lhs += rhs`.
-    AssignOp {
-        op: AssignOp,
-        lhs: ExprId,
+        lhs: Box<Pat<'tcx>>,
         rhs: ExprId,
     },
     /// Access to a field of a struct, a tuple, an union, or an enum.
@@ -838,6 +832,12 @@ pub enum PatKind<'tcx> {
 
     /// Match against the current value of an existing local variable.
     Pin {
+        #[type_visitable(ignore)]
+        var: LocalVarId,
+    },
+
+    /// Assign the matched value to an existing local variable.
+    Assignee {
         #[type_visitable(ignore)]
         var: LocalVarId,
     },

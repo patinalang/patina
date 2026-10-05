@@ -585,8 +585,7 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
             }
 
             hir::ExprKind::Assign(lhs, rhs, _) => {
-                self.mutate_expr(lhs)?;
-                self.consume_expr(rhs)?;
+                self.walk_local(rhs, lhs, None, || Ok(()))?;
             }
 
             hir::ExprKind::Cast(base, _) => {
@@ -962,6 +961,28 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
                         self.delegate.borrow_mut().borrow(place, discr_place.hir_id, bk);
                     }
                 }
+                PatKind::Pin(expr) => {
+                    // A pin compares the matched value against its variable, reading both.
+                    read_discriminant();
+                    let PatExprKind::Path(qpath) = &expr.kind else {
+                        return Err(self.cx.report_bug(expr.span, "pin operand is not a path"));
+                    };
+                    let res = self.cx.typeck_results().qpath_res(qpath, expr.hir_id);
+                    let ty = self.node_ty(expr.hir_id)?;
+                    let pinned_place = self.cat_res(expr.hir_id, expr.span, ty, res)?;
+                    self.consume_or_copy(&pinned_place, expr.hir_id);
+                }
+                PatKind::Assignee(expr) => {
+                    // An assignee moves or copies the matched value into its variable.
+                    self.consume_or_copy(place, discr_place.hir_id);
+                    let PatExprKind::Path(qpath) = &expr.kind else {
+                        return Err(self.cx.report_bug(expr.span, "assignee is not a path"));
+                    };
+                    let res = self.cx.typeck_results().qpath_res(qpath, expr.hir_id);
+                    let ty = self.node_ty(expr.hir_id)?;
+                    let assignee_place = self.cat_res(expr.hir_id, expr.span, ty, res)?;
+                    self.delegate.borrow_mut().mutate(&assignee_place, assignee_place.hir_id);
+                }
                 PatKind::Never => {
                     // A `!` pattern always counts as an immutable read of the discriminant,
                     // even in an irrefutable pattern.
@@ -993,7 +1014,6 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
                 }
                 PatKind::Expr(_)
                 | PatKind::Range(..)
-                | PatKind::Pin(_)
                 | PatKind::TermClass(..)
                 | PatKind::Exception { .. } => {
                     // When matching against a literal or range, we need to
@@ -1954,18 +1974,10 @@ impl<'tcx, Cx: TypeInformationCtxt<'tcx>, D: Delegate<'tcx>> ExprUseVisitor<'tcx
                 }
             }
 
-            PatKind::Pin(expr) => {
-                let PatExprKind::Path(qpath) = &expr.kind else {
-                    return Err(self.cx.report_bug(expr.span, "pin operand is not a path"));
-                };
-                let res = self.cx.typeck_results().qpath_res(qpath, expr.hir_id);
-                let ty = self.node_ty(expr.hir_id)?;
-                let pinned_place = self.cat_res(expr.hir_id, expr.span, ty, res)?;
-                self.consume_or_copy(&pinned_place, expr.hir_id);
-            }
-
             PatKind::Binding(.., None)
             | PatKind::Expr(..)
+            | PatKind::Pin(..)
+            | PatKind::Assignee(..)
             | PatKind::Range(..)
             | PatKind::Never
             | PatKind::Missing

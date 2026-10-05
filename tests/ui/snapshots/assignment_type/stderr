@@ -1,5 +1,5 @@
 warning: assignment used in a boolean context
-  --> tests/ui/src/assignment_type.pt:36:8
+  --> tests/ui/src/assignment_type.pt:107:8
    |
 LL |     if value = true { value } else { false }
    |        ^^^^^^^^^^^^

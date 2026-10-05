@@ -21,8 +21,8 @@ fn initialize_in_short_circuit(run_rhs: bool)
 
     let _ =
         ((run_rhs as bool) &&
-            ({ ((value as int) = (30 as int) as int); (true as bool) } as
-                bool) as bool);
+            ({ (value = (30 as int) as int); (true as bool) } as bool) as
+            bool);
 
     (value as int)
 } as int)

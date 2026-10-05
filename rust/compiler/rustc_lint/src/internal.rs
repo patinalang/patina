@@ -775,6 +775,7 @@ fn pat_is_not_exhaustive_heuristic(pat: &hir::Pat<'_>) -> Option<(Span, &'static
         hir::PatKind::Ref(pat, _, _) => pat_is_not_exhaustive_heuristic(&*pat),
         hir::PatKind::Expr(..) => None,
         hir::PatKind::Pin(..) => None,
+        hir::PatKind::Assignee(..) => None,
         hir::PatKind::TermClass(..) => None,
         hir::PatKind::Exception { .. } => None,
         hir::PatKind::Guard(..) => None,

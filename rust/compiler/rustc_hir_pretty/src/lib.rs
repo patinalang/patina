@@ -16,12 +16,11 @@ use rustc_ast_pretty::pp::Breaks::{Consistent, Inconsistent};
 use rustc_ast_pretty::pp::{self, BoxMarker, Breaks};
 use rustc_ast_pretty::pprust::state::MacHeader;
 use rustc_ast_pretty::pprust::{Comments, PrintState};
-use rustc_hir as hir;
 use rustc_hir::attrs::{AttributeKind, PrintAttribute};
 use rustc_hir::{
-    BindingMode, ByRef, ConstArg, ConstArgExprField, ConstArgKind, GenericArg, GenericBound,
-    GenericParam, GenericParamKind, HirId, ImplicitSelfKind, LifetimeParamKind, Node, PatKind,
-    PreciseCapturingArg, RangeEnd, Term, TyFieldPath, TyPatKind,
+    self as hir, BindingMode, ByRef, ConstArg, ConstArgExprField, ConstArgKind, GenericArg,
+    GenericBound, GenericParam, GenericParamKind, HirId, ImplicitSelfKind, LifetimeParamKind, Node,
+    Pat, PatKind, PreciseCapturingArg, RangeEnd, Term, TyFieldPath, TyPatKind,
 };
 use rustc_span::source_map::SourceMap;
 use rustc_span::{DUMMY_SP, FileName, Ident, Span, Spanned, Symbol, kw, sym};
@@ -1793,7 +1792,7 @@ impl<'a> State<'a> {
                 self.print_block(blk, cb, ib);
             }
             hir::ExprKind::Assign(lhs, rhs, _) => {
-                self.print_expr_cond_paren(lhs, self.precedence(lhs) <= ExprPrecedence::Assign);
+                self.print_pat(lhs);
                 self.space();
                 self.word_space("=");
                 self.print_expr_cond_paren(rhs, self.precedence(rhs) < ExprPrecedence::Assign);
@@ -2240,6 +2239,7 @@ impl<'a> State<'a> {
                 self.word("^");
                 self.print_pat_expr(e);
             }
+            PatKind::Assignee(e) => self.print_pat_expr(e),
             PatKind::TermClass(subpattern, class) => {
                 self.word(class.name().to_string());
                 self.popen();
@@ -2877,9 +2877,10 @@ fn contains_exterior_struct_lit(value: &hir::Expr<'_>) -> bool {
     match value.kind {
         hir::ExprKind::Struct(..) => true,
 
-        hir::ExprKind::Assign(lhs, rhs, _)
-        | hir::ExprKind::AssignOp(_, lhs, rhs)
-        | hir::ExprKind::Binary(_, lhs, rhs) => {
+        hir::ExprKind::Assign(Pat { kind: hir::PatKind::Struct(..), .. }, _rhs, _) => true,
+        hir::ExprKind::Assign(_lhs, rhs, _) => contains_exterior_struct_lit(rhs),
+
+        hir::ExprKind::AssignOp(_, lhs, rhs) | hir::ExprKind::Binary(_, lhs, rhs) => {
             // `X { y: 1 } + X { y: 2 }`
             contains_exterior_struct_lit(lhs) || contains_exterior_struct_lit(rhs)
         }

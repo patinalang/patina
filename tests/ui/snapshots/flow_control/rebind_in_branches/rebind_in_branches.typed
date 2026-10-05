@@ -35,9 +35,9 @@ fn latest_version_wins(take_then: bool)
     let mut value = (1 as int);
 
     (if (take_then as bool) {
-        ((value as int) = (2 as int) as int);
-        ((value as int) = (3 as int) as int);
-    } else { ((value as int) = (4 as int) as int); } as ())
+        (value = (2 as int) as int);
+        (value = (3 as int) as int);
+    } else { (value = (4 as int) as int); } as ())
 
     (value as int)
 } as int)
@@ -48,8 +48,8 @@ fn initialize_in_branches(take_then: bool)
     let value;
 
     (if (take_then as bool) {
-        ((value as int) = (10 as int) as int);
-    } else { ((value as int) = (20 as int) as int); } as ())
+        (value = (10 as int) as int);
+    } else { (value = (20 as int) as int); } as ())
 
     (value as int)
 } as int)
@@ -60,7 +60,7 @@ fn initialize_or_return(take_then: bool)
     let value;
 
     (if (take_then as bool) {
-        ((value as int) = (30 as int) as int);
+        (value = (30 as int) as int);
     } else { (return (40 as int) as !); } as ())
 
     (value as int)
@@ -92,12 +92,11 @@ fn nested_branches(take_outer: bool, take_inner: bool)
         (if (take_outer as bool) {
             let inner_value =
                 (if (take_inner as bool) {
-                    ((value as int) = (1 as int) as int);
+                    (value = (1 as int) as int);
                     (10 as int)
-                } else { ((value as int) = (2 as int) as int); (20 as int) }
-                    as int);
+                } else { (value = (2 as int) as int); (20 as int) } as int);
             ((inner_value as int) + (100 as int) as int)
-        } else { ((value as int) = (3 as int) as int); (300 as int) } as int);
+        } else { (value = (3 as int) as int); (300 as int) } as int);
 
     ((block_value as int) + (value as int) as int)
 } as int)
@@ -109,7 +108,7 @@ fn nested_diverging_rebind(take_outer: bool, take_inner: bool)
 
     (if (take_outer as bool) {
         (if (take_inner as bool) {
-            ((value as int) = (1 as int) as int);
+            (value = (1 as int) as int);
             (return (value as int) as !);
         } else { (() as ()) } as ())
     } else { (() as ()) } as ())

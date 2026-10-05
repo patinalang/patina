@@ -110,10 +110,8 @@ fn wildcard(map: #{int => int})
 
 fn wildcard_in_assignment(map:
         #{int => int}) ({
-    ({
-        let #{((/*ERROR*/) as {type error}) => _, ..} =
-            (map as #{int => int});
-    } as ());
+    (#{((/*ERROR*/) as {type error}) => _, ..} = (map as #{int => int}) as
+        #{int => int});
 } as ())
 
 fn splittable_or_key(map: #{int => int})
@@ -136,10 +134,8 @@ fn nested_or_key(map: #{(int, int) => int})
 
 fn or_key_in_assignment(map:
         #{int => int}) ({
-    ({
-        let #{((/*ERROR*/) as {type error}) => _, ..} =
-            (map as #{int => int});
-    } as ());
+    (#{((/*ERROR*/) as {type error}) => _, ..} = (map as #{int => int}) as
+        #{int => int});
 } as ())
 
 fn pin_outside_key(value: int)

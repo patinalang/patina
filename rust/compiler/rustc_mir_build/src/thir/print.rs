@@ -401,16 +401,7 @@ impl<'a, 'tcx> ThirPrinter<'a, 'tcx> {
             Assign { lhs, rhs } => {
                 print_indented!(self, "Assign {", depth_lvl);
                 print_indented!(self, "lhs:", depth_lvl + 1);
-                self.print_expr(*lhs, depth_lvl + 2);
-                print_indented!(self, "rhs:", depth_lvl + 1);
-                self.print_expr(*rhs, depth_lvl + 2);
-                print_indented!(self, "}", depth_lvl);
-            }
-            AssignOp { op, lhs, rhs } => {
-                print_indented!(self, "AssignOp {", depth_lvl);
-                print_indented!(self, format!("op: {:?}", op), depth_lvl + 1);
-                print_indented!(self, "lhs:", depth_lvl + 1);
-                self.print_expr(*lhs, depth_lvl + 2);
+                self.print_pat(lhs, depth_lvl + 2);
                 print_indented!(self, "rhs:", depth_lvl + 1);
                 self.print_expr(*rhs, depth_lvl + 2);
                 print_indented!(self, "}", depth_lvl);
@@ -821,6 +812,11 @@ impl<'a, 'tcx> ThirPrinter<'a, 'tcx> {
             }
             PatKind::Pin { var } => {
                 print_indented!(self, "Pin {", depth_lvl + 1);
+                print_indented!(self, format!("var: {:?}", var), depth_lvl + 2);
+                print_indented!(self, "}", depth_lvl + 1);
+            }
+            PatKind::Assignee { var } => {
+                print_indented!(self, "Assignee {", depth_lvl + 1);
                 print_indented!(self, format!("var: {:?}", var), depth_lvl + 2);
                 print_indented!(self, "}", depth_lvl + 1);
             }

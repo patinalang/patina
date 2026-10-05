@@ -323,6 +323,16 @@ impl<'tcx, 'ptcx> PatCtxt<'tcx, 'ptcx> {
                 }
             }
 
+            hir::PatKind::Assignee(expr) => match expr.kind {
+                hir::PatExprKind::Path(hir::QPath::Resolved(
+                    None,
+                    hir::Path { res: Res::Local(id), .. },
+                )) => PatKind::Assignee { var: LocalVarId(*id) },
+                _ => PatKind::Error(
+                    self.tcx.dcx().span_delayed_bug(expr.span, "assignee is not a local variable"),
+                ),
+            },
+
             hir::PatKind::TermClass(subpattern, class) => {
                 PatKind::TermClass { class, subpattern: self.lower_pattern(subpattern) }
             }

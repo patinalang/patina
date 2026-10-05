@@ -96,11 +96,11 @@ fn merge_timeout()
     ->
         int ({
     let mut value = (1 as int);
-    (receive { int(n) => { ((value as int) = (n as int) as int); } }
+    (receive { int(n) => { (value = (n as int) as int); } }
         after ((Timeout::from_millis as
                 fn(int) -> Core::Timeout {Core::Timeout::from_millis})((0 as
                 int)) as Core::Timeout)
-        ({ ((value as int) = (2 as int) as int); } as ()) as ())
+        ({ (value = (2 as int) as int); } as ()) as ())
     (value as int)
 } as int)
 
@@ -108,7 +108,7 @@ fn unchanged_timeout()
     ->
         int ({
     let mut value = (1 as int);
-    (receive { int(n) => { ((value as int) = (n as int) as int); } }
+    (receive { int(n) => { (value = (n as int) as int); } }
         after ((Timeout::from_millis as
                 fn(int) -> Core::Timeout {Core::Timeout::from_millis})((0 as
                 int)) as Core::Timeout) ({ } as ()) as ())

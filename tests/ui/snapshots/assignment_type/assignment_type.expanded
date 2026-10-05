@@ -33,6 +33,72 @@ pub fn assign_as_match_scrutinee() -> int {
     match value = 42 { 42 => value, _ => 0, }
 }
 
+pub fn destructuring_assign() -> int {
+    let first;
+    let second;
+    (first, second) = (40, 2);
+    first + second
+}
+
+pub fn destructuring_assign_value() -> (int, int) {
+    let first;
+    let second;
+    (first, second) = (40, 2)
+}
+
+pub fn swap() -> (int, int) {
+    let mut first = 1;
+    let mut second = 2;
+    (first, second) = (second, first);
+    (first, second)
+}
+
+pub fn nested(value: ((int, int), (int, int))) -> int {
+    let first;
+    let second;
+    let third;
+    ((first, second), (third, _)) = value;
+    first + second + third
+}
+
+struct Point {
+    x: int,
+    y: int,
+}
+
+pub fn struct_fields() -> int {
+    let x;
+    let y;
+    Point { x, y } = Point { x: 40, y: 2 };
+    x + y
+}
+
+pub fn assign_coerces_to_var_type() -> (term, int) {
+    let first: term;
+    let second;
+    (first, second) = (40, 2);
+    (first, second)
+}
+
+pub fn fibonacci(n: int) -> int {
+    let mut current = 0;
+    let mut next = 1;
+    let mut i = 0;
+    while i < n { (current, next) = (next, current + next); i += 1; }
+    current
+}
+
+pub fn discard() -> int { _ = 42 }
+
+pub fn parenthesized_struct_in_scrutinee() -> int {
+    let x;
+    let y;
+    match (Point { x, y } = Point { x: 1, y: 2 }) {
+        Point { x: 1, .. } => x + y,
+        _ => 0,
+    }
+}
+
 pub fn assign_in_boolean_context() -> bool {
     let mut value = false;
     if value = true { value } else { false }
@@ -51,3 +117,8 @@ pub fn block_ending_in_let_else(value: int) {
 pub fn block_ending_in_unit_expr() { (); }
 
 pub fn block_ending_in_assignment() { let mut value = 0; value = 42; }
+
+pub fn block_ending_in_destructuring_assignment() {
+    let _first;
+    (_first, _) = (1, 2);
+}

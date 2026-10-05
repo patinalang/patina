@@ -14,13 +14,24 @@
          chained_assign/0,
          assign_as_argument/0,
          assign_as_match_scrutinee/0,
+         destructuring_assign/0,
+         destructuring_assign_value/0,
+         swap/0,
+         nested/1,
+         struct_fields/0,
+         assign_coerces_to_var_type/0,
+         'fibonacci$patina_loop_1'/4,
+         fibonacci/1,
+         discard/0,
+         parenthesized_struct_in_scrutinee/0,
          assign_in_boolean_context/0,
          empty_block/0,
          block_ending_in_let/0,
          block_ending_in_uninitialized_let/0,
          block_ending_in_let_else/1,
          block_ending_in_unit_expr/0,
-         block_ending_in_assignment/0]).
+         block_ending_in_assignment/0,
+         block_ending_in_destructuring_assignment/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -61,6 +72,112 @@ assign_as_match_scrutinee() ->
         _ -> 0
     end.
 
+destructuring_assign() ->
+    begin _first@0_0 = {} end,
+    begin _second@1_0 = {} end,
+    {_first@0_1, _second@1_1} = {40, 2},
+    _first@0_1 + _second@1_1.
+
+destructuring_assign_value() ->
+    begin _first@0_0 = {} end,
+    begin _second@1_0 = {} end,
+    {_first@0_1, _second@1_1} = {40, 2}.
+
+swap() ->
+    _first@0_0 = 1,
+    _second@1_0 = 2,
+    {_first@0_1, _second@1_1} = {_second@1_0, _first@0_0},
+    {_first@0_1, _second@1_1}.
+
+nested(_value@0_0) ->
+    begin _first@1_0 = {} end,
+    begin _second@2_0 = {} end,
+    begin _third@3_0 = {} end,
+    {{_first@1_1, _second@2_1}, {_third@3_1, _}} =
+        _value@0_0,
+    _first@1_1 + _second@2_1 + _third@3_1.
+
+struct_fields() ->
+    begin _x@0_0 = {} end,
+    begin _y@1_0 = {} end,
+    #'Elixir.Patina.AssignmentType.Point':'Point'{x =
+                                                      _x@0_1,
+                                                  y = _y@1_1} =
+        'Elixir.Patina.AssignmentType.Point':'$patina_constructor__Point'(40,
+                                                                          2),
+    _x@0_1 + _y@1_1.
+
+assign_coerces_to_var_type() ->
+    begin _first@0_0 = {} end,
+    begin _second@1_0 = {} end,
+    {_first@0_1, _second@1_1} = {40, 2},
+    {_first@0_1, _second@1_1}.
+
+'fibonacci$patina_loop_1'(_i@3_0, _n@0_0, _current@1_0,
+                          _next@2_0) ->
+    _ = begin
+            case _i@3_0 < _n@0_0 of
+                true ->
+                    {_current@1_1, _next@2_1} = {_next@2_0,
+                                                 _current@1_0 + _next@2_0},
+                    _i@3_1 = _i@3_0 + 1,
+                    {};
+                false ->
+                    _branch_value@4_0 = begin
+                                            '$patina_marker':break({break,
+                                                                    0,
+                                                                    {},
+                                                                    _current@1_0,
+                                                                    _next@2_0,
+                                                                    _i@3_0})
+                                        end,
+                    _current@1_1 = _current@1_0,
+                    _next@2_1 = _next@2_0,
+                    _i@3_1 = _i@3_0,
+                    _branch_value@4_0
+            end
+        end,
+    '$patina_marker':continue(_i@3_1,
+                              _n@0_0,
+                              _current@1_1,
+                              _next@2_1).
+
+fibonacci(_n@0_0) ->
+    _current@1_0 = 0,
+    _next@2_0 = 1,
+    _i@3_0 = 0,
+    case 'fibonacci$patina_loop_1'(_i@3_0,
+                                   _n@0_0,
+                                   _current@1_0,
+                                   _next@2_0)
+        of
+        {break,
+         0,
+         _loop_value@5_0,
+         _current@1_1,
+         _next@2_1,
+         _i@3_1} ->
+            _loop_value@5_0
+    end,
+    _current@1_1.
+
+discard() -> _ = 42.
+
+parenthesized_struct_in_scrutinee() ->
+    begin _x@0_0 = {} end,
+    begin _y@1_0 = {} end,
+    case #'Elixir.Patina.AssignmentType.Point':'Point'{x =
+                                                           _x@0_1,
+                                                       y = _y@1_1} =
+             'Elixir.Patina.AssignmentType.Point':'$patina_constructor__Point'(1,
+                                                                               2)
+        of
+        #'Elixir.Patina.AssignmentType.Point':'Point'{x = 1,
+                                                      y = _} ->
+            _x@0_1 + _y@1_1;
+        _ -> 0
+    end.
+
 assign_in_boolean_context() ->
     _value@0_0 = false,
     case _value@0_1 = true of
@@ -90,4 +207,9 @@ block_ending_in_unit_expr() -> {}.
 block_ending_in_assignment() ->
     _value@0_0 = 0,
     _value@0_1 = 42,
+    {}.
+
+block_ending_in_destructuring_assignment() ->
+    begin __first@0_0 = {} end,
+    {__first@0_1, _} = {1, 2},
     {}.

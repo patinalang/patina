@@ -2913,10 +2913,6 @@ impl<'hir> LoweringContext<'_, 'hir> {
         self.pat_ident_binding_mode(span, ident, hir::BindingMode::NONE)
     }
 
-    fn pat_ident_mut(&mut self, span: Span, ident: Ident) -> (hir::Pat<'hir>, HirId) {
-        self.pat_ident_binding_mode_mut(span, ident, hir::BindingMode::NONE)
-    }
-
     fn pat_ident_binding_mode(
         &mut self,
         span: Span,

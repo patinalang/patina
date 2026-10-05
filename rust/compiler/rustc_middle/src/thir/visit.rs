@@ -110,8 +110,8 @@ pub fn walk_expr<'thir, 'tcx: 'thir, V: Visitor<'thir, 'tcx>>(
             }
         }
         Block { block } => visitor.visit_block(&visitor.thir()[block]),
-        Assign { lhs, rhs } | AssignOp { lhs, rhs, op: _ } => {
-            visitor.visit_expr(&visitor.thir()[lhs]);
+        Assign { ref lhs, rhs } => {
+            visitor.visit_pat(lhs);
             visitor.visit_expr(&visitor.thir()[rhs]);
         }
         Field { lhs, variant_index: _, name: _ } => visitor.visit_expr(&visitor.thir()[lhs]),
@@ -337,6 +337,7 @@ pub(crate) fn for_each_immediate_subpat<'a, 'tcx>(
         | PatKind::Wild
         | PatKind::Binding { subpattern: None, .. }
         | PatKind::Pin { var: _ }
+        | PatKind::Assignee { var: _ }
         | PatKind::Constant { value: _ }
         | PatKind::Range(_)
         | PatKind::Never

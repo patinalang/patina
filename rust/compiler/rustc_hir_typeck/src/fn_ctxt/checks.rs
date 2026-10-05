@@ -766,7 +766,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                     init_ty,
                     local_ty,
                     None,
-                    None,
                 );
                 diag.emit();
             }
@@ -999,48 +998,6 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                                         expected_ty,
                                         err,
                                     );
-                                }
-                                if expected_ty == self.tcx.types.bool {
-                                    // If this is caused by a missing `let` in a `while let`,
-                                    // silence this redundant error, as we already emit E0070.
-
-                                    // Our block must be a `assign desugar local; assignment`
-                                    if let hir::Block {
-                                        stmts:
-                                            [
-                                                hir::Stmt {
-                                                    kind:
-                                                        hir::StmtKind::Let(hir::LetStmt {
-                                                            source: hir::LocalSource::AssignDesugar,
-                                                            ..
-                                                        }),
-                                                    ..
-                                                },
-                                                hir::Stmt {
-                                                    kind:
-                                                        hir::StmtKind::Expr(hir::Expr {
-                                                            kind: hir::ExprKind::Assign(lhs, ..),
-                                                            ..
-                                                        }),
-                                                    ..
-                                                },
-                                            ],
-                                        ..
-                                    } = blk
-                                    {
-                                        self.comes_from_while_condition(blk.hir_id, |_| {
-                                            // We cannot suppress the error if the LHS of assignment
-                                            // is a syntactic place expression because E0070 would
-                                            // not be emitted by `check_lhs_assignable`.
-                                            let res = self.typeck_results.borrow().expr_ty_opt(lhs);
-
-                                            if !lhs.is_syntactic_place_expr()
-                                                || res.references_error()
-                                            {
-                                                err.downgrade_to_delayed_bug();
-                                            }
-                                        })
-                                    }
                                 }
                             }
                             if let Some(fn_span) = fn_span {

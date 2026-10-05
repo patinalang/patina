@@ -21,9 +21,7 @@ fn main() ({
     // only `mut` bindings can be rebound
     let mut n = (5 as int);
 
-    (if ((n as int) > (4 as int) as bool) {
-        ((n as int) = (4 as int) as int);
-    } as ())
+    (if ((n as int) > (4 as int) as bool) { (n = (4 as int) as int); } as ())
 
     // 4
     ({

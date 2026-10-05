@@ -143,7 +143,7 @@ fn main() ({
                 ((Point::new as
                         fn(float, float) -> Point {Point::new})((1.0 as float),
                     (1.0 as float)) as Point) } as Rectangle);
-    ((square as Rectangle) =
+    (square =
         ((square as Rectangle).translate((1.0 as float), (1.0 as float)) as
             Rectangle) as Rectangle);
 } as ())

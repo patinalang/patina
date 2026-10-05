@@ -93,18 +93,16 @@ fn impossible_class() ({
 
 fn mutate_try() ({
     let mut value = (1 as int);
-    (try ({ ((value as int) = (2 as int) as int); } as ()) after ({ } as ())
-        as ())
+    (try ({ (value = (2 as int) as int); } as ()) after ({ } as ()) as ())
 } as ())
 
 fn mutate_catch() ({
     let mut value = (1 as int);
-    (try ({ } as ())
-        catch { error(_) => { ((value as int) = (2 as int) as int); } } as ())
+    (try ({ } as ()) catch { error(_) => { (value = (2 as int) as int); } } as
+        ())
 } as ())
 
 fn mutate_after() ({
     let mut value = (1 as int);
-    (try ({ } as ()) after ({ ((value as int) = (2 as int) as int); } as ())
-        as ())
+    (try ({ } as ()) after ({ (value = (2 as int) as int); } as ()) as ())
 } as ())

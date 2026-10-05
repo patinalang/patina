@@ -5,7 +5,7 @@ LL |     let _immutable_binding = 1;
    |         ------------------ help: consider making this binding mutable: `mut _immutable_binding`
 ...
 LL |     _immutable_binding += 1;
-   |     ^^^^^^^^^^^^^^^^^^^^^^^ cannot assign
+   |     ^^^^^^^^^^^^^^^^^^ cannot assign
 
 error: cannot assign to `mutable_binding`, as it is captured by the closure
   --> tests/ui/src/variable_bindings/mut__01.pt:22:9
@@ -14,7 +14,7 @@ LL |     let mut mutable_binding = 1;
    |             --------------- `mutable_binding` is declared here
 ...
 LL |         mutable_binding += 1;
-   |         ^^^^^^^^^^^^^^^^^^^^ cannot assign
+   |         ^^^^^^^^^^^^^^^ cannot assign
    |
    = note: closures capture by value; assignments inside a closure do not escape it
 

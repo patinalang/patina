@@ -1,0 +1,54 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro, prelude_import)]
+#![no_std]
+#![no_core]
+
+
+
+
+#![allow(dead_code)]
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+#[allow(unused_imports)]
+#[prelude_import]
+use Core::Prelude::*;
+#[allow(unused)]
+extern mod patina_fmt;
+
+fn assign_to_immutable() {
+    let first = 1;
+    let mut second = 2;
+    (first, second) = (3, 4);
+}
+
+fn assign_to_captured() {
+    let mut value = 1;
+    let _closure = || { (value, _) = (2, 3); };
+}
+
+fn assign_across_try() {
+    let mut value = 1;
+    try { (value, _) = (2, 3); } after {}
+}
+
+struct Value {
+    field: int,
+}
+
+fn assign_to_field() {
+    let value = Value { field: 1 };
+    let other;
+    (value.field, other) = (2, 3);
+}
+
+const THRESHOLD: int = 10;
+
+fn assign_to_constant() { let other; (THRESHOLD, other) = (2, 3); }
+
+fn one() -> int { 1 }
+
+fn assign_to_call() { let other; (one(), other) = (2, 3); }
+
+// A pinned variable makes the pattern refutable.
+fn assign_with_pin(expected: int) { let value; (value, ^expected) = (1, 2); }

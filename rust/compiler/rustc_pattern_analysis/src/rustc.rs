@@ -450,7 +450,10 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
         match &pat.kind {
             PatKind::Binding { subpattern: Some(subpat), .. }
             | PatKind::Guard { subpattern: subpat, .. } => return self.lower_pat(subpat),
-            PatKind::Missing | PatKind::Binding { subpattern: None, .. } | PatKind::Wild => {
+            PatKind::Missing
+            | PatKind::Binding { subpattern: None, .. }
+            | PatKind::Assignee { .. }
+            | PatKind::Wild => {
                 ctor = Wildcard;
                 fields = vec![];
                 arity = 0;

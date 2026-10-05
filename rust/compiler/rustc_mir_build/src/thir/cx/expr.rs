@@ -499,7 +499,7 @@ impl<'tcx> ThirBuildCx<'tcx> {
             hir::ExprKind::Block(blk, _) => ExprKind::Block { block: self.mirror_block(blk) },
 
             hir::ExprKind::Assign(lhs, rhs, _) => {
-                ExprKind::Assign { lhs: self.mirror_expr(lhs), rhs: self.mirror_expr(rhs) }
+                ExprKind::Assign { lhs: self.pattern_from_hir(lhs), rhs: self.mirror_expr(rhs) }
             }
 
             hir::ExprKind::AssignOp(op, lhs, rhs) => {
@@ -508,11 +508,36 @@ impl<'tcx> ThirBuildCx<'tcx> {
                     let rhs = self.mirror_expr(rhs);
                     self.overloaded_operator(expr, Box::new([lhs, rhs]))
                 } else {
-                    ExprKind::AssignOp {
-                        op: assign_op(op.node),
-                        lhs: self.mirror_expr(lhs),
-                        rhs: self.mirror_expr(rhs),
-                    }
+                    // `lhs op= rhs` is `lhs = lhs op rhs`.
+                    let kind = match lhs.kind {
+                        hir::ExprKind::Path(hir::QPath::Resolved(
+                            None,
+                            &hir::Path { res: Res::Local(id), .. },
+                        )) => PatKind::Assignee { var: LocalVarId(id) },
+                        _ => PatKind::Error(
+                            self.tcx.dcx().emit_err(AssignToNonVariable { assignment: lhs.span }),
+                        ),
+                    };
+
+                    let assignee = Box::new(Pat {
+                        ty: self.typeck_results.expr_ty(lhs),
+                        span: lhs.span,
+                        extra: None,
+                        kind,
+                    });
+
+                    let value = Expr {
+                        kind: ExprKind::Binary {
+                            op: assign_op(op.node).into(),
+                            lhs: self.mirror_expr(lhs),
+                            rhs: self.mirror_expr(rhs),
+                        },
+                        ty: self.typeck_results.expr_ty(expr),
+                        temp_scope_id: expr.hir_id.local_id,
+                        span: expr.span,
+                    };
+
+                    ExprKind::Assign { lhs: assignee, rhs: self.thir.exprs.push(value) }
                 }
             }
 
@@ -999,15 +1024,27 @@ impl<'tcx> ThirBuildCx<'tcx> {
                         dcx.emit_fatal(LoopMatchInvalidMatch { span: scrutinee.span })
                     };
 
-                    if local(self, state) != Some(scrutinee_hir_id) {
+                    if !matches!(state.kind,
+                        hir::PatKind::Assignee(hir::PatExpr {
+                            kind: hir::PatExprKind::Path(hir::QPath::Resolved(_, state_path)),
+                            ..
+                        }) if state_path.res != Res::Local(scrutinee_hir_id))
+                    {
                         dcx.emit_fatal(LoopMatchInvalidUpdate {
                             scrutinee: scrutinee.span,
                             lhs: state.span,
                         })
-                    }
+                    };
+
+                    let state = Expr {
+                        kind: ExprKind::VarRef { id: LocalVarId(scrutinee_hir_id) },
+                        ty: self.typeck_results.node_type(state.hir_id),
+                        temp_scope_id: state.hir_id.local_id,
+                        span: state.span,
+                    };
 
                     ExprKind::LoopMatch {
-                        state: self.mirror_expr(state),
+                        state: self.thir.exprs.push(state),
                         region_scope: region::Scope {
                             local_id: block_body.hir_id.local_id,
                             data: region::ScopeData::Node,

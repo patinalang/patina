@@ -660,14 +660,8 @@ pub(crate) struct IncorrectCrateType {
 }
 
 #[derive(Diagnostic)]
-#[diag(
-    "useless assignment of {$is_field_assign ->
-        [true] field
-        *[false] variable
-    } of type `{$ty}` to itself"
-)]
+#[diag("useless assignment of variable of type `{$ty}` to itself")]
 pub(crate) struct UselessAssignment<'a> {
-    pub is_field_assign: bool,
     pub ty: Ty<'a>,
 }
 

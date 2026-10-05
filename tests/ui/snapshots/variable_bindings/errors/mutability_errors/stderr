@@ -1,10 +1,19 @@
+error: cannot assign to this expression
+  --> tests/ui/src/variable_bindings/errors/mutability_errors.pt:52:5
+   |
+LL |     value.field = 2;
+   |     ^^^^^^^^^^^ cannot assign
+   |
+   = help: only `mut` variables can be assigned to
+   = note: Patina values are immutable
+
 error[E0384]: cannot assign to `value`, as it is not declared as mutable
   --> tests/ui/src/variable_bindings/errors/mutability_errors.pt:5:5
    |
 LL |     let value = 1;
    |         ----- help: consider making this binding mutable: `mut value`
 LL |     value = 2;
-   |     ^^^^^^^^^ cannot assign
+   |     ^^^^^ cannot assign
 
 error[E0384]: cannot assign to `value`, as it is not declared as mutable
   --> tests/ui/src/variable_bindings/errors/mutability_errors.pt:9:5
@@ -12,7 +21,7 @@ error[E0384]: cannot assign to `value`, as it is not declared as mutable
 LL | fn assign_to_immutable_parameter(value: int) {
    |                                  ----- help: consider making this binding mutable: `mut value`
 LL |     value = 2;
-   |     ^^^^^^^^^ cannot assign
+   |     ^^^^^ cannot assign
 
 error[E0384]: cannot assign to `first`, as it is not declared as mutable
   --> tests/ui/src/variable_bindings/errors/mutability_errors.pt:16:5
@@ -21,7 +30,7 @@ LL |     let first = 1;
    |         ----- help: consider making this binding mutable: `mut first`
 ...
 LL |     first = 3;
-   |     ^^^^^^^^^ cannot assign
+   |     ^^^^^ cannot assign
 
 error[E0384]: cannot assign to `second`, as it is not declared as mutable
   --> tests/ui/src/variable_bindings/errors/mutability_errors.pt:17:5
@@ -30,7 +39,7 @@ LL |     let second = 2;
    |         ------ help: consider making this binding mutable: `mut second`
 ...
 LL |     second = 4;
-   |     ^^^^^^^^^^ cannot assign
+   |     ^^^^^^ cannot assign
 
 error[E0384]: cannot assign to `value`, as it is not declared as mutable
   --> tests/ui/src/variable_bindings/errors/mutability_errors.pt:23:5
@@ -39,7 +48,7 @@ LL |     let value;
    |         ----- help: consider making this binding mutable: `mut value`
 LL |     value = 1;
 LL |     value = 2;
-   |     ^^^^^^^^^ cannot assign
+   |     ^^^^^ cannot assign
 
 error[E0384]: cannot assign to `value`, as it is not declared as mutable
   --> tests/ui/src/variable_bindings/errors/mutability_errors.pt:35:5
@@ -48,7 +57,7 @@ LL |     let value;
    |         ----- help: consider making this binding mutable: `mut value`
 ...
 LL |     value = 3;
-   |     ^^^^^^^^^ cannot assign
+   |     ^^^^^ cannot assign
 
 error: cannot initialize `value` in only some non-diverging branches
   --> tests/ui/src/variable_bindings/errors/mutability_errors.pt:41:5
@@ -62,14 +71,6 @@ LL | |     }
    | |_____^ not all non-diverging branches initialize `value`
    |
    = note: all non-diverging branches must either initialize the binding or leave it uninitialized
-
-error: cannot assign to this expression
-  --> tests/ui/src/variable_bindings/errors/mutability_errors.pt:52:5
-   |
-LL |     value.field = 2;
-   |     ^^^^^^^^^^^^^^^ cannot assign
-   |
-   = note: only variables can be assigned to; Patina values are immutable
 
 error: cannot use `value`, as it is not initialized
   --> tests/ui/src/variable_bindings/errors/mutability_errors.pt:57:5

@@ -192,7 +192,7 @@ fn recurse_build<'tcx>(
         ExprKind::LogicalOp { .. } => {
             error(GenericConstantTooComplexSub::LogicalOpNotSupported(node.span))?
         }
-        ExprKind::Assign { .. } | ExprKind::AssignOp { .. } => {
+        ExprKind::Assign { .. } => {
             error(GenericConstantTooComplexSub::AssignNotSupported(node.span))?
         }
         // FIXME(explicit_tail_calls): maybe get `become` a new error
@@ -291,7 +291,6 @@ impl<'a, 'tcx> IsThirPolymorphic<'a, 'tcx> {
             | thir::ExprKind::Match { .. }
             | thir::ExprKind::Block { .. }
             | thir::ExprKind::Assign { .. }
-            | thir::ExprKind::AssignOp { .. }
             | thir::ExprKind::Field { .. }
             | thir::ExprKind::Index { .. }
             | thir::ExprKind::VarRef { .. }

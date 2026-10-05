@@ -19,7 +19,7 @@ fn initialize_in_one_branch(take_then: bool)
         int ({
     let value;
 
-    (if (take_then as bool) { ((value as int) = (30 as int) as int); } as ())
+    (if (take_then as bool) { (value = (30 as int) as int); } as ())
 
     (value as int)
 } as int)

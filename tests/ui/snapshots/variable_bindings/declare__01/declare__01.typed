@@ -25,7 +25,7 @@ fn main() ({
         let x = (2 as int);
 
         // Initialize the binding
-        ((a_binding as int) = ((x as int) * (x as int) as int) as int);
+        (a_binding = ((x as int) * (x as int) as int) as int);
     } as ())
 
 
@@ -51,7 +51,7 @@ fn main() ({
                         [term])] as [[term]])) as term);
         ((::Core::io::nl as fn() -> term)() as term);
     } as ());
-    ((another_binding as term) = (1 as int) as term);
+    (another_binding = (1 as int) as term);
     ({
         ((::Core::io::put_chars as
                 fn(term) -> term)(([([("another binding: " as str),

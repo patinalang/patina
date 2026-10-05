@@ -173,6 +173,11 @@ impl<'p, 'tcx> Visitor<'p, 'tcx> for MatchVisitor<'p, 'tcx> {
             ExprKind::Let { box ref pat, expr } => {
                 self.check_let(pat, Some(expr), ex.span, None);
             }
+            ExprKind::Assign { box ref lhs, rhs } => {
+                self.with_let_source(LetSource::PlainLet, |this| {
+                    this.check_let(lhs, Some(rhs), ex.span, None)
+                });
+            }
             ExprKind::LogicalOp { op: LogicalOp::And, .. }
                 if !matches!(self.let_source, LetSource::None) =>
             {
@@ -345,10 +350,11 @@ impl<'p, 'tcx> MatchVisitor<'p, 'tcx> {
             | Return { .. } => true,
 
             // These are statements that evaluate to `()`.
-            Assign { .. } | AssignOp { .. } | InlineAsm { .. } | Let { .. } => true,
+            InlineAsm { .. } => true,
 
             // These evaluate to a value.
-            RawBorrow { .. }
+            Assign { .. }
+            | RawBorrow { .. }
             | Adt { .. }
             | Array { .. }
             | Map { .. }
@@ -363,6 +369,7 @@ impl<'p, 'tcx> MatchVisitor<'p, 'tcx> {
             | ConstParam { .. }
             | If { .. }
             | Literal { .. }
+            | Let { .. }
             | LogicalOp { .. }
             | Loop { .. }
             | LoopMatch { .. }

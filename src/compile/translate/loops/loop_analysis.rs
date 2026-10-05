@@ -32,31 +32,6 @@ struct LoopVarAnalysis<'thir, 'tcx, 'scopes> {
     rebound: FxIndexSet<LocalVarId>,
 }
 
-impl LoopVarAnalysis<'_, '_, '_> {
-    fn record_lhs(&mut self, mut expr_id: ExprId) {
-        loop {
-            match &self.thir[expr_id].kind {
-                ExprKind::VarRef { id } => {
-                    if self.scopes.get_var(*id).is_some() {
-                        self.referenced.insert(*id);
-                        self.rebound.insert(*id);
-                    }
-                    return;
-                }
-                ExprKind::Scope { value, .. } => expr_id = *value,
-                ExprKind::Use { source }
-                | ExprKind::ByUse { expr: source, .. }
-                | ExprKind::NeverToAny { source }
-                | ExprKind::Cast { source }
-                | ExprKind::PointerCoercion { source, .. }
-                | ExprKind::PlaceTypeAscription { source, .. }
-                | ExprKind::ValueTypeAscription { source, .. } => expr_id = *source,
-                _ => return,
-            }
-        }
-    }
-}
-
 impl<'thir, 'tcx: 'thir> Visitor<'thir, 'tcx> for LoopVarAnalysis<'thir, 'tcx, '_> {
     fn thir(&self) -> &'thir thir::Thir<'tcx> {
         self.thir
@@ -74,10 +49,6 @@ impl<'thir, 'tcx: 'thir> Visitor<'thir, 'tcx> for LoopVarAnalysis<'thir, 'tcx, '
                     self.referenced.insert(*var_hir_id);
                 }
             }
-            ExprKind::Assign { lhs, .. } | ExprKind::AssignOp { lhs, .. } => {
-                self.record_lhs(*lhs);
-                visit::walk_expr(self, expr);
-            }
             ExprKind::Closure(closure) => {
                 // The closure body has its own THIR, but its capture expressions are
                 // evaluated in (and therefore must be parameters of) this loop helper.
@@ -90,10 +61,15 @@ impl<'thir, 'tcx: 'thir> Visitor<'thir, 'tcx> for LoopVarAnalysis<'thir, 'tcx, '
     }
 
     fn visit_pat(&mut self, pat: &'thir Pat<'tcx>) {
-        if let PatKind::Pin { var } = pat.kind
-            && self.scopes.get_var(var).is_some()
-        {
-            self.referenced.insert(var);
+        match pat.kind {
+            PatKind::Pin { var } if self.scopes.get_var(var).is_some() => {
+                self.referenced.insert(var);
+            }
+            PatKind::Assignee { var } if self.scopes.get_var(var).is_some() => {
+                self.referenced.insert(var);
+                self.rebound.insert(var);
+            }
+            _ => {}
         }
         visit::walk_pat(self, pat);
     }

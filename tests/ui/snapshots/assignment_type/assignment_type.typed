@@ -16,10 +16,8 @@ extern mod patina_fmt;
 
 fn assign()
     ->
-        int ({
-    let mut value = (0 as int);
-    ((value as int) = (42 as int) as int)
-} as int)
+        int ({ let mut value = (0 as int); (value = (42 as int) as int) } as
+    int)
 
 fn assign_op()
     ->
@@ -33,7 +31,7 @@ fn chained_assign()
         int ({
     let mut first = (0 as int);
     let mut second = (0 as int);
-    ((first as int) = ((second as int) = (21 as int) as int) as int)
+    (first = (second = (21 as int) as int) as int)
 } as int)
 
 fn identity(value: int) -> int ({ (value as int) } as int)
@@ -42,17 +40,115 @@ fn assign_as_argument()
     ->
         int ({
     let mut value = (0 as int);
-    ((identity as
-            fn(int) -> int {identity})(((value as int) = (42 as int) as int))
-        as int)
+    ((identity as fn(int) -> int {identity})((value = (42 as int) as int)) as
+        int)
 } as int)
 
 fn assign_as_match_scrutinee()
     ->
         int ({
     let mut value = (0 as int);
-    (match ((value as int) = (42 as int) as int) {
+    (match (value = (42 as int) as int) {
         42 => (value as int),
+        _ => (0 as int),
+    } as int)
+} as int)
+
+fn destructuring_assign()
+    ->
+        int ({
+    let first;
+    let second;
+    ((first, second) = (((40 as int), (2 as int)) as (int, int)) as
+        (int, int));
+    ((first as int) + (second as int) as int)
+} as int)
+
+fn destructuring_assign_value()
+    ->
+        (int,
+        int) ({
+    let first;
+    let second;
+    ((first, second) = (((40 as int), (2 as int)) as (int, int)) as
+        (int, int))
+} as (int, int))
+
+fn swap()
+    ->
+        (int,
+        int) ({
+    let mut first = (1 as int);
+    let mut second = (2 as int);
+    ((first, second) = (((second as int), (first as int)) as (int, int)) as
+        (int, int));
+    (((first as int), (second as int)) as (int, int))
+} as (int, int))
+
+fn nested(value: ((int, int), (int, int)))
+    ->
+        int ({
+    let first;
+    let second;
+    let third;
+    (((first, second), (third, _)) = (value as ((int, int), (int, int))) as
+        ((int, int), (int, int)));
+    (((first as int) + (second as int) as int) + (third as int) as int)
+} as int)
+
+struct Point {
+    x: int,
+    y: int,
+}
+
+fn struct_fields()
+    ->
+        int ({
+    let x;
+    let y;
+    (Point {  x,  y } = (Point { x: (40 as int), y: (2 as int) } as Point) as
+        Point);
+    ((x as int) + (y as int) as int)
+} as int)
+
+fn assign_coerces_to_var_type()
+    ->
+        (term,
+        int) ({
+    let first: term;
+    let second;
+    ((first, second) = (((40 as int), (2 as int)) as (int, int)) as
+        (int, int));
+    (((first as term), (second as int)) as (term, int))
+} as (term, int))
+
+fn fibonacci(n: int)
+    ->
+        int ({
+    let mut current = (0 as int);
+    let mut next = (1 as int);
+    let mut i = (0 as int);
+    (loop {
+        (if ((i as int) < (n as int) as bool) {
+            ((current, next) =
+                (((next as int), ((current as int) + (next as int) as int)) as
+                    (int, int)) as (int, int));
+            ((i as int) += (1 as int) as int);
+        } else { (break as !); } as ())
+    } as ())
+    (current as int)
+} as int)
+
+fn discard() -> int ({ (_ = (42 as int) as int) } as int)
+
+fn parenthesized_struct_in_scrutinee()
+    ->
+        int ({
+    let x;
+    let y;
+    (match ((Point {  x,  y } =
+            (Point { x: (1 as int), y: (2 as int) } as Point) as Point)) {
+        Point {  x: 1, .. } => ((x as int) + (y as int) as int),
         _ => (0 as int),
     } as int)
 } as int)
@@ -61,7 +157,7 @@ fn assign_in_boolean_context()
     ->
         bool ({
     let mut value = (false as bool);
-    (if ((value as bool) = (true as bool) as bool) {
+    (if (value = (true as bool) as bool) {
         (value as bool)
     } else { (false as bool) } as bool)
 } as bool)
@@ -79,5 +175,10 @@ fn block_ending_in_unit_expr() ({ (() as ()); } as ())
 
 fn block_ending_in_assignment() ({
     let mut value = (0 as int);
-    ((value as int) = (42 as int) as int);
+    (value = (42 as int) as int);
+} as ())
+
+fn block_ending_in_destructuring_assignment() ({
+    let _first;
+    ((_first, _) = (((1 as int), (2 as int)) as (int, int)) as (int, int));
 } as ())

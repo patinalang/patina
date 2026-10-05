@@ -105,7 +105,7 @@ LL |     let mut value = 1;
    |         --------- `value` is declared here
 LL |     try {
 LL |         value = 2;
-   |         ^^^^^^^^^ cannot assign
+   |         ^^^^^ cannot assign
    |
    = note: bindings made inside a `try`, `catch` or `after` block do not escape it
 
@@ -116,7 +116,7 @@ LL |     let mut value = 1;
    |         --------- `value` is declared here
 ...
 LL |             value = 2;
-   |             ^^^^^^^^^ cannot assign
+   |             ^^^^^ cannot assign
    |
    = note: bindings made inside a `try`, `catch` or `after` block do not escape it
 
@@ -127,7 +127,7 @@ LL |     let mut value = 1;
    |         --------- `value` is declared here
 LL |     try {} after {
 LL |         value = 2;
-   |         ^^^^^^^^^ cannot assign
+   |         ^^^^^ cannot assign
    |
    = note: bindings made inside a `try`, `catch` or `after` block do not escape it
 

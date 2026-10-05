@@ -798,8 +798,11 @@ pub fn walk_pat<'v, V: Visitor<'v>>(visitor: &mut V, pattern: &'v Pat<'v>) -> V:
             try_visit!(visitor.visit_ident(ident));
             visit_opt!(visitor, visit_pat, optional_subpattern);
         }
-        PatKind::Expr(ref expression) => try_visit!(visitor.visit_pat_expr(expression)),
-        PatKind::Pin(ref expression) => try_visit!(visitor.visit_pat_expr(expression)),
+        PatKind::Expr(ref expression)
+        | PatKind::Pin(ref expression)
+        | PatKind::Assignee(ref expression) => {
+            try_visit!(visitor.visit_pat_expr(expression))
+        }
         PatKind::Range(ref lower_bound, ref upper_bound, _) => {
             visit_opt!(visitor, visit_pat_expr, lower_bound);
             visit_opt!(visitor, visit_pat_expr, upper_bound);
@@ -977,7 +980,7 @@ pub fn walk_expr<'v, V: Visitor<'v>>(visitor: &mut V, expression: &'v Expr<'v>) 
         }
         ExprKind::Assign(ref lhs, ref rhs, _) => {
             try_visit!(visitor.visit_expr(rhs));
-            try_visit!(visitor.visit_expr(lhs));
+            try_visit!(visitor.visit_pat(lhs));
         }
         ExprKind::AssignOp(_, ref left_expression, ref right_expression) => {
             try_visit!(visitor.visit_expr(right_expression));

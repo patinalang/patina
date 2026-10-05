@@ -39,8 +39,7 @@ fn main() ({
                                     [str])] as [[str]])) as term);
                     ((::Core::io::nl as fn() -> term)() as term);
                 } as ());
-                ((optional as Core::Option<int>) = (None as Core::Option<int>)
-                    as Core::Option<int>);
+                (optional = (None as Core::Option<int>) as Core::Option<int>);
             } else {
                 ({
                     ((::Core::io::put_chars as
@@ -50,7 +49,7 @@ fn main() ({
                         as term);
                     ((::Core::io::nl as fn() -> term)() as term);
                 } as ());
-                ((optional as Core::Option<int>) =
+                (optional =
                     ((Some as
                             fn(int) -> Core::Option<int> {Core::Option::<int>::Some})(((i
                                 as int) + (1 as int) as int)) as Core::Option<int>) as

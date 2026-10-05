@@ -1,0 +1,74 @@
+error: cannot assign to this expression
+  --> tests/ui/src/variable_bindings/errors/destructuring_assignment_errors.pt:30:6
+   |
+LL |     (value.field, other) = (2, 3);
+   |      ^^^^^^^^^^^ cannot assign
+   |
+   = help: only `mut` variables can be assigned to
+   = note: Patina values are immutable
+
+error[E0070]: invalid left-hand side of assignment
+  --> tests/ui/src/variable_bindings/errors/destructuring_assignment_errors.pt:37:24
+   |
+LL |     (THRESHOLD, other) = (2, 3);
+   |      ---------         ^
+   |      |
+   |      cannot assign to `THRESHOLD`, as it is a constant, not a variable
+
+error[E0070]: invalid left-hand side of assignment
+  --> tests/ui/src/variable_bindings/errors/destructuring_assignment_errors.pt:46:20
+   |
+LL |     (one(), other) = (2, 3);
+   |      -----         ^
+   |      |
+   |      cannot assign to this expression, as it is not a variable
+
+error[E0384]: cannot assign to `first`, as it is not declared as mutable
+  --> tests/ui/src/variable_bindings/errors/destructuring_assignment_errors.pt:6:6
+   |
+LL |     let first = 1;
+   |         ----- help: consider making this binding mutable: `mut first`
+LL |     let mut second = 2;
+LL |     (first, second) = (3, 4);
+   |      ^^^^^ cannot assign
+
+error: cannot assign to `value`, as it is captured by the closure
+  --> tests/ui/src/variable_bindings/errors/destructuring_assignment_errors.pt:12:10
+   |
+LL |     let mut value = 1;
+   |             ----- `value` is declared here
+LL |     let _closure = || {
+LL |         (value, _) = (2, 3);
+   |          ^^^^^ cannot assign
+   |
+   = note: closures capture by value; assignments inside a closure do not escape it
+
+error: cannot assign to `value`, as it is declared outside the `try` block
+  --> tests/ui/src/variable_bindings/errors/destructuring_assignment_errors.pt:19:10
+   |
+LL |     let mut value = 1;
+   |         --------- `value` is declared here
+LL |     try {
+LL |         (value, _) = (2, 3);
+   |          ^^^^^ cannot assign
+   |
+   = note: bindings made inside a `try`, `catch` or `after` block do not escape it
+
+error[E0005]: refutable pattern in local binding
+  --> tests/ui/src/variable_bindings/errors/destructuring_assignment_errors.pt:52:5
+   |
+LL |     (value, ^expected) = (1, 2);
+   |     ^^^^^^^^^^^^^^^^^^ pattern `(_, _)` not covered
+   |
+   = note: `let` bindings require an "irrefutable pattern", like a `struct` or an `enum` with only one variant
+   = note: for more information, visit https://doc.rust-lang.org/book/ch19-02-refutability.html
+   = note: the matched value is of type `(int, int)`
+help: you might want to use `if let` to ignore the variant that isn't matched
+   |
+LL |     if (value, ^expected) = (1, 2) { todo!() };
+   |     ++                             +++++++++++
+
+error: aborting due to 7 previous errors
+
+Some errors have detailed explanations: E0005, E0070, E0384.
+For more information about an error, try `rustc --explain E0005`.

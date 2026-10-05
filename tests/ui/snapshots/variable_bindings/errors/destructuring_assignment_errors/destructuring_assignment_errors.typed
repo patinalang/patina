@@ -1,0 +1,78 @@
+#![allow(internal_features)]
+
+
+
+
+#![allow(dead_code)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+#[allow(unused)]
+extern mod patina_fmt;
+
+fn assign_to_immutable() ({
+    let first = (1 as int);
+    let mut second = (2 as int);
+    ((first, second) = (((3 as int), (4 as int)) as (int, int)) as
+        (int, int));
+} as ())
+
+fn assign_to_captured() ({
+    let mut value = (1 as int);
+    let _closure =
+        (||
+            ({
+                ((value, _) = (((2 as int), (3 as int)) as (int, int)) as
+                    (int, int));
+            } as ()) as
+            {closure@tests/ui/src/variable_bindings/errors/destructuring_assignment_errors.pt:11:20: 11:22});
+} as ())
+
+fn assign_across_try() ({
+    let mut value = (1 as int);
+    (try ({
+            ((value, _) = (((2 as int), (3 as int)) as (int, int)) as
+                (int, int));
+        } as ()) after ({ } as ()) as ())
+} as ())
+
+struct Value {
+    field: int,
+}
+
+fn assign_to_field() ({
+    let value = (Value { field: (1 as int) } as Value);
+    let other;
+    (((/*ERROR*/), other) = (((2 as int), (3 as int)) as (int, int)) as
+        (int, int));
+} as ())
+
+const THRESHOLD: int = (10 as int);
+
+fn assign_to_constant() ({
+    let other;
+    (((/*ERROR*/), other) = (((2 as int), (3 as int)) as (int, int)) as
+        (int, int));
+} as ())
+
+fn one() -> int ({ (1 as int) } as int)
+
+fn assign_to_call() ({
+    let other;
+    (((/*ERROR*/), other) = (((2 as int), (3 as int)) as (int, int)) as
+        (int, int));
+} as ())
+
+// A pinned variable makes the pattern refutable.
+fn assign_with_pin(expected:
+        int) ({
+    let value;
+    ((value, ^expected) = (((1 as int), (2 as int)) as (int, int)) as
+        (int, int));
+} as ())

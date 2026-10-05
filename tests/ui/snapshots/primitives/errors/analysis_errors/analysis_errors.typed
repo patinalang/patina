@@ -44,11 +44,11 @@ fn bad_values()
 
 fn functional_update(map: #{str => int},
     rest:
-        #{str => int}) ({ ({ let #{..} = (map as #{str => int}); } as ()); }
+        #{str => int}) ({ (#{..} = (map as #{str => int}) as #{str => int}); }
     as ())
 
 fn destructuring_missing_rest(map:
-        #{str => int}) ({ ({ let #{..} = (map as #{str => int}); } as ()); }
+        #{str => int}) ({ (#{..} = (map as #{str => int}) as #{str => int}); }
     as ())
 
 fn computed_key(map: #{int => int})

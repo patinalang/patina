@@ -1767,7 +1767,14 @@ impl<'hir> Pat<'hir> {
         use PatKind::*;
         match self.kind {
             Missing => unreachable!(),
-            Wild | Never | Expr(_) | Pin(_) | Range(..) | Binding(.., None) | Err(_) => true,
+            Wild
+            | Never
+            | Expr(_)
+            | Pin(_)
+            | Assignee(_)
+            | Range(..)
+            | Binding(.., None)
+            | Err(_) => true,
             Box(s)
             | Deref(s)
             | Ref(s, _, _)
@@ -1804,7 +1811,15 @@ impl<'hir> Pat<'hir> {
 
         use PatKind::*;
         match self.kind {
-            Missing | Wild | Never | Expr(_) | Pin(_) | Range(..) | Binding(.., None) | Err(_) => {}
+            Missing
+            | Wild
+            | Never
+            | Expr(_)
+            | Pin(_)
+            | Assignee(_)
+            | Range(..)
+            | Binding(.., None)
+            | Err(_) => {}
             Box(s)
             | Deref(s)
             | Ref(s, _, _)
@@ -1903,6 +1918,7 @@ impl<'hir> Pat<'hir> {
             | PatKind::Deref(_)
             | PatKind::Expr(_)
             | PatKind::Pin(_)
+            | PatKind::Assignee(_)
             | PatKind::TermClass(_, _)
             | PatKind::Exception { .. }
             | PatKind::Range(_, _, _)
@@ -2130,6 +2146,10 @@ pub enum PatKind<'hir> {
 
     /// A pin pattern that compares against the current value of a local variable.
     Pin(&'hir PatExpr<'hir>),
+
+    /// An assignee in the pattern of an assignment, which assigns the matched value
+    /// to an existing local variable.
+    Assignee(&'hir PatExpr<'hir>),
 
     /// A BEAM runtime class pattern (e.g., `int(value)`).
     TermClass(&'hir Pat<'hir>, TermClass),
@@ -3032,8 +3052,8 @@ pub enum ExprKind<'hir> {
     /// A block (e.g., `'label: { ... }`).
     Block(&'hir Block<'hir>, Option<Label>),
 
-    /// An assignment (e.g., `a = foo()`).
-    Assign(&'hir Expr<'hir>, &'hir Expr<'hir>, Span),
+    /// An assignment (e.g., `(a, b) = foo()`).
+    Assign(&'hir Pat<'hir>, &'hir Expr<'hir>, Span),
     /// An assignment with an operator.
     ///
     /// E.g., `a += 1`.

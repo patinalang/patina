@@ -11,7 +11,7 @@ use rustc_middle::span_bug;
 use rustc_middle::thir::visit::Visitor;
 use rustc_middle::thir::*;
 use rustc_middle::ty::print::with_no_trimmed_paths;
-use rustc_middle::ty::{self, Ty, TyCtxt};
+use rustc_middle::ty::{self, TyCtxt};
 use rustc_session::lint::Level;
 use rustc_session::lint::builtin::{DEPRECATED_SAFE_2024, UNSAFE_OP_IN_UNSAFE_FN, UNUSED_UNSAFE};
 use rustc_span::def_id::{DefId, LocalDefId};
@@ -31,9 +31,6 @@ struct UnsafetyVisitor<'a, 'tcx> {
     /// The `#[target_feature]` attributes of the body. Used for checking
     /// calls to functions with `#[target_feature]` (RFC 2396).
     body_target_features: &'tcx [TargetFeature],
-    /// When inside the LHS of an assignment to a field, this is the type
-    /// of the LHS and the span of the assignment expression.
-    assignment_info: Option<Ty<'tcx>>,
     in_union_destructure: bool,
     typing_env: ty::TypingEnv<'tcx>,
     inside_adt: bool,
@@ -199,7 +196,6 @@ impl<'tcx> UnsafetyVisitor<'_, 'tcx> {
                 hir_context,
                 safety_context,
                 body_target_features: self.body_target_features,
-                assignment_info: self.assignment_info,
                 in_union_destructure: false,
                 typing_env: self.typing_env,
                 inside_adt: false,
@@ -280,6 +276,7 @@ impl<'a, 'tcx> Visitor<'a, 'tcx> for UnsafetyVisitor<'a, 'tcx> {
                 | PatKind::Map { .. }
                 | PatKind::BinaryPattern { .. }
                 | PatKind::Guard { .. }
+                | PatKind::Assignee { .. }
                 // Never constitutes a witness of uninhabitedness.
                 | PatKind::Never => {
                     self.requires_unsafe(pat.span, AccessToUnionField);
@@ -356,70 +353,6 @@ impl<'a, 'tcx> Visitor<'a, 'tcx> for UnsafetyVisitor<'a, 'tcx> {
     }
 
     fn visit_expr(&mut self, expr: &'a Expr<'tcx>) {
-        // could we be in the LHS of an assignment to a field?
-        match expr.kind {
-            ExprKind::Field { .. }
-            | ExprKind::VarRef { .. }
-            | ExprKind::UpvarRef { .. }
-            | ExprKind::Scope { .. }
-            | ExprKind::Cast { .. } => {}
-
-            ExprKind::RawBorrow { .. }
-            | ExprKind::Adt { .. }
-            | ExprKind::Array { .. }
-            | ExprKind::Map { .. }
-            | ExprKind::BinaryPattern { .. }
-            | ExprKind::Binary { .. }
-            | ExprKind::Block { .. }
-            | ExprKind::Borrow { .. }
-            | ExprKind::Literal { .. }
-            | ExprKind::NamedConst { .. }
-            | ExprKind::NonHirLiteral { .. }
-            | ExprKind::ZstLiteral { .. }
-            | ExprKind::ConstParam { .. }
-            | ExprKind::ConstBlock { .. }
-            | ExprKind::Deref { .. }
-            | ExprKind::Index { .. }
-            | ExprKind::NeverToAny { .. }
-            | ExprKind::PlaceTypeAscription { .. }
-            | ExprKind::ValueTypeAscription { .. }
-            | ExprKind::PlaceUnwrapUnsafeBinder { .. }
-            | ExprKind::ValueUnwrapUnsafeBinder { .. }
-            | ExprKind::WrapUnsafeBinder { .. }
-            | ExprKind::PointerCoercion { .. }
-            | ExprKind::Repeat { .. }
-            | ExprKind::StaticRef { .. }
-            | ExprKind::ThreadLocalRef { .. }
-            | ExprKind::Tuple { .. }
-            | ExprKind::Unary { .. }
-            | ExprKind::Call { .. }
-            | ExprKind::ByUse { .. }
-            | ExprKind::Assign { .. }
-            | ExprKind::AssignOp { .. }
-            | ExprKind::Break { .. }
-            | ExprKind::Closure { .. }
-            | ExprKind::Continue { .. }
-            | ExprKind::ConstContinue { .. }
-            | ExprKind::Return { .. }
-            | ExprKind::Become { .. }
-            | ExprKind::Yield { .. }
-            | ExprKind::Loop { .. }
-            | ExprKind::LoopMatch { .. }
-            | ExprKind::Let { .. }
-            | ExprKind::Receive { .. }
-            | ExprKind::TryCatch { .. }
-            | ExprKind::Match { .. }
-            | ExprKind::If { .. }
-            | ExprKind::InlineAsm { .. }
-            | ExprKind::LogicalOp { .. }
-            | ExprKind::ExternMod { .. }
-            | ExprKind::Use { .. } => {
-                // We don't need to save the old value and restore it
-                // because all the place expressions can't have more
-                // than one child.
-                self.assignment_info = None;
-            }
-        };
         match expr.kind {
             ExprKind::Scope { value, hir_id, region_scope: _ } => {
                 let prev_id = self.hir_context;
@@ -602,33 +535,8 @@ impl<'a, 'tcx> Visitor<'a, 'tcx> for UnsafetyVisitor<'a, 'tcx> {
                     if adt_def.variant(variant_index).fields[name].safety.is_unsafe() {
                         self.requires_unsafe(expr.span, UseOfUnsafeField);
                     } else if adt_def.is_union() {
-                        if let Some(assigned_ty) = self.assignment_info {
-                            if assigned_ty.needs_drop(self.tcx, self.typing_env) {
-                                // This would be unsafe, but should be outright impossible since we
-                                // reject such unions.
-                                assert!(
-                                    self.tcx.dcx().has_errors().is_some(),
-                                    "union fields that need dropping should be impossible: {assigned_ty}"
-                                );
-                            }
-                        } else {
-                            self.requires_unsafe(expr.span, AccessToUnionField);
-                        }
+                        self.requires_unsafe(expr.span, AccessToUnionField);
                     }
-                }
-            }
-            ExprKind::Assign { lhs, rhs } | ExprKind::AssignOp { lhs, rhs, .. } => {
-                let lhs = &self.thir[lhs];
-
-                // Check for accesses to union fields. Don't have any
-                // special handling for AssignOp since it causes a read *and*
-                // write to lhs.
-                if matches!(expr.kind, ExprKind::Assign { .. }) {
-                    self.assignment_info = Some(lhs.ty);
-                    visit::walk_expr(self, lhs);
-                    self.assignment_info = None;
-                    visit::walk_expr(self, &self.thir()[rhs]);
-                    return; // We have already visited everything by now.
                 }
             }
             ExprKind::PlaceUnwrapUnsafeBinder { .. }
@@ -1118,7 +1026,6 @@ pub(crate) fn check_unsafety(tcx: TyCtxt<'_>, def: LocalDefId) {
         safety_context,
         hir_context: hir_id,
         body_target_features,
-        assignment_info: None,
         in_union_destructure: false,
         // FIXME(#132279): we're clearly in a body here.
         typing_env: ty::TypingEnv::non_body_analysis(tcx, def),

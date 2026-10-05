@@ -51,8 +51,7 @@ fn outer_break_initializes()
     let value;
 
     ('outer: loop {
-        (loop { ((value as int) = (7 as int) as int); (break 'outer as !); }
-            as !)
+        (loop { (value = (7 as int) as int); (break 'outer as !); } as !)
     } as ())
 
     (value as int)

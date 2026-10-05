@@ -236,7 +236,7 @@ fn rotate(b: bin)
         bin ({
     (match (b as bin) {
         <<first: int(size = (8 as int)), mut rest @ ..>> => {
-            ((rest as bin) =
+            (rest =
                 (<<(rest as bin), (first as int): int(size = (8 as int))>> as
                     bin) as bin);
             (rest as bin)

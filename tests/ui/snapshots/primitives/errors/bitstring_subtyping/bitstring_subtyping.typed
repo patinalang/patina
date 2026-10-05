@@ -37,7 +37,6 @@ fn first_type_wins()
     ->
         [str] ({
     let mut values = ([("text" as str)] as [str]);
-    ((values as [str]) = ([(b"\xff" as bin)] as [{type error}]) as
-        {type error});
+    (values = ([(b"\xff" as bin)] as [{type error}]) as {type error});
     (values as [str])
 } as [str])
