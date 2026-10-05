@@ -25,7 +25,7 @@ fn main() ({
     // Indexing starts at 0.
     // `.get(n)` can be used to traverse to and return the nth element of the list
     // as an `Option`.
-    (match ((xs as [int]).get((0 as int)) as {type error}) {
+    (match ((xs as [int]).get((0 as int)) as Core::Option<int>) {
         Some(xval) =>
             // `len` returns the count of elements in the list.
             // Internally, it does that by traversing the list and counting all elements.
@@ -41,9 +41,8 @@ fn main() ({
             {
             ((::Core::io::put_chars as
                     fn(term) -> term)(([([("elem 0: " as str),
-                                ((patina_fmt::display as
-                                        fn(term) -> term)(({ } as {type error})) as term)] as
-                            [term])] as [[term]])) as term);
+                                ((patina_fmt::display as fn(term) -> term)((xval as int)) as
+                                    term)] as [term])] as [[term]])) as term);
             ((::Core::io::nl as fn() -> term)() as term);
         }
         None => {
@@ -58,24 +57,25 @@ fn main() ({
                 fn(term) -> term)(([([("Number of elements in array: " as
                                 str),
                             ((patina_fmt::display as
-                                    fn(term) -> term)(((xs as [int]).len() as {type error})) as
-                                term)] as [term])] as [[term]])) as term);
+                                    fn(term) -> term)(((xs as [int]).len() as int)) as term)] as
+                        [term])] as [[term]])) as term);
         ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
         ((::Core::io::put_chars as
                 fn(term) -> term)(([([("First element of the list: " as str),
                             ((patina_fmt::display as
-                                    fn(term) -> term)(((xs as [int]).head as {type error})) as
-                                term)] as [term])] as [[term]])) as term);
+                                    fn(term) -> term)(((xs as [int]).head() as
+                                    Core::Option<int>)) as term)] as [term])] as [[term]])) as
+            term);
         ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     ({
         ((::Core::io::put_chars as
                 fn(term) -> term)(([([("Rest of the list: " as str),
                             ((patina_fmt::debug as
-                                    fn(term) -> term)(((xs as [int]).tail as {type error})) as
-                                term)] as [term])] as [[term]])) as term);
+                                    fn(term) -> term)(((xs as [int]).tail() as [int])) as term)]
+                        as [term])] as [[term]])) as term);
         ((::Core::io::nl as fn() -> term)() as term);
     } as ());
     let more_xs =
@@ -85,8 +85,8 @@ fn main() ({
                 fn(term) -> term)(([([("more_xs tail is equal to xs: " as
                                 str),
                             ((patina_fmt::display as
-                                    fn(term) -> term)((((more_xs as [int]).tail as {type error})
-                                    == (xs as [int]) as bool)) as term)] as [term])] as
+                                    fn(term) -> term)((((more_xs as [int]).tail() as [int]) ==
+                                    (xs as [int]) as {type error})) as term)] as [term])] as
                 [[term]])) as term);
         ((::Core::io::nl as fn() -> term)() as term);
     } as ());

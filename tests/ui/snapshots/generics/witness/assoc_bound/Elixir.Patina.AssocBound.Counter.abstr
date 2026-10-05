@@ -107,7 +107,7 @@
                     [{atom,{21,5},'impl AssocBound::Show for int'},
                      {atom,
                          {21,5},
-                         'Elixir.Patina.AssocBound.$impl.Core.int'}]}]}]}]},
+                         'Elixir.Patina.AssocBound.$impl.Core.Int'}]}]}]}]},
  {function,
      {23,5},
      'AssocBound::Iter::next',2,

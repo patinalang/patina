@@ -33,7 +33,7 @@ main() ->
     begin
         io:put_chars([[io_lib:format("~ktp",
                                      [compare({{'impl Core::PartialEq for int',
-                                                'Elixir.Patina.Core.int'}},
+                                                'Elixir.Patina.Core.Int'}},
                                               1,
                                               1)])]]),
         io:nl(),

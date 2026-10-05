@@ -1,5 +1,5 @@
 [{attribute,{7,18},file,{"tests/ui/src/generics/witness/impl_prim.pt",7}},
- {attribute,{7,18},module,'Elixir.Patina.ImplPrim.$impl.Core.int'},
+ {attribute,{7,18},module,'Elixir.Patina.ImplPrim.$impl.Core.Int'},
  {attribute,{7,18},compile,[no_auto_import]},
  {attribute,{7,18},import,{erlang,[{is_record,3}]}},
  {attribute,{7,18},export_record,[]},

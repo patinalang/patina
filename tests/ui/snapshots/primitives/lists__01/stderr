@@ -1,43 +1,11 @@
-error[E0599]: no method named `get` found for slice `[int]` in the current scope
-  --> tests/ui/src/primitives/lists__01.pt:11:14
+error[E0369]: binary operation `==` cannot be applied to type `[int]`
+  --> tests/ui/src/primitives/lists__01.pt:29:64
    |
-LL |     match xs.get(0) {
-   |              ^^^ method not found in `[int]`
+LL |     println!("more_xs tail is equal to xs: {}", more_xs.tail() == xs);
+   |                                                 -------------- ^^ -- [int]
+   |                                                 |
+   |                                                 [int]
 
-error[E0308]: mismatched types
-  --> tests/ui/src/primitives/lists__01.pt:12:46
-   |
-LL |         Some(xval) => println!("elem 0: {}", {}),
-   |                                              ^^ expected `term`, found `()`
-   |
-   = note:   expected type `term`
-           found unit type `()`
+error: aborting due to 1 previous error
 
-error[E0599]: no method named `len` found for slice `[int]` in the current scope
-  --> tests/ui/src/primitives/lists__01.pt:18:52
-   |
-LL |     println!("Number of elements in array: {}", xs.len());
-   |                                                    ^^^ method not found in `[int]`
-
-error[E0609]: no field `head` on type `[int]`
-  --> tests/ui/src/primitives/lists__01.pt:22:50
-   |
-LL |     println!("First element of the list: {}", xs.head);
-   |                                                  ^^^^ unknown field
-
-error[E0609]: no field `tail` on type `[int]`
-  --> tests/ui/src/primitives/lists__01.pt:23:43
-   |
-LL |     println!("Rest of the list: {:?}", xs.tail);
-   |                                           ^^^^ unknown field
-
-error[E0609]: no field `tail` on type `[int]`
-  --> tests/ui/src/primitives/lists__01.pt:29:57
-   |
-LL |     println!("more_xs tail is equal to xs: {}", more_xs.tail == xs);
-   |                                                         ^^^^ unknown field
-
-error: aborting due to 6 previous errors
-
-Some errors have detailed explanations: E0308, E0599, E0609.
-For more information about an error, try `rustc --explain E0308`.
+For more information about this error, try `rustc --explain E0369`.

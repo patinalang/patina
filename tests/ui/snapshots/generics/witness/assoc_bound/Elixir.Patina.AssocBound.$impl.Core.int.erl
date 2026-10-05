@@ -1,7 +1,7 @@
 -file("tests/ui/src/generics/witness/assoc_bound.pt",
       8).
 
--module('Elixir.Patina.AssocBound.$impl.Core.int').
+-module('Elixir.Patina.AssocBound.$impl.Core.Int').
 
 -compile([no_auto_import]).
 

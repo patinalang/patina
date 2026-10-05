@@ -73,8 +73,7 @@ OpenParen
 Literal { kind: Str { terminated: true }, suffix_start: 12 }
 Comma
 Whitespace
-OpenBrace
-CloseBrace
+Ident
 CloseParen
 Comma
 Whitespace
@@ -123,6 +122,8 @@ Whitespace
 Ident
 Dot
 Ident
+OpenParen
+CloseParen
 CloseParen
 Semi
 Whitespace
@@ -135,6 +136,8 @@ Whitespace
 Ident
 Dot
 Ident
+OpenParen
+CloseParen
 CloseParen
 Semi
 Whitespace
@@ -173,6 +176,8 @@ Whitespace
 Ident
 Dot
 Ident
+OpenParen
+CloseParen
 Whitespace
 Eq
 Eq

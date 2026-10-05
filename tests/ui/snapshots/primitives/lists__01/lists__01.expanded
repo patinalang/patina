@@ -38,7 +38,7 @@ pub fn main() {
 
             // Lists can also be destructured using a similar syntax
             {
-            ::Core::io::put_chars([["elem 0: ", patina_fmt::display({})]]);
+            ::Core::io::put_chars([["elem 0: ", patina_fmt::display(xval)]]);
             ::Core::io::nl();
         }
         None => {
@@ -53,18 +53,18 @@ pub fn main() {
     };
     {
         ::Core::io::put_chars([["First element of the list: ",
-                            patina_fmt::display(xs.head)]]);
+                            patina_fmt::display(xs.head())]]);
         ::Core::io::nl();
     };
     {
         ::Core::io::put_chars([["Rest of the list: ",
-                            patina_fmt::debug(xs.tail)]]);
+                            patina_fmt::debug(xs.tail())]]);
         ::Core::io::nl();
     };
     let more_xs = [-1, 0, ..xs];
     {
         ::Core::io::put_chars([["more_xs tail is equal to xs: ",
-                            patina_fmt::display(more_xs.tail == xs)]]);
+                            patina_fmt::display(more_xs.tail() == xs)]]);
         ::Core::io::nl();
     };
     let [first, second, third, rest @ ..] = more_xs else { return };

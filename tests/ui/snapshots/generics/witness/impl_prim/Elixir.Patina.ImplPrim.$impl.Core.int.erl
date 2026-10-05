@@ -1,6 +1,6 @@
 -file("tests/ui/src/generics/witness/impl_prim.pt", 7).
 
--module('Elixir.Patina.ImplPrim.$impl.Core.int').
+-module('Elixir.Patina.ImplPrim.$impl.Core.Int').
 
 -compile([no_auto_import]).
 

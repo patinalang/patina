@@ -105,7 +105,7 @@
                  [{tuple,
                    {3,32},
                    [{atom,{3,32},'impl Core::PartialEq for int'},
-                    {atom,{3,32},'Elixir.Patina.Core.int'}]}]},
+                    {atom,{3,32},'Elixir.Patina.Core.Int'}]}]},
                 {integer,{3,40},1},
                 {integer,{3,43},1}]},
               {nil,{3,17}}}]},

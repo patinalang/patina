@@ -30,7 +30,7 @@
                                    {'impl AssocBound::Iter for AssocBound::Counter',
                                     _}) ->
     {{'impl AssocBound::Show for int',
-      'Elixir.Patina.AssocBound.$impl.Core.int'}}.
+      'Elixir.Patina.AssocBound.$impl.Core.Int'}}.
 
 'AssocBound::Iter::next'(_witness@0_0 =
                              {'impl AssocBound::Iter for AssocBound::Counter',

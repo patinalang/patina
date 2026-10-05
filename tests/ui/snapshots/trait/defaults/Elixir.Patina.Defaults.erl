@@ -424,14 +424,14 @@ differ({_witness@0_0}, _a@1_0, _b@2_0) ->
                                                          _b@2_0).
 
 int_ne(_a@0_0, _b@1_0) ->
-    'Elixir.Patina.Core.int':'Core::PartialEq::ne'({'impl Core::PartialEq for int',
-                                                    'Elixir.Patina.Core.int'},
+    'Elixir.Patina.Core.Int':'Core::PartialEq::ne'({'impl Core::PartialEq for int',
+                                                    'Elixir.Patina.Core.Int'},
                                                    _a@0_0,
                                                    _b@1_0).
 
 str_ne(_a@0_0, _b@1_0) ->
-    'Elixir.Patina.Core.str':'Core::PartialEq::ne'({'impl Core::PartialEq for str',
-                                                    'Elixir.Patina.Core.str'},
+    'Elixir.Patina.Core.Str':'Core::PartialEq::ne'({'impl Core::PartialEq for str',
+                                                    'Elixir.Patina.Core.Str'},
                                                    _a@0_0,
                                                    _b@1_0).
 
@@ -449,7 +449,7 @@ p_differ(_a@0_0, _b@1_0) ->
 
 int_differ(_a@0_0, _b@1_0) ->
     differ({{'impl Core::PartialEq for int',
-             'Elixir.Patina.Core.int'}},
+             'Elixir.Patina.Core.Int'}},
            _a@0_0,
            _b@1_0).
 

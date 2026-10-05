@@ -949,7 +949,9 @@ fn erl_module_name(tcx: TyCtxt<'_>, module: ErlModuleId) -> Symbol {
             Symbol::intern(&segments.join("."))
         }
         ErlModuleId::Prim(prim_ty) => {
-            Symbol::intern(&format!("Elixir.Patina.Core.{}", prim_ty.name()))
+            // The primitive modules are capitalized to be easy to call from Elixir.
+            let name = prim_ty.name_str().to_case(Case::Pascal);
+            Symbol::intern(&format!("Elixir.Patina.Core.{name}"))
         }
         ErlModuleId::AdtImplHost(krate, adt) => {
             erl_impl_host_name(tcx, krate, tcx.erl_module_name(ErlModuleId::Adt(adt)))
