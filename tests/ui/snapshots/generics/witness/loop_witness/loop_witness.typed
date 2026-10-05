@@ -1,0 +1,142 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+trait Score {
+    fn score(self)
+    -> int;
+
+    fn loop_in_default(self, times: int)
+        ->
+            int ({
+        let mut total = (0 as int);
+        let mut n = (0 as int);
+        (loop {
+            (if ((n as int) < (times as int) as bool) {
+                ((total as int) += ((self as Self).score() as int) as int);
+                ((n as int) += (1 as int) as int);
+            } else { (break as !); } as ())
+        } as ())
+        (total as int)
+    } as int)
+}
+
+struct Points {
+    n: int,
+}
+
+impl Score for Points {
+    fn score(self) -> int ({ ((self as Points).n as int) } as int)
+}
+
+struct Pair<T> {
+    a: T,
+    b: T,
+}
+
+// A trait impl method with a where-clause: the helper takes the Self witness and the
+// where-clause witness.
+impl <T> Score for Pair<T> where T: Score {
+    fn score(self)
+        ->
+            int ({
+        let mut total = (0 as int);
+        (loop {
+            ((total as int) +=
+                ((((self as Pair<T>).a as T).score() as int) +
+                    (((self as Pair<T>).b as T).score() as int) as int) as int);
+            (break as !);
+        } as ())
+        (total as int)
+    } as int)
+}
+
+fn loop_continuing_outer<T>(t: T, rounds: int) -> int where
+    T: Score ({
+    let mut round = (0 as int);
+    let mut total = (0 as int);
+    ('outer: loop {
+        ((round as int) += (1 as int) as int);
+        (loop {
+            ((total as int) += ((t as T).score() as int) as int);
+            (if ((round as int) < (rounds as int) as bool) {
+                (continue 'outer as !);
+            } as ())
+            (break 'outer as !);
+        } as !)
+    } as ())
+    (total as int)
+} as int)
+
+fn loop_in_closure<T>(t: T, times: int) -> int where
+    T: Score ({
+    let f =
+        (|k: int|
+            ({
+                let mut total = (0 as int);
+                let mut n = (0 as int);
+                (loop {
+                    (if ((n as int) < (k as int) as bool) {
+                        ((total as int) += ((t as T).score() as int) as int);
+                        ((n as int) += (1 as int) as int);
+                    } else { (break as !); } as ())
+                } as ())
+                (total as int)
+            } as int) as
+            {closure@tests/ui/src/generics/witness/loop_witness.pt:60:13: 60:21});
+    ((f as
+            {closure@tests/ui/src/generics/witness/loop_witness.pt:60:13: 60:21})((times
+            as int)) as int)
+} as int)
+
+fn loop_in_default(n: int, times: int)
+    ->
+        int ({
+    ((Points { (n as int) } as Points).loop_in_default((times as int)) as int)
+} as int)
+
+fn pair(a: int, b: int)
+    ->
+        int ({
+    ((Pair {
+            a: (Points { n: (a as int) } as Points),
+            b: (Points { n: (b as int) } as Points) } as Pair<Points>).score()
+        as int)
+} as int)
+
+fn pair_repeated(a: int, b: int, times: int)
+    ->
+        int ({
+    ((Pair {
+            a: (Points { n: (a as int) } as Points),
+            b: (Points { n: (b as int) } as Points) } as
+            Pair<Points>).loop_in_default((times as int)) as int)
+} as int)
+
+fn nested_rounds(n: int, rounds: int)
+    ->
+        int ({
+    ((loop_continuing_outer as
+            fn(Points, int) -> int {loop_continuing_outer::<Points>})((Points {
+            (n as int) } as Points), (rounds as int)) as int)
+} as int)
+
+fn closure_loop(n: int, times: int)
+    ->
+        int ({
+    ((loop_in_closure as
+            fn(Points, int) -> int {loop_in_closure::<Points>})((Points {
+            (n as int) } as Points), (times as int)) as int)
+} as int)

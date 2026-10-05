@@ -1,0 +1,80 @@
+trait Score {
+    fn score(self)
+    -> int;
+
+    fn loop_in_default(self, times: int) -> int {
+        let mut total = 0;
+        let mut n = 0;
+        while n < times { total += self.score(); n += 1; }
+        total
+    }
+}
+
+struct Points {
+    n: int,
+}
+
+impl Score for Points {
+    fn score(self) -> int { self.n }
+}
+
+struct Pair<T> {
+    a: T,
+    b: T,
+}
+
+// A trait impl method with a where-clause: the helper takes the Self witness and the
+// where-clause witness.
+impl<T: Score> Score for Pair<T> {
+    fn score(self) -> int {
+        let mut total = 0;
+        loop { total += self.a.score() + self.b.score(); break; }
+        total
+    }
+}
+
+fn loop_continuing_outer<T: Score>(t: T, rounds: int) -> int {
+    let mut round = 0;
+    let mut total = 0;
+    'outer: loop {
+        round += 1;
+        loop {
+            total += t.score();
+            if round < rounds { continue 'outer; }
+            break 'outer;
+        }
+    }
+    total
+}
+
+fn loop_in_closure<T: Score>(t: T, times: int) -> int {
+    let f =
+        |k: int|
+            {
+                let mut total = 0;
+                let mut n = 0;
+                while n < k { total += t.score(); n += 1; }
+                total
+            };
+    f(times)
+}
+
+pub fn loop_in_default(n: int, times: int) -> int {
+    Points { n }.loop_in_default(times)
+}
+
+pub fn pair(a: int, b: int) -> int {
+    Pair { a: Points { n: a }, b: Points { n: b } }.score()
+}
+
+pub fn pair_repeated(a: int, b: int, times: int) -> int {
+    Pair { a: Points { n: a }, b: Points { n: b } }.loop_in_default(times)
+}
+
+pub fn nested_rounds(n: int, rounds: int) -> int {
+    loop_continuing_outer(Points { n }, rounds)
+}
+
+pub fn closure_loop(n: int, times: int) -> int {
+    loop_in_closure(Points { n }, times)
+}

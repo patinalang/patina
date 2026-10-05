@@ -155,7 +155,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 let translated_body = cx.translate_expr(body);
 
                 let loop_cx = cx.loops.current();
-                let recurse_args = cx.var_exprs(expr.span, loop_cx.params.iter().copied());
+                let recurse_args = cx.loop_helper_param_exprs(expr.span, loop_cx);
                 let recurse = cx.marker_call(expr.span, kw::Continue, recurse_args);
 
                 // The body does not land as a tail expression, so Erlang warns
@@ -173,17 +173,18 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let helper_function = afb.simple_function(
             expr.span,
             loop_cx.helper_erl_name,
-            self.var_pats(expr.span, loop_cx.params.iter().copied()),
+            self.loop_helper_param_pats(expr.span, &loop_cx),
             loop_body,
         );
 
         self.translator.push_function(self.parts, expr.span, helper_function);
-        self.parts.exports.push((loop_cx.helper_erl_name, loop_cx.params.len() as u32));
+        let arity = self.witness_env.vars.len() + loop_cx.params.len();
+        self.parts.exports.push((loop_cx.helper_erl_name, arity as u32));
 
         let loop_helper_call = afb.expr_local_call(
             expr.span,
             afb.expr_atom(expr.span, loop_cx.helper_erl_name),
-            self.var_exprs(expr.span, loop_cx.params.iter().copied()),
+            self.loop_helper_param_exprs(expr.span, &loop_cx),
         );
 
         for id in &loop_cx.rebound {
@@ -280,7 +281,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let loop_cx = self.loops.current();
 
         if target_depth == loop_cx.depth {
-            let args = self.var_exprs(span, loop_cx.params.iter().copied());
+            let args = self.loop_helper_param_exprs(span, loop_cx);
             self.marker_call(span, kw::Continue, args)
         } else {
             let target_depth = afb.expr_int(span, target_depth as u128);
@@ -347,7 +348,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             [afb.pat_int(span, outer_loop.depth as u128)],
             loop_cx,
         );
-        let args = self.var_exprs(span, outer_loop.params.iter().copied());
+        let args = self.loop_helper_param_exprs(span, outer_loop);
         let body = self.marker_call(span, kw::Continue, args);
         afb.clause(span, [continue_pattern], None, body)
     }
@@ -448,6 +449,28 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let marker = afb.pat_atom(span, marker);
         let vars = self.var_pats(span, loop_cx.rebound.iter().copied());
         afb.pat_tuple(span, std::iter::once(marker).chain(additional_pats).chain(vars))
+    }
+
+    /// var_pats with witness variables first
+    fn loop_helper_param_pats(
+        &self,
+        span: Span,
+        loop_cx: &LoopContext,
+    ) -> impl Iterator<Item = eaf::Pattern<'arena>> {
+        let afb = &self.translator.afb;
+        let witnesses = self.witness_env.vars.iter().map(move |&var| afb.pat_var(span, var));
+        witnesses.chain(self.var_pats(span, loop_cx.params.iter().copied()))
+    }
+
+    /// var_exprs with witness variables first
+    fn loop_helper_param_exprs(
+        &self,
+        span: Span,
+        loop_cx: &LoopContext,
+    ) -> impl Iterator<Item = eaf::Expr<'arena>> {
+        let afb = &self.translator.afb;
+        let witnesses = self.witness_env.vars.iter().map(move |&var| afb.expr_var(span, var));
+        witnesses.chain(self.var_exprs(span, loop_cx.params.iter().copied()))
     }
 
     fn var_pats(

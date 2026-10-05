@@ -9,8 +9,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         '<impl Loops::Count for Loops::Counter<int>>::count$patina_loop_1'/2,
-         '<impl Loops::Count for Loops::Counter<str>>::count$patina_loop_1'/2,
+         '<impl Loops::Count for Loops::Counter<int>>::count$patina_loop_1'/3,
+         '<impl Loops::Count for Loops::Counter<str>>::count$patina_loop_1'/3,
          'Loops::Count::count'/3]).
 
 '__info__'(functions) ->
@@ -26,7 +26,8 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'<impl Loops::Count for Loops::Counter<int>>::count$patina_loop_1'(_n@3_0,
+'<impl Loops::Count for Loops::Counter<int>>::count$patina_loop_1'(_witness@0_0,
+                                                                   _n@3_0,
                                                                    _limit@2_0) ->
     _ = begin
             case _n@3_0 < _limit@2_0 of
@@ -44,9 +45,12 @@
                     _branch_value@4_0
             end
         end,
-    '$patina_marker':continue(_n@3_1, _limit@2_0).
+    '$patina_marker':continue(_witness@0_0,
+                              _n@3_1,
+                              _limit@2_0).
 
-'<impl Loops::Count for Loops::Counter<str>>::count$patina_loop_1'(_n@3_0,
+'<impl Loops::Count for Loops::Counter<str>>::count$patina_loop_1'(_witness@0_0,
+                                                                   _n@3_0,
                                                                    _limit@2_0) ->
     _ = begin
             case _n@3_0 < _limit@2_0 of
@@ -64,14 +68,17 @@
                     _branch_value@4_0
             end
         end,
-    '$patina_marker':continue(_n@3_1, _limit@2_0).
+    '$patina_marker':continue(_witness@0_0,
+                              _n@3_1,
+                              _limit@2_0).
 
 'Loops::Count::count'(_witness@0_0 =
                           {'impl Loops::Count for Loops::Counter<int>', _},
                       _self@1_0, _limit@2_0) ->
     _n@3_0 = 0,
     case
-        '<impl Loops::Count for Loops::Counter<int>>::count$patina_loop_1'(_n@3_0,
+        '<impl Loops::Count for Loops::Counter<int>>::count$patina_loop_1'(_witness@0_0,
+                                                                           _n@3_0,
                                                                            _limit@2_0)
         of
         {break, 0, _loop_value@5_0, _n@3_1} -> _loop_value@5_0
@@ -82,7 +89,8 @@
                       _self@1_0, _limit@2_0) ->
     _n@3_0 = 0,
     case
-        '<impl Loops::Count for Loops::Counter<str>>::count$patina_loop_1'(_n@3_0,
+        '<impl Loops::Count for Loops::Counter<str>>::count$patina_loop_1'(_witness@0_0,
+                                                                           _n@3_0,
                                                                            _limit@2_0)
         of
         {break, 0, _loop_value@5_0, _n@3_1} -> _loop_value@5_0

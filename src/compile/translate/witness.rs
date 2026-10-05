@@ -22,8 +22,14 @@ use super::scopes::Scopes;
 use crate::erlang::abstract_format as eaf;
 use crate::{not_implemented, span_fatal};
 
-/// For each bound that a body can prove from its parameters, the expression of its witness.
-pub(super) type WitnessEnv<'tcx, 'arena> = FxHashMap<ty::TraitRef<'tcx>, eaf::Expr<'arena>>;
+/// The witnesses that a body has from its witness parameters.
+#[derive(Default)]
+pub(crate) struct WitnessEnv<'tcx, 'arena> {
+    /// For each bound that the body can prove, the expression of its witness.
+    bounds: FxHashMap<ty::TraitRef<'tcx>, eaf::Expr<'arena>>,
+    /// The witness parameter variables
+    pub(super) vars: SmallVec<[Symbol; 4]>,
+}
 
 /// The 1-based position of the host module in an impl witness. The tag is at position 1.
 const HOST_INDEX: u32 = 2;
@@ -59,7 +65,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         expr: eaf::Expr<'arena>,
     ) {
         let trait_ref = self.tcx.erl_normalize(owner, trait_ref);
-        let Entry::Vacant(entry) = env.entry(trait_ref) else { return };
+        let Entry::Vacant(entry) = env.bounds.entry(trait_ref) else { return };
         entry.insert(expr);
 
         for (index, supertrait) in self.supertrait_refs(trait_ref).into_iter().enumerate() {
@@ -133,6 +139,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         if let Some(trait_def_id) = tcx.erl_entry_trait(owner) {
             let self_var = scopes.fresh_var(sym::witness).erl_name;
             let self_expr = afb.expr_var(span, self_var);
+            env.vars.push(self_var);
 
             match tcx.trait_impl_of_assoc(owner) {
                 Some(impl_def_id) => {
@@ -150,6 +157,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                         .into_iter()
                         .map(|bound| {
                             let var = scopes.fresh_var(sym::witness).erl_name;
+                            env.vars.push(var);
                             self.add_witness_to_env(
                                 owner,
                                 span,
@@ -179,6 +187,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         if !bounds.is_empty() {
             let bound_pats = bounds.iter().map(|&bound| {
                 let var = scopes.fresh_var(sym::witness).erl_name;
+                env.vars.push(var);
                 self.add_witness_to_env(owner, span, &mut env, bound, afb.expr_var(span, var));
                 afb.pat_var(span, var)
             });
@@ -236,7 +245,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         let afb = &self.afb;
         let trait_ref = tcx.erl_normalize(owner, trait_ref);
 
-        if let Some(&expr) = env.get(&trait_ref) {
+        if let Some(&expr) = env.bounds.get(&trait_ref) {
             return expr;
         }
 
