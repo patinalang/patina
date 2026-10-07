@@ -15,7 +15,7 @@ use rustc_data_structures::fx::{FxHashMap, FxHashSet, FxIndexMap};
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LocalDefId, LocalModDefId};
-use rustc_hir::{BodyId, ItemKind, Mod, VariantData};
+use rustc_hir::{BodyId, FieldDef, ItemKind, Mod};
 use rustc_middle::erl::{ErlModuleId, ErlReprKind, ErlVariantRepr};
 use rustc_middle::ty::{self, TyCtxt};
 use rustc_middle::{bug, span_bug};
@@ -392,8 +392,9 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
     }
 
     fn translate_struct(&self, def_id: LocalDefId) -> (Symbol, eaf::Module<'arena>) {
-        let item = self.tcx.hir_expect_item(def_id);
-        let ItemKind::Struct(_ident, _generics, variant_data) = item.kind else {
+        let &rustc_hir::Item { span, kind: ItemKind::Struct(..), .. } =
+            self.tcx.hir_expect_item(def_id)
+        else {
             unreachable!("def_kind Struct must be an ItemKind::Struct");
         };
 
@@ -402,10 +403,10 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         if let Some((_, span)) = self.tcx.find_erl_record_module_attr(def_id.to_def_id()) {
             not_implemented!(self.tcx, span, "`record_module` attribute", repr.kind)
         }
-        let parts = self.collect_struct_fns(item.span, mod_name, def_id, variant_data, repr);
+        let parts = self.collect_struct_fns(span, mod_name, def_id, repr);
         let record_exports =
             (repr.kind == ErlReprKind::NativeRecord).then_some(repr.tag).into_iter();
-        self.assemble_module(item.span, mod_name, record_exports, parts)
+        self.assemble_module(span, mod_name, record_exports, parts)
     }
 
     fn translate_enum(&self, def_id: LocalDefId) -> (Symbol, eaf::Module<'arena>) {
@@ -443,15 +444,15 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 not_implemented!(self.tcx, span, "`record_module` attribute", repr.kind)
             }
 
-            let variant_fields = variant
-                .data
-                .fields()
+            let variant_def = self.tcx.adt_def(def_id).variant_with_id(variant.def_id.to_def_id());
+            let fields = self.erl_runtime_hir_fields(variant_def);
+            let field_decls = fields
                 .iter()
                 .map(|field| self.afb.record_field_decl(field.span, field.ident, None));
 
-            parts.forms.push(self.afb.native_record_attr(item.span, repr.tag, variant_fields));
+            parts.forms.push(self.afb.native_record_attr(item.span, repr.tag, field_decls));
             record_exports.push(repr.tag);
-            self.push_record_constructor(&mut parts, variant.span, repr.tag, variant.data);
+            self.push_record_constructor(&mut parts, variant.span, repr.tag, &fields);
         }
 
         self.collect_impl_fns(ErlModuleId::Adt(def_id.to_def_id()), &mut parts);
@@ -464,23 +465,20 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         span: Span,
         mod_name: Symbol,
         def_id: rustc_hir::def_id::LocalDefId,
-        variant_data: VariantData<'tcx>,
         repr: ErlVariantRepr,
     ) -> ModuleParts<'arena> {
         let mut parts = self.module_parts(span);
 
-        let struct_info = (repr.kind == ErlReprKind::Elixir).then_some(variant_data);
+        let fields = self.erl_runtime_hir_fields(self.tcx.adt_def(def_id).non_enum_variant());
+        let struct_info = (repr.kind == ErlReprKind::Elixir).then_some(&fields[..]);
         parts.forms.push(elixir_compat::info_function(&self.afb, span, struct_info));
         parts.exports.push((sym::__info__, 1));
 
         match repr.kind {
             ErlReprKind::Elixir => {
-                parts.forms.push(elixir_compat::struct0_function(
-                    &self.afb,
-                    span,
-                    mod_name,
-                    variant_data,
-                ));
+                parts
+                    .forms
+                    .push(elixir_compat::struct0_function(&self.afb, span, mod_name, &fields));
                 parts.exports.push((sym::__struct__, 0));
 
                 parts.forms.push(elixir_compat::struct1_function(&self.afb, span));
@@ -488,13 +486,12 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             }
 
             ErlReprKind::NativeRecord => {
-                let fields = variant_data
-                    .fields()
+                let field_decls = fields
                     .iter()
                     .map(|field| self.afb.record_field_decl(field.span, field.ident, None));
 
-                parts.forms.push(self.afb.native_record_attr(span, repr.tag, fields));
-                self.push_record_constructor(&mut parts, span, repr.tag, variant_data);
+                parts.forms.push(self.afb.native_record_attr(span, repr.tag, field_decls));
+                self.push_record_constructor(&mut parts, span, repr.tag, &fields);
             }
 
             // These variants don't implement anything in the struct's module.
@@ -507,6 +504,16 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         parts
     }
 
+    fn erl_runtime_hir_fields(
+        &self,
+        variant: &ty::VariantDef,
+    ) -> SmallVec<[&'tcx FieldDef<'tcx>; 8]> {
+        self.tcx
+            .erl_runtime_fields(variant)
+            .map(|(_, field)| self.tcx.hir_node_by_def_id(field.did.expect_local()).expect_field())
+            .collect()
+    }
+
     /// Emits the exported constructor of a native record declared in this module:
     /// `'$patina_constructor__Tag'(F_1, ..., F_k) -> #'Tag'{f_1 = F_1, ..., f_k = F_k}`.
     fn push_record_constructor(
@@ -514,14 +521,13 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         parts: &mut ModuleParts<'arena>,
         span: Span,
         tag: Symbol,
-        variant_data: VariantData<'tcx>,
+        fields: &[&'tcx FieldDef<'tcx>],
     ) {
         let mut scopes = Scopes::new();
 
-        let vars = variant_data
-            .fields()
+        let vars = fields
             .iter()
-            .map(|field| (field, scopes.fresh_var(field.ident.name).erl_name))
+            .map(|&field| (field, scopes.fresh_var(field.ident.name).erl_name))
             .collect::<SmallVec<[_; 4]>>();
 
         let params = vars.iter().map(|&(field, var)| self.afb.pat_var(field.span, var));

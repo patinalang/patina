@@ -1683,6 +1683,12 @@ fn check_erl_repr<'tcx>(tcx: TyCtxt<'tcx>, adt: AdtDef<'tcx>) {
     let mut first_open_transparent: Option<(Ty<'_>, Span)> = None;
     let recursive_variants = tcx.recursive_transparent_variants(adt.did());
 
+    let payload_field = |variant: &'tcx ty::VariantDef| {
+        tcx.erl_single_runtime_field(variant)
+            .unwrap_or_else(|| bug!("transparent variant without a single runtime field"))
+            .1
+    };
+
     for (index, variant) in adt.variants().iter_enumerated() {
         let variant_repr = tcx.erl_variant_repr(variant.def_id);
         let recovering_transparent = if recursive_variants.contains(&index)
@@ -1708,7 +1714,7 @@ fn check_erl_repr<'tcx>(tcx: TyCtxt<'tcx>, adt: AdtDef<'tcx>) {
             };
             tcx.dcx().emit_err(crate::errors::RecursiveTransparentRepr {
                 span,
-                payload_span: tcx.def_span(variant.fields[FieldIdx::ZERO].did),
+                payload_span: tcx.def_span(payload_field(variant).did),
                 suggestion_span,
                 repr_attribute,
             });
@@ -1724,7 +1730,7 @@ fn check_erl_repr<'tcx>(tcx: TyCtxt<'tcx>, adt: AdtDef<'tcx>) {
         let dynamic_wrap = tcx.find_erl_dynamic_wrap_attr(variant.def_id);
 
         if open_shape {
-            let payload = &variant.fields[FieldIdx::ZERO];
+            let payload = payload_field(variant);
             let payload_span = tcx.def_span(payload.did);
             let payload_ty = payload.ty(tcx, args);
 
@@ -1776,7 +1782,7 @@ fn check_erl_repr<'tcx>(tcx: TyCtxt<'tcx>, adt: AdtDef<'tcx>) {
         }
 
         if repr == ErlReprKind::Atom
-            && !variant.fields.is_empty()
+            && tcx.erl_runtime_field_count(variant) != 0
             && let Some((_, atom_attr_span)) = variant_repr.repr_attribute
         {
             tcx.dcx().emit_err(crate::errors::AtomReprRequiresNoFields {
@@ -1787,7 +1793,7 @@ fn check_erl_repr<'tcx>(tcx: TyCtxt<'tcx>, adt: AdtDef<'tcx>) {
 
         if matches!(repr, ErlReprKind::Transparent { .. })
             && let Some((_, transparent_attr_span)) = variant_repr.repr_attribute
-            && variant.fields.len() != 1
+            && tcx.erl_runtime_field_count(variant) != 1
         {
             tcx.dcx().emit_err(crate::errors::TransparentReprRequiresNewtype {
                 span: transparent_attr_span,

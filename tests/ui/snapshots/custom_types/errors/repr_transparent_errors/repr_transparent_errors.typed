@@ -20,6 +20,18 @@ struct Unit;
 #[attr = Repr {reprs: [Transparent], modifiers: []}]
 struct Pair(int, int);
 
+// `PhantomData` fields don't count: one other field is fine, none is not.
+use Core::PhantomData;
+
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
+struct PhantomNewtype<T>(int, PhantomData<T>);
+
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
+struct OnlyPhantom<T>(PhantomData<T>);
+
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
+struct PhantomPair<T>(int, PhantomData<T>, int);
+
 #[attr = Repr {reprs: [Patina], modifiers: []}]
 enum InvalidVariants {
     #[attr = Repr {reprs: [Transparent],

@@ -26,4 +26,13 @@ enum AtomVariant {
 #[attr = Repr {reprs: [Atom], modifiers: []}]
 enum InheritedAtom { Unit, NonUnit(int), }
 
+// `PhantomData` fields don't count.
+use Core::PhantomData;
+
+#[attr = Repr {reprs: [Atom], modifiers: []}]
+struct PhantomAtom<T>(PhantomData<T>);
+
+#[attr = Repr {reprs: [Atom], modifiers: []}]
+struct PhantomAndValue<T>(PhantomData<T>, int);
+
 fn main() ({ } as ())

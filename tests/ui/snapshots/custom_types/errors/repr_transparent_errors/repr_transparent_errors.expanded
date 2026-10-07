@@ -20,6 +20,18 @@ struct Unit;
 #[repr(transparent)]
 struct Pair(int, int);
 
+// `PhantomData` fields don't count: one other field is fine, none is not.
+use Core::PhantomData;
+
+#[repr(transparent)]
+struct PhantomNewtype<T>(int, PhantomData<T>);
+
+#[repr(transparent)]
+struct OnlyPhantom<T>(PhantomData<T>);
+
+#[repr(transparent)]
+struct PhantomPair<T>(int, PhantomData<T>, int);
+
 #[repr(Patina)]
 enum InvalidVariants {
 

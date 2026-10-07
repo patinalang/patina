@@ -1,0 +1,36 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// The other direction of each conversion is rejected, and so is a parameter with no use.
+
+use Core::PhantomData;
+
+struct Source<T>(term, PhantomData<T>);
+
+struct Sink<T>(term, PhantomData<fn(T)>);
+
+struct Invariant<T>(term, PhantomData<fn(T) -> T>);
+
+struct Unused<T>(term);
+
+fn narrow_source(source: Source<bin>)
+    -> Source<str> ({ (source as Source<bin>) } as {type error})
+
+fn widen_sink(sink: Sink<str>)
+    -> Sink<bin> ({ (sink as Sink<str>) } as {type error})
+
+fn widen_invariant(value: Invariant<str>)
+    -> Invariant<bin> ({ (value as Invariant<str>) } as {type error})

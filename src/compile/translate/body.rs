@@ -121,6 +121,10 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
             ExprKind::Literal { lit, neg } => self.translate_literal(expr.span, lit, *neg),
 
+            ExprKind::VarRef { .. } | ExprKind::UpvarRef { .. } if expr.ty.is_phantom_data() => {
+                self.translate_phantom_data(expr.span, expr.ty)
+            }
+
             ExprKind::VarRef { id } => self.translate_var_ref(expr.span, *id),
             ExprKind::UpvarRef { var_hir_id, .. } => self.translate_var_ref(expr.span, *var_hir_id),
 
@@ -305,6 +309,17 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         if neg { afb.expr_unary_op(span, eaf::UnaryOp::Neg, value) } else { value }
     }
 
+    pub(super) fn translate_phantom_data(&self, span: Span, ty: Ty<'tcx>) -> eaf::Expr<'arena> {
+        let Some(adt_def) = ty.ty_adt_def() else {
+            span_bug!(span, "`PhantomData` value has non-ADT type {ty}")
+        };
+        let repr = self.tcx().erl_variant_repr(adt_def.non_enum_variant().def_id);
+        let ErlReprKind::Atom = repr.kind else {
+            span_bug!(span, "`PhantomData` is represented as {:?}, not as an atom", repr.kind)
+        };
+        self.translator.afb.expr_atom(span, repr.tag)
+    }
+
     fn translate_pin_var_ref(&self, span: Span, id: LocalVarId) -> eaf::Pattern<'arena> {
         let var = self.var_for_read(span, id);
         self.translator.afb.pat_var(span, var.erl_name)
@@ -328,10 +343,10 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     ) -> eaf::Expr<'arena> {
         let lhs_expr = &self.thir[lhs];
         let ty = lhs_expr.ty;
+        let afb = &self.translator.afb;
 
         if let ty::Tuple(_) = ty.kind() {
             let subject = self.translate_expr(lhs);
-            let afb = &self.translator.afb;
             return afb.expr_remote_call(
                 expr.span,
                 afb.expr_atom(expr.span, sym::erlang),
@@ -347,7 +362,13 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let variant = adt_def.variant(variant_index);
         let repr = self.tcx().erl_variant_repr(variant.def_id);
         let subject = self.translate_expr(lhs);
-        let afb = &self.translator.afb;
+
+        if self.tcx().is_erl_phantom_field(variant.fields[name].did) {
+            let span = lhs_expr.span;
+            let effect = afb.expr_match(span, afb.pat_var(span, kw::Underscore), subject);
+            let value = self.translate_phantom_data(expr.span, expr.ty);
+            return afb.expr_block(expr.span, [effect, value]);
+        }
 
         match repr.kind {
             ErlReprKind::Elixir => {
@@ -359,12 +380,18 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                     [field_name, subject],
                 )
             }
-            ErlReprKind::Tagged => afb.expr_remote_call(
-                expr.span,
-                afb.expr_atom(expr.span, sym::erlang),
-                afb.expr_atom(expr.span, sym::element),
-                [afb.expr_int(expr.span, name.index() as u128 + 2), subject],
-            ),
+            ErlReprKind::Tagged => {
+                let position =
+                    self.tcx().erl_runtime_field_position(variant, name).unwrap_or_else(|| {
+                        span_bug!(expr.span, "phantom field access in a tagged tuple")
+                    });
+                afb.expr_remote_call(
+                    expr.span,
+                    afb.expr_atom(expr.span, sym::erlang),
+                    afb.expr_atom(expr.span, sym::element),
+                    [afb.expr_int(expr.span, position as u128 + 2), subject],
+                )
+            }
             ErlReprKind::Int => not_implemented!(self.tcx(), expr.span, "int-represented ADT"),
             ErlReprKind::Transparent { .. } => subject,
             ErlReprKind::NativeRecord => afb.expr_record_field(
@@ -1288,6 +1315,10 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 input,
             ),
 
+            PatKind::Pin { .. } | PatKind::Assignee { .. } if pat.ty.is_phantom_data() => {
+                self.translate_wild_pattern(pat.span, pat.ty, input)
+            }
+
             PatKind::Pin { var } => self.translate_pin_var_ref(pat.span, *var).into(),
 
             PatKind::Assignee { var } => self.translate_assignee(pat.span, *var).into(),
@@ -1396,7 +1427,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     ) {
         match &pat.kind {
             PatKind::Binding { var, subpattern, is_primary, .. } => {
-                if *is_primary {
+                if *is_primary && !pat.ty.is_phantom_data() {
                     let ident = self.tcx().hir_ident(var.0);
                     let erl_name = self.scopes.bind_var(*var, ident.name).erl_name;
                     let afb = &self.translator.afb;
@@ -1583,6 +1614,13 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         is_primary: bool,
         input: PatternInput,
     ) -> Patterns<'arena> {
+        if pat.ty.is_phantom_data() {
+            return match subpattern {
+                Some(sub) => self.translate_pattern(sub, input),
+                None => self.translate_wild_pattern(pat.span, pat.ty, input),
+            };
+        }
+
         let erl_name = self.bind_pattern_var(name, var, is_primary).erl_name;
         let var_pat = self.translator.afb.pat_var(pat.span, erl_name);
 

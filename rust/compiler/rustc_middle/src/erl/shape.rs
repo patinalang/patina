@@ -165,7 +165,7 @@ impl<'tcx> TyCtxt<'tcx> {
         let repr = self.erl_variant_repr(variant.def_id);
         match repr.kind {
             ErlReprKind::Transparent { open_payload } => {
-                let [field] = variant.fields.iter().as_slice() else {
+                let Some((_, field)) = self.erl_single_runtime_field(variant) else {
                     // Any other variant is invalid, and will be reported by the type checker.
                     // Returning an empty union prevents error cascades from treating this variant
                     // as open-shape.
@@ -208,7 +208,7 @@ impl<'tcx> TyCtxt<'tcx> {
             }
 
             ErlReprKind::Transparent { open_payload: false } => {
-                let [field] = variant.fields.iter().as_slice() else {
+                let Some((_, field)) = self.erl_single_runtime_field(variant) else {
                     // Invalid variant, returned just so later diagnostics can report an error.
                     return ErlShape::Union(Box::new([]));
                 };
@@ -233,9 +233,10 @@ impl<'tcx> TyCtxt<'tcx> {
             ErlReprKind::Elixir => {
                 ErlShape::ElixirStruct(self.erl_module_name(ErlModuleId::Adt(adt.did())))
             }
-            ErlReprKind::Tagged => {
-                ErlShape::Tuple { arity: variant.fields.len() + 1, tag: Some(repr.tag) }
-            }
+            ErlReprKind::Tagged => ErlShape::Tuple {
+                arity: self.erl_runtime_field_count(variant) + 1,
+                tag: Some(repr.tag),
+            },
             ErlReprKind::Atom => ErlShape::Atom(repr.tag),
             ErlReprKind::Int => ErlShape::Int,
             ErlReprKind::NativeRecord => {
@@ -270,7 +271,7 @@ pub(super) fn erl_variant_wrap_guards<'tcx>(
     }
 
     let variant = def.variant_with_id(variant_def_id);
-    let [payload_field] = variant.fields.iter().as_slice() else { return &[] };
+    let Some((_, payload_field)) = tcx.erl_single_runtime_field(variant) else { return &[] };
     let payload = tcx.erl_shape_of_ty(payload_field.ty(tcx, args));
 
     tcx.arena.alloc_from_iter(def.variants().iter().filter_map(|sibling| {

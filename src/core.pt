@@ -459,6 +459,19 @@ pub enum Option<T> {
     Some(T),
 }
 
+/// A field of this type uses a type parameter without storing anything.
+///
+/// `PhantomData` fields have no runtime representation; they are only visible in the type system,
+/// and they don't contribute to the decision on `#[repr(...)]`. For example,
+/// `struct S(int, PhantomData<str>)` can still be `#[repr(transparent)]`.
+/// 
+/// The type argument decides the variance of the parameter:
+/// - `PhantomData<T>`: covariant, for a type that holds or produces `T` values.
+/// - `PhantomData<fn(T)>`: contravariant, for a type that consumes `T` values.
+/// - `PhantomData<fn(T) -> T>`: invariant.
+#[lang = "phantom_data"]
+pub struct PhantomData<T>;
+
 /// A half-open range `start..end`.
 #[lang = "Range"]
 pub struct Range<Idx> {

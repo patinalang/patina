@@ -1,0 +1,17 @@
+// The other direction of each conversion is rejected, and so is a parameter with no use.
+
+use Core::PhantomData;
+
+pub struct Source<T>(term, PhantomData<T>);
+
+pub struct Sink<T>(term, PhantomData<fn(T)>);
+
+pub struct Invariant<T>(term, PhantomData<fn(T) -> T>);
+
+pub struct Unused<T>(term);
+
+pub fn narrow_source(source: Source<bin>) -> Source<str> { source }
+
+pub fn widen_sink(sink: Sink<str>) -> Sink<bin> { sink }
+
+pub fn widen_invariant(value: Invariant<str>) -> Invariant<bin> { value }

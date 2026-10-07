@@ -1,0 +1,394 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+use Core::PhantomData;
+
+extern mod io;
+extern mod maps;
+
+fn id<T>(value: T) -> T ({ (value as T) } as T)
+
+// One runtime field: transparent by default.
+struct Typed<T>(int, PhantomData<T>);
+
+fn typed(n: int)
+    ->
+        Typed<str> ({
+    ((Typed as
+            fn(int, Core::PhantomData<str>) -> Typed<str> {Typed::<str>})((n
+            as int), (PhantomData as Core::PhantomData<str>)) as Typed<str>)
+} as Typed<str>)
+
+fn typed_value(value: Typed<str>)
+    -> int ({ ((value as Typed<str>).0 as int) } as int)
+
+fn typed_marker(value: Typed<str>)
+    ->
+        PhantomData<str> ({
+    ((value as Typed<str>).1 as Core::PhantomData<str>)
+} as Core::PhantomData<str>)
+
+fn typed_destructure(value: Typed<str>)
+    -> int ({ let Typed(n, _) = (value as Typed<str>); (n as int) } as int)
+
+fn typed_binding(value: Typed<str>)
+    ->
+        PhantomData<str> ({
+    let Typed(_, marker) = (value as Typed<str>);
+    ((id as
+            fn(Core::PhantomData<str>) -> Core::PhantomData<str> {id::<Core::PhantomData<str>>})((marker
+            as Core::PhantomData<str>)) as Core::PhantomData<str>)
+} as Core::PhantomData<str>)
+
+fn typed_constant_pattern(value: Typed<str>)
+    ->
+        int ({
+    (match (value as Typed<str>) { Typed(n, PhantomData) => (n as int), } as
+        int)
+} as int)
+
+fn typed_or_pattern(value: Typed<str>)
+    ->
+        int ({
+    (match (value as Typed<str>) {
+        Typed(1 | 2, _) => (0 as int),
+        Typed(n, _) => (n as int),
+    } as int)
+} as int)
+
+fn typed_update(value: Typed<str>)
+    ->
+        Typed<str> ({
+    (Typed { 0: (7 as int), ..(value as Typed<str>) } as Typed<str>)
+} as Typed<str>)
+
+fn marker_with_side_effect<T>()
+    ->
+        PhantomData<T> ({
+    ((io::put_chars as fn(term) -> term)(("made a marker\n" as str)) as term);
+    (PhantomData as Core::PhantomData<T>)
+} as Core::PhantomData<T>)
+
+fn typed_effect(n: int)
+    ->
+        Typed<str> ({
+    ((Typed as
+            fn(int, Core::PhantomData<str>) -> Typed<str> {Typed::<str>})((n
+            as int),
+        ((marker_with_side_effect as
+                fn() -> Core::PhantomData<str> {marker_with_side_effect::<str>})()
+            as Core::PhantomData<str>)) as Typed<str>)
+} as Typed<str>)
+
+fn marker_effect()
+    ->
+        PhantomData<str> ({
+    (((typed_effect as fn(int) -> Typed<str> {typed_effect})((1 as int)) as
+            Typed<str>).1 as Core::PhantomData<str>)
+} as Core::PhantomData<str>)
+
+fn phantom_in_loop_and_closure(n: int)
+    ->
+        int ({
+    let marker: PhantomData<int> = (PhantomData as Core::PhantomData<int>);
+    let mut count = (0 as int);
+    let mut last =
+        ((Typed as
+                fn(int, Core::PhantomData<int>) -> Typed<int> {Typed::<int>})((0
+                as int), (PhantomData as Core::PhantomData<int>)) as
+            Typed<int>);
+    (loop {
+        (if ((count as int) < (n as int) as bool) {
+            (last =
+                ((Typed as
+                        fn(int, Core::PhantomData<int>) -> Typed<int> {Typed::<int>})((count
+                        as int), (marker as Core::PhantomData<int>)) as Typed<int>)
+                as Typed<int>);
+            ((count as int) += (1 as int) as int);
+        } else { (break as !); } as ())
+    } as ())
+    let make =
+        (|value|
+            ((Typed as
+                    fn(int, Core::PhantomData<int>) -> Typed<int> {Typed::<int>})((value
+                    as int), (marker as Core::PhantomData<int>)) as Typed<int>)
+            as
+            {closure@tests/ui/src/custom_types/phantom_data.pt:73:16: 73:23});
+    (((make as
+                {closure@tests/ui/src/custom_types/phantom_data.pt:73:16: 73:23})(((last
+                    as Typed<int>).0 as int)) as Typed<int>).0 as int)
+} as int)
+
+// A lazy iterator over a map: the runtime value is the bare `maps:iterator/1` term.
+struct MapIter<K, V>(term, PhantomData<(K, V)>);
+
+impl <K, V> MapIter<K, V> {
+    fn new(map: #{K => V})
+        ->
+            MapIter<K,
+            V> ({
+        ((MapIter as
+                fn(term, Core::PhantomData<(K, V)>) -> MapIter<K, V> {MapIter::<K, V>})(((maps::iterator
+                    as fn(term) -> term)((map as #{K => V})) as term),
+            (PhantomData as Core::PhantomData<(K, V)>)) as MapIter<K, V>)
+    } as MapIter<K, V>)
+
+    fn next(self)
+        ->
+            Option<((K, V),
+            MapIter<K,
+            V>)> ({
+        (match ((maps::next as
+                    fn(term) -> term)(((self as MapIter<K, V>).0 as term)) as
+                term) {
+            (key, value, rest) => {
+                let entry =
+                    (unsafe {
+                        ((((key as term).cast_unchecked() as K),
+                            ((value as term).cast_unchecked() as V)) as (K, V))
+                    } as (K, V));
+                ((Some as
+                        fn(((K, V), MapIter<K, V>)) -> Core::Option<((K, V), MapIter<K, V>)> {Core::Option::<((K, V), MapIter<K, V>)>::Some})((((entry
+                            as (K, V)),
+                        ((MapIter as
+                                fn(term, Core::PhantomData<(K, V)>) -> MapIter<K, V> {MapIter::<K, V>})((rest
+                                as term), (PhantomData as Core::PhantomData<(K, V)>)) as
+                            MapIter<K, V>)) as ((K, V), MapIter<K, V>))) as
+                    Core::Option<((K, V), MapIter<K, V>)>)
+            }
+            _ => (None as Core::Option<((K, V), MapIter<K, V>)>),
+        } as Core::Option<((K, V), MapIter<K, V>)>)
+    } as Core::Option<((K, V), MapIter<K, V>)>)
+}
+
+fn map_iter(map: #{str => int})
+    ->
+        MapIter<str,
+        int> ({
+    ((MapIter::new as
+            fn(#{str => int}) -> MapIter<str, int> {MapIter::<str, int>::new})((map
+            as #{str => int})) as MapIter<str, int>)
+} as MapIter<str, int>)
+
+fn sum_values(map: #{str => int})
+    ->
+        int ({
+    let mut iter =
+        ((MapIter::new as
+                fn(#{str => int}) -> MapIter<str, int> {MapIter::<str, int>::new})((map
+                as #{str => int})) as MapIter<str, int>);
+    let mut total = (0 as int);
+    (loop {
+        (match ((iter as MapIter<str, int>).next() as
+                Core::Option<((str, int), MapIter<str, int>)>) {
+            None => (break as !),
+            Some(((_, value), rest)) => {
+                (iter = (rest as MapIter<str, int>) as MapIter<str, int>);
+                ((total as int) += (value as int) as int);
+            }
+        } as ())
+    } as ())
+    (total as int)
+} as int)
+
+fn first_entry(iter: MapIter<str, int>)
+    ->
+        Option<(str,
+        int)> ({
+    (match ((iter as MapIter<str, int>).next() as
+            Core::Option<((str, int), MapIter<str, int>)>) {
+        Some((entry, _)) =>
+            ((Some as
+                    fn((str, int)) -> Core::Option<(str, int)> {Core::Option::<(str, int)>::Some})((entry
+                    as (str, int))) as Core::Option<(str, int)>),
+        None => (None as Core::Option<(str, int)>),
+    } as Core::Option<(str, int)>)
+} as Core::Option<(str, int)>)
+
+// Several runtime fields: a native record without the phantom field.
+struct Record<T> {
+    a: int,
+    marker: PhantomData<T>,
+    b: str,
+}
+
+fn record(a: int, b: str)
+    ->
+        Record<int> ({
+    (Record {
+        (a as int),
+        marker: (PhantomData as Core::PhantomData<int>),
+        (b as str) } as Record<int>)
+} as Record<int>)
+
+fn record_b(value: Record<int>)
+    -> str ({ ((value as Record<int>).b as str) } as str)
+
+fn record_update(value: Record<int>)
+    ->
+        Record<int> ({
+    (Record { b: ("updated" as str), ..(value as Record<int>) } as
+        Record<int>)
+} as Record<int>)
+
+fn record_update_marker(value: Record<int>)
+    ->
+        Record<int> ({
+    (Record {
+        marker:
+            ((marker_with_side_effect as
+                    fn() -> Core::PhantomData<int> {marker_with_side_effect::<int>})()
+                as Core::PhantomData<int>), ..(value as Record<int>) } as
+        Record<int>)
+} as Record<int>)
+
+fn record_destructure(value: Record<int>)
+    ->
+        int ({
+    let Record {  a,  marker, .. } = (value as Record<int>);
+    let _marker =
+        ((id as
+                fn(Core::PhantomData<int>) -> Core::PhantomData<int> {id::<Core::PhantomData<int>>})((marker
+                as Core::PhantomData<int>)) as Core::PhantomData<int>);
+    (a as int)
+} as int)
+
+// Tagged tuples skip the phantom field, so later fields move up.
+#[attr = Repr {reprs: [Tagged], modifiers: []}]
+enum Shape<T> { Pair(int, PhantomData<T>, int), }
+
+fn pair(a: int, b: int)
+    ->
+        Shape<int> ({
+    ((Shape::Pair as
+            fn(int, Core::PhantomData<int>, int) -> Shape<int> {Shape::<int>::Pair})((a
+            as int), (PhantomData as Core::PhantomData<int>), (b as int)) as
+        Shape<int>)
+} as Shape<int>)
+
+fn pair_second(value: Shape<int>)
+    ->
+        int ({
+    (match (value as Shape<int>) { Shape::Pair(_, _, b) => (b as int), } as
+        int)
+} as int)
+
+#[attr = Repr {reprs: [Tagged], modifiers: []}]
+struct TaggedPair<T> {
+    a: int,
+    marker: PhantomData<T>,
+    b: int,
+}
+
+fn tagged_pair(a: int, b: int)
+    ->
+        TaggedPair<int> ({
+    (TaggedPair {
+        (a as int),
+        marker: (PhantomData as Core::PhantomData<int>),
+        (b as int) } as TaggedPair<int>)
+} as TaggedPair<int>)
+
+fn tagged_pair_b(value: TaggedPair<int>)
+    -> int ({ ((value as TaggedPair<int>).b as int) } as int)
+
+fn tagged_pair_update(value: TaggedPair<int>)
+    ->
+        TaggedPair<int> ({
+    (TaggedPair { b: (99 as int), ..(value as TaggedPair<int>) } as
+        TaggedPair<int>)
+} as TaggedPair<int>)
+
+// Elixir structs leave the phantom field out of the map.
+#[attr = Repr {reprs: [Elixir], modifiers: []}]
+struct ElixirPoint<T> {
+    x: int,
+    unit: PhantomData<T>,
+    y: int,
+}
+
+fn elixir_point(x: int, y: int)
+    ->
+        ElixirPoint<float> ({
+    (ElixirPoint {
+        (x as int),
+        unit: (PhantomData as Core::PhantomData<float>),
+        (y as int) } as ElixirPoint<float>)
+} as ElixirPoint<float>)
+
+fn elixir_point_sum(value: ElixirPoint<float>)
+    ->
+        int ({
+    let ElixirPoint {  x,  y, .. } = (value as ElixirPoint<float>);
+    ((x as int) + (y as int) as int)
+} as int)
+
+// Only phantom fields: an atom.
+struct Marker<T>(PhantomData<T>);
+
+fn marker()
+    ->
+        Marker<int> ({
+    ((Marker as
+            fn(Core::PhantomData<int>) -> Marker<int> {Marker::<int>})((PhantomData
+            as Core::PhantomData<int>)) as Marker<int>)
+} as Marker<int>)
+
+fn marker_inner(value: Marker<int>)
+    ->
+        PhantomData<int> ({
+    ((value as Marker<int>).0 as Core::PhantomData<int>)
+} as Core::PhantomData<int>)
+
+fn materialized_marker()
+    ->
+        Option<PhantomData<int>> ({
+    ((Some as
+            fn(Core::PhantomData<int>) -> Core::Option<Core::PhantomData<int>> {Core::Option::<Core::PhantomData<int>>::Some})((PhantomData
+            as Core::PhantomData<int>)) as
+        Core::Option<Core::PhantomData<int>>)
+} as Core::Option<Core::PhantomData<int>>)
+
+fn is_some_marker(value: Option<PhantomData<int>>)
+    ->
+        bool ({
+    (match (value as Core::Option<Core::PhantomData<int>>) {
+        Some(_) => (true as bool),
+        None => (false as bool),
+    } as bool)
+} as bool)
+
+fn term_matches_phantom_struct(value: term)
+    ->
+        int ({
+    (unsafe {
+        (match (value as term) {
+            Record::<int> {  a, .. } => (a as int),
+            _ => (-(1 as int) as int),
+        } as int)
+    } as int)
+} as int)
+
+// `PhantomData<T>` makes `T` covariant, `PhantomData<fn(T)>` contravariant.
+struct Source<T>(term, PhantomData<T>);
+
+struct Sink<T>(term, PhantomData<fn(T)>);
+
+fn widen_source(source: Source<str>)
+    -> Source<bin> ({ (source as Source<str>) } as Source<bin>)
+
+fn narrow_sink(sink: Sink<bin>)
+    -> Sink<str> ({ (sink as Sink<bin>) } as Sink<str>)

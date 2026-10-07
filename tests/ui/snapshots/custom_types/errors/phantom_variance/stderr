@@ -1,0 +1,46 @@
+error[E0308]: mismatched types
+  --> tests/ui/src/custom_types/errors/phantom_variance.pt:14:5
+   |
+LL | pub fn narrow_source(source: Source<bin>) -> Source<str> {
+   |                                              ----------- expected `Source<str>` because of return type
+LL |     source
+   |     ^^^^^^ expected `Source<str>`, found `Source<bin>`
+   |
+   = note: expected struct `Source<str>`
+              found struct `Source<bin>`
+
+error[E0308]: mismatched types
+  --> tests/ui/src/custom_types/errors/phantom_variance.pt:18:5
+   |
+LL | pub fn widen_sink(sink: Sink<str>) -> Sink<bin> {
+   |                                       --------- expected `Sink<bin>` because of return type
+LL |     sink
+   |     ^^^^ expected `Sink<bin>`, found `Sink<str>`
+   |
+   = note: expected struct `Sink<bin>`
+              found struct `Sink<str>`
+
+error[E0308]: mismatched types
+  --> tests/ui/src/custom_types/errors/phantom_variance.pt:22:5
+   |
+LL | pub fn widen_invariant(value: Invariant<str>) -> Invariant<bin> {
+   |                                                  -------------- expected `Invariant<bin>` because of return type
+LL |     value
+   |     ^^^^^ expected `Invariant<bin>`, found `Invariant<str>`
+   |
+   = note: expected struct `Invariant<bin>`
+              found struct `Invariant<str>`
+
+error[E0392]: type parameter `T` is never used
+  --> tests/ui/src/custom_types/errors/phantom_variance.pt:11:19
+   |
+LL | pub struct Unused<T>(term);
+   |                   ^ unused type parameter
+   |
+   = help: consider removing `T`, referring to it in a field, or using a marker such as `Core::PhantomData`
+   = help: if you intended `T` to be a const parameter, use `const T: /* Type */` instead
+
+error: aborting due to 4 previous errors
+
+Some errors have detailed explanations: E0308, E0392.
+For more information about an error, try `rustc --explain E0308`.

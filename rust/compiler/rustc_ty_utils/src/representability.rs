@@ -168,7 +168,7 @@ fn potentially_transparent_payloads<'tcx>(
     def_id: DefId,
 ) -> impl Iterator<Item = (VariantIdx, Ty<'tcx>)> + 'tcx {
     tcx.adt_def(def_id).variants().iter_enumerated().filter_map(move |(index, variant)| {
-        let [field] = variant.fields.iter().as_slice() else { return None };
+        let (_, field) = tcx.erl_single_runtime_field(variant)?;
         match tcx.effective_erl_repr_kind_attr(variant.def_id) {
             None | Some((ReprAttr::Patina | ReprAttr::Transparent, _)) => {
                 Some((index, tcx.type_of(field.did).instantiate_identity().skip_norm_wip()))

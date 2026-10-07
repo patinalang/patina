@@ -1,0 +1,208 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro, prelude_import)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[prelude_import]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+use Core::PhantomData;
+
+extern mod io;
+extern mod maps;
+
+fn id<T>(value: T) -> T { value }
+
+// One runtime field: transparent by default.
+pub struct Typed<T>(int, PhantomData<T>);
+
+pub fn typed(n: int) -> Typed<str> { Typed(n, PhantomData) }
+
+pub fn typed_value(value: Typed<str>) -> int { value.0 }
+
+pub fn typed_marker(value: Typed<str>) -> PhantomData<str> { value.1 }
+
+pub fn typed_destructure(value: Typed<str>) -> int {
+    let Typed(n, _) = value;
+    n
+}
+
+pub fn typed_binding(value: Typed<str>) -> PhantomData<str> {
+    let Typed(_, marker) = value;
+    id(marker)
+}
+
+pub fn typed_constant_pattern(value: Typed<str>) -> int {
+    match value { Typed(n, PhantomData) => n, }
+}
+
+pub fn typed_or_pattern(value: Typed<str>) -> int {
+    match value { Typed(1 | 2, _) => 0, Typed(n, _) => n, }
+}
+
+pub fn typed_update(value: Typed<str>) -> Typed<str> {
+    Typed { 0: 7, ..value }
+}
+
+fn marker_with_side_effect<T>() -> PhantomData<T> {
+    io::put_chars("made a marker\n");
+    PhantomData
+}
+
+pub fn typed_effect(n: int) -> Typed<str> {
+    Typed(n, marker_with_side_effect())
+}
+
+pub fn marker_effect() -> PhantomData<str> { typed_effect(1).1 }
+
+pub fn phantom_in_loop_and_closure(n: int) -> int {
+    let marker: PhantomData<int> = PhantomData;
+    let mut count = 0;
+    let mut last = Typed(0, PhantomData);
+    while count < n { last = Typed(count, marker); count += 1; }
+    let make = |value| Typed(value, marker);
+    make(last.0).0
+}
+
+// A lazy iterator over a map: the runtime value is the bare `maps:iterator/1` term.
+pub struct MapIter<K, V>(term, PhantomData<(K, V)>);
+
+impl<K, V> MapIter<K, V> {
+    pub fn new(map: #{K => V}) -> MapIter<K, V> {
+        MapIter(maps::iterator(map), PhantomData)
+    }
+
+    pub fn next(self) -> Option<((K, V), MapIter<K, V>)> {
+        match maps::next(self.0) {
+            (key, value, rest) => {
+                let entry =
+                    unsafe { (key.cast_unchecked(), value.cast_unchecked()) };
+                Some((entry, MapIter(rest, PhantomData)))
+            }
+            _ => None,
+        }
+    }
+}
+
+pub fn map_iter(map: #{str => int}) -> MapIter<str, int> { MapIter::new(map) }
+
+pub fn sum_values(map: #{str => int}) -> int {
+    let mut iter = MapIter::new(map);
+    let mut total = 0;
+    loop {
+        match iter.next() {
+            None => break,
+            Some(((_, value), rest)) => { iter = rest; total += value; }
+        }
+    }
+    total
+}
+
+pub fn first_entry(iter: MapIter<str, int>) -> Option<(str, int)> {
+    match iter.next() { Some((entry, _)) => Some(entry), None => None, }
+}
+
+// Several runtime fields: a native record without the phantom field.
+pub struct Record<T> {
+    pub a: int,
+    pub marker: PhantomData<T>,
+    pub b: str,
+}
+
+pub fn record(a: int, b: str) -> Record<int> {
+    Record { a, marker: PhantomData, b }
+}
+
+pub fn record_b(value: Record<int>) -> str { value.b }
+
+pub fn record_update(value: Record<int>) -> Record<int> {
+    Record { b: "updated", ..value }
+}
+
+pub fn record_update_marker(value: Record<int>) -> Record<int> {
+    Record { marker: marker_with_side_effect(), ..value }
+}
+
+pub fn record_destructure(value: Record<int>) -> int {
+    let Record { a, marker, .. } = value;
+    let _marker = id(marker);
+    a
+}
+
+// Tagged tuples skip the phantom field, so later fields move up.
+#[repr(tagged)]
+pub enum Shape<T> { Pair(int, PhantomData<T>, int), }
+
+pub fn pair(a: int, b: int) -> Shape<int> { Shape::Pair(a, PhantomData, b) }
+
+pub fn pair_second(value: Shape<int>) -> int {
+    match value { Shape::Pair(_, _, b) => b, }
+}
+
+#[repr(tagged)]
+pub struct TaggedPair<T> {
+    pub a: int,
+    pub marker: PhantomData<T>,
+    pub b: int,
+}
+
+pub fn tagged_pair(a: int, b: int) -> TaggedPair<int> {
+    TaggedPair { a, marker: PhantomData, b }
+}
+
+pub fn tagged_pair_b(value: TaggedPair<int>) -> int { value.b }
+
+pub fn tagged_pair_update(value: TaggedPair<int>) -> TaggedPair<int> {
+    TaggedPair { b: 99, ..value }
+}
+
+// Elixir structs leave the phantom field out of the map.
+#[repr(Elixir)]
+pub struct ElixirPoint<T> {
+    pub x: int,
+    pub unit: PhantomData<T>,
+    pub y: int,
+}
+
+pub fn elixir_point(x: int, y: int) -> ElixirPoint<float> {
+    ElixirPoint { x, unit: PhantomData, y }
+}
+
+pub fn elixir_point_sum(value: ElixirPoint<float>) -> int {
+    let ElixirPoint { x, y, .. } = value;
+    x + y
+}
+
+// Only phantom fields: an atom.
+pub struct Marker<T>(PhantomData<T>);
+
+pub fn marker() -> Marker<int> { Marker(PhantomData) }
+
+pub fn marker_inner(value: Marker<int>) -> PhantomData<int> { value.0 }
+
+pub fn materialized_marker() -> Option<PhantomData<int>> { Some(PhantomData) }
+
+pub fn is_some_marker(value: Option<PhantomData<int>>) -> bool {
+    match value { Some(_) => true, None => false, }
+}
+
+pub fn term_matches_phantom_struct(value: term) -> int {
+    unsafe { match value { Record::<int> { a, .. } => a, _ => -1, } }
+}
+
+// `PhantomData<T>` makes `T` covariant, `PhantomData<fn(T)>` contravariant.
+pub struct Source<T>(term, PhantomData<T>);
+
+pub struct Sink<T>(term, PhantomData<fn(T)>);
+
+pub fn widen_source(source: Source<str>) -> Source<bin> { source }
+
+pub fn narrow_sink(sink: Sink<bin>) -> Sink<str> { sink }

@@ -6,7 +6,7 @@ pub mod shape;
 use std::hash::Hash as _;
 
 use convert_case::{Case, Casing};
-use rustc_abi::FIRST_VARIANT;
+use rustc_abi::{FIRST_VARIANT, FieldIdx};
 use rustc_data_structures::fx::FxIndexSet;
 use rustc_data_structures::stable_hasher::StableHasher;
 use rustc_hashes::Hash128;
@@ -24,7 +24,7 @@ use crate::query::Providers;
 use crate::traits::ImplSource;
 use crate::ty::print::PrintTraitRefExt as _;
 use crate::ty::{
-    self, AdtDef, GenericArgsRef, Ty, TyCtxt, TypeFoldable, TypeVisitableExt, TypingEnv,
+    self, AdtDef, FieldDef, GenericArgsRef, Ty, TyCtxt, TypeFoldable, TypeVisitableExt, TypingEnv,
     Unnormalized, VariantDef, Visibility,
 };
 
@@ -177,6 +177,37 @@ impl<'tcx> TyCtxt<'tcx> {
                 _ => def_id = self.parent(def_id),
             }
         }
+    }
+
+    pub fn is_erl_phantom_field(self, field_did: impl Into<DefId>) -> bool {
+        self.type_of(field_did.into()).instantiate_identity().skip_normalization().is_phantom_data()
+    }
+
+    pub fn erl_runtime_fields<'a>(
+        self,
+        variant: &'a VariantDef,
+    ) -> impl Iterator<Item = (FieldIdx, &'a FieldDef)> {
+        variant
+            .fields
+            .iter_enumerated()
+            .filter(move |(_, field)| !self.is_erl_phantom_field(field.did))
+    }
+
+    pub fn erl_runtime_field_count(self, variant: &VariantDef) -> usize {
+        self.erl_runtime_fields(variant).count()
+    }
+
+    pub fn erl_single_runtime_field<'a>(
+        self,
+        variant: &'a VariantDef,
+    ) -> Option<(FieldIdx, &'a FieldDef)> {
+        let mut fields = self.erl_runtime_fields(variant);
+        let field = fields.next()?;
+        fields.next().is_none().then_some(field)
+    }
+
+    pub fn erl_runtime_field_position(self, variant: &VariantDef, idx: FieldIdx) -> Option<usize> {
+        self.erl_runtime_fields(variant).position(|(field_idx, _)| field_idx == idx)
     }
 
     /// Whether `def_id` has an Erlang function name (`erl_fn_name`): the items that become
@@ -675,9 +706,11 @@ impl<'tcx> TyCtxt<'tcx> {
 
             let repr_attr = match erl_repr_attr(repr_attribute) {
                 Some(repr_attr) => repr_attr,
-                None if variant.fields.is_empty() => ReprAttr::Atom,
-                None if variant.fields.len() != 1 => ReprAttr::NativeRecord,
-                None => continue,
+                None => match self.erl_runtime_field_count(variant) {
+                    0 => ReprAttr::Atom,
+                    1 => continue,
+                    _ => ReprAttr::NativeRecord,
+                },
             };
 
             let (repr, reserved_shape) =
@@ -698,7 +731,7 @@ impl<'tcx> TyCtxt<'tcx> {
                 continue;
             }
 
-            let [field] = variant.fields.iter().as_slice() else {
+            let Some((_, field)) = self.erl_single_runtime_field(variant) else {
                 bug!("undecided variant with more than one field: {variant:?}")
             };
 
@@ -731,7 +764,7 @@ impl<'tcx> TyCtxt<'tcx> {
                 continue;
             }
 
-            let [field] = variant.fields.iter().as_slice() else {
+            let Some((_, field)) = self.erl_single_runtime_field(variant) else {
                 bug!("undecided variants must have exactly one field")
             };
 
@@ -764,7 +797,8 @@ impl<'tcx> TyCtxt<'tcx> {
             ReprAttr::ReprInt => ErlReprKind::Int,
             ReprAttr::NativeRecord => ErlReprKind::NativeRecord,
             ReprAttr::Transparent => {
-                let open_payload = if let [field] = variant.fields.iter().as_slice() {
+                let open_payload = if let Some((_, field)) = self.erl_single_runtime_field(variant)
+                {
                     let args = ty::GenericArgs::identity_for_item(self, adt.did());
                     matches!(self.erl_shape_of_ty(field.ty(self, args)), ErlShape::Any)
                 } else {
@@ -856,7 +890,7 @@ fn erl_adt_reprs<'tcx>(tcx: TyCtxt<'tcx>, def_id: DefId) -> &'tcx [ErlVariantRep
     let repr_attr = if tcx.recursive_transparent_variants(def_id).contains(&FIRST_VARIANT) {
         ReprAttr::NativeRecord
     } else {
-        erl_repr_attr(repr_attribute).unwrap_or_else(|| struct_repr_from_arity(variant))
+        erl_repr_attr(repr_attribute).unwrap_or_else(|| struct_repr_from_arity(tcx, variant))
     };
 
     let (repr, _reserved_shape) =
@@ -989,8 +1023,8 @@ fn erl_repr_attr(attribute: Option<(ReprAttr, Span)>) -> Option<ReprAttr> {
     }
 }
 
-fn struct_repr_from_arity(variant: &VariantDef) -> ReprAttr {
-    match variant.fields.len() {
+fn struct_repr_from_arity(tcx: TyCtxt<'_>, variant: &VariantDef) -> ReprAttr {
+    match tcx.erl_runtime_field_count(variant) {
         0 => ReprAttr::Atom,
         1 => ReprAttr::Transparent,
         _ => ReprAttr::NativeRecord,

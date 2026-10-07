@@ -1,0 +1,6 @@
+[{attribute,{153,1},file,{"tests/ui/src/custom_types/phantom_data.pt",153}},
+ {attribute,{153,1},module,'Elixir.Patina.PhantomData.Shape'},
+ {attribute,{153,1},compile,[no_auto_import]},
+ {attribute,{153,1},import,{erlang,[{is_record,3}]}},
+ {attribute,{153,1},export_record,[]},
+ {attribute,{153,1},export,[]}]

@@ -23,5 +23,13 @@ LL | #[repr(atom)]
 LL |     NonUnit(int),
    |     ------- has fields
 
-error: aborting due to 3 previous errors
+error: the `atom` repr attribute is only allowed on structs and variants without fields
+  --> tests/ui/src/custom_types/errors/repr_atom_on_non_unit.pt:21:8
+   |
+LL | #[repr(atom)]
+   |        ^^^^ invalid `atom` repr attribute
+LL | struct PhantomAndValue<T>(PhantomData<T>, int);
+   | ------------------------- has fields
+
+error: aborting due to 4 previous errors
 

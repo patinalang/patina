@@ -1,4 +1,4 @@
-use rustc_hir::VariantData;
+use rustc_hir::FieldDef;
 use rustc_span::{Span, Symbol, kw, sym};
 
 use crate::compile::eaf_builder::EafBuilder;
@@ -7,12 +7,12 @@ use crate::erlang::abstract_format as eaf;
 pub(super) fn info_function<'tcx, 'arena>(
     afb: &EafBuilder<'tcx, 'arena>,
     span: Span,
-    variant_data: Option<VariantData<'tcx>>,
+    struct_fields: Option<&[&FieldDef<'tcx>]>,
 ) -> eaf::ModuleForm<'arena> {
     let clauses = [
         info_functions_clause(afb, span),
         info_macros_clause(afb, span),
-        info_struct_clause(afb, span, variant_data),
+        info_struct_clause(afb, span, struct_fields),
         info_exports_md5_clause(afb, span),
         info_deprecated_clause(afb, span),
         info_default_clause(afb, span),
@@ -75,10 +75,10 @@ fn info_macros_clause<'tcx, 'arena>(
 fn info_struct_clause<'tcx, 'arena>(
     afb: &EafBuilder<'tcx, 'arena>,
     span: Span,
-    variant_data: Option<VariantData<'tcx>>,
+    struct_fields: Option<&[&FieldDef<'tcx>]>,
 ) -> eaf::Clause<'arena> {
-    let variant_data = match variant_data {
-        Some(variant_data) => variant_data,
+    let fields = match struct_fields {
+        Some(fields) => fields,
         None => {
             let body = afb.expr_atom(span, sym::nil);
             let arg = afb.pat_atom(span, kw::Struct);
@@ -86,7 +86,7 @@ fn info_struct_clause<'tcx, 'arena>(
         }
     };
 
-    let list_elems = variant_data.fields().iter().map(|field| {
+    let list_elems = fields.iter().map(|field| {
         // field => $field_name
         let field_key = afb.expr_atom(field.ident.span, sym::field);
         let field_val = afb.expr_atom(field.ident.span, field.ident.name);
@@ -189,9 +189,9 @@ pub(super) fn struct0_function<'tcx, 'arena>(
     afb: &EafBuilder<'tcx, 'arena>,
     span: Span,
     mod_name: Symbol,
-    variant_data: VariantData<'tcx>,
+    fields: &[&FieldDef<'tcx>],
 ) -> eaf::ModuleForm<'arena> {
-    let base_map = base_struct_map(afb, span, mod_name, variant_data);
+    let base_map = base_struct_map(afb, span, mod_name, fields);
     let clause0 = afb.clause(span, [], None, base_map);
     afb.function(span, sym::__struct__, 0, [clause0])
 }
@@ -233,12 +233,12 @@ fn base_struct_map<'tcx, 'arena>(
     afb: &EafBuilder<'tcx, 'arena>,
     span: Span,
     mod_name: Symbol,
-    variant_data: VariantData<'tcx>,
+    fields: &[&FieldDef<'tcx>],
 ) -> eaf::Expr<'arena> {
     let struct_key = afb.expr_atom(span, sym::__struct__);
     let struct_val = afb.expr_atom(span, mod_name);
 
-    let field_assocs = variant_data.fields().iter().map(|field| {
+    let field_assocs = fields.iter().map(|field| {
         let key = afb.expr_atom(field.ident.span, field.ident.name);
         let val = afb.expr_atom(field.span, sym::nil);
         (key, val)
