@@ -258,7 +258,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         };
 
         let Some(host) = tcx.erl_definition_module(impl_def_id) else {
-            not_implemented!(tcx, span, "witness for an impl with a non-ADT self type", trait_ref);
+            span_bug!(span, "trait impl {impl_def_id:?} has no host module");
         };
 
         // An impl witness holds its elements, so a bound that needs itself has no finite witness.

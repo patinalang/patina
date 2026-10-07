@@ -43,6 +43,8 @@ pub enum ErlModuleId {
     AdtImplHost(CrateNum, DefId),
     /// The trait impls of a crate other than Core on a primitive type.
     PrimImplHost(CrateNum, PrimTy),
+    /// Impls without a host type land here, e.g. `impl<T: Show> Display for T`.
+    BlanketImplHost(CrateNum),
 }
 
 /// The semantic target of an Erlang call.
@@ -139,15 +141,20 @@ impl<'tcx> TyCtxt<'tcx> {
 
                 DefKind::Impl { .. } => {
                     let self_ty = self.type_of(def_id).instantiate_identity().skip_normalization();
-                    let ErlModuleResolution::Static(module) =
-                        self.resolve_erl_receiver_module(self_ty, self.erl_typing_env(def_id))?
-                    else {
-                        return None;
+                    let module = match self
+                        .resolve_erl_receiver_module(self_ty, self.erl_typing_env(def_id))
+                    {
+                        Some(ErlModuleResolution::Static(module)) => Some(module),
+                        Some(ErlModuleResolution::Dynamic) | None => None,
                     };
 
                     if self.impl_opt_trait_id(def_id).is_none() {
-                        return Some(module);
+                        return module;
                     }
+
+                    let Some(module) = module else {
+                        return Some(ErlModuleId::BlanketImplHost(def_id.krate));
+                    };
 
                     return Some(match module {
                         ErlModuleId::Adt(adt) if adt.krate != def_id.krate => {
@@ -160,7 +167,8 @@ impl<'tcx> TyCtxt<'tcx> {
                         ErlModuleId::Mod(_)
                         | ErlModuleId::Extern(_)
                         | ErlModuleId::AdtImplHost(..)
-                        | ErlModuleId::PrimImplHost(..) => {
+                        | ErlModuleId::PrimImplHost(..)
+                        | ErlModuleId::BlanketImplHost(_) => {
                             bug!("self type of {def_id:?} resolves to module {module:?}")
                         }
                     });
@@ -958,6 +966,10 @@ fn erl_module_name(tcx: TyCtxt<'_>, module: ErlModuleId) -> Symbol {
         }
         ErlModuleId::PrimImplHost(krate, prim_ty) => {
             erl_impl_host_name(tcx, krate, tcx.erl_module_name(ErlModuleId::Prim(prim_ty)))
+        }
+        // `Elixir.Patina.<Crate>.$impl`
+        ErlModuleId::BlanketImplHost(krate) => {
+            Symbol::intern(&format!("Elixir.Patina.{}.$impl", tcx.crate_name(krate)))
         }
     }
 }

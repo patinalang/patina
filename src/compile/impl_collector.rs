@@ -53,7 +53,11 @@ impl<'tcx> ImplCollector<'tcx> {
                     impls.entry(module_id).or_default().push((def_id.to_def_id(), impl_item));
                 }
                 None => {
-                    not_implemented!(tcx, impl_item.self_ty.span, "impl with a non-ADT self type");
+                    not_implemented!(
+                        tcx,
+                        impl_item.self_ty.span,
+                        "inherent impl on a type without a module"
+                    );
                 }
             }
         }
@@ -65,12 +69,15 @@ impl<'tcx> ImplCollector<'tcx> {
         self.impls.get(&module)
     }
 
-    /// The primitive modules in Core, and the host modules of impls on types of other crates.
+    /// Modules with no local item behind them.
     pub fn impl_only_modules(&self) -> impl Iterator<Item = &ErlModuleId> + '_ {
         self.impls.keys().filter(|&module| {
             matches!(
                 module,
-                ErlModuleId::Prim(_) | ErlModuleId::AdtImplHost(..) | ErlModuleId::PrimImplHost(..)
+                ErlModuleId::Prim(_)
+                    | ErlModuleId::AdtImplHost(..)
+                    | ErlModuleId::PrimImplHost(..)
+                    | ErlModuleId::BlanketImplHost(_)
             )
         })
     }

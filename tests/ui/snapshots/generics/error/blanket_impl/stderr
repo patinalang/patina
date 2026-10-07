@@ -1,8 +1,0 @@
-error: impl with a non-ADT self type not yet implemented
-  --> tests/ui/src/generics/error/blanket_impl.pt:7:16
-   |
-LL | impl<T> Tr for T {
-   |                ^
-
-error: aborting due to 1 previous error
-

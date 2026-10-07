@@ -69,6 +69,7 @@ impl QueryKey for ErlModuleId {
                 tcx.def_span(def_id)
             }
             ErlModuleId::AdtImplHost(_, adt) => tcx.def_span(adt),
+            ErlModuleId::BlanketImplHost(krate) => tcx.def_span(krate.as_def_id()),
             ErlModuleId::Prim(_) | ErlModuleId::PrimImplHost(..) => DUMMY_SP,
         }
     }
@@ -78,9 +79,10 @@ impl QueryKey for ErlModuleId {
             ErlModuleId::Mod(def_id) | ErlModuleId::Adt(def_id) | ErlModuleId::Extern(def_id) => {
                 Some(def_id)
             }
-            ErlModuleId::Prim(_) | ErlModuleId::AdtImplHost(..) | ErlModuleId::PrimImplHost(..) => {
-                None
-            }
+            ErlModuleId::Prim(_)
+            | ErlModuleId::AdtImplHost(..)
+            | ErlModuleId::PrimImplHost(..)
+            | ErlModuleId::BlanketImplHost(_) => None,
         }
     }
 }

@@ -1,0 +1,125 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// A trait impl whose self type has no module of its own is hosted in the crate's `$impl` module:
+// a blanket impl over a type parameter, or an impl on a tuple.
+
+trait Show {
+    fn show(self)
+    -> str;
+}
+
+impl Show for int {
+    fn show(self) -> str ({ ("an int" as str) } as str)
+}
+
+impl Show for str {
+    fn show(self) -> str ({ (self as str) } as str)
+}
+
+trait Describe {
+    fn describe(self)
+    -> str;
+
+    fn shout(self)
+        ->
+            str ({
+        (((self as Self).describe() as str) + ("!" as str) as str)
+    } as str)
+}
+
+// Called from the host module, so it must be exported from this one.
+fn wrap(s: str)
+    ->
+        str ({ ((("<" as str) + (s as str) as str) + (">" as str) as str) } as
+    str)
+
+impl <T> Describe for T where T: Show {
+    fn describe(self)
+        ->
+            str ({
+        ((wrap as fn(str) -> str {wrap})(((self as T).show() as str)) as str)
+    } as str)
+}
+
+impl Describe for (int, str) {
+    fn describe(self)
+        ->
+            str ({
+        let (n, s) = (self as (int, str));
+        ((((n as int).show() as str) + (" and " as str) as str) +
+            ((s as str).show() as str) as str)
+    } as str)
+}
+
+mod Nested {
+    trait Twice {
+        fn twice(self)
+        -> str;
+    }
+
+    impl <T> Twice for T where T: super::Describe {
+        fn twice(self)
+            ->
+                str ({
+            (((self as T).describe() as str) + ((self as T).describe() as str)
+                as str)
+        } as str)
+    }
+}
+
+use Nested::Twice;
+
+fn describe_generic<T>(t: T) -> str where
+    T: Describe ({ ((t as T).describe() as str) } as str)
+
+fn twice_generic<T>(t: T) -> str where
+    T: Twice ({ ((t as T).twice() as str) } as str)
+
+fn describe_int(n: int) -> str ({ ((n as int).describe() as str) } as str)
+
+fn shout_str(s: str) -> str ({ ((s as str).shout() as str) } as str)
+
+fn describe_generic_int(n: int)
+    ->
+        str ({
+    ((describe_generic as
+            fn(int) -> str {describe_generic::<int>})((n as int)) as str)
+} as str)
+
+fn describe_pair(n: int, s: str)
+    ->
+        str ({ ((((n as int), (s as str)) as (int, str)).describe() as str) }
+    as str)
+
+fn shout_pair_generic(n: int, s: str)
+    ->
+        str ({
+    (((describe_generic as
+                fn((int, str)) -> str {describe_generic::<(int, str)>})((((n
+                    as int), (s as str)) as (int, str))) as str) +
+        ((((n as int), (s as str)) as (int, str)).shout() as str) as str)
+} as str)
+
+fn twice_str(s: str) -> str ({ ((s as str).twice() as str) } as str)
+
+fn twice_generic_pair(n: int, s: str)
+    ->
+        str ({
+    ((twice_generic as
+            fn((int, str)) -> str {twice_generic::<(int, str)>})((((n as int),
+            (s as str)) as (int, str))) as str)
+} as str)
