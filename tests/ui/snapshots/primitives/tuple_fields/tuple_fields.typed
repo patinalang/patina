@@ -1,0 +1,49 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+fn second<A, B>(pair: (A, B)) -> B ({ ((pair as (A, B)).1 as B) } as B)
+
+fn first_of_three(t: (int, str, bool))
+    -> int ({ ((t as (int, str, bool)).0 as int) } as int)
+
+fn last_of_three(t: (int, str, bool))
+    -> bool ({ ((t as (int, str, bool)).2 as bool) } as bool)
+
+fn nested(t: (int, (str, float)))
+    ->
+        float ({ (((t as (int, (str, float))).1 as (str, float)).1 as float) }
+    as float)
+
+fn generic_second(n: int, s: str)
+    ->
+        str ({
+    ((second as
+            fn((int, str)) -> str {second::<int, str>})((((n as int),
+            (s as str)) as (int, str))) as str)
+} as str)
+
+fn single(t: (atom,)) -> atom ({ ((t as (atom,)).0 as atom) } as atom)
+
+fn of_call(n: int)
+    ->
+        int ({
+    (((second as
+                fn((int, (int, int))) -> (int, int) {second::<int, (int, int)>})((((n
+                    as int),
+                ((((n as int) + (1 as int) as int),
+                    ((n as int) + (2 as int) as int)) as (int, int))) as
+                (int, (int, int)))) as (int, int)).0 as int)
+} as int)

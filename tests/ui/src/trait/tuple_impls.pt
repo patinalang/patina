@@ -1,0 +1,53 @@
+trait Show {
+    fn show(self) -> str;
+}
+
+impl Show for int {
+    fn show(self) -> str {
+        "i"
+    }
+}
+
+impl Show for str {
+    fn show(self) -> str {
+        self
+    }
+}
+
+impl Show for () {
+    fn show(self) -> str {
+        "()"
+    }
+}
+
+macro_rules! tuple_show {
+    ($($name:ident)+) => {
+        impl<$($name: Show),+> Show for ($($name,)+) {
+            #[allow(non_snake_case)]
+            fn show(self) -> str {
+                let ($($name,)+) = self;
+                "(" $(+ $name.show() + ",")+ + ")"
+            }
+        }
+    };
+}
+
+tuple_show! { A }
+tuple_show! { A B }
+tuple_show! { A B C }
+
+fn show_generic<T: Show>(t: T) -> str {
+    t.show()
+}
+
+pub fn show_unit() -> str {
+    ().show()
+}
+
+pub fn show_pair(n: int, s: str) -> str {
+    (n, s).show()
+}
+
+pub fn show_generic_all(n: int, s: str) -> str {
+    show_generic((n,)) + show_generic((n, s)) + show_generic((n, s, (n, ())))
+}

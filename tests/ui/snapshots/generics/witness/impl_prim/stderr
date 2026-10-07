@@ -1,5 +1,0 @@
-warning: [{"tests/ui/src/generics/witness/impl_prim.pt",
-           [{{8,5},erl_lint,{unused_function,{'ImplPrim::MyTrait::f',2}}}]}]
-
-warning: 1 warning emitted
-

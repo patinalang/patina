@@ -1,0 +1,103 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+trait Show {
+    fn show(self)
+    -> str;
+}
+
+impl Show for int {
+    fn show(self) -> str ({ ("i" as str) } as str)
+}
+
+impl Show for str {
+    fn show(self) -> str ({ (self as str) } as str)
+}
+
+impl Show for () {
+    fn show(self) -> str ({ ("()" as str) } as str)
+}
+
+macro_rules! tuple_show {
+    ($($name:ident)+) =>
+    {
+        impl<$($name: Show),+> Show for ($($name,)+)
+        {
+            #[allow(non_snake_case)] fn show(self) -> str
+            { let ($($name,)+) = self; "(" $(+ $name.show() + ",")+ + ")" }
+        }
+    };
+}
+impl <A> Show for (A,) where
+    A: Show {
+    #[allow(non_snake_case)]
+    fn show(self)
+        ->
+            str ({
+        let (A,) = (self as (A,));
+        (((("(" as str) + ((A as A).show() as str) as str) + ("," as str) as
+                str) + (")" as str) as str)
+    } as str)
+}
+impl <A, B> Show for (A, B) where A: Show, B: Show {
+    #[allow(non_snake_case)]
+    fn show(self)
+        ->
+            str ({
+        let (A, B) = (self as (A, B));
+        (((((("(" as str) + ((A as A).show() as str) as str) + ("," as str) as
+                        str) + ((B as B).show() as str) as str) + ("," as str) as
+                str) + (")" as str) as str)
+    } as str)
+}
+impl <A, B, C> Show for (A, B, C) where A: Show, B: Show, C: Show {
+    #[allow(non_snake_case)]
+    fn show(self)
+        ->
+            str ({
+        let (A, B, C) = (self as (A, B, C));
+        (((((((("(" as str) + ((A as A).show() as str) as str) + ("," as str)
+                                as str) + ((B as B).show() as str) as str) + ("," as str) as
+                        str) + ((C as C).show() as str) as str) + ("," as str) as
+                str) + (")" as str) as str)
+    } as str)
+}
+
+fn show_generic<T>(t: T) -> str where
+    T: Show ({ ((t as T).show() as str) } as str)
+
+fn show_unit() -> str ({ ((() as ()).show() as str) } as str)
+
+fn show_pair(n: int, s: str)
+    ->
+        str ({ ((((n as int), (s as str)) as (int, str)).show() as str) } as
+    str)
+
+fn show_generic_all(n: int, s: str)
+    ->
+        str ({
+    ((((show_generic as
+                    fn((int,)) -> str {show_generic::<(int,)>})((((n as int),)
+                    as (int,))) as str) +
+            ((show_generic as
+                    fn((int, str)) -> str {show_generic::<(int, str)>})((((n as
+                        int), (s as str)) as (int, str))) as str) as str) +
+        ((show_generic as
+                fn((int, str, (int, ()))) -> str {show_generic::<(int, str, (int, ()))>})((((n
+                    as int), (s as str),
+                (((n as int), (() as ())) as (int, ()))) as
+                (int, str, (int, ())))) as str) as str)
+} as str)

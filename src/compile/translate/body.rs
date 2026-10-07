@@ -329,6 +329,17 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let lhs_expr = &self.thir[lhs];
         let ty = lhs_expr.ty;
 
+        if let ty::Tuple(_) = ty.kind() {
+            let subject = self.translate_expr(lhs);
+            let afb = &self.translator.afb;
+            return afb.expr_remote_call(
+                expr.span,
+                afb.expr_atom(expr.span, sym::erlang),
+                afb.expr_atom(expr.span, sym::element),
+                [afb.expr_int(expr.span, name.index() as u128 + 1), subject],
+            );
+        }
+
         let adt_def = ty.ty_adt_def().unwrap_or_else(|| {
             not_implemented!(self.tcx(), expr.span, "field access on non-ADT type", ty);
         });

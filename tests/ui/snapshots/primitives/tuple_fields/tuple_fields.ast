@@ -1,0 +1,13 @@
+fn second<A, B>(pair: (A, B)) -> B { pair.1 }
+
+pub fn first_of_three(t: (int, str, bool)) -> int { t.0 }
+
+pub fn last_of_three(t: (int, str, bool)) -> bool { t.2 }
+
+pub fn nested(t: (int, (str, float))) -> float { t.1.1 }
+
+pub fn generic_second(n: int, s: str) -> str { second((n, s)) }
+
+pub fn single(t: (atom,)) -> atom { t.0 }
+
+pub fn of_call(n: int) -> int { second((n, (n + 1, n + 2))).0 }
