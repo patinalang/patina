@@ -21,7 +21,7 @@ fn main() ({
     let strings = ([("tofu" as str), ("93" as str), ("18" as str)] as [str]);
     let numbers: Result<[_], _> =
         ((((strings as [str]).into_iter() as
-                    {type error}).map((|s|
+                    Core::ListIter<str>).map((|s|
                     ((s as {type error}).parse::<int>() as {type error}) as
                     {closure@tests/ui/src/error/iter_result__03.pt:8:14: 8:17}))
                 as {type error}).collect() as {type error});

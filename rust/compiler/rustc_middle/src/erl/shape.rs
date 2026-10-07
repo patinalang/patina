@@ -17,7 +17,7 @@ pub enum ErlShape {
     Bitstring,
     List,
     Fun,
-    Tuple { arity: usize, tag: Option<Symbol> },
+    Tuple { arity: usize, first: Box<ErlShape> },
     AnyTuple,
     Map,
     ElixirStruct(Symbol),
@@ -37,9 +37,7 @@ impl ErlShape {
             (Any, _) | (_, Any) => true,
             (Atom(a), Atom(b)) => a == b,
             (AnyAtom, Atom(_) | AnyAtom) | (Atom(_), AnyAtom) => true,
-            (Tuple { arity: a, tag: x }, Tuple { arity: b, tag: y }) => {
-                a == b && (x.is_none() || y.is_none() || x == y)
-            }
+            (Tuple { arity: a, first: x }, Tuple { arity: b, first: y }) => a == b && x.overlaps(y),
             (AnyTuple, Tuple { .. } | AnyTuple) | (Tuple { .. }, AnyTuple) => true,
             (ElixirStruct(a), ElixirStruct(b)) => a == b,
             (Map, Map | ElixirStruct(_)) | (ElixirStruct(_), Map) => true,
@@ -106,8 +104,29 @@ impl ErlShape {
             (AnyTuple, Tuple { .. }) => true,
             (Bitstring, Binary) => true,
             (Map, ElixirStruct(_)) => true,
-            (Tuple { arity: a, tag: None }, Tuple { arity: b, .. }) => a == b,
+            (Tuple { arity: a, first: x }, Tuple { arity: b, first: y }) => {
+                a == b && x.superset_of(y)
+            }
             _ => self == other,
+        }
+    }
+
+    fn tagged_tuple(arity: usize, tag: Symbol) -> ErlShape {
+        ErlShape::Tuple { arity, first: Box::new(ErlShape::Atom(tag)) }
+    }
+
+    /// Widen any non-atom first element of a tuple to `Any`.
+    /// This helps build smaller guard sets.
+    fn shallow(&self) -> ErlShape {
+        match self {
+            ErlShape::Tuple { arity: _, first: box ErlShape::Atom(_) } => self.clone(),
+            ErlShape::Tuple { arity, first: _ } => {
+                ErlShape::Tuple { arity: *arity, first: Box::new(ErlShape::Any) }
+            }
+            ErlShape::Union(shapes) => {
+                ErlShape::Union(shapes.iter().map(ErlShape::shallow).collect())
+            }
+            shape => shape.clone(),
         }
     }
 }
@@ -125,10 +144,16 @@ impl<'tcx> TyCtxt<'tcx> {
             ty::Atom => ErlShape::AnyAtom,
             ty::Slice(_) => ErlShape::List,
             ty::Map(..) => ErlShape::Map,
-            ty::Tuple(tys) => ErlShape::Tuple { arity: tys.len(), tag: None },
+            ty::Tuple(tys) => {
+                let first = match tys.first() {
+                    Some(&first) => self.erl_shape_of_ty_rec(first, visiting).simplify(),
+                    None => ErlShape::Any,
+                };
+                ErlShape::Tuple { arity: tys.len(), first: Box::new(first) }
+            }
             ty::FnDef(..) | ty::FnPtr(..) => ErlShape::Fun,
             ty::Adt(def, args) => self.erl_shape_of_adt(*def, args, visiting),
-            ty::Term | ty::Param(_) | ty::Error(_) => ErlShape::Any,
+            ty::Term | ty::Param(_) | ty::Alias(..) | ty::Error(_) => ErlShape::Any,
             _ => unreachable!("not a thing in Patina"),
         }
     }
@@ -181,15 +206,35 @@ impl<'tcx> TyCtxt<'tcx> {
                 } else {
                     // This variant's shape can overlap with other variants, so we also need
                     // to account for its wrapped shape.
-                    ErlShape::Union(Box::new([
-                        payload,
-                        ErlShape::Tuple { arity: 2, tag: Some(repr.tag) },
-                    ]))
+                    ErlShape::Union(Box::new([payload, ErlShape::tagged_tuple(2, repr.tag)]))
                 }
             }
 
             _ => self.erl_variant_simple_shape(def, variant, repr),
         }
+    }
+
+    /// A shape that tells the values of the closed transparent variant `variant_def_id` apart
+    /// from its siblings' values.
+    pub fn erl_variant_discriminating_shape(
+        self,
+        variant_def_id: DefId,
+        args: GenericArgsRef<'tcx>,
+        payload_ty: Ty<'tcx>,
+    ) -> ErlShape {
+        let shape = self.erl_shape_of_ty(payload_ty);
+        let shallow = shape.shallow();
+
+        let def = self.adt_def(self.parent(variant_def_id));
+        let mut siblings =
+            def.variants().iter().filter(|sibling| sibling.def_id != variant_def_id).map(
+                |sibling| {
+                    self.erl_variant_term_shape(def, sibling, args, &mut FxHashSet::default())
+                        .simplify()
+                },
+            );
+
+        if siblings.all(|sibling| !shallow.overlaps(&sibling)) { shallow } else { shape.clone() }
     }
 
     /// Returns the runtime shape which must remain unique for this variant's representation.
@@ -203,9 +248,7 @@ impl<'tcx> TyCtxt<'tcx> {
         repr: ErlVariantRepr,
     ) -> ErlShape {
         match repr.kind {
-            ErlReprKind::Transparent { open_payload: true } => {
-                ErlShape::Tuple { arity: 2, tag: Some(repr.tag) }
-            }
+            ErlReprKind::Transparent { open_payload: true } => ErlShape::tagged_tuple(2, repr.tag),
 
             ErlReprKind::Transparent { open_payload: false } => {
                 let Some((_, field)) = self.erl_single_runtime_field(variant) else {
@@ -233,10 +276,9 @@ impl<'tcx> TyCtxt<'tcx> {
             ErlReprKind::Elixir => {
                 ErlShape::ElixirStruct(self.erl_module_name(ErlModuleId::Adt(adt.did())))
             }
-            ErlReprKind::Tagged => ErlShape::Tuple {
-                arity: self.erl_runtime_field_count(variant) + 1,
-                tag: Some(repr.tag),
-            },
+            ErlReprKind::Tagged => {
+                ErlShape::tagged_tuple(self.erl_runtime_field_count(variant) + 1, repr.tag)
+            }
             ErlReprKind::Atom => ErlShape::Atom(repr.tag),
             ErlReprKind::Int => ErlShape::Int,
             ErlReprKind::NativeRecord => {
@@ -276,7 +318,7 @@ pub(super) fn erl_variant_wrap_guards<'tcx>(
 
     tcx.arena.alloc_from_iter(def.variants().iter().filter_map(|sibling| {
         let shape = if sibling.def_id == variant_def_id {
-            ErlShape::Tuple { arity: 2, tag: Some(tcx.erl_variant_repr(variant_def_id).tag) }
+            ErlShape::tagged_tuple(2, tcx.erl_variant_repr(variant_def_id).tag)
         } else {
             tcx.erl_variant_term_shape(def, sibling, args, &mut FxHashSet::default()).simplify()
         };
@@ -318,20 +360,38 @@ mod tests {
         });
     }
 
+    fn tuple(arity: usize, first: super::ErlShape) -> super::ErlShape {
+        Tuple { arity, first: Box::new(first) }
+    }
+
     #[test]
     fn tuple_overlap_depends_on_arity_and_tag() {
         create_default_session_globals_then(|| {
             let some = Symbol::intern("some");
-            let tagged = Tuple { arity: 2, tag: Some(some) };
-            let untagged = Tuple { arity: 2, tag: None };
+            let tagged = super::ErlShape::tagged_tuple(2, some);
+            let untagged = tuple(2, Any);
 
             assert!(tagged.overlaps(&tagged));
             assert!(tagged.overlaps(&untagged));
             assert!(untagged.overlaps(&tagged));
             assert!(tagged.overlaps(&AnyTuple));
             assert!(AnyTuple.overlaps(&tagged));
-            assert!(!tagged.overlaps(&Tuple { arity: 2, tag: Some(Symbol::intern("none")) }));
-            assert!(!tagged.overlaps(&Tuple { arity: 3, tag: Some(some) }));
+            assert!(!tagged.overlaps(&super::ErlShape::tagged_tuple(2, Symbol::intern("none"))));
+            assert!(!tagged.overlaps(&super::ErlShape::tagged_tuple(3, some)));
+        });
+    }
+
+    #[test]
+    fn tuple_overlap_depends_on_first_element() {
+        create_default_session_globals_then(|| {
+            let tagged = super::ErlShape::tagged_tuple(2, Symbol::intern("some"));
+
+            assert!(!tuple(2, Int).overlaps(&tagged));
+            assert!(!tagged.overlaps(&tuple(2, Binary)));
+            assert!(tuple(2, AnyAtom).overlaps(&tagged));
+            assert!(!tuple(2, Atom(Symbol::intern("ok"))).overlaps(&tagged));
+            assert!(tuple(2, union([Int, AnyAtom])).overlaps(&tagged));
+            assert!(tuple(0, Any).overlaps(&tuple(0, Any)));
         });
     }
 
@@ -382,8 +442,8 @@ mod tests {
     fn superset() {
         create_default_session_globals_then(|| {
             let some = Atom(Symbol::intern("some"));
-            let tagged = Tuple { arity: 2, tag: Some(Symbol::intern("some")) };
-            let untagged = Tuple { arity: 2, tag: None };
+            let tagged = super::ErlShape::tagged_tuple(2, Symbol::intern("some"));
+            let untagged = tuple(2, Any);
             let numbers = union([Int, Float]);
 
             assert!(Any.superset_of(&tagged));
@@ -391,6 +451,8 @@ mod tests {
             assert!(!some.superset_of(&AnyAtom));
             assert!(untagged.superset_of(&tagged));
             assert!(!tagged.superset_of(&untagged));
+            assert!(tuple(2, AnyAtom).superset_of(&tagged));
+            assert!(!tuple(2, Int).superset_of(&tagged));
             assert!(AnyTuple.superset_of(&tagged));
             assert!(numbers.superset_of(&Int));
             assert!(numbers.superset_of(&union([Float, Int])));
@@ -409,12 +471,12 @@ mod tests {
                 yes.clone(),
                 union([no, yes]),
                 AnyAtom,
-                Tuple { arity: 2, tag: Some(some) },
-                Tuple { arity: 2, tag: None },
+                super::ErlShape::tagged_tuple(2, some),
+                tuple(2, Any),
                 Int,
             ]);
 
-            assert_eq!(shape.simplify(), union([AnyAtom, Tuple { arity: 2, tag: None }, Int]));
+            assert_eq!(shape.simplify(), union([AnyAtom, tuple(2, Any), Int]));
         });
     }
 

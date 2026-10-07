@@ -33,17 +33,9 @@ next(_self@0_0) ->
     case maps:next(_self@0_0) of
         {_key@1_0, _value@2_0, _rest@3_0} ->
             _entry@4_0 = begin {_key@1_0, _value@2_0} end,
-            case {_entry@4_0,
-                  begin
-                      _ = 'Elixir.Patina.Core.PhantomData', _rest@3_0
-                  end}
-                of
-                _value@5_0
-                    when (erlang:is_tuple(_value@5_0) andalso
-                              erlang:tuple_size(_value@5_0) =:= 2)
-                             andalso erlang:element(1, _value@5_0) =:= some ->
-                    {some, _value@5_0};
-                _value@5_0 -> _value@5_0
-            end;
+            {_entry@4_0,
+             begin
+                 _ = 'Elixir.Patina.Core.PhantomData', _rest@3_0
+             end};
         _ -> nil
     end.

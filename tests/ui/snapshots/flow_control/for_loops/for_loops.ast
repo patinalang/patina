@@ -1,0 +1,127 @@
+pub fn sum_list(xs: [int]) -> int {
+    let mut total = 0;
+    for x in xs { total += x; }
+    total
+}
+
+pub fn sum_twice(xs: [int]) -> int {
+    let mut total = 0;
+    for x in xs.iter() { total += x; }
+    // Iterating doesn't consume the list.
+    for x in xs { total += x * 100; }
+    total
+}
+
+pub fn sum_range(start: int, end: int) -> int {
+    let mut total = 0;
+    for n in start..end { total += n; }
+    total
+}
+
+pub fn sum_range_inclusive(start: int, end: int) -> int {
+    let mut total = 0;
+    for n in start..=end { total += n; }
+    total
+}
+
+pub fn weighted_map_sum(map: #{int => int}) -> int {
+    let mut total = 0;
+    for (key, value) in map { total += key * value; }
+    total
+}
+
+pub fn map_entry_count(map: #{str => int}) -> int {
+    let mut count = 0;
+    for _ in map.iter() { count += 1; }
+    count
+}
+
+fn count<I: IntoIterator>(items: I) -> int {
+    let mut n = 0;
+    for _ in items { n += 1; }
+    n
+}
+
+pub fn count_list(xs: [str]) -> int { count(xs) }
+
+pub fn count_map(map: #{str => int}) -> int { count(map) }
+
+fn total<I: IntoIterator<Item = int>>(items: I) -> int {
+    let mut total = 0;
+    for item in items { total += item; }
+    total
+}
+
+pub fn total_range(end: int) -> int { total(0..end) }
+
+pub fn total_list(xs: [int]) -> int { total(xs) }
+
+pub fn skip_odd_until(xs: [int], limit: int) -> int {
+    let mut total = 0;
+    for x in xs {
+        if x % 2 == 1 { continue; }
+        if x > limit { break; }
+        total += x;
+    }
+    total
+}
+
+pub fn find_index(xs: [int], target: int) -> int {
+    let mut index = 0;
+    for x in xs { if x == target { return index; } index += 1; }
+    -1
+}
+
+pub fn first_pair_with_sum(xs: [int], sum: int) -> (int, int) {
+    let mut found = (0, 0);
+    'outer:
+        for a in xs {
+        for b in xs {
+            if b <= a { continue; }
+            if a + b == sum { found = (a, b); break 'outer; }
+        }
+    }
+    found
+}
+
+pub fn count_skipping_rows(rows: [[int]]) -> int {
+    let mut visited = 0;
+    'rows:
+        for row in rows {
+        for x in row { if x < 0 { continue 'rows; } visited += 1; }
+    }
+    visited
+}
+
+struct Countdown {
+    from: int,
+}
+
+impl Iterator for Countdown {
+    type Item = int;
+
+    fn next(self) -> Option<(int, Countdown)> {
+        if self.from == 0 {
+            None
+        } else { Some((self.from, Countdown { from: self.from - 1 })) }
+    }
+}
+
+pub fn countdown(from: int) -> [int] {
+    let mut seen = [];
+    for n in (Countdown { from: from }) { seen = [n, ..seen]; }
+    seen
+}
+
+struct Bag {
+    items: [str],
+}
+
+impl IntoIterator for Bag {
+    type Item = str;
+    type IntoIter = Core::ListIter<str>;
+
+    fn into_iter(self) -> Core::ListIter<str> { self.items.iter() }
+}
+
+pub fn bag_count(items: [str]) -> int { count(Bag { items: items }) }

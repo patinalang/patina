@@ -4,13 +4,14 @@ error[E0425]: cannot find type `Result` in this scope
 LL |     let numbers: Result<[_], _> = strings
    |                  ^^^^^^ not found in this scope
 
-error[E0599]: no method named `into_iter` found for slice `[str]` in the current scope
-  --> tests/ui/src/error/iter_result__03.pt:7:10
+error[E0599]: no method named `map` found for struct `Core::ListIter<T>` in the current scope
+  --> tests/ui/src/error/iter_result__03.pt:8:10
    |
 LL |       let numbers: Result<[_], _> = strings
    |  ___________________________________-
 LL | |         .into_iter()
-   | |         -^^^^^^^^^ method not found in `[str]`
+LL | |         .map(|s| s.parse::<int>())
+   | |         -^^^ method not found in `Core::ListIter<str>`
    | |_________|
    |
 

@@ -1,0 +1,71 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// source: patina-by-example/src/flow_control/for.md
+// block: 3/3
+
+fn main() ({
+    let names =
+        ([("Bob" as str), ("Frank" as str), ("Ferris" as str)] as [str]);
+
+    ({
+        let _t =
+            (match ((into_iter as
+                        fn(Core::ListIter<str>) -> <Core::ListIter<str> as Core::IntoIterator>::IntoIter {<Core::ListIter<str> as Core::IntoIterator>::into_iter})(((names
+                            as [str]).iter() as Core::ListIter<str>)) as
+                    Core::ListIter<str>) {
+                mut iter =>
+                    (loop {
+                        (match ((next as
+                                    fn(Core::ListIter<str>) -> Core::Option<(<Core::ListIter<str> as Core::Iterator>::Item, Core::ListIter<str>)> {<Core::ListIter<str> as Core::Iterator>::next})((iter
+                                    as Core::ListIter<str>)) as
+                                Core::Option<(str, Core::ListIter<str>)>) {
+                            None {} => (break as !),
+                            Some {  0: (name, next) } => {
+                                (iter = (next as Core::ListIter<str>) as
+                                    Core::ListIter<str>);
+                                ({
+                                    (match (name as str) {
+                                        "Ferris" =>
+                                            {
+                                            ((::Core::io::put_chars as
+                                                    fn(term) -> term)(([([("There is a rustacean among us!" as
+                                                                    str)] as [str])] as [[str]])) as term);
+                                            ((::Core::io::nl as fn() -> term)() as term);
+                                        }
+                                        _ => {
+                                            ((::Core::io::put_chars as
+                                                    fn(term) -> term)(([([("Hello " as str),
+                                                                ((patina_fmt::display as fn(term) -> term)((name as str)) as
+                                                                    term)] as [term])] as [[term]])) as term);
+                                            ((::Core::io::nl as fn() -> term)() as term);
+                                        }
+                                    } as ())
+                                } as ())
+                            }
+                        } as ())
+                    } as ()),
+            } as ());
+        _t
+    } as ());
+    ({
+        ((::Core::io::put_chars as
+                fn(term) -> term)(([([("names: " as str),
+                            ((patina_fmt::debug as fn(term) -> term)((names as [str]))
+                                as term)] as [term])] as [[term]])) as term);
+        ((::Core::io::nl as fn() -> term)() as term);
+    } as ());
+} as ())

@@ -1,8 +1,0 @@
-error: requires `next` lang_item
-  --> tests/ui/src/primitives/maps__01.pt:43:30
-   |
-LL |     for (contact, number) in contacts {
-   |                              ^^^^^^^^
-
-error: aborting due to 1 previous error
-

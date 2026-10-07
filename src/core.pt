@@ -510,6 +510,12 @@ extern mod maps;
 use crate::Option::{None, Some};
 
 impl<T> [T] {
+    /// Returns a lazy iterator over the elements of the list.
+    #[must_use]
+    pub fn iter(self) -> ListIter<T> {
+        ListIter(self)
+    }
+
     /// Returns the number of elements in the list by walking the whole list.
     #[must_use]
     pub fn len(self) -> int {
@@ -586,6 +592,12 @@ impl<T> [T] {
 }
 
 impl<K, V> #{K => V} {
+    /// Returns a lazy iterator over the `(key, value)` entries of the map, in undefined order.
+    #[must_use]
+    pub fn iter(self) -> MapIter<K, V> {
+        MapIter(unsafe { maps::iterator(self).cast_unchecked() }, PhantomData)
+    }
+
     /// Returns the number of entries in the map.
     #[must_use]
     pub fn size(self) -> int {
@@ -656,6 +668,106 @@ impl<K, V> #{K => V} {
     }
 }
 
+/// A lazy sequence of values.
+#[lang = "iterator"]
+pub trait Iterator {
+    type Item;
+
+    #[lang = "next"]
+    fn next(self) -> Option<(Self::Item, Self)>;
+}
+
+/// A value that can be turned into an iterator.
+pub trait IntoIterator {
+    type Item;
+    type IntoIter: Iterator<Item = Self::Item>;
+
+    #[lang = "into_iter"]
+    fn into_iter(self) -> Self::IntoIter;
+}
+
+impl<I: Iterator> IntoIterator for I {
+    type Item = I::Item;
+    type IntoIter = I;
+
+    fn into_iter(self) -> I {
+        self
+    }
+}
+
+#[repr(transparent)]
+pub struct ListIter<T>([T]);
+
+impl<T> Iterator for ListIter<T> {
+    type Item = T;
+
+    fn next(self) -> Option<(T, ListIter<T>)> {
+        match self.0 {
+            [head, tail @ ..] => Some((head, ListIter(tail))),
+            [] => None,
+        }
+    }
+}
+
+impl<T> IntoIterator for [T] {
+    type Item = T;
+    type IntoIter = ListIter<T>;
+
+    fn into_iter(self) -> ListIter<T> {
+        self.iter()
+    }
+}
+
+#[repr(transparent)]
+pub struct MapIter<K, V>(term, PhantomData<(K, V)>);
+
+impl<K, V> Iterator for MapIter<K, V> {
+    type Item = (K, V);
+
+    fn next(self) -> Option<((K, V), MapIter<K, V>)> {
+        match maps::next(self.0) {
+            (key, value, rest) => {
+                let entry = unsafe { (key.cast_unchecked(), value.cast_unchecked()) };
+                Some((entry, MapIter(rest, PhantomData)))
+            }
+            _ => None,
+        }
+    }
+}
+
+impl<K, V> IntoIterator for #{K => V} {
+    type Item = (K, V);
+    type IntoIter = MapIter<K, V>;
+
+    fn into_iter(self) -> MapIter<K, V> {
+        self.iter()
+    }
+}
+
+impl Iterator for Range<int> {
+    type Item = int;
+
+    fn next(self) -> Option<(int, Range<int>)> {
+        if self.start < self.end {
+            Some((self.start, Range { start: self.start + 1, end: self.end }))
+        } else {
+            None
+        }
+    }
+}
+
+impl Iterator for RangeInclusive<int> {
+    type Item = int;
+
+    fn next(self) -> Option<(int, RangeInclusive<int>)> {
+        if self.start <= self.end {
+            Some((self.start, RangeInclusive { start: self.start + 1, end: self.end }))
+        } else {
+            None
+        }
+    }
+}
+
 #[lang = "timeout"]
 pub enum Timeout {
     #[repr(transparent)]
@@ -687,5 +799,7 @@ impl Timeout {
 /// Imported with `#[prelude_import]`.
 pub mod Prelude {
     pub use crate::Option::{None, Some};
-    pub use crate::{Copy, Fn, FnOnce, Option, PartialEq, PartialOrd, Timeout, derive};
+    pub use crate::{
+        Copy, Fn, FnOnce, IntoIterator, Iterator, Option, PartialEq, PartialOrd, Timeout, derive,
+    };
 }

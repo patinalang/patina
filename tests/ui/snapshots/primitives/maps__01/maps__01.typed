@@ -1,0 +1,131 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// source: patina-by-example/src/primitives/maps.md
+// block: 1/1
+
+fn call(number: str)
+    ->
+        str ({
+    (match (number as str) {
+        "798-1364" =>
+            ("We\'re sorry, the call cannot be completed as dialed.\n            Please hang up and try again."
+                as str),
+        "645-7689" =>
+            ("Hello, this is Mr. Awesome\'s Pizza. My name is Fred.\n            What can I get for you today?"
+                as str),
+        _ => ("Hi! Who is this again?" as str),
+    } as str)
+} as str)
+
+fn main() ({
+    let mut contacts =
+        (#{("Daniel" as str) => ("798-1364" as str), ("Ashley" as str) =>
+                ("645-7689" as str), ("Katie" as str) => ("435-8291" as str),
+                ("Robert" as str) => ("956-1745" as str)} as #{str => str});
+
+    // Returns Option<str>
+    (match ((contacts as #{str => str}).get(("Daniel" as str)) as
+            Core::Option<str>) {
+        Some(number) =>
+            // `.insert()` returns an updated map.
+            // The value must be used, otherwise it will emit a compilation warning.
+
+
+
+            // Like structs, maps can also be updated using the special `..` syntax
+
+            // `for` will iterate over the (key, value) pairs in arbitrary order.
+            {
+            ((::Core::io::put_chars as
+                    fn(term) -> term)(([([("Calling Daniel: " as str),
+                                ((patina_fmt::display as
+                                        fn(term) -> term)(((call as
+                                            fn(str) -> str {call})((number as str)) as str)) as term)]
+                            as [term])] as [[term]])) as term);
+            ((::Core::io::nl as fn() -> term)() as term);
+        }
+        _ => {
+            ((::Core::io::put_chars as
+                    fn(term) -> term)(([([("Don\'t have Daniel\'s number." as
+                                    str)] as [str])] as [[str]])) as term);
+            ((::Core::io::nl as fn() -> term)() as term);
+        }
+    } as ())
+    (contacts =
+        ((contacts as
+                #{str => str}).insert(("Daniel" as str), ("164-6743" as str))
+            as #{str => str}) as #{str => str});
+    (match ((contacts as #{str => str}).get(("Ashley" as str)) as
+            Core::Option<str>) {
+        Some(number) => {
+            ((::Core::io::put_chars as
+                    fn(term) -> term)(([([("Calling Ashley: " as str),
+                                ((patina_fmt::display as
+                                        fn(term) -> term)(((call as
+                                            fn(str) -> str {call})((number as str)) as str)) as term)]
+                            as [term])] as [[term]])) as term);
+            ((::Core::io::nl as fn() -> term)() as term);
+        }
+        _ => {
+            ((::Core::io::put_chars as
+                    fn(term) -> term)(([([("Don\'t have Ashley\'s number." as
+                                    str)] as [str])] as [[str]])) as term);
+            ((::Core::io::nl as fn() -> term)() as term);
+        }
+    } as ())
+    (contacts =
+        ((contacts as #{str => str}).remove(("Ashley" as str)) as
+            #{str => str}) as #{str => str});
+    (contacts =
+        (#{("Laura" as str) => ("132-8372" as str),
+                ..(contacts as #{str => str})} as #{str => str}) as
+        #{str => str});
+    ({
+        let _t =
+            (match ((into_iter as
+                        fn(#{str => str}) -> <#{str => str} as Core::IntoIterator>::IntoIter {<#{str => str} as Core::IntoIterator>::into_iter})((contacts
+                        as #{str => str})) as Core::MapIter<str, str>) {
+                mut iter =>
+                    (loop {
+                        (match ((next as
+                                    fn(Core::MapIter<str, str>) -> Core::Option<(<Core::MapIter<str, str> as Core::Iterator>::Item, Core::MapIter<str, str>)> {<Core::MapIter<str, str> as Core::Iterator>::next})((iter
+                                    as Core::MapIter<str, str>)) as
+                                Core::Option<((str, str), Core::MapIter<str, str>)>) {
+                            None {} => (break as !),
+                            Some {  0: ((contact, number), next) } => {
+                                (iter = (next as Core::MapIter<str, str>) as
+                                    Core::MapIter<str, str>);
+                                ({
+                                    ({
+                                        ((::Core::io::put_chars as
+                                                fn(term) -> term)(([([("Calling " as str),
+                                                            ((patina_fmt::display as fn(term) -> term)((contact as str))
+                                                                as term), (": " as str),
+                                                            ((patina_fmt::display as
+                                                                    fn(term) -> term)(((call as
+                                                                        fn(str) -> str {call})((number as str)) as str)) as term)]
+                                                        as [term])] as [[term]])) as term);
+                                        ((::Core::io::nl as fn() -> term)() as term);
+                                    } as ());
+                                } as ())
+                            }
+                        } as ())
+                    } as ()),
+            } as ());
+        _t
+    } as ())
+} as ())

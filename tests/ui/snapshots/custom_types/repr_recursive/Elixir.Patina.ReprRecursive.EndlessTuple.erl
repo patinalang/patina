@@ -7,9 +7,10 @@
 
 -import(erlang, [is_record/3]).
 
--export_record([]).
+-export_record(['EndlessTuple']).
 
--export(['__info__'/1]).
+-export(['__info__'/1,
+         '$patina_constructor__EndlessTuple'/1]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -23,3 +24,8 @@
                                      [deterministic]));
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
+
+-record #'EndlessTuple'{'0'}.
+
+'$patina_constructor__EndlessTuple'(_0@0_0) ->
+    #'EndlessTuple'{'0' = _0@0_0}.

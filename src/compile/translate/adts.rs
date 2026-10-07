@@ -228,8 +228,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             // shape. Another guard is redundant.
             SmallVec::new()
         } else {
-            let shape = self.tcx().erl_shape_of_ty(payload_ty);
-            self.guards_for_shape(span, shape_expr, shape).into_iter().collect()
+            let shape =
+                self.tcx().erl_variant_discriminating_shape(variant.def_id, args, payload_ty);
+            self.guards_for_shape(span, shape_expr, &shape).into_iter().collect()
         };
 
         let unwrapped = payload_patterns.into_iter().map(|GuardedPattern(payload, mut guards)| {
@@ -627,16 +628,14 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             ErlShape::Bitstring => bif(sym::is_bitstring, &[value]),
             ErlShape::List => bif(sym::is_list, &[value]),
             ErlShape::Fun => bif(sym::is_function, &[value]),
-            ErlShape::Tuple { arity, tag } => {
+            ErlShape::Tuple { arity, first } => {
                 let tuple = bif(sym::is_tuple, &[value]);
                 let size = eq(bif(sym::tuple_size, &[value]), afb.expr_int(span, *arity as u128));
                 let tuple_and_size = and(tuple, size);
-                if let Some(tag) = tag {
-                    let head = bif(sym::element, &[afb.expr_int(span, 1), value]);
-                    let tag_match = eq(head, afb.expr_atom(span, *tag));
-                    and(tuple_and_size, tag_match)
-                } else {
-                    tuple_and_size
+                let head = bif(sym::element, &[afb.expr_int(span, 1), value]);
+                match self.guards_for_shape(span, head, first) {
+                    Some(head_match) if *arity > 0 => and(tuple_and_size, head_match),
+                    _ => tuple_and_size,
                 }
             }
             ErlShape::AnyTuple => bif(sym::is_tuple, &[value]),

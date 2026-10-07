@@ -1,8 +1,0 @@
-error: requires `next` lang_item
-  --> tests/ui/src/flow_control/for__01.pt:6:14
-   |
-LL |     for n in 1..101 {
-   |              ^^^^^^
-
-error: aborting due to 1 previous error
-

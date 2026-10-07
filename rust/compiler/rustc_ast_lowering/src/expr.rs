@@ -1913,9 +1913,12 @@ impl<'hir> LoweringContext<'_, 'hir> {
     ///     let result = match IntoIterator::into_iter(<head>) {
     ///         mut iter => {
     ///             [opt_ident]: loop {
-    ///                 match Iterator::next(&mut iter) {
+    ///                 match Iterator::next(iter) {
     ///                     None => break,
-    ///                     Some(<pat>) => <body>,
+    ///                     Some((<pat>, next)) => {
+    ///                         iter = next;
+    ///                         <body>
+    ///                     }
     ///                 };
     ///             }
     ///         }
@@ -1956,30 +1959,61 @@ impl<'hir> LoweringContext<'_, 'hir> {
             self.arm(pat, break_expr, for_span)
         };
 
-        // Some(<pat>) => <body>,
-        let some_arm = {
-            let some_pat = self.pat_some(pat_span, pat);
-            let body_block =
-                self.with_loop_scope(loop_hir_id, |this| this.lower_block(body, false));
-            let body_expr = self.arena.alloc(self.expr_block(body_block));
-            self.arm(some_pat, body_expr, for_span)
-        };
-
         // `mut iter`
         let iter = Ident::with_dummy_span(sym::iter);
         let (iter_pat, iter_pat_nid) =
             self.pat_ident_binding_mode(head_span, iter, hir::BindingMode::MUT);
 
+        let some_arm = match loop_kind {
+            // `Some((<pat>, next)) => { iter = next; <body> }`
+            ForLoopKind::For => {
+                let next = Ident::with_dummy_span(sym::next);
+                let (next_pat, next_pat_nid) = self.pat_ident(head_span, next);
+                let step_pat = self.pat(
+                    pat_span,
+                    hir::PatKind::Tuple(
+                        arena_vec![self; *pat, *next_pat],
+                        hir::DotDotPos::new(None),
+                    ),
+                );
+                let some_pat = self.pat_some(pat_span, step_pat);
+
+                let assignee = self.pat_assignee(head_span, iter, iter_pat_nid);
+                let next_expr = self.expr_ident(head_span, next, next_pat_nid);
+                let assign = self.expr(
+                    head_span,
+                    hir::ExprKind::Assign(assignee, next_expr, self.lower_span(head_span)),
+                );
+                let assign_stmt =
+                    self.stmt(head_span, hir::StmtKind::Semi(self.arena.alloc(assign)));
+
+                let body_block =
+                    self.with_loop_scope(loop_hir_id, |this| this.lower_block(body, false));
+                let body_expr = self.arena.alloc(self.expr_block(body_block));
+                let block =
+                    self.block_all(for_span, arena_vec![self; assign_stmt], Some(body_expr));
+                let block_expr = self.arena.alloc(self.expr_block(block));
+                self.arm(some_pat, block_expr, for_span)
+            }
+            // `Some(<pat>) => <body>`
+            ForLoopKind::ForAwait => {
+                let some_pat = self.pat_some(pat_span, pat);
+                let body_block =
+                    self.with_loop_scope(loop_hir_id, |this| this.lower_block(body, false));
+                let body_expr = self.arena.alloc(self.expr_block(body_block));
+                self.arm(some_pat, body_expr, for_span)
+            }
+        };
+
         let match_expr = {
             let iter = self.expr_ident(head_span, iter, iter_pat_nid);
             let next_expr = match loop_kind {
                 ForLoopKind::For => {
-                    // `Iterator::next(&mut iter)`
-                    let ref_mut_iter = self.expr_mut_addr_of(head_span, iter);
+                    // `Iterator::next(iter)`
                     self.expr_call_lang_item_fn(
                         head_span,
                         hir::LangItem::IteratorNext,
-                        arena_vec![self; ref_mut_iter],
+                        arena_vec![self; *iter],
                     )
                 }
                 ForLoopKind::ForAwait => {

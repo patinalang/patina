@@ -44,7 +44,15 @@ fn representation_reaches_adt<'tcx>(
     root: DefId,
     seen: &mut FxHashSet<DefId>,
 ) -> bool {
-    let ty::Adt(adt, args) = ty.kind() else { return false };
+    let (adt, args) = match ty.kind() {
+        ty::Adt(adt, args) => (adt, args),
+        ty::Tuple(tys) => {
+            return tys
+                .first()
+                .is_some_and(|&first| representation_reaches_adt(tcx, first, root, seen));
+        }
+        _ => return false,
+    };
     if adt.did() == root {
         return true;
     }
@@ -136,19 +144,26 @@ fn params_in_repr_ty<'tcx>(
         ty::Param(param) => {
             params_in_repr.insert(param.index);
         }
+        ty::Tuple(tys) if let Some(&first) = tys.first() => {
+            params_in_repr_ty(tcx, first, solver, params_in_repr);
+        }
         _ => {}
     }
 }
 
 /// Add dependencies on local ADTs named by `ty` or its nested generic arguments.
-/// Tuple, list and map contents are not inspected.
+/// Only the first element of a tuple is inspected. List and map contents are not inspected.
 fn add_edges(
     ty: Ty<'_>,
     from: usize,
     ids: &FxIndexSet<LocalDefId>,
     edges: &mut Vec<(usize, usize)>,
 ) {
-    if let ty::Adt(adt, args) = ty.kind() {
+    if let ty::Tuple(tys) = ty.kind()
+        && let Some(&first) = tys.first()
+    {
+        add_edges(first, from, ids, edges);
+    } else if let ty::Adt(adt, args) = ty.kind() {
         if let Some(local) = adt.did().as_local()
             && let Some(target) = ids.get_index_of(&local)
         {

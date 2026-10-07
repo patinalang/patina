@@ -1,0 +1,111 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// source: patina-by-example/src/fn.md
+// block: 1/1
+
+// There's no restriction on the order of function definitions
+fn main() ({
+    // We can use this function here, and define it somewhere later
+    ((fizzbuzz_to as fn(int) {fizzbuzz_to})((100 as int)) as ());
+} as ())
+
+// Function that returns a boolean value
+fn is_divisible_by(lhs: int, rhs: int)
+    ->
+        bool ({
+    // Corner case, early return
+    (if ((rhs as int) == (0 as int) as bool) {
+        (return (false as bool) as !);
+    } as ())
+
+    // This is an expression, the `return` keyword is not necessary here
+    (((lhs as int) % (rhs as int) as int) == (0 as int) as bool)
+} as bool)
+
+// Functions that "don't" return a value, actually return the unit type `()`
+fn fizzbuzz(n: int)
+    ->
+        () ({
+    (if ((is_divisible_by as
+                fn(int, int) -> bool {is_divisible_by})((n as int),
+            (15 as int)) as bool) {
+
+        // When a function returns `()`, the return type can be omitted from the
+        // signature
+        ({
+            ((::Core::io::put_chars as
+                    fn(term) -> term)(([([("fizzbuzz" as str)] as [str])] as
+                    [[str]])) as term);
+            ((::Core::io::nl as fn() -> term)() as term);
+        } as ());
+    } else if ((is_divisible_by as
+                fn(int, int) -> bool {is_divisible_by})((n as int),
+            (3 as int)) as bool) {
+        ({
+            ((::Core::io::put_chars as
+                    fn(term) -> term)(([([("fizz" as str)] as [str])] as
+                    [[str]])) as term);
+            ((::Core::io::nl as fn() -> term)() as term);
+        } as ());
+    } else if ((is_divisible_by as
+                fn(int, int) -> bool {is_divisible_by})((n as int),
+            (5 as int)) as bool) {
+        ({
+            ((::Core::io::put_chars as
+                    fn(term) -> term)(([([("buzz" as str)] as [str])] as
+                    [[str]])) as term);
+            ((::Core::io::nl as fn() -> term)() as term);
+        } as ());
+    } else {
+        ({
+            ((::Core::io::put_chars as
+                    fn(term) -> term)(([([((patina_fmt::display as
+                                        fn(term) -> term)((n as int)) as term)] as [term])] as
+                    [[term]])) as term);
+            ((::Core::io::nl as fn() -> term)() as term);
+        } as ());
+    } as ())
+} as ())
+fn fizzbuzz_to(n:
+        int) ({
+    ({
+        let _t =
+            (match ((into_iter as
+                        fn(Core::RangeInclusive<int>) -> <Core::RangeInclusive<int> as Core::IntoIterator>::IntoIter {<Core::RangeInclusive<int> as Core::IntoIterator>::into_iter})(((range_inclusive_new
+                            as
+                            fn(int, int) -> Core::RangeInclusive<int> {Core::RangeInclusive::<int>::new})((1
+                            as int), (n as int)) as Core::RangeInclusive<int>)) as
+                    Core::RangeInclusive<int>) {
+                mut iter =>
+                    (loop {
+                        (match ((next as
+                                    fn(Core::RangeInclusive<int>) -> Core::Option<(<Core::RangeInclusive<int> as Core::Iterator>::Item, Core::RangeInclusive<int>)> {<Core::RangeInclusive<int> as Core::Iterator>::next})((iter
+                                    as Core::RangeInclusive<int>)) as
+                                Core::Option<(int, Core::RangeInclusive<int>)>) {
+                            None {} => (break as !),
+                            Some {  0: (n, next) } => {
+                                (iter = (next as Core::RangeInclusive<int>) as
+                                    Core::RangeInclusive<int>);
+                                ({ ((fizzbuzz as fn(int) {fizzbuzz})((n as int)) as ()); }
+                                    as ())
+                            }
+                        } as ())
+                    } as ()),
+            } as ());
+        _t
+    } as ())
+} as ())

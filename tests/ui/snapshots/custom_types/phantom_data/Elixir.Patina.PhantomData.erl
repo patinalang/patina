@@ -166,16 +166,9 @@ map_iter(_map@0_0) ->
                     _iter@1_1 = _iter@1_0,
                     _total@2_1 = _total@2_0,
                     _branch_value@6_0;
-                {some, {{_, _value@3_0}, _rest@4_0}} ->
-                    _iter@1_1 = _rest@4_0,
-                    _total@2_1 = _total@2_0 + _value@3_0,
-                    {};
                 _value@5_0 = {{_, _value@3_0}, _rest@4_0}
-                    when not
-                             ((erlang:is_tuple(_value@5_0) andalso
-                                   erlang:tuple_size(_value@5_0) =:= 2)
-                                  andalso
-                                  erlang:element(1, _value@5_0) =:= some) ->
+                    when erlang:is_tuple(_value@5_0) andalso
+                             erlang:tuple_size(_value@5_0) =:= 2 ->
                     _iter@1_1 = _rest@4_0,
                     _total@2_1 = _total@2_0 + _value@3_0,
                     {}
@@ -197,28 +190,10 @@ sum_values(_map@0_0) ->
 first_entry(_iter@0_0) ->
     case 'Elixir.Patina.PhantomData.MapIter':next(_iter@0_0)
         of
-        {some, {_entry@1_0, _}} ->
-            case _entry@1_0 of
-                _value@3_0
-                    when (erlang:is_tuple(_value@3_0) andalso
-                              erlang:tuple_size(_value@3_0) =:= 2)
-                             andalso erlang:element(1, _value@3_0) =:= some ->
-                    {some, _value@3_0};
-                _value@3_0 -> _value@3_0
-            end;
         _value@2_0 = {_entry@1_0, _}
-            when not
-                     ((erlang:is_tuple(_value@2_0) andalso
-                           erlang:tuple_size(_value@2_0) =:= 2)
-                          andalso erlang:element(1, _value@2_0) =:= some) ->
-            case _entry@1_0 of
-                _value@3_0
-                    when (erlang:is_tuple(_value@3_0) andalso
-                              erlang:tuple_size(_value@3_0) =:= 2)
-                             andalso erlang:element(1, _value@3_0) =:= some ->
-                    {some, _value@3_0};
-                _value@3_0 -> _value@3_0
-            end;
+            when erlang:is_tuple(_value@2_0) andalso
+                     erlang:tuple_size(_value@2_0) =:= 2 ->
+            _entry@1_0;
         nil -> nil
     end.
 

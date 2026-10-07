@@ -248,7 +248,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         self.write_args(hir_id, method.args);
     }
 
-    fn write_args(&self, node_id: HirId, args: GenericArgsRef<'tcx>) {
+    pub(crate) fn write_args(&self, node_id: HirId, args: GenericArgsRef<'tcx>) {
         if !args.is_empty() {
             debug!("write_args({:?}, {:?}) in fcx {}", node_id, args, self.tag());
 

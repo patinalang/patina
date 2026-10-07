@@ -64,7 +64,8 @@ endless_field(_value@0_0) ->
     _value@0_0#'Elixir.Patina.ReprRecursive.Endless':'Endless'.'0'.
 
 endless_tuple_field(_value@0_0) ->
-    {_next@1_0, _} = _value@0_0,
+    {_next@1_0, _} =
+        _value@0_0#'Elixir.Patina.ReprRecursive.EndlessTuple':'EndlessTuple'.'0',
     _next@1_0.
 
 struct_cycle() ->

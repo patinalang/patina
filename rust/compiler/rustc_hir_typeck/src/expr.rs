@@ -614,6 +614,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 self.add_required_obligations_with_code(expr.span, def_id, args, |_, _| {
                     code.clone()
                 });
+                self.write_args(expr.hir_id, args);
                 return tcx.type_of(def_id).instantiate(tcx, args).skip_norm_wip();
             }
         }
