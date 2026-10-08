@@ -1,0 +1,172 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro, prelude_import)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[prelude_import]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+trait Show {
+    fn show(self)
+    -> str;
+}
+impl Show for int {
+    fn show(self) -> str { "int" }
+}
+
+pub fn before_declaration() -> int {
+    let value = later();
+    fn later() -> int { 7 }
+    value
+}
+
+pub fn mutual(n: int) -> bool {
+    fn is_even(n: int) -> bool { if n == 0 { true } else { is_odd(n - 1) } }
+    fn is_odd(n: int) -> bool { if n == 0 { false } else { is_even(n - 1) } }
+    is_even(n)
+}
+
+pub fn first() -> int {
+    fn helper() -> int { 1 }
+    helper()
+}
+
+pub fn second() -> int {
+    fn helper() -> int { 2 }
+    helper()
+}
+
+pub fn shadowed_blocks() -> int {
+    let a =
+        {
+            fn f() -> int { 10 }
+            f()
+        };
+    let b =
+        {
+            fn f() -> int { 20 }
+            f()
+        };
+    a + b
+}
+
+pub fn recursive_loop(n: int) -> int {
+    fn sum_to(n: int) -> int {
+        let mut total = 0;
+        for i in 0..n {
+            if i == 3 { total += sum_to(2); continue; }
+            total += i;
+        }
+        total
+    }
+    sum_to(n)
+}
+
+pub fn generic() -> str {
+    fn describe<T: Show>(value: T) -> str { value.show() }
+    describe(5)
+}
+
+pub fn in_closure() -> int {
+    let f =
+        |x: int|
+            {
+                fn double(x: int) -> int { x * 2 }
+                double(x)
+            };
+    f(21)
+}
+
+pub fn as_value() -> int {
+    fn triple(x: int) -> int { x * 3 }
+    let f = triple;
+    f(4)
+}
+
+pub fn not_exported() -> int {
+    pub fn hidden() -> int { 5 }
+    hidden()
+}
+
+pub struct Counter {
+    pub n: int,
+}
+
+#[allow(non_local_definitions)]
+pub fn from_impl() -> int {
+    fn base() -> int { 100 }
+    impl Counter {
+        pub fn bump(self) -> int { self.n + base() }
+    }
+    Counter { n: 1 }.bump()
+}
+
+pub fn nested_trait() -> int {
+    trait Answer {
+        fn answer(self) -> int { 42 }
+    }
+    impl Answer for Counter {}
+    Counter { n: 0 }.answer()
+}
+
+pub struct Wrapper;
+
+#[allow(non_local_definitions)]
+impl Wrapper {
+    pub fn trait_in_method(self) -> int {
+        trait Base {
+            fn base(self) -> int { 1000 }
+        }
+        impl Base for Wrapper {}
+        self.base()
+    }
+}
+
+pub fn trait_in_method() -> int { Wrapper.trait_in_method() }
+
+#[allow(non_local_definitions)]
+pub fn first_answer() -> int {
+    trait Answer {
+        fn answer(self) -> int { 1 }
+    }
+    impl Answer for Wrapper {}
+    Wrapper.answer()
+}
+
+#[allow(non_local_definitions)]
+pub fn second_answer() -> int {
+    trait Answer {
+        fn answer(self) -> int { 2 }
+    }
+    impl Answer for Wrapper {}
+    Wrapper.answer()
+}
+
+#[allow(non_local_definitions)]
+pub fn answers_in_blocks() -> int {
+    let a =
+        {
+            trait Answer {
+                fn answer(self) -> int { 3 }
+            }
+            impl Answer for Wrapper {}
+            Wrapper.answer()
+        };
+    let b =
+        {
+            trait Answer {
+                fn answer(self) -> int { 4 }
+            }
+            impl Answer for Wrapper {}
+            Wrapper.answer()
+        };
+    a * 10 + b
+}

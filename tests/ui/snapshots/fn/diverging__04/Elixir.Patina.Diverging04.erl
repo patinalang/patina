@@ -8,7 +8,9 @@
 
 -export_record([]).
 
--export(['__info__'/1, main/0]).
+-export(['__info__'/1,
+         main/0,
+         'main::sum_odd_numbers$patina_loop_1'/2]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -26,7 +28,62 @@
 main() ->
     begin
         io:put_chars([[<<"Sum of odd numbers up to 9 (excluding): "/utf8>>,
-                       io_lib:format("~ktp", [sum_odd_numbers(9)])]]),
+                       io_lib:format("~ktp", ['main::sum_odd_numbers'(9)])]]),
         io:nl(),
         {}
     end.
+
+'main::sum_odd_numbers$patina_loop_1'(_iter@2_0,
+                                      _acc@1_0) ->
+    _ = begin
+            case
+                'Elixir.Patina.Core.Range':'Core::Iterator::next'({'impl Core::Iterator for Core::Range<int>',
+                                                                   'Elixir.Patina.Core.Range'},
+                                                                  _iter@2_0)
+                of
+                nil ->
+                    _branch_value@7_0 = '$patina_marker':break({break,
+                                                                0,
+                                                                {},
+                                                                _iter@2_0,
+                                                                _acc@1_0}),
+                    _iter@2_1 = _iter@2_0,
+                    _acc@1_1 = _acc@1_0,
+                    _branch_value@7_0;
+                _value@5_0 = {_i@3_0, _next@4_0}
+                    when erlang:is_tuple(_value@5_0) andalso
+                             erlang:tuple_size(_value@5_0) =:= 2 ->
+                    _iter@2_1 = _next@4_0,
+                    begin
+                        _addition@6_0 = case _i@3_0 rem 2 =:= 1 of
+                                            true -> _i@3_0;
+                                            false ->
+                                                '$patina_marker':continue(_iter@2_1,
+                                                                          _acc@1_0)
+                                        end,
+                        _acc@1_1 = _acc@1_0 + _addition@6_0,
+                        {}
+                    end
+            end
+        end,
+    '$patina_marker':continue(_iter@2_1, _acc@1_1).
+
+'main::sum_odd_numbers'(_up_to@0_0) ->
+    _acc@1_0 = 0,
+    case
+        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'({'impl Core::IntoIterator for _',
+                                                                    'Elixir.Patina.Core.$impl',
+                                                                    {'impl Core::Iterator for Core::Range<int>',
+                                                                     'Elixir.Patina.Core.Range'}},
+                                                                   'Elixir.Patina.Core.Range':'$patina_constructor__Range'(0,
+                                                                                                                           _up_to@0_0))
+        of
+        _iter@2_0 ->
+            case 'main::sum_odd_numbers$patina_loop_1'(_iter@2_0,
+                                                       _acc@1_0)
+                of
+                {break, 0, _loop_value@8_0, _iter@2_1, _acc@1_1} ->
+                    _loop_value@8_0
+            end
+    end,
+    _acc@1_1.

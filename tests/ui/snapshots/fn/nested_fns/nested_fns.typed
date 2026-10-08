@@ -1,0 +1,266 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+trait Show {
+    fn show(self)
+    -> str;
+}
+impl Show for int {
+    fn show(self) -> str ({ ("int" as str) } as str)
+}
+
+fn before_declaration()
+    ->
+        int ({
+    let value = ((later as fn() -> int {before_declaration::later})() as int);
+    fn later() -> int ({ (7 as int) } as int)
+    (value as int)
+} as int)
+
+fn mutual(n: int)
+    ->
+        bool ({
+    fn is_even(n: int)
+        ->
+            bool ({
+        (if ((n as int) == (0 as int) as bool) {
+            (true as bool)
+        } else {
+            ((is_odd as
+                    fn(int) -> bool {mutual::is_odd})(((n as int) - (1 as int)
+                    as int)) as bool)
+        } as bool)
+    } as bool)
+    fn is_odd(n: int)
+        ->
+            bool ({
+        (if ((n as int) == (0 as int) as bool) {
+            (false as bool)
+        } else {
+            ((is_even as
+                    fn(int) -> bool {mutual::is_even})(((n as int) - (1 as int)
+                    as int)) as bool)
+        } as bool)
+    } as bool)
+    ((is_even as fn(int) -> bool {mutual::is_even})((n as int)) as bool)
+} as bool)
+
+fn first()
+    ->
+        int ({
+    fn helper() -> int ({ (1 as int) } as int)
+    ((helper as fn() -> int {first::helper})() as int)
+} as int)
+
+fn second()
+    ->
+        int ({
+    fn helper() -> int ({ (2 as int) } as int)
+    ((helper as fn() -> int {second::helper})() as int)
+} as int)
+
+fn shadowed_blocks()
+    ->
+        int ({
+    let a =
+        ({
+            fn f() -> int ({ (10 as int) } as int)
+            ((f as fn() -> int {shadowed_blocks::f})() as int)
+        } as int);
+    let b =
+        ({
+            fn f() -> int ({ (20 as int) } as int)
+            ((f as fn() -> int {shadowed_blocks::f})() as int)
+        } as int);
+    ((a as int) + (b as int) as int)
+} as int)
+
+fn recursive_loop(n: int)
+    ->
+        int ({
+    fn sum_to(n: int)
+        ->
+            int ({
+        let mut total = (0 as int);
+        ({
+            let _t =
+                (match ((into_iter as
+                            fn(Core::Range<int>) -> <Core::Range<int> as Core::IntoIterator>::IntoIter {<Core::Range<int> as Core::IntoIterator>::into_iter})((Range {
+                            start: (0 as int), end: (n as int) } as Core::Range<int>))
+                        as Core::Range<int>) {
+                    mut iter =>
+                        (loop {
+                            (match ((next as
+                                        fn(Core::Range<int>) -> Core::Option<(<Core::Range<int> as Core::Iterator>::Item, Core::Range<int>)> {<Core::Range<int> as Core::Iterator>::next})((iter
+                                        as Core::Range<int>)) as
+                                    Core::Option<(int, Core::Range<int>)>) {
+                                None {} => (break as !),
+                                Some {  0: (i, next) } => {
+                                    (iter = (next as Core::Range<int>) as Core::Range<int>);
+                                    ({
+                                        (if ((i as int) == (3 as int) as bool) {
+                                            ((total as int) +=
+                                                ((sum_to as
+                                                        fn(int) -> int {recursive_loop::sum_to})((2 as int)) as int)
+                                                as int);
+                                            (continue as !);
+                                        } as ())
+                                        ((total as int) += (i as int) as int);
+                                    } as ())
+                                }
+                            } as ())
+                        } as ()),
+                } as ());
+            _t
+        } as ());
+        (total as int)
+    } as int)
+    ((sum_to as fn(int) -> int {recursive_loop::sum_to})((n as int)) as int)
+} as int)
+
+fn generic()
+    ->
+        str ({
+    fn describe<T>(value: T) -> str where
+        T: Show ({ ((value as T).show() as str) } as str)
+    ((describe as fn(int) -> str {generic::describe::<int>})((5 as int)) as
+        str)
+} as str)
+
+fn in_closure()
+    ->
+        int ({
+    let f =
+        (|x: int|
+            ({
+                fn double(x: int)
+                    -> int ({ ((x as int) * (2 as int) as int) } as int)
+                ((double as
+                        fn(int) -> int {in_closure::{closure#0}::double})((x as
+                        int)) as int)
+            } as int) as
+            {closure@tests/ui/src/fn/nested_fns.pt:50:13: 50:21});
+    ((f as {closure@tests/ui/src/fn/nested_fns.pt:50:13: 50:21})((21 as int))
+        as int)
+} as int)
+
+fn as_value()
+    ->
+        int ({
+    fn triple(x: int) -> int ({ ((x as int) * (3 as int) as int) } as int)
+    let f = (triple as fn(int) -> int {as_value::triple});
+    ((f as fn(int) -> int {as_value::triple})((4 as int)) as int)
+} as int)
+
+fn not_exported()
+    ->
+        int ({
+    fn hidden() -> int ({ (5 as int) } as int)
+    ((hidden as fn() -> int {not_exported::hidden})() as int)
+} as int)
+
+struct Counter {
+    n: int,
+}
+
+#[allow(non_local_definitions)]
+fn from_impl()
+    ->
+        int ({
+    fn base() -> int ({ (100 as int) } as int)
+    impl Counter {
+        fn bump(self)
+            ->
+                int ({
+            (((self as Counter).n as int) +
+                ((base as fn() -> int {from_impl::base})() as int) as int)
+        } as int)
+    }
+    ((Counter { n: (1 as int) } as Counter).bump() as int)
+} as int)
+
+fn nested_trait()
+    ->
+        int ({
+    trait Answer {
+        fn answer(self) -> int ({ (42 as int) } as int)
+    }
+    impl Answer for Counter { }
+    ((Counter { n: (0 as int) } as Counter).answer() as int)
+} as int)
+
+struct Wrapper;
+
+#[allow(non_local_definitions)]
+impl Wrapper {
+    fn trait_in_method(self)
+        ->
+            int ({
+        trait Base {
+            fn base(self) -> int ({ (1000 as int) } as int)
+        }
+        impl Base for Wrapper { }
+        ((self as Wrapper).base() as int)
+    } as int)
+}
+
+fn trait_in_method()
+    -> int ({ ((Wrapper as Wrapper).trait_in_method() as int) } as int)
+
+#[allow(non_local_definitions)]
+fn first_answer()
+    ->
+        int ({
+    trait Answer {
+        fn answer(self) -> int ({ (1 as int) } as int)
+    }
+    impl Answer for Wrapper { }
+    ((Wrapper as Wrapper).answer() as int)
+} as int)
+
+#[allow(non_local_definitions)]
+fn second_answer()
+    ->
+        int ({
+    trait Answer {
+        fn answer(self) -> int ({ (2 as int) } as int)
+    }
+    impl Answer for Wrapper { }
+    ((Wrapper as Wrapper).answer() as int)
+} as int)
+
+#[allow(non_local_definitions)]
+fn answers_in_blocks()
+    ->
+        int ({
+    let a =
+        ({
+            trait Answer {
+                fn answer(self) -> int ({ (3 as int) } as int)
+            }
+            impl Answer for Wrapper { }
+            ((Wrapper as Wrapper).answer() as int)
+        } as int);
+    let b =
+        ({
+            trait Answer {
+                fn answer(self) -> int ({ (4 as int) } as int)
+            }
+            impl Answer for Wrapper { }
+            ((Wrapper as Wrapper).answer() as int)
+        } as int);
+    (((a as int) * (10 as int) as int) + (b as int) as int)
+} as int)

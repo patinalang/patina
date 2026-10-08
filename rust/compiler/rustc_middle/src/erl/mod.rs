@@ -130,6 +130,10 @@ impl<'tcx> TyCtxt<'tcx> {
         let mut def_id = def_id.into();
 
         loop {
+            if self.is_erl_nested_item(def_id) {
+                return Some(ErlModuleId::Mod(self.lexical_erl_module(def_id)));
+            }
+
             match self.def_kind(def_id) {
                 DefKind::Mod => return Some(ErlModuleId::Mod(def_id)),
 
@@ -222,6 +226,15 @@ impl<'tcx> TyCtxt<'tcx> {
     /// Whether `krate` is Core. Core is the crate that defines the lang items.
     pub fn is_erl_core_crate(self, krate: CrateNum) -> bool {
         self.lang_items().sized_trait().is_some_and(|sized| sized.krate == krate)
+    }
+
+    /// Whether `def_id` is a `fn` or `trait` item declared inside a body, like another function's.
+    pub fn is_erl_nested_item(self, def_id: DefId) -> bool {
+        matches!(self.def_kind(def_id), DefKind::Fn | DefKind::Trait)
+            && !matches!(
+                self.def_kind(self.parent(def_id)),
+                DefKind::Mod | DefKind::ExternMod | DefKind::ForeignMod
+            )
     }
 
     /// The trait `def_id` is a method of, for a trait method or a trait impl item.
@@ -414,17 +427,18 @@ impl<'tcx> TyCtxt<'tcx> {
             return true;
         }
 
-        let visible_outside_rust_module = match def_id.as_local() {
-            // A foreign item here is a trait item that this crate implements. Other crates
-            // can dispatch to its override or delegation stub.
-            None => true,
-            Some(local_def_id) => match self.visibility(local_def_id) {
-                Visibility::Public => true,
-                Visibility::Restricted(restricted) => {
-                    restricted != self.parent_module_from_def_id(local_def_id).to_def_id()
-                }
-            },
-        };
+        let visible_outside_rust_module = !self.is_erl_nested_item(def_id)
+            && match def_id.as_local() {
+                // A foreign item here is a trait item that this crate implements. Other crates
+                // can dispatch to its override or delegation stub.
+                None => true,
+                Some(local_def_id) => match self.visibility(local_def_id) {
+                    Visibility::Public => true,
+                    Visibility::Restricted(restricted) => {
+                        restricted != self.parent_module_from_def_id(local_def_id).to_def_id()
+                    }
+                },
+            };
 
         visible_outside_rust_module || self.fns_called_externally(()).contains(&(module, def_id))
     }
@@ -905,6 +919,14 @@ fn erl_fn_name(tcx: TyCtxt<'_>, def_id: LocalDefId) -> Symbol {
         bug!("`{}` has no Erlang function name", tcx.def_path_str(def_id));
     }
     let item_name = tcx.item_name(def_id);
+
+    if tcx.is_erl_nested_item(def_id) {
+        let module_depth = tcx.def_path(tcx.lexical_erl_module(def_id)).data.len();
+        let path = tcx.def_path(def_id);
+        let segments =
+            path.data[module_depth..].iter().map(|segment| segment.as_sym(true).to_string());
+        return Symbol::intern(&erl_fit_atom(segments.collect::<Vec<_>>().join("::")));
+    }
 
     let Some(trait_def_id) = tcx.erl_entry_trait(def_id) else {
         // Inherent impls on different arguments of one type can have methods of the same name,

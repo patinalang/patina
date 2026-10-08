@@ -189,9 +189,8 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
     fn translate_module(&self, def_id: LocalDefId) -> (Symbol, eaf::Module<'arena>) {
         let module_id = LocalModDefId::new_unchecked(def_id);
         let (module, _span, _hir_id) = self.tcx.hir_get_module(module_id);
-        let erl_module_id = ErlModuleId::Mod(def_id.to_def_id());
-        let parts = self.collect_module_fns(erl_module_id, module);
-        let mod_name = self.tcx.erl_module_name(erl_module_id);
+        let parts = self.collect_module_fns(module_id, module);
+        let mod_name = self.tcx.erl_module_name(ErlModuleId::Mod(def_id.to_def_id()));
         self.assemble_module(module.spans.inner_span, mod_name, [], parts)
     }
 
@@ -324,16 +323,17 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
 
     fn collect_module_fns(
         &self,
-        module_id: ErlModuleId,
+        local_module_id: LocalModDefId,
         module: &Mod<'tcx>,
     ) -> ModuleParts<'arena> {
+        let module_id = ErlModuleId::Mod(local_module_id.to_def_id());
         let mut parts = self.module_parts(module.spans.inner_span);
 
         parts.forms.push(elixir_compat::info_function(&self.afb, module.spans.inner_span, None));
         parts.exports.push((sym::__info__, 1));
 
-        for item_id in module.item_ids {
-            let item = self.tcx.hir_item(*item_id);
+        for item_id in self.tcx.hir_module_free_items(local_module_id) {
+            let item = self.tcx.hir_item(item_id);
             let def_id = item.owner_id.def_id;
             match item.kind {
                 ItemKind::Fn { ref sig, body, has_body: true, .. } => {
