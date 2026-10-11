@@ -352,60 +352,60 @@ map_entry_count(_map@0_0) ->
     end,
     _count@1_1.
 
-'count$patina_loop_1'(_witness@0_0, _iter@3_0,
-                      _n@2_0) ->
+'count$patina_loop_1'(_witness@1_0 = {_witness@0_0},
+                      _iter@4_0, _n@3_0) ->
     _ = begin
             case begin
-                     _witness@4_0 = erlang:element(1,
+                     _witness@5_0 = erlang:element(1,
                                                    (erlang:element(2,
                                                                    _witness@0_0)):'Core::IntoIterator::type::IntoIter'(_witness@0_0)),
                      (erlang:element(2,
-                                     _witness@4_0)):'Core::Iterator::next'(_witness@4_0,
-                                                                           _iter@3_0)
+                                     _witness@5_0)):'Core::Iterator::next'(_witness@5_0,
+                                                                           _iter@4_0)
                  end
                 of
                 nil ->
-                    _branch_value@7_0 = '$patina_marker':break({break,
+                    _branch_value@8_0 = '$patina_marker':break({break,
                                                                 0,
                                                                 {},
-                                                                _iter@3_0,
-                                                                _n@2_0}),
-                    _iter@3_1 = _iter@3_0,
-                    _n@2_1 = _n@2_0,
-                    _branch_value@7_0;
-                {some, {_, _next@5_0}} ->
-                    _iter@3_1 = _next@5_0,
-                    begin _n@2_1 = _n@2_0 + 1, {} end;
-                _value@6_0 = {_, _next@5_0}
+                                                                _iter@4_0,
+                                                                _n@3_0}),
+                    _iter@4_1 = _iter@4_0,
+                    _n@3_1 = _n@3_0,
+                    _branch_value@8_0;
+                {some, {_, _next@6_0}} ->
+                    _iter@4_1 = _next@6_0,
+                    begin _n@3_1 = _n@3_0 + 1, {} end;
+                _value@7_0 = {_, _next@6_0}
                     when not
-                             ((erlang:is_tuple(_value@6_0) andalso
-                                   erlang:tuple_size(_value@6_0) =:= 2)
+                             ((erlang:is_tuple(_value@7_0) andalso
+                                   erlang:tuple_size(_value@7_0) =:= 2)
                                   andalso
-                                  erlang:element(1, _value@6_0) =:= some) ->
-                    _iter@3_1 = _next@5_0,
-                    begin _n@2_1 = _n@2_0 + 1, {} end
+                                  erlang:element(1, _value@7_0) =:= some) ->
+                    _iter@4_1 = _next@6_0,
+                    begin _n@3_1 = _n@3_0 + 1, {} end
             end
         end,
-    '$patina_marker':continue(_witness@0_0,
-                              _iter@3_1,
-                              _n@2_1).
+    '$patina_marker':continue(_witness@1_0,
+                              _iter@4_1,
+                              _n@3_1).
 
-count({_witness@0_0}, _items@1_0) ->
-    _n@2_0 = 0,
+count(_witness@1_0 = {_witness@0_0}, _items@2_0) ->
+    _n@3_0 = 0,
     case (erlang:element(2,
                          _witness@0_0)):'Core::IntoIterator::into_iter'(_witness@0_0,
-                                                                        _items@1_0)
+                                                                        _items@2_0)
         of
-        _iter@3_0 ->
-            case 'count$patina_loop_1'(_witness@0_0,
-                                       _iter@3_0,
-                                       _n@2_0)
+        _iter@4_0 ->
+            case 'count$patina_loop_1'(_witness@1_0,
+                                       _iter@4_0,
+                                       _n@3_0)
                 of
-                {break, 0, _loop_value@8_0, _iter@3_1, _n@2_1} ->
-                    _loop_value@8_0
+                {break, 0, _loop_value@9_0, _iter@4_1, _n@3_1} ->
+                    _loop_value@9_0
             end
     end,
-    _n@2_1.
+    _n@3_1.
 
 count_list(_xs@0_0) ->
     count({{'impl Core::IntoIterator for [_]',
@@ -417,54 +417,54 @@ count_map(_map@0_0) ->
             'Elixir.Patina.Core.Map'}},
           _map@0_0).
 
-'total$patina_loop_1'(_witness@0_0, _iter@3_0,
-                      _total@2_0) ->
+'total$patina_loop_1'(_witness@1_0 = {_witness@0_0},
+                      _iter@4_0, _total@3_0) ->
     _ = begin
             case begin
-                     _witness@4_0 = erlang:element(1,
+                     _witness@5_0 = erlang:element(1,
                                                    (erlang:element(2,
                                                                    _witness@0_0)):'Core::IntoIterator::type::IntoIter'(_witness@0_0)),
                      (erlang:element(2,
-                                     _witness@4_0)):'Core::Iterator::next'(_witness@4_0,
-                                                                           _iter@3_0)
+                                     _witness@5_0)):'Core::Iterator::next'(_witness@5_0,
+                                                                           _iter@4_0)
                  end
                 of
                 nil ->
-                    _branch_value@8_0 = '$patina_marker':break({break,
+                    _branch_value@9_0 = '$patina_marker':break({break,
                                                                 0,
                                                                 {},
-                                                                _iter@3_0,
-                                                                _total@2_0}),
-                    _iter@3_1 = _iter@3_0,
-                    _total@2_1 = _total@2_0,
-                    _branch_value@8_0;
-                _value@7_0 = {_item@5_0, _next@6_0}
-                    when erlang:is_tuple(_value@7_0) andalso
-                             erlang:tuple_size(_value@7_0) =:= 2 ->
-                    _iter@3_1 = _next@6_0,
-                    begin _total@2_1 = _total@2_0 + _item@5_0, {} end
+                                                                _iter@4_0,
+                                                                _total@3_0}),
+                    _iter@4_1 = _iter@4_0,
+                    _total@3_1 = _total@3_0,
+                    _branch_value@9_0;
+                _value@8_0 = {_item@6_0, _next@7_0}
+                    when erlang:is_tuple(_value@8_0) andalso
+                             erlang:tuple_size(_value@8_0) =:= 2 ->
+                    _iter@4_1 = _next@7_0,
+                    begin _total@3_1 = _total@3_0 + _item@6_0, {} end
             end
         end,
-    '$patina_marker':continue(_witness@0_0,
-                              _iter@3_1,
-                              _total@2_1).
+    '$patina_marker':continue(_witness@1_0,
+                              _iter@4_1,
+                              _total@3_1).
 
-total({_witness@0_0}, _items@1_0) ->
-    _total@2_0 = 0,
+total(_witness@1_0 = {_witness@0_0}, _items@2_0) ->
+    _total@3_0 = 0,
     case (erlang:element(2,
                          _witness@0_0)):'Core::IntoIterator::into_iter'(_witness@0_0,
-                                                                        _items@1_0)
+                                                                        _items@2_0)
         of
-        _iter@3_0 ->
-            case 'total$patina_loop_1'(_witness@0_0,
-                                       _iter@3_0,
-                                       _total@2_0)
+        _iter@4_0 ->
+            case 'total$patina_loop_1'(_witness@1_0,
+                                       _iter@4_0,
+                                       _total@3_0)
                 of
-                {break, 0, _loop_value@9_0, _iter@3_1, _total@2_1} ->
-                    _loop_value@9_0
+                {break, 0, _loop_value@10_0, _iter@4_1, _total@3_1} ->
+                    _loop_value@10_0
             end
     end,
-    _total@2_1.
+    _total@3_1.
 
 total_range(_end@0_0) ->
     total({{'impl Core::IntoIterator for _',
@@ -505,8 +505,7 @@ total_list(_xs@0_0) ->
                             true ->
                                 '$patina_marker':continue(_iter@3_1,
                                                           _limit@1_0,
-                                                          _total@2_0),
-                                {};
+                                                          _total@2_0);
                             false -> {}
                         end,
                         case _x@4_0 > _limit@1_0 of
@@ -515,8 +514,7 @@ total_list(_xs@0_0) ->
                                                         0,
                                                         {},
                                                         _iter@3_1,
-                                                        _total@2_0}),
-                                {};
+                                                        _total@2_0});
                             false -> {}
                         end,
                         _total@2_1 = _total@2_0 + _x@4_0,
@@ -573,8 +571,7 @@ skip_odd_until(_xs@0_0, _limit@1_0) ->
                                 '$patina_marker':return({return,
                                                          _index@2_0,
                                                          _iter@3_1,
-                                                         _index@2_0}),
-                                {};
+                                                         _index@2_0});
                             false -> {}
                         end,
                         _index@2_1 = _index@2_0 + 1,
@@ -633,8 +630,7 @@ find_index(_xs@0_0, _target@1_0) ->
                                 '$patina_marker':continue(_iter@7_1,
                                                           _a@4_0,
                                                           _sum@1_0,
-                                                          _found@2_0),
-                                {};
+                                                          _found@2_0);
                             false -> {}
                         end,
                         case _a@4_0 + _b@8_0 =:= _sum@1_0 of
@@ -644,8 +640,7 @@ find_index(_xs@0_0, _target@1_0) ->
                                                         0,
                                                         {},
                                                         _iter@7_1,
-                                                        _found@2_1}),
-                                {};
+                                                        _found@2_1});
                             false ->
                                 _branch_value@11_0 = {},
                                 _found@2_1 = _found@2_0,
@@ -765,8 +760,7 @@ first_pair_with_sum(_xs@0_0, _sum@1_0) ->
                                 '$patina_marker':break({continue,
                                                         0,
                                                         _iter@6_1,
-                                                        _visited@1_0}),
-                                {};
+                                                        _visited@1_0});
                             false -> {}
                         end,
                         _visited@1_1 = _visited@1_0 + 1,

@@ -91,5 +91,4 @@
                {5,5},
                {atom,{5,5},module},
                {atom,{5,5},'Elixir.Patina.Core.Panic'}}]}]},
-          {nil,{5,5}}}]}]},
-     {tuple,{4,15},[]}]}]}]
+          {nil,{5,5}}}]}]}]}]}]

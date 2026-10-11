@@ -1,13 +1,13 @@
 use rustc_data_structures::fx::FxIndexMap;
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_middle::bug;
-use rustc_middle::thir::LocalVarId;
+use rustc_middle::erl::etir::VarId;
 use rustc_span::Symbol;
 
 use crate::compile::translate::BodyCx;
 
 #[derive(Clone)]
-pub(super) struct Scope(FxIndexMap<LocalVarId, PatinaVar>);
+pub(super) struct Scope(FxIndexMap<VarId, PatinaVar>);
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub(super) struct PatinaVar {
@@ -50,11 +50,11 @@ impl Scope {
         Self(FxIndexMap::default())
     }
 
-    pub(super) fn get_var(&self, id: LocalVarId) -> Option<&PatinaVar> {
+    pub(super) fn get_var(&self, id: VarId) -> Option<&PatinaVar> {
         self.0.get(&id)
     }
 
-    fn bind_var(&mut self, id: LocalVarId, var: PatinaVar) -> &PatinaVar {
+    fn bind_var(&mut self, id: VarId, var: PatinaVar) -> &PatinaVar {
         self.0.entry(id).insert_entry(var).into_mut()
     }
 }
@@ -72,11 +72,11 @@ impl Scopes {
         Self { scopes, next_var_num: 0, loop_count: 0 }
     }
 
-    pub(super) fn get_var(&self, id: LocalVarId) -> Option<&PatinaVar> {
+    pub(super) fn get_var(&self, id: VarId) -> Option<&PatinaVar> {
         self.scopes.iter().rev().find_map(|scope| scope.get_var(id))
     }
 
-    pub(super) fn fetch_var(&self, id: LocalVarId) -> &PatinaVar {
+    pub(super) fn fetch_var(&self, id: VarId) -> &PatinaVar {
         self.get_var(id).unwrap_or_else(|| bug!("variable {:?} is not in scope", id))
     }
 
@@ -92,7 +92,7 @@ impl Scopes {
         self.loop_count
     }
 
-    pub(super) fn bind_var(&mut self, id: LocalVarId, name: Symbol) -> &PatinaVar {
+    pub(super) fn bind_var(&mut self, id: VarId, name: Symbol) -> &PatinaVar {
         let var = match self
             .scopes
             .iter()
@@ -107,7 +107,7 @@ impl Scopes {
         self.last_scope_mut().bind_var(id, var)
     }
 
-    pub(super) fn rebind_var(&mut self, id: LocalVarId) -> &PatinaVar {
+    pub(super) fn rebind_var(&mut self, id: VarId) -> &PatinaVar {
         let name = self.fetch_var(id).name;
         self.bind_var(id, name)
     }
@@ -125,7 +125,7 @@ impl Scopes {
     pub(super) fn modified_outer_vars<'a>(
         &mut self,
         branches: impl IntoIterator<Item = &'a Scope>,
-    ) -> FxIndexMap<LocalVarId, PatinaVar> {
+    ) -> FxIndexMap<VarId, PatinaVar> {
         let mut modified_outer_vars = FxIndexMap::default();
         for branch in branches {
             for (id, branch_var) in &branch.0 {
@@ -151,10 +151,7 @@ impl Scopes {
     }
 
     /// Merges the scopes of the branches into a single after-branch scope.
-    pub(super) fn join_branches(
-        &mut self,
-        modified_outer_vars: &FxIndexMap<LocalVarId, PatinaVar>,
-    ) {
+    pub(super) fn join_branches(&mut self, modified_outer_vars: &FxIndexMap<VarId, PatinaVar>) {
         for (id, var) in modified_outer_vars {
             self.last_scope_mut().0.insert(*id, *var);
         }

@@ -882,6 +882,7 @@ pub static DEFAULT_QUERY_PROVIDERS: LazyLock<Providers> = LazyLock::new(|| {
     rustc_middle::erl::provide(&mut providers.queries);
     rustc_incremental::provide(providers);
     rustc_mir_build::provide(providers);
+    patina_etir_build::provide(providers);
     rustc_privacy::provide(&mut providers.queries);
     rustc_query_impl::provide(providers);
     rustc_resolve::provide(&mut providers.queries);

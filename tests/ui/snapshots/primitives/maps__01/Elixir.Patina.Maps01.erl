@@ -25,11 +25,11 @@
 
 call(_number@0_0) ->
     case _number@0_0 of
-        <<55, 57, 56, 45, 49, 51, 54, 52>> ->
+        <<"798-1364"/utf8>> ->
             <<"We're sorry, the call cannot be completed "
               "as dialed.\n            Please hang "
               "up and try again."/utf8>>;
-        <<54, 52, 53, 45, 55, 54, 56, 57>> ->
+        <<"645-7689"/utf8>> ->
             <<"Hello, this is Mr. Awesome's Pizza. "
               "My name is Fred.\n            What can "
               "I get for you today?"/utf8>>;

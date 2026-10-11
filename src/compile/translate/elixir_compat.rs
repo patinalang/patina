@@ -139,19 +139,9 @@ fn info_exports_md5_clause<'tcx, 'arena>(
     // [deterministic]
     let deterministic_list = afb.expr_list(s, [afb.expr_atom(s, sym::deterministic)], None);
     // term_to_binary({lists:sort(module_info(exports)), [], '__info__'(struct)}, [deterministic])
-    let term_to_binary = afb.expr_remote_call(
-        s,
-        afb.expr_atom(s, sym::erlang),
-        afb.expr_atom(s, sym::term_to_binary),
-        [tuple, deterministic_list],
-    );
+    let term_to_binary = afb.erlang_bif(s, sym::term_to_binary, [tuple, deterministic_list]);
     // erlang:md5(term_to_binary({lists:sort(module_info(exports)), [], Struct}, [deterministic])).
-    let erlang_md5 = afb.expr_remote_call(
-        s,
-        afb.expr_atom(s, sym::erlang),
-        afb.expr_atom(s, sym::md5),
-        [term_to_binary],
-    );
+    let erlang_md5 = afb.erlang_bif(s, sym::md5, [term_to_binary]);
 
     // (exports_md5) ->
     //     erlang:md5(term_to_binary({lists:sort(module_info(exports)), [], Struct}, [deterministic])).

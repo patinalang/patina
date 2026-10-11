@@ -30,10 +30,11 @@
 
 marker_bounds_only(_t@0_0) -> _t@0_0.
 
-subtrait_of_marker({_witness@0_0}, _t@1_0) ->
+subtrait_of_marker(_witness@1_0 = {_witness@0_0},
+                   _t@2_0) ->
     (erlang:element(2,
                     _witness@0_0)):'MarkerTraits::Show::show'(_witness@0_0,
-                                                              _t@1_0).
+                                                              _t@2_0).
 
 a_both() ->
     subtrait_of_marker({{'impl MarkerTraits::Show for MarkerTraits::A',

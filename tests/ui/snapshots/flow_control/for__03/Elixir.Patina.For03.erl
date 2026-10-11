@@ -43,7 +43,7 @@
                     _iter@1_1 = _next@3_0,
                     begin
                         case _name@2_0 of
-                            <<70, 101, 114, 114, 105, 115>> ->
+                            <<"Ferris"/utf8>> ->
                                 io:put_chars([[<<"There is a rustacean among us!"/utf8>>]]),
                                 io:nl(),
                                 {};

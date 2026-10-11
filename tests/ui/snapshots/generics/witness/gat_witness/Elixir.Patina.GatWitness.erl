@@ -24,11 +24,12 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-describe_member({_witness@0_0, _witness@1_0},
-                _family@2_0) ->
+describe_member(_witness@2_0 = {_witness@0_0,
+                                _witness@1_0},
+                _family@3_0) ->
     (erlang:element(2,
                     _witness@1_0)):'GatWitness::Describe::describe'(_witness@1_0,
                                                                     (erlang:element(2,
                                                                                     _witness@0_0)):'GatWitness::Family::member'(_witness@0_0,
-                                                                                                                                _family@2_0,
+                                                                                                                                _family@3_0,
                                                                                                                                 1)).

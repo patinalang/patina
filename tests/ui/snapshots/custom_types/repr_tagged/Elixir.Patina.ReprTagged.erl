@@ -44,9 +44,9 @@ update_code(_value@0_0) ->
     erlang:setelement(2, _value@0_0, 201).
 
 update_fields(_value@0_0) ->
-    erlang:setelement(2,
-                      erlang:setelement(3, _value@0_0, <<"updated"/utf8>>),
-                      202).
+    erlang:setelement(3,
+                      erlang:setelement(2, _value@0_0, 202),
+                      <<"updated"/utf8>>).
 
 destructure_struct(_value@0_0) ->
     {struct_http_style, _code@1_0, _} = _value@0_0,

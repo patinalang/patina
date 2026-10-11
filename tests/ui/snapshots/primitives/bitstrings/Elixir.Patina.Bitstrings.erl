@@ -92,14 +92,14 @@ bits_concat(_left@0_0, _right@1_0) ->
 bin_classify(_value@0_0) ->
     case _value@0_0 of
         <<137, 80, 78, 71>> -> png;
-        <<71, 73, 70, 56>> -> gif;
+        <<"GIF8"/utf8>> -> gif;
         _ -> unknown
     end.
 
 bits_classify(_value@0_0) ->
     case _value@0_0 of
         <<255>> -> ff;
-        <<116, 101, 120, 116>> -> text;
+        <<"text"/utf8>> -> text;
         _ -> unknown
     end.
 
@@ -108,7 +108,7 @@ term_classes(_value@0_0) ->
         _value@1_0 = <<120>>
             when erlang:is_binary(_value@1_0) ->
             bin_x;
-        _value@2_0 = <<121>>
+        _value@2_0 = <<"y"/utf8>>
             when erlang:is_bitstring(_value@2_0) ->
             bits_y;
         _value@3_0 when erlang:is_binary(_value@3_0) -> bin;
@@ -163,21 +163,21 @@ bits_to_term(_value@0_0) -> _value@0_0.
 
 term_str_then_bin(_value@0_0) ->
     case _value@0_0 of
-        <<97>> -> 1;
+        <<"a"/utf8>> -> 1;
         <<97>> -> 2;
         _ -> 0
     end.
 
 term_duplicate_str(_value@0_0) ->
     case _value@0_0 of
-        <<97>> -> 1;
-        <<97>> -> 2;
+        <<"a"/utf8>> -> 1;
+        <<"a"/utf8>> -> 2;
         _ -> 0
     end.
 
 bin_str_then_bin(_value@0_0) ->
     case _value@0_0 of
-        <<97>> -> 1;
+        <<"a"/utf8>> -> 1;
         <<97>> -> 2;
         _ -> 0
     end.
@@ -185,14 +185,14 @@ bin_str_then_bin(_value@0_0) ->
 bits_bin_then_str(_value@0_0) ->
     case _value@0_0 of
         <<97>> -> 1;
-        <<97>> -> 2;
+        <<"a"/utf8>> -> 2;
         _ -> 0
     end.
 
 term_atom_and_str(_value@0_0) ->
     case _value@0_0 of
         a -> 1;
-        <<97>> -> 2;
+        <<"a"/utf8>> -> 2;
         <<255>> -> 3;
         _ -> 0
     end.
@@ -200,7 +200,7 @@ term_atom_and_str(_value@0_0) ->
 bin_distinct(_value@0_0) ->
     case _value@0_0 of
         <<97>> -> 1;
-        <<97, 98>> -> 2;
+        <<"ab"/utf8>> -> 2;
         <<255>> -> 3;
         _ -> 0
     end.

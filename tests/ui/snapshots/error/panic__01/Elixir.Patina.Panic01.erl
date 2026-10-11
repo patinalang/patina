@@ -31,8 +31,7 @@ drink(_beverage@0_0) ->
                              none,
                              [{error_info,
                                #{module => 'Elixir.Patina.Core.Panic'}}])
-            end,
-            {};
+            end;
         false -> {}
     end,
     begin

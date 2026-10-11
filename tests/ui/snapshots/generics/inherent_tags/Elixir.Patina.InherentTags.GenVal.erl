@@ -31,9 +31,9 @@
 
 'value<str>'(_self@0_0) -> _self@0_0.
 
-f({_witness@0_0}, _self@1_0) ->
+f(_witness@1_0 = {_witness@0_0}, _self@2_0) ->
     (erlang:element(2,
                     _witness@0_0)):'InherentTags::Show::show'(_witness@0_0,
-                                                              _self@1_0).
+                                                              _self@2_0).
 
 'f<int>'(_self@0_0, _x@1_0) -> _self@0_0 + _x@1_0.

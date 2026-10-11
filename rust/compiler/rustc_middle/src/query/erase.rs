@@ -117,6 +117,10 @@ impl<T> Erasable for &'_ [T] {
     type Storage = [u8; size_of::<&'_ [()]>()];
 }
 
+impl<I: rustc_index::Idx, T> Erasable for &'_ rustc_index::IndexSlice<I, T> {
+    type Storage = [u8; size_of::<&'_ [()]>()];
+}
+
 // Note: this impl does not overlap with the impl for `&'_ T` above because `RawList` is unsized
 // and does not satisfy the implicit `T: Sized` bound.
 //

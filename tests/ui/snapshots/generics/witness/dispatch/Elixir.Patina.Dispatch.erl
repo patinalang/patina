@@ -23,10 +23,10 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-total_area({_witness@0_0}, _t@1_0) ->
+total_area(_witness@1_0 = {_witness@0_0}, _t@2_0) ->
     (erlang:element(2,
                     _witness@0_0)):'Dispatch::Area::area'(_witness@0_0,
-                                                          _t@1_0).
+                                                          _t@2_0).
 
 main() ->
     _p@0_0 =

@@ -29,6 +29,5 @@ const_values() ->
     {[1, 2, 3], #{<<"answer"/utf8>> => 42}}.
 
 binary_pattern_values() ->
-    {<<<<80, 84>>:2/binary, 2:16/integer, $ł/utf16,
-       1.5:32/float>>,
+    {<<80, 84, 2:16/integer, $ł/utf16, 1.5:32/float>>,
      [<<1:1/integer, 0:2/integer>>, <<1:3/integer>>]}.

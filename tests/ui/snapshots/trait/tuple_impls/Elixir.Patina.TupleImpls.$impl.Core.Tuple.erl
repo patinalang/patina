@@ -33,12 +33,12 @@
                               _witness@1_0},
                          _self@2_0) ->
     {_A@3_0} = _self@2_0,
-    <<<<<<<<"("/utf8>>/binary,
+    <<<<<<"("/utf8,
           ((erlang:element(2,
                            _witness@1_0)):'TupleImpls::Show::show'(_witness@1_0,
                                                                    _A@3_0))/binary>>/binary,
-        <<","/utf8>>/binary>>/binary,
-      <<")"/utf8>>/binary>>;
+        ","/utf8>>/binary,
+      ")"/utf8>>;
 'TupleImpls::Show::show'(_witness@0_0 =
                              {'impl TupleImpls::Show for (_, _)',
                               _,
@@ -46,16 +46,16 @@
                               _witness@2_0},
                          _self@3_0) ->
     {_A@4_0, _B@5_0} = _self@3_0,
-    <<<<<<<<<<<<"("/utf8>>/binary,
+    <<<<<<<<<<"("/utf8,
               ((erlang:element(2,
                                _witness@1_0)):'TupleImpls::Show::show'(_witness@1_0,
                                                                        _A@4_0))/binary>>/binary,
-            <<","/utf8>>/binary>>/binary,
+            ","/utf8>>/binary,
           ((erlang:element(2,
                            _witness@2_0)):'TupleImpls::Show::show'(_witness@2_0,
                                                                    _B@5_0))/binary>>/binary,
-        <<","/utf8>>/binary>>/binary,
-      <<")"/utf8>>/binary>>;
+        ","/utf8>>/binary,
+      ")"/utf8>>;
 'TupleImpls::Show::show'(_witness@0_0 =
                              {'impl TupleImpls::Show for (_, _, _)',
                               _,
@@ -64,17 +64,17 @@
                               _witness@3_0},
                          _self@4_0) ->
     {_A@5_0, _B@6_0, _C@7_0} = _self@4_0,
-    <<<<<<<<<<<<<<<<"("/utf8>>/binary,
+    <<<<<<<<<<<<<<"("/utf8,
                   ((erlang:element(2,
                                    _witness@1_0)):'TupleImpls::Show::show'(_witness@1_0,
                                                                            _A@5_0))/binary>>/binary,
-                <<","/utf8>>/binary>>/binary,
+                ","/utf8>>/binary,
               ((erlang:element(2,
                                _witness@2_0)):'TupleImpls::Show::show'(_witness@2_0,
                                                                        _B@6_0))/binary>>/binary,
-            <<","/utf8>>/binary>>/binary,
+            ","/utf8>>/binary,
           ((erlang:element(2,
                            _witness@3_0)):'TupleImpls::Show::show'(_witness@3_0,
                                                                    _C@7_0))/binary>>/binary,
-        <<","/utf8>>/binary>>/binary,
-      <<")"/utf8>>/binary>>.
+        ","/utf8>>/binary,
+      ")"/utf8>>.

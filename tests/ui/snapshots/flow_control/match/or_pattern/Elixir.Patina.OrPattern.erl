@@ -78,8 +78,6 @@ classify_let_else(_number@0_0) ->
         1 -> {};
         3 -> {};
         5 -> {};
-        _ ->
-            '$patina_marker':return(0),
-            {}
+        _ -> '$patina_marker':return(0)
     end,
     10.

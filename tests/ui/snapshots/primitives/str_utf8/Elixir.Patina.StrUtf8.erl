@@ -30,9 +30,7 @@ greeting() -> <<"héllo, wörld ∞"/utf8>>.
 
 is_greeting(_s@0_0) ->
     case _s@0_0 of
-        <<104, 195, 169, 108, 108, 111, 44, 32, 119, 195, 182,
-          114, 108, 100, 32, 226, 136, 158>> ->
-            true;
+        <<"héllo, wörld ∞"/utf8>> -> true;
         _ -> false
     end.
 

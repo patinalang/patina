@@ -162,5 +162,5 @@ diverging_timeout() ->
         _n@0_0 when erlang:is_integer(_n@0_0) ->
             '$patina_marker':return(_n@0_0)
         after 'Elixir.Patina.Core.Timeout':from_millis(0) ->
-                  '$patina_marker':return(-1), {}
+                  '$patina_marker':return(-1)
     end.

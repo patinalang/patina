@@ -29,9 +29,7 @@ main() -> fizzbuzz_to(100).
 
 is_divisible_by(_lhs@0_0, _rhs@1_0) ->
     case _rhs@1_0 =:= 0 of
-        true ->
-            '$patina_marker':return(false),
-            {};
+        true -> '$patina_marker':return(false);
         false -> {}
     end,
     _lhs@0_0 rem _rhs@1_0 =:= 0.

@@ -33,7 +33,7 @@
                                                                                'Elixir.Patina.BlanketImpl.$impl.Core.Int'},
                                                                               erlang:element(1,
                                                                                              _self@1_0)))/binary,
-        <<" and "/utf8>>/binary>>/binary,
+        " and "/utf8>>/binary,
       ('Elixir.Patina.BlanketImpl.$impl.Core.Str':'BlanketImpl::Show::show'({'impl BlanketImpl::Show for str',
                                                                              'Elixir.Patina.BlanketImpl.$impl.Core.Str'},
                                                                             erlang:element(2,

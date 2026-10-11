@@ -37,21 +37,21 @@
     <<((erlang:element(2,
                        _witness@0_0)):'BlanketImpl::Describe::describe'(_witness@0_0,
                                                                         _self@1_0))/binary,
-      <<"!"/utf8>>/binary>>.
+      "!"/utf8>>.
 
 wrap(_s@0_0) ->
-    <<<<<<"<"/utf8>>/binary, _s@0_0/binary>>/binary,
-      <<">"/utf8>>/binary>>.
+    <<<<"<"/utf8, _s@0_0/binary>>/binary, ">"/utf8>>.
 
-describe_generic({_witness@0_0}, _t@1_0) ->
+describe_generic(_witness@1_0 = {_witness@0_0},
+                 _t@2_0) ->
     (erlang:element(2,
                     _witness@0_0)):'BlanketImpl::Describe::describe'(_witness@0_0,
-                                                                     _t@1_0).
+                                                                     _t@2_0).
 
-twice_generic({_witness@0_0}, _t@1_0) ->
+twice_generic(_witness@1_0 = {_witness@0_0}, _t@2_0) ->
     (erlang:element(2,
                     _witness@0_0)):'BlanketImpl::Nested::Twice::twice'(_witness@0_0,
-                                                                       _t@1_0).
+                                                                       _t@2_0).
 
 describe_int(_n@0_0) ->
     'Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Describe::describe'({'impl BlanketImpl::Describe for _',

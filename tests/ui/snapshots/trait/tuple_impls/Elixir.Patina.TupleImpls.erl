@@ -26,10 +26,10 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-show_generic({_witness@0_0}, _t@1_0) ->
+show_generic(_witness@1_0 = {_witness@0_0}, _t@2_0) ->
     (erlang:element(2,
                     _witness@0_0)):'TupleImpls::Show::show'(_witness@0_0,
-                                                            _t@1_0).
+                                                            _t@2_0).
 
 show_unit() ->
     'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::show'({'impl TupleImpls::Show for ()',

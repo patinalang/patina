@@ -30,8 +30,8 @@ main() ->
     _version@1_0 = 3,
     _greeting@2_0 = <<"Hello, "/utf8, _name@0_0/binary,
                       $!/utf8>>,
-    _header@3_0 = <<<<80, 84>>:2/binary,
-                    _version@1_0:16/integer, 1.5:32/float, $é/utf16>>,
+    _header@3_0 = <<80, 84, _version@1_0:16/integer,
+                    1.5:32/float, $é/utf16>>,
     _flags@4_0 = <<1:1/integer, 0:1/integer,
                    (_version@1_0 + 1):3/integer>>,
     begin

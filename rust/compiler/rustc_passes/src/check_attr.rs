@@ -1730,7 +1730,9 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             _ => unreachable!("call expression checked above"),
         };
 
-        match self.tcx.erl_call_kind(hir_id.owner.def_id.to_def_id(), target, None) {
+        let caller = hir_id.owner.def_id.to_def_id();
+        let callee_module = self.tcx.erl_module_for_target(caller, target);
+        match self.tcx.erl_call_kind(caller, callee_module, target, None) {
             Some(ErlCallKind::Extern) => {
                 self.dcx().emit_warn(errors::ExternCallRedundant {
                     attr_span,

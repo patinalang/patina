@@ -204,7 +204,7 @@ fn atomic_literal_integer_above_u128() {
     // 2^128 forces the SMALL_BIG_EXT path inside the integer literal.
     let v = AtomicLiteral::Integer(anno(), big_pow128());
     let mut bigint_b = vec![SMALL_BIG_EXT, 17, 0];
-    bigint_b.extend(std::iter::repeat(0u8).take(16));
+    bigint_b.extend(std::iter::repeat_n(0u8, 16));
     bigint_b.push(1);
     let expected = term(tuple(&[atom("integer"), anno_bytes(), bigint_b]));
     assert_eq!(to_bytes(&v).unwrap(), expected);

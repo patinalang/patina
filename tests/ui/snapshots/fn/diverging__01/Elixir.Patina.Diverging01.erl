@@ -28,5 +28,4 @@ foo() ->
         erlang:error('Elixir.Patina.Core.Panic':new(<<"This call never returns."/utf8>>),
                      none,
                      [{error_info, #{module => 'Elixir.Patina.Core.Panic'}}])
-    end,
-    {}.
+    end.

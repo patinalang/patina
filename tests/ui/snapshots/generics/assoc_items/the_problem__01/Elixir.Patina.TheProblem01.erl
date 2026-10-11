@@ -25,14 +25,15 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-difference({_witness@0_0}, _container@1_0) ->
+difference(_witness@1_0 = {_witness@0_0},
+           _container@2_0) ->
     (erlang:element(2,
                     _witness@0_0)):'TheProblem01::Contains::last'(_witness@0_0,
-                                                                  _container@1_0)
+                                                                  _container@2_0)
         -
         (erlang:element(2,
                         _witness@0_0)):'TheProblem01::Contains::first'(_witness@0_0,
-                                                                       _container@1_0).
+                                                                       _container@2_0).
 
 main() ->
     _number_1@0_0 = 3,

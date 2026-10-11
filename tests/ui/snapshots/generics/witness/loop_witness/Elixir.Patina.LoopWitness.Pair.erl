@@ -11,7 +11,7 @@
 
 -export(['__info__'/1,
          '$patina_constructor__Pair'/2,
-         '<impl LoopWitness::Score for LoopWitness::Pair<_>>::score$patina_loop_1'/4,
+         '<impl LoopWitness::Score for LoopWitness::Pair<_>>::score$patina_loop_1'/3,
          'LoopWitness::Score::score'/2,
          'LoopWitness::Score::loop_in_default'/3]).
 
@@ -33,8 +33,10 @@
 '$patina_constructor__Pair'(_a@0_0, _b@1_0) ->
     #'Pair'{a = _a@0_0, b = _b@1_0}.
 
-'<impl LoopWitness::Score for LoopWitness::Pair<_>>::score$patina_loop_1'(_witness@0_0,
-                                                                          _witness@1_0,
+'<impl LoopWitness::Score for LoopWitness::Pair<_>>::score$patina_loop_1'(_witness@0_0 =
+                                                                              {'impl LoopWitness::Score for LoopWitness::Pair<_>',
+                                                                               _,
+                                                                               _witness@1_0},
                                                                           _total@3_0,
                                                                           _self@2_0) ->
     _ = begin
@@ -46,11 +48,9 @@
                                   (erlang:element(2,
                                                   _witness@1_0)):'LoopWitness::Score::score'(_witness@1_0,
                                                                                              _self@2_0#'Pair'.b)),
-            '$patina_marker':break({break, 0, {}, _total@3_1}),
-            {}
+            '$patina_marker':break({break, 0, {}, _total@3_1})
         end,
     '$patina_marker':continue(_witness@0_0,
-                              _witness@1_0,
                               _total@3_1,
                               _self@2_0).
 
@@ -62,7 +62,6 @@
     _total@3_0 = 0,
     case
         '<impl LoopWitness::Score for LoopWitness::Pair<_>>::score$patina_loop_1'(_witness@0_0,
-                                                                                  _witness@1_0,
                                                                                   _total@3_0,
                                                                                   _self@2_0)
         of

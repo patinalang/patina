@@ -24,11 +24,11 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-call({_witness@0_0}, _h@1_0) ->
+call(_witness@1_0 = {_witness@0_0}, _h@2_0) ->
     'Elixir.Patina.BoundGeneric.Holder':'BoundGeneric::Tr::method'({'impl BoundGeneric::Tr for BoundGeneric::Holder<_>',
                                                                     'Elixir.Patina.BoundGeneric.Holder',
                                                                     _witness@0_0},
-                                                                   _h@1_0).
+                                                                   _h@2_0).
 
 main() ->
     _h@0_0 = 5,

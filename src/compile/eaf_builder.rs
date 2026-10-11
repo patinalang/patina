@@ -1,7 +1,7 @@
 //! Convenience functions for building Erlang Abstract Format (eaf) nodes.
 use rustc_arena::DroplessArena;
 use rustc_span::source_map::SourceMap;
-use rustc_span::{ByteSymbol, Ident, Span, Symbol};
+use rustc_span::{ByteSymbol, Ident, Span, Symbol, sym};
 
 use crate::erlang::abstract_format as eaf;
 use crate::num_utils::trim_trailing_zeroes;
@@ -89,6 +89,13 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         eaf::Pattern::Bin(anno, self.arena.alloc_from_iter(elements))
     }
 
+    pub(crate) fn pat_binary_string(&self, span: impl IntoAnno, s: Symbol) -> eaf::Pattern<'arena> {
+        let anno = span.into_anno(self.source_map);
+        let value = self.pat_string(anno, s.as_str());
+        let elem = self.pat_binary_element(anno, value, None, Some([eaf::Tsl::Utf8]));
+        self.pat_binary(anno, [elem])
+    }
+
     pub(crate) fn pat_binary_element(
         &self,
         span: impl IntoAnno,
@@ -139,17 +146,6 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
             span.into_anno(self.source_map),
             self.biguint(value),
         ))
-    }
-
-    pub(crate) fn expr_sint(&self, span: impl IntoAnno, value: i128) -> eaf::Expr<'arena> {
-        let anno = span.into_anno(self.source_map);
-        let value_expr = self.expr_int(anno, value.unsigned_abs());
-
-        if value < 0 {
-            eaf::Expr::UnaryOp(anno, eaf::UnaryOp::Neg, self.arena.alloc(value_expr))
-        } else {
-            value_expr
-        }
     }
 
     fn biguint(&self, value: u128) -> eaf::BigUInt<'arena> {
@@ -364,6 +360,18 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         let remote = eaf::Remote(anno, self.arena.alloc(module), self.arena.alloc(func));
         let args = self.arena.alloc_from_iter(args);
         eaf::Expr::RemoteCall(anno, remote, args)
+    }
+
+    /// A call to the `erlang:Function`.
+    pub(crate) fn erlang_bif(
+        &self,
+        span: impl IntoAnno,
+        function: Symbol,
+        args: impl IntoIterator<Item = eaf::Expr<'arena>>,
+    ) -> eaf::Expr<'arena> {
+        let anno = span.into_anno(self.source_map);
+        let module = self.expr_atom(anno, sym::erlang);
+        self.expr_remote_call(anno, module, self.expr_atom(anno, function), args)
     }
 
     pub(crate) fn expr_local_call(

@@ -37,15 +37,13 @@
             _visits@2_1 = _visits@2_0 + 1,
             case _outer@1_1 < _limit@0_0 of
                 true ->
-                    '$patina_marker':break({continue, 0, _visits@2_1}),
-                    {};
+                    '$patina_marker':break({continue, 0, _visits@2_1});
                 false -> {}
             end,
             '$patina_marker':break({break,
                                     0,
                                     _visits@2_1 * 100 + _outer@1_1,
-                                    _visits@2_1}),
-            {}
+                                    _visits@2_1})
         end,
     '$patina_marker':continue(_visits@2_1,
                               _outer@1_1,
@@ -95,15 +93,13 @@ continue_outer_loop(_limit@0_0) ->
             _visits@2_1 = _visits@2_0 + 1,
             case _outer@1_1 < _limit@0_0 of
                 true ->
-                    '$patina_marker':break({continue, 0, _visits@2_1}),
-                    {};
+                    '$patina_marker':break({continue, 0, _visits@2_1});
                 false -> {}
             end,
             '$patina_marker':break({break,
                                     0,
                                     _visits@2_1 * 100 + _outer@1_1,
-                                    _visits@2_1}),
-            {}
+                                    _visits@2_1})
         end,
     '$patina_marker':continue(_visits@2_1,
                               _outer@1_1,

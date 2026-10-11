@@ -114,8 +114,7 @@ recursive_loop(_n@0_0) ->
                                 _total@1_1 = _total@1_0 +
                                                  'recursive_loop::sum_to'(2),
                                 '$patina_marker':continue(_iter@2_1,
-                                                          _total@1_1),
-                                {};
+                                                          _total@1_1);
                             false ->
                                 _branch_value@6_0 = {},
                                 _total@1_1 = _total@1_0,
@@ -153,10 +152,11 @@ generic() ->
                           'Elixir.Patina.NestedFns.$impl.Core.Int'}},
                         5).
 
-'generic::describe'({_witness@0_0}, _value@1_0) ->
+'generic::describe'(_witness@1_0 = {_witness@0_0},
+                    _value@2_0) ->
     (erlang:element(2,
                     _witness@0_0)):'NestedFns::Show::show'(_witness@0_0,
-                                                           _value@1_0).
+                                                           _value@2_0).
 
 in_closure() ->
     _f@1_0 = fun (_x@0_0) ->

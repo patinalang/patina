@@ -16,6 +16,7 @@ use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LocalDefId, LocalModDefId};
 use rustc_hir::{BodyId, FieldDef, ItemKind, Mod};
+use rustc_middle::erl::witness::WitnessResolver;
 use rustc_middle::erl::{ErlModuleId, ErlReprKind, ErlVariantRepr};
 use rustc_middle::ty::{self, TyCtxt};
 use rustc_middle::{bug, span_bug};
@@ -71,7 +72,6 @@ pub(super) struct Translator<'tcx, 'arena> {
     afb: EafBuilder<'tcx, 'arena>,
     impls: ImplCollector<'tcx>,
     translated_consts: RefCell<FxHashMap<LocalDefId, TranslatedConst<'arena>>>,
-    witnesses_in_progress: RefCell<Vec<ty::TraitRef<'tcx>>>,
 }
 
 impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
@@ -81,7 +81,6 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             afb: EafBuilder::new(tcx.sess.source_map(), arena),
             impls: ImplCollector::new(tcx),
             translated_consts: RefCell::new(FxHashMap::default()),
-            witnesses_in_progress: RefCell::new(Vec::new()),
         }
     }
 
@@ -90,30 +89,12 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         owner: LocalDefId,
         parts: &mut ModuleParts<'arena>,
         scopes: &mut Scopes,
-        witness_env: &WitnessEnv<'tcx, 'arena>,
+        witness_env: &WitnessEnv<'arena>,
     ) -> TranslatedBody<'arena> {
-        let (thir, root) =
-            self.tcx.thir_body(owner).unwrap_or_else(|guaranteed| guaranteed.raise_fatal());
-
-        let thir = thir.borrow();
-        let mut cx = BodyCx::new(self, owner, &thir, parts, scopes, witness_env);
-
-        let mut params = SmallVec::new();
-
-        for param in thir.params.iter() {
-            let Some(_hir_id) = param.hir_id else { continue };
-
-            let pat = param
-                .pat
-                .as_deref()
-                .unwrap_or_else(|| bug!("explicit parameter must have a THIR pattern"));
-
-            params.push(cx.translate_single_pattern(pat));
-        }
-
-        let value = cx.translate_expr(root);
-
-        TranslatedBody { params, value }
+        let owner = owner.to_def_id();
+        let etir = self.tcx.etir_body(owner);
+        let mut cx = BodyCx::new(self, owner, etir, parts, scopes, witness_env);
+        cx.translate_body_with_params(&etir.params, etir.value)
     }
 
     pub(super) fn translate_const(
@@ -260,10 +241,12 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         let owner = self.tcx.hir_body_owner_def_id(body);
         let mut scopes = Scopes::new();
 
-        let (mut params, witness_env) = self.translate_witness_params(def_id, span, &mut scopes);
+        let witness_params = self.tcx.erl_witness_params_identity(owner.to_def_id());
+        let witness_env = self.translate_witness_params(&witness_params, span, &mut scopes);
 
         let translated = self.translate_body(owner, parts, &mut scopes, &witness_env);
-        params.extend(translated.params);
+        let params: SmallVec<[_; 8]> =
+            witness_env.params.iter().map(|param| param.pat).chain(translated.params).collect();
 
         FnClause {
             span,
@@ -601,15 +584,20 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         let args = tcx.erl_trait_item_args_for_impl_item(owner);
 
         let mut scopes = Scopes::new();
-        let (params, witness_env) = self.translate_witness_params(def_id, span, &mut scopes);
+        let witness_env = self.translate_witness_params(
+            &tcx.erl_witness_params_identity(owner),
+            span,
+            &mut scopes,
+        );
+        let params: SmallVec<[_; 2]> = witness_env.params.iter().map(|param| param.pat).collect();
+        let mut resolver = WitnessResolver::new(tcx, owner);
 
         let witnesses = tcx
             .erl_assoc_type_bounds(trait_assoc_def_id)
-            .iter()
-            .map(|&bound| {
-                let bound =
-                    ty::EarlyBinder::bind(bound).instantiate(tcx, args).skip_normalization();
-                self.resolve_witness(owner, span, bound, &witness_env, &mut scopes)
+            .iter_instantiated_copied(tcx, args)
+            .map(|bound| {
+                let source = resolver.witness_source(span, bound);
+                self.translate_witness(span, &source, &witness_env, &mut scopes)
             })
             .collect::<SmallVec<[_; 4]>>();
         let value = self.afb.expr_tuple(span, witnesses);

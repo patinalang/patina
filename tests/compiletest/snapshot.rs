@@ -39,15 +39,17 @@ fn remove_snapshot(path: &Path) {
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(()),
         other => other,
     }
-    .expect(&format!("remove {}", path.display()));
+    .unwrap_or_else(|_| panic!("remove {}", path.display()));
 }
 
 fn write_snapshot(snapshot_path: &Path, actual: &str) {
     if let Some(parent) = snapshot_path.parent() {
-        std::fs::create_dir_all(parent).expect(&format!("create dir {}", parent.display()));
+        std::fs::create_dir_all(parent)
+            .unwrap_or_else(|_| panic!("create dir {}", parent.display()));
     }
 
-    std::fs::write(snapshot_path, actual).expect(&format!("write {}", snapshot_path.display()));
+    std::fs::write(snapshot_path, actual)
+        .unwrap_or_else(|_| panic!("write {}", snapshot_path.display()));
 }
 
 fn check(snapshot_path: &Path, actual: &str) -> Result<(), Failed> {
@@ -60,7 +62,7 @@ fn check(snapshot_path: &Path, actual: &str) -> Result<(), Failed> {
                 snapshot_path.display(),
             )));
         }
-        other => other.expect(&format!("read {}", snapshot_path.display())),
+        other => other.unwrap_or_else(|_| panic!("read {}", snapshot_path.display())),
     };
 
     if expected == actual {

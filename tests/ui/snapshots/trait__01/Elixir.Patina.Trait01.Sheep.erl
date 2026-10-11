@@ -61,7 +61,7 @@ shear(_self@0_0) ->
 'Trait01::Animal::new'(_witness@0_0 =
                            {'impl Trait01::Animal for Trait01::Sheep', _},
                        _name@1_0) ->
-    #'Sheep'{name = _name@1_0, naked = false}.
+    #'Sheep'{naked = false, name = _name@1_0}.
 
 'Trait01::Animal::name'(_witness@0_0 =
                             {'impl Trait01::Animal for Trait01::Sheep', _},

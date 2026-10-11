@@ -1,144 +1,98 @@
-use rustc_abi::{FieldIdx, VariantIdx};
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::DefId;
+use rustc_middle::erl::etir::{self, AdtRepr, PatternInput};
 use rustc_middle::erl::shape::ErlShape;
-use rustc_middle::erl::{
-    ErlCallKind, ErlCallTarget, ErlModuleResolution, ErlReprKind, ErlVariantRepr,
-};
-use rustc_middle::span_bug;
-use rustc_middle::thir::{AdtExpr, AdtExprBase, Expr, FieldExpr, FieldPat, Pat};
-use rustc_middle::ty::{self, AdtDef, VariantDef};
+use rustc_middle::erl::{ErlCallKind, ErlCallTarget, ErlModuleResolution};
+use rustc_middle::{span_bug, ty};
 use rustc_span::{Ident, Span, Symbol, kw, sym};
 
-use crate::compile::translate::body::{BodyCx, GuardedPattern, PatternInput, Patterns};
+use crate::compile::translate::body::{BodyCx, GuardedPattern, Patterns};
 use crate::compile::translate::record_constructor_name;
 use crate::erlang::abstract_format as eaf;
-use crate::{not_implemented, span_fatal};
 
 impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     pub(super) fn translate_adt_pattern(
         &mut self,
-        pat: &Pat<'tcx>,
-        adt_def: AdtDef<'tcx>,
-        variant_index: VariantIdx,
-        subpatterns: &[FieldPat<'tcx>],
-        input: PatternInput,
+        pat: &etir::Pat<'tcx>,
+        adt: &etir::AdtPat<'tcx>,
     ) -> Patterns<'arena> {
-        let variant = adt_def.variant(variant_index);
-        let repr = self.tcx().erl_variant_repr(variant.def_id);
-        match repr.kind {
-            ErlReprKind::Atom => self.translator.afb.pat_atom(pat.span, repr.tag).into(),
-            ErlReprKind::Int => not_implemented!(self.tcx(), pat.span, "int-represented ADT"),
-            ErlReprKind::Tagged => {
-                self.translate_tagged_pattern(pat, adt_def, variant_index, subpatterns, repr, input)
+        let afb = &self.translator.afb;
+
+        match adt.repr {
+            AdtRepr::Atom { tag } => afb.pat_atom(pat.span, tag).into(),
+            AdtRepr::Tagged { tag } => self.translate_tagged_pattern(pat, adt, tag),
+            AdtRepr::Elixir { adt: adt_def_id, variant } => {
+                self.translate_elixir_struct_pattern(pat, adt, adt_def_id, variant)
             }
-            ErlReprKind::Elixir => self.translate_elixir_struct_pattern(
-                pat,
-                adt_def,
-                variant_index,
-                subpatterns,
-                input,
-            ),
-            ErlReprKind::NativeRecord => self.translate_native_record_pattern(
-                pat,
-                adt_def,
-                variant_index,
-                subpatterns,
-                repr,
-                input,
-            ),
-            ErlReprKind::Transparent { .. } => self.translate_transparent_pattern(
-                pat,
-                adt_def,
-                variant_index,
-                subpatterns,
-                repr,
-                input,
-            ),
+            AdtRepr::NativeRecord { record_module, tag } => {
+                self.translate_native_record_pattern(pat, adt, record_module, tag)
+            }
+            AdtRepr::Transparent { tag, variant, has_siblings } => {
+                self.translate_transparent_pattern(pat, adt, tag, variant, has_siblings)
+            }
         }
     }
 
     pub(super) fn translate_adt(
         &mut self,
-        expr: &Expr<'tcx>,
-        adt_expr: &AdtExpr<'tcx>,
+        expr: &etir::Expr<'tcx>,
+        adt: &etir::AdtExpr,
     ) -> eaf::Expr<'arena> {
         let afb = &self.translator.afb;
-        let adt_def = adt_expr.adt_def;
-        let variant = adt_def.variant(adt_expr.variant_index);
 
-        let mut fields = SmallVec::<[&FieldExpr; 4]>::new();
-        let mut effects = Vec::new();
-        for field in &adt_expr.fields {
-            if self.tcx().is_erl_phantom_field(variant.fields[field.name].did) {
-                let span = self.thir[field.expr].span;
-                let value = self.translate_expr(field.expr);
-                effects.push(afb.expr_match(span, afb.pat_var(span, kw::Underscore), value));
-            } else {
-                fields.push(field);
+        match adt.repr {
+            AdtRepr::Atom { tag } => afb.expr_atom(expr.span, tag),
+            AdtRepr::Tagged { tag } => self.translate_tagged(expr, adt, tag),
+            AdtRepr::Elixir { adt: adt_def_id, variant } => {
+                self.translate_elixir_struct(expr, adt, adt_def_id, variant)
             }
-        }
-
-        let repr = self.tcx().erl_variant_repr(variant.def_id);
-        let value = match repr.kind {
-            ErlReprKind::Atom => afb.expr_atom(expr.span, repr.tag),
-            ErlReprKind::Int => not_implemented!(self.tcx(), expr.span, "int-represented ADT"),
-            ErlReprKind::Tagged => self.translate_tagged(expr, adt_expr, &fields, variant, repr),
-            ErlReprKind::Elixir => self.translate_elixir_struct(expr, adt_expr, &fields, variant),
-            ErlReprKind::NativeRecord => {
-                self.translate_native_record(expr, adt_expr, &fields, variant, repr)
+            AdtRepr::NativeRecord { record_module, tag } => {
+                self.translate_native_record(expr, adt, record_module, tag)
             }
-            ErlReprKind::Transparent { .. } => {
-                self.translate_transparent(expr, adt_expr, &fields, variant, repr)
+            AdtRepr::Transparent { tag, variant, .. } => {
+                self.translate_transparent(expr, adt, variant, tag)
             }
-        };
-
-        if effects.is_empty() {
-            value
-        } else {
-            afb.expr_block(expr.span, effects.into_iter().chain([value]))
         }
     }
 
     fn translate_transparent(
         &mut self,
-        expr: &Expr<'tcx>,
-        adt_expr: &AdtExpr<'tcx>,
-        fields: &[&FieldExpr],
-        variant: &VariantDef,
-        repr: ErlVariantRepr,
+        expr: &etir::Expr<'tcx>,
+        adt: &etir::AdtExpr,
+        variant: DefId,
+        tag: Symbol,
     ) -> eaf::Expr<'arena> {
         let afb = &self.translator.afb;
+        let fields = &adt.fields[..];
 
-        let value = match &adt_expr.base {
-            AdtExprBase::None => {
+        let value = match adt.base {
+            None => {
                 let [field] = fields else {
                     span_bug!(
                         expr.span,
                         "transparent ADT construction has num of fields other than 1: {fields:?}",
                     )
                 };
-                self.translate_expr(field.expr)
+                self.translate_expr(field.value)
             }
 
-            AdtExprBase::Base(base) => match fields {
-                [] => self.translate_expr(base.base),
-                [field] => self.translate_expr(field.expr),
-                _ => {
+            Some(base) => match fields {
+                [] => self.translate_expr(base),
+                [field] => self.translate_expr(field.value),
+                fields => {
                     span_bug!(
                         expr.span,
                         "transparent ADT update has more than one field: {fields:?}",
                     )
                 }
             },
-
-            AdtExprBase::DefaultFields(_) => {
-                not_implemented!(self.tcx(), expr.span, "transparent ADT with default fields")
-            }
         };
 
-        let guard_shapes = self.tcx().erl_variant_wrap_guards((variant.def_id, adt_expr.args));
+        let ty::Adt(_, args) = *expr.ty.kind() else {
+            span_bug!(expr.span, "transparent ADT construction has non-ADT type {}", expr.ty)
+        };
+        let guard_shapes = self.tcx().erl_variant_wrap_guards((variant, args));
         if guard_shapes.is_empty() {
             // The variant is either not open-shape, or can't be mistaken with any other variant.
             return value;
@@ -147,8 +101,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let value_var = self.scopes.fresh_var(sym::value);
         let value_var_pat = afb.pat_var(expr.span, value_var.erl_name);
         let value_var_expr = afb.expr_var(expr.span, value_var.erl_name);
-        let wrapped =
-            afb.expr_tuple(expr.span, [afb.expr_atom(expr.span, repr.tag), value_var_expr]);
+        let wrapped = afb.expr_tuple(expr.span, [afb.expr_atom(expr.span, tag), value_var_expr]);
 
         let clauses = guard_shapes
             .iter()
@@ -166,45 +119,39 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
     fn translate_transparent_pattern(
         &mut self,
-        pat: &Pat<'tcx>,
-        adt_def: AdtDef<'tcx>,
-        variant_index: VariantIdx,
-        subpatterns: &[FieldPat<'tcx>],
-        repr: ErlVariantRepr,
-        input: PatternInput,
+        pat: &etir::Pat<'tcx>,
+        adt: &etir::AdtPat<'tcx>,
+        tag: Symbol,
+        variant: DefId,
+        has_siblings: bool,
     ) -> Patterns<'arena> {
         let afb = &self.translator.afb;
         let span = pat.span;
         let adt_ty = pat.ty;
-        let variant = adt_def.variant(variant_index);
 
         let ty::Adt(_, args) = adt_ty.kind() else {
             span_bug!(span, "transparent ADT pattern has non-ADT type {adt_ty}")
         };
-        let Some((payload_idx, payload_field)) = self.tcx().erl_single_runtime_field(variant)
-        else {
+
+        let [payload] = &adt.fields.raw[..] else {
             span_bug!(span, "transparent ADT pattern without a single runtime field")
         };
-        let payload_ty = payload_field.ty(self.tcx(), args);
 
-        let payload_patterns = match subpatterns.iter().find(|field| field.field == payload_idx) {
-            None => self.translate_wild_pattern(span, payload_ty, input),
-            Some(field) => self.translate_pattern(&field.pattern, input),
-        };
+        let payload_patterns = self.translate_pattern(payload.pattern);
 
         // A variant with no siblings is never wrapped.
-        if adt_def.variants().len() == 1 {
+        if !has_siblings {
             return payload_patterns;
         }
 
-        let guard_shapes = self.tcx().erl_variant_wrap_guards((variant.def_id, args));
+        let guard_shapes = self.tcx().erl_variant_wrap_guards((variant, args));
         let wraps = !guard_shapes.is_empty();
 
         // If wrapping is a possibility, we need to guard against the wrapped shape as well.
         let wrapped = wraps
             .then(|| {
                 payload_patterns.clone().into_iter().map(|GuardedPattern(payload, guards)| {
-                    let tag = afb.pat_atom(span, repr.tag);
+                    let tag = afb.pat_atom(span, tag);
                     GuardedPattern(afb.pat_tuple(span, [tag, payload]), guards)
                 })
             })
@@ -223,13 +170,12 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                     None => afb.expr_atom(span, kw::False),
                 })
                 .collect()
-        } else if matches!(input, PatternInput::UntrustedRepresentation) {
+        } else if matches!(adt.input, PatternInput::UntrustedRepresentation) {
             // Translating the payload under `UntrustedRepresentation` already establishes its
             // shape. Another guard is redundant.
             SmallVec::new()
         } else {
-            let shape =
-                self.tcx().erl_variant_discriminating_shape(variant.def_id, args, payload_ty);
+            let shape = self.tcx().erl_variant_discriminating_shape(variant, args, payload.ty);
             self.guards_for_shape(span, shape_expr, &shape).into_iter().collect()
         };
 
@@ -243,75 +189,52 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
     fn translate_tagged(
         &mut self,
-        expr: &Expr<'tcx>,
-        adt_expr: &AdtExpr<'tcx>,
-        fields: &[&FieldExpr],
-        variant: &VariantDef,
-        repr: ErlVariantRepr,
+        expr: &etir::Expr<'tcx>,
+        adt: &etir::AdtExpr,
+        tag: Symbol,
     ) -> eaf::Expr<'arena> {
         let afb = &self.translator.afb;
 
-        match &adt_expr.base {
-            AdtExprBase::None => {
-                let tag = afb.expr_atom(expr.span, repr.tag);
-                let values = self.tcx().erl_runtime_fields(variant).map(|(idx, _)| {
-                    let field =
-                        fields.iter().find(|field| field.name == idx).unwrap_or_else(|| {
-                            span_bug!(
-                                expr.span,
-                                "tagged tuple construction is missing field {idx:?}"
-                            )
-                        });
-                    self.translate_expr(field.expr)
-                });
+        match adt.base {
+            None => {
+                let tag = afb.expr_atom(expr.span, tag);
+                let values = adt.fields.iter().map(|field| self.translate_expr(field.value));
 
                 afb.expr_tuple(expr.span, std::iter::once(tag).chain(values))
             }
-            AdtExprBase::Base(base) => {
-                let mut value = self.translate_expr(base.base);
+            Some(base) => {
+                let mut value = self.translate_expr(base);
 
-                for field in fields {
-                    let field_span = self.thir[field.expr].span;
-                    let field_value = self.translate_expr(field.expr);
-                    let position =
-                        self.tcx().erl_runtime_field_position(variant, field.name).unwrap_or_else(
-                            || span_bug!(field_span, "update of a phantom field in a tagged tuple"),
-                        );
-                    value = afb.expr_remote_call(
+                for field in &adt.fields {
+                    let field_span = self.etir[field.value].span;
+                    let field_value = self.translate_expr(field.value);
+                    let position = field.position.as_u32();
+                    value = afb.erlang_bif(
                         field_span,
-                        afb.expr_atom(field_span, sym::erlang),
-                        afb.expr_atom(field_span, sym::setelement),
+                        sym::setelement,
                         [afb.expr_int(field_span, position as u128 + 2), value, field_value],
                     );
                 }
 
                 value
             }
-            AdtExprBase::DefaultFields(_) => {
-                not_implemented!(self.tcx(), expr.span, "tagged tuple with default fields")
-            }
         }
     }
 
     fn translate_elixir_struct(
         &mut self,
-        expr: &Expr<'tcx>,
-        adt_expr: &AdtExpr<'tcx>,
-        fields: &[&FieldExpr],
-        variant: &VariantDef,
+        expr: &etir::Expr<'tcx>,
+        adt: &etir::AdtExpr,
+        adt_def_id: DefId,
+        variant: DefId,
     ) -> eaf::Expr<'arena> {
         let afb = &self.translator.afb;
-        let tcx = self.tcx();
 
-        let base = match &adt_expr.base {
-            AdtExprBase::None => {
+        let base = match adt.base {
+            None => {
                 let fn_atom = afb.expr_atom(expr.span, sym::__struct__);
 
-                match self.resolve_extern_module_name(
-                    expr.span,
-                    adt_expr.adt_def.did(),
-                    variant.def_id,
-                ) {
+                match self.resolve_extern_module_name(expr.span, adt_def_id, variant) {
                     Some(module) => {
                         let mod_expr = afb.expr_atom(expr.span, module);
                         afb.expr_remote_call(expr.span, mod_expr, fn_atom, [])
@@ -319,16 +242,12 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                     None => afb.expr_local_call(expr.span, fn_atom, []),
                 }
             }
-            AdtExprBase::Base(base) => self.translate_expr(base.base),
-            AdtExprBase::DefaultFields(_) => {
-                not_implemented!(tcx, expr.span, "ADT default-field base", adt_expr.base);
-            }
+            Some(base) => self.translate_expr(base),
         };
 
-        let updates = fields.iter().map(|field| {
-            let field_def = &variant.fields[field.name];
-            let value = self.translate_expr(field.expr);
-            let key = afb.expr_atom(self.thir[field.expr].span, field_def.name);
+        let updates = adt.fields.iter().map(|field| {
+            let value = self.translate_expr(field.value);
+            let key = afb.expr_atom(self.etir[field.value].span, field.name);
             (key, value)
         });
 
@@ -337,36 +256,20 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
     fn translate_native_record(
         &mut self,
-        expr: &Expr<'tcx>,
-        adt_expr: &AdtExpr<'tcx>,
-        fields: &[&FieldExpr],
-        variant: &VariantDef,
-        repr: ErlVariantRepr,
+        expr: &etir::Expr<'tcx>,
+        adt: &etir::AdtExpr,
+        record_module: Symbol,
+        record_name: Symbol,
     ) -> eaf::Expr<'arena> {
-        let tcx = self.tcx();
         let afb = &self.translator.afb;
 
-        let base = match &adt_expr.base {
-            AdtExprBase::None => None,
-            AdtExprBase::Base(base) => Some(self.translate_expr(base.base)),
-            AdtExprBase::DefaultFields(_) => {
-                not_implemented!(
-                    tcx,
-                    expr.span,
-                    "native record with default fields",
-                    adt_expr.base
-                );
-            }
-        };
+        let base = adt.base.map(|base| self.translate_expr(base));
+        let module = self.record_module_for_access(record_module);
 
-        let record_name = repr.tag;
-        let module = self.record_module_for_access(repr.record_module);
-
-        let fields = fields.iter().map(|field| {
-            let field_def = &variant.fields[field.name];
-            let value = self.translate_expr(field.expr);
-            let ident = Ident::new(field_def.name, self.thir[field.expr].span);
-            (field.name, ident, value)
+        let fields = adt.fields.iter().map(|field| {
+            let value = self.translate_expr(field.value);
+            let ident = Ident::new(field.name, self.etir[field.value].span);
+            (ident, value)
         });
 
         match (base, module) {
@@ -375,95 +278,51 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 // We do this because crating a record requires the defining module to be loaded,
                 // and unlike functions, it does not autoload on use.
                 // The constructor takes every field, in declaration order.
-                let mut fields = fields.into_iter().collect::<SmallVec<[_; 8]>>();
-                fields.sort_by_key(|&(index, ..)| index);
                 afb.expr_remote_call(
                     expr.span,
                     afb.expr_atom(expr.span, module),
                     afb.expr_atom(expr.span, record_constructor_name(record_name)),
-                    fields.into_iter().map(|(_, _, value)| value),
+                    fields.map(|(_, value)| value),
                 )
             }
-            (None, None) => afb.expr_record_create(
-                expr.span,
-                None,
-                record_name,
-                fields.map(|(_, ident, value)| (ident, value)),
-            ),
-            (Some(base), module) => afb.expr_record_update(
-                expr.span,
-                base,
-                module,
-                record_name,
-                fields.map(|(_, ident, value)| (ident, value)),
-            ),
+            (None, None) => afb.expr_record_create(expr.span, None, record_name, fields),
+            (Some(base), module) => {
+                afb.expr_record_update(expr.span, base, module, record_name, fields)
+            }
         }
     }
 
     fn translate_adt_fields(
         &mut self,
-        pat: &Pat<'tcx>,
-        variant: &VariantDef,
-        subpatterns: &[FieldPat<'tcx>],
-        input: PatternInput,
-        fields: impl IntoIterator<Item = FieldIdx>,
+        adt: &etir::AdtPat<'tcx>,
+        only_mentioned: bool,
     ) -> SmallVec<[(Ident, Patterns<'arena>); 4]> {
-        let ty::Adt(_, args) = pat.ty.kind() else {
-            span_bug!(pat.span, "ADT pattern has non-ADT type {}", pat.ty)
-        };
-
-        fields
-            .into_iter()
-            .map(|idx| {
-                let field_def = &variant.fields[idx];
-                let field = subpatterns.iter().find(|field| field.field == idx);
-                let span = field.map_or(pat.span, |field| field.pattern.span);
-                let patterns = if let Some(field) = field {
-                    self.translate_pattern(&field.pattern, input)
-                } else {
-                    self.translate_wild_pattern(pat.span, field_def.ty(self.tcx(), args), input)
-                };
-                (Ident::new(field_def.name, span), patterns)
+        adt.fields
+            .iter()
+            .filter(|field| !only_mentioned || !self.etir[field.pattern].kind.is_wild())
+            .map(|field| {
+                let span = self.etir[field.pattern].span;
+                let patterns = self.translate_pattern(field.pattern);
+                (Ident::new(field.name, span), patterns)
             })
             .collect()
     }
 
     fn translate_elixir_struct_pattern(
         &mut self,
-        pat: &Pat<'tcx>,
-        adt_def: AdtDef<'tcx>,
-        variant_index: VariantIdx,
-        subpatterns: &[FieldPat<'tcx>],
-        input: PatternInput,
+        pat: &etir::Pat<'tcx>,
+        adt: &etir::AdtPat<'tcx>,
+        adt_def_id: DefId,
+        variant: DefId,
     ) -> Patterns<'arena> {
-        let tcx = self.tcx();
         let afb = &self.translator.afb;
         let span = pat.span;
-        let variant = adt_def.variant(variant_index);
 
-        let struct_module = self.resolve_module_name(span, adt_def.did(), variant.def_id);
+        let struct_module = self.resolve_module_name(span, adt_def_id, variant);
         let struct_key = afb.expr_atom(span, sym::__struct__);
         let struct_val = afb.pat_atom(span, struct_module);
 
-        let fields = match input {
-            PatternInput::UntrustedRepresentation => self.translate_adt_fields(
-                pat,
-                variant,
-                subpatterns,
-                input,
-                tcx.erl_runtime_fields(variant).map(|(idx, _)| idx),
-            ),
-            PatternInput::Typed => self.translate_adt_fields(
-                pat,
-                variant,
-                subpatterns,
-                input,
-                subpatterns
-                    .iter()
-                    .map(|field| field.field)
-                    .filter(|&idx| !tcx.is_erl_phantom_field(variant.fields[idx].did)),
-            ),
-        };
+        let fields = self.translate_adt_fields(adt, matches!(adt.input, PatternInput::Typed));
         let (keys, groups): (SmallVec<[_; 4]>, SmallVec<[_; 4]>) = fields
             .into_iter()
             .map(|(field, patterns)| (afb.expr_atom(field.span, field.name), patterns))
@@ -478,34 +337,22 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
     fn translate_native_record_pattern(
         &mut self,
-        pat: &Pat<'tcx>,
-        adt_def: AdtDef<'tcx>,
-        variant_index: VariantIdx,
-        subpatterns: &[FieldPat<'tcx>],
-        repr: ErlVariantRepr,
-        input: PatternInput,
+        pat: &etir::Pat<'tcx>,
+        adt: &etir::AdtPat<'tcx>,
+        record_module: Symbol,
+        tag: Symbol,
     ) -> Patterns<'arena> {
         let span = pat.span;
-        let variant = adt_def.variant(variant_index);
-        let module = self.record_module_for_access(repr.record_module);
+        let module = self.record_module_for_access(record_module);
 
-        let (fields, groups): (SmallVec<[_; 4]>, SmallVec<[_; 4]>) = self
-            .translate_adt_fields(
-                pat,
-                variant,
-                subpatterns,
-                input,
-                self.tcx().erl_runtime_fields(variant).map(|(idx, _)| idx),
-            )
-            .into_iter()
-            .map(|(field, patterns)| (Ident::new(field.name, span), patterns))
-            .unzip();
+        let (fields, groups): (SmallVec<[_; 4]>, SmallVec<[_; 4]>) =
+            self.translate_adt_fields(adt, false).into_iter().unzip();
 
         self.pattern_cartesian_product(span, &groups, |values| {
             self.translator.afb.pat_record(
                 span,
                 module,
-                repr.tag,
+                tag,
                 fields.iter().copied().zip(values.iter().copied()),
             )
         })
@@ -513,31 +360,53 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
     fn translate_tagged_pattern(
         &mut self,
-        pat: &Pat<'tcx>,
-        adt_def: AdtDef<'tcx>,
-        variant_index: VariantIdx,
-        subpatterns: &[FieldPat<'tcx>],
-        repr: ErlVariantRepr,
-        input: PatternInput,
+        pat: &etir::Pat<'tcx>,
+        adt: &etir::AdtPat<'tcx>,
+        tag: Symbol,
     ) -> Patterns<'arena> {
+        let afb = &self.translator.afb;
         let span = pat.span;
-        let variant = adt_def.variant(variant_index);
         let groups = self
-            .translate_adt_fields(
-                pat,
-                variant,
-                subpatterns,
-                input,
-                self.tcx().erl_runtime_fields(variant).map(|(idx, _)| idx),
-            )
+            .translate_adt_fields(adt, false)
             .into_iter()
             .map(|(_, patterns)| patterns)
             .collect::<SmallVec<[_; 4]>>();
 
         self.pattern_cartesian_product(span, &groups, |fields| {
-            let tag = self.translator.afb.pat_atom(span, repr.tag);
+            let tag = afb.pat_atom(span, tag);
             self.translator.afb.pat_tuple(span, std::iter::once(tag).chain(fields.iter().copied()))
         })
+    }
+
+    pub(super) fn translate_field(
+        &mut self,
+        span: Span,
+        lhs: etir::ExprId,
+        repr: AdtRepr,
+        position: etir::FieldIdx,
+        name: Symbol,
+    ) -> eaf::Expr<'arena> {
+        let afb = &self.translator.afb;
+        let value = self.translate_expr(lhs);
+
+        match repr {
+            AdtRepr::Atom { .. } => {
+                span_bug!(span, "field access on atom-represented ADT (unit variant)")
+            }
+            AdtRepr::Tagged { .. } => {
+                let index = afb.expr_int(span, (position.as_u32() + 2).into());
+                afb.erlang_bif(span, sym::element, [index, value])
+            }
+            AdtRepr::Elixir { .. } => {
+                let lhs_span = self.etir[lhs].span;
+                afb.erlang_bif(span, sym::map_get, [afb.expr_atom(lhs_span, name), value])
+            }
+            AdtRepr::NativeRecord { record_module, tag } => {
+                let module = self.record_module_for_access(record_module);
+                afb.expr_record_field(span, value, module, tag, name)
+            }
+            AdtRepr::Transparent { .. } => value,
+        }
     }
 
     fn resolve_module_name(
@@ -552,7 +421,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             ErlCallTarget::Constructor { nominal_type: adt_def_id, variant: variant_def_id };
 
         let module_resolution = tcx
-            .erl_module_for_target(self.owner.to_def_id(), target)
+            .erl_module_for_target(self.owner, target)
             .unwrap_or_else(|| span_bug!(span, "adt constructor must resolve to a module"));
 
         let ErlModuleResolution::Static(module_id) = module_resolution else {
@@ -569,9 +438,8 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             return Some(record_module);
         }
 
-        let current_module = tcx
-            .erl_definition_module(self.owner.to_def_id())
-            .map(|module_id| tcx.erl_module_name(module_id));
+        let current_module =
+            tcx.erl_definition_module(self.owner).map(|module_id| tcx.erl_module_name(module_id));
 
         (current_module != Some(record_module)).then_some(record_module)
     }
@@ -586,9 +454,10 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
         let target =
             ErlCallTarget::Constructor { nominal_type: adt_def_id, variant: variant_def_id };
+        let module = tcx.erl_module_for_target(self.owner, target);
 
         let call_kind = tcx
-            .erl_call_kind(self.owner.to_def_id(), target, None)
+            .erl_call_kind(self.owner, module, target, None)
             .unwrap_or_else(|| span_bug!(span, "adt constructor didn't classify"));
 
         // adt construction is always local if possible
@@ -608,12 +477,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let afb = &self.translator.afb;
 
         let bif = |name: Symbol, args: &[eaf::Expr<'arena>]| {
-            afb.expr_remote_call(
-                span,
-                afb.expr_atom(span, sym::erlang),
-                afb.expr_atom(span, name),
-                args.iter().copied(),
-            )
+            afb.erlang_bif(span, name, args.iter().copied())
         };
         let and = |left, right| afb.expr_binary_op(span, eaf::BinaryOp::Andalso, left, right);
         let or = |left, right| afb.expr_binary_op(span, eaf::BinaryOp::Orelse, left, right);

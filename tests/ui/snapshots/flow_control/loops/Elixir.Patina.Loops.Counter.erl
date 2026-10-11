@@ -26,7 +26,9 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'<impl Loops::Count for Loops::Counter<int>>::count$patina_loop_1'(_witness@0_0,
+'<impl Loops::Count for Loops::Counter<int>>::count$patina_loop_1'(_witness@0_0 =
+                                                                       {'impl Loops::Count for Loops::Counter<int>',
+                                                                        _},
                                                                    _n@3_0,
                                                                    _limit@2_0) ->
     _ = begin
@@ -49,7 +51,9 @@
                               _n@3_1,
                               _limit@2_0).
 
-'<impl Loops::Count for Loops::Counter<str>>::count$patina_loop_1'(_witness@0_0,
+'<impl Loops::Count for Loops::Counter<str>>::count$patina_loop_1'(_witness@0_0 =
+                                                                       {'impl Loops::Count for Loops::Counter<str>',
+                                                                        _},
                                                                    _n@3_0,
                                                                    _limit@2_0) ->
     _ = begin

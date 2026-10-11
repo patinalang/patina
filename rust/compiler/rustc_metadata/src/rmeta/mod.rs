@@ -434,6 +434,7 @@ define_tables! {
     impl_trait_header: Table<DefIndex, LazyValue<ty::ImplTraitHeader<'static>>>,
     erl_impl_tag: Table<DefIndex, LazyValue<Symbol>>,
     erl_fn_name: Table<DefIndex, LazyValue<Symbol>>,
+    etir_body: Table<DefIndex, LazyValue<rustc_middle::erl::etir::Body<'static>>>,
     const_param_default: Table<DefIndex, LazyValue<ty::EarlyBinder<'static, rustc_middle::ty::Const<'static>>>>,
     object_lifetime_default: Table<DefIndex, LazyValue<ObjectLifetimeDefault>>,
     optimized_mir: Table<DefIndex, LazyValue<mir::Body<'static>>>,

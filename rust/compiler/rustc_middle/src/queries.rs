@@ -69,7 +69,7 @@ use rustc_hir::def_id::{
 };
 use rustc_hir::lang_items::{LangItem, LanguageItems};
 use rustc_hir::{ItemLocalId, ItemLocalMap, PreciseCapturingArgKind, TraitCandidate};
-use rustc_index::IndexVec;
+use rustc_index::{IndexSlice, IndexVec};
 use rustc_lint_defs::LintId;
 use rustc_macros::rustc_queries;
 use rustc_session::Limits;
@@ -605,6 +605,13 @@ rustc_queries! {
         // Perf tests revealed that hashing THIR is inefficient (see #85729).
         no_hash
         desc { "building THIR for `{}`", tcx.def_path_str(key) }
+    }
+
+    /// Fetch the ETIR for a given body.
+    query etir_body(key: DefId) -> &'tcx crate::erl::etir::Body<'tcx> {
+        no_hash
+        desc { "lowering `{}` to the Erlang translation IR", tcx.def_path_str(key) }
+        separate_provide_extern
     }
 
     /// Set of all the `DefId`s in this crate that have MIR associated with
@@ -1215,13 +1222,13 @@ rustc_queries! {
     }
 
     /// The direct supertraits of the trait, in the trait's generics.
-    query erl_trait_supertraits(trait_def_id: DefId) -> &'tcx [ty::TraitRef<'tcx>] {
+    query erl_trait_supertraits(trait_def_id: DefId) -> ty::EarlyBinder<'tcx, &'tcx IndexSlice<crate::erl::witness::SupertraitIdx, ty::TraitRef<'tcx>>> {
         desc { "computing the witnessed supertraits of `{}`", tcx.def_path_str(trait_def_id) }
     }
 
     /// The declared bounds of the associated type, in the trait's generics. They include the
     /// bounds of its nested projections, like `Item: Label` in `type Inner: HasItem<Item: Label>`.
-    query erl_assoc_type_bounds(assoc_def_id: DefId) -> &'tcx [ty::TraitRef<'tcx>] {
+    query erl_assoc_type_bounds(assoc_def_id: DefId) -> ty::EarlyBinder<'tcx, &'tcx IndexSlice<crate::erl::witness::AssocTypeBoundIdx, ty::TraitRef<'tcx>>> {
         desc { "computing the witnessed bounds of `{}`", tcx.def_path_str(assoc_def_id) }
     }
 
@@ -1229,7 +1236,7 @@ rustc_queries! {
     /// they are its `Bounds` argument; for a trait item, the self witness holds `Self: Trait` and
     /// its supertraits instead. For a trait impl, they are its where-clauses, which its witness
     /// holds after the supertraits.
-    query erl_bounds(def_id: DefId) -> &'tcx [ty::TraitRef<'tcx>] {
+    query erl_bounds(def_id: DefId) -> ty::EarlyBinder<'tcx, &'tcx IndexSlice<crate::erl::witness::BoundIdx, ty::TraitRef<'tcx>>> {
         desc { "computing the witnessed bounds of `{}`", tcx.def_path_str(def_id) }
     }
 

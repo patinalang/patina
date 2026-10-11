@@ -118,8 +118,8 @@ marker_effect() ->
                                             '$patina_marker':break({break,
                                                                     0,
                                                                     {},
-                                                                    _last@2_0,
-                                                                    _count@1_0})
+                                                                    _count@1_0,
+                                                                    _last@2_0})
                                         end,
                     _last@2_1 = _last@2_0,
                     _count@1_1 = _count@1_0,
@@ -141,7 +141,7 @@ phantom_in_loop_and_closure(_n@0_0) ->
                                                     _n@0_0,
                                                     _last@2_0)
         of
-        {break, 0, _loop_value@4_0, _last@2_1, _count@1_1} ->
+        {break, 0, _loop_value@4_0, _count@1_1, _last@2_1} ->
             _loop_value@4_0
     end,
     _make@6_0 = fun (_value@5_0) ->

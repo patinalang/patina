@@ -58,55 +58,58 @@
                                                                                _self@1_0)
      end}.
 
-via_subtrait_bound({_witness@0_0}, _x@1_0) ->
+via_subtrait_bound(_witness@1_0 = {_witness@0_0},
+                   _x@2_0) ->
     {begin
-         _witness@2_0 = erlang:element(3, _witness@0_0),
+         _witness@3_0 = erlang:element(3, _witness@0_0),
          (erlang:element(2,
-                         _witness@2_0)):'Supertraits::Named::name'(_witness@2_0,
-                                                                   _x@1_0)
+                         _witness@3_0)):'Supertraits::Named::name'(_witness@3_0,
+                                                                   _x@2_0)
      end,
      (erlang:element(2,
                      _witness@0_0)):'Supertraits::Greet::calls_supertrait'(_witness@0_0,
-                                                                           _x@1_0)}.
+                                                                           _x@2_0)}.
 
-via_indirect_supertrait({_witness@0_0}, _x@1_0) ->
+via_indirect_supertrait(_witness@1_0 = {_witness@0_0},
+                        _x@2_0) ->
     {begin
-         _witness@2_0 = erlang:element(3,
+         _witness@3_0 = erlang:element(3,
                                        erlang:element(3, _witness@0_0)),
          (erlang:element(2,
-                         _witness@2_0)):'Supertraits::Named::name'(_witness@2_0,
-                                                                   _x@1_0)
+                         _witness@3_0)):'Supertraits::Named::name'(_witness@3_0,
+                                                                   _x@2_0)
      end,
      (erlang:element(2,
                      _witness@0_0)):'Supertraits::Loud::shout'(_witness@0_0,
-                                                               _x@1_0)}.
+                                                               _x@2_0)}.
 
 'Supertraits::Library::count'(_witness@0_0,
-                              {_witness@1_0}, _self@2_0, _p@3_0) ->
+                              _witness@2_0 = {_witness@1_0}, _self@3_0,
+                              _p@4_0) ->
     {begin
-         _witness@4_0 = erlang:element(3, _witness@0_0),
+         _witness@5_0 = erlang:element(3, _witness@0_0),
          (erlang:element(2,
-                         _witness@4_0)):'Supertraits::Shelf::size'(_witness@4_0,
-                                                                   _self@2_0)
+                         _witness@5_0)):'Supertraits::Shelf::size'(_witness@5_0,
+                                                                   _self@3_0)
      end,
      (erlang:element(2,
                      _witness@1_0)):'Supertraits::Pred::test'(_witness@1_0,
-                                                              _p@3_0,
+                                                              _p@4_0,
                                                               begin
-                                                                  _witness@5_0 =
+                                                                  _witness@6_0 =
                                                                       erlang:element(3,
                                                                                      _witness@0_0),
                                                                   (erlang:element(2,
-                                                                                  _witness@5_0)):'Supertraits::Shelf::size'(_witness@5_0,
-                                                                                                                            _self@2_0)
+                                                                                  _witness@6_0)):'Supertraits::Shelf::size'(_witness@6_0,
+                                                                                                                            _self@3_0)
                                                               end)}.
 
-count_in({_witness@0_0}, _l@1_0) ->
+count_in(_witness@1_0 = {_witness@0_0}, _l@2_0) ->
     (erlang:element(2,
                     _witness@0_0)):'Supertraits::Library::count'(_witness@0_0,
                                                                  {{'impl Supertraits::Pred for Supertraits::IsEven',
                                                                    'Elixir.Patina.Supertraits.IsEven'}},
-                                                                 _l@1_0,
+                                                                 _l@2_0,
                                                                  'Elixir.Patina.Supertraits.IsEven').
 
 bob_intro() ->

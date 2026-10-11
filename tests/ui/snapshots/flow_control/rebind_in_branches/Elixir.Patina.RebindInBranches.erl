@@ -79,7 +79,7 @@ initialize_or_return(_take_then@0_0) ->
             {};
         false ->
             _branch_value@2_0 = begin
-                                    '$patina_marker':return(40), {}
+                                    '$patina_marker':return(40)
                                 end,
             _value@1_1 = _value@1_0,
             _branch_value@2_0
@@ -125,8 +125,7 @@ nested_diverging_rebind(_take_outer@0_0,
             case _take_inner@1_0 of
                 true ->
                     _value@2_1 = 1,
-                    '$patina_marker':return(_value@2_1),
-                    {};
+                    '$patina_marker':return(_value@2_1);
                 false ->
                     _branch_value@3_0 = begin {} end,
                     _value@2_1 = _value@2_0,

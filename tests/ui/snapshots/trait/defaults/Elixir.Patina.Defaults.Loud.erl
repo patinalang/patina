@@ -25,7 +25,7 @@
 
 'Defaults::Ring::ring'(_witness@0_0 =
                            {'impl Defaults::Ring for Defaults::Loud', _},
-                       {_witness@1_0}, _self@2_0, _t@3_0) ->
+                       _witness@2_0 = {_witness@1_0}, _self@3_0, _t@4_0) ->
     (erlang:element(2,
                     _witness@1_0)):'Defaults::Tag::tag'(_witness@1_0,
-                                                        _t@3_0).
+                                                        _t@4_0).

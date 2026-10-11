@@ -261,8 +261,8 @@ if_let_open(_value@0_0) ->
                                             '$patina_marker':break({break,
                                                                     0,
                                                                     {},
-                                                                    _count@2_0,
-                                                                    _current@1_0})
+                                                                    _current@1_0,
+                                                                    _count@2_0})
                                         end,
                     _count@2_1 = _count@2_0,
                     _current@1_1 = _current@1_0,
@@ -277,7 +277,7 @@ while_let_open(_value@0_0) ->
     case 'while_let_open$patina_loop_1'(_current@1_0,
                                         _count@2_0)
         of
-        {break, 0, _loop_value@5_0, _count@2_1, _current@1_1} ->
+        {break, 0, _loop_value@5_0, _current@1_1, _count@2_1} ->
             _loop_value@5_0
     end,
     _count@2_1.
@@ -300,9 +300,7 @@ let_else_open(_value@0_0) ->
                            erlang:tuple_size(_value@1_0) =:= 2)
                           andalso erlang:element(1, _value@1_0) =:= tagged) ->
             {};
-        _ ->
-            '$patina_marker':return(other),
-            {}
+        _ -> '$patina_marker':return(other)
     end,
     dynamic.
 

@@ -63,8 +63,8 @@ if_let_pin(_actual@0_0, _expected@1_0) ->
                                             '$patina_marker':break({break,
                                                                     0,
                                                                     {},
-                                                                    _count@3_0,
-                                                                    _current@2_0})
+                                                                    _current@2_0,
+                                                                    _count@3_0})
                                         end,
                     _count@3_1 = _count@3_0,
                     _current@2_1 = _current@2_0,
@@ -82,7 +82,7 @@ while_let_pin(_start@0_0, _expected@1_0) ->
                                        _expected@1_0,
                                        _count@3_0)
         of
-        {break, 0, _loop_value@5_0, _count@3_1, _current@2_1} ->
+        {break, 0, _loop_value@5_0, _current@2_1, _count@3_1} ->
             _loop_value@5_0
     end,
     _count@3_1 * 10 + _current@2_1.
@@ -90,9 +90,7 @@ while_let_pin(_start@0_0, _expected@1_0) ->
 let_else_pin(_actual@0_0, _expected@1_0) ->
     case _actual@0_0 of
         _expected@1_0 -> {};
-        _ ->
-            '$patina_marker':return(false),
-            {}
+        _ -> '$patina_marker':return(false)
     end,
     true.
 

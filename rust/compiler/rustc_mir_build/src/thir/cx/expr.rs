@@ -1163,8 +1163,9 @@ impl<'tcx> ThirBuildCx<'tcx> {
                             );
                             return None;
                         };
-                        let layout = layout
-                            .map_size_expr(|size| self.mirror_expr(self.tcx.hir_expect_expr(size)));
+                        let layout = layout.with_size_expr(|size| {
+                            self.mirror_expr(self.tcx.hir_expect_expr(size))
+                        });
                         Some(BinarySegmentExpr {
                             value: self.mirror_expr(segment.expr),
                             layout,

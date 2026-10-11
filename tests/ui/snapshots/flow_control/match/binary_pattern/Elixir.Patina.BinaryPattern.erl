@@ -54,7 +54,7 @@ utf8_segments_make_str(_name@0_0, _c@1_0) ->
 
 whole_bytes_make_bin(_n@0_0, _c@1_0) ->
     <<_n@0_0:16/integer, _c@1_0/utf16, _c@1_0/utf32-little,
-      1.5:32/float, <<255>>:1/binary>>.
+      1.5:32/float, 255>>.
 
 partial_bytes_make_bits(_n@0_0) ->
     <<1:3/integer, (_n@0_0 + 1):2/integer-unit:4>>.

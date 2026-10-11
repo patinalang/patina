@@ -31,8 +31,7 @@
                     begin
                         io:put_chars([[<<"three"/utf8>>]]), io:nl(), {}
                     end,
-                    '$patina_marker':continue(_count@0_1),
-                    {};
+                    '$patina_marker':continue(_count@0_1);
                 false -> {}
             end,
             begin
@@ -47,8 +46,7 @@
                         io:nl(),
                         {}
                     end,
-                    '$patina_marker':break({break, 0, {}, _count@0_1}),
-                    {};
+                    '$patina_marker':break({break, 0, {}, _count@0_1});
                 false -> {}
             end
         end,

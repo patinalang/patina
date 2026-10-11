@@ -127,9 +127,9 @@ assign_coerces_to_var_type() ->
                                             '$patina_marker':break({break,
                                                                     0,
                                                                     {},
+                                                                    _i@3_0,
                                                                     _current@1_0,
-                                                                    _next@2_0,
-                                                                    _i@3_0})
+                                                                    _next@2_0})
                                         end,
                     _current@1_1 = _current@1_0,
                     _next@2_1 = _next@2_0,
@@ -154,9 +154,9 @@ fibonacci(_n@0_0) ->
         {break,
          0,
          _loop_value@5_0,
+         _i@3_1,
          _current@1_1,
-         _next@2_1,
-         _i@3_1} ->
+         _next@2_1} ->
             _loop_value@5_0
     end,
     _current@1_1.
@@ -197,9 +197,7 @@ block_ending_in_uninitialized_let() ->
 block_ending_in_let_else(_value@0_0) ->
     case _value@0_0 of
         42 -> {};
-        _ ->
-            '$patina_marker':return({}),
-            {}
+        _ -> '$patina_marker':return({})
     end.
 
 block_ending_in_unit_expr() -> {}.

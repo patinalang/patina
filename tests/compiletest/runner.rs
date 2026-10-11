@@ -47,7 +47,7 @@ pub fn run_exs(pt_path: &Path, exs_path: &Path) -> Result<(), Failed> {
         .arg(
             exs_path
                 .canonicalize()
-                .expect(&format!("canonicalize elixir test {}", exs_path.display())),
+                .unwrap_or_else(|_| panic!("canonicalize elixir test {}", exs_path.display())),
         )
         .current_dir(out_dir.path())
         .output()
@@ -95,10 +95,11 @@ fn run_compile(dumps: &[&str], emits: &[&str], pt_path: &Path, out_dir: &Path) -
 fn read_text_artifacts(out_dir: &Path, extensions: &HashSet<&str>) -> Vec<TextArtifact> {
     let mut artifacts = Vec::new();
 
-    for entry in
-        std::fs::read_dir(out_dir).expect(&format!("read emit out dir {}", out_dir.display()))
+    for entry in std::fs::read_dir(out_dir)
+        .unwrap_or_else(|_| panic!("read emit out dir {}", out_dir.display()))
     {
-        let path = entry.expect(&format!("read emit out dir {}", out_dir.display())).path();
+        let path =
+            entry.unwrap_or_else(|_| panic!("read emit out dir {}", out_dir.display())).path();
         let Some(ext) = path.extension().and_then(|ext| ext.to_str()) else {
             continue;
         };
@@ -109,10 +110,10 @@ fn read_text_artifacts(out_dir: &Path, extensions: &HashSet<&str>) -> Vec<TextAr
         let file_name = path
             .file_name()
             .and_then(|name| name.to_str())
-            .expect(&format!("emitted file name is not UTF-8: {}", path.display()))
+            .unwrap_or_else(|| panic!("emitted file name is not UTF-8: {}", path.display()))
             .to_string();
-        let content =
-            std::fs::read_to_string(&path).expect(&format!("read emitted file {}", path.display()));
+        let content = std::fs::read_to_string(&path)
+            .unwrap_or_else(|_| panic!("read emitted file {}", path.display()));
 
         artifacts.push(TextArtifact { file_name, content });
     }

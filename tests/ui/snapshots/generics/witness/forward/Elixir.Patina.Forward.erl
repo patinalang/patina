@@ -23,12 +23,13 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-b({_witness@0_0}, _x@1_0) ->
+b(_witness@1_0 = {_witness@0_0}, _x@2_0) ->
     (erlang:element(2,
                     _witness@0_0)):'Forward::Tr::method'(_witness@0_0,
-                                                         _x@1_0).
+                                                         _x@2_0).
 
-a({_witness@0_0}, _x@1_0) -> b({_witness@0_0}, _x@1_0).
+a(_witness@1_0 = {_witness@0_0}, _x@2_0) ->
+    b({_witness@0_0}, _x@2_0).
 
 main() ->
     a({{'impl Forward::Tr for Forward::S',

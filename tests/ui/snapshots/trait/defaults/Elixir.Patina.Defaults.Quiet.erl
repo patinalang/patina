@@ -25,5 +25,5 @@
 
 'Defaults::Ring::ring'(_witness@0_0 =
                            {'impl Defaults::Ring for Defaults::Quiet', _},
-                       {_witness@1_0}, _self@2_0, __t@3_0) ->
+                       _witness@2_0 = {_witness@1_0}, _self@3_0, __t@4_0) ->
     <<"..."/utf8>>.

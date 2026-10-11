@@ -43,7 +43,7 @@ pub struct BinarySegmentLayout<E> {
 }
 
 impl<E> BinarySegmentLayout<E> {
-    pub fn map_size_expr<F>(self, f: impl FnOnce(E) -> F) -> BinarySegmentLayout<F> {
+    pub fn with_size_expr<F>(self, f: impl FnOnce(E) -> F) -> BinarySegmentLayout<F> {
         let Self { ty, size, unit, signed, endianness } = self;
         let size = match size {
             BinarySegmentSize::Fixed(size) => BinarySegmentSize::Fixed(size),

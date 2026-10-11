@@ -1,7 +1,9 @@
 //! Erlang call resolution and module placement.
 
 pub mod binary_pattern;
+pub mod etir;
 pub mod shape;
+pub mod witness;
 
 use std::hash::Hash as _;
 
@@ -15,11 +17,13 @@ use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{CrateNum, DefId, LocalDefId};
 use rustc_hir::definitions::DefPathData;
 use rustc_hir::{Attribute, HirId, PrimTy};
-use rustc_macros::StableHash;
+use rustc_index::IndexSlice;
+use rustc_macros::{StableHash, TyDecodable, TyEncodable};
 use rustc_span::{Span, Symbol, kw};
 use smallvec::SmallVec;
 
 use self::shape::ErlShape;
+use self::witness::{AssocTypeBoundIdx, BoundIdx, SupertraitIdx};
 use crate::query::Providers;
 use crate::traits::ImplSource;
 use crate::ty::print::PrintTraitRefExt as _;
@@ -29,7 +33,7 @@ use crate::ty::{
 };
 
 /// The identity of a module in the generated Erlang program.
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, StableHash)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, StableHash, TyEncodable, TyDecodable)]
 pub enum ErlModuleId {
     /// A module generated for a Rust `mod`.
     Mod(DefId),
@@ -48,7 +52,7 @@ pub enum ErlModuleId {
 }
 
 /// The semantic target of an Erlang call.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, TyEncodable, TyDecodable)]
 pub enum ErlCallTarget<'tcx> {
     /// A free function, inherent method, trait method, or trait associated const.
     Item { def_id: DefId, args: GenericArgsRef<'tcx> },
@@ -61,7 +65,7 @@ pub enum ErlCallTarget<'tcx> {
 }
 
 /// The result of resolving which Erlang module contains a caller or callee.
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, TyEncodable, TyDecodable)]
 pub enum ErlModuleResolution {
     Static(ErlModuleId),
     Dynamic,
@@ -183,18 +187,13 @@ impl<'tcx> TyCtxt<'tcx> {
         }
     }
 
-    pub fn is_erl_phantom_field(self, field_did: impl Into<DefId>) -> bool {
-        self.type_of(field_did.into()).instantiate_identity().skip_normalization().is_phantom_data()
-    }
-
     pub fn erl_runtime_fields<'a>(
         self,
         variant: &'a VariantDef,
     ) -> impl Iterator<Item = (FieldIdx, &'a FieldDef)> {
-        variant
-            .fields
-            .iter_enumerated()
-            .filter(move |(_, field)| !self.is_erl_phantom_field(field.did))
+        variant.fields.iter_enumerated().filter(move |(_, field)| {
+            !self.type_of(field.did).instantiate_identity().skip_normalization().is_phantom_data()
+        })
     }
 
     pub fn erl_runtime_field_count(self, variant: &VariantDef) -> usize {
@@ -387,15 +386,19 @@ impl<'tcx> TyCtxt<'tcx> {
 
         params
             + usize::from(self.erl_entry_trait(def_id).is_some())
-            + usize::from(!self.erl_bounds(def_id).is_empty())
+            + usize::from(!self.erl_bounds(def_id).skip_binder().is_empty())
     }
 
     /// Normalizes `value` in `owner`'s environment. A projection whose self type is a type
     /// parameter, like `<T as Iterator>::Item`, has no impl to resolve to, and stays as it is.
     /// If normalization fails, returns `value` unchanged.
-    pub fn erl_normalize<T: TypeFoldable<TyCtxt<'tcx>> + Copy>(self, owner: DefId, value: T) -> T {
-        self.try_normalize_erasing_regions(self.erl_typing_env(owner), Unnormalized::new_wip(value))
-            .unwrap_or(value)
+    pub fn erl_normalize<T: TypeFoldable<TyCtxt<'tcx>> + Copy>(
+        self,
+        owner: DefId,
+        value: Unnormalized<'tcx, T>,
+    ) -> T {
+        self.try_normalize_erasing_regions(self.erl_typing_env(owner), value)
+            .unwrap_or(value.skip_normalization())
     }
 
     pub fn is_forced_extern(self, hir_id: HirId) -> bool {
@@ -455,16 +458,15 @@ impl<'tcx> TyCtxt<'tcx> {
         }
     }
 
-    /// Classifies a call target identified by `caller` and `target`.
+    /// Classifies a call from `caller` to `target`, whose module is `callee`.
     pub fn erl_call_kind(
         self,
         caller: DefId,
+        callee_module: Option<ErlModuleResolution>,
         target: ErlCallTarget<'tcx>,
         forced_extern: Option<bool>,
     ) -> Option<ErlCallKind> {
-        let callee = self.erl_module_for_target(caller, target)?;
-
-        let kind = match callee {
+        let kind = match callee_module? {
             ErlModuleResolution::Static(callee) => {
                 // An inlined constant's calls land in whichever module uses its value.
                 if self.is_in_erl_inlined_const(caller)
@@ -581,7 +583,7 @@ impl<'tcx> TyCtxt<'tcx> {
                             // Dispatch, also for a concrete self type: in `where Celsius:
                             // From<T>`, `T` picks the impl, and so the host, which can be in
                             // another crate. A failed selection also dispatches, so that
-                            // `resolve_witness` reports it.
+                            // `WitnessResolver::witness_source` reports it.
                             Some(ImplSource::Param(_)) | None => None,
                             Some(ImplSource::Builtin(..)) => {
                                 self.resolve_erl_receiver_module(args.type_at(0), typing_env)
@@ -1057,7 +1059,7 @@ fn struct_repr_from_arity(tcx: TyCtxt<'_>, variant: &VariantDef) -> ReprAttr {
 fn erl_trait_supertraits<'tcx>(
     tcx: TyCtxt<'tcx>,
     trait_def_id: DefId,
-) -> &'tcx [ty::TraitRef<'tcx>] {
+) -> ty::EarlyBinder<'tcx, &'tcx IndexSlice<SupertraitIdx, ty::TraitRef<'tcx>>> {
     // The implied predicates also hold the bounds on the associated types of `Self`, like
     // `<Self as HasItem>::Item: Label` in `trait Labelled: HasItem<Item: Label>`.
     let clauses = tcx.explicit_implied_predicates_of(trait_def_id).skip_binder();
@@ -1070,14 +1072,14 @@ fn erl_trait_supertraits<'tcx>(
         }
         ty == tcx.types.self_param
     });
-    tcx.arena.alloc_from_iter(supertraits)
+    ty::EarlyBinder::bind(IndexSlice::from_raw(tcx.arena.alloc_from_iter(supertraits)))
 }
 
 /// Provider for [`TyCtxt::erl_assoc_type_bounds`].
 fn erl_assoc_type_bounds<'tcx>(
     tcx: TyCtxt<'tcx>,
     assoc_def_id: DefId,
-) -> &'tcx [ty::TraitRef<'tcx>] {
+) -> ty::EarlyBinder<'tcx, &'tcx IndexSlice<AssocTypeBoundIdx, ty::TraitRef<'tcx>>> {
     let clauses = tcx.explicit_item_bounds(assoc_def_id).skip_binder();
     let bounds = tcx.erl_witnessed_trait_refs(clauses).into_iter().filter(|trait_ref| {
         let mut ty = trait_ref.self_ty();
@@ -1091,31 +1093,36 @@ fn erl_assoc_type_bounds<'tcx>(
         }
         false
     });
-    tcx.arena.alloc_from_iter(bounds)
+    ty::EarlyBinder::bind(IndexSlice::from_raw(tcx.arena.alloc_from_iter(bounds)))
 }
 
 /// Provider for [`TyCtxt::erl_bounds`].
-fn erl_bounds<'tcx>(tcx: TyCtxt<'tcx>, def_id: DefId) -> &'tcx [ty::TraitRef<'tcx>] {
+fn erl_bounds<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    def_id: DefId,
+) -> ty::EarlyBinder<'tcx, &'tcx IndexSlice<BoundIdx, ty::TraitRef<'tcx>>> {
     if let Some(trait_def_id) = tcx.trait_of_assoc(def_id) {
         let self_trait_ref = ty::TraitRef::identity(tcx, trait_def_id);
-        let supertraits = tcx.erl_trait_supertraits(trait_def_id);
+        // Both are in the trait's generics.
+        let supertraits = tcx.erl_trait_supertraits(trait_def_id).skip_binder();
         let clauses = tcx
             .predicates_of(trait_def_id)
             .predicates
             .iter()
             .chain(tcx.predicates_of(def_id).predicates);
-        let bounds = tcx
-            .erl_witnessed_trait_refs(clauses)
-            .into_iter()
-            .filter(|trait_ref| *trait_ref != self_trait_ref && !supertraits.contains(trait_ref));
-        return tcx.arena.alloc_from_iter(bounds);
+        let bounds = tcx.erl_witnessed_trait_refs(clauses).into_iter().filter(|trait_ref| {
+            *trait_ref != self_trait_ref && !supertraits.raw.contains(trait_ref)
+        });
+        return ty::EarlyBinder::bind(IndexSlice::from_raw(tcx.arena.alloc_from_iter(bounds)));
     }
 
     if let Some(trait_item_def_id) = tcx.trait_item_of(def_id) {
         let args = tcx.erl_trait_item_args_for_impl_item(def_id);
-        return tcx.arena.alloc_from_iter(tcx.erl_bounds(trait_item_def_id).iter().map(|&bound| {
-            ty::EarlyBinder::bind(bound).instantiate(tcx, args).skip_normalization()
-        }));
+        let bounds = tcx
+            .erl_bounds(trait_item_def_id)
+            .iter_instantiated_copied(tcx, args)
+            .map(|bound| bound.skip_normalization());
+        return ty::EarlyBinder::bind(IndexSlice::from_raw(tcx.arena.alloc_from_iter(bounds)));
     }
 
     let predicates = tcx.predicates_of(def_id);
@@ -1124,8 +1131,8 @@ fn erl_bounds<'tcx>(tcx: TyCtxt<'tcx>, def_id: DefId) -> &'tcx [ty::TraitRef<'tc
         .filter(|&parent| matches!(tcx.def_kind(parent), DefKind::Impl { .. }))
         .into_iter()
         .flat_map(|parent| tcx.predicates_of(parent).predicates);
-    tcx.arena
-        .alloc_from_iter(tcx.erl_witnessed_trait_refs(parent_clauses.chain(predicates.predicates)))
+    let bounds = tcx.erl_witnessed_trait_refs(parent_clauses.chain(predicates.predicates));
+    ty::EarlyBinder::bind(IndexSlice::from_raw(tcx.arena.alloc_from_iter(bounds)))
 }
 
 /// Provider for [`TyCtxt::erl_impl_tag`].

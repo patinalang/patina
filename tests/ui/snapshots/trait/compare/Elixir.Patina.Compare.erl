@@ -23,11 +23,12 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-compare({_witness@0_0}, _a@1_0, _b@2_0) ->
+compare(_witness@1_0 = {_witness@0_0}, _a@2_0,
+        _b@3_0) ->
     (erlang:element(2,
                     _witness@0_0)):'Core::PartialEq::eq'(_witness@0_0,
-                                                         _a@1_0,
-                                                         _b@2_0).
+                                                         _a@2_0,
+                                                         _b@3_0).
 
 main() ->
     begin

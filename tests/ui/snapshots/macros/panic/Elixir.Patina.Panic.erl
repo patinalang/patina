@@ -64,7 +64,7 @@ todo_with_message() ->
 
 panic_in_let_else(_map@0_0) ->
     begin
-        _value@1_0 = {},
+        begin _value@1_0 = {} end,
         case _map@0_0 of
             #{1 := _value@1_1} -> {};
             _ ->
@@ -85,7 +85,7 @@ panic_in_let_else(_map@0_0) ->
 
 todo_in_let_else(_map@0_0) ->
     begin
-        _value@1_0 = {},
+        begin _value@1_0 = {} end,
         case _map@0_0 of
             #{1 := _value@1_1} -> {};
             _ ->

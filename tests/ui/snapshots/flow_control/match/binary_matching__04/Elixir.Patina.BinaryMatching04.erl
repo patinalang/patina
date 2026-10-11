@@ -27,9 +27,8 @@
 
 main() ->
     _text@0_0 = <<"Patina!"/utf8>>,
-    _bytes@1_0 = <<<<80, 78, 71>>:3/binary, $!/utf8,
-                   "rest"/utf8>>,
-    _packet@2_0 = <<<<80, 84>>:2/binary, $!/utf8, "ok"/utf8,
+    _bytes@1_0 = <<80, 78, 71, $!/utf8, "rest"/utf8>>,
+    _packet@2_0 = <<80, 84, $!/utf8, "ok"/utf8,
                     5:3/integer>>,
     case _text@0_0 of
         <<"Pa"/utf8, $t/utf8, _rest@3_0/binary>> ->

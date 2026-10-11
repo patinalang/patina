@@ -152,6 +152,7 @@ macro_rules! parameterized_over_tcx {
 parameterized_over_tcx! {
     // tidy-alphabetical-start
     crate::rmeta::DefPathHashMapRef,
+    rustc_middle::erl::etir::Body,
     rustc_middle::middle::exported_symbols::ExportedSymbol,
     rustc_middle::mir::Body,
     rustc_middle::mir::CoroutineLayout,

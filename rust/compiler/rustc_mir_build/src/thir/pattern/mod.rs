@@ -504,7 +504,7 @@ impl<'tcx, 'ptcx> PatCtxt<'tcx, 'ptcx> {
         };
         let pattern = *self.lower_pattern(segment.pat);
         let layout =
-            layout.map_size_expr(|size| self.upper.mirror_expr(self.tcx.hir_expect_expr(size)));
+            layout.with_size_expr(|size| self.upper.mirror_expr(self.tcx.hir_expect_expr(size)));
         Ok(BinarySegmentPat { pattern, layout, span: segment.span })
     }
 
