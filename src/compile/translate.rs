@@ -11,7 +11,7 @@ use std::path::PathBuf;
 
 use body::{BodyCx, TranslatedBody};
 use rustc_arena::DroplessArena;
-use rustc_data_structures::fx::{FxHashMap, FxHashSet, FxIndexMap};
+use rustc_data_structures::fx::{FxHashMap, FxIndexMap};
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LocalDefId, LocalModDefId};
@@ -533,18 +533,8 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         let tcx = self.tcx;
 
         let mut clauses = Vec::new();
-        let mut tags = FxHashSet::default();
         for (impl_def_id, imp) in impls {
             let trait_def_id = tcx.impl_opt_trait_id(*impl_def_id);
-
-            // Paths print without disambiguators, so types of the same name in sibling blocks
-            // give the same tag.
-            if let Some(trait_def_id) = trait_def_id {
-                let tag = tcx.erl_impl_tag(*impl_def_id);
-                if !tags.insert((trait_def_id, tag)) {
-                    not_implemented!(tcx, imp.self_ty.span, "impl with a colliding tag", tag);
-                }
-            }
 
             // Inherent consts and types don't become functions, and neither do intrinsics.
             for item in tcx.associated_items(*impl_def_id).in_definition_order() {

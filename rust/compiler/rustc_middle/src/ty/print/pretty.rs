@@ -38,6 +38,7 @@ thread_local! {
     static REDUCED_QUERIES: Cell<bool> = const { Cell::new(false) };
     static NO_VISIBLE_PATH: Cell<bool> = const { Cell::new(false) };
     static NO_VISIBLE_PATH_IF_DOC_HIDDEN: Cell<bool> = const { Cell::new(false) };
+    static DISAMBIGUATED_PATH: Cell<bool> = const { Cell::new(false) };
     static RTN_MODE: Cell<RtnMode> = const { Cell::new(RtnMode::ForDiagnostic) };
 }
 
@@ -122,6 +123,9 @@ define_helper!(
     fn with_no_visible_paths(NoVisibleGuard, NO_VISIBLE_PATH);
     /// Prevent selection of visible paths if the paths are through a doc hidden path.
     fn with_no_visible_paths_if_doc_hidden(NoVisibleIfDocHiddenGuard, NO_VISIBLE_PATH_IF_DOC_HIDDEN);
+    /// Print paths as their definition paths: with the disambiguators of same-named siblings,
+    /// like `Foo#1`, and with impls as `{impl#N}` rather than their types.
+    fn with_disambiguated_paths(DisambiguatedPathGuard, DISAMBIGUATED_PATH);
 );
 
 #[must_use]
@@ -2282,6 +2286,14 @@ impl<'tcx> Printer<'tcx> for FmtPrinter<'_, 'tcx> {
 
         let key = self.tcx.def_key(def_id);
         if let DefPathData::Impl = key.disambiguated_data.data {
+            if with_disambiguated_paths() {
+                let parent_def_id = DefId { index: key.parent.unwrap(), ..def_id };
+                return self.print_path_with_simple(
+                    |p| p.print_def_path(parent_def_id, &[]),
+                    &key.disambiguated_data,
+                );
+            }
+
             // Always use types for non-local impls, where types are always
             // available, and filename/line-number is mostly uninteresting.
             let use_types = !def_id.is_local() || {
@@ -2446,7 +2458,7 @@ impl<'tcx> Printer<'tcx> for FmtPrinter<'_, 'tcx> {
             write!(self, "`")?;
         }
 
-        let verbose = self.should_print_verbose();
+        let verbose = self.should_print_verbose() || with_disambiguated_paths();
         write!(self, "{}", disambiguated_data.as_sym(verbose))?;
 
         if is_raw {

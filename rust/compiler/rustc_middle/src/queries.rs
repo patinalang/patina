@@ -1240,11 +1240,15 @@ rustc_queries! {
         desc { "computing the witnessed bounds of `{}`", tcx.def_path_str(def_id) }
     }
 
-    /// The tag of the trait impl. The tag is an atom. It identifies the impl among the impls of
-    /// its trait in the same host. These impls share one function for each trait item. Each impl
-    /// gives one clause of the function. The tag is the header of the impl, with full paths and
-    /// without lifetimes. Type and const parameters show as `_`. For example, the impl
-    /// `impl<T> From<int> for Pair<T>` has the tag `'impl Temps::From<int> for Temps::Pair<_>'`.
+    /// The tag of the trait impl.
+    ///
+    /// It identifies the impl among the impls of its trait in the same
+    /// host. The tag is the header of the impl, with full definition paths (without lifetimes).
+    /// Type and const parameters show as `_`.
+    ///
+    /// For example, the impl `impl<T> From<int> for Pair<T>`
+    /// has the tag          `'impl Temps::From<int> for Temps::Pair<_>'`.
+    ///
     /// If two impls have the same tag, they overlap. Other crates read the tag from the metadata
     /// of the impl's crate.
     query erl_impl_tag(impl_def_id: DefId) -> Symbol {

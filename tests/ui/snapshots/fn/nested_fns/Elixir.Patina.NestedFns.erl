@@ -222,7 +222,7 @@ answers_in_blocks() ->
                                                                                                   'Elixir.Patina.NestedFns.Wrapper')
              end,
     _b@1_0 = begin
-                 'Elixir.Patina.NestedFns.Wrapper':'NestedFns::answers_in_blocks::Answer#1::answer'({'impl NestedFns::answers_in_blocks::Answer for NestedFns::Wrapper',
+                 'Elixir.Patina.NestedFns.Wrapper':'NestedFns::answers_in_blocks::Answer#1::answer'({'impl NestedFns::answers_in_blocks::Answer#1 for NestedFns::Wrapper',
                                                                                                      'Elixir.Patina.NestedFns.Wrapper'},
                                                                                                     'Elixir.Patina.NestedFns.Wrapper')
              end,

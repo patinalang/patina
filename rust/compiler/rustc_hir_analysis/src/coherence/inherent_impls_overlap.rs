@@ -101,65 +101,6 @@ impl<'tcx> InherentOverlapChecker<'tcx> {
         res
     }
 
-    /// Checks that two inherent impls that don't overlap don't compile a method each to the
-    /// same Erlang function of the type's module.
-    fn check_for_name_arity_collision(
-        &self,
-        impl1: DefId,
-        impl2: DefId,
-    ) -> Result<(), ErrorGuaranteed> {
-        let impl_items1 = self.tcx.associated_items(impl1);
-        let impl_items2 = self.tcx.associated_items(impl2);
-
-        let mut res = Ok(());
-        for &item1 in impl_items1.in_definition_order() {
-            let ty::AssocKind::Fn { .. } = item1.kind else {
-                continue;
-            };
-            // The Erlang arity also counts witness parameters.
-            let arity = self.tcx.erl_fn_arity(item1.def_id);
-
-            let collision = impl_items2.filter_by_name_unhygienic(item1.name()).find(|&&item2| {
-                matches!(item2.kind, ty::AssocKind::Fn { .. })
-                    && self.compare_hygienically(item1, item2)
-                    && self.tcx.erl_fn_name(item1.def_id) == self.tcx.erl_fn_name(item2.def_id)
-                    && self.tcx.erl_fn_arity(item2.def_id) == arity
-            });
-
-            if let Some(item2) = collision {
-                let name = item1.ident(self.tcx).normalize_to_macros_2_0();
-                let erl_name = self.tcx.erl_fn_name(item1.def_id);
-                let rust_arity = self.tcx.fn_arg_idents(item1.def_id).len();
-                let mut err = struct_span_code_err!(
-                    self.tcx.dcx(),
-                    self.tcx.def_span(item1.def_id),
-                    E0592,
-                    "duplicate definitions with name `{}`",
-                    name
-                );
-                err.span_label(
-                    self.tcx.def_span(item1.def_id),
-                    format!("duplicate definitions for `{name}`"),
-                );
-                err.span_label(
-                    self.tcx.def_span(item2.def_id),
-                    format!("other definition for `{name}`"),
-                );
-                let witnesses = match arity - rust_arity {
-                    0 => String::new(),
-                    1 => " (the arity counts 1 witness argument)".to_owned(),
-                    n => format!(" (the arity counts {n} witness arguments)"),
-                };
-                err.note(format!(
-                    "both methods compile to the Erlang function `{erl_name}/{arity}` of the \
-                     type's module{witnesses}"
-                ));
-                res = Err(err.emit());
-            }
-        }
-        res
-    }
-
     fn check_for_common_items_in_impls(
         &self,
         impl1: DefId,
@@ -226,7 +167,7 @@ impl<'tcx> InherentOverlapChecker<'tcx> {
         if let Some(overlap) = maybe_overlap {
             self.check_for_common_items_in_impls(impl1_def_id, impl2_def_id, overlap)
         } else {
-            self.check_for_name_arity_collision(impl1_def_id, impl2_def_id)
+            Ok(())
         }
     }
 

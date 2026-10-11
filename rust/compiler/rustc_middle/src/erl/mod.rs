@@ -957,7 +957,7 @@ fn erl_fn_name(tcx: TyCtxt<'_>, def_id: LocalDefId) -> Symbol {
 /// Prints paths from the crate name, so that every crate prints the same text.
 fn with_erl_paths<R>(print: impl FnOnce() -> R) -> R {
     ty::print::with_resolve_crate_name!(ty::print::with_no_visible_paths!(
-        ty::print::with_no_trimmed_paths!(print())
+        ty::print::with_no_trimmed_paths!(ty::print::with_disambiguated_paths!(print()))
     ))
 }
 

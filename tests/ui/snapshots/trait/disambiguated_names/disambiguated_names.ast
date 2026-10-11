@@ -1,0 +1,56 @@
+#![allow(non_local_definitions)]
+
+pub trait Show {
+    fn show(self)
+    -> str;
+}
+
+pub trait From<T> {
+    fn from(t: T)
+    -> Self;
+}
+
+pub struct Pair<T>(T);
+
+pub struct Celsius;
+
+pub struct Wrapper;
+
+pub fn sibling_blocks() {
+    {
+        struct Foo;
+        impl Pair<Foo> {
+            pub fn value(self) -> int { 1 }
+        }
+        impl From<Foo> for Celsius {
+            fn from(_foo: Foo) -> Self { Celsius }
+        }
+        impl Show for Foo {
+            fn show(self) -> str { "a" }
+        }
+    }
+    {
+        struct Foo;
+        impl Pair<Foo> {
+            pub fn value(self) -> int { 2 }
+        }
+        impl From<Foo> for Celsius {
+            fn from(_foo: Foo) -> Self { Celsius }
+        }
+        impl Show for Foo {
+            fn show(self) -> str { "b" }
+        }
+    }
+}
+
+impl Wrapper {
+    pub fn local_type(self) {
+        struct Local;
+        impl Pair<Local> {
+            pub fn value(self) -> int { 3 }
+        }
+        impl Show for Local {
+            fn show(self) -> str { "local" }
+        }
+    }
+}

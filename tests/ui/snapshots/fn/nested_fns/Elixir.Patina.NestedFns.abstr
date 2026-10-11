@@ -638,7 +638,7 @@
            {128,9},
            [{atom,
              {128,9},
-             'impl NestedFns::answers_in_blocks::Answer for NestedFns::Wrapper'},
+             'impl NestedFns::answers_in_blocks::Answer#1 for NestedFns::Wrapper'},
             {atom,{128,9},'Elixir.Patina.NestedFns.Wrapper'}]},
           {atom,{128,9},'Elixir.Patina.NestedFns.Wrapper'}]}]}},
      {op,
