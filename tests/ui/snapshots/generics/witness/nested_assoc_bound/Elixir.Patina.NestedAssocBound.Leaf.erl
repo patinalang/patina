@@ -11,7 +11,7 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'NestedAssocBound::HasItem::type::Item'/1,
+         'NestedAssocBound::HasItem::$patina_type::Item'/1,
          'NestedAssocBound::HasItem::item'/2]).
 
 '__info__'(functions) ->
@@ -27,9 +27,9 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'NestedAssocBound::HasItem::type::Item'(_witness@0_0 =
-                                            {'impl NestedAssocBound::HasItem for NestedAssocBound::Leaf',
-                                             _}) ->
+'NestedAssocBound::HasItem::$patina_type::Item'(_witness@0_0 =
+                                                    {'impl NestedAssocBound::HasItem for NestedAssocBound::Leaf',
+                                                     _}) ->
     {}.
 
 'NestedAssocBound::HasItem::item'(_witness@0_0 =

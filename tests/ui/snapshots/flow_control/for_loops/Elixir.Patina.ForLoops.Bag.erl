@@ -9,8 +9,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'Core::IntoIterator::type::Item'/1,
-         'Core::IntoIterator::type::IntoIter'/1,
+         'Core::IntoIterator::$patina_type::Item'/1,
+         'Core::IntoIterator::$patina_type::IntoIter'/1,
          'Core::IntoIterator::into_iter'/2]).
 
 '__info__'(functions) ->
@@ -26,14 +26,14 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Core::IntoIterator::type::Item'(_witness@0_0 =
-                                     {'impl Core::IntoIterator for ForLoops::Bag',
-                                      _}) ->
+'Core::IntoIterator::$patina_type::Item'(_witness@0_0 =
+                                             {'impl Core::IntoIterator for ForLoops::Bag',
+                                              _}) ->
     {}.
 
-'Core::IntoIterator::type::IntoIter'(_witness@0_0 =
-                                         {'impl Core::IntoIterator for ForLoops::Bag',
-                                          _}) ->
+'Core::IntoIterator::$patina_type::IntoIter'(_witness@0_0 =
+                                                 {'impl Core::IntoIterator for ForLoops::Bag',
+                                                  _}) ->
     {{'impl Core::Iterator for Core::ListIter<_>',
       'Elixir.Patina.Core.ListIter'}}.
 

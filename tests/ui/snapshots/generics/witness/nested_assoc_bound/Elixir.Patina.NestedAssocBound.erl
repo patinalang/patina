@@ -29,14 +29,14 @@ nested_label(_witness@1_0 = {_witness@0_0}, _t@2_0) ->
     begin
         _witness@4_0 = erlang:element(2,
                                       (erlang:element(2,
-                                                      _witness@0_0)):'NestedAssocBound::Outer::type::Inner'(_witness@0_0)),
+                                                      _witness@0_0)):'NestedAssocBound::Outer::$patina_type::Inner'(_witness@0_0)),
         (erlang:element(2,
                         _witness@4_0)):'NestedAssocBound::Label::label'(_witness@4_0,
                                                                         begin
                                                                             _witness@3_0 =
                                                                                 erlang:element(1,
                                                                                                (erlang:element(2,
-                                                                                                               _witness@0_0)):'NestedAssocBound::Outer::type::Inner'(_witness@0_0)),
+                                                                                                               _witness@0_0)):'NestedAssocBound::Outer::$patina_type::Inner'(_witness@0_0)),
                                                                             (erlang:element(2,
                                                                                             _witness@3_0)):'NestedAssocBound::HasItem::item'(_witness@3_0,
                                                                                                                                              (erlang:element(2,

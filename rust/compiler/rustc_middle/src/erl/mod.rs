@@ -945,8 +945,8 @@ fn erl_fn_name(tcx: TyCtxt<'_>, def_id: LocalDefId) -> Symbol {
     let mut segments = erl_def_path_segments(tcx, trait_def_id);
 
     match tcx.def_kind(def_id) {
-        DefKind::AssocTy => segments.push("type".to_owned()),
-        DefKind::AssocConst { .. } => segments.push("const".to_owned()),
+        DefKind::AssocTy => segments.push("$patina_type".to_owned()),
+        DefKind::AssocConst { .. } => segments.push("$patina_const".to_owned()),
         _ => {}
     }
 

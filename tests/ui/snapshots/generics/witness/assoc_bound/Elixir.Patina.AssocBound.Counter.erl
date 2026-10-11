@@ -10,7 +10,7 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'AssocBound::Iter::type::Item'/1,
+         'AssocBound::Iter::$patina_type::Item'/1,
          'AssocBound::Iter::next'/2]).
 
 '__info__'(functions) ->
@@ -26,9 +26,9 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'AssocBound::Iter::type::Item'(_witness@0_0 =
-                                   {'impl AssocBound::Iter for AssocBound::Counter',
-                                    _}) ->
+'AssocBound::Iter::$patina_type::Item'(_witness@0_0 =
+                                           {'impl AssocBound::Iter for AssocBound::Counter',
+                                            _}) ->
     {{'impl AssocBound::Show for int',
       'Elixir.Patina.AssocBound.$impl.Core.Int'}}.
 

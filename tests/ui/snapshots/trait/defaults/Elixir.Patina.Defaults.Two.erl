@@ -9,8 +9,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'Defaults::Numbered::const::C'/1,
-         'Defaults::Numbered::const::D'/1,
+         'Defaults::Numbered::$patina_const::C'/1,
+         'Defaults::Numbered::$patina_const::D'/1,
          'Defaults::Numbered::consts'/2]).
 
 '__info__'(functions) ->
@@ -26,14 +26,14 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Numbered::const::C'(_witness@0_0 =
-                                   {'impl Defaults::Numbered for Defaults::Two',
-                                    _}) ->
+'Defaults::Numbered::$patina_const::C'(_witness@0_0 =
+                                           {'impl Defaults::Numbered for Defaults::Two',
+                                            _}) ->
     2.
 
-'Defaults::Numbered::const::D'(_witness@0_0 =
-                                   {'impl Defaults::Numbered for Defaults::Two',
-                                    _}) ->
+'Defaults::Numbered::$patina_const::D'(_witness@0_0 =
+                                           {'impl Defaults::Numbered for Defaults::Two',
+                                            _}) ->
     200.
 
 'Defaults::Numbered::consts'(_witness@0_0 =

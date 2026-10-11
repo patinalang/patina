@@ -11,7 +11,7 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'NestedAssocBound::Outer::type::Inner'/1,
+         'NestedAssocBound::Outer::$patina_type::Inner'/1,
          'NestedAssocBound::Outer::inner'/2]).
 
 '__info__'(functions) ->
@@ -27,9 +27,9 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'NestedAssocBound::Outer::type::Inner'(_witness@0_0 =
-                                           {'impl NestedAssocBound::Outer for NestedAssocBound::Root',
-                                            _}) ->
+'NestedAssocBound::Outer::$patina_type::Inner'(_witness@0_0 =
+                                                   {'impl NestedAssocBound::Outer for NestedAssocBound::Root',
+                                                    _}) ->
     {{'impl NestedAssocBound::HasItem for NestedAssocBound::Leaf',
       'Elixir.Patina.NestedAssocBound.Leaf'},
      {'impl NestedAssocBound::Label for NestedAssocBound::Tag',

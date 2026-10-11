@@ -28,7 +28,7 @@ first(_witness@1_0 = {_witness@0_0}, _i@2_0) ->
     begin
         _witness@3_0 = erlang:element(1,
                                       (erlang:element(2,
-                                                      _witness@0_0)):'AssocBound::Iter::type::Item'(_witness@0_0)),
+                                                      _witness@0_0)):'AssocBound::Iter::$patina_type::Item'(_witness@0_0)),
         (erlang:element(2,
                         _witness@3_0)):'AssocBound::Show::show'(_witness@3_0,
                                                                 (erlang:element(2,

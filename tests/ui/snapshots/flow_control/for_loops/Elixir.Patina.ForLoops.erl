@@ -358,7 +358,7 @@ map_entry_count(_map@0_0) ->
             case begin
                      _witness@5_0 = erlang:element(1,
                                                    (erlang:element(2,
-                                                                   _witness@0_0)):'Core::IntoIterator::type::IntoIter'(_witness@0_0)),
+                                                                   _witness@0_0)):'Core::IntoIterator::$patina_type::IntoIter'(_witness@0_0)),
                      (erlang:element(2,
                                      _witness@5_0)):'Core::Iterator::next'(_witness@5_0,
                                                                            _iter@4_0)
@@ -423,7 +423,7 @@ count_map(_map@0_0) ->
             case begin
                      _witness@5_0 = erlang:element(1,
                                                    (erlang:element(2,
-                                                                   _witness@0_0)):'Core::IntoIterator::type::IntoIter'(_witness@0_0)),
+                                                                   _witness@0_0)):'Core::IntoIterator::$patina_type::IntoIter'(_witness@0_0)),
                      (erlang:element(2,
                                      _witness@5_0)):'Core::Iterator::next'(_witness@5_0,
                                                                            _iter@4_0)

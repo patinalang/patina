@@ -41,7 +41,7 @@
          describe_nested/1,
          'Defaults::Maker::make'/2,
          make/0,
-         'Defaults::Numbered::const::D'/1,
+         'Defaults::Numbered::$patina_const::D'/1,
          'Defaults::Numbered::consts'/2,
          one_consts/0,
          two_consts/0,
@@ -372,20 +372,21 @@ make() ->
                                                                <<"unused"/utf8>>),
     {}.
 
-'Defaults::Numbered::const::D'(_witness@0_0) -> 100.
+'Defaults::Numbered::$patina_const::D'(_witness@0_0) ->
+    100.
 
 'Defaults::Numbered::consts'(_witness@0_0, _self@1_0) ->
     {(erlang:element(2,
-                     _witness@0_0)):'Defaults::Numbered::const::C'(_witness@0_0),
+                     _witness@0_0)):'Defaults::Numbered::$patina_const::C'(_witness@0_0),
      (erlang:element(2,
-                     _witness@0_0)):'Defaults::Numbered::const::D'(_witness@0_0)}.
+                     _witness@0_0)):'Defaults::Numbered::$patina_const::D'(_witness@0_0)}.
 
 sum(_witness@1_0 = {_witness@0_0}, __t@2_0) ->
     (erlang:element(2,
-                    _witness@0_0)):'Defaults::Numbered::const::C'(_witness@0_0)
+                    _witness@0_0)):'Defaults::Numbered::$patina_const::C'(_witness@0_0)
         +
         (erlang:element(2,
-                        _witness@0_0)):'Defaults::Numbered::const::D'(_witness@0_0).
+                        _witness@0_0)):'Defaults::Numbered::$patina_const::D'(_witness@0_0).
 
 one_consts() ->
     'Elixir.Patina.Defaults.One':'Defaults::Numbered::consts'({'impl Defaults::Numbered for Defaults::One',
@@ -410,18 +411,18 @@ sum_two() ->
         'Elixir.Patina.Defaults.Two').
 
 one_c() ->
-    'Elixir.Patina.Defaults.One':'Defaults::Numbered::const::C'({'impl Defaults::Numbered for Defaults::One',
-                                                                 'Elixir.Patina.Defaults.One'}).
+    'Elixir.Patina.Defaults.One':'Defaults::Numbered::$patina_const::C'({'impl Defaults::Numbered for Defaults::One',
+                                                                         'Elixir.Patina.Defaults.One'}).
 
 plus_two_d() ->
-    'Elixir.Patina.Defaults.Plus':'Defaults::Numbered::const::D'({'impl Defaults::Numbered for Defaults::Plus<_>',
-                                                                  'Elixir.Patina.Defaults.Plus',
-                                                                  {'impl Defaults::Numbered for Defaults::Two',
-                                                                   'Elixir.Patina.Defaults.Two'}}).
+    'Elixir.Patina.Defaults.Plus':'Defaults::Numbered::$patina_const::D'({'impl Defaults::Numbered for Defaults::Plus<_>',
+                                                                          'Elixir.Patina.Defaults.Plus',
+                                                                          {'impl Defaults::Numbered for Defaults::Two',
+                                                                           'Elixir.Patina.Defaults.Two'}}).
 
 doubled_k() ->
-    'Elixir.Patina.Defaults.Holder':'Defaults::Konst::const::K'({'impl Defaults::Konst for Defaults::Holder',
-                                                                 'Elixir.Patina.Defaults.Holder'})
+    'Elixir.Patina.Defaults.Holder':'Defaults::Konst::$patina_const::K'({'impl Defaults::Konst for Defaults::Holder',
+                                                                         'Elixir.Patina.Defaults.Holder'})
         * 2.
 
 differ(_witness@1_0 = {_witness@0_0}, _a@2_0, _b@3_0) ->

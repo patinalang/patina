@@ -83,7 +83,7 @@
              {27,5},
              {remote,{27,5},{atom,{27,5},erlang},{atom,{27,5},element}},
              [{integer,{27,5},2},{var,{26,1},'_witness@0_0'}]},
-            {atom,{27,5},'AssocBound::Iter::type::Item'}},
+            {atom,{27,5},'AssocBound::Iter::$patina_type::Item'}},
            [{var,{26,1},'_witness@0_0'}]}]}},
        {call,
         {27,5},

@@ -9,7 +9,7 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'Defaults::Container::type::Item'/1,
+         'Defaults::Container::$patina_type::Item'/1,
          'Defaults::Container::get'/2,
          'Defaults::Container::needs_item_witness'/3]).
 
@@ -26,9 +26,9 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Container::type::Item'(_witness@0_0 =
-                                      {'impl Defaults::Container for Defaults::Rewrapped',
-                                       _}) ->
+'Defaults::Container::$patina_type::Item'(_witness@0_0 =
+                                              {'impl Defaults::Container for Defaults::Rewrapped',
+                                               _}) ->
     {}.
 
 'Defaults::Container::get'(_witness@0_0 =

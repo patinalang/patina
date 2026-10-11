@@ -11,7 +11,7 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'ImpliedAssocBound::HasItem::type::Item'/1,
+         'ImpliedAssocBound::HasItem::$patina_type::Item'/1,
          'ImpliedAssocBound::HasItem::item'/2,
          'ImpliedAssocBound::LabelledWithItems::other'/2]).
 
@@ -28,9 +28,9 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'ImpliedAssocBound::HasItem::type::Item'(_witness@0_0 =
-                                             {'impl ImpliedAssocBound::HasItem for ImpliedAssocBound::Crate',
-                                              _}) ->
+'ImpliedAssocBound::HasItem::$patina_type::Item'(_witness@0_0 =
+                                                     {'impl ImpliedAssocBound::HasItem for ImpliedAssocBound::Crate',
+                                                      _}) ->
     {}.
 
 'ImpliedAssocBound::HasItem::item'(_witness@0_0 =

@@ -9,7 +9,7 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'Core::Iterator::type::Item'/1,
+         'Core::Iterator::$patina_type::Item'/1,
          'Core::Iterator::next'/2]).
 
 '__info__'(functions) ->
@@ -25,9 +25,9 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Core::Iterator::type::Item'(_witness@0_0 =
-                                 {'impl Core::Iterator for ForLoops::Countdown',
-                                  _}) ->
+'Core::Iterator::$patina_type::Item'(_witness@0_0 =
+                                         {'impl Core::Iterator for ForLoops::Countdown',
+                                          _}) ->
     {}.
 
 'Core::Iterator::next'(_witness@0_0 =
