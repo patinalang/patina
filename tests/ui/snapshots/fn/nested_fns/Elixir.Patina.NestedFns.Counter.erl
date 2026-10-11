@@ -8,9 +8,7 @@
 
 -export_record([]).
 
--export(['__info__'/1,
-         bump/1,
-         'NestedFns::nested_trait::Answer::answer'/2]).
+-export(['__info__'/1, bump/1]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),

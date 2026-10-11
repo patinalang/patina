@@ -449,7 +449,8 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         let tcx = self.cx.tcx;
         let span = expr.span;
 
-        let (target, name) = if let ty::FnDef(callee_def_id, generic_args) = callable_ty.kind() {
+        let owner = self.owner.to_def_id();
+        let target = if let ty::FnDef(callee_def_id, generic_args) = callable_ty.kind() {
             if tcx.is_fn_trait(tcx.parent(*callee_def_id)) {
                 return self.lower_expr_fn_trait_call(expr, args);
             }
@@ -460,11 +461,9 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
                 return self.lower_expr_intrinsic_call(expr, intrinsic.name, args);
             }
 
-            let target = tcx.erl_call_target_for_def(*callee_def_id, generic_args);
-            (target, tcx.erl_fn_name(*callee_def_id))
+            tcx.erl_call_target_for_def(owner, *callee_def_id, generic_args)
         } else if let thir::ExprKind::ExternMod { def_id } = &self.resolve(fun).kind {
-            let target = tcx.erl_call_target_for_def(*def_id, ty::GenericArgs::empty());
-            (target, tcx.item_name(*def_id))
+            tcx.erl_call_target_for_def(owner, *def_id, ty::GenericArgs::empty())
         } else {
             let callee = etir::Callee::Value(self.lower_expr(fun));
             let kind = etir::ExprKind::Call { callee, args: self.lower_exprs(args) };
@@ -480,7 +479,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             }
         }
 
-        let callee = etir::Callee::Item { item: self.item_ref(span, name, target), forced_extern };
+        let callee = etir::Callee::Item { item: self.item_ref(span, target), forced_extern };
         let kind = etir::ExprKind::Call { callee, args: self.lower_exprs(args) };
         self.push_expr(kind, expr.ty, span)
     }
@@ -579,9 +578,9 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             not_implemented_kind(tcx, expr.span, "intrinsic as a value", intrinsic.name);
         }
 
-        let target = tcx.erl_call_target_for_def(def_id, args);
+        let target = tcx.erl_call_target_for_def(self.owner.to_def_id(), def_id, args);
         let kind = etir::ExprKind::FnRef {
-            item: self.item_ref(expr.span, tcx.erl_fn_name(def_id), target),
+            item: self.item_ref(expr.span, target),
             arity: tcx.fn_sig(def_id).skip_binder().inputs().skip_binder().len(),
             erl_arity: tcx.erl_fn_arity(def_id) as u32,
         };
@@ -601,8 +600,8 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         if matches!(tcx.def_kind(def_id), DefKind::AssocConst { .. })
             && tcx.erl_entry_trait(def_id).is_some()
         {
-            let target = tcx.erl_call_target_for_def(def_id, args);
-            let item = self.item_ref(span, tcx.erl_fn_name(def_id), target);
+            let target = tcx.erl_call_target_for_def(self.owner.to_def_id(), def_id, args);
+            let item = self.item_ref(span, target);
             let callee = etir::Callee::Item { item, forced_extern: false };
             let kind = etir::ExprKind::Call { callee, args: Box::new([]) };
             return self.push_expr(kind, expr.ty, span);
@@ -889,20 +888,20 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         self.push_expr(unit, tcx.types.unit, span)
     }
 
-    fn item_ref(
-        &mut self,
-        span: Span,
-        name: Symbol,
-        target: ErlCallTarget<'tcx>,
-    ) -> Box<etir::ItemRef<'tcx>> {
+    fn item_ref(&mut self, span: Span, target: ErlCallTarget<'tcx>) -> Box<etir::ItemRef<'tcx>> {
         let tcx = self.cx.tcx;
         let owner = self.owner.to_def_id();
         let module = tcx.erl_module_for_target(owner, target);
-        let witnesses = match target {
+        let (name, witnesses) = match target {
             ErlCallTarget::Item { def_id, args } => {
-                self.cx.witness_resolver.witness_args(span, def_id, args)
+                (tcx.erl_fn_name(def_id), self.cx.witness_resolver.witness_args(span, def_id, args))
             }
-            _ => WitnessArgs::default(),
+            ErlCallTarget::Extern { function, .. } => {
+                (tcx.item_name(function), WitnessArgs::default())
+            }
+            ErlCallTarget::Constructor { .. } | ErlCallTarget::Dynamic => {
+                span_bug!(span, "item reference to {target:?}")
+            }
         };
         Box::new(etir::ItemRef { name, target, module, witnesses })
     }

@@ -13,8 +13,6 @@
          'Defaults::Animal::noise'/2,
          'Defaults::Animal::calls_required'/2,
          'Defaults::Animal::calls_default'/2,
-         'Defaults::Animal::with_bounded_param'/4,
-         'Defaults::Animal::returns_self'/2,
          calls_stubs_locally/1]).
 
 '__info__'(functions) ->
@@ -78,9 +76,9 @@
                                                          _arg@1_0).
 
 calls_stubs_locally(_self@0_0) ->
-    {'Defaults::Animal::calls_required'({'impl Defaults::Animal for Defaults::Sheep',
-                                         'Elixir.Patina.Defaults.Sheep'},
-                                        _self@0_0),
-     'Defaults::Animal::whisper'({'impl Defaults::Animal for Defaults::Sheep',
-                                  'Elixir.Patina.Defaults.Sheep'},
-                                 _self@0_0)}.
+    {'Elixir.Patina.Defaults':'Defaults::Animal::calls_required'({'impl Defaults::Animal for Defaults::Sheep',
+                                                                  'Elixir.Patina.Defaults.Sheep'},
+                                                                 _self@0_0),
+     'Elixir.Patina.Defaults':'Defaults::Animal::whisper'({'impl Defaults::Animal for Defaults::Sheep',
+                                                           'Elixir.Patina.Defaults.Sheep'},
+                                                          _self@0_0)}.

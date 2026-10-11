@@ -10,8 +10,7 @@
 
 -export(['__info__'/1,
          'Defaults::Container::$patina_type::Item'/1,
-         'Defaults::Container::get'/2,
-         'Defaults::Container::needs_item_witness'/3]).
+         'Defaults::Container::get'/2]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),

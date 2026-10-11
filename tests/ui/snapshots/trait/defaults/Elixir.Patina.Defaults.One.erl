@@ -10,8 +10,7 @@
 
 -export(['__info__'/1,
          'Defaults::Numbered::$patina_const::C'/1,
-         'Defaults::Numbered::$patina_const::D'/1,
-         'Defaults::Numbered::consts'/2]).
+         'Defaults::Numbered::$patina_const::D'/1]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),

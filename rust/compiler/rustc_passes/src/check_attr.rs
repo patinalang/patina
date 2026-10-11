@@ -1709,20 +1709,25 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         }
 
         let typeck = self.tcx.typeck(expr.hir_id.owner.def_id);
+        let caller = hir_id.owner.def_id.to_def_id();
         let target = match expr.kind {
             hir::ExprKind::Call(callee, _) => {
                 if let hir::ExprKind::Path(ref qpath) = callee.kind
                     && let Res::Def(DefKind::Fn | DefKind::AssocFn | DefKind::ExternMod, def_id) =
                         typeck.qpath_res(qpath, callee.hir_id)
                 {
-                    self.tcx.erl_call_target_for_def(def_id, typeck.node_args(callee.hir_id))
+                    self.tcx.erl_call_target_for_def(
+                        caller,
+                        def_id,
+                        typeck.node_args(callee.hir_id),
+                    )
                 } else {
                     ErlCallTarget::Dynamic
                 }
             }
             hir::ExprKind::MethodCall(..) => {
                 if let Some(def_id) = typeck.type_dependent_def_id(expr.hir_id) {
-                    self.tcx.erl_call_target_for_def(def_id, typeck.node_args(expr.hir_id))
+                    self.tcx.erl_call_target_for_def(caller, def_id, typeck.node_args(expr.hir_id))
                 } else {
                     ErlCallTarget::Dynamic
                 }
@@ -1730,7 +1735,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             _ => unreachable!("call expression checked above"),
         };
 
-        let caller = hir_id.owner.def_id.to_def_id();
         let callee_module = self.tcx.erl_module_for_target(caller, target);
         match self.tcx.erl_call_kind(caller, callee_module, target, None) {
             Some(ErlCallKind::Extern) => {

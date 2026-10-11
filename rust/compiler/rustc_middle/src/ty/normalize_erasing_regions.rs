@@ -100,6 +100,21 @@ impl<'tcx> TyCtxt<'tcx> {
         }
     }
 
+    /// Like `try_normalize_erasing_regions`, but returns `value` unchanged if normalization fails.
+    ///
+    /// A projection whose self type is a type parameter, like `<T as Iterator>::Item`, has no impl
+    /// to normalize to, and stays as it is.
+    pub fn normalize_erasing_regions_or_unchanged<T>(
+        self,
+        typing_env: ty::TypingEnv<'tcx>,
+        value: Unnormalized<'tcx, T>,
+    ) -> T
+    where
+        T: TypeFoldable<TyCtxt<'tcx>> + Copy,
+    {
+        self.try_normalize_erasing_regions(typing_env, value).unwrap_or(value.skip_normalization())
+    }
+
     /// If you have a `Binder<'tcx, T>`, you can do this to strip out the
     /// late-bound regions and then normalize the result, yielding up
     /// a `T` (with regions erased). This is appropriate when the

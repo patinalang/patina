@@ -8,9 +8,9 @@ use rustc_macros::{StableHash, TypeVisitable};
 use rustc_type_ir::solve::AliasBoundKind;
 
 use self::EvaluationResult::*;
-use super::{SelectionError, SelectionResult};
+use super::{ImplSource, SelectionError, SelectionResult};
 use crate::traits::cache::WithDepNodeCache;
-use crate::ty;
+use crate::ty::{self, GenericArgsRef, TyCtxt, TypingEnv, Unnormalized};
 
 pub type SelectionCache<'tcx, ENV> = WithDepNodeCache<
     (ENV, ty::TraitPredicate<'tcx>),
@@ -277,6 +277,28 @@ impl<'tcx> From<OverflowError> for SelectionError<'tcx> {
         match overflow_error {
             OverflowError::Error(e) => SelectionError::Overflow(OverflowError::Error(e)),
             OverflowError::Canonical => SelectionError::Overflow(OverflowError::Canonical),
+        }
+    }
+}
+
+impl<'tcx> TyCtxt<'tcx> {
+    /// The impl that proves `trait_ref` in `typing_env`.
+    ///
+    /// `None` if
+    ///   * it's proved by a where-clause or a builtin impl,
+    ///   * nothing proves it,
+    ///   * the choice is ambiguous.
+    pub fn select_impl(
+        self,
+        typing_env: TypingEnv<'tcx>,
+        trait_ref: ty::TraitRef<'tcx>,
+    ) -> Option<(DefId, GenericArgsRef<'tcx>)> {
+        let trait_ref = self
+            .try_normalize_erasing_regions(typing_env, Unnormalized::new_wip(trait_ref))
+            .ok()?;
+        match self.codegen_select_candidate(typing_env.as_query_input(trait_ref)).ok()? {
+            ImplSource::UserDefined(data) => Some((data.impl_def_id, data.args)),
+            ImplSource::Param(_) | ImplSource::Builtin(..) => None,
         }
     }
 }

@@ -203,10 +203,10 @@ loop_in_closure(_witness@1_0 = {_witness@0_0}, _t@2_0,
     _f@9_0(_times@3_0).
 
 loop_in_default(_n@0_0, _times@1_0) ->
-    'Elixir.Patina.LoopWitness.Points':'LoopWitness::Score::loop_in_default'({'impl LoopWitness::Score for LoopWitness::Points',
-                                                                              'Elixir.Patina.LoopWitness.Points'},
-                                                                             _n@0_0,
-                                                                             _times@1_0).
+    'LoopWitness::Score::loop_in_default'({'impl LoopWitness::Score for LoopWitness::Points',
+                                           'Elixir.Patina.LoopWitness.Points'},
+                                          _n@0_0,
+                                          _times@1_0).
 
 pair(_a@0_0, _b@1_0) ->
     'Elixir.Patina.LoopWitness.Pair':'LoopWitness::Score::score'({'impl LoopWitness::Score for LoopWitness::Pair<_>',
@@ -217,13 +217,13 @@ pair(_a@0_0, _b@1_0) ->
                                                                                                                               _b@1_0)).
 
 pair_repeated(_a@0_0, _b@1_0, _times@2_0) ->
-    'Elixir.Patina.LoopWitness.Pair':'LoopWitness::Score::loop_in_default'({'impl LoopWitness::Score for LoopWitness::Pair<_>',
-                                                                            'Elixir.Patina.LoopWitness.Pair',
-                                                                            {'impl LoopWitness::Score for LoopWitness::Points',
-                                                                             'Elixir.Patina.LoopWitness.Points'}},
-                                                                           'Elixir.Patina.LoopWitness.Pair':'$patina_constructor__Pair'(_a@0_0,
-                                                                                                                                        _b@1_0),
-                                                                           _times@2_0).
+    'LoopWitness::Score::loop_in_default'({'impl LoopWitness::Score for LoopWitness::Pair<_>',
+                                           'Elixir.Patina.LoopWitness.Pair',
+                                           {'impl LoopWitness::Score for LoopWitness::Points',
+                                            'Elixir.Patina.LoopWitness.Points'}},
+                                          'Elixir.Patina.LoopWitness.Pair':'$patina_constructor__Pair'(_a@0_0,
+                                                                                                       _b@1_0),
+                                          _times@2_0).
 
 nested_rounds(_n@0_0, _rounds@1_0) ->
     loop_continuing_outer({{'impl LoopWitness::Score for LoopWitness::Points',

@@ -8,12 +8,7 @@
 
 -export_record([]).
 
--export(['__info__'/1,
-         trait_in_method/1,
-         'NestedFns::first_answer::Answer::answer'/2,
-         'NestedFns::second_answer::Answer::answer'/2,
-         'NestedFns::answers_in_blocks::Answer::answer'/2,
-         'NestedFns::answers_in_blocks::Answer#1::answer'/2]).
+-export(['__info__'/1, trait_in_method/1]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -29,9 +24,9 @@
 '__info__'(Key) -> module_info(Key).
 
 trait_in_method(_self@0_0) ->
-    'NestedFns::{impl#1}::trait_in_method::Base::base'({'impl NestedFns::{impl#1}::trait_in_method::Base for NestedFns::Wrapper',
-                                                        'Elixir.Patina.NestedFns.Wrapper'},
-                                                       _self@0_0).
+    'Elixir.Patina.NestedFns':'NestedFns::{impl#1}::trait_in_method::Base::base'({'impl NestedFns::{impl#1}::trait_in_method::Base for NestedFns::Wrapper',
+                                                                                  'Elixir.Patina.NestedFns.Wrapper'},
+                                                                                 _self@0_0).
 
 'NestedFns::{impl#1}::trait_in_method::Base::base'(_witness@0_0 =
                                                        {'impl NestedFns::{impl#1}::trait_in_method::Base for NestedFns::Wrapper',

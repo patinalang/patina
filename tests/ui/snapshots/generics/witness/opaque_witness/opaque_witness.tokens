@@ -121,7 +121,7 @@ CloseParen
 Whitespace
 CloseBrace
 Whitespace
-LineComment { doc_style: None }
+Ident
 Whitespace
 Ident
 Whitespace

@@ -9,8 +9,7 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'BlanketImpl::Describe::describe'/2,
-         'BlanketImpl::Describe::shout'/2]).
+         'BlanketImpl::Describe::describe'/2]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),

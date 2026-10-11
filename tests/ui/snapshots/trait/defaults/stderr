@@ -1,5 +1,46 @@
 warning: [{"tests/ui/src/trait/defaults.pt",
-           [{{57,17},erl_lint,{unused_function,{'Defaults::Animal::whisper',2}}}]}]
+           [{{48,17},erl_lint,{unused_function,{'Defaults::Animal::returns_self',2}}},
+            {{48,17},erl_lint,{unused_function,{'Defaults::Animal::whisper',2}}},
+            {{48,17},
+             erl_lint,
+             {unused_function,{'Defaults::Animal::with_bounded_param',4}}}]}]
 
-warning: 1 warning emitted
+warning: [{"tests/ui/src/trait/defaults.pt",
+           [{{57,17},erl_lint,{unused_function,{'Defaults::Animal::returns_self',2}}},
+            {{57,17},erl_lint,{unused_function,{'Defaults::Animal::whisper',2}}},
+            {{57,17},
+             erl_lint,
+             {unused_function,{'Defaults::Animal::with_bounded_param',4}}}]}]
+
+warning: [{"tests/ui/src/trait/defaults.pt",
+           [{{270,20},
+             erl_lint,
+             {unused_function,{'Defaults::Container::needs_item_witness',3}}},
+            {{360,16},erl_lint,{unused_function,{'Defaults::Maker::make',2}}}]}]
+
+warning: [{"tests/ui/src/trait/defaults.pt",
+           [{{286,33},
+             erl_lint,
+             {unused_function,{'Defaults::Container::needs_item_witness',3}}}]}]
+
+warning: [{"tests/ui/src/trait/defaults.pt",
+           [{{296,20},
+             erl_lint,
+             {unused_function,{'Defaults::Container::needs_item_witness',3}}}]}]
+
+warning: [{"tests/ui/src/trait/defaults.pt",
+           [{{306,23},
+             erl_lint,
+             {unused_function,{'Defaults::Container::needs_item_witness',3}}}]}]
+
+warning: [{"tests/ui/src/trait/defaults.pt",
+           [{{383,19},erl_lint,{unused_function,{'Defaults::Numbered::consts',2}}}]}]
+
+warning: [{"tests/ui/src/trait/defaults.pt",
+           [{{387,19},erl_lint,{unused_function,{'Defaults::Numbered::consts',2}}}]}]
+
+warning: [{"tests/ui/src/trait/defaults.pt",
+           [{{393,32},erl_lint,{unused_function,{'Defaults::Numbered::consts',2}}}]}]
+
+warning: 9 warnings emitted
 

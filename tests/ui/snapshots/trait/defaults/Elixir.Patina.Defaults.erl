@@ -125,9 +125,9 @@ via(_witness@1_0 = {_witness@0_0}, _animal@2_0) ->
                                                                       _animal@2_0)}.
 
 sheep_calls_required(_name@0_0) ->
-    'Elixir.Patina.Defaults.Sheep':'Defaults::Animal::calls_required'({'impl Defaults::Animal for Defaults::Sheep',
-                                                                       'Elixir.Patina.Defaults.Sheep'},
-                                                                      _name@0_0).
+    'Defaults::Animal::calls_required'({'impl Defaults::Animal for Defaults::Sheep',
+                                        'Elixir.Patina.Defaults.Sheep'},
+                                       _name@0_0).
 
 dog_calls_required(_name@0_0) ->
     'Elixir.Patina.Defaults.Dog':'Defaults::Animal::calls_required'({'impl Defaults::Animal for Defaults::Dog',
@@ -135,20 +135,20 @@ dog_calls_required(_name@0_0) ->
                                                                     _name@0_0).
 
 sheep_with_bounded_param(_name@0_0) ->
-    'Elixir.Patina.Defaults.Sheep':'Defaults::Animal::with_bounded_param'({'impl Defaults::Animal for Defaults::Sheep',
-                                                                           'Elixir.Patina.Defaults.Sheep'},
-                                                                          {{'impl Defaults::Tag for Defaults::Bell',
-                                                                            'Elixir.Patina.Defaults.Bell'}},
-                                                                          _name@0_0,
-                                                                          'Elixir.Patina.Defaults.Bell').
+    'Defaults::Animal::with_bounded_param'({'impl Defaults::Animal for Defaults::Sheep',
+                                            'Elixir.Patina.Defaults.Sheep'},
+                                           {{'impl Defaults::Tag for Defaults::Bell',
+                                             'Elixir.Patina.Defaults.Bell'}},
+                                           _name@0_0,
+                                           'Elixir.Patina.Defaults.Bell').
 
 dog_with_bounded_param(_name@0_0) ->
-    'Elixir.Patina.Defaults.Dog':'Defaults::Animal::with_bounded_param'({'impl Defaults::Animal for Defaults::Dog',
-                                                                         'Elixir.Patina.Defaults.Dog'},
-                                                                        {{'impl Defaults::Tag for Defaults::Bell',
-                                                                          'Elixir.Patina.Defaults.Bell'}},
-                                                                        _name@0_0,
-                                                                        'Elixir.Patina.Defaults.Bell').
+    'Defaults::Animal::with_bounded_param'({'impl Defaults::Animal for Defaults::Dog',
+                                            'Elixir.Patina.Defaults.Dog'},
+                                           {{'impl Defaults::Tag for Defaults::Bell',
+                                             'Elixir.Patina.Defaults.Bell'}},
+                                           _name@0_0,
+                                           'Elixir.Patina.Defaults.Bell').
 
 sheep_calls_stubs_locally(_name@0_0) ->
     'Elixir.Patina.Defaults.Sheep':calls_stubs_locally(_name@0_0).
@@ -166,16 +166,16 @@ dog_via(_name@0_0) ->
 sheep_returns_self(_name@0_0) ->
     'Elixir.Patina.Defaults.Sheep':'Defaults::Animal::name'({'impl Defaults::Animal for Defaults::Sheep',
                                                              'Elixir.Patina.Defaults.Sheep'},
-                                                            'Elixir.Patina.Defaults.Sheep':'Defaults::Animal::returns_self'({'impl Defaults::Animal for Defaults::Sheep',
-                                                                                                                             'Elixir.Patina.Defaults.Sheep'},
-                                                                                                                            _name@0_0)).
+                                                            'Defaults::Animal::returns_self'({'impl Defaults::Animal for Defaults::Sheep',
+                                                                                              'Elixir.Patina.Defaults.Sheep'},
+                                                                                             _name@0_0)).
 
 dog_returns_self(_name@0_0) ->
     'Elixir.Patina.Defaults.Dog':'Defaults::Animal::name'({'impl Defaults::Animal for Defaults::Dog',
                                                            'Elixir.Patina.Defaults.Dog'},
-                                                          'Elixir.Patina.Defaults.Dog':'Defaults::Animal::returns_self'({'impl Defaults::Animal for Defaults::Dog',
-                                                                                                                         'Elixir.Patina.Defaults.Dog'},
-                                                                                                                        _name@0_0)).
+                                                          'Defaults::Animal::returns_self'({'impl Defaults::Animal for Defaults::Dog',
+                                                                                            'Elixir.Patina.Defaults.Dog'},
+                                                                                           _name@0_0)).
 
 'Defaults::Combine::uses_rhs_witness'(_witness@0_0,
                                       _witness@2_0 = {_witness@1_0}, _self@3_0,
@@ -200,30 +200,30 @@ combine_via(_witness@2_0 = {_witness@0_0, _witness@1_0},
                                                                          _b@4_0).
 
 combine_coin_piles(_a@0_0, _b@1_0) ->
-    'Elixir.Patina.Defaults.Pile':'Defaults::Combine::uses_rhs_witness'({'impl Defaults::Combine for Defaults::Pile<_>',
-                                                                         'Elixir.Patina.Defaults.Pile',
-                                                                         {'impl Defaults::Value for Defaults::Pile<_>',
-                                                                          'Elixir.Patina.Defaults.Pile',
-                                                                          {'impl Defaults::Value for Defaults::Coin',
-                                                                           'Elixir.Patina.Defaults.Coin'}},
-                                                                         {'impl Defaults::Value for Defaults::Coin',
-                                                                          'Elixir.Patina.Defaults.Coin'}},
-                                                                        {{'impl Defaults::Value for Defaults::Pile<_>',
-                                                                          'Elixir.Patina.Defaults.Pile',
-                                                                          {'impl Defaults::Value for Defaults::Coin',
-                                                                           'Elixir.Patina.Defaults.Coin'}}},
-                                                                        _a@0_0,
-                                                                        _b@1_0).
+    'Defaults::Combine::uses_rhs_witness'({'impl Defaults::Combine for Defaults::Pile<_>',
+                                           'Elixir.Patina.Defaults.Pile',
+                                           {'impl Defaults::Value for Defaults::Pile<_>',
+                                            'Elixir.Patina.Defaults.Pile',
+                                            {'impl Defaults::Value for Defaults::Coin',
+                                             'Elixir.Patina.Defaults.Coin'}},
+                                           {'impl Defaults::Value for Defaults::Coin',
+                                            'Elixir.Patina.Defaults.Coin'}},
+                                          {{'impl Defaults::Value for Defaults::Pile<_>',
+                                            'Elixir.Patina.Defaults.Pile',
+                                            {'impl Defaults::Value for Defaults::Coin',
+                                             'Elixir.Patina.Defaults.Coin'}}},
+                                          _a@0_0,
+                                          _b@1_0).
 
 combine_coin_with_note(_a@0_0, _b@1_0) ->
-    'Elixir.Patina.Defaults.Coin':'Defaults::Combine::uses_rhs_witness'({'impl Defaults::Combine<Defaults::Note> for Defaults::Coin',
-                                                                         'Elixir.Patina.Defaults.Coin',
-                                                                         {'impl Defaults::Value for Defaults::Coin',
-                                                                          'Elixir.Patina.Defaults.Coin'}},
-                                                                        {{'impl Defaults::Value for Defaults::Note',
-                                                                          'Elixir.Patina.Defaults.Note'}},
-                                                                        _a@0_0,
-                                                                        _b@1_0).
+    'Defaults::Combine::uses_rhs_witness'({'impl Defaults::Combine<Defaults::Note> for Defaults::Coin',
+                                           'Elixir.Patina.Defaults.Coin',
+                                           {'impl Defaults::Value for Defaults::Coin',
+                                            'Elixir.Patina.Defaults.Coin'}},
+                                          {{'impl Defaults::Value for Defaults::Note',
+                                            'Elixir.Patina.Defaults.Note'}},
+                                          _a@0_0,
+                                          _b@1_0).
 
 combine_note_piles_via(_a@0_0, _b@1_0) ->
     combine_via({{'impl Defaults::Combine for Defaults::Pile<_>',
@@ -252,9 +252,9 @@ combine_coin_with_note_via(_a@0_0, _b@1_0) ->
                 _b@1_0).
 
 double(_x@0_0) ->
-    'Elixir.Patina.Defaults.N':'Defaults::Inner::Doubler::doubled'({'impl Defaults::Inner::Doubler for Defaults::N',
-                                                                    'Elixir.Patina.Defaults.N'},
-                                                                   _x@0_0).
+    'Elixir.Patina.Defaults.Inner':'Defaults::Inner::Doubler::doubled'({'impl Defaults::Inner::Doubler for Defaults::N',
+                                                                        'Elixir.Patina.Defaults.N'},
+                                                                       _x@0_0).
 
 'Defaults::Greeter::greet'(_witness@0_0, _self@1_0) ->
     {<<"Hello"/utf8>>,
@@ -272,11 +272,11 @@ greet_via(_witness@1_0 = {_witness@0_0},
                                                               _greeter@2_0).
 
 greet(_name@0_0) ->
-    'Elixir.Patina.Defaults.Person':'Defaults::Greeter::greet'({'impl Defaults::Greeter for Defaults::Person',
-                                                                'Elixir.Patina.Defaults.Person',
-                                                                {'impl Defaults::Named for Defaults::Person',
-                                                                 'Elixir.Patina.Defaults.Person'}},
-                                                               _name@0_0).
+    'Defaults::Greeter::greet'({'impl Defaults::Greeter for Defaults::Person',
+                                'Elixir.Patina.Defaults.Person',
+                                {'impl Defaults::Named for Defaults::Person',
+                                 'Elixir.Patina.Defaults.Person'}},
+                               _name@0_0).
 
 greet_through_witness(_name@0_0) ->
     greet_via({{'impl Defaults::Greeter for Defaults::Person',
@@ -315,34 +315,34 @@ nested(_witness@3_0 = {_witness@0_0,
                                                                                                                                                                                       _container@4_0))).
 
 describe_boxed(_name@0_0) ->
-    'Elixir.Patina.Defaults.Boxed':'Defaults::Container::needs_item_witness'({'impl Defaults::Container for Defaults::Boxed',
-                                                                              'Elixir.Patina.Defaults.Boxed'},
-                                                                             {{'impl Defaults::Describe for Defaults::Name',
-                                                                               'Elixir.Patina.Defaults.Name'}},
-                                                                             _name@0_0).
+    'Defaults::Container::needs_item_witness'({'impl Defaults::Container for Defaults::Boxed',
+                                               'Elixir.Patina.Defaults.Boxed'},
+                                              {{'impl Defaults::Describe for Defaults::Name',
+                                                'Elixir.Patina.Defaults.Name'}},
+                                              _name@0_0).
 
 describe_wrapped(_name@0_0) ->
-    'Elixir.Patina.Defaults.Wrapped':'Defaults::Container::needs_item_witness'({'impl Defaults::Container for Defaults::Wrapped<_>',
-                                                                                'Elixir.Patina.Defaults.Wrapped',
-                                                                                {'impl Defaults::Describe for Defaults::Name',
-                                                                                 'Elixir.Patina.Defaults.Name'}},
-                                                                               {{'impl Defaults::Describe for Defaults::Name',
-                                                                                 'Elixir.Patina.Defaults.Name'}},
-                                                                               _name@0_0).
+    'Defaults::Container::needs_item_witness'({'impl Defaults::Container for Defaults::Wrapped<_>',
+                                               'Elixir.Patina.Defaults.Wrapped',
+                                               {'impl Defaults::Describe for Defaults::Name',
+                                                'Elixir.Patina.Defaults.Name'}},
+                                              {{'impl Defaults::Describe for Defaults::Name',
+                                                'Elixir.Patina.Defaults.Name'}},
+                                              _name@0_0).
 
 describe_rewrapped(_name@0_0) ->
-    'Elixir.Patina.Defaults.Rewrapped':'Defaults::Container::needs_item_witness'({'impl Defaults::Container for Defaults::Rewrapped',
-                                                                                  'Elixir.Patina.Defaults.Rewrapped'},
-                                                                                 {{'impl Defaults::Describe for Defaults::Name',
-                                                                                   'Elixir.Patina.Defaults.Name'}},
-                                                                                 _name@0_0).
+    'Defaults::Container::needs_item_witness'({'impl Defaults::Container for Defaults::Rewrapped',
+                                               'Elixir.Patina.Defaults.Rewrapped'},
+                                              {{'impl Defaults::Describe for Defaults::Name',
+                                                'Elixir.Patina.Defaults.Name'}},
+                                              _name@0_0).
 
 describe_loose(_name@0_0) ->
-    'Elixir.Patina.Defaults.Loose':'Defaults::Container::needs_item_witness'({'impl Defaults::Container for Defaults::Loose<_>',
-                                                                              'Elixir.Patina.Defaults.Loose'},
-                                                                             {{'impl Defaults::Describe for Defaults::Name',
-                                                                               'Elixir.Patina.Defaults.Name'}},
-                                                                             _name@0_0).
+    'Defaults::Container::needs_item_witness'({'impl Defaults::Container for Defaults::Loose<_>',
+                                               'Elixir.Patina.Defaults.Loose'},
+                                              {{'impl Defaults::Describe for Defaults::Name',
+                                                'Elixir.Patina.Defaults.Name'}},
+                                              _name@0_0).
 
 describe_first_loose(_name@0_0) ->
     first({{'impl Defaults::Container for Defaults::Loose<_>',
@@ -367,9 +367,9 @@ describe_nested(_name@0_0) ->
 
 make() ->
     _ =
-        'Elixir.Patina.Defaults.Boxed':'Defaults::Maker::make'({'impl Defaults::Maker for Defaults::Boxed',
-                                                                'Elixir.Patina.Defaults.Boxed'},
-                                                               <<"unused"/utf8>>),
+        'Defaults::Maker::make'({'impl Defaults::Maker for Defaults::Boxed',
+                                 'Elixir.Patina.Defaults.Boxed'},
+                                <<"unused"/utf8>>),
     {}.
 
 'Defaults::Numbered::$patina_const::D'(_witness@0_0) ->
@@ -389,21 +389,21 @@ sum(_witness@1_0 = {_witness@0_0}, __t@2_0) ->
                         _witness@0_0)):'Defaults::Numbered::$patina_const::D'(_witness@0_0).
 
 one_consts() ->
-    'Elixir.Patina.Defaults.One':'Defaults::Numbered::consts'({'impl Defaults::Numbered for Defaults::One',
-                                                               'Elixir.Patina.Defaults.One'},
-                                                              'Elixir.Patina.Defaults.One').
+    'Defaults::Numbered::consts'({'impl Defaults::Numbered for Defaults::One',
+                                  'Elixir.Patina.Defaults.One'},
+                                 'Elixir.Patina.Defaults.One').
 
 two_consts() ->
-    'Elixir.Patina.Defaults.Two':'Defaults::Numbered::consts'({'impl Defaults::Numbered for Defaults::Two',
-                                                               'Elixir.Patina.Defaults.Two'},
-                                                              'Elixir.Patina.Defaults.Two').
+    'Defaults::Numbered::consts'({'impl Defaults::Numbered for Defaults::Two',
+                                  'Elixir.Patina.Defaults.Two'},
+                                 'Elixir.Patina.Defaults.Two').
 
 plus_one_consts() ->
-    'Elixir.Patina.Defaults.Plus':'Defaults::Numbered::consts'({'impl Defaults::Numbered for Defaults::Plus<_>',
-                                                                'Elixir.Patina.Defaults.Plus',
-                                                                {'impl Defaults::Numbered for Defaults::One',
-                                                                 'Elixir.Patina.Defaults.One'}},
-                                                               'Elixir.Patina.Defaults.One').
+    'Defaults::Numbered::consts'({'impl Defaults::Numbered for Defaults::Plus<_>',
+                                  'Elixir.Patina.Defaults.Plus',
+                                  {'impl Defaults::Numbered for Defaults::One',
+                                   'Elixir.Patina.Defaults.One'}},
+                                 'Elixir.Patina.Defaults.One').
 
 sum_two() ->
     sum({{'impl Defaults::Numbered for Defaults::Two',
@@ -415,10 +415,10 @@ one_c() ->
                                                                          'Elixir.Patina.Defaults.One'}).
 
 plus_two_d() ->
-    'Elixir.Patina.Defaults.Plus':'Defaults::Numbered::$patina_const::D'({'impl Defaults::Numbered for Defaults::Plus<_>',
-                                                                          'Elixir.Patina.Defaults.Plus',
-                                                                          {'impl Defaults::Numbered for Defaults::Two',
-                                                                           'Elixir.Patina.Defaults.Two'}}).
+    'Defaults::Numbered::$patina_const::D'({'impl Defaults::Numbered for Defaults::Plus<_>',
+                                            'Elixir.Patina.Defaults.Plus',
+                                            {'impl Defaults::Numbered for Defaults::Two',
+                                             'Elixir.Patina.Defaults.Two'}}).
 
 doubled_k() ->
     'Elixir.Patina.Defaults.Holder':'Defaults::Konst::$patina_const::K'({'impl Defaults::Konst for Defaults::Holder',
@@ -444,10 +444,10 @@ str_ne(_a@0_0, _b@1_0) ->
                                                    _b@1_0).
 
 p_ne(_a@0_0, _b@1_0) ->
-    'Elixir.Patina.Defaults.P':'Core::PartialEq::ne'({'impl Core::PartialEq for Defaults::P',
-                                                      'Elixir.Patina.Defaults.P'},
-                                                     _a@0_0,
-                                                     _b@1_0).
+    'Elixir.Patina.Core':'Core::PartialEq::ne'({'impl Core::PartialEq for Defaults::P',
+                                                'Elixir.Patina.Defaults.P'},
+                                               _a@0_0,
+                                               _b@1_0).
 
 p_differ(_a@0_0, _b@1_0) ->
     differ({{'impl Core::PartialEq for Defaults::P',
@@ -509,10 +509,10 @@ describe_through_pointer(_name@0_0) ->
 
 ne_through_pointer(_a@0_0, _b@1_0) ->
     _ne@4_0 = fun (_arg@2_0, _arg@3_0) ->
-                      'Elixir.Patina.Defaults.P':'Core::PartialEq::ne'({'impl Core::PartialEq for Defaults::P',
-                                                                        'Elixir.Patina.Defaults.P'},
-                                                                       _arg@2_0,
-                                                                       _arg@3_0)
+                      'Elixir.Patina.Core':'Core::PartialEq::ne'({'impl Core::PartialEq for Defaults::P',
+                                                                  'Elixir.Patina.Defaults.P'},
+                                                                 _arg@2_0,
+                                                                 _arg@3_0)
               end,
     _ne@4_0(_a@0_0, _b@1_0).
 

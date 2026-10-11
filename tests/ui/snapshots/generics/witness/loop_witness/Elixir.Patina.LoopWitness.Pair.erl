@@ -12,8 +12,7 @@
 -export(['__info__'/1,
          '$patina_constructor__Pair'/2,
          '<impl LoopWitness::Score for LoopWitness::Pair<_>>::score$patina_loop_1'/3,
-         'LoopWitness::Score::score'/2,
-         'LoopWitness::Score::loop_in_default'/3]).
+         'LoopWitness::Score::score'/2]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),

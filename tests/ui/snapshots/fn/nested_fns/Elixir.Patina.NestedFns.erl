@@ -182,9 +182,9 @@ from_impl() ->
 'from_impl::base'() -> 100.
 
 nested_trait() ->
-    'Elixir.Patina.NestedFns.Counter':'NestedFns::nested_trait::Answer::answer'({'impl NestedFns::nested_trait::Answer for NestedFns::Counter',
-                                                                                 'Elixir.Patina.NestedFns.Counter'},
-                                                                                0).
+    'NestedFns::nested_trait::Answer::answer'({'impl NestedFns::nested_trait::Answer for NestedFns::Counter',
+                                               'Elixir.Patina.NestedFns.Counter'},
+                                              0).
 
 'NestedFns::nested_trait::Answer::answer'(_witness@0_0,
                                           _self@1_0) ->
@@ -198,18 +198,18 @@ trait_in_method() ->
     'Elixir.Patina.NestedFns.Wrapper':trait_in_method('Elixir.Patina.NestedFns.Wrapper').
 
 first_answer() ->
-    'Elixir.Patina.NestedFns.Wrapper':'NestedFns::first_answer::Answer::answer'({'impl NestedFns::first_answer::Answer for NestedFns::Wrapper',
-                                                                                 'Elixir.Patina.NestedFns.Wrapper'},
-                                                                                'Elixir.Patina.NestedFns.Wrapper').
+    'NestedFns::first_answer::Answer::answer'({'impl NestedFns::first_answer::Answer for NestedFns::Wrapper',
+                                               'Elixir.Patina.NestedFns.Wrapper'},
+                                              'Elixir.Patina.NestedFns.Wrapper').
 
 'NestedFns::first_answer::Answer::answer'(_witness@0_0,
                                           _self@1_0) ->
     1.
 
 second_answer() ->
-    'Elixir.Patina.NestedFns.Wrapper':'NestedFns::second_answer::Answer::answer'({'impl NestedFns::second_answer::Answer for NestedFns::Wrapper',
-                                                                                  'Elixir.Patina.NestedFns.Wrapper'},
-                                                                                 'Elixir.Patina.NestedFns.Wrapper').
+    'NestedFns::second_answer::Answer::answer'({'impl NestedFns::second_answer::Answer for NestedFns::Wrapper',
+                                                'Elixir.Patina.NestedFns.Wrapper'},
+                                               'Elixir.Patina.NestedFns.Wrapper').
 
 'NestedFns::second_answer::Answer::answer'(_witness@0_0,
                                            _self@1_0) ->
@@ -217,14 +217,14 @@ second_answer() ->
 
 answers_in_blocks() ->
     _a@0_0 = begin
-                 'Elixir.Patina.NestedFns.Wrapper':'NestedFns::answers_in_blocks::Answer::answer'({'impl NestedFns::answers_in_blocks::Answer for NestedFns::Wrapper',
-                                                                                                   'Elixir.Patina.NestedFns.Wrapper'},
-                                                                                                  'Elixir.Patina.NestedFns.Wrapper')
+                 'NestedFns::answers_in_blocks::Answer::answer'({'impl NestedFns::answers_in_blocks::Answer for NestedFns::Wrapper',
+                                                                 'Elixir.Patina.NestedFns.Wrapper'},
+                                                                'Elixir.Patina.NestedFns.Wrapper')
              end,
     _b@1_0 = begin
-                 'Elixir.Patina.NestedFns.Wrapper':'NestedFns::answers_in_blocks::Answer#1::answer'({'impl NestedFns::answers_in_blocks::Answer#1 for NestedFns::Wrapper',
-                                                                                                     'Elixir.Patina.NestedFns.Wrapper'},
-                                                                                                    'Elixir.Patina.NestedFns.Wrapper')
+                 'NestedFns::answers_in_blocks::Answer#1::answer'({'impl NestedFns::answers_in_blocks::Answer#1 for NestedFns::Wrapper',
+                                                                   'Elixir.Patina.NestedFns.Wrapper'},
+                                                                  'Elixir.Patina.NestedFns.Wrapper')
              end,
     _a@0_0 * 10 + _b@1_0.
 

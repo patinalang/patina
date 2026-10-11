@@ -1,8 +1,0 @@
-error: witness for the bound not yet implemented: <impl Describe as Describe>
-  --> tests/ui/src/generics/error/opaque_witness.pt:25:5
-   |
-LL |     show(make())
-   |     ^^^^^^^^^^^^
-
-error: aborting due to 1 previous error
-

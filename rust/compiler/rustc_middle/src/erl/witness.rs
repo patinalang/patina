@@ -166,15 +166,19 @@ impl<'tcx> TyCtxt<'tcx> {
 
 pub struct WitnessResolver<'tcx> {
     tcx: TyCtxt<'tcx>,
-    owner: DefId,
+    typing_env: ty::TypingEnv<'tcx>,
     env: FxHashMap<ty::TraitRef<'tcx>, WitnessSource<'tcx>>,
     seen: SmallVec<[ty::TraitRef<'tcx>; 1]>,
 }
 
 impl<'tcx> WitnessResolver<'tcx> {
     pub fn new(tcx: TyCtxt<'tcx>, owner: DefId) -> WitnessResolver<'tcx> {
-        let mut resolver =
-            WitnessResolver { tcx, owner, env: FxHashMap::default(), seen: SmallVec::new() };
+        let mut resolver = WitnessResolver {
+            tcx,
+            typing_env: ty::TypingEnv::post_analysis(tcx, owner),
+            env: FxHashMap::default(),
+            seen: SmallVec::new(),
+        };
         let params = tcx.erl_witness_params_identity(owner);
 
         match params.self_bound {
@@ -207,7 +211,7 @@ impl<'tcx> WitnessResolver<'tcx> {
         source: WitnessSource<'tcx>,
     ) {
         let tcx = self.tcx;
-        let bound = tcx.erl_normalize(self.owner, bound);
+        let bound = tcx.normalize_erasing_regions_or_unchanged(self.typing_env, bound);
         let Entry::Vacant(entry) = self.env.entry(bound) else { return };
         entry.insert(source.clone());
 
@@ -226,13 +230,12 @@ impl<'tcx> WitnessResolver<'tcx> {
 
         let params = tcx.erl_witness_params(def_id, args);
 
-        let self_witness = params.self_bound.map(|self_bound| match self_bound {
-            SelfBound::Trait(bound) => Box::new(self.witness_source(span, bound)),
-            SelfBound::TraitImpl(_) => span_bug!(
-                span,
-                "call to the trait impl item `{}`, not to its trait item",
-                tcx.def_path_str(def_id)
-            ),
+        let self_witness = params.self_bound.map(|self_bound| {
+            let bound = match self_bound {
+                SelfBound::Trait(bound) => bound,
+                SelfBound::TraitImpl(TraitImplSelfBound { bound, .. }) => bound,
+            };
+            Box::new(self.witness_source(span, bound))
         });
 
         let bounds =
@@ -247,7 +250,7 @@ impl<'tcx> WitnessResolver<'tcx> {
         bound: Unnormalized<'tcx, ty::TraitRef<'tcx>>,
     ) -> WitnessSource<'tcx> {
         let tcx = self.tcx;
-        let bound = tcx.erl_normalize(self.owner, bound);
+        let bound = tcx.normalize_erasing_regions_or_unchanged(self.typing_env, bound);
 
         if let Some(source) = self.env.get(&bound) {
             return source.clone();
@@ -257,7 +260,7 @@ impl<'tcx> WitnessResolver<'tcx> {
             return source;
         }
 
-        let Some((impl_def_id, impl_args)) = tcx.erl_select_impl(self.owner, bound) else {
+        let Some((impl_def_id, impl_args)) = tcx.select_impl(self.typing_env, bound) else {
             tcx.dcx()
                 .span_fatal(span, format!("witness for the bound not yet implemented: {bound:?}"));
         };
@@ -320,7 +323,8 @@ impl<'tcx> WitnessResolver<'tcx> {
                 tcx.erl_assoc_type_bounds(assoc_def_id).iter_instantiated_copied(tcx, alias.args);
             let found = declared_bounds.enumerate().find_map(|(index, declared)| {
                 let index = AssocTypeBoundIdx::from_usize(index);
-                let declared = tcx.erl_normalize(self.owner, declared);
+                let declared =
+                    tcx.normalize_erasing_regions_or_unchanged(self.typing_env, declared);
 
                 self.supertrait_path(declared, bound).map(|path| (index, path))
             });
@@ -357,7 +361,8 @@ impl<'tcx> WitnessResolver<'tcx> {
         }
         let tcx = self.tcx;
         tcx.erl_supertrait_bounds(from).into_iter_enumerated().find_map(|(index, supertrait)| {
-            let supertrait = tcx.erl_normalize(self.owner, supertrait);
+            let supertrait =
+                tcx.normalize_erasing_regions_or_unchanged(self.typing_env, supertrait);
             self.supertrait_path(supertrait, to).map(|mut path| {
                 path.insert(0, index);
                 path

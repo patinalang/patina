@@ -12,9 +12,7 @@
          'Defaults::Animal::name'/2,
          'Defaults::Animal::noise'/2,
          'Defaults::Animal::calls_required'/2,
-         'Defaults::Animal::calls_default'/2,
-         'Defaults::Animal::with_bounded_param'/4,
-         'Defaults::Animal::returns_self'/2]).
+         'Defaults::Animal::calls_default'/2]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),

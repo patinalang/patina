@@ -1,0 +1,12 @@
+warning: [{"tests/ui/src/generics/witness/loop_witness.pt",
+           [{{19,16},
+             erl_lint,
+             {unused_function,{'LoopWitness::Score::loop_in_default',3}}}]}]
+
+warning: [{"tests/ui/src/generics/witness/loop_witness.pt",
+           [{{32,26},
+             erl_lint,
+             {unused_function,{'LoopWitness::Score::loop_in_default',3}}}]}]
+
+warning: 2 warnings emitted
+

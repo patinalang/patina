@@ -61,11 +61,11 @@ describe_int(_n@0_0) ->
                                                                         _n@0_0).
 
 shout_str(_s@0_0) ->
-    'Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Describe::shout'({'impl BlanketImpl::Describe for _',
-                                                                      'Elixir.Patina.BlanketImpl.$impl',
-                                                                      {'impl BlanketImpl::Show for str',
-                                                                       'Elixir.Patina.BlanketImpl.$impl.Core.Str'}},
-                                                                     _s@0_0).
+    'BlanketImpl::Describe::shout'({'impl BlanketImpl::Describe for _',
+                                    'Elixir.Patina.BlanketImpl.$impl',
+                                    {'impl BlanketImpl::Show for str',
+                                     'Elixir.Patina.BlanketImpl.$impl.Core.Str'}},
+                                   _s@0_0).
 
 describe_generic_int(_n@0_0) ->
     describe_generic({{'impl BlanketImpl::Describe for _',
@@ -84,10 +84,9 @@ shout_pair_generic(_n@0_0, _s@1_0) ->
     <<(describe_generic({{'impl BlanketImpl::Describe for (int, str)',
                           'Elixir.Patina.BlanketImpl.$impl.Core.Tuple'}},
                         {_n@0_0, _s@1_0}))/binary,
-      ('Elixir.Patina.BlanketImpl.$impl.Core.Tuple':'BlanketImpl::Describe::shout'({'impl BlanketImpl::Describe for (int, str)',
-                                                                                    'Elixir.Patina.BlanketImpl.$impl.Core.Tuple'},
-                                                                                   {_n@0_0,
-                                                                                    _s@1_0}))/binary>>.
+      ('BlanketImpl::Describe::shout'({'impl BlanketImpl::Describe for (int, str)',
+                                       'Elixir.Patina.BlanketImpl.$impl.Core.Tuple'},
+                                      {_n@0_0, _s@1_0}))/binary>>.
 
 twice_str(_s@0_0) ->
     'Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Nested::Twice::twice'({'impl BlanketImpl::Nested::Twice for _',

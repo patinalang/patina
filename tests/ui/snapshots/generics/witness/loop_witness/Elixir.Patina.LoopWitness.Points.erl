@@ -9,9 +9,7 @@
 
 -export_record([]).
 
--export(['__info__'/1,
-         'LoopWitness::Score::score'/2,
-         'LoopWitness::Score::loop_in_default'/3]).
+-export(['__info__'/1, 'LoopWitness::Score::score'/2]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),

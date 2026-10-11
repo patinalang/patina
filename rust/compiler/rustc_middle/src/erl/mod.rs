@@ -25,11 +25,10 @@ use smallvec::SmallVec;
 use self::shape::ErlShape;
 use self::witness::{AssocTypeBoundIdx, BoundIdx, SupertraitIdx};
 use crate::query::Providers;
-use crate::traits::ImplSource;
 use crate::ty::print::PrintTraitRefExt as _;
 use crate::ty::{
-    self, AdtDef, FieldDef, GenericArgsRef, Ty, TyCtxt, TypeFoldable, TypeVisitableExt, TypingEnv,
-    Unnormalized, VariantDef, Visibility,
+    self, AdtDef, FieldDef, GenericArgsRef, Ty, TyCtxt, TypeVisitableExt, TypingEnv, Unnormalized,
+    VariantDef, Visibility,
 };
 
 /// The identity of a module in the generated Erlang program.
@@ -149,9 +148,10 @@ impl<'tcx> TyCtxt<'tcx> {
 
                 DefKind::Impl { .. } => {
                     let self_ty = self.type_of(def_id).instantiate_identity().skip_normalization();
-                    let module = match self
-                        .resolve_erl_receiver_module(self_ty, self.erl_typing_env(def_id))
-                    {
+                    let module = match self.resolve_erl_receiver_module(
+                        self_ty,
+                        TypingEnv::post_analysis(self, def_id),
+                    ) {
                         Some(ErlModuleResolution::Static(module)) => Some(module),
                         Some(ErlModuleResolution::Dynamic) | None => None,
                     };
@@ -347,31 +347,6 @@ impl<'tcx> TyCtxt<'tcx> {
         })
     }
 
-    /// The impl that proves `trait_ref` in `owner`'s environment, if an impl proves it.
-    pub fn erl_select_impl(
-        self,
-        owner: DefId,
-        trait_ref: ty::TraitRef<'tcx>,
-    ) -> Option<(DefId, GenericArgsRef<'tcx>)> {
-        match self.erl_select(self.erl_typing_env(owner), trait_ref)? {
-            ImplSource::UserDefined(data) => Some((data.impl_def_id, data.args)),
-            ImplSource::Param(_) | ImplSource::Builtin(..) => None,
-        }
-    }
-
-    /// What proves `trait_ref` in `typing_env`: an impl, a where-clause (`Param`), or a builtin
-    /// impl. `None` if nothing proves it or the choice is ambiguous.
-    fn erl_select(
-        self,
-        typing_env: TypingEnv<'tcx>,
-        trait_ref: ty::TraitRef<'tcx>,
-    ) -> Option<&'tcx ImplSource<'tcx, ()>> {
-        let trait_ref = self
-            .try_normalize_erasing_regions(typing_env, Unnormalized::new_wip(trait_ref))
-            .ok()?;
-        self.codegen_select_candidate(typing_env.as_query_input(trait_ref)).ok()
-    }
-
     /// The arity of the Erlang function generated for `def_id`.
     pub fn erl_fn_arity(self, def_id: DefId) -> usize {
         let def_id = self.erl_fn_item(def_id);
@@ -387,18 +362,6 @@ impl<'tcx> TyCtxt<'tcx> {
         params
             + usize::from(self.erl_entry_trait(def_id).is_some())
             + usize::from(!self.erl_bounds(def_id).skip_binder().is_empty())
-    }
-
-    /// Normalizes `value` in `owner`'s environment. A projection whose self type is a type
-    /// parameter, like `<T as Iterator>::Item`, has no impl to resolve to, and stays as it is.
-    /// If normalization fails, returns `value` unchanged.
-    pub fn erl_normalize<T: TypeFoldable<TyCtxt<'tcx>> + Copy>(
-        self,
-        owner: DefId,
-        value: Unnormalized<'tcx, T>,
-    ) -> T {
-        self.try_normalize_erasing_regions(self.erl_typing_env(owner), value)
-            .unwrap_or(value.skip_normalization())
     }
 
     pub fn is_forced_extern(self, hir_id: HirId) -> bool {
@@ -492,10 +455,23 @@ impl<'tcx> TyCtxt<'tcx> {
     /// Classifies a statically resolved callable definition.
     pub fn erl_call_target_for_def(
         self,
+        caller: DefId,
         def_id: DefId,
         args: GenericArgsRef<'tcx>,
     ) -> ErlCallTarget<'tcx> {
         match self.def_kind(def_id) {
+            DefKind::AssocFn | DefKind::AssocConst { .. }
+                if self.trait_of_assoc(def_id).is_some() =>
+            {
+                let typing_env = TypingEnv::post_analysis(self, caller);
+                match ty::Instance::try_resolve(self, typing_env, def_id, args) {
+                    Ok(Some(ty::Instance { def: ty::InstanceKind::Item(def_id), args })) => {
+                        ErlCallTarget::Item { def_id, args }
+                    }
+                    _ => ErlCallTarget::Item { def_id, args },
+                }
+            }
+
             DefKind::Fn | DefKind::AssocFn | DefKind::AssocConst { .. } => {
                 ErlCallTarget::Item { def_id, args }
             }
@@ -512,11 +488,6 @@ impl<'tcx> TyCtxt<'tcx> {
         }
     }
 
-    fn erl_typing_env(self, owner: impl Into<DefId>) -> TypingEnv<'tcx> {
-        let owner = owner.into();
-        TypingEnv::new(self.param_env(owner), ty::TypingMode::non_body_analysis())
-    }
-
     fn erl_call_target_is_exported(self, module: ErlModuleId, target: ErlCallTarget<'tcx>) -> bool {
         match target {
             ErlCallTarget::Item { def_id, args: _ } => self.is_erl_exported_fn(module, def_id),
@@ -530,7 +501,7 @@ impl<'tcx> TyCtxt<'tcx> {
         owner: DefId,
         target: ErlCallTarget<'tcx>,
     ) -> Option<ErlModuleResolution> {
-        let typing_env = self.erl_typing_env(owner);
+        let typing_env = TypingEnv::post_analysis(self, owner);
         match target {
             ErlCallTarget::Item { def_id, args } => {
                 self.erl_module_for_target_item(def_id, args, typing_env)
@@ -575,19 +546,16 @@ impl<'tcx> TyCtxt<'tcx> {
                     }
 
                     DefKind::Trait => {
-                        let trait_ref = ty::TraitRef::from_assoc(self, parent, args);
-                        match self.erl_select(typing_env, trait_ref) {
-                            Some(ImplSource::UserDefined(data)) => self
-                                .erl_definition_module(data.impl_def_id)
-                                .map(ErlModuleResolution::Static),
-                            // Dispatch, also for a concrete self type: in `where Celsius:
-                            // From<T>`, `T` picks the impl, and so the host, which can be in
-                            // another crate. A failed selection also dispatches, so that
-                            // `WitnessResolver::witness_source` reports it.
-                            Some(ImplSource::Param(_)) | None => None,
-                            Some(ImplSource::Builtin(..)) => {
+                        match ty::Instance::try_resolve(self, typing_env, def_id, args) {
+                            Ok(Some(ty::Instance {
+                                def: ty::InstanceKind::Item(item), ..
+                            })) => {
+                                self.erl_definition_module(item).map(ErlModuleResolution::Static)
+                            }
+                            Ok(Some(_)) => {
                                 self.resolve_erl_receiver_module(args.type_at(0), typing_env)
                             }
+                            Ok(None) | Err(_) => None,
                         }
                     }
 

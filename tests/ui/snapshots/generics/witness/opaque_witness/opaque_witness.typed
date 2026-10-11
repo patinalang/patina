@@ -36,8 +36,7 @@ fn make()
 fn show<T>(t: T) -> str where
     T: Describe ({ ((t as T).describe() as str) } as str)
 
-// Calling `show` needs the witness of the opaque return type of `make`.
-fn show_made()
+fn show_opaque_return()
     ->
         str ({
     ((show as

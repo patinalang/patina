@@ -10,7 +10,6 @@
 
 -export(['__info__'/1,
          'BlanketImpl::Describe::describe'/2,
-         'BlanketImpl::Describe::shout'/2,
          'BlanketImpl::Nested::Twice::twice'/2]).
 
 '__info__'(functions) ->
