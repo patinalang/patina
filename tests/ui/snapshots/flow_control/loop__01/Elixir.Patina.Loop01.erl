@@ -29,20 +29,37 @@
             case _count@0_1 =:= 3 of
                 true ->
                     begin
-                        io:put_chars([[<<"three"/utf8>>]]), io:nl(), {}
+                        io:put_chars(begin
+                                         _element@2_0 = [<<"three"/utf8>>],
+                                         [_element@2_0]
+                                     end),
+                        io:nl(),
+                        {}
                     end,
                     '$patina_marker':continue(_count@0_1);
                 false -> {}
             end,
             begin
-                io:put_chars([[io_lib:format("~ktp", [_count@0_1])]]),
+                io:put_chars(begin
+                                 _element@4_0 = begin
+                                                    _element@3_0 =
+                                                        io_lib:format("~ktp",
+                                                                      [_count@0_1]),
+                                                    [_element@3_0]
+                                                end,
+                                 [_element@4_0]
+                             end),
                 io:nl(),
                 {}
             end,
             case _count@0_1 =:= 5 of
                 true ->
                     begin
-                        io:put_chars([[<<"OK, that's enough"/utf8>>]]),
+                        io:put_chars(begin
+                                         _element@5_0 =
+                                             [<<"OK, that's enough"/utf8>>],
+                                         [_element@5_0]
+                                     end),
                         io:nl(),
                         {}
                     end,
@@ -55,11 +72,15 @@
 main() ->
     _count@0_0 = 0,
     begin
-        io:put_chars([[<<"Let's count until infinity!"/utf8>>]]),
+        io:put_chars(begin
+                         _element@1_0 =
+                             [<<"Let's count until infinity!"/utf8>>],
+                         [_element@1_0]
+                     end),
         io:nl(),
         {}
     end,
     case 'main$patina_loop_1'(_count@0_0) of
-        {break, 0, _loop_value@1_0, _count@0_1} ->
-            _loop_value@1_0
+        {break, 0, _loop_value@6_0, _count@0_1} ->
+            _loop_value@6_0
     end.

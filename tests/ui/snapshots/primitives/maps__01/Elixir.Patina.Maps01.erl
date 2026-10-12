@@ -36,36 +36,50 @@ call(_number@0_0) ->
         _ -> <<"Hi! Who is this again?"/utf8>>
     end.
 
-'main$patina_loop_1'(_iter@5_0) ->
+'main$patina_loop_1'(_iter@13_0) ->
     _ = begin
             case
                 'Elixir.Patina.Core.MapIter':'Core::Iterator::next'('Elixir.Patina.Core.MapIter':'Core::Iterator::$patina_witness'(),
-                                                                    _iter@5_0)
+                                                                    _iter@13_0)
                 of
                 nil ->
-                    _branch_value@10_0 = '$patina_marker':break({break,
+                    _branch_value@23_0 = '$patina_marker':break({break,
                                                                  0,
                                                                  {},
-                                                                 _iter@5_0}),
-                    _iter@5_1 = _iter@5_0,
-                    _branch_value@10_0;
-                _value@9_0 = {{_contact@6_0, _number@7_0}, _next@8_0}
-                    when erlang:is_tuple(_value@9_0) andalso
-                             erlang:tuple_size(_value@9_0) =:= 2 ->
-                    _iter@5_1 = _next@8_0,
+                                                                 _iter@13_0}),
+                    _iter@13_1 = _iter@13_0,
+                    _branch_value@23_0;
+                _value@17_0 = {{_contact@14_0, _number@15_0},
+                               _next@16_0}
+                    when erlang:is_tuple(_value@17_0) andalso
+                             erlang:tuple_size(_value@17_0) =:= 2 ->
+                    _iter@13_1 = _next@16_0,
                     begin
                         begin
-                            io:put_chars([[<<"Calling "/utf8>>,
-                                           _contact@6_0,
-                                           <<": "/utf8>>,
-                                           call(_number@7_0)]]),
+                            io:put_chars(begin
+                                             _element@22_0 = begin
+                                                                 _element@18_0 =
+                                                                     <<"Calling "/utf8>>,
+                                                                 _element@19_0 =
+                                                                     _contact@14_0,
+                                                                 _element@20_0 =
+                                                                     <<": "/utf8>>,
+                                                                 _element@21_0 =
+                                                                     call(_number@15_0),
+                                                                 [_element@18_0,
+                                                                  _element@19_0,
+                                                                  _element@20_0,
+                                                                  _element@21_0]
+                                                             end,
+                                             [_element@22_0]
+                                         end),
                             io:nl(),
                             {}
                         end
                     end
             end
         end,
-    '$patina_marker':continue(_iter@5_1).
+    '$patina_marker':continue(_iter@13_1).
 
 main() ->
     _contacts@0_0 = #{<<"Daniel"/utf8>> =>
@@ -78,12 +92,24 @@ main() ->
         of
         _value@2_0 = _number@1_0
             when erlang:is_binary(_value@2_0) ->
-            io:put_chars([[<<"Calling Daniel: "/utf8>>,
-                           call(_number@1_0)]]),
+            io:put_chars(begin
+                             _element@5_0 = begin
+                                                _element@3_0 =
+                                                    <<"Calling Daniel: "/utf8>>,
+                                                _element@4_0 =
+                                                    call(_number@1_0),
+                                                [_element@3_0, _element@4_0]
+                                            end,
+                             [_element@5_0]
+                         end),
             io:nl(),
             {};
         _ ->
-            io:put_chars([[<<"Don't have Daniel's number."/utf8>>]]),
+            io:put_chars(begin
+                             _element@6_0 =
+                                 [<<"Don't have Daniel's number."/utf8>>],
+                             [_element@6_0]
+                         end),
             io:nl(),
             {}
     end,
@@ -94,14 +120,26 @@ main() ->
     case 'Elixir.Patina.Core.Map':get(_contacts@0_1,
                                       <<"Ashley"/utf8>>)
         of
-        _value@4_0 = _number@3_0
-            when erlang:is_binary(_value@4_0) ->
-            io:put_chars([[<<"Calling Ashley: "/utf8>>,
-                           call(_number@3_0)]]),
+        _value@8_0 = _number@7_0
+            when erlang:is_binary(_value@8_0) ->
+            io:put_chars(begin
+                             _element@11_0 = begin
+                                                 _element@9_0 =
+                                                     <<"Calling Ashley: "/utf8>>,
+                                                 _element@10_0 =
+                                                     call(_number@7_0),
+                                                 [_element@9_0, _element@10_0]
+                                             end,
+                             [_element@11_0]
+                         end),
             io:nl(),
             {};
         _ ->
-            io:put_chars([[<<"Don't have Ashley's number."/utf8>>]]),
+            io:put_chars(begin
+                             _element@12_0 =
+                                 [<<"Don't have Ashley's number."/utf8>>],
+                             [_element@12_0]
+                         end),
             io:nl(),
             {}
     end,
@@ -114,9 +152,9 @@ main() ->
         'Elixir.Patina.Core.Map':'Core::IntoIterator::into_iter'('Elixir.Patina.Core.Map':'Core::IntoIterator::$patina_witness'(),
                                                                  _contacts@0_3)
         of
-        _iter@5_0 ->
-            case 'main$patina_loop_1'(_iter@5_0) of
-                {break, 0, _loop_value@11_0, _iter@5_1} ->
-                    _loop_value@11_0
+        _iter@13_0 ->
+            case 'main$patina_loop_1'(_iter@13_0) of
+                {break, 0, _loop_value@24_0, _iter@13_1} ->
+                    _loop_value@24_0
             end
     end.

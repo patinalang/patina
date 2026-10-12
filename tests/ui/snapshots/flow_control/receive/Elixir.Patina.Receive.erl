@@ -137,8 +137,13 @@ unchanged_timeout() ->
     _value@0_1.
 
 durations() ->
-    {'Elixir.Patina.Core.Timeout':from_seconds(2),
-     'Elixir.Patina.Core.Timeout':from_minutes(3)}.
+    begin
+        _element@0_0 =
+            'Elixir.Patina.Core.Timeout':from_seconds(2),
+        _element@1_0 =
+            'Elixir.Patina.Core.Timeout':from_minutes(3),
+        {_element@0_0, _element@1_0}
+    end.
 
 contextual_after() ->
     _after@0_0 = 4,

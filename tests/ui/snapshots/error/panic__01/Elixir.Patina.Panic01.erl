@@ -29,15 +29,31 @@ drink(_beverage@0_0) ->
             begin
                 erlang:error('Elixir.Patina.Core.Panic':new(<<"AAAaaaaa!!!!"/utf8>>),
                              none,
-                             [{error_info,
-                               #{module => 'Elixir.Patina.Core.Panic'}}])
+                             begin
+                                 _element@2_0 = begin
+                                                    _element@1_0 = #{module =>
+                                                                         'Elixir.Patina.Core.Panic'},
+                                                    {error_info, _element@1_0}
+                                                end,
+                                 [_element@2_0]
+                             end)
             end;
         false -> {}
     end,
     begin
-        io:put_chars([[<<"Some refreshing "/utf8>>,
-                       _beverage@0_0,
-                       <<" is all I need."/utf8>>]]),
+        io:put_chars(begin
+                         _element@6_0 = begin
+                                            _element@3_0 =
+                                                <<"Some refreshing "/utf8>>,
+                                            _element@4_0 = _beverage@0_0,
+                                            _element@5_0 =
+                                                <<" is all I need."/utf8>>,
+                                            [_element@3_0,
+                                             _element@4_0,
+                                             _element@5_0]
+                                        end,
+                         [_element@6_0]
+                     end),
         io:nl(),
         {}
     end.

@@ -27,29 +27,64 @@ main() ->
     _shadowed_binding@0_0 = 1,
     begin
         begin
-            io:put_chars([[<<"before being shadowed: "/utf8>>,
-                           io_lib:format("~ktp", [_shadowed_binding@0_0])]]),
+            io:put_chars(begin
+                             _element@3_0 = begin
+                                                _element@1_0 =
+                                                    <<"before being shadowed: "/utf8>>,
+                                                _element@2_0 =
+                                                    io_lib:format("~ktp",
+                                                                  [_shadowed_binding@0_0]),
+                                                [_element@1_0, _element@2_0]
+                                            end,
+                             [_element@3_0]
+                         end),
             io:nl(),
             {}
         end,
-        _shadowed_binding@1_0 = <<"abc"/utf8>>,
+        _shadowed_binding@4_0 = <<"abc"/utf8>>,
         begin
-            io:put_chars([[<<"shadowed in inner block: "/utf8>>,
-                           _shadowed_binding@1_0]]),
+            io:put_chars(begin
+                             _element@7_0 = begin
+                                                _element@5_0 =
+                                                    <<"shadowed in inner block: "/utf8>>,
+                                                _element@6_0 =
+                                                    _shadowed_binding@4_0,
+                                                [_element@5_0, _element@6_0]
+                                            end,
+                             [_element@7_0]
+                         end),
             io:nl(),
             {}
         end
     end,
     begin
-        io:put_chars([[<<"outside inner block: "/utf8>>,
-                       io_lib:format("~ktp", [_shadowed_binding@0_0])]]),
+        io:put_chars(begin
+                         _element@10_0 = begin
+                                             _element@8_0 =
+                                                 <<"outside inner block: "/utf8>>,
+                                             _element@9_0 =
+                                                 io_lib:format("~ktp",
+                                                               [_shadowed_binding@0_0]),
+                                             [_element@8_0, _element@9_0]
+                                         end,
+                         [_element@10_0]
+                     end),
         io:nl(),
         {}
     end,
-    _shadowed_binding@2_0 = 2,
+    _shadowed_binding@11_0 = 2,
     begin
-        io:put_chars([[<<"shadowed in outer block: "/utf8>>,
-                       io_lib:format("~ktp", [_shadowed_binding@2_0])]]),
+        io:put_chars(begin
+                         _element@14_0 = begin
+                                             _element@12_0 =
+                                                 <<"shadowed in outer block: "/utf8>>,
+                                             _element@13_0 =
+                                                 io_lib:format("~ktp",
+                                                               [_shadowed_binding@11_0]),
+                                             [_element@12_0, _element@13_0]
+                                         end,
+                         [_element@14_0]
+                     end),
         io:nl(),
         {}
     end.

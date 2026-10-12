@@ -38,24 +38,47 @@ fizzbuzz(_n@0_0) ->
     case is_divisible_by(_n@0_0, 15) of
         true ->
             begin
-                io:put_chars([[<<"fizzbuzz"/utf8>>]]), io:nl(), {}
+                io:put_chars(begin
+                                 _element@1_0 = [<<"fizzbuzz"/utf8>>],
+                                 [_element@1_0]
+                             end),
+                io:nl(),
+                {}
             end;
         false ->
             case is_divisible_by(_n@0_0, 3) of
                 true ->
                     begin
-                        io:put_chars([[<<"fizz"/utf8>>]]), io:nl(), {}
+                        io:put_chars(begin
+                                         _element@2_0 = [<<"fizz"/utf8>>],
+                                         [_element@2_0]
+                                     end),
+                        io:nl(),
+                        {}
                     end;
                 false ->
                     case is_divisible_by(_n@0_0, 5) of
                         true ->
                             begin
-                                io:put_chars([[<<"buzz"/utf8>>]]), io:nl(), {}
+                                io:put_chars(begin
+                                                 _element@3_0 =
+                                                     [<<"buzz"/utf8>>],
+                                                 [_element@3_0]
+                                             end),
+                                io:nl(),
+                                {}
                             end;
                         false ->
                             begin
-                                io:put_chars([[io_lib:format("~ktp",
-                                                             [_n@0_0])]]),
+                                io:put_chars(begin
+                                                 _element@5_0 = begin
+                                                                    _element@4_0 =
+                                                                        io_lib:format("~ktp",
+                                                                                      [_n@0_0]),
+                                                                    [_element@4_0]
+                                                                end,
+                                                 [_element@5_0]
+                                             end),
                                 io:nl(),
                                 {}
                             end

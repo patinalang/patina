@@ -53,4 +53,10 @@ show_generic_all(_n@0_0, _s@1_0) ->
                                                                                                                  'Elixir.Patina.TupleImpls.$impl.Core.Str':'TupleImpls::Show::$patina_witness'(),
                                                                                                                  'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::$patina_witness<(_, _)>'({'Elixir.Patina.TupleImpls.$impl.Core.Int':'TupleImpls::Show::$patina_witness'(),
                                                                                                                                                                                                           'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::$patina_witness<()>'()})})},
-                    {_n@0_0, _s@1_0, {_n@0_0, {}}}))/binary>>.
+                    begin
+                        _element@3_0 = begin
+                                           _element@2_0 = {},
+                                           {_n@0_0, _element@2_0}
+                                       end,
+                        {_n@0_0, _s@1_0, _element@3_0}
+                    end))/binary>>.

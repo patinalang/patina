@@ -41,14 +41,24 @@ half_open_bounds() ->
     _range@0_0 =
         'Elixir.Patina.Core.Range':'$patina_constructor__Range'(1,
                                                                 101),
-    {_range@0_0#'Elixir.Patina.Core.Range':'Range'.start,
-     _range@0_0#'Elixir.Patina.Core.Range':'Range'.'end'}.
+    begin
+        _element@1_0 =
+            _range@0_0#'Elixir.Patina.Core.Range':'Range'.start,
+        _element@2_0 =
+            _range@0_0#'Elixir.Patina.Core.Range':'Range'.'end',
+        {_element@1_0, _element@2_0}
+    end.
 
 closed_bounds() ->
     _range@0_0 = 'Elixir.Patina.Core.RangeInclusive':new(1,
                                                          100),
-    {_range@0_0#'Elixir.Patina.Core.RangeInclusive':'RangeInclusive'.start,
-     _range@0_0#'Elixir.Patina.Core.RangeInclusive':'RangeInclusive'.'end'}.
+    begin
+        _element@1_0 =
+            _range@0_0#'Elixir.Patina.Core.RangeInclusive':'RangeInclusive'.start,
+        _element@2_0 =
+            _range@0_0#'Elixir.Patina.Core.RangeInclusive':'RangeInclusive'.'end',
+        {_element@1_0, _element@2_0}
+    end.
 
 char_range() ->
     'Elixir.Patina.Core.RangeInclusive':new($a, $z).

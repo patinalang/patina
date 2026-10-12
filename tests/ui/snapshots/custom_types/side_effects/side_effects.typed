@@ -1,0 +1,792 @@
+#![allow(internal_features)]
+
+
+
+
+#![allow(dead_code)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+#[allow(unused)]
+extern mod patina_fmt;
+
+extern mod erlang;
+
+// Every call reports an event so the Elixir tests can check multiplicity.
+// Evaluation order is undefined; the tests compare the events as a multiset.
+fn effect<T>(event: atom, value: T)
+    ->
+        T ({
+    ((erlang::send as
+            fn(term, term) -> term)(((erlang::self as fn() -> term)() as
+            term),
+        (((a"side_effect" as atom), (event as atom)) as (atom, atom))) as
+        term);
+    (value as T)
+} as T)
+
+macro_rules! record_cases {
+    ($record:ident, $repr:meta) =>
+    {
+        #[$repr] pub struct $record { x: int, y: int, z: int, } impl $record
+        {
+            pub fn fields() -> term
+            {
+                $record
+                {
+                    z: effect(a"z", 30), x: effect(a"x", 10), y:
+                    effect(a"y", 20),
+
+                } as term
+            } pub fn base() -> term
+            {
+                $record
+                {
+                    ..effect(a"base", $record
+                    {
+                        x: 1, y: 2, z: 3
+
+                        // More than one field is inherited from the same base call.
+                    })
+                } as term
+            } pub fn update() -> term
+            {
+                $record
+                {
+                    x: 10,
+                    ..effect(a"base", $record
+                    {
+                        x: 1, y: 2, z: 3
+
+                    })
+                } as term
+            } pub fn mixed() -> term
+            {
+                $record
+                {
+                    z: effect(a"z", 30), x: effect(a"x", 10),
+                    ..effect(a"base", $record
+                    {
+                        x: 1, y: 2, z: 3
+
+                    })
+                } as term
+            } pub fn replace() -> term
+            {
+                $record
+                {
+                    z: effect(a"z", 30), x: effect(a"x", 10), y:
+                    effect(a"y", 20),
+                    ..effect(a"base", $record
+                    {
+                        x: 1, y: 2, z: 3
+
+                        // The base call still has effects when none of its fields are inherited.
+                    })
+                } as term
+            }
+        }
+    };
+}
+#[attr = Repr {reprs: [Patina], modifiers: []}]
+struct PatinaRecord {
+    x: int,
+    y: int,
+    z: int,
+}
+impl PatinaRecord {
+    fn fields()
+        ->
+            term ({
+        ((PatinaRecord {
+                z:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"z" as atom),
+                        (30 as int)) as int),
+                x:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"x" as atom),
+                        (10 as int)) as int),
+                y:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"y" as atom),
+                        (20 as int)) as int) } as PatinaRecord) as term as term)
+    } as term)
+    fn base()
+        ->
+            term ({
+        ((PatinaRecord {
+                ..((effect as
+                            fn(atom, PatinaRecord) -> PatinaRecord {effect::<PatinaRecord>})((a"base"
+                            as atom),
+                        (PatinaRecord { x: (1 as int), y: (2 as int), z: (3 as int)
+                            } as PatinaRecord)) as PatinaRecord) } as PatinaRecord) as
+            term as term)
+    } as term)
+    fn update()
+        ->
+            term ({
+        ((PatinaRecord {
+                x:
+                    (10 as
+                        int),
+                    ..((effect as
+                            fn(atom, PatinaRecord) -> PatinaRecord {effect::<PatinaRecord>})((a"base"
+                            as atom),
+                        (PatinaRecord { x: (1 as int), y: (2 as int), z: (3 as int)
+                            } as PatinaRecord)) as PatinaRecord) } as PatinaRecord) as
+            term as term)
+    } as term)
+    fn mixed()
+        ->
+            term ({
+        ((PatinaRecord {
+                z:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"z" as atom),
+                        (30 as int)) as int),
+                x:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"x" as atom),
+                        (10 as int)) as
+                        int),
+                    ..((effect as
+                            fn(atom, PatinaRecord) -> PatinaRecord {effect::<PatinaRecord>})((a"base"
+                            as atom),
+                        (PatinaRecord { x: (1 as int), y: (2 as int), z: (3 as int)
+                            } as PatinaRecord)) as PatinaRecord) } as PatinaRecord) as
+            term as term)
+    } as term)
+    fn replace()
+        ->
+            term ({
+        ((PatinaRecord {
+                z:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"z" as atom),
+                        (30 as int)) as int),
+                x:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"x" as atom),
+                        (10 as int)) as int),
+                y:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"y" as atom),
+                        (20 as int)) as
+                        int),
+                    ..((effect as
+                            fn(atom, PatinaRecord) -> PatinaRecord {effect::<PatinaRecord>})((a"base"
+                            as atom),
+                        (PatinaRecord { x: (1 as int), y: (2 as int), z: (3 as int)
+                            } as PatinaRecord)) as PatinaRecord) } as PatinaRecord) as
+            term as term)
+    } as term)
+}
+#[attr = Repr {reprs: [NativeRecord], modifiers: []}]
+struct NativeRecord {
+    x: int,
+    y: int,
+    z: int,
+}
+impl NativeRecord {
+    fn fields()
+        ->
+            term ({
+        ((NativeRecord {
+                z:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"z" as atom),
+                        (30 as int)) as int),
+                x:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"x" as atom),
+                        (10 as int)) as int),
+                y:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"y" as atom),
+                        (20 as int)) as int) } as NativeRecord) as term as term)
+    } as term)
+    fn base()
+        ->
+            term ({
+        ((NativeRecord {
+                ..((effect as
+                            fn(atom, NativeRecord) -> NativeRecord {effect::<NativeRecord>})((a"base"
+                            as atom),
+                        (NativeRecord { x: (1 as int), y: (2 as int), z: (3 as int)
+                            } as NativeRecord)) as NativeRecord) } as NativeRecord) as
+            term as term)
+    } as term)
+    fn update()
+        ->
+            term ({
+        ((NativeRecord {
+                x:
+                    (10 as
+                        int),
+                    ..((effect as
+                            fn(atom, NativeRecord) -> NativeRecord {effect::<NativeRecord>})((a"base"
+                            as atom),
+                        (NativeRecord { x: (1 as int), y: (2 as int), z: (3 as int)
+                            } as NativeRecord)) as NativeRecord) } as NativeRecord) as
+            term as term)
+    } as term)
+    fn mixed()
+        ->
+            term ({
+        ((NativeRecord {
+                z:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"z" as atom),
+                        (30 as int)) as int),
+                x:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"x" as atom),
+                        (10 as int)) as
+                        int),
+                    ..((effect as
+                            fn(atom, NativeRecord) -> NativeRecord {effect::<NativeRecord>})((a"base"
+                            as atom),
+                        (NativeRecord { x: (1 as int), y: (2 as int), z: (3 as int)
+                            } as NativeRecord)) as NativeRecord) } as NativeRecord) as
+            term as term)
+    } as term)
+    fn replace()
+        ->
+            term ({
+        ((NativeRecord {
+                z:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"z" as atom),
+                        (30 as int)) as int),
+                x:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"x" as atom),
+                        (10 as int)) as int),
+                y:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"y" as atom),
+                        (20 as int)) as
+                        int),
+                    ..((effect as
+                            fn(atom, NativeRecord) -> NativeRecord {effect::<NativeRecord>})((a"base"
+                            as atom),
+                        (NativeRecord { x: (1 as int), y: (2 as int), z: (3 as int)
+                            } as NativeRecord)) as NativeRecord) } as NativeRecord) as
+            term as term)
+    } as term)
+}
+#[attr = Repr {reprs: [Tagged], modifiers: [Tag("tagged")]}]
+struct TaggedRecord {
+    x: int,
+    y: int,
+    z: int,
+}
+impl TaggedRecord {
+    fn fields()
+        ->
+            term ({
+        ((TaggedRecord {
+                z:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"z" as atom),
+                        (30 as int)) as int),
+                x:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"x" as atom),
+                        (10 as int)) as int),
+                y:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"y" as atom),
+                        (20 as int)) as int) } as TaggedRecord) as term as term)
+    } as term)
+    fn base()
+        ->
+            term ({
+        ((TaggedRecord {
+                ..((effect as
+                            fn(atom, TaggedRecord) -> TaggedRecord {effect::<TaggedRecord>})((a"base"
+                            as atom),
+                        (TaggedRecord { x: (1 as int), y: (2 as int), z: (3 as int)
+                            } as TaggedRecord)) as TaggedRecord) } as TaggedRecord) as
+            term as term)
+    } as term)
+    fn update()
+        ->
+            term ({
+        ((TaggedRecord {
+                x:
+                    (10 as
+                        int),
+                    ..((effect as
+                            fn(atom, TaggedRecord) -> TaggedRecord {effect::<TaggedRecord>})((a"base"
+                            as atom),
+                        (TaggedRecord { x: (1 as int), y: (2 as int), z: (3 as int)
+                            } as TaggedRecord)) as TaggedRecord) } as TaggedRecord) as
+            term as term)
+    } as term)
+    fn mixed()
+        ->
+            term ({
+        ((TaggedRecord {
+                z:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"z" as atom),
+                        (30 as int)) as int),
+                x:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"x" as atom),
+                        (10 as int)) as
+                        int),
+                    ..((effect as
+                            fn(atom, TaggedRecord) -> TaggedRecord {effect::<TaggedRecord>})((a"base"
+                            as atom),
+                        (TaggedRecord { x: (1 as int), y: (2 as int), z: (3 as int)
+                            } as TaggedRecord)) as TaggedRecord) } as TaggedRecord) as
+            term as term)
+    } as term)
+    fn replace()
+        ->
+            term ({
+        ((TaggedRecord {
+                z:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"z" as atom),
+                        (30 as int)) as int),
+                x:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"x" as atom),
+                        (10 as int)) as int),
+                y:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"y" as atom),
+                        (20 as int)) as
+                        int),
+                    ..((effect as
+                            fn(atom, TaggedRecord) -> TaggedRecord {effect::<TaggedRecord>})((a"base"
+                            as atom),
+                        (TaggedRecord { x: (1 as int), y: (2 as int), z: (3 as int)
+                            } as TaggedRecord)) as TaggedRecord) } as TaggedRecord) as
+            term as term)
+    } as term)
+}
+#[attr = Repr {reprs: [Elixir], modifiers: []}]
+struct ElixirRecord {
+    x: int,
+    y: int,
+    z: int,
+}
+impl ElixirRecord {
+    fn fields()
+        ->
+            term ({
+        ((ElixirRecord {
+                z:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"z" as atom),
+                        (30 as int)) as int),
+                x:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"x" as atom),
+                        (10 as int)) as int),
+                y:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"y" as atom),
+                        (20 as int)) as int) } as ElixirRecord) as term as term)
+    } as term)
+    fn base()
+        ->
+            term ({
+        ((ElixirRecord {
+                ..((effect as
+                            fn(atom, ElixirRecord) -> ElixirRecord {effect::<ElixirRecord>})((a"base"
+                            as atom),
+                        (ElixirRecord { x: (1 as int), y: (2 as int), z: (3 as int)
+                            } as ElixirRecord)) as ElixirRecord) } as ElixirRecord) as
+            term as term)
+    } as term)
+    fn update()
+        ->
+            term ({
+        ((ElixirRecord {
+                x:
+                    (10 as
+                        int),
+                    ..((effect as
+                            fn(atom, ElixirRecord) -> ElixirRecord {effect::<ElixirRecord>})((a"base"
+                            as atom),
+                        (ElixirRecord { x: (1 as int), y: (2 as int), z: (3 as int)
+                            } as ElixirRecord)) as ElixirRecord) } as ElixirRecord) as
+            term as term)
+    } as term)
+    fn mixed()
+        ->
+            term ({
+        ((ElixirRecord {
+                z:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"z" as atom),
+                        (30 as int)) as int),
+                x:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"x" as atom),
+                        (10 as int)) as
+                        int),
+                    ..((effect as
+                            fn(atom, ElixirRecord) -> ElixirRecord {effect::<ElixirRecord>})((a"base"
+                            as atom),
+                        (ElixirRecord { x: (1 as int), y: (2 as int), z: (3 as int)
+                            } as ElixirRecord)) as ElixirRecord) } as ElixirRecord) as
+            term as term)
+    } as term)
+    fn replace()
+        ->
+            term ({
+        ((ElixirRecord {
+                z:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"z" as atom),
+                        (30 as int)) as int),
+                x:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"x" as atom),
+                        (10 as int)) as int),
+                y:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"y" as atom),
+                        (20 as int)) as
+                        int),
+                    ..((effect as
+                            fn(atom, ElixirRecord) -> ElixirRecord {effect::<ElixirRecord>})((a"base"
+                            as atom),
+                        (ElixirRecord { x: (1 as int), y: (2 as int), z: (3 as int)
+                            } as ElixirRecord)) as ElixirRecord) } as ElixirRecord) as
+            term as term)
+    } as term)
+}
+
+
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
+struct Transparent {
+    value: int,
+}
+
+impl Transparent {
+    fn fields()
+        ->
+            term ({
+        ((Transparent {
+                value:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"field" as atom),
+                        (10 as int)) as int) } as Transparent) as term as term)
+    } as term)
+
+    fn base()
+        ->
+            term ({
+        ((Transparent {
+                ..((effect as
+                            fn(atom, Transparent) -> Transparent {effect::<Transparent>})((a"base"
+                            as atom),
+                        (Transparent { value: (1 as int) } as Transparent)) as
+                        Transparent) } as Transparent) as term as term)
+    } as term)
+
+    fn update()
+        ->
+            term ({
+        ((Transparent {
+                value:
+                    (10 as
+                        int),
+                    ..((effect as
+                            fn(atom, Transparent) -> Transparent {effect::<Transparent>})((a"base"
+                            as atom),
+                        (Transparent { value: (1 as int) } as Transparent)) as
+                        Transparent) } as Transparent) as term as term)
+    } as term)
+
+    fn mixed()
+        ->
+            term ({
+        ((Transparent {
+                value:
+                    ((effect as
+                            fn(atom, int) -> int {effect::<int>})((a"field" as atom),
+                        (10 as int)) as
+                        int),
+                    ..((effect as
+                            fn(atom, Transparent) -> Transparent {effect::<Transparent>})((a"base"
+                            as atom),
+                        (Transparent { value: (1 as int) } as Transparent)) as
+                        Transparent) } as Transparent) as term as term)
+    } as term)
+}
+
+// An atom has no fields, but its base expression must still be evaluated.
+#[attr = Repr {reprs: [Atom], modifiers: []}]
+struct AtomUnit {
+}
+
+impl AtomUnit {
+    fn base()
+        ->
+            term ({
+        ((AtomUnit {
+                ..((effect as
+                            fn(atom, AtomUnit) -> AtomUnit {effect::<AtomUnit>})((a"base"
+                            as atom), (AtomUnit {  } as AtomUnit)) as AtomUnit) } as
+                AtomUnit) as term as term)
+    } as term)
+}
+
+#[attr = Repr {reprs: [Transparent], modifiers: []}]
+enum Dynamic {
+    #[attr = Repr {reprs: [],
+    modifiers: [DynamicWrap,
+    Tag("dynamic")]}]
+    Value {
+            value: term,
+        },
+    Text(str),
+}
+
+// Enum variants have field expressions but do not support struct updates.
+impl Dynamic {
+    fn fields(value: term)
+        ->
+            term ({
+        ((Dynamic::Value {
+                value:
+                    ((effect as
+                            fn(atom, term) -> term {effect::<term>})((a"field" as atom),
+                        (value as term)) as term) } as Dynamic) as term as term)
+    } as term)
+}
+
+mod Tuples {
+    use super::effect;
+
+    fn fields()
+        ->
+            (int, int,
+            int) ({
+        ((((effect as
+                    fn(atom, int) -> int {effect::<int>})((a"x" as atom),
+                (10 as int)) as int),
+            ((effect as
+                    fn(atom, int) -> int {effect::<int>})((a"y" as atom),
+                (20 as int)) as int),
+            ((effect as
+                    fn(atom, int) -> int {effect::<int>})((a"z" as atom),
+                (30 as int)) as int)) as (int, int, int))
+    } as (int, int, int))
+
+    // Tuples have no update syntax; a call can be the base of field access.
+    fn base()
+        ->
+            int ({
+        (((effect as
+                    fn(atom, (int, int, int)) -> (int, int, int) {effect::<(int, int, int)>})((a"base"
+                    as atom),
+                (((1 as int), (2 as int), (3 as int)) as (int, int, int))) as
+                (int, int, int)).1 as int)
+    } as int)
+
+    fn mixed()
+        ->
+            (int, int,
+            int) ({
+        ((((effect as
+                    fn(atom, int) -> int {effect::<int>})((a"x" as atom),
+                (10 as int)) as int),
+            (((effect as
+                        fn(atom, (int, int, int)) -> (int, int, int) {effect::<(int, int, int)>})((a"base"
+                        as atom),
+                    (((1 as int), (2 as int), (3 as int)) as (int, int, int)))
+                    as (int, int, int)).1 as int),
+            ((effect as
+                    fn(atom, int) -> int {effect::<int>})((a"z" as atom),
+                (30 as int)) as int)) as (int, int, int))
+    } as (int, int, int))
+}
+
+mod Maps {
+    use super::effect;
+
+    fn fields()
+        ->
+            #{atom => int} ({
+        (#{((effect as
+                        fn(atom, atom) -> atom {effect::<atom>})((a"x_key" as atom),
+                    (a"x" as atom)) as atom) =>
+                ((effect as
+                        fn(atom, int) -> int {effect::<int>})((a"x" as atom),
+                    (10 as int)) as int),
+                ((effect as
+                        fn(atom, atom) -> atom {effect::<atom>})((a"y_key" as atom),
+                    (a"y" as atom)) as atom) =>
+                ((effect as
+                        fn(atom, int) -> int {effect::<int>})((a"y" as atom),
+                    (20 as int)) as int),
+                ((effect as
+                        fn(atom, atom) -> atom {effect::<atom>})((a"z_key" as atom),
+                    (a"z" as atom)) as atom) =>
+                ((effect as
+                        fn(atom, int) -> int {effect::<int>})((a"z" as atom),
+                    (30 as int)) as int)} as #{atom => int})
+    } as #{atom => int})
+
+    fn base()
+        ->
+            #{atom => int} ({
+        (#{..((effect as
+                        fn(atom, #{atom => int}) -> #{atom => int} {effect::<#{atom => int}>})((a"base"
+                        as atom),
+                    (#{(a"x" as atom) => (1 as int), (a"y" as atom) =>
+                            (2 as int), (a"z" as atom) => (3 as int)} as
+                        #{atom => int})) as #{atom => int})} as #{atom => int})
+    } as #{atom => int})
+
+    fn update()
+        ->
+            #{atom => int} ({
+        (#{(a"x" as atom) => (10 as int),
+                ..((effect as
+                        fn(atom, #{atom => int}) -> #{atom => int} {effect::<#{atom => int}>})((a"base"
+                        as atom),
+                    (#{(a"x" as atom) => (1 as int), (a"y" as atom) =>
+                            (2 as int), (a"z" as atom) => (3 as int)} as
+                        #{atom => int})) as #{atom => int})} as #{atom => int})
+    } as #{atom => int})
+
+    fn mixed()
+        ->
+            #{atom => int} ({
+        (#{((effect as
+                        fn(atom, atom) -> atom {effect::<atom>})((a"z_key" as atom),
+                    (a"z" as atom)) as atom) =>
+                ((effect as
+                        fn(atom, int) -> int {effect::<int>})((a"z" as atom),
+                    (30 as int)) as int),
+                ((effect as
+                        fn(atom, atom) -> atom {effect::<atom>})((a"x_key" as atom),
+                    (a"x" as atom)) as atom) =>
+                ((effect as
+                        fn(atom, int) -> int {effect::<int>})((a"x" as atom),
+                    (10 as int)) as int),
+                ..((effect as
+                        fn(atom, #{atom => int}) -> #{atom => int} {effect::<#{atom => int}>})((a"base"
+                        as atom),
+                    (#{(a"x" as atom) => (1 as int), (a"y" as atom) =>
+                            (2 as int), (a"z" as atom) => (3 as int)} as
+                        #{atom => int})) as #{atom => int})} as #{atom => int})
+    } as #{atom => int})
+
+    fn replace()
+        ->
+            #{atom => int} ({
+        (#{((effect as
+                        fn(atom, atom) -> atom {effect::<atom>})((a"z_key" as atom),
+                    (a"z" as atom)) as atom) =>
+                ((effect as
+                        fn(atom, int) -> int {effect::<int>})((a"z" as atom),
+                    (30 as int)) as int),
+                ((effect as
+                        fn(atom, atom) -> atom {effect::<atom>})((a"x_key" as atom),
+                    (a"x" as atom)) as atom) =>
+                ((effect as
+                        fn(atom, int) -> int {effect::<int>})((a"x" as atom),
+                    (10 as int)) as int),
+                ((effect as
+                        fn(atom, atom) -> atom {effect::<atom>})((a"y_key" as atom),
+                    (a"y" as atom)) as atom) =>
+                ((effect as
+                        fn(atom, int) -> int {effect::<int>})((a"y" as atom),
+                    (20 as int)) as int),
+                ..((effect as
+                        fn(atom, #{atom => int}) -> #{atom => int} {effect::<#{atom => int}>})((a"base"
+                        as atom),
+                    (#{(a"x" as atom) => (1 as int), (a"y" as atom) =>
+                            (2 as int), (a"z" as atom) => (3 as int)} as
+                        #{atom => int})) as #{atom => int})} as #{atom => int})
+    } as #{atom => int})
+
+    fn duplicate()
+        ->
+            #{atom => int} ({
+        (#{((effect as
+                        fn(atom, atom) -> atom {effect::<atom>})((a"key" as atom),
+                    (a"x" as atom)) as atom) =>
+                ((effect as
+                        fn(atom, int) -> int {effect::<int>})((a"value" as atom),
+                    (10 as int)) as int),
+                ((effect as
+                        fn(atom, atom) -> atom {effect::<atom>})((a"key" as atom),
+                    (a"x" as atom)) as atom) =>
+                ((effect as
+                        fn(atom, int) -> int {effect::<int>})((a"value" as atom),
+                    (20 as int)) as int)} as #{atom => int})
+    } as #{atom => int})
+}
+
+mod Lists {
+    use super::effect;
+
+    fn fields()
+        ->
+            [int] ({
+        ([((effect as
+                        fn(atom, int) -> int {effect::<int>})((a"x" as atom),
+                    (10 as int)) as int),
+                ((effect as
+                        fn(atom, int) -> int {effect::<int>})((a"y" as atom),
+                    (20 as int)) as int),
+                ((effect as
+                        fn(atom, int) -> int {effect::<int>})((a"z" as atom),
+                    (30 as int)) as int)] as [int])
+    } as [int])
+
+    fn base()
+        ->
+            [int] ({
+        ([(0 as int),
+                ..((effect as
+                        fn(atom, [int]) -> [int] {effect::<[int]>})((a"base" as
+                        atom), ([(1 as int), (2 as int), (3 as int)] as [int])) as
+                    [int])] as [int])
+    } as [int])
+
+    fn mixed()
+        ->
+            [int] ({
+        ([((effect as
+                        fn(atom, int) -> int {effect::<int>})((a"x" as atom),
+                    (10 as int)) as int),
+                ((effect as
+                        fn(atom, int) -> int {effect::<int>})((a"y" as atom),
+                    (20 as int)) as int),
+                ..((effect as
+                        fn(atom, [int]) -> [int] {effect::<[int]>})((a"base" as
+                        atom), ([(3 as int), (4 as int)] as [int])) as [int])] as
+            [int])
+    } as [int])
+
+    fn empty_tail()
+        ->
+            [int] ({
+        ([((effect as
+                        fn(atom, int) -> int {effect::<int>})((a"field" as atom),
+                    (10 as int)) as int),
+                ..((effect as
+                        fn(atom, [int]) -> [int] {effect::<[int]>})((a"base" as
+                        atom), ([] as [int])) as [int])] as [int])
+    } as [int])
+}

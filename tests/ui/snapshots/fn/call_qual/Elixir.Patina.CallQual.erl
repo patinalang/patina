@@ -38,7 +38,14 @@ main() ->
     _ = priv_main(),
     _s@0_0 = 'Elixir.Patina.CallQual.StructWithNew':new(42),
     begin
-        io:put_chars([[io_lib:format("~ktp", [_s@0_0])]]),
+        io:put_chars(begin
+                         _element@2_0 = begin
+                                            _element@1_0 = io_lib:format("~ktp",
+                                                                         [_s@0_0]),
+                                            [_element@1_0]
+                                        end,
+                         [_element@2_0]
+                     end),
         io:nl(),
         {}
     end.

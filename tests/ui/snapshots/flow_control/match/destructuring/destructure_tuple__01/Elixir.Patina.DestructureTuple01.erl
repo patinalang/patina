@@ -28,34 +28,73 @@
 main() ->
     _triple@0_0 = {0, -2, 3},
     begin
-        io:put_chars([[<<"Tell me about "/utf8>>,
-                       io_lib:format("~ktp", [_triple@0_0])]]),
+        io:put_chars(begin
+                         _element@3_0 = begin
+                                            _element@1_0 =
+                                                <<"Tell me about "/utf8>>,
+                                            _element@2_0 = io_lib:format("~ktp",
+                                                                         [_triple@0_0]),
+                                            [_element@1_0, _element@2_0]
+                                        end,
+                         [_element@3_0]
+                     end),
         io:nl(),
         {}
     end,
     case _triple@0_0 of
-        {0, _y@1_0, _z@2_0} ->
-            io:put_chars([[<<"First is `0`, `y` is "/utf8>>,
-                           io_lib:format("~ktp", [_y@1_0]),
-                           <<", and `z` is "/utf8>>,
-                           io_lib:format("~ktp", [_z@2_0])]]),
+        {0, _y@4_0, _z@5_0} ->
+            io:put_chars(begin
+                             _element@10_0 = begin
+                                                 _element@6_0 =
+                                                     <<"First is `0`, `y` is "/utf8>>,
+                                                 _element@7_0 =
+                                                     io_lib:format("~ktp",
+                                                                   [_y@4_0]),
+                                                 _element@8_0 =
+                                                     <<", and `z` is "/utf8>>,
+                                                 _element@9_0 =
+                                                     io_lib:format("~ktp",
+                                                                   [_z@5_0]),
+                                                 [_element@6_0,
+                                                  _element@7_0,
+                                                  _element@8_0,
+                                                  _element@9_0]
+                                             end,
+                             [_element@10_0]
+                         end),
             io:nl(),
             {};
         {1, _, _} ->
-            io:put_chars([[<<"First is `1` and the rest doesn't matter"/utf8>>]]),
+            io:put_chars(begin
+                             _element@11_0 =
+                                 [<<"First is `1` and the rest doesn't matter"/utf8>>],
+                             [_element@11_0]
+                         end),
             io:nl(),
             {};
         {_, _, 2} ->
-            io:put_chars([[<<"last is `2` and the rest doesn't matter"/utf8>>]]),
+            io:put_chars(begin
+                             _element@12_0 =
+                                 [<<"last is `2` and the rest doesn't matter"/utf8>>],
+                             [_element@12_0]
+                         end),
             io:nl(),
             {};
         {3, _, 4} ->
-            io:put_chars([[<<"First is `3`, last is `4`, and the rest "
-                             "doesn't matter"/utf8>>]]),
+            io:put_chars(begin
+                             _element@13_0 =
+                                 [<<"First is `3`, last is `4`, and the rest "
+                                    "doesn't matter"/utf8>>],
+                             [_element@13_0]
+                         end),
             io:nl(),
             {};
         _ ->
-            io:put_chars([[<<"It doesn't matter what they are"/utf8>>]]),
+            io:put_chars(begin
+                             _element@14_0 =
+                                 [<<"It doesn't matter what they are"/utf8>>],
+                             [_element@14_0]
+                         end),
             io:nl(),
             {}
     end.

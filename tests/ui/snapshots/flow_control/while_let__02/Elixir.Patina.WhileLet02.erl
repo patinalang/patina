@@ -31,7 +31,11 @@
                     case _i@1_0 > 9 of
                         true ->
                             begin
-                                io:put_chars([[<<"Greater than 9, quit!"/utf8>>]]),
+                                io:put_chars(begin
+                                                 _element@3_0 =
+                                                     [<<"Greater than 9, quit!"/utf8>>],
+                                                 [_element@3_0]
+                                             end),
                                 io:nl(),
                                 {}
                             end,
@@ -39,24 +43,38 @@
                             {};
                         false ->
                             begin
-                                io:put_chars([[<<"`i` is `"/utf8>>,
-                                               io_lib:format("~ktp", [_i@1_0]),
-                                               <<"`. Try again."/utf8>>]]),
+                                io:put_chars(begin
+                                                 _element@7_0 = begin
+                                                                    _element@4_0 =
+                                                                        <<"`i` is `"/utf8>>,
+                                                                    _element@5_0 =
+                                                                        io_lib:format("~ktp",
+                                                                                      [_i@1_0]),
+                                                                    _element@6_0 =
+                                                                        <<"`. Try again."/utf8>>,
+                                                                    [_element@4_0,
+                                                                     _element@5_0,
+                                                                     _element@6_0]
+                                                                end,
+                                                 [_element@7_0]
+                                             end),
                                 io:nl(),
                                 {}
                             end,
-                            _optional@0_1 = _i@1_0 + 1,
+                            _optional@0_1 = begin
+                                                _0@8_0 = _i@1_0 + 1, _0@8_0
+                                            end,
                             {}
                     end;
                 _ ->
-                    _branch_value@3_0 = begin
+                    _branch_value@9_0 = begin
                                             '$patina_marker':break({break,
                                                                     0,
                                                                     {},
                                                                     _optional@0_0})
                                         end,
                     _optional@0_1 = _optional@0_0,
-                    _branch_value@3_0
+                    _branch_value@9_0
             end
         end,
     '$patina_marker':continue(_optional@0_1).
@@ -64,6 +82,6 @@
 main() ->
     _optional@0_0 = 0,
     case 'main$patina_loop_1'(_optional@0_0) of
-        {break, 0, _loop_value@4_0, _optional@0_1} ->
-            _loop_value@4_0
+        {break, 0, _loop_value@10_0, _optional@0_1} ->
+            _loop_value@10_0
     end.

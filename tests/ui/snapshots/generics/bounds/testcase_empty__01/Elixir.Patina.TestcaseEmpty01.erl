@@ -35,14 +35,28 @@ main() ->
     _blue_jay@1_0 = 'Elixir.Patina.TestcaseEmpty01.BlueJay',
     __turkey@2_0 = 'Elixir.Patina.TestcaseEmpty01.Turkey',
     begin
-        io:put_chars([[<<"A cardinal is "/utf8>>,
-                       red(_cardinal@0_0)]]),
+        io:put_chars(begin
+                         _element@5_0 = begin
+                                            _element@3_0 =
+                                                <<"A cardinal is "/utf8>>,
+                                            _element@4_0 = red(_cardinal@0_0),
+                                            [_element@3_0, _element@4_0]
+                                        end,
+                         [_element@5_0]
+                     end),
         io:nl(),
         {}
     end,
     begin
-        io:put_chars([[<<"A blue jay is "/utf8>>,
-                       blue(_blue_jay@1_0)]]),
+        io:put_chars(begin
+                         _element@8_0 = begin
+                                            _element@6_0 =
+                                                <<"A blue jay is "/utf8>>,
+                                            _element@7_0 = blue(_blue_jay@1_0),
+                                            [_element@6_0, _element@7_0]
+                                        end,
+                         [_element@8_0]
+                     end),
         io:nl(),
         {}
     end.

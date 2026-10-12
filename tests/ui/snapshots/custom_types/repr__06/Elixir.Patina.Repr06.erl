@@ -25,15 +25,28 @@
 
 main() ->
     begin
-        io:put_chars([[io_lib:format("~ktp", [unit_variant])]]),
+        io:put_chars(begin
+                         _element@1_0 = begin
+                                            _element@0_0 = io_lib:format("~ktp",
+                                                                         [unit_variant]),
+                                            [_element@0_0]
+                                        end,
+                         [_element@1_0]
+                     end),
         io:nl(),
         {}
     end,
     begin
-        io:put_chars([[io_lib:format("~ktp",
-                                     [{struct_http_style,
-                                       200,
-                                       <<"hi"/utf8>>}])]]),
+        io:put_chars(begin
+                         _element@3_0 = begin
+                                            _element@2_0 = io_lib:format("~ktp",
+                                                                         [{struct_http_style,
+                                                                           200,
+                                                                           <<"hi"/utf8>>}]),
+                                            [_element@2_0]
+                                        end,
+                         [_element@3_0]
+                     end),
         io:nl(),
         {}
     end.

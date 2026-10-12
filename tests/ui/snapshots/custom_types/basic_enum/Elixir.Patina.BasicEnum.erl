@@ -32,11 +32,24 @@ main() ->
         'Elixir.Patina.BasicEnum.BasicEnum':'$patina_constructor__Struct'(1,
                                                                           <<"hello"/utf8>>),
     begin
-        io:put_chars([[io_lib:format("~ktp", [_x@0_0]),
-                       <<"\n"/utf8>>,
-                       io_lib:format("~ktp", [_y@1_0]),
-                       <<"\n"/utf8>>,
-                       io_lib:format("~ktp", [_z@2_0])]]),
+        io:put_chars(begin
+                         _element@8_0 = begin
+                                            _element@3_0 = io_lib:format("~ktp",
+                                                                         [_x@0_0]),
+                                            _element@4_0 = <<"\n"/utf8>>,
+                                            _element@5_0 = io_lib:format("~ktp",
+                                                                         [_y@1_0]),
+                                            _element@6_0 = <<"\n"/utf8>>,
+                                            _element@7_0 = io_lib:format("~ktp",
+                                                                         [_z@2_0]),
+                                            [_element@3_0,
+                                             _element@4_0,
+                                             _element@5_0,
+                                             _element@6_0,
+                                             _element@7_0]
+                                        end,
+                         [_element@8_0]
+                     end),
         io:nl(),
         {}
     end.

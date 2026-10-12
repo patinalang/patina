@@ -27,11 +27,20 @@ main() ->
     _a@0_0 = 5,
     _b@1_0 = <<"hi"/utf8>>,
     begin
-        io:put_chars([[io_lib:format("~ktp",
-                                     ['Elixir.Patina.ImplArity.GenVal':'value<int>'(_a@0_0)]),
-                       <<" "/utf8>>,
-                       'Elixir.Patina.ImplArity.GenVal':'value<str>'(_b@1_0,
-                                                                     0)]]),
+        io:put_chars(begin
+                         _element@5_0 = begin
+                                            _element@2_0 = io_lib:format("~ktp",
+                                                                         ['Elixir.Patina.ImplArity.GenVal':'value<int>'(_a@0_0)]),
+                                            _element@3_0 = <<" "/utf8>>,
+                                            _element@4_0 =
+                                                'Elixir.Patina.ImplArity.GenVal':'value<str>'(_b@1_0,
+                                                                                              0),
+                                            [_element@2_0,
+                                             _element@3_0,
+                                             _element@4_0]
+                                        end,
+                         [_element@5_0]
+                     end),
         io:nl(),
         {}
     end.

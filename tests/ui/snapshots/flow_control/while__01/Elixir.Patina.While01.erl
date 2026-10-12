@@ -30,7 +30,11 @@
                     case _n@0_0 rem 15 =:= 0 of
                         true ->
                             begin
-                                io:put_chars([[<<"fizzbuzz"/utf8>>]]),
+                                io:put_chars(begin
+                                                 _element@1_0 =
+                                                     [<<"fizzbuzz"/utf8>>],
+                                                 [_element@1_0]
+                                             end),
                                 io:nl(),
                                 {}
                             end;
@@ -38,7 +42,11 @@
                             case _n@0_0 rem 3 =:= 0 of
                                 true ->
                                     begin
-                                        io:put_chars([[<<"fizz"/utf8>>]]),
+                                        io:put_chars(begin
+                                                         _element@2_0 =
+                                                             [<<"fizz"/utf8>>],
+                                                         [_element@2_0]
+                                                     end),
                                         io:nl(),
                                         {}
                                     end;
@@ -46,14 +54,26 @@
                                     case _n@0_0 rem 5 =:= 0 of
                                         true ->
                                             begin
-                                                io:put_chars([[<<"buzz"/utf8>>]]),
+                                                io:put_chars(begin
+                                                                 _element@3_0 =
+                                                                     [<<"buzz"/utf8>>],
+                                                                 [_element@3_0]
+                                                             end),
                                                 io:nl(),
                                                 {}
                                             end;
                                         false ->
                                             begin
-                                                io:put_chars([[io_lib:format("~ktp",
-                                                                             [_n@0_0])]]),
+                                                io:put_chars(begin
+                                                                 _element@5_0 =
+                                                                     begin
+                                                                         _element@4_0 =
+                                                                             io_lib:format("~ktp",
+                                                                                           [_n@0_0]),
+                                                                         [_element@4_0]
+                                                                     end,
+                                                                 [_element@5_0]
+                                                             end),
                                                 io:nl(),
                                                 {}
                                             end
@@ -63,14 +83,14 @@
                     _n@0_1 = _n@0_0 + 1,
                     {};
                 false ->
-                    _branch_value@1_0 = begin
+                    _branch_value@6_0 = begin
                                             '$patina_marker':break({break,
                                                                     0,
                                                                     {},
                                                                     _n@0_0})
                                         end,
                     _n@0_1 = _n@0_0,
-                    _branch_value@1_0
+                    _branch_value@6_0
             end
         end,
     '$patina_marker':continue(_n@0_1).
@@ -78,5 +98,5 @@
 main() ->
     _n@0_0 = 1,
     case 'main$patina_loop_1'(_n@0_0) of
-        {break, 0, _loop_value@2_0, _n@0_1} -> _loop_value@2_0
+        {break, 0, _loop_value@7_0, _n@0_1} -> _loop_value@7_0
     end.

@@ -25,13 +25,19 @@
 
 main() ->
     begin
-        io:put_chars([[io_lib:format("~ktp",
-                                     [('Elixir.Patina.Repr11.Point':'__struct__'())#{x
-                                                                                         :=
-                                                                                         5.2,
-                                                                                     y
-                                                                                         :=
-                                                                                         4.0e-1}])]]),
+        io:put_chars(begin
+                         _element@1_0 = begin
+                                            _element@0_0 = io_lib:format("~ktp",
+                                                                         [('Elixir.Patina.Repr11.Point':'__struct__'())#{x
+                                                                                                                             :=
+                                                                                                                             5.2,
+                                                                                                                         y
+                                                                                                                             :=
+                                                                                                                             4.0e-1}]),
+                                            [_element@0_0]
+                                        end,
+                         [_element@1_0]
+                     end),
         io:nl(),
         {}
     end.

@@ -34,10 +34,16 @@ compare(_witness@0_0, _a@1_0, _b@2_0) ->
 
 main() ->
     begin
-        io:put_chars([[io_lib:format("~ktp",
-                                     [compare({'Elixir.Patina.Core.Int':'Core::PartialEq::$patina_witness'()},
-                                              1,
-                                              1)])]]),
+        io:put_chars(begin
+                         _element@1_0 = begin
+                                            _element@0_0 = io_lib:format("~ktp",
+                                                                         [compare({'Elixir.Patina.Core.Int':'Core::PartialEq::$patina_witness'()},
+                                                                                  1,
+                                                                                  1)]),
+                                            [_element@0_0]
+                                        end,
+                         [_element@1_0]
+                     end),
         io:nl(),
         {}
     end.

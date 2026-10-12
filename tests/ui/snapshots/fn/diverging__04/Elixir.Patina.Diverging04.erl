@@ -27,8 +27,16 @@
 
 main() ->
     begin
-        io:put_chars([[<<"Sum of odd numbers up to 9 (excluding): "/utf8>>,
-                       io_lib:format("~ktp", ['main::sum_odd_numbers'(9)])]]),
+        io:put_chars(begin
+                         _element@2_0 = begin
+                                            _element@0_0 =
+                                                <<"Sum of odd numbers up to 9 (excluding): "/utf8>>,
+                                            _element@1_0 = io_lib:format("~ktp",
+                                                                         ['main::sum_odd_numbers'(9)]),
+                                            [_element@0_0, _element@1_0]
+                                        end,
+                         [_element@2_0]
+                     end),
         io:nl(),
         {}
     end.

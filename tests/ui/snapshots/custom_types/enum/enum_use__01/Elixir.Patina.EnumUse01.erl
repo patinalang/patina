@@ -29,23 +29,39 @@ main() ->
     _role@1_0 = 'Elixir.Patina.EnumUse01.Role.Student',
     case _stage@0_0 of
         'Elixir.Patina.EnumUse01.Stage.Beginner' ->
-            io:put_chars([[<<"Beginners are starting their learning "
-                             "journey!"/utf8>>]]),
+            io:put_chars(begin
+                             _element@2_0 =
+                                 [<<"Beginners are starting their learning "
+                                    "journey!"/utf8>>],
+                             [_element@2_0]
+                         end),
             io:nl(),
             {};
         'Elixir.Patina.EnumUse01.Stage.Advanced' ->
-            io:put_chars([[<<"Advanced learners are mastering their "
-                             "subjects..."/utf8>>]]),
+            io:put_chars(begin
+                             _element@3_0 =
+                                 [<<"Advanced learners are mastering their "
+                                    "subjects..."/utf8>>],
+                             [_element@3_0]
+                         end),
             io:nl(),
             {}
     end,
     case _role@1_0 of
         'Elixir.Patina.EnumUse01.Role.Student' ->
-            io:put_chars([[<<"Students are acquiring knowledge!"/utf8>>]]),
+            io:put_chars(begin
+                             _element@4_0 =
+                                 [<<"Students are acquiring knowledge!"/utf8>>],
+                             [_element@4_0]
+                         end),
             io:nl(),
             {};
         'Elixir.Patina.EnumUse01.Role.Teacher' ->
-            io:put_chars([[<<"Teachers are spreading knowledge!"/utf8>>]]),
+            io:put_chars(begin
+                             _element@5_0 =
+                                 [<<"Teachers are spreading knowledge!"/utf8>>],
+                             [_element@5_0]
+                         end),
             io:nl(),
             {}
     end.

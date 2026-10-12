@@ -27,15 +27,23 @@
 
 'Trait01::Animal::talk'(_witness@0_0, _self@1_0) ->
     begin
-        io:put_chars([[(erlang:element(2,
-                                       erlang:element(1,
-                                                      _witness@0_0)))(_witness@0_0,
-                                                                      _self@1_0),
-                       <<" says "/utf8>>,
-                       (erlang:element(3,
-                                       erlang:element(1,
-                                                      _witness@0_0)))(_witness@0_0,
-                                                                      _self@1_0)]]),
+        io:put_chars(begin
+                         _element@5_0 = begin
+                                            _element@2_0 = (erlang:element(2,
+                                                                           erlang:element(1,
+                                                                                          _witness@0_0)))(_witness@0_0,
+                                                                                                          _self@1_0),
+                                            _element@3_0 = <<" says "/utf8>>,
+                                            _element@4_0 = (erlang:element(3,
+                                                                           erlang:element(1,
+                                                                                          _witness@0_0)))(_witness@0_0,
+                                                                                                          _self@1_0),
+                                            [_element@2_0,
+                                             _element@3_0,
+                                             _element@4_0]
+                                        end,
+                         [_element@5_0]
+                     end),
         io:nl(),
         {}
     end.

@@ -1,0 +1,202 @@
+#![allow(dead_code)]
+
+extern mod erlang;
+
+// Every call reports an event so the Elixir tests can check multiplicity.
+// Evaluation order is undefined; the tests compare the events as a multiset.
+fn effect<T>(event: atom, value: T) -> T {
+    erlang::send(erlang::self(), (a"side_effect", event));
+    value
+}
+
+macro_rules! record_cases {
+    ($record:ident, $repr:meta) =>
+    {
+        #[$repr] pub struct $record { x: int, y: int, z: int, } impl $record
+        {
+            pub fn fields() -> term
+            {
+                $record
+                {
+                    z: effect(a"z", 30), x: effect(a"x", 10), y:
+                    effect(a"y", 20),
+
+                } as term
+            } pub fn base() -> term
+            {
+                $record
+                {
+                    ..effect(a"base", $record
+                    {
+                        x: 1, y: 2, z: 3
+
+                        // More than one field is inherited from the same base call.
+                    })
+                } as term
+            } pub fn update() -> term
+            {
+                $record
+                {
+                    x: 10,
+                    ..effect(a"base", $record
+                    {
+                        x: 1, y: 2, z: 3
+
+                    })
+                } as term
+            } pub fn mixed() -> term
+            {
+                $record
+                {
+                    z: effect(a"z", 30), x: effect(a"x", 10),
+                    ..effect(a"base", $record
+                    {
+                        x: 1, y: 2, z: 3
+
+                    })
+                } as term
+            } pub fn replace() -> term
+            {
+                $record
+                {
+                    z: effect(a"z", 30), x: effect(a"x", 10), y:
+                    effect(a"y", 20),
+                    ..effect(a"base", $record
+                    {
+                        x: 1, y: 2, z: 3
+
+                        // The base call still has effects when none of its fields are inherited.
+                    })
+                } as term
+            }
+        }
+    };
+}
+
+record_cases!(PatinaRecord, repr(Patina));
+record_cases!(NativeRecord, repr(native_record));
+record_cases!(TaggedRecord, repr(tagged, tag = "tagged"));
+record_cases!(ElixirRecord, repr(Elixir));
+
+#[repr(transparent)]
+pub struct Transparent {
+    value: int,
+}
+
+impl Transparent {
+    pub fn fields() -> term {
+        Transparent { value: effect(a"field", 10) } as term
+    }
+
+    pub fn base() -> term {
+        Transparent { ..effect(a"base", Transparent { value: 1 }) } as term
+    }
+
+    pub fn update() -> term {
+        Transparent { value: 10, ..effect(a"base", Transparent { value: 1 }) }
+            as term
+    }
+
+    pub fn mixed() -> term {
+        Transparent {
+                value: effect(a"field", 10),
+                ..effect(a"base", Transparent { value: 1 })
+            } as term
+    }
+}
+
+// An atom has no fields, but its base expression must still be evaluated.
+#[repr(atom)]
+pub struct AtomUnit {}
+
+impl AtomUnit {
+    pub fn base() -> term {
+        AtomUnit { ..effect(a"base", AtomUnit {}) } as term
+    }
+}
+
+#[repr(transparent)]
+pub enum Dynamic {
+
+    #[repr(dynamic_wrap, tag = "dynamic")]
+    Value {
+        value: term,
+    },
+    Text(str),
+}
+
+// Enum variants have field expressions but do not support struct updates.
+impl Dynamic {
+    pub fn fields(value: term) -> term {
+        Dynamic::Value { value: effect(a"field", value) } as term
+    }
+}
+
+pub mod Tuples {
+    use super::effect;
+
+    pub fn fields() -> (int, int, int) {
+        (effect(a"x", 10), effect(a"y", 20), effect(a"z", 30))
+    }
+
+    // Tuples have no update syntax; a call can be the base of field access.
+    pub fn base() -> int { effect(a"base", (1, 2, 3)).1 }
+
+    pub fn mixed() -> (int, int, int) {
+        (effect(a"x", 10), effect(a"base", (1, 2, 3)).1, effect(a"z", 30))
+    }
+}
+
+pub mod Maps {
+    use super::effect;
+
+    pub fn fields() -> #{atom => int} {
+        #{effect(a"x_key", a"x") => effect(a"x", 10), effect(a"y_key", a"y")
+                => effect(a"y", 20), effect(a"z_key", a"z") =>
+                effect(a"z", 30)}
+    }
+
+    pub fn base() -> #{atom => int} {
+        #{..effect(a"base", #{a"x" => 1, a"y" => 2, a"z" => 3})}
+    }
+
+    pub fn update() -> #{atom => int} {
+        #{a"x" => 10, ..effect(a"base", #{a"x" => 1, a"y" => 2, a"z" => 3})}
+    }
+
+    pub fn mixed() -> #{atom => int} {
+        #{effect(a"z_key", a"z") => effect(a"z", 30), effect(a"x_key", a"x")
+                => effect(a"x", 10),
+                ..effect(a"base", #{a"x" => 1, a"y" => 2, a"z" => 3})}
+    }
+
+    pub fn replace() -> #{atom => int} {
+        #{effect(a"z_key", a"z") => effect(a"z", 30), effect(a"x_key", a"x")
+                => effect(a"x", 10), effect(a"y_key", a"y") =>
+                effect(a"y", 20),
+                ..effect(a"base", #{a"x" => 1, a"y" => 2, a"z" => 3})}
+    }
+
+    pub fn duplicate() -> #{atom => int} {
+        #{effect(a"key", a"x") => effect(a"value", 10), effect(a"key", a"x")
+                => effect(a"value", 20)}
+    }
+}
+
+pub mod Lists {
+    use super::effect;
+
+    pub fn fields() -> [int] {
+        [effect(a"x", 10), effect(a"y", 20), effect(a"z", 30)]
+    }
+
+    pub fn base() -> [int] { [0, ..effect(a"base", [1, 2, 3])] }
+
+    pub fn mixed() -> [int] {
+        [effect(a"x", 10), effect(a"y", 20), ..effect(a"base", [3, 4])]
+    }
+
+    pub fn empty_tail() -> [int] {
+        [effect(a"field", 10), ..effect(a"base", [])]
+    }
+}

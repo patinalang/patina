@@ -25,5 +25,9 @@
 
 main() ->
     begin
-        io:put_chars([[<<"Hello!"/utf8>>]]), io:nl(), {}
+        io:put_chars(begin
+                         _element@0_0 = [<<"Hello!"/utf8>>], [_element@0_0]
+                     end),
+        io:nl(),
+        {}
     end.

@@ -215,13 +215,23 @@ loop_in_default(_n@0_0, _times@1_0) ->
 
 pair(_a@0_0, _b@1_0) ->
     'Elixir.Patina.LoopWitness.Pair':'LoopWitness::Score::score'('Elixir.Patina.LoopWitness.Pair':'LoopWitness::Score::$patina_witness'({'Elixir.Patina.LoopWitness.Points':'LoopWitness::Score::$patina_witness'()}),
-                                                                 'Elixir.Patina.LoopWitness.Pair':'$patina_constructor__Pair'(_a@0_0,
-                                                                                                                              _b@1_0)).
+                                                                 begin
+                                                                     _a@2_0 =
+                                                                         _a@0_0,
+                                                                     _b@3_0 =
+                                                                         _b@1_0,
+                                                                     'Elixir.Patina.LoopWitness.Pair':'$patina_constructor__Pair'(_a@2_0,
+                                                                                                                                  _b@3_0)
+                                                                 end).
 
 pair_repeated(_a@0_0, _b@1_0, _times@2_0) ->
     'LoopWitness::Score::loop_in_default'('Elixir.Patina.LoopWitness.Pair':'LoopWitness::Score::$patina_witness'({'Elixir.Patina.LoopWitness.Points':'LoopWitness::Score::$patina_witness'()}),
-                                          'Elixir.Patina.LoopWitness.Pair':'$patina_constructor__Pair'(_a@0_0,
-                                                                                                       _b@1_0),
+                                          begin
+                                              _a@3_0 = _a@0_0,
+                                              _b@4_0 = _b@1_0,
+                                              'Elixir.Patina.LoopWitness.Pair':'$patina_constructor__Pair'(_a@3_0,
+                                                                                                           _b@4_0)
+                                          end,
                                           _times@2_0).
 
 nested_rounds(_n@0_0, _rounds@1_0) ->

@@ -45,7 +45,12 @@
      {}}.
 
 calls_stubs_locally(_self@0_0) ->
-    {'Elixir.Patina.Defaults':'Defaults::Animal::calls_required'('Elixir.Patina.Defaults.Sheep':'Defaults::Animal::$patina_witness'(),
+    begin
+        _element@1_0 =
+            'Elixir.Patina.Defaults':'Defaults::Animal::calls_required'('Elixir.Patina.Defaults.Sheep':'Defaults::Animal::$patina_witness'(),
+                                                                        _self@0_0),
+        _element@2_0 =
+            'Elixir.Patina.Defaults':'Defaults::Animal::whisper'('Elixir.Patina.Defaults.Sheep':'Defaults::Animal::$patina_witness'(),
                                                                  _self@0_0),
-     'Elixir.Patina.Defaults':'Defaults::Animal::whisper'('Elixir.Patina.Defaults.Sheep':'Defaults::Animal::$patina_witness'(),
-                                                          _self@0_0)}.
+        {_element@1_0, _element@2_0}
+    end.

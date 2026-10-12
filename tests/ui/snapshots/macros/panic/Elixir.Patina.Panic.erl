@@ -38,28 +38,56 @@ explicit_panic() ->
     begin
         erlang:error('Elixir.Patina.Core.Panic':new(<<"explicit panic"/utf8>>),
                      none,
-                     [{error_info, #{module => 'Elixir.Patina.Core.Panic'}}])
+                     begin
+                         _element@1_0 = begin
+                                            _element@0_0 = #{module =>
+                                                                 'Elixir.Patina.Core.Panic'},
+                                            {error_info, _element@0_0}
+                                        end,
+                         [_element@1_0]
+                     end)
     end.
 
 panic_with_message() ->
     begin
         erlang:error('Elixir.Patina.Core.Panic':new(<<"unexpected value"/utf8>>),
                      none,
-                     [{error_info, #{module => 'Elixir.Patina.Core.Panic'}}])
+                     begin
+                         _element@1_0 = begin
+                                            _element@0_0 = #{module =>
+                                                                 'Elixir.Patina.Core.Panic'},
+                                            {error_info, _element@0_0}
+                                        end,
+                         [_element@1_0]
+                     end)
     end.
 
 todo_without_message() ->
     begin
         erlang:error('Elixir.Patina.Core.Panic':new(<<"not yet implemented"/utf8>>),
                      none,
-                     [{error_info, #{module => 'Elixir.Patina.Core.Panic'}}])
+                     begin
+                         _element@1_0 = begin
+                                            _element@0_0 = #{module =>
+                                                                 'Elixir.Patina.Core.Panic'},
+                                            {error_info, _element@0_0}
+                                        end,
+                         [_element@1_0]
+                     end)
     end.
 
 todo_with_message() ->
     begin
         erlang:error('Elixir.Patina.Core.Panic':new(<<"not yet implemented: handle the value"/utf8>>),
                      none,
-                     [{error_info, #{module => 'Elixir.Patina.Core.Panic'}}])
+                     begin
+                         _element@1_0 = begin
+                                            _element@0_0 = #{module =>
+                                                                 'Elixir.Patina.Core.Panic'},
+                                            {error_info, _element@0_0}
+                                        end,
+                         [_element@1_0]
+                     end)
     end.
 
 panic_in_let_else(_map@0_0) ->
@@ -68,17 +96,26 @@ panic_in_let_else(_map@0_0) ->
         case _map@0_0 of
             #{1 := _value@1_1} -> {};
             _ ->
-                _branch_value@2_0 = begin
+                _branch_value@4_0 = begin
                                         begin
                                             erlang:error('Elixir.Patina.Core.Panic':new(<<"missing key"/utf8>>),
                                                          none,
-                                                         [{error_info,
-                                                           #{module =>
-                                                                 'Elixir.Patina.Core.Panic'}}])
+                                                         begin
+                                                             _element@3_0 =
+                                                                 begin
+                                                                     _element@2_0 =
+                                                                         #{module
+                                                                               =>
+                                                                               'Elixir.Patina.Core.Panic'},
+                                                                     {error_info,
+                                                                      _element@2_0}
+                                                                 end,
+                                                             [_element@3_0]
+                                                         end)
                                         end
                                     end,
                 _value@1_1 = _value@1_0,
-                _branch_value@2_0
+                _branch_value@4_0
         end
     end,
     _value@1_1.
@@ -89,17 +126,26 @@ todo_in_let_else(_map@0_0) ->
         case _map@0_0 of
             #{1 := _value@1_1} -> {};
             _ ->
-                _branch_value@2_0 = begin
+                _branch_value@4_0 = begin
                                         begin
                                             erlang:error('Elixir.Patina.Core.Panic':new(<<"not yet implemented"/utf8>>),
                                                          none,
-                                                         [{error_info,
-                                                           #{module =>
-                                                                 'Elixir.Patina.Core.Panic'}}])
+                                                         begin
+                                                             _element@3_0 =
+                                                                 begin
+                                                                     _element@2_0 =
+                                                                         #{module
+                                                                               =>
+                                                                               'Elixir.Patina.Core.Panic'},
+                                                                     {error_info,
+                                                                      _element@2_0}
+                                                                 end,
+                                                             [_element@3_0]
+                                                         end)
                                         end
                                     end,
                 _value@1_1 = _value@1_0,
-                _branch_value@2_0
+                _branch_value@4_0
         end
     end,
     _value@1_1.
@@ -111,9 +157,16 @@ todo_in_let_else(_map@0_0) ->
                     begin
                         erlang:error('Elixir.Patina.Core.Panic':new(<<"reached the limit"/utf8>>),
                                      none,
-                                     [{error_info,
-                                       #{module =>
-                                             'Elixir.Patina.Core.Panic'}}])
+                                     begin
+                                         _element@3_0 = begin
+                                                            _element@2_0 =
+                                                                #{module =>
+                                                                      'Elixir.Patina.Core.Panic'},
+                                                            {error_info,
+                                                             _element@2_0}
+                                                        end,
+                                         [_element@3_0]
+                                     end)
                     end;
                 false -> {}
             end,
@@ -136,23 +189,31 @@ panic_in_loop(_limit@0_0) ->
                             begin
                                 erlang:error('Elixir.Patina.Core.Panic':new(<<"reached the limit"/utf8>>),
                                              none,
-                                             [{error_info,
-                                               #{module =>
-                                                     'Elixir.Patina.Core.Panic'}}])
+                                             begin
+                                                 _element@4_0 = begin
+                                                                    _element@3_0 =
+                                                                        #{module
+                                                                              =>
+                                                                              'Elixir.Patina.Core.Panic'},
+                                                                    {error_info,
+                                                                     _element@3_0}
+                                                                end,
+                                                 [_element@4_0]
+                                             end)
                             end;
                         false -> {}
                     end,
                     _j@2_1 = _j@2_0 + 1,
                     {};
                 false ->
-                    _branch_value@3_0 = begin
+                    _branch_value@5_0 = begin
                                             '$patina_marker':break({break,
                                                                     1,
                                                                     {},
                                                                     _j@2_0})
                                         end,
                     _j@2_1 = _j@2_0,
-                    _branch_value@3_0
+                    _branch_value@5_0
             end
         end,
     '$patina_marker':continue(_j@2_1, _limit@0_0, _i@1_0).
@@ -165,7 +226,7 @@ panic_in_loop(_limit@0_0) ->
                                                       _limit@0_0,
                                                       _i@1_0)
                 of
-                {break, 1, _loop_value@4_0, _j@2_1} -> _loop_value@4_0
+                {break, 1, _loop_value@6_0, _j@2_1} -> _loop_value@6_0
             end,
             _i@1_1 = _i@1_0 + 1,
             {}

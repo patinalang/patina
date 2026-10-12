@@ -32,7 +32,18 @@
 'Core::Iterator::next'(_witness@0_0, _self@1_0) ->
     case _self@1_0 =:= 0 of
         true -> nil;
-        false -> {_self@1_0, _self@1_0 - 1}
+        false ->
+            begin
+                _0@5_0 = begin
+                             _element@2_0 = _self@1_0,
+                             _element@4_0 = begin
+                                                _from@3_0 = _self@1_0 - 1,
+                                                _from@3_0
+                                            end,
+                             {_element@2_0, _element@4_0}
+                         end,
+                _0@5_0
+            end
     end.
 
 'Core::Iterator::$patina_witness'() ->

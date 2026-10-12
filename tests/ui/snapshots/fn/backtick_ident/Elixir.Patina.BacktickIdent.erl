@@ -32,7 +32,11 @@
 
 'save!'() ->
     begin
-        io:put_chars([[<<"saved!"/utf8>>]]), io:nl(), {}
+        io:put_chars(begin
+                         _element@0_0 = [<<"saved!"/utf8>>], [_element@0_0]
+                     end),
+        io:nl(),
+        {}
     end.
 
 'a{b}'() -> 1.
@@ -69,15 +73,37 @@ main() ->
     'exists?'(1),
     'save!'(),
     begin
-        io:put_chars([[<<"`a{b}`"/utf8>>]]), io:nl(), {}
-    end,
-    begin
-        io:put_chars([[io_lib:format("~ktp", [_value?@1_0])]]),
+        io:put_chars(begin
+                         _element@4_0 = begin
+                                            _element@3_0 = <<"`a{b}`"/utf8>>,
+                                            [_element@3_0]
+                                        end,
+                         [_element@4_0]
+                     end),
         io:nl(),
         {}
     end,
     begin
-        io:put_chars([[io_lib:format("~ktp", [_type@2_0])]]),
+        io:put_chars(begin
+                         _element@6_0 = begin
+                                            _element@5_0 = io_lib:format("~ktp",
+                                                                         [_value?@1_0]),
+                                            [_element@5_0]
+                                        end,
+                         [_element@6_0]
+                     end),
+        io:nl(),
+        {}
+    end,
+    begin
+        io:put_chars(begin
+                         _element@8_0 = begin
+                                            _element@7_0 = io_lib:format("~ktp",
+                                                                         [_type@2_0]),
+                                            [_element@7_0]
+                                        end,
+                         [_element@8_0]
+                     end),
         io:nl(),
         {}
     end,

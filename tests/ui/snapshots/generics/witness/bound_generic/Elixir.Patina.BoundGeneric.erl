@@ -30,11 +30,17 @@ call(_witness@0_0, _h@1_0) ->
                                                                    _h@1_0).
 
 main() ->
-    _h@0_0 = 5,
+    _h@1_0 = begin _value@0_0 = 5, _value@0_0 end,
     begin
-        io:put_chars([[io_lib:format("~ktp",
-                                     [call({'Elixir.Patina.BoundGeneric.Number':'BoundGeneric::Bound::$patina_witness'()},
-                                           _h@0_0)])]]),
+        io:put_chars(begin
+                         _element@3_0 = begin
+                                            _element@2_0 = io_lib:format("~ktp",
+                                                                         [call({'Elixir.Patina.BoundGeneric.Number':'BoundGeneric::Bound::$patina_witness'()},
+                                                                               _h@1_0)]),
+                                            [_element@2_0]
+                                        end,
+                         [_element@3_0]
+                     end),
         io:nl(),
         {}
     end.

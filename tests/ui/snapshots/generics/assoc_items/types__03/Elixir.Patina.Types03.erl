@@ -46,40 +46,78 @@ main() ->
         'Elixir.Patina.Types03.Container':'$patina_constructor__Container'(_number_1@0_0,
                                                                            _number_2@1_0),
     begin
-        io:put_chars([[<<"Does container contain "/utf8>>,
-                       io_lib:format("~ktp", [_number_1@0_0]),
-                       <<" and "/utf8>>,
-                       io_lib:format("~ktp", [_number_2@1_0]),
-                       <<": "/utf8>>,
-                       io_lib:format("~ktp",
-                                     ['Elixir.Patina.Types03.Container':'Types03::Contains::contains'('Elixir.Patina.Types03.Container':'Types03::Contains::$patina_witness'(),
-                                                                                                      _container@2_0,
-                                                                                                      _number_1@0_0,
-                                                                                                      _number_2@1_0)])]]),
+        io:put_chars(begin
+                         _element@9_0 = begin
+                                            _element@3_0 =
+                                                <<"Does container contain "/utf8>>,
+                                            _element@4_0 = io_lib:format("~ktp",
+                                                                         [_number_1@0_0]),
+                                            _element@5_0 = <<" and "/utf8>>,
+                                            _element@6_0 = io_lib:format("~ktp",
+                                                                         [_number_2@1_0]),
+                                            _element@7_0 = <<": "/utf8>>,
+                                            _element@8_0 = io_lib:format("~ktp",
+                                                                         ['Elixir.Patina.Types03.Container':'Types03::Contains::contains'('Elixir.Patina.Types03.Container':'Types03::Contains::$patina_witness'(),
+                                                                                                                                          _container@2_0,
+                                                                                                                                          _number_1@0_0,
+                                                                                                                                          _number_2@1_0)]),
+                                            [_element@3_0,
+                                             _element@4_0,
+                                             _element@5_0,
+                                             _element@6_0,
+                                             _element@7_0,
+                                             _element@8_0]
+                                        end,
+                         [_element@9_0]
+                     end),
         io:nl(),
         {}
     end,
     begin
-        io:put_chars([[<<"First number: "/utf8>>,
-                       io_lib:format("~ktp",
-                                     ['Elixir.Patina.Types03.Container':'Types03::Contains::first'('Elixir.Patina.Types03.Container':'Types03::Contains::$patina_witness'(),
-                                                                                                   _container@2_0)])]]),
+        io:put_chars(begin
+                         _element@12_0 = begin
+                                             _element@10_0 =
+                                                 <<"First number: "/utf8>>,
+                                             _element@11_0 =
+                                                 io_lib:format("~ktp",
+                                                               ['Elixir.Patina.Types03.Container':'Types03::Contains::first'('Elixir.Patina.Types03.Container':'Types03::Contains::$patina_witness'(),
+                                                                                                                             _container@2_0)]),
+                                             [_element@10_0, _element@11_0]
+                                         end,
+                         [_element@12_0]
+                     end),
         io:nl(),
         {}
     end,
     begin
-        io:put_chars([[<<"Last number: "/utf8>>,
-                       io_lib:format("~ktp",
-                                     ['Elixir.Patina.Types03.Container':'Types03::Contains::last'('Elixir.Patina.Types03.Container':'Types03::Contains::$patina_witness'(),
-                                                                                                  _container@2_0)])]]),
+        io:put_chars(begin
+                         _element@15_0 = begin
+                                             _element@13_0 =
+                                                 <<"Last number: "/utf8>>,
+                                             _element@14_0 =
+                                                 io_lib:format("~ktp",
+                                                               ['Elixir.Patina.Types03.Container':'Types03::Contains::last'('Elixir.Patina.Types03.Container':'Types03::Contains::$patina_witness'(),
+                                                                                                                            _container@2_0)]),
+                                             [_element@13_0, _element@14_0]
+                                         end,
+                         [_element@15_0]
+                     end),
         io:nl(),
         {}
     end,
     begin
-        io:put_chars([[<<"The difference is: "/utf8>>,
-                       io_lib:format("~ktp",
-                                     [difference({'Elixir.Patina.Types03.Container':'Types03::Contains::$patina_witness'()},
-                                                 _container@2_0)])]]),
+        io:put_chars(begin
+                         _element@18_0 = begin
+                                             _element@16_0 =
+                                                 <<"The difference is: "/utf8>>,
+                                             _element@17_0 =
+                                                 io_lib:format("~ktp",
+                                                               [difference({'Elixir.Patina.Types03.Container':'Types03::Contains::$patina_witness'()},
+                                                                           _container@2_0)]),
+                                             [_element@16_0, _element@17_0]
+                                         end,
+                         [_element@18_0]
+                     end),
         io:nl(),
         {}
     end.

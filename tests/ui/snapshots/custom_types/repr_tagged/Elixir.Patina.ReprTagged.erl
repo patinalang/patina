@@ -55,12 +55,19 @@ destructure_struct(_value@0_0) ->
 unit_value() -> {custom_unit}.
 
 enum_values() ->
-    [{'Elixir.Patina.ReprTagged.TaggedEnum.Unit'},
-     {'Elixir.Patina.ReprTagged.TaggedEnum.TupleValue', 10},
-     {'Elixir.Patina.ReprTagged.TaggedEnum.RecordValue',
-      20,
-      30},
-     'Elixir.Patina.ReprTagged.TaggedEnum.AtomOverride'].
+    begin
+        _element@0_0 =
+            {'Elixir.Patina.ReprTagged.TaggedEnum.Unit'},
+        _element@1_0 =
+            {'Elixir.Patina.ReprTagged.TaggedEnum.TupleValue', 10},
+        _element@2_0 =
+            {'Elixir.Patina.ReprTagged.TaggedEnum.RecordValue',
+             20,
+             30},
+        _element@3_0 =
+            'Elixir.Patina.ReprTagged.TaggedEnum.AtomOverride',
+        [_element@0_0, _element@1_0, _element@2_0, _element@3_0]
+    end.
 
 enum_payload(_value@0_0) ->
     case _value@0_0 of
@@ -76,7 +83,11 @@ enum_payload(_value@0_0) ->
     end.
 
 result_values() ->
-    [{ok, 42}, {error, <<"reason"/utf8>>}].
+    begin
+        _element@0_0 = {ok, 42},
+        _element@1_0 = {error, <<"reason"/utf8>>},
+        [_element@0_0, _element@1_0]
+    end.
 
 result_payload(_value@0_0) ->
     case _value@0_0 of

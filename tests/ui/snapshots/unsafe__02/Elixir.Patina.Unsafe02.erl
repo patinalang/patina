@@ -40,9 +40,19 @@ main() ->
                                   end
                               end,
     begin
-        io:put_chars([[_safe_description@3_0,
-                       <<", "/utf8>>,
-                       _unsafe_description@4_0]]),
+        io:put_chars(begin
+                         _element@8_0 = begin
+                                            _element@5_0 =
+                                                _safe_description@3_0,
+                                            _element@6_0 = <<", "/utf8>>,
+                                            _element@7_0 =
+                                                _unsafe_description@4_0,
+                                            [_element@5_0,
+                                             _element@6_0,
+                                             _element@7_0]
+                                        end,
+                         [_element@8_0]
+                     end),
         io:nl(),
         {}
     end.

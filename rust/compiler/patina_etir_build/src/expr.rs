@@ -1,4 +1,3 @@
-use rustc_ast::LitKind;
 use rustc_data_structures::fx::{FxHashSet, FxIndexMap};
 use rustc_hir::def::DefKind;
 use rustc_hir::{BinarySegmentTy, HirId};
@@ -12,9 +11,77 @@ use rustc_middle::span_bug;
 use rustc_middle::thir::visit::{self, Visitor};
 use rustc_middle::thir::{self, AdtExprBase, LocalVarId, PatKind, Thir};
 use rustc_middle::ty::{self, GenericArgsRef, Ty};
-use rustc_span::{Span, Symbol, sym};
+use rustc_span::{Ident, Span, Symbol, sym};
 
 use super::{ThirBodyCx, not_implemented, not_implemented_kind};
+
+/// Some expressions that we translate result in a whole block being emitted.
+/// This helper structure collects additional exprs that should be emitted before
+/// the final results.
+struct ExprBlock(Vec<ExprId>);
+
+macro_rules! with_expr_block {
+    ($cx:ident, |$block:ident| $body:block) => {{
+        let mut $block = ExprBlock(Vec::new());
+        let result = (|| $body)();
+        $block.emit($cx, result)
+    }};
+}
+
+impl<'a, 'tcx> ExprBlock {
+    /// `lower_expr` then run it through `maybe_bind` to ensure we got a variable or literal.
+    fn lower_and_maybe_bind(
+        &mut self,
+        cx: &mut ThirBodyCx<'a, 'tcx>,
+        name: Symbol,
+        expr_id: thir::ExprId,
+    ) -> ExprId {
+        let expr = cx.lower_expr(expr_id);
+        self.maybe_bind(cx, name, expr)
+    }
+
+    /// Emits an assignment of `value` to a fresh var named `name`, and returns the var expr.
+    /// If `value` is already a var or a literal, does nothing.
+    fn maybe_bind(&mut self, cx: &mut ThirBodyCx<'a, 'tcx>, name: Symbol, value: ExprId) -> ExprId {
+        let etir::Expr { ty, span, ref kind } = cx.cx.body[value];
+        if matches!(kind, etir::ExprKind::Var(_) | etir::ExprKind::Literal(_, _)) {
+            return value;
+        }
+
+        let vars = &mut cx.cx.body.vars;
+        let var = vars.push(etir::Var { ident: Ident { name, span } });
+
+        let binding = cx.push_pat(
+            etir::PatKind::Binding {
+                var,
+                is_primary: true,
+                subpattern: None,
+                input: PatternInput::Typed,
+            },
+            ty,
+            span,
+        );
+
+        let assign_expr =
+            cx.push_expr(etir::ExprKind::Assign { lhs: binding, rhs: value }, ty, span);
+
+        self.0.push(assign_expr);
+
+        cx.push_expr(etir::ExprKind::Var(var), ty, span)
+    }
+
+    /// Wraps the final expression `value` in a block with all the expressions prepared
+    /// through other functions of this struct.
+    fn emit(mut self, cx: &mut ThirBodyCx<'a, 'tcx>, value: ExprId) -> ExprId {
+        if self.0.is_empty() {
+            value
+        } else {
+            let etir::Expr { ty, span, kind: _ } = cx.cx.body[value];
+            self.0.push(value);
+            cx.push_expr(etir::ExprKind::Block(self.0.into_boxed_slice()), ty, span)
+        }
+    }
+}
 
 impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
     pub(super) fn lower_expr(&mut self, expr_id: thir::ExprId) -> ExprId {
@@ -189,6 +256,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         neg: bool,
     ) -> ExprId {
         let tcx = self.cx.tcx;
+        use rustc_ast::LitKind;
         let value = match lit.node {
             LitKind::Int(value) => etir::Lit::Int { value, neg },
             LitKind::Float(symbol, _style) => {
@@ -238,9 +306,15 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         items: &[thir::ExprId],
         tail: Option<thir::ExprId>,
     ) -> ExprId {
-        let tail = tail.map(|tail| self.lower_expr(tail));
-        let items = self.lower_exprs(items);
-        self.push_expr(etir::ExprKind::List { items, tail }, expr.ty, expr.span)
+        with_expr_block!(self, |expr_body| {
+            let tail = tail.map(|tail| expr_body.lower_and_maybe_bind(self, sym::tail, tail));
+            let items = items
+                .iter()
+                .map(|&item| expr_body.lower_and_maybe_bind(self, sym::element, item))
+                .collect();
+
+            self.push_expr(etir::ExprKind::List { items, tail }, expr.ty, expr.span)
+        })
     }
 
     fn lower_expr_map(
@@ -249,12 +323,19 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         fields: &[thir::MapFieldExpr],
         base: Option<thir::ExprId>,
     ) -> ExprId {
-        let base = base.map(|base| self.lower_expr(base));
-        let fields = fields
-            .iter()
-            .map(|field| (self.lower_expr(field.key), self.lower_expr(field.value)))
-            .collect();
-        self.push_expr(etir::ExprKind::Map { fields, base }, expr.ty, expr.span)
+        with_expr_block!(self, |expr_body| {
+            let base = base.map(|base| expr_body.lower_and_maybe_bind(self, sym::field_base, base));
+            let fields = fields
+                .iter()
+                .map(|field| {
+                    let key = expr_body.lower_and_maybe_bind(self, sym::key, field.key);
+                    let value = expr_body.lower_and_maybe_bind(self, sym::value, field.value);
+                    (key, value)
+                })
+                .collect();
+
+            self.push_expr(etir::ExprKind::Map { fields, base }, expr.ty, expr.span)
+        })
     }
 
     fn lower_expr_binary_pattern(
@@ -277,8 +358,14 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
     }
 
     fn lower_expr_tuple(&mut self, expr: &thir::Expr<'tcx>, fields: &[thir::ExprId]) -> ExprId {
-        let fields = self.lower_exprs(fields);
-        self.push_expr(etir::ExprKind::Tuple { fields }, expr.ty, expr.span)
+        with_expr_block!(self, |expr_body| {
+            let fields = fields
+                .iter()
+                .map(|&field| expr_body.lower_and_maybe_bind(self, sym::element, field))
+                .collect();
+
+            self.push_expr(etir::ExprKind::Tuple { fields }, expr.ty, expr.span)
+        })
     }
 
     fn lower_expr_field(
@@ -310,7 +397,11 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
                 span_bug!(span, "field without a runtime value has type {}", expr.ty)
             }
             let tag = self.lower_expr_phantom_data(expr);
-            return self.wrap_side_effects(&[lhs], tag);
+            return with_expr_block!(self, |expr_body| {
+                // The lhs may have side effects, such as in `fetch_struct().phantom`.
+                expr_body.maybe_bind(self, sym::field_base, lhs);
+                tag
+            });
         };
 
         let kind = etir::ExprKind::Field {
@@ -628,40 +719,42 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         let adt_def = adt_expr.adt_def;
         let variant = adt_def.variant(adt_expr.variant_index);
 
-        let mut side_effects = Vec::new();
-        for field in &adt_expr.fields {
-            if tcx.erl_runtime_field_position(variant, field.name).is_none() {
-                side_effects.push(self.lower_expr(field.expr));
-            }
-        }
+        with_expr_block!(self, |expr_body| {
+            let repr = self.lower_adt_repr(span, adt_def, variant);
 
-        let repr = self.lower_adt_repr(span, adt_def, variant);
+            let base = match &adt_expr.base {
+                AdtExprBase::None => None,
+                AdtExprBase::Base(base) => {
+                    Some(expr_body.lower_and_maybe_bind(self, sym::field_base, base.base))
+                }
+                AdtExprBase::DefaultFields(_) => {
+                    not_implemented_kind(tcx, span, "default fields", repr)
+                }
+            };
 
-        // In declaration order.
-        let fields: Box<[_]> = tcx
-            .erl_runtime_fields(variant)
-            .enumerate()
-            .filter_map(|(position, (idx, field_def))| {
-                let field = adt_expr.fields.iter().find(|field| field.name == idx)?;
-                Some(etir::FieldExpr {
-                    position: etir::FieldIdx::from_usize(position),
-                    name: field_def.name,
-                    value: self.lower_expr(field.expr),
+            // In declaration order.
+            let fields: Box<[_]> = variant
+                .fields
+                .iter_enumerated()
+                .filter_map(|(idx, field_def)| {
+                    let field = adt_expr.fields.iter().find(|field| field.name == idx)?;
+                    let value = expr_body.lower_and_maybe_bind(self, field_def.name, field.expr);
+                    let Some(position) = tcx.erl_runtime_field_position(variant, idx) else {
+                        // The binding for `field.expr` was still emitted to `expr_body`
+                        // to account for any side effects, even though we don't emit the field.
+                        return None;
+                    };
+                    Some(etir::FieldExpr {
+                        position: etir::FieldIdx::from_usize(position),
+                        name: field_def.name,
+                        value,
+                    })
                 })
-            })
-            .collect();
+                .collect();
 
-        let base = match &adt_expr.base {
-            AdtExprBase::None => None,
-            AdtExprBase::Base(base) => Some(self.lower_expr(base.base)),
-            AdtExprBase::DefaultFields(_) => {
-                not_implemented_kind(tcx, span, "default fields", repr)
-            }
-        };
-
-        let adt = etir::AdtExpr { repr, base, fields };
-        let adt = self.push_expr(etir::ExprKind::Adt(Box::new(adt)), expr.ty, span);
-        self.wrap_side_effects(&side_effects, adt)
+            let adt = etir::AdtExpr { repr, base, fields };
+            self.push_expr(etir::ExprKind::Adt(Box::new(adt)), expr.ty, span)
+        })
     }
 
     fn lower_expr_assign(
@@ -859,27 +952,6 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         let callee = etir::Callee::Direct(sym::io_lib, sym::format);
         let kind = etir::ExprKind::Call { callee, args: Box::new([format, args]) };
         self.push_expr(kind, expr.ty, expr.span)
-    }
-
-    fn wrap_side_effects(&mut self, side_effects: &[ExprId], value: ExprId) -> ExprId {
-        if side_effects.is_empty() {
-            return value;
-        }
-
-        let etir::Expr { ty, span, .. } = self.cx.body[value];
-        let exprs = side_effects
-            .iter()
-            .map(|&side_effect| self.underscore_assign(side_effect))
-            .chain([value])
-            .collect();
-
-        self.push_expr(etir::ExprKind::Block(exprs), ty, span)
-    }
-
-    fn underscore_assign(&mut self, value: ExprId) -> ExprId {
-        let etir::Expr { ty, span, .. } = self.cx.body[value];
-        let wild = self.push_pat(etir::PatKind::Wild { input: PatternInput::Typed }, ty, span);
-        self.push_expr(etir::ExprKind::Assign { lhs: wild, rhs: value }, ty, span)
     }
 
     fn unit_expr(&mut self, span: Span) -> ExprId {

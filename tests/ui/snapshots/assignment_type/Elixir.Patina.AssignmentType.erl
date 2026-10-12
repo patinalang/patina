@@ -118,12 +118,16 @@ assign_coerces_to_var_type() ->
     _ = begin
             case _i@3_0 < _n@0_0 of
                 true ->
-                    {_current@1_1, _next@2_1} = {_next@2_0,
-                                                 _current@1_0 + _next@2_0},
+                    {_current@1_1, _next@2_1} = begin
+                                                    _element@4_0 = _current@1_0
+                                                                       +
+                                                                       _next@2_0,
+                                                    {_next@2_0, _element@4_0}
+                                                end,
                     _i@3_1 = _i@3_0 + 1,
                     {};
                 false ->
-                    _branch_value@4_0 = begin
+                    _branch_value@5_0 = begin
                                             '$patina_marker':break({break,
                                                                     0,
                                                                     {},
@@ -134,7 +138,7 @@ assign_coerces_to_var_type() ->
                     _current@1_1 = _current@1_0,
                     _next@2_1 = _next@2_0,
                     _i@3_1 = _i@3_0,
-                    _branch_value@4_0
+                    _branch_value@5_0
             end
         end,
     '$patina_marker':continue(_i@3_1,
@@ -153,11 +157,11 @@ fibonacci(_n@0_0) ->
         of
         {break,
          0,
-         _loop_value@5_0,
+         _loop_value@6_0,
          _i@3_1,
          _current@1_1,
          _next@2_1} ->
-            _loop_value@5_0
+            _loop_value@6_0
     end,
     _current@1_1.
 

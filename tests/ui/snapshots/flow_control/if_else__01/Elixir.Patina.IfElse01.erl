@@ -28,46 +28,77 @@ main() ->
     case _n@0_0 < 0 of
         true ->
             begin
-                io:put_chars([io_lib:format("~ktp", [_n@0_0]),
-                              <<" is negative"/utf8>>]),
+                io:put_chars(begin
+                                 _element@1_0 = io_lib:format("~ktp", [_n@0_0]),
+                                 _element@2_0 = <<" is negative"/utf8>>,
+                                 [_element@1_0, _element@2_0]
+                             end),
                 {}
             end;
         false ->
             case _n@0_0 > 0 of
                 true ->
                     begin
-                        io:put_chars([io_lib:format("~ktp", [_n@0_0]),
-                                      <<" is positive"/utf8>>]),
+                        io:put_chars(begin
+                                         _element@3_0 = io_lib:format("~ktp",
+                                                                      [_n@0_0]),
+                                         _element@4_0 = <<" is positive"/utf8>>,
+                                         [_element@3_0, _element@4_0]
+                                     end),
                         {}
                     end;
                 false ->
                     begin
-                        io:put_chars([io_lib:format("~ktp", [_n@0_0]),
-                                      <<" is zero"/utf8>>]),
+                        io:put_chars(begin
+                                         _element@5_0 = io_lib:format("~ktp",
+                                                                      [_n@0_0]),
+                                         _element@6_0 = <<" is zero"/utf8>>,
+                                         [_element@5_0, _element@6_0]
+                                     end),
                         {}
                     end
             end
     end,
-    _big_n@1_0 = case _n@0_0 < 10 andalso _n@0_0 > -10 of
+    _big_n@9_0 = case _n@0_0 < 10 andalso _n@0_0 > -10 of
                      true ->
                          begin
-                             io:put_chars([[<<", and is a small number, increase ten-fold"/utf8>>]]),
+                             io:put_chars(begin
+                                              _element@7_0 =
+                                                  [<<", and is a small number, increase ten-fold"/utf8>>],
+                                              [_element@7_0]
+                                          end),
                              io:nl(),
                              {}
                          end,
                          10 * _n@0_0;
                      false ->
                          begin
-                             io:put_chars([[<<", and is a big number, halve the number"/utf8>>]]),
+                             io:put_chars(begin
+                                              _element@8_0 =
+                                                  [<<", and is a big number, halve the number"/utf8>>],
+                                              [_element@8_0]
+                                          end),
                              io:nl(),
                              {}
                          end,
                          _n@0_0 div 2
                  end,
     begin
-        io:put_chars([[io_lib:format("~ktp", [_n@0_0]),
-                       <<" -> "/utf8>>,
-                       io_lib:format("~ktp", [_big_n@1_0])]]),
+        io:put_chars(begin
+                         _element@13_0 = begin
+                                             _element@10_0 =
+                                                 io_lib:format("~ktp",
+                                                               [_n@0_0]),
+                                             _element@11_0 = <<" -> "/utf8>>,
+                                             _element@12_0 =
+                                                 io_lib:format("~ktp",
+                                                               [_big_n@9_0]),
+                                             [_element@10_0,
+                                              _element@11_0,
+                                              _element@12_0]
+                                         end,
+                         [_element@13_0]
+                     end),
         io:nl(),
         {}
     end.

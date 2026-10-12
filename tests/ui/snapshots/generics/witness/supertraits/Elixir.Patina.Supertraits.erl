@@ -33,93 +33,125 @@
 
 'Supertraits::Greet::calls_supertrait'(_witness@0_0,
                                        _self@1_0) ->
-    {(erlang:element(1,
-                     erlang:element(1, _witness@0_0)))(_witness@0_0,
-                                                       _self@1_0),
-     begin
-         _witness@2_0 = erlang:element(1,
-                                       erlang:element(2, _witness@0_0)),
-         (erlang:element(1,
-                         erlang:element(1, _witness@2_0)))(_witness@2_0,
-                                                           _self@1_0)
-     end}.
+    begin
+        _element@2_0 = (erlang:element(1,
+                                       erlang:element(1,
+                                                      _witness@0_0)))(_witness@0_0,
+                                                                      _self@1_0),
+        _element@4_0 = begin
+                           _witness@3_0 = erlang:element(1,
+                                                         erlang:element(2,
+                                                                        _witness@0_0)),
+                           (erlang:element(1,
+                                           erlang:element(1,
+                                                          _witness@3_0)))(_witness@3_0,
+                                                                          _self@1_0)
+                       end,
+        {_element@2_0, _element@4_0}
+    end.
 
 'Supertraits::Loud::shout'(_witness@0_0, _self@1_0) ->
-    {begin
-         _witness@2_0 = erlang:element(1,
-                                       erlang:element(2,
-                                                      erlang:element(1,
-                                                                     erlang:element(2,
-                                                                                    _witness@0_0)))),
-         (erlang:element(1,
-                         erlang:element(1, _witness@2_0)))(_witness@2_0,
-                                                           _self@1_0)
-     end,
-     begin
-         _witness@3_0 = erlang:element(1,
-                                       erlang:element(2, _witness@0_0)),
-         (erlang:element(2,
-                         erlang:element(1, _witness@3_0)))(_witness@3_0,
-                                                           _self@1_0)
-     end}.
+    begin
+        _element@3_0 = begin
+                           _witness@2_0 = erlang:element(1,
+                                                         erlang:element(2,
+                                                                        erlang:element(1,
+                                                                                       erlang:element(2,
+                                                                                                      _witness@0_0)))),
+                           (erlang:element(1,
+                                           erlang:element(1,
+                                                          _witness@2_0)))(_witness@2_0,
+                                                                          _self@1_0)
+                       end,
+        _element@5_0 = begin
+                           _witness@4_0 = erlang:element(1,
+                                                         erlang:element(2,
+                                                                        _witness@0_0)),
+                           (erlang:element(2,
+                                           erlang:element(1,
+                                                          _witness@4_0)))(_witness@4_0,
+                                                                          _self@1_0)
+                       end,
+        {_element@3_0, _element@5_0}
+    end.
 
 via_subtrait_bound(_witness@0_0, _x@1_0) ->
-    {begin
-         _witness@2_0 = erlang:element(1,
-                                       erlang:element(2,
-                                                      erlang:element(1,
-                                                                     _witness@0_0))),
-         (erlang:element(1,
-                         erlang:element(1, _witness@2_0)))(_witness@2_0, _x@1_0)
-     end,
-     begin
-         _witness@3_0 = erlang:element(1, _witness@0_0),
-         (erlang:element(2,
-                         erlang:element(1, _witness@3_0)))(_witness@3_0, _x@1_0)
-     end}.
+    begin
+        _element@3_0 = begin
+                           _witness@2_0 = erlang:element(1,
+                                                         erlang:element(2,
+                                                                        erlang:element(1,
+                                                                                       _witness@0_0))),
+                           (erlang:element(1,
+                                           erlang:element(1,
+                                                          _witness@2_0)))(_witness@2_0,
+                                                                          _x@1_0)
+                       end,
+        _element@5_0 = begin
+                           _witness@4_0 = erlang:element(1, _witness@0_0),
+                           (erlang:element(2,
+                                           erlang:element(1,
+                                                          _witness@4_0)))(_witness@4_0,
+                                                                          _x@1_0)
+                       end,
+        {_element@3_0, _element@5_0}
+    end.
 
 via_indirect_supertrait(_witness@0_0, _x@1_0) ->
-    {begin
-         _witness@2_0 = erlang:element(1,
-                                       erlang:element(2,
-                                                      erlang:element(1,
-                                                                     erlang:element(2,
-                                                                                    erlang:element(1,
-                                                                                                   _witness@0_0))))),
-         (erlang:element(1,
-                         erlang:element(1, _witness@2_0)))(_witness@2_0, _x@1_0)
-     end,
-     begin
-         _witness@3_0 = erlang:element(1, _witness@0_0),
-         (erlang:element(1,
-                         erlang:element(1, _witness@3_0)))(_witness@3_0, _x@1_0)
-     end}.
+    begin
+        _element@3_0 = begin
+                           _witness@2_0 = erlang:element(1,
+                                                         erlang:element(2,
+                                                                        erlang:element(1,
+                                                                                       erlang:element(2,
+                                                                                                      erlang:element(1,
+                                                                                                                     _witness@0_0))))),
+                           (erlang:element(1,
+                                           erlang:element(1,
+                                                          _witness@2_0)))(_witness@2_0,
+                                                                          _x@1_0)
+                       end,
+        _element@5_0 = begin
+                           _witness@4_0 = erlang:element(1, _witness@0_0),
+                           (erlang:element(1,
+                                           erlang:element(1,
+                                                          _witness@4_0)))(_witness@4_0,
+                                                                          _x@1_0)
+                       end,
+        {_element@3_0, _element@5_0}
+    end.
 
 'Supertraits::Library::count'(_witness@0_0,
                               _witness@1_0, _self@2_0, _p@3_0) ->
-    {begin
-         _witness@4_0 = erlang:element(1,
-                                       erlang:element(2, _witness@0_0)),
-         (erlang:element(1,
-                         erlang:element(1, _witness@4_0)))(_witness@4_0,
-                                                           _self@2_0)
-     end,
-     begin
-         _witness@6_0 = erlang:element(1, _witness@1_0),
-         (erlang:element(1,
-                         erlang:element(1, _witness@6_0)))(_witness@6_0,
-                                                           _p@3_0,
-                                                           begin
-                                                               _witness@5_0 =
-                                                                   erlang:element(1,
-                                                                                  erlang:element(2,
-                                                                                                 _witness@0_0)),
-                                                               (erlang:element(1,
-                                                                               erlang:element(1,
-                                                                                              _witness@5_0)))(_witness@5_0,
-                                                                                                              _self@2_0)
-                                                           end)
-     end}.
+    begin
+        _element@5_0 = begin
+                           _witness@4_0 = erlang:element(1,
+                                                         erlang:element(2,
+                                                                        _witness@0_0)),
+                           (erlang:element(1,
+                                           erlang:element(1,
+                                                          _witness@4_0)))(_witness@4_0,
+                                                                          _self@2_0)
+                       end,
+        _element@8_0 = begin
+                           _witness@7_0 = erlang:element(1, _witness@1_0),
+                           (erlang:element(1,
+                                           erlang:element(1,
+                                                          _witness@7_0)))(_witness@7_0,
+                                                                          _p@3_0,
+                                                                          begin
+                                                                              _witness@6_0 =
+                                                                                  erlang:element(1,
+                                                                                                 erlang:element(2,
+                                                                                                                _witness@0_0)),
+                                                                              (erlang:element(1,
+                                                                                              erlang:element(1,
+                                                                                                             _witness@6_0)))(_witness@6_0,
+                                                                                                                             _self@2_0)
+                                                                          end)
+                       end,
+        {_element@5_0, _element@8_0}
+    end.
 
 count_in(_witness@0_0, _l@1_0) ->
     begin

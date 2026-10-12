@@ -27,13 +27,24 @@ some_fn() ->
     begin
         erlang:error('Elixir.Patina.Core.Panic':new(<<"This call never returns."/utf8>>),
                      none,
-                     [{error_info, #{module => 'Elixir.Patina.Core.Panic'}}])
+                     begin
+                         _element@1_0 = begin
+                                            _element@0_0 = #{module =>
+                                                                 'Elixir.Patina.Core.Panic'},
+                                            {error_info, _element@0_0}
+                                        end,
+                         [_element@1_0]
+                     end)
     end.
 
 main() ->
     __a@0_0 = some_fn(),
     begin
-        io:put_chars([[<<"You will never see this line!"/utf8>>]]),
+        io:put_chars(begin
+                         _element@1_0 =
+                             [<<"You will never see this line!"/utf8>>],
+                         [_element@1_0]
+                     end),
         io:nl(),
         {}
     end.

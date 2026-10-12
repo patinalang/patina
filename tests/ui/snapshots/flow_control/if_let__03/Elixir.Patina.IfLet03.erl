@@ -30,33 +30,55 @@ main() ->
     case _a@0_0 of
         'Elixir.Patina.IfLet03.Foo.Bar' ->
             begin
-                io:put_chars([[<<"a is foobar"/utf8>>]]), io:nl(), {}
+                io:put_chars(begin
+                                 _element@3_0 = [<<"a is foobar"/utf8>>],
+                                 [_element@3_0]
+                             end),
+                io:nl(),
+                {}
             end;
         _ -> {}
     end,
     case _b@1_0 of
         'Elixir.Patina.IfLet03.Foo.Bar' ->
             begin
-                io:put_chars([[<<"b is foobar"/utf8>>]]), io:nl(), {}
-            end;
-        _ -> {}
-    end,
-    case _c@2_0 of
-        _value@4_0 = _value@3_0
-            when erlang:is_integer(_value@4_0) ->
-            begin
-                io:put_chars([[<<"c is "/utf8>>,
-                               io_lib:format("~ktp", [_value@3_0])]]),
+                io:put_chars(begin
+                                 _element@4_0 = [<<"b is foobar"/utf8>>],
+                                 [_element@4_0]
+                             end),
                 io:nl(),
                 {}
             end;
         _ -> {}
     end,
     case _c@2_0 of
-        _value@6_0 = _value@5_0 = 100
+        _value@6_0 = _value@5_0
             when erlang:is_integer(_value@6_0) ->
             begin
-                io:put_chars([[<<"c is one hundred"/utf8>>]]),
+                io:put_chars(begin
+                                 _element@9_0 = begin
+                                                    _element@7_0 =
+                                                        <<"c is "/utf8>>,
+                                                    _element@8_0 =
+                                                        io_lib:format("~ktp",
+                                                                      [_value@5_0]),
+                                                    [_element@7_0, _element@8_0]
+                                                end,
+                                 [_element@9_0]
+                             end),
+                io:nl(),
+                {}
+            end;
+        _ -> {}
+    end,
+    case _c@2_0 of
+        _value@11_0 = _value@10_0 = 100
+            when erlang:is_integer(_value@11_0) ->
+            begin
+                io:put_chars(begin
+                                 _element@12_0 = [<<"c is one hundred"/utf8>>],
+                                 [_element@12_0]
+                             end),
                 io:nl(),
                 {}
             end;

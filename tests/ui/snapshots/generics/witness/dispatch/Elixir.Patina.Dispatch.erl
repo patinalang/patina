@@ -35,9 +35,15 @@ main() ->
         'Elixir.Patina.Dispatch.Point':'$patina_constructor__Point'(3,
                                                                     4),
     begin
-        io:put_chars([[io_lib:format("~ktp",
-                                     [total_area({'Elixir.Patina.Dispatch.Point':'Dispatch::Area::$patina_witness'()},
-                                                 _p@0_0)])]]),
+        io:put_chars(begin
+                         _element@2_0 = begin
+                                            _element@1_0 = io_lib:format("~ktp",
+                                                                         [total_area({'Elixir.Patina.Dispatch.Point':'Dispatch::Area::$patina_witness'()},
+                                                                                     _p@0_0)]),
+                                            [_element@1_0]
+                                        end,
+                         [_element@2_0]
+                     end),
         io:nl(),
         {}
     end.

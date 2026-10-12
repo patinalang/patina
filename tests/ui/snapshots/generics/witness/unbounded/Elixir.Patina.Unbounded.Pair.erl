@@ -32,9 +32,19 @@
 
 len(_self@0_0) ->
     begin
-        io:put_chars([[<<"Pair::len("/utf8>>,
-                       io_lib:format("~ktp", [_self@0_0]),
-                       <<")"/utf8>>]]),
+        io:put_chars(begin
+                         _element@4_0 = begin
+                                            _element@1_0 =
+                                                <<"Pair::len("/utf8>>,
+                                            _element@2_0 = io_lib:format("~ktp",
+                                                                         [_self@0_0]),
+                                            _element@3_0 = <<")"/utf8>>,
+                                            [_element@1_0,
+                                             _element@2_0,
+                                             _element@3_0]
+                                        end,
+                         [_element@4_0]
+                     end),
         io:nl(),
         {}
     end,

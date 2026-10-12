@@ -45,4 +45,11 @@ single(_t@0_0) -> erlang:element(1, _t@0_0).
 
 of_call(_n@0_0) ->
     erlang:element(1,
-                   second({_n@0_0, {_n@0_0 + 1, _n@0_0 + 2}})).
+                   second(begin
+                              _element@3_0 = begin
+                                                 _element@1_0 = _n@0_0 + 1,
+                                                 _element@2_0 = _n@0_0 + 2,
+                                                 {_element@1_0, _element@2_0}
+                                             end,
+                              {_n@0_0, _element@3_0}
+                          end)).

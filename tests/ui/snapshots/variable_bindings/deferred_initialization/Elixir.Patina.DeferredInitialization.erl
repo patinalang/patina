@@ -80,20 +80,38 @@ initialized_on_every_loop_exit(_condition@0_0) ->
 
 main() ->
     begin
-        io:put_chars([[io_lib:format("~ktp",
-                                     [initialized_in_branches(true)])]]),
+        io:put_chars(begin
+                         _element@1_0 = begin
+                                            _element@0_0 = io_lib:format("~ktp",
+                                                                         [initialized_in_branches(true)]),
+                                            [_element@0_0]
+                                        end,
+                         [_element@1_0]
+                     end),
         io:nl(),
         {}
     end,
     begin
-        io:put_chars([[io_lib:format("~ktp",
-                                     [initialized_after_diverging_branch(false)])]]),
+        io:put_chars(begin
+                         _element@3_0 = begin
+                                            _element@2_0 = io_lib:format("~ktp",
+                                                                         [initialized_after_diverging_branch(false)]),
+                                            [_element@2_0]
+                                        end,
+                         [_element@3_0]
+                     end),
         io:nl(),
         {}
     end,
     begin
-        io:put_chars([[io_lib:format("~ktp",
-                                     [initialized_on_every_loop_exit(true)])]]),
+        io:put_chars(begin
+                         _element@5_0 = begin
+                                            _element@4_0 = io_lib:format("~ktp",
+                                                                         [initialized_on_every_loop_exit(true)]),
+                                            [_element@4_0]
+                                        end,
+                         [_element@5_0]
+                     end),
         io:nl(),
         {}
     end.

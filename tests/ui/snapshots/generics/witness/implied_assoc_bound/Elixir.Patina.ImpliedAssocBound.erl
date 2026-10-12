@@ -66,8 +66,13 @@ labelled_with_items(_witness@0_0, _t@1_0) ->
     end.
 
 crate_labels() ->
-    {labelled({'Elixir.Patina.ImpliedAssocBound.Crate':'ImpliedAssocBound::HasItem::$patina_witness'(),
-               'Elixir.Patina.ImpliedAssocBound.Tag':'ImpliedAssocBound::Label::$patina_witness'()},
-              'Elixir.Patina.ImpliedAssocBound.Crate'),
-     labelled_with_items({'Elixir.Patina.ImpliedAssocBound.Crate':'ImpliedAssocBound::LabelledWithItems::$patina_witness'()},
-                         'Elixir.Patina.ImpliedAssocBound.Crate')}.
+    begin
+        _element@0_0 =
+            labelled({'Elixir.Patina.ImpliedAssocBound.Crate':'ImpliedAssocBound::HasItem::$patina_witness'(),
+                      'Elixir.Patina.ImpliedAssocBound.Tag':'ImpliedAssocBound::Label::$patina_witness'()},
+                     'Elixir.Patina.ImpliedAssocBound.Crate'),
+        _element@1_0 =
+            labelled_with_items({'Elixir.Patina.ImpliedAssocBound.Crate':'ImpliedAssocBound::LabelledWithItems::$patina_witness'()},
+                                'Elixir.Patina.ImpliedAssocBound.Crate'),
+        {_element@0_0, _element@1_0}
+    end.

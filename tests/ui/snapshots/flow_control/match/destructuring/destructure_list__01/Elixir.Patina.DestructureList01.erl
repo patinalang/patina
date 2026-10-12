@@ -29,33 +29,91 @@ main() ->
     _list@0_0 = [1, -2, 6],
     case _list@0_0 of
         [0, _second@1_0, _third@2_0] ->
-            io:put_chars([[<<"list[0] = 0, list[1] = "/utf8>>,
-                           io_lib:format("~ktp", [_second@1_0]),
-                           <<", list[2] = "/utf8>>,
-                           io_lib:format("~ktp", [_third@2_0])]]),
+            io:put_chars(begin
+                             _element@7_0 = begin
+                                                _element@3_0 =
+                                                    <<"list[0] = 0, list[1] = "/utf8>>,
+                                                _element@4_0 =
+                                                    io_lib:format("~ktp",
+                                                                  [_second@1_0]),
+                                                _element@5_0 =
+                                                    <<", list[2] = "/utf8>>,
+                                                _element@6_0 =
+                                                    io_lib:format("~ktp",
+                                                                  [_third@2_0]),
+                                                [_element@3_0,
+                                                 _element@4_0,
+                                                 _element@5_0,
+                                                 _element@6_0]
+                                            end,
+                             [_element@7_0]
+                         end),
             io:nl(),
             {};
-        [1, _, _third@3_0] ->
-            io:put_chars([[<<"list[0] = 1, list[2] = "/utf8>>,
-                           io_lib:format("~ktp", [_third@3_0]),
-                           <<" and list[1] was ignored"/utf8>>]]),
+        [1, _, _third@8_0] ->
+            io:put_chars(begin
+                             _element@12_0 = begin
+                                                 _element@9_0 =
+                                                     <<"list[0] = 1, list[2] = "/utf8>>,
+                                                 _element@10_0 =
+                                                     io_lib:format("~ktp",
+                                                                   [_third@8_0]),
+                                                 _element@11_0 =
+                                                     <<" and list[1] was ignored"/utf8>>,
+                                                 [_element@9_0,
+                                                  _element@10_0,
+                                                  _element@11_0]
+                                             end,
+                             [_element@12_0]
+                         end),
             io:nl(),
             {};
-        [-1, _second@4_0 | _] ->
-            io:put_chars([[<<"list[0] = -1, list[1] = "/utf8>>,
-                           io_lib:format("~ktp", [_second@4_0]),
-                           <<" and all the other ones were ignored"/utf8>>]]),
+        [-1, _second@13_0 | _] ->
+            io:put_chars(begin
+                             _element@17_0 = begin
+                                                 _element@14_0 =
+                                                     <<"list[0] = -1, list[1] = "/utf8>>,
+                                                 _element@15_0 =
+                                                     io_lib:format("~ktp",
+                                                                   [_second@13_0]),
+                                                 _element@16_0 =
+                                                     <<" and all the other ones were ignored"/utf8>>,
+                                                 [_element@14_0,
+                                                  _element@15_0,
+                                                  _element@16_0]
+                                             end,
+                             [_element@17_0]
+                         end),
             io:nl(),
             {};
-        [3, _second@6_0 | _tail@5_0 = _] ->
-            io:put_chars([[<<"list[0] = 3, list[1] = "/utf8>>,
-                           io_lib:format("~ktp", [_second@6_0]),
-                           <<" and the other elements were "/utf8>>,
-                           io_lib:format("~ktp", [_tail@5_0])]]),
+        [3, _second@19_0 | _tail@18_0 = _] ->
+            io:put_chars(begin
+                             _element@24_0 = begin
+                                                 _element@20_0 =
+                                                     <<"list[0] = 3, list[1] = "/utf8>>,
+                                                 _element@21_0 =
+                                                     io_lib:format("~ktp",
+                                                                   [_second@19_0]),
+                                                 _element@22_0 =
+                                                     <<" and the other elements were "/utf8>>,
+                                                 _element@23_0 =
+                                                     io_lib:format("~ktp",
+                                                                   [_tail@18_0]),
+                                                 [_element@20_0,
+                                                  _element@21_0,
+                                                  _element@22_0,
+                                                  _element@23_0]
+                                             end,
+                             [_element@24_0]
+                         end),
             io:nl(),
             {};
         _ ->
-            io:put_chars([[<<"no list pattern matched"/utf8>>]]),
+            io:put_chars(begin
+                             _element@25_0 =
+                                 [<<"no list pattern matched"/utf8>>],
+                             [_element@25_0]
+                         end),
             io:nl(),
             {}
     end.

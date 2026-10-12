@@ -27,29 +27,47 @@
 
 main() ->
     begin
-        io:put_chars([[io_lib:format("~ktp",
-                                     ['Elixir.Patina.TraitArgumentPatterns.UnboundContainer':'TraitArgumentPatterns::Contains<int, _>::contains'('Elixir.Patina.TraitArgumentPatterns.UnboundContainer':'TraitArgumentPatterns::Contains<int, _>::$patina_witness'(),
-                                                                                                                                                 'Elixir.Patina.TraitArgumentPatterns.UnboundContainer',
-                                                                                                                                                 1,
-                                                                                                                                                 false)])]]),
+        io:put_chars(begin
+                         _element@1_0 = begin
+                                            _element@0_0 = io_lib:format("~ktp",
+                                                                         ['Elixir.Patina.TraitArgumentPatterns.UnboundContainer':'TraitArgumentPatterns::Contains<int, _>::contains'('Elixir.Patina.TraitArgumentPatterns.UnboundContainer':'TraitArgumentPatterns::Contains<int, _>::$patina_witness'(),
+                                                                                                                                                                                     'Elixir.Patina.TraitArgumentPatterns.UnboundContainer',
+                                                                                                                                                                                     1,
+                                                                                                                                                                                     false)]),
+                                            [_element@0_0]
+                                        end,
+                         [_element@1_0]
+                     end),
         io:nl(),
         {}
     end,
     begin
-        io:put_chars([[io_lib:format("~ktp",
-                                     ['Elixir.Patina.TraitArgumentPatterns.BoundContainer':'TraitArgumentPatterns::Contains<int, _>::contains'('Elixir.Patina.TraitArgumentPatterns.BoundContainer':'TraitArgumentPatterns::Contains<int, _>::$patina_witness'({'Elixir.Patina.TraitArgumentPatterns.Marked':'TraitArgumentPatterns::Marker::$patina_witness'()}),
-                                                                                                                                               'Elixir.Patina.TraitArgumentPatterns.BoundContainer',
-                                                                                                                                               1,
-                                                                                                                                               2)])]]),
+        io:put_chars(begin
+                         _element@3_0 = begin
+                                            _element@2_0 = io_lib:format("~ktp",
+                                                                         ['Elixir.Patina.TraitArgumentPatterns.BoundContainer':'TraitArgumentPatterns::Contains<int, _>::contains'('Elixir.Patina.TraitArgumentPatterns.BoundContainer':'TraitArgumentPatterns::Contains<int, _>::$patina_witness'({'Elixir.Patina.TraitArgumentPatterns.Marked':'TraitArgumentPatterns::Marker::$patina_witness'()}),
+                                                                                                                                                                                   'Elixir.Patina.TraitArgumentPatterns.BoundContainer',
+                                                                                                                                                                                   1,
+                                                                                                                                                                                   2)]),
+                                            [_element@2_0]
+                                        end,
+                         [_element@3_0]
+                     end),
         io:nl(),
         {}
     end,
     begin
-        io:put_chars([[io_lib:format("~ktp",
-                                     ['Elixir.Patina.TraitArgumentPatterns.NestedContainer':'TraitArgumentPatterns::Contains<int, TraitArgumentPatterns::Wrapped<_>>::contains'('Elixir.Patina.TraitArgumentPatterns.NestedContainer':'TraitArgumentPatterns::Contains<int, TraitArgumentPatterns::Wrapped<_>>::$patina_witness'(),
-                                                                                                                                                                                'Elixir.Patina.TraitArgumentPatterns.NestedContainer',
-                                                                                                                                                                                1,
-                                                                                                                                                                                false)])]]),
+        io:put_chars(begin
+                         _element@5_0 = begin
+                                            _element@4_0 = io_lib:format("~ktp",
+                                                                         ['Elixir.Patina.TraitArgumentPatterns.NestedContainer':'TraitArgumentPatterns::Contains<int, TraitArgumentPatterns::Wrapped<_>>::contains'('Elixir.Patina.TraitArgumentPatterns.NestedContainer':'TraitArgumentPatterns::Contains<int, TraitArgumentPatterns::Wrapped<_>>::$patina_witness'(),
+                                                                                                                                                                                                                    'Elixir.Patina.TraitArgumentPatterns.NestedContainer',
+                                                                                                                                                                                                                    1,
+                                                                                                                                                                                                                    false)]),
+                                            [_element@4_0]
+                                        end,
+                         [_element@5_0]
+                     end),
         io:nl(),
         {}
     end.

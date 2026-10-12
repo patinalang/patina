@@ -30,12 +30,12 @@
                                                                      _iter@1_0)
                 of
                 nil ->
-                    _branch_value@5_0 = '$patina_marker':break({break,
+                    _branch_value@9_0 = '$patina_marker':break({break,
                                                                 0,
                                                                 {},
                                                                 _iter@1_0}),
                     _iter@1_1 = _iter@1_0,
-                    _branch_value@5_0;
+                    _branch_value@9_0;
                 _value@4_0 = {_name@2_0, _next@3_0}
                     when erlang:is_tuple(_value@4_0) andalso
                              erlang:tuple_size(_value@4_0) =:= 2 ->
@@ -43,11 +43,25 @@
                     begin
                         case _name@2_0 of
                             <<"Ferris"/utf8>> ->
-                                io:put_chars([[<<"There is a rustacean among us!"/utf8>>]]),
+                                io:put_chars(begin
+                                                 _element@5_0 =
+                                                     [<<"There is a rustacean among us!"/utf8>>],
+                                                 [_element@5_0]
+                                             end),
                                 io:nl(),
                                 {};
                             _ ->
-                                io:put_chars([[<<"Hello "/utf8>>, _name@2_0]]),
+                                io:put_chars(begin
+                                                 _element@8_0 = begin
+                                                                    _element@6_0 =
+                                                                        <<"Hello "/utf8>>,
+                                                                    _element@7_0 =
+                                                                        _name@2_0,
+                                                                    [_element@6_0,
+                                                                     _element@7_0]
+                                                                end,
+                                                 [_element@8_0]
+                                             end),
                                 io:nl(),
                                 {}
                         end
@@ -66,13 +80,21 @@ main() ->
         of
         _iter@1_0 ->
             case 'main$patina_loop_1'(_iter@1_0) of
-                {break, 0, _loop_value@6_0, _iter@1_1} ->
-                    _loop_value@6_0
+                {break, 0, _loop_value@10_0, _iter@1_1} ->
+                    _loop_value@10_0
             end
     end,
     begin
-        io:put_chars([[<<"names: "/utf8>>,
-                       io_lib:format("~ktp", [_names@0_0])]]),
+        io:put_chars(begin
+                         _element@13_0 = begin
+                                             _element@11_0 = <<"names: "/utf8>>,
+                                             _element@12_0 =
+                                                 io_lib:format("~ktp",
+                                                               [_names@0_0]),
+                                             [_element@11_0, _element@12_0]
+                                         end,
+                         [_element@13_0]
+                     end),
         io:nl(),
         {}
     end.

@@ -26,8 +26,22 @@
 '__info__'(Key) -> module_info(Key).
 
 const_values() ->
-    {[1, 2, 3], #{<<"answer"/utf8>> => 42}}.
+    begin
+        _element@0_0 = [1, 2, 3],
+        _element@2_0 = begin
+                           _key@1_0 = <<"answer"/utf8>>, #{_key@1_0 => 42}
+                       end,
+        {_element@0_0, _element@2_0}
+    end.
 
 binary_pattern_values() ->
-    {<<80, 84, 2:16/integer, $ł/utf16, 1.5:32/float>>,
-     [<<1:1/integer, 0:2/integer>>, <<1:3/integer>>]}.
+    begin
+        _element@0_0 = <<80, 84, 2:16/integer, $ł/utf16,
+                         1.5:32/float>>,
+        _element@3_0 = begin
+                           _element@1_0 = <<1:1/integer, 0:2/integer>>,
+                           _element@2_0 = <<1:3/integer>>,
+                           [_element@1_0, _element@2_0]
+                       end,
+        {_element@0_0, _element@3_0}
+    end.

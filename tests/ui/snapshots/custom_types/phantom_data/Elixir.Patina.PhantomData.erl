@@ -61,14 +61,14 @@
 id(_value@0_0) -> _value@0_0.
 
 typed(_n@0_0) ->
-    begin _ = 'Elixir.Patina.Core.PhantomData', _n@0_0 end.
+    begin
+        _1@1_0 = 'Elixir.Patina.Core.PhantomData', _n@0_0
+    end.
 
 typed_value(_value@0_0) -> _value@0_0.
 
 typed_marker(_value@0_0) ->
-    begin
-        _ = _value@0_0, 'Elixir.Patina.Core.PhantomData'
-    end.
+    'Elixir.Patina.Core.PhantomData'.
 
 typed_destructure(_value@0_0) ->
     _n@1_0 = _value@0_0,
@@ -95,60 +95,55 @@ marker_with_side_effect() ->
     'Elixir.Patina.Core.PhantomData'.
 
 typed_effect(_n@0_0) ->
-    begin _ = marker_with_side_effect(), _n@0_0 end.
+    begin _1@1_0 = marker_with_side_effect(), _n@0_0 end.
 
 marker_effect() ->
     begin
-        _ = typed_effect(1), 'Elixir.Patina.Core.PhantomData'
+        _field_base@0_0 = typed_effect(1),
+        'Elixir.Patina.Core.PhantomData'
     end.
 
 'phantom_in_loop_and_closure$patina_loop_1'(_count@1_0,
-                                            _n@0_0, _last@2_0) ->
+                                            _n@0_0, _last@3_0) ->
     _ = begin
             case _count@1_0 < _n@0_0 of
                 true ->
-                    _last@2_1 = begin
-                                    _ = 'Elixir.Patina.Core.PhantomData',
-                                    _count@1_0
-                                end,
+                    _last@3_1 = _count@1_0,
                     _count@1_1 = _count@1_0 + 1,
                     {};
                 false ->
-                    _branch_value@3_0 = begin
+                    _branch_value@4_0 = begin
                                             '$patina_marker':break({break,
                                                                     0,
                                                                     {},
                                                                     _count@1_0,
-                                                                    _last@2_0})
+                                                                    _last@3_0})
                                         end,
-                    _last@2_1 = _last@2_0,
+                    _last@3_1 = _last@3_0,
                     _count@1_1 = _count@1_0,
-                    _branch_value@3_0
+                    _branch_value@4_0
             end
         end,
     '$patina_marker':continue(_count@1_1,
                               _n@0_0,
-                              _last@2_1).
+                              _last@3_1).
 
 phantom_in_loop_and_closure(_n@0_0) ->
     _ = 'Elixir.Patina.Core.PhantomData',
     _count@1_0 = 0,
-    _last@2_0 = begin
-                    _ = 'Elixir.Patina.Core.PhantomData', 0
+    _last@3_0 = begin
+                    _1@2_0 = 'Elixir.Patina.Core.PhantomData', 0
                 end,
     case
         'phantom_in_loop_and_closure$patina_loop_1'(_count@1_0,
                                                     _n@0_0,
-                                                    _last@2_0)
+                                                    _last@3_0)
         of
-        {break, 0, _loop_value@4_0, _count@1_1, _last@2_1} ->
-            _loop_value@4_0
+        {break, 0, _loop_value@5_0, _count@1_1, _last@3_1} ->
+            _loop_value@5_0
     end,
-    _make@6_0 = fun (_value@5_0) ->
-                        _ = 'Elixir.Patina.Core.PhantomData',
-                        _value@5_0
-                end,
-    _make@6_0(_last@2_1).
+    _make@7_0 = fun (_value@6_0) -> _value@6_0 end,
+    _make@7_0(_last@3_1).
 
 map_iter(_map@0_0) ->
     'Elixir.Patina.PhantomData.MapIter':new(_map@0_0).
@@ -199,7 +194,7 @@ first_entry(_iter@0_0) ->
 
 record(_a@0_0, _b@1_0) ->
     begin
-        _ = 'Elixir.Patina.Core.PhantomData',
+        _marker@2_0 = 'Elixir.Patina.Core.PhantomData',
         'Elixir.Patina.PhantomData.Record':'$patina_constructor__Record'(_a@0_0,
                                                                          _b@1_0)
     end.
@@ -214,7 +209,7 @@ record_update(_value@0_0) ->
 
 record_update_marker(_value@0_0) ->
     begin
-        _ = marker_with_side_effect(),
+        _marker@1_0 = marker_with_side_effect(),
         _value@0_0#'Elixir.Patina.PhantomData.Record':'Record'{}
     end.
 
@@ -227,7 +222,7 @@ record_destructure(_value@0_0) ->
 
 pair(_a@0_0, _b@1_0) ->
     begin
-        _ = 'Elixir.Patina.Core.PhantomData',
+        _1@2_0 = 'Elixir.Patina.Core.PhantomData',
         {'Elixir.Patina.PhantomData.Shape.Pair', _a@0_0, _b@1_0}
     end.
 
@@ -239,7 +234,7 @@ pair_second(_value@0_0) ->
 
 tagged_pair(_a@0_0, _b@1_0) ->
     begin
-        _ = 'Elixir.Patina.Core.PhantomData',
+        _marker@2_0 = 'Elixir.Patina.Core.PhantomData',
         {'Elixir.Patina.PhantomData.TaggedPair', _a@0_0, _b@1_0}
     end.
 
@@ -251,7 +246,7 @@ tagged_pair_update(_value@0_0) ->
 
 elixir_point(_x@0_0, _y@1_0) ->
     begin
-        _ = 'Elixir.Patina.Core.PhantomData',
+        _unit@2_0 = 'Elixir.Patina.Core.PhantomData',
         ('Elixir.Patina.PhantomData.ElixirPoint':'__struct__'())#{x
                                                                       := _x@0_0,
                                                                   y := _y@1_0}
@@ -266,17 +261,17 @@ elixir_point_sum(_value@0_0) ->
 
 marker() ->
     begin
-        _ = 'Elixir.Patina.Core.PhantomData',
+        _0@0_0 = 'Elixir.Patina.Core.PhantomData',
         'Elixir.Patina.PhantomData.Marker'
     end.
 
 marker_inner(_value@0_0) ->
-    begin
-        _ = _value@0_0, 'Elixir.Patina.Core.PhantomData'
-    end.
+    'Elixir.Patina.Core.PhantomData'.
 
 materialized_marker() ->
-    'Elixir.Patina.Core.PhantomData'.
+    begin
+        _0@0_0 = 'Elixir.Patina.Core.PhantomData', _0@0_0
+    end.
 
 is_some_marker(_value@0_0) ->
     case _value@0_0 of

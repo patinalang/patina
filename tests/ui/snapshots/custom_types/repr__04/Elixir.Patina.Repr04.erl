@@ -25,16 +25,28 @@
 
 main() ->
     begin
-        io:put_chars([[io_lib:format("~ktp",
-                                     [{'Elixir.Patina.Repr04.Pair',
-                                       42,
-                                       3.14}])]]),
+        io:put_chars(begin
+                         _element@1_0 = begin
+                                            _element@0_0 = io_lib:format("~ktp",
+                                                                         [{'Elixir.Patina.Repr04.Pair',
+                                                                           42,
+                                                                           3.14}]),
+                                            [_element@0_0]
+                                        end,
+                         [_element@1_0]
+                     end),
         io:nl(),
         {}
     end,
     begin
-        io:put_chars([[io_lib:format("~ktp",
-                                     [{'Elixir.BarBar'}])]]),
+        io:put_chars(begin
+                         _element@3_0 = begin
+                                            _element@2_0 = io_lib:format("~ktp",
+                                                                         [{'Elixir.BarBar'}]),
+                                            [_element@2_0]
+                                        end,
+                         [_element@3_0]
+                     end),
         io:nl(),
         {}
     end.

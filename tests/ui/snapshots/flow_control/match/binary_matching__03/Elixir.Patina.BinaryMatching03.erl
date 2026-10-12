@@ -31,41 +31,103 @@ main() ->
     case _bin@0_0 of
         <<_kind@1_0:8/integer, _len@2_0:8/integer,
           _payload@3_0:_len@2_0/binary, _rest@4_0/binary>> ->
-            io:put_chars([[<<"kind = "/utf8>>,
-                           io_lib:format("~ktp", [_kind@1_0]),
-                           <<", payload = "/utf8>>,
-                           io_lib:format("~ktp", [_payload@3_0]),
-                           <<", rest = "/utf8>>,
-                           io_lib:format("~ktp", [_rest@4_0])]]),
+            io:put_chars(begin
+                             _element@11_0 = begin
+                                                 _element@5_0 =
+                                                     <<"kind = "/utf8>>,
+                                                 _element@6_0 =
+                                                     io_lib:format("~ktp",
+                                                                   [_kind@1_0]),
+                                                 _element@7_0 =
+                                                     <<", payload = "/utf8>>,
+                                                 _element@8_0 =
+                                                     io_lib:format("~ktp",
+                                                                   [_payload@3_0]),
+                                                 _element@9_0 =
+                                                     <<", rest = "/utf8>>,
+                                                 _element@10_0 =
+                                                     io_lib:format("~ktp",
+                                                                   [_rest@4_0]),
+                                                 [_element@5_0,
+                                                  _element@6_0,
+                                                  _element@7_0,
+                                                  _element@8_0,
+                                                  _element@9_0,
+                                                  _element@10_0]
+                                             end,
+                             [_element@11_0]
+                         end),
             io:nl(),
             {};
-        <<_kind@5_0:8/integer, _len@6_0:8/integer,
-          _payload@7_0:(_len@6_0 div 2)/binary,
-          _rest@8_0/binary>> ->
-            io:put_chars([[<<"kind = "/utf8>>,
-                           io_lib:format("~ktp", [_kind@5_0]),
-                           <<", payload = "/utf8>>,
-                           io_lib:format("~ktp", [_payload@7_0]),
-                           <<", rest = "/utf8>>,
-                           io_lib:format("~ktp", [_rest@8_0])]]),
+        <<_kind@12_0:8/integer, _len@13_0:8/integer,
+          _payload@14_0:(_len@13_0 div 2)/binary,
+          _rest@15_0/binary>> ->
+            io:put_chars(begin
+                             _element@22_0 = begin
+                                                 _element@16_0 =
+                                                     <<"kind = "/utf8>>,
+                                                 _element@17_0 =
+                                                     io_lib:format("~ktp",
+                                                                   [_kind@12_0]),
+                                                 _element@18_0 =
+                                                     <<", payload = "/utf8>>,
+                                                 _element@19_0 =
+                                                     io_lib:format("~ktp",
+                                                                   [_payload@14_0]),
+                                                 _element@20_0 =
+                                                     <<", rest = "/utf8>>,
+                                                 _element@21_0 =
+                                                     io_lib:format("~ktp",
+                                                                   [_rest@15_0]),
+                                                 [_element@16_0,
+                                                  _element@17_0,
+                                                  _element@18_0,
+                                                  _element@19_0,
+                                                  _element@20_0,
+                                                  _element@21_0]
+                                             end,
+                             [_element@22_0]
+                         end),
             io:nl(),
             {};
         _ ->
-            io:put_chars([[<<"invalid packet"/utf8>>]]),
+            io:put_chars(begin
+                             _element@23_0 = [<<"invalid packet"/utf8>>],
+                             [_element@23_0]
+                         end),
             io:nl(),
             {}
     end,
-    _packet@9_0 = <<3:4/integer, 5:4/integer, 7:3/integer>>,
-    case _packet@9_0 of
-        <<_header@10_0:8/integer, _tail@11_0/bitstring>> ->
-            io:put_chars([[<<"header = "/utf8>>,
-                           io_lib:format("~ktp", [_header@10_0]),
-                           <<", tail = "/utf8>>,
-                           io_lib:format("~ktp", [_tail@11_0])]]),
+    _packet@24_0 = <<3:4/integer, 5:4/integer,
+                     7:3/integer>>,
+    case _packet@24_0 of
+        <<_header@25_0:8/integer, _tail@26_0/bitstring>> ->
+            io:put_chars(begin
+                             _element@31_0 = begin
+                                                 _element@27_0 =
+                                                     <<"header = "/utf8>>,
+                                                 _element@28_0 =
+                                                     io_lib:format("~ktp",
+                                                                   [_header@25_0]),
+                                                 _element@29_0 =
+                                                     <<", tail = "/utf8>>,
+                                                 _element@30_0 =
+                                                     io_lib:format("~ktp",
+                                                                   [_tail@26_0]),
+                                                 [_element@27_0,
+                                                  _element@28_0,
+                                                  _element@29_0,
+                                                  _element@30_0]
+                                             end,
+                             [_element@31_0]
+                         end),
             io:nl(),
             {};
         _ ->
-            io:put_chars([[<<"did not match"/utf8>>]]),
+            io:put_chars(begin
+                             _element@32_0 = [<<"did not match"/utf8>>],
+                             [_element@32_0]
+                         end),
             io:nl(),
             {}
     end.

@@ -25,22 +25,58 @@
 
 main() ->
     begin
-        io:put_chars([[io_lib:format("~ktp",
-                                     [<<"1 + 1 == 2"/utf8>>]),
-                       <<" and "/utf8>>,
-                       io_lib:format("~ktp", [<<"2 * 2 == 4"/utf8>>]),
-                       <<" is "/utf8>>,
-                       io_lib:format("~ktp",
-                                     [1 + 1 =:= 2 andalso 2 * 2 =:= 4])]]),
+        io:put_chars(begin
+                         _element@5_0 = begin
+                                            _element@0_0 = io_lib:format("~ktp",
+                                                                         [<<"1 + 1 == 2"/utf8>>]),
+                                            _element@1_0 = <<" and "/utf8>>,
+                                            _element@2_0 = io_lib:format("~ktp",
+                                                                         [<<"2 * 2 == 4"/utf8>>]),
+                                            _element@3_0 = <<" is "/utf8>>,
+                                            _element@4_0 = io_lib:format("~ktp",
+                                                                         [1 + 1
+                                                                              =:=
+                                                                              2
+                                                                              andalso
+                                                                              2
+                                                                                  *
+                                                                                  2
+                                                                                  =:=
+                                                                                  4]),
+                                            [_element@0_0,
+                                             _element@1_0,
+                                             _element@2_0,
+                                             _element@3_0,
+                                             _element@4_0]
+                                        end,
+                         [_element@5_0]
+                     end),
         io:nl(),
         {}
     end,
     begin
-        io:put_chars([[io_lib:format("~ktp", [<<"true"/utf8>>]),
-                       <<" or "/utf8>>,
-                       io_lib:format("~ktp", [<<"false"/utf8>>]),
-                       <<" is "/utf8>>,
-                       io_lib:format("~ktp", [true orelse false])]]),
+        io:put_chars(begin
+                         _element@11_0 = begin
+                                             _element@6_0 =
+                                                 io_lib:format("~ktp",
+                                                               [<<"true"/utf8>>]),
+                                             _element@7_0 = <<" or "/utf8>>,
+                                             _element@8_0 =
+                                                 io_lib:format("~ktp",
+                                                               [<<"false"/utf8>>]),
+                                             _element@9_0 = <<" is "/utf8>>,
+                                             _element@10_0 =
+                                                 io_lib:format("~ktp",
+                                                               [true orelse
+                                                                    false]),
+                                             [_element@6_0,
+                                              _element@7_0,
+                                              _element@8_0,
+                                              _element@9_0,
+                                              _element@10_0]
+                                         end,
+                         [_element@11_0]
+                     end),
         io:nl(),
         {}
     end.

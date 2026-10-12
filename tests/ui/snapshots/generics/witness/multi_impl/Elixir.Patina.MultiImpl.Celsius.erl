@@ -29,7 +29,7 @@
 
 'MultiImpl::From<MultiImpl::Fahrenheit>::from'(_witness@0_0,
                                                _f@1_0) ->
-    (_f@1_0 - 32) * 5 div 9.
+    begin _0@2_0 = (_f@1_0 - 32) * 5 div 9, _0@2_0 end.
 
 'MultiImpl::From<MultiImpl::Fahrenheit>::$patina_witness'() ->
     {{fun 'Elixir.Patina.MultiImpl.Celsius':'MultiImpl::From<MultiImpl::Fahrenheit>::from'/2},
@@ -38,7 +38,7 @@
 
 'MultiImpl::From<MultiImpl::Kelvin>::from'(_witness@0_0,
                                            _k@1_0) ->
-    _k@1_0 - 273.
+    begin _0@2_0 = _k@1_0 - 273, _0@2_0 end.
 
 'MultiImpl::From<MultiImpl::Kelvin>::$patina_witness'() ->
     {{fun 'Elixir.Patina.MultiImpl.Celsius':'MultiImpl::From<MultiImpl::Kelvin>::from'/2},

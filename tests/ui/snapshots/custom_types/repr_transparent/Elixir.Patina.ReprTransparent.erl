@@ -64,9 +64,15 @@ degrees(_value@0_0) -> _value@0_0.
 integer(_value@0_0) -> _value@0_0.
 
 point(_x@0_0, _y@1_0) ->
-    ('Elixir.Patina.ReprTransparent.Point':'__struct__'())#{x
-                                                                := _x@0_0,
-                                                            y := _y@1_0}.
+    begin
+        _0@2_0 =
+            ('Elixir.Patina.ReprTransparent.Point':'__struct__'())#{x
+                                                                        :=
+                                                                        _x@0_0,
+                                                                    y :=
+                                                                        _y@1_0},
+        _0@2_0
+    end.
 
 classify(_value@0_0) ->
     case _value@0_0 of
@@ -106,7 +112,11 @@ open_text(_value@0_0) -> _value@0_0.
 open_tagged(_value@0_0) -> {tagged, _value@0_0}.
 
 open_record(_value@0_0) ->
-    'Elixir.Patina.ReprTransparent.NativeValue':'$patina_constructor__NativeValue'(_value@0_0).
+    begin
+        _0@1_0 =
+            'Elixir.Patina.ReprTransparent.NativeValue':'$patina_constructor__NativeValue'(_value@0_0),
+        _0@1_0
+    end.
 
 classify_open(_value@0_0) ->
     case _value@0_0 of
@@ -137,15 +147,18 @@ classify_open(_value@0_0) ->
     end.
 
 nested_open(_value@0_0) ->
-    case _value@0_0 of
-        _value@1_0
-            when (erlang:is_tuple(_value@1_0) andalso
-                      erlang:tuple_size(_value@1_0) =:= 2)
-                     andalso erlang:element(1, _value@1_0) =:= nested ->
-            {nested, _value@1_0};
-        _value@1_0 when erlang:is_binary(_value@1_0) ->
-            {nested, _value@1_0};
-        _value@1_0 -> _value@1_0
+    begin
+        _0@1_0 = _value@0_0,
+        case _0@1_0 of
+            _value@2_0
+                when (erlang:is_tuple(_value@2_0) andalso
+                          erlang:tuple_size(_value@2_0) =:= 2)
+                         andalso erlang:element(1, _value@2_0) =:= nested ->
+                {nested, _value@2_0};
+            _value@2_0 when erlang:is_binary(_value@2_0) ->
+                {nested, _value@2_0};
+            _value@2_0 -> _value@2_0
+        end
     end.
 
 nested_text(_value@0_0) -> _value@0_0.
@@ -163,7 +176,8 @@ classify_nested(_value@0_0) ->
         _value@2_0 = _ when erlang:is_binary(_value@2_0) -> text
     end.
 
-concrete_nested(_value@0_0) -> _value@0_0.
+concrete_nested(_value@0_0) ->
+    begin _0@1_0 = _value@0_0, _0@1_0 end.
 
 concrete_text(_value@0_0) -> _value@0_0.
 
@@ -313,30 +327,32 @@ unwrap_inner_let(_value@0_0) ->
     _payload@1_0.
 
 nested_wrapper(_value@0_0) ->
-    case case _value@0_0 of
-             _value@1_0 when erlang:is_binary(_value@1_0) ->
-                 {dynamic, _value@1_0};
-             _value@1_0 -> _value@1_0
-         end
-        of
-        _value@2_0
-            when (erlang:is_tuple(_value@2_0) andalso
-                      erlang:tuple_size(_value@2_0) =:= 2)
-                     andalso erlang:element(1, _value@2_0) =:= dynamic ->
-            {dynamic, _value@2_0};
-        _value@2_0 when erlang:is_binary(_value@2_0) ->
-            {dynamic, _value@2_0};
-        _value@2_0
-            when erlang:is_record(_value@2_0,
-                                  'Elixir.Patina.ReprTransparent.NativeValue',
-                                  'NativeValue') ->
-            {dynamic, _value@2_0};
-        _value@2_0
-            when (erlang:is_tuple(_value@2_0) andalso
-                      erlang:tuple_size(_value@2_0) =:= 2)
-                     andalso erlang:element(1, _value@2_0) =:= tagged ->
-            {dynamic, _value@2_0};
-        _value@2_0 -> _value@2_0
+    begin
+        _0@2_0 = case _value@0_0 of
+                     _value@1_0 when erlang:is_binary(_value@1_0) ->
+                         {dynamic, _value@1_0};
+                     _value@1_0 -> _value@1_0
+                 end,
+        case _0@2_0 of
+            _value@3_0
+                when (erlang:is_tuple(_value@3_0) andalso
+                          erlang:tuple_size(_value@3_0) =:= 2)
+                         andalso erlang:element(1, _value@3_0) =:= dynamic ->
+                {dynamic, _value@3_0};
+            _value@3_0 when erlang:is_binary(_value@3_0) ->
+                {dynamic, _value@3_0};
+            _value@3_0
+                when erlang:is_record(_value@3_0,
+                                      'Elixir.Patina.ReprTransparent.NativeValue',
+                                      'NativeValue') ->
+                {dynamic, _value@3_0};
+            _value@3_0
+                when (erlang:is_tuple(_value@3_0) andalso
+                          erlang:tuple_size(_value@3_0) =:= 2)
+                         andalso erlang:element(1, _value@3_0) =:= tagged ->
+                {dynamic, _value@3_0};
+            _value@3_0 -> _value@3_0
+        end
     end.
 
 classify_nested_wrapper(_value@0_0) ->
