@@ -31,10 +31,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'TupleImpls::Show::show<()>'(_witness_self@0_0 = {_,
-                                                  {},
-                                                  {}},
-                             _self@1_0) ->
+'TupleImpls::Show::show<()>'(_witness@0_0, _self@1_0) ->
     <<"()"/utf8>>.
 
 'TupleImpls::Show::$patina_witness<()>'() ->
@@ -42,81 +39,89 @@
      {},
      {}}.
 
-'TupleImpls::Show::show<(_,)>'(_witness_self@0_0 = {_,
-                                                    {},
-                                                    {_witness_where_clause@1_0}},
-                               _self@2_0) ->
-    {_A@3_0} = _self@2_0,
+'TupleImpls::Show::show<(_,)>'(_witness@0_0,
+                               _self@1_0) ->
+    {_A@2_0} = _self@1_0,
     <<<<<<"("/utf8,
-          ((erlang:element(1,
-                           erlang:element(1,
-                                          _witness_where_clause@1_0)))(_witness_where_clause@1_0,
-                                                                       _A@3_0))/binary>>/binary,
+          begin
+              _witness@3_0 = erlang:element(1,
+                                            erlang:element(3, _witness@0_0)),
+              (erlang:element(1,
+                              erlang:element(1, _witness@3_0)))(_witness@3_0,
+                                                                _A@2_0)
+          end/binary>>/binary,
         ","/utf8>>/binary,
       ")"/utf8>>.
 
-'TupleImpls::Show::$patina_witness<(_,)>'(_witness_bounds@1_0 =
-                                              {_witness_bound@0_0}) ->
+'TupleImpls::Show::$patina_witness<(_,)>'(_witness@0_0) ->
     {{fun 'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::show<(_,)>'/2},
      {},
-     _witness_bounds@1_0}.
+     _witness@0_0}.
 
-'TupleImpls::Show::show<(_, _)>'(_witness_self@0_0 = {_,
-                                                      {},
-                                                      {_witness_where_clause@1_0,
-                                                       _witness_where_clause@2_0}},
-                                 _self@3_0) ->
-    {_A@4_0, _B@5_0} = _self@3_0,
+'TupleImpls::Show::show<(_, _)>'(_witness@0_0,
+                                 _self@1_0) ->
+    {_A@2_0, _B@3_0} = _self@1_0,
     <<<<<<<<<<"("/utf8,
-              ((erlang:element(1,
-                               erlang:element(1,
-                                              _witness_where_clause@1_0)))(_witness_where_clause@1_0,
-                                                                           _A@4_0))/binary>>/binary,
+              begin
+                  _witness@4_0 = erlang:element(1,
+                                                erlang:element(3,
+                                                               _witness@0_0)),
+                  (erlang:element(1,
+                                  erlang:element(1,
+                                                 _witness@4_0)))(_witness@4_0,
+                                                                 _A@2_0)
+              end/binary>>/binary,
             ","/utf8>>/binary,
-          ((erlang:element(1,
-                           erlang:element(1,
-                                          _witness_where_clause@2_0)))(_witness_where_clause@2_0,
-                                                                       _B@5_0))/binary>>/binary,
+          begin
+              _witness@5_0 = erlang:element(2,
+                                            erlang:element(3, _witness@0_0)),
+              (erlang:element(1,
+                              erlang:element(1, _witness@5_0)))(_witness@5_0,
+                                                                _B@3_0)
+          end/binary>>/binary,
         ","/utf8>>/binary,
       ")"/utf8>>.
 
-'TupleImpls::Show::$patina_witness<(_, _)>'(_witness_bounds@2_0 =
-                                                {_witness_bound@0_0,
-                                                 _witness_bound@1_0}) ->
+'TupleImpls::Show::$patina_witness<(_, _)>'(_witness@0_0) ->
     {{fun 'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::show<(_, _)>'/2},
      {},
-     _witness_bounds@2_0}.
+     _witness@0_0}.
 
-'TupleImpls::Show::show<(_, _, _)>'(_witness_self@0_0 =
-                                        {_,
-                                         {},
-                                         {_witness_where_clause@1_0,
-                                          _witness_where_clause@2_0,
-                                          _witness_where_clause@3_0}},
-                                    _self@4_0) ->
-    {_A@5_0, _B@6_0, _C@7_0} = _self@4_0,
+'TupleImpls::Show::show<(_, _, _)>'(_witness@0_0,
+                                    _self@1_0) ->
+    {_A@2_0, _B@3_0, _C@4_0} = _self@1_0,
     <<<<<<<<<<<<<<"("/utf8,
-                  ((erlang:element(1,
-                                   erlang:element(1,
-                                                  _witness_where_clause@1_0)))(_witness_where_clause@1_0,
-                                                                               _A@5_0))/binary>>/binary,
+                  begin
+                      _witness@5_0 = erlang:element(1,
+                                                    erlang:element(3,
+                                                                   _witness@0_0)),
+                      (erlang:element(1,
+                                      erlang:element(1,
+                                                     _witness@5_0)))(_witness@5_0,
+                                                                     _A@2_0)
+                  end/binary>>/binary,
                 ","/utf8>>/binary,
-              ((erlang:element(1,
-                               erlang:element(1,
-                                              _witness_where_clause@2_0)))(_witness_where_clause@2_0,
-                                                                           _B@6_0))/binary>>/binary,
+              begin
+                  _witness@6_0 = erlang:element(2,
+                                                erlang:element(3,
+                                                               _witness@0_0)),
+                  (erlang:element(1,
+                                  erlang:element(1,
+                                                 _witness@6_0)))(_witness@6_0,
+                                                                 _B@3_0)
+              end/binary>>/binary,
             ","/utf8>>/binary,
-          ((erlang:element(1,
-                           erlang:element(1,
-                                          _witness_where_clause@3_0)))(_witness_where_clause@3_0,
-                                                                       _C@7_0))/binary>>/binary,
+          begin
+              _witness@7_0 = erlang:element(3,
+                                            erlang:element(3, _witness@0_0)),
+              (erlang:element(1,
+                              erlang:element(1, _witness@7_0)))(_witness@7_0,
+                                                                _C@4_0)
+          end/binary>>/binary,
         ","/utf8>>/binary,
       ")"/utf8>>.
 
-'TupleImpls::Show::$patina_witness<(_, _, _)>'(_witness_bounds@3_0 =
-                                                   {_witness_bound@0_0,
-                                                    _witness_bound@1_0,
-                                                    _witness_bound@2_0}) ->
+'TupleImpls::Show::$patina_witness<(_, _, _)>'(_witness@0_0) ->
     {{fun 'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::show<(_, _, _)>'/2},
      {},
-     _witness_bounds@3_0}.
+     _witness@0_0}.

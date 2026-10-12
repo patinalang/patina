@@ -26,12 +26,12 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-to_celsius(_witness_bounds@1_0 = {_witness_bound@0_0},
-           _t@2_0) ->
-    (erlang:element(1,
-                    erlang:element(1,
-                                   _witness_bound@0_0)))(_witness_bound@0_0,
-                                                         _t@2_0).
+to_celsius(_witness@0_0, _t@1_0) ->
+    begin
+        _witness@2_0 = erlang:element(1, _witness@0_0),
+        (erlang:element(1,
+                        erlang:element(1, _witness@2_0)))(_witness@2_0, _t@1_0)
+    end.
 
 from_fahrenheit(_f@0_0) ->
     to_celsius({'Elixir.Patina.MultiImpl.Celsius':'MultiImpl::From<MultiImpl::Fahrenheit>::$patina_witness'()},

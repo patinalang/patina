@@ -30,13 +30,12 @@
 
 marker_bounds_only(_t@0_0) -> _t@0_0.
 
-subtrait_of_marker(_witness_bounds@1_0 =
-                       {_witness_bound@0_0},
-                   _t@2_0) ->
-    (erlang:element(1,
-                    erlang:element(1,
-                                   _witness_bound@0_0)))(_witness_bound@0_0,
-                                                         _t@2_0).
+subtrait_of_marker(_witness@0_0, _t@1_0) ->
+    begin
+        _witness@2_0 = erlang:element(1, _witness@0_0),
+        (erlang:element(1,
+                        erlang:element(1, _witness@2_0)))(_witness@2_0, _t@1_0)
+    end.
 
 a_both() ->
     subtrait_of_marker({'Elixir.Patina.MarkerTraits.A':'MarkerTraits::Show::$patina_witness'()},

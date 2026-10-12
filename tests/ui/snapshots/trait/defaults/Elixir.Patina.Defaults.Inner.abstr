@@ -96,7 +96,7 @@
      'Defaults::Inner::Doubler::doubled',2,
      [{clause,
           {186,9},
-          [{var,{186,9},'_witness_self@0_0'},{var,{186,20},'_self@1_0'}],
+          [{var,{186,9},'_witness@0_0'},{var,{186,20},'_self@1_0'}],
           [],
           [{call,
                {187,13},
@@ -117,6 +117,6 @@
                                  {atom,{187,20},erlang},
                                  {atom,{187,20},element}},
                              [{integer,{187,20},1},
-                              {var,{186,9},'_witness_self@0_0'}]}]},
-                    [{var,{186,9},'_witness_self@0_0'},
+                              {var,{186,9},'_witness@0_0'}]}]},
+                    [{var,{186,9},'_witness@0_0'},
                      {var,{187,20},'_self@1_0'}]}]}]}]}]

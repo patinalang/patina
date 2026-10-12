@@ -25,19 +25,18 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Numbered::$patina_const::C'(_witness_self@0_0 =
-                                           {_,
-                                            {},
-                                            {_witness_where_clause@1_0}}) ->
-    (erlang:element(1,
-                    erlang:element(1,
-                                   _witness_where_clause@1_0)))(_witness_where_clause@1_0)
+'Defaults::Numbered::$patina_const::C'(_witness@0_0) ->
+    begin
+        _witness@1_0 = erlang:element(1,
+                                      erlang:element(3, _witness@0_0)),
+        (erlang:element(1,
+                        erlang:element(1, _witness@1_0)))(_witness@1_0)
+    end
         + 10.
 
-'Defaults::Numbered::$patina_witness'(_witness_bounds@1_0 =
-                                          {_witness_bound@0_0}) ->
+'Defaults::Numbered::$patina_witness'(_witness@0_0) ->
     {{fun 'Elixir.Patina.Defaults.Plus':'Defaults::Numbered::$patina_const::C'/1,
       fun 'Elixir.Patina.Defaults':'Defaults::Numbered::$patina_const::D'/1,
       fun 'Elixir.Patina.Defaults':'Defaults::Numbered::consts'/2},
      {},
-     _witness_bounds@1_0}.
+     _witness@0_0}.

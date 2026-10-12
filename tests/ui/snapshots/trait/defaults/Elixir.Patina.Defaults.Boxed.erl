@@ -29,14 +29,10 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Container::$patina_type::Item'(_witness_self@0_0 =
-                                              {_, {}, {}}) ->
+'Defaults::Container::$patina_type::Item'(_witness@0_0) ->
     {}.
 
-'Defaults::Container::get'(_witness_self@0_0 = {_,
-                                                {},
-                                                {}},
-                           _self@1_0) ->
+'Defaults::Container::get'(_witness@0_0, _self@1_0) ->
     _self@1_0.
 
 'Defaults::Container::$patina_witness'() ->
@@ -46,9 +42,7 @@
      {},
      {}}.
 
-'Defaults::Describe::describe'(_witness_self@0_0 = {_,
-                                                    {},
-                                                    {}},
+'Defaults::Describe::describe'(_witness@0_0,
                                _self@1_0) ->
     <<"boxed"/utf8>>.
 

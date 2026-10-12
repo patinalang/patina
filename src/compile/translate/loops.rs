@@ -449,7 +449,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         span: Span,
         loop_cx: &LoopContext,
     ) -> impl Iterator<Item = eaf::Pattern<'arena>> {
-        let witnesses = self.witness_env.params.iter().map(|param| param.pat);
+        let witnesses = self.witness_env.param_pats(&self.translator.afb);
         witnesses.chain(self.var_pats(span, loop_cx.params.iter().copied()))
     }
 
@@ -459,7 +459,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         span: Span,
         loop_cx: &LoopContext,
     ) -> impl Iterator<Item = eaf::Expr<'arena>> {
-        let witnesses = self.witness_env.params.iter().map(|param| param.var);
+        let witnesses = self.witness_env.param_exprs(&self.translator.afb);
         witnesses.chain(self.var_exprs(span, loop_cx.params.iter().copied()))
     }
 

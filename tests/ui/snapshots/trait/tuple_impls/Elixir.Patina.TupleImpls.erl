@@ -26,12 +26,12 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-show_generic(_witness_bounds@1_0 = {_witness_bound@0_0},
-             _t@2_0) ->
-    (erlang:element(1,
-                    erlang:element(1,
-                                   _witness_bound@0_0)))(_witness_bound@0_0,
-                                                         _t@2_0).
+show_generic(_witness@0_0, _t@1_0) ->
+    begin
+        _witness@2_0 = erlang:element(1, _witness@0_0),
+        (erlang:element(1,
+                        erlang:element(1, _witness@2_0)))(_witness@2_0, _t@1_0)
+    end.
 
 show_unit() ->
     'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::show<()>'('Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::$patina_witness<()>'(),

@@ -28,10 +28,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Supertraits::Named::name'(_witness_self@0_0 = {_,
-                                                {},
-                                                {}},
-                           _self@1_0) ->
+'Supertraits::Named::name'(_witness@0_0, _self@1_0) ->
     <<"Robot"/utf8>>.
 
 'Supertraits::Named::$patina_witness'() ->
@@ -39,10 +36,8 @@
      {},
      {}}.
 
-'Supertraits::Greet::greeting'(_witness_self@0_0 = {_,
-                                                    {_witness_supertrait@1_0},
-                                                    {}},
-                               _self@2_0) ->
+'Supertraits::Greet::greeting'(_witness@0_0,
+                               _self@1_0) ->
     <<"Beep"/utf8>>.
 
 'Supertraits::Greet::$patina_witness'() ->

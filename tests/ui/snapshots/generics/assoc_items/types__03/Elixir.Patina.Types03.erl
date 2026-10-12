@@ -24,17 +24,20 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-difference(_witness_bounds@1_0 = {_witness_bound@0_0},
-           _container@2_0) ->
-    (erlang:element(5,
-                    erlang:element(1,
-                                   _witness_bound@0_0)))(_witness_bound@0_0,
-                                                         _container@2_0)
+difference(_witness@0_0, _container@1_0) ->
+    begin
+        _witness@2_0 = erlang:element(1, _witness@0_0),
+        (erlang:element(5,
+                        erlang:element(1, _witness@2_0)))(_witness@2_0,
+                                                          _container@1_0)
+    end
         -
-        (erlang:element(4,
-                        erlang:element(1,
-                                       _witness_bound@0_0)))(_witness_bound@0_0,
-                                                             _container@2_0).
+        begin
+            _witness@3_0 = erlang:element(1, _witness@0_0),
+            (erlang:element(4,
+                            erlang:element(1, _witness@3_0)))(_witness@3_0,
+                                                              _container@1_0)
+        end.
 
 main() ->
     _number_1@0_0 = 3,

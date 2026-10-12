@@ -27,8 +27,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'MultiImpl::From<MultiImpl::Fahrenheit>::from'(_witness_self@0_0 =
-                                                   {_, {}, {}},
+'MultiImpl::From<MultiImpl::Fahrenheit>::from'(_witness@0_0,
                                                _f@1_0) ->
     (_f@1_0 - 32) * 5 div 9.
 
@@ -37,8 +36,7 @@
      {},
      {}}.
 
-'MultiImpl::From<MultiImpl::Kelvin>::from'(_witness_self@0_0 =
-                                               {_, {}, {}},
+'MultiImpl::From<MultiImpl::Kelvin>::from'(_witness@0_0,
                                            _k@1_0) ->
     _k@1_0 - 273.
 

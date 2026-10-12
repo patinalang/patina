@@ -24,13 +24,14 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-call(_witness_bounds@1_0 = {_witness_bound@0_0},
-     _t@2_0) ->
+call(_witness@0_0, _t@1_0) ->
     begin
-        _witness@3_0 = erlang:element(1,
-                                      erlang:element(2, _witness_bound@0_0)),
+        _witness@2_0 = erlang:element(1,
+                                      erlang:element(2,
+                                                     erlang:element(1,
+                                                                    _witness@0_0))),
         (erlang:element(1,
-                        erlang:element(1, _witness@3_0)))(_witness@3_0, _t@2_0)
+                        erlang:element(1, _witness@2_0)))(_witness@2_0, _t@1_0)
     end.
 
 only_global_bound() ->

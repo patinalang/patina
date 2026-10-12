@@ -28,14 +28,11 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'NestedAssocBound::Outer::$patina_type::Inner'(_witness_self@0_0 =
-                                                   {_, {}, {}}) ->
+'NestedAssocBound::Outer::$patina_type::Inner'(_witness@0_0) ->
     {'Elixir.Patina.NestedAssocBound.Leaf':'NestedAssocBound::HasItem::$patina_witness'(),
      'Elixir.Patina.NestedAssocBound.Tag':'NestedAssocBound::Label::$patina_witness'()}.
 
-'NestedAssocBound::Outer::inner'(_witness_self@0_0 = {_,
-                                                      {},
-                                                      {}},
+'NestedAssocBound::Outer::inner'(_witness@0_0,
                                  _self@1_0) ->
     'Elixir.Patina.NestedAssocBound.Leaf'.
 

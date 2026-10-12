@@ -58,30 +58,23 @@ shear(_self@0_0) ->
             _self@0_0#'Sheep'{naked = true}
     end.
 
-'Trait01::Animal::new'(_witness_self@0_0 = {_, {}, {}},
-                       _name@1_0) ->
+'Trait01::Animal::new'(_witness@0_0, _name@1_0) ->
     #'Sheep'{naked = false, name = _name@1_0}.
 
-'Trait01::Animal::name'(_witness_self@0_0 = {_, {}, {}},
-                        _self@1_0) ->
+'Trait01::Animal::name'(_witness@0_0, _self@1_0) ->
     _self@1_0#'Sheep'.name.
 
-'Trait01::Animal::noise'(_witness_self@0_0 = {_,
-                                              {},
-                                              {}},
-                         _self@1_0) ->
+'Trait01::Animal::noise'(_witness@0_0, _self@1_0) ->
     case is_naked(_self@1_0) of
         true -> <<"baaaaah?"/utf8>>;
         false -> <<"baaaaah!"/utf8>>
     end.
 
-'Trait01::Animal::talk'(_witness_self@0_0 = {_, {}, {}},
-                        _self@1_0) ->
+'Trait01::Animal::talk'(_witness@0_0, _self@1_0) ->
     begin
         io:put_chars([[_self@1_0#'Sheep'.name,
                        <<" pauses briefly... "/utf8>>,
-                       'Trait01::Animal::noise'(_witness_self@0_0,
-                                                _self@1_0)]]),
+                       'Trait01::Animal::noise'(_witness@0_0, _self@1_0)]]),
         io:nl(),
         {}
     end.

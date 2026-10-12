@@ -87,7 +87,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         owner: LocalDefId,
         parts: &mut ModuleParts<'arena>,
         scopes: &mut Scopes,
-        witness_env: &WitnessEnv<'arena>,
+        witness_env: &WitnessEnv,
     ) -> TranslatedBody<'arena> {
         let owner = owner.to_def_id();
         let etir = self.tcx.etir_body(owner);
@@ -245,7 +245,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
 
         let translated = self.translate_body(owner, parts, &mut scopes, &witness_env);
         let params: SmallVec<[_; 8]> =
-            witness_env.params.iter().map(|param| param.pat).chain(translated.params).collect();
+            witness_env.param_pats(&self.afb).chain(translated.params).collect();
 
         Function {
             span,
@@ -542,12 +542,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         Function {
             span,
             name: tcx.erl_fn_name(def_id),
-            clause: self.afb.clause(
-                span,
-                witness_env.params.iter().map(|param| param.pat),
-                None,
-                value,
-            ),
+            clause: self.afb.clause(span, witness_env.param_pats(&self.afb), None, value),
             exported: true,
         }
     }

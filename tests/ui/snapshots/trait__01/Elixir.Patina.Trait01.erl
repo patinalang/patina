@@ -25,17 +25,17 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Trait01::Animal::talk'(_witness_self@0_0, _self@1_0) ->
+'Trait01::Animal::talk'(_witness@0_0, _self@1_0) ->
     begin
         io:put_chars([[(erlang:element(2,
                                        erlang:element(1,
-                                                      _witness_self@0_0)))(_witness_self@0_0,
-                                                                           _self@1_0),
+                                                      _witness@0_0)))(_witness@0_0,
+                                                                      _self@1_0),
                        <<" says "/utf8>>,
                        (erlang:element(3,
                                        erlang:element(1,
-                                                      _witness_self@0_0)))(_witness_self@0_0,
-                                                                           _self@1_0)]]),
+                                                      _witness@0_0)))(_witness@0_0,
+                                                                      _self@1_0)]]),
         io:nl(),
         {}
     end.

@@ -30,12 +30,10 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'ImpliedAssocBound::HasItem::$patina_type::Item'(_witness_self@0_0 =
-                                                     {_, {}, {}}) ->
+'ImpliedAssocBound::HasItem::$patina_type::Item'(_witness@0_0) ->
     {}.
 
-'ImpliedAssocBound::HasItem::item'(_witness_self@0_0 =
-                                       {_, {}, {}},
+'ImpliedAssocBound::HasItem::item'(_witness@0_0,
                                    _self@1_0) ->
     'Elixir.Patina.ImpliedAssocBound.Tag'.
 
@@ -45,12 +43,8 @@
      {},
      {}}.
 
-'ImpliedAssocBound::LabelledWithItems::other'(_witness_self@0_0 =
-                                                  {_,
-                                                   {_witness_supertrait@1_0,
-                                                    _witness_supertrait@2_0},
-                                                   {}},
-                                              _self@3_0) ->
+'ImpliedAssocBound::LabelledWithItems::other'(_witness@0_0,
+                                              _self@1_0) ->
     1.
 
 'ImpliedAssocBound::LabelledWithItems::$patina_witness'() ->

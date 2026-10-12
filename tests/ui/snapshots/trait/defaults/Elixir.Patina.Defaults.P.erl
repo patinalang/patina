@@ -25,8 +25,8 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Core::PartialEq::eq'(_witness_self@0_0 = {_, {}, {}},
-                      _self@1_0, _other@2_0) ->
+'Core::PartialEq::eq'(_witness@0_0, _self@1_0,
+                      _other@2_0) ->
     _self@1_0 =:= _other@2_0.
 
 'Core::PartialEq::$patina_witness'() ->

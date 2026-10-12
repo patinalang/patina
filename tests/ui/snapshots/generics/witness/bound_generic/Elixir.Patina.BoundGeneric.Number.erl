@@ -26,10 +26,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'BoundGeneric::Bound::b'(_witness_self@0_0 = {_,
-                                              {},
-                                              {}},
-                         _self@1_0) ->
+'BoundGeneric::Bound::b'(_witness@0_0, _self@1_0) ->
     begin
         io:put_chars([[<<"Bound::b("/utf8>>,
                        io_lib:format("~ktp", [_self@1_0]),

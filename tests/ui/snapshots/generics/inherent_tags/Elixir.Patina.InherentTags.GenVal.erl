@@ -31,11 +31,12 @@
 
 'value<str>'(_self@0_0) -> _self@0_0.
 
-f(_witness_bounds@1_0 = {_witness_bound@0_0},
-  _self@2_0) ->
-    (erlang:element(1,
-                    erlang:element(1,
-                                   _witness_bound@0_0)))(_witness_bound@0_0,
-                                                         _self@2_0).
+f(_witness@0_0, _self@1_0) ->
+    begin
+        _witness@2_0 = erlang:element(1, _witness@0_0),
+        (erlang:element(1,
+                        erlang:element(1, _witness@2_0)))(_witness@2_0,
+                                                          _self@1_0)
+    end.
 
 'f<int>'(_self@0_0, _x@1_0) -> _self@0_0 + _x@1_0.

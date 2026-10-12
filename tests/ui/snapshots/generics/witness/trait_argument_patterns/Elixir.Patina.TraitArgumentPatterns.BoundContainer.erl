@@ -27,31 +27,30 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'TraitArgumentPatterns::Contains<int, _>::contains'(_witness_self@0_0 =
-                                                        {_,
-                                                         {},
-                                                         {_witness_where_clause@1_0}},
-                                                    _self@2_0, _a@3_0,
-                                                    _value@4_0) ->
+'TraitArgumentPatterns::Contains<int, _>::contains'(_witness@0_0,
+                                                    _self@1_0, _a@2_0,
+                                                    _value@3_0) ->
     begin
         io:put_chars([[<<"BoundContainer::contains("/utf8>>,
-                       io_lib:format("~ktp", [_self@2_0]),
+                       io_lib:format("~ktp", [_self@1_0]),
                        <<", "/utf8>>,
-                       io_lib:format("~ktp", [_a@3_0]),
+                       io_lib:format("~ktp", [_a@2_0]),
                        <<", "/utf8>>,
-                       io_lib:format("~ktp", [_value@4_0]),
+                       io_lib:format("~ktp", [_value@3_0]),
                        <<")"/utf8>>]]),
         io:nl(),
         {}
     end,
-    (erlang:element(1,
-                    erlang:element(1,
-                                   _witness_where_clause@1_0)))(_witness_where_clause@1_0,
-                                                                _value@4_0)
+    begin
+        _witness@4_0 = erlang:element(1,
+                                      erlang:element(3, _witness@0_0)),
+        (erlang:element(1,
+                        erlang:element(1, _witness@4_0)))(_witness@4_0,
+                                                          _value@3_0)
+    end
         > 0.
 
-'TraitArgumentPatterns::Contains<int, _>::$patina_witness'(_witness_bounds@1_0 =
-                                                               {_witness_bound@0_0}) ->
+'TraitArgumentPatterns::Contains<int, _>::$patina_witness'(_witness@0_0) ->
     {{fun 'Elixir.Patina.TraitArgumentPatterns.BoundContainer':'TraitArgumentPatterns::Contains<int, _>::contains'/4},
      {},
-     _witness_bounds@1_0}.
+     _witness@0_0}.

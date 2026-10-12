@@ -27,8 +27,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'LocalExport::Priv::p'(_witness_self@0_0 = {_, {}, {}},
-                       _self@1_0) ->
+'LocalExport::Priv::p'(_witness@0_0, _self@1_0) ->
     begin
         io:put_chars([[<<"Priv::p("/utf8>>,
                        io_lib:format("~ktp", [_self@1_0]),

@@ -32,32 +32,29 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'BlanketImpl::Describe::shout'(_witness_self@0_0,
+'BlanketImpl::Describe::shout'(_witness@0_0,
                                _self@1_0) ->
     <<((erlang:element(1,
-                       erlang:element(1,
-                                      _witness_self@0_0)))(_witness_self@0_0,
-                                                           _self@1_0))/binary,
+                       erlang:element(1, _witness@0_0)))(_witness@0_0,
+                                                         _self@1_0))/binary,
       "!"/utf8>>.
 
 wrap(_s@0_0) ->
     <<<<"<"/utf8, _s@0_0/binary>>/binary, ">"/utf8>>.
 
-describe_generic(_witness_bounds@1_0 =
-                     {_witness_bound@0_0},
-                 _t@2_0) ->
-    (erlang:element(1,
-                    erlang:element(1,
-                                   _witness_bound@0_0)))(_witness_bound@0_0,
-                                                         _t@2_0).
+describe_generic(_witness@0_0, _t@1_0) ->
+    begin
+        _witness@2_0 = erlang:element(1, _witness@0_0),
+        (erlang:element(1,
+                        erlang:element(1, _witness@2_0)))(_witness@2_0, _t@1_0)
+    end.
 
-twice_generic(_witness_bounds@1_0 =
-                  {_witness_bound@0_0},
-              _t@2_0) ->
-    (erlang:element(1,
-                    erlang:element(1,
-                                   _witness_bound@0_0)))(_witness_bound@0_0,
-                                                         _t@2_0).
+twice_generic(_witness@0_0, _t@1_0) ->
+    begin
+        _witness@2_0 = erlang:element(1, _witness@0_0),
+        (erlang:element(1,
+                        erlang:element(1, _witness@2_0)))(_witness@2_0, _t@1_0)
+    end.
 
 describe_int(_n@0_0) ->
     'Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Describe::describe'('Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Describe::$patina_witness'({'Elixir.Patina.BlanketImpl.$impl.Core.Int':'BlanketImpl::Show::$patina_witness'()}),

@@ -75,67 +75,62 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Animal::calls_required'(_witness_self@0_0,
+'Defaults::Animal::calls_required'(_witness@0_0,
                                    _self@1_0) ->
     {(erlang:element(1,
-                     erlang:element(1,
-                                    _witness_self@0_0)))(_witness_self@0_0,
-                                                         _self@1_0),
+                     erlang:element(1, _witness@0_0)))(_witness@0_0,
+                                                       _self@1_0),
      (erlang:element(2,
-                     erlang:element(1,
-                                    _witness_self@0_0)))(_witness_self@0_0,
-                                                         _self@1_0)}.
+                     erlang:element(1, _witness@0_0)))(_witness@0_0,
+                                                       _self@1_0)}.
 
-'Defaults::Animal::calls_default'(_witness_self@0_0,
+'Defaults::Animal::calls_default'(_witness@0_0,
                                   _self@1_0) ->
     {(erlang:element(3,
-                     erlang:element(1,
-                                    _witness_self@0_0)))(_witness_self@0_0,
-                                                         _self@1_0),
+                     erlang:element(1, _witness@0_0)))(_witness@0_0,
+                                                       _self@1_0),
      (erlang:element(3,
-                     erlang:element(1,
-                                    _witness_self@0_0)))(_witness_self@0_0,
-                                                         _self@1_0)}.
+                     erlang:element(1, _witness@0_0)))(_witness@0_0,
+                                                       _self@1_0)}.
 
-'Defaults::Animal::with_bounded_param'(_witness_self@0_0,
-                                       _witness_bounds@2_0 =
-                                           {_witness_bound@1_0},
-                                       _self@3_0, _tag@4_0) ->
+'Defaults::Animal::with_bounded_param'(_witness@0_0,
+                                       _witness@1_0, _self@2_0, _tag@3_0) ->
     {(erlang:element(1,
-                     erlang:element(1,
-                                    _witness_self@0_0)))(_witness_self@0_0,
-                                                         _self@3_0),
+                     erlang:element(1, _witness@0_0)))(_witness@0_0,
+                                                       _self@2_0),
      (erlang:element(2,
-                     erlang:element(1,
-                                    _witness_self@0_0)))(_witness_self@0_0,
-                                                         _self@3_0),
-     (erlang:element(1,
-                     erlang:element(1,
-                                    _witness_bound@1_0)))(_witness_bound@1_0,
-                                                          _tag@4_0)}.
+                     erlang:element(1, _witness@0_0)))(_witness@0_0,
+                                                       _self@2_0),
+     begin
+         _witness@4_0 = erlang:element(1, _witness@1_0),
+         (erlang:element(1,
+                         erlang:element(1, _witness@4_0)))(_witness@4_0,
+                                                           _tag@3_0)
+     end}.
 
-'Defaults::Animal::returns_self'(_witness_self@0_0,
+'Defaults::Animal::returns_self'(_witness@0_0,
                                  _self@1_0) ->
     _this@2_0 = _self@1_0,
     _this@2_0.
 
-'Defaults::Animal::whisper'(_witness_self@0_0,
-                            _self@1_0) ->
+'Defaults::Animal::whisper'(_witness@0_0, _self@1_0) ->
     (erlang:element(1,
-                    erlang:element(1,
-                                   _witness_self@0_0)))(_witness_self@0_0,
-                                                        _self@1_0).
+                    erlang:element(1, _witness@0_0)))(_witness@0_0,
+                                                      _self@1_0).
 
-via(_witness_bounds@1_0 = {_witness_bound@0_0},
-    _animal@2_0) ->
-    {(erlang:element(3,
-                     erlang:element(1,
-                                    _witness_bound@0_0)))(_witness_bound@0_0,
-                                                          _animal@2_0),
-     (erlang:element(4,
-                     erlang:element(1,
-                                    _witness_bound@0_0)))(_witness_bound@0_0,
-                                                          _animal@2_0)}.
+via(_witness@0_0, _animal@1_0) ->
+    {begin
+         _witness@2_0 = erlang:element(1, _witness@0_0),
+         (erlang:element(3,
+                         erlang:element(1, _witness@2_0)))(_witness@2_0,
+                                                           _animal@1_0)
+     end,
+     begin
+         _witness@3_0 = erlang:element(1, _witness@0_0),
+         (erlang:element(4,
+                         erlang:element(1, _witness@3_0)))(_witness@3_0,
+                                                           _animal@1_0)
+     end}.
 
 sheep_calls_required(_name@0_0) ->
     'Defaults::Animal::calls_required'('Elixir.Patina.Defaults.Sheep':'Defaults::Animal::$patina_witness'(),
@@ -178,32 +173,33 @@ dog_returns_self(_name@0_0) ->
                                                           'Defaults::Animal::returns_self'('Elixir.Patina.Defaults.Dog':'Defaults::Animal::$patina_witness'(),
                                                                                            _name@0_0)).
 
-'Defaults::Combine::uses_rhs_witness'(_witness_self@0_0,
-                                      _witness_bounds@2_0 =
-                                          {_witness_bound@1_0},
-                                      _self@3_0, _other@4_0) ->
+'Defaults::Combine::uses_rhs_witness'(_witness@0_0,
+                                      _witness@1_0, _self@2_0, _other@3_0) ->
     begin
-        _witness@5_0 = erlang:element(1,
-                                      erlang:element(2, _witness_self@0_0)),
+        _witness@4_0 = erlang:element(1,
+                                      erlang:element(2, _witness@0_0)),
         (erlang:element(1,
-                        erlang:element(1, _witness@5_0)))(_witness@5_0,
-                                                          _self@3_0)
+                        erlang:element(1, _witness@4_0)))(_witness@4_0,
+                                                          _self@2_0)
     end
         +
-        (erlang:element(1,
-                        erlang:element(1,
-                                       _witness_bound@1_0)))(_witness_bound@1_0,
-                                                             _other@4_0).
+        begin
+            _witness@5_0 = erlang:element(1, _witness@1_0),
+            (erlang:element(1,
+                            erlang:element(1, _witness@5_0)))(_witness@5_0,
+                                                              _other@3_0)
+        end.
 
-combine_via(_witness_bounds@2_0 = {_witness_bound@0_0,
-                                   _witness_bound@1_0},
-            _a@3_0, _b@4_0) ->
-    (erlang:element(1,
-                    erlang:element(1,
-                                   _witness_bound@0_0)))(_witness_bound@0_0,
-                                                         {_witness_bound@1_0},
-                                                         _a@3_0,
-                                                         _b@4_0).
+combine_via(_witness@0_0, _a@1_0, _b@2_0) ->
+    begin
+        _witness@3_0 = erlang:element(1, _witness@0_0),
+        (erlang:element(1,
+                        erlang:element(1, _witness@3_0)))(_witness@3_0,
+                                                          {erlang:element(2,
+                                                                          _witness@0_0)},
+                                                          _a@1_0,
+                                                          _b@2_0)
+    end.
 
 combine_coin_piles(_a@0_0, _b@1_0) ->
     'Defaults::Combine::uses_rhs_witness'('Elixir.Patina.Defaults.Pile':'Defaults::Combine::$patina_witness'({'Elixir.Patina.Defaults.Coin':'Defaults::Value::$patina_witness'()}),
@@ -233,23 +229,23 @@ double(_x@0_0) ->
     'Elixir.Patina.Defaults.Inner':'Defaults::Inner::Doubler::doubled'('Elixir.Patina.Defaults.N':'Defaults::Inner::Doubler::$patina_witness'(),
                                                                        _x@0_0).
 
-'Defaults::Greeter::greet'(_witness_self@0_0,
-                           _self@1_0) ->
+'Defaults::Greeter::greet'(_witness@0_0, _self@1_0) ->
     {<<"Hello"/utf8>>,
      begin
          _witness@2_0 = erlang:element(1,
-                                       erlang:element(2, _witness_self@0_0)),
+                                       erlang:element(2, _witness@0_0)),
          (erlang:element(1,
                          erlang:element(1, _witness@2_0)))(_witness@2_0,
                                                            _self@1_0)
      end}.
 
-greet_via(_witness_bounds@1_0 = {_witness_bound@0_0},
-          _greeter@2_0) ->
-    (erlang:element(1,
-                    erlang:element(1,
-                                   _witness_bound@0_0)))(_witness_bound@0_0,
-                                                         _greeter@2_0).
+greet_via(_witness@0_0, _greeter@1_0) ->
+    begin
+        _witness@2_0 = erlang:element(1, _witness@0_0),
+        (erlang:element(1,
+                        erlang:element(1, _witness@2_0)))(_witness@2_0,
+                                                          _greeter@1_0)
+    end.
 
 greet(_name@0_0) ->
     'Defaults::Greeter::greet'('Elixir.Patina.Defaults.Person':'Defaults::Greeter::$patina_witness'(),
@@ -259,43 +255,57 @@ greet_through_witness(_name@0_0) ->
     greet_via({'Elixir.Patina.Defaults.Person':'Defaults::Greeter::$patina_witness'()},
               _name@0_0).
 
-'Defaults::Container::needs_item_witness'(_witness_self@0_0,
-                                          _witness_bounds@2_0 =
-                                              {_witness_bound@1_0},
-                                          _self@3_0) ->
-    (erlang:element(1,
-                    erlang:element(1,
-                                   _witness_bound@1_0)))(_witness_bound@1_0,
-                                                         (erlang:element(2,
-                                                                         erlang:element(1,
-                                                                                        _witness_self@0_0)))(_witness_self@0_0,
-                                                                                                             _self@3_0)).
+'Defaults::Container::needs_item_witness'(_witness@0_0,
+                                          _witness@1_0, _self@2_0) ->
+    begin
+        _witness@3_0 = erlang:element(1, _witness@1_0),
+        (erlang:element(1,
+                        erlang:element(1, _witness@3_0)))(_witness@3_0,
+                                                          (erlang:element(2,
+                                                                          erlang:element(1,
+                                                                                         _witness@0_0)))(_witness@0_0,
+                                                                                                         _self@2_0))
+    end.
 
-first(_witness_bounds@2_0 = {_witness_bound@0_0,
-                             _witness_bound@1_0},
-      _container@3_0) ->
-    (erlang:element(1,
-                    erlang:element(1,
-                                   _witness_bound@1_0)))(_witness_bound@1_0,
-                                                         (erlang:element(2,
-                                                                         erlang:element(1,
-                                                                                        _witness_bound@0_0)))(_witness_bound@0_0,
-                                                                                                              _container@3_0)).
+first(_witness@0_0, _container@1_0) ->
+    begin
+        _witness@3_0 = erlang:element(2, _witness@0_0),
+        (erlang:element(1,
+                        erlang:element(1, _witness@3_0)))(_witness@3_0,
+                                                          begin
+                                                              _witness@2_0 =
+                                                                  erlang:element(1,
+                                                                                 _witness@0_0),
+                                                              (erlang:element(2,
+                                                                              erlang:element(1,
+                                                                                             _witness@2_0)))(_witness@2_0,
+                                                                                                             _container@1_0)
+                                                          end)
+    end.
 
-nested(_witness_bounds@3_0 = {_witness_bound@0_0,
-                              _witness_bound@1_0,
-                              _witness_bound@2_0},
-       _container@4_0) ->
-    (erlang:element(1,
-                    erlang:element(1,
-                                   _witness_bound@2_0)))(_witness_bound@2_0,
-                                                         (erlang:element(2,
-                                                                         erlang:element(1,
-                                                                                        _witness_bound@1_0)))(_witness_bound@1_0,
-                                                                                                              (erlang:element(2,
-                                                                                                                              erlang:element(1,
-                                                                                                                                             _witness_bound@0_0)))(_witness_bound@0_0,
-                                                                                                                                                                   _container@4_0))).
+nested(_witness@0_0, _container@1_0) ->
+    begin
+        _witness@4_0 = erlang:element(3, _witness@0_0),
+        (erlang:element(1,
+                        erlang:element(1, _witness@4_0)))(_witness@4_0,
+                                                          begin
+                                                              _witness@3_0 =
+                                                                  erlang:element(2,
+                                                                                 _witness@0_0),
+                                                              (erlang:element(2,
+                                                                              erlang:element(1,
+                                                                                             _witness@3_0)))(_witness@3_0,
+                                                                                                             begin
+                                                                                                                 _witness@2_0 =
+                                                                                                                     erlang:element(1,
+                                                                                                                                    _witness@0_0),
+                                                                                                                 (erlang:element(2,
+                                                                                                                                 erlang:element(1,
+                                                                                                                                                _witness@2_0)))(_witness@2_0,
+                                                                                                                                                                _container@1_0)
+                                                                                                             end)
+                                                          end)
+    end.
 
 describe_boxed(_name@0_0) ->
     'Defaults::Container::needs_item_witness'('Elixir.Patina.Defaults.Boxed':'Defaults::Container::$patina_witness'(),
@@ -328,7 +338,7 @@ describe_nested(_name@0_0) ->
             'Elixir.Patina.Defaults.Name':'Defaults::Describe::$patina_witness'()},
            _name@0_0).
 
-'Defaults::Maker::make'(_witness_self@0_0, _self@1_0) ->
+'Defaults::Maker::make'(_witness@0_0, _self@1_0) ->
     <<"made"/utf8>>.
 
 make() ->
@@ -337,27 +347,27 @@ make() ->
                                 <<"unused"/utf8>>),
     {}.
 
-'Defaults::Numbered::$patina_const::D'(_witness_self@0_0) ->
+'Defaults::Numbered::$patina_const::D'(_witness@0_0) ->
     100.
 
-'Defaults::Numbered::consts'(_witness_self@0_0,
-                             _self@1_0) ->
+'Defaults::Numbered::consts'(_witness@0_0, _self@1_0) ->
     {(erlang:element(1,
-                     erlang:element(1,
-                                    _witness_self@0_0)))(_witness_self@0_0),
+                     erlang:element(1, _witness@0_0)))(_witness@0_0),
      (erlang:element(2,
-                     erlang:element(1,
-                                    _witness_self@0_0)))(_witness_self@0_0)}.
+                     erlang:element(1, _witness@0_0)))(_witness@0_0)}.
 
-sum(_witness_bounds@1_0 = {_witness_bound@0_0},
-    __t@2_0) ->
-    (erlang:element(1,
-                    erlang:element(1,
-                                   _witness_bound@0_0)))(_witness_bound@0_0)
+sum(_witness@0_0, __t@1_0) ->
+    begin
+        _witness@2_0 = erlang:element(1, _witness@0_0),
+        (erlang:element(1,
+                        erlang:element(1, _witness@2_0)))(_witness@2_0)
+    end
         +
-        (erlang:element(2,
-                        erlang:element(1,
-                                       _witness_bound@0_0)))(_witness_bound@0_0).
+        begin
+            _witness@3_0 = erlang:element(1, _witness@0_0),
+            (erlang:element(2,
+                            erlang:element(1, _witness@3_0)))(_witness@3_0)
+        end.
 
 one_consts() ->
     'Defaults::Numbered::consts'('Elixir.Patina.Defaults.One':'Defaults::Numbered::$patina_witness'(),
@@ -385,13 +395,14 @@ doubled_k() ->
     'Elixir.Patina.Defaults.Holder':'Defaults::Konst::$patina_const::K'('Elixir.Patina.Defaults.Holder':'Defaults::Konst::$patina_witness'())
         * 2.
 
-differ(_witness_bounds@1_0 = {_witness_bound@0_0},
-       _a@2_0, _b@3_0) ->
-    (erlang:element(2,
-                    erlang:element(1,
-                                   _witness_bound@0_0)))(_witness_bound@0_0,
-                                                         _a@2_0,
-                                                         _b@3_0).
+differ(_witness@0_0, _a@1_0, _b@2_0) ->
+    begin
+        _witness@3_0 = erlang:element(1, _witness@0_0),
+        (erlang:element(2,
+                        erlang:element(1, _witness@3_0)))(_witness@3_0,
+                                                          _a@1_0,
+                                                          _b@2_0)
+    end.
 
 int_ne(_a@0_0, _b@1_0) ->
     'Elixir.Patina.Core.Int':'Core::PartialEq::ne'('Elixir.Patina.Core.Int':'Core::PartialEq::$patina_witness'(),
@@ -418,14 +429,15 @@ int_differ(_a@0_0, _b@1_0) ->
            _a@0_0,
            _b@1_0).
 
-ring_via(_witness_bounds@1_0 = {_witness_bound@0_0},
-         _ringer@2_0) ->
-    (erlang:element(1,
-                    erlang:element(1,
-                                   _witness_bound@0_0)))(_witness_bound@0_0,
-                                                         {'Elixir.Patina.Defaults.Bell':'Defaults::Tag::$patina_witness'()},
-                                                         _ringer@2_0,
-                                                         'Elixir.Patina.Defaults.Bell').
+ring_via(_witness@0_0, _ringer@1_0) ->
+    begin
+        _witness@2_0 = erlang:element(1, _witness@0_0),
+        (erlang:element(1,
+                        erlang:element(1, _witness@2_0)))(_witness@2_0,
+                                                          {'Elixir.Patina.Defaults.Bell':'Defaults::Tag::$patina_witness'()},
+                                                          _ringer@1_0,
+                                                          'Elixir.Patina.Defaults.Bell')
+    end.
 
 ring_loud() ->
     ring_via({'Elixir.Patina.Defaults.Loud':'Defaults::Ring::$patina_witness'()},
@@ -441,16 +453,17 @@ ring_quiet_directly() ->
                                                           'Elixir.Patina.Defaults.Quiet',
                                                           'Elixir.Patina.Defaults.Bell').
 
-calls_required_through_pointer(_witness_bounds@1_0 =
-                                   {_witness_bound@0_0},
-                               _animal@2_0) ->
-    _calls_required@4_0 = fun (_arg@3_0) ->
+calls_required_through_pointer(_witness@0_0,
+                               _animal@1_0) ->
+    _calls_required@4_0 = fun (_arg@2_0) ->
+                                  _witness@3_0 = erlang:element(1,
+                                                                _witness@0_0),
                                   (erlang:element(3,
                                                   erlang:element(1,
-                                                                 _witness_bound@0_0)))(_witness_bound@0_0,
-                                                                                       _arg@3_0)
+                                                                 _witness@3_0)))(_witness@3_0,
+                                                                                 _arg@2_0)
                           end,
-    _calls_required@4_0(_animal@2_0).
+    _calls_required@4_0(_animal@1_0).
 
 describe_through_pointer(_name@0_0) ->
     _describe@2_0 = fun (_arg@1_0) ->

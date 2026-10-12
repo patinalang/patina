@@ -27,10 +27,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'DisambiguatedNames::From<DisambiguatedNames::sibling_blocks::Foo>::from'(_witness_self@0_0 =
-                                                                              {_,
-                                                                               {},
-                                                                               {}},
+'DisambiguatedNames::From<DisambiguatedNames::sibling_blocks::Foo>::from'(_witness@0_0,
                                                                           __foo@1_0) ->
     'Elixir.Patina.DisambiguatedNames.Celsius'.
 
@@ -39,10 +36,7 @@
      {},
      {}}.
 
-'DisambiguatedNames::From<DisambiguatedNames::sibling_blocks::Foo#1>::from'(_witness_self@0_0 =
-                                                                                {_,
-                                                                                 {},
-                                                                                 {}},
+'DisambiguatedNames::From<DisambiguatedNames::sibling_blocks::Foo#1>::from'(_witness@0_0,
                                                                             __foo@1_0) ->
     'Elixir.Patina.DisambiguatedNames.Celsius'.
 

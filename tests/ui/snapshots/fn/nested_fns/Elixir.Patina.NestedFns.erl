@@ -147,13 +147,13 @@ generic() ->
     'generic::describe'({'Elixir.Patina.NestedFns.$impl.Core.Int':'NestedFns::Show::$patina_witness'()},
                         5).
 
-'generic::describe'(_witness_bounds@1_0 =
-                        {_witness_bound@0_0},
-                    _value@2_0) ->
-    (erlang:element(1,
-                    erlang:element(1,
-                                   _witness_bound@0_0)))(_witness_bound@0_0,
-                                                         _value@2_0).
+'generic::describe'(_witness@0_0, _value@1_0) ->
+    begin
+        _witness@2_0 = erlang:element(1, _witness@0_0),
+        (erlang:element(1,
+                        erlang:element(1, _witness@2_0)))(_witness@2_0,
+                                                          _value@1_0)
+    end.
 
 in_closure() ->
     _f@1_0 = fun (_x@0_0) ->
@@ -182,11 +182,11 @@ nested_trait() ->
     'NestedFns::nested_trait::Answer::answer'('Elixir.Patina.NestedFns.Counter':'NestedFns::nested_trait::Answer::$patina_witness'(),
                                               0).
 
-'NestedFns::nested_trait::Answer::answer'(_witness_self@0_0,
+'NestedFns::nested_trait::Answer::answer'(_witness@0_0,
                                           _self@1_0) ->
     42.
 
-'NestedFns::{impl#1}::trait_in_method::Base::base'(_witness_self@0_0,
+'NestedFns::{impl#1}::trait_in_method::Base::base'(_witness@0_0,
                                                    _self@1_0) ->
     1000.
 
@@ -197,7 +197,7 @@ first_answer() ->
     'NestedFns::first_answer::Answer::answer'('Elixir.Patina.NestedFns.Wrapper':'NestedFns::first_answer::Answer::$patina_witness'(),
                                               'Elixir.Patina.NestedFns.Wrapper').
 
-'NestedFns::first_answer::Answer::answer'(_witness_self@0_0,
+'NestedFns::first_answer::Answer::answer'(_witness@0_0,
                                           _self@1_0) ->
     1.
 
@@ -205,7 +205,7 @@ second_answer() ->
     'NestedFns::second_answer::Answer::answer'('Elixir.Patina.NestedFns.Wrapper':'NestedFns::second_answer::Answer::$patina_witness'(),
                                                'Elixir.Patina.NestedFns.Wrapper').
 
-'NestedFns::second_answer::Answer::answer'(_witness_self@0_0,
+'NestedFns::second_answer::Answer::answer'(_witness@0_0,
                                            _self@1_0) ->
     2.
 
@@ -220,10 +220,10 @@ answers_in_blocks() ->
              end,
     _a@0_0 * 10 + _b@1_0.
 
-'NestedFns::answers_in_blocks::Answer::answer'(_witness_self@0_0,
+'NestedFns::answers_in_blocks::Answer::answer'(_witness@0_0,
                                                _self@1_0) ->
     3.
 
-'NestedFns::answers_in_blocks::Answer#1::answer'(_witness_self@0_0,
+'NestedFns::answers_in_blocks::Answer#1::answer'(_witness@0_0,
                                                  _self@1_0) ->
     4.

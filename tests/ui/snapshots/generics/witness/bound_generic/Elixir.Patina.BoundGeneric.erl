@@ -24,10 +24,10 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-call(_witness_bounds@1_0 = {_witness_bound@0_0},
-     _h@2_0) ->
-    'Elixir.Patina.BoundGeneric.Holder':'BoundGeneric::Tr::method'('Elixir.Patina.BoundGeneric.Holder':'BoundGeneric::Tr::$patina_witness'({_witness_bound@0_0}),
-                                                                   _h@2_0).
+call(_witness@0_0, _h@1_0) ->
+    'Elixir.Patina.BoundGeneric.Holder':'BoundGeneric::Tr::method'('Elixir.Patina.BoundGeneric.Holder':'BoundGeneric::Tr::$patina_witness'({erlang:element(1,
+                                                                                                                                                           _witness@0_0)}),
+                                                                   _h@1_0).
 
 main() ->
     _h@0_0 = 5,

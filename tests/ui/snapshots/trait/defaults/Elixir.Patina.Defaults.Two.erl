@@ -26,12 +26,10 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Numbered::$patina_const::C'(_witness_self@0_0 =
-                                           {_, {}, {}}) ->
+'Defaults::Numbered::$patina_const::C'(_witness@0_0) ->
     2.
 
-'Defaults::Numbered::$patina_const::D'(_witness_self@0_0 =
-                                           {_, {}, {}}) ->
+'Defaults::Numbered::$patina_const::D'(_witness@0_0) ->
     200.
 
 'Defaults::Numbered::$patina_witness'() ->

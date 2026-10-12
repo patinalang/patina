@@ -25,8 +25,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Tag::tag'(_witness_self@0_0 = {_, {}, {}},
-                     _self@1_0) ->
+'Defaults::Tag::tag'(_witness@0_0, _self@1_0) ->
     <<"a bell"/utf8>>.
 
 'Defaults::Tag::$patina_witness'() ->

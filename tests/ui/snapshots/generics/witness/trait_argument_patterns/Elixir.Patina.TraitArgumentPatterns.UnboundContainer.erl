@@ -27,8 +27,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'TraitArgumentPatterns::Contains<int, _>::contains'(_witness_self@0_0 =
-                                                        {_, {}, {}},
+'TraitArgumentPatterns::Contains<int, _>::contains'(_witness@0_0,
                                                     _self@1_0, _a@2_0,
                                                     _b@3_0) ->
     begin

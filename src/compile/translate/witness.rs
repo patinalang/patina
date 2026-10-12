@@ -13,13 +13,11 @@
 
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def_id::DefId;
-use rustc_index::IndexVec;
 use rustc_middle::erl::witness::{
-    BoundIdx, ParamBound, SelfBound, SupertraitIdx, WitnessArgs, WitnessParams, WitnessResolver,
-    WitnessSource,
+    ParamBound, WitnessArgs, WitnessParams, WitnessResolver, WitnessSource,
 };
 use rustc_middle::{bug, span_bug};
-use rustc_span::{Span, Symbol, kw, sym};
+use rustc_span::{Span, Symbol, sym};
 
 use super::scopes::Scopes;
 use super::{Function, Translator};
@@ -29,18 +27,14 @@ use crate::{not_implemented, span_fatal};
 
 /// The witnesses that a body has from its witness parameters.
 #[derive(Default)]
-pub(crate) struct WitnessEnv<'arena> {
+pub(crate) struct WitnessEnv {
     /// The span of the witness parameters.
     span: Span,
-    /// The variable name of this item's `Self: Trait` witness.
+    /// The variable of this item's `Self: Trait` witness.
     /// This is present for trait impl items and for trait items (e.g. trait default functions).
     self_witness: Option<Symbol>,
-    /// For a trait impl item, the variable names of the elements of the self witness.
-    impl_elements: Option<ImplElements>,
-    /// The variable names of the witnesses of this item's bounds, in `erl_bounds` order.
-    bounds: IndexVec<BoundIdx, Symbol>,
-    /// The witness parameters of the function. Patterns within bind the variables of `bounds`.
-    pub(super) params: SmallVec<[WitnessParam<'arena>; 2]>,
+    /// The variable of the tuple of the witnesses of this item's bounds, in `erl_bounds` order.
+    bounds: Option<Symbol>,
     /// Whether impl witnesses are built in place, or whether they're built by calling
     /// the impls $patina_witness function.
     /// $patina_witness functions themselves build in-place, so the full built witness
@@ -48,42 +42,28 @@ pub(crate) struct WitnessEnv<'arena> {
     builds_impl_witnesses: bool,
 }
 
-/// A witness parameter of a function.
-#[derive(Clone, Copy)]
-pub(super) struct WitnessParam<'arena> {
-    /// The pattern of the parameter.
-    pub(super) pat: eaf::Pattern<'arena>,
-    /// The variable that holds the whole witness.
-    pub(super) var: eaf::Expr<'arena>,
-}
-
 /// The 1-based positions of the parts of an impl witness.
 const VTABLE_INDEX: u32 = 1;
 const SUPERTRAITS_INDEX: u32 = 2;
+const BOUNDS_INDEX: u32 = 3;
 
-struct ImplElements {
-    /// The variable names of the supertrait witnesses, in `erl_trait_supertraits` order.
-    supertraits: IndexVec<SupertraitIdx, Symbol>,
-    /// The variable names of the witnesses of the impl's where-clauses, in `erl_bounds` order.
-    where_clauses: IndexVec<BoundIdx, Symbol>,
-}
+impl<'arena> WitnessEnv {
+    pub(super) fn param_pats(
+        &self,
+        afb: &EafBuilder<'_, 'arena>,
+    ) -> impl Iterator<Item = eaf::Pattern<'arena>> {
+        self.params().map(|var| afb.pat_var(self.span, var))
+    }
 
-impl<'arena> WitnessEnv<'arena> {
-    fn var_name_for_param(&self, param: ParamBound) -> Symbol {
-        match param {
-            ParamBound::InSelf => {
-                self.self_witness.unwrap_or_else(|| bug!("no self witness parameter"))
-            }
-            ParamBound::ImplWhereClause(index) => {
-                let elements = self
-                    .impl_elements
-                    .as_ref()
-                    .unwrap_or_else(|| bug!("no trait impl witness parameter"));
+    pub(super) fn param_exprs(
+        &self,
+        afb: &EafBuilder<'_, 'arena>,
+    ) -> impl Iterator<Item = eaf::Expr<'arena>> {
+        self.params().map(|var| afb.expr_var(self.span, var))
+    }
 
-                elements.where_clauses[index]
-            }
-            ParamBound::ItemBound(index) => self.bounds[index],
-        }
+    fn params(&self) -> impl Iterator<Item = Symbol> {
+        self.self_witness.into_iter().chain(self.bounds)
     }
 
     fn span_of(&self, span: Span, witness: &WitnessSource<'_>) -> Span {
@@ -93,29 +73,6 @@ impl<'arena> WitnessEnv<'arena> {
             WitnessSource::Impl { .. } | WitnessSource::AssocTypeBound { .. } => span,
         }
     }
-
-    /// Adds a witness parameter.
-    ///
-    /// If `pat` is given, e.g. `{_, {S1}, {}}`, the code emits a match
-    /// `foo(..., var = {_, {S1}, {}}, ...)` at the parameter's location.
-    ///
-    /// If `pat` isn't given, the whole witness is matched :`foo(..., var, ...)`.
-    fn push_param(
-        &mut self,
-        afb: &EafBuilder<'_, 'arena>,
-        var_name: Symbol,
-        pattern: Option<eaf::Pattern<'arena>>,
-    ) {
-        let var = afb.expr_var(self.span, var_name);
-
-        let var_pat = afb.pat_var(self.span, var_name);
-        let pat = match pattern {
-            Some(pat) => afb.pat_match(self.span, var_pat, pat),
-            None => var_pat,
-        };
-
-        self.params.push(WitnessParam { pat, var });
-    }
 }
 
 impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
@@ -124,62 +81,14 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         params: &WitnessParams<'tcx>,
         span: Span,
         scopes: &mut Scopes,
-    ) -> WitnessEnv<'arena> {
-        let afb = &self.afb;
-        let mut env = WitnessEnv { span, ..WitnessEnv::default() };
-        let vars_pat =
-            |vars: &[Symbol]| afb.pat_tuple(span, vars.iter().map(|&var| afb.pat_var(span, var)));
-
-        match &params.self_bound {
-            Some(SelfBound::TraitImpl(self_bound)) => {
-                let self_var = scopes.fresh_var(sym::witness_self).erl_name;
-                let elements = ImplElements {
-                    supertraits: self_bound
-                        .supertraits
-                        .iter()
-                        .map(|_| scopes.fresh_var(sym::witness_supertrait).erl_name)
-                        .collect(),
-                    where_clauses: self_bound
-                        .where_clauses
-                        .iter()
-                        .map(|_| scopes.fresh_var(sym::witness_where_clause).erl_name)
-                        .collect(),
-                };
-                let pat = afb.pat_tuple(
-                    span,
-                    [
-                        afb.pat_var(span, kw::Underscore),
-                        vars_pat(&elements.supertraits.raw),
-                        vars_pat(&elements.where_clauses.raw),
-                    ],
-                );
-
-                env.self_witness = Some(self_var);
-                env.impl_elements = Some(elements);
-                env.push_param(afb, self_var, Some(pat));
-            }
-
-            Some(SelfBound::Trait(_)) => {
-                let self_var = scopes.fresh_var(sym::witness_self).erl_name;
-                env.self_witness = Some(self_var);
-                env.push_param(afb, self_var, None);
-            }
-
-            None => {}
+    ) -> WitnessEnv {
+        let mut fresh_var = || scopes.fresh_var(sym::witness).erl_name;
+        WitnessEnv {
+            span,
+            self_witness: params.self_bound.is_some().then(&mut fresh_var),
+            bounds: (!params.bounds.is_empty()).then(&mut fresh_var),
+            builds_impl_witnesses: false,
         }
-
-        if !params.bounds.is_empty() {
-            env.bounds = params
-                .bounds
-                .iter()
-                .map(|_| scopes.fresh_var(sym::witness_bound).erl_name)
-                .collect();
-
-            let pat = vars_pat(&env.bounds.raw);
-            env.push_param(afb, scopes.fresh_var(sym::witness_bounds).erl_name, Some(pat));
-        }
-
-        env
     }
 
     pub(super) fn translate_witness_args(
@@ -214,14 +123,26 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         let tcx = self.tcx;
         let afb = &self.afb;
         match witness {
-            WitnessSource::Param(param) => afb.expr_var(env.span, env.var_name_for_param(*param)),
+            WitnessSource::Param(param) => {
+                let span = env.span;
+                let var = |var: Option<Symbol>, what| {
+                    afb.expr_var(span, var.unwrap_or_else(|| bug!("no {what} parameter")))
+                };
+                match *param {
+                    ParamBound::InSelf => var(env.self_witness, "self witness"),
+                    ParamBound::ImplWhereClause(index) => {
+                        let witness = var(env.self_witness, "self witness");
+                        let bounds = self.element(span, BOUNDS_INDEX, witness);
+                        self.element(span, index.as_u32() + 1, bounds)
+                    }
+                    ParamBound::ItemBound(index) => {
+                        let bounds = var(env.bounds, "bounds");
+                        self.element(span, index.as_u32() + 1, bounds)
+                    }
+                }
+            }
 
             WitnessSource::Supertrait(of, index) => {
-                if let WitnessSource::Param(ParamBound::InSelf) = **of
-                    && let Some(elements) = &env.impl_elements
-                {
-                    return afb.expr_var(env.span, elements.supertraits[*index]);
-                }
                 let of_expr = self.translate_witness(span, of, env, scopes);
                 let span = env.span_of(span, of);
                 let supertraits = self.element(span, SUPERTRAITS_INDEX, of_expr);
@@ -285,9 +206,8 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
 
         let vtable = self.vtable(span, impl_def_id);
         let supertraits = afb.expr_tuple(span, supertraits);
-
-        let bounds = match env.params.first() {
-            Some(param) => param.var,
+        let bounds = match env.bounds {
+            Some(var) => afb.expr_var(span, var),
             None => afb.expr_tuple(span, []),
         };
 
@@ -296,7 +216,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         Function {
             span,
             name: self.witness_fn_name(impl_def_id),
-            clause: afb.clause(span, env.params.iter().map(|param| param.pat), None, witness),
+            clause: afb.clause(span, env.param_pats(afb), None, witness),
             exported: true,
         }
     }

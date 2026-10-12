@@ -26,12 +26,10 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Core::Iterator::$patina_type::Item'(_witness_self@0_0 =
-                                         {_, {}, {}}) ->
+'Core::Iterator::$patina_type::Item'(_witness@0_0) ->
     {}.
 
-'Core::Iterator::next'(_witness_self@0_0 = {_, {}, {}},
-                       _self@1_0) ->
+'Core::Iterator::next'(_witness@0_0, _self@1_0) ->
     case _self@1_0 =:= 0 of
         true -> nil;
         false -> {_self@1_0, _self@1_0 - 1}

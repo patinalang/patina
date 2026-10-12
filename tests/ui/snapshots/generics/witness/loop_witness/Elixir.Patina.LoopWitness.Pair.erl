@@ -33,46 +33,49 @@
 '$patina_constructor__Pair'(_a@0_0, _b@1_0) ->
     #'Pair'{a = _a@0_0, b = _b@1_0}.
 
-'LoopWitness::Score::score$patina_loop_1'(_witness_self@0_0 =
-                                              {_,
-                                               {},
-                                               {_witness_where_clause@1_0}},
-                                          _total@3_0, _self@2_0) ->
+'LoopWitness::Score::score$patina_loop_1'(_witness@0_0,
+                                          _total@2_0, _self@1_0) ->
     _ = begin
-            _total@3_1 = _total@3_0 +
-                             ((erlang:element(1,
-                                              erlang:element(1,
-                                                             _witness_where_clause@1_0)))(_witness_where_clause@1_0,
-                                                                                          _self@2_0#'Pair'.a)
-                                  +
+            _total@2_1 = _total@2_0 +
+                             (begin
+                                  _witness@3_0 = erlang:element(1,
+                                                                erlang:element(3,
+                                                                               _witness@0_0)),
                                   (erlang:element(1,
                                                   erlang:element(1,
-                                                                 _witness_where_clause@1_0)))(_witness_where_clause@1_0,
-                                                                                              _self@2_0#'Pair'.b)),
-            '$patina_marker':break({break, 0, {}, _total@3_1})
+                                                                 _witness@3_0)))(_witness@3_0,
+                                                                                 _self@1_0#'Pair'.a)
+                              end
+                                  +
+                                  begin
+                                      _witness@4_0 = erlang:element(1,
+                                                                    erlang:element(3,
+                                                                                   _witness@0_0)),
+                                      (erlang:element(1,
+                                                      erlang:element(1,
+                                                                     _witness@4_0)))(_witness@4_0,
+                                                                                     _self@1_0#'Pair'.b)
+                                  end),
+            '$patina_marker':break({break, 0, {}, _total@2_1})
         end,
-    '$patina_marker':continue(_witness_self@0_0,
-                              _total@3_1,
-                              _self@2_0).
+    '$patina_marker':continue(_witness@0_0,
+                              _total@2_1,
+                              _self@1_0).
 
-'LoopWitness::Score::score'(_witness_self@0_0 = {_,
-                                                 {},
-                                                 {_witness_where_clause@1_0}},
-                            _self@2_0) ->
-    _total@3_0 = 0,
+'LoopWitness::Score::score'(_witness@0_0, _self@1_0) ->
+    _total@2_0 = 0,
     case
-        'LoopWitness::Score::score$patina_loop_1'(_witness_self@0_0,
-                                                  _total@3_0,
-                                                  _self@2_0)
+        'LoopWitness::Score::score$patina_loop_1'(_witness@0_0,
+                                                  _total@2_0,
+                                                  _self@1_0)
         of
-        {break, 0, _loop_value@4_0, _total@3_1} ->
-            _loop_value@4_0
+        {break, 0, _loop_value@5_0, _total@2_1} ->
+            _loop_value@5_0
     end,
-    _total@3_1.
+    _total@2_1.
 
-'LoopWitness::Score::$patina_witness'(_witness_bounds@1_0 =
-                                          {_witness_bound@0_0}) ->
+'LoopWitness::Score::$patina_witness'(_witness@0_0) ->
     {{fun 'Elixir.Patina.LoopWitness.Pair':'LoopWitness::Score::score'/2,
       fun 'Elixir.Patina.LoopWitness':'LoopWitness::Score::loop_in_default'/3},
      {},
-     _witness_bounds@1_0}.
+     _witness@0_0}.

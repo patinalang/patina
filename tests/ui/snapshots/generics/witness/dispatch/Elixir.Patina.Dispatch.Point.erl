@@ -31,8 +31,7 @@
 '$patina_constructor__Point'(_x@0_0, _y@1_0) ->
     #'Point'{x = _x@0_0, y = _y@1_0}.
 
-'Dispatch::Area::area'(_witness_self@0_0 = {_, {}, {}},
-                       _self@1_0) ->
+'Dispatch::Area::area'(_witness@0_0, _self@1_0) ->
     begin
         io:put_chars([[<<"Area::area("/utf8>>,
                        io_lib:format("~ktp", [_self@1_0]),

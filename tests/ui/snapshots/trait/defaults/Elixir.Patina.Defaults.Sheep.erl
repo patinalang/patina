@@ -27,16 +27,10 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Animal::name'(_witness_self@0_0 = {_,
-                                              {},
-                                              {}},
-                         _self@1_0) ->
+'Defaults::Animal::name'(_witness@0_0, _self@1_0) ->
     _self@1_0.
 
-'Defaults::Animal::noise'(_witness_self@0_0 = {_,
-                                               {},
-                                               {}},
-                          _self@1_0) ->
+'Defaults::Animal::noise'(_witness@0_0, _self@1_0) ->
     <<"baaaaah"/utf8>>.
 
 'Defaults::Animal::$patina_witness'() ->

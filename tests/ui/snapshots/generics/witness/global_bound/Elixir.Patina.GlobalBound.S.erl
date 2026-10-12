@@ -28,10 +28,8 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'GlobalBound::Derived::derived'(_witness_self@0_0 = {_,
-                                                     {_witness_supertrait@1_0},
-                                                     {}},
-                                _self@2_0) ->
+'GlobalBound::Derived::derived'(_witness@0_0,
+                                _self@1_0) ->
     1.
 
 'GlobalBound::Derived::$patina_witness'() ->
@@ -41,10 +39,7 @@
        {}}},
      {}}.
 
-'GlobalBound::Base::base'(_witness_self@0_0 = {_,
-                                               {},
-                                               {}},
-                          _self@1_0) ->
+'GlobalBound::Base::base'(_witness@0_0, _self@1_0) ->
     'GlobalBound::Derived::derived'('Elixir.Patina.GlobalBound.S':'GlobalBound::Derived::$patina_witness'(),
                                     _self@1_0)
         + 1.

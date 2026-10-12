@@ -26,24 +26,23 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'BoundGeneric::Tr::method'(_witness_self@0_0 = {_,
-                                                {},
-                                                {_witness_where_clause@1_0}},
-                           _self@2_0) ->
+'BoundGeneric::Tr::method'(_witness@0_0, _self@1_0) ->
     begin
         io:put_chars([[<<"Tr::method("/utf8>>,
-                       io_lib:format("~ktp", [_self@2_0]),
+                       io_lib:format("~ktp", [_self@1_0]),
                        <<")"/utf8>>]]),
         io:nl(),
         {}
     end,
-    (erlang:element(1,
-                    erlang:element(1,
-                                   _witness_where_clause@1_0)))(_witness_where_clause@1_0,
-                                                                _self@2_0).
+    begin
+        _witness@2_0 = erlang:element(1,
+                                      erlang:element(3, _witness@0_0)),
+        (erlang:element(1,
+                        erlang:element(1, _witness@2_0)))(_witness@2_0,
+                                                          _self@1_0)
+    end.
 
-'BoundGeneric::Tr::$patina_witness'(_witness_bounds@1_0 =
-                                        {_witness_bound@0_0}) ->
+'BoundGeneric::Tr::$patina_witness'(_witness@0_0) ->
     {{fun 'Elixir.Patina.BoundGeneric.Holder':'BoundGeneric::Tr::method'/2},
      {},
-     _witness_bounds@1_0}.
+     _witness@0_0}.

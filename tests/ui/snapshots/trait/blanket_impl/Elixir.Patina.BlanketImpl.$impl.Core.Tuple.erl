@@ -25,8 +25,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'BlanketImpl::Describe::describe<(int, str)>'(_witness_self@0_0 =
-                                                  {_, {}, {}},
+'BlanketImpl::Describe::describe<(int, str)>'(_witness@0_0,
                                               _self@1_0) ->
     <<<<('Elixir.Patina.BlanketImpl.$impl.Core.Int':'BlanketImpl::Show::show'('Elixir.Patina.BlanketImpl.$impl.Core.Int':'BlanketImpl::Show::$patina_witness'(),
                                                                               erlang:element(1,

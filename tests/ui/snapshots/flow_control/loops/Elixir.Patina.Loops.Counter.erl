@@ -29,8 +29,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Loops::Count::count<int>$patina_loop_1'(_witness_self@0_0 =
-                                             {_, {}, {}},
+'Loops::Count::count<int>$patina_loop_1'(_witness@0_0,
                                          _n@3_0, _limit@2_0) ->
     _ = begin
             case _n@3_0 < _limit@2_0 of
@@ -48,17 +47,15 @@
                     _branch_value@4_0
             end
         end,
-    '$patina_marker':continue(_witness_self@0_0,
+    '$patina_marker':continue(_witness@0_0,
                               _n@3_1,
                               _limit@2_0).
 
-'Loops::Count::count<int>'(_witness_self@0_0 = {_,
-                                                {},
-                                                {}},
-                           _self@1_0, _limit@2_0) ->
+'Loops::Count::count<int>'(_witness@0_0, _self@1_0,
+                           _limit@2_0) ->
     _n@3_0 = 0,
     case
-        'Loops::Count::count<int>$patina_loop_1'(_witness_self@0_0,
+        'Loops::Count::count<int>$patina_loop_1'(_witness@0_0,
                                                  _n@3_0,
                                                  _limit@2_0)
         of
@@ -71,8 +68,7 @@
      {},
      {}}.
 
-'Loops::Count::count<str>$patina_loop_1'(_witness_self@0_0 =
-                                             {_, {}, {}},
+'Loops::Count::count<str>$patina_loop_1'(_witness@0_0,
                                          _n@3_0, _limit@2_0) ->
     _ = begin
             case _n@3_0 < _limit@2_0 of
@@ -90,17 +86,15 @@
                     _branch_value@4_0
             end
         end,
-    '$patina_marker':continue(_witness_self@0_0,
+    '$patina_marker':continue(_witness@0_0,
                               _n@3_1,
                               _limit@2_0).
 
-'Loops::Count::count<str>'(_witness_self@0_0 = {_,
-                                                {},
-                                                {}},
-                           _self@1_0, _limit@2_0) ->
+'Loops::Count::count<str>'(_witness@0_0, _self@1_0,
+                           _limit@2_0) ->
     _n@3_0 = 0,
     case
-        'Loops::Count::count<str>$patina_loop_1'(_witness_self@0_0,
+        'Loops::Count::count<str>$patina_loop_1'(_witness@0_0,
                                                  _n@3_0,
                                                  _limit@2_0)
         of

@@ -79,7 +79,7 @@ pub(super) struct BodyCx<'a, 'tcx, 'arena> {
     pub parts: &'a mut ModuleParts<'arena>,
     pub scopes: &'a mut Scopes,
     pub loops: Loops,
-    pub witness_env: &'a WitnessEnv<'arena>,
+    pub witness_env: &'a WitnessEnv,
 }
 
 impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
@@ -89,7 +89,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         etir: &'tcx etir::Body<'tcx>,
         parts: &'a mut ModuleParts<'arena>,
         scopes: &'a mut Scopes,
-        witness_env: &'a WitnessEnv<'arena>,
+        witness_env: &'a WitnessEnv,
     ) -> Self {
         BodyCx { translator, owner, etir, parts, scopes, witness_env, loops: Loops::new() }
     }

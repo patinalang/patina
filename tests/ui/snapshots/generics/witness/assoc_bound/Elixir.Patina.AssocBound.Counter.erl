@@ -27,14 +27,10 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'AssocBound::Iter::$patina_type::Item'(_witness_self@0_0 =
-                                           {_, {}, {}}) ->
+'AssocBound::Iter::$patina_type::Item'(_witness@0_0) ->
     {'Elixir.Patina.AssocBound.$impl.Core.Int':'AssocBound::Show::$patina_witness'()}.
 
-'AssocBound::Iter::next'(_witness_self@0_0 = {_,
-                                              {},
-                                              {}},
-                         _self@1_0) ->
+'AssocBound::Iter::next'(_witness@0_0, _self@1_0) ->
     _self@1_0.
 
 'AssocBound::Iter::$patina_witness'() ->

@@ -24,14 +24,19 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-describe_member(_witness_bounds@2_0 =
-                    {_witness_bound@0_0, _witness_bound@1_0},
-                _family@3_0) ->
-    (erlang:element(1,
-                    erlang:element(1,
-                                   _witness_bound@1_0)))(_witness_bound@1_0,
-                                                         (erlang:element(2,
-                                                                         erlang:element(1,
-                                                                                        _witness_bound@0_0)))(_witness_bound@0_0,
-                                                                                                              _family@3_0,
-                                                                                                              1)).
+describe_member(_witness@0_0, _family@1_0) ->
+    begin
+        _witness@3_0 = erlang:element(2, _witness@0_0),
+        (erlang:element(1,
+                        erlang:element(1, _witness@3_0)))(_witness@3_0,
+                                                          begin
+                                                              _witness@2_0 =
+                                                                  erlang:element(1,
+                                                                                 _witness@0_0),
+                                                              (erlang:element(2,
+                                                                              erlang:element(1,
+                                                                                             _witness@2_0)))(_witness@2_0,
+                                                                                                             _family@1_0,
+                                                                                                             1)
+                                                          end)
+    end.
