@@ -32,74 +32,60 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'BlanketImpl::Describe::shout'(_witness@0_0,
+'BlanketImpl::Describe::shout'(_witness_self@0_0,
                                _self@1_0) ->
-    <<((erlang:element(2,
-                       _witness@0_0)):'BlanketImpl::Describe::describe'(_witness@0_0,
-                                                                        _self@1_0))/binary,
+    <<((erlang:element(1,
+                       erlang:element(1,
+                                      _witness_self@0_0)))(_witness_self@0_0,
+                                                           _self@1_0))/binary,
       "!"/utf8>>.
 
 wrap(_s@0_0) ->
     <<<<"<"/utf8, _s@0_0/binary>>/binary, ">"/utf8>>.
 
-describe_generic(_witness@1_0 = {_witness@0_0},
+describe_generic(_witness_bounds@1_0 =
+                     {_witness_bound@0_0},
                  _t@2_0) ->
-    (erlang:element(2,
-                    _witness@0_0)):'BlanketImpl::Describe::describe'(_witness@0_0,
-                                                                     _t@2_0).
+    (erlang:element(1,
+                    erlang:element(1,
+                                   _witness_bound@0_0)))(_witness_bound@0_0,
+                                                         _t@2_0).
 
-twice_generic(_witness@1_0 = {_witness@0_0}, _t@2_0) ->
-    (erlang:element(2,
-                    _witness@0_0)):'BlanketImpl::Nested::Twice::twice'(_witness@0_0,
-                                                                       _t@2_0).
+twice_generic(_witness_bounds@1_0 =
+                  {_witness_bound@0_0},
+              _t@2_0) ->
+    (erlang:element(1,
+                    erlang:element(1,
+                                   _witness_bound@0_0)))(_witness_bound@0_0,
+                                                         _t@2_0).
 
 describe_int(_n@0_0) ->
-    'Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Describe::describe'({'impl BlanketImpl::Describe for _',
-                                                                         'Elixir.Patina.BlanketImpl.$impl',
-                                                                         {'impl BlanketImpl::Show for int',
-                                                                          'Elixir.Patina.BlanketImpl.$impl.Core.Int'}},
+    'Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Describe::describe'('Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Describe::$patina_witness'({'Elixir.Patina.BlanketImpl.$impl.Core.Int':'BlanketImpl::Show::$patina_witness'()}),
                                                                         _n@0_0).
 
 shout_str(_s@0_0) ->
-    'BlanketImpl::Describe::shout'({'impl BlanketImpl::Describe for _',
-                                    'Elixir.Patina.BlanketImpl.$impl',
-                                    {'impl BlanketImpl::Show for str',
-                                     'Elixir.Patina.BlanketImpl.$impl.Core.Str'}},
+    'BlanketImpl::Describe::shout'('Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Describe::$patina_witness'({'Elixir.Patina.BlanketImpl.$impl.Core.Str':'BlanketImpl::Show::$patina_witness'()}),
                                    _s@0_0).
 
 describe_generic_int(_n@0_0) ->
-    describe_generic({{'impl BlanketImpl::Describe for _',
-                       'Elixir.Patina.BlanketImpl.$impl',
-                       {'impl BlanketImpl::Show for int',
-                        'Elixir.Patina.BlanketImpl.$impl.Core.Int'}}},
+    describe_generic({'Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Describe::$patina_witness'({'Elixir.Patina.BlanketImpl.$impl.Core.Int':'BlanketImpl::Show::$patina_witness'()})},
                      _n@0_0).
 
 describe_pair(_n@0_0, _s@1_0) ->
-    'Elixir.Patina.BlanketImpl.$impl.Core.Tuple':'BlanketImpl::Describe::describe'({'impl BlanketImpl::Describe for (int, str)',
-                                                                                    'Elixir.Patina.BlanketImpl.$impl.Core.Tuple'},
-                                                                                   {_n@0_0,
-                                                                                    _s@1_0}).
+    'Elixir.Patina.BlanketImpl.$impl.Core.Tuple':'BlanketImpl::Describe::describe<(int, str)>'('Elixir.Patina.BlanketImpl.$impl.Core.Tuple':'BlanketImpl::Describe::$patina_witness<(int, str)>'(),
+                                                                                               {_n@0_0,
+                                                                                                _s@1_0}).
 
 shout_pair_generic(_n@0_0, _s@1_0) ->
-    <<(describe_generic({{'impl BlanketImpl::Describe for (int, str)',
-                          'Elixir.Patina.BlanketImpl.$impl.Core.Tuple'}},
+    <<(describe_generic({'Elixir.Patina.BlanketImpl.$impl.Core.Tuple':'BlanketImpl::Describe::$patina_witness<(int, str)>'()},
                         {_n@0_0, _s@1_0}))/binary,
-      ('BlanketImpl::Describe::shout'({'impl BlanketImpl::Describe for (int, str)',
-                                       'Elixir.Patina.BlanketImpl.$impl.Core.Tuple'},
+      ('BlanketImpl::Describe::shout'('Elixir.Patina.BlanketImpl.$impl.Core.Tuple':'BlanketImpl::Describe::$patina_witness<(int, str)>'(),
                                       {_n@0_0, _s@1_0}))/binary>>.
 
 twice_str(_s@0_0) ->
-    'Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Nested::Twice::twice'({'impl BlanketImpl::Nested::Twice for _',
-                                                                           'Elixir.Patina.BlanketImpl.$impl',
-                                                                           {'impl BlanketImpl::Describe for _',
-                                                                            'Elixir.Patina.BlanketImpl.$impl',
-                                                                            {'impl BlanketImpl::Show for str',
-                                                                             'Elixir.Patina.BlanketImpl.$impl.Core.Str'}}},
+    'Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Nested::Twice::twice'('Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Nested::Twice::$patina_witness'({'Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Describe::$patina_witness'({'Elixir.Patina.BlanketImpl.$impl.Core.Str':'BlanketImpl::Show::$patina_witness'()})}),
                                                                           _s@0_0).
 
 twice_generic_pair(_n@0_0, _s@1_0) ->
-    twice_generic({{'impl BlanketImpl::Nested::Twice for _',
-                    'Elixir.Patina.BlanketImpl.$impl',
-                    {'impl BlanketImpl::Describe for (int, str)',
-                     'Elixir.Patina.BlanketImpl.$impl.Core.Tuple'}}},
+    twice_generic({'Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Nested::Twice::$patina_witness'({'Elixir.Patina.BlanketImpl.$impl.Core.Tuple':'BlanketImpl::Describe::$patina_witness<(int, str)>'()})},
                   {_n@0_0, _s@1_0}).

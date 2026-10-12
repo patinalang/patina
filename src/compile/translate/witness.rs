@@ -1,25 +1,31 @@
 //! The runtime representation of witnesses.
 //!
 //! The witness of `Ty: Trait` names the impl that proves the bound:
-//! `{Tag, HostModule, S1, …, Sk, W1, …, Wn}`.
-//! - `Tag` identifies the impl in `HostModule` (see `TyCtxt::erl_impl_tag`).
-//! - `HostModule` contains the functions of the impl. Dispatch calls `(element(2, W)):F(W, …)`.
+//! `{Vtable, {S1, …, Sk}, {W1, …, Wn}}`.
+//! - `Vtable` holds a fun reference for each of `Trait`'s items in `erl_vtable_items` order:
+//!   the impl's item, or the trait's default body.
+//!   Dispatch calls `(element(Slot, element(1, W)))(W, …)`.
 //! - `S1 … Sk` are the witnesses of `Ty` for the direct supertraits of `Trait`.
-//! - `W1 … Wn` are the witnesses of the where-clauses of the impl.
+//! - `W1 … Wn` are the witnesses of the where-clauses of the impla.
+//!
+//! The impl's host module builds the witness tuple in `$patina_witness` function.
+//! Everything else calls that function, so we can share literals within ERTS.
 
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def_id::DefId;
 use rustc_index::IndexVec;
 use rustc_middle::erl::witness::{
-    BoundIdx, ParamBound, SelfBound, SupertraitIdx, WitnessArgs, WitnessParams, WitnessSource,
+    BoundIdx, ParamBound, SelfBound, SupertraitIdx, WitnessArgs, WitnessParams, WitnessResolver,
+    WitnessSource,
 };
 use rustc_middle::{bug, span_bug};
 use rustc_span::{Span, Symbol, kw, sym};
 
-use super::Translator;
 use super::scopes::Scopes;
+use super::{Function, Translator};
 use crate::compile::eaf_builder::EafBuilder;
 use crate::erlang::abstract_format as eaf;
+use crate::{not_implemented, span_fatal};
 
 /// The witnesses that a body has from its witness parameters.
 #[derive(Default)]
@@ -35,6 +41,11 @@ pub(crate) struct WitnessEnv<'arena> {
     bounds: IndexVec<BoundIdx, Symbol>,
     /// The witness parameters of the function. Patterns within bind the variables of `bounds`.
     pub(super) params: SmallVec<[WitnessParam<'arena>; 2]>,
+    /// Whether impl witnesses are built in place, or whether they're built by calling
+    /// the impls $patina_witness function.
+    /// $patina_witness functions themselves build in-place, so the full built witness
+    /// can possibly be a literal. Other witness users call $patina_witness instead.
+    builds_impl_witnesses: bool,
 }
 
 /// A witness parameter of a function.
@@ -46,12 +57,9 @@ pub(super) struct WitnessParam<'arena> {
     pub(super) var: eaf::Expr<'arena>,
 }
 
-/// The 1-based position of the host module in an impl witness. The tag is at position 1.
-const HOST_INDEX: u32 = 2;
-
-/// The 1-based position of the first element (supertrait or where-clause witness) in an impl
-/// witness.
-const FIRST_ELEMENT_INDEX: u32 = 3;
+/// The 1-based positions of the parts of an impl witness.
+const VTABLE_INDEX: u32 = 1;
+const SUPERTRAITS_INDEX: u32 = 2;
 
 struct ImplElements {
     /// The variable names of the supertrait witnesses, in `erl_trait_supertraits` order.
@@ -88,8 +96,8 @@ impl<'arena> WitnessEnv<'arena> {
 
     /// Adds a witness parameter.
     ///
-    /// If `pat` is given, e.g. `{tag, _, S1}`, the code emits a match
-    /// `foo(..., var = {tag, _, S1}, ...)` at the parameter's location.
+    /// If `pat` is given, e.g. `{_, {S1}, {}}`, the code emits a match
+    /// `foo(..., var = {_, {S1}, {}}, ...)` at the parameter's location.
     ///
     /// If `pat` isn't given, the whole witness is matched :`foo(..., var, ...)`.
     fn push_param(
@@ -111,29 +119,6 @@ impl<'arena> WitnessEnv<'arena> {
 }
 
 impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
-    /// The number of supertrait and where-clause elements in a witness of the trait impl.
-    pub(super) fn impl_witness_element_count(&self, impl_def_id: DefId) -> usize {
-        let tcx = self.tcx;
-        let trait_def_id = tcx
-            .impl_opt_trait_id(impl_def_id)
-            .unwrap_or_else(|| bug!("{impl_def_id:?} is not a trait impl"));
-
-        tcx.erl_trait_supertraits(trait_def_id).skip_binder().len()
-            + tcx.erl_bounds(impl_def_id).skip_binder().len()
-    }
-
-    pub(super) fn impl_witness_pat(
-        &self,
-        impl_def_id: DefId,
-        span: Span,
-        elements: impl IntoIterator<Item = eaf::Pattern<'arena>>,
-    ) -> eaf::Pattern<'arena> {
-        let afb = &self.afb;
-        let tag = self.tcx.erl_impl_tag(impl_def_id);
-        let head = [afb.pat_atom(span, tag), afb.pat_var(span, kw::Underscore)];
-        afb.pat_tuple(span, head.into_iter().chain(elements))
-    }
-
     pub(super) fn translate_witness_params(
         &self,
         params: &WitnessParams<'tcx>,
@@ -141,29 +126,41 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         scopes: &mut Scopes,
     ) -> WitnessEnv<'arena> {
         let afb = &self.afb;
-        let mut fresh_var = || scopes.fresh_var(sym::witness).erl_name;
         let mut env = WitnessEnv { span, ..WitnessEnv::default() };
+        let vars_pat =
+            |vars: &[Symbol]| afb.pat_tuple(span, vars.iter().map(|&var| afb.pat_var(span, var)));
 
         match &params.self_bound {
             Some(SelfBound::TraitImpl(self_bound)) => {
-                let self_var = fresh_var();
+                let self_var = scopes.fresh_var(sym::witness_self).erl_name;
                 let elements = ImplElements {
-                    supertraits: self_bound.supertraits.iter().map(|_| fresh_var()).collect(),
-                    where_clauses: self_bound.where_clauses.iter().map(|_| fresh_var()).collect(),
+                    supertraits: self_bound
+                        .supertraits
+                        .iter()
+                        .map(|_| scopes.fresh_var(sym::witness_supertrait).erl_name)
+                        .collect(),
+                    where_clauses: self_bound
+                        .where_clauses
+                        .iter()
+                        .map(|_| scopes.fresh_var(sym::witness_where_clause).erl_name)
+                        .collect(),
                 };
-                let element_pats = (elements.supertraits.iter())
-                    .chain(&elements.where_clauses)
-                    .map(|&var| afb.pat_var(span, var));
-                let pat = self.impl_witness_pat(self_bound.impl_def_id, span, element_pats);
+                let pat = afb.pat_tuple(
+                    span,
+                    [
+                        afb.pat_var(span, kw::Underscore),
+                        vars_pat(&elements.supertraits.raw),
+                        vars_pat(&elements.where_clauses.raw),
+                    ],
+                );
 
                 env.self_witness = Some(self_var);
                 env.impl_elements = Some(elements);
                 env.push_param(afb, self_var, Some(pat));
             }
 
-            // A default body serves every impl, so it does not match a tag.
             Some(SelfBound::Trait(_)) => {
-                let self_var = fresh_var();
+                let self_var = scopes.fresh_var(sym::witness_self).erl_name;
                 env.self_witness = Some(self_var);
                 env.push_param(afb, self_var, None);
             }
@@ -172,9 +169,14 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         }
 
         if !params.bounds.is_empty() {
-            env.bounds = params.bounds.iter().map(|_| fresh_var()).collect();
-            let pat = afb.pat_tuple(span, env.bounds.iter().map(|&var| afb.pat_var(span, var)));
-            env.push_param(afb, fresh_var(), Some(pat));
+            env.bounds = params
+                .bounds
+                .iter()
+                .map(|_| scopes.fresh_var(sym::witness_bound).erl_name)
+                .collect();
+
+            let pat = vars_pat(&env.bounds.raw);
+            env.push_param(afb, scopes.fresh_var(sym::witness_bounds).erl_name, Some(pat));
         }
 
         env
@@ -184,7 +186,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         &self,
         span: Span,
         witnesses: &WitnessArgs<'tcx>,
-        env: &WitnessEnv<'arena>,
+        env: &WitnessEnv,
         scopes: &mut Scopes,
     ) -> SmallVec<[eaf::Expr<'arena>; 8]> {
         let mut exprs = SmallVec::new();
@@ -206,7 +208,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         &self,
         span: Span,
         witness: &WitnessSource<'tcx>,
-        env: &WitnessEnv<'arena>,
+        env: &WitnessEnv,
         scopes: &mut Scopes,
     ) -> eaf::Expr<'arena> {
         let tcx = self.tcx;
@@ -221,26 +223,31 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                     return afb.expr_var(env.span, elements.supertraits[*index]);
                 }
                 let of_expr = self.translate_witness(span, of, env, scopes);
-                let index = FIRST_ELEMENT_INDEX + index.as_u32();
                 let span = env.span_of(span, of);
-                afb.erlang_bif(span, sym::element, [afb.expr_int(span, index.into()), of_expr])
+                let supertraits = self.element(span, SUPERTRAITS_INDEX, of_expr);
+                self.element(span, index.as_u32() + 1, supertraits)
             }
 
             WitnessSource::Impl { impl_def_id, supertraits, where_clauses, .. } => {
+                let mut translate = |element| self.translate_witness(span, element, env, scopes);
+                let bounds: SmallVec<[_; 2]> = where_clauses.iter().map(&mut translate).collect();
+                if env.builds_impl_witnesses {
+                    let supertraits = afb.expr_tuple(span, supertraits.iter().map(translate));
+                    let bounds = afb.expr_tuple(span, bounds);
+                    let vtable = self.vtable(span, *impl_def_id);
+                    return afb.expr_tuple(span, [vtable, supertraits, bounds]);
+                }
+
                 let Some(host) = tcx.erl_definition_module(*impl_def_id) else {
                     span_bug!(span, "trait impl {impl_def_id:?} has no host module");
                 };
-
-                let elements = (supertraits.iter())
-                    .chain(where_clauses)
-                    .map(|element| self.translate_witness(span, element, env, scopes));
-
-                let head = [
-                    afb.expr_atom(span, tcx.erl_impl_tag(*impl_def_id)),
+                let args = (!bounds.is_empty()).then(|| afb.expr_tuple(span, bounds));
+                afb.expr_remote_call(
+                    span,
                     afb.expr_atom(span, tcx.erl_module_name(host)),
-                ];
-
-                afb.expr_tuple(span, head.into_iter().chain(elements))
+                    afb.expr_atom(span, self.witness_fn_name(*impl_def_id)),
+                    args,
+                )
             }
 
             // The impl's function for the associated type returns the witnesses
@@ -250,24 +257,110 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                     self.translate_witness_args(span, witness_args, env, scopes).into_iter();
                 let of =
                     args.next().unwrap_or_else(|| bug!("associated type without a self witness"));
-                let name = tcx.erl_fn_name(*assoc_def_id);
-                let bounds = self.dispatch_call(span, name, of, args, scopes);
-                let index = afb.expr_int(span, (index.as_u32() + 1).into());
-                afb.erlang_bif(span, sym::element, [index, bounds])
+                let bounds = self.dispatch_call(span, *assoc_def_id, of, args, scopes);
+                self.element(span, index.as_u32() + 1, bounds)
             }
         }
     }
 
-    /// Call `name` through `receiver_witness`: `(element(HOST_INDEX, W)):name(W, Args…)`.
+    /// The `$patina_witness` function of the trait impl.
+    pub(super) fn translate_witness_fn(&self, impl_def_id: DefId, span: Span) -> Function<'arena> {
+        let tcx = self.tcx;
+        let afb = &self.afb;
+        let mut scopes = Scopes::new();
+
+        let params = tcx.erl_witness_params_identity(impl_def_id);
+        let mut env = self.translate_witness_params(&params, span, &mut scopes);
+        env.builds_impl_witnesses = true;
+
+        let mut resolver = WitnessResolver::new(tcx, impl_def_id);
+        let trait_ref = tcx.impl_trait_ref(impl_def_id).instantiate_identity().skip_normalization();
+        let supertraits = tcx
+            .erl_trait_supertraits(trait_ref.def_id)
+            .iter_instantiated_copied(tcx, trait_ref.args)
+            .map(|bound| {
+                let source = resolver.witness_source(span, bound);
+                self.translate_witness(span, &source, &env, &mut scopes)
+            });
+
+        let vtable = self.vtable(span, impl_def_id);
+        let supertraits = afb.expr_tuple(span, supertraits);
+
+        let bounds = match env.params.first() {
+            Some(param) => param.var,
+            None => afb.expr_tuple(span, []),
+        };
+
+        let witness = afb.expr_tuple(span, [vtable, supertraits, bounds]);
+
+        Function {
+            span,
+            name: self.witness_fn_name(impl_def_id),
+            clause: afb.clause(span, env.params.iter().map(|param| param.pat), None, witness),
+            exported: true,
+        }
+    }
+
+    /// The vtable of the trait impl is a tuple literal.
+    /// For each trait item, it's an external fun pointing either at the impl's item,
+    /// or at the default body if the impl doesn't override it.
+    fn vtable(&self, span: Span, impl_def_id: DefId) -> eaf::Expr<'arena> {
+        let tcx = self.tcx;
+        let afb = &self.afb;
+
+        let trait_def_id = tcx
+            .impl_opt_trait_id(impl_def_id)
+            .unwrap_or_else(|| span_bug!(span, "{impl_def_id:?} is not a trait impl"));
+
+        let implemented = tcx.impl_item_implementor_ids(impl_def_id);
+
+        let funs = tcx.erl_vtable_items(trait_def_id).map(|trait_item| {
+            let def_id = match implemented.get(&trait_item.def_id) {
+                Some(&impl_item_def_id) => impl_item_def_id,
+                None if trait_item.is_type() => {
+                    not_implemented!(tcx, span, "associated type default", trait_item.def_id)
+                }
+                None => trait_item.def_id,
+            };
+            let module = tcx.erl_definition_module(def_id).unwrap_or_else(|| {
+                span_bug!(span, "`{}` has no definition module", tcx.def_path_str(def_id))
+            });
+
+            afb.expr_remote_fun(
+                span,
+                tcx.erl_module_name(module),
+                tcx.erl_fn_name(def_id),
+                tcx.erl_fn_arity(def_id) as u32,
+            )
+        });
+
+        afb.expr_tuple(span, funs)
+    }
+
+    fn element(&self, span: Span, index: u32, tuple: eaf::Expr<'arena>) -> eaf::Expr<'arena> {
+        let afb = &self.afb;
+        afb.erlang_bif(span, sym::element, [afb.expr_int(span, index.into()), tuple])
+    }
+
+    /// Call the trait item through the vtable of `receiver_witness`:
+    /// `(element(Slot, element(VTABLE_INDEX, W)))(W, Args…)`.
     pub(super) fn dispatch_call(
         &self,
         span: Span,
-        name: Symbol,
+        trait_item: DefId,
         receiver_witness: eaf::Expr<'arena>,
         args: impl IntoIterator<Item = eaf::Expr<'arena>>,
         scopes: &mut Scopes,
     ) -> eaf::Expr<'arena> {
+        let tcx = self.tcx;
         let afb = &self.afb;
+
+        let slot = tcx
+            .erl_vtable_items(tcx.parent(trait_item))
+            .position(|item| item.def_id == trait_item)
+            .unwrap_or_else(|| {
+                span_bug!(span, "`{}` has no vtable slot", tcx.def_path_str(trait_item))
+            });
 
         let (binding, receiver_witness) = match receiver_witness {
             eaf::Expr::Var(..) => (None, receiver_witness),
@@ -278,18 +371,17 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             }
         };
 
-        let host_index = afb.expr_int(span, HOST_INDEX.into());
-        let module = afb.erlang_bif(span, sym::element, [host_index, receiver_witness]);
-        let call = afb.expr_remote_call(
-            span,
-            module,
-            afb.expr_atom(span, name),
-            [receiver_witness].into_iter().chain(args),
-        );
+        let vtable = self.element(span, VTABLE_INDEX, receiver_witness);
+        let fun = self.element(span, slot as u32 + 1, vtable);
+        let call = afb.expr_local_call(span, fun, [receiver_witness].into_iter().chain(args));
 
         match binding {
             Some(binding) => afb.expr_block(span, [binding, call]),
             None => call,
         }
+    }
+
+    pub fn witness_fn_name(&self, impl_def_id: DefId) -> Symbol {
+        self.tcx.erl_impl_member_name(impl_def_id, "$patina_witness")
     }
 }

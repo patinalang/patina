@@ -528,7 +528,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         item: &ItemRef<'tcx>,
         arg_exprs: SmallVec<[eaf::Expr<'arena>; 8]>,
     ) -> eaf::Expr<'arena> {
-        let ErlCallTarget::Item { .. } = item.target else {
+        let ErlCallTarget::Item { def_id, .. } = item.target else {
             span_bug!(span, "dispatch through a type parameter must have an item target");
         };
 
@@ -537,7 +537,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             .next()
             .unwrap_or_else(|| span_bug!(span, "dispatch must have a receiver witness"));
 
-        self.translator.dispatch_call(span, item.name, self_witness, arg_exprs, self.scopes)
+        self.translator.dispatch_call(span, def_id, self_witness, arg_exprs, self.scopes)
     }
 
     /// `fun(A1, ..., An) -> Name(Witnesses..., A1, ..., An) end`

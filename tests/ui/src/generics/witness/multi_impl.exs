@@ -15,14 +15,16 @@ defmodule MultiImplTest do
     assert 27 == MultiImpl.from_kelvin_static(300)
   end
 
-  test "the tag selects the clause of the impl" do
-    assert 100 == Celsius."MultiImpl::From::from"({:"impl MultiImpl::From<MultiImpl::Fahrenheit> for MultiImpl::Celsius", Celsius}, 212)
-    assert -61 == Celsius."MultiImpl::From::from"({:"impl MultiImpl::From<MultiImpl::Kelvin> for MultiImpl::Celsius", Celsius}, 212)
-  end
+  test "each impl has its own function" do
+    fahrenheit = Celsius."MultiImpl::From<MultiImpl::Fahrenheit>::$patina_witness"()
+    kelvin = Celsius."MultiImpl::From<MultiImpl::Kelvin>::$patina_witness"()
 
-  test "a tag that no impl has fails at the call" do
-    assert_raise FunctionClauseError, fn ->
-      Celsius."MultiImpl::From::from"({:"impl MultiImpl::From<MultiImpl::Rankine> for MultiImpl::Celsius", Celsius}, 212)
-    end
+    assert 100 == Celsius."MultiImpl::From<MultiImpl::Fahrenheit>::from"(fahrenheit, 212)
+    assert -61 == Celsius."MultiImpl::From<MultiImpl::Kelvin>::from"(kelvin, 212)
+
+    {{from}, {}, {}} = fahrenheit
+    assert 100 == from.(fahrenheit, 212)
+    {{from}, {}, {}} = kelvin
+    assert -61 == from.(kelvin, 212)
   end
 end

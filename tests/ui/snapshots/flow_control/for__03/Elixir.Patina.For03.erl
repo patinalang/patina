@@ -26,8 +26,7 @@
 'main$patina_loop_1'(_iter@1_0) ->
     _ = begin
             case
-                'Elixir.Patina.Core.ListIter':'Core::Iterator::next'({'impl Core::Iterator for Core::ListIter<_>',
-                                                                      'Elixir.Patina.Core.ListIter'},
+                'Elixir.Patina.Core.ListIter':'Core::Iterator::next'('Elixir.Patina.Core.ListIter':'Core::Iterator::$patina_witness'(),
                                                                      _iter@1_0)
                 of
                 nil ->
@@ -62,10 +61,7 @@ main() ->
                   <<"Frank"/utf8>>,
                   <<"Ferris"/utf8>>],
     case
-        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'({'impl Core::IntoIterator for _',
-                                                                    'Elixir.Patina.Core.$impl',
-                                                                    {'impl Core::Iterator for Core::ListIter<_>',
-                                                                     'Elixir.Patina.Core.ListIter'}},
+        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'('Elixir.Patina.Core.$impl':'Core::IntoIterator::$patina_witness'({'Elixir.Patina.Core.ListIter':'Core::Iterator::$patina_witness'()}),
                                                                    'Elixir.Patina.Core.List':iter(_names@0_0))
         of
         _iter@1_0 ->

@@ -1,8 +1,0 @@
-warning: [{"tests/ui/src/trait/blanket_impl.pt",
-           [{{36,19},erl_lint,{unused_function,{'BlanketImpl::Describe::shout',2}}}]}]
-
-warning: [{"tests/ui/src/trait/blanket_impl.pt",
-           [{{30,28},erl_lint,{unused_function,{'BlanketImpl::Describe::shout',2}}}]}]
-
-warning: 2 warnings emitted
-

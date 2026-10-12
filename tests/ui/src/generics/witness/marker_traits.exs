@@ -15,7 +15,7 @@ defmodule MarkerTraitsTest do
     assert "a" == MarkerTraits.a_both()
 
     # The bounds tuple holds only the witness of `A: Show`; `A: Marker` has none.
-    show_a = {:"impl MarkerTraits::Show for MarkerTraits::A", A}
+    show_a = A."MarkerTraits::Show::$patina_witness"()
     assert "a" == MarkerTraits.subtrait_of_marker({show_a}, A)
   end
 end

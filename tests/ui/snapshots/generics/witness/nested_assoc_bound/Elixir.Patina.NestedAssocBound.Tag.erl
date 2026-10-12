@@ -11,7 +11,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'NestedAssocBound::Label::label'/2]).
+         'NestedAssocBound::Label::label'/2,
+         'NestedAssocBound::Label::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -26,8 +27,13 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'NestedAssocBound::Label::label'(_witness@0_0 =
-                                     {'impl NestedAssocBound::Label for NestedAssocBound::Tag',
-                                      _},
+'NestedAssocBound::Label::label'(_witness_self@0_0 = {_,
+                                                      {},
+                                                      {}},
                                  _self@1_0) ->
     <<"tag"/utf8>>.
+
+'NestedAssocBound::Label::$patina_witness'() ->
+    {{fun 'Elixir.Patina.NestedAssocBound.Tag':'NestedAssocBound::Label::label'/2},
+     {},
+     {}}.

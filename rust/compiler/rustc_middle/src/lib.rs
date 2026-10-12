@@ -42,6 +42,7 @@
 #![feature(extern_types)]
 #![feature(file_buffered)]
 #![feature(gen_blocks)]
+#![feature(iter_intersperse)]
 #![feature(min_specialization)]
 #![feature(negative_impls)]
 #![feature(never_type)]

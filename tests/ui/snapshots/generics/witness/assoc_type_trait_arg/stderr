@@ -1,7 +1,0 @@
-warning: [{"tests/ui/src/generics/witness/assoc_type_trait_arg.pt",
-           [{{16,5},
-             erl_lint,
-             {unused_function,{'AssocTypeTraitArg::Wraps::wrapped',2}}}]}]
-
-warning: 1 warning emitted
-

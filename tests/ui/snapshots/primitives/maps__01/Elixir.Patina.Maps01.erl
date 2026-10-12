@@ -39,8 +39,7 @@ call(_number@0_0) ->
 'main$patina_loop_1'(_iter@5_0) ->
     _ = begin
             case
-                'Elixir.Patina.Core.MapIter':'Core::Iterator::next'({'impl Core::Iterator for Core::MapIter<_, _>',
-                                                                     'Elixir.Patina.Core.MapIter'},
+                'Elixir.Patina.Core.MapIter':'Core::Iterator::next'('Elixir.Patina.Core.MapIter':'Core::Iterator::$patina_witness'(),
                                                                     _iter@5_0)
                 of
                 nil ->
@@ -112,8 +111,7 @@ main() ->
     _contacts@0_3 = _contacts@0_2#{<<"Laura"/utf8>> =>
                                        <<"132-8372"/utf8>>},
     case
-        'Elixir.Patina.Core.Map':'Core::IntoIterator::into_iter'({'impl Core::IntoIterator for #{_ => _}',
-                                                                  'Elixir.Patina.Core.Map'},
+        'Elixir.Patina.Core.Map':'Core::IntoIterator::into_iter'('Elixir.Patina.Core.Map':'Core::IntoIterator::$patina_witness'(),
                                                                  _contacts@0_3)
         of
         _iter@5_0 ->

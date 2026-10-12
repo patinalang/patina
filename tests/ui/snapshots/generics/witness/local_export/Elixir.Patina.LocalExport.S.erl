@@ -9,7 +9,10 @@
 
 -export_record([]).
 
--export(['__info__'/1, q/1]).
+-export(['__info__'/1,
+         'LocalExport::Priv::p'/2,
+         'LocalExport::Priv::$patina_witness'/0,
+         q/1]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -24,8 +27,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'LocalExport::Priv::p'(_witness@0_0 =
-                           {'impl LocalExport::Priv for LocalExport::S', _},
+'LocalExport::Priv::p'(_witness_self@0_0 = {_, {}, {}},
                        _self@1_0) ->
     begin
         io:put_chars([[<<"Priv::p("/utf8>>,
@@ -35,7 +37,11 @@
         {}
     end.
 
+'LocalExport::Priv::$patina_witness'() ->
+    {{fun 'Elixir.Patina.LocalExport.S':'LocalExport::Priv::p'/2},
+     {},
+     {}}.
+
 q(_self@0_0) ->
-    'LocalExport::Priv::p'({'impl LocalExport::Priv for LocalExport::S',
-                            'Elixir.Patina.LocalExport.S'},
+    'LocalExport::Priv::p'('Elixir.Patina.LocalExport.S':'LocalExport::Priv::$patina_witness'(),
                            _self@0_0).

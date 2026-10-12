@@ -8,7 +8,9 @@
 
 -export_record([]).
 
--export(['__info__'/1, 'Defaults::Tag::tag'/2]).
+-export(['__info__'/1,
+         'Defaults::Tag::tag'/2,
+         'Defaults::Tag::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -23,7 +25,11 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Tag::tag'(_witness@0_0 =
-                         {'impl Defaults::Tag for Defaults::Bell', _},
+'Defaults::Tag::tag'(_witness_self@0_0 = {_, {}, {}},
                      _self@1_0) ->
     <<"a bell"/utf8>>.
+
+'Defaults::Tag::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Defaults.Bell':'Defaults::Tag::tag'/2},
+     {},
+     {}}.

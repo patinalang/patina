@@ -30,18 +30,18 @@
 
 marker_bounds_only(_t@0_0) -> _t@0_0.
 
-subtrait_of_marker(_witness@1_0 = {_witness@0_0},
+subtrait_of_marker(_witness_bounds@1_0 =
+                       {_witness_bound@0_0},
                    _t@2_0) ->
-    (erlang:element(2,
-                    _witness@0_0)):'MarkerTraits::Show::show'(_witness@0_0,
-                                                              _t@2_0).
+    (erlang:element(1,
+                    erlang:element(1,
+                                   _witness_bound@0_0)))(_witness_bound@0_0,
+                                                         _t@2_0).
 
 a_both() ->
-    subtrait_of_marker({{'impl MarkerTraits::Show for MarkerTraits::A',
-                         'Elixir.Patina.MarkerTraits.A'}},
+    subtrait_of_marker({'Elixir.Patina.MarkerTraits.A':'MarkerTraits::Show::$patina_witness'()},
                        'Elixir.Patina.MarkerTraits.A').
 
 a_marked() ->
-    'Elixir.Patina.MarkerTraits.A':'MarkerTraits::Show::show'({'impl MarkerTraits::Show for MarkerTraits::A',
-                                                               'Elixir.Patina.MarkerTraits.A'},
+    'Elixir.Patina.MarkerTraits.A':'MarkerTraits::Show::show'('Elixir.Patina.MarkerTraits.A':'MarkerTraits::Show::$patina_witness'(),
                                                               marker_bounds_only('Elixir.Patina.MarkerTraits.A')).

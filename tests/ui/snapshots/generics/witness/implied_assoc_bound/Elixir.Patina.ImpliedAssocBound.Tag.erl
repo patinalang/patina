@@ -11,7 +11,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'ImpliedAssocBound::Label::label'/2]).
+         'ImpliedAssocBound::Label::label'/2,
+         'ImpliedAssocBound::Label::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -26,8 +27,12 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'ImpliedAssocBound::Label::label'(_witness@0_0 =
-                                      {'impl ImpliedAssocBound::Label for ImpliedAssocBound::Tag',
-                                       _},
+'ImpliedAssocBound::Label::label'(_witness_self@0_0 =
+                                      {_, {}, {}},
                                   _self@1_0) ->
     <<"tag"/utf8>>.
+
+'ImpliedAssocBound::Label::$patina_witness'() ->
+    {{fun 'Elixir.Patina.ImpliedAssocBound.Tag':'ImpliedAssocBound::Label::label'/2},
+     {},
+     {}}.

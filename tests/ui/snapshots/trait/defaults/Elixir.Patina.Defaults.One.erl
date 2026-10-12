@@ -10,7 +10,7 @@
 
 -export(['__info__'/1,
          'Defaults::Numbered::$patina_const::C'/1,
-         'Defaults::Numbered::$patina_const::D'/1]).
+         'Defaults::Numbered::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,19 +25,13 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Numbered::$patina_const::C'(_witness@0_0 =
-                                           {'impl Defaults::Numbered for Defaults::One',
-                                            _}) ->
+'Defaults::Numbered::$patina_const::C'(_witness_self@0_0 =
+                                           {_, {}, {}}) ->
     1.
 
-'Defaults::Numbered::$patina_const::D'(_witness@0_0 =
-                                           {'impl Defaults::Numbered for Defaults::One',
-                                            _}) ->
-    'Elixir.Patina.Defaults':'Defaults::Numbered::$patina_const::D'(_witness@0_0).
-
-'Defaults::Numbered::consts'(_witness@0_0 =
-                                 {'impl Defaults::Numbered for Defaults::One',
-                                  _},
-                             _arg@1_0) ->
-    'Elixir.Patina.Defaults':'Defaults::Numbered::consts'(_witness@0_0,
-                                                          _arg@1_0).
+'Defaults::Numbered::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Defaults.One':'Defaults::Numbered::$patina_const::C'/1,
+      fun 'Elixir.Patina.Defaults':'Defaults::Numbered::$patina_const::D'/1,
+      fun 'Elixir.Patina.Defaults':'Defaults::Numbered::consts'/2},
+     {},
+     {}}.

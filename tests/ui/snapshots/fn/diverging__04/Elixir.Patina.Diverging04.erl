@@ -37,9 +37,8 @@ main() ->
                                       _acc@1_0) ->
     _ = begin
             case
-                'Elixir.Patina.Core.Range':'Core::Iterator::next'({'impl Core::Iterator for Core::Range<int>',
-                                                                   'Elixir.Patina.Core.Range'},
-                                                                  _iter@2_0)
+                'Elixir.Patina.Core.Range':'Core::Iterator::next<int>'('Elixir.Patina.Core.Range':'Core::Iterator::$patina_witness<int>'(),
+                                                                       _iter@2_0)
                 of
                 nil ->
                     _branch_value@7_0 = '$patina_marker':break({break,
@@ -71,10 +70,7 @@ main() ->
 'main::sum_odd_numbers'(_up_to@0_0) ->
     _acc@1_0 = 0,
     case
-        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'({'impl Core::IntoIterator for _',
-                                                                    'Elixir.Patina.Core.$impl',
-                                                                    {'impl Core::Iterator for Core::Range<int>',
-                                                                     'Elixir.Patina.Core.Range'}},
+        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'('Elixir.Patina.Core.$impl':'Core::IntoIterator::$patina_witness'({'Elixir.Patina.Core.Range':'Core::Iterator::$patina_witness<int>'()}),
                                                                    'Elixir.Patina.Core.Range':'$patina_constructor__Range'(0,
                                                                                                                            _up_to@0_0))
         of

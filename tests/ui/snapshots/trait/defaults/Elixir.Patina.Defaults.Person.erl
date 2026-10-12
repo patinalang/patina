@@ -10,7 +10,8 @@
 
 -export(['__info__'/1,
          'Defaults::Named::name'/2,
-         'Defaults::Greeter::greet'/2]).
+         'Defaults::Named::$patina_witness'/0,
+         'Defaults::Greeter::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,15 +26,18 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Named::name'(_witness@0_0 =
-                            {'impl Defaults::Named for Defaults::Person', _},
+'Defaults::Named::name'(_witness_self@0_0 = {_, {}, {}},
                         _self@1_0) ->
     _self@1_0.
 
-'Defaults::Greeter::greet'(_witness@0_0 =
-                               {'impl Defaults::Greeter for Defaults::Person',
-                                _,
-                                _},
-                           _arg@1_0) ->
-    'Elixir.Patina.Defaults':'Defaults::Greeter::greet'(_witness@0_0,
-                                                        _arg@1_0).
+'Defaults::Named::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Defaults.Person':'Defaults::Named::name'/2},
+     {},
+     {}}.
+
+'Defaults::Greeter::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Defaults':'Defaults::Greeter::greet'/2},
+     {{{fun 'Elixir.Patina.Defaults.Person':'Defaults::Named::name'/2},
+       {},
+       {}}},
+     {}}.

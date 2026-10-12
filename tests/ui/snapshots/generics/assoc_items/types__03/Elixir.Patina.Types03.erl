@@ -24,15 +24,17 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-difference(_witness@1_0 = {_witness@0_0},
+difference(_witness_bounds@1_0 = {_witness_bound@0_0},
            _container@2_0) ->
-    (erlang:element(2,
-                    _witness@0_0)):'Types03::Contains::last'(_witness@0_0,
-                                                             _container@2_0)
+    (erlang:element(5,
+                    erlang:element(1,
+                                   _witness_bound@0_0)))(_witness_bound@0_0,
+                                                         _container@2_0)
         -
-        (erlang:element(2,
-                        _witness@0_0)):'Types03::Contains::first'(_witness@0_0,
-                                                                  _container@2_0).
+        (erlang:element(4,
+                        erlang:element(1,
+                                       _witness_bound@0_0)))(_witness_bound@0_0,
+                                                             _container@2_0).
 
 main() ->
     _number_1@0_0 = 3,
@@ -47,8 +49,7 @@ main() ->
                        io_lib:format("~ktp", [_number_2@1_0]),
                        <<": "/utf8>>,
                        io_lib:format("~ktp",
-                                     ['Elixir.Patina.Types03.Container':'Types03::Contains::contains'({'impl Types03::Contains for Types03::Container',
-                                                                                                       'Elixir.Patina.Types03.Container'},
+                                     ['Elixir.Patina.Types03.Container':'Types03::Contains::contains'('Elixir.Patina.Types03.Container':'Types03::Contains::$patina_witness'(),
                                                                                                       _container@2_0,
                                                                                                       _number_1@0_0,
                                                                                                       _number_2@1_0)])]]),
@@ -58,8 +59,7 @@ main() ->
     begin
         io:put_chars([[<<"First number: "/utf8>>,
                        io_lib:format("~ktp",
-                                     ['Elixir.Patina.Types03.Container':'Types03::Contains::first'({'impl Types03::Contains for Types03::Container',
-                                                                                                    'Elixir.Patina.Types03.Container'},
+                                     ['Elixir.Patina.Types03.Container':'Types03::Contains::first'('Elixir.Patina.Types03.Container':'Types03::Contains::$patina_witness'(),
                                                                                                    _container@2_0)])]]),
         io:nl(),
         {}
@@ -67,8 +67,7 @@ main() ->
     begin
         io:put_chars([[<<"Last number: "/utf8>>,
                        io_lib:format("~ktp",
-                                     ['Elixir.Patina.Types03.Container':'Types03::Contains::last'({'impl Types03::Contains for Types03::Container',
-                                                                                                   'Elixir.Patina.Types03.Container'},
+                                     ['Elixir.Patina.Types03.Container':'Types03::Contains::last'('Elixir.Patina.Types03.Container':'Types03::Contains::$patina_witness'(),
                                                                                                   _container@2_0)])]]),
         io:nl(),
         {}
@@ -76,8 +75,7 @@ main() ->
     begin
         io:put_chars([[<<"The difference is: "/utf8>>,
                        io_lib:format("~ktp",
-                                     [difference({{'impl Types03::Contains for Types03::Container',
-                                                   'Elixir.Patina.Types03.Container'}},
+                                     [difference({'Elixir.Patina.Types03.Container':'Types03::Contains::$patina_witness'()},
                                                  _container@2_0)])]]),
         io:nl(),
         {}

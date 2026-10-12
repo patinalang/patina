@@ -1,12 +1,12 @@
 use rustc_data_structures::fx::FxIndexSet;
 use rustc_data_structures::smallvec::SmallVec;
-use rustc_middle::erl::erl_fit_atom;
 use rustc_middle::erl::etir::{self, ExprId, LoopId, LoopOuterVar, VarId};
+use rustc_middle::erl::to_atom_symbol;
 use rustc_middle::{bug, span_bug};
 use rustc_span::{Span, Symbol, kw, sym};
 
-use crate::compile::translate::BodyCx;
 use crate::compile::translate::scopes::PatinaVar;
+use crate::compile::translate::{BodyCx, Function};
 use crate::erlang::abstract_format as eaf;
 use crate::{not_implemented, span_fatal};
 
@@ -129,13 +129,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let tcx = self.tcx();
         let root = tcx.typeck_root_def_id(self.owner);
         let num = self.scopes.next_loop_num();
-        let name = if let Some(impl_def_id) = tcx.trait_impl_of_assoc(root) {
-            let tag = tcx.erl_impl_tag(impl_def_id);
-            format!("<{tag}>::{}$patina_loop_{num}", tcx.item_name(root))
-        } else {
-            format!("{}$patina_loop_{num}", tcx.erl_fn_name(root))
-        };
-        Symbol::intern(&erl_fit_atom(name))
+        to_atom_symbol(format!("{}$patina_loop_{num}", tcx.erl_fn_name(root)))
     }
 
     pub(super) fn translate_loop(
@@ -166,16 +160,21 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             })
         });
 
-        let helper_function = afb.simple_function(
-            expr.span,
-            loop_cx.helper_erl_name,
-            self.loop_helper_param_pats(expr.span, &loop_cx),
-            loop_body,
-        );
-
-        self.translator.push_function(self.parts, expr.span, helper_function);
-        let arity = self.witness_env.params.len() + loop_cx.params.len();
-        self.parts.exports.push((loop_cx.helper_erl_name, arity as u32));
+        let helper_function = Function {
+            span: expr.span,
+            name: loop_cx.helper_erl_name,
+            clause: afb.clause(
+                expr.span,
+                self.loop_helper_param_pats(expr.span, &loop_cx),
+                None,
+                loop_body,
+            ),
+            // Loop helper functions are exported so Erlang compiler doesn't elide them,
+            // as it can't properly analyze them due to `$patina_marker` tags. They're
+            // later hidden by a pass in `patina_compile_server.erl`.
+            exported: true,
+        };
+        self.translator.push_function(self.parts, helper_function);
 
         let loop_helper_call = afb.expr_local_call(
             expr.span,

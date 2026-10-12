@@ -9,7 +9,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'BlanketImpl::Describe::describe'/2]).
+         'BlanketImpl::Describe::describe<(int, str)>'/2,
+         'BlanketImpl::Describe::$patina_witness<(int, str)>'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -24,23 +25,19 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'BlanketImpl::Describe::describe'(_witness@0_0 =
-                                      {'impl BlanketImpl::Describe for (int, str)',
-                                       _},
-                                  _self@1_0) ->
-    <<<<('Elixir.Patina.BlanketImpl.$impl.Core.Int':'BlanketImpl::Show::show'({'impl BlanketImpl::Show for int',
-                                                                               'Elixir.Patina.BlanketImpl.$impl.Core.Int'},
+'BlanketImpl::Describe::describe<(int, str)>'(_witness_self@0_0 =
+                                                  {_, {}, {}},
+                                              _self@1_0) ->
+    <<<<('Elixir.Patina.BlanketImpl.$impl.Core.Int':'BlanketImpl::Show::show'('Elixir.Patina.BlanketImpl.$impl.Core.Int':'BlanketImpl::Show::$patina_witness'(),
                                                                               erlang:element(1,
                                                                                              _self@1_0)))/binary,
         " and "/utf8>>/binary,
-      ('Elixir.Patina.BlanketImpl.$impl.Core.Str':'BlanketImpl::Show::show'({'impl BlanketImpl::Show for str',
-                                                                             'Elixir.Patina.BlanketImpl.$impl.Core.Str'},
+      ('Elixir.Patina.BlanketImpl.$impl.Core.Str':'BlanketImpl::Show::show'('Elixir.Patina.BlanketImpl.$impl.Core.Str':'BlanketImpl::Show::$patina_witness'(),
                                                                             erlang:element(2,
                                                                                            _self@1_0)))/binary>>.
 
-'BlanketImpl::Describe::shout'(_witness@0_0 =
-                                   {'impl BlanketImpl::Describe for (int, str)',
-                                    _},
-                               _arg@1_0) ->
-    'Elixir.Patina.BlanketImpl':'BlanketImpl::Describe::shout'(_witness@0_0,
-                                                               _arg@1_0).
+'BlanketImpl::Describe::$patina_witness<(int, str)>'() ->
+    {{fun 'Elixir.Patina.BlanketImpl.$impl.Core.Tuple':'BlanketImpl::Describe::describe<(int, str)>'/2,
+      fun 'Elixir.Patina.BlanketImpl':'BlanketImpl::Describe::shout'/2},
+     {},
+     {}}.

@@ -11,7 +11,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'TraitArgumentPatterns::Marker::value'/2]).
+         'TraitArgumentPatterns::Marker::value'/2,
+         'TraitArgumentPatterns::Marker::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -26,9 +27,8 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'TraitArgumentPatterns::Marker::value'(_witness@0_0 =
-                                           {'impl TraitArgumentPatterns::Marker for TraitArgumentPatterns::Marked',
-                                            _},
+'TraitArgumentPatterns::Marker::value'(_witness_self@0_0 =
+                                           {_, {}, {}},
                                        _self@1_0) ->
     begin
         io:put_chars([[<<"Marker::value("/utf8>>,
@@ -38,3 +38,8 @@
         {}
     end,
     _self@1_0.
+
+'TraitArgumentPatterns::Marker::$patina_witness'() ->
+    {{fun 'Elixir.Patina.TraitArgumentPatterns.Marked':'TraitArgumentPatterns::Marker::value'/2},
+     {},
+     {}}.

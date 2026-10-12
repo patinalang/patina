@@ -26,12 +26,13 @@
 
 make() -> <<"a"/utf8>>.
 
-show(_witness@1_0 = {_witness@0_0}, _t@2_0) ->
-    (erlang:element(2,
-                    _witness@0_0)):'OpaqueWitness::Describe::describe'(_witness@0_0,
-                                                                       _t@2_0).
+show(_witness_bounds@1_0 = {_witness_bound@0_0},
+     _t@2_0) ->
+    (erlang:element(1,
+                    erlang:element(1,
+                                   _witness_bound@0_0)))(_witness_bound@0_0,
+                                                         _t@2_0).
 
 show_opaque_return() ->
-    show({{'impl OpaqueWitness::Describe for OpaqueWitness::Name',
-           'Elixir.Patina.OpaqueWitness.Name'}},
+    show({'Elixir.Patina.OpaqueWitness.Name':'OpaqueWitness::Describe::$patina_witness'()},
          make()).

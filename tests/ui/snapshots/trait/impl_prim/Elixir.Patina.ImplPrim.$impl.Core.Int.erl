@@ -8,7 +8,9 @@
 
 -export_record([]).
 
--export(['__info__'/1]).
+-export(['__info__'/1,
+         'ImplPrim::MyTrait::f'/2,
+         'ImplPrim::MyTrait::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -23,7 +25,11 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'ImplPrim::MyTrait::f'(_witness@0_0 =
-                           {'impl ImplPrim::MyTrait for int', _},
+'ImplPrim::MyTrait::f'(_witness_self@0_0 = {_, {}, {}},
                        _self@1_0) ->
     1.
+
+'ImplPrim::MyTrait::$patina_witness'() ->
+    {{fun 'Elixir.Patina.ImplPrim.$impl.Core.Int':'ImplPrim::MyTrait::f'/2},
+     {},
+     {}}.

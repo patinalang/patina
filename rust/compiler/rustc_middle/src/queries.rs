@@ -1188,8 +1188,7 @@ rustc_queries! {
     /// outside their impls, and free functions called from an impl (which is translated into its
     /// own module).
     ///
-    /// Each function is identified by its module and [`TyCtxt::erl_fn_item`]. For an impl of
-    /// a trait from another crate, that item is the foreign trait item.
+    /// Each function is identified by its module and its item.
     ///
     /// For example, for code:
     ///
@@ -1240,28 +1239,28 @@ rustc_queries! {
         desc { "computing the witnessed bounds of `{}`", tcx.def_path_str(def_id) }
     }
 
-    /// The tag of the trait impl.
-    ///
-    /// It identifies the impl among the impls of its trait in the same
-    /// host. The tag is the header of the impl, with full definition paths (without lifetimes).
-    /// Type and const parameters show as `_`.
-    ///
-    /// For example, the impl `impl<T> From<int> for Pair<T>`
-    /// has the tag          `'impl Temps::From<int> for Temps::Pair<_>'`.
-    ///
-    /// If two impls have the same tag, they overlap. Other crates read the tag from the metadata
-    /// of the impl's crate.
-    query erl_impl_tag(impl_def_id: DefId) -> Symbol {
-        desc { "computing the impl tag of `{}`", tcx.def_path_str(impl_def_id) }
-        separate_provide_extern
-    }
-
     /// The Erlang function name of a callable item. See `TyCtxt::erl_has_fn_name`.
     ///
-    /// - Trait items and trait impl items get the full trait path, e.g. `Std::Ops::Add::add`.
-    /// - Methods of an inherent impl on specific generic arguments get these arguments, e.g.
-    ///   `'value<int>'` for `impl S<int> { fn value() }`. A fully generic impl, like
-    ///   `impl<T> S<T>`, keeps plain names.
+    /// For an example `trait From<T> { fn from(t: T) -> Self { ... } }` in crate `Temps`:
+    ///
+    /// - Trait items get the full trait path,
+    ///   e.g. `Temps::From::from` for the default body of `from`.
+    ///
+    /// - Trait impl items get the path of the trait with its arguments,
+    ///   e.g. `Temps::From<int>::from` for `impl Temps::From<int> for Celsius`.
+    ///
+    /// - Associated consts and types get `$patina_const` or `$patina_type` before their name,
+    ///   e.g. `Temps::From::$patina_const::SCALE` and `Temps::From<int>::$patina_const::SCALE`.
+    ///
+    /// - Items of an impl on a fully generic self type keep plain function names,
+    ///   e.g. `Temps::From<int>::from` for `impl<T> Temps::From<int> for Pair<T>`
+    ///     or `show` for `impl<T> Inherent<T> { fn show(t: T) { ... } }`.
+    ///
+    /// - Otherwise, the specific types of self type tag the function name segment,
+    ///   e.g. `Temps::From<int>::from<str>` for `impl Temps::From<int> for Pair<str>`,
+    ///     or `show<int>` for `impl Inherent<int> { fn show(t: int) { ... } }`.
+    ///
+    /// For rules for non-ADT self types, see `erl_impl_self_tag` implementation.
     ///
     /// Other crates read the name from the metadata of the item's crate.
     query erl_fn_name(def_id: DefId) -> Symbol {

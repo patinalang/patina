@@ -12,9 +12,10 @@
 
 -export(['__info__'/1,
          '$patina_constructor__Container'/2,
-         'TheProblem01::Contains::contains'/4,
-         'TheProblem01::Contains::first'/2,
-         'TheProblem01::Contains::last'/2]).
+         'TheProblem01::Contains<int, int>::contains'/4,
+         'TheProblem01::Contains<int, int>::first'/2,
+         'TheProblem01::Contains<int, int>::last'/2,
+         'TheProblem01::Contains<int, int>::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -34,21 +35,26 @@
 '$patina_constructor__Container'(_0@0_0, _1@1_0) ->
     #'Container'{'0' = _0@0_0, '1' = _1@1_0}.
 
-'TheProblem01::Contains::contains'(_witness@0_0 =
-                                       {'impl TheProblem01::Contains<int, int> for TheProblem01::Container',
-                                        _},
-                                   _self@1_0, _number_1@2_0, _number_2@3_0) ->
+'TheProblem01::Contains<int, int>::contains'(_witness_self@0_0 =
+                                                 {_, {}, {}},
+                                             _self@1_0, _number_1@2_0,
+                                             _number_2@3_0) ->
     _self@1_0#'Container'.'0' =:= _number_1@2_0 andalso
         _self@1_0#'Container'.'1' =:= _number_2@3_0.
 
-'TheProblem01::Contains::first'(_witness@0_0 =
-                                    {'impl TheProblem01::Contains<int, int> for TheProblem01::Container',
-                                     _},
-                                _self@1_0) ->
+'TheProblem01::Contains<int, int>::first'(_witness_self@0_0 =
+                                              {_, {}, {}},
+                                          _self@1_0) ->
     _self@1_0#'Container'.'0'.
 
-'TheProblem01::Contains::last'(_witness@0_0 =
-                                   {'impl TheProblem01::Contains<int, int> for TheProblem01::Container',
-                                    _},
-                               _self@1_0) ->
+'TheProblem01::Contains<int, int>::last'(_witness_self@0_0 =
+                                             {_, {}, {}},
+                                         _self@1_0) ->
     _self@1_0#'Container'.'1'.
+
+'TheProblem01::Contains<int, int>::$patina_witness'() ->
+    {{fun 'Elixir.Patina.TheProblem01.Container':'TheProblem01::Contains<int, int>::contains'/4,
+      fun 'Elixir.Patina.TheProblem01.Container':'TheProblem01::Contains<int, int>::first'/2,
+      fun 'Elixir.Patina.TheProblem01.Container':'TheProblem01::Contains<int, int>::last'/2},
+     {},
+     {}}.

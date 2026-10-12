@@ -11,7 +11,9 @@
 
 -export(['__info__'/1,
          'GlobalBound::Derived::derived'/2,
-         'GlobalBound::Base::base'/2]).
+         'GlobalBound::Derived::$patina_witness'/0,
+         'GlobalBound::Base::base'/2,
+         'GlobalBound::Base::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -26,18 +28,28 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'GlobalBound::Derived::derived'(_witness@0_0 =
-                                    {'impl GlobalBound::Derived for GlobalBound::S',
-                                     _,
-                                     _witness@1_0},
+'GlobalBound::Derived::derived'(_witness_self@0_0 = {_,
+                                                     {_witness_supertrait@1_0},
+                                                     {}},
                                 _self@2_0) ->
     1.
 
-'GlobalBound::Base::base'(_witness@0_0 =
-                              {'impl GlobalBound::Base for GlobalBound::S', _},
+'GlobalBound::Derived::$patina_witness'() ->
+    {{fun 'Elixir.Patina.GlobalBound.S':'GlobalBound::Derived::derived'/2},
+     {{{fun 'Elixir.Patina.GlobalBound.S':'GlobalBound::Base::base'/2},
+       {},
+       {}}},
+     {}}.
+
+'GlobalBound::Base::base'(_witness_self@0_0 = {_,
+                                               {},
+                                               {}},
                           _self@1_0) ->
-    'GlobalBound::Derived::derived'({'impl GlobalBound::Derived for GlobalBound::S',
-                                     'Elixir.Patina.GlobalBound.S',
-                                     _witness@0_0},
+    'GlobalBound::Derived::derived'('Elixir.Patina.GlobalBound.S':'GlobalBound::Derived::$patina_witness'(),
                                     _self@1_0)
         + 1.
+
+'GlobalBound::Base::$patina_witness'() ->
+    {{fun 'Elixir.Patina.GlobalBound.S':'GlobalBound::Base::base'/2},
+     {},
+     {}}.

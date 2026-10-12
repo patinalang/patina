@@ -26,22 +26,21 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-to_celsius(_witness@1_0 = {_witness@0_0}, _t@2_0) ->
-    (erlang:element(2,
-                    _witness@0_0)):'MultiImpl::From::from'(_witness@0_0,
-                                                           _t@2_0).
+to_celsius(_witness_bounds@1_0 = {_witness_bound@0_0},
+           _t@2_0) ->
+    (erlang:element(1,
+                    erlang:element(1,
+                                   _witness_bound@0_0)))(_witness_bound@0_0,
+                                                         _t@2_0).
 
 from_fahrenheit(_f@0_0) ->
-    to_celsius({{'impl MultiImpl::From<MultiImpl::Fahrenheit> for MultiImpl::Celsius',
-                 'Elixir.Patina.MultiImpl.Celsius'}},
+    to_celsius({'Elixir.Patina.MultiImpl.Celsius':'MultiImpl::From<MultiImpl::Fahrenheit>::$patina_witness'()},
                _f@0_0).
 
 from_kelvin(_k@0_0) ->
-    to_celsius({{'impl MultiImpl::From<MultiImpl::Kelvin> for MultiImpl::Celsius',
-                 'Elixir.Patina.MultiImpl.Celsius'}},
+    to_celsius({'Elixir.Patina.MultiImpl.Celsius':'MultiImpl::From<MultiImpl::Kelvin>::$patina_witness'()},
                _k@0_0).
 
 from_kelvin_static(_k@0_0) ->
-    'Elixir.Patina.MultiImpl.Celsius':'MultiImpl::From::from'({'impl MultiImpl::From<MultiImpl::Kelvin> for MultiImpl::Celsius',
-                                                               'Elixir.Patina.MultiImpl.Celsius'},
-                                                              _k@0_0).
+    'Elixir.Patina.MultiImpl.Celsius':'MultiImpl::From<MultiImpl::Kelvin>::from'('Elixir.Patina.MultiImpl.Celsius':'MultiImpl::From<MultiImpl::Kelvin>::$patina_witness'(),
+                                                                                 _k@0_0).

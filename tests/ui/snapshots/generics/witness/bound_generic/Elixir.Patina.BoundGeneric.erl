@@ -24,18 +24,16 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-call(_witness@1_0 = {_witness@0_0}, _h@2_0) ->
-    'Elixir.Patina.BoundGeneric.Holder':'BoundGeneric::Tr::method'({'impl BoundGeneric::Tr for BoundGeneric::Holder<_>',
-                                                                    'Elixir.Patina.BoundGeneric.Holder',
-                                                                    _witness@0_0},
+call(_witness_bounds@1_0 = {_witness_bound@0_0},
+     _h@2_0) ->
+    'Elixir.Patina.BoundGeneric.Holder':'BoundGeneric::Tr::method'('Elixir.Patina.BoundGeneric.Holder':'BoundGeneric::Tr::$patina_witness'({_witness_bound@0_0}),
                                                                    _h@2_0).
 
 main() ->
     _h@0_0 = 5,
     begin
         io:put_chars([[io_lib:format("~ktp",
-                                     [call({{'impl BoundGeneric::Bound for BoundGeneric::Number',
-                                             'Elixir.Patina.BoundGeneric.Number'}},
+                                     [call({'Elixir.Patina.BoundGeneric.Number':'BoundGeneric::Bound::$patina_witness'()},
                                            _h@0_0)])]]),
         io:nl(),
         {}

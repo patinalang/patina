@@ -19,8 +19,8 @@ defmodule InherentTagsTest do
     assert 7 == InherentTags.int_f(5, 2)
     assert 7 == GenVal."f<int>"(5, 2)
 
-    # The bounds tuple holds the witness of `Name: Show`: the impl's tag, then its host module.
-    show_name = {:"impl InherentTags::Show for InherentTags::Name", Name}
+    # The bounds tuple holds the witness of `Name: Show`.
+    show_name = Name."InherentTags::Show::$patina_witness"()
     assert "a name" == GenVal.f({show_name}, Name)
   end
 end

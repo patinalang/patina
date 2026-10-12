@@ -26,9 +26,8 @@
 'main$patina_loop_1'(_iter@0_0) ->
     _ = begin
             case
-                'Elixir.Patina.Core.RangeInclusive':'Core::Iterator::next'({'impl Core::Iterator for Core::RangeInclusive<int>',
-                                                                            'Elixir.Patina.Core.RangeInclusive'},
-                                                                           _iter@0_0)
+                'Elixir.Patina.Core.RangeInclusive':'Core::Iterator::next<int>'('Elixir.Patina.Core.RangeInclusive':'Core::Iterator::$patina_witness<int>'(),
+                                                                                _iter@0_0)
                 of
                 nil ->
                     _branch_value@4_0 = '$patina_marker':break({break,
@@ -82,10 +81,7 @@
 
 main() ->
     case
-        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'({'impl Core::IntoIterator for _',
-                                                                    'Elixir.Patina.Core.$impl',
-                                                                    {'impl Core::Iterator for Core::RangeInclusive<int>',
-                                                                     'Elixir.Patina.Core.RangeInclusive'}},
+        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'('Elixir.Patina.Core.$impl':'Core::IntoIterator::$patina_witness'({'Elixir.Patina.Core.RangeInclusive':'Core::Iterator::$patina_witness<int>'()}),
                                                                    'Elixir.Patina.Core.RangeInclusive':new(1,
                                                                                                            100))
         of

@@ -8,7 +8,9 @@
 
 -export_record([]).
 
--export(['__info__'/1, 'Forward::Tr::method'/2]).
+-export(['__info__'/1,
+         'Forward::Tr::method'/2,
+         'Forward::Tr::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -23,8 +25,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Forward::Tr::method'(_witness@0_0 =
-                          {'impl Forward::Tr for Forward::S', _},
+'Forward::Tr::method'(_witness_self@0_0 = {_, {}, {}},
                       _self@1_0) ->
     begin
         io:put_chars([[<<"Tr::method("/utf8>>,
@@ -33,3 +34,8 @@
         io:nl(),
         {}
     end.
+
+'Forward::Tr::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Forward.S':'Forward::Tr::method'/2},
+     {},
+     {}}.

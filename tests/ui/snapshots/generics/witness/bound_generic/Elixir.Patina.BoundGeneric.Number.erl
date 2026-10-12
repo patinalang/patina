@@ -9,7 +9,9 @@
 
 -export_record([]).
 
--export(['__info__'/1, 'BoundGeneric::Bound::b'/2]).
+-export(['__info__'/1,
+         'BoundGeneric::Bound::b'/2,
+         'BoundGeneric::Bound::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -24,9 +26,9 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'BoundGeneric::Bound::b'(_witness@0_0 =
-                             {'impl BoundGeneric::Bound for BoundGeneric::Number',
-                              _},
+'BoundGeneric::Bound::b'(_witness_self@0_0 = {_,
+                                              {},
+                                              {}},
                          _self@1_0) ->
     begin
         io:put_chars([[<<"Bound::b("/utf8>>,
@@ -36,3 +38,8 @@
         {}
     end,
     _self@1_0.
+
+'BoundGeneric::Bound::$patina_witness'() ->
+    {{fun 'Elixir.Patina.BoundGeneric.Number':'BoundGeneric::Bound::b'/2},
+     {},
+     {}}.

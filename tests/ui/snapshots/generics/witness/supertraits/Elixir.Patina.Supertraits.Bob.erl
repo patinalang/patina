@@ -11,9 +11,10 @@
 
 -export(['__info__'/1,
          'Supertraits::Named::name'/2,
+         'Supertraits::Named::$patina_witness'/0,
          'Supertraits::Greet::greeting'/2,
-         'Supertraits::Greet::calls_supertrait'/2,
-         'Supertraits::Loud::shout'/2]).
+         'Supertraits::Greet::$patina_witness'/0,
+         'Supertraits::Loud::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -28,31 +29,37 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Supertraits::Named::name'(_witness@0_0 =
-                               {'impl Supertraits::Named for Supertraits::Bob',
-                                _},
+'Supertraits::Named::name'(_witness_self@0_0 = {_,
+                                                {},
+                                                {}},
                            _self@1_0) ->
     <<"Bob"/utf8>>.
 
-'Supertraits::Greet::greeting'(_witness@0_0 =
-                                   {'impl Supertraits::Greet for Supertraits::Bob',
-                                    _,
-                                    _witness@1_0},
+'Supertraits::Named::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Supertraits.Bob':'Supertraits::Named::name'/2},
+     {},
+     {}}.
+
+'Supertraits::Greet::greeting'(_witness_self@0_0 = {_,
+                                                    {_witness_supertrait@1_0},
+                                                    {}},
                                _self@2_0) ->
     <<"Hi"/utf8>>.
 
-'Supertraits::Greet::calls_supertrait'(_witness@0_0 =
-                                           {'impl Supertraits::Greet for Supertraits::Bob',
-                                            _,
-                                            _},
-                                       _arg@1_0) ->
-    'Elixir.Patina.Supertraits':'Supertraits::Greet::calls_supertrait'(_witness@0_0,
-                                                                       _arg@1_0).
+'Supertraits::Greet::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Supertraits.Bob':'Supertraits::Greet::greeting'/2,
+      fun 'Elixir.Patina.Supertraits':'Supertraits::Greet::calls_supertrait'/2},
+     {{{fun 'Elixir.Patina.Supertraits.Bob':'Supertraits::Named::name'/2},
+       {},
+       {}}},
+     {}}.
 
-'Supertraits::Loud::shout'(_witness@0_0 =
-                               {'impl Supertraits::Loud for Supertraits::Bob',
-                                _,
-                                _},
-                           _arg@1_0) ->
-    'Elixir.Patina.Supertraits':'Supertraits::Loud::shout'(_witness@0_0,
-                                                           _arg@1_0).
+'Supertraits::Loud::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Supertraits':'Supertraits::Loud::shout'/2},
+     {{{fun 'Elixir.Patina.Supertraits.Bob':'Supertraits::Greet::greeting'/2,
+        fun 'Elixir.Patina.Supertraits':'Supertraits::Greet::calls_supertrait'/2},
+       {{{fun 'Elixir.Patina.Supertraits.Bob':'Supertraits::Named::name'/2},
+         {},
+         {}}},
+       {}}},
+     {}}.

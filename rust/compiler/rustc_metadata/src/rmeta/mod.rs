@@ -432,7 +432,6 @@ define_tables! {
     fn_sig: Table<DefIndex, LazyValue<ty::EarlyBinder<'static, ty::PolyFnSig<'static>>>>,
     codegen_fn_attrs: Table<DefIndex, LazyValue<CodegenFnAttrs>>,
     impl_trait_header: Table<DefIndex, LazyValue<ty::ImplTraitHeader<'static>>>,
-    erl_impl_tag: Table<DefIndex, LazyValue<Symbol>>,
     erl_fn_name: Table<DefIndex, LazyValue<Symbol>>,
     etir_body: Table<DefIndex, LazyValue<rustc_middle::erl::etir::Body<'static>>>,
     const_param_default: Table<DefIndex, LazyValue<ty::EarlyBinder<'static, rustc_middle::ty::Const<'static>>>>,

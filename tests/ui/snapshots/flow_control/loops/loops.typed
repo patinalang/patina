@@ -305,8 +305,8 @@ trait Count {
 
 struct Counter<T>(T);
 
-// Impls of one trait method on the same type share an Erlang function, so their loop helpers
-// include the impl's tag.
+// The impls' functions get the self type's arguments in their names, and so do the loop
+// helpers of their methods.
 impl Count for Counter<int> {
     fn count(self, limit: int)
         ->

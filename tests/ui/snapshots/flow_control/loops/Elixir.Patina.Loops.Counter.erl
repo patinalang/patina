@@ -9,9 +9,12 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         '<impl Loops::Count for Loops::Counter<int>>::count$patina_loop_1'/3,
-         '<impl Loops::Count for Loops::Counter<str>>::count$patina_loop_1'/3,
-         'Loops::Count::count'/3]).
+         'Loops::Count::count<int>$patina_loop_1'/3,
+         'Loops::Count::count<int>'/3,
+         'Loops::Count::$patina_witness<int>'/0,
+         'Loops::Count::count<str>$patina_loop_1'/3,
+         'Loops::Count::count<str>'/3,
+         'Loops::Count::$patina_witness<str>'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -26,11 +29,9 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'<impl Loops::Count for Loops::Counter<int>>::count$patina_loop_1'(_witness@0_0 =
-                                                                       {'impl Loops::Count for Loops::Counter<int>',
-                                                                        _},
-                                                                   _n@3_0,
-                                                                   _limit@2_0) ->
+'Loops::Count::count<int>$patina_loop_1'(_witness_self@0_0 =
+                                             {_, {}, {}},
+                                         _n@3_0, _limit@2_0) ->
     _ = begin
             case _n@3_0 < _limit@2_0 of
                 true ->
@@ -47,15 +48,32 @@
                     _branch_value@4_0
             end
         end,
-    '$patina_marker':continue(_witness@0_0,
+    '$patina_marker':continue(_witness_self@0_0,
                               _n@3_1,
                               _limit@2_0).
 
-'<impl Loops::Count for Loops::Counter<str>>::count$patina_loop_1'(_witness@0_0 =
-                                                                       {'impl Loops::Count for Loops::Counter<str>',
-                                                                        _},
-                                                                   _n@3_0,
-                                                                   _limit@2_0) ->
+'Loops::Count::count<int>'(_witness_self@0_0 = {_,
+                                                {},
+                                                {}},
+                           _self@1_0, _limit@2_0) ->
+    _n@3_0 = 0,
+    case
+        'Loops::Count::count<int>$patina_loop_1'(_witness_self@0_0,
+                                                 _n@3_0,
+                                                 _limit@2_0)
+        of
+        {break, 0, _loop_value@5_0, _n@3_1} -> _loop_value@5_0
+    end,
+    _n@3_1.
+
+'Loops::Count::$patina_witness<int>'() ->
+    {{fun 'Elixir.Patina.Loops.Counter':'Loops::Count::count<int>'/3},
+     {},
+     {}}.
+
+'Loops::Count::count<str>$patina_loop_1'(_witness_self@0_0 =
+                                             {_, {}, {}},
+                                         _n@3_0, _limit@2_0) ->
     _ = begin
             case _n@3_0 < _limit@2_0 of
                 true ->
@@ -72,31 +90,25 @@
                     _branch_value@4_0
             end
         end,
-    '$patina_marker':continue(_witness@0_0,
+    '$patina_marker':continue(_witness_self@0_0,
                               _n@3_1,
                               _limit@2_0).
 
-'Loops::Count::count'(_witness@0_0 =
-                          {'impl Loops::Count for Loops::Counter<int>', _},
-                      _self@1_0, _limit@2_0) ->
+'Loops::Count::count<str>'(_witness_self@0_0 = {_,
+                                                {},
+                                                {}},
+                           _self@1_0, _limit@2_0) ->
     _n@3_0 = 0,
     case
-        '<impl Loops::Count for Loops::Counter<int>>::count$patina_loop_1'(_witness@0_0,
-                                                                           _n@3_0,
-                                                                           _limit@2_0)
-        of
-        {break, 0, _loop_value@5_0, _n@3_1} -> _loop_value@5_0
-    end,
-    _n@3_1;
-'Loops::Count::count'(_witness@0_0 =
-                          {'impl Loops::Count for Loops::Counter<str>', _},
-                      _self@1_0, _limit@2_0) ->
-    _n@3_0 = 0,
-    case
-        '<impl Loops::Count for Loops::Counter<str>>::count$patina_loop_1'(_witness@0_0,
-                                                                           _n@3_0,
-                                                                           _limit@2_0)
+        'Loops::Count::count<str>$patina_loop_1'(_witness_self@0_0,
+                                                 _n@3_0,
+                                                 _limit@2_0)
         of
         {break, 0, _loop_value@5_0, _n@3_1} -> _loop_value@5_0
     end,
     _n@3_1.
+
+'Loops::Count::$patina_witness<str>'() ->
+    {{fun 'Elixir.Patina.Loops.Counter':'Loops::Count::count<str>'/3},
+     {},
+     {}}.

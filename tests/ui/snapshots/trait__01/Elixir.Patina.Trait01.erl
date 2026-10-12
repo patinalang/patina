@@ -25,28 +25,27 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Trait01::Animal::talk'(_witness@0_0, _self@1_0) ->
+'Trait01::Animal::talk'(_witness_self@0_0, _self@1_0) ->
     begin
         io:put_chars([[(erlang:element(2,
-                                       _witness@0_0)):'Trait01::Animal::name'(_witness@0_0,
-                                                                              _self@1_0),
+                                       erlang:element(1,
+                                                      _witness_self@0_0)))(_witness_self@0_0,
+                                                                           _self@1_0),
                        <<" says "/utf8>>,
-                       (erlang:element(2,
-                                       _witness@0_0)):'Trait01::Animal::noise'(_witness@0_0,
-                                                                               _self@1_0)]]),
+                       (erlang:element(3,
+                                       erlang:element(1,
+                                                      _witness_self@0_0)))(_witness_self@0_0,
+                                                                           _self@1_0)]]),
         io:nl(),
         {}
     end.
 
 main() ->
     _dolly@0_0 =
-        'Elixir.Patina.Trait01.Sheep':'Trait01::Animal::new'({'impl Trait01::Animal for Trait01::Sheep',
-                                                              'Elixir.Patina.Trait01.Sheep'},
+        'Elixir.Patina.Trait01.Sheep':'Trait01::Animal::new'('Elixir.Patina.Trait01.Sheep':'Trait01::Animal::$patina_witness'(),
                                                              <<"Dolly"/utf8>>),
-    'Elixir.Patina.Trait01.Sheep':'Trait01::Animal::talk'({'impl Trait01::Animal for Trait01::Sheep',
-                                                           'Elixir.Patina.Trait01.Sheep'},
+    'Elixir.Patina.Trait01.Sheep':'Trait01::Animal::talk'('Elixir.Patina.Trait01.Sheep':'Trait01::Animal::$patina_witness'(),
                                                           _dolly@0_0),
     'Elixir.Patina.Trait01.Sheep':shear(_dolly@0_0),
-    'Elixir.Patina.Trait01.Sheep':'Trait01::Animal::talk'({'impl Trait01::Animal for Trait01::Sheep',
-                                                           'Elixir.Patina.Trait01.Sheep'},
+    'Elixir.Patina.Trait01.Sheep':'Trait01::Animal::talk'('Elixir.Patina.Trait01.Sheep':'Trait01::Animal::$patina_witness'(),
                                                           _dolly@0_0).

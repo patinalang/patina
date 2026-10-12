@@ -100,7 +100,6 @@ pub enum SelfBound<'tcx> {
 
 #[derive(Clone, Debug)]
 pub struct TraitImplSelfBound<'tcx> {
-    pub impl_def_id: DefId,
     pub bound: Unnormalized<'tcx, ty::TraitRef<'tcx>>,
     pub supertraits: IndexVec<SupertraitIdx, Unnormalized<'tcx, ty::TraitRef<'tcx>>>,
     pub where_clauses: IndexVec<BoundIdx, Unnormalized<'tcx, ty::TraitRef<'tcx>>>,
@@ -146,7 +145,7 @@ impl<'tcx> TyCtxt<'tcx> {
         let where_clauses =
             self.erl_bounds(impl_def_id).iter_instantiated_copied(self, args).collect();
 
-        TraitImplSelfBound { impl_def_id, bound, supertraits, where_clauses }
+        TraitImplSelfBound { bound, supertraits, where_clauses }
     }
 
     /// [`TyCtxt::erl_witness_params`] with the item's identity args, for use within the item.

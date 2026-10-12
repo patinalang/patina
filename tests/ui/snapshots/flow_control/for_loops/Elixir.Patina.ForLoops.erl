@@ -58,8 +58,7 @@
 'sum_list$patina_loop_1'(_iter@2_0, _total@1_0) ->
     _ = begin
             case
-                'Elixir.Patina.Core.ListIter':'Core::Iterator::next'({'impl Core::Iterator for Core::ListIter<_>',
-                                                                      'Elixir.Patina.Core.ListIter'},
+                'Elixir.Patina.Core.ListIter':'Core::Iterator::next'('Elixir.Patina.Core.ListIter':'Core::Iterator::$patina_witness'(),
                                                                      _iter@2_0)
                 of
                 nil ->
@@ -83,8 +82,7 @@
 sum_list(_xs@0_0) ->
     _total@1_0 = 0,
     case
-        'Elixir.Patina.Core.List':'Core::IntoIterator::into_iter'({'impl Core::IntoIterator for [_]',
-                                                                   'Elixir.Patina.Core.List'},
+        'Elixir.Patina.Core.List':'Core::IntoIterator::into_iter'('Elixir.Patina.Core.List':'Core::IntoIterator::$patina_witness'(),
                                                                   _xs@0_0)
         of
         _iter@2_0 ->
@@ -98,8 +96,7 @@ sum_list(_xs@0_0) ->
 'sum_twice$patina_loop_1'(_iter@2_0, _total@1_0) ->
     _ = begin
             case
-                'Elixir.Patina.Core.ListIter':'Core::Iterator::next'({'impl Core::Iterator for Core::ListIter<_>',
-                                                                      'Elixir.Patina.Core.ListIter'},
+                'Elixir.Patina.Core.ListIter':'Core::Iterator::next'('Elixir.Patina.Core.ListIter':'Core::Iterator::$patina_witness'(),
                                                                      _iter@2_0)
                 of
                 nil ->
@@ -123,8 +120,7 @@ sum_list(_xs@0_0) ->
 'sum_twice$patina_loop_2'(_iter@8_0, _total@1_1) ->
     _ = begin
             case
-                'Elixir.Patina.Core.ListIter':'Core::Iterator::next'({'impl Core::Iterator for Core::ListIter<_>',
-                                                                      'Elixir.Patina.Core.ListIter'},
+                'Elixir.Patina.Core.ListIter':'Core::Iterator::next'('Elixir.Patina.Core.ListIter':'Core::Iterator::$patina_witness'(),
                                                                      _iter@8_0)
                 of
                 nil ->
@@ -148,10 +144,7 @@ sum_list(_xs@0_0) ->
 sum_twice(_xs@0_0) ->
     _total@1_0 = 0,
     case
-        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'({'impl Core::IntoIterator for _',
-                                                                    'Elixir.Patina.Core.$impl',
-                                                                    {'impl Core::Iterator for Core::ListIter<_>',
-                                                                     'Elixir.Patina.Core.ListIter'}},
+        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'('Elixir.Patina.Core.$impl':'Core::IntoIterator::$patina_witness'({'Elixir.Patina.Core.ListIter':'Core::Iterator::$patina_witness'()}),
                                                                    'Elixir.Patina.Core.List':iter(_xs@0_0))
         of
         _iter@2_0 ->
@@ -161,8 +154,7 @@ sum_twice(_xs@0_0) ->
             end
     end,
     case
-        'Elixir.Patina.Core.List':'Core::IntoIterator::into_iter'({'impl Core::IntoIterator for [_]',
-                                                                   'Elixir.Patina.Core.List'},
+        'Elixir.Patina.Core.List':'Core::IntoIterator::into_iter'('Elixir.Patina.Core.List':'Core::IntoIterator::$patina_witness'(),
                                                                   _xs@0_0)
         of
         _iter@8_0 ->
@@ -176,9 +168,8 @@ sum_twice(_xs@0_0) ->
 'sum_range$patina_loop_1'(_iter@3_0, _total@2_0) ->
     _ = begin
             case
-                'Elixir.Patina.Core.Range':'Core::Iterator::next'({'impl Core::Iterator for Core::Range<int>',
-                                                                   'Elixir.Patina.Core.Range'},
-                                                                  _iter@3_0)
+                'Elixir.Patina.Core.Range':'Core::Iterator::next<int>'('Elixir.Patina.Core.Range':'Core::Iterator::$patina_witness<int>'(),
+                                                                       _iter@3_0)
                 of
                 nil ->
                     _branch_value@7_0 = '$patina_marker':break({break,
@@ -201,10 +192,7 @@ sum_twice(_xs@0_0) ->
 sum_range(_start@0_0, _end@1_0) ->
     _total@2_0 = 0,
     case
-        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'({'impl Core::IntoIterator for _',
-                                                                    'Elixir.Patina.Core.$impl',
-                                                                    {'impl Core::Iterator for Core::Range<int>',
-                                                                     'Elixir.Patina.Core.Range'}},
+        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'('Elixir.Patina.Core.$impl':'Core::IntoIterator::$patina_witness'({'Elixir.Patina.Core.Range':'Core::Iterator::$patina_witness<int>'()}),
                                                                    'Elixir.Patina.Core.Range':'$patina_constructor__Range'(_start@0_0,
                                                                                                                            _end@1_0))
         of
@@ -220,9 +208,8 @@ sum_range(_start@0_0, _end@1_0) ->
                                     _total@2_0) ->
     _ = begin
             case
-                'Elixir.Patina.Core.RangeInclusive':'Core::Iterator::next'({'impl Core::Iterator for Core::RangeInclusive<int>',
-                                                                            'Elixir.Patina.Core.RangeInclusive'},
-                                                                           _iter@3_0)
+                'Elixir.Patina.Core.RangeInclusive':'Core::Iterator::next<int>'('Elixir.Patina.Core.RangeInclusive':'Core::Iterator::$patina_witness<int>'(),
+                                                                                _iter@3_0)
                 of
                 nil ->
                     _branch_value@7_0 = '$patina_marker':break({break,
@@ -245,10 +232,7 @@ sum_range(_start@0_0, _end@1_0) ->
 sum_range_inclusive(_start@0_0, _end@1_0) ->
     _total@2_0 = 0,
     case
-        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'({'impl Core::IntoIterator for _',
-                                                                    'Elixir.Patina.Core.$impl',
-                                                                    {'impl Core::Iterator for Core::RangeInclusive<int>',
-                                                                     'Elixir.Patina.Core.RangeInclusive'}},
+        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'('Elixir.Patina.Core.$impl':'Core::IntoIterator::$patina_witness'({'Elixir.Patina.Core.RangeInclusive':'Core::Iterator::$patina_witness<int>'()}),
                                                                    'Elixir.Patina.Core.RangeInclusive':new(_start@0_0,
                                                                                                            _end@1_0))
         of
@@ -266,8 +250,7 @@ sum_range_inclusive(_start@0_0, _end@1_0) ->
                                  _total@1_0) ->
     _ = begin
             case
-                'Elixir.Patina.Core.MapIter':'Core::Iterator::next'({'impl Core::Iterator for Core::MapIter<_, _>',
-                                                                     'Elixir.Patina.Core.MapIter'},
+                'Elixir.Patina.Core.MapIter':'Core::Iterator::next'('Elixir.Patina.Core.MapIter':'Core::Iterator::$patina_witness'(),
                                                                     _iter@2_0)
                 of
                 nil ->
@@ -293,8 +276,7 @@ sum_range_inclusive(_start@0_0, _end@1_0) ->
 weighted_map_sum(_map@0_0) ->
     _total@1_0 = 0,
     case
-        'Elixir.Patina.Core.Map':'Core::IntoIterator::into_iter'({'impl Core::IntoIterator for #{_ => _}',
-                                                                  'Elixir.Patina.Core.Map'},
+        'Elixir.Patina.Core.Map':'Core::IntoIterator::into_iter'('Elixir.Patina.Core.Map':'Core::IntoIterator::$patina_witness'(),
                                                                  _map@0_0)
         of
         _iter@2_0 ->
@@ -311,8 +293,7 @@ weighted_map_sum(_map@0_0) ->
                                 _count@1_0) ->
     _ = begin
             case
-                'Elixir.Patina.Core.MapIter':'Core::Iterator::next'({'impl Core::Iterator for Core::MapIter<_, _>',
-                                                                     'Elixir.Patina.Core.MapIter'},
+                'Elixir.Patina.Core.MapIter':'Core::Iterator::next'('Elixir.Patina.Core.MapIter':'Core::Iterator::$patina_witness'(),
                                                                     _iter@2_0)
                 of
                 nil ->
@@ -336,10 +317,7 @@ weighted_map_sum(_map@0_0) ->
 map_entry_count(_map@0_0) ->
     _count@1_0 = 0,
     case
-        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'({'impl Core::IntoIterator for _',
-                                                                    'Elixir.Patina.Core.$impl',
-                                                                    {'impl Core::Iterator for Core::MapIter<_, _>',
-                                                                     'Elixir.Patina.Core.MapIter'}},
+        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'('Elixir.Patina.Core.$impl':'Core::IntoIterator::$patina_witness'({'Elixir.Patina.Core.MapIter':'Core::Iterator::$patina_witness'()}),
                                                                    'Elixir.Patina.Core.Map':iter(_map@0_0))
         of
         _iter@2_0 ->
@@ -352,16 +330,19 @@ map_entry_count(_map@0_0) ->
     end,
     _count@1_1.
 
-'count$patina_loop_1'(_witness@1_0 = {_witness@0_0},
+'count$patina_loop_1'(_witness_bounds@1_0 =
+                          {_witness_bound@0_0},
                       _iter@4_0, _n@3_0) ->
     _ = begin
             case begin
                      _witness@5_0 = erlang:element(1,
                                                    (erlang:element(2,
-                                                                   _witness@0_0)):'Core::IntoIterator::$patina_type::IntoIter'(_witness@0_0)),
+                                                                   erlang:element(1,
+                                                                                  _witness_bound@0_0)))(_witness_bound@0_0)),
                      (erlang:element(2,
-                                     _witness@5_0)):'Core::Iterator::next'(_witness@5_0,
-                                                                           _iter@4_0)
+                                     erlang:element(1,
+                                                    _witness@5_0)))(_witness@5_0,
+                                                                    _iter@4_0)
                  end
                 of
                 nil ->
@@ -386,18 +367,20 @@ map_entry_count(_map@0_0) ->
                     begin _n@3_1 = _n@3_0 + 1, {} end
             end
         end,
-    '$patina_marker':continue(_witness@1_0,
+    '$patina_marker':continue(_witness_bounds@1_0,
                               _iter@4_1,
                               _n@3_1).
 
-count(_witness@1_0 = {_witness@0_0}, _items@2_0) ->
+count(_witness_bounds@1_0 = {_witness_bound@0_0},
+      _items@2_0) ->
     _n@3_0 = 0,
-    case (erlang:element(2,
-                         _witness@0_0)):'Core::IntoIterator::into_iter'(_witness@0_0,
-                                                                        _items@2_0)
+    case (erlang:element(3,
+                         erlang:element(1,
+                                        _witness_bound@0_0)))(_witness_bound@0_0,
+                                                              _items@2_0)
         of
         _iter@4_0 ->
-            case 'count$patina_loop_1'(_witness@1_0,
+            case 'count$patina_loop_1'(_witness_bounds@1_0,
                                        _iter@4_0,
                                        _n@3_0)
                 of
@@ -408,25 +391,26 @@ count(_witness@1_0 = {_witness@0_0}, _items@2_0) ->
     _n@3_1.
 
 count_list(_xs@0_0) ->
-    count({{'impl Core::IntoIterator for [_]',
-            'Elixir.Patina.Core.List'}},
+    count({'Elixir.Patina.Core.List':'Core::IntoIterator::$patina_witness'()},
           _xs@0_0).
 
 count_map(_map@0_0) ->
-    count({{'impl Core::IntoIterator for #{_ => _}',
-            'Elixir.Patina.Core.Map'}},
+    count({'Elixir.Patina.Core.Map':'Core::IntoIterator::$patina_witness'()},
           _map@0_0).
 
-'total$patina_loop_1'(_witness@1_0 = {_witness@0_0},
+'total$patina_loop_1'(_witness_bounds@1_0 =
+                          {_witness_bound@0_0},
                       _iter@4_0, _total@3_0) ->
     _ = begin
             case begin
                      _witness@5_0 = erlang:element(1,
                                                    (erlang:element(2,
-                                                                   _witness@0_0)):'Core::IntoIterator::$patina_type::IntoIter'(_witness@0_0)),
+                                                                   erlang:element(1,
+                                                                                  _witness_bound@0_0)))(_witness_bound@0_0)),
                      (erlang:element(2,
-                                     _witness@5_0)):'Core::Iterator::next'(_witness@5_0,
-                                                                           _iter@4_0)
+                                     erlang:element(1,
+                                                    _witness@5_0)))(_witness@5_0,
+                                                                    _iter@4_0)
                  end
                 of
                 nil ->
@@ -445,18 +429,20 @@ count_map(_map@0_0) ->
                     begin _total@3_1 = _total@3_0 + _item@6_0, {} end
             end
         end,
-    '$patina_marker':continue(_witness@1_0,
+    '$patina_marker':continue(_witness_bounds@1_0,
                               _iter@4_1,
                               _total@3_1).
 
-total(_witness@1_0 = {_witness@0_0}, _items@2_0) ->
+total(_witness_bounds@1_0 = {_witness_bound@0_0},
+      _items@2_0) ->
     _total@3_0 = 0,
-    case (erlang:element(2,
-                         _witness@0_0)):'Core::IntoIterator::into_iter'(_witness@0_0,
-                                                                        _items@2_0)
+    case (erlang:element(3,
+                         erlang:element(1,
+                                        _witness_bound@0_0)))(_witness_bound@0_0,
+                                                              _items@2_0)
         of
         _iter@4_0 ->
-            case 'total$patina_loop_1'(_witness@1_0,
+            case 'total$patina_loop_1'(_witness_bounds@1_0,
                                        _iter@4_0,
                                        _total@3_0)
                 of
@@ -467,24 +453,19 @@ total(_witness@1_0 = {_witness@0_0}, _items@2_0) ->
     _total@3_1.
 
 total_range(_end@0_0) ->
-    total({{'impl Core::IntoIterator for _',
-            'Elixir.Patina.Core.$impl',
-            {'impl Core::Iterator for Core::Range<int>',
-             'Elixir.Patina.Core.Range'}}},
+    total({'Elixir.Patina.Core.$impl':'Core::IntoIterator::$patina_witness'({'Elixir.Patina.Core.Range':'Core::Iterator::$patina_witness<int>'()})},
           'Elixir.Patina.Core.Range':'$patina_constructor__Range'(0,
                                                                   _end@0_0)).
 
 total_list(_xs@0_0) ->
-    total({{'impl Core::IntoIterator for [_]',
-            'Elixir.Patina.Core.List'}},
+    total({'Elixir.Patina.Core.List':'Core::IntoIterator::$patina_witness'()},
           _xs@0_0).
 
 'skip_odd_until$patina_loop_1'(_iter@3_0, _limit@1_0,
                                _total@2_0) ->
     _ = begin
             case
-                'Elixir.Patina.Core.ListIter':'Core::Iterator::next'({'impl Core::Iterator for Core::ListIter<_>',
-                                                                      'Elixir.Patina.Core.ListIter'},
+                'Elixir.Patina.Core.ListIter':'Core::Iterator::next'('Elixir.Patina.Core.ListIter':'Core::Iterator::$patina_witness'(),
                                                                      _iter@3_0)
                 of
                 nil ->
@@ -529,8 +510,7 @@ total_list(_xs@0_0) ->
 skip_odd_until(_xs@0_0, _limit@1_0) ->
     _total@2_0 = 0,
     case
-        'Elixir.Patina.Core.List':'Core::IntoIterator::into_iter'({'impl Core::IntoIterator for [_]',
-                                                                   'Elixir.Patina.Core.List'},
+        'Elixir.Patina.Core.List':'Core::IntoIterator::into_iter'('Elixir.Patina.Core.List':'Core::IntoIterator::$patina_witness'(),
                                                                   _xs@0_0)
         of
         _iter@3_0 ->
@@ -548,8 +528,7 @@ skip_odd_until(_xs@0_0, _limit@1_0) ->
                            _index@2_0) ->
     _ = begin
             case
-                'Elixir.Patina.Core.ListIter':'Core::Iterator::next'({'impl Core::Iterator for Core::ListIter<_>',
-                                                                      'Elixir.Patina.Core.ListIter'},
+                'Elixir.Patina.Core.ListIter':'Core::Iterator::next'('Elixir.Patina.Core.ListIter':'Core::Iterator::$patina_witness'(),
                                                                      _iter@3_0)
                 of
                 nil ->
@@ -586,8 +565,7 @@ skip_odd_until(_xs@0_0, _limit@1_0) ->
 find_index(_xs@0_0, _target@1_0) ->
     _index@2_0 = 0,
     case
-        'Elixir.Patina.Core.List':'Core::IntoIterator::into_iter'({'impl Core::IntoIterator for [_]',
-                                                                   'Elixir.Patina.Core.List'},
+        'Elixir.Patina.Core.List':'Core::IntoIterator::into_iter'('Elixir.Patina.Core.List':'Core::IntoIterator::$patina_witness'(),
                                                                   _xs@0_0)
         of
         _iter@3_0 ->
@@ -607,8 +585,7 @@ find_index(_xs@0_0, _target@1_0) ->
                                     _sum@1_0, _found@2_0) ->
     _ = begin
             case
-                'Elixir.Patina.Core.ListIter':'Core::Iterator::next'({'impl Core::Iterator for Core::ListIter<_>',
-                                                                      'Elixir.Patina.Core.ListIter'},
+                'Elixir.Patina.Core.ListIter':'Core::Iterator::next'('Elixir.Patina.Core.ListIter':'Core::Iterator::$patina_witness'(),
                                                                      _iter@7_0)
                 of
                 nil ->
@@ -658,8 +635,7 @@ find_index(_xs@0_0, _target@1_0) ->
                                     _sum@1_0, _found@2_0) ->
     _ = begin
             case
-                'Elixir.Patina.Core.ListIter':'Core::Iterator::next'({'impl Core::Iterator for Core::ListIter<_>',
-                                                                      'Elixir.Patina.Core.ListIter'},
+                'Elixir.Patina.Core.ListIter':'Core::Iterator::next'('Elixir.Patina.Core.ListIter':'Core::Iterator::$patina_witness'(),
                                                                      _iter@3_0)
                 of
                 nil ->
@@ -677,8 +653,7 @@ find_index(_xs@0_0, _target@1_0) ->
                     _iter@3_1 = _next@5_0,
                     begin
                         case
-                            'Elixir.Patina.Core.List':'Core::IntoIterator::into_iter'({'impl Core::IntoIterator for [_]',
-                                                                                       'Elixir.Patina.Core.List'},
+                            'Elixir.Patina.Core.List':'Core::IntoIterator::into_iter'('Elixir.Patina.Core.List':'Core::IntoIterator::$patina_witness'(),
                                                                                       _xs@0_0)
                             of
                             _iter@7_0 ->
@@ -717,8 +692,7 @@ find_index(_xs@0_0, _target@1_0) ->
 first_pair_with_sum(_xs@0_0, _sum@1_0) ->
     _found@2_0 = {0, 0},
     case
-        'Elixir.Patina.Core.List':'Core::IntoIterator::into_iter'({'impl Core::IntoIterator for [_]',
-                                                                   'Elixir.Patina.Core.List'},
+        'Elixir.Patina.Core.List':'Core::IntoIterator::into_iter'('Elixir.Patina.Core.List':'Core::IntoIterator::$patina_witness'(),
                                                                   _xs@0_0)
         of
         _iter@3_0 ->
@@ -737,8 +711,7 @@ first_pair_with_sum(_xs@0_0, _sum@1_0) ->
                                     _visited@1_0) ->
     _ = begin
             case
-                'Elixir.Patina.Core.ListIter':'Core::Iterator::next'({'impl Core::Iterator for Core::ListIter<_>',
-                                                                      'Elixir.Patina.Core.ListIter'},
+                'Elixir.Patina.Core.ListIter':'Core::Iterator::next'('Elixir.Patina.Core.ListIter':'Core::Iterator::$patina_witness'(),
                                                                      _iter@6_0)
                 of
                 nil ->
@@ -774,8 +747,7 @@ first_pair_with_sum(_xs@0_0, _sum@1_0) ->
                                     _visited@1_0) ->
     _ = begin
             case
-                'Elixir.Patina.Core.ListIter':'Core::Iterator::next'({'impl Core::Iterator for Core::ListIter<_>',
-                                                                      'Elixir.Patina.Core.ListIter'},
+                'Elixir.Patina.Core.ListIter':'Core::Iterator::next'('Elixir.Patina.Core.ListIter':'Core::Iterator::$patina_witness'(),
                                                                      _iter@2_0)
                 of
                 nil ->
@@ -793,8 +765,7 @@ first_pair_with_sum(_xs@0_0, _sum@1_0) ->
                     _iter@2_1 = _next@4_0,
                     begin
                         case
-                            'Elixir.Patina.Core.List':'Core::IntoIterator::into_iter'({'impl Core::IntoIterator for [_]',
-                                                                                       'Elixir.Patina.Core.List'},
+                            'Elixir.Patina.Core.List':'Core::IntoIterator::into_iter'('Elixir.Patina.Core.List':'Core::IntoIterator::$patina_witness'(),
                                                                                       _row@3_0)
                             of
                             _iter@6_0 ->
@@ -821,8 +792,7 @@ first_pair_with_sum(_xs@0_0, _sum@1_0) ->
 count_skipping_rows(_rows@0_0) ->
     _visited@1_0 = 0,
     case
-        'Elixir.Patina.Core.List':'Core::IntoIterator::into_iter'({'impl Core::IntoIterator for [_]',
-                                                                   'Elixir.Patina.Core.List'},
+        'Elixir.Patina.Core.List':'Core::IntoIterator::into_iter'('Elixir.Patina.Core.List':'Core::IntoIterator::$patina_witness'(),
                                                                   _rows@0_0)
         of
         _iter@2_0 ->
@@ -838,8 +808,7 @@ count_skipping_rows(_rows@0_0) ->
 'countdown$patina_loop_1'(_iter@2_0, _seen@1_0) ->
     _ = begin
             case
-                'Elixir.Patina.ForLoops.Countdown':'Core::Iterator::next'({'impl Core::Iterator for ForLoops::Countdown',
-                                                                           'Elixir.Patina.ForLoops.Countdown'},
+                'Elixir.Patina.ForLoops.Countdown':'Core::Iterator::next'('Elixir.Patina.ForLoops.Countdown':'Core::Iterator::$patina_witness'(),
                                                                           _iter@2_0)
                 of
                 nil ->
@@ -863,10 +832,7 @@ count_skipping_rows(_rows@0_0) ->
 countdown(_from@0_0) ->
     _seen@1_0 = [],
     case
-        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'({'impl Core::IntoIterator for _',
-                                                                    'Elixir.Patina.Core.$impl',
-                                                                    {'impl Core::Iterator for ForLoops::Countdown',
-                                                                     'Elixir.Patina.ForLoops.Countdown'}},
+        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'('Elixir.Patina.Core.$impl':'Core::IntoIterator::$patina_witness'({'Elixir.Patina.ForLoops.Countdown':'Core::Iterator::$patina_witness'()}),
                                                                    _from@0_0)
         of
         _iter@2_0 ->
@@ -878,6 +844,5 @@ countdown(_from@0_0) ->
     _seen@1_1.
 
 bag_count(_items@0_0) ->
-    count({{'impl Core::IntoIterator for ForLoops::Bag',
-            'Elixir.Patina.ForLoops.Bag'}},
+    count({'Elixir.Patina.ForLoops.Bag':'Core::IntoIterator::$patina_witness'()},
           _items@0_0).

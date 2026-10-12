@@ -34,8 +34,7 @@ str_value(_s@0_0) ->
     'Elixir.Patina.InherentTags.GenVal':'value<str>'(_s@0_0).
 
 name_f() ->
-    'Elixir.Patina.InherentTags.GenVal':f({{'impl InherentTags::Show for InherentTags::Name',
-                                            'Elixir.Patina.InherentTags.Name'}},
+    'Elixir.Patina.InherentTags.GenVal':f({'Elixir.Patina.InherentTags.Name':'InherentTags::Show::$patina_witness'()},
                                           'Elixir.Patina.InherentTags.Name').
 
 int_f(_n@0_0, _x@1_0) ->

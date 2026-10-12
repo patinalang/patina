@@ -9,7 +9,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'DisambiguatedNames::Show::show'/2]).
+         'DisambiguatedNames::Show::show'/2,
+         'DisambiguatedNames::Show::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -24,8 +25,13 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'DisambiguatedNames::Show::show'(_witness@0_0 =
-                                     {'impl DisambiguatedNames::Show for DisambiguatedNames::{impl#0}::local_type::Local',
-                                      _},
+'DisambiguatedNames::Show::show'(_witness_self@0_0 = {_,
+                                                      {},
+                                                      {}},
                                  _self@1_0) ->
     <<"local"/utf8>>.
+
+'DisambiguatedNames::Show::$patina_witness'() ->
+    {{fun 'Elixir.Patina.DisambiguatedNames.{impl#0}.local_type.Local':'DisambiguatedNames::Show::show'/2},
+     {},
+     {}}.

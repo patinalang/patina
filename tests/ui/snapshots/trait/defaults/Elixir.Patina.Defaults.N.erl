@@ -10,7 +10,7 @@
 
 -export(['__info__'/1,
          'Defaults::Inner::Doubler::base'/2,
-         'Defaults::Inner::Doubler::doubled'/2]).
+         'Defaults::Inner::Doubler::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,15 +25,14 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Inner::Doubler::base'(_witness@0_0 =
-                                     {'impl Defaults::Inner::Doubler for Defaults::N',
-                                      _},
+'Defaults::Inner::Doubler::base'(_witness_self@0_0 = {_,
+                                                      {},
+                                                      {}},
                                  _self@1_0) ->
     _self@1_0.
 
-'Defaults::Inner::Doubler::doubled'(_witness@0_0 =
-                                        {'impl Defaults::Inner::Doubler for Defaults::N',
-                                         _},
-                                    _arg@1_0) ->
-    'Elixir.Patina.Defaults.Inner':'Defaults::Inner::Doubler::doubled'(_witness@0_0,
-                                                                       _arg@1_0).
+'Defaults::Inner::Doubler::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Defaults.N':'Defaults::Inner::Doubler::base'/2,
+      fun 'Elixir.Patina.Defaults.Inner':'Defaults::Inner::Doubler::doubled'/2},
+     {},
+     {}}.

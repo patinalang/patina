@@ -10,7 +10,7 @@
 
 -export(['__info__'/1,
          'Defaults::Numbered::$patina_const::C'/1,
-         'Defaults::Numbered::$patina_const::D'/1]).
+         'Defaults::Numbered::$patina_witness'/1]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,24 +25,19 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Numbered::$patina_const::C'(_witness@0_0 =
-                                           {'impl Defaults::Numbered for Defaults::Plus<_>',
-                                            _,
-                                            _witness@1_0}) ->
-    (erlang:element(2,
-                    _witness@1_0)):'Defaults::Numbered::$patina_const::C'(_witness@1_0)
+'Defaults::Numbered::$patina_const::C'(_witness_self@0_0 =
+                                           {_,
+                                            {},
+                                            {_witness_where_clause@1_0}}) ->
+    (erlang:element(1,
+                    erlang:element(1,
+                                   _witness_where_clause@1_0)))(_witness_where_clause@1_0)
         + 10.
 
-'Defaults::Numbered::$patina_const::D'(_witness@0_0 =
-                                           {'impl Defaults::Numbered for Defaults::Plus<_>',
-                                            _,
-                                            _}) ->
-    'Elixir.Patina.Defaults':'Defaults::Numbered::$patina_const::D'(_witness@0_0).
-
-'Defaults::Numbered::consts'(_witness@0_0 =
-                                 {'impl Defaults::Numbered for Defaults::Plus<_>',
-                                  _,
-                                  _},
-                             _arg@1_0) ->
-    'Elixir.Patina.Defaults':'Defaults::Numbered::consts'(_witness@0_0,
-                                                          _arg@1_0).
+'Defaults::Numbered::$patina_witness'(_witness_bounds@1_0 =
+                                          {_witness_bound@0_0}) ->
+    {{fun 'Elixir.Patina.Defaults.Plus':'Defaults::Numbered::$patina_const::C'/1,
+      fun 'Elixir.Patina.Defaults':'Defaults::Numbered::$patina_const::D'/1,
+      fun 'Elixir.Patina.Defaults':'Defaults::Numbered::consts'/2},
+     {},
+     _witness_bounds@1_0}.

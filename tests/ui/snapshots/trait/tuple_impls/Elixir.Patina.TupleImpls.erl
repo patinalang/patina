@@ -26,49 +26,31 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-show_generic(_witness@1_0 = {_witness@0_0}, _t@2_0) ->
-    (erlang:element(2,
-                    _witness@0_0)):'TupleImpls::Show::show'(_witness@0_0,
-                                                            _t@2_0).
+show_generic(_witness_bounds@1_0 = {_witness_bound@0_0},
+             _t@2_0) ->
+    (erlang:element(1,
+                    erlang:element(1,
+                                   _witness_bound@0_0)))(_witness_bound@0_0,
+                                                         _t@2_0).
 
 show_unit() ->
-    'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::show'({'impl TupleImpls::Show for ()',
-                                                                          'Elixir.Patina.TupleImpls.$impl.Core.Tuple'},
-                                                                         {}).
+    'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::show<()>'('Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::$patina_witness<()>'(),
+                                                                             {}).
 
 show_pair(_n@0_0, _s@1_0) ->
-    'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::show'({'impl TupleImpls::Show for (_, _)',
-                                                                          'Elixir.Patina.TupleImpls.$impl.Core.Tuple',
-                                                                          {'impl TupleImpls::Show for int',
-                                                                           'Elixir.Patina.TupleImpls.$impl.Core.Int'},
-                                                                          {'impl TupleImpls::Show for str',
-                                                                           'Elixir.Patina.TupleImpls.$impl.Core.Str'}},
-                                                                         {_n@0_0,
-                                                                          _s@1_0}).
+    'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::show<(_, _)>'('Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::$patina_witness<(_, _)>'({'Elixir.Patina.TupleImpls.$impl.Core.Int':'TupleImpls::Show::$patina_witness'(),
+                                                                                                                                                                          'Elixir.Patina.TupleImpls.$impl.Core.Str':'TupleImpls::Show::$patina_witness'()}),
+                                                                                 {_n@0_0,
+                                                                                  _s@1_0}).
 
 show_generic_all(_n@0_0, _s@1_0) ->
-    <<<<(show_generic({{'impl TupleImpls::Show for (_,)',
-                        'Elixir.Patina.TupleImpls.$impl.Core.Tuple',
-                        {'impl TupleImpls::Show for int',
-                         'Elixir.Patina.TupleImpls.$impl.Core.Int'}}},
+    <<<<(show_generic({'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::$patina_witness<(_,)>'({'Elixir.Patina.TupleImpls.$impl.Core.Int':'TupleImpls::Show::$patina_witness'()})},
                       {_n@0_0}))/binary,
-        (show_generic({{'impl TupleImpls::Show for (_, _)',
-                        'Elixir.Patina.TupleImpls.$impl.Core.Tuple',
-                        {'impl TupleImpls::Show for int',
-                         'Elixir.Patina.TupleImpls.$impl.Core.Int'},
-                        {'impl TupleImpls::Show for str',
-                         'Elixir.Patina.TupleImpls.$impl.Core.Str'}}},
+        (show_generic({'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::$patina_witness<(_, _)>'({'Elixir.Patina.TupleImpls.$impl.Core.Int':'TupleImpls::Show::$patina_witness'(),
+                                                                                                                'Elixir.Patina.TupleImpls.$impl.Core.Str':'TupleImpls::Show::$patina_witness'()})},
                       {_n@0_0, _s@1_0}))/binary>>/binary,
-      (show_generic({{'impl TupleImpls::Show for (_, _, _)',
-                      'Elixir.Patina.TupleImpls.$impl.Core.Tuple',
-                      {'impl TupleImpls::Show for int',
-                       'Elixir.Patina.TupleImpls.$impl.Core.Int'},
-                      {'impl TupleImpls::Show for str',
-                       'Elixir.Patina.TupleImpls.$impl.Core.Str'},
-                      {'impl TupleImpls::Show for (_, _)',
-                       'Elixir.Patina.TupleImpls.$impl.Core.Tuple',
-                       {'impl TupleImpls::Show for int',
-                        'Elixir.Patina.TupleImpls.$impl.Core.Int'},
-                       {'impl TupleImpls::Show for ()',
-                        'Elixir.Patina.TupleImpls.$impl.Core.Tuple'}}}},
+      (show_generic({'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::$patina_witness<(_, _, _)>'({'Elixir.Patina.TupleImpls.$impl.Core.Int':'TupleImpls::Show::$patina_witness'(),
+                                                                                                                 'Elixir.Patina.TupleImpls.$impl.Core.Str':'TupleImpls::Show::$patina_witness'(),
+                                                                                                                 'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::$patina_witness<(_, _)>'({'Elixir.Patina.TupleImpls.$impl.Core.Int':'TupleImpls::Show::$patina_witness'(),
+                                                                                                                                                                                                          'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::$patina_witness<()>'()})})},
                     {_n@0_0, _s@1_0, {_n@0_0, {}}}))/binary>>.

@@ -6,7 +6,7 @@ defmodule Trait01Test do
 
   alias Patina.Trait01.Sheep
 
-  @sheep_witness {:"impl Trait01::Animal for Trait01::Sheep", Sheep}
+  @sheep_witness Sheep."Trait01::Animal::$patina_witness"()
 
   defp dolly, do: Sheep."Trait01::Animal::new"(@sheep_witness, "Dolly")
 

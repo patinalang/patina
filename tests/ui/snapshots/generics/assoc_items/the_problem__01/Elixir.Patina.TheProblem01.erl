@@ -25,15 +25,17 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-difference(_witness@1_0 = {_witness@0_0},
+difference(_witness_bounds@1_0 = {_witness_bound@0_0},
            _container@2_0) ->
-    (erlang:element(2,
-                    _witness@0_0)):'TheProblem01::Contains::last'(_witness@0_0,
-                                                                  _container@2_0)
+    (erlang:element(3,
+                    erlang:element(1,
+                                   _witness_bound@0_0)))(_witness_bound@0_0,
+                                                         _container@2_0)
         -
         (erlang:element(2,
-                        _witness@0_0)):'TheProblem01::Contains::first'(_witness@0_0,
-                                                                       _container@2_0).
+                        erlang:element(1,
+                                       _witness_bound@0_0)))(_witness_bound@0_0,
+                                                             _container@2_0).
 
 main() ->
     _number_1@0_0 = 3,
@@ -48,37 +50,33 @@ main() ->
                        io_lib:format("~ktp", [_number_2@1_0]),
                        <<": "/utf8>>,
                        io_lib:format("~ktp",
-                                     ['Elixir.Patina.TheProblem01.Container':'TheProblem01::Contains::contains'({'impl TheProblem01::Contains<int, int> for TheProblem01::Container',
-                                                                                                                 'Elixir.Patina.TheProblem01.Container'},
-                                                                                                                _container@2_0,
-                                                                                                                _number_1@0_0,
-                                                                                                                _number_2@1_0)])]]),
+                                     ['Elixir.Patina.TheProblem01.Container':'TheProblem01::Contains<int, int>::contains'('Elixir.Patina.TheProblem01.Container':'TheProblem01::Contains<int, int>::$patina_witness'(),
+                                                                                                                          _container@2_0,
+                                                                                                                          _number_1@0_0,
+                                                                                                                          _number_2@1_0)])]]),
         io:nl(),
         {}
     end,
     begin
         io:put_chars([[<<"First number: "/utf8>>,
                        io_lib:format("~ktp",
-                                     ['Elixir.Patina.TheProblem01.Container':'TheProblem01::Contains::first'({'impl TheProblem01::Contains<int, int> for TheProblem01::Container',
-                                                                                                              'Elixir.Patina.TheProblem01.Container'},
-                                                                                                             _container@2_0)])]]),
+                                     ['Elixir.Patina.TheProblem01.Container':'TheProblem01::Contains<int, int>::first'('Elixir.Patina.TheProblem01.Container':'TheProblem01::Contains<int, int>::$patina_witness'(),
+                                                                                                                       _container@2_0)])]]),
         io:nl(),
         {}
     end,
     begin
         io:put_chars([[<<"Last number: "/utf8>>,
                        io_lib:format("~ktp",
-                                     ['Elixir.Patina.TheProblem01.Container':'TheProblem01::Contains::last'({'impl TheProblem01::Contains<int, int> for TheProblem01::Container',
-                                                                                                             'Elixir.Patina.TheProblem01.Container'},
-                                                                                                            _container@2_0)])]]),
+                                     ['Elixir.Patina.TheProblem01.Container':'TheProblem01::Contains<int, int>::last'('Elixir.Patina.TheProblem01.Container':'TheProblem01::Contains<int, int>::$patina_witness'(),
+                                                                                                                      _container@2_0)])]]),
         io:nl(),
         {}
     end,
     begin
         io:put_chars([[<<"The difference is: "/utf8>>,
                        io_lib:format("~ktp",
-                                     [difference({{'impl TheProblem01::Contains<int, int> for TheProblem01::Container',
-                                                   'Elixir.Patina.TheProblem01.Container'}},
+                                     [difference({'Elixir.Patina.TheProblem01.Container':'TheProblem01::Contains<int, int>::$patina_witness'()},
                                                  _container@2_0)])]]),
         io:nl(),
         {}

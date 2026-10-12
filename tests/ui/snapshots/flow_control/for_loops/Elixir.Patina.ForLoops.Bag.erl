@@ -11,7 +11,8 @@
 -export(['__info__'/1,
          'Core::IntoIterator::$patina_type::Item'/1,
          'Core::IntoIterator::$patina_type::IntoIter'/1,
-         'Core::IntoIterator::into_iter'/2]).
+         'Core::IntoIterator::into_iter'/2,
+         'Core::IntoIterator::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -26,19 +27,23 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Core::IntoIterator::$patina_type::Item'(_witness@0_0 =
-                                             {'impl Core::IntoIterator for ForLoops::Bag',
-                                              _}) ->
+'Core::IntoIterator::$patina_type::Item'(_witness_self@0_0 =
+                                             {_, {}, {}}) ->
     {}.
 
-'Core::IntoIterator::$patina_type::IntoIter'(_witness@0_0 =
-                                                 {'impl Core::IntoIterator for ForLoops::Bag',
-                                                  _}) ->
-    {{'impl Core::Iterator for Core::ListIter<_>',
-      'Elixir.Patina.Core.ListIter'}}.
+'Core::IntoIterator::$patina_type::IntoIter'(_witness_self@0_0 =
+                                                 {_, {}, {}}) ->
+    {'Elixir.Patina.Core.ListIter':'Core::Iterator::$patina_witness'()}.
 
-'Core::IntoIterator::into_iter'(_witness@0_0 =
-                                    {'impl Core::IntoIterator for ForLoops::Bag',
-                                     _},
+'Core::IntoIterator::into_iter'(_witness_self@0_0 = {_,
+                                                     {},
+                                                     {}},
                                 _self@1_0) ->
     'Elixir.Patina.Core.List':iter(_self@1_0).
+
+'Core::IntoIterator::$patina_witness'() ->
+    {{fun 'Elixir.Patina.ForLoops.Bag':'Core::IntoIterator::$patina_type::Item'/1,
+      fun 'Elixir.Patina.ForLoops.Bag':'Core::IntoIterator::$patina_type::IntoIter'/1,
+      fun 'Elixir.Patina.ForLoops.Bag':'Core::IntoIterator::into_iter'/2},
+     {},
+     {}}.

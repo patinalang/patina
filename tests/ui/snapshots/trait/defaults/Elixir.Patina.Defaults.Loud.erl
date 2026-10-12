@@ -8,7 +8,9 @@
 
 -export_record([]).
 
--export(['__info__'/1, 'Defaults::Ring::ring'/4]).
+-export(['__info__'/1,
+         'Defaults::Ring::ring'/4,
+         'Defaults::Ring::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -23,9 +25,15 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Ring::ring'(_witness@0_0 =
-                           {'impl Defaults::Ring for Defaults::Loud', _},
-                       _witness@2_0 = {_witness@1_0}, _self@3_0, _t@4_0) ->
-    (erlang:element(2,
-                    _witness@1_0)):'Defaults::Tag::tag'(_witness@1_0,
-                                                        _t@4_0).
+'Defaults::Ring::ring'(_witness_self@0_0 = {_, {}, {}},
+                       _witness_bounds@2_0 = {_witness_bound@1_0}, _self@3_0,
+                       _t@4_0) ->
+    (erlang:element(1,
+                    erlang:element(1,
+                                   _witness_bound@1_0)))(_witness_bound@1_0,
+                                                         _t@4_0).
+
+'Defaults::Ring::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Defaults.Loud':'Defaults::Ring::ring'/4},
+     {},
+     {}}.

@@ -28,40 +28,40 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-labelled(_witness@2_0 = {_witness@0_0, _witness@1_0},
+labelled(_witness_bounds@2_0 = {_witness_bound@0_0,
+                                _witness_bound@1_0},
          _t@3_0) ->
-    (erlang:element(2,
-                    _witness@1_0)):'ImpliedAssocBound::Label::label'(_witness@1_0,
-                                                                     (erlang:element(2,
-                                                                                     _witness@0_0)):'ImpliedAssocBound::HasItem::item'(_witness@0_0,
-                                                                                                                                       _t@3_0)).
+    (erlang:element(1,
+                    erlang:element(1,
+                                   _witness_bound@1_0)))(_witness_bound@1_0,
+                                                         (erlang:element(2,
+                                                                         erlang:element(1,
+                                                                                        _witness_bound@0_0)))(_witness_bound@0_0,
+                                                                                                              _t@3_0)).
 
-labelled_with_items(_witness@1_0 = {_witness@0_0},
+labelled_with_items(_witness_bounds@1_0 =
+                        {_witness_bound@0_0},
                     _t@2_0) ->
     begin
-        _witness@4_0 = erlang:element(4, _witness@0_0),
-        (erlang:element(2,
-                        _witness@4_0)):'ImpliedAssocBound::Label::label'(_witness@4_0,
-                                                                         begin
-                                                                             _witness@3_0 =
-                                                                                 erlang:element(3,
-                                                                                                _witness@0_0),
-                                                                             (erlang:element(2,
-                                                                                             _witness@3_0)):'ImpliedAssocBound::HasItem::item'(_witness@3_0,
-                                                                                                                                               _t@2_0)
-                                                                         end)
+        _witness@4_0 = erlang:element(2,
+                                      erlang:element(2, _witness_bound@0_0)),
+        (erlang:element(1,
+                        erlang:element(1, _witness@4_0)))(_witness@4_0,
+                                                          begin
+                                                              _witness@3_0 =
+                                                                  erlang:element(1,
+                                                                                 erlang:element(2,
+                                                                                                _witness_bound@0_0)),
+                                                              (erlang:element(2,
+                                                                              erlang:element(1,
+                                                                                             _witness@3_0)))(_witness@3_0,
+                                                                                                             _t@2_0)
+                                                          end)
     end.
 
 crate_labels() ->
-    {labelled({{'impl ImpliedAssocBound::HasItem for ImpliedAssocBound::Crate',
-                'Elixir.Patina.ImpliedAssocBound.Crate'},
-               {'impl ImpliedAssocBound::Label for ImpliedAssocBound::Tag',
-                'Elixir.Patina.ImpliedAssocBound.Tag'}},
+    {labelled({'Elixir.Patina.ImpliedAssocBound.Crate':'ImpliedAssocBound::HasItem::$patina_witness'(),
+               'Elixir.Patina.ImpliedAssocBound.Tag':'ImpliedAssocBound::Label::$patina_witness'()},
               'Elixir.Patina.ImpliedAssocBound.Crate'),
-     labelled_with_items({{'impl ImpliedAssocBound::LabelledWithItems for ImpliedAssocBound::Crate',
-                           'Elixir.Patina.ImpliedAssocBound.Crate',
-                           {'impl ImpliedAssocBound::HasItem for ImpliedAssocBound::Crate',
-                            'Elixir.Patina.ImpliedAssocBound.Crate'},
-                           {'impl ImpliedAssocBound::Label for ImpliedAssocBound::Tag',
-                            'Elixir.Patina.ImpliedAssocBound.Tag'}}},
+     labelled_with_items({'Elixir.Patina.ImpliedAssocBound.Crate':'ImpliedAssocBound::LabelledWithItems::$patina_witness'()},
                          'Elixir.Patina.ImpliedAssocBound.Crate')}.

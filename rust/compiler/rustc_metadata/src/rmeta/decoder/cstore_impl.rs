@@ -232,7 +232,6 @@ provide! { tcx, def_id, other, cdata,
     fn_sig => { table }
     codegen_fn_attrs => { table }
     impl_trait_header => { table }
-    erl_impl_tag => { table }
     erl_fn_name => { table }
     etir_body => { table }
     const_param_default => { table }

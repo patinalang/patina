@@ -10,7 +10,8 @@
 
 -export(['__info__'/1,
          '$patina_constructor__Point'/2,
-         'Dispatch::Area::area'/2]).
+         'Dispatch::Area::area'/2,
+         'Dispatch::Area::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -30,8 +31,7 @@
 '$patina_constructor__Point'(_x@0_0, _y@1_0) ->
     #'Point'{x = _x@0_0, y = _y@1_0}.
 
-'Dispatch::Area::area'(_witness@0_0 =
-                           {'impl Dispatch::Area for Dispatch::Point', _},
+'Dispatch::Area::area'(_witness_self@0_0 = {_, {}, {}},
                        _self@1_0) ->
     begin
         io:put_chars([[<<"Area::area("/utf8>>,
@@ -41,3 +41,8 @@
         {}
     end,
     _self@1_0#'Point'.x * _self@1_0#'Point'.y.
+
+'Dispatch::Area::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Dispatch.Point':'Dispatch::Area::area'/2},
+     {},
+     {}}.

@@ -11,7 +11,8 @@
 
 -export(['__info__'/1,
          'AssocBound::Iter::$patina_type::Item'/1,
-         'AssocBound::Iter::next'/2]).
+         'AssocBound::Iter::next'/2,
+         'AssocBound::Iter::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -26,14 +27,18 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'AssocBound::Iter::$patina_type::Item'(_witness@0_0 =
-                                           {'impl AssocBound::Iter for AssocBound::Counter',
-                                            _}) ->
-    {{'impl AssocBound::Show for int',
-      'Elixir.Patina.AssocBound.$impl.Core.Int'}}.
+'AssocBound::Iter::$patina_type::Item'(_witness_self@0_0 =
+                                           {_, {}, {}}) ->
+    {'Elixir.Patina.AssocBound.$impl.Core.Int':'AssocBound::Show::$patina_witness'()}.
 
-'AssocBound::Iter::next'(_witness@0_0 =
-                             {'impl AssocBound::Iter for AssocBound::Counter',
-                              _},
+'AssocBound::Iter::next'(_witness_self@0_0 = {_,
+                                              {},
+                                              {}},
                          _self@1_0) ->
     _self@1_0.
+
+'AssocBound::Iter::$patina_witness'() ->
+    {{fun 'Elixir.Patina.AssocBound.Counter':'AssocBound::Iter::$patina_type::Item'/1,
+      fun 'Elixir.Patina.AssocBound.Counter':'AssocBound::Iter::next'/2},
+     {},
+     {}}.

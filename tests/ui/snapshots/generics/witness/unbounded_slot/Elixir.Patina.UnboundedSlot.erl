@@ -25,8 +25,7 @@
 '__info__'(Key) -> module_info(Key).
 
 call(_h@0_0) ->
-    'Elixir.Patina.UnboundedSlot.Holder':'UnboundedSlot::Tr::method'({'impl UnboundedSlot::Tr for UnboundedSlot::Holder<_>',
-                                                                      'Elixir.Patina.UnboundedSlot.Holder'},
+    'Elixir.Patina.UnboundedSlot.Holder':'UnboundedSlot::Tr::method'('Elixir.Patina.UnboundedSlot.Holder':'UnboundedSlot::Tr::$patina_witness'(),
                                                                      _h@0_0).
 
 main() ->

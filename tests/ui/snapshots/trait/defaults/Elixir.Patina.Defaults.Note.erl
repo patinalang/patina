@@ -8,7 +8,9 @@
 
 -export_record([]).
 
--export(['__info__'/1, 'Defaults::Value::value'/2]).
+-export(['__info__'/1,
+         'Defaults::Value::value'/2,
+         'Defaults::Value::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -23,7 +25,13 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Value::value'(_witness@0_0 =
-                             {'impl Defaults::Value for Defaults::Note', _},
+'Defaults::Value::value'(_witness_self@0_0 = {_,
+                                              {},
+                                              {}},
                          _self@1_0) ->
     _self@1_0 * 10.
+
+'Defaults::Value::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Defaults.Note':'Defaults::Value::value'/2},
+     {},
+     {}}.

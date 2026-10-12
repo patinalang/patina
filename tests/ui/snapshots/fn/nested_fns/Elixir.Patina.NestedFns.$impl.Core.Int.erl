@@ -8,7 +8,9 @@
 
 -export_record([]).
 
--export(['__info__'/1, 'NestedFns::Show::show'/2]).
+-export(['__info__'/1,
+         'NestedFns::Show::show'/2,
+         'NestedFns::Show::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -23,7 +25,11 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'NestedFns::Show::show'(_witness@0_0 =
-                            {'impl NestedFns::Show for int', _},
+'NestedFns::Show::show'(_witness_self@0_0 = {_, {}, {}},
                         _self@1_0) ->
     <<"int"/utf8>>.
+
+'NestedFns::Show::$patina_witness'() ->
+    {{fun 'Elixir.Patina.NestedFns.$impl.Core.Int':'NestedFns::Show::show'/2},
+     {},
+     {}}.

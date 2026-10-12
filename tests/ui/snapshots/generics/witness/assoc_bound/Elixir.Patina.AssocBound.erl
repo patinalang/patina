@@ -24,19 +24,21 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-first(_witness@1_0 = {_witness@0_0}, _i@2_0) ->
+first(_witness_bounds@1_0 = {_witness_bound@0_0},
+      _i@2_0) ->
     begin
         _witness@3_0 = erlang:element(1,
-                                      (erlang:element(2,
-                                                      _witness@0_0)):'AssocBound::Iter::$patina_type::Item'(_witness@0_0)),
-        (erlang:element(2,
-                        _witness@3_0)):'AssocBound::Show::show'(_witness@3_0,
-                                                                (erlang:element(2,
-                                                                                _witness@0_0)):'AssocBound::Iter::next'(_witness@0_0,
-                                                                                                                        _i@2_0))
+                                      (erlang:element(1,
+                                                      erlang:element(1,
+                                                                     _witness_bound@0_0)))(_witness_bound@0_0)),
+        (erlang:element(1,
+                        erlang:element(1, _witness@3_0)))(_witness@3_0,
+                                                          (erlang:element(2,
+                                                                          erlang:element(1,
+                                                                                         _witness_bound@0_0)))(_witness_bound@0_0,
+                                                                                                               _i@2_0))
     end.
 
 counter_first(_n@0_0) ->
-    first({{'impl AssocBound::Iter for AssocBound::Counter',
-            'Elixir.Patina.AssocBound.Counter'}},
+    first({'Elixir.Patina.AssocBound.Counter':'AssocBound::Iter::$patina_witness'()},
           _n@0_0).

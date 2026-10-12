@@ -11,7 +11,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'TraitArgumentPatterns::Contains::contains'/4]).
+         'TraitArgumentPatterns::Contains<int, TraitArgumentPatterns::Wrapped<_>>::contains'/4,
+         'TraitArgumentPatterns::Contains<int, TraitArgumentPatterns::Wrapped<_>>::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -26,10 +27,13 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'TraitArgumentPatterns::Contains::contains'(_witness@0_0 =
-                                                {'impl TraitArgumentPatterns::Contains<int, TraitArgumentPatterns::Wrapped<_>> for TraitArgumentPatterns::NestedContainer',
-                                                 _},
-                                            _self@1_0, _a@2_0, _wrapped@3_0) ->
+'TraitArgumentPatterns::Contains<int, TraitArgumentPatterns::Wrapped<_>>::contains'(_witness_self@0_0 =
+                                                                                        {_,
+                                                                                         {},
+                                                                                         {}},
+                                                                                    _self@1_0,
+                                                                                    _a@2_0,
+                                                                                    _wrapped@3_0) ->
     begin
         io:put_chars([[<<"NestedContainer::contains("/utf8>>,
                        io_lib:format("~ktp", [_self@1_0]),
@@ -42,3 +46,8 @@
         {}
     end,
     true.
+
+'TraitArgumentPatterns::Contains<int, TraitArgumentPatterns::Wrapped<_>>::$patina_witness'() ->
+    {{fun 'Elixir.Patina.TraitArgumentPatterns.NestedContainer':'TraitArgumentPatterns::Contains<int, TraitArgumentPatterns::Wrapped<_>>::contains'/4},
+     {},
+     {}}.

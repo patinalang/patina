@@ -54,7 +54,7 @@ defmodule LoopsTest do
   defp loop_helpers(module, fun_name) do
     for {name, _arity} <- module.module_info(:functions),
         name = Atom.to_string(name),
-        String.contains?(name, fun_name <> "$patina_loop_"),
+        String.starts_with?(name, fun_name) and String.contains?(name, "$patina_loop_"),
         into: MapSet.new(),
         do: name
   end
@@ -64,11 +64,11 @@ defmodule LoopsTest do
              MapSet.new(for n <- 1..5, do: "helper_names$patina_loop_#{n}")
   end
 
-  test "loop helpers in trait impls are named after the impl" do
-    assert loop_helpers(Loops.Counter, "count") ==
+  test "loop helpers in trait impls are named after the impl's function" do
+    assert loop_helpers(Loops.Counter, "Loops::Count::count") ==
              MapSet.new([
-               "<impl Loops::Count for Loops::Counter<int>>::count$patina_loop_1",
-               "<impl Loops::Count for Loops::Counter<str>>::count$patina_loop_1"
+               "Loops::Count::count<int>$patina_loop_1",
+               "Loops::Count::count<str>$patina_loop_1"
              ])
   end
 end

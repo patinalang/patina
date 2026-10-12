@@ -10,7 +10,9 @@
 
 -export(['__info__'/1,
          'BlanketImpl::Describe::describe'/2,
-         'BlanketImpl::Nested::Twice::twice'/2]).
+         'BlanketImpl::Describe::$patina_witness'/1,
+         'BlanketImpl::Nested::Twice::twice'/2,
+         'BlanketImpl::Nested::Twice::$patina_witness'/1]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,29 +27,35 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'BlanketImpl::Describe::describe'(_witness@0_0 =
-                                      {'impl BlanketImpl::Describe for _',
-                                       _,
-                                       _witness@1_0},
+'BlanketImpl::Describe::describe'(_witness_self@0_0 =
+                                      {_, {}, {_witness_where_clause@1_0}},
                                   _self@2_0) ->
-    'Elixir.Patina.BlanketImpl':wrap((erlang:element(2,
-                                                     _witness@1_0)):'BlanketImpl::Show::show'(_witness@1_0,
-                                                                                              _self@2_0)).
+    'Elixir.Patina.BlanketImpl':wrap((erlang:element(1,
+                                                     erlang:element(1,
+                                                                    _witness_where_clause@1_0)))(_witness_where_clause@1_0,
+                                                                                                 _self@2_0)).
 
-'BlanketImpl::Describe::shout'(_witness@0_0 =
-                                   {'impl BlanketImpl::Describe for _', _, _},
-                               _arg@1_0) ->
-    'Elixir.Patina.BlanketImpl':'BlanketImpl::Describe::shout'(_witness@0_0,
-                                                               _arg@1_0).
+'BlanketImpl::Describe::$patina_witness'(_witness_bounds@1_0 =
+                                             {_witness_bound@0_0}) ->
+    {{fun 'Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Describe::describe'/2,
+      fun 'Elixir.Patina.BlanketImpl':'BlanketImpl::Describe::shout'/2},
+     {},
+     _witness_bounds@1_0}.
 
-'BlanketImpl::Nested::Twice::twice'(_witness@0_0 =
-                                        {'impl BlanketImpl::Nested::Twice for _',
-                                         _,
-                                         _witness@1_0},
+'BlanketImpl::Nested::Twice::twice'(_witness_self@0_0 =
+                                        {_, {}, {_witness_where_clause@1_0}},
                                     _self@2_0) ->
-    <<((erlang:element(2,
-                       _witness@1_0)):'BlanketImpl::Describe::describe'(_witness@1_0,
-                                                                        _self@2_0))/binary,
-      ((erlang:element(2,
-                       _witness@1_0)):'BlanketImpl::Describe::describe'(_witness@1_0,
-                                                                        _self@2_0))/binary>>.
+    <<((erlang:element(1,
+                       erlang:element(1,
+                                      _witness_where_clause@1_0)))(_witness_where_clause@1_0,
+                                                                   _self@2_0))/binary,
+      ((erlang:element(1,
+                       erlang:element(1,
+                                      _witness_where_clause@1_0)))(_witness_where_clause@1_0,
+                                                                   _self@2_0))/binary>>.
+
+'BlanketImpl::Nested::Twice::$patina_witness'(_witness_bounds@1_0 =
+                                                  {_witness_bound@0_0}) ->
+    {{fun 'Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Nested::Twice::twice'/2},
+     {},
+     _witness_bounds@1_0}.

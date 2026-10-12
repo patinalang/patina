@@ -8,7 +8,9 @@
 
 -export_record([]).
 
--export(['__info__'/1, bump/1]).
+-export(['__info__'/1,
+         bump/1,
+         'NestedFns::nested_trait::Answer::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -27,9 +29,7 @@ bump(_self@0_0) ->
     _self@0_0 +
         'Elixir.Patina.NestedFns':'from_impl::base'().
 
-'NestedFns::nested_trait::Answer::answer'(_witness@0_0 =
-                                              {'impl NestedFns::nested_trait::Answer for NestedFns::Counter',
-                                               _},
-                                          _arg@1_0) ->
-    'Elixir.Patina.NestedFns':'NestedFns::nested_trait::Answer::answer'(_witness@0_0,
-                                                                        _arg@1_0).
+'NestedFns::nested_trait::Answer::$patina_witness'() ->
+    {{fun 'Elixir.Patina.NestedFns':'NestedFns::nested_trait::Answer::answer'/2},
+     {},
+     {}}.

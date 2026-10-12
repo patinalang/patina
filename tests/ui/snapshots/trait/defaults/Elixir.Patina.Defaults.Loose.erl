@@ -10,7 +10,8 @@
 
 -export(['__info__'/1,
          'Defaults::Container::$patina_type::Item'/1,
-         'Defaults::Container::get'/2]).
+         'Defaults::Container::get'/2,
+         'Defaults::Container::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,21 +26,19 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Container::$patina_type::Item'(_witness@0_0 =
-                                              {'impl Defaults::Container for Defaults::Loose<_>',
-                                               _}) ->
+'Defaults::Container::$patina_type::Item'(_witness_self@0_0 =
+                                              {_, {}, {}}) ->
     {}.
 
-'Defaults::Container::get'(_witness@0_0 =
-                               {'impl Defaults::Container for Defaults::Loose<_>',
-                                _},
+'Defaults::Container::get'(_witness_self@0_0 = {_,
+                                                {},
+                                                {}},
                            _self@1_0) ->
     _self@1_0.
 
-'Defaults::Container::needs_item_witness'(_witness@0_0 =
-                                              {'impl Defaults::Container for Defaults::Loose<_>',
-                                               _},
-                                          _arg@1_0, _arg@2_0) ->
-    'Elixir.Patina.Defaults':'Defaults::Container::needs_item_witness'(_witness@0_0,
-                                                                       _arg@1_0,
-                                                                       _arg@2_0).
+'Defaults::Container::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Defaults.Loose':'Defaults::Container::$patina_type::Item'/1,
+      fun 'Elixir.Patina.Defaults.Loose':'Defaults::Container::get'/2,
+      fun 'Elixir.Patina.Defaults':'Defaults::Container::needs_item_witness'/3},
+     {},
+     {}}.

@@ -1989,7 +1989,6 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
             if of_trait {
                 let header = tcx.impl_trait_header(def_id);
                 record!(self.tables.impl_trait_header[def_id] <- header);
-                record!(self.tables.erl_impl_tag[def_id] <- tcx.erl_impl_tag(def_id));
 
                 self.tables.defaultness.set(def_id.index, tcx.defaultness(def_id));
 

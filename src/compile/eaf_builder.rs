@@ -823,18 +823,6 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         eaf::ModuleForm::Function(span.into_anno(self.source_map), name.into(), arity, clauses)
     }
 
-    pub(crate) fn simple_function(
-        &self,
-        span: impl IntoAnno,
-        name: Symbol,
-        params: impl IntoIterator<Item = eaf::Pattern<'arena>>,
-        body: eaf::Expr<'arena>,
-    ) -> eaf::ModuleForm<'arena> {
-        let anno = span.into_anno(self.source_map);
-        let clause = self.clause(anno, params, None, body);
-        self.function(anno, name, clause.patterns.len() as u32, [clause])
-    }
-
     pub(crate) fn module(
         &self,
         forms: impl IntoIterator<Item = eaf::ModuleForm<'arena>>,

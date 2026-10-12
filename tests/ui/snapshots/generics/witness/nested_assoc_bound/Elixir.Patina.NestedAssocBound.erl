@@ -25,27 +25,31 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-nested_label(_witness@1_0 = {_witness@0_0}, _t@2_0) ->
+nested_label(_witness_bounds@1_0 = {_witness_bound@0_0},
+             _t@2_0) ->
     begin
         _witness@4_0 = erlang:element(2,
-                                      (erlang:element(2,
-                                                      _witness@0_0)):'NestedAssocBound::Outer::$patina_type::Inner'(_witness@0_0)),
-        (erlang:element(2,
-                        _witness@4_0)):'NestedAssocBound::Label::label'(_witness@4_0,
-                                                                        begin
-                                                                            _witness@3_0 =
-                                                                                erlang:element(1,
-                                                                                               (erlang:element(2,
-                                                                                                               _witness@0_0)):'NestedAssocBound::Outer::$patina_type::Inner'(_witness@0_0)),
-                                                                            (erlang:element(2,
-                                                                                            _witness@3_0)):'NestedAssocBound::HasItem::item'(_witness@3_0,
-                                                                                                                                             (erlang:element(2,
-                                                                                                                                                             _witness@0_0)):'NestedAssocBound::Outer::inner'(_witness@0_0,
-                                                                                                                                                                                                             _t@2_0))
-                                                                        end)
+                                      (erlang:element(1,
+                                                      erlang:element(1,
+                                                                     _witness_bound@0_0)))(_witness_bound@0_0)),
+        (erlang:element(1,
+                        erlang:element(1, _witness@4_0)))(_witness@4_0,
+                                                          begin
+                                                              _witness@3_0 =
+                                                                  erlang:element(1,
+                                                                                 (erlang:element(1,
+                                                                                                 erlang:element(1,
+                                                                                                                _witness_bound@0_0)))(_witness_bound@0_0)),
+                                                              (erlang:element(2,
+                                                                              erlang:element(1,
+                                                                                             _witness@3_0)))(_witness@3_0,
+                                                                                                             (erlang:element(2,
+                                                                                                                             erlang:element(1,
+                                                                                                                                            _witness_bound@0_0)))(_witness_bound@0_0,
+                                                                                                                                                                  _t@2_0))
+                                                          end)
     end.
 
 root_label() ->
-    nested_label({{'impl NestedAssocBound::Outer for NestedAssocBound::Root',
-                   'Elixir.Patina.NestedAssocBound.Root'}},
+    nested_label({'Elixir.Patina.NestedAssocBound.Root':'NestedAssocBound::Outer::$patina_witness'()},
                  'Elixir.Patina.NestedAssocBound.Root').

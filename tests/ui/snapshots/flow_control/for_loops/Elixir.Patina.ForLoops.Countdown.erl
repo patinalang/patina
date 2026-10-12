@@ -10,7 +10,8 @@
 
 -export(['__info__'/1,
          'Core::Iterator::$patina_type::Item'/1,
-         'Core::Iterator::next'/2]).
+         'Core::Iterator::next'/2,
+         'Core::Iterator::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,15 +26,19 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Core::Iterator::$patina_type::Item'(_witness@0_0 =
-                                         {'impl Core::Iterator for ForLoops::Countdown',
-                                          _}) ->
+'Core::Iterator::$patina_type::Item'(_witness_self@0_0 =
+                                         {_, {}, {}}) ->
     {}.
 
-'Core::Iterator::next'(_witness@0_0 =
-                           {'impl Core::Iterator for ForLoops::Countdown', _},
+'Core::Iterator::next'(_witness_self@0_0 = {_, {}, {}},
                        _self@1_0) ->
     case _self@1_0 =:= 0 of
         true -> nil;
         false -> {_self@1_0, _self@1_0 - 1}
     end.
+
+'Core::Iterator::$patina_witness'() ->
+    {{fun 'Elixir.Patina.ForLoops.Countdown':'Core::Iterator::$patina_type::Item'/1,
+      fun 'Elixir.Patina.ForLoops.Countdown':'Core::Iterator::next'/2},
+     {},
+     {}}.

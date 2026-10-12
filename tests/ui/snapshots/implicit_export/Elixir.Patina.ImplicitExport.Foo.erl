@@ -8,7 +8,10 @@
 
 -export_record([]).
 
--export(['__info__'/1, foo/0]).
+-export(['__info__'/1,
+         foo/0,
+         'ImplicitExport::FooTrait::bar'/1,
+         'ImplicitExport::FooTrait::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -27,7 +30,12 @@ foo() -> priv_foo().
 
 priv_foo() -> {}.
 
-'ImplicitExport::FooTrait::bar'(_witness@0_0 =
-                                    {'impl ImplicitExport::FooTrait for ImplicitExport::Foo',
-                                     _}) ->
+'ImplicitExport::FooTrait::bar'(_witness_self@0_0 = {_,
+                                                     {},
+                                                     {}}) ->
     priv_foo().
+
+'ImplicitExport::FooTrait::$patina_witness'() ->
+    {{fun 'Elixir.Patina.ImplicitExport.Foo':'ImplicitExport::FooTrait::bar'/1},
+     {},
+     {}}.

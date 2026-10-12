@@ -9,7 +9,9 @@
 
 -export_record([]).
 
--export(['__info__'/1, 'Supertraits::Pred::test'/3]).
+-export(['__info__'/1,
+         'Supertraits::Pred::test'/3,
+         'Supertraits::Pred::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -24,8 +26,13 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Supertraits::Pred::test'(_witness@0_0 =
-                              {'impl Supertraits::Pred for Supertraits::IsEven',
-                               _},
+'Supertraits::Pred::test'(_witness_self@0_0 = {_,
+                                               {},
+                                               {}},
                           _self@1_0, _n@2_0) ->
     _n@2_0 rem 2 =:= 0.
+
+'Supertraits::Pred::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Supertraits.IsEven':'Supertraits::Pred::test'/3},
+     {},
+     {}}.

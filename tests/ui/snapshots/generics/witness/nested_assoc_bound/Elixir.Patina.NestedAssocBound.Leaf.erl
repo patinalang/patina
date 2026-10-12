@@ -12,7 +12,8 @@
 
 -export(['__info__'/1,
          'NestedAssocBound::HasItem::$patina_type::Item'/1,
-         'NestedAssocBound::HasItem::item'/2]).
+         'NestedAssocBound::HasItem::item'/2,
+         'NestedAssocBound::HasItem::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -27,13 +28,17 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'NestedAssocBound::HasItem::$patina_type::Item'(_witness@0_0 =
-                                                    {'impl NestedAssocBound::HasItem for NestedAssocBound::Leaf',
-                                                     _}) ->
+'NestedAssocBound::HasItem::$patina_type::Item'(_witness_self@0_0 =
+                                                    {_, {}, {}}) ->
     {}.
 
-'NestedAssocBound::HasItem::item'(_witness@0_0 =
-                                      {'impl NestedAssocBound::HasItem for NestedAssocBound::Leaf',
-                                       _},
+'NestedAssocBound::HasItem::item'(_witness_self@0_0 =
+                                      {_, {}, {}},
                                   _self@1_0) ->
     'Elixir.Patina.NestedAssocBound.Tag'.
+
+'NestedAssocBound::HasItem::$patina_witness'() ->
+    {{fun 'Elixir.Patina.NestedAssocBound.Leaf':'NestedAssocBound::HasItem::$patina_type::Item'/1,
+      fun 'Elixir.Patina.NestedAssocBound.Leaf':'NestedAssocBound::HasItem::item'/2},
+     {},
+     {}}.

@@ -9,7 +9,9 @@
 
 -export_record([]).
 
--export(['__info__'/1, 'LoopWitness::Score::score'/2]).
+-export(['__info__'/1,
+         'LoopWitness::Score::score'/2,
+         'LoopWitness::Score::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -24,16 +26,14 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'LoopWitness::Score::score'(_witness@0_0 =
-                                {'impl LoopWitness::Score for LoopWitness::Points',
-                                 _},
+'LoopWitness::Score::score'(_witness_self@0_0 = {_,
+                                                 {},
+                                                 {}},
                             _self@1_0) ->
     _self@1_0.
 
-'LoopWitness::Score::loop_in_default'(_witness@0_0 =
-                                          {'impl LoopWitness::Score for LoopWitness::Points',
-                                           _},
-                                      _arg@1_0, _arg@2_0) ->
-    'Elixir.Patina.LoopWitness':'LoopWitness::Score::loop_in_default'(_witness@0_0,
-                                                                      _arg@1_0,
-                                                                      _arg@2_0).
+'LoopWitness::Score::$patina_witness'() ->
+    {{fun 'Elixir.Patina.LoopWitness.Points':'LoopWitness::Score::score'/2,
+      fun 'Elixir.Patina.LoopWitness':'LoopWitness::Score::loop_in_default'/3},
+     {},
+     {}}.

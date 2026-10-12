@@ -24,26 +24,21 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-call(_witness@1_0 = {_witness@0_0}, _t@2_0) ->
+call(_witness_bounds@1_0 = {_witness_bound@0_0},
+     _t@2_0) ->
     begin
-        _witness@3_0 = erlang:element(3, _witness@0_0),
-        (erlang:element(2,
-                        _witness@3_0)):'GlobalBound::Base::base'(_witness@3_0,
-                                                                 _t@2_0)
+        _witness@3_0 = erlang:element(1,
+                                      erlang:element(2, _witness_bound@0_0)),
+        (erlang:element(1,
+                        erlang:element(1, _witness@3_0)))(_witness@3_0, _t@2_0)
     end.
 
 only_global_bound() ->
-    'Elixir.Patina.GlobalBound.S':'GlobalBound::Derived::derived'({'impl GlobalBound::Derived for GlobalBound::S',
-                                                                   'Elixir.Patina.GlobalBound.S',
-                                                                   {'impl GlobalBound::Base for GlobalBound::S',
-                                                                    'Elixir.Patina.GlobalBound.S'}},
+    'Elixir.Patina.GlobalBound.S':'GlobalBound::Derived::derived'('Elixir.Patina.GlobalBound.S':'GlobalBound::Derived::$patina_witness'(),
                                                                   'Elixir.Patina.GlobalBound.S').
 
 base() ->
-    call({{'impl GlobalBound::Derived for GlobalBound::S',
-           'Elixir.Patina.GlobalBound.S',
-           {'impl GlobalBound::Base for GlobalBound::S',
-            'Elixir.Patina.GlobalBound.S'}}},
+    call({'Elixir.Patina.GlobalBound.S':'GlobalBound::Derived::$patina_witness'()},
          'Elixir.Patina.GlobalBound.S').
 
 global() -> only_global_bound().

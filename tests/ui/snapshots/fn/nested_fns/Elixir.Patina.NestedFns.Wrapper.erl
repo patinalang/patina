@@ -8,7 +8,13 @@
 
 -export_record([]).
 
--export(['__info__'/1, trait_in_method/1]).
+-export(['__info__'/1,
+         trait_in_method/1,
+         'NestedFns::{impl#1}::trait_in_method::Base::$patina_witness'/0,
+         'NestedFns::first_answer::Answer::$patina_witness'/0,
+         'NestedFns::second_answer::Answer::$patina_witness'/0,
+         'NestedFns::answers_in_blocks::Answer::$patina_witness'/0,
+         'NestedFns::answers_in_blocks::Answer#1::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -24,41 +30,30 @@
 '__info__'(Key) -> module_info(Key).
 
 trait_in_method(_self@0_0) ->
-    'Elixir.Patina.NestedFns':'NestedFns::{impl#1}::trait_in_method::Base::base'({'impl NestedFns::{impl#1}::trait_in_method::Base for NestedFns::Wrapper',
-                                                                                  'Elixir.Patina.NestedFns.Wrapper'},
+    'Elixir.Patina.NestedFns':'NestedFns::{impl#1}::trait_in_method::Base::base'('Elixir.Patina.NestedFns.Wrapper':'NestedFns::{impl#1}::trait_in_method::Base::$patina_witness'(),
                                                                                  _self@0_0).
 
-'NestedFns::{impl#1}::trait_in_method::Base::base'(_witness@0_0 =
-                                                       {'impl NestedFns::{impl#1}::trait_in_method::Base for NestedFns::Wrapper',
-                                                        _},
-                                                   _arg@1_0) ->
-    'Elixir.Patina.NestedFns':'NestedFns::{impl#1}::trait_in_method::Base::base'(_witness@0_0,
-                                                                                 _arg@1_0).
+'NestedFns::{impl#1}::trait_in_method::Base::$patina_witness'() ->
+    {{fun 'Elixir.Patina.NestedFns':'NestedFns::{impl#1}::trait_in_method::Base::base'/2},
+     {},
+     {}}.
 
-'NestedFns::first_answer::Answer::answer'(_witness@0_0 =
-                                              {'impl NestedFns::first_answer::Answer for NestedFns::Wrapper',
-                                               _},
-                                          _arg@1_0) ->
-    'Elixir.Patina.NestedFns':'NestedFns::first_answer::Answer::answer'(_witness@0_0,
-                                                                        _arg@1_0).
+'NestedFns::first_answer::Answer::$patina_witness'() ->
+    {{fun 'Elixir.Patina.NestedFns':'NestedFns::first_answer::Answer::answer'/2},
+     {},
+     {}}.
 
-'NestedFns::second_answer::Answer::answer'(_witness@0_0 =
-                                               {'impl NestedFns::second_answer::Answer for NestedFns::Wrapper',
-                                                _},
-                                           _arg@1_0) ->
-    'Elixir.Patina.NestedFns':'NestedFns::second_answer::Answer::answer'(_witness@0_0,
-                                                                         _arg@1_0).
+'NestedFns::second_answer::Answer::$patina_witness'() ->
+    {{fun 'Elixir.Patina.NestedFns':'NestedFns::second_answer::Answer::answer'/2},
+     {},
+     {}}.
 
-'NestedFns::answers_in_blocks::Answer::answer'(_witness@0_0 =
-                                                   {'impl NestedFns::answers_in_blocks::Answer for NestedFns::Wrapper',
-                                                    _},
-                                               _arg@1_0) ->
-    'Elixir.Patina.NestedFns':'NestedFns::answers_in_blocks::Answer::answer'(_witness@0_0,
-                                                                             _arg@1_0).
+'NestedFns::answers_in_blocks::Answer::$patina_witness'() ->
+    {{fun 'Elixir.Patina.NestedFns':'NestedFns::answers_in_blocks::Answer::answer'/2},
+     {},
+     {}}.
 
-'NestedFns::answers_in_blocks::Answer#1::answer'(_witness@0_0 =
-                                                     {'impl NestedFns::answers_in_blocks::Answer#1 for NestedFns::Wrapper',
-                                                      _},
-                                                 _arg@1_0) ->
-    'Elixir.Patina.NestedFns':'NestedFns::answers_in_blocks::Answer#1::answer'(_witness@0_0,
-                                                                               _arg@1_0).
+'NestedFns::answers_in_blocks::Answer#1::$patina_witness'() ->
+    {{fun 'Elixir.Patina.NestedFns':'NestedFns::answers_in_blocks::Answer#1::answer'/2},
+     {},
+     {}}.

@@ -14,7 +14,8 @@
          'Trait01::Animal::new'/2,
          'Trait01::Animal::name'/2,
          'Trait01::Animal::noise'/2,
-         'Trait01::Animal::talk'/2]).
+         'Trait01::Animal::talk'/2,
+         'Trait01::Animal::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -40,8 +41,7 @@ shear(_self@0_0) ->
     case is_naked(_self@0_0) of
         true ->
             begin
-                io:put_chars([['Trait01::Animal::name'({'impl Trait01::Animal for Trait01::Sheep',
-                                                        'Elixir.Patina.Trait01.Sheep'},
+                io:put_chars([['Trait01::Animal::name'('Elixir.Patina.Trait01.Sheep':'Trait01::Animal::$patina_witness'(),
                                                        _self@0_0),
                                <<" is already naked..."/utf8>>]]),
                 io:nl(),
@@ -58,31 +58,38 @@ shear(_self@0_0) ->
             _self@0_0#'Sheep'{naked = true}
     end.
 
-'Trait01::Animal::new'(_witness@0_0 =
-                           {'impl Trait01::Animal for Trait01::Sheep', _},
+'Trait01::Animal::new'(_witness_self@0_0 = {_, {}, {}},
                        _name@1_0) ->
     #'Sheep'{naked = false, name = _name@1_0}.
 
-'Trait01::Animal::name'(_witness@0_0 =
-                            {'impl Trait01::Animal for Trait01::Sheep', _},
+'Trait01::Animal::name'(_witness_self@0_0 = {_, {}, {}},
                         _self@1_0) ->
     _self@1_0#'Sheep'.name.
 
-'Trait01::Animal::noise'(_witness@0_0 =
-                             {'impl Trait01::Animal for Trait01::Sheep', _},
+'Trait01::Animal::noise'(_witness_self@0_0 = {_,
+                                              {},
+                                              {}},
                          _self@1_0) ->
     case is_naked(_self@1_0) of
         true -> <<"baaaaah?"/utf8>>;
         false -> <<"baaaaah!"/utf8>>
     end.
 
-'Trait01::Animal::talk'(_witness@0_0 =
-                            {'impl Trait01::Animal for Trait01::Sheep', _},
+'Trait01::Animal::talk'(_witness_self@0_0 = {_, {}, {}},
                         _self@1_0) ->
     begin
         io:put_chars([[_self@1_0#'Sheep'.name,
                        <<" pauses briefly... "/utf8>>,
-                       'Trait01::Animal::noise'(_witness@0_0, _self@1_0)]]),
+                       'Trait01::Animal::noise'(_witness_self@0_0,
+                                                _self@1_0)]]),
         io:nl(),
         {}
     end.
+
+'Trait01::Animal::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Trait01.Sheep':'Trait01::Animal::new'/2,
+      fun 'Elixir.Patina.Trait01.Sheep':'Trait01::Animal::name'/2,
+      fun 'Elixir.Patina.Trait01.Sheep':'Trait01::Animal::noise'/2,
+      fun 'Elixir.Patina.Trait01.Sheep':'Trait01::Animal::talk'/2},
+     {},
+     {}}.

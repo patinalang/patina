@@ -11,7 +11,8 @@
 
 -export(['__info__'/1,
          'Supertraits::Shelf::size'/2,
-         'Supertraits::Library::count'/4]).
+         'Supertraits::Shelf::$patina_witness'/0,
+         'Supertraits::Library::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -26,18 +27,20 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Supertraits::Shelf::size'(_witness@0_0 =
-                               {'impl Supertraits::Shelf for Supertraits::Books',
-                                _},
+'Supertraits::Shelf::size'(_witness_self@0_0 = {_,
+                                                {},
+                                                {}},
                            _self@1_0) ->
     _self@1_0.
 
-'Supertraits::Library::count'(_witness@0_0 =
-                                  {'impl Supertraits::Library for Supertraits::Books',
-                                   _,
-                                   _},
-                              _arg@1_0, _arg@2_0, _arg@3_0) ->
-    'Elixir.Patina.Supertraits':'Supertraits::Library::count'(_witness@0_0,
-                                                              _arg@1_0,
-                                                              _arg@2_0,
-                                                              _arg@3_0).
+'Supertraits::Shelf::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Supertraits.Books':'Supertraits::Shelf::size'/2},
+     {},
+     {}}.
+
+'Supertraits::Library::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Supertraits':'Supertraits::Library::count'/4},
+     {{{fun 'Elixir.Patina.Supertraits.Books':'Supertraits::Shelf::size'/2},
+       {},
+       {}}},
+     {}}.

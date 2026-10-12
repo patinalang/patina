@@ -20,7 +20,7 @@ use rustc_hir::{Attribute, HirId, PrimTy};
 use rustc_index::IndexSlice;
 use rustc_macros::{StableHash, TyDecodable, TyEncodable};
 use rustc_span::{Span, Symbol, kw};
-use smallvec::SmallVec;
+use smallvec::{SmallVec, smallvec};
 
 use self::shape::ErlShape;
 use self::witness::{AssocTypeBoundIdx, BoundIdx, SupertraitIdx};
@@ -303,30 +303,6 @@ impl<'tcx> TyCtxt<'tcx> {
         )
     }
 
-    /// The generic arguments of the self type of the inherent impl `impl_def_id`, as in
-    /// `erl_impl_tag`. `None` if the arguments are all parameters, like `impl<T> S<T>` or
-    /// `impl<T> S<T, T>`: any two such impls overlap, so their method names need no tag.
-    fn erl_inherent_impl_tag(self, impl_def_id: DefId) -> Option<String> {
-        let self_ty = self.type_of(impl_def_id);
-        let ty::Adt(_, args) = self_ty.instantiate_identity().skip_normalization().kind() else {
-            return None;
-        };
-
-        let fully_generic = args.iter().all(|arg| match arg.kind() {
-            ty::GenericArgKind::Lifetime(_) => true,
-            ty::GenericArgKind::Type(ty) => matches!(ty.kind(), ty::Param(_)),
-            ty::GenericArgKind::Const(ct) => matches!(ct.kind(), ty::ConstKind::Param(_)),
-        });
-        if fully_generic {
-            return None;
-        }
-
-        let self_ty =
-            self_ty.instantiate(self, self.erl_tag_args(impl_def_id)).skip_normalization();
-        let ty::Adt(_, args) = self_ty.kind() else { unreachable!() };
-        Some(self.erl_tag_text(args.iter()))
-    }
-
     /// The identity arguments of `impl_def_id`, with type and const parameters named `_`.
     fn erl_tag_args(self, impl_def_id: DefId) -> GenericArgsRef<'tcx> {
         ty::GenericArgs::for_item(self, impl_def_id, |param, _| match param.kind {
@@ -349,8 +325,6 @@ impl<'tcx> TyCtxt<'tcx> {
 
     /// The arity of the Erlang function generated for `def_id`.
     pub fn erl_fn_arity(self, def_id: DefId) -> usize {
-        let def_id = self.erl_fn_item(def_id);
-
         let params = match self.def_kind(def_id) {
             DefKind::Fn | DefKind::AssocFn => {
                 self.fn_sig(def_id).skip_binder().inputs().skip_binder().len()
@@ -370,11 +344,6 @@ impl<'tcx> TyCtxt<'tcx> {
             .any(|attr| matches!(attr, Attribute::Parsed(AttributeKind::ExternCall(..))))
     }
 
-    /// The item that identifies the Erlang function generated for `def_id` in its module.
-    pub fn erl_fn_item(self, def_id: DefId) -> DefId {
-        self.trait_item_of(def_id).unwrap_or(def_id)
-    }
-
     /// Returns whether the function generated for `def_id` must be exported from `module`.
     ///
     /// All `pub(x)` where `x != self` are always exported.
@@ -383,20 +352,13 @@ impl<'tcx> TyCtxt<'tcx> {
     /// types. In that case, we additionally export those private associated functions that
     /// are actually called externally.
     pub fn is_erl_exported_fn(self, module: ErlModuleId, def_id: DefId) -> bool {
-        let def_id = self.erl_fn_item(def_id);
-
-        // In the trait's own module, a trait item is its default body. The delegation stubs
-        // of the impls that use the default body call it from other (external) modules and crates.
-        if self.trait_of_assoc(def_id).is_some()
-            && self.erl_definition_module(def_id) == Some(module)
-        {
+        // We use external funs for trait vtables, so all of their fns are exported.
+        if self.erl_entry_trait(def_id).is_some() {
             return true;
         }
 
         let visible_outside_rust_module = !self.is_erl_nested_item(def_id)
             && match def_id.as_local() {
-                // A foreign item here is a trait item that this crate implements. Other crates
-                // can dispatch to its override or delegation stub.
                 None => true,
                 Some(local_def_id) => match self.visibility(local_def_id) {
                     Visibility::Public => true,
@@ -486,6 +448,35 @@ impl<'tcx> TyCtxt<'tcx> {
 
             kind => bug!("non-callable definition passed as an Erlang call target: {kind:?}"),
         }
+    }
+
+    /// The name of the Erlang function for `member` of the impl: `[TraitPath::]member[<SelfTag>]`.
+    pub fn erl_impl_member_name(self, impl_def_id: DefId, member: &str) -> Symbol {
+        let mut name = String::new();
+        if let Some(trait_ref) = self.impl_opt_trait_ref(impl_def_id) {
+            let trait_ref =
+                trait_ref.instantiate(self, self.erl_tag_args(impl_def_id)).skip_normalization();
+
+            name.push_str(&with_erl_paths(|| trait_ref.print_only_trait_path().to_string()));
+            name.push_str("::");
+        }
+        name.push_str(member);
+
+        if let Some(self_tag) = erl_impl_self_tag(self, impl_def_id) {
+            name.push_str(&format!("<{self_tag}>"));
+        }
+        to_atom_symbol(name)
+    }
+
+    /// The trait items that comprise a trait impl's vtable.
+    /// The order of items returned here is the canonical order of the vtable funs.
+    pub fn erl_vtable_items(
+        self,
+        trait_def_id: DefId,
+    ) -> impl Iterator<Item = &'tcx ty::AssocItem> {
+        self.associated_items(trait_def_id)
+            .in_definition_order()
+            .filter(move |item| self.erl_has_fn_name(item.def_id))
     }
 
     fn erl_call_target_is_exported(self, module: ErlModuleId, target: ErlCallTarget<'tcx>) -> bool {
@@ -893,33 +884,74 @@ fn erl_fn_name(tcx: TyCtxt<'_>, def_id: LocalDefId) -> Symbol {
     if tcx.is_erl_nested_item(def_id) {
         let module_depth = tcx.def_path(tcx.lexical_erl_module(def_id)).data.len();
         let path = tcx.def_path(def_id);
-        let segments =
-            path.data[module_depth..].iter().map(|segment| segment.as_sym(true).to_string());
-        return Symbol::intern(&erl_fit_atom(segments.collect::<Vec<_>>().join("::")));
+        let name = path.data[module_depth..]
+            .iter()
+            .map(|segment| segment.as_sym(true).to_string())
+            .intersperse("::".to_owned())
+            .collect();
+
+        return to_atom_symbol(name);
     }
 
-    let Some(trait_def_id) = tcx.erl_entry_trait(def_id) else {
-        // Inherent impls on different arguments of one type can have methods of the same name,
-        // like `impl S<int> { fn f() }` and `impl S<str> { fn f() }`. We disambiguate by including
-        // the generic arguments in the functtion name.
-        if let Some(parent) = tcx.opt_parent(def_id)
-            && matches!(tcx.def_kind(parent), DefKind::Impl { .. })
-            && let Some(tag) = tcx.erl_inherent_impl_tag(parent)
-        {
-            return Symbol::intern(&erl_fit_atom(format!("{item_name}<{tag}>")));
-        }
-        return item_name;
+    // `[$patina_type::|$patina_const::]item`
+    let member = match tcx.def_kind(def_id) {
+        DefKind::AssocTy => format!("$patina_type::{item_name}"),
+        DefKind::AssocConst { .. } => format!("$patina_const::{item_name}"),
+        _ => item_name.to_string(),
     };
-    let mut segments = erl_def_path_segments(tcx, trait_def_id);
 
-    match tcx.def_kind(def_id) {
-        DefKind::AssocTy => segments.push("$patina_type".to_owned()),
-        DefKind::AssocConst { .. } => segments.push("$patina_const".to_owned()),
-        _ => {}
+    let parent = tcx.opt_parent(def_id);
+    match parent.map(|parent| tcx.def_kind(parent)) {
+        Some(DefKind::Impl { .. }) => tcx.erl_impl_member_name(parent.unwrap(), &member),
+        Some(DefKind::Trait) => {
+            let trait_path = with_erl_paths(|| tcx.def_path_str(parent.unwrap()));
+            to_atom_symbol(format!("{trait_path}::{member}"))
+        }
+        _ => to_atom_symbol(member),
     }
+}
 
-    segments.push(item_name.as_str().to_owned());
-    Symbol::intern(&segments.join("::"))
+/// The optional `Self` suffix in an impl member's Erlang name, without angle brackets.
+///
+/// Impls may define same-named members that land in one Erlang module, for example when
+/// defining `impl From<int> for Foo<int>` and `impl From<int> for Foo<str>` - both can
+/// land in the same module for `Foo`.
+///
+/// We use a suffix <tag> to preemptively disambiguate such functions. For the `From` example,
+/// the functions would be defined as `From<int>::from<int>` and `From<int>::from<str>`.
+/// This function you're looking at is responsible for figuring out the tag in the suffix.
+/// The prefix tag comes from the trait path.
+fn erl_impl_self_tag(tcx: TyCtxt<'_>, impl_def_id: DefId) -> Option<String> {
+    let self_ty = tcx
+        .type_of(impl_def_id)
+        .instantiate(tcx, tcx.erl_tag_args(impl_def_id))
+        .skip_normalization();
+
+    // First remove the information already supplied by the host module.
+    let tag_args: SmallVec<[ty::GenericArg<'_>; 2]> = match *self_ty.kind() {
+        ty::Adt(_, args) => args.iter().collect(),
+        ty::Slice(item) => smallvec![item.into()],
+        ty::Map(key, value) => smallvec![key.into(), value.into()],
+        ty::Bool
+        | ty::Char
+        | ty::Int
+        | ty::Float
+        | ty::Str
+        | ty::Term
+        | ty::Atom
+        | ty::Bin
+        | ty::Bits
+        | ty::Param(_) => smallvec![],
+        _ => smallvec![self_ty.into()],
+    };
+
+    // Then omit bare parameters, but retain nested structure such as `[_]` or `(_,)`.
+    let needs_tag = tag_args.iter().any(|arg| match arg.kind() {
+        ty::GenericArgKind::Lifetime(_) => false,
+        ty::GenericArgKind::Type(ty) => !matches!(ty.kind(), ty::Param(_)),
+        ty::GenericArgKind::Const(ct) => !matches!(ct.kind(), ty::ConstKind::Param(_)),
+    });
+    needs_tag.then(|| tcx.erl_tag_text(tag_args))
 }
 
 /// Prints paths from the crate name, so that every crate prints the same text.
@@ -929,11 +961,11 @@ fn with_erl_paths<R>(print: impl FnOnce() -> R) -> R {
     ))
 }
 
-/// `text`, shortened with a hash suffix if it is longer than the longest atom.
-pub fn erl_fit_atom(mut text: String) -> String {
+/// `text`, as a symbol, shortened with a hash suffix if it is longer than the longest atom.
+pub fn to_atom_symbol(mut text: String) -> Symbol {
     const MAX_ATOM_CHARS: usize = 255;
     if text.chars().count() <= MAX_ATOM_CHARS {
-        return text;
+        return Symbol::intern(&text);
     }
 
     let mut hasher = StableHasher::new();
@@ -942,7 +974,7 @@ pub fn erl_fit_atom(mut text: String) -> String {
     let suffix = format!("#{:016x}", hash.as_u128() as u64);
     let (end, _) = text.char_indices().nth(MAX_ATOM_CHARS - suffix.len()).unwrap();
     text.truncate(end);
-    text + &suffix
+    Symbol::intern(&(text + &suffix))
 }
 
 /// The crate name followed by the definition path segments of `def_id`.
@@ -1103,21 +1135,6 @@ fn erl_bounds<'tcx>(
     ty::EarlyBinder::bind(IndexSlice::from_raw(tcx.arena.alloc_from_iter(bounds)))
 }
 
-/// Provider for [`TyCtxt::erl_impl_tag`].
-fn erl_impl_tag(tcx: TyCtxt<'_>, impl_def_id: LocalDefId) -> Symbol {
-    let impl_def_id = impl_def_id.to_def_id();
-    let trait_ref = tcx
-        .impl_opt_trait_ref(impl_def_id)
-        .unwrap_or_else(|| bug!("{impl_def_id:?} is not a trait impl"))
-        .instantiate(tcx, tcx.erl_tag_args(impl_def_id))
-        .skip_normalization();
-
-    let text = with_erl_paths(|| {
-        format!("impl {} for {}", trait_ref.print_only_trait_path(), trait_ref.self_ty())
-    });
-    Symbol::intern(&erl_fit_atom(text))
-}
-
 /// Provider for [`TyCtxt::erl_trait_needs_witness`].
 fn erl_trait_needs_witness(tcx: TyCtxt<'_>, trait_def_id: DefId) -> bool {
     // A closure is an Erlang fun, so a call through `Fn*` needs no witness.
@@ -1133,7 +1150,6 @@ pub fn provide(providers: &mut Providers) {
         erl_trait_supertraits,
         erl_assoc_type_bounds,
         erl_bounds,
-        erl_impl_tag,
         erl_module_name,
         erl_shape_of_ty: shape::erl_shape_of_ty,
         erl_variant_wrap_guards: shape::erl_variant_wrap_guards,
