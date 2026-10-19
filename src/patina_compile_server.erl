@@ -9,6 +9,7 @@
 -define(MACRO_TIMEOUT_SECONDS, 30).
 -define(MACRO_TIMEOUT, timer:seconds(?MACRO_TIMEOUT_SECONDS)).
 
+-record #state{socket, listing_dir}.
 
 start_link(SockPath) ->
     gen_server:start_link(?MODULE, [SockPath], []).
@@ -17,19 +18,29 @@ init([SockPath]) ->
     {ok, Socket} = socket:open(local, stream, default, #{}),
     ok = socket:bind(Socket, #{family => local, path => SockPath}),
     ok = socket:listen(Socket),
-    {ok, Socket, {continue, accept}}.
+    {ok, ListingDir} = listing_dir(SockPath),
+    State = #state{socket=Socket, listing_dir=ListingDir},
+    {ok, State, {continue, accept}}.
 
-handle_call(_Request, _From, Sock) ->
-    {reply, ok, Sock}.
+listing_dir(SockPath) ->
+    ListingDir = filename:join(filename:dirname(SockPath), "trash"),
+    case file:make_dir(ListingDir) of
+        ok -> {ok, ListingDir};
+        {error, eexist} -> {ok, ListingDir};
+        Error -> Error
+    end.
 
-handle_cast(_Msg, Sock) ->
-    {noreply, Sock}.
+handle_call(_Request, _From, State) ->
+    {reply, ok, State}.
 
-handle_continue(accept, Sock) ->
+handle_cast(_Msg, State) ->
+    {noreply, State}.
+
+handle_continue(accept, #state{socket=Sock} = State) ->
     Deadline = erlang:monotonic_time(millisecond) + ?ACCEPT_TIMEOUT,
     case accept_client(Sock, Deadline) of
         {ok, ClientSock} ->
-            socket_loop(ClientSock),
+            socket_loop(ClientSock, State),
             socket:close(ClientSock);
         {error, Reason} ->
             io:format(standard_error, "patina compile server cannot accept: ~tp~n", [Reason])
@@ -55,43 +66,43 @@ accept_client(Sock, Deadline) ->
             end
     end.
 
-socket_loop(Sock) ->
+socket_loop(Sock, State) ->
     case read_msg(Sock) of
         {ok, [Op | Args]} ->
-            handle_request(Sock, Op, Args),
-            socket_loop(Sock);
+            handle_request(Sock, State, Op, Args),
+            socket_loop(Sock, State);
         closed ->
             ok
     end.
 
-handle_request(Sock, Op, Args) ->
+handle_request(Sock, State, Op, Args) ->
     try
-        do_request(Sock, Op, Args)
+        do_request(Sock, State, Op, Args)
     catch
         Class:Reason:Stacktrace ->
             write_msg(Sock, [~"raise", Class, Reason, Stacktrace])
     end.
 
-do_request(Sock, ~"compile", [Eaf]) ->
-    case compile_forms(binary_to_term(Eaf)) of
+do_request(Sock, State, ~"compile", [Eaf]) ->
+    case compile_forms(binary_to_term(Eaf), State) of
         {ok, _Mod, Beam, Warnings} ->
             write_msg(Sock, [~"ok", Beam, Warnings]);
         {error, Errors, Warnings} ->
             write_msg(Sock, [~"error", Errors, Warnings])
     end;
-do_request(Sock, ~"abstr", [Eaf]) ->
+do_request(Sock, _State, ~"abstr", [Eaf]) ->
     Rendered = unicode:characters_to_binary(io_lib:format("~tp", [binary_to_term(Eaf)])),
     write_msg(Sock, [~"ok", Rendered]);
-do_request(Sock, ~"erl", [Eaf]) ->
+do_request(Sock, _State, ~"erl", [Eaf]) ->
     Forms = binary_to_term(Eaf),
     Rendered = unicode:characters_to_binary([erl_prettypr:format(erl_syntax:form_list(Forms)), "\n"]),
     write_msg(Sock, [~"ok", Rendered]);
-do_request(Sock, ~"code_path", Dirs) ->
+do_request(Sock, _State, ~"code_path", Dirs) ->
     lists:foreach(fun(Dir) -> code:add_pathz(binary_to_list(Dir)) end, Dirs),
     write_msg(Sock, [~"ok"]);
-do_request(Sock, ~"echo", [Bin]) ->
+do_request(Sock, _State, ~"echo", [Bin]) ->
     write_msg(Sock, [~"ok", term_to_binary(binary_to_term(Bin), [{minor_version, 2}])]);
-do_request(Sock, ~"macro", [Mod, Fun | ArgBins]) ->
+do_request(Sock, _State, ~"macro", [Mod, Fun | ArgBins]) ->
     Args = [binary_to_term(Arg) || Arg <- ArgBins],
     Module = binary_to_atom(Mod, utf8),
     Function = binary_to_atom(Fun, utf8),
@@ -152,13 +163,21 @@ receive_run_macro_result(Ref) ->
         {error, timeout}
     end.
 
-compile_forms(Forms) ->
+compile_forms(Forms, State) ->
     CompileOpts = [binary, return, nowarn_opportunistic, nowarn_underscore_match],
-    case compile:noenv_forms(Forms, [to_asm, no_postopt | CompileOpts]) of
+    %% Previously we ran `to_asm, no_postopt` to get asm for rewriting, but that
+    %% runs `beam_z` which drops `{line, _}` instructions. This brought variety
+    %% of small problems, including issues with block sharing and inaccurate
+    %% stack locations.
+    %% `da` stops compilation right after `beam_a` and - very importantly -
+    %% before `beam_z`. The price we pay is that `da` also outputs asm listing
+    %% into `outdir`, which costs io and processing time. Alas, this is the best
+    %% tradeoff for now.
+    ListingDir = State#state.listing_dir,
+    case compile:noenv_forms(Forms, [da, {outdir, ListingDir} | CompileOpts]) of
         {ok, _Mod, Asm0, Warnings0} ->
-            {ok, Asm1} = beam_a:module(Asm0, []),
-            Asm2 = rewrite_asm(Asm1),
-            case compile:noenv_forms(Asm2, [from_asm | CompileOpts]) of
+            Asm1 = rewrite_asm(Asm0),
+            case compile:noenv_forms(Asm1, [from_asm | CompileOpts]) of
                 {ok, Mod, Asm, Warnings1} ->
                     {ok, Mod, Asm, lists:uniq(Warnings0 ++ Warnings1)};
                 {error, Errors, Warnings1} ->
@@ -179,11 +198,27 @@ drop_loop_helper_exports(Exports) ->
         string:find(atom_to_list(Name), "$patina_loop_") =:= nomatch
     end, Exports).
 
-rewrite_function({function, Name, Arity, Entry, Instrs} = Function) ->
-    case lists:any(fun is_control_marker/1, Instrs) of
-        true -> {function, Name, Arity, Entry, rewrite_control_markers(Instrs, Entry)};
-        false -> Function
+rewrite_function({function, Name, Arity, Entry, Instrs0} = Function) ->
+    case drop_marker_lines(Instrs0, false, []) of
+        {true, Instrs} ->
+            {function, Name, Arity, Entry, rewrite_control_markers(Instrs, Entry)};
+        {false, _} ->
+            Function
     end.
+
+%% beam_ssa_codegen adds {line, _} instructions in certain scenarios,
+%% in particular before an extern call such as `$patina_marker`.
+%% Drop these specific ones, as they interfere with our asm rewriting.
+drop_marker_lines([{line, _} = Line, Instr | Instrs], Found, Acc) ->
+    case is_control_marker(Instr) of
+        true -> drop_marker_lines([Instr | Instrs], true, Acc);
+        false -> drop_marker_lines([Instr | Instrs], Found, [Line | Acc])
+    end;
+drop_marker_lines([Instr | Instrs], Found0, Acc) ->
+    Found = Found0 orelse is_control_marker(Instr),
+    drop_marker_lines(Instrs, Found, [Instr | Acc]);
+drop_marker_lines([], Found, Acc) ->
+    {Found, lists:reverse(Acc)}.
 
 read_msg(Sock) ->
     case socket:recv(Sock, 1) of
