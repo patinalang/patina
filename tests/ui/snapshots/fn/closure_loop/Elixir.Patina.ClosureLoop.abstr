@@ -93,7 +93,7 @@
                 {integer,{8,17},0},
                 {tuple,{8,17},[]},
                 {var,{8,17},'_i@2_1'}]}]}]},
-          {clause,{7,13},[{atom,{7,13},false}],[],[{tuple,{7,13},[]}]}]}]}},
+          {clause,{7,13},[{var,{7,13},'_'}],[],[{tuple,{7,13},[]}]}]}]}},
      {call,
       {5,9},
       {remote,{5,9},{atom,{5,9},'$patina_marker'},{atom,{5,9},continue}},

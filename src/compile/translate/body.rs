@@ -397,7 +397,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         );
         let false_clause = afb.clause(
             span,
-            [afb.pat_atom(span, kw::False)],
+            [afb.pat_var(span, kw::Underscore)],
             None,
             match op {
                 etir::LogicalOp::And => short,

@@ -130,7 +130,7 @@ pass_str() ->
 bin_branches(_flag@0_0) ->
     case _flag@0_0 of
         true -> <<"text"/utf8>>;
-        false -> <<255>>
+        _ -> <<255>>
     end.
 
 bin_match_arms(_flag@0_0) ->
@@ -142,7 +142,7 @@ bin_match_arms(_flag@0_0) ->
 bits_branches(_flag@0_0, _value@1_0) ->
     case _flag@0_0 of
         true -> <<"text"/utf8>>;
-        false -> _value@1_0
+        _ -> _value@1_0
     end.
 
 str_slice(_values@0_0) -> _values@0_0.

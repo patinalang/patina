@@ -168,7 +168,7 @@ todo_in_let_else(_map@0_0) ->
                                          [_element@3_0]
                                      end)
                     end;
-                false -> {}
+                _ -> {}
             end,
             _i@1_1 = _i@1_0 + 1,
             {}
@@ -201,11 +201,11 @@ panic_in_loop(_limit@0_0) ->
                                                  [_element@4_0]
                                              end)
                             end;
-                        false -> {}
+                        _ -> {}
                     end,
                     _j@2_1 = _j@2_0 + 1,
                     {};
-                false ->
+                _ ->
                     _branch_value@5_0 = begin
                                             '$patina_marker':break({break,
                                                                     1,

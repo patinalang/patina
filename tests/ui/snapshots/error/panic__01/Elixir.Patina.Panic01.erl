@@ -38,7 +38,7 @@ drink(_beverage@0_0) ->
                                  [_element@2_0]
                              end)
             end;
-        false -> {}
+        _ -> {}
     end,
     begin
         io:put_chars(begin

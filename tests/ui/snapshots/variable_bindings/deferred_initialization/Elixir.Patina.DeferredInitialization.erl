@@ -33,7 +33,7 @@ initialized_in_branches(_condition@0_0) ->
         true ->
             _value@1_1 = 1,
             {};
-        false ->
+        _ ->
             _value@1_1 = 2,
             {}
     end,
@@ -45,7 +45,7 @@ initialized_after_diverging_branch(_condition@0_0) ->
         true ->
             _value@1_1 = 1,
             '$patina_marker':return(_value@1_1);
-        false ->
+        _ ->
             _branch_value@2_0 = {},
             _value@1_1 = _value@1_0,
             _branch_value@2_0
@@ -60,7 +60,7 @@ initialized_after_diverging_branch(_condition@0_0) ->
                 true ->
                     _value@1_1 = 1,
                     '$patina_marker':break({break, 0, {}, _value@1_1});
-                false ->
+                _ ->
                     _value@1_1 = 2,
                     '$patina_marker':break({break, 0, {}, _value@1_1})
             end

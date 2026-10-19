@@ -26,5 +26,5 @@
 outer(_n@0_0) ->
     case _n@0_0 > 0 of
         true -> _n@0_0;
-        false -> nil
+        _ -> nil
     end.

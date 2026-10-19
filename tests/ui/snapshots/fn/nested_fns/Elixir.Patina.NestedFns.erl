@@ -58,13 +58,13 @@ mutual(_n@0_0) -> 'mutual::is_even'(_n@0_0).
 'mutual::is_even'(_n@0_0) ->
     case _n@0_0 =:= 0 of
         true -> true;
-        false -> 'mutual::is_odd'(_n@0_0 - 1)
+        _ -> 'mutual::is_odd'(_n@0_0 - 1)
     end.
 
 'mutual::is_odd'(_n@0_0) ->
     case _n@0_0 =:= 0 of
         true -> false;
-        false -> 'mutual::is_even'(_n@0_0 - 1)
+        _ -> 'mutual::is_even'(_n@0_0 - 1)
     end.
 
 first() -> 'first::helper'().
@@ -115,7 +115,7 @@ recursive_loop(_n@0_0) ->
                                 '$patina_marker':continue(_witness_Iterator@1_0,
                                                           _iter@5_1,
                                                           _total@4_1);
-                            false ->
+                            _ ->
                                 _branch_value@9_0 = {},
                                 _total@4_1 = _total@4_0,
                                 _branch_value@9_0

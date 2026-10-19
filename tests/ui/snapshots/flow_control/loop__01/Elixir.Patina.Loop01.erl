@@ -37,7 +37,7 @@
                         {}
                     end,
                     '$patina_marker':continue(_count@0_1);
-                false -> {}
+                _ -> {}
             end,
             begin
                 io:put_chars(begin
@@ -64,7 +64,7 @@
                         {}
                     end,
                     '$patina_marker':break({break, 0, {}, _count@0_1});
-                false -> {}
+                _ -> {}
             end
         end,
     '$patina_marker':continue(_count@0_1).

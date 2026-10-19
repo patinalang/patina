@@ -41,7 +41,7 @@
                             end,
                             _optional@0_1 = nil,
                             {};
-                        false ->
+                        _ ->
                             begin
                                 io:put_chars(begin
                                                  _element@7_0 = begin

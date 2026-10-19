@@ -118,7 +118,7 @@ early(_witnesses_where_early@0_0, _x@1_0) ->
                                                          _x@1_0),
                     _i@9_1 = _i@9_0 + 1,
                     {};
-                false ->
+                _ ->
                     _branch_value@10_0 = begin
                                              '$patina_marker':break({break,
                                                                      0,

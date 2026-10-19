@@ -111,7 +111,7 @@ marker_effect() ->
                     _last@3_1 = _count@1_0,
                     _count@1_1 = _count@1_0 + 1,
                     {};
-                false ->
+                _ ->
                     _branch_value@4_0 = begin
                                             '$patina_marker':break({break,
                                                                     0,

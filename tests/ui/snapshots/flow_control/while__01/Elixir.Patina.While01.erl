@@ -38,7 +38,7 @@
                                 io:nl(),
                                 {}
                             end;
-                        false ->
+                        _ ->
                             case _n@0_0 rem 3 =:= 0 of
                                 true ->
                                     begin
@@ -50,7 +50,7 @@
                                         io:nl(),
                                         {}
                                     end;
-                                false ->
+                                _ ->
                                     case _n@0_0 rem 5 =:= 0 of
                                         true ->
                                             begin
@@ -62,7 +62,7 @@
                                                 io:nl(),
                                                 {}
                                             end;
-                                        false ->
+                                        _ ->
                                             begin
                                                 io:put_chars(begin
                                                                  _element@5_0 =
@@ -82,7 +82,7 @@
                     end,
                     _n@0_1 = _n@0_0 + 1,
                     {};
-                false ->
+                _ ->
                     _branch_value@6_0 = begin
                                             '$patina_marker':break({break,
                                                                     0,

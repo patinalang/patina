@@ -58,14 +58,14 @@ match_value(_choice@0_0) ->
 is_negative(_x@0_0) ->
     case _x@0_0 >= 0 of
         true -> '$patina_marker':return(false);
-        false -> {}
+        _ -> {}
     end,
     '$patina_marker':return(true).
 
 is_negative_implicit(_x@0_0) ->
     case _x@0_0 >= 0 of
         true -> '$patina_marker':return(false);
-        false -> {}
+        _ -> {}
     end,
     true.
 
@@ -73,7 +73,7 @@ closure_value(_stop@0_0) ->
     __closure@1_0 = fun () ->
                             case _stop@0_0 of
                                 true -> '$patina_marker':return(4);
-                                false -> {}
+                                _ -> {}
                             end,
                             5
                     end,
@@ -84,7 +84,7 @@ expression_value(_stop@0_0) ->
         begin
             case _stop@0_0 of
                 true -> '$patina_marker':return(mark(2));
-                false -> {}
+                _ -> {}
             end,
             mark(3)
         end.
@@ -99,7 +99,7 @@ match_scrutinee_value(_stop@0_0) ->
     case begin
              case _stop@0_0 of
                  true -> '$patina_marker':return(40);
-                 false -> {}
+                 _ -> {}
              end,
              'Elixir.Patina.EarlyReturn.Choice.Continue'
          end
@@ -112,12 +112,12 @@ nested_value(_x@0_0) ->
     _result@1_0 = begin
                       case _x@0_0 =:= 0 of
                           true -> '$patina_marker':return(10);
-                          false -> {}
+                          _ -> {}
                       end,
                       begin
                           case _x@0_0 =:= 1 of
                               true -> '$patina_marker':return(20);
-                              false -> {}
+                              _ -> {}
                           end,
                           30
                       end
@@ -128,11 +128,11 @@ if_condition_value(_stop@0_0) ->
     case begin
              case _stop@0_0 of
                  true -> '$patina_marker':return(10);
-                 false -> {}
+                 _ -> {}
              end,
              true
          end
         of
         true -> 20;
-        false -> 30
+        _ -> 30
     end.

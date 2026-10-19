@@ -60,7 +60,7 @@ shear(_self@0_0) ->
                     {}
                 end,
                 _self@0_0;
-            false ->
+            _ ->
                 begin
                     io:put_chars(begin
                                      _element@7_0 = begin
@@ -92,7 +92,7 @@ shear(_self@0_0) ->
                          _self@1_0) ->
     case is_naked(_self@1_0) of
         true -> <<"baaaaah?"/utf8>>;
-        false -> <<"baaaaah!"/utf8>>
+        _ -> <<"baaaaah!"/utf8>>
     end.
 
 'Trait01::Animal::talk'(_witness_Animal@0_0,

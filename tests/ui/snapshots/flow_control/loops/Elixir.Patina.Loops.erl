@@ -69,7 +69,7 @@
                     '$patina_marker':continue(_count@1_1,
                                               _total@2_0,
                                               _limit@0_0);
-                false -> {}
+                _ -> {}
             end,
             _total@2_1 = _total@2_0 + _count@1_1,
             case _count@1_1 >= _limit@0_0 of
@@ -79,7 +79,7 @@
                                             {},
                                             _count@1_1,
                                             _total@2_1});
-                false -> {}
+                _ -> {}
             end
         end,
     '$patina_marker':continue(_count@1_1,
@@ -107,7 +107,7 @@ normal_continue(_limit@0_0) ->
                                             0,
                                             _counter@1_1 * 2,
                                             _counter@1_1});
-                false -> {}
+                _ -> {}
             end
         end,
     '$patina_marker':continue(_counter@1_1, _target@0_0).
@@ -154,7 +154,7 @@ initialize_in_loop() ->
                     _total@3_1 = _total@3_0 + _n@2_0,
                     _n@2_1 = _n@2_0 + 1,
                     {};
-                false ->
+                _ ->
                     _branch_value@4_0 = begin
                                             '$patina_marker':break({break,
                                                                     0,
@@ -193,7 +193,7 @@ while_sum(_start@0_0, _limit@1_0) ->
                                               _inner_limit@1_0,
                                               _visits@3_0,
                                               _outer@2_1);
-                false -> {}
+                _ -> {}
             end,
             _visits@3_1 = _visits@3_0 +
                               (_outer@2_1 * 10 + _inner@4_1),
@@ -228,7 +228,7 @@ while_sum(_start@0_0, _limit@1_0) ->
                                             {},
                                             _outer@2_1,
                                             _visits@3_1});
-                false -> {}
+                _ -> {}
             end
         end,
     '$patina_marker':continue(_outer@2_1,
@@ -256,11 +256,11 @@ nested(_outer_limit@0_0, _inner_limit@1_0) ->
             case _n@1_1 =:= _stop_at@0_0 of
                 true ->
                     '$patina_marker':return({return, _n@1_1 * 10, _n@1_1});
-                false -> {}
+                _ -> {}
             end,
             case _n@1_1 >= 10 of
                 true -> '$patina_marker':break({break, 0, {}, _n@1_1});
-                false -> {}
+                _ -> {}
             end
         end,
     '$patina_marker':continue(_n@1_1, _stop_at@0_0).
@@ -288,12 +288,12 @@ return_from_loop(_stop_at@0_0) ->
                     '$patina_marker':return({return,
                                              _outer@2_1 * 100 + _inner@3_1,
                                              _inner@3_1});
-                false -> {}
+                _ -> {}
             end,
             case _inner@3_1 >= 3 of
                 true ->
                     '$patina_marker':break({break, 1, {}, _inner@3_1});
-                false -> {}
+                _ -> {}
             end
         end,
     '$patina_marker':continue(_inner@3_1,
@@ -321,7 +321,7 @@ return_from_loop(_stop_at@0_0) ->
             case _outer@2_1 >= 3 of
                 true ->
                     '$patina_marker':break({break, 0, {}, _outer@2_1});
-                false -> {}
+                _ -> {}
             end
         end,
     '$patina_marker':continue(_outer@2_1,
@@ -354,12 +354,12 @@ return_from_nested(_outer_stop@0_0, _inner_stop@1_0) ->
                                              _a@2_1 * 1000 + _b@3_1 * 10 +
                                                  _inner@4_1,
                                              _inner@4_1});
-                false -> {}
+                _ -> {}
             end,
             case _inner@4_1 >= 3 of
                 true ->
                     '$patina_marker':break({break, 1, {}, _inner@4_1});
-                false -> {}
+                _ -> {}
             end
         end,
     '$patina_marker':continue(_inner@4_1,
@@ -393,7 +393,7 @@ return_from_nested(_outer_stop@0_0, _inner_stop@1_0) ->
             case _a@2_1 >= 3 of
                 true ->
                     '$patina_marker':break({break, 0, {}, _a@2_1, _b@3_1});
-                false -> {}
+                _ -> {}
             end
         end,
     '$patina_marker':continue(_a@2_1,
@@ -425,7 +425,7 @@ return_from_nested_uneven_rebinds(_outer_stop@0_0,
             case _outer@1_1 < _limit@0_0 of
                 true ->
                     '$patina_marker':break({continue, 0, _visits@2_1});
-                false -> {}
+                _ -> {}
             end,
             '$patina_marker':break({break, 0, {}, _visits@2_1})
         end,
@@ -479,7 +479,7 @@ continue_outer(_limit@0_0) ->
             case _outer@1_1 < _limit@0_0 of
                 true ->
                     '$patina_marker':break({continue, 0, _visits@2_1});
-                false -> {}
+                _ -> {}
             end,
             '$patina_marker':break({break, 0, {}, _visits@2_1})
         end,
@@ -571,7 +571,7 @@ cast_loop_value() ->
                     _total@1_1 = _total@1_0 + 1,
                     _i@2_1 = _i@2_0 + 1,
                     {};
-                false ->
+                _ ->
                     _branch_value@3_0 = begin
                                             '$patina_marker':break({break,
                                                                     0,
@@ -596,7 +596,7 @@ cast_loop_value() ->
                     _total@1_2 = _total@1_1 + 10,
                     _k@6_1 = _k@6_0 + 1,
                     {};
-                false ->
+                _ ->
                     _branch_value@7_0 = begin
                                             '$patina_marker':break({break,
                                                                     1,
@@ -621,7 +621,7 @@ cast_loop_value() ->
                     _total@1_3 = _total@1_2 + 100,
                     _l@9_1 = _l@9_0 + 1,
                     {};
-                false ->
+                _ ->
                     _branch_value@10_0 = begin
                                              '$patina_marker':break({break,
                                                                      1,
@@ -661,7 +661,7 @@ cast_loop_value() ->
                     end,
                     _j@5_1 = _j@5_0 + 1,
                     {};
-                false ->
+                _ ->
                     _branch_value@12_0 = begin
                                              '$patina_marker':break({break,
                                                                      0,
@@ -684,7 +684,7 @@ cast_loop_value() ->
                 true ->
                     _m@15_1 = _m@15_0 + 1,
                     {};
-                false ->
+                _ ->
                     _branch_value@16_0 = begin
                                              '$patina_marker':break({break,
                                                                      0,

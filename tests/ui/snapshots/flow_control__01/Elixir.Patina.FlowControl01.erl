@@ -29,7 +29,7 @@ main() ->
         true ->
             _n@0_1 = 4,
             {};
-        false ->
+        _ ->
             _branch_value@1_0 = {},
             _n@0_1 = _n@0_0,
             _branch_value@1_0

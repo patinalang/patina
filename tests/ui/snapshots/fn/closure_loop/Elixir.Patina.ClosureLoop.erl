@@ -30,7 +30,7 @@
             _i@2_1 = _i@2_0 + _y@1_0,
             case _i@2_1 > 3 of
                 true -> '$patina_marker':break({break, 0, {}, _i@2_1});
-                false -> {}
+                _ -> {}
             end
         end,
     '$patina_marker':continue(_i@2_1, _y@1_0).

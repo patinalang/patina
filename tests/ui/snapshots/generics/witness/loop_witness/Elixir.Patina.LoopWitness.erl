@@ -47,7 +47,7 @@
                                                          _self@1_0),
                     _n@6_1 = _n@6_0 + 1,
                     {};
-                false ->
+                _ ->
                     _branch_value@7_0 = begin
                                             '$patina_marker':break({break,
                                                                     0,
@@ -99,7 +99,7 @@
             case _round@6_1 < _rounds@2_0 of
                 true ->
                     '$patina_marker':break({continue, 0, _total@7_1});
-                false -> {}
+                _ -> {}
             end,
             '$patina_marker':break({break, 0, {}, _total@7_1})
         end,
@@ -183,7 +183,7 @@ loop_continuing_outer(_witnesses_where_loop_continuing_outer@0_0,
                                                          _t@1_0),
                     _n@8_1 = _n@8_0 + 1,
                     {};
-                false ->
+                _ ->
                     _branch_value@9_0 = begin
                                             '$patina_marker':break({break,
                                                                     0,

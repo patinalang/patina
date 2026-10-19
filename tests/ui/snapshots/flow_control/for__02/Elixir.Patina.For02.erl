@@ -53,7 +53,7 @@
                                     io:nl(),
                                     {}
                                 end;
-                            false ->
+                            _ ->
                                 case _n@4_0 rem 3 =:= 0 of
                                     true ->
                                         begin
@@ -65,7 +65,7 @@
                                             io:nl(),
                                             {}
                                         end;
-                                    false ->
+                                    _ ->
                                         case _n@4_0 rem 5 =:= 0 of
                                             true ->
                                                 begin
@@ -77,7 +77,7 @@
                                                     io:nl(),
                                                     {}
                                                 end;
-                                            false ->
+                                            _ ->
                                                 begin
                                                     io:put_chars(begin
                                                                      _element@11_0 =

@@ -769,7 +769,6 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         // TODO: this detection of `ExprKind::Let` has an issue with let chains.
         // We'll want to rewrite this into `maybe`. Possibly, we'll want to rewrite all `case`
         // into `maybe`, if I confirm that it results in the same bytecode.
-        // Note that a case without a wildcard sets up for case clause.
         let (scrutinee, then_pattern, is_let) =
             if let thir::ExprKind::Let { expr: scrutinee, pat } = &self.resolve(cond).kind {
                 (self.lower_expr(*scrutinee), self.lower_pat(pat, PatternInput::Typed), true)
@@ -786,12 +785,11 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
 
         let then_span = self.cx.body[then_body].span;
         let else_span = self.cx.body[else_body].span;
+        let wild = etir::PatKind::Wild { input: PatternInput::Typed };
         let else_pattern = if is_let {
-            let wild = etir::PatKind::Wild { input: PatternInput::Typed };
             self.push_pat(wild, self.cx.body[scrutinee].ty, else_span)
         } else {
-            let bool_false = etir::PatKind::Literal(etir::Lit::Bool(false));
-            self.push_pat(bool_false, tcx.types.bool, span)
+            self.push_pat(wild, tcx.types.bool, else_span)
         };
 
         let arms = Box::new([

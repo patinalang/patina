@@ -35,7 +35,7 @@ main() ->
                              end),
                 {}
             end;
-        false ->
+        _ ->
             case _n@0_0 > 0 of
                 true ->
                     begin
@@ -47,7 +47,7 @@ main() ->
                                      end),
                         {}
                     end;
-                false ->
+                _ ->
                     begin
                         io:put_chars(begin
                                          _element@5_0 = io_lib:format("~ktp",
@@ -71,7 +71,7 @@ main() ->
                              {}
                          end,
                          10 * _n@0_0;
-                     false ->
+                     _ ->
                          begin
                              io:put_chars(begin
                                               _element@8_0 =

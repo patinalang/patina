@@ -607,7 +607,7 @@ total_list(_xs@0_0) ->
                                                           _iter@5_1,
                                                           _limit@1_0,
                                                           _total@4_0);
-                            false -> {}
+                            _ -> {}
                         end,
                         case _x@6_0 > _limit@1_0 of
                             true ->
@@ -616,7 +616,7 @@ total_list(_xs@0_0) ->
                                                         {},
                                                         _iter@5_1,
                                                         _total@4_0});
-                            false -> {}
+                            _ -> {}
                         end,
                         _total@4_1 = _total@4_0 + _x@6_0,
                         {}
@@ -680,7 +680,7 @@ skip_odd_until(_xs@0_0, _limit@1_0) ->
                                                          _index@4_0,
                                                          _iter@5_1,
                                                          _index@4_0});
-                            false -> {}
+                            _ -> {}
                         end,
                         _index@4_1 = _index@4_0 + 1,
                         {}
@@ -746,7 +746,7 @@ find_index(_xs@0_0, _target@1_0) ->
                                                           _a@6_0,
                                                           _sum@1_0,
                                                           _found@4_0);
-                            false -> {}
+                            _ -> {}
                         end,
                         case _a@6_0 + _b@10_0 =:= _sum@1_0 of
                             true ->
@@ -756,7 +756,7 @@ find_index(_xs@0_0, _target@1_0) ->
                                                         {},
                                                         _iter@9_1,
                                                         _found@4_1});
-                            false ->
+                            _ ->
                                 _branch_value@13_0 = {},
                                 _found@4_1 = _found@4_0,
                                 _branch_value@13_0
@@ -886,7 +886,7 @@ first_pair_with_sum(_xs@0_0, _sum@1_0) ->
                                                         0,
                                                         _iter@8_1,
                                                         _visited@3_0});
-                            false -> {}
+                            _ -> {}
                         end,
                         _visited@3_1 = _visited@3_0 + 1,
                         {}

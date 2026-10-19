@@ -126,7 +126,7 @@ assign_coerces_to_var_type() ->
                                                 end,
                     _i@3_1 = _i@3_0 + 1,
                     {};
-                false ->
+                _ ->
                     _branch_value@5_0 = begin
                                             '$patina_marker':break({break,
                                                                     0,
@@ -186,7 +186,7 @@ assign_in_boolean_context() ->
     _value@0_0 = false,
     case _value@0_1 = true of
         true -> _value@0_1;
-        false -> false
+        _ -> false
     end.
 
 empty_block() -> {}.

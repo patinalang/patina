@@ -30,7 +30,7 @@ main() -> fizzbuzz_to(100).
 is_divisible_by(_lhs@0_0, _rhs@1_0) ->
     case _rhs@1_0 =:= 0 of
         true -> '$patina_marker':return(false);
-        false -> {}
+        _ -> {}
     end,
     _lhs@0_0 rem _rhs@1_0 =:= 0.
 
@@ -45,7 +45,7 @@ fizzbuzz(_n@0_0) ->
                 io:nl(),
                 {}
             end;
-        false ->
+        _ ->
             case is_divisible_by(_n@0_0, 3) of
                 true ->
                     begin
@@ -56,7 +56,7 @@ fizzbuzz(_n@0_0) ->
                         io:nl(),
                         {}
                     end;
-                false ->
+                _ ->
                     case is_divisible_by(_n@0_0, 5) of
                         true ->
                             begin
@@ -68,7 +68,7 @@ fizzbuzz(_n@0_0) ->
                                 io:nl(),
                                 {}
                             end;
-                        false ->
+                        _ ->
                             begin
                                 io:put_chars(begin
                                                  _element@5_0 = begin

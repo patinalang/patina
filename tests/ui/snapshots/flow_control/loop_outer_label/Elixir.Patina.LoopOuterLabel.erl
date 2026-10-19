@@ -75,7 +75,7 @@ break_outer_loop() ->
                                             0,
                                             _value@0_1 * 10,
                                             _value@0_1});
-                false -> {}
+                _ -> {}
             end
         end,
     '$patina_marker':continue(_value@0_1).

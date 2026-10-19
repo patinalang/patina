@@ -39,7 +39,7 @@ branch_result(_take_then@0_0) ->
                            true ->
                                _value@1_1 = _value@1_0 + 1,
                                100;
-                           false ->
+                           _ ->
                                _value@1_1 = _value@1_0 + 2,
                                200
                        end,
@@ -52,7 +52,7 @@ latest_version_wins(_take_then@0_0) ->
             _value@1_1 = 2,
             _value@1_2 = 3,
             {};
-        false ->
+        _ ->
             _branch_value@2_0 = begin _value@1_1 = 4, {} end,
             _value@1_2 = _value@1_1,
             _branch_value@2_0
@@ -65,7 +65,7 @@ initialize_in_branches(_take_then@0_0) ->
         true ->
             _value@1_1 = 10,
             {};
-        false ->
+        _ ->
             _value@1_1 = 20,
             {}
     end,
@@ -77,7 +77,7 @@ initialize_or_return(_take_then@0_0) ->
         true ->
             _value@1_1 = 30,
             {};
-        false ->
+        _ ->
             _branch_value@2_0 = begin
                                     '$patina_marker':return(40)
                                 end,
@@ -106,12 +106,12 @@ nested_branches(_take_outer@0_0, _take_inner@1_0) ->
                                                       true ->
                                                           _value@2_1 = 1,
                                                           10;
-                                                      false ->
+                                                      _ ->
                                                           _value@2_1 = 2,
                                                           20
                                                   end,
                                _inner_value@3_0 + 100;
-                           false ->
+                           _ ->
                                _value@2_1 = 3,
                                300
                        end,
@@ -126,12 +126,12 @@ nested_diverging_rebind(_take_outer@0_0,
                 true ->
                     _value@2_1 = 1,
                     '$patina_marker':return(_value@2_1);
-                false ->
+                _ ->
                     _branch_value@3_0 = begin {} end,
                     _value@2_1 = _value@2_0,
                     _branch_value@3_0
             end;
-        false ->
+        _ ->
             _branch_value@4_0 = begin {} end,
             _value@2_1 = _value@2_0,
             _branch_value@4_0
@@ -144,7 +144,7 @@ short_circuit_result(_run_block@0_0) ->
                        true ->
                            _value@1_1 = _value@1_0 + 5,
                            true;
-                       false ->
+                       _ ->
                            _branch_value@2_0 = false,
                            _value@1_1 = _value@1_0,
                            _branch_value@2_0
@@ -155,7 +155,7 @@ match_result(_take_first@0_0) ->
     _value@1_0 = 10,
     _branch@2_0 = case _take_first@0_0 of
                       true -> 'Elixir.Patina.RebindInBranches.Branch.First';
-                      false -> 'Elixir.Patina.RebindInBranches.Branch.Second'
+                      _ -> 'Elixir.Patina.RebindInBranches.Branch.Second'
                   end,
     _block_value@3_0 = case _branch@2_0 of
                            'Elixir.Patina.RebindInBranches.Branch.First' ->

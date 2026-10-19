@@ -120,7 +120,7 @@ main() ->
                         io:nl(),
                         {}
                     end;
-                false ->
+                _ ->
                     begin
                         io:put_chars(begin
                                          _element@24_0 =
