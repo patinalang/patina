@@ -25,7 +25,8 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Value::value'(_witness@0_0, _self@1_0) ->
+'Defaults::Value::value'(_witness_Value@0_0,
+                         _self@1_0) ->
     _self@1_0 * 10.
 
 'Defaults::Value::$patina_witness'() ->

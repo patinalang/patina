@@ -32,10 +32,6 @@ impl<'tcx> ExternalCallVisitor<'_, 'tcx> {
             return;
         }
 
-        let Some(caller_module) = self.tcx.erl_definition_module(self.owner) else {
-            return;
-        };
-
         let Some(ErlModuleResolution::Static(callee_module)) =
             self.tcx.erl_module_for_target(self.owner, target)
         else {
@@ -43,8 +39,7 @@ impl<'tcx> ExternalCallVisitor<'_, 'tcx> {
             return;
         };
 
-        // An inlined constant's calls land in whichever module uses its value.
-        if caller_module != callee_module || self.tcx.is_in_erl_inlined_const(self.owner) {
+        if self.tcx.is_erl_cross_module_call(self.owner, callee_module) == Some(true) {
             self.called_externally.insert((callee_module, def_id));
         }
     }

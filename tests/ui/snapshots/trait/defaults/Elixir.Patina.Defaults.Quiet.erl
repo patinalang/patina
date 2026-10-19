@@ -25,8 +25,8 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Ring::ring'(_witness@0_0, _witness@1_0,
-                       _self@2_0, __t@3_0) ->
+'Defaults::Ring::ring'(_witness_Ring@0_0,
+                       _witnesses_where_Ring_ring@1_0, _self@2_0, __t@3_0) ->
     <<"..."/utf8>>.
 
 'Defaults::Ring::$patina_witness'() ->

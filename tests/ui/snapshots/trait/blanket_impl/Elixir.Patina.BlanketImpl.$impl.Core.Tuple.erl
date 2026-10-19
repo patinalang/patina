@@ -25,15 +25,21 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'BlanketImpl::Describe::describe<(int, str)>'(_witness@0_0,
+'BlanketImpl::Describe::describe<(int, str)>'(_witness_Describe@0_0,
                                               _self@1_0) ->
-    <<<<('Elixir.Patina.BlanketImpl.$impl.Core.Int':'BlanketImpl::Show::show'('Elixir.Patina.BlanketImpl.$impl.Core.Int':'BlanketImpl::Show::$patina_witness'(),
-                                                                              erlang:element(1,
-                                                                                             _self@1_0)))/binary,
-        " and "/utf8>>/binary,
-      ('Elixir.Patina.BlanketImpl.$impl.Core.Str':'BlanketImpl::Show::show'('Elixir.Patina.BlanketImpl.$impl.Core.Str':'BlanketImpl::Show::$patina_witness'(),
-                                                                            erlang:element(2,
-                                                                                           _self@1_0)))/binary>>.
+    _witness_Show@2_0 =
+        'Elixir.Patina.BlanketImpl.$impl.Core.Int':'BlanketImpl::Show::$patina_witness'(),
+    _witness_Show@3_0 =
+        'Elixir.Patina.BlanketImpl.$impl.Core.Str':'BlanketImpl::Show::$patina_witness'(),
+    begin
+        <<<<('Elixir.Patina.BlanketImpl.$impl.Core.Int':'BlanketImpl::Show::show'(_witness_Show@2_0,
+                                                                                  erlang:element(1,
+                                                                                                 _self@1_0)))/binary,
+            " and "/utf8>>/binary,
+          ('Elixir.Patina.BlanketImpl.$impl.Core.Str':'BlanketImpl::Show::show'(_witness_Show@3_0,
+                                                                                erlang:element(2,
+                                                                                               _self@1_0)))/binary>>
+    end.
 
 'BlanketImpl::Describe::$patina_witness<(int, str)>'() ->
     {{fun 'Elixir.Patina.BlanketImpl.$impl.Core.Tuple':'BlanketImpl::Describe::describe<(int, str)>'/2,

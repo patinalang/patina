@@ -65,7 +65,7 @@
   'UnboundedSlot::Tr::method',2,
   [{clause,
     {10,5},
-    [{var,{10,5},'_witness@0_0'},{var,{10,15},'_self@1_0'}],
+    [{var,{10,5},'_witness_Tr@0_0'},{var,{10,15},'_self@1_0'}],
     [],
     [{block,
       {10,23},

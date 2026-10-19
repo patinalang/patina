@@ -30,3 +30,45 @@ fn first<I: Iter>(i: I) -> str {
 pub fn counter_first(n: int) -> str {
     first(Counter { n: n })
 }
+
+// The bounds of a generic associated type can need the witnesses of its own parameters.
+
+struct Pair<T> { v: T }
+
+impl<T: Show> Show for Pair<T> {
+    fn show(self) -> str { self.v.show() }
+}
+
+trait Family {
+    type Plain<T>: Show;
+    type Member<T: Show>: Show;
+
+    fn plain<T>(self, t: T) -> Self::Plain<T>;
+    fn member<T: Show>(self, t: T) -> Self::Member<T>;
+}
+
+struct Wrapper {}
+
+impl Family for Wrapper {
+    type Plain<T> = int;
+    type Member<T: Show> = Pair<T>;
+
+    fn plain<T>(self, _t: T) -> int { 7 }
+    fn member<T: Show>(self, t: T) -> Pair<T> { Pair { v: t } }
+}
+
+fn show_plain<F: Family>(f: F) -> str {
+    f.plain("x").show()
+}
+
+fn show_member<F: Family>(f: F) -> str {
+    f.member(3).show()
+}
+
+pub fn wrapper_plain() -> str {
+    show_plain(Wrapper {})
+}
+
+pub fn wrapper_member() -> str {
+    show_member(Wrapper {})
+}

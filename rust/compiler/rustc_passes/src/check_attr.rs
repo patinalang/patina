@@ -29,7 +29,7 @@ use rustc_hir::{
     Item, ItemKind, MethodKind, Node, ParamName, Target, TraitItem, find_attr,
 };
 use rustc_macros::Diagnostic;
-use rustc_middle::erl::{ErlCallKind, ErlCallTarget};
+use rustc_middle::erl::{ErlCallTarget, ErlModuleResolution};
 use rustc_middle::hir::nested_filter;
 use rustc_middle::middle::resolve_bound_vars::ObjectLifetimeDefault;
 use rustc_middle::query::Providers;
@@ -1735,31 +1735,31 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
             _ => unreachable!("call expression checked above"),
         };
 
-        let callee_module = self.tcx.erl_module_for_target(caller, target);
-        match self.tcx.erl_call_kind(caller, callee_module, target, None) {
-            Some(ErlCallKind::Extern) => {
-                self.dcx().emit_warn(errors::ExternCallRedundant {
-                    attr_span,
-                    node_span: self.tcx.hir_span(hir_id),
-                });
-                Some(())
-            }
-            Some(ErlCallKind::Local) => {
-                let target_def_id = match target {
-                    ErlCallTarget::Item { def_id, args: _ } => def_id,
-                    _ => unreachable!("extern and dynamic targets won't be ErlCallKind::Local"),
-                };
+        let Some(ErlModuleResolution::Static(callee_module)) =
+            self.tcx.erl_module_for_target(caller, target)
+        else {
+            return None;
+        };
 
+        if self.tcx.is_erl_cross_module_call(caller, callee_module)? {
+            self.dcx().emit_warn(errors::ExternCallRedundant {
+                attr_span,
+                node_span: self.tcx.hir_span(hir_id),
+            });
+        } else {
+            let ErlCallTarget::Item { def_id, args: _ } = target else {
+                unreachable!("extern targets are cross_module_calls")
+            };
+
+            if !self.tcx.is_erl_exported_fn(callee_module, def_id) {
                 self.dcx().emit_err(errors::ExternCallPrivateFn {
                     attr_span,
                     node_span: self.tcx.hir_span(hir_id),
-                    fn_span: self.tcx.def_span(target_def_id),
+                    fn_span: self.tcx.def_span(def_id),
                 });
-                Some(())
             }
-            Some(ErlCallKind::LocalOrExtern) => Some(()),
-            Some(ErlCallKind::Dynamic) | None => None,
         }
+        Some(())
     }
 }
 

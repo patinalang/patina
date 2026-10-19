@@ -25,8 +25,12 @@
 '__info__'(Key) -> module_info(Key).
 
 call(_h@0_0) ->
-    'Elixir.Patina.UnboundedSlot.Holder':'UnboundedSlot::Tr::method'('Elixir.Patina.UnboundedSlot.Holder':'UnboundedSlot::Tr::$patina_witness'(),
-                                                                     _h@0_0).
+    _witness_Tr@1_0 =
+        'Elixir.Patina.UnboundedSlot.Holder':'UnboundedSlot::Tr::$patina_witness'(),
+    begin
+        'Elixir.Patina.UnboundedSlot.Holder':'UnboundedSlot::Tr::method'(_witness_Tr@1_0,
+                                                                         _h@0_0)
+    end.
 
 main() ->
     _h@0_0 = 1,

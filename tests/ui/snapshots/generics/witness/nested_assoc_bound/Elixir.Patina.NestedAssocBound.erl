@@ -25,44 +25,43 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-nested_label(_witness@0_0, _t@1_0) ->
+nested_label(_witnesses_where_nested_label@0_0,
+             _t@1_0) ->
+    _witness_Outer@2_0 = erlang:element(1,
+                                        _witnesses_where_nested_label@0_0),
+    _vtable_Outer@3_0 = erlang:element(1,
+                                       _witness_Outer@2_0),
+    _fn_Outer_inner@4_0 = erlang:element(2,
+                                         _vtable_Outer@3_0),
+    _type_Outer_Inner@5_0 = erlang:element(1,
+                                           _vtable_Outer@3_0),
+    _where_Outer@6_0 =
+        _type_Outer_Inner@5_0(_witness_Outer@2_0),
+    _witness_Label@7_0 = erlang:element(2,
+                                        _where_Outer@6_0),
+    _witness_HasItem@8_0 = erlang:element(1,
+                                          _where_Outer@6_0),
+    _vtable_Label@9_0 = erlang:element(1,
+                                       _witness_Label@7_0),
+    _fn_Label_label@10_0 = erlang:element(1,
+                                          _vtable_Label@9_0),
+    _vtable_HasItem@11_0 = erlang:element(1,
+                                          _witness_HasItem@8_0),
+    _fn_HasItem_item@12_0 = erlang:element(2,
+                                           _vtable_HasItem@11_0),
     begin
-        _witness@6_0 = erlang:element(2,
-                                      begin
-                                          _witness@2_0 = erlang:element(1,
-                                                                        _witness@0_0),
-                                          (erlang:element(1,
-                                                          erlang:element(1,
-                                                                         _witness@2_0)))(_witness@2_0)
-                                      end),
-        (erlang:element(1,
-                        erlang:element(1, _witness@6_0)))(_witness@6_0,
-                                                          begin
-                                                              _witness@5_0 =
-                                                                  erlang:element(1,
-                                                                                 begin
-                                                                                     _witness@3_0 =
-                                                                                         erlang:element(1,
-                                                                                                        _witness@0_0),
-                                                                                     (erlang:element(1,
-                                                                                                     erlang:element(1,
-                                                                                                                    _witness@3_0)))(_witness@3_0)
-                                                                                 end),
-                                                              (erlang:element(2,
-                                                                              erlang:element(1,
-                                                                                             _witness@5_0)))(_witness@5_0,
-                                                                                                             begin
-                                                                                                                 _witness@4_0 =
-                                                                                                                     erlang:element(1,
-                                                                                                                                    _witness@0_0),
-                                                                                                                 (erlang:element(2,
-                                                                                                                                 erlang:element(1,
-                                                                                                                                                _witness@4_0)))(_witness@4_0,
-                                                                                                                                                                _t@1_0)
-                                                                                                             end)
-                                                          end)
+        _fn_Label_label@10_0(_witness_Label@7_0,
+                             _fn_HasItem_item@12_0(_witness_HasItem@8_0,
+                                                   _fn_Outer_inner@4_0(_witness_Outer@2_0,
+                                                                       _t@1_0)))
     end.
 
 root_label() ->
-    nested_label({'Elixir.Patina.NestedAssocBound.Root':'NestedAssocBound::Outer::$patina_witness'()},
-                 'Elixir.Patina.NestedAssocBound.Root').
+    _witness_Outer@0_0 =
+        'Elixir.Patina.NestedAssocBound.Root':'NestedAssocBound::Outer::$patina_witness'(),
+    _witnesses_where_nested_label@1_0 =
+        {_witness_Outer@0_0},
+    begin
+        nested_label(_witnesses_where_nested_label@1_0,
+                     'Elixir.Patina.NestedAssocBound.Root')
+    end.

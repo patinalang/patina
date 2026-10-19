@@ -26,10 +26,11 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Container::$patina_type::Item'(_witness@0_0) ->
+'Defaults::Container::$patina_type::Item'(_witness_Container@0_0) ->
     {}.
 
-'Defaults::Container::get'(_witness@0_0, _self@1_0) ->
+'Defaults::Container::get'(_witness_Container@0_0,
+                           _self@1_0) ->
     _self@1_0.
 
 'Defaults::Container::$patina_witness'() ->

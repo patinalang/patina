@@ -1,5 +1,4 @@
 use rustc_data_structures::smallvec::SmallVec;
-use rustc_hir::def::DefKind;
 use rustc_hir::def_id::DefId;
 use rustc_middle::erl::etir::{self, AdtRepr, PatternInput};
 use rustc_middle::erl::shape::ErlShape;
@@ -434,7 +433,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     pub(super) fn record_module_for_access(&self, record_module: Symbol) -> Option<Symbol> {
         let tcx = self.tcx();
 
-        if matches!(tcx.def_kind(self.owner), DefKind::Const { .. } | DefKind::AssocConst { .. }) {
+        if tcx.is_in_erl_inlined_const(self.owner) {
             return Some(record_module);
         }
 
@@ -454,10 +453,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
         let target =
             ErlCallTarget::Constructor { nominal_type: adt_def_id, variant: variant_def_id };
-        let module = tcx.erl_module_for_target(self.owner, target);
-
         let call_kind = tcx
-            .erl_call_kind(self.owner, module, target, None)
+            .erl_module_for_target(self.owner, target)
+            .and_then(|module| tcx.erl_call_kind(self.owner, module, false))
             .unwrap_or_else(|| span_bug!(span, "adt constructor didn't classify"));
 
         // adt construction is always local if possible

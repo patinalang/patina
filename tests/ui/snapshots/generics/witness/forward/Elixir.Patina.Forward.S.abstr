@@ -65,7 +65,7 @@
   'Forward::Tr::method',2,
   [{clause,
     {8,5},
-    [{var,{8,5},'_witness@0_0'},{var,{8,15},'_self@1_0'}],
+    [{var,{8,5},'_witness_Tr@0_0'},{var,{8,15},'_self@1_0'}],
     [],
     [{block,
       {8,23},

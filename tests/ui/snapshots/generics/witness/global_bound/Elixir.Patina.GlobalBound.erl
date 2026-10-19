@@ -24,22 +24,32 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-call(_witness@0_0, _t@1_0) ->
-    begin
-        _witness@2_0 = erlang:element(1,
-                                      erlang:element(2,
-                                                     erlang:element(1,
-                                                                    _witness@0_0))),
-        (erlang:element(1,
-                        erlang:element(1, _witness@2_0)))(_witness@2_0, _t@1_0)
-    end.
+call(_witnesses_where_call@0_0, _t@1_0) ->
+    _witness_Derived@2_0 = erlang:element(1,
+                                          _witnesses_where_call@0_0),
+    _supertraits_Derived@3_0 = erlang:element(2,
+                                              _witness_Derived@2_0),
+    _witness_Base@4_0 = erlang:element(1,
+                                       _supertraits_Derived@3_0),
+    _vtable_Base@5_0 = erlang:element(1, _witness_Base@4_0),
+    _fn_Base_base@6_0 = erlang:element(1, _vtable_Base@5_0),
+    begin _fn_Base_base@6_0(_witness_Base@4_0, _t@1_0) end.
 
 only_global_bound() ->
-    'Elixir.Patina.GlobalBound.S':'GlobalBound::Derived::derived'('Elixir.Patina.GlobalBound.S':'GlobalBound::Derived::$patina_witness'(),
-                                                                  'Elixir.Patina.GlobalBound.S').
+    _witness_Derived@0_0 =
+        'Elixir.Patina.GlobalBound.S':'GlobalBound::Derived::$patina_witness'(),
+    begin
+        'Elixir.Patina.GlobalBound.S':'GlobalBound::Derived::derived'(_witness_Derived@0_0,
+                                                                      'Elixir.Patina.GlobalBound.S')
+    end.
 
 base() ->
-    call({'Elixir.Patina.GlobalBound.S':'GlobalBound::Derived::$patina_witness'()},
-         'Elixir.Patina.GlobalBound.S').
+    _witness_Derived@0_0 =
+        'Elixir.Patina.GlobalBound.S':'GlobalBound::Derived::$patina_witness'(),
+    _witnesses_where_call@1_0 = {_witness_Derived@0_0},
+    begin
+        call(_witnesses_where_call@1_0,
+             'Elixir.Patina.GlobalBound.S')
+    end.
 
 global() -> only_global_bound().

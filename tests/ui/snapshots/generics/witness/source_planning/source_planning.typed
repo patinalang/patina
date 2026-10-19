@@ -1,0 +1,168 @@
+#![allow(internal_features)]
+
+
+
+
+#![allow(dead_code)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+#[allow(unused)]
+extern mod patina_fmt;
+
+trait Value {
+    fn value(self)
+    -> int;
+}
+
+trait Middle: Value {
+    fn middle(self) -> int ({ ((self as Self).value() as int) } as int)
+}
+
+trait Deep: Middle {
+    fn deep(self) -> int ({ ((self as Self).middle() as int) } as int)
+}
+
+trait Direct: Value {
+    fn direct(self)
+    -> int;
+}
+
+struct Wrapped<T> {
+    inner: T,
+}
+
+impl <T> Value for Wrapped<T> {
+    fn value(self) -> int ({ (10 as int) } as int)
+}
+
+impl <T> Direct for Wrapped<T> {
+    fn direct(self) -> int ({ (20 as int) } as int)
+}
+
+impl Middle for Wrapped<int> { }
+impl Deep for Wrapped<int> { }
+
+// The first call discovers Value through Deep -> Middle -> Value. The later
+// Direct constructor gives it a shorter source; both Value uses should use it.
+fn late<T>(x: Wrapped<T>) -> (int, int, int) where
+    Wrapped<T>: Deep ({
+    let first = ((x as Wrapped<T>).value() as int);
+    let direct = ((x as Wrapped<T>).direct() as int);
+    (((first as int), (direct as int), ((x as Wrapped<T>).value() as int)) as
+        (int, int, int))
+} as (int, int, int))
+
+fn early<T>(x: Wrapped<T>) -> (int, int, int) where
+    Wrapped<T>: Deep ({
+    let direct = ((x as Wrapped<T>).direct() as int);
+    ((((x as Wrapped<T>).value() as int), (direct as int),
+        ((x as Wrapped<T>).value() as int)) as (int, int, int))
+} as (int, int, int))
+
+fn loop_late<T>(x: Wrapped<T>, n: int) -> int where
+    Wrapped<T>: Deep ({
+    let mut total = (0 as int);
+    let mut i = (0 as int);
+    (loop {
+        (if ((i as int) < (n as int) as bool) {
+            ((total as int) += ((x as Wrapped<T>).value() as int) as int);
+            ((i as int) += (1 as int) as int);
+        } else { (break as !); } as ())
+    } as ())
+    ((total as int) + ((x as Wrapped<T>).direct() as int) as int)
+} as int)
+
+// Direct's input requires Value, so Value cannot be extracted from its output.
+struct Bounded<T> {
+    inner: T,
+}
+
+impl Value for Bounded<int> {
+    fn value(self) -> int ({ (30 as int) } as int)
+}
+
+impl Middle for Bounded<int> { }
+impl Deep for Bounded<int> { }
+
+impl <T> Direct for Bounded<T> where Bounded<T>: Value {
+    fn direct(self) -> int ({ ((self as Bounded<T>).value() as int) } as int)
+}
+
+fn bounded<T>(x: Bounded<T>) -> (int, int) where
+    Bounded<T>: Deep ({
+    ((((x as Bounded<T>).value() as int), ((x as Bounded<T>).direct() as int))
+        as (int, int))
+} as (int, int))
+
+trait Factory {
+    // Value has a direct slot as well as a longer path through Deep.
+    type
+    Item: Deep +
+    Value;
+    fn item(self)
+    -> Self::Item;
+}
+
+struct Maker;
+
+impl Factory for Maker {
+    type
+    Item
+    =
+    Wrapped<int>;
+    fn item(self)
+        ->
+            Wrapped<int> ({ (Wrapped { inner: (0 as int) } as Wrapped<int>) }
+        as Wrapped<int>)
+}
+
+fn associated<F>(f: F) -> int where
+    F: Factory ({
+    ((((f as F).item() as <F as Factory>::Item).value() as int) +
+        (((f as F).item() as <F as Factory>::Item).value() as int) as int)
+} as int)
+
+fn late_source()
+    ->
+        (int, int,
+        int) ({
+    ((late as
+            fn(Wrapped<int>) -> (int, int, int) {late::<int>})((Wrapped {
+            inner: (0 as int) } as Wrapped<int>)) as (int, int, int))
+} as (int, int, int))
+fn early_source()
+    ->
+        (int, int,
+        int) ({
+    ((early as
+            fn(Wrapped<int>) -> (int, int, int) {early::<int>})((Wrapped {
+            inner: (0 as int) } as Wrapped<int>)) as (int, int, int))
+} as (int, int, int))
+fn loop_source(n: int)
+    ->
+        int ({
+    ((loop_late as
+            fn(Wrapped<int>, int) -> int {loop_late::<int>})((Wrapped {
+            inner: (0 as int) } as Wrapped<int>), (n as int)) as int)
+} as int)
+fn constructor_input()
+    ->
+        (int,
+        int) ({
+    ((bounded as
+            fn(Bounded<int>) -> (int, int) {bounded::<int>})((Bounded {
+            inner: (0 as int) } as Bounded<int>)) as (int, int))
+} as (int, int))
+fn associated_source()
+    ->
+        int ({
+    ((associated as fn(Maker) -> int {associated::<Maker>})((Maker as Maker))
+        as int)
+} as int)

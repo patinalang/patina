@@ -1,30 +1,22 @@
-use rustc_data_structures::fx::{FxHashSet, FxIndexMap};
 use rustc_hir::def::DefKind;
 use rustc_hir::{BinarySegmentTy, HirId};
 use rustc_middle::erl::binary_pattern::{BinaryEndianness, BinarySegmentLayout, BinarySegmentSize};
 use rustc_middle::erl::etir::{self, ExprId, PatId, PatternInput};
-use rustc_middle::erl::witness::WitnessArgs;
-use rustc_middle::erl::{ErlCallTarget, ErlModuleId};
+use rustc_middle::erl::{ErlCallTarget, ErlModuleId, ErlModuleResolution};
 use rustc_middle::middle::region;
 use rustc_middle::mir::{BinOp, UnOp};
 use rustc_middle::span_bug;
-use rustc_middle::thir::visit::{self, Visitor};
-use rustc_middle::thir::{self, AdtExprBase, LocalVarId, PatKind, Thir};
+use rustc_middle::thir::{self, AdtExprBase, LocalVarId};
 use rustc_middle::ty::{self, GenericArgsRef, Ty};
 use rustc_span::{Ident, Span, Symbol, sym};
 
-use super::{ThirBodyCx, not_implemented, not_implemented_kind};
-
-/// Some expressions that we translate result in a whole block being emitted.
-/// This helper structure collects additional exprs that should be emitted before
-/// the final results.
-struct ExprBlock(Vec<ExprId>);
+use super::{ExprBlock, ThirBodyCx, not_implemented, not_implemented_kind};
 
 macro_rules! with_expr_block {
     ($cx:ident, |$block:ident| $body:block) => {{
-        let mut $block = ExprBlock(Vec::new());
+        let mut $block = ExprBlock::default();
         let result = (|| $body)();
-        $block.emit($cx, result)
+        $block.emit(&mut $cx.cx.body, result)
     }};
 }
 
@@ -68,18 +60,6 @@ impl<'a, 'tcx> ExprBlock {
         self.0.push(assign_expr);
 
         cx.push_expr(etir::ExprKind::Var(var), ty, span)
-    }
-
-    /// Wraps the final expression `value` in a block with all the expressions prepared
-    /// through other functions of this struct.
-    fn emit(mut self, cx: &mut ThirBodyCx<'a, 'tcx>, value: ExprId) -> ExprId {
-        if self.0.is_empty() {
-            value
-        } else {
-            let etir::Expr { ty, span, kind: _ } = cx.cx.body[value];
-            self.0.push(value);
-            cx.push_expr(etir::ExprKind::Block(self.0.into_boxed_slice()), ty, span)
-        }
     }
 }
 
@@ -570,7 +550,10 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             }
         }
 
-        let callee = etir::Callee::Item { item: self.item_ref(span, target), forced_extern };
+        let callee = match self.witnessless_erl_fun(span, target, args.len() as u32) {
+            Some(fun) => etir::Callee::Fun { fun, forced_extern },
+            None => etir::Callee::Item { item: self.item_ref(span, target), forced_extern },
+        };
         let kind = etir::ExprKind::Call { callee, args: self.lower_exprs(args) };
         self.push_expr(kind, expr.ty, span)
     }
@@ -670,10 +653,15 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         }
 
         let target = tcx.erl_call_target_for_def(self.owner.to_def_id(), def_id, args);
-        let kind = etir::ExprKind::FnRef {
-            item: self.item_ref(expr.span, target),
-            arity: tcx.fn_sig(def_id).skip_binder().inputs().skip_binder().len(),
-            erl_arity: tcx.erl_fn_arity(def_id) as u32,
+        let arity = tcx.fn_sig(def_id).skip_binder().inputs().skip_binder().len() as u32;
+
+        // TODO: add an attribute to allow forcing `fnref` to be an extern call
+        let kind = match self.witnessless_erl_fun(expr.span, target, arity) {
+            Some(fun) => etir::ExprKind::Fun { fun, forced_extern: false },
+            None => {
+                let item = self.item_ref(expr.span, target);
+                etir::ExprKind::FnItem { item, arity, forced_extern: false }
+            }
         };
         self.push_expr(kind, expr.ty, expr.span)
     }
@@ -906,18 +894,8 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             span_bug!(expr.span, "HIR-derived loop has no outer Scope")
         };
 
-        let outer_vars = LoopVarAnalysis::analyze(self.thir, body)
-            .into_iter()
-            .map(|(var, reassigned)| {
-                if reassigned {
-                    etir::LoopOuterVar::Reassigned(self.var(var))
-                } else {
-                    etir::LoopOuterVar::Referenced(self.var(var))
-                }
-            })
-            .collect();
-
-        let loop_id = self.push_loop(label, outer_vars);
+        // `outer_vars` are analyzed in a separate pass
+        let loop_id = self.push_loop(label, Box::new([]));
         let body = self.lower_expr(body);
         self.push_expr(etir::ExprKind::Loop { id: loop_id, body }, expr.ty, expr.span)
     }
@@ -960,22 +938,46 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         self.push_expr(unit, tcx.types.unit, span)
     }
 
-    fn item_ref(&mut self, span: Span, target: ErlCallTarget<'tcx>) -> Box<etir::ItemRef<'tcx>> {
+    fn item_ref(&self, span: Span, target: ErlCallTarget<'tcx>) -> Box<etir::ItemRef<'tcx>> {
+        let (module, name) = self.target_module_and_name(span, target);
+        Box::new(etir::ItemRef { name, target, module })
+    }
+
+    fn witnessless_erl_fun(
+        &self,
+        span: Span,
+        target: ErlCallTarget<'tcx>,
+        arity: u32,
+    ) -> Option<etir::ErlFun> {
+        if let ErlCallTarget::Item { def_id, .. } = target
+            && self.cx.tcx.erl_needs_witnesses(def_id)
+        {
+            return None;
+        }
+
+        let (module, name) = self.target_module_and_name(span, target);
+        let module =
+            module.unwrap_or_else(|| span_bug!(span, "`{name}` dispatches without a self witness"));
+
+        Some(etir::ErlFun { module, name, arity })
+    }
+
+    fn target_module_and_name(
+        &self,
+        span: Span,
+        target: ErlCallTarget<'tcx>,
+    ) -> (Option<ErlModuleResolution>, Symbol) {
         let tcx = self.cx.tcx;
         let owner = self.owner.to_def_id();
         let module = tcx.erl_module_for_target(owner, target);
-        let (name, witnesses) = match target {
-            ErlCallTarget::Item { def_id, args } => {
-                (tcx.erl_fn_name(def_id), self.cx.witness_resolver.witness_args(span, def_id, args))
-            }
-            ErlCallTarget::Extern { function, .. } => {
-                (tcx.item_name(function), WitnessArgs::default())
-            }
+        let name = match target {
+            ErlCallTarget::Item { def_id, .. } => tcx.erl_fn_name(def_id),
+            ErlCallTarget::Extern { function, .. } => tcx.item_name(function),
             ErlCallTarget::Constructor { .. } | ErlCallTarget::Dynamic => {
                 span_bug!(span, "item reference to {target:?}")
             }
         };
-        Box::new(etir::ItemRef { name, target, module, witnesses })
+        (module, name)
     }
 
     fn resolve_expr_with_scope(
@@ -1004,66 +1006,5 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
 
     fn resolve(&self, expr: thir::ExprId) -> &'a thir::Expr<'tcx> {
         self.resolve_expr_with_scope(expr).0
-    }
-}
-
-struct LoopVarAnalysis<'thir, 'tcx> {
-    thir: &'thir Thir<'tcx>,
-    outer_vars: FxIndexMap<LocalVarId, bool>,
-    bound_in_loop: FxHashSet<LocalVarId>,
-}
-
-impl<'thir, 'tcx> LoopVarAnalysis<'thir, 'tcx> {
-    fn analyze(thir: &'thir Thir<'tcx>, body: thir::ExprId) -> FxIndexMap<LocalVarId, bool> {
-        let mut analysis = LoopVarAnalysis {
-            thir,
-            outer_vars: FxIndexMap::default(),
-            bound_in_loop: FxHashSet::default(),
-        };
-        analysis.visit_expr(&thir[body]);
-        let bound = &analysis.bound_in_loop;
-        analysis.outer_vars.retain(|var, _| !bound.contains(var));
-        analysis.outer_vars
-    }
-}
-
-impl<'thir, 'tcx: 'thir> Visitor<'thir, 'tcx> for LoopVarAnalysis<'thir, 'tcx> {
-    fn thir(&self) -> &'thir Thir<'tcx> {
-        self.thir
-    }
-
-    fn visit_expr(&mut self, expr: &'thir thir::Expr<'tcx>) {
-        match &expr.kind {
-            thir::ExprKind::VarRef { .. } | thir::ExprKind::UpvarRef { .. }
-                if expr.ty.is_phantom_data() => {}
-            thir::ExprKind::VarRef { id } | thir::ExprKind::UpvarRef { var_hir_id: id, .. } => {
-                self.outer_vars.entry(*id).or_insert(false);
-            }
-            thir::ExprKind::Closure(closure) => {
-                // The closure body has its own THIR, but its capture expressions are
-                // evaluated in (and therefore must be parameters of) this loop helper.
-                for upvar in closure.upvars.iter() {
-                    self.visit_expr(&self.thir[*upvar]);
-                }
-            }
-            _ => visit::walk_expr(self, expr),
-        }
-    }
-
-    fn visit_pat(&mut self, pat: &'thir thir::Pat<'tcx>) {
-        match pat.kind {
-            PatKind::Pin { .. } | PatKind::Assignee { .. } if pat.ty.is_phantom_data() => {}
-            PatKind::Pin { var } => {
-                self.outer_vars.entry(var).or_insert(false);
-            }
-            PatKind::Assignee { var } => {
-                self.outer_vars.insert(var, true);
-            }
-            PatKind::Binding { var, .. } => {
-                self.bound_in_loop.insert(var);
-            }
-            _ => {}
-        }
-        visit::walk_pat(self, pat);
     }
 }

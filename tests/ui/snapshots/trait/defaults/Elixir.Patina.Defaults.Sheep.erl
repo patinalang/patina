@@ -27,10 +27,12 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Animal::name'(_witness@0_0, _self@1_0) ->
+'Defaults::Animal::name'(_witness_Animal@0_0,
+                         _self@1_0) ->
     _self@1_0.
 
-'Defaults::Animal::noise'(_witness@0_0, _self@1_0) ->
+'Defaults::Animal::noise'(_witness_Animal@0_0,
+                          _self@1_0) ->
     <<"baaaaah"/utf8>>.
 
 'Defaults::Animal::$patina_witness'() ->
@@ -45,12 +47,16 @@
      {}}.
 
 calls_stubs_locally(_self@0_0) ->
+    _witness_Animal@1_0 =
+        'Defaults::Animal::$patina_witness'(),
     begin
-        _element@1_0 =
-            'Elixir.Patina.Defaults':'Defaults::Animal::calls_required'('Elixir.Patina.Defaults.Sheep':'Defaults::Animal::$patina_witness'(),
-                                                                        _self@0_0),
-        _element@2_0 =
-            'Elixir.Patina.Defaults':'Defaults::Animal::whisper'('Elixir.Patina.Defaults.Sheep':'Defaults::Animal::$patina_witness'(),
-                                                                 _self@0_0),
-        {_element@1_0, _element@2_0}
+        begin
+            _element@2_0 =
+                'Elixir.Patina.Defaults':'Defaults::Animal::calls_required'(_witness_Animal@1_0,
+                                                                            _self@0_0),
+            _element@3_0 =
+                'Elixir.Patina.Defaults':'Defaults::Animal::whisper'(_witness_Animal@1_0,
+                                                                     _self@0_0),
+            {_element@2_0, _element@3_0}
+        end
     end.

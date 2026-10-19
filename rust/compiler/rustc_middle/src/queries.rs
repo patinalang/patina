@@ -607,7 +607,7 @@ rustc_queries! {
         desc { "building THIR for `{}`", tcx.def_path_str(key) }
     }
 
-    /// Fetch the ETIR for a given body.
+    /// Fetch the ETIR body for a given item.
     query etir_body(key: DefId) -> &'tcx crate::erl::etir::Body<'tcx> {
         no_hash
         desc { "lowering `{}` to the Erlang translation IR", tcx.def_path_str(key) }
@@ -1139,6 +1139,11 @@ rustc_queries! {
     /// Check assignment legality (mutability, scope boundaries) in this `LocalDefId`.
     query check_mutability(key: LocalDefId) {
         desc { "mutability-checking `{}`", tcx.def_path_str(key) }
+    }
+
+    /// Check that every `fnref` in this `LocalDefId` names a static Erlang item.
+    query check_fnrefs(key: LocalDefId) {
+        desc { "fnref-checking `{}`", tcx.def_path_str(key) }
     }
 
     /// Checks well-formedness of tail calls (`become f()`).

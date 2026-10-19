@@ -91,7 +91,7 @@
      'Defaults::Container::$patina_type::Item',1,
      [{clause,
           {287,5},
-          [{var,{287,5},'_witness@0_0'}],
+          [{var,{287,5},'_witness_Container@0_0'}],
           [],
           [{tuple,{287,5},[]}]}]},
  {function,
@@ -99,7 +99,7 @@
      'Defaults::Container::get',2,
      [{clause,
           {288,5},
-          [{var,{288,5},'_witness@0_0'},{var,{288,12},'_self@1_0'}],
+          [{var,{288,5},'_witness_Container@0_0'},{var,{288,12},'_self@1_0'}],
           [],
           [{var,{289,9},'_self@1_0'}]}]},
  {function,
@@ -107,7 +107,7 @@
      'Defaults::Container::$patina_witness',1,
      [{clause,
           {286,33},
-          [{var,{286,33},'_witness@0_0'}],
+          [{var,{286,33},'_witnesses_where_Container@0_0'}],
           [],
           [{tuple,
                {286,33},
@@ -136,4 +136,4 @@
                                  'Defaults::Container::needs_item_witness'},
                              {integer,{286,33},3}}}]},
                 {tuple,{286,33},[]},
-                {var,{286,33},'_witness@0_0'}]}]}]}]
+                {var,{286,33},'_witnesses_where_Container@0_0'}]}]}]}]

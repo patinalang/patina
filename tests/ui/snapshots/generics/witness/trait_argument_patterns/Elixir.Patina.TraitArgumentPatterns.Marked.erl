@@ -27,7 +27,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'TraitArgumentPatterns::Marker::value'(_witness@0_0,
+'TraitArgumentPatterns::Marker::value'(_witness_Marker@0_0,
                                        _self@1_0) ->
     begin
         io:put_chars(begin

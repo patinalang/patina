@@ -26,12 +26,17 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Container::$patina_type::Item'(_witness@0_0) ->
+'Defaults::Container::$patina_type::Item'(_witness_Container@0_0) ->
     {}.
 
-'Defaults::Container::get'(_witness@0_0, _self@1_0) ->
-    'Elixir.Patina.Defaults.Boxed':'Defaults::Container::get'('Elixir.Patina.Defaults.Boxed':'Defaults::Container::$patina_witness'(),
-                                                              _self@1_0).
+'Defaults::Container::get'(_witness_Container@0_0,
+                           _self@1_0) ->
+    _witness_Container@2_0 =
+        'Elixir.Patina.Defaults.Boxed':'Defaults::Container::$patina_witness'(),
+    begin
+        'Elixir.Patina.Defaults.Boxed':'Defaults::Container::get'(_witness_Container@2_0,
+                                                                  _self@1_0)
+    end.
 
 'Defaults::Container::$patina_witness'() ->
     {{fun 'Elixir.Patina.Defaults.Rewrapped':'Defaults::Container::$patina_type::Item'/1,

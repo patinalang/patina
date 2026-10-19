@@ -26,7 +26,8 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Value::value'(_witness@0_0, _self@1_0) ->
+'Defaults::Value::value'(_witness_Value@0_0,
+                         _self@1_0) ->
     _self@1_0.
 
 'Defaults::Value::$patina_witness'() ->
@@ -35,8 +36,10 @@
      {}}.
 
 'Defaults::Combine<Defaults::Note>::$patina_witness'() ->
+    _witness_Value@0_0 =
+        {{fun 'Elixir.Patina.Defaults.Coin':'Defaults::Value::value'/2},
+         {},
+         {}},
     {{fun 'Elixir.Patina.Defaults':'Defaults::Combine::uses_rhs_witness'/4},
-     {{{fun 'Elixir.Patina.Defaults.Coin':'Defaults::Value::value'/2},
-       {},
-       {}}},
+     {_witness_Value@0_0},
      {}}.

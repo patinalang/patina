@@ -3,16 +3,15 @@ use rustc_data_structures::smallvec::{SmallVec, smallvec};
 use rustc_hir::TermClass;
 use rustc_hir::def_id::DefId;
 use rustc_middle::erl::etir::{
-    self, Callee, ExprId, ExprKind, ItemRef, Lit, PatId, PatKind, PatternInput, VarId,
+    self, Callee, ErlFun, ExprId, ExprKind, Lit, PatId, PatKind, PatternInput, VarId,
 };
-use rustc_middle::erl::{ErlCallKind, ErlCallTarget, ErlModuleResolution};
+use rustc_middle::erl::{ErlCallKind, ErlModuleResolution};
 use rustc_middle::span_bug;
 use rustc_middle::ty::{Ty, TyCtxt};
 use rustc_span::{Span, Symbol, kw, sym};
 
 use crate::compile::translate::loops::Loops;
 use crate::compile::translate::scopes::{PatinaVar, Scope, Scopes};
-use crate::compile::translate::witness::WitnessEnv;
 use crate::compile::translate::{ModuleParts, Translator};
 use crate::erlang::abstract_format as eaf;
 use crate::{not_implemented, span_fatal};
@@ -79,7 +78,6 @@ pub(super) struct BodyCx<'a, 'tcx, 'arena> {
     pub parts: &'a mut ModuleParts<'arena>,
     pub scopes: &'a mut Scopes,
     pub loops: Loops,
-    pub witness_env: &'a WitnessEnv,
 }
 
 impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
@@ -89,9 +87,8 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         etir: &'tcx etir::Body<'tcx>,
         parts: &'a mut ModuleParts<'arena>,
         scopes: &'a mut Scopes,
-        witness_env: &'a WitnessEnv,
     ) -> Self {
-        BodyCx { translator, owner, etir, parts, scopes, witness_env, loops: Loops::new() }
+        BodyCx { translator, owner, etir, parts, scopes, loops: Loops::new() }
     }
 
     pub(super) fn tcx(&self) -> TyCtxt<'tcx> {
@@ -154,8 +151,10 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 self.translate_closure(span, def_id, params, body)
             }
 
-            ExprKind::FnRef { ref item, arity, erl_arity } => {
-                self.translate_fn_ref(expr, item, arity, erl_arity)
+            ExprKind::FnItem { .. } => span_bug!(span, "FnItem in lowered ETIR"),
+
+            ExprKind::Fun { ref fun, forced_extern } => {
+                self.translate_fun(expr, fun, forced_extern)
             }
 
             ExprKind::Const { def_id } => {
@@ -464,16 +463,10 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 afb.expr_local_call(span, callee_expr, arg_exprs)
             }
 
-            Callee::Item { ref item, forced_extern } => {
-                let callee_expr = afb.expr_atom(span, item.name);
-                let mut arg_exprs = self.translator.translate_witness_args(
-                    span,
-                    &item.witnesses,
-                    self.witness_env,
-                    self.scopes,
-                );
-                arg_exprs.extend(args.iter().map(|&id| self.translate_expr(id)));
-                self.emit_item_call(span, item, callee_expr, arg_exprs, Some(forced_extern))
+            Callee::Item { .. } => span_bug!(span, "item call in lowered ETIR"),
+
+            Callee::Fun { ref fun, forced_extern } => {
+                self.emit_fun_call(span, fun, args, forced_extern)
             }
 
             Callee::Direct(module, function) => {
@@ -488,81 +481,49 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         }
     }
 
-    fn emit_item_call(
+    fn emit_fun_call(
         &mut self,
         span: Span,
-        item: &ItemRef<'tcx>,
-        callee_expr: eaf::Expr<'arena>,
-        arg_exprs: SmallVec<[eaf::Expr<'arena>; 8]>,
-        forced_extern: Option<bool>,
+        fun: &ErlFun,
+        args: &[ExprId],
+        forced_extern: bool,
     ) -> eaf::Expr<'arena> {
         let afb = &self.translator.afb;
 
-        let Some(call_kind) =
-            self.tcx().erl_call_kind(self.owner, item.module, item.target, forced_extern)
-        else {
-            return self.translate_call_via_dispatch_through_type_parameter(span, item, arg_exprs);
-        };
+        let callee_expr = afb.expr_atom(span, fun.name);
 
-        if matches!(call_kind, ErlCallKind::Local | ErlCallKind::Dynamic) {
-            return afb.expr_local_call(span, callee_expr, arg_exprs);
+        match self.fun_call_kind(span, fun, forced_extern) {
+            ErlCallKind::Local => {
+                let arg_exprs = args.iter().map(|&id| self.translate_expr(id));
+                afb.expr_local_call(span, callee_expr, arg_exprs)
+            }
+            ErlCallKind::Extern => {
+                let mod_expr = afb.expr_atom(span, self.static_module(span, fun));
+                let arg_exprs = args.iter().map(|&id| self.translate_expr(id));
+                afb.expr_remote_call(span, mod_expr, callee_expr, arg_exprs)
+            }
+            ErlCallKind::Dynamic => {
+                not_implemented!(
+                    self.tcx(),
+                    span,
+                    "call of an item on a dynamic receiver",
+                    fun.name
+                )
+            }
         }
-
-        let mod_expr = afb.expr_atom(span, self.static_module_for_item(span, item));
-        afb.expr_remote_call(span, mod_expr, callee_expr, arg_exprs)
     }
 
-    fn static_module_for_item(&self, span: Span, item: &ItemRef<'tcx>) -> Symbol {
-        let Some(module_resolution) = item.module else {
-            span_bug!(span, "item call must have module resolution")
-        };
-        let ErlModuleResolution::Static(module_id) = module_resolution else {
+    fn fun_call_kind(&self, span: Span, fun: &ErlFun, forced_extern: bool) -> ErlCallKind {
+        self.tcx()
+            .erl_call_kind(self.owner, fun.module, forced_extern)
+            .unwrap_or_else(|| span_bug!(span, "`{:?}` has no Erlang module", self.owner))
+    }
+
+    fn static_module(&self, span: Span, fun: &ErlFun) -> Symbol {
+        let ErlModuleResolution::Static(module_id) = fun.module else {
             span_bug!(span, "dynamic target in static call path");
         };
         self.tcx().erl_module_name(module_id)
-    }
-
-    fn translate_call_via_dispatch_through_type_parameter(
-        &mut self,
-        span: Span,
-        item: &ItemRef<'tcx>,
-        arg_exprs: SmallVec<[eaf::Expr<'arena>; 8]>,
-    ) -> eaf::Expr<'arena> {
-        let ErlCallTarget::Item { def_id, .. } = item.target else {
-            span_bug!(span, "dispatch through a type parameter must have an item target");
-        };
-
-        let mut arg_exprs = arg_exprs.into_iter();
-        let self_witness = arg_exprs
-            .next()
-            .unwrap_or_else(|| span_bug!(span, "dispatch must have a receiver witness"));
-
-        self.translator.dispatch_call(span, def_id, self_witness, arg_exprs, self.scopes)
-    }
-
-    /// `fun(A1, ..., An) -> Name(Witnesses..., A1, ..., An) end`
-    fn witnessed_fun(
-        &mut self,
-        span: Span,
-        item: &ItemRef<'tcx>,
-        arity: usize,
-        witness_exprs: SmallVec<[eaf::Expr<'arena>; 8]>,
-    ) -> eaf::Expr<'arena> {
-        let vars = (0..arity)
-            .map(|_| self.scopes.fresh_var(sym::arg).erl_name)
-            .collect::<SmallVec<[_; 4]>>();
-
-        let afb = &self.translator.afb;
-        let arg_exprs = witness_exprs
-            .into_iter()
-            .chain(vars.iter().map(|&var| afb.expr_var(span, var)))
-            .collect();
-        let callee_expr = afb.expr_atom(span, item.name);
-        let body = self.emit_item_call(span, item, callee_expr, arg_exprs, Some(false));
-
-        let afb = &self.translator.afb;
-        let params = vars.iter().map(|&var| afb.pat_var(span, var));
-        afb.expr_fun(span, [afb.clause(span, params, None, body)])
     }
 
     fn translate_closure(
@@ -588,43 +549,21 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         afb.expr_fun(span, [clause])
     }
 
-    fn translate_fn_ref(
+    fn translate_fun(
         &mut self,
         expr: &etir::Expr<'tcx>,
-        item: &ItemRef<'tcx>,
-        arity: usize,
-        erl_arity: u32,
+        fun: &ErlFun,
+        forced_extern: bool,
     ) -> eaf::Expr<'arena> {
         let tcx = self.tcx();
         let span = expr.span;
         let afb = &self.translator.afb;
 
-        // A function with witness parameters becomes a closure that passes this call site's
-        // witnesses along.
-        let witness_exprs = self.translator.translate_witness_args(
-            span,
-            &item.witnesses,
-            self.witness_env,
-            self.scopes,
-        );
-        if !witness_exprs.is_empty() {
-            return self.witnessed_fun(span, item, arity, witness_exprs);
-        }
-
-        let Some(call_kind) = tcx.erl_call_kind(self.owner, item.module, item.target, None) else {
-            span_bug!(span, "`{}` dispatches through a witness it doesn't have", item.name)
-        };
-
-        match call_kind {
-            ErlCallKind::Local | ErlCallKind::LocalOrExtern => {
-                afb.expr_local_fun(span, item.name, erl_arity)
+        match self.fun_call_kind(span, fun, forced_extern) {
+            ErlCallKind::Local => afb.expr_local_fun(span, fun.name, fun.arity),
+            ErlCallKind::Extern => {
+                afb.expr_remote_fun(span, self.static_module(span, fun), fun.name, fun.arity)
             }
-            ErlCallKind::Extern => afb.expr_remote_fun(
-                span,
-                self.static_module_for_item(span, item),
-                item.name,
-                erl_arity,
-            ),
             ErlCallKind::Dynamic => {
                 not_implemented!(tcx, span, "dynamic function-item value", expr.ty)
             }

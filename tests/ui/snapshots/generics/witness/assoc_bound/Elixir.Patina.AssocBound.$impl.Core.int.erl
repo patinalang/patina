@@ -26,7 +26,8 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'AssocBound::Show::show'(_witness@0_0, _self@1_0) ->
+'AssocBound::Show::show'(_witness_Show@0_0,
+                         _self@1_0) ->
     <<"an int"/utf8>>.
 
 'AssocBound::Show::$patina_witness'() ->

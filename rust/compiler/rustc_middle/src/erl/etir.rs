@@ -8,7 +8,6 @@ use rustc_macros::{TyDecodable, TyEncodable};
 use rustc_span::{ByteSymbol, Ident, Span, Symbol};
 
 use crate::erl::binary_pattern::BinarySegmentLayout;
-use crate::erl::witness::WitnessArgs;
 use crate::erl::{ErlCallTarget, ErlModuleResolution};
 use crate::ty::Ty;
 
@@ -131,7 +130,9 @@ pub enum ExprKind<'tcx> {
     Call { callee: Callee<'tcx>, args: Box<[ExprId]> },
     Adt(Box<AdtExpr>),
     Closure { def_id: DefId, params: Box<[PatId]>, body: ExprId },
-    FnRef { item: Box<ItemRef<'tcx>>, arity: usize, erl_arity: u32 },
+    // Only a thing between lowering passes; it gets lowered to a `Closure` over its witnesses.
+    FnItem { item: Box<ItemRef<'tcx>>, arity: u32, forced_extern: bool },
+    Fun { fun: ErlFun, forced_extern: bool },
     Const { def_id: DefId },
     Assign { lhs: PatId, rhs: ExprId },
     Declare { vars: Box<[VarId]> },
@@ -209,7 +210,9 @@ pub enum CastKind {
 #[derive(Debug, TyEncodable, TyDecodable)]
 pub enum Callee<'tcx> {
     Value(ExprId),
+    // Only a thing between lowering passes; it gets lowered to `Fun`.
     Item { item: Box<ItemRef<'tcx>>, forced_extern: bool },
+    Fun { fun: ErlFun, forced_extern: bool },
     Direct(Symbol, Symbol),
 }
 
@@ -220,7 +223,14 @@ pub struct ItemRef<'tcx> {
     pub target: ErlCallTarget<'tcx>,
     /// `None` if the reference dispatches through the self witness.
     pub module: Option<ErlModuleResolution>,
-    pub witnesses: WitnessArgs<'tcx>,
+}
+
+/// An Erlang function.
+#[derive(Debug, TyEncodable, TyDecodable)]
+pub struct ErlFun {
+    pub module: ErlModuleResolution,
+    pub name: Symbol,
+    pub arity: u32,
 }
 
 #[derive(Debug, TyEncodable, TyDecodable)]

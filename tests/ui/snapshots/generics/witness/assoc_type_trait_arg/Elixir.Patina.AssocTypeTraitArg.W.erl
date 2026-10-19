@@ -27,11 +27,11 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'AssocTypeTraitArg::Wraps<<_ as AssocTypeTraitArg::Container>::Item>::wrapped'(_witness@0_0,
+'AssocTypeTraitArg::Wraps<<_ as AssocTypeTraitArg::Container>::Item>::wrapped'(_witness_Wraps@0_0,
                                                                                _self@1_0) ->
     0.
 
-'AssocTypeTraitArg::Wraps<<_ as AssocTypeTraitArg::Container>::Item>::$patina_witness'(_witness@0_0) ->
+'AssocTypeTraitArg::Wraps<<_ as AssocTypeTraitArg::Container>::Item>::$patina_witness'(_witnesses_where_Wraps@0_0) ->
     {{fun 'Elixir.Patina.AssocTypeTraitArg.W':'AssocTypeTraitArg::Wraps<<_ as AssocTypeTraitArg::Container>::Item>::wrapped'/2},
      {},
-     _witness@0_0}.
+     _witnesses_where_Wraps@0_0}.

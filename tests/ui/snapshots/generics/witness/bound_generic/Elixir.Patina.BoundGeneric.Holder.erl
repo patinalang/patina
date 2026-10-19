@@ -26,33 +26,36 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'BoundGeneric::Tr::method'(_witness@0_0, _self@1_0) ->
+'BoundGeneric::Tr::method'(_witness_Tr@0_0,
+                           _self@1_0) ->
+    _where_Tr@2_0 = erlang:element(3, _witness_Tr@0_0),
+    _witness_Bound@3_0 = erlang:element(1, _where_Tr@2_0),
+    _vtable_Bound@4_0 = erlang:element(1,
+                                       _witness_Bound@3_0),
+    _fn_Bound_b@5_0 = erlang:element(1, _vtable_Bound@4_0),
     begin
-        io:put_chars(begin
-                         _element@5_0 = begin
-                                            _element@2_0 =
-                                                <<"Tr::method("/utf8>>,
-                                            _element@3_0 = io_lib:format("~ktp",
-                                                                         [_self@1_0]),
-                                            _element@4_0 = <<")"/utf8>>,
-                                            [_element@2_0,
-                                             _element@3_0,
-                                             _element@4_0]
-                                        end,
-                         [_element@5_0]
-                     end),
-        io:nl(),
-        {}
-    end,
-    begin
-        _witness@6_0 = erlang:element(1,
-                                      erlang:element(3, _witness@0_0)),
-        (erlang:element(1,
-                        erlang:element(1, _witness@6_0)))(_witness@6_0,
-                                                          _self@1_0)
+        begin
+            io:put_chars(begin
+                             _element@9_0 = begin
+                                                _element@6_0 =
+                                                    <<"Tr::method("/utf8>>,
+                                                _element@7_0 =
+                                                    io_lib:format("~ktp",
+                                                                  [_self@1_0]),
+                                                _element@8_0 = <<")"/utf8>>,
+                                                [_element@6_0,
+                                                 _element@7_0,
+                                                 _element@8_0]
+                                            end,
+                             [_element@9_0]
+                         end),
+            io:nl(),
+            {}
+        end,
+        _fn_Bound_b@5_0(_witness_Bound@3_0, _self@1_0)
     end.
 
-'BoundGeneric::Tr::$patina_witness'(_witness@0_0) ->
+'BoundGeneric::Tr::$patina_witness'(_witnesses_where_Tr@0_0) ->
     {{fun 'Elixir.Patina.BoundGeneric.Holder':'BoundGeneric::Tr::method'/2},
      {},
-     _witness@0_0}.
+     _witnesses_where_Tr@0_0}.

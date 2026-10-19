@@ -1,14 +1,10 @@
-use std::collections::hash_map::Entry;
-
-use rustc_data_structures::fx::FxHashMap;
-use rustc_data_structures::stack::ensure_sufficient_stack;
+use rustc_data_structures::fx::FxIndexSet;
+use rustc_hir::def::DefKind;
 use rustc_hir::def_id::DefId;
-use rustc_index::{IndexVec, newtype_index};
-use rustc_macros::{TyDecodable, TyEncodable};
+use rustc_index::{IndexSlice, newtype_index};
 use rustc_span::Span;
-use smallvec::SmallVec;
 
-use crate::ty::{self, GenericArgsRef, TyCtxt, Unnormalized};
+use crate::ty::{self, TyCtxt, TypeVisitableExt};
 
 newtype_index! {
     /// A direct supertrait of a trait, in `erl_trait_supertraits` order.
@@ -31,341 +27,137 @@ newtype_index! {
     pub struct AssocTypeBoundIdx {}
 }
 
-/// For a given bound `T: Trait`, describe where its witness (how we know the bound holds)
-/// comes from in a given item, in a way that can be translated to runtime code.
-#[derive(Clone, Debug, TyEncodable, TyDecodable)]
-pub enum WitnessSource<'tcx> {
-    /// The witness for the bound is passed in by this item's user.
-    Param(ParamBound),
-    /// The bound `T: Trait` is proven by its subtrait's bound `trait U: Trait`,
-    /// so the witness can be found nested within `U`'s witness.
-    Supertrait(Box<WitnessSource<'tcx>>, SupertraitIdx),
-    /// At this point in code, we know exactly which impl proves the bound,
-    /// so we can build our own witness.
-    Impl {
-        impl_def_id: DefId,
-        args: GenericArgsRef<'tcx>,
-        supertraits: IndexVec<SupertraitIdx, WitnessSource<'tcx>>,
-        where_clauses: IndexVec<BoundIdx, WitnessSource<'tcx>>,
-    },
-    /// The bound is declared on an associated type of a trait,
-    /// such as `trait U { type T: Trait }`, so the witness can be found
-    /// nested within `U`'s witness.
-    AssocTypeBound {
-        assoc_def_id: DefId,
-        args: GenericArgsRef<'tcx>,
-        witness_args: WitnessArgs<'tcx>,
-        index: AssocTypeBoundIdx,
-    },
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, Eq, TyEncodable, TyDecodable)]
-pub enum ParamBound {
-    /// This item's `Self: Trait` is `T: Trait`.
-    InSelf,
-    /// This item belongs to a trait impl, and the impl's `i`-th where-clause is `T: Trait`.
-    ImplWhereClause(BoundIdx),
-    /// This item's `i`-th bound (see `erl_bounds`) is `T: Trait`.
-    ItemBound(BoundIdx),
-}
-
-/// Witnesses passed in by a user of an item (e.g. function caller).
-/// The user-side counterpart to the item-side `WitnessParams`.
-#[derive(Clone, Debug, Default, TyEncodable, TyDecodable)]
-pub struct WitnessArgs<'tcx> {
-    pub self_witness: Option<Box<WitnessSource<'tcx>>>,
-    pub bounds: IndexVec<BoundIdx, WitnessSource<'tcx>>,
-}
-
-impl WitnessArgs<'_> {
-    pub fn is_empty(&self) -> bool {
-        self.self_witness.is_none() && self.bounds.is_empty()
-    }
-}
-
-/// Witnesses received by an item when used (e.g. the function definition).
-/// The item-side counterpart to the user-side `WitnessArgs`.
-#[derive(Clone, Debug)]
-pub struct WitnessParams<'tcx> {
-    pub self_bound: Option<SelfBound<'tcx>>,
-    pub bounds: IndexVec<BoundIdx, Unnormalized<'tcx, ty::TraitRef<'tcx>>>,
-}
-
-/// The `Self: Trait` bound of a trait item or a trait impl item.
-#[derive(Clone, Debug)]
-pub enum SelfBound<'tcx> {
-    Trait(Unnormalized<'tcx, ty::TraitRef<'tcx>>),
-    TraitImpl(TraitImplSelfBound<'tcx>),
-}
-
-#[derive(Clone, Debug)]
-pub struct TraitImplSelfBound<'tcx> {
-    pub bound: Unnormalized<'tcx, ty::TraitRef<'tcx>>,
-    pub supertraits: IndexVec<SupertraitIdx, Unnormalized<'tcx, ty::TraitRef<'tcx>>>,
-    pub where_clauses: IndexVec<BoundIdx, Unnormalized<'tcx, ty::TraitRef<'tcx>>>,
-}
-
 impl<'tcx> TyCtxt<'tcx> {
-    pub fn erl_witness_params(
+    /// The bounds in `clauses` that need a runtime witness, in order and without duplicates.
+    fn erl_witnessed_trait_refs(
         self,
-        def_id: DefId,
-        args: GenericArgsRef<'tcx>,
-    ) -> WitnessParams<'tcx> {
-        let self_bound = self.erl_entry_trait(def_id).map(|trait_def_id| {
-            match self.trait_impl_of_assoc(def_id) {
-                Some(impl_def_id) => {
-                    SelfBound::TraitImpl(self.erl_trait_impl_self_bound(impl_def_id, args))
-                }
-
-                None => {
-                    let bound = ty::EarlyBinder::bind(ty::TraitRef::identity(self, trait_def_id));
-                    SelfBound::Trait(bound.instantiate(self, args))
-                }
+        clauses: impl IntoIterator<Item = &'tcx (ty::Clause<'tcx>, Span)>,
+    ) -> FxIndexSet<ty::TraitRef<'tcx>> {
+        let mut trait_refs = FxIndexSet::default();
+        for &(clause, _) in clauses {
+            let Some(trait_pred) = clause.as_trait_clause() else { continue };
+            let trait_pred = self.instantiate_bound_regions_with_erased(trait_pred);
+            // A bound without type parameters, like `where S: Derived`, needs no runtime
+            // witness: code that uses it selects the impl itself.
+            if trait_pred.polarity == ty::PredicatePolarity::Positive
+                && trait_pred.trait_ref.has_non_region_param()
+            {
+                self.insert_witnessed_trait_ref(trait_pred.trait_ref, &mut trait_refs);
             }
-        });
-
-        WitnessParams {
-            self_bound,
-            bounds: self.erl_bounds(def_id).iter_instantiated_copied(self, args).collect(),
         }
+        trait_refs
     }
 
-    pub fn erl_trait_impl_self_bound(
+    /// A bound on a trait without a witness stands for the bounds on its supertraits.
+    fn insert_witnessed_trait_ref(
         self,
-        impl_def_id: DefId,
-        args: GenericArgsRef<'tcx>,
-    ) -> TraitImplSelfBound<'tcx> {
-        let bound = self
-            .impl_opt_trait_ref(impl_def_id)
-            .unwrap_or_else(|| bug!("{impl_def_id:?} is not a trait impl"))
-            .instantiate(self, args);
-
-        // The supertraits are normalized when they are used.
-        let supertraits = self.erl_supertrait_bounds(bound.skip_normalization());
-        let where_clauses =
-            self.erl_bounds(impl_def_id).iter_instantiated_copied(self, args).collect();
-
-        TraitImplSelfBound { bound, supertraits, where_clauses }
-    }
-
-    /// [`TyCtxt::erl_witness_params`] with the item's identity args, for use within the item.
-    pub fn erl_witness_params_identity(self, def_id: DefId) -> WitnessParams<'tcx> {
-        self.erl_witness_params(def_id, ty::GenericArgs::identity_for_item(self, def_id))
-    }
-
-    fn erl_supertrait_bounds(
-        self,
-        bound: ty::TraitRef<'tcx>,
-    ) -> IndexVec<SupertraitIdx, Unnormalized<'tcx, ty::TraitRef<'tcx>>> {
-        self.erl_trait_supertraits(bound.def_id)
-            .iter_instantiated_copied(self, bound.args)
-            .collect()
-    }
-}
-
-pub struct WitnessResolver<'tcx> {
-    tcx: TyCtxt<'tcx>,
-    typing_env: ty::TypingEnv<'tcx>,
-    env: FxHashMap<ty::TraitRef<'tcx>, WitnessSource<'tcx>>,
-    seen: SmallVec<[ty::TraitRef<'tcx>; 1]>,
-}
-
-impl<'tcx> WitnessResolver<'tcx> {
-    pub fn new(tcx: TyCtxt<'tcx>, owner: DefId) -> WitnessResolver<'tcx> {
-        let mut resolver = WitnessResolver {
-            tcx,
-            typing_env: ty::TypingEnv::post_analysis(tcx, owner),
-            env: FxHashMap::default(),
-            seen: SmallVec::new(),
-        };
-        let params = tcx.erl_witness_params_identity(owner);
-
-        match params.self_bound {
-            Some(SelfBound::Trait(self_bound)) => {
-                resolver.add_to_env(self_bound, WitnessSource::Param(ParamBound::InSelf));
-            }
-            Some(SelfBound::TraitImpl(TraitImplSelfBound { bound, where_clauses, .. })) => {
-                resolver.add_to_env(bound, WitnessSource::Param(ParamBound::InSelf));
-                for (index, where_clause) in where_clauses.into_iter_enumerated() {
-                    resolver.add_to_env(
-                        where_clause,
-                        WitnessSource::Param(ParamBound::ImplWhereClause(index)),
-                    );
-                }
-            }
-            None => {}
-        }
-
-        for (index, &bound) in params.bounds.iter_enumerated() {
-            resolver.add_to_env(bound, WitnessSource::Param(ParamBound::ItemBound(index)));
-        }
-
-        resolver
-    }
-
-    /// Also adds the supertraits of `bound`. No effect if this trait was already processed.
-    fn add_to_env(
-        &mut self,
-        bound: Unnormalized<'tcx, ty::TraitRef<'tcx>>,
-        source: WitnessSource<'tcx>,
+        trait_ref: ty::TraitRef<'tcx>,
+        trait_refs: &mut FxIndexSet<ty::TraitRef<'tcx>>,
     ) {
-        let tcx = self.tcx;
-        let bound = tcx.normalize_erasing_regions_or_unchanged(self.typing_env, bound);
-        let Entry::Vacant(entry) = self.env.entry(bound) else { return };
-        entry.insert(source.clone());
+        if self.erl_trait_needs_witness(trait_ref.def_id) {
+            trait_refs.insert(trait_ref);
+            return;
+        }
 
-        for (index, supertrait) in tcx.erl_supertrait_bounds(bound).into_iter_enumerated() {
-            self.add_to_env(supertrait, WitnessSource::Supertrait(Box::new(source.clone()), index));
+        for &(clause, _) in self.explicit_implied_predicates_of(trait_ref.def_id).skip_binder() {
+            if let Some(supertrait) = clause.as_trait_clause() {
+                let supertrait = self.instantiate_bound_regions_with_erased(supertrait);
+                let supertrait = ty::EarlyBinder::bind(supertrait.trait_ref)
+                    .instantiate(self, trait_ref.args)
+                    .skip_normalization();
+                self.insert_witnessed_trait_ref(supertrait, trait_refs);
+            }
         }
     }
 
-    pub fn witness_args(
-        &mut self,
-        span: Span,
-        def_id: DefId,
-        args: GenericArgsRef<'tcx>,
-    ) -> WitnessArgs<'tcx> {
-        let tcx = self.tcx;
-
-        let params = tcx.erl_witness_params(def_id, args);
-
-        let self_witness = params.self_bound.map(|self_bound| {
-            let bound = match self_bound {
-                SelfBound::Trait(bound) => bound,
-                SelfBound::TraitImpl(TraitImplSelfBound { bound, .. }) => bound,
-            };
-            Box::new(self.witness_source(span, bound))
-        });
-
-        let bounds =
-            params.bounds.into_iter().map(|bound| self.witness_source(span, bound)).collect();
-
-        WitnessArgs { self_witness, bounds }
+    pub fn erl_needs_witnesses(self, def_id: DefId) -> bool {
+        self.erl_entry_trait(def_id).is_some() || !self.erl_bounds(def_id).skip_binder().is_empty()
     }
+}
 
-    pub fn witness_source(
-        &mut self,
-        span: Span,
-        bound: Unnormalized<'tcx, ty::TraitRef<'tcx>>,
-    ) -> WitnessSource<'tcx> {
-        let tcx = self.tcx;
-        let bound = tcx.normalize_erasing_regions_or_unchanged(self.typing_env, bound);
-
-        if let Some(source) = self.env.get(&bound) {
-            return source.clone();
-        }
-
-        if let Some(source) = self.witness_source_for_assoc_type_bound(span, bound) {
-            return source;
-        }
-
-        let Some((impl_def_id, impl_args)) = tcx.select_impl(self.typing_env, bound) else {
-            tcx.dcx()
-                .span_fatal(span, format!("witness for the bound not yet implemented: {bound:?}"));
-        };
-
-        if self.seen.contains(&bound) {
-            tcx.dcx()
-                .span_fatal(span, format!("recursive impl witness not yet implemented: {bound:?}"));
-        }
-
-        let limit = tcx.recursion_limit();
-        if !limit.value_within_limit(self.seen.len()) {
-            tcx.dcx().span_fatal(
-                span,
-                format!(
-                    "the impl witness of `{}` nests deeper than the recursion limit ({limit})",
-                    self.seen[0]
-                ),
-            );
-        }
-        self.seen.push(bound);
-
-        let source = ensure_sufficient_stack(|| {
-            let impl_self_bound = tcx.erl_trait_impl_self_bound(impl_def_id, impl_args);
-
-            let supertraits = (impl_self_bound.supertraits.into_iter())
-                .map(|supertrait| self.witness_source(span, supertrait))
-                .collect();
-
-            let where_clauses = (impl_self_bound.where_clauses.into_iter())
-                .map(|where_clause| self.witness_source(span, where_clause))
-                .collect();
-
-            WitnessSource::Impl { impl_def_id, args: impl_args, supertraits, where_clauses }
-        });
-
-        self.seen.pop();
-        source
-    }
-
-    /// The source of `bound`'s witness, if `bound` is a declared bound of an associated type.
-    ///
-    /// This needs `bound`'s self type to be a projection, like `<T as Trait>::A`.
-    /// If `Trait` declares `type A: AnotherTrait`, only the impl behind `T: Trait` knows
-    /// its witness.
-    ///
-    /// Note that in some situations the projection can be concretely known within this item,
-    /// and then this function returns `None`.
-    fn witness_source_for_assoc_type_bound(
-        &mut self,
-        span: Span,
-        bound: ty::TraitRef<'tcx>,
-    ) -> Option<WitnessSource<'tcx>> {
-        let tcx = self.tcx;
-
-        let mut self_ty = bound.self_ty();
-        while let ty::Alias(alias) = self_ty.kind()
-            && let ty::AliasTyKind::Projection { def_id: assoc_def_id } = alias.kind
+/// Provider for [`TyCtxt::erl_trait_supertraits`].
+pub(super) fn erl_trait_supertraits<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    trait_def_id: DefId,
+) -> ty::EarlyBinder<'tcx, &'tcx IndexSlice<SupertraitIdx, ty::TraitRef<'tcx>>> {
+    // The implied predicates also hold the bounds on the associated types of `Self`, like
+    // `<Self as HasItem>::Item: Label` in `trait Labelled: HasItem<Item: Label>`.
+    let clauses = tcx.explicit_implied_predicates_of(trait_def_id).skip_binder();
+    let supertraits = tcx.erl_witnessed_trait_refs(clauses).into_iter().filter(|trait_ref| {
+        let mut ty = trait_ref.self_ty();
+        while let ty::Alias(alias) = ty.kind()
+            && let ty::AliasTyKind::Projection { .. } = alias.kind
         {
-            let declared_bounds =
-                tcx.erl_assoc_type_bounds(assoc_def_id).iter_instantiated_copied(tcx, alias.args);
-            let found = declared_bounds.enumerate().find_map(|(index, declared)| {
-                let index = AssocTypeBoundIdx::from_usize(index);
-                let declared =
-                    tcx.normalize_erasing_regions_or_unchanged(self.typing_env, declared);
-
-                self.supertrait_path(declared, bound).map(|path| (index, path))
-            });
-
-            let Some((index, path)) = found else {
-                self_ty = alias.self_ty();
-                continue;
-            };
-
-            let witness_args = self.witness_args(span, assoc_def_id, alias.args);
-            let source = WitnessSource::AssocTypeBound {
-                assoc_def_id,
-                args: alias.args,
-                witness_args,
-                index,
-            };
-            return Some(
-                path.into_iter()
-                    .fold(source, |of, index| WitnessSource::Supertrait(Box::new(of), index)),
-            );
+            ty = alias.self_ty();
         }
+        ty == tcx.types.self_param
+    });
+    ty::EarlyBinder::bind(IndexSlice::from_raw(tcx.arena.alloc_from_iter(supertraits)))
+}
 
-        None
+/// Provider for [`TyCtxt::erl_assoc_type_bounds`].
+pub(super) fn erl_assoc_type_bounds<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    assoc_def_id: DefId,
+) -> ty::EarlyBinder<'tcx, &'tcx IndexSlice<AssocTypeBoundIdx, ty::TraitRef<'tcx>>> {
+    let clauses = tcx.explicit_item_bounds(assoc_def_id).skip_binder();
+    let bounds = tcx.erl_witnessed_trait_refs(clauses).into_iter().filter(|trait_ref| {
+        let mut ty = trait_ref.self_ty();
+        while let ty::Alias(alias) = ty.kind()
+            && let ty::AliasTyKind::Projection { def_id } = alias.kind
+        {
+            if def_id == assoc_def_id {
+                return true;
+            }
+            ty = alias.self_ty();
+        }
+        false
+    });
+    ty::EarlyBinder::bind(IndexSlice::from_raw(tcx.arena.alloc_from_iter(bounds)))
+}
+
+/// Provider for [`TyCtxt::erl_bounds`].
+pub(super) fn erl_bounds<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    def_id: DefId,
+) -> ty::EarlyBinder<'tcx, &'tcx IndexSlice<BoundIdx, ty::TraitRef<'tcx>>> {
+    if let Some(trait_def_id) = tcx.trait_of_assoc(def_id) {
+        let self_trait_ref = ty::TraitRef::identity(tcx, trait_def_id);
+        // Both are in the trait's generics.
+        let supertraits = tcx.erl_trait_supertraits(trait_def_id).skip_binder();
+        let clauses = tcx
+            .predicates_of(trait_def_id)
+            .predicates
+            .iter()
+            .chain(tcx.predicates_of(def_id).predicates);
+        let bounds = tcx.erl_witnessed_trait_refs(clauses).into_iter().filter(|trait_ref| {
+            *trait_ref != self_trait_ref && !supertraits.raw.contains(trait_ref)
+        });
+        return ty::EarlyBinder::bind(IndexSlice::from_raw(tcx.arena.alloc_from_iter(bounds)));
     }
 
-    /// The supertraits that lead from the bound `from` to the bound `to`.
-    fn supertrait_path(
-        &self,
-        from: ty::TraitRef<'tcx>,
-        to: ty::TraitRef<'tcx>,
-    ) -> Option<Vec<SupertraitIdx>> {
-        if from == to {
-            return Some(Vec::new());
-        }
-        let tcx = self.tcx;
-        tcx.erl_supertrait_bounds(from).into_iter_enumerated().find_map(|(index, supertrait)| {
-            let supertrait =
-                tcx.normalize_erasing_regions_or_unchanged(self.typing_env, supertrait);
-            self.supertrait_path(supertrait, to).map(|mut path| {
-                path.insert(0, index);
-                path
-            })
-        })
+    if let Some(trait_item_def_id) = tcx.trait_item_of(def_id) {
+        let args = tcx.erl_trait_item_args_for_impl_item(def_id);
+        let bounds = tcx
+            .erl_bounds(trait_item_def_id)
+            .iter_instantiated_copied(tcx, args)
+            .map(|bound| bound.skip_normalization());
+        return ty::EarlyBinder::bind(IndexSlice::from_raw(tcx.arena.alloc_from_iter(bounds)));
     }
+
+    let predicates = tcx.predicates_of(def_id);
+    let parent_clauses = predicates
+        .parent
+        .filter(|&parent| matches!(tcx.def_kind(parent), DefKind::Impl { .. }))
+        .into_iter()
+        .flat_map(|parent| tcx.predicates_of(parent).predicates);
+    let bounds = tcx.erl_witnessed_trait_refs(parent_clauses.chain(predicates.predicates));
+    ty::EarlyBinder::bind(IndexSlice::from_raw(tcx.arena.alloc_from_iter(bounds)))
+}
+
+/// Provider for [`TyCtxt::erl_trait_needs_witness`].
+pub(super) fn erl_trait_needs_witness(tcx: TyCtxt<'_>, trait_def_id: DefId) -> bool {
+    // A closure is an Erlang fun, so a call through `Fn*` needs no witness.
+    !tcx.is_fn_trait(trait_def_id)
+        && tcx.associated_items(trait_def_id).in_definition_order().next().is_some()
 }

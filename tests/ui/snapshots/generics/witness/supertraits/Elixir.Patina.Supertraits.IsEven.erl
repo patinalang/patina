@@ -26,7 +26,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Supertraits::Pred::test'(_witness@0_0, _self@1_0,
+'Supertraits::Pred::test'(_witness_Pred@0_0, _self@1_0,
                           _n@2_0) ->
     _n@2_0 rem 2 =:= 0.
 

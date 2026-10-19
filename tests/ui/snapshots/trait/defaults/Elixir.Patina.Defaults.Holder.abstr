@@ -90,7 +90,7 @@
      'Defaults::Konst::$patina_const::K',1,
      [{clause,
           {435,5},
-          [{var,{435,5},'_witness@0_0'}],
+          [{var,{435,5},'_witness_Konst@0_0'}],
           [],
           [{integer,{435,20},7}]}]},
  {function,

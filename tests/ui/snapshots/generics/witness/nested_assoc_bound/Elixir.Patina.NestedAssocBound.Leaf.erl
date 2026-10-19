@@ -28,10 +28,10 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'NestedAssocBound::HasItem::$patina_type::Item'(_witness@0_0) ->
+'NestedAssocBound::HasItem::$patina_type::Item'(_witness_HasItem@0_0) ->
     {}.
 
-'NestedAssocBound::HasItem::item'(_witness@0_0,
+'NestedAssocBound::HasItem::item'(_witness_HasItem@0_0,
                                   _self@1_0) ->
     'Elixir.Patina.NestedAssocBound.Tag'.
 

@@ -1,0 +1,35 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// A `fnref` refers to a function statically, so it cannot capture the witnesses its function
+// needs. A `fn` pointer can.
+
+trait Animal {
+    fn talk(self)
+    -> str;
+}
+
+fn talk_through_pointer<T>(animal: T) -> str where
+    T: Animal ({
+    let talk: fn(T) -> str = (T::talk as fn(T) -> str {<T as Animal>::talk});
+    ((talk as fn(T) -> str)((animal as T)) as str)
+} as str)
+
+fn talk_through_fnref<T>(animal: T) -> str where
+    T: Animal ({
+    let talk: fn(T) -> str = (T::talk as fn(T) -> str {<T as Animal>::talk});
+    ((talk as fnref(T) -> str)((animal as T)) as str)
+} as str)

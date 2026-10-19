@@ -90,7 +90,7 @@
      'Defaults::Numbered::$patina_const::C',1,
      [{clause,
           {384,5},
-          [{var,{384,5},'_witness@0_0'}],
+          [{var,{384,5},'_witness_Numbered@0_0'}],
           [],
           [{integer,{384,20},1}]}]},
  {function,

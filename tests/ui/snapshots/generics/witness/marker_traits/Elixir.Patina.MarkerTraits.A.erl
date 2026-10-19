@@ -26,7 +26,8 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'MarkerTraits::Show::show'(_witness@0_0, _self@1_0) ->
+'MarkerTraits::Show::show'(_witness_Show@0_0,
+                           _self@1_0) ->
     <<"a"/utf8>>.
 
 'MarkerTraits::Show::$patina_witness'() ->

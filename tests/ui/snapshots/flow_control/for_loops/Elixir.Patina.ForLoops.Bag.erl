@@ -27,13 +27,18 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Core::IntoIterator::$patina_type::Item'(_witness@0_0) ->
+'Core::IntoIterator::$patina_type::Item'(_witness_IntoIterator@0_0) ->
     {}.
 
-'Core::IntoIterator::$patina_type::IntoIter'(_witness@0_0) ->
-    {'Elixir.Patina.Core.ListIter':'Core::Iterator::$patina_witness'()}.
+'Core::IntoIterator::$patina_type::IntoIter'(_witness_IntoIterator@0_0) ->
+    _witness_Iterator@1_0 =
+        {{fun 'Elixir.Patina.Core.ListIter':'Core::Iterator::$patina_type::Item'/1,
+          fun 'Elixir.Patina.Core.ListIter':'Core::Iterator::next'/2},
+         {},
+         {}},
+    {_witness_Iterator@1_0}.
 
-'Core::IntoIterator::into_iter'(_witness@0_0,
+'Core::IntoIterator::into_iter'(_witness_IntoIterator@0_0,
                                 _self@1_0) ->
     'Elixir.Patina.Core.List':iter(_self@1_0).
 

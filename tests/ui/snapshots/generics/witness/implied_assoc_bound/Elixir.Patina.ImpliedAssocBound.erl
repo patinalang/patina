@@ -28,51 +28,67 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-labelled(_witness@0_0, _t@1_0) ->
+labelled(_witnesses_where_labelled@0_0, _t@1_0) ->
+    _witness_Label@2_0 = erlang:element(2,
+                                        _witnesses_where_labelled@0_0),
+    _witness_HasItem@3_0 = erlang:element(1,
+                                          _witnesses_where_labelled@0_0),
+    _vtable_Label@4_0 = erlang:element(1,
+                                       _witness_Label@2_0),
+    _fn_Label_label@5_0 = erlang:element(1,
+                                         _vtable_Label@4_0),
+    _vtable_HasItem@6_0 = erlang:element(1,
+                                         _witness_HasItem@3_0),
+    _fn_HasItem_item@7_0 = erlang:element(2,
+                                          _vtable_HasItem@6_0),
     begin
-        _witness@3_0 = erlang:element(2, _witness@0_0),
-        (erlang:element(1,
-                        erlang:element(1, _witness@3_0)))(_witness@3_0,
-                                                          begin
-                                                              _witness@2_0 =
-                                                                  erlang:element(1,
-                                                                                 _witness@0_0),
-                                                              (erlang:element(2,
-                                                                              erlang:element(1,
-                                                                                             _witness@2_0)))(_witness@2_0,
-                                                                                                             _t@1_0)
-                                                          end)
+        _fn_Label_label@5_0(_witness_Label@2_0,
+                            _fn_HasItem_item@7_0(_witness_HasItem@3_0, _t@1_0))
     end.
 
-labelled_with_items(_witness@0_0, _t@1_0) ->
+labelled_with_items(_witnesses_where_labelled_with_items@0_0,
+                    _t@1_0) ->
+    _witness_LabelledWithItems@2_0 = erlang:element(1,
+                                                    _witnesses_where_labelled_with_items@0_0),
+    _supertraits_LabelledWithItems@3_0 = erlang:element(2,
+                                                        _witness_LabelledWithItems@2_0),
+    _witness_Label@4_0 = erlang:element(2,
+                                        _supertraits_LabelledWithItems@3_0),
+    _witness_HasItem@5_0 = erlang:element(1,
+                                          _supertraits_LabelledWithItems@3_0),
+    _vtable_Label@6_0 = erlang:element(1,
+                                       _witness_Label@4_0),
+    _fn_Label_label@7_0 = erlang:element(1,
+                                         _vtable_Label@6_0),
+    _vtable_HasItem@8_0 = erlang:element(1,
+                                         _witness_HasItem@5_0),
+    _fn_HasItem_item@9_0 = erlang:element(2,
+                                          _vtable_HasItem@8_0),
     begin
-        _witness@3_0 = erlang:element(2,
-                                      erlang:element(2,
-                                                     erlang:element(1,
-                                                                    _witness@0_0))),
-        (erlang:element(1,
-                        erlang:element(1, _witness@3_0)))(_witness@3_0,
-                                                          begin
-                                                              _witness@2_0 =
-                                                                  erlang:element(1,
-                                                                                 erlang:element(2,
-                                                                                                erlang:element(1,
-                                                                                                               _witness@0_0))),
-                                                              (erlang:element(2,
-                                                                              erlang:element(1,
-                                                                                             _witness@2_0)))(_witness@2_0,
-                                                                                                             _t@1_0)
-                                                          end)
+        _fn_Label_label@7_0(_witness_Label@4_0,
+                            _fn_HasItem_item@9_0(_witness_HasItem@5_0, _t@1_0))
     end.
 
 crate_labels() ->
+    _witness_LabelledWithItems@0_0 =
+        'Elixir.Patina.ImpliedAssocBound.Crate':'ImpliedAssocBound::LabelledWithItems::$patina_witness'(),
+    _supertraits_LabelledWithItems@1_0 = erlang:element(2,
+                                                        _witness_LabelledWithItems@0_0),
+    _witness_Label@2_0 = erlang:element(2,
+                                        _supertraits_LabelledWithItems@1_0),
+    _witness_HasItem@3_0 = erlang:element(1,
+                                          _supertraits_LabelledWithItems@1_0),
+    _witnesses_where_labelled@4_0 = {_witness_HasItem@3_0,
+                                     _witness_Label@2_0},
+    _witnesses_where_labelled_with_items@5_0 =
+        {_witness_LabelledWithItems@0_0},
     begin
-        _element@0_0 =
-            labelled({'Elixir.Patina.ImpliedAssocBound.Crate':'ImpliedAssocBound::HasItem::$patina_witness'(),
-                      'Elixir.Patina.ImpliedAssocBound.Tag':'ImpliedAssocBound::Label::$patina_witness'()},
-                     'Elixir.Patina.ImpliedAssocBound.Crate'),
-        _element@1_0 =
-            labelled_with_items({'Elixir.Patina.ImpliedAssocBound.Crate':'ImpliedAssocBound::LabelledWithItems::$patina_witness'()},
-                                'Elixir.Patina.ImpliedAssocBound.Crate'),
-        {_element@0_0, _element@1_0}
+        begin
+            _element@6_0 = labelled(_witnesses_where_labelled@4_0,
+                                    'Elixir.Patina.ImpliedAssocBound.Crate'),
+            _element@7_0 =
+                labelled_with_items(_witnesses_where_labelled_with_items@5_0,
+                                    'Elixir.Patina.ImpliedAssocBound.Crate'),
+            {_element@6_0, _element@7_0}
+        end
     end.

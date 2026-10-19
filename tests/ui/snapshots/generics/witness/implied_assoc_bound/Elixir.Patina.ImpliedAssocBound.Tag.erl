@@ -27,7 +27,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'ImpliedAssocBound::Label::label'(_witness@0_0,
+'ImpliedAssocBound::Label::label'(_witness_Label@0_0,
                                   _self@1_0) ->
     <<"tag"/utf8>>.
 

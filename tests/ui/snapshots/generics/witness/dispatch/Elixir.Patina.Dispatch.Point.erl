@@ -31,7 +31,7 @@
 '$patina_constructor__Point'(_x@0_0, _y@1_0) ->
     #'Point'{x = _x@0_0, y = _y@1_0}.
 
-'Dispatch::Area::area'(_witness@0_0, _self@1_0) ->
+'Dispatch::Area::area'(_witness_Area@0_0, _self@1_0) ->
     begin
         io:put_chars(begin
                          _element@5_0 = begin

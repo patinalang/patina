@@ -26,7 +26,8 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'UnboundedSlot::Tr::method'(_witness@0_0, _self@1_0) ->
+'UnboundedSlot::Tr::method'(_witness_Tr@0_0,
+                            _self@1_0) ->
     begin
         io:put_chars(begin
                          _element@5_0 = begin

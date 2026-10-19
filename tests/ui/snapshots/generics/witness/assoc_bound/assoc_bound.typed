@@ -58,3 +58,78 @@ fn counter_first(n: int)
             fn(Counter) -> str {first::<Counter>})((Counter { n: (n as int) }
             as Counter)) as str)
 } as str)
+
+// The bounds of a generic associated type can need the witnesses of its own parameters.
+
+struct Pair<T> {
+    v: T,
+}
+
+impl <T> Show for Pair<T> where T: Show {
+    fn show(self)
+        -> str ({ (((self as Pair<T>).v as T).show() as str) } as str)
+}
+
+trait Family {
+    type
+    Plain<T>: Show;
+    type
+    Member<T>: Show
+    where
+    T: Show;
+
+    fn plain<T>(self, t: T)
+    -> Self::Plain<T>;
+    fn member<T>(self, t: T)
+    -> Self::Member<T>
+    where
+    T: Show;
+}
+
+struct Wrapper {
+}
+
+impl Family for Wrapper {
+    type
+    Plain<T>
+    =
+    int;
+    type
+    Member<T>
+    where
+    T: Show
+    =
+    Pair<T>;
+
+    fn plain<T>(self, _t: T) -> int ({ (7 as int) } as int)
+    fn member<T>(self, t: T) -> Pair<T> where
+        T: Show ({ (Pair { v: (t as T) } as Pair<T>) } as Pair<T>)
+}
+
+fn show_plain<F>(f: F) -> str where
+    F: Family ({
+    (((f as F).plain(("x" as str)) as <F as Family>::Plain<str>).show() as
+        str)
+} as str)
+
+fn show_member<F>(f: F) -> str where
+    F: Family ({
+    (((f as F).member((3 as int)) as <F as Family>::Member<int>).show() as
+        str)
+} as str)
+
+fn wrapper_plain()
+    ->
+        str ({
+    ((show_plain as
+            fn(Wrapper) -> str {show_plain::<Wrapper>})((Wrapper {  } as
+            Wrapper)) as str)
+} as str)
+
+fn wrapper_member()
+    ->
+        str ({
+    ((show_member as
+            fn(Wrapper) -> str {show_member::<Wrapper>})((Wrapper {  } as
+            Wrapper)) as str)
+} as str)

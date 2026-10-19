@@ -90,7 +90,7 @@
      'LoopWitness::Score::score',2,
      [{clause,
           {20,5},
-          [{var,{20,5},'_witness@0_0'},{var,{20,14},'_self@1_0'}],
+          [{var,{20,5},'_witness_Score@0_0'},{var,{20,14},'_self@1_0'}],
           [],
           [{var,{21,9},'_self@1_0'}]}]},
  {function,

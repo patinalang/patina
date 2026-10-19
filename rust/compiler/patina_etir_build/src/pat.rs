@@ -2,7 +2,7 @@ use rustc_abi::FIRST_VARIANT;
 use rustc_data_structures::packed::Pu128;
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::TermClass;
-use rustc_middle::erl::etir::visit::{Visitor, walk_pat};
+use rustc_middle::erl::etir::visit::{self, Visitor, walk_pat};
 use rustc_middle::erl::etir::{self, ExprId, PatId, PatternInput, VarId};
 use rustc_middle::span_bug;
 use rustc_middle::thir::{self, LocalVarId, PatKind};
@@ -342,11 +342,11 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
                 self.body
             }
 
-            fn visit_expr(&mut self, _expr: &'a etir::Expr<'tcx>) {
+            fn visit_expr(&mut self, _id: ExprId, _expr: &'a etir::Expr<'tcx>) {
                 // No (externally visible) binding happens within pattern's expressions.
             }
 
-            fn visit_pat(&mut self, pat: &'a etir::Pat<'tcx>) {
+            fn visit_pat(&mut self, _id: PatId, pat: &'a etir::Pat<'tcx>) {
                 if let etir::PatKind::Binding { var, is_primary: true, .. } = pat.kind {
                     self.vars.push(var);
                 }
@@ -355,7 +355,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         }
 
         let mut visitor = BoundVars { body: &self.cx.body, vars: SmallVec::new() };
-        visitor.visit_pat(&self.cx.body[pattern]);
+        visit::visit_pat_id(&mut visitor, pattern);
         visitor.vars
     }
 }

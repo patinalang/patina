@@ -1,0 +1,76 @@
+#![allow(internal_features)]
+
+
+
+
+#![allow(dead_code)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+#[allow(unused)]
+extern mod patina_fmt;
+
+trait Bar {
+    fn bar(self)
+    -> int;
+}
+
+trait Foo {
+    fn foo(self)
+    -> int;
+}
+
+trait Left: Bar {
+    fn left(self)
+    -> int;
+}
+
+trait Right: Bar {
+    fn right(self)
+    -> int;
+}
+
+impl Bar for int {
+    fn bar(self) -> int ({ (self as int) } as int)
+}
+
+impl Left for int {
+    fn left(self) -> int ({ (0 as int) } as int)
+}
+
+impl Right for int {
+    fn right(self) -> int ({ (0 as int) } as int)
+}
+
+// Used at `(T, T)`, both where-clauses are `T: Bar`.
+impl <T, U> Foo for (T, U) where T: Bar, U: Bar {
+    fn foo(self)
+        ->
+            int ({
+        let (a, b) = (self as (T, U));
+        (((a as T).bar() as int) + ((b as U).bar() as int) as int)
+    } as int)
+}
+
+fn use_foo<F>(f: F) -> int where F: Foo ({ ((f as F).foo() as int) } as int)
+
+fn bar_from_left_or_right<T>(a: T, b: T) -> int where T: Left +
+    Right ({
+    ((use_foo as
+            fn((T, T)) -> int {use_foo::<(T, T)>})((((a as T), (b as T)) as
+            (T, T))) as int)
+} as int)
+
+fn duplicate_where_clauses()
+    ->
+        int ({
+    ((bar_from_left_or_right as
+            fn(int, int) -> int {bar_from_left_or_right::<int>})((30 as int),
+        (3 as int)) as int)
+} as int)

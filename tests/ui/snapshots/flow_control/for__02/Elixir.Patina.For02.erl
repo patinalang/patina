@@ -8,7 +8,7 @@
 
 -export_record([]).
 
--export(['__info__'/1, 'main$patina_loop_1'/1, main/0]).
+-export(['__info__'/1, 'main$patina_loop_1'/2, main/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -23,55 +23,56 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'main$patina_loop_1'(_iter@0_0) ->
+'main$patina_loop_1'(_witness_Iterator@0_0,
+                     _iter@3_0) ->
     _ = begin
             case
-                'Elixir.Patina.Core.RangeInclusive':'Core::Iterator::next<int>'('Elixir.Patina.Core.RangeInclusive':'Core::Iterator::$patina_witness<int>'(),
-                                                                                _iter@0_0)
+                'Elixir.Patina.Core.RangeInclusive':'Core::Iterator::next<int>'(_witness_Iterator@0_0,
+                                                                                _iter@3_0)
                 of
                 nil ->
-                    _branch_value@9_0 = '$patina_marker':break({break,
-                                                                0,
-                                                                {},
-                                                                _iter@0_0}),
-                    _iter@0_1 = _iter@0_0,
-                    _branch_value@9_0;
-                _value@3_0 = {_n@1_0, _next@2_0}
-                    when erlang:is_tuple(_value@3_0) andalso
-                             erlang:tuple_size(_value@3_0) =:= 2 ->
-                    _iter@0_1 = _next@2_0,
+                    _branch_value@12_0 = '$patina_marker':break({break,
+                                                                 0,
+                                                                 {},
+                                                                 _iter@3_0}),
+                    _iter@3_1 = _iter@3_0,
+                    _branch_value@12_0;
+                _value@6_0 = {_n@4_0, _next@5_0}
+                    when erlang:is_tuple(_value@6_0) andalso
+                             erlang:tuple_size(_value@6_0) =:= 2 ->
+                    _iter@3_1 = _next@5_0,
                     begin
-                        case _n@1_0 rem 15 =:= 0 of
+                        case _n@4_0 rem 15 =:= 0 of
                             true ->
                                 begin
                                     io:put_chars(begin
-                                                     _element@4_0 =
+                                                     _element@7_0 =
                                                          [<<"fizzbuzz"/utf8>>],
-                                                     [_element@4_0]
+                                                     [_element@7_0]
                                                  end),
                                     io:nl(),
                                     {}
                                 end;
                             false ->
-                                case _n@1_0 rem 3 =:= 0 of
+                                case _n@4_0 rem 3 =:= 0 of
                                     true ->
                                         begin
                                             io:put_chars(begin
-                                                             _element@5_0 =
+                                                             _element@8_0 =
                                                                  [<<"fizz"/utf8>>],
-                                                             [_element@5_0]
+                                                             [_element@8_0]
                                                          end),
                                             io:nl(),
                                             {}
                                         end;
                                     false ->
-                                        case _n@1_0 rem 5 =:= 0 of
+                                        case _n@4_0 rem 5 =:= 0 of
                                             true ->
                                                 begin
                                                     io:put_chars(begin
-                                                                     _element@6_0 =
+                                                                     _element@9_0 =
                                                                          [<<"buzz"/utf8>>],
-                                                                     [_element@6_0]
+                                                                     [_element@9_0]
                                                                  end),
                                                     io:nl(),
                                                     {}
@@ -79,14 +80,14 @@
                                             false ->
                                                 begin
                                                     io:put_chars(begin
-                                                                     _element@8_0 =
+                                                                     _element@11_0 =
                                                                          begin
-                                                                             _element@7_0 =
+                                                                             _element@10_0 =
                                                                                  io_lib:format("~ktp",
-                                                                                               [_n@1_0]),
-                                                                             [_element@7_0]
+                                                                                               [_n@4_0]),
+                                                                             [_element@10_0]
                                                                          end,
-                                                                     [_element@8_0]
+                                                                     [_element@11_0]
                                                                  end),
                                                     io:nl(),
                                                     {}
@@ -97,17 +98,28 @@
                     end
             end
         end,
-    '$patina_marker':continue(_iter@0_1).
+    '$patina_marker':continue(_witness_Iterator@0_0,
+                              _iter@3_1).
 
 main() ->
-    case
-        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'('Elixir.Patina.Core.$impl':'Core::IntoIterator::$patina_witness'({'Elixir.Patina.Core.RangeInclusive':'Core::Iterator::$patina_witness<int>'()}),
-                                                                   'Elixir.Patina.Core.RangeInclusive':new(1,
-                                                                                                           100))
-        of
-        _iter@0_0 ->
-            case 'main$patina_loop_1'(_iter@0_0) of
-                {break, 0, _loop_value@10_0, _iter@0_1} ->
-                    _loop_value@10_0
-            end
+    _witness_Iterator@0_0 =
+        'Elixir.Patina.Core.RangeInclusive':'Core::Iterator::$patina_witness<int>'(),
+    _witnesses_where_IntoIterator@1_0 =
+        {_witness_Iterator@0_0},
+    _witness_IntoIterator@2_0 =
+        'Elixir.Patina.Core.$impl':'Core::IntoIterator::$patina_witness'(_witnesses_where_IntoIterator@1_0),
+    begin
+        case
+            'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'(_witness_IntoIterator@2_0,
+                                                                       'Elixir.Patina.Core.RangeInclusive':new(1,
+                                                                                                               100))
+            of
+            _iter@3_0 ->
+                case 'main$patina_loop_1'(_witness_Iterator@0_0,
+                                          _iter@3_0)
+                    of
+                    {break, 0, _loop_value@13_0, _iter@3_1} ->
+                        _loop_value@13_0
+                end
+        end
     end.

@@ -26,7 +26,8 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Named::name'(_witness@0_0, _self@1_0) ->
+'Defaults::Named::name'(_witness_Named@0_0,
+                        _self@1_0) ->
     _self@1_0.
 
 'Defaults::Named::$patina_witness'() ->
@@ -35,8 +36,10 @@
      {}}.
 
 'Defaults::Greeter::$patina_witness'() ->
+    _witness_Named@0_0 =
+        {{fun 'Elixir.Patina.Defaults.Person':'Defaults::Named::name'/2},
+         {},
+         {}},
     {{fun 'Elixir.Patina.Defaults':'Defaults::Greeter::greet'/2},
-     {{{fun 'Elixir.Patina.Defaults.Person':'Defaults::Named::name'/2},
-       {},
-       {}}},
+     {_witness_Named@0_0},
      {}}.

@@ -26,8 +26,13 @@
 
 helper(_x@0_0) -> _x@0_0 * 2.
 
-'Defaults::Inner::Doubler::doubled'(_witness@0_0,
+'Defaults::Inner::Doubler::doubled'(_witness_Doubler@0_0,
                                     _self@1_0) ->
-    helper((erlang:element(1,
-                           erlang:element(1, _witness@0_0)))(_witness@0_0,
-                                                             _self@1_0)).
+    _vtable_Doubler@2_0 = erlang:element(1,
+                                         _witness_Doubler@0_0),
+    _fn_Doubler_base@3_0 = erlang:element(1,
+                                          _vtable_Doubler@2_0),
+    begin
+        helper(_fn_Doubler_base@3_0(_witness_Doubler@0_0,
+                                    _self@1_0))
+    end.

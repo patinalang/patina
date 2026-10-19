@@ -26,7 +26,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'OpaqueWitness::Describe::describe'(_witness@0_0,
+'OpaqueWitness::Describe::describe'(_witness_Describe@0_0,
                                     _self@1_0) ->
     _self@1_0.
 

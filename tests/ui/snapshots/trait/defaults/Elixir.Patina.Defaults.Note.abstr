@@ -90,7 +90,7 @@
      'Defaults::Value::value',2,
      [{clause,
           {141,5},
-          [{var,{141,5},'_witness@0_0'},{var,{141,14},'_self@1_0'}],
+          [{var,{141,5},'_witness_Value@0_0'},{var,{141,14},'_self@1_0'}],
           [],
           [{op,{142,9},
                '*',

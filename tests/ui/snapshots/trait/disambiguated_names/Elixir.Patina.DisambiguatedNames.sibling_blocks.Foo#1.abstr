@@ -92,7 +92,7 @@
      'DisambiguatedNames::Show::show',2,
      [{clause,
           {49,13},
-          [{var,{49,13},'_witness@0_0'},{var,{49,21},'_self@1_0'}],
+          [{var,{49,13},'_witness_Show@0_0'},{var,{49,21},'_self@1_0'}],
           [],
           [{bin,
                {50,17},

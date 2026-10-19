@@ -31,12 +31,13 @@
 
 'value<str>'(_self@0_0) -> _self@0_0.
 
-f(_witness@0_0, _self@1_0) ->
+f(_witnesses_where_f@0_0, _self@1_0) ->
+    _witness_Show@2_0 = erlang:element(1,
+                                       _witnesses_where_f@0_0),
+    _vtable_Show@3_0 = erlang:element(1, _witness_Show@2_0),
+    _fn_Show_show@4_0 = erlang:element(1, _vtable_Show@3_0),
     begin
-        _witness@2_0 = erlang:element(1, _witness@0_0),
-        (erlang:element(1,
-                        erlang:element(1, _witness@2_0)))(_witness@2_0,
-                                                          _self@1_0)
+        _fn_Show_show@4_0(_witness_Show@2_0, _self@1_0)
     end.
 
 'f<int>'(_self@0_0, _x@1_0) -> _self@0_0 + _x@1_0.

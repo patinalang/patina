@@ -8,7 +8,7 @@
 
 -export_record([]).
 
--export(['__info__'/1, 'main$patina_loop_1'/1, main/0]).
+-export(['__info__'/1, 'main$patina_loop_1'/2, main/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -23,44 +23,45 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'main$patina_loop_1'(_iter@1_0) ->
+'main$patina_loop_1'(_witness_Iterator@0_0,
+                     _iter@4_0) ->
     _ = begin
             case
-                'Elixir.Patina.Core.ListIter':'Core::Iterator::next'('Elixir.Patina.Core.ListIter':'Core::Iterator::$patina_witness'(),
-                                                                     _iter@1_0)
+                'Elixir.Patina.Core.ListIter':'Core::Iterator::next'(_witness_Iterator@0_0,
+                                                                     _iter@4_0)
                 of
                 nil ->
-                    _branch_value@9_0 = '$patina_marker':break({break,
-                                                                0,
-                                                                {},
-                                                                _iter@1_0}),
-                    _iter@1_1 = _iter@1_0,
-                    _branch_value@9_0;
-                _value@4_0 = {_name@2_0, _next@3_0}
-                    when erlang:is_tuple(_value@4_0) andalso
-                             erlang:tuple_size(_value@4_0) =:= 2 ->
-                    _iter@1_1 = _next@3_0,
+                    _branch_value@12_0 = '$patina_marker':break({break,
+                                                                 0,
+                                                                 {},
+                                                                 _iter@4_0}),
+                    _iter@4_1 = _iter@4_0,
+                    _branch_value@12_0;
+                _value@7_0 = {_name@5_0, _next@6_0}
+                    when erlang:is_tuple(_value@7_0) andalso
+                             erlang:tuple_size(_value@7_0) =:= 2 ->
+                    _iter@4_1 = _next@6_0,
                     begin
-                        case _name@2_0 of
+                        case _name@5_0 of
                             <<"Ferris"/utf8>> ->
                                 io:put_chars(begin
-                                                 _element@5_0 =
+                                                 _element@8_0 =
                                                      [<<"There is a rustacean among us!"/utf8>>],
-                                                 [_element@5_0]
+                                                 [_element@8_0]
                                              end),
                                 io:nl(),
                                 {};
                             _ ->
                                 io:put_chars(begin
-                                                 _element@8_0 = begin
-                                                                    _element@6_0 =
-                                                                        <<"Hello "/utf8>>,
-                                                                    _element@7_0 =
-                                                                        _name@2_0,
-                                                                    [_element@6_0,
-                                                                     _element@7_0]
-                                                                end,
-                                                 [_element@8_0]
+                                                 _element@11_0 = begin
+                                                                     _element@9_0 =
+                                                                         <<"Hello "/utf8>>,
+                                                                     _element@10_0 =
+                                                                         _name@5_0,
+                                                                     [_element@9_0,
+                                                                      _element@10_0]
+                                                                 end,
+                                                 [_element@11_0]
                                              end),
                                 io:nl(),
                                 {}
@@ -68,33 +69,45 @@
                     end
             end
         end,
-    '$patina_marker':continue(_iter@1_1).
+    '$patina_marker':continue(_witness_Iterator@0_0,
+                              _iter@4_1).
 
 main() ->
-    _names@0_0 = [<<"Bob"/utf8>>,
-                  <<"Frank"/utf8>>,
-                  <<"Ferris"/utf8>>],
-    case
-        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'('Elixir.Patina.Core.$impl':'Core::IntoIterator::$patina_witness'({'Elixir.Patina.Core.ListIter':'Core::Iterator::$patina_witness'()}),
-                                                                   'Elixir.Patina.Core.List':iter(_names@0_0))
-        of
-        _iter@1_0 ->
-            case 'main$patina_loop_1'(_iter@1_0) of
-                {break, 0, _loop_value@10_0, _iter@1_1} ->
-                    _loop_value@10_0
-            end
-    end,
+    _witness_Iterator@0_0 =
+        'Elixir.Patina.Core.ListIter':'Core::Iterator::$patina_witness'(),
+    _witnesses_where_IntoIterator@1_0 =
+        {_witness_Iterator@0_0},
+    _witness_IntoIterator@2_0 =
+        'Elixir.Patina.Core.$impl':'Core::IntoIterator::$patina_witness'(_witnesses_where_IntoIterator@1_0),
     begin
-        io:put_chars(begin
-                         _element@13_0 = begin
-                                             _element@11_0 = <<"names: "/utf8>>,
-                                             _element@12_0 =
-                                                 io_lib:format("~ktp",
-                                                               [_names@0_0]),
-                                             [_element@11_0, _element@12_0]
-                                         end,
-                         [_element@13_0]
-                     end),
-        io:nl(),
-        {}
+        _names@3_0 = [<<"Bob"/utf8>>,
+                      <<"Frank"/utf8>>,
+                      <<"Ferris"/utf8>>],
+        case
+            'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'(_witness_IntoIterator@2_0,
+                                                                       'Elixir.Patina.Core.List':iter(_names@3_0))
+            of
+            _iter@4_0 ->
+                case 'main$patina_loop_1'(_witness_Iterator@0_0,
+                                          _iter@4_0)
+                    of
+                    {break, 0, _loop_value@13_0, _iter@4_1} ->
+                        _loop_value@13_0
+                end
+        end,
+        begin
+            io:put_chars(begin
+                             _element@16_0 = begin
+                                                 _element@14_0 =
+                                                     <<"names: "/utf8>>,
+                                                 _element@15_0 =
+                                                     io_lib:format("~ktp",
+                                                                   [_names@3_0]),
+                                                 [_element@14_0, _element@15_0]
+                                             end,
+                             [_element@16_0]
+                         end),
+            io:nl(),
+            {}
+        end
     end.

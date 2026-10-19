@@ -27,7 +27,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'LocalExport::Priv::p'(_witness@0_0, _self@1_0) ->
+'LocalExport::Priv::p'(_witness_Priv@0_0, _self@1_0) ->
     begin
         io:put_chars(begin
                          _element@5_0 = begin
@@ -51,5 +51,8 @@
      {}}.
 
 q(_self@0_0) ->
-    'LocalExport::Priv::p'('Elixir.Patina.LocalExport.S':'LocalExport::Priv::$patina_witness'(),
-                           _self@0_0).
+    _witness_Priv@1_0 =
+        'LocalExport::Priv::$patina_witness'(),
+    begin
+        'LocalExport::Priv::p'(_witness_Priv@1_0, _self@0_0)
+    end.

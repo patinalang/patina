@@ -1,0 +1,62 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro, prelude_import)]
+#![no_std]
+#![no_core]
+
+
+
+
+#![allow(dead_code)]
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+#[allow(unused_imports)]
+#[prelude_import]
+use Core::Prelude::*;
+#[allow(unused)]
+extern mod patina_fmt;
+
+trait Bar {
+    fn bar(self)
+    -> int;
+}
+
+trait Foo {
+    fn foo(self)
+    -> int;
+}
+
+trait Left: Bar {
+    fn left(self)
+    -> int;
+}
+
+trait Right: Bar {
+    fn right(self)
+    -> int;
+}
+
+impl Bar for int {
+    fn bar(self) -> int { self }
+}
+
+impl Left for int {
+    fn left(self) -> int { 0 }
+}
+
+impl Right for int {
+    fn right(self) -> int { 0 }
+}
+
+// Used at `(T, T)`, both where-clauses are `T: Bar`.
+impl<T: Bar, U: Bar> Foo for (T, U) {
+    fn foo(self) -> int { let (a, b) = self; a.bar() + b.bar() }
+}
+
+fn use_foo<F: Foo>(f: F) -> int { f.foo() }
+
+fn bar_from_left_or_right<T: Left + Right>(a: T, b: T) -> int {
+    use_foo((a, b))
+}
+
+pub fn duplicate_where_clauses() -> int { bar_from_left_or_right(30, 3) }

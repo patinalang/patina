@@ -726,10 +726,16 @@ helper_names(_limit@0_0) ->
     _total@1_2 + _f@18_0(_limit@0_0).
 
 trait_helper_names(_limit@0_0) ->
-    'Elixir.Patina.Loops.Counter':'Loops::Count::count<int>'('Elixir.Patina.Loops.Counter':'Loops::Count::$patina_witness<int>'(),
-                                                             0,
-                                                             _limit@0_0)
-        +
-        'Elixir.Patina.Loops.Counter':'Loops::Count::count<str>'('Elixir.Patina.Loops.Counter':'Loops::Count::$patina_witness<str>'(),
-                                                                 <<"a"/utf8>>,
-                                                                 _limit@0_0).
+    _witness_Count@1_0 =
+        'Elixir.Patina.Loops.Counter':'Loops::Count::$patina_witness<int>'(),
+    _witness_Count@2_0 =
+        'Elixir.Patina.Loops.Counter':'Loops::Count::$patina_witness<str>'(),
+    begin
+        'Elixir.Patina.Loops.Counter':'Loops::Count::count<int>'(_witness_Count@1_0,
+                                                                 0,
+                                                                 _limit@0_0)
+            +
+            'Elixir.Patina.Loops.Counter':'Loops::Count::count<str>'(_witness_Count@2_0,
+                                                                     <<"a"/utf8>>,
+                                                                     _limit@0_0)
+    end.

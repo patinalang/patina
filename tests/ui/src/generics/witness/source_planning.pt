@@ -1,0 +1,94 @@
+#![allow(dead_code)]
+
+trait Value {
+    fn value(self) -> int;
+}
+
+trait Middle: Value {
+    fn middle(self) -> int { self.value() }
+}
+
+trait Deep: Middle {
+    fn deep(self) -> int { self.middle() }
+}
+
+trait Direct: Value {
+    fn direct(self) -> int;
+}
+
+struct Wrapped<T> { inner: T }
+
+impl<T> Value for Wrapped<T> {
+    fn value(self) -> int { 10 }
+}
+
+impl<T> Direct for Wrapped<T> {
+    fn direct(self) -> int { 20 }
+}
+
+impl Middle for Wrapped<int> {}
+impl Deep for Wrapped<int> {}
+
+// The first call discovers Value through Deep -> Middle -> Value. The later
+// Direct constructor gives it a shorter source; both Value uses should use it.
+fn late<T>(x: Wrapped<T>) -> (int, int, int) where Wrapped<T>: Deep {
+    let first = x.value();
+    let direct = x.direct();
+    (first, direct, x.value())
+}
+
+fn early<T>(x: Wrapped<T>) -> (int, int, int) where Wrapped<T>: Deep {
+    let direct = x.direct();
+    (x.value(), direct, x.value())
+}
+
+fn loop_late<T>(x: Wrapped<T>, n: int) -> int where Wrapped<T>: Deep {
+    let mut total = 0;
+    let mut i = 0;
+    while i < n {
+        total += x.value();
+        i += 1;
+    }
+    total + x.direct()
+}
+
+// Direct's input requires Value, so Value cannot be extracted from its output.
+struct Bounded<T> { inner: T }
+
+impl Value for Bounded<int> {
+    fn value(self) -> int { 30 }
+}
+
+impl Middle for Bounded<int> {}
+impl Deep for Bounded<int> {}
+
+impl<T> Direct for Bounded<T> where Bounded<T>: Value {
+    fn direct(self) -> int { self.value() }
+}
+
+fn bounded<T>(x: Bounded<T>) -> (int, int) where Bounded<T>: Deep {
+    (x.value(), x.direct())
+}
+
+trait Factory {
+    // Value has a direct slot as well as a longer path through Deep.
+    type Item: Deep + Value;
+    fn item(self) -> Self::Item;
+}
+
+struct Maker;
+
+impl Factory for Maker {
+    type Item = Wrapped<int>;
+    fn item(self) -> Wrapped<int> { Wrapped { inner: 0 } }
+}
+
+fn associated<F: Factory>(f: F) -> int {
+    f.item().value() + f.item().value()
+}
+
+pub fn late_source() -> (int, int, int) { late(Wrapped { inner: 0 }) }
+pub fn early_source() -> (int, int, int) { early(Wrapped { inner: 0 }) }
+pub fn loop_source(n: int) -> int { loop_late(Wrapped { inner: 0 }, n) }
+pub fn constructor_input() -> (int, int) { bounded(Bounded { inner: 0 }) }
+pub fn associated_source() -> int { associated(Maker) }

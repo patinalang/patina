@@ -84,7 +84,7 @@
   'Dispatch::Area::area',2,
   [{clause,
     {8,5},
-    [{var,{8,5},'_witness@0_0'},{var,{8,13},'_self@1_0'}],
+    [{var,{8,5},'_witness_Area@0_0'},{var,{8,13},'_self@1_0'}],
     [],
     [{block,
       {9,9},

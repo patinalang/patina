@@ -25,7 +25,8 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Konst::$patina_const::K'(_witness@0_0) -> 7.
+'Defaults::Konst::$patina_const::K'(_witness_Konst@0_0) ->
+    7.
 
 'Defaults::Konst::$patina_witness'() ->
     {{fun 'Elixir.Patina.Defaults.Holder':'Defaults::Konst::$patina_const::K'/1},

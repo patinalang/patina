@@ -25,13 +25,13 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Ring::ring'(_witness@0_0, _witness@1_0,
-                       _self@2_0, _t@3_0) ->
-    begin
-        _witness@4_0 = erlang:element(1, _witness@1_0),
-        (erlang:element(1,
-                        erlang:element(1, _witness@4_0)))(_witness@4_0, _t@3_0)
-    end.
+'Defaults::Ring::ring'(_witness_Ring@0_0,
+                       _witnesses_where_Ring_ring@1_0, _self@2_0, _t@3_0) ->
+    _witness_Tag@4_0 = erlang:element(1,
+                                      _witnesses_where_Ring_ring@1_0),
+    _vtable_Tag@5_0 = erlang:element(1, _witness_Tag@4_0),
+    _fn_Tag_tag@6_0 = erlang:element(1, _vtable_Tag@5_0),
+    begin _fn_Tag_tag@6_0(_witness_Tag@4_0, _t@3_0) end.
 
 'Defaults::Ring::$patina_witness'() ->
     {{fun 'Elixir.Patina.Defaults.Loud':'Defaults::Ring::ring'/4},

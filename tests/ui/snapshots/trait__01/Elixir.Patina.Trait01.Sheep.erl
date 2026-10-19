@@ -38,55 +38,65 @@
 is_naked(_self@0_0) -> _self@0_0#'Sheep'.naked.
 
 shear(_self@0_0) ->
-    case is_naked(_self@0_0) of
-        true ->
-            begin
-                io:put_chars(begin
-                                 _element@3_0 = begin
-                                                    _element@1_0 =
-                                                        'Trait01::Animal::name'('Elixir.Patina.Trait01.Sheep':'Trait01::Animal::$patina_witness'(),
-                                                                                _self@0_0),
-                                                    _element@2_0 =
-                                                        <<" is already naked..."/utf8>>,
-                                                    [_element@1_0, _element@2_0]
-                                                end,
-                                 [_element@3_0]
-                             end),
-                io:nl(),
-                {}
-            end,
-            _self@0_0;
-        false ->
-            begin
-                io:put_chars(begin
-                                 _element@6_0 = begin
-                                                    _element@4_0 =
-                                                        _self@0_0#'Sheep'.name,
-                                                    _element@5_0 =
-                                                        <<" gets a haircut!"/utf8>>,
-                                                    [_element@4_0, _element@5_0]
-                                                end,
-                                 [_element@6_0]
-                             end),
-                io:nl(),
-                {}
-            end,
-            _self@0_0#'Sheep'{naked = true}
+    _witness_Animal@1_0 =
+        'Trait01::Animal::$patina_witness'(),
+    begin
+        case is_naked(_self@0_0) of
+            true ->
+                begin
+                    io:put_chars(begin
+                                     _element@4_0 = begin
+                                                        _element@2_0 =
+                                                            'Trait01::Animal::name'(_witness_Animal@1_0,
+                                                                                    _self@0_0),
+                                                        _element@3_0 =
+                                                            <<" is already naked..."/utf8>>,
+                                                        [_element@2_0,
+                                                         _element@3_0]
+                                                    end,
+                                     [_element@4_0]
+                                 end),
+                    io:nl(),
+                    {}
+                end,
+                _self@0_0;
+            false ->
+                begin
+                    io:put_chars(begin
+                                     _element@7_0 = begin
+                                                        _element@5_0 =
+                                                            _self@0_0#'Sheep'.name,
+                                                        _element@6_0 =
+                                                            <<" gets a haircut!"/utf8>>,
+                                                        [_element@5_0,
+                                                         _element@6_0]
+                                                    end,
+                                     [_element@7_0]
+                                 end),
+                    io:nl(),
+                    {}
+                end,
+                _self@0_0#'Sheep'{naked = true}
+        end
     end.
 
-'Trait01::Animal::new'(_witness@0_0, _name@1_0) ->
+'Trait01::Animal::new'(_witness_Animal@0_0,
+                       _name@1_0) ->
     #'Sheep'{naked = false, name = _name@1_0}.
 
-'Trait01::Animal::name'(_witness@0_0, _self@1_0) ->
+'Trait01::Animal::name'(_witness_Animal@0_0,
+                        _self@1_0) ->
     _self@1_0#'Sheep'.name.
 
-'Trait01::Animal::noise'(_witness@0_0, _self@1_0) ->
+'Trait01::Animal::noise'(_witness_Animal@0_0,
+                         _self@1_0) ->
     case is_naked(_self@1_0) of
         true -> <<"baaaaah?"/utf8>>;
         false -> <<"baaaaah!"/utf8>>
     end.
 
-'Trait01::Animal::talk'(_witness@0_0, _self@1_0) ->
+'Trait01::Animal::talk'(_witness_Animal@0_0,
+                        _self@1_0) ->
     begin
         io:put_chars(begin
                          _element@5_0 = begin
@@ -95,7 +105,7 @@ shear(_self@0_0) ->
                                             _element@3_0 =
                                                 <<" pauses briefly... "/utf8>>,
                                             _element@4_0 =
-                                                'Trait01::Animal::noise'(_witness@0_0,
+                                                'Trait01::Animal::noise'(_witness_Animal@0_0,
                                                                          _self@1_0),
                                             [_element@2_0,
                                              _element@3_0,

@@ -27,42 +27,43 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'BlanketImpl::Describe::describe'(_witness@0_0,
+'BlanketImpl::Describe::describe'(_witness_Describe@0_0,
                                   _self@1_0) ->
-    'Elixir.Patina.BlanketImpl':wrap(begin
-                                         _witness@2_0 = erlang:element(1,
-                                                                       erlang:element(3,
-                                                                                      _witness@0_0)),
-                                         (erlang:element(1,
-                                                         erlang:element(1,
-                                                                        _witness@2_0)))(_witness@2_0,
-                                                                                        _self@1_0)
-                                     end).
+    _where_Describe@2_0 = erlang:element(3,
+                                         _witness_Describe@0_0),
+    _witness_Show@3_0 = erlang:element(1,
+                                       _where_Describe@2_0),
+    _vtable_Show@4_0 = erlang:element(1, _witness_Show@3_0),
+    _fn_Show_show@5_0 = erlang:element(1, _vtable_Show@4_0),
+    begin
+        'Elixir.Patina.BlanketImpl':wrap(_fn_Show_show@5_0(_witness_Show@3_0,
+                                                           _self@1_0))
+    end.
 
-'BlanketImpl::Describe::$patina_witness'(_witness@0_0) ->
+'BlanketImpl::Describe::$patina_witness'(_witnesses_where_Describe@0_0) ->
     {{fun 'Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Describe::describe'/2,
       fun 'Elixir.Patina.BlanketImpl':'BlanketImpl::Describe::shout'/2},
      {},
-     _witness@0_0}.
+     _witnesses_where_Describe@0_0}.
 
-'BlanketImpl::Nested::Twice::twice'(_witness@0_0,
+'BlanketImpl::Nested::Twice::twice'(_witness_Twice@0_0,
                                     _self@1_0) ->
-    <<begin
-          _witness@2_0 = erlang:element(1,
-                                        erlang:element(3, _witness@0_0)),
-          (erlang:element(1,
-                          erlang:element(1, _witness@2_0)))(_witness@2_0,
-                                                            _self@1_0)
-      end/binary,
-      begin
-          _witness@3_0 = erlang:element(1,
-                                        erlang:element(3, _witness@0_0)),
-          (erlang:element(1,
-                          erlang:element(1, _witness@3_0)))(_witness@3_0,
-                                                            _self@1_0)
-      end/binary>>.
+    _where_Twice@2_0 = erlang:element(3,
+                                      _witness_Twice@0_0),
+    _witness_Describe@3_0 = erlang:element(1,
+                                           _where_Twice@2_0),
+    _vtable_Describe@4_0 = erlang:element(1,
+                                          _witness_Describe@3_0),
+    _fn_Describe_describe@5_0 = erlang:element(1,
+                                               _vtable_Describe@4_0),
+    begin
+        <<(_fn_Describe_describe@5_0(_witness_Describe@3_0,
+                                     _self@1_0))/binary,
+          (_fn_Describe_describe@5_0(_witness_Describe@3_0,
+                                     _self@1_0))/binary>>
+    end.
 
-'BlanketImpl::Nested::Twice::$patina_witness'(_witness@0_0) ->
+'BlanketImpl::Nested::Twice::$patina_witness'(_witnesses_where_Twice@0_0) ->
     {{fun 'Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Nested::Twice::twice'/2},
      {},
-     _witness@0_0}.
+     _witnesses_where_Twice@0_0}.

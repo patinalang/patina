@@ -90,7 +90,7 @@
      'Defaults::Inner::Doubler::base',2,
      [{clause,
           {197,5},
-          [{var,{197,5},'_witness@0_0'},{var,{197,13},'_self@1_0'}],
+          [{var,{197,5},'_witness_Doubler@0_0'},{var,{197,13},'_self@1_0'}],
           [],
           [{var,{198,9},'_self@1_0'}]}]},
  {function,

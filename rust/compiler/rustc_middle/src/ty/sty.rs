@@ -1543,6 +1543,11 @@ impl<'tcx> Ty<'tcx> {
     }
 
     #[inline]
+    pub fn is_fnref(self) -> bool {
+        matches!(self.kind(), FnPtr(_, header) if header.is_fnref())
+    }
+
+    #[inline]
     pub fn is_opaque(self) -> bool {
         matches!(self.kind(), Alias(ty::AliasTy { kind: ty::Opaque { .. }, .. }))
     }

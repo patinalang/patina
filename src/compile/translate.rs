@@ -4,7 +4,6 @@ mod body;
 mod elixir_compat;
 mod loops;
 mod scopes;
-mod witness;
 
 use std::cell::RefCell;
 use std::path::PathBuf;
@@ -15,14 +14,12 @@ use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{LocalDefId, LocalModDefId};
-use rustc_hir::{BodyId, FieldDef, ItemKind, Mod};
-use rustc_middle::erl::witness::WitnessResolver;
+use rustc_hir::{FieldDef, ItemKind, Mod};
 use rustc_middle::erl::{ErlModuleId, ErlReprKind, ErlVariantRepr};
 use rustc_middle::ty::{self, TyCtxt};
 use rustc_middle::{bug, span_bug};
 use rustc_span::{Span, Symbol, sym};
 use scopes::Scopes;
-use witness::WitnessEnv;
 
 use crate::compile::eaf_builder::EafBuilder;
 use crate::compile::impl_collector::ImplCollector;
@@ -87,11 +84,10 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         owner: LocalDefId,
         parts: &mut ModuleParts<'arena>,
         scopes: &mut Scopes,
-        witness_env: &WitnessEnv,
     ) -> TranslatedBody<'arena> {
         let owner = owner.to_def_id();
         let etir = self.tcx.etir_body(owner);
-        let mut cx = BodyCx::new(self, owner, etir, parts, scopes, witness_env);
+        let mut cx = BodyCx::new(self, owner, etir, parts, scopes);
         cx.translate_body_with_params(&etir.params, etir.value)
     }
 
@@ -113,8 +109,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         }
 
         self.translated_consts.borrow_mut().insert(def_id, TranslatedConst::Translating);
-        let value =
-            self.translate_body(def_id, parts, &mut Scopes::new(), &WitnessEnv::default()).value;
+        let value = self.translate_body(def_id, parts, &mut Scopes::new()).value;
         self.translated_consts.borrow_mut().insert(def_id, TranslatedConst::Value(value));
         value
     }
@@ -231,28 +226,16 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
 
     fn translate_callable(
         &self,
-        module_id: ErlModuleId,
-        def_id: LocalDefId,
+        owner: LocalDefId,
+        name: Symbol,
         span: Span,
-        body: BodyId,
+        exported: bool,
         parts: &mut ModuleParts<'arena>,
     ) -> Function<'arena> {
-        let owner = self.tcx.hir_body_owner_def_id(body);
-        let mut scopes = Scopes::new();
+        let translated = self.translate_body(owner, parts, &mut Scopes::new());
+        let clause = self.afb.clause(span, translated.params, None, translated.value);
 
-        let witness_params = self.tcx.erl_witness_params_identity(owner.to_def_id());
-        let witness_env = self.translate_witness_params(&witness_params, span, &mut scopes);
-
-        let translated = self.translate_body(owner, parts, &mut scopes, &witness_env);
-        let params: SmallVec<[_; 8]> =
-            witness_env.param_pats(&self.afb).chain(translated.params).collect();
-
-        Function {
-            span,
-            name: self.tcx.erl_fn_name(def_id),
-            clause: self.afb.clause(span, params, None, translated.value),
-            exported: self.tcx.is_erl_exported_fn(module_id, def_id.to_def_id()),
-        }
+        Function { span, name, clause, exported }
     }
 
     fn collect_module_fns(
@@ -270,9 +253,14 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             let item = self.tcx.hir_item(item_id);
             let def_id = item.owner_id.def_id;
             match item.kind {
-                ItemKind::Fn { ref sig, body, has_body: true, .. } => {
-                    let function =
-                        self.translate_callable(module_id, def_id, sig.span, body, &mut parts);
+                ItemKind::Fn { ref sig, has_body: true, .. } => {
+                    let function = self.translate_callable(
+                        def_id,
+                        self.tcx.erl_fn_name(def_id),
+                        sig.span,
+                        self.tcx.is_erl_exported_fn(module_id, def_id.to_def_id()),
+                        &mut parts,
+                    );
                     self.push_function(&mut parts, function);
                 }
                 ItemKind::Trait { .. } => {
@@ -315,13 +303,15 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                 not_implemented!(tcx, span, "associated type const");
             }
             ty::AssocKind::Fn { .. } | ty::AssocKind::Const { .. } => {
-                let body = tcx.hir_body_owned_by(def_id).id();
-                self.translate_callable(module_id, def_id, span, body, parts)
+                let exported = tcx.is_erl_exported_fn(module_id, def_id.to_def_id());
+                self.translate_callable(def_id, tcx.erl_fn_name(def_id), span, exported, parts)
             }
             ty::AssocKind::Type { .. } if item.trait_container(tcx).is_some() => {
                 not_implemented!(tcx, span, "associated type default");
             }
-            ty::AssocKind::Type { .. } => self.translate_assoc_type_witness(def_id, span),
+            ty::AssocKind::Type { .. } => {
+                self.translate_callable(def_id, tcx.erl_fn_name(def_id), span, true, parts)
+            }
         }
     }
 
@@ -502,48 +492,15 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             if let Some(trait_def_id) = trait_def_id
                 && tcx.erl_trait_needs_witness(trait_def_id)
             {
-                let function = self.translate_witness_fn(*impl_def_id, imp.self_ty.span);
+                let function = self.translate_callable(
+                    impl_def_id.expect_local(),
+                    tcx.erl_impl_member_name(*impl_def_id, "$patina_witness"),
+                    imp.self_ty.span,
+                    true,
+                    parts,
+                );
                 self.push_function(parts, function);
             }
-        }
-    }
-
-    /// The function that returns the witnesses of the declared bounds of an associated type.
-    fn translate_assoc_type_witness(&self, def_id: LocalDefId, span: Span) -> Function<'arena> {
-        let tcx = self.tcx;
-        if !tcx.generics_of(def_id).own_params.is_empty() {
-            not_implemented!(tcx, span, "generic associated type");
-        }
-
-        let owner = def_id.to_def_id();
-        let trait_assoc_def_id = tcx
-            .trait_item_of(owner)
-            .unwrap_or_else(|| span_bug!(span, "associated type witness outside a trait impl"));
-        let args = tcx.erl_trait_item_args_for_impl_item(owner);
-
-        let mut scopes = Scopes::new();
-        let witness_env = self.translate_witness_params(
-            &tcx.erl_witness_params_identity(owner),
-            span,
-            &mut scopes,
-        );
-        let mut resolver = WitnessResolver::new(tcx, owner);
-
-        let witnesses = tcx
-            .erl_assoc_type_bounds(trait_assoc_def_id)
-            .iter_instantiated_copied(tcx, args)
-            .map(|bound| {
-                let source = resolver.witness_source(span, bound);
-                self.translate_witness(span, &source, &witness_env, &mut scopes)
-            })
-            .collect::<SmallVec<[_; 4]>>();
-        let value = self.afb.expr_tuple(span, witnesses);
-
-        Function {
-            span,
-            name: tcx.erl_fn_name(def_id),
-            clause: self.afb.clause(span, witness_env.param_pats(&self.afb), None, value),
-            exported: true,
         }
     }
 

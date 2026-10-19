@@ -25,100 +25,113 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-difference(_witness@0_0, _container@1_0) ->
+difference(_witnesses_where_difference@0_0,
+           _container@1_0) ->
+    _witness_Contains@2_0 = erlang:element(1,
+                                           _witnesses_where_difference@0_0),
+    _vtable_Contains@3_0 = erlang:element(1,
+                                          _witness_Contains@2_0),
+    _fn_Contains_last@4_0 = erlang:element(3,
+                                           _vtable_Contains@3_0),
+    _fn_Contains_first@5_0 = erlang:element(2,
+                                            _vtable_Contains@3_0),
     begin
-        _witness@2_0 = erlang:element(1, _witness@0_0),
-        (erlang:element(3,
-                        erlang:element(1, _witness@2_0)))(_witness@2_0,
-                                                          _container@1_0)
-    end
-        -
-        begin
-            _witness@3_0 = erlang:element(1, _witness@0_0),
-            (erlang:element(2,
-                            erlang:element(1, _witness@3_0)))(_witness@3_0,
-                                                              _container@1_0)
-        end.
+        _fn_Contains_last@4_0(_witness_Contains@2_0,
+                              _container@1_0)
+            -
+            _fn_Contains_first@5_0(_witness_Contains@2_0,
+                                   _container@1_0)
+    end.
 
 main() ->
-    _number_1@0_0 = 3,
-    _number_2@1_0 = 10,
-    _container@2_0 =
-        'Elixir.Patina.TheProblem01.Container':'$patina_constructor__Container'(_number_1@0_0,
-                                                                                _number_2@1_0),
+    _witness_Contains@0_0 =
+        'Elixir.Patina.TheProblem01.Container':'TheProblem01::Contains<int, int>::$patina_witness'(),
+    _witnesses_where_difference@1_0 =
+        {_witness_Contains@0_0},
     begin
-        io:put_chars(begin
-                         _element@9_0 = begin
-                                            _element@3_0 =
-                                                <<"Does container contain "/utf8>>,
-                                            _element@4_0 = io_lib:format("~ktp",
-                                                                         [_number_1@0_0]),
-                                            _element@5_0 = <<" and "/utf8>>,
-                                            _element@6_0 = io_lib:format("~ktp",
-                                                                         [_number_2@1_0]),
-                                            _element@7_0 = <<": "/utf8>>,
-                                            _element@8_0 = io_lib:format("~ktp",
-                                                                         ['Elixir.Patina.TheProblem01.Container':'TheProblem01::Contains<int, int>::contains'('Elixir.Patina.TheProblem01.Container':'TheProblem01::Contains<int, int>::$patina_witness'(),
-                                                                                                                                                              _container@2_0,
-                                                                                                                                                              _number_1@0_0,
-                                                                                                                                                              _number_2@1_0)]),
-                                            [_element@3_0,
-                                             _element@4_0,
-                                             _element@5_0,
-                                             _element@6_0,
-                                             _element@7_0,
-                                             _element@8_0]
-                                        end,
-                         [_element@9_0]
-                     end),
-        io:nl(),
-        {}
-    end,
-    begin
-        io:put_chars(begin
-                         _element@12_0 = begin
-                                             _element@10_0 =
-                                                 <<"First number: "/utf8>>,
-                                             _element@11_0 =
-                                                 io_lib:format("~ktp",
-                                                               ['Elixir.Patina.TheProblem01.Container':'TheProblem01::Contains<int, int>::first'('Elixir.Patina.TheProblem01.Container':'TheProblem01::Contains<int, int>::$patina_witness'(),
-                                                                                                                                                 _container@2_0)]),
-                                             [_element@10_0, _element@11_0]
-                                         end,
-                         [_element@12_0]
-                     end),
-        io:nl(),
-        {}
-    end,
-    begin
-        io:put_chars(begin
-                         _element@15_0 = begin
-                                             _element@13_0 =
-                                                 <<"Last number: "/utf8>>,
-                                             _element@14_0 =
-                                                 io_lib:format("~ktp",
-                                                               ['Elixir.Patina.TheProblem01.Container':'TheProblem01::Contains<int, int>::last'('Elixir.Patina.TheProblem01.Container':'TheProblem01::Contains<int, int>::$patina_witness'(),
-                                                                                                                                                _container@2_0)]),
-                                             [_element@13_0, _element@14_0]
-                                         end,
-                         [_element@15_0]
-                     end),
-        io:nl(),
-        {}
-    end,
-    begin
-        io:put_chars(begin
-                         _element@18_0 = begin
-                                             _element@16_0 =
-                                                 <<"The difference is: "/utf8>>,
-                                             _element@17_0 =
-                                                 io_lib:format("~ktp",
-                                                               [difference({'Elixir.Patina.TheProblem01.Container':'TheProblem01::Contains<int, int>::$patina_witness'()},
-                                                                           _container@2_0)]),
-                                             [_element@16_0, _element@17_0]
-                                         end,
-                         [_element@18_0]
-                     end),
-        io:nl(),
-        {}
+        _number_1@2_0 = 3,
+        _number_2@3_0 = 10,
+        _container@4_0 =
+            'Elixir.Patina.TheProblem01.Container':'$patina_constructor__Container'(_number_1@2_0,
+                                                                                    _number_2@3_0),
+        begin
+            io:put_chars(begin
+                             _element@11_0 = begin
+                                                 _element@5_0 =
+                                                     <<"Does container contain "/utf8>>,
+                                                 _element@6_0 =
+                                                     io_lib:format("~ktp",
+                                                                   [_number_1@2_0]),
+                                                 _element@7_0 =
+                                                     <<" and "/utf8>>,
+                                                 _element@8_0 =
+                                                     io_lib:format("~ktp",
+                                                                   [_number_2@3_0]),
+                                                 _element@9_0 = <<": "/utf8>>,
+                                                 _element@10_0 =
+                                                     io_lib:format("~ktp",
+                                                                   ['Elixir.Patina.TheProblem01.Container':'TheProblem01::Contains<int, int>::contains'(_witness_Contains@0_0,
+                                                                                                                                                        _container@4_0,
+                                                                                                                                                        _number_1@2_0,
+                                                                                                                                                        _number_2@3_0)]),
+                                                 [_element@5_0,
+                                                  _element@6_0,
+                                                  _element@7_0,
+                                                  _element@8_0,
+                                                  _element@9_0,
+                                                  _element@10_0]
+                                             end,
+                             [_element@11_0]
+                         end),
+            io:nl(),
+            {}
+        end,
+        begin
+            io:put_chars(begin
+                             _element@14_0 = begin
+                                                 _element@12_0 =
+                                                     <<"First number: "/utf8>>,
+                                                 _element@13_0 =
+                                                     io_lib:format("~ktp",
+                                                                   ['Elixir.Patina.TheProblem01.Container':'TheProblem01::Contains<int, int>::first'(_witness_Contains@0_0,
+                                                                                                                                                     _container@4_0)]),
+                                                 [_element@12_0, _element@13_0]
+                                             end,
+                             [_element@14_0]
+                         end),
+            io:nl(),
+            {}
+        end,
+        begin
+            io:put_chars(begin
+                             _element@17_0 = begin
+                                                 _element@15_0 =
+                                                     <<"Last number: "/utf8>>,
+                                                 _element@16_0 =
+                                                     io_lib:format("~ktp",
+                                                                   ['Elixir.Patina.TheProblem01.Container':'TheProblem01::Contains<int, int>::last'(_witness_Contains@0_0,
+                                                                                                                                                    _container@4_0)]),
+                                                 [_element@15_0, _element@16_0]
+                                             end,
+                             [_element@17_0]
+                         end),
+            io:nl(),
+            {}
+        end,
+        begin
+            io:put_chars(begin
+                             _element@20_0 = begin
+                                                 _element@18_0 =
+                                                     <<"The difference is: "/utf8>>,
+                                                 _element@19_0 =
+                                                     io_lib:format("~ktp",
+                                                                   [difference(_witnesses_where_difference@1_0,
+                                                                               _container@4_0)]),
+                                                 [_element@18_0, _element@19_0]
+                                             end,
+                             [_element@20_0]
+                         end),
+            io:nl(),
+            {}
+        end
     end.

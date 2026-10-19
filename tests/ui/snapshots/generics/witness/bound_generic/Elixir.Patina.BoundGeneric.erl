@@ -24,23 +24,35 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-call(_witness@0_0, _h@1_0) ->
-    'Elixir.Patina.BoundGeneric.Holder':'BoundGeneric::Tr::method'('Elixir.Patina.BoundGeneric.Holder':'BoundGeneric::Tr::$patina_witness'({erlang:element(1,
-                                                                                                                                                           _witness@0_0)}),
-                                                                   _h@1_0).
+call(_witnesses_where_call@0_0, _h@1_0) ->
+    _witness_Bound@2_0 = erlang:element(1,
+                                        _witnesses_where_call@0_0),
+    _witnesses_where_Tr@3_0 = {_witness_Bound@2_0},
+    _witness_Tr@4_0 =
+        'Elixir.Patina.BoundGeneric.Holder':'BoundGeneric::Tr::$patina_witness'(_witnesses_where_Tr@3_0),
+    begin
+        'Elixir.Patina.BoundGeneric.Holder':'BoundGeneric::Tr::method'(_witness_Tr@4_0,
+                                                                       _h@1_0)
+    end.
 
 main() ->
-    _h@1_0 = begin _value@0_0 = 5, _value@0_0 end,
+    _witness_Bound@0_0 =
+        'Elixir.Patina.BoundGeneric.Number':'BoundGeneric::Bound::$patina_witness'(),
+    _witnesses_where_call@1_0 = {_witness_Bound@0_0},
     begin
-        io:put_chars(begin
-                         _element@3_0 = begin
-                                            _element@2_0 = io_lib:format("~ktp",
-                                                                         [call({'Elixir.Patina.BoundGeneric.Number':'BoundGeneric::Bound::$patina_witness'()},
-                                                                               _h@1_0)]),
-                                            [_element@2_0]
-                                        end,
-                         [_element@3_0]
-                     end),
-        io:nl(),
-        {}
+        _h@3_0 = begin _value@2_0 = 5, _value@2_0 end,
+        begin
+            io:put_chars(begin
+                             _element@5_0 = begin
+                                                _element@4_0 =
+                                                    io_lib:format("~ktp",
+                                                                  [call(_witnesses_where_call@1_0,
+                                                                        _h@3_0)]),
+                                                [_element@4_0]
+                                            end,
+                             [_element@5_0]
+                         end),
+            io:nl(),
+            {}
+        end
     end.

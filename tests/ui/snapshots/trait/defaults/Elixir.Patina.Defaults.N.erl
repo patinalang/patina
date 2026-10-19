@@ -25,7 +25,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Inner::Doubler::base'(_witness@0_0,
+'Defaults::Inner::Doubler::base'(_witness_Doubler@0_0,
                                  _self@1_0) ->
     _self@1_0.
 

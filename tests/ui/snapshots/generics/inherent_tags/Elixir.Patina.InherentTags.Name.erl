@@ -25,7 +25,8 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'InherentTags::Show::show'(_witness@0_0, _self@1_0) ->
+'InherentTags::Show::show'(_witness_Show@0_0,
+                           _self@1_0) ->
     <<"a name"/utf8>>.
 
 'InherentTags::Show::$patina_witness'() ->

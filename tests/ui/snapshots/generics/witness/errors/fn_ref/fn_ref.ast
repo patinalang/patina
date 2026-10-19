@@ -1,0 +1,17 @@
+// A `fnref` refers to a function statically, so it cannot capture the witnesses its function
+// needs. A `fn` pointer can.
+
+pub trait Animal {
+    fn talk(self)
+    -> str;
+}
+
+pub fn talk_through_pointer<T: Animal>(animal: T) -> str {
+    let talk: fn(T) -> str = T::talk;
+    talk(animal)
+}
+
+pub fn talk_through_fnref<T: Animal>(animal: T) -> str {
+    let talk: fnref(T) -> str = T::talk;
+    talk(animal)
+}

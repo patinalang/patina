@@ -93,7 +93,7 @@
      'NestedAssocBound::Label::label',2,
      [{clause,
           {25,5},
-          [{var,{25,5},'_witness@0_0'},{var,{25,14},'_self@1_0'}],
+          [{var,{25,5},'_witness_Label@0_0'},{var,{25,14},'_self@1_0'}],
           [],
           [{bin,
                {25,29},

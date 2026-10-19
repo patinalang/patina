@@ -90,7 +90,7 @@
      'ImplicitExport::FooTrait::bar',1,
      [{clause,
           {15,5},
-          [{var,{15,5},'_witness@0_0'}],
+          [{var,{15,5},'_witness_FooTrait@0_0'}],
           [],
           [{call,{16,9},{atom,{16,9},priv_foo},[]}]}]},
  {function,

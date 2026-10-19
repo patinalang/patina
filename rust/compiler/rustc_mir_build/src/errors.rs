@@ -78,6 +78,17 @@ pub(crate) struct UseOfUninitialized {
 }
 
 #[derive(Diagnostic)]
+#[diag("`{$item}` cannot be used as a `fnref`")]
+#[note("`fnref` is guaranteed to be a static Erlang item")]
+#[help("use an `fn` pointer instead")]
+pub(crate) struct FnrefNeedsWitness {
+    #[primary_span]
+    #[label("generic function requiring runtime dispatch")]
+    pub(crate) span: Span,
+    pub(crate) item: String,
+}
+
+#[derive(Diagnostic)]
 #[diag("call to deprecated safe function `{$function}` is unsafe and requires unsafe block")]
 pub(crate) struct CallToDeprecatedSafeFnRequiresUnsafe {
     #[label("call to unsafe function")]

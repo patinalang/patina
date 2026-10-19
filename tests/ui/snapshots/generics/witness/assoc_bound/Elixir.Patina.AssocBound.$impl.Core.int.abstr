@@ -90,7 +90,7 @@
      'AssocBound::Show::show',2,
      [{clause,
           {9,5},
-          [{var,{9,5},'_witness@0_0'},{var,{9,13},'_self@1_0'}],
+          [{var,{9,5},'_witness_Show@0_0'},{var,{9,13},'_self@1_0'}],
           [],
           [{bin,
                {9,28},

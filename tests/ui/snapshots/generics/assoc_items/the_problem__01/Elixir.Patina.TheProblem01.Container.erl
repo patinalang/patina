@@ -35,17 +35,17 @@
 '$patina_constructor__Container'(_0@0_0, _1@1_0) ->
     #'Container'{'0' = _0@0_0, '1' = _1@1_0}.
 
-'TheProblem01::Contains<int, int>::contains'(_witness@0_0,
+'TheProblem01::Contains<int, int>::contains'(_witness_Contains@0_0,
                                              _self@1_0, _number_1@2_0,
                                              _number_2@3_0) ->
     _self@1_0#'Container'.'0' =:= _number_1@2_0 andalso
         _self@1_0#'Container'.'1' =:= _number_2@3_0.
 
-'TheProblem01::Contains<int, int>::first'(_witness@0_0,
+'TheProblem01::Contains<int, int>::first'(_witness_Contains@0_0,
                                           _self@1_0) ->
     _self@1_0#'Container'.'0'.
 
-'TheProblem01::Contains<int, int>::last'(_witness@0_0,
+'TheProblem01::Contains<int, int>::last'(_witness_Contains@0_0,
                                          _self@1_0) ->
     _self@1_0#'Container'.'1'.
 

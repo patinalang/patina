@@ -34,12 +34,17 @@ str_value(_s@0_0) ->
     'Elixir.Patina.InherentTags.GenVal':'value<str>'(_s@0_0).
 
 name_f() ->
-    'Elixir.Patina.InherentTags.GenVal':f({'Elixir.Patina.InherentTags.Name':'InherentTags::Show::$patina_witness'()},
-                                          begin
-                                              _gen_val@0_0 =
-                                                  'Elixir.Patina.InherentTags.Name',
-                                              _gen_val@0_0
-                                          end).
+    _witness_Show@0_0 =
+        'Elixir.Patina.InherentTags.Name':'InherentTags::Show::$patina_witness'(),
+    _witnesses_where_f@1_0 = {_witness_Show@0_0},
+    begin
+        'Elixir.Patina.InherentTags.GenVal':f(_witnesses_where_f@1_0,
+                                              begin
+                                                  _gen_val@2_0 =
+                                                      'Elixir.Patina.InherentTags.Name',
+                                                  _gen_val@2_0
+                                              end)
+    end.
 
 int_f(_n@0_0, _x@1_0) ->
     'Elixir.Patina.InherentTags.GenVal':'f<int>'(_n@0_0,

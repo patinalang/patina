@@ -25,7 +25,8 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'TupleImpls::Show::show'(_witness@0_0, _self@1_0) ->
+'TupleImpls::Show::show'(_witness_Show@0_0,
+                         _self@1_0) ->
     <<"i"/utf8>>.
 
 'TupleImpls::Show::$patina_witness'() ->

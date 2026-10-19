@@ -26,24 +26,32 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Value::value'(_witness@0_0, _self@1_0) ->
+'Defaults::Value::value'(_witness_Value@0_0,
+                         _self@1_0) ->
+    _where_Value@2_0 = erlang:element(3,
+                                      _witness_Value@0_0),
+    _witness_Value@3_0 = erlang:element(1,
+                                        _where_Value@2_0),
+    _vtable_Value@4_0 = erlang:element(1,
+                                       _witness_Value@3_0),
+    _fn_Value_value@5_0 = erlang:element(1,
+                                         _vtable_Value@4_0),
     begin
-        _witness@2_0 = erlang:element(1,
-                                      erlang:element(3, _witness@0_0)),
-        (erlang:element(1,
-                        erlang:element(1, _witness@2_0)))(_witness@2_0,
-                                                          _self@1_0)
-    end
-        + 1.
+        _fn_Value_value@5_0(_witness_Value@3_0, _self@1_0) + 1
+    end.
 
-'Defaults::Value::$patina_witness'(_witness@0_0) ->
+'Defaults::Value::$patina_witness'(_witnesses_where_Value@0_0) ->
     {{fun 'Elixir.Patina.Defaults.Pile':'Defaults::Value::value'/2},
      {},
-     _witness@0_0}.
+     _witnesses_where_Value@0_0}.
 
-'Defaults::Combine::$patina_witness'(_witness@0_0) ->
+'Defaults::Combine::$patina_witness'(_witnesses_where_Combine@0_0) ->
+    _witness_Value@1_0 = erlang:element(1,
+                                        _witnesses_where_Combine@0_0),
+    _witness_Value@2_0 =
+        {{fun 'Elixir.Patina.Defaults.Pile':'Defaults::Value::value'/2},
+         {},
+         {_witness_Value@1_0}},
     {{fun 'Elixir.Patina.Defaults':'Defaults::Combine::uses_rhs_witness'/4},
-     {{{fun 'Elixir.Patina.Defaults.Pile':'Defaults::Value::value'/2},
-       {},
-       {erlang:element(1, _witness@0_0)}}},
-     _witness@0_0}.
+     {_witness_Value@2_0},
+     _witnesses_where_Combine@0_0}.

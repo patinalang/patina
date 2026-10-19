@@ -24,19 +24,23 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-describe_member(_witness@0_0, _family@1_0) ->
+describe_member(_witnesses_where_describe_member@0_0,
+                _family@1_0) ->
+    _witness_Describe@2_0 = erlang:element(2,
+                                           _witnesses_where_describe_member@0_0),
+    _witness_Family@3_0 = erlang:element(1,
+                                         _witnesses_where_describe_member@0_0),
+    _vtable_Describe@4_0 = erlang:element(1,
+                                          _witness_Describe@2_0),
+    _fn_Describe_describe@5_0 = erlang:element(1,
+                                               _vtable_Describe@4_0),
+    _vtable_Family@6_0 = erlang:element(1,
+                                        _witness_Family@3_0),
+    _fn_Family_member@7_0 = erlang:element(2,
+                                           _vtable_Family@6_0),
     begin
-        _witness@3_0 = erlang:element(2, _witness@0_0),
-        (erlang:element(1,
-                        erlang:element(1, _witness@3_0)))(_witness@3_0,
-                                                          begin
-                                                              _witness@2_0 =
-                                                                  erlang:element(1,
-                                                                                 _witness@0_0),
-                                                              (erlang:element(2,
-                                                                              erlang:element(1,
-                                                                                             _witness@2_0)))(_witness@2_0,
-                                                                                                             _family@1_0,
-                                                                                                             1)
-                                                          end)
+        _fn_Describe_describe@5_0(_witness_Describe@2_0,
+                                  _fn_Family_member@7_0(_witness_Family@3_0,
+                                                        _family@1_0,
+                                                        1))
     end.

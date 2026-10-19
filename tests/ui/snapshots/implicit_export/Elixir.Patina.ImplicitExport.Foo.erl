@@ -30,7 +30,7 @@ foo() -> priv_foo().
 
 priv_foo() -> {}.
 
-'ImplicitExport::FooTrait::bar'(_witness@0_0) ->
+'ImplicitExport::FooTrait::bar'(_witness_FooTrait@0_0) ->
     priv_foo().
 
 'ImplicitExport::FooTrait::$patina_witness'() ->

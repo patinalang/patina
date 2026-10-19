@@ -9,7 +9,6 @@ use std::hash::Hash as _;
 
 use convert_case::{Case, Casing};
 use rustc_abi::{FIRST_VARIANT, FieldIdx};
-use rustc_data_structures::fx::FxIndexSet;
 use rustc_data_structures::stable_hasher::StableHasher;
 use rustc_hashes::Hash128;
 use rustc_hir::attrs::{AttributeKind, ErlTagStyle, ReprAttr, ReprAttrModifier};
@@ -17,18 +16,16 @@ use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{CrateNum, DefId, LocalDefId};
 use rustc_hir::definitions::DefPathData;
 use rustc_hir::{Attribute, HirId, PrimTy};
-use rustc_index::IndexSlice;
 use rustc_macros::{StableHash, TyDecodable, TyEncodable};
 use rustc_span::{Span, Symbol, kw};
 use smallvec::{SmallVec, smallvec};
 
 use self::shape::ErlShape;
-use self::witness::{AssocTypeBoundIdx, BoundIdx, SupertraitIdx};
 use crate::query::Providers;
 use crate::ty::print::PrintTraitRefExt as _;
 use crate::ty::{
-    self, AdtDef, FieldDef, GenericArgsRef, Ty, TyCtxt, TypeVisitableExt, TypingEnv, Unnormalized,
-    VariantDef, Visibility,
+    self, AdtDef, FieldDef, GenericArgsRef, Ty, TyCtxt, TypingEnv, Unnormalized, VariantDef,
+    Visibility,
 };
 
 /// The identity of a module in the generated Erlang program.
@@ -70,30 +67,15 @@ pub enum ErlModuleResolution {
     Dynamic,
 }
 
-/// The kind of Erlang call we can make to a given target, from a given caller.
+/// The kind of Erlang call we make to a given target, from a given caller.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum ErlCallKind {
-    /// The callee is a private function in the caller's module.
-    /// Only `priv_fn()` call is possible.
+    /// The callee is in the caller's module: `fun()`.
     Local,
-    /// The callee is a public function in a different module.
-    /// Only `Mod:pub_fn()` call is possible.
+    /// The callee is in a different module, or the call is forced extern: `Mod:fun()`.
     Extern,
-    /// The callee is a public function in the caller's module.
-    /// Either `Mod:pub_fn()` or `pub_fn()` call are possible.
-    LocalOrExtern,
     /// We're not calling a module.
     Dynamic,
-}
-
-impl ErlCallKind {
-    pub fn can_be_local(self) -> bool {
-        matches!(self, ErlCallKind::Local | ErlCallKind::LocalOrExtern)
-    }
-
-    pub fn can_be_extern(self) -> bool {
-        matches!(self, ErlCallKind::Extern | ErlCallKind::LocalOrExtern)
-    }
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, StableHash)]
@@ -236,55 +218,13 @@ impl<'tcx> TyCtxt<'tcx> {
             )
     }
 
-    /// The trait `def_id` is a method of, for a trait method or a trait impl item.
+    /// Returns the trait of a trait method or trait impl item.
     pub fn erl_entry_trait(self, def_id: DefId) -> Option<DefId> {
         if let Some(trait_def_id) = self.trait_of_assoc(def_id) {
             return Some(trait_def_id);
         }
         let impl_def_id = self.trait_impl_of_assoc(def_id)?;
         self.impl_opt_trait_id(impl_def_id)
-    }
-
-    /// The bounds in `clauses` that need a runtime witness, in order and without duplicates.
-    fn erl_witnessed_trait_refs(
-        self,
-        clauses: impl IntoIterator<Item = &'tcx (ty::Clause<'tcx>, Span)>,
-    ) -> FxIndexSet<ty::TraitRef<'tcx>> {
-        let mut trait_refs = FxIndexSet::default();
-        for &(clause, _) in clauses {
-            let Some(trait_pred) = clause.as_trait_clause() else { continue };
-            let trait_pred = self.instantiate_bound_regions_with_erased(trait_pred);
-            // A bound without type parameters, like `where S: Derived`, needs no runtime
-            // witness: code that uses it selects the impl itself.
-            if trait_pred.polarity == ty::PredicatePolarity::Positive
-                && trait_pred.trait_ref.has_non_region_param()
-            {
-                self.insert_witnessed_trait_ref(trait_pred.trait_ref, &mut trait_refs);
-            }
-        }
-        trait_refs
-    }
-
-    /// A bound on a trait without a witness stands for the bounds on its supertraits.
-    fn insert_witnessed_trait_ref(
-        self,
-        trait_ref: ty::TraitRef<'tcx>,
-        trait_refs: &mut FxIndexSet<ty::TraitRef<'tcx>>,
-    ) {
-        if self.erl_trait_needs_witness(trait_ref.def_id) {
-            trait_refs.insert(trait_ref);
-            return;
-        }
-
-        for &(clause, _) in self.explicit_implied_predicates_of(trait_ref.def_id).skip_binder() {
-            if let Some(supertrait) = clause.as_trait_clause() {
-                let supertrait = self.instantiate_bound_regions_with_erased(supertrait);
-                let supertrait = ty::EarlyBinder::bind(supertrait.trait_ref)
-                    .instantiate(self, trait_ref.args)
-                    .skip_normalization();
-                self.insert_witnessed_trait_ref(supertrait, trait_refs);
-            }
-        }
     }
 
     /// The generic arguments of the trait item that the trait impl item `def_id` implements, in
@@ -383,27 +323,24 @@ impl<'tcx> TyCtxt<'tcx> {
         }
     }
 
-    /// Classifies a call from `caller` to `target`, whose module is `callee`.
+    /// Does `caller`->`callee` require an extern call?
+    /// `None` when the `caller` has no module at all.
+    pub fn is_erl_cross_module_call(self, caller: DefId, callee: ErlModuleId) -> Option<bool> {
+        // An inlined constant's calls land in whichever module uses its value.
+        Some(self.is_in_erl_inlined_const(caller) || callee != self.erl_definition_module(caller)?)
+    }
+
+    /// Classifies a call from `caller` to a function of `callee_module`.
     pub fn erl_call_kind(
         self,
         caller: DefId,
-        callee_module: Option<ErlModuleResolution>,
-        target: ErlCallTarget<'tcx>,
-        forced_extern: Option<bool>,
+        callee_module: ErlModuleResolution,
+        forced_extern: bool,
     ) -> Option<ErlCallKind> {
-        let kind = match callee_module? {
+        let kind = match callee_module {
             ErlModuleResolution::Static(callee) => {
-                // An inlined constant's calls land in whichever module uses its value.
-                if self.is_in_erl_inlined_const(caller)
-                    || callee != self.erl_definition_module(caller)?
-                {
+                if forced_extern || self.is_erl_cross_module_call(caller, callee)? {
                     ErlCallKind::Extern
-                } else if self.erl_call_target_is_exported(callee, target) {
-                    match forced_extern {
-                        Some(true) => ErlCallKind::Extern,
-                        Some(false) => ErlCallKind::Local,
-                        None => ErlCallKind::LocalOrExtern,
-                    }
                 } else {
                     ErlCallKind::Local
                 }
@@ -477,14 +414,6 @@ impl<'tcx> TyCtxt<'tcx> {
         self.associated_items(trait_def_id)
             .in_definition_order()
             .filter(move |item| self.erl_has_fn_name(item.def_id))
-    }
-
-    fn erl_call_target_is_exported(self, module: ErlModuleId, target: ErlCallTarget<'tcx>) -> bool {
-        match target {
-            ErlCallTarget::Item { def_id, args: _ } => self.is_erl_exported_fn(module, def_id),
-            ErlCallTarget::Constructor { variant, .. } => self.is_erl_exported_fn(module, variant),
-            ErlCallTarget::Extern { .. } | ErlCallTarget::Dynamic => false,
-        }
     }
 
     pub fn erl_module_for_target(
@@ -1055,101 +984,14 @@ fn struct_repr_from_arity(tcx: TyCtxt<'_>, variant: &VariantDef) -> ReprAttr {
     }
 }
 
-/// Provider for [`TyCtxt::erl_trait_supertraits`].
-fn erl_trait_supertraits<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    trait_def_id: DefId,
-) -> ty::EarlyBinder<'tcx, &'tcx IndexSlice<SupertraitIdx, ty::TraitRef<'tcx>>> {
-    // The implied predicates also hold the bounds on the associated types of `Self`, like
-    // `<Self as HasItem>::Item: Label` in `trait Labelled: HasItem<Item: Label>`.
-    let clauses = tcx.explicit_implied_predicates_of(trait_def_id).skip_binder();
-    let supertraits = tcx.erl_witnessed_trait_refs(clauses).into_iter().filter(|trait_ref| {
-        let mut ty = trait_ref.self_ty();
-        while let ty::Alias(alias) = ty.kind()
-            && let ty::AliasTyKind::Projection { .. } = alias.kind
-        {
-            ty = alias.self_ty();
-        }
-        ty == tcx.types.self_param
-    });
-    ty::EarlyBinder::bind(IndexSlice::from_raw(tcx.arena.alloc_from_iter(supertraits)))
-}
-
-/// Provider for [`TyCtxt::erl_assoc_type_bounds`].
-fn erl_assoc_type_bounds<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    assoc_def_id: DefId,
-) -> ty::EarlyBinder<'tcx, &'tcx IndexSlice<AssocTypeBoundIdx, ty::TraitRef<'tcx>>> {
-    let clauses = tcx.explicit_item_bounds(assoc_def_id).skip_binder();
-    let bounds = tcx.erl_witnessed_trait_refs(clauses).into_iter().filter(|trait_ref| {
-        let mut ty = trait_ref.self_ty();
-        while let ty::Alias(alias) = ty.kind()
-            && let ty::AliasTyKind::Projection { def_id } = alias.kind
-        {
-            if def_id == assoc_def_id {
-                return true;
-            }
-            ty = alias.self_ty();
-        }
-        false
-    });
-    ty::EarlyBinder::bind(IndexSlice::from_raw(tcx.arena.alloc_from_iter(bounds)))
-}
-
-/// Provider for [`TyCtxt::erl_bounds`].
-fn erl_bounds<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    def_id: DefId,
-) -> ty::EarlyBinder<'tcx, &'tcx IndexSlice<BoundIdx, ty::TraitRef<'tcx>>> {
-    if let Some(trait_def_id) = tcx.trait_of_assoc(def_id) {
-        let self_trait_ref = ty::TraitRef::identity(tcx, trait_def_id);
-        // Both are in the trait's generics.
-        let supertraits = tcx.erl_trait_supertraits(trait_def_id).skip_binder();
-        let clauses = tcx
-            .predicates_of(trait_def_id)
-            .predicates
-            .iter()
-            .chain(tcx.predicates_of(def_id).predicates);
-        let bounds = tcx.erl_witnessed_trait_refs(clauses).into_iter().filter(|trait_ref| {
-            *trait_ref != self_trait_ref && !supertraits.raw.contains(trait_ref)
-        });
-        return ty::EarlyBinder::bind(IndexSlice::from_raw(tcx.arena.alloc_from_iter(bounds)));
-    }
-
-    if let Some(trait_item_def_id) = tcx.trait_item_of(def_id) {
-        let args = tcx.erl_trait_item_args_for_impl_item(def_id);
-        let bounds = tcx
-            .erl_bounds(trait_item_def_id)
-            .iter_instantiated_copied(tcx, args)
-            .map(|bound| bound.skip_normalization());
-        return ty::EarlyBinder::bind(IndexSlice::from_raw(tcx.arena.alloc_from_iter(bounds)));
-    }
-
-    let predicates = tcx.predicates_of(def_id);
-    let parent_clauses = predicates
-        .parent
-        .filter(|&parent| matches!(tcx.def_kind(parent), DefKind::Impl { .. }))
-        .into_iter()
-        .flat_map(|parent| tcx.predicates_of(parent).predicates);
-    let bounds = tcx.erl_witnessed_trait_refs(parent_clauses.chain(predicates.predicates));
-    ty::EarlyBinder::bind(IndexSlice::from_raw(tcx.arena.alloc_from_iter(bounds)))
-}
-
-/// Provider for [`TyCtxt::erl_trait_needs_witness`].
-fn erl_trait_needs_witness(tcx: TyCtxt<'_>, trait_def_id: DefId) -> bool {
-    // A closure is an Erlang fun, so a call through `Fn*` needs no witness.
-    !tcx.is_fn_trait(trait_def_id)
-        && tcx.associated_items(trait_def_id).in_definition_order().next().is_some()
-}
-
 pub fn provide(providers: &mut Providers) {
     *providers = Providers {
         erl_adt_reprs,
         erl_fn_name,
-        erl_trait_needs_witness,
-        erl_trait_supertraits,
-        erl_assoc_type_bounds,
-        erl_bounds,
+        erl_trait_needs_witness: witness::erl_trait_needs_witness,
+        erl_trait_supertraits: witness::erl_trait_supertraits,
+        erl_assoc_type_bounds: witness::erl_assoc_type_bounds,
+        erl_bounds: witness::erl_bounds,
         erl_module_name,
         erl_shape_of_ty: shape::erl_shape_of_ty,
         erl_variant_wrap_guards: shape::erl_variant_wrap_guards,

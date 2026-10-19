@@ -96,7 +96,7 @@
      2,
      [{clause,
           {16,5},
-          [{var,{16,5},'_witness@0_0'},{var,{16,16},'_self@1_0'}],
+          [{var,{16,5},'_witness_Wraps@0_0'},{var,{16,16},'_self@1_0'}],
           [],
           [{integer,{17,9},0}]}]},
  {function,
@@ -105,7 +105,7 @@
      1,
      [{clause,
           {15,39},
-          [{var,{15,39},'_witness@0_0'}],
+          [{var,{15,39},'_witnesses_where_Wraps@0_0'}],
           [],
           [{tuple,
                {15,39},
@@ -122,4 +122,4 @@
                                  'AssocTypeTraitArg::Wraps<<_ as AssocTypeTraitArg::Container>::Item>::wrapped'},
                              {integer,{15,39},2}}}]},
                 {tuple,{15,39},[]},
-                {var,{15,39},'_witness@0_0'}]}]}]}]
+                {var,{15,39},'_witnesses_where_Wraps@0_0'}]}]}]}]

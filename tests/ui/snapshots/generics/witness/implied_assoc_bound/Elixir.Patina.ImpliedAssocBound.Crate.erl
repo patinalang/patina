@@ -30,10 +30,10 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'ImpliedAssocBound::HasItem::$patina_type::Item'(_witness@0_0) ->
+'ImpliedAssocBound::HasItem::$patina_type::Item'(_witness_HasItem@0_0) ->
     {}.
 
-'ImpliedAssocBound::HasItem::item'(_witness@0_0,
+'ImpliedAssocBound::HasItem::item'(_witness_HasItem@0_0,
                                    _self@1_0) ->
     'Elixir.Patina.ImpliedAssocBound.Tag'.
 
@@ -43,17 +43,20 @@
      {},
      {}}.
 
-'ImpliedAssocBound::LabelledWithItems::other'(_witness@0_0,
+'ImpliedAssocBound::LabelledWithItems::other'(_witness_LabelledWithItems@0_0,
                                               _self@1_0) ->
     1.
 
 'ImpliedAssocBound::LabelledWithItems::$patina_witness'() ->
+    _witness_HasItem@0_0 =
+        {{fun 'Elixir.Patina.ImpliedAssocBound.Crate':'ImpliedAssocBound::HasItem::$patina_type::Item'/1,
+          fun 'Elixir.Patina.ImpliedAssocBound.Crate':'ImpliedAssocBound::HasItem::item'/2},
+         {},
+         {}},
+    _witness_Label@1_0 =
+        {{fun 'Elixir.Patina.ImpliedAssocBound.Tag':'ImpliedAssocBound::Label::label'/2},
+         {},
+         {}},
     {{fun 'Elixir.Patina.ImpliedAssocBound.Crate':'ImpliedAssocBound::LabelledWithItems::other'/2},
-     {{{fun 'Elixir.Patina.ImpliedAssocBound.Crate':'ImpliedAssocBound::HasItem::$patina_type::Item'/1,
-        fun 'Elixir.Patina.ImpliedAssocBound.Crate':'ImpliedAssocBound::HasItem::item'/2},
-       {},
-       {}},
-      {{fun 'Elixir.Patina.ImpliedAssocBound.Tag':'ImpliedAssocBound::Label::label'/2},
-       {},
-       {}}},
+     {_witness_HasItem@0_0, _witness_Label@1_0},
      {}}.

@@ -27,13 +27,15 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Animal::name'(_witness@0_0, _self@1_0) ->
+'Defaults::Animal::name'(_witness_Animal@0_0,
+                         _self@1_0) ->
     _self@1_0.
 
-'Defaults::Animal::noise'(_witness@0_0, _self@1_0) ->
+'Defaults::Animal::noise'(_witness_Animal@0_0,
+                          _self@1_0) ->
     <<"woof"/utf8>>.
 
-'Defaults::Animal::calls_required'(_witness@0_0,
+'Defaults::Animal::calls_required'(_witness_Animal@0_0,
                                    _self@1_0) ->
     begin
         _element@2_0 = _self@1_0,

@@ -90,7 +90,7 @@
      'TupleImpls::Show::show',2,
      [{clause,
           {12,5},
-          [{var,{12,5},'_witness@0_0'},{var,{12,13},'_self@1_0'}],
+          [{var,{12,5},'_witness_Show@0_0'},{var,{12,13},'_self@1_0'}],
           [],
           [{var,{13,9},'_self@1_0'}]}]},
  {function,

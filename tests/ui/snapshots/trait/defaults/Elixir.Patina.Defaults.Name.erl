@@ -25,7 +25,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Describe::describe'(_witness@0_0,
+'Defaults::Describe::describe'(_witness_Describe@0_0,
                                _self@1_0) ->
     _self@1_0.
 

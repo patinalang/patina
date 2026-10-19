@@ -25,7 +25,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'NestedFns::Show::show'(_witness@0_0, _self@1_0) ->
+'NestedFns::Show::show'(_witness_Show@0_0, _self@1_0) ->
     <<"int"/utf8>>.
 
 'NestedFns::Show::$patina_witness'() ->

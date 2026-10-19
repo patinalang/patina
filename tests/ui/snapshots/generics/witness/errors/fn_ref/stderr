@@ -1,0 +1,11 @@
+error: `Animal::talk` cannot be used as a `fnref`
+  --> tests/ui/src/generics/witness/errors/fn_ref.pt:14:33
+   |
+LL |     let talk: fnref(T) -> str = T::talk;
+   |                                 ^^^^^^^ generic function requiring runtime dispatch
+   |
+   = note: `fnref` is guaranteed to be a static Erlang item
+   = help: use an `fn` pointer instead
+
+error: aborting due to 1 previous error
+

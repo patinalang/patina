@@ -90,7 +90,7 @@
      'BlanketImpl::Show::show',2,
      [{clause,
           {6,5},
-          [{var,{6,5},'_witness@0_0'},{var,{6,13},'_self@1_0'}],
+          [{var,{6,5},'_witness_Show@0_0'},{var,{6,13},'_self@1_0'}],
           [],
           [{bin,
                {7,9},

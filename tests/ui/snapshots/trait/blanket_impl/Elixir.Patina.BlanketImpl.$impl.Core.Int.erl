@@ -25,7 +25,8 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'BlanketImpl::Show::show'(_witness@0_0, _self@1_0) ->
+'BlanketImpl::Show::show'(_witness_Show@0_0,
+                          _self@1_0) ->
     <<"an int"/utf8>>.
 
 'BlanketImpl::Show::$patina_witness'() ->

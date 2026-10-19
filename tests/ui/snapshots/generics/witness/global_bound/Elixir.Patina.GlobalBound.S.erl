@@ -28,21 +28,28 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'GlobalBound::Derived::derived'(_witness@0_0,
+'GlobalBound::Derived::derived'(_witness_Derived@0_0,
                                 _self@1_0) ->
     1.
 
 'GlobalBound::Derived::$patina_witness'() ->
+    _witness_Base@0_0 =
+        {{fun 'Elixir.Patina.GlobalBound.S':'GlobalBound::Base::base'/2},
+         {},
+         {}},
     {{fun 'Elixir.Patina.GlobalBound.S':'GlobalBound::Derived::derived'/2},
-     {{{fun 'Elixir.Patina.GlobalBound.S':'GlobalBound::Base::base'/2},
-       {},
-       {}}},
+     {_witness_Base@0_0},
      {}}.
 
-'GlobalBound::Base::base'(_witness@0_0, _self@1_0) ->
-    'GlobalBound::Derived::derived'('Elixir.Patina.GlobalBound.S':'GlobalBound::Derived::$patina_witness'(),
-                                    _self@1_0)
-        + 1.
+'GlobalBound::Base::base'(_witness_Base@0_0,
+                          _self@1_0) ->
+    _witness_Derived@2_0 =
+        'GlobalBound::Derived::$patina_witness'(),
+    begin
+        'GlobalBound::Derived::derived'(_witness_Derived@2_0,
+                                        _self@1_0)
+            + 1
+    end.
 
 'GlobalBound::Base::$patina_witness'() ->
     {{fun 'Elixir.Patina.GlobalBound.S':'GlobalBound::Base::base'/2},
