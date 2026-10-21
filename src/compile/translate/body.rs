@@ -353,59 +353,18 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         lhs: ExprId,
         rhs: ExprId,
     ) -> eaf::Expr<'arena> {
-        let afb = &self.translator.afb;
-
         let left = self.translate_expr(lhs);
-
         let (right, right_scope) = self.with_scope(|cx| cx.translate_expr(rhs));
-        let short_scope = Scope::new();
 
-        let changed_vars = self.scopes.modified_outer_vars([&right_scope, &short_scope]);
-
-        if changed_vars.is_empty() {
-            self.scopes.join_branches(&changed_vars);
-            let operator = match op {
-                etir::LogicalOp::And => eaf::BinaryOp::Andalso,
-                etir::LogicalOp::Or => eaf::BinaryOp::Orelse,
-            };
-            return self.translator.afb.expr_binary_op(span, operator, left, right);
+        if !self.scopes.modified_outer_vars([&right_scope]).is_empty() {
+            span_bug!(span, "lowering didn't convert an rhs that assigns vars to a match");
         }
 
-        let short_expr = match op {
-            etir::LogicalOp::And => afb.expr_atom(span, kw::False),
-            etir::LogicalOp::Or => afb.expr_atom(span, kw::True),
+        let operator = match op {
+            etir::LogicalOp::And => eaf::BinaryOp::Andalso,
+            etir::LogicalOp::Or => eaf::BinaryOp::Orelse,
         };
-        let short = self.bind_branch_outer_variables(span, short_expr, &short_scope, &changed_vars);
-
-        let right = self.bind_branch_outer_variables(
-            self.etir[rhs].span,
-            right,
-            &right_scope,
-            &changed_vars,
-        );
-
-        self.scopes.join_branches(&changed_vars);
-
-        let true_clause = afb.clause(
-            span,
-            [afb.pat_atom(span, kw::True)],
-            None,
-            match op {
-                etir::LogicalOp::And => right,
-                etir::LogicalOp::Or => short,
-            },
-        );
-        let false_clause = afb.clause(
-            span,
-            [afb.pat_var(span, kw::Underscore)],
-            None,
-            match op {
-                etir::LogicalOp::And => short,
-                etir::LogicalOp::Or => right,
-            },
-        );
-
-        afb.expr_case(span, left, [true_clause, false_clause])
+        self.translator.afb.expr_binary_op(span, operator, left, right)
     }
 
     fn translate_unary(&mut self, span: Span, op: etir::UnaryOp, arg: ExprId) -> eaf::Expr<'arena> {

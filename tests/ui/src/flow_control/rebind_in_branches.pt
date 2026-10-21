@@ -113,6 +113,36 @@ pub fn short_circuit_result(run_block: bool) -> int {
     value
 }
 
+pub fn short_circuit_or_result(skip_block: bool) -> int {
+    let mut value = 10;
+
+    let result = skip_block || {
+        value += 5;
+        false
+    };
+
+    if result { value + 100 } else { value }
+}
+
+pub fn nested_short_circuit_result(outer: bool, inner: bool) -> int {
+    let mut value = 10;
+
+    let result = outer
+        && (inner || {
+            value += 1;
+            true
+        });
+
+    if result { value + 100 } else { value }
+}
+
+pub fn short_circuit_local_binding(run_block: bool, value: int) -> bool {
+    run_block && {
+        let doubled = value * 2;
+        doubled > 10
+    }
+}
+
 enum Branch {
     First,
     Second,

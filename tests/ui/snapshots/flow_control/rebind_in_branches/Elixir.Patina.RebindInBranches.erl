@@ -18,6 +18,9 @@
          nested_branches/2,
          nested_diverging_rebind/2,
          short_circuit_result/1,
+         short_circuit_or_result/1,
+         nested_short_circuit_result/2,
+         short_circuit_local_binding/2,
          match_result/1]).
 
 '__info__'(functions) ->
@@ -150,6 +153,52 @@ short_circuit_result(_run_block@0_0) ->
                            _branch_value@2_0
                    end,
     _value@1_1.
+
+short_circuit_or_result(_skip_block@0_0) ->
+    _value@1_0 = 10,
+    _result@3_0 = case _skip_block@0_0 of
+                      true ->
+                          _branch_value@2_0 = true,
+                          _value@1_1 = _value@1_0,
+                          _branch_value@2_0;
+                      _ ->
+                          _value@1_1 = _value@1_0 + 5,
+                          false
+                  end,
+    case _result@3_0 of
+        true -> _value@1_1 + 100;
+        _ -> _value@1_1
+    end.
+
+nested_short_circuit_result(_outer@0_0, _inner@1_0) ->
+    _value@2_0 = 10,
+    _result@5_0 = case _outer@0_0 of
+                      true ->
+                          case _inner@1_0 of
+                              true ->
+                                  _branch_value@3_0 = true,
+                                  _value@2_1 = _value@2_0,
+                                  _branch_value@3_0;
+                              _ ->
+                                  _value@2_1 = _value@2_0 + 1,
+                                  true
+                          end;
+                      _ ->
+                          _branch_value@4_0 = false,
+                          _value@2_1 = _value@2_0,
+                          _branch_value@4_0
+                  end,
+    case _result@5_0 of
+        true -> _value@2_1 + 100;
+        _ -> _value@2_1
+    end.
+
+short_circuit_local_binding(_run_block@0_0,
+                            _value@1_0) ->
+    _run_block@0_0 andalso
+        begin
+            _doubled@2_0 = _value@1_0 * 2, _doubled@2_0 > 10
+        end.
 
 match_result(_take_first@0_0) ->
     _value@1_0 = 10,

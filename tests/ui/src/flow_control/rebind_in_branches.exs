@@ -40,6 +40,23 @@ defmodule RebindInBranchesTest do
     assert RebindInBranches.short_circuit_result(false) == 10
   end
 
+  test "short-circuited `||` blocks forward their incoming bindings" do
+    assert RebindInBranches.short_circuit_or_result(true) == 110
+    assert RebindInBranches.short_circuit_or_result(false) == 15
+  end
+
+  test "nested short circuits forward bindings through both operators" do
+    assert RebindInBranches.nested_short_circuit_result(true, true) == 110
+    assert RebindInBranches.nested_short_circuit_result(true, false) == 111
+    assert RebindInBranches.nested_short_circuit_result(false, false) == 10
+  end
+
+  test "bindings local to the rhs don't need exporting" do
+    assert RebindInBranches.short_circuit_local_binding(true, 6) == true
+    assert RebindInBranches.short_circuit_local_binding(true, 5) == false
+    assert RebindInBranches.short_circuit_local_binding(false, 6) == false
+  end
+
   test "match arms rebind from the same incoming value" do
     assert RebindInBranches.match_result(true) == 111
     assert RebindInBranches.match_result(false) == 212

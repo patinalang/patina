@@ -1,6 +1,7 @@
 use rustc_hir::def::DefKind;
 use rustc_hir::{BinarySegmentTy, HirId};
 use rustc_middle::erl::binary_pattern::{BinaryEndianness, BinarySegmentLayout, BinarySegmentSize};
+use rustc_middle::erl::etir::visit::{self, Visitor, walk_expr, walk_pat};
 use rustc_middle::erl::etir::{self, ExprId, PatId, PatternInput};
 use rustc_middle::erl::{ErlCallTarget, ErlModuleId, ErlModuleResolution};
 use rustc_middle::middle::region;
@@ -466,13 +467,26 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         lhs: thir::ExprId,
         rhs: thir::ExprId,
     ) -> ExprId {
-        let op = match op {
-            thir::LogicalOp::And => etir::LogicalOp::And,
-            thir::LogicalOp::Or => etir::LogicalOp::Or,
+        let span = expr.span;
+        let lhs = self.lower_expr(lhs);
+        let rhs = self.lower_expr(rhs);
+
+        if !self.reassigns_vars(rhs) {
+            let op = match op {
+                thir::LogicalOp::And => etir::LogicalOp::And,
+                thir::LogicalOp::Or => etir::LogicalOp::Or,
+            };
+            return self.push_expr(etir::ExprKind::LogicalOp { op, lhs, rhs }, expr.ty, span);
+        }
+
+        let then_pattern = self.bool_pat(span, true);
+
+        let (then_body, else_body) = match op {
+            thir::LogicalOp::And => (rhs, self.bool_expr(span, false)),
+            thir::LogicalOp::Or => (self.bool_expr(span, true), rhs),
         };
-        let kind =
-            etir::ExprKind::LogicalOp { op, lhs: self.lower_expr(lhs), rhs: self.lower_expr(rhs) };
-        self.push_expr(kind, expr.ty, expr.span)
+
+        self.ifelse_match_expr(expr, lhs, then_pattern, then_body, else_body)
     }
 
     fn lower_expr_unary_op(
@@ -769,12 +783,11 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         // TODO: this detection of `ExprKind::Let` has an issue with let chains.
         // We'll want to rewrite this into `maybe`. Possibly, we'll want to rewrite all `case`
         // into `maybe`, if I confirm that it results in the same bytecode.
-        let (scrutinee, then_pattern, is_let) =
+        let (scrutinee, then_pattern) =
             if let thir::ExprKind::Let { expr: scrutinee, pat } = &self.resolve(cond).kind {
-                (self.lower_expr(*scrutinee), self.lower_pat(pat, PatternInput::Typed), true)
+                (self.lower_expr(*scrutinee), self.lower_pat(pat, PatternInput::Typed))
             } else {
-                let bool_true = etir::PatKind::Literal(etir::Lit::Bool(true));
-                (self.lower_expr(cond), self.push_pat(bool_true, tcx.types.bool, span), false)
+                (self.lower_expr(cond), self.bool_pat(span, true))
             };
 
         let then_body = self.lower_expr(then);
@@ -783,14 +796,23 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             None => self.unit_expr(span),
         };
 
+        self.ifelse_match_expr(expr, scrutinee, then_pattern, then_body, else_body)
+    }
+
+    fn ifelse_match_expr(
+        &mut self,
+        expr: &thir::Expr<'tcx>,
+        scrutinee: ExprId,
+        then_pattern: PatId,
+        then_body: ExprId,
+        else_body: ExprId,
+    ) -> ExprId {
+        let span = expr.span;
         let then_span = self.cx.body[then_body].span;
         let else_span = self.cx.body[else_body].span;
+
         let wild = etir::PatKind::Wild { input: PatternInput::Typed };
-        let else_pattern = if is_let {
-            self.push_pat(wild, self.cx.body[scrutinee].ty, else_span)
-        } else {
-            self.push_pat(wild, tcx.types.bool, else_span)
-        };
+        let else_pattern = self.push_pat(wild, self.cx.body[scrutinee].ty, else_span);
 
         let arms = Box::new([
             etir::Arm { pattern: then_pattern, guard: None, body: then_body, span: then_span },
@@ -941,6 +963,11 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         Box::new(etir::ItemRef { name, target, module })
     }
 
+    fn bool_expr(&mut self, span: Span, value: bool) -> ExprId {
+        let kind = etir::ExprKind::Literal(etir::Lit::Bool(value), span);
+        self.push_expr(kind, self.cx.tcx.types.bool, span)
+    }
+
     fn witnessless_erl_fun(
         &self,
         span: Span,
@@ -1004,5 +1031,36 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
 
     fn resolve(&self, expr: thir::ExprId) -> &'a thir::Expr<'tcx> {
         self.resolve_expr_with_scope(expr).0
+    }
+
+    fn reassigns_vars(&self, expr: ExprId) -> bool {
+        struct FindAssignee<'a, 'tcx> {
+            body: &'a etir::Body<'tcx>,
+            found: bool,
+        }
+
+        impl<'a, 'tcx: 'a> Visitor<'a, 'tcx> for FindAssignee<'a, 'tcx> {
+            fn etir(&self) -> &'a etir::Body<'tcx> {
+                self.body
+            }
+
+            fn visit_expr(&mut self, _id: ExprId, expr: &'a etir::Expr<'tcx>) {
+                if !self.found && !matches!(expr.kind, etir::ExprKind::Closure { .. }) {
+                    walk_expr(self, expr);
+                }
+            }
+
+            fn visit_pat(&mut self, _id: PatId, pat: &'a etir::Pat<'tcx>) {
+                if let etir::PatKind::Assignee { .. } = pat.kind {
+                    self.found = true;
+                } else if !self.found {
+                    walk_pat(self, pat);
+                }
+            }
+        }
+
+        let mut visitor = FindAssignee { body: &self.cx.body, found: false };
+        visit::visit_expr_id(&mut visitor, expr);
+        visitor.found
     }
 }

@@ -358,4 +358,9 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         visit::visit_pat_id(&mut visitor, pattern);
         visitor.vars
     }
+
+    pub(super) fn bool_pat(&mut self, span: Span, value: bool) -> PatId {
+        let kind = etir::PatKind::Literal(etir::Lit::Bool(value));
+        self.push_pat(kind, self.cx.tcx.types.bool, span)
+    }
 }

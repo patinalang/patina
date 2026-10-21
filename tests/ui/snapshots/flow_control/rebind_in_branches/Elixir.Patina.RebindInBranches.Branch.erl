@@ -1,5 +1,5 @@
 -file("tests/ui/src/flow_control/rebind_in_branches.pt",
-      116).
+      146).
 
 -module('Elixir.Patina.RebindInBranches.Branch').
 
