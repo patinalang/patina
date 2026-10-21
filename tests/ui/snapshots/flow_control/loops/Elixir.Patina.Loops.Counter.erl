@@ -1,4 +1,4 @@
--file("tests/ui/src/flow_control/loops.pt", 257).
+-file("tests/ui/src/flow_control/loops.pt", 259).
 
 -module('Elixir.Patina.Loops.Counter').
 
@@ -9,10 +9,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'Loops::Count::count<int>$patina_loop_1'/2,
          'Loops::Count::count<int>'/3,
          'Loops::Count::$patina_witness<int>'/0,
-         'Loops::Count::count<str>$patina_loop_1'/2,
          'Loops::Count::count<str>'/3,
          'Loops::Count::$patina_witness<str>'/0]).
 
@@ -38,16 +36,21 @@
                     {};
                 _ ->
                     _branch_value@4_0 = begin
-                                            '$patina_marker':break({break,
-                                                                    0,
-                                                                    {},
-                                                                    _n@3_0})
+                                            begin
+                                                '$patina_marker':break({break,
+                                                                        0,
+                                                                        {},
+                                                                        _n@3_0}),
+                                                []
+                                            end
                                         end,
                     _n@3_1 = _n@3_0,
                     _branch_value@4_0
             end
         end,
-    '$patina_marker':continue(_n@3_1, _limit@2_0).
+    begin
+        '$patina_marker':continue(_n@3_1, _limit@2_0), []
+    end.
 
 'Loops::Count::count<int>'(_witness_Count@0_0,
                            _self@1_0, _limit@2_0) ->
@@ -73,16 +76,21 @@
                     {};
                 _ ->
                     _branch_value@4_0 = begin
-                                            '$patina_marker':break({break,
-                                                                    0,
-                                                                    {},
-                                                                    _n@3_0})
+                                            begin
+                                                '$patina_marker':break({break,
+                                                                        0,
+                                                                        {},
+                                                                        _n@3_0}),
+                                                []
+                                            end
                                         end,
                     _n@3_1 = _n@3_0,
                     _branch_value@4_0
             end
         end,
-    '$patina_marker':continue(_n@3_1, _limit@2_0).
+    begin
+        '$patina_marker':continue(_n@3_1, _limit@2_0), []
+    end.
 
 'Loops::Count::count<str>'(_witness_Count@0_0,
                            _self@1_0, _limit@2_0) ->

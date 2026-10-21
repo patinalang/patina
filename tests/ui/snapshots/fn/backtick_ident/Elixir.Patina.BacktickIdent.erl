@@ -51,23 +51,23 @@ main() ->
     case not
              'Elixir.Patina.BacktickIdent.S':'valid?'(_s@0_0)
         of
-        true -> '$patina_marker':return({});
+        true -> begin '$patina_marker':return({}), [] end;
         _ -> {}
     end,
     case not
              'Elixir.Patina.BacktickIdent.S':'valid?'(_s@0_0)
         of
-        true -> '$patina_marker':return({});
+        true -> begin '$patina_marker':return({}), [] end;
         _ -> {}
     end,
     case not
              'Elixir.Patina.BacktickIdent.S':check_via_self(_s@0_0)
         of
-        true -> '$patina_marker':return({});
+        true -> begin '$patina_marker':return({}), [] end;
         _ -> {}
     end,
     case not 'exists?'(1) of
-        true -> '$patina_marker':return({});
+        true -> begin '$patina_marker':return({}), [] end;
         _ -> {}
     end,
     'exists?'(1),

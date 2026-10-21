@@ -14,60 +14,153 @@ use Core::Prelude::*;
 #[allow(unused)]
 extern mod patina_fmt;
 
+extern mod erlang;
+
 fn mark(value: int) -> int {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    {
-        ::Core::io::put_chars([[patina_fmt::display(value)]]);
-        ::Core::io::nl();
-    };
+    let marks = unsafe { erlang::get(a"marks").cast_unchecked::<[int]>() };
+    erlang::put(a"marks", [value, ..marks]);
     value
 }
+
 enum Choice { Stop, Continue, }
+
 fn match_value(choice: Choice) -> int {
     let value =
         match choice { Choice::Stop => return 10, Choice::Continue => 20, };
     value + 1
 }
+
 pub fn is_negative(x: int) -> bool {
     if x >= 0 { return false; }
     return true;
 }
+
 pub fn is_negative_implicit(x: int) -> bool {
     if x >= 0 { return false; }
     true
 }
+
 pub fn closure_value(stop: bool) -> int {
     let _closure = || -> int { if stop { return 4; } 5 };
+
     10
 }
+
+pub fn inlined_closure_value(stop: bool) -> int {
+    let closure = || -> int { if stop { return 4; } 5 };
+
+    closure() * 10
+}
+
+fn call_with(f: fn(int) -> int, x: int) -> int { f(x) * 10 }
+
+pub fn passed_closure_value(x: int) -> int {
+    call_with(|y: int| -> int { if y < 0 { return 0; } y + 1 }, x)
+}
+
 pub fn expression_value(stop: bool) -> int {
     mark(1) + { if stop { return mark(2); } mark(3) }
 }
+
 pub fn match_stopped() -> int { match_value(Choice::Stop) }
+
 pub fn match_continued() -> int { match_value(Choice::Continue) }
+
 pub fn match_scrutinee_value(stop: bool) -> int {
     match { if stop { return 40; } Choice::Continue } {
         Choice::Stop => 50,
         Choice::Continue => 60,
     }
 }
+
 pub fn nested_value(x: int) -> int {
-    let result = { if x == 0 { return 10; } { if x == 1 { return 20; } 30 } };
+    let result =
+        {
+            if x == 0 { return 10; }
+
+            { if x == 1 { return 20; } 30 }
+        };
+
     result + 1
 }
+
 pub fn if_condition_value(stop: bool) -> int {
     if { if stop { return 10; } true } { 20 } else { 30 }
+}
+
+pub fn return_in_try(stop: bool, f: fn() -> term) -> int {
+    let value =
+        try { if stop { return 10; } f(); 20 } catch { error(_) => 30, }
+            after { mark(0); };
+    value + 1
+}
+
+pub fn return_in_catch(stop: bool, f: fn() -> term) -> int {
+    let value =
+        try { f(); 20 } catch { error(_) => { if stop { return 10; } 30 } }
+            after { mark(0); };
+    value + 1
+}
+
+pub fn return_in_after(stop: bool, f: fn() -> term) -> int {
+    let value =
+        try { f(); 20 } catch { error(_) => 30, }
+            after { mark(0); if stop { return 10; } };
+    value + 1
+}
+
+pub fn return_in_try_and_after(stop_try: bool, stop_after: bool) -> int {
+    try { if stop_try { return mark(1); } 2 }
+        after { if stop_after { return mark(3); } }
+}
+
+pub fn return_through_nested_afters(stop: bool) -> int {
+    try { try { if stop { return mark(1); } 2 } after { mark(10); } }
+        after { mark(20); }
+}
+
+pub fn return_from_inner_after(stop: bool) -> int {
+    try { try { 2 } after { if stop { return 1; } mark(10); } }
+        after { mark(20); }
+}
+
+pub fn return_in_try_without_after(stop: bool, f: fn() -> term) -> int {
+    let value =
+        try { if stop { return 10; } f(); 20 } catch { error(_) => 30, };
+    value + 1
+}
+
+pub fn return_in_large_after(stop: bool, x: int) -> int {
+    let value =
+        try { mark(1) }
+            after {
+            let v0 = x;
+            let v1 = v0 + x;
+            let v2 = v1 + x;
+            let v3 = v2 + x;
+            let v4 = v3 + x;
+            let v5 = v4 + x;
+            let v6 = v5 + x;
+            let v7 = v6 + x;
+            let v8 = v7 + x;
+            let v9 = v8 + x;
+            let v10 = v9 + x;
+            let v11 = v10 + x;
+            let v12 = v11 + x;
+            let v13 = v12 + x;
+            let v14 = v13 + x;
+            let v15 = v14 + x;
+            let v16 = v15 + x;
+            let v17 = v16 + x;
+            let v18 = v17 + x;
+            let v19 = v18 + x;
+            let v20 = v19 + x;
+            let v21 = v20 + x;
+            let v22 = v21 + x;
+            let v23 = v22 + x;
+            let v24 = v23 + x;
+            if stop { return v24; }
+            mark(v24);
+        };
+    value + 1
 }

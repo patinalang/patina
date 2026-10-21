@@ -19,10 +19,8 @@
          typed_update/1,
          typed_effect/1,
          marker_effect/0,
-         'phantom_in_loop_and_closure$patina_loop_1'/3,
          phantom_in_loop_and_closure/1,
          map_iter/1,
-         'sum_values$patina_loop_1'/2,
          sum_values/1,
          first_entry/1,
          record/2,
@@ -113,20 +111,26 @@ marker_effect() ->
                     {};
                 _ ->
                     _branch_value@4_0 = begin
-                                            '$patina_marker':break({break,
-                                                                    0,
-                                                                    {},
-                                                                    _count@1_0,
-                                                                    _last@3_0})
+                                            begin
+                                                '$patina_marker':break({break,
+                                                                        0,
+                                                                        {},
+                                                                        _count@1_0,
+                                                                        _last@3_0}),
+                                                []
+                                            end
                                         end,
                     _last@3_1 = _last@3_0,
                     _count@1_1 = _count@1_0,
                     _branch_value@4_0
             end
         end,
-    '$patina_marker':continue(_count@1_1,
-                              _n@0_0,
-                              _last@3_1).
+    begin
+        '$patina_marker':continue(_count@1_1,
+                                  _n@0_0,
+                                  _last@3_1),
+        []
+    end.
 
 phantom_in_loop_and_closure(_n@0_0) ->
     _ = 'Elixir.Patina.Core.PhantomData',
@@ -153,11 +157,14 @@ map_iter(_map@0_0) ->
             case 'Elixir.Patina.PhantomData.MapIter':next(_iter@1_0)
                 of
                 nil ->
-                    _branch_value@6_0 = '$patina_marker':break({break,
-                                                                0,
-                                                                {},
-                                                                _iter@1_0,
-                                                                _total@2_0}),
+                    _branch_value@6_0 = begin
+                                            '$patina_marker':break({break,
+                                                                    0,
+                                                                    {},
+                                                                    _iter@1_0,
+                                                                    _total@2_0}),
+                                            []
+                                        end,
                     _iter@1_1 = _iter@1_0,
                     _total@2_1 = _total@2_0,
                     _branch_value@6_0;
@@ -169,7 +176,9 @@ map_iter(_map@0_0) ->
                     {}
             end
         end,
-    '$patina_marker':continue(_iter@1_1, _total@2_1).
+    begin
+        '$patina_marker':continue(_iter@1_1, _total@2_1), []
+    end.
 
 sum_values(_map@0_0) ->
     _iter@1_0 =

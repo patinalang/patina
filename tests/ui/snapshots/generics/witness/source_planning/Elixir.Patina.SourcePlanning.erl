@@ -12,7 +12,6 @@
 -export(['__info__'/1,
          'SourcePlanning::Middle::middle'/2,
          'SourcePlanning::Deep::deep'/2,
-         'loop_late$patina_loop_1'/6,
          late_source/0,
          early_source/0,
          loop_source/1,
@@ -120,23 +119,29 @@ early(_witnesses_where_early@0_0, _x@1_0) ->
                     {};
                 _ ->
                     _branch_value@10_0 = begin
-                                             '$patina_marker':break({break,
-                                                                     0,
-                                                                     {},
-                                                                     _i@9_0,
-                                                                     _total@8_0})
+                                             begin
+                                                 '$patina_marker':break({break,
+                                                                         0,
+                                                                         {},
+                                                                         _i@9_0,
+                                                                         _total@8_0}),
+                                                 []
+                                             end
                                          end,
                     _total@8_1 = _total@8_0,
                     _i@9_1 = _i@9_0,
                     _branch_value@10_0
             end
         end,
-    '$patina_marker':continue(_i@9_1,
-                              _n@2_0,
-                              _total@8_1,
-                              _fn_Value_value@7_0,
-                              _witness_Value@5_0,
-                              _x@1_0).
+    begin
+        '$patina_marker':continue(_i@9_1,
+                                  _n@2_0,
+                                  _total@8_1,
+                                  _fn_Value_value@7_0,
+                                  _witness_Value@5_0,
+                                  _x@1_0),
+        []
+    end.
 
 loop_late(_witnesses_where_loop_late@0_0, _x@1_0,
           _n@2_0) ->

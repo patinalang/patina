@@ -149,7 +149,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 let recurse = cx.marker_call(expr.span, kw::Continue, recurse_args);
 
                 // The body does not land as a tail expression, so Erlang warns
-                // the result is unused, because it doesn't know we rewrite assembly later.
+                // the result is unused. Erlang does not know that we rewrite the markers later.
                 // Assign to `_` to silence the warnings.
                 let discard_body = afb.expr_match(
                     expr.span,
@@ -169,10 +169,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 None,
                 loop_body,
             ),
-            // Loop helper functions are exported so Erlang compiler doesn't elide them,
-            // as it can't properly analyze them due to `$patina_marker` tags. They're
-            // later hidden by a pass in `patina_compile_server.erl`.
-            exported: true,
+            exported: false,
         };
         self.translator.push_function(self.parts, helper_function);
 

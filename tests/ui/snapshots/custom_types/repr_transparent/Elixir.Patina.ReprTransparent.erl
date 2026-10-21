@@ -30,7 +30,6 @@
          term_text/1,
          classify_term/1,
          if_let_open/1,
-         'while_let_open$patina_loop_1'/2,
          while_let_open/1,
          let_else_open/1,
          inner_open/1,
@@ -272,18 +271,23 @@ if_let_open(_value@0_0) ->
                     {};
                 _ ->
                     _branch_value@4_0 = begin
-                                            '$patina_marker':break({break,
-                                                                    0,
-                                                                    {},
-                                                                    _current@1_0,
-                                                                    _count@2_0})
+                                            begin
+                                                '$patina_marker':break({break,
+                                                                        0,
+                                                                        {},
+                                                                        _current@1_0,
+                                                                        _count@2_0}),
+                                                []
+                                            end
                                         end,
                     _count@2_1 = _count@2_0,
                     _current@1_1 = _current@1_0,
                     _branch_value@4_0
             end
         end,
-    '$patina_marker':continue(_current@1_1, _count@2_1).
+    begin
+        '$patina_marker':continue(_current@1_1, _count@2_1), []
+    end.
 
 while_let_open(_value@0_0) ->
     _current@1_0 = _value@0_0,
@@ -314,7 +318,7 @@ let_else_open(_value@0_0) ->
                            erlang:tuple_size(_value@1_0) =:= 2)
                           andalso erlang:element(1, _value@1_0) =:= tagged) ->
             {};
-        _ -> '$patina_marker':return(other)
+        _ -> begin '$patina_marker':return(other), [] end
     end,
     dynamic.
 

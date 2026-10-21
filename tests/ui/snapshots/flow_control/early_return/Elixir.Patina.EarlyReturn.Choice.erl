@@ -1,4 +1,4 @@
--file("tests/ui/src/flow_control/early_return.pt", 6).
+-file("tests/ui/src/flow_control/early_return.pt", 9).
 
 -module('Elixir.Patina.EarlyReturn.Choice').
 

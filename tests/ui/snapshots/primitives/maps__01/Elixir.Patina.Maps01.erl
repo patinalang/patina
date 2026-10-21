@@ -8,7 +8,7 @@
 
 -export_record([]).
 
--export(['__info__'/1, 'main$patina_loop_1'/2, main/0]).
+-export(['__info__'/1, main/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -44,10 +44,13 @@ call(_number@0_0) ->
                                                                     _iter@15_0)
                 of
                 nil ->
-                    _branch_value@25_0 = '$patina_marker':break({break,
-                                                                 0,
-                                                                 {},
-                                                                 _iter@15_0}),
+                    _branch_value@25_0 = begin
+                                             '$patina_marker':break({break,
+                                                                     0,
+                                                                     {},
+                                                                     _iter@15_0}),
+                                             []
+                                         end,
                     _iter@15_1 = _iter@15_0,
                     _branch_value@25_0;
                 _value@19_0 = {{_contact@16_0, _number@17_0},
@@ -80,8 +83,11 @@ call(_number@0_0) ->
                     end
             end
         end,
-    '$patina_marker':continue(_witness_Iterator@1_0,
-                              _iter@15_1).
+    begin
+        '$patina_marker':continue(_witness_Iterator@1_0,
+                                  _iter@15_1),
+        []
+    end.
 
 main() ->
     _witness_IntoIterator@0_0 =

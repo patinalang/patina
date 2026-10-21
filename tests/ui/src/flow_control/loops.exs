@@ -5,6 +5,11 @@ defmodule LoopsTest do
 
   alias Patina.Loops
 
+  setup do
+    Process.put(:notes, [])
+    :ok
+  end
+
   test "generated loop helpers are private in the final BEAM" do
     refute Enum.any?(Loops.module_info(:exports), fn {name, _arity} ->
              String.contains?(Atom.to_string(name), "$patina_loop_")
@@ -70,5 +75,67 @@ defmodule LoopsTest do
                "Loops::Count::count<int>$patina_loop_1",
                "Loops::Count::count<str>$patina_loop_1"
              ])
+  end
+
+  test "continue and break in a try body run the after body" do
+    assert Loops.continue_and_break_in_try(3) == 30
+    assert Process.put(:notes, []) == [3, 2, 1]
+
+    assert Loops.continue_and_break_in_try(1) == 10
+    assert Process.put(:notes, []) == [1]
+  end
+
+  test "break in a catch arm runs the after body" do
+    assert Loops.break_in_catch(5, fn n -> if n == 3, do: :erlang.error(:boom), else: :ok end) ==
+             3
+
+    assert Process.put(:notes, []) == [3, 2, 1]
+
+    assert Loops.break_in_catch(2, fn n -> if n == 3, do: :erlang.error(:boom), else: :ok end) ==
+             -1
+
+    assert Process.put(:notes, []) == [2, 1]
+  end
+
+  test "continue in a catch arm runs the after body" do
+    assert Loops.continue_in_catch(4, fn n ->
+             if rem(n, 2) == 0, do: :erlang.error(:boom), else: :ok
+           end) == 2
+
+    assert Process.put(:notes, []) == [4, 3, 2, 1]
+  end
+
+  test "break and continue in an after body" do
+    assert Loops.break_and_continue_in_after(5) == 52
+    assert Process.put(:notes, []) == [5, 4, 3, 2, 1]
+  end
+
+  test "return in a try body inside a loop runs the after body" do
+    assert Loops.return_in_try_in_loop(3) == 30
+    assert Process.put(:notes, []) == [3, 2, 1]
+
+    assert Loops.return_in_try_in_loop(9) == -1
+    assert Process.put(:notes, []) == [5, 4, 3, 2, 1]
+  end
+
+  test "return in an after body inside a loop" do
+    assert Loops.return_in_after_in_loop(3) == 30
+    assert Process.put(:notes, []) == [3, 2, 1]
+
+    assert Loops.return_in_after_in_loop(9) == -1
+    assert Process.put(:notes, []) == [5, 4, 3, 2, 1]
+  end
+
+  test "labeled continue and break out of a try body run the after body" do
+    assert Loops.continue_outer_from_try(3) == 303
+    assert Process.put(:notes, []) == [3, 2, 1]
+  end
+
+  test "return and break from a loop inside a try body" do
+    assert Loops.loop_in_try(3) == 3
+    assert Process.put(:notes, []) == [0]
+
+    assert Loops.loop_in_try(9) == 51
+    assert Process.put(:notes, []) == [0]
   end
 end

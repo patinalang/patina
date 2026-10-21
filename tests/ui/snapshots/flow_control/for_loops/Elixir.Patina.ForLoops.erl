@@ -9,36 +9,20 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'sum_list$patina_loop_1'/3,
          sum_list/1,
-         'sum_twice$patina_loop_1'/3,
-         'sum_twice$patina_loop_2'/3,
          sum_twice/1,
-         'sum_range$patina_loop_1'/3,
          sum_range/2,
-         'sum_range_inclusive$patina_loop_1'/3,
          sum_range_inclusive/2,
-         'weighted_map_sum$patina_loop_1'/3,
          weighted_map_sum/1,
-         'map_entry_count$patina_loop_1'/3,
          map_entry_count/1,
-         'count$patina_loop_1'/4,
          count_list/1,
          count_map/1,
-         'total$patina_loop_1'/4,
          total_range/1,
          total_list/1,
-         'skip_odd_until$patina_loop_1'/4,
          skip_odd_until/2,
-         'find_index$patina_loop_1'/4,
          find_index/2,
-         'first_pair_with_sum$patina_loop_2'/5,
-         'first_pair_with_sum$patina_loop_1'/6,
          first_pair_with_sum/2,
-         'count_skipping_rows$patina_loop_2'/3,
-         'count_skipping_rows$patina_loop_1'/4,
          count_skipping_rows/1,
-         'countdown$patina_loop_1'/3,
          countdown/1,
          bag_count/1]).
 
@@ -63,11 +47,14 @@
                                                                      _iter@4_0)
                 of
                 nil ->
-                    _branch_value@8_0 = '$patina_marker':break({break,
-                                                                0,
-                                                                {},
-                                                                _iter@4_0,
-                                                                _total@3_0}),
+                    _branch_value@8_0 = begin
+                                            '$patina_marker':break({break,
+                                                                    0,
+                                                                    {},
+                                                                    _iter@4_0,
+                                                                    _total@3_0}),
+                                            []
+                                        end,
                     _iter@4_1 = _iter@4_0,
                     _total@3_1 = _total@3_0,
                     _branch_value@8_0;
@@ -78,9 +65,12 @@
                     begin _total@3_1 = _total@3_0 + _x@5_0, {} end
             end
         end,
-    '$patina_marker':continue(_witness_Iterator@2_0,
-                              _iter@4_1,
-                              _total@3_1).
+    begin
+        '$patina_marker':continue(_witness_Iterator@2_0,
+                                  _iter@4_1,
+                                  _total@3_1),
+        []
+    end.
 
 sum_list(_xs@0_0) ->
     _witness_IntoIterator@1_0 =
@@ -113,11 +103,14 @@ sum_list(_xs@0_0) ->
                                                                      _iter@6_0)
                 of
                 nil ->
-                    _branch_value@10_0 = '$patina_marker':break({break,
-                                                                 0,
-                                                                 {},
-                                                                 _iter@6_0,
-                                                                 _total@5_0}),
+                    _branch_value@10_0 = begin
+                                             '$patina_marker':break({break,
+                                                                     0,
+                                                                     {},
+                                                                     _iter@6_0,
+                                                                     _total@5_0}),
+                                             []
+                                         end,
                     _iter@6_1 = _iter@6_0,
                     _total@5_1 = _total@5_0,
                     _branch_value@10_0;
@@ -128,9 +121,12 @@ sum_list(_xs@0_0) ->
                     begin _total@5_1 = _total@5_0 + _x@7_0, {} end
             end
         end,
-    '$patina_marker':continue(_witness_Iterator@1_0,
-                              _iter@6_1,
-                              _total@5_1).
+    begin
+        '$patina_marker':continue(_witness_Iterator@1_0,
+                                  _iter@6_1,
+                                  _total@5_1),
+        []
+    end.
 
 'sum_twice$patina_loop_2'(_witness_Iterator@1_0,
                           _iter@12_0, _total@5_1) ->
@@ -140,11 +136,14 @@ sum_list(_xs@0_0) ->
                                                                      _iter@12_0)
                 of
                 nil ->
-                    _branch_value@16_0 = '$patina_marker':break({break,
-                                                                 0,
-                                                                 {},
-                                                                 _iter@12_0,
-                                                                 _total@5_1}),
+                    _branch_value@16_0 = begin
+                                             '$patina_marker':break({break,
+                                                                     0,
+                                                                     {},
+                                                                     _iter@12_0,
+                                                                     _total@5_1}),
+                                             []
+                                         end,
                     _iter@12_1 = _iter@12_0,
                     _total@5_2 = _total@5_1,
                     _branch_value@16_0;
@@ -155,9 +154,12 @@ sum_list(_xs@0_0) ->
                     begin _total@5_2 = _total@5_1 + _x@13_0 * 100, {} end
             end
         end,
-    '$patina_marker':continue(_witness_Iterator@1_0,
-                              _iter@12_1,
-                              _total@5_2).
+    begin
+        '$patina_marker':continue(_witness_Iterator@1_0,
+                                  _iter@12_1,
+                                  _total@5_2),
+        []
+    end.
 
 sum_twice(_xs@0_0) ->
     _witness_Iterator@1_0 =
@@ -207,11 +209,14 @@ sum_twice(_xs@0_0) ->
                                                                        _iter@6_0)
                 of
                 nil ->
-                    _branch_value@10_0 = '$patina_marker':break({break,
-                                                                 0,
-                                                                 {},
-                                                                 _iter@6_0,
-                                                                 _total@5_0}),
+                    _branch_value@10_0 = begin
+                                             '$patina_marker':break({break,
+                                                                     0,
+                                                                     {},
+                                                                     _iter@6_0,
+                                                                     _total@5_0}),
+                                             []
+                                         end,
                     _iter@6_1 = _iter@6_0,
                     _total@5_1 = _total@5_0,
                     _branch_value@10_0;
@@ -222,9 +227,12 @@ sum_twice(_xs@0_0) ->
                     begin _total@5_1 = _total@5_0 + _n@7_0, {} end
             end
         end,
-    '$patina_marker':continue(_witness_Iterator@2_0,
-                              _iter@6_1,
-                              _total@5_1).
+    begin
+        '$patina_marker':continue(_witness_Iterator@2_0,
+                                  _iter@6_1,
+                                  _total@5_1),
+        []
+    end.
 
 sum_range(_start@0_0, _end@1_0) ->
     _witness_Iterator@2_0 =
@@ -260,11 +268,14 @@ sum_range(_start@0_0, _end@1_0) ->
                                                                                 _iter@6_0)
                 of
                 nil ->
-                    _branch_value@10_0 = '$patina_marker':break({break,
-                                                                 0,
-                                                                 {},
-                                                                 _iter@6_0,
-                                                                 _total@5_0}),
+                    _branch_value@10_0 = begin
+                                             '$patina_marker':break({break,
+                                                                     0,
+                                                                     {},
+                                                                     _iter@6_0,
+                                                                     _total@5_0}),
+                                             []
+                                         end,
                     _iter@6_1 = _iter@6_0,
                     _total@5_1 = _total@5_0,
                     _branch_value@10_0;
@@ -275,9 +286,12 @@ sum_range(_start@0_0, _end@1_0) ->
                     begin _total@5_1 = _total@5_0 + _n@7_0, {} end
             end
         end,
-    '$patina_marker':continue(_witness_Iterator@2_0,
-                              _iter@6_1,
-                              _total@5_1).
+    begin
+        '$patina_marker':continue(_witness_Iterator@2_0,
+                                  _iter@6_1,
+                                  _total@5_1),
+        []
+    end.
 
 sum_range_inclusive(_start@0_0, _end@1_0) ->
     _witness_Iterator@2_0 =
@@ -314,11 +328,14 @@ sum_range_inclusive(_start@0_0, _end@1_0) ->
                                                                     _iter@4_0)
                 of
                 nil ->
-                    _branch_value@9_0 = '$patina_marker':break({break,
-                                                                0,
-                                                                {},
-                                                                _iter@4_0,
-                                                                _total@3_0}),
+                    _branch_value@9_0 = begin
+                                            '$patina_marker':break({break,
+                                                                    0,
+                                                                    {},
+                                                                    _iter@4_0,
+                                                                    _total@3_0}),
+                                            []
+                                        end,
                     _iter@4_1 = _iter@4_0,
                     _total@3_1 = _total@3_0,
                     _branch_value@9_0;
@@ -331,9 +348,12 @@ sum_range_inclusive(_start@0_0, _end@1_0) ->
                     end
             end
         end,
-    '$patina_marker':continue(_witness_Iterator@2_0,
-                              _iter@4_1,
-                              _total@3_1).
+    begin
+        '$patina_marker':continue(_witness_Iterator@2_0,
+                                  _iter@4_1,
+                                  _total@3_1),
+        []
+    end.
 
 weighted_map_sum(_map@0_0) ->
     _witness_IntoIterator@1_0 =
@@ -367,11 +387,14 @@ weighted_map_sum(_map@0_0) ->
                                                                     _iter@5_0)
                 of
                 nil ->
-                    _branch_value@8_0 = '$patina_marker':break({break,
-                                                                0,
-                                                                {},
-                                                                _iter@5_0,
-                                                                _count@4_0}),
+                    _branch_value@8_0 = begin
+                                            '$patina_marker':break({break,
+                                                                    0,
+                                                                    {},
+                                                                    _iter@5_0,
+                                                                    _count@4_0}),
+                                            []
+                                        end,
                     _iter@5_1 = _iter@5_0,
                     _count@4_1 = _count@4_0,
                     _branch_value@8_0;
@@ -382,9 +405,12 @@ weighted_map_sum(_map@0_0) ->
                     begin _count@4_1 = _count@4_0 + 1, {} end
             end
         end,
-    '$patina_marker':continue(_witness_Iterator@1_0,
-                              _iter@5_1,
-                              _count@4_1).
+    begin
+        '$patina_marker':continue(_witness_Iterator@1_0,
+                                  _iter@5_1,
+                                  _count@4_1),
+        []
+    end.
 
 map_entry_count(_map@0_0) ->
     _witness_Iterator@1_0 =
@@ -419,11 +445,14 @@ map_entry_count(_map@0_0) ->
                                        _iter@11_0)
                 of
                 nil ->
-                    _branch_value@14_0 = '$patina_marker':break({break,
-                                                                 0,
-                                                                 {},
-                                                                 _iter@11_0,
-                                                                 _n@10_0}),
+                    _branch_value@14_0 = begin
+                                             '$patina_marker':break({break,
+                                                                     0,
+                                                                     {},
+                                                                     _iter@11_0,
+                                                                     _n@10_0}),
+                                             []
+                                         end,
                     _iter@11_1 = _iter@11_0,
                     _n@10_1 = _n@10_0,
                     _branch_value@14_0;
@@ -440,10 +469,13 @@ map_entry_count(_map@0_0) ->
                     begin _n@10_1 = _n@10_0 + 1, {} end
             end
         end,
-    '$patina_marker':continue(_fn_Iterator_next@9_0,
-                              _witness_Iterator@7_0,
-                              _iter@11_1,
-                              _n@10_1).
+    begin
+        '$patina_marker':continue(_fn_Iterator_next@9_0,
+                                  _witness_Iterator@7_0,
+                                  _iter@11_1,
+                                  _n@10_1),
+        []
+    end.
 
 count(_witnesses_where_count@0_0, _items@1_0) ->
     _witness_IntoIterator@2_0 = erlang:element(1,
@@ -502,11 +534,14 @@ count_map(_map@0_0) ->
                                        _iter@11_0)
                 of
                 nil ->
-                    _branch_value@15_0 = '$patina_marker':break({break,
-                                                                 0,
-                                                                 {},
-                                                                 _iter@11_0,
-                                                                 _total@10_0}),
+                    _branch_value@15_0 = begin
+                                             '$patina_marker':break({break,
+                                                                     0,
+                                                                     {},
+                                                                     _iter@11_0,
+                                                                     _total@10_0}),
+                                             []
+                                         end,
                     _iter@11_1 = _iter@11_0,
                     _total@10_1 = _total@10_0,
                     _branch_value@15_0;
@@ -517,10 +552,13 @@ count_map(_map@0_0) ->
                     begin _total@10_1 = _total@10_0 + _item@12_0, {} end
             end
         end,
-    '$patina_marker':continue(_fn_Iterator_next@9_0,
-                              _witness_Iterator@7_0,
-                              _iter@11_1,
-                              _total@10_1).
+    begin
+        '$patina_marker':continue(_fn_Iterator_next@9_0,
+                                  _witness_Iterator@7_0,
+                                  _iter@11_1,
+                                  _total@10_1),
+        []
+    end.
 
 total(_witnesses_where_total@0_0, _items@1_0) ->
     _witness_IntoIterator@2_0 = erlang:element(1,
@@ -588,11 +626,14 @@ total_list(_xs@0_0) ->
                                                                      _iter@5_0)
                 of
                 nil ->
-                    _branch_value@9_0 = '$patina_marker':break({break,
-                                                                0,
-                                                                {},
-                                                                _iter@5_0,
-                                                                _total@4_0}),
+                    _branch_value@9_0 = begin
+                                            '$patina_marker':break({break,
+                                                                    0,
+                                                                    {},
+                                                                    _iter@5_0,
+                                                                    _total@4_0}),
+                                            []
+                                        end,
                     _iter@5_1 = _iter@5_0,
                     _total@4_1 = _total@4_0,
                     _branch_value@9_0;
@@ -603,19 +644,25 @@ total_list(_xs@0_0) ->
                     begin
                         case _x@6_0 rem 2 =:= 1 of
                             true ->
-                                '$patina_marker':continue(_witness_Iterator@3_0,
-                                                          _iter@5_1,
-                                                          _limit@1_0,
-                                                          _total@4_0);
+                                begin
+                                    '$patina_marker':continue(_witness_Iterator@3_0,
+                                                              _iter@5_1,
+                                                              _limit@1_0,
+                                                              _total@4_0),
+                                    []
+                                end;
                             _ -> {}
                         end,
                         case _x@6_0 > _limit@1_0 of
                             true ->
-                                '$patina_marker':break({break,
-                                                        0,
-                                                        {},
-                                                        _iter@5_1,
-                                                        _total@4_0});
+                                begin
+                                    '$patina_marker':break({break,
+                                                            0,
+                                                            {},
+                                                            _iter@5_1,
+                                                            _total@4_0}),
+                                    []
+                                end;
                             _ -> {}
                         end,
                         _total@4_1 = _total@4_0 + _x@6_0,
@@ -623,10 +670,13 @@ total_list(_xs@0_0) ->
                     end
             end
         end,
-    '$patina_marker':continue(_witness_Iterator@3_0,
-                              _iter@5_1,
-                              _limit@1_0,
-                              _total@4_1).
+    begin
+        '$patina_marker':continue(_witness_Iterator@3_0,
+                                  _iter@5_1,
+                                  _limit@1_0,
+                                  _total@4_1),
+        []
+    end.
 
 skip_odd_until(_xs@0_0, _limit@1_0) ->
     _witness_IntoIterator@2_0 =
@@ -661,11 +711,14 @@ skip_odd_until(_xs@0_0, _limit@1_0) ->
                                                                      _iter@5_0)
                 of
                 nil ->
-                    _branch_value@9_0 = '$patina_marker':break({break,
-                                                                0,
-                                                                {},
-                                                                _iter@5_0,
-                                                                _index@4_0}),
+                    _branch_value@9_0 = begin
+                                            '$patina_marker':break({break,
+                                                                    0,
+                                                                    {},
+                                                                    _iter@5_0,
+                                                                    _index@4_0}),
+                                            []
+                                        end,
                     _iter@5_1 = _iter@5_0,
                     _index@4_1 = _index@4_0,
                     _branch_value@9_0;
@@ -676,10 +729,13 @@ skip_odd_until(_xs@0_0, _limit@1_0) ->
                     begin
                         case _x@6_0 =:= _target@1_0 of
                             true ->
-                                '$patina_marker':return({return,
-                                                         _index@4_0,
-                                                         _iter@5_1,
-                                                         _index@4_0});
+                                begin
+                                    '$patina_marker':return({return,
+                                                             _index@4_0,
+                                                             _iter@5_1,
+                                                             _index@4_0}),
+                                    []
+                                end;
                             _ -> {}
                         end,
                         _index@4_1 = _index@4_0 + 1,
@@ -687,10 +743,13 @@ skip_odd_until(_xs@0_0, _limit@1_0) ->
                     end
             end
         end,
-    '$patina_marker':continue(_witness_Iterator@3_0,
-                              _iter@5_1,
-                              _target@1_0,
-                              _index@4_1).
+    begin
+        '$patina_marker':continue(_witness_Iterator@3_0,
+                                  _iter@5_1,
+                                  _target@1_0,
+                                  _index@4_1),
+        []
+    end.
 
 find_index(_xs@0_0, _target@1_0) ->
     _witness_IntoIterator@2_0 =
@@ -712,7 +771,8 @@ find_index(_xs@0_0, _target@1_0) ->
                     {break, 0, _loop_value@10_0, _iter@5_1, _index@4_1} ->
                         _loop_value@10_0;
                     {return, _loop_value@11_0, _iter@5_1, _index@4_1} ->
-                        '$patina_marker':return(_loop_value@11_0)
+                        '$patina_marker':return(_loop_value@11_0),
+                        []
                 end
         end,
         -1
@@ -726,11 +786,14 @@ find_index(_xs@0_0, _target@1_0) ->
                                                                      _iter@9_0)
                 of
                 nil ->
-                    _branch_value@14_0 = '$patina_marker':break({break,
-                                                                 1,
-                                                                 {},
-                                                                 _iter@9_0,
-                                                                 _found@4_0}),
+                    _branch_value@14_0 = begin
+                                             '$patina_marker':break({break,
+                                                                     1,
+                                                                     {},
+                                                                     _iter@9_0,
+                                                                     _found@4_0}),
+                                             []
+                                         end,
                     _iter@9_1 = _iter@9_0,
                     _found@4_1 = _found@4_0,
                     _branch_value@14_0;
@@ -741,21 +804,27 @@ find_index(_xs@0_0, _target@1_0) ->
                     begin
                         case _b@10_0 =< _a@6_0 of
                             true ->
-                                '$patina_marker':continue(_witness_Iterator@3_0,
-                                                          _iter@9_1,
-                                                          _a@6_0,
-                                                          _sum@1_0,
-                                                          _found@4_0);
+                                begin
+                                    '$patina_marker':continue(_witness_Iterator@3_0,
+                                                              _iter@9_1,
+                                                              _a@6_0,
+                                                              _sum@1_0,
+                                                              _found@4_0),
+                                    []
+                                end;
                             _ -> {}
                         end,
                         case _a@6_0 + _b@10_0 =:= _sum@1_0 of
                             true ->
                                 _found@4_1 = {_a@6_0, _b@10_0},
-                                '$patina_marker':break({break,
-                                                        0,
-                                                        {},
-                                                        _iter@9_1,
-                                                        _found@4_1});
+                                begin
+                                    '$patina_marker':break({break,
+                                                            0,
+                                                            {},
+                                                            _iter@9_1,
+                                                            _found@4_1}),
+                                    []
+                                end;
                             _ ->
                                 _branch_value@13_0 = {},
                                 _found@4_1 = _found@4_0,
@@ -764,11 +833,14 @@ find_index(_xs@0_0, _target@1_0) ->
                     end
             end
         end,
-    '$patina_marker':continue(_witness_Iterator@3_0,
-                              _iter@9_1,
-                              _a@6_0,
-                              _sum@1_0,
-                              _found@4_1).
+    begin
+        '$patina_marker':continue(_witness_Iterator@3_0,
+                                  _iter@9_1,
+                                  _a@6_0,
+                                  _sum@1_0,
+                                  _found@4_1),
+        []
+    end.
 
 'first_pair_with_sum$patina_loop_1'(_witness_Iterator@3_0,
                                     _iter@5_0, _witness_IntoIterator@2_0,
@@ -779,11 +851,14 @@ find_index(_xs@0_0, _target@1_0) ->
                                                                      _iter@5_0)
                 of
                 nil ->
-                    _branch_value@18_0 = '$patina_marker':break({break,
-                                                                 0,
-                                                                 {},
-                                                                 _iter@5_0,
-                                                                 _found@4_0}),
+                    _branch_value@18_0 = begin
+                                             '$patina_marker':break({break,
+                                                                     0,
+                                                                     {},
+                                                                     _iter@5_0,
+                                                                     _found@4_0}),
+                                             []
+                                         end,
                     _iter@5_1 = _iter@5_0,
                     _found@4_1 = _found@4_0,
                     _branch_value@18_0;
@@ -819,18 +894,22 @@ find_index(_xs@0_0, _target@1_0) ->
                                                                 _target_loop_depth@16_0,
                                                                 _loop_value@17_0,
                                                                 _iter@5_1,
-                                                                _found@4_1})
+                                                                _found@4_1}),
+                                        []
                                 end
                         end
                     end
             end
         end,
-    '$patina_marker':continue(_witness_Iterator@3_0,
-                              _iter@5_1,
-                              _witness_IntoIterator@2_0,
-                              _xs@0_0,
-                              _sum@1_0,
-                              _found@4_1).
+    begin
+        '$patina_marker':continue(_witness_Iterator@3_0,
+                                  _iter@5_1,
+                                  _witness_IntoIterator@2_0,
+                                  _xs@0_0,
+                                  _sum@1_0,
+                                  _found@4_1),
+        []
+    end.
 
 first_pair_with_sum(_xs@0_0, _sum@1_0) ->
     _witness_IntoIterator@2_0 =
@@ -867,11 +946,14 @@ first_pair_with_sum(_xs@0_0, _sum@1_0) ->
                                                                      _iter@8_0)
                 of
                 nil ->
-                    _branch_value@12_0 = '$patina_marker':break({break,
-                                                                 1,
-                                                                 {},
-                                                                 _iter@8_0,
-                                                                 _visited@3_0}),
+                    _branch_value@12_0 = begin
+                                             '$patina_marker':break({break,
+                                                                     1,
+                                                                     {},
+                                                                     _iter@8_0,
+                                                                     _visited@3_0}),
+                                             []
+                                         end,
                     _iter@8_1 = _iter@8_0,
                     _visited@3_1 = _visited@3_0,
                     _branch_value@12_0;
@@ -882,10 +964,13 @@ first_pair_with_sum(_xs@0_0, _sum@1_0) ->
                     begin
                         case _x@9_0 < 0 of
                             true ->
-                                '$patina_marker':break({continue,
-                                                        0,
-                                                        _iter@8_1,
-                                                        _visited@3_0});
+                                begin
+                                    '$patina_marker':break({continue,
+                                                            0,
+                                                            _iter@8_1,
+                                                            _visited@3_0}),
+                                    []
+                                end;
                             _ -> {}
                         end,
                         _visited@3_1 = _visited@3_0 + 1,
@@ -893,9 +978,12 @@ first_pair_with_sum(_xs@0_0, _sum@1_0) ->
                     end
             end
         end,
-    '$patina_marker':continue(_witness_Iterator@2_0,
-                              _iter@8_1,
-                              _visited@3_1).
+    begin
+        '$patina_marker':continue(_witness_Iterator@2_0,
+                                  _iter@8_1,
+                                  _visited@3_1),
+        []
+    end.
 
 'count_skipping_rows$patina_loop_1'(_witness_Iterator@2_0,
                                     _iter@4_0, _witness_IntoIterator@1_0,
@@ -906,11 +994,14 @@ first_pair_with_sum(_xs@0_0, _sum@1_0) ->
                                                                      _iter@4_0)
                 of
                 nil ->
-                    _branch_value@14_0 = '$patina_marker':break({break,
-                                                                 0,
-                                                                 {},
-                                                                 _iter@4_0,
-                                                                 _visited@3_0}),
+                    _branch_value@14_0 = begin
+                                             '$patina_marker':break({break,
+                                                                     0,
+                                                                     {},
+                                                                     _iter@4_0,
+                                                                     _visited@3_0}),
+                                             []
+                                         end,
                     _iter@4_1 = _iter@4_0,
                     _visited@3_1 = _visited@3_0,
                     _branch_value@14_0;
@@ -939,16 +1030,20 @@ first_pair_with_sum(_xs@0_0, _sum@1_0) ->
                                         '$patina_marker':continue(_witness_Iterator@2_0,
                                                                   _iter@4_1,
                                                                   _witness_IntoIterator@1_0,
-                                                                  _visited@3_1)
+                                                                  _visited@3_1),
+                                        []
                                 end
                         end
                     end
             end
         end,
-    '$patina_marker':continue(_witness_Iterator@2_0,
-                              _iter@4_1,
-                              _witness_IntoIterator@1_0,
-                              _visited@3_1).
+    begin
+        '$patina_marker':continue(_witness_Iterator@2_0,
+                                  _iter@4_1,
+                                  _witness_IntoIterator@1_0,
+                                  _visited@3_1),
+        []
+    end.
 
 count_skipping_rows(_rows@0_0) ->
     _witness_IntoIterator@1_0 =
@@ -983,11 +1078,14 @@ count_skipping_rows(_rows@0_0) ->
                                                                           _iter@5_0)
                 of
                 nil ->
-                    _branch_value@9_0 = '$patina_marker':break({break,
-                                                                0,
-                                                                {},
-                                                                _iter@5_0,
-                                                                _seen@4_0}),
+                    _branch_value@9_0 = begin
+                                            '$patina_marker':break({break,
+                                                                    0,
+                                                                    {},
+                                                                    _iter@5_0,
+                                                                    _seen@4_0}),
+                                            []
+                                        end,
                     _iter@5_1 = _iter@5_0,
                     _seen@4_1 = _seen@4_0,
                     _branch_value@9_0;
@@ -998,9 +1096,12 @@ count_skipping_rows(_rows@0_0) ->
                     begin _seen@4_1 = [_n@6_0 | _seen@4_0], {} end
             end
         end,
-    '$patina_marker':continue(_witness_Iterator@1_0,
-                              _iter@5_1,
-                              _seen@4_1).
+    begin
+        '$patina_marker':continue(_witness_Iterator@1_0,
+                                  _iter@5_1,
+                                  _seen@4_1),
+        []
+    end.
 
 countdown(_from@0_0) ->
     _witness_Iterator@1_0 =

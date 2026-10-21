@@ -15,10 +15,7 @@
          todo_with_message/0,
          panic_in_let_else/1,
          todo_in_let_else/1,
-         'panic_in_loop$patina_loop_1'/2,
          panic_in_loop/1,
-         'panic_in_nested_loop$patina_loop_2'/3,
-         'panic_in_nested_loop$patina_loop_1'/2,
          panic_in_nested_loop/1]).
 
 '__info__'(functions) ->
@@ -173,7 +170,9 @@ todo_in_let_else(_map@0_0) ->
             _i@1_1 = _i@1_0 + 1,
             {}
         end,
-    '$patina_marker':continue(_i@1_1, _limit@0_0).
+    begin
+        '$patina_marker':continue(_i@1_1, _limit@0_0), []
+    end.
 
 panic_in_loop(_limit@0_0) ->
     _i@1_0 = 0,
@@ -207,16 +206,22 @@ panic_in_loop(_limit@0_0) ->
                     {};
                 _ ->
                     _branch_value@5_0 = begin
-                                            '$patina_marker':break({break,
-                                                                    1,
-                                                                    {},
-                                                                    _j@2_0})
+                                            begin
+                                                '$patina_marker':break({break,
+                                                                        1,
+                                                                        {},
+                                                                        _j@2_0}),
+                                                []
+                                            end
                                         end,
                     _j@2_1 = _j@2_0,
                     _branch_value@5_0
             end
         end,
-    '$patina_marker':continue(_j@2_1, _limit@0_0, _i@1_0).
+    begin
+        '$patina_marker':continue(_j@2_1, _limit@0_0, _i@1_0),
+        []
+    end.
 
 'panic_in_nested_loop$patina_loop_1'(_limit@0_0,
                                      _i@1_0) ->
@@ -231,7 +236,9 @@ panic_in_loop(_limit@0_0) ->
             _i@1_1 = _i@1_0 + 1,
             {}
         end,
-    '$patina_marker':continue(_limit@0_0, _i@1_1).
+    begin
+        '$patina_marker':continue(_limit@0_0, _i@1_1), []
+    end.
 
 panic_in_nested_loop(_limit@0_0) ->
     _i@1_0 = 0,

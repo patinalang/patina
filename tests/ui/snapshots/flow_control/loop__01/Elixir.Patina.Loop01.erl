@@ -8,7 +8,7 @@
 
 -export_record([]).
 
--export(['__info__'/1, 'main$patina_loop_1'/1, main/0]).
+-export(['__info__'/1, main/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -36,7 +36,7 @@
                         io:nl(),
                         {}
                     end,
-                    '$patina_marker':continue(_count@0_1);
+                    begin '$patina_marker':continue(_count@0_1), [] end;
                 _ -> {}
             end,
             begin
@@ -63,11 +63,13 @@
                         io:nl(),
                         {}
                     end,
-                    '$patina_marker':break({break, 0, {}, _count@0_1});
+                    begin
+                        '$patina_marker':break({break, 0, {}, _count@0_1}), []
+                    end;
                 _ -> {}
             end
         end,
-    '$patina_marker':continue(_count@0_1).
+    begin '$patina_marker':continue(_count@0_1), [] end.
 
 main() ->
     _count@0_0 = 0,

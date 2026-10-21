@@ -139,7 +139,7 @@ if_let_term(_value@0_0) ->
 let_else_term(_value@0_0) ->
     case _value@0_0 of
         [_ | _] -> {};
-        _ -> '$patina_marker':return(false)
+        _ -> begin '$patina_marker':return(false), [] end
     end,
     true.
 

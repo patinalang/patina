@@ -399,12 +399,16 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         args: impl IntoIterator<Item = eaf::Expr<'arena>>,
     ) -> eaf::Expr<'arena> {
         let afb = &self.translator.afb;
-        afb.expr_remote_call(
+        let call = afb.expr_remote_call(
             span,
             afb.expr_atom(span, sym::dollar_patina_marker),
             afb.expr_atom(span, name),
             args,
-        )
+        );
+        // Wrap the marker call with `begin $call, [] end` so the call is never treated as a value
+        // of an expression. We need that because otherwise, when we rewrite to jumps in core
+        // Erlang, some jumps can end up in positions that are annoying to fix at that stage.
+        afb.expr_block(span, [call, afb.expr_nil(span)])
     }
 
     fn translate_call(

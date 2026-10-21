@@ -11,7 +11,6 @@
 
 -export(['__info__'/1,
          '$patina_constructor__Pair'/2,
-         'LoopWitness::Score::score$patina_loop_1'/4,
          'LoopWitness::Score::score'/2,
          'LoopWitness::Score::$patina_witness'/1]).
 
@@ -43,12 +42,17 @@
                                   +
                                   _fn_Score_score@5_0(_witness_Score@3_0,
                                                       _self@1_0#'Pair'.b)),
-            '$patina_marker':break({break, 0, {}, _total@6_1})
+            begin
+                '$patina_marker':break({break, 0, {}, _total@6_1}), []
+            end
         end,
-    '$patina_marker':continue(_total@6_1,
-                              _fn_Score_score@5_0,
-                              _witness_Score@3_0,
-                              _self@1_0).
+    begin
+        '$patina_marker':continue(_total@6_1,
+                                  _fn_Score_score@5_0,
+                                  _witness_Score@3_0,
+                                  _self@1_0),
+        []
+    end.
 
 'LoopWitness::Score::score'(_witness_Score@0_0,
                             _self@1_0) ->

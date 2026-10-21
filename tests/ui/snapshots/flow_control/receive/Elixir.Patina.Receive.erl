@@ -13,7 +13,6 @@
          take_int_or_timeout/0,
          take_atom/0,
          echo/0,
-         'sum_until_stop$patina_loop_1'/1,
          sum_until_stop/0,
          unsafe_value/0,
          only_timeout/0,
@@ -69,15 +68,18 @@ echo() ->
                     _total@0_1 = _total@0_0 + _n@1_0,
                     {};
                 stop ->
-                    _branch_value@2_0 = '$patina_marker':break({break,
-                                                                0,
-                                                                {},
-                                                                _total@0_0}),
+                    _branch_value@2_0 = begin
+                                            '$patina_marker':break({break,
+                                                                    0,
+                                                                    {},
+                                                                    _total@0_0}),
+                                            []
+                                        end,
                     _total@0_1 = _total@0_0,
                     _branch_value@2_0
             end
         end,
-    '$patina_marker':continue(_total@0_1).
+    begin '$patina_marker':continue(_total@0_1), [] end.
 
 sum_until_stop() ->
     _total@0_0 = 0,
@@ -165,7 +167,8 @@ closure_receive(_value@0_0) ->
 diverging_timeout() ->
     receive
         _n@0_0 when erlang:is_integer(_n@0_0) ->
-            '$patina_marker':return(_n@0_0)
+            '$patina_marker':return(_n@0_0),
+            []
         after 'Elixir.Patina.Core.Timeout':from_millis(0) ->
-                  '$patina_marker':return(-1)
+                  begin '$patina_marker':return(-1), [] end
     end.

@@ -112,6 +112,6 @@ if_let_range(_value@0_0) ->
 let_else_range(_value@0_0) ->
     case _value@0_0 of
         _range@1_0 when _range@1_0 >= -1, _range@1_0 =< 1 -> {};
-        _ -> '$patina_marker':return(false)
+        _ -> begin '$patina_marker':return(false), [] end
     end,
     true.

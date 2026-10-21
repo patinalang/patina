@@ -14,33 +14,24 @@ use Core::Prelude::*;
 #[allow(unused)]
 extern mod patina_fmt;
 
+extern mod erlang;
+
 fn mark(value: int)
     ->
         int ({
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    ({
-        ((::Core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
-                                    fn(term) -> term)((value as int)) as term)] as [term])] as
-                [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
-    } as ());
+    let marks =
+        (unsafe {
+            (((erlang::get as fn(term) -> term)((a"marks" as atom)) as
+                    term).cast_unchecked::<[int]>() as [int])
+        } as [int]);
+    ((erlang::put as
+            fn(term, term) -> term)((a"marks" as atom),
+        ([(value as int), ..(marks as [int])] as [int])) as term);
     (value as int)
 } as int)
+
 enum Choice { Stop, Continue, }
+
 fn match_value(choice: Choice)
     ->
         int ({
@@ -51,6 +42,7 @@ fn match_value(choice: Choice)
         } as int);
     ((value as int) + (1 as int) as int)
 } as int)
+
 fn is_negative(x: int)
     ->
         bool ({
@@ -58,6 +50,7 @@ fn is_negative(x: int)
         as ())
     (return (true as bool) as !);
 } as !)
+
 fn is_negative_implicit(x: int)
     ->
         bool ({
@@ -65,6 +58,7 @@ fn is_negative_implicit(x: int)
         as ())
     (true as bool)
 } as bool)
+
 fn closure_value(stop: bool)
     ->
         int ({
@@ -74,9 +68,48 @@ fn closure_value(stop: bool)
                 (if (stop as bool) { (return (4 as int) as !); } as ())
                 (5 as int)
             } as int) as
-            {closure@tests/ui/src/flow_control/early_return.pt:34:20: 34:29});
+            {closure@tests/ui/src/flow_control/early_return.pt:37:20: 37:29});
+
     (10 as int)
 } as int)
+
+fn inlined_closure_value(stop: bool)
+    ->
+        int ({
+    let closure =
+        (|| -> int
+            ({
+                (if (stop as bool) { (return (4 as int) as !); } as ())
+                (5 as int)
+            } as int) as
+            {closure@tests/ui/src/flow_control/early_return.pt:48:19: 48:28});
+
+    (((closure as
+                {closure@tests/ui/src/flow_control/early_return.pt:48:19: 48:28})()
+            as int) * (10 as int) as int)
+} as int)
+
+fn call_with(f: fn(int) -> int, x: int)
+    ->
+        int ({
+    (((f as fn(int) -> int)((x as int)) as int) * (10 as int) as int)
+} as int)
+
+fn passed_closure_value(x: int)
+    ->
+        int ({
+    ((call_with as
+            fn(fn(int) -> int, int) -> int {call_with})((|y: int| -> int
+            ({
+                (if ((y as int) < (0 as int) as bool) {
+                    (return (0 as int) as !);
+                } as ())
+                ((y as int) + (1 as int) as int)
+            } as int) as
+            {closure@tests/ui/src/flow_control/early_return.pt:63:15: 63:30}),
+        (x as int)) as int)
+} as int)
+
 fn expression_value(stop: bool)
     ->
         int ({
@@ -89,12 +122,14 @@ fn expression_value(stop: bool)
             ((mark as fn(int) -> int {mark})((3 as int)) as int)
         } as int) as int)
 } as int)
+
 fn match_stopped()
     ->
         int ({
     ((match_value as
             fn(Choice) -> int {match_value})((Choice::Stop as Choice)) as int)
 } as int)
+
 fn match_continued()
     ->
         int ({
@@ -102,6 +137,7 @@ fn match_continued()
             fn(Choice) -> int {match_value})((Choice::Continue as Choice)) as
         int)
 } as int)
+
 fn match_scrutinee_value(stop: bool)
     ->
         int ({
@@ -113,6 +149,7 @@ fn match_scrutinee_value(stop: bool)
         Choice::Continue => (60 as int),
     } as int)
 } as int)
+
 fn nested_value(x: int)
     ->
         int ({
@@ -121,6 +158,7 @@ fn nested_value(x: int)
             (if ((x as int) == (0 as int) as bool) {
                 (return (10 as int) as !);
             } as ())
+
             ({
                 (if ((x as int) == (1 as int) as bool) {
                     (return (20 as int) as !);
@@ -128,8 +166,10 @@ fn nested_value(x: int)
                 (30 as int)
             } as int)
         } as int);
+
     ((result as int) + (1 as int) as int)
 } as int)
+
 fn if_condition_value(stop: bool)
     ->
         int ({
@@ -139,4 +179,147 @@ fn if_condition_value(stop: bool)
         } as bool) {
         (20 as int)
     } else { (30 as int) } as int)
+} as int)
+
+fn return_in_try(stop: bool, f: fn() -> term)
+    ->
+        int ({
+    let value =
+        (try ({
+                (if (stop as bool) { (return (10 as int) as !); } as ())
+                ((f as fn() -> term)() as term);
+                (20 as int)
+            } as int) catch { error(_) => (30 as int), }
+            after ({ ((mark as fn(int) -> int {mark})((0 as int)) as int); }
+                as ()) as int);
+    ((value as int) + (1 as int) as int)
+} as int)
+
+fn return_in_catch(stop: bool, f: fn() -> term)
+    ->
+        int ({
+    let value =
+        (try ({ ((f as fn() -> term)() as term); (20 as int) } as int)
+            catch {
+            error(_) => {
+                (if (stop as bool) { (return (10 as int) as !); } as ())
+                (30 as int)
+            }
+        }
+            after ({ ((mark as fn(int) -> int {mark})((0 as int)) as int); }
+                as ()) as int);
+    ((value as int) + (1 as int) as int)
+} as int)
+
+fn return_in_after(stop: bool, f: fn() -> term)
+    ->
+        int ({
+    let value =
+        (try ({ ((f as fn() -> term)() as term); (20 as int) } as int)
+            catch { error(_) => (30 as int), }
+            after ({
+                ((mark as fn(int) -> int {mark})((0 as int)) as int);
+                (if (stop as bool) { (return (10 as int) as !); } as ())
+            } as ()) as int);
+    ((value as int) + (1 as int) as int)
+} as int)
+
+fn return_in_try_and_after(stop_try: bool, stop_after: bool)
+    ->
+        int ({
+    (try ({
+            (if (stop_try as bool) {
+                (return ((mark as fn(int) -> int {mark})((1 as int)) as int)
+                    as !);
+            } as ())
+            (2 as int)
+        } as int)
+        after ({
+            (if (stop_after as bool) {
+                (return ((mark as fn(int) -> int {mark})((3 as int)) as int)
+                    as !);
+            } as ())
+        } as ()) as int)
+} as int)
+
+fn return_through_nested_afters(stop: bool)
+    ->
+        int ({
+    (try ({
+            (try ({
+                    (if (stop as bool) {
+                        (return ((mark as fn(int) -> int {mark})((1 as int)) as int)
+                            as !);
+                    } as ())
+                    (2 as int)
+                } as int)
+                after ({
+                    ((mark as fn(int) -> int {mark})((10 as int)) as int);
+                } as ()) as int)
+        } as int)
+        after ({ ((mark as fn(int) -> int {mark})((20 as int)) as int); } as
+            ()) as int)
+} as int)
+
+fn return_from_inner_after(stop: bool)
+    ->
+        int ({
+    (try ({
+            (try ({ (2 as int) } as int)
+                after ({
+                    (if (stop as bool) { (return (1 as int) as !); } as ())
+                    ((mark as fn(int) -> int {mark})((10 as int)) as int);
+                } as ()) as int)
+        } as int)
+        after ({ ((mark as fn(int) -> int {mark})((20 as int)) as int); } as
+            ()) as int)
+} as int)
+
+fn return_in_try_without_after(stop: bool, f: fn() -> term)
+    ->
+        int ({
+    let value =
+        (try ({
+                (if (stop as bool) { (return (10 as int) as !); } as ())
+                ((f as fn() -> term)() as term);
+                (20 as int)
+            } as int) catch { error(_) => (30 as int), } as int);
+    ((value as int) + (1 as int) as int)
+} as int)
+
+fn return_in_large_after(stop: bool, x: int)
+    ->
+        int ({
+    let value =
+        (try ({ ((mark as fn(int) -> int {mark})((1 as int)) as int) } as int)
+            after ({
+                let v0 = (x as int);
+                let v1 = ((v0 as int) + (x as int) as int);
+                let v2 = ((v1 as int) + (x as int) as int);
+                let v3 = ((v2 as int) + (x as int) as int);
+                let v4 = ((v3 as int) + (x as int) as int);
+                let v5 = ((v4 as int) + (x as int) as int);
+                let v6 = ((v5 as int) + (x as int) as int);
+                let v7 = ((v6 as int) + (x as int) as int);
+                let v8 = ((v7 as int) + (x as int) as int);
+                let v9 = ((v8 as int) + (x as int) as int);
+                let v10 = ((v9 as int) + (x as int) as int);
+                let v11 = ((v10 as int) + (x as int) as int);
+                let v12 = ((v11 as int) + (x as int) as int);
+                let v13 = ((v12 as int) + (x as int) as int);
+                let v14 = ((v13 as int) + (x as int) as int);
+                let v15 = ((v14 as int) + (x as int) as int);
+                let v16 = ((v15 as int) + (x as int) as int);
+                let v17 = ((v16 as int) + (x as int) as int);
+                let v18 = ((v17 as int) + (x as int) as int);
+                let v19 = ((v18 as int) + (x as int) as int);
+                let v20 = ((v19 as int) + (x as int) as int);
+                let v21 = ((v20 as int) + (x as int) as int);
+                let v22 = ((v21 as int) + (x as int) as int);
+                let v23 = ((v22 as int) + (x as int) as int);
+                let v24 = ((v23 as int) + (x as int) as int);
+                (if (stop as bool) { (return (v24 as int) as !); } as ())
+                ((mark as fn(int) -> int {mark})((v24 as int)) as int);
+            } as ()) as int);
+    ((value as int) + (1 as int) as int)
 } as int)

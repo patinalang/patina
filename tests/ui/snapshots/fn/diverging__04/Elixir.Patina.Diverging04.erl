@@ -8,9 +8,7 @@
 
 -export_record([]).
 
--export(['__info__'/1,
-         main/0,
-         'main::sum_odd_numbers$patina_loop_1'/3]).
+-export(['__info__'/1, main/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -49,11 +47,14 @@ main() ->
                                                                        _iter@5_0)
                 of
                 nil ->
-                    _branch_value@10_0 = '$patina_marker':break({break,
-                                                                 0,
-                                                                 {},
-                                                                 _iter@5_0,
-                                                                 _acc@4_0}),
+                    _branch_value@10_0 = begin
+                                             '$patina_marker':break({break,
+                                                                     0,
+                                                                     {},
+                                                                     _iter@5_0,
+                                                                     _acc@4_0}),
+                                             []
+                                         end,
                     _iter@5_1 = _iter@5_0,
                     _acc@4_1 = _acc@4_0,
                     _branch_value@10_0;
@@ -67,16 +68,20 @@ main() ->
                                             false ->
                                                 '$patina_marker':continue(_witness_Iterator@1_0,
                                                                           _iter@5_1,
-                                                                          _acc@4_0)
+                                                                          _acc@4_0),
+                                                []
                                         end,
                         _acc@4_1 = _acc@4_0 + _addition@9_0,
                         {}
                     end
             end
         end,
-    '$patina_marker':continue(_witness_Iterator@1_0,
-                              _iter@5_1,
-                              _acc@4_1).
+    begin
+        '$patina_marker':continue(_witness_Iterator@1_0,
+                                  _iter@5_1,
+                                  _acc@4_1),
+        []
+    end.
 
 'main::sum_odd_numbers'(_up_to@0_0) ->
     _witness_Iterator@1_0 =

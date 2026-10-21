@@ -14,6 +14,8 @@ use Core::Prelude::*;
 #[allow(unused)]
 extern mod patina_fmt;
 
+extern mod erlang;
+
 pub fn normal_continue(limit: int) -> int {
     let mut count = 0;
     let mut total = 0;
@@ -243,4 +245,104 @@ impl Count for Counter<str> {
 
 pub fn trait_helper_names(limit: int) -> int {
     Counter(0).count(limit) + Counter("a").count(limit)
+}
+
+fn note(value: int) {
+    let notes = unsafe { erlang::get(a"notes").cast_unchecked::<[int]>() };
+    erlang::put(a"notes", [value, ..notes]);
+}
+
+pub fn continue_and_break_in_try(limit: int) -> int {
+    let mut n = 0;
+    loop {
+        n += 1;
+        try { if n < limit { continue; } if n >= limit { break n * 10; } }
+            after { note(n); }
+    }
+}
+
+pub fn break_in_catch(limit: int, f: fn(int) -> term) -> int {
+    let mut n = 0;
+    loop {
+        n += 1;
+        try { f(n); } catch { error(_) => { break n; } } after { note(n); }
+        if n >= limit { break -1; }
+    }
+}
+
+pub fn continue_in_catch(limit: int, f: fn(int) -> term) -> int {
+    let mut n = 0;
+    let mut passed = 0;
+    loop {
+        n += 1;
+        if n > limit { break passed; }
+        try { f(n); } catch { error(_) => { continue; } } after { note(n); }
+        passed += 1;
+    }
+}
+
+pub fn break_and_continue_in_after(limit: int) -> int {
+    let mut n = 0;
+    let mut odd = 0;
+    loop {
+        n += 1;
+        try { note(n); }
+            after {
+            if n >= limit { break n * 10 + odd; }
+            if n % 2 == 0 { continue; }
+        }
+        odd += 1;
+    }
+}
+
+pub fn return_in_try_in_loop(stop: int) -> int {
+    let mut n = 0;
+    loop {
+        n += 1;
+        try { if n == stop { return n * 10; } } after { note(n); }
+        if n >= 5 { break; }
+    }
+    -1
+}
+
+pub fn return_in_after_in_loop(stop: int) -> int {
+    let mut n = 0;
+    loop {
+        n += 1;
+        try { note(n); } after { if n == stop { return n * 10; } }
+        if n >= 5 { break; }
+    }
+    -1
+}
+
+pub fn continue_outer_from_try(limit: int) -> int {
+    let mut outer = 0;
+    let mut visits = 0;
+
+    'outer: loop {
+        outer += 1;
+
+        loop {
+            visits += 1;
+            try {
+                if outer < limit { continue 'outer; }
+                if outer >= limit { break 'outer; }
+            } after { note(outer); }
+        }
+    }
+
+    visits * 100 + outer
+}
+
+pub fn loop_in_try(stop: int) -> int {
+    let result =
+        try {
+            let mut n = 0;
+            loop {
+                n += 1;
+                if n == stop { return n; }
+                if n >= 5 { break n * 10; }
+            }
+        } after { note(0); };
+    result + 1
 }

@@ -20,7 +20,6 @@
          nested/1,
          struct_fields/0,
          assign_coerces_to_var_type/0,
-         'fibonacci$patina_loop_1'/4,
          fibonacci/1,
          discard/0,
          parenthesized_struct_in_scrutinee/0,
@@ -128,12 +127,15 @@ assign_coerces_to_var_type() ->
                     {};
                 _ ->
                     _branch_value@5_0 = begin
-                                            '$patina_marker':break({break,
-                                                                    0,
-                                                                    {},
-                                                                    _i@3_0,
-                                                                    _current@1_0,
-                                                                    _next@2_0})
+                                            begin
+                                                '$patina_marker':break({break,
+                                                                        0,
+                                                                        {},
+                                                                        _i@3_0,
+                                                                        _current@1_0,
+                                                                        _next@2_0}),
+                                                []
+                                            end
                                         end,
                     _current@1_1 = _current@1_0,
                     _next@2_1 = _next@2_0,
@@ -141,10 +143,13 @@ assign_coerces_to_var_type() ->
                     _branch_value@5_0
             end
         end,
-    '$patina_marker':continue(_i@3_1,
-                              _n@0_0,
-                              _current@1_1,
-                              _next@2_1).
+    begin
+        '$patina_marker':continue(_i@3_1,
+                                  _n@0_0,
+                                  _current@1_1,
+                                  _next@2_1),
+        []
+    end.
 
 fibonacci(_n@0_0) ->
     _current@1_0 = 0,
@@ -201,7 +206,7 @@ block_ending_in_uninitialized_let() ->
 block_ending_in_let_else(_value@0_0) ->
     case _value@0_0 of
         42 -> {};
-        _ -> '$patina_marker':return({})
+        _ -> begin '$patina_marker':return({}), [] end
     end.
 
 block_ending_in_unit_expr() -> {}.

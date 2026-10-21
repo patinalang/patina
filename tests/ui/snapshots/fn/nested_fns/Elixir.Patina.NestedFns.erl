@@ -15,7 +15,6 @@
          second/0,
          shadowed_blocks/0,
          recursive_loop/1,
-         'recursive_loop::sum_to$patina_loop_1'/3,
          generic/0,
          in_closure/0,
          as_value/0,
@@ -95,11 +94,14 @@ recursive_loop(_n@0_0) ->
                                                                        _iter@5_0)
                 of
                 nil ->
-                    _branch_value@10_0 = '$patina_marker':break({break,
-                                                                 0,
-                                                                 {},
-                                                                 _iter@5_0,
-                                                                 _total@4_0}),
+                    _branch_value@10_0 = begin
+                                             '$patina_marker':break({break,
+                                                                     0,
+                                                                     {},
+                                                                     _iter@5_0,
+                                                                     _total@4_0}),
+                                             []
+                                         end,
                     _iter@5_1 = _iter@5_0,
                     _total@4_2 = _total@4_0,
                     _branch_value@10_0;
@@ -112,9 +114,12 @@ recursive_loop(_n@0_0) ->
                             true ->
                                 _total@4_1 = _total@4_0 +
                                                  'recursive_loop::sum_to'(2),
-                                '$patina_marker':continue(_witness_Iterator@1_0,
-                                                          _iter@5_1,
-                                                          _total@4_1);
+                                begin
+                                    '$patina_marker':continue(_witness_Iterator@1_0,
+                                                              _iter@5_1,
+                                                              _total@4_1),
+                                    []
+                                end;
                             _ ->
                                 _branch_value@9_0 = {},
                                 _total@4_1 = _total@4_0,
@@ -125,9 +130,12 @@ recursive_loop(_n@0_0) ->
                     end
             end
         end,
-    '$patina_marker':continue(_witness_Iterator@1_0,
-                              _iter@5_1,
-                              _total@4_2).
+    begin
+        '$patina_marker':continue(_witness_Iterator@1_0,
+                                  _iter@5_1,
+                                  _total@4_2),
+        []
+    end.
 
 'recursive_loop::sum_to'(_n@0_0) ->
     _witness_Iterator@1_0 =

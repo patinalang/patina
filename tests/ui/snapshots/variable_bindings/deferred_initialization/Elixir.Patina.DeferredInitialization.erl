@@ -10,9 +10,7 @@
 
 -export_record([]).
 
--export(['__info__'/1,
-         'initialized_on_every_loop_exit$patina_loop_1'/2,
-         main/0]).
+-export(['__info__'/1, main/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -44,7 +42,7 @@ initialized_after_diverging_branch(_condition@0_0) ->
     case _condition@0_0 of
         true ->
             _value@1_1 = 1,
-            '$patina_marker':return(_value@1_1);
+            begin '$patina_marker':return(_value@1_1), [] end;
         _ ->
             _branch_value@2_0 = {},
             _value@1_1 = _value@1_0,
@@ -59,13 +57,20 @@ initialized_after_diverging_branch(_condition@0_0) ->
             case _condition@0_0 of
                 true ->
                     _value@1_1 = 1,
-                    '$patina_marker':break({break, 0, {}, _value@1_1});
+                    begin
+                        '$patina_marker':break({break, 0, {}, _value@1_1}), []
+                    end;
                 _ ->
                     _value@1_1 = 2,
-                    '$patina_marker':break({break, 0, {}, _value@1_1})
+                    begin
+                        '$patina_marker':break({break, 0, {}, _value@1_1}), []
+                    end
             end
         end,
-    '$patina_marker':continue(_condition@0_0, _value@1_1).
+    begin
+        '$patina_marker':continue(_condition@0_0, _value@1_1),
+        []
+    end.
 
 initialized_on_every_loop_exit(_condition@0_0) ->
     begin _value@1_0 = {} end,
