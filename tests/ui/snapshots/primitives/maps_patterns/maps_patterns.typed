@@ -83,6 +83,47 @@ fn lookup_pinned_key_in_closure(map: #{str => int}, key: str)
             as #{str => int})) as int)
 } as int)
 
+trait Keyed {
+    const
+    KEY:
+    str;
+}
+
+struct NameKey;
+
+impl Keyed for NameKey {
+    const
+    KEY:
+    str
+    =
+    ("name" as str);
+}
+
+fn lookup_assoc_const_key(map: #{str => int})
+    ->
+        int ({
+    (match (map as #{str => int}) {
+        #{(<NameKey as Keyed>::KEY as str) => value, ..} => (value as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)
+
+fn lookup_generic_key<K>(map: #{str => int}) -> int where
+    K: Keyed ({
+    (match (map as #{str => int}) {
+        #{(K::KEY as str) => value, ..} => (value as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)
+
+fn lookup_generic_name_key(map: #{str => int})
+    ->
+        int ({
+    ((lookup_generic_key::<NameKey> as
+            fn(#{str => int}) -> int {lookup_generic_key::<NameKey>})((map as
+            #{str => int})) as int)
+} as int)
+
 fn lookup_tuple_key(map: #{(int, int) => int}, k: int)
     ->
         int ({

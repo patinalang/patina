@@ -32,9 +32,11 @@
                                            _where_Numbered@1_0),
     _vtable_Numbered@3_0 = erlang:element(1,
                                           _witness_Numbered@2_0),
-    _const_Numbered_C@4_0 = erlang:element(1,
-                                           _vtable_Numbered@3_0),
-    _const_Numbered_C@4_0(_witness_Numbered@2_0) + 10.
+    _const_fn_Numbered_C@4_0 = erlang:element(1,
+                                              _vtable_Numbered@3_0),
+    _const_Numbered_C@5_0 =
+        _const_fn_Numbered_C@4_0(_witness_Numbered@2_0),
+    _const_Numbered_C@5_0 + 10.
 
 'Defaults::Numbered::$patina_witness'(_witnesses_where_Numbered@0_0) ->
     {{fun 'Elixir.Patina.Defaults.Plus':'Defaults::Numbered::$patina_const::C'/1,

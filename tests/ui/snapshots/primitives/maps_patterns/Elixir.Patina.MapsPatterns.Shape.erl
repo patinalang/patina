@@ -1,4 +1,4 @@
--file("tests/ui/src/primitives/maps_patterns.pt", 81).
+-file("tests/ui/src/primitives/maps_patterns.pt", 109).
 
 -module('Elixir.Patina.MapsPatterns.Shape').
 

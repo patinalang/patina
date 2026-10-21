@@ -16,6 +16,8 @@
          lookup_constant_key/1,
          lookup_pinned_key/2,
          lookup_pinned_key_in_closure/2,
+         lookup_assoc_const_key/1,
+         lookup_generic_name_key/1,
          lookup_tuple_key/2,
          lookup_list_key/1,
          lookup_binary_key/1,
@@ -78,6 +80,45 @@ lookup_pinned_key_in_closure(_map@0_0, _key@1_0) ->
                           end
                   end,
     _lookup@4_0(_map@0_0).
+
+lookup_assoc_const_key(_map@0_0) ->
+    _witness_Keyed@1_0 =
+        'Elixir.Patina.MapsPatterns.NameKey':'MapsPatterns::Keyed::$patina_witness'(),
+    _const_Keyed_KEY@2_0 =
+        'Elixir.Patina.MapsPatterns.NameKey':'MapsPatterns::Keyed::$patina_const::KEY'(_witness_Keyed@1_0),
+    begin
+        case _map@0_0 of
+            #{_const_Keyed_KEY@2_0 := _value@3_0} -> _value@3_0;
+            _ -> -1
+        end
+    end.
+
+lookup_generic_key(_witnesses_where_lookup_generic_key@0_0,
+                   _map@1_0) ->
+    _witness_Keyed@2_0 = erlang:element(1,
+                                        _witnesses_where_lookup_generic_key@0_0),
+    _vtable_Keyed@3_0 = erlang:element(1,
+                                       _witness_Keyed@2_0),
+    _const_fn_Keyed_KEY@4_0 = erlang:element(1,
+                                             _vtable_Keyed@3_0),
+    _const_Keyed_KEY@5_0 =
+        _const_fn_Keyed_KEY@4_0(_witness_Keyed@2_0),
+    begin
+        case _map@1_0 of
+            #{_const_Keyed_KEY@5_0 := _value@6_0} -> _value@6_0;
+            _ -> -1
+        end
+    end.
+
+lookup_generic_name_key(_map@0_0) ->
+    _witness_Keyed@1_0 =
+        'Elixir.Patina.MapsPatterns.NameKey':'MapsPatterns::Keyed::$patina_witness'(),
+    _witnesses_where_lookup_generic_key@2_0 =
+        {_witness_Keyed@1_0},
+    begin
+        lookup_generic_key(_witnesses_where_lookup_generic_key@2_0,
+                           _map@0_0)
+    end.
 
 lookup_tuple_key(_map@0_0, _k@1_0) ->
     case _map@0_0 of

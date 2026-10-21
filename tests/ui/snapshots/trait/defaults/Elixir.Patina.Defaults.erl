@@ -593,17 +593,19 @@ make() ->
                              _self@1_0) ->
     _vtable_Numbered@2_0 = erlang:element(1,
                                           _witness_Numbered@0_0),
-    _const_Numbered_D@3_0 = erlang:element(2,
-                                           _vtable_Numbered@2_0),
-    _const_Numbered_C@4_0 = erlang:element(1,
-                                           _vtable_Numbered@2_0),
+    _const_fn_Numbered_D@3_0 = erlang:element(2,
+                                              _vtable_Numbered@2_0),
+    _const_fn_Numbered_C@4_0 = erlang:element(1,
+                                              _vtable_Numbered@2_0),
+    _const_Numbered_C@5_0 =
+        _const_fn_Numbered_C@4_0(_witness_Numbered@0_0),
+    _const_Numbered_D@6_0 =
+        _const_fn_Numbered_D@3_0(_witness_Numbered@0_0),
     begin
         begin
-            _element@5_0 =
-                _const_Numbered_C@4_0(_witness_Numbered@0_0),
-            _element@6_0 =
-                _const_Numbered_D@3_0(_witness_Numbered@0_0),
-            {_element@5_0, _element@6_0}
+            _element@7_0 = _const_Numbered_C@5_0,
+            _element@8_0 = _const_Numbered_D@6_0,
+            {_element@7_0, _element@8_0}
         end
     end.
 
@@ -612,14 +614,15 @@ sum(_witnesses_where_sum@0_0, __t@1_0) ->
                                            _witnesses_where_sum@0_0),
     _vtable_Numbered@3_0 = erlang:element(1,
                                           _witness_Numbered@2_0),
-    _const_Numbered_D@4_0 = erlang:element(2,
-                                           _vtable_Numbered@3_0),
-    _const_Numbered_C@5_0 = erlang:element(1,
-                                           _vtable_Numbered@3_0),
-    begin
-        _const_Numbered_C@5_0(_witness_Numbered@2_0) +
-            _const_Numbered_D@4_0(_witness_Numbered@2_0)
-    end.
+    _const_fn_Numbered_D@4_0 = erlang:element(2,
+                                              _vtable_Numbered@3_0),
+    _const_fn_Numbered_C@5_0 = erlang:element(1,
+                                              _vtable_Numbered@3_0),
+    _const_Numbered_C@6_0 =
+        _const_fn_Numbered_C@5_0(_witness_Numbered@2_0),
+    _const_Numbered_D@7_0 =
+        _const_fn_Numbered_D@4_0(_witness_Numbered@2_0),
+    begin _const_Numbered_C@6_0 + _const_Numbered_D@7_0 end.
 
 one_consts() ->
     _witness_Numbered@0_0 =
@@ -663,9 +666,9 @@ sum_two() ->
 one_c() ->
     _witness_Numbered@0_0 =
         'Elixir.Patina.Defaults.One':'Defaults::Numbered::$patina_witness'(),
-    begin
-        'Elixir.Patina.Defaults.One':'Defaults::Numbered::$patina_const::C'(_witness_Numbered@0_0)
-    end.
+    _const_Numbered_C@1_0 =
+        'Elixir.Patina.Defaults.One':'Defaults::Numbered::$patina_const::C'(_witness_Numbered@0_0),
+    begin _const_Numbered_C@1_0 end.
 
 plus_two_d() ->
     _witness_Numbered@0_0 =
@@ -673,16 +676,17 @@ plus_two_d() ->
     _witnesses_where_Numbered@1_0 = {_witness_Numbered@0_0},
     _witness_Numbered@2_0 =
         'Elixir.Patina.Defaults.Plus':'Defaults::Numbered::$patina_witness'(_witnesses_where_Numbered@1_0),
-    begin
-        'Defaults::Numbered::$patina_const::D'(_witness_Numbered@2_0)
-    end.
+    _const_Numbered_D@3_0 =
+        'Defaults::Numbered::$patina_const::D'(_witness_Numbered@2_0),
+    begin _const_Numbered_D@3_0 end.
 
 doubled_k() ->
     begin
         _witness_Konst@0_0 =
             'Elixir.Patina.Defaults.Holder':'Defaults::Konst::$patina_witness'(),
-        'Elixir.Patina.Defaults.Holder':'Defaults::Konst::$patina_const::K'(_witness_Konst@0_0)
-            * 2
+        _const_Konst_K@1_0 =
+            'Elixir.Patina.Defaults.Holder':'Defaults::Konst::$patina_const::K'(_witness_Konst@0_0),
+        _const_Konst_K@1_0 * 2
     end.
 
 differ(_witnesses_where_differ@0_0, _a@1_0, _b@2_0) ->

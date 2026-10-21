@@ -28,6 +28,13 @@ defmodule MapsPatternsTest do
     assert MapsPatterns.lookup_pinned_key_in_closure(%{"a" => 1, "b" => 2}, "a") == 1
   end
 
+  test "a key can be a trait's associated constant" do
+    assert MapsPatterns.lookup_assoc_const_key(%{"name" => 7}) == 7
+    assert MapsPatterns.lookup_assoc_const_key(%{"other" => 7}) == -1
+    assert MapsPatterns.lookup_generic_name_key(%{"name" => 8}) == 8
+    assert MapsPatterns.lookup_generic_name_key(%{"other" => 8}) == -1
+  end
+
   test "a key can be a tuple, list, binary or map" do
     assert MapsPatterns.lookup_tuple_key(%{{7, 1} => 1}, 7) == 1
     assert MapsPatterns.lookup_tuple_key(%{{8, 1} => 3}, 7) == -1

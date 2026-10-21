@@ -72,6 +72,7 @@ enum VarNodeKey<'tcx> {
     Element(VarNodeId, usize),
     Tuple(Box<[VarNodeId]>),
     AssocTypeBounds { of: VarNodeId, def_id: DefId, bounds: Box<[VarNodeId]> },
+    AssocConst { def_id: DefId, args: ty::GenericArgsRef<'tcx> },
 }
 
 struct Collect<'a, 'tcx> {
@@ -123,11 +124,17 @@ pub(super) fn lower<'tcx>(tcx: TyCtxt<'tcx>, owner: DefId, body: Body<'tcx>) -> 
         let kind = std::mem::replace(&mut lower.body.exprs[id].kind, ExprKind::Block(Box::new([])));
         lower.body.exprs[id].kind = match kind {
             ExprKind::Call { callee: Callee::Item { item, forced_extern }, args } => {
-                lower.lower_call(item, &witnesses, args, span, forced_extern)
+                if lower.is_assoc_const(&item) {
+                    lower.lower_assoc_const(item, &witnesses, span, forced_extern)
+                } else {
+                    lower.lower_call(item, &witnesses, args, span, forced_extern)
+                }
             }
             ExprKind::FnItem { item, arity, forced_extern } => {
                 lower.lower_fn_item(item, &witnesses, arity, span, forced_extern)
             }
+            // An duplicated associated const node; converted to a var by the clause above.
+            ExprKind::Var(var) => ExprKind::Var(var),
             kind => span_bug!(span, "only item calls and `FnItem`s pass witnesses, got {kind:?}"),
         };
     }
@@ -515,7 +522,7 @@ impl<'tcx> Lower<'tcx> {
         let slot_name = match entry.kind {
             ty::AssocKind::Fn { .. } => var_name(self.tcx, VarPrefix::Fn, item),
             ty::AssocKind::Type { .. } => var_name(self.tcx, VarPrefix::Type, item),
-            ty::AssocKind::Const { .. } => var_name(self.tcx, VarPrefix::Const, item),
+            ty::AssocKind::Const { .. } => var_name(self.tcx, VarPrefix::ConstFn, item),
         };
 
         let vtable_name = var_name(self.tcx, VarPrefix::Vtable, trait_def_id);
@@ -563,6 +570,32 @@ impl<'tcx> Lower<'tcx> {
 
         let witnesses = witness_nodes.iter().map(|&node| self.var_nodes[node].expr);
         ExprKind::Call { callee, args: witnesses.chain(args).collect() }
+    }
+
+    fn is_assoc_const(&self, item: &ItemRef<'tcx>) -> bool {
+        matches!(
+            item.target,
+            ErlCallTarget::Item { def_id, .. }
+                if matches!(self.tcx.def_kind(def_id), DefKind::AssocConst { .. })
+        )
+    }
+
+    /// Lowers an associated const call into the witness prologue. From here on it will be a Var.
+    fn lower_assoc_const(
+        &mut self,
+        item: Box<ItemRef<'tcx>>,
+        witnesses: &WitnessArgs<'tcx>,
+        span: Span,
+        forced_extern: bool,
+    ) -> ExprKind<'tcx> {
+        let ErlCallTarget::Item { def_id, args } = item.target else { bug!("non-item const") };
+        let node = self.intern(VarNodeKey::AssocConst { def_id, args }, |lower| {
+            let call_kind = lower.lower_call(item, witnesses, Box::new([]), span, forced_extern);
+            let call = lower.expr(call_kind, span);
+            let name = var_name(lower.tcx, VarPrefix::Const, def_id);
+            lower.var_node(name, NodeValueSource::Expr(call), span)
+        });
+        ExprKind::Var(self.var_nodes[node].var)
     }
 
     /// Lowers a fn item as a closure over already-bound witnesses and its dispatch fun.
@@ -642,6 +675,7 @@ enum VarPrefix {
     Fn,
     Type,
     Const,
+    ConstFn,
 }
 
 impl VarPrefix {
@@ -655,6 +689,7 @@ impl VarPrefix {
             VarPrefix::Fn => "fn",
             VarPrefix::Type => "type",
             VarPrefix::Const => "const",
+            VarPrefix::ConstFn => "const_fn",
         }
     }
 }

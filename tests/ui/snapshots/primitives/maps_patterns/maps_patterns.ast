@@ -29,6 +29,28 @@ pub fn lookup_pinned_key_in_closure(map: #{str => int}, key: str) -> int {
     lookup(map)
 }
 
+pub trait Keyed {
+    const KEY: str;
+}
+
+pub struct NameKey;
+
+impl Keyed for NameKey {
+    const KEY: str = "name";
+}
+
+pub fn lookup_assoc_const_key(map: #{str => int}) -> int {
+    match map { #{<NameKey as Keyed>::KEY => value, ..} => value, _ => -1, }
+}
+
+fn lookup_generic_key<K: Keyed>(map: #{str => int}) -> int {
+    match map { #{K::KEY => value, ..} => value, _ => -1, }
+}
+
+pub fn lookup_generic_name_key(map: #{str => int}) -> int {
+    lookup_generic_key::<NameKey>(map)
+}
+
 pub fn lookup_tuple_key(map: #{(int, int) => int}, k: int) -> int {
     match map { #{(^k, 1) => value, ..} => value, _ => -1, }
 }
