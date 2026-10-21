@@ -5,7 +5,7 @@ use rustc_middle::middle::region;
 use rustc_middle::span_bug;
 use rustc_middle::thir::visit::{self, Visitor};
 use rustc_middle::thir::{
-    Arm, ArmId, Expr, ExprId, ExprKind, LocalVarId, Pat, PatKind, Stmt, StmtKind, Thir,
+    Arm, ArmId, Expr, ExprId, ExprKind, LocalVarId, LogicalOp, Pat, PatKind, Stmt, StmtKind, Thir,
 };
 use rustc_middle::ty::TyCtxt;
 use rustc_span::def_id::LocalDefId;
@@ -206,6 +206,21 @@ impl<'thir, 'tcx> MutabilityVisitor<'thir, 'tcx> {
         Branch { frames, diverges: self.expr_always_diverges(arm.body) }
     }
 
+    /// The operands of `expr`'s `&&` chain, in order.
+    /// We don't care about `||` because `let` can only happen as an operand of `&&`.
+    fn gather_and_operands(&self, mut expr: ExprId, operands: &mut Vec<ExprId>) {
+        while let ExprKind::Scope { value, .. } = self.thir[expr].kind {
+            expr = value;
+        }
+
+        if let ExprKind::LogicalOp { op: LogicalOp::And, lhs, rhs } = self.thir[expr].kind {
+            self.gather_and_operands(lhs, operands);
+            self.gather_and_operands(rhs, operands);
+        } else {
+            operands.push(expr);
+        }
+    }
+
     fn visit_loop(&mut self, span: Span, label: region::Scope, body: ExprId) {
         let (_, loop_frame) = self.capture_branch(|s| {
             s.loops.push(LoopFrame { label, breaks: Vec::new() });
@@ -403,13 +418,36 @@ impl<'thir, 'tcx> Visitor<'thir, 'tcx> for MutabilityVisitor<'thir, 'tcx> {
                 }
             }
             ExprKind::If { cond, then, else_opt, .. } => {
-                self.visit_expr(&self.thir[*cond]);
-                let mut branches = vec![self.visit_expr_branch(*then)];
-                branches.push(match else_opt {
+                let mut operands = Vec::new();
+                self.gather_and_operands(*cond, &mut operands);
+
+                let (then_frames, failures) = self.capture_branch(|s| {
+                    let failures = operands
+                        .iter()
+                        .map(|&operand| {
+                            s.visit_expr(&s.thir[operand]);
+                            Branch {
+                                frames: s.frames.clone(),
+                                diverges: s.expr_always_diverges(operand),
+                            }
+                        })
+                        .collect::<Vec<_>>();
+
+                    s.visit_expr(&s.thir[*then]);
+                    failures
+                });
+
+                let then_branch =
+                    Branch { frames: then_frames, diverges: self.expr_always_diverges(*then) };
+
+                self.merge_branches(expr.span, &failures);
+
+                let else_branch = match else_opt {
                     Some(otherwise) => self.visit_expr_branch(*otherwise),
                     None => Branch::continuing(self.frames.clone()),
-                });
-                self.merge_branches(expr.span, &branches);
+                };
+
+                self.merge_branches(expr.span, &[then_branch, else_branch]);
             }
             ExprKind::LogicalOp { lhs, rhs, .. } => {
                 self.visit_expr(&self.thir[*lhs]);

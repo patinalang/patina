@@ -110,3 +110,40 @@ pub fn match_result(take_first: bool) -> int {
 
     block_value + value
 }
+
+pub fn or_assign(a: bool, b: bool) -> int {
+    let mut y = 0;
+    let r = if a || { y += 1; b } { y + 10 } else { y + 20 };
+    r * 100 + y
+}
+
+pub fn not_and_assign(a: bool, b: bool) -> int {
+    let mut y = 0;
+    let r = if !(a && { y += 1; b }) { y + 10 } else { y + 20 };
+    r * 100 + y
+}
+
+pub fn and_or_right(a: bool, b: bool, c: bool) -> int {
+    let mut y = 0;
+    let r = if a && (b || { y += 1; c }) { y + 10 } else { y + 20 };
+    r * 100 + y
+}
+
+pub fn or_then_and(a: bool, b: bool, c: bool) -> int {
+    let mut y = 0;
+    let r = if (a || { y += 1; b }) && c { y + 10 } else { y + 20 };
+    r * 100 + y
+}
+
+pub fn and_then_or(a: bool, b: bool, c: bool) -> int {
+    let mut y = 0;
+    let r = if (a && { y += 1; b }) || c { y + 10 } else { y + 20 };
+    r * 100 + y
+}
+
+pub fn while_or(n: int) -> int {
+    let mut i = 0;
+    let mut steps = 0;
+    while i < 3 || { steps += 1; i < n } { i += 1; }
+    i * 100 + steps
+}

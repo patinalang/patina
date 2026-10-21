@@ -21,3 +21,10 @@ pub fn initialize_in_short_circuit(run_rhs: bool) -> int {
 
     value
 }
+
+fn opt(x: int) -> Option<int> { if x >= 0 { Some(x) } else { None } }
+
+pub fn deferred_in_later_operand(a: int) -> int {
+    let mut x;
+    if let Some(v) = opt(a) && { x = v; v > 1 } { x } else { 0 }
+}

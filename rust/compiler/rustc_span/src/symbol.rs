@@ -1182,6 +1182,7 @@ symbols! {
         iter_mut,
         iterator,
         iterator_collect_fn,
+        jump,
         kcfi,
         kernel_address,
         kernel_hwaddress,

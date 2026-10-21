@@ -363,4 +363,8 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         let kind = etir::PatKind::Literal(etir::Lit::Bool(value));
         self.push_pat(kind, self.cx.tcx.types.bool, span)
     }
+
+    pub(super) fn is_literal_bool_pat(&self, pattern: PatId, value: bool) -> bool {
+        matches!(self.cx.body[pattern].kind, etir::PatKind::Literal(etir::Lit::Bool(v)) if v == value)
+    }
 }

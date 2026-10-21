@@ -476,7 +476,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
                 thir::LogicalOp::And => etir::LogicalOp::And,
                 thir::LogicalOp::Or => etir::LogicalOp::Or,
             };
-            return self.push_expr(etir::ExprKind::LogicalOp { op, lhs, rhs }, expr.ty, span);
+            return self.push_expr(etir::ExprKind::LogicalOp { op, lhs, rhs }, expr.ty, expr.span);
         }
 
         let then_pattern = self.bool_pat(span, true);
@@ -777,26 +777,123 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         then: thir::ExprId,
         else_opt: Option<thir::ExprId>,
     ) -> ExprId {
-        let tcx = self.cx.tcx;
-        let span = expr.span;
-
-        // TODO: this detection of `ExprKind::Let` has an issue with let chains.
-        // We'll want to rewrite this into `maybe`. Possibly, we'll want to rewrite all `case`
-        // into `maybe`, if I confirm that it results in the same bytecode.
-        let (scrutinee, then_pattern) =
-            if let thir::ExprKind::Let { expr: scrutinee, pat } = &self.resolve(cond).kind {
-                (self.lower_expr(*scrutinee), self.lower_pat(pat, PatternInput::Typed))
-            } else {
-                (self.lower_expr(cond), self.bool_pat(span, true))
-            };
+        let cond = self.lower_cond(cond);
 
         let then_body = self.lower_expr(then);
         let else_body = match else_opt {
             Some(else_expr) => self.lower_expr(else_expr),
-            None => self.unit_expr(span),
+            None => self.unit_expr(expr.span),
         };
 
-        self.ifelse_match_expr(expr, scrutinee, then_pattern, then_body, else_body)
+        let mut joins = Vec::new();
+        let body = self.logical_match_expr(expr, cond, then_body, else_body, &mut joins);
+        if joins.is_empty() {
+            return body;
+        }
+        let kind = etir::ExprKind::Join { joins: joins.into(), body };
+        self.push_expr(kind, expr.ty, expr.span)
+    }
+
+    fn lower_cond(&mut self, cond: thir::ExprId) -> Cond {
+        let expr = self.resolve(cond);
+        match expr.kind {
+            thir::ExprKind::Let { expr: scrutinee, ref pat } => {
+                let scrutinee = self.lower_expr(scrutinee);
+                let pattern = self.lower_pat(pat, PatternInput::Typed);
+                Cond::Test { scrutinee, pattern }
+            }
+
+            thir::ExprKind::LogicalOp { op, lhs, rhs } => {
+                match (self.lower_cond(lhs), self.lower_cond(rhs)) {
+                    // Two simple Cond::Test arms can be joined into a single Cond::Test.
+                    (
+                        Cond::Test { scrutinee: lhs, pattern: lhs_pattern },
+                        Cond::Test { scrutinee: rhs, pattern: rhs_pattern },
+                    ) if self.is_literal_bool_pat(lhs_pattern, true)
+                        && self.is_literal_bool_pat(rhs_pattern, true)
+                        && !self.reassigns_vars(rhs) =>
+                    {
+                        let op = match op {
+                            thir::LogicalOp::And => etir::LogicalOp::And,
+                            thir::LogicalOp::Or => etir::LogicalOp::Or,
+                        };
+                        let scrutinee = self.push_expr(
+                            etir::ExprKind::LogicalOp { op, lhs, rhs },
+                            expr.ty,
+                            expr.span,
+                        );
+                        Cond::Test { scrutinee, pattern: lhs_pattern }
+                    }
+
+                    (lhs, rhs) => match op {
+                        thir::LogicalOp::And => Cond::And(Box::new(lhs), Box::new(rhs)),
+                        thir::LogicalOp::Or => Cond::Or(Box::new(lhs), Box::new(rhs)),
+                    },
+                }
+            }
+
+            thir::ExprKind::Unary { op: UnOp::Not, arg } => match self.lower_cond(arg) {
+                Cond::Test { scrutinee, pattern } if self.is_literal_bool_pat(pattern, true) => {
+                    let kind = etir::ExprKind::UnaryOp { op: etir::UnaryOp::Not, arg: scrutinee };
+                    Cond::Test { scrutinee: self.push_expr(kind, expr.ty, expr.span), pattern }
+                }
+                arg => Cond::Not(Box::new(arg)),
+            },
+
+            _ => Cond::Test {
+                scrutinee: self.lower_expr(cond),
+                pattern: self.bool_pat(expr.span, true),
+            },
+        }
+    }
+
+    fn logical_match_expr(
+        &mut self,
+        expr: &thir::Expr<'tcx>,
+        cond: Cond,
+        then_body: ExprId,
+        else_body: ExprId,
+        joins: &mut Vec<etir::JoinId>,
+    ) -> ExprId {
+        match cond {
+            Cond::Test { scrutinee, pattern } => {
+                let then = self.maybe_shared_body(then_body);
+                let otherwise = self.maybe_shared_body(else_body);
+                self.ifelse_match_expr(expr, scrutinee, pattern, then, otherwise)
+            }
+
+            Cond::And(lhs, rhs) => {
+                self.share_body(else_body, joins);
+                let then = self.logical_match_expr(expr, *rhs, then_body, else_body, joins);
+                self.logical_match_expr(expr, *lhs, then, else_body, joins)
+            }
+
+            Cond::Or(lhs, rhs) => {
+                self.share_body(then_body, joins);
+                let otherwise = self.logical_match_expr(expr, *rhs, then_body, else_body, joins);
+                self.logical_match_expr(expr, *lhs, then_body, otherwise, joins)
+            }
+
+            Cond::Not(cond) => self.logical_match_expr(expr, *cond, else_body, then_body, joins),
+        }
+    }
+
+    fn share_body(&mut self, body: ExprId, joins: &mut Vec<etir::JoinId>) {
+        if !self.cx.join_ids.contains_key(&body) {
+            let join = self.cx.body.joins.push(etir::Join { body, params: Box::new([]) });
+            self.cx.join_ids.insert(body, join);
+            joins.push(join);
+        }
+    }
+
+    fn maybe_shared_body(&mut self, body: ExprId) -> ExprId {
+        match self.cx.join_ids.get(&body) {
+            Some(&target) => {
+                let etir::Expr { ty, span, .. } = self.cx.body[body];
+                self.push_expr(etir::ExprKind::Jump { target }, ty, span)
+            }
+            None => body,
+        }
     }
 
     fn ifelse_match_expr(
@@ -1063,4 +1160,11 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         visit::visit_expr_id(&mut visitor, expr);
         visitor.found
     }
+}
+
+enum Cond {
+    Test { scrutinee: ExprId, pattern: PatId },
+    And(Box<Cond>, Box<Cond>),
+    Or(Box<Cond>, Box<Cond>),
+    Not(Box<Cond>),
 }

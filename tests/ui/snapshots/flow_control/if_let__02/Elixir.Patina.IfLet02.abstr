@@ -293,7 +293,7 @@
           {var,{31,15},'_i_like_letters@16_0'},
           [{clause,
             {31,30},
-            [{atom,{31,12},true}],
+            [{atom,{31,15},true}],
             [],
             [{block,
               {32,9},

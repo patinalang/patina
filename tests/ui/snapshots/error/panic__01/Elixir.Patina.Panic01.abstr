@@ -73,7 +73,7 @@
         [{bin_element,{6,20},{string,{6,20},"lemonade"},default,[utf8]}]}},
       [{clause,
         {6,31},
-        [{atom,{6,5},true}],
+        [{atom,{6,8},true}],
         [],
         [{block,
           {6,33},

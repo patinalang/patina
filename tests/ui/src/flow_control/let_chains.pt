@@ -1,0 +1,252 @@
+fn opt(x: int) -> Option<int> {
+    if x >= 0 { Some(x) } else { None }
+}
+
+pub fn let_and_bool(a: int) -> int {
+    if let Some(v) = opt(a)
+        && v > 5
+    {
+        v
+    } else {
+        0
+    }
+}
+
+pub fn bool_and_let(flag: bool, a: int) -> int {
+    if flag && let Some(v) = opt(a) { v } else { -1 }
+}
+
+pub fn let_let_cond(a: int, b: int) -> int {
+    if let Some(v) = opt(a)
+        && let Some(w) = opt(b)
+        && v > w
+    {
+        v + w
+    } else {
+        0
+    }
+}
+
+pub fn let_and_nested(a: int, x: bool, y: bool) -> int {
+    if let Some(v) = opt(a)
+        && (x && y)
+    {
+        v
+    } else {
+        0
+    }
+}
+
+enum Shape {
+    A(int),
+    B(int),
+    C,
+}
+
+pub fn or_pattern(kind: int, c: bool) -> int {
+    let s = if kind == 0 {
+        Shape::A(10)
+    } else if kind == 1 {
+        Shape::B(20)
+    } else {
+        Shape::C
+    };
+    if let Shape::A(x) | Shape::B(x) = s
+        && c
+    {
+        x
+    } else {
+        0
+    }
+}
+
+pub fn assign_in_first(a: int) -> int {
+    let mut y = 0;
+    if let Some(v) = {
+        y = 5;
+        opt(a)
+    } && v > 1
+    {
+        v + y
+    } else {
+        y
+    }
+}
+
+pub fn assign_in_later(a: int) -> int {
+    let mut y = 0;
+    let r = if let Some(v) = opt(a)
+        && {
+            y += 1;
+            v > 0
+        }
+        && {
+            y += 10;
+            v > 5
+        } {
+        v * 100
+    } else {
+        y
+    };
+    r * 1000 + y
+}
+
+pub fn assign_two_vars(a: int) -> int {
+    let mut x = 0;
+    let mut z = 0;
+    if let Some(v) = opt(a)
+        && {
+            x = v;
+            v > 1
+        }
+        && {
+            z = v * 2;
+            v > 5
+        }
+    {
+        x + z
+    } else {
+        x * 10 + z
+    }
+}
+
+pub fn local_in_operand(a: int) -> int {
+    if let Some(v) = opt(a)
+        && {
+            let mut t = v;
+            t += 1;
+            t > 5
+        }
+    {
+        v
+    } else {
+        -1
+    }
+}
+
+pub fn mutate_in_branches(a: int) -> int {
+    let mut y = 1;
+    if let Some(v) = opt(a)
+        && v > 1
+    {
+        y += v;
+    } else {
+        y -= 1;
+    }
+    y
+}
+
+pub fn deferred_init(a: int) -> int {
+    let x;
+    if let Some(v) = opt(a)
+        && v > 1
+    {
+        x = v;
+    } else {
+        x = 0;
+    }
+    x
+}
+
+pub fn return_in_else(a: int) -> int {
+    let r = if let Some(v) = opt(a)
+        && v > 1
+    {
+        v
+    } else {
+        return -1;
+    };
+    r + 1
+}
+
+pub fn return_in_then(a: int) -> int {
+    if let Some(v) = opt(a)
+        && v > 1
+    {
+        return v;
+    }
+    0
+}
+
+pub fn big_else(a: int) {
+    if let Some(v) = opt(a)
+        && v > 1
+        && v < 10
+    {
+        println!("in range {}", v);
+    } else {
+        println!("out of range");
+        println!("not between 2 and 9");
+        println!("or missing");
+    }
+}
+
+pub fn ladder(a: int, b: int) -> int {
+    if let Some(v) = opt(a)
+        && v > 10
+    {
+        1
+    } else if let Some(w) = opt(b)
+        && w > 10
+    {
+        2
+    } else if a == b {
+        3
+    } else {
+        4
+    }
+}
+
+pub fn while_let_chain(limit: int) -> int {
+    let mut i = 0;
+    let mut n = 0;
+    let mut sum = 0;
+    while let Some(v) = opt(i)
+        && {
+            n += 1;
+            v < limit
+        }
+    {
+        i += 1;
+        if v == 2 {
+            continue;
+        }
+        if v == 7 {
+            break;
+        }
+        sum += v;
+    }
+    sum * 100 + n
+}
+
+pub fn in_loop(n: int) -> int {
+    let mut total = 0;
+    let mut i = 0;
+    loop {
+        if i >= n {
+            break;
+        }
+        if let Some(v) = opt(i - 2)
+            && v != 1
+        {
+            total += v;
+        } else {
+            total += 100;
+        }
+        i += 1;
+    }
+    total
+}
+
+pub fn in_closure(a: int) -> int {
+    let f = |x: int| {
+        if let Some(v) = opt(x)
+            && v > 1
+        {
+            v
+        } else {
+            0
+        }
+    };
+    f(a) + f(a + 1)
+}

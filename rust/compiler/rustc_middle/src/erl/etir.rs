@@ -38,6 +38,12 @@ newtype_index! {
 }
 
 newtype_index! {
+    #[encodable]
+    #[debug_format = "j{}"]
+    pub struct JoinId {}
+}
+
+newtype_index! {
     /// A runtime field of a variant, in declaration order.
     #[encodable]
     #[orderable]
@@ -53,6 +59,7 @@ pub struct Body<'tcx> {
     pub pats: IndexVec<PatId, Pat<'tcx>>,
     pub vars: IndexVec<VarId, Var>,
     pub loops: IndexVec<LoopId, Loop>,
+    pub joins: IndexVec<JoinId, Join>,
 }
 
 impl<'tcx> Body<'tcx> {
@@ -64,6 +71,7 @@ impl<'tcx> Body<'tcx> {
             pats: IndexVec::new(),
             vars: IndexVec::new(),
             loops: IndexVec::new(),
+            joins: IndexVec::new(),
         }
     }
 }
@@ -97,6 +105,14 @@ impl<'tcx> std::ops::Index<LoopId> for Body<'tcx> {
 
     fn index(&self, id: LoopId) -> &Loop {
         &self.loops[id]
+    }
+}
+
+impl<'tcx> std::ops::Index<JoinId> for Body<'tcx> {
+    type Output = Join;
+
+    fn index(&self, id: JoinId) -> &Join {
+        &self.joins[id]
     }
 }
 
@@ -143,6 +159,8 @@ pub enum ExprKind<'tcx> {
     Loop { id: LoopId, body: ExprId },
     Break { target: LoopId, value: Option<ExprId> },
     Continue { target: LoopId },
+    Join { joins: Box<[JoinId]>, body: ExprId },
+    Jump { target: JoinId },
 }
 
 #[derive(Copy, Clone, Debug, TyEncodable, TyDecodable)]
@@ -286,6 +304,13 @@ pub struct ReceiveAfter {
 pub struct Loop {
     /// Variables from the outer scope used by the loop
     pub outer_vars: Box<[LoopOuterVar]>,
+}
+
+#[derive(Debug, TyEncodable, TyDecodable)]
+pub struct Join {
+    pub body: ExprId,
+    /// Outer variables that may have a different versions at each `Jump`.
+    pub params: Box<[VarId]>,
 }
 
 #[derive(Copy, Clone, Debug, TyEncodable, TyDecodable)]

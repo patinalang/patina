@@ -1,32 +1,39 @@
 use rustc_data_structures::fx::{FxHashSet, FxIndexMap};
 use rustc_middle::erl::etir::visit::{self, Visitor};
 use rustc_middle::erl::etir::{
-    Body, CatchArm, Expr, ExprId, ExprKind, LoopId, LoopOuterVar, Pat, PatId, PatKind, VarId,
+    Body, CatchArm, Expr, ExprId, ExprKind, JoinId, LoopId, LoopOuterVar, Pat, PatId, PatKind,
+    VarId,
 };
 
-/// Analyzes which parameters have to be passed in to loop helpers, and which vars have
-/// to be returned out.
-/// Fills in `etir::Loop.outer_vars`.
+/// Analyzes which parameters have to be passed in to loop helpers / joins, and which vars have
+/// to be returned out of loop helpers.
+/// Fills in `etir::Loop.outer_vars` and `etir::Join.params`.
 pub(super) fn analyze(body: &mut Body<'_>) {
     let mut captures = Captures {
         body,
         used: FxIndexMap::default(),
         bound: FxHashSet::default(),
         outer_vars: Vec::new(),
+        join_params: Vec::new(),
     };
     visit::visit_expr_id(&mut captures, body.value);
-    for (id, vars) in captures.outer_vars {
+    let Captures { outer_vars, join_params, .. } = captures;
+    for (id, vars) in outer_vars {
         body.loops[id].outer_vars = vars;
+    }
+    for (id, vars) in join_params {
+        body.joins[id].params = vars;
     }
 }
 
 struct Captures<'etir, 'tcx> {
     body: &'etir Body<'tcx>,
-    /// Variables from outer scopes that are used inside the current loop body.
+    /// Variables from outer scopes that are used inside the current body.
     used: FxIndexMap<VarId, LoopOuterVar>,
     /// Variables that are bound inside the current scope.
     bound: FxHashSet<VarId>,
     outer_vars: Vec<(LoopId, Box<[LoopOuterVar]>)>,
+    join_params: Vec<(JoinId, Box<[VarId]>)>,
 }
 
 impl<'etir, 'tcx> Captures<'etir, 'tcx> {
@@ -39,6 +46,19 @@ impl<'etir, 'tcx> Captures<'etir, 'tcx> {
         if let LoopOuterVar::Reassigned(_) = var {
             *used = var;
         }
+    }
+
+    fn with_scope(&mut self, f: impl FnOnce(&mut Self)) -> FxIndexMap<VarId, LoopOuterVar> {
+        let used = std::mem::take(&mut self.used);
+        let bound = std::mem::take(&mut self.bound);
+        f(self);
+        let inner_bound = std::mem::replace(&mut self.bound, bound);
+        let captured = std::mem::replace(&mut self.used, used);
+        for &var in captured.values() {
+            self.use_var(var);
+        }
+        self.bound.extend(inner_bound);
+        captured
     }
 }
 
@@ -54,16 +74,22 @@ impl<'etir, 'tcx: 'etir> Visitor<'etir, 'tcx> for Captures<'etir, 'tcx> {
                 self.bound.extend(vars.iter().copied());
             }
             ExprKind::Loop { id, body: _ } => {
-                let used = std::mem::take(&mut self.used);
-                let bound = std::mem::take(&mut self.bound);
-                visit::walk_expr(self, expr);
-                self.bound = bound;
-                let captured = std::mem::replace(&mut self.used, used);
-
-                for &var in captured.values() {
-                    self.use_var(var);
-                }
+                let captured = self.with_scope(|s| visit::walk_expr(s, expr));
                 self.outer_vars.push((*id, captured.into_values().collect()));
+            }
+            ExprKind::Join { joins, body } => {
+                let captured = self.with_scope(|s| visit::visit_expr_id(s, *body));
+                let params: Box<[VarId]> = captured
+                    .into_values()
+                    .filter_map(|var| match var {
+                        LoopOuterVar::Reassigned(var) => Some(var),
+                        LoopOuterVar::Referenced(_) => None,
+                    })
+                    .collect();
+                for &join in joins {
+                    self.join_params.push((join, params.clone()));
+                    visit::visit_expr_id(self, self.body[join].body);
+                }
             }
             _ => visit::walk_expr(self, expr),
         }

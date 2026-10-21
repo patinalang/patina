@@ -4,7 +4,7 @@ use rustc_data_structures::fx::FxHashMap;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::LocalDefId;
 use rustc_middle::erl::ErlReprKind;
-use rustc_middle::erl::etir::{self, ExprId, LoopId, PatId, PatternInput, VarId};
+use rustc_middle::erl::etir::{self, ExprId, JoinId, LoopId, PatId, PatternInput, VarId};
 use rustc_middle::middle::region;
 use rustc_middle::thir::{LocalVarId, Thir};
 use rustc_middle::ty::{self, Ty, TyCtxt};
@@ -12,8 +12,8 @@ use rustc_middle::util::Providers;
 use rustc_middle::{bug, span_bug};
 use rustc_span::Span;
 
+mod assigned_outer_vars;
 mod expr;
-mod loops;
 mod pat;
 mod witness;
 
@@ -46,6 +46,7 @@ struct BodyBuildCx<'tcx> {
     body: etir::Body<'tcx>,
     var_ids: FxHashMap<LocalVarId, VarId>,
     loop_ids: FxHashMap<region::Scope, LoopId>,
+    join_ids: FxHashMap<ExprId, JoinId>,
 }
 
 pub(crate) fn etir_body<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId) -> &'tcx etir::Body<'tcx> {
@@ -75,6 +76,7 @@ pub(crate) fn etir_body<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId) -> &'tcx et
         body: etir::Body::new(),
         var_ids: FxHashMap::default(),
         loop_ids: FxHashMap::default(),
+        join_ids: FxHashMap::default(),
     };
 
     let (params, value) = ThirBodyCx::lower(&mut cx, def_id);
@@ -83,7 +85,7 @@ pub(crate) fn etir_body<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId) -> &'tcx et
     cx.body.value = value;
 
     let mut body = witness::lower(tcx, def_id.to_def_id(), cx.body);
-    loops::analyze(&mut body);
+    assigned_outer_vars::analyze(&mut body);
 
     tcx.arena.alloc(body)
 }

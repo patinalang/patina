@@ -195,3 +195,86 @@ fn match_result(take_first: bool)
 
     ((block_value as int) + (value as int) as int)
 } as int)
+
+fn or_assign(a: bool, b: bool)
+    ->
+        int ({
+    let mut y = (0 as int);
+    let r =
+        (if ((a as bool) ||
+                ({ ((y as int) += (1 as int) as int); (b as bool) } as bool)
+                as bool) {
+            ((y as int) + (10 as int) as int)
+        } else { ((y as int) + (20 as int) as int) } as int);
+    (((r as int) * (100 as int) as int) + (y as int) as int)
+} as int)
+
+fn not_and_assign(a: bool, b: bool)
+    ->
+        int ({
+    let mut y = (0 as int);
+    let r =
+        (if (!(((a as bool) &&
+                    ({ ((y as int) += (1 as int) as int); (b as bool) } as bool)
+                    as bool)) as bool) {
+            ((y as int) + (10 as int) as int)
+        } else { ((y as int) + (20 as int) as int) } as int);
+    (((r as int) * (100 as int) as int) + (y as int) as int)
+} as int)
+
+fn and_or_right(a: bool, b: bool, c: bool)
+    ->
+        int ({
+    let mut y = (0 as int);
+    let r =
+        (if ((a as bool) &&
+                (((b as bool) ||
+                    ({ ((y as int) += (1 as int) as int); (c as bool) } as bool)
+                    as bool)) as bool) {
+            ((y as int) + (10 as int) as int)
+        } else { ((y as int) + (20 as int) as int) } as int);
+    (((r as int) * (100 as int) as int) + (y as int) as int)
+} as int)
+
+fn or_then_and(a: bool, b: bool, c: bool)
+    ->
+        int ({
+    let mut y = (0 as int);
+    let r =
+        (if ((((a as bool) ||
+                    ({ ((y as int) += (1 as int) as int); (b as bool) } as bool)
+                    as bool)) && (c as bool) as bool) {
+            ((y as int) + (10 as int) as int)
+        } else { ((y as int) + (20 as int) as int) } as int);
+    (((r as int) * (100 as int) as int) + (y as int) as int)
+} as int)
+
+fn and_then_or(a: bool, b: bool, c: bool)
+    ->
+        int ({
+    let mut y = (0 as int);
+    let r =
+        (if (((a as bool) &&
+                    ({ ((y as int) += (1 as int) as int); (b as bool) } as bool)
+                    as bool) || (c as bool) as bool) {
+            ((y as int) + (10 as int) as int)
+        } else { ((y as int) + (20 as int) as int) } as int);
+    (((r as int) * (100 as int) as int) + (y as int) as int)
+} as int)
+
+fn while_or(n: int)
+    ->
+        int ({
+    let mut i = (0 as int);
+    let mut steps = (0 as int);
+    (loop {
+        (if (((i as int) < (3 as int) as bool) ||
+                ({
+                    ((steps as int) += (1 as int) as int);
+                    ((i as int) < (n as int) as bool)
+                } as bool) as bool) {
+            ((i as int) += (1 as int) as int);
+        } else { (break as !); } as ())
+    } as ())
+    (((i as int) * (100 as int) as int) + (steps as int) as int)
+} as int)

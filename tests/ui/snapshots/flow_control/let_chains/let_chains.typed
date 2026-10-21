@@ -1,0 +1,329 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+fn opt(x: int)
+    ->
+        Option<int> ({
+    (if ((x as int) >= (0 as int) as bool) {
+        ((Some as
+                fn(int) -> Core::Option<int> {Core::Option::<int>::Some})((x
+                as int)) as Core::Option<int>)
+    } else { (None as Core::Option<int>) } as Core::Option<int>)
+} as Core::Option<int>)
+
+fn let_and_bool(a: int)
+    ->
+        int ({
+    (if ((let Some(v) =
+                ((opt as fn(int) -> Core::Option<int> {opt})((a as int)) as
+                    Core::Option<int>) as bool) &&
+            ((v as int) > (5 as int) as bool) as bool) {
+        (v as int)
+    } else { (0 as int) } as int)
+} as int)
+
+fn bool_and_let(flag: bool, a: int)
+    ->
+        int ({
+    (if ((flag as bool) &&
+            (let Some(v) =
+                ((opt as fn(int) -> Core::Option<int> {opt})((a as int)) as
+                    Core::Option<int>) as bool) as bool) {
+        (v as int)
+    } else { (-(1 as int) as int) } as int)
+} as int)
+
+fn let_let_cond(a: int, b: int)
+    ->
+        int ({
+    (if (((let Some(v) =
+                    ((opt as fn(int) -> Core::Option<int> {opt})((a as int)) as
+                        Core::Option<int>) as bool) &&
+                (let Some(w) =
+                    ((opt as fn(int) -> Core::Option<int> {opt})((b as int)) as
+                        Core::Option<int>) as bool) as bool) &&
+            ((v as int) > (w as int) as bool) as bool) {
+        ((v as int) + (w as int) as int)
+    } else { (0 as int) } as int)
+} as int)
+
+fn let_and_nested(a: int, x: bool, y: bool)
+    ->
+        int ({
+    (if ((let Some(v) =
+                ((opt as fn(int) -> Core::Option<int> {opt})((a as int)) as
+                    Core::Option<int>) as bool) &&
+            (((x as bool) && (y as bool) as bool)) as bool) {
+        (v as int)
+    } else { (0 as int) } as int)
+} as int)
+
+enum Shape { A(int), B(int), C, }
+
+fn or_pattern(kind: int, c: bool)
+    ->
+        int ({
+    let s =
+        (if ((kind as int) == (0 as int) as bool) {
+            ((Shape::A as fn(int) -> Shape {Shape::A})((10 as int)) as Shape)
+        } else if ((kind as int) == (1 as int) as bool) {
+            ((Shape::B as fn(int) -> Shape {Shape::B})((20 as int)) as Shape)
+        } else { (Shape::C as Shape) } as Shape);
+    (if ((let Shape::A(x) | Shape::B(x) = (s as Shape) as bool) && (c as bool)
+            as bool) {
+        (x as int)
+    } else { (0 as int) } as int)
+} as int)
+
+fn assign_in_first(a: int)
+    ->
+        int ({
+    let mut y = (0 as int);
+    (if ((let Some(v) =
+                ({
+                    (y = (5 as int) as int);
+                    ((opt as fn(int) -> Core::Option<int> {opt})((a as int)) as
+                        Core::Option<int>)
+                } as Core::Option<int>) as bool) &&
+            ((v as int) > (1 as int) as bool) as bool) {
+        ((v as int) + (y as int) as int)
+    } else { (y as int) } as int)
+} as int)
+
+fn assign_in_later(a: int)
+    ->
+        int ({
+    let mut y = (0 as int);
+    let r =
+        (if (((let Some(v) =
+                        ((opt as fn(int) -> Core::Option<int> {opt})((a as int)) as
+                            Core::Option<int>) as bool) &&
+                    ({
+                        ((y as int) += (1 as int) as int);
+                        ((v as int) > (0 as int) as bool)
+                    } as bool) as bool) &&
+                ({
+                    ((y as int) += (10 as int) as int);
+                    ((v as int) > (5 as int) as bool)
+                } as bool) as bool) {
+            ((v as int) * (100 as int) as int)
+        } else { (y as int) } as int);
+    (((r as int) * (1000 as int) as int) + (y as int) as int)
+} as int)
+
+fn assign_two_vars(a: int)
+    ->
+        int ({
+    let mut x = (0 as int);
+    let mut z = (0 as int);
+    (if (((let Some(v) =
+                    ((opt as fn(int) -> Core::Option<int> {opt})((a as int)) as
+                        Core::Option<int>) as bool) &&
+                ({
+                    (x = (v as int) as int);
+                    ((v as int) > (1 as int) as bool)
+                } as bool) as bool) &&
+            ({
+                (z = ((v as int) * (2 as int) as int) as int);
+                ((v as int) > (5 as int) as bool)
+            } as bool) as bool) {
+        ((x as int) + (z as int) as int)
+    } else { (((x as int) * (10 as int) as int) + (z as int) as int) } as int)
+} as int)
+
+fn local_in_operand(a: int)
+    ->
+        int ({
+    (if ((let Some(v) =
+                ((opt as fn(int) -> Core::Option<int> {opt})((a as int)) as
+                    Core::Option<int>) as bool) &&
+            ({
+                let mut t = (v as int);
+                ((t as int) += (1 as int) as int);
+                ((t as int) > (5 as int) as bool)
+            } as bool) as bool) {
+        (v as int)
+    } else { (-(1 as int) as int) } as int)
+} as int)
+
+fn mutate_in_branches(a: int)
+    ->
+        int ({
+    let mut y = (1 as int);
+    (if ((let Some(v) =
+                ((opt as fn(int) -> Core::Option<int> {opt})((a as int)) as
+                    Core::Option<int>) as bool) &&
+            ((v as int) > (1 as int) as bool) as bool) {
+        ((y as int) += (v as int) as int);
+    } else { ((y as int) -= (1 as int) as int); } as ())
+    (y as int)
+} as int)
+
+fn deferred_init(a: int)
+    ->
+        int ({
+    let x;
+    (if ((let Some(v) =
+                ((opt as fn(int) -> Core::Option<int> {opt})((a as int)) as
+                    Core::Option<int>) as bool) &&
+            ((v as int) > (1 as int) as bool) as bool) {
+        (x = (v as int) as int);
+    } else { (x = (0 as int) as int); } as ())
+    (x as int)
+} as int)
+
+fn return_in_else(a: int)
+    ->
+        int ({
+    let r =
+        (if ((let Some(v) =
+                    ((opt as fn(int) -> Core::Option<int> {opt})((a as int)) as
+                        Core::Option<int>) as bool) &&
+                ((v as int) > (1 as int) as bool) as bool) {
+            (v as int)
+        } else { (return (-(1 as int) as int) as !); } as int);
+    ((r as int) + (1 as int) as int)
+} as int)
+
+fn return_in_then(a: int)
+    ->
+        int ({
+    (if ((let Some(v) =
+                ((opt as fn(int) -> Core::Option<int> {opt})((a as int)) as
+                    Core::Option<int>) as bool) &&
+            ((v as int) > (1 as int) as bool) as bool) {
+        (return (v as int) as !);
+    } as ())
+    (0 as int)
+} as int)
+
+fn big_else(a:
+        int) ({
+    (if (((let Some(v) =
+                    ((opt as fn(int) -> Core::Option<int> {opt})((a as int)) as
+                        Core::Option<int>) as bool) &&
+                ((v as int) > (1 as int) as bool) as bool) &&
+            ((v as int) < (10 as int) as bool) as bool) {
+
+
+
+
+        ({
+            ((::Core::io::put_chars as
+                    fn(term) -> term)(([([("in range " as str),
+                                ((patina_fmt::display as fn(term) -> term)((v as int)) as
+                                    term)] as [term])] as [[term]])) as term);
+            ((::Core::io::nl as fn() -> term)() as term);
+        } as ());
+    } else {
+        ({
+            ((::Core::io::put_chars as
+                    fn(term) -> term)(([([("out of range" as str)] as [str])] as
+                    [[str]])) as term);
+            ((::Core::io::nl as fn() -> term)() as term);
+        } as ());
+        ({
+            ((::Core::io::put_chars as
+                    fn(term) -> term)(([([("not between 2 and 9" as str)] as
+                            [str])] as [[str]])) as term);
+            ((::Core::io::nl as fn() -> term)() as term);
+        } as ());
+        ({
+            ((::Core::io::put_chars as
+                    fn(term) -> term)(([([("or missing" as str)] as [str])] as
+                    [[str]])) as term);
+            ((::Core::io::nl as fn() -> term)() as term);
+        } as ());
+    } as ())
+} as ())
+fn ladder(a: int, b: int)
+    ->
+        int ({
+    (if ((let Some(v) =
+                ((opt as fn(int) -> Core::Option<int> {opt})((a as int)) as
+                    Core::Option<int>) as bool) &&
+            ((v as int) > (10 as int) as bool) as bool) {
+        (1 as int)
+    } else if ((let Some(w) =
+                ((opt as fn(int) -> Core::Option<int> {opt})((b as int)) as
+                    Core::Option<int>) as bool) &&
+            ((w as int) > (10 as int) as bool) as bool) {
+        (2 as int)
+    } else if ((a as int) == (b as int) as bool) {
+        (3 as int)
+    } else { (4 as int) } as int)
+} as int)
+fn while_let_chain(limit: int)
+    ->
+        int ({
+    let mut i = (0 as int);
+    let mut n = (0 as int);
+    let mut sum = (0 as int);
+    (loop {
+        (if ((let Some(v) =
+                    ((opt as fn(int) -> Core::Option<int> {opt})((i as int)) as
+                        Core::Option<int>) as bool) &&
+                ({
+                    ((n as int) += (1 as int) as int);
+                    ((v as int) < (limit as int) as bool)
+                } as bool) as bool) {
+            ((i as int) += (1 as int) as int);
+            (if ((v as int) == (2 as int) as bool) { (continue as !); } as ())
+            (if ((v as int) == (7 as int) as bool) { (break as !); } as ())
+            ((sum as int) += (v as int) as int);
+        } else { (break as !); } as ())
+    } as ())
+    (((sum as int) * (100 as int) as int) + (n as int) as int)
+} as int)
+fn in_loop(n: int)
+    ->
+        int ({
+    let mut total = (0 as int);
+    let mut i = (0 as int);
+    (loop {
+        (if ((i as int) >= (n as int) as bool) { (break as !); } as ())
+        (if ((let Some(v) =
+                    ((opt as
+                            fn(int) -> Core::Option<int> {opt})(((i as int) - (2 as int)
+                            as int)) as Core::Option<int>) as bool) &&
+                ((v as int) != (1 as int) as bool) as bool) {
+            ((total as int) += (v as int) as int);
+        } else { ((total as int) += (100 as int) as int); } as ())
+        ((i as int) += (1 as int) as int);
+    } as ())
+    (total as int)
+} as int)
+fn in_closure(a: int)
+    ->
+        int ({
+    let f =
+        (|x: int|
+            ({
+                (if ((let Some(v) =
+                            ((opt as fn(int) -> Core::Option<int> {opt})((x as int)) as
+                                Core::Option<int>) as bool) &&
+                        ((v as int) > (1 as int) as bool) as bool) {
+                    (v as int)
+                } else { (0 as int) } as int)
+            } as int) as
+            {closure@tests/ui/src/flow_control/let_chains.pt:242:13: 242:21});
+    (((f as
+                {closure@tests/ui/src/flow_control/let_chains.pt:242:13: 242:21})((a
+                as int)) as int) +
+        ((f as
+                {closure@tests/ui/src/flow_control/let_chains.pt:242:13: 242:21})(((a
+                    as int) + (1 as int) as int)) as int) as int)
+} as int)

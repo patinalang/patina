@@ -61,4 +61,44 @@ defmodule RebindInBranchesTest do
     assert RebindInBranches.match_result(true) == 111
     assert RebindInBranches.match_result(false) == 212
   end
+
+  test "an `||` operand that rebinds reaches then, else and the code after the if" do
+    assert RebindInBranches.or_assign(true, false) == 1000
+    assert RebindInBranches.or_assign(false, true) == 1101
+    assert RebindInBranches.or_assign(false, false) == 2101
+  end
+
+  test "a negated `&&` swaps which branch each operand reaches" do
+    assert RebindInBranches.not_and_assign(false, true) == 1000
+    assert RebindInBranches.not_and_assign(true, false) == 1101
+    assert RebindInBranches.not_and_assign(true, true) == 2101
+  end
+
+  test "an `||` nested in `&&` forwards bindings to both branches" do
+    assert RebindInBranches.and_or_right(false, true, true) == 2000
+    assert RebindInBranches.and_or_right(true, true, false) == 1000
+    assert RebindInBranches.and_or_right(true, false, true) == 1101
+    assert RebindInBranches.and_or_right(true, false, false) == 2101
+  end
+
+  test "an `||` on the left of `&&` forwards bindings to both branches" do
+    assert RebindInBranches.or_then_and(true, false, true) == 1000
+    assert RebindInBranches.or_then_and(true, false, false) == 2000
+    assert RebindInBranches.or_then_and(false, true, true) == 1101
+    assert RebindInBranches.or_then_and(false, true, false) == 2101
+    assert RebindInBranches.or_then_and(false, false, true) == 2101
+  end
+
+  test "an `&&` on the left of `||` forwards bindings to both branches" do
+    assert RebindInBranches.and_then_or(true, true, false) == 1101
+    assert RebindInBranches.and_then_or(true, false, true) == 1101
+    assert RebindInBranches.and_then_or(true, false, false) == 2101
+    assert RebindInBranches.and_then_or(false, false, true) == 1000
+    assert RebindInBranches.and_then_or(false, false, false) == 2000
+  end
+
+  test "while conditions with a rebinding `||` operand forward bindings" do
+    assert RebindInBranches.while_or(5) == 503
+    assert RebindInBranches.while_or(0) == 301
+  end
 end

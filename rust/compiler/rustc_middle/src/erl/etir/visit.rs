@@ -148,6 +148,13 @@ pub fn walk_expr<'etir, 'tcx: 'etir, V: Visitor<'etir, 'tcx>>(
         }
         Loop { id: _, body } => visit_expr_id(visitor, body),
         Continue { target: _ } => {}
+        Join { ref joins, body } => {
+            visit_expr_id(visitor, body);
+            for &join in joins {
+                visit_expr_id(visitor, visitor.etir()[join].body);
+            }
+        }
+        Jump { target: _ } => {}
     }
 }
 

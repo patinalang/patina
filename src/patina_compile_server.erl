@@ -206,35 +206,87 @@ write(Sock, Data) ->
 %% Control markers
 %% -----------------------------------------------------------------------------
 
-%% Rewrites the '$patina_marker' control-flow markers into jumps.
+core_transform(Module0) ->
+    Module1 = cerl_trees:map(fun rewrite_labels/1, Module0),
+    cerl_trees:map(fun rewrite/1, gather(Module1)).
+
+%% Rewrites labels into `letrec_goto` join points. A label is scoped to one `case`, and jumps
+%% never cross a `try` or a function boundary.
 %%
-%% A jump is an apply of a `letrec_goto` join point. This transform is meant to run before
-%% any optimization, because the inlining opt can inline a lambda with `return` into parent body.
+%% - A `case` clause matching `{'$patina_label_N', ...Vars}` is rewritten into `letrec` that
+%%   `'$patina_marker':jump('$patina_label_n', ...Vars)` jumps to.
 %%
-%% - `return(Value)` and `break(Value)` jump to `'$patina_return'/1`.
-%% - `continue(Args...)` jumps to `'$patina_continue'/N`.
+%% - `'$patina_marker:jump(Label, Args...)` jumps to `Label/N`.
 %%
-%% A jump goes to the innermost join point with its name. The labels are always named the same
-%% (as above), so they follow lexical shadowing.
-%%
-%% The same jump has a different effect in each scope:
-%%
-%% - If the marker is inside a local function (e.g. an outlined `after` block), it can't jump
-%%   to the outer function, so it returns the marker as a tuple `{'$patina_return', Value}`
-%%   or `{$patina_continue, ..Args}`.
-%%
-%% - If the marker is inside `try` protected expression it also can't jump outside of `try` block,
-%%   so it likewise returns the tuple from the block.
-%%
-%% - At call sites for both of the scenarios above, we have to have a `case` that peels out markers,
-%%   and jumps again, starting this list from the top.
-%%
-%% - In a (non-local) function, a `continue` jumps to a tail-call-helper that calls self-function
-%%   again.
-%%
-%% - In a (non-local) function, a `return` or `break` simply `ret`.
-core_transform(Module) ->
-    cerl_trees:map(fun rewrite/1, gather(Module)).
+%% What's left should be just a case with a single `_ -> ...` clause that points to "real" body
+%% that uses the jumps.
+rewrite_labels(Expr) ->
+    case cerl:type(Expr) of
+        'case' -> rewrite_join_case(Expr);
+        call -> rewrite_label_jump(Expr);
+        seq -> rewrite_label_seq(Expr);
+        _ -> Expr
+    end.
+
+rewrite_join_case(Case) ->
+    {Clauses, Joins} = lists:foldl(fun rewrite_label_clause/2, {[], []}, cerl:case_clauses(Case)),
+    lists:foldl(
+        fun(Join, Acc) -> cerl:ann_c_letrec([letrec_goto], [Join], Acc) end,
+        cerl:update_c_case(Case, cerl:case_arg(Case), lists:reverse(Clauses)),
+        Joins
+    ).
+
+rewrite_label_clause(Clause, {Clauses, Joins}) ->
+    case label_clause(Clause) of
+        {Label, Vars} ->
+            Name = cerl:c_fname(cerl:atom_val(Label), length(Vars)),
+            Body = cerl:clause_body(Clause),
+            Join = {Name, cerl:c_fun(Vars, Body)},
+            {Clauses, [Join | Joins]};
+        false ->
+            {[Clause | Clauses], Joins}
+    end.
+
+label_clause(Clause) ->
+    maybe
+        [Pat] ?= cerl:clause_pats(Clause),
+        true ?= cerl:is_c_tuple(Pat),
+        [Label | Vars] ?= cerl:tuple_es(Pat),
+        true ?= cerl:is_c_atom(Label),
+        true ?= is_label(cerl:atom_val(Label)),
+        {Label, Vars}
+    else
+        _ -> false
+    end.
+
+rewrite_label_jump(Call) ->
+    IsJump =
+        cerl:is_c_atom(cerl:call_module(Call)) andalso
+            cerl:atom_val(cerl:call_module(Call)) =:= '$patina_marker' andalso
+            cerl:concrete(cerl:call_name(Call)) =:= jump,
+
+    case IsJump of
+        true ->
+            [Label | Args] = cerl:call_args(Call),
+            cerl:c_apply(cerl:c_fname(cerl:atom_val(Label), length(Args)), Args);
+        false ->
+            Call
+    end.
+
+%% `do Jump Rest`: `Rest` cannot run.
+rewrite_label_seq(Seq) ->
+    Arg = cerl:seq_arg(Seq),
+    IsJump =
+        cerl:is_c_apply(Arg) andalso cerl:is_c_fname(cerl:apply_op(Arg)) andalso
+            is_label(cerl:fname_id(cerl:apply_op(Arg))),
+
+    case IsJump of
+        true -> Arg;
+        false -> Seq
+    end.
+
+is_label(Name) ->
+    lists:prefix("$patina_label_", atom_to_list(Name)).
 
 %% Adds annotations to the module.
 %% `MarkerJoins` is an ordset of `{MarkerTag, Arity}`.
@@ -351,6 +403,33 @@ dispatch_marker_joins(Expr, Locals) ->
             []
     end.
 
+%% Rewrites the '$patina_marker' control-flow markers into jumps.
+%%
+%% A jump is an apply of a `letrec_goto` join point. This transform is meant to run before
+%% any optimization, because the inlining opt can inline a lambda with `return` into parent body.
+%%
+%% - `return(Value)` and `break(Value)` jump to `'$patina_return'/1`.
+%% - `continue(Args...)` jumps to `'$patina_continue'/N`.
+%%
+%% A jump goes to the innermost join point with its name. The labels are always named the same
+%% (as above), so they follow lexical shadowing.
+%%
+%% The same jump has a different effect in each scope:
+%%
+%% - If the marker is inside a local function (e.g. an outlined `after` block), it can't jump
+%%   to the outer function, so it returns the marker as a tuple `{'$patina_return', Value}`
+%%   or `{$patina_continue, ..Args}`.
+%%
+%% - If the marker is inside `try` protected expression it also can't jump outside of `try` block,
+%%   so it likewise returns the tuple from the block.
+%%
+%% - At call sites for both of the scenarios above, we have to have a `case` that peels out markers,
+%%   and jumps again, starting this list from the top.
+%%
+%% - In a (non-local) function, a `continue` jumps to a tail-call-helper that calls self-function
+%%   again.
+%%
+%% - In a (non-local) function, a `return` or `break` simply `ret`.
 rewrite(Expr0) ->
     Expr = drop_gather_annotations(Expr0),
     case cerl:type(Expr) of

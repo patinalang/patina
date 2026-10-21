@@ -3,7 +3,7 @@ use rustc_data_structures::smallvec::{SmallVec, smallvec};
 use rustc_hir::TermClass;
 use rustc_hir::def_id::DefId;
 use rustc_middle::erl::etir::{
-    self, Callee, ErlFun, ExprId, ExprKind, Lit, PatId, PatKind, PatternInput, VarId,
+    self, Callee, ErlFun, ExprId, ExprKind, JoinId, Lit, PatId, PatKind, PatternInput, VarId,
 };
 use rustc_middle::erl::{ErlCallKind, ErlModuleResolution};
 use rustc_middle::span_bug;
@@ -176,12 +176,16 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 self.translate_try_catch(span, body, arms, after)
             }
 
-            ExprKind::Match { scrutinee, ref arms } => self.translate_match(span, scrutinee, arms),
+            ExprKind::Match { scrutinee, ref arms } => {
+                self.translate_match(span, scrutinee, arms, &[])
+            }
 
             ExprKind::Return { value } => self.translate_return(span, value),
             ExprKind::Loop { id, body } => self.translate_loop(expr, id, body),
             ExprKind::Break { target, value } => self.translate_break(span, target, value),
             ExprKind::Continue { target } => self.translate_continue(span, target),
+            ExprKind::Join { ref joins, body } => self.translate_join(span, joins, body),
+            ExprKind::Jump { target } => self.translate_jump(span, target),
         }
     }
 
@@ -392,6 +396,46 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         }
     }
 
+    fn translate_join(&mut self, span: Span, joins: &[JoinId], body: ExprId) -> eaf::Expr<'arena> {
+        let ExprKind::Match { scrutinee, ref arms } = self.etir[body].kind else {
+            span_bug!(span, "`Join` body is not a `Match`")
+        };
+        self.translate_match(span, scrutinee, arms, joins)
+    }
+
+    fn translate_jump(&mut self, span: Span, target: JoinId) -> eaf::Expr<'arena> {
+        let args = self.label_args(span, target);
+        self.marker_call(span, sym::jump, args)
+    }
+
+    fn label_args(&mut self, span: Span, join: JoinId) -> SmallVec<[eaf::Expr<'arena>; 1]> {
+        let afb = &self.translator.afb;
+        let label = afb.expr_atom(span, label_name(join));
+        let params = self.etir[join].params.iter().map(|&var| self.translate_var_ref(span, var));
+        std::iter::once(label).chain(params).collect()
+    }
+
+    fn translate_join_arm(&mut self, join: JoinId) -> TranslatedArm<'arena> {
+        let afb = &self.translator.afb;
+        let body = self.etir[join].body;
+        let span = self.etir[body].span;
+
+        // {$patina_label_XX, reassigned_arg1, reassigned_arg2, ...}
+        // This prepares fresh variables for our later Core Erlang rewriting.
+        let ((pattern, body), scope) = self.with_scope(|cx| {
+            let label = afb.pat_atom(span, label_name(join));
+            let params = cx.etir[join].params.iter().map(|&var| cx.translate_assignee(span, var));
+            let pattern = afb.pat_tuple(span, std::iter::once(label).chain(params));
+            (pattern, cx.translate_expr(body))
+        });
+
+        TranslatedArm {
+            patterns: smallvec![GuardedPattern(pattern, smallvec![])],
+            guard: None,
+            branch: Branch { span, body, scope },
+        }
+    }
+
     pub(super) fn marker_call(
         &self,
         span: Span,
@@ -549,12 +593,15 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         span: Span,
         scrutinee: ExprId,
         arms: &[etir::Arm],
+        joins: &[JoinId],
     ) -> eaf::Expr<'arena> {
         let afb = &self.translator.afb;
         let scrutinee = self.translate_expr(scrutinee);
 
         let mut translated: SmallVec<[TranslatedArm<'arena>; 4]> =
             arms.iter().map(|arm| self.translate_arm(arm)).collect();
+
+        translated.extend(joins.iter().map(|&join| self.translate_join_arm(join)));
 
         self.merge_branches(translated.iter_mut().map(|arm| &mut arm.branch));
 
@@ -1110,4 +1157,8 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         visit(groups, 0, &mut SmallVec::new(), &mut translated, &mut build);
         translated
     }
+}
+
+fn label_name(join: JoinId) -> Symbol {
+    Symbol::intern(&format!("$patina_label_{}", join.as_usize()))
 }
