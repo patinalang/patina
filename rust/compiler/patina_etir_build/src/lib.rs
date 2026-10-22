@@ -46,7 +46,7 @@ struct BodyBuildCx<'tcx> {
     body: etir::Body<'tcx>,
     var_ids: FxHashMap<LocalVarId, VarId>,
     loop_ids: FxHashMap<region::Scope, LoopId>,
-    join_ids: FxHashMap<ExprId, JoinId>,
+    reassign_count: usize,
 }
 
 pub(crate) fn etir_body<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId) -> &'tcx etir::Body<'tcx> {
@@ -76,7 +76,7 @@ pub(crate) fn etir_body<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId) -> &'tcx et
         body: etir::Body::new(),
         var_ids: FxHashMap::default(),
         loop_ids: FxHashMap::default(),
-        join_ids: FxHashMap::default(),
+        reassign_count: 0,
     };
 
     let (params, value) = ThirBodyCx::lower(&mut cx, def_id);
@@ -136,6 +136,13 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         loop_id
     }
 
+    fn push_join_and_replace(&mut self, expr: &mut ExprId) -> JoinId {
+        let etir::Expr { ty, span, .. } = self.cx.body[*expr];
+        let join = self.cx.body.joins.push(etir::Join { body: *expr, params: Box::new([]) });
+        *expr = self.push_expr(etir::ExprKind::Jump { target: join }, ty, span);
+        join
+    }
+
     fn var(&mut self, id: LocalVarId) -> VarId {
         let tcx = self.cx.tcx;
         let vars = &mut self.cx.body.vars;
@@ -170,6 +177,13 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
                 has_siblings: adt_def.variants().len() != 1,
             },
         }
+    }
+
+    fn track_reassigns<T>(&mut self, f: impl FnOnce(&mut Self) -> T) -> (T, bool) {
+        let prev = self.cx.reassign_count;
+        let result = f(self);
+        let reassigned = self.cx.reassign_count != prev;
+        (result, reassigned)
     }
 }
 

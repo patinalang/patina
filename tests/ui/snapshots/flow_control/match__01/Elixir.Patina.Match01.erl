@@ -47,49 +47,36 @@ main() ->
             io:nl(),
             {};
         2 ->
-            io:put_chars(begin
-                             _element@5_0 = [<<"This is a prime"/utf8>>],
-                             [_element@5_0]
-                         end),
-            io:nl(),
-            {};
+            '$patina_marker':jump('$patina_label_0'),
+            [];
         3 ->
-            io:put_chars(begin
-                             _element@5_0 = [<<"This is a prime"/utf8>>],
-                             [_element@5_0]
-                         end),
-            io:nl(),
-            {};
+            '$patina_marker':jump('$patina_label_0'),
+            [];
         5 ->
-            io:put_chars(begin
-                             _element@5_0 = [<<"This is a prime"/utf8>>],
-                             [_element@5_0]
-                         end),
-            io:nl(),
-            {};
+            '$patina_marker':jump('$patina_label_0'),
+            [];
         7 ->
-            io:put_chars(begin
-                             _element@5_0 = [<<"This is a prime"/utf8>>],
-                             [_element@5_0]
-                         end),
-            io:nl(),
-            {};
+            '$patina_marker':jump('$patina_label_0'),
+            [];
         11 ->
+            '$patina_marker':jump('$patina_label_0'),
+            [];
+        _range@5_0 when _range@5_0 >= 13, _range@5_0 =< 19 ->
             io:put_chars(begin
-                             _element@5_0 = [<<"This is a prime"/utf8>>],
-                             [_element@5_0]
-                         end),
-            io:nl(),
-            {};
-        _range@6_0 when _range@6_0 >= 13, _range@6_0 =< 19 ->
-            io:put_chars(begin
-                             _element@7_0 = [<<"A teen"/utf8>>], [_element@7_0]
+                             _element@6_0 = [<<"A teen"/utf8>>], [_element@6_0]
                          end),
             io:nl(),
             {};
         _ ->
             io:put_chars(begin
-                             _element@8_0 = [<<"Ain't special"/utf8>>],
+                             _element@7_0 = [<<"Ain't special"/utf8>>],
+                             [_element@7_0]
+                         end),
+            io:nl(),
+            {};
+        {'$patina_label_0'} ->
+            io:put_chars(begin
+                             _element@8_0 = [<<"This is a prime"/utf8>>],
                              [_element@8_0]
                          end),
             io:nl(),

@@ -1,7 +1,7 @@
 use rustc_hir::def::DefKind;
 use rustc_hir::{BinarySegmentTy, HirId};
 use rustc_middle::erl::binary_pattern::{BinaryEndianness, BinarySegmentLayout, BinarySegmentSize};
-use rustc_middle::erl::etir::visit::{self, Visitor, walk_expr, walk_pat};
+use rustc_middle::erl::etir::visit::{self, Visitor, walk_pat};
 use rustc_middle::erl::etir::{self, ExprId, PatId, PatternInput};
 use rustc_middle::erl::{ErlCallTarget, ErlModuleId, ErlModuleResolution};
 use rustc_middle::middle::region;
@@ -469,9 +469,10 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
     ) -> ExprId {
         let span = expr.span;
         let lhs = self.lower_expr(lhs);
-        let rhs = self.lower_expr(rhs);
 
-        if !self.reassigns_vars(rhs) {
+        let (rhs, reassigned) = self.track_reassigns(|cx| cx.lower_expr(rhs));
+
+        if !reassigned {
             let op = match op {
                 thir::LogicalOp::And => etir::LogicalOp::And,
                 thir::LogicalOp::Or => etir::LogicalOp::Or,
@@ -767,6 +768,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
     ) -> ExprId {
         let rhs = self.lower_expr(rhs);
         let lhs = self.lower_pat(lhs, PatternInput::Typed);
+        self.cx.reassign_count += 1;
         self.push_expr(etir::ExprKind::Assign { lhs, rhs }, expr.ty, expr.span)
     }
 
@@ -804,14 +806,16 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             }
 
             thir::ExprKind::LogicalOp { op, lhs, rhs } => {
-                match (self.lower_cond(lhs), self.lower_cond(rhs)) {
+                let lhs = self.lower_cond(lhs);
+                let (rhs, rhs_reassigns) = self.track_reassigns(|cx| cx.lower_cond(rhs));
+                match (lhs, rhs) {
                     // Two simple Cond::Test arms can be joined into a single Cond::Test.
                     (
                         Cond::Test { scrutinee: lhs, pattern: lhs_pattern },
                         Cond::Test { scrutinee: rhs, pattern: rhs_pattern },
                     ) if self.is_literal_bool_pat(lhs_pattern, true)
                         && self.is_literal_bool_pat(rhs_pattern, true)
-                        && !self.reassigns_vars(rhs) =>
+                        && !rhs_reassigns =>
                     {
                         let op = match op {
                             thir::LogicalOp::And => etir::LogicalOp::And,
@@ -851,25 +855,23 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         &mut self,
         expr: &thir::Expr<'tcx>,
         cond: Cond,
-        then_body: ExprId,
-        else_body: ExprId,
+        mut then_body: ExprId,
+        mut else_body: ExprId,
         joins: &mut Vec<etir::JoinId>,
     ) -> ExprId {
         match cond {
             Cond::Test { scrutinee, pattern } => {
-                let then = self.maybe_shared_body(then_body);
-                let otherwise = self.maybe_shared_body(else_body);
-                self.ifelse_match_expr(expr, scrutinee, pattern, then, otherwise)
+                self.ifelse_match_expr(expr, scrutinee, pattern, then_body, else_body)
             }
 
             Cond::And(lhs, rhs) => {
-                self.share_body(else_body, joins);
+                self.share_body(&mut else_body, joins);
                 let then = self.logical_match_expr(expr, *rhs, then_body, else_body, joins);
                 self.logical_match_expr(expr, *lhs, then, else_body, joins)
             }
 
             Cond::Or(lhs, rhs) => {
-                self.share_body(then_body, joins);
+                self.share_body(&mut then_body, joins);
                 let otherwise = self.logical_match_expr(expr, *rhs, then_body, else_body, joins);
                 self.logical_match_expr(expr, *lhs, then_body, otherwise, joins)
             }
@@ -878,21 +880,9 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         }
     }
 
-    fn share_body(&mut self, body: ExprId, joins: &mut Vec<etir::JoinId>) {
-        if !self.cx.join_ids.contains_key(&body) {
-            let join = self.cx.body.joins.push(etir::Join { body, params: Box::new([]) });
-            self.cx.join_ids.insert(body, join);
-            joins.push(join);
-        }
-    }
-
-    fn maybe_shared_body(&mut self, body: ExprId) -> ExprId {
-        match self.cx.join_ids.get(&body) {
-            Some(&target) => {
-                let etir::Expr { ty, span, .. } = self.cx.body[body];
-                self.push_expr(etir::ExprKind::Jump { target }, ty, span)
-            }
-            None => body,
+    fn share_body(&mut self, body: &mut ExprId, joins: &mut Vec<etir::JoinId>) {
+        if !matches!(self.cx.body[*body].kind, etir::ExprKind::Jump { .. }) {
+            joins.push(self.push_join_and_replace(body));
         }
     }
 
@@ -940,9 +930,50 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         arms: &[thir::ArmId],
     ) -> ExprId {
         let scrutinee = self.lower_expr(scrutinee);
-        let arms = arms.iter().map(|&arm| self.lower_arm(arm)).collect();
-        let kind = etir::ExprKind::Match { scrutinee, arms };
+
+        let mut joins = Vec::new();
+        let arms = arms
+            .iter()
+            .map(|&arm| {
+                let mut arm = self.lower_arm(arm);
+                if self.has_or_pattern(arm.pattern) {
+                    joins.push(self.push_join_and_replace(&mut arm.body));
+                }
+                arm
+            })
+            .collect();
+
+        let body = self.push_expr(etir::ExprKind::Match { scrutinee, arms }, expr.ty, expr.span);
+        if joins.is_empty() {
+            return body;
+        }
+        let kind = etir::ExprKind::Join { joins: joins.into(), body };
         self.push_expr(kind, expr.ty, expr.span)
+    }
+
+    fn has_or_pattern(&self, pat: PatId) -> bool {
+        struct FindOr<'a, 'tcx> {
+            body: &'a etir::Body<'tcx>,
+            found: bool,
+        }
+
+        impl<'a, 'tcx: 'a> Visitor<'a, 'tcx> for FindOr<'a, 'tcx> {
+            fn etir(&self) -> &'a etir::Body<'tcx> {
+                self.body
+            }
+
+            fn visit_pat(&mut self, _id: PatId, pat: &'a etir::Pat<'tcx>) {
+                if let etir::PatKind::Or { .. } = pat.kind {
+                    self.found = true;
+                } else if !self.found {
+                    walk_pat(self, pat);
+                }
+            }
+        }
+
+        let mut visitor = FindOr { body: &self.cx.body, found: false };
+        visit::visit_pat_id(&mut visitor, pat);
+        visitor.found
     }
 
     fn lower_arm(&mut self, arm: thir::ArmId) -> etir::Arm {
@@ -1128,37 +1159,6 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
 
     fn resolve(&self, expr: thir::ExprId) -> &'a thir::Expr<'tcx> {
         self.resolve_expr_with_scope(expr).0
-    }
-
-    fn reassigns_vars(&self, expr: ExprId) -> bool {
-        struct FindAssignee<'a, 'tcx> {
-            body: &'a etir::Body<'tcx>,
-            found: bool,
-        }
-
-        impl<'a, 'tcx: 'a> Visitor<'a, 'tcx> for FindAssignee<'a, 'tcx> {
-            fn etir(&self) -> &'a etir::Body<'tcx> {
-                self.body
-            }
-
-            fn visit_expr(&mut self, _id: ExprId, expr: &'a etir::Expr<'tcx>) {
-                if !self.found && !matches!(expr.kind, etir::ExprKind::Closure { .. }) {
-                    walk_expr(self, expr);
-                }
-            }
-
-            fn visit_pat(&mut self, _id: PatId, pat: &'a etir::Pat<'tcx>) {
-                if let etir::PatKind::Assignee { .. } = pat.kind {
-                    self.found = true;
-                } else if !self.found {
-                    walk_pat(self, pat);
-                }
-            }
-        }
-
-        let mut visitor = FindAssignee { body: &self.cx.body, found: false };
-        visit::visit_expr_id(&mut visitor, expr);
-        visitor.found
     }
 }
 

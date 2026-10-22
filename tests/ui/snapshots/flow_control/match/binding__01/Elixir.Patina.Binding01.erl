@@ -77,72 +77,42 @@ main() ->
             io:nl(),
             {};
         _n@12_0 = 1 ->
-            io:put_chars(begin
-                             _element@15_0 = begin
-                                                 _element@13_0 =
-                                                     <<"I'm a teen of age "/utf8>>,
-                                                 _element@14_0 =
-                                                     io_lib:format("~ktp",
-                                                                   [_n@12_0]),
-                                                 [_element@13_0, _element@14_0]
-                                             end,
-                             [_element@15_0]
-                         end),
-            io:nl(),
-            {};
+            '$patina_marker':jump('$patina_label_0', _n@12_0),
+            [];
         _n@12_0 = 7 ->
-            io:put_chars(begin
-                             _element@15_0 = begin
-                                                 _element@13_0 =
-                                                     <<"I'm a teen of age "/utf8>>,
-                                                 _element@14_0 =
-                                                     io_lib:format("~ktp",
-                                                                   [_n@12_0]),
-                                                 [_element@13_0, _element@14_0]
-                                             end,
-                             [_element@15_0]
-                         end),
-            io:nl(),
-            {};
+            '$patina_marker':jump('$patina_label_0', _n@12_0),
+            [];
         _n@12_0 = 15 ->
-            io:put_chars(begin
-                             _element@15_0 = begin
-                                                 _element@13_0 =
-                                                     <<"I'm a teen of age "/utf8>>,
-                                                 _element@14_0 =
-                                                     io_lib:format("~ktp",
-                                                                   [_n@12_0]),
-                                                 [_element@13_0, _element@14_0]
-                                             end,
-                             [_element@15_0]
-                         end),
-            io:nl(),
-            {};
+            '$patina_marker':jump('$patina_label_0', _n@12_0),
+            [];
         _n@12_0 = 13 ->
+            '$patina_marker':jump('$patina_label_0', _n@12_0),
+            [];
+        _n@13_0 ->
             io:put_chars(begin
-                             _element@15_0 = begin
-                                                 _element@13_0 =
-                                                     <<"I'm a teen of age "/utf8>>,
+                             _element@16_0 = begin
                                                  _element@14_0 =
+                                                     <<"I'm an old person of age "/utf8>>,
+                                                 _element@15_0 =
                                                      io_lib:format("~ktp",
-                                                                   [_n@12_0]),
-                                                 [_element@13_0, _element@14_0]
+                                                                   [_n@13_0]),
+                                                 [_element@14_0, _element@15_0]
                                              end,
-                             [_element@15_0]
+                             [_element@16_0]
                          end),
             io:nl(),
             {};
-        _n@16_0 ->
+        {'$patina_label_0', _n@17_0} ->
             io:put_chars(begin
-                             _element@19_0 = begin
-                                                 _element@17_0 =
-                                                     <<"I'm an old person of age "/utf8>>,
+                             _element@20_0 = begin
                                                  _element@18_0 =
+                                                     <<"I'm a teen of age "/utf8>>,
+                                                 _element@19_0 =
                                                      io_lib:format("~ktp",
-                                                                   [_n@16_0]),
-                                                 [_element@17_0, _element@18_0]
+                                                                   [_n@17_0]),
+                                                 [_element@18_0, _element@19_0]
                                              end,
-                             [_element@19_0]
+                             [_element@20_0]
                          end),
             io:nl(),
             {}

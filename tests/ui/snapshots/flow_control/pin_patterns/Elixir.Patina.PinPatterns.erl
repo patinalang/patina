@@ -100,9 +100,14 @@ let_else_pin(_actual@0_0, _expected@1_0) ->
 
 or_pin(_value@0_0, _first@1_0, _second@2_0) ->
     case _value@0_0 of
-        _first@1_0 -> true;
-        _second@2_0 -> true;
-        _ -> false
+        _first@1_0 ->
+            '$patina_marker':jump('$patina_label_0'),
+            [];
+        _second@2_0 ->
+            '$patina_marker':jump('$patina_label_0'),
+            [];
+        _ -> false;
+        {'$patina_label_0'} -> true
     end.
 
 map_value_pin(_map@0_0, _expected@1_0) ->

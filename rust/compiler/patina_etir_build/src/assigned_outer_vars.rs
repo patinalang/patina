@@ -48,7 +48,10 @@ impl<'etir, 'tcx> Captures<'etir, 'tcx> {
         }
     }
 
-    fn with_scope(&mut self, f: impl FnOnce(&mut Self)) -> FxIndexMap<VarId, LoopOuterVar> {
+    fn with_scope(
+        &mut self,
+        f: impl FnOnce(&mut Self),
+    ) -> (FxIndexMap<VarId, LoopOuterVar>, FxHashSet<VarId>) {
         let used = std::mem::take(&mut self.used);
         let bound = std::mem::take(&mut self.bound);
         f(self);
@@ -57,8 +60,8 @@ impl<'etir, 'tcx> Captures<'etir, 'tcx> {
         for &var in captured.values() {
             self.use_var(var);
         }
-        self.bound.extend(inner_bound);
-        captured
+        self.bound.extend(inner_bound.iter().copied());
+        (captured, inner_bound)
     }
 }
 
@@ -74,21 +77,30 @@ impl<'etir, 'tcx: 'etir> Visitor<'etir, 'tcx> for Captures<'etir, 'tcx> {
                 self.bound.extend(vars.iter().copied());
             }
             ExprKind::Loop { id, body: _ } => {
-                let captured = self.with_scope(|s| visit::walk_expr(s, expr));
+                let captured = self.with_scope(|s| visit::walk_expr(s, expr)).0;
                 self.outer_vars.push((*id, captured.into_values().collect()));
             }
             ExprKind::Join { joins, body } => {
-                let captured = self.with_scope(|s| visit::visit_expr_id(s, *body));
-                let params: Box<[VarId]> = captured
+                let (used_in_body, bound_in_body) =
+                    self.with_scope(|s| visit::visit_expr_id(s, *body));
+
+                let reassigned_in_body: Vec<VarId> = used_in_body
                     .into_values()
                     .filter_map(|var| match var {
                         LoopOuterVar::Reassigned(var) => Some(var),
                         LoopOuterVar::Referenced(_) => None,
                     })
                     .collect();
+
                 for &join in joins {
-                    self.join_params.push((join, params.clone()));
-                    visit::visit_expr_id(self, self.body[join].body);
+                    let used_in_join =
+                        self.with_scope(|s| visit::visit_expr_id(s, s.body[join].body)).0;
+                    let read_body_bindings =
+                        used_in_join.into_keys().filter(|var| bound_in_body.contains(var));
+                    let params =
+                        reassigned_in_body.iter().copied().chain(read_body_bindings).collect();
+
+                    self.join_params.push((join, params));
                 }
             }
             _ => visit::walk_expr(self, expr),

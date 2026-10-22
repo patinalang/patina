@@ -154,27 +154,39 @@ closure_term(_value@0_0) ->
 
 literal_or(_value@0_0) ->
     case _value@0_0 of
-        1 -> true;
-        2 -> true;
-        ok -> true;
-        _ -> false
+        1 ->
+            '$patina_marker':jump('$patina_label_0'),
+            [];
+        2 ->
+            '$patina_marker':jump('$patina_label_0'),
+            [];
+        ok ->
+            '$patina_marker':jump('$patina_label_0'),
+            [];
+        _ -> false;
+        {'$patina_label_0'} -> true
     end.
 
 nested_or(_value@0_0) ->
     case _value@0_0 of
         {ok, _value@1_0 = 1}
             when erlang:is_integer(_value@1_0) ->
-            true;
+            '$patina_marker':jump('$patina_label_0'),
+            [];
         {ok, _value@2_0 = 2}
             when erlang:is_integer(_value@2_0) ->
-            true;
+            '$patina_marker':jump('$patina_label_0'),
+            [];
         {error, _value@1_0 = 1}
             when erlang:is_integer(_value@1_0) ->
-            true;
+            '$patina_marker':jump('$patina_label_0'),
+            [];
         {error, _value@2_0 = 2}
             when erlang:is_integer(_value@2_0) ->
-            true;
-        _ -> false
+            '$patina_marker':jump('$patina_label_0'),
+            [];
+        _ -> false;
+        {'$patina_label_0'} -> true
     end.
 
 int_class(_value@0_0) ->
@@ -254,9 +266,14 @@ ref_class(_value@0_0) ->
 
 number(_value@0_0) ->
     case _value@0_0 of
-        _value@1_0 when erlang:is_integer(_value@1_0) -> true;
-        _value@2_0 when erlang:is_float(_value@2_0) -> true;
-        _ -> false
+        _value@1_0 when erlang:is_integer(_value@1_0) ->
+            '$patina_marker':jump('$patina_label_0'),
+            [];
+        _value@2_0 when erlang:is_float(_value@2_0) ->
+            '$patina_marker':jump('$patina_label_0'),
+            [];
+        _ -> false;
+        {'$patina_label_0'} -> true
     end.
 
 alias_list(_value@0_0) ->
@@ -474,12 +491,16 @@ wrapped_int(_value@0_0) ->
 literal_or_point(_value@0_0) ->
     begin
         case _value@0_0 of
-            0 -> true;
+            0 ->
+                '$patina_marker':jump('$patina_label_0'),
+                [];
             #'Elixir.Patina.TermMatch.Point':'Point'{x = 0,
                                                      y = _value@1_0}
                 when erlang:is_integer(_value@1_0) ->
-                true;
-            _ -> false
+                '$patina_marker':jump('$patina_label_0'),
+                [];
+            _ -> false;
+            {'$patina_label_0'} -> true
         end
     end.
 

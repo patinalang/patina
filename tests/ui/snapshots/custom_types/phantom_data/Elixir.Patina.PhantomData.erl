@@ -81,9 +81,14 @@ typed_constant_pattern(_value@0_0) ->
 
 typed_or_pattern(_value@0_0) ->
     case _value@0_0 of
-        1 -> 0;
-        2 -> 0;
-        _n@1_0 -> _n@1_0
+        1 ->
+            '$patina_marker':jump('$patina_label_0'),
+            [];
+        2 ->
+            '$patina_marker':jump('$patina_label_0'),
+            [];
+        _n@1_0 -> _n@1_0;
+        {'$patina_label_0'} -> 0
     end.
 
 typed_update(_value@0_0) -> 7.

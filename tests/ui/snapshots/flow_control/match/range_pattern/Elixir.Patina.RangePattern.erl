@@ -61,10 +61,16 @@ classify_float(_value@0_0) ->
 matches_either_range(_value@0_0) ->
     case _value@0_0 of
         _range@1_0 when _range@1_0 >= 1, _range@1_0 =< 3 ->
-            true;
-        _range@2_0 when _range@2_0 >= 7, _range@2_0 < 9 -> true;
-        11 -> true;
-        _ -> false
+            '$patina_marker':jump('$patina_label_0'),
+            [];
+        _range@2_0 when _range@2_0 >= 7, _range@2_0 < 9 ->
+            '$patina_marker':jump('$patina_label_0'),
+            [];
+        11 ->
+            '$patina_marker':jump('$patina_label_0'),
+            [];
+        _ -> false;
+        {'$patina_label_0'} -> true
     end.
 
 match_bound_range(_value@0_0) ->

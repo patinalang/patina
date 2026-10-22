@@ -32,30 +32,60 @@
 
 classify(_number@0_0) ->
     case _number@0_0 of
-        1 -> 10;
-        3 -> 10;
-        5 -> 10;
-        2 -> 20;
-        4 -> 20;
-        _ -> 0
+        1 ->
+            '$patina_marker':jump('$patina_label_0'),
+            [];
+        3 ->
+            '$patina_marker':jump('$patina_label_0'),
+            [];
+        5 ->
+            '$patina_marker':jump('$patina_label_0'),
+            [];
+        2 ->
+            '$patina_marker':jump('$patina_label_1'),
+            [];
+        4 ->
+            '$patina_marker':jump('$patina_label_1'),
+            [];
+        _ -> 0;
+        {'$patina_label_0'} -> 10;
+        {'$patina_label_1'} -> 20
     end.
 
 classify_nested(_pair@0_0) ->
     case _pair@0_0 of
-        {0, 2} -> 10;
-        {0, 3} -> 10;
-        {1, 2} -> 10;
-        {1, 3} -> 10;
-        _ -> 0
+        {0, 2} ->
+            '$patina_marker':jump('$patina_label_0'),
+            [];
+        {0, 3} ->
+            '$patina_marker':jump('$patina_label_0'),
+            [];
+        {1, 2} ->
+            '$patina_marker':jump('$patina_label_0'),
+            [];
+        {1, 3} ->
+            '$patina_marker':jump('$patina_label_0'),
+            [];
+        _ -> 0;
+        {'$patina_label_0'} -> 10
     end.
 
 classify_nested_map(_map@0_0) ->
     case _map@0_0 of
-        #{<<"first"/utf8>> := 0, <<"second"/utf8>> := 2} -> 10;
-        #{<<"first"/utf8>> := 0, <<"second"/utf8>> := 3} -> 10;
-        #{<<"first"/utf8>> := 1, <<"second"/utf8>> := 2} -> 10;
-        #{<<"first"/utf8>> := 1, <<"second"/utf8>> := 3} -> 10;
-        _ -> 0
+        #{<<"first"/utf8>> := 0, <<"second"/utf8>> := 2} ->
+            '$patina_marker':jump('$patina_label_0'),
+            [];
+        #{<<"first"/utf8>> := 0, <<"second"/utf8>> := 3} ->
+            '$patina_marker':jump('$patina_label_0'),
+            [];
+        #{<<"first"/utf8>> := 1, <<"second"/utf8>> := 2} ->
+            '$patina_marker':jump('$patina_label_0'),
+            [];
+        #{<<"first"/utf8>> := 1, <<"second"/utf8>> := 3} ->
+            '$patina_marker':jump('$patina_label_0'),
+            [];
+        _ -> 0;
+        {'$patina_label_0'} -> 10
     end.
 
 classify_if_let(_number@0_0) ->
