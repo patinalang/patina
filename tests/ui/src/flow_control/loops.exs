@@ -12,7 +12,7 @@ defmodule LoopsTest do
 
   test "generated loop helpers are private in the final BEAM" do
     refute Enum.any?(Loops.module_info(:exports), fn {name, _arity} ->
-             String.contains?(Atom.to_string(name), "$patina_loop_")
+             String.contains?(Atom.to_string(name), "_$patina_loop")
            end)
   end
 
@@ -56,25 +56,19 @@ defmodule LoopsTest do
     assert Loops.cast_loop_value() == 1
   end
 
-  defp loop_helpers(module, fun_name) do
+  defp loop_helper_parents(module) do
     for {name, _arity} <- module.module_info(:functions),
-        name = Atom.to_string(name),
-        String.starts_with?(name, fun_name) and String.contains?(name, "$patina_loop_"),
-        into: MapSet.new(),
-        do: name
+        [_, parent] <- [Regex.run(~r"^-(.+)/\d+-_\$patina_loop/\d+-\d+-$", Atom.to_string(name))],
+        do: parent
   end
 
-  test "loop helpers are numbered from the top of the function, including nested and closure loops" do
-    assert loop_helpers(Loops, "helper_names") ==
-             MapSet.new(for n <- 1..5, do: "helper_names$patina_loop_#{n}")
+  test "each loop gets a helper, including nested and closure loops" do
+    assert Enum.count(loop_helper_parents(Loops), &(&1 == "helper_names")) == 5
   end
 
   test "loop helpers in trait impls are named after the impl's function" do
-    assert loop_helpers(Loops.Counter, "Loops::Count::count") ==
-             MapSet.new([
-               "Loops::Count::count<int>$patina_loop_1",
-               "Loops::Count::count<str>$patina_loop_1"
-             ])
+    assert MapSet.new(loop_helper_parents(Loops.Counter)) ==
+             MapSet.new(["Loops::Count::count<int>", "Loops::Count::count<str>"])
   end
 
   test "continue and break in a try body run the after body" do

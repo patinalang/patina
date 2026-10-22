@@ -1,12 +1,11 @@
 use rustc_data_structures::fx::FxIndexSet;
 use rustc_data_structures::smallvec::SmallVec;
-use rustc_middle::erl::etir::{self, ExprId, LoopId, LoopOuterVar, VarId};
-use rustc_middle::erl::to_atom_symbol;
+use rustc_middle::erl::etir::{self, ExprId, LoopId, VarId};
 use rustc_middle::{bug, span_bug};
 use rustc_span::{Span, Symbol, kw, sym};
 
+use crate::compile::translate::BodyCx;
 use crate::compile::translate::scopes::PatinaVar;
-use crate::compile::translate::{BodyCx, Function};
 use crate::erlang::abstract_format as eaf;
 use crate::{not_implemented, span_fatal};
 
@@ -78,25 +77,16 @@ pub(super) struct LoopControl {
 }
 
 pub(super) struct LoopContext {
-    pub helper_erl_name: Symbol,
     pub depth: usize,
     label: LoopId,
-    /// Variables that are passed as parameters to the loop helper.
-    pub params: FxIndexSet<VarId>,
-    /// Variables that are reassigned in the loop body; a subset of `params`.
+    /// Variables that are reassigned in the loop body.
     pub reassigned: FxIndexSet<VarId>,
     pub control: LoopControl,
 }
 
 impl LoopContext {
-    fn new(
-        helper_erl_name: Symbol,
-        depth: usize,
-        label: LoopId,
-        params: FxIndexSet<VarId>,
-        reassigned: FxIndexSet<VarId>,
-    ) -> Self {
-        Self { helper_erl_name, depth, label, params, reassigned, control: LoopControl::default() }
+    fn new(depth: usize, label: LoopId, reassigned: FxIndexSet<VarId>) -> Self {
+        Self { depth, label, reassigned, control: LoopControl::default() }
     }
 }
 
@@ -106,30 +96,13 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         id: LoopId,
         f: impl FnOnce(&mut Self) -> R,
     ) -> (R, LoopContext) {
-        let outer_vars = &self.etir[id].outer_vars;
-        let params = outer_vars.iter().map(|outer| outer.var()).collect();
-        let reassigned = outer_vars
-            .iter()
-            .filter_map(|&outer| match outer {
-                LoopOuterVar::Reassigned(var) => Some(var),
-                LoopOuterVar::Referenced(_) => None,
-            })
-            .collect();
-
-        let helper_erl_name = self.loop_helper_erl_name();
-        let loop_cx = LoopContext::new(helper_erl_name, self.loops.depth(), id, params, reassigned);
+        let reassigned = self.etir[id].reassigned.iter().copied().collect();
+        let loop_cx = LoopContext::new(self.loops.depth(), id, reassigned);
 
         self.loops.push(loop_cx);
         let result = f(self);
         let loop_cx = self.loops.pop();
         (result, loop_cx)
-    }
-
-    fn loop_helper_erl_name(&mut self) -> Symbol {
-        let tcx = self.tcx();
-        let root = tcx.typeck_root_def_id(self.owner);
-        let num = self.scopes.next_loop_num();
-        to_atom_symbol(format!("{}$patina_loop_{num}", tcx.erl_fn_name(root)))
     }
 
     pub(super) fn translate_loop(
@@ -145,8 +118,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 let translated_body = cx.translate_expr(body);
 
                 let loop_cx = cx.loops.current();
-                let recurse_args = cx.var_exprs(expr.span, &loop_cx.params);
-                let recurse = cx.marker_call(expr.span, kw::Continue, recurse_args);
+                let recurse_args = cx.var_exprs(expr.span, &loop_cx.reassigned);
+                let self_fun_name = afb.expr_var(expr.span, sym::_dollar_patina_loop);
+                let recurse = afb.expr_local_call(expr.span, self_fun_name, recurse_args);
 
                 // The body does not land as a tail expression, so Erlang warns
                 // the result is unused. Erlang does not know that we rewrite the markers later.
@@ -160,23 +134,15 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             })
         });
 
-        let helper_function = Function {
-            span: expr.span,
-            name: loop_cx.helper_erl_name,
-            clause: afb.clause(
-                expr.span,
-                self.var_pats(expr.span, &loop_cx.params),
-                None,
-                loop_body,
-            ),
-            exported: false,
-        };
-        self.translator.push_function(self.parts, helper_function);
-
+        let helper_fun = afb.expr_named_fun(
+            expr.span,
+            sym::_dollar_patina_loop,
+            [afb.clause(expr.span, self.var_pats(expr.span, &loop_cx.reassigned), None, loop_body)],
+        );
         let loop_helper_call = afb.expr_local_call(
             expr.span,
-            afb.expr_atom(expr.span, loop_cx.helper_erl_name),
-            self.var_exprs(expr.span, &loop_cx.params),
+            helper_fun,
+            self.var_exprs(expr.span, &loop_cx.reassigned),
         );
 
         for id in &loop_cx.reassigned {
@@ -270,7 +236,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let loop_cx = self.loops.current();
 
         if target_depth == loop_cx.depth {
-            let args = self.var_exprs(span, &loop_cx.params);
+            let args = self.var_exprs(span, &loop_cx.reassigned);
             self.marker_call(span, kw::Continue, args)
         } else {
             let target_depth = afb.expr_int(span, target_depth as u128);
@@ -337,7 +303,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             [afb.pat_int(span, outer_loop.depth as u128)],
             loop_cx,
         );
-        let args = self.var_exprs(span, &outer_loop.params);
+        let args = self.var_exprs(span, &outer_loop.reassigned);
         let body = self.marker_call(span, kw::Continue, args);
         afb.clause(span, [continue_pattern], None, body)
     }

@@ -1042,8 +1042,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             span_bug!(expr.span, "HIR-derived loop has no outer Scope")
         };
 
-        // `outer_vars` are analyzed in a separate pass
-        let loop_id = self.push_loop(label, Box::new([]));
+        let loop_id = self.push_loop(label);
         let body = self.lower_expr(body);
         self.push_expr(etir::ExprKind::Loop { id: loop_id, body }, expr.ty, expr.span)
     }

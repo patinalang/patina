@@ -86,57 +86,6 @@ shadowed_blocks() ->
 recursive_loop(_n@0_0) ->
     'recursive_loop::sum_to'(_n@0_0).
 
-'recursive_loop::sum_to$patina_loop_1'(_witness_Iterator@1_0,
-                                       _iter@5_0, _total@4_0) ->
-    _ = begin
-            case
-                'Elixir.Patina.Core.Range':'Core::Iterator::next<int>'(_witness_Iterator@1_0,
-                                                                       _iter@5_0)
-                of
-                nil ->
-                    _branch_value@10_0 = begin
-                                             '$patina_marker':break({break,
-                                                                     0,
-                                                                     {},
-                                                                     _iter@5_0,
-                                                                     _total@4_0}),
-                                             []
-                                         end,
-                    _iter@5_1 = _iter@5_0,
-                    _total@4_2 = _total@4_0,
-                    _branch_value@10_0;
-                _value@8_0 = {_i@6_0, _next@7_0}
-                    when erlang:is_tuple(_value@8_0) andalso
-                             erlang:tuple_size(_value@8_0) =:= 2 ->
-                    _iter@5_1 = _next@7_0,
-                    begin
-                        case _i@6_0 =:= 3 of
-                            true ->
-                                _total@4_1 = _total@4_0 +
-                                                 'recursive_loop::sum_to'(2),
-                                begin
-                                    '$patina_marker':continue(_witness_Iterator@1_0,
-                                                              _iter@5_1,
-                                                              _total@4_1),
-                                    []
-                                end;
-                            _ ->
-                                _branch_value@9_0 = {},
-                                _total@4_1 = _total@4_0,
-                                _branch_value@9_0
-                        end,
-                        _total@4_2 = _total@4_1 + _i@6_0,
-                        {}
-                    end
-            end
-        end,
-    begin
-        '$patina_marker':continue(_witness_Iterator@1_0,
-                                  _iter@5_1,
-                                  _total@4_2),
-        []
-    end.
-
 'recursive_loop::sum_to'(_n@0_0) ->
     _witness_Iterator@1_0 =
         'Elixir.Patina.Core.Range':'Core::Iterator::$patina_witness<int>'(),
@@ -152,10 +101,55 @@ recursive_loop(_n@0_0) ->
                                                                                                                                _n@0_0))
             of
             _iter@5_0 ->
-                case
-                    'recursive_loop::sum_to$patina_loop_1'(_witness_Iterator@1_0,
-                                                           _iter@5_0,
-                                                           _total@4_0)
+                case fun _$patina_loop(_iter@5_0, _total@4_0) ->
+                             _ = begin
+                                     case
+                                         'Elixir.Patina.Core.Range':'Core::Iterator::next<int>'(_witness_Iterator@1_0,
+                                                                                                _iter@5_0)
+                                         of
+                                         nil ->
+                                             _branch_value@10_0 = begin
+                                                                      '$patina_marker':break({break,
+                                                                                              0,
+                                                                                              {},
+                                                                                              _iter@5_0,
+                                                                                              _total@4_0}),
+                                                                      []
+                                                                  end,
+                                             _iter@5_1 = _iter@5_0,
+                                             _total@4_2 = _total@4_0,
+                                             _branch_value@10_0;
+                                         _value@8_0 = {_i@6_0, _next@7_0}
+                                             when erlang:is_tuple(_value@8_0)
+                                                      andalso
+                                                      erlang:tuple_size(_value@8_0)
+                                                          =:= 2 ->
+                                             _iter@5_1 = _next@7_0,
+                                             begin
+                                                 case _i@6_0 =:= 3 of
+                                                     true ->
+                                                         _total@4_1 = _total@4_0
+                                                                          +
+                                                                          'recursive_loop::sum_to'(2),
+                                                         begin
+                                                             '$patina_marker':continue(_iter@5_1,
+                                                                                       _total@4_1),
+                                                             []
+                                                         end;
+                                                     _ ->
+                                                         _branch_value@9_0 = {},
+                                                         _total@4_1 =
+                                                             _total@4_0,
+                                                         _branch_value@9_0
+                                                 end,
+                                                 _total@4_2 = _total@4_1 +
+                                                                  _i@6_0,
+                                                 {}
+                                             end
+                                     end
+                                 end,
+                             _$patina_loop(_iter@5_1, _total@4_2)
+                     end(_iter@5_0, _total@4_0)
                     of
                     {break, 0, _loop_value@11_0, _iter@5_1, _total@4_1} ->
                         _loop_value@11_0

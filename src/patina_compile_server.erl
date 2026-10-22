@@ -161,7 +161,9 @@ receive_run_macro_result(Ref) ->
     end.
 
 compile_forms(Forms) ->
-    CompileOpts = [binary, return, nowarn_opportunistic, nowarn_underscore_match],
+    CompileOpts = [
+        binary, return, nowarn_opportunistic, nowarn_underscore_match, nowarn_shadow_vars
+    ],
     %% We stop at `to_core0` specifically, so we can rewrite forms before lambdas get inlined.
     case compile:noenv_forms(Forms, [to_core0 | CompileOpts]) of
         {ok, _Mod, Core0, Warnings0} ->
@@ -313,6 +315,9 @@ is_label(Name) ->
 %% - `{{patina, function}, Name}`: on a module-level function. Like `local`, it is marked in
 %%   preorder from the parent (the module). `rewrite` uses `Name` for the `'$patina_continue'`
 %%   self-call.
+%%
+%% - `{{patina, lambda}, Name}`: on a named lambda fun. Like `function`, `rewrite` uses `Name`
+%%   for the `'$patina_continue'` self-call.
 gather(Module0) ->
     {Module, _Locals} = cerl_trees:mapfold(fun gather_pre/2, fun gather_post/2, #{}, Module0),
     Module.
@@ -345,7 +350,7 @@ annotate_locals(Letrec) ->
             Defs = lists:map(
                 fun({Name, Fun}) ->
                     case is_lambda(Fun) of
-                        true -> {Name, Fun};
+                        true -> {Name, put_annotation(lambda, cerl:var_name(Name), Fun)};
                         false -> {Name, put_annotation(local, cerl:var_name(Name), Fun)}
                     end
                 end,
@@ -473,6 +478,7 @@ rewrite_fun(Expr0, Expr) ->
     MarkerJoins = get_annotation(defined_joins, Expr0, []),
     Function = get_annotation(function, Expr0),
     Local = get_annotation(local, Expr0),
+    Lambda = get_annotation(lambda, Expr0),
     if
         Function =/= undefined ->
             add_function_join_points(Expr, Function, MarkerJoins);
@@ -484,7 +490,7 @@ rewrite_fun(Expr0, Expr) ->
             );
         true ->
             case is_lambda(Expr) of
-                true -> add_function_join_points(Expr, undefined, MarkerJoins);
+                true -> add_function_join_points(Expr, Lambda, MarkerJoins);
                 %% A `letrec_goto` label body is part of the enclosing scope.
                 false -> Expr
             end

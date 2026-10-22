@@ -112,53 +112,45 @@ assign_coerces_to_var_type() ->
     {_first@0_1, _second@1_1} = {40, 2},
     {_first@0_1, _second@1_1}.
 
-'fibonacci$patina_loop_1'(_i@3_0, _n@0_0, _current@1_0,
-                          _next@2_0) ->
-    _ = begin
-            case _i@3_0 < _n@0_0 of
-                true ->
-                    {_current@1_1, _next@2_1} = begin
-                                                    _element@4_0 = _current@1_0
-                                                                       +
-                                                                       _next@2_0,
-                                                    {_next@2_0, _element@4_0}
-                                                end,
-                    _i@3_1 = _i@3_0 + 1,
-                    {};
-                _ ->
-                    _branch_value@5_0 = begin
-                                            begin
-                                                '$patina_marker':break({break,
-                                                                        0,
-                                                                        {},
-                                                                        _i@3_0,
-                                                                        _current@1_0,
-                                                                        _next@2_0}),
-                                                []
-                                            end
-                                        end,
-                    _current@1_1 = _current@1_0,
-                    _next@2_1 = _next@2_0,
-                    _i@3_1 = _i@3_0,
-                    _branch_value@5_0
-            end
-        end,
-    begin
-        '$patina_marker':continue(_i@3_1,
-                                  _n@0_0,
-                                  _current@1_1,
-                                  _next@2_1),
-        []
-    end.
-
 fibonacci(_n@0_0) ->
     _current@1_0 = 0,
     _next@2_0 = 1,
     _i@3_0 = 0,
-    case 'fibonacci$patina_loop_1'(_i@3_0,
-                                   _n@0_0,
-                                   _current@1_0,
-                                   _next@2_0)
+    case fun _$patina_loop(_i@3_0, _current@1_0,
+                           _next@2_0) ->
+                 _ = begin
+                         case _i@3_0 < _n@0_0 of
+                             true ->
+                                 {_current@1_1, _next@2_1} = begin
+                                                                 _element@4_0 =
+                                                                     _current@1_0
+                                                                         +
+                                                                         _next@2_0,
+                                                                 {_next@2_0,
+                                                                  _element@4_0}
+                                                             end,
+                                 _i@3_1 = _i@3_0 + 1,
+                                 {};
+                             _ ->
+                                 _branch_value@5_0 = begin
+                                                         begin
+                                                             '$patina_marker':break({break,
+                                                                                     0,
+                                                                                     {},
+                                                                                     _i@3_0,
+                                                                                     _current@1_0,
+                                                                                     _next@2_0}),
+                                                             []
+                                                         end
+                                                     end,
+                                 _current@1_1 = _current@1_0,
+                                 _next@2_1 = _next@2_0,
+                                 _i@3_1 = _i@3_0,
+                                 _branch_value@5_0
+                         end
+                     end,
+                 _$patina_loop(_i@3_1, _current@1_1, _next@2_1)
+         end(_i@3_0, _current@1_0, _next@2_0)
         of
         {break,
          0,

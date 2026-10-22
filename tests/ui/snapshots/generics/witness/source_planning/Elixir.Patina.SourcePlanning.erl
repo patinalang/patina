@@ -107,42 +107,6 @@ early(_witnesses_where_early@0_0, _x@1_0) ->
         end
     end.
 
-'loop_late$patina_loop_1'(_i@9_0, _n@2_0, _total@8_0,
-                          _fn_Value_value@7_0, _witness_Value@5_0, _x@1_0) ->
-    _ = begin
-            case _i@9_0 < _n@2_0 of
-                true ->
-                    _total@8_1 = _total@8_0 +
-                                     _fn_Value_value@7_0(_witness_Value@5_0,
-                                                         _x@1_0),
-                    _i@9_1 = _i@9_0 + 1,
-                    {};
-                _ ->
-                    _branch_value@10_0 = begin
-                                             begin
-                                                 '$patina_marker':break({break,
-                                                                         0,
-                                                                         {},
-                                                                         _i@9_0,
-                                                                         _total@8_0}),
-                                                 []
-                                             end
-                                         end,
-                    _total@8_1 = _total@8_0,
-                    _i@9_1 = _i@9_0,
-                    _branch_value@10_0
-            end
-        end,
-    begin
-        '$patina_marker':continue(_i@9_1,
-                                  _n@2_0,
-                                  _total@8_1,
-                                  _fn_Value_value@7_0,
-                                  _witness_Value@5_0,
-                                  _x@1_0),
-        []
-    end.
-
 loop_late(_witnesses_where_loop_late@0_0, _x@1_0,
           _n@2_0) ->
     _witness_Direct@3_0 =
@@ -158,12 +122,33 @@ loop_late(_witnesses_where_loop_late@0_0, _x@1_0,
     begin
         _total@8_0 = 0,
         _i@9_0 = 0,
-        case 'loop_late$patina_loop_1'(_i@9_0,
-                                       _n@2_0,
-                                       _total@8_0,
-                                       _fn_Value_value@7_0,
-                                       _witness_Value@5_0,
-                                       _x@1_0)
+        case fun _$patina_loop(_i@9_0, _total@8_0) ->
+                     _ = begin
+                             case _i@9_0 < _n@2_0 of
+                                 true ->
+                                     _total@8_1 = _total@8_0 +
+                                                      _fn_Value_value@7_0(_witness_Value@5_0,
+                                                                          _x@1_0),
+                                     _i@9_1 = _i@9_0 + 1,
+                                     {};
+                                 _ ->
+                                     _branch_value@10_0 = begin
+                                                              begin
+                                                                  '$patina_marker':break({break,
+                                                                                          0,
+                                                                                          {},
+                                                                                          _i@9_0,
+                                                                                          _total@8_0}),
+                                                                  []
+                                                              end
+                                                          end,
+                                     _total@8_1 = _total@8_0,
+                                     _i@9_1 = _i@9_0,
+                                     _branch_value@10_0
+                             end
+                         end,
+                     _$patina_loop(_i@9_1, _total@8_1)
+             end(_i@9_0, _total@8_0)
             of
             {break, 0, _loop_value@11_0, _i@9_1, _total@8_1} ->
                 _loop_value@11_0

@@ -26,169 +26,145 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'continue_outer_loop$patina_loop_2'(_visits@2_0,
-                                    _outer@1_1, _limit@0_0) ->
-    _ = begin
-            _visits@2_1 = _visits@2_0 + 1,
-            case _outer@1_1 < _limit@0_0 of
-                true ->
-                    begin
-                        '$patina_marker':break({continue, 0, _visits@2_1}), []
-                    end;
-                _ -> {}
-            end,
-            begin
-                '$patina_marker':break({break,
-                                        0,
-                                        _visits@2_1 * 100 + _outer@1_1,
-                                        _visits@2_1}),
-                []
-            end
-        end,
-    begin
-        '$patina_marker':continue(_visits@2_1,
-                                  _outer@1_1,
-                                  _limit@0_0),
-        []
-    end.
-
-'continue_outer_loop$patina_loop_1'(_outer@1_0,
-                                    _visits@2_0, _limit@0_0) ->
-    _ = begin
-            _outer@1_1 = _outer@1_0 + 1,
-            case 'continue_outer_loop$patina_loop_2'(_visits@2_0,
-                                                     _outer@1_1,
-                                                     _limit@0_0)
-                of
-                {break,
-                 _target_loop_depth@3_0,
-                 _loop_value@4_0,
-                 _visits@2_1} ->
-                    '$patina_marker':break({break,
-                                            _target_loop_depth@3_0,
-                                            _loop_value@4_0,
-                                            _outer@1_1,
-                                            _visits@2_1}),
-                    [];
-                {continue, 0, _visits@2_1} ->
-                    '$patina_marker':continue(_outer@1_1,
-                                              _visits@2_1,
-                                              _limit@0_0),
-                    []
-            end
-        end,
-    begin
-        '$patina_marker':continue(_outer@1_1,
-                                  _visits@2_1,
-                                  _limit@0_0),
-        []
-    end.
-
 continue_outer_loop(_limit@0_0) ->
     _outer@1_0 = 0,
     _visits@2_0 = 0,
-    case 'continue_outer_loop$patina_loop_1'(_outer@1_0,
-                                             _visits@2_0,
-                                             _limit@0_0)
+    case fun _$patina_loop(_outer@1_0, _visits@2_0) ->
+                 _ = begin
+                         _outer@1_1 = _outer@1_0 + 1,
+                         case fun _$patina_loop(_visits@2_0) ->
+                                      _ = begin
+                                              _visits@2_1 = _visits@2_0 + 1,
+                                              case _outer@1_1 < _limit@0_0 of
+                                                  true ->
+                                                      begin
+                                                          '$patina_marker':break({continue,
+                                                                                  0,
+                                                                                  _visits@2_1}),
+                                                          []
+                                                      end;
+                                                  _ -> {}
+                                              end,
+                                              begin
+                                                  '$patina_marker':break({break,
+                                                                          0,
+                                                                          _visits@2_1
+                                                                              *
+                                                                              100
+                                                                              +
+                                                                              _outer@1_1,
+                                                                          _visits@2_1}),
+                                                  []
+                                              end
+                                          end,
+                                      _$patina_loop(_visits@2_1)
+                              end(_visits@2_0)
+                             of
+                             {break,
+                              _target_loop_depth@3_0,
+                              _loop_value@4_0,
+                              _visits@2_1} ->
+                                 '$patina_marker':break({break,
+                                                         _target_loop_depth@3_0,
+                                                         _loop_value@4_0,
+                                                         _outer@1_1,
+                                                         _visits@2_1}),
+                                 [];
+                             {continue, 0, _visits@2_1} ->
+                                 '$patina_marker':continue(_outer@1_1,
+                                                           _visits@2_1),
+                                 []
+                         end
+                     end,
+                 _$patina_loop(_outer@1_1, _visits@2_1)
+         end(_outer@1_0, _visits@2_0)
         of
         {break, 0, _loop_value@5_0, _outer@1_1, _visits@2_1} ->
             _loop_value@5_0
     end.
 
-'continue_two_loops$patina_loop_3'(_visits@2_0,
-                                   _outer@1_1, _limit@0_0) ->
-    _ = begin
-            _visits@2_1 = _visits@2_0 + 1,
-            case _outer@1_1 < _limit@0_0 of
-                true ->
-                    begin
-                        '$patina_marker':break({continue, 0, _visits@2_1}), []
-                    end;
-                _ -> {}
-            end,
-            begin
-                '$patina_marker':break({break,
-                                        0,
-                                        _visits@2_1 * 100 + _outer@1_1,
-                                        _visits@2_1}),
-                []
-            end
-        end,
-    begin
-        '$patina_marker':continue(_visits@2_1,
-                                  _outer@1_1,
-                                  _limit@0_0),
-        []
-    end.
-
-'continue_two_loops$patina_loop_2'(_visits@2_0,
-                                   _outer@1_1, _limit@0_0) ->
-    _ = begin
-            case 'continue_two_loops$patina_loop_3'(_visits@2_0,
-                                                    _outer@1_1,
-                                                    _limit@0_0)
-                of
-                {break,
-                 _target_loop_depth@3_0,
-                 _loop_value@4_0,
-                 _visits@2_1} ->
-                    '$patina_marker':break({break,
-                                            _target_loop_depth@3_0,
-                                            _loop_value@4_0,
-                                            _visits@2_1}),
-                    [];
-                {continue, _target_loop_depth@5_0, _visits@2_1} ->
-                    '$patina_marker':break({continue,
-                                            _target_loop_depth@5_0,
-                                            _visits@2_1}),
-                    []
-            end
-        end,
-    begin
-        '$patina_marker':continue(_visits@2_1,
-                                  _outer@1_1,
-                                  _limit@0_0),
-        []
-    end.
-
-'continue_two_loops$patina_loop_1'(_outer@1_0,
-                                   _visits@2_0, _limit@0_0) ->
-    _ = begin
-            _outer@1_1 = _outer@1_0 + 1,
-            case 'continue_two_loops$patina_loop_2'(_visits@2_0,
-                                                    _outer@1_1,
-                                                    _limit@0_0)
-                of
-                {break,
-                 _target_loop_depth@6_0,
-                 _loop_value@7_0,
-                 _visits@2_1} ->
-                    '$patina_marker':break({break,
-                                            _target_loop_depth@6_0,
-                                            _loop_value@7_0,
-                                            _outer@1_1,
-                                            _visits@2_1}),
-                    [];
-                {continue, 0, _visits@2_1} ->
-                    '$patina_marker':continue(_outer@1_1,
-                                              _visits@2_1,
-                                              _limit@0_0),
-                    []
-            end
-        end,
-    begin
-        '$patina_marker':continue(_outer@1_1,
-                                  _visits@2_1,
-                                  _limit@0_0),
-        []
-    end.
-
 continue_two_loops(_limit@0_0) ->
     _outer@1_0 = 0,
     _visits@2_0 = 0,
-    case 'continue_two_loops$patina_loop_1'(_outer@1_0,
-                                            _visits@2_0,
-                                            _limit@0_0)
+    case fun _$patina_loop(_outer@1_0, _visits@2_0) ->
+                 _ = begin
+                         _outer@1_1 = _outer@1_0 + 1,
+                         case fun _$patina_loop(_visits@2_0) ->
+                                      _ = begin
+                                              case fun
+                                                       _$patina_loop(_visits@2_0) ->
+                                                           _ = begin
+                                                                   _visits@2_1 =
+                                                                       _visits@2_0
+                                                                           + 1,
+                                                                   case
+                                                                       _outer@1_1
+                                                                           <
+                                                                           _limit@0_0
+                                                                       of
+                                                                       true ->
+                                                                           begin
+                                                                               '$patina_marker':break({continue,
+                                                                                                       0,
+                                                                                                       _visits@2_1}),
+                                                                               []
+                                                                           end;
+                                                                       _ -> {}
+                                                                   end,
+                                                                   begin
+                                                                       '$patina_marker':break({break,
+                                                                                               0,
+                                                                                               _visits@2_1
+                                                                                                   *
+                                                                                                   100
+                                                                                                   +
+                                                                                                   _outer@1_1,
+                                                                                               _visits@2_1}),
+                                                                       []
+                                                                   end
+                                                               end,
+                                                           _$patina_loop(_visits@2_1)
+                                                   end(_visits@2_0)
+                                                  of
+                                                  {break,
+                                                   _target_loop_depth@3_0,
+                                                   _loop_value@4_0,
+                                                   _visits@2_1} ->
+                                                      '$patina_marker':break({break,
+                                                                              _target_loop_depth@3_0,
+                                                                              _loop_value@4_0,
+                                                                              _visits@2_1}),
+                                                      [];
+                                                  {continue,
+                                                   _target_loop_depth@5_0,
+                                                   _visits@2_1} ->
+                                                      '$patina_marker':break({continue,
+                                                                              _target_loop_depth@5_0,
+                                                                              _visits@2_1}),
+                                                      []
+                                              end
+                                          end,
+                                      _$patina_loop(_visits@2_1)
+                              end(_visits@2_0)
+                             of
+                             {break,
+                              _target_loop_depth@6_0,
+                              _loop_value@7_0,
+                              _visits@2_1} ->
+                                 '$patina_marker':break({break,
+                                                         _target_loop_depth@6_0,
+                                                         _loop_value@7_0,
+                                                         _outer@1_1,
+                                                         _visits@2_1}),
+                                 [];
+                             {continue, 0, _visits@2_1} ->
+                                 '$patina_marker':continue(_outer@1_1,
+                                                           _visits@2_1),
+                                 []
+                         end
+                     end,
+                 _$patina_loop(_outer@1_1, _visits@2_1)
+         end(_outer@1_0, _visits@2_0)
         of
         {break, 0, _loop_value@8_0, _outer@1_1, _visits@2_1} ->
             _loop_value@8_0

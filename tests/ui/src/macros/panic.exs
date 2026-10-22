@@ -50,13 +50,17 @@ defmodule PanicTest do
   test "inside a loop, the panic raises from the loop's helper function" do
     formatted = format_panic(fn -> Patina.Panic.panic_in_loop(3) end)
     assert formatted =~ "** (Patina.Core.Panic) reached the limit\n"
-    assert formatted =~ ~s'panic.pt:32: Patina.Panic."panic_in_loop$patina_loop_1"/2\n'
+    assert formatted =~ ~s'panic.pt:30: Patina.Panic."-panic_in_loop/1-_$patina_loop/1-0-"/2\n'
 
     # The helper of an inner loop is called from the helper of the outer loop.
     formatted = format_panic(fn -> Patina.Panic.panic_in_nested_loop(1) end)
     assert formatted =~ "** (Patina.Core.Panic) reached the limit\n"
-    assert formatted =~ ~s'panic.pt:42: Patina.Panic."panic_in_nested_loop$patina_loop_2"/3\n'
-    assert formatted =~ ~s'panic.pt:41: Patina.Panic."panic_in_nested_loop$patina_loop_1"/2\n'
+
+    assert formatted =~
+             ~s'panic.pt:40: Patina.Panic."-panic_in_nested_loop/1-_$patina_loop/1-1-"/3\n'
+
+    assert formatted =~
+             ~s'panic.pt:39: Patina.Panic."-panic_in_nested_loop/1-_$patina_loop/1-0-"/2\n'
   end
 
   test "erl_error formats the panic" do

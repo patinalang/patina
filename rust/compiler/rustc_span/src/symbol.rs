@@ -157,6 +157,7 @@ symbols! {
     // nice to have.
     Symbols {
         // tidy-alphabetical-start
+        _dollar_patina_loop: "_$patina_loop",
         dollar_patina_marker: "$patina_marker",
         __info__,
         __struct__,

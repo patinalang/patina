@@ -30,45 +30,6 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'LoopWitness::Score::loop_in_default$patina_loop_1'(_n@6_0,
-                                                    _times@2_0, _total@5_0,
-                                                    _fn_Score_score@4_0,
-                                                    _witness_Score@0_0,
-                                                    _self@1_0) ->
-    _ = begin
-            case _n@6_0 < _times@2_0 of
-                true ->
-                    _total@5_1 = _total@5_0 +
-                                     _fn_Score_score@4_0(_witness_Score@0_0,
-                                                         _self@1_0),
-                    _n@6_1 = _n@6_0 + 1,
-                    {};
-                _ ->
-                    _branch_value@7_0 = begin
-                                            begin
-                                                '$patina_marker':break({break,
-                                                                        0,
-                                                                        {},
-                                                                        _n@6_0,
-                                                                        _total@5_0}),
-                                                []
-                                            end
-                                        end,
-                    _total@5_1 = _total@5_0,
-                    _n@6_1 = _n@6_0,
-                    _branch_value@7_0
-            end
-        end,
-    begin
-        '$patina_marker':continue(_n@6_1,
-                                  _times@2_0,
-                                  _total@5_1,
-                                  _fn_Score_score@4_0,
-                                  _witness_Score@0_0,
-                                  _self@1_0),
-        []
-    end.
-
 'LoopWitness::Score::loop_in_default'(_witness_Score@0_0,
                                       _self@1_0, _times@2_0) ->
     _vtable_Score@3_0 = erlang:element(1,
@@ -78,88 +39,38 @@
     begin
         _total@5_0 = 0,
         _n@6_0 = 0,
-        case
-            'LoopWitness::Score::loop_in_default$patina_loop_1'(_n@6_0,
-                                                                _times@2_0,
-                                                                _total@5_0,
-                                                                _fn_Score_score@4_0,
-                                                                _witness_Score@0_0,
-                                                                _self@1_0)
+        case fun _$patina_loop(_n@6_0, _total@5_0) ->
+                     _ = begin
+                             case _n@6_0 < _times@2_0 of
+                                 true ->
+                                     _total@5_1 = _total@5_0 +
+                                                      _fn_Score_score@4_0(_witness_Score@0_0,
+                                                                          _self@1_0),
+                                     _n@6_1 = _n@6_0 + 1,
+                                     {};
+                                 _ ->
+                                     _branch_value@7_0 = begin
+                                                             begin
+                                                                 '$patina_marker':break({break,
+                                                                                         0,
+                                                                                         {},
+                                                                                         _n@6_0,
+                                                                                         _total@5_0}),
+                                                                 []
+                                                             end
+                                                         end,
+                                     _total@5_1 = _total@5_0,
+                                     _n@6_1 = _n@6_0,
+                                     _branch_value@7_0
+                             end
+                         end,
+                     _$patina_loop(_n@6_1, _total@5_1)
+             end(_n@6_0, _total@5_0)
             of
             {break, 0, _loop_value@8_0, _n@6_1, _total@5_1} ->
                 _loop_value@8_0
         end,
         _total@5_1
-    end.
-
-'loop_continuing_outer$patina_loop_2'(_total@7_0,
-                                      _fn_Score_score@5_0, _witness_Score@3_0,
-                                      _t@1_0, _round@6_1, _rounds@2_0) ->
-    _ = begin
-            _total@7_1 = _total@7_0 +
-                             _fn_Score_score@5_0(_witness_Score@3_0, _t@1_0),
-            case _round@6_1 < _rounds@2_0 of
-                true ->
-                    begin
-                        '$patina_marker':break({continue, 0, _total@7_1}), []
-                    end;
-                _ -> {}
-            end,
-            begin
-                '$patina_marker':break({break, 0, {}, _total@7_1}), []
-            end
-        end,
-    begin
-        '$patina_marker':continue(_total@7_1,
-                                  _fn_Score_score@5_0,
-                                  _witness_Score@3_0,
-                                  _t@1_0,
-                                  _round@6_1,
-                                  _rounds@2_0),
-        []
-    end.
-
-'loop_continuing_outer$patina_loop_1'(_round@6_0,
-                                      _total@7_0, _fn_Score_score@5_0,
-                                      _witness_Score@3_0, _t@1_0,
-                                      _rounds@2_0) ->
-    _ = begin
-            _round@6_1 = _round@6_0 + 1,
-            case 'loop_continuing_outer$patina_loop_2'(_total@7_0,
-                                                       _fn_Score_score@5_0,
-                                                       _witness_Score@3_0,
-                                                       _t@1_0,
-                                                       _round@6_1,
-                                                       _rounds@2_0)
-                of
-                {break,
-                 _target_loop_depth@8_0,
-                 _loop_value@9_0,
-                 _total@7_1} ->
-                    '$patina_marker':break({break,
-                                            _target_loop_depth@8_0,
-                                            _loop_value@9_0,
-                                            _round@6_1,
-                                            _total@7_1}),
-                    [];
-                {continue, 0, _total@7_1} ->
-                    '$patina_marker':continue(_round@6_1,
-                                              _total@7_1,
-                                              _fn_Score_score@5_0,
-                                              _witness_Score@3_0,
-                                              _t@1_0,
-                                              _rounds@2_0),
-                    []
-            end
-        end,
-    begin
-        '$patina_marker':continue(_round@6_1,
-                                  _total@7_1,
-                                  _fn_Score_score@5_0,
-                                  _witness_Score@3_0,
-                                  _t@1_0,
-                                  _rounds@2_0),
-        []
     end.
 
 loop_continuing_outer(_witnesses_where_loop_continuing_outer@0_0,
@@ -173,54 +84,59 @@ loop_continuing_outer(_witnesses_where_loop_continuing_outer@0_0,
     begin
         _round@6_0 = 0,
         _total@7_0 = 0,
-        case 'loop_continuing_outer$patina_loop_1'(_round@6_0,
-                                                   _total@7_0,
-                                                   _fn_Score_score@5_0,
-                                                   _witness_Score@3_0,
-                                                   _t@1_0,
-                                                   _rounds@2_0)
+        case fun _$patina_loop(_round@6_0, _total@7_0) ->
+                     _ = begin
+                             _round@6_1 = _round@6_0 + 1,
+                             case fun _$patina_loop(_total@7_0) ->
+                                          _ = begin
+                                                  _total@7_1 = _total@7_0 +
+                                                                   _fn_Score_score@5_0(_witness_Score@3_0,
+                                                                                       _t@1_0),
+                                                  case _round@6_1 < _rounds@2_0
+                                                      of
+                                                      true ->
+                                                          begin
+                                                              '$patina_marker':break({continue,
+                                                                                      0,
+                                                                                      _total@7_1}),
+                                                              []
+                                                          end;
+                                                      _ -> {}
+                                                  end,
+                                                  begin
+                                                      '$patina_marker':break({break,
+                                                                              0,
+                                                                              {},
+                                                                              _total@7_1}),
+                                                      []
+                                                  end
+                                              end,
+                                          _$patina_loop(_total@7_1)
+                                  end(_total@7_0)
+                                 of
+                                 {break,
+                                  _target_loop_depth@8_0,
+                                  _loop_value@9_0,
+                                  _total@7_1} ->
+                                     '$patina_marker':break({break,
+                                                             _target_loop_depth@8_0,
+                                                             _loop_value@9_0,
+                                                             _round@6_1,
+                                                             _total@7_1}),
+                                     [];
+                                 {continue, 0, _total@7_1} ->
+                                     '$patina_marker':continue(_round@6_1,
+                                                               _total@7_1),
+                                     []
+                             end
+                         end,
+                     _$patina_loop(_round@6_1, _total@7_1)
+             end(_round@6_0, _total@7_0)
             of
             {break, 0, _loop_value@10_0, _round@6_1, _total@7_1} ->
                 _loop_value@10_0
         end,
         _total@7_1
-    end.
-
-'loop_in_closure$patina_loop_1'(_n@8_0, _k@6_0,
-                                _total@7_0, _fn_Score_score@5_0,
-                                _witness_Score@3_0, _t@1_0) ->
-    _ = begin
-            case _n@8_0 < _k@6_0 of
-                true ->
-                    _total@7_1 = _total@7_0 +
-                                     _fn_Score_score@5_0(_witness_Score@3_0,
-                                                         _t@1_0),
-                    _n@8_1 = _n@8_0 + 1,
-                    {};
-                _ ->
-                    _branch_value@9_0 = begin
-                                            begin
-                                                '$patina_marker':break({break,
-                                                                        0,
-                                                                        {},
-                                                                        _n@8_0,
-                                                                        _total@7_0}),
-                                                []
-                                            end
-                                        end,
-                    _total@7_1 = _total@7_0,
-                    _n@8_1 = _n@8_0,
-                    _branch_value@9_0
-            end
-        end,
-    begin
-        '$patina_marker':continue(_n@8_1,
-                                  _k@6_0,
-                                  _total@7_1,
-                                  _fn_Score_score@5_0,
-                                  _witness_Score@3_0,
-                                  _t@1_0),
-        []
     end.
 
 loop_in_closure(_witnesses_where_loop_in_closure@0_0,
@@ -235,12 +151,33 @@ loop_in_closure(_witnesses_where_loop_in_closure@0_0,
         _f@11_0 = fun (_k@6_0) ->
                           _total@7_0 = 0,
                           _n@8_0 = 0,
-                          case 'loop_in_closure$patina_loop_1'(_n@8_0,
-                                                               _k@6_0,
-                                                               _total@7_0,
-                                                               _fn_Score_score@5_0,
-                                                               _witness_Score@3_0,
-                                                               _t@1_0)
+                          case fun _$patina_loop(_n@8_0, _total@7_0) ->
+                                       _ = begin
+                                               case _n@8_0 < _k@6_0 of
+                                                   true ->
+                                                       _total@7_1 = _total@7_0 +
+                                                                        _fn_Score_score@5_0(_witness_Score@3_0,
+                                                                                            _t@1_0),
+                                                       _n@8_1 = _n@8_0 + 1,
+                                                       {};
+                                                   _ ->
+                                                       _branch_value@9_0 = begin
+                                                                               begin
+                                                                                   '$patina_marker':break({break,
+                                                                                                           0,
+                                                                                                           {},
+                                                                                                           _n@8_0,
+                                                                                                           _total@7_0}),
+                                                                                   []
+                                                                               end
+                                                                           end,
+                                                       _total@7_1 = _total@7_0,
+                                                       _n@8_1 = _n@8_0,
+                                                       _branch_value@9_0
+                                               end
+                                           end,
+                                       _$patina_loop(_n@8_1, _total@7_1)
+                               end(_n@8_0, _total@7_0)
                               of
                               {break,
                                0,

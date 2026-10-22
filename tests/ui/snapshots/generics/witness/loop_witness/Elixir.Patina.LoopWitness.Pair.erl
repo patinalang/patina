@@ -32,28 +32,6 @@
 '$patina_constructor__Pair'(_a@0_0, _b@1_0) ->
     #'Pair'{a = _a@0_0, b = _b@1_0}.
 
-'LoopWitness::Score::score$patina_loop_1'(_total@6_0,
-                                          _fn_Score_score@5_0,
-                                          _witness_Score@3_0, _self@1_0) ->
-    _ = begin
-            _total@6_1 = _total@6_0 +
-                             (_fn_Score_score@5_0(_witness_Score@3_0,
-                                                  _self@1_0#'Pair'.a)
-                                  +
-                                  _fn_Score_score@5_0(_witness_Score@3_0,
-                                                      _self@1_0#'Pair'.b)),
-            begin
-                '$patina_marker':break({break, 0, {}, _total@6_1}), []
-            end
-        end,
-    begin
-        '$patina_marker':continue(_total@6_1,
-                                  _fn_Score_score@5_0,
-                                  _witness_Score@3_0,
-                                  _self@1_0),
-        []
-    end.
-
 'LoopWitness::Score::score'(_witness_Score@0_0,
                             _self@1_0) ->
     _where_Score@2_0 = erlang:element(3,
@@ -66,11 +44,24 @@
                                          _vtable_Score@4_0),
     begin
         _total@6_0 = 0,
-        case
-            'LoopWitness::Score::score$patina_loop_1'(_total@6_0,
-                                                      _fn_Score_score@5_0,
-                                                      _witness_Score@3_0,
-                                                      _self@1_0)
+        case fun _$patina_loop(_total@6_0) ->
+                     _ = begin
+                             _total@6_1 = _total@6_0 +
+                                              (_fn_Score_score@5_0(_witness_Score@3_0,
+                                                                   _self@1_0#'Pair'.a)
+                                                   +
+                                                   _fn_Score_score@5_0(_witness_Score@3_0,
+                                                                       _self@1_0#'Pair'.b)),
+                             begin
+                                 '$patina_marker':break({break,
+                                                         0,
+                                                         {},
+                                                         _total@6_1}),
+                                 []
+                             end
+                         end,
+                     _$patina_loop(_total@6_1)
+             end(_total@6_0)
             of
             {break, 0, _loop_value@7_0, _total@6_1} ->
                 _loop_value@7_0

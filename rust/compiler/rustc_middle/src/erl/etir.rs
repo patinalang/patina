@@ -302,8 +302,8 @@ pub struct ReceiveAfter {
 
 #[derive(Debug, TyEncodable, TyDecodable)]
 pub struct Loop {
-    /// Variables from the outer scope used by the loop
-    pub outer_vars: Box<[LoopOuterVar]>,
+    /// Variables from the outer scope that are assigned to inside the loop.
+    pub reassigned: Box<[VarId]>,
 }
 
 #[derive(Debug, TyEncodable, TyDecodable)]
@@ -311,22 +311,6 @@ pub struct Join {
     pub body: ExprId,
     /// Outer variables that may have a different versions at each `Jump`.
     pub params: Box<[VarId]>,
-}
-
-#[derive(Copy, Clone, Debug, TyEncodable, TyDecodable)]
-pub enum LoopOuterVar {
-    /// Only referenced inside the loop.
-    Referenced(VarId),
-    /// Assigned to inside the loop.
-    Reassigned(VarId),
-}
-
-impl LoopOuterVar {
-    pub fn var(self) -> VarId {
-        match self {
-            LoopOuterVar::Referenced(var) | LoopOuterVar::Reassigned(var) => var,
-        }
-    }
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, TyEncodable, TyDecodable)]

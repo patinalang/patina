@@ -106,47 +106,37 @@ marker_effect() ->
         'Elixir.Patina.Core.PhantomData'
     end.
 
-'phantom_in_loop_and_closure$patina_loop_1'(_count@1_0,
-                                            _n@0_0, _last@3_0) ->
-    _ = begin
-            case _count@1_0 < _n@0_0 of
-                true ->
-                    _last@3_1 = _count@1_0,
-                    _count@1_1 = _count@1_0 + 1,
-                    {};
-                _ ->
-                    _branch_value@4_0 = begin
-                                            begin
-                                                '$patina_marker':break({break,
-                                                                        0,
-                                                                        {},
-                                                                        _count@1_0,
-                                                                        _last@3_0}),
-                                                []
-                                            end
-                                        end,
-                    _last@3_1 = _last@3_0,
-                    _count@1_1 = _count@1_0,
-                    _branch_value@4_0
-            end
-        end,
-    begin
-        '$patina_marker':continue(_count@1_1,
-                                  _n@0_0,
-                                  _last@3_1),
-        []
-    end.
-
 phantom_in_loop_and_closure(_n@0_0) ->
     _ = 'Elixir.Patina.Core.PhantomData',
     _count@1_0 = 0,
     _last@3_0 = begin
                     _1@2_0 = 'Elixir.Patina.Core.PhantomData', 0
                 end,
-    case
-        'phantom_in_loop_and_closure$patina_loop_1'(_count@1_0,
-                                                    _n@0_0,
-                                                    _last@3_0)
+    case fun _$patina_loop(_count@1_0, _last@3_0) ->
+                 _ = begin
+                         case _count@1_0 < _n@0_0 of
+                             true ->
+                                 _last@3_1 = _count@1_0,
+                                 _count@1_1 = _count@1_0 + 1,
+                                 {};
+                             _ ->
+                                 _branch_value@4_0 = begin
+                                                         begin
+                                                             '$patina_marker':break({break,
+                                                                                     0,
+                                                                                     {},
+                                                                                     _count@1_0,
+                                                                                     _last@3_0}),
+                                                             []
+                                                         end
+                                                     end,
+                                 _last@3_1 = _last@3_0,
+                                 _count@1_1 = _count@1_0,
+                                 _branch_value@4_0
+                         end
+                     end,
+                 _$patina_loop(_count@1_1, _last@3_1)
+         end(_count@1_0, _last@3_0)
         of
         {break, 0, _loop_value@5_0, _count@1_1, _last@3_1} ->
             _loop_value@5_0
@@ -157,39 +147,37 @@ phantom_in_loop_and_closure(_n@0_0) ->
 map_iter(_map@0_0) ->
     'Elixir.Patina.PhantomData.MapIter':new(_map@0_0).
 
-'sum_values$patina_loop_1'(_iter@1_0, _total@2_0) ->
-    _ = begin
-            case 'Elixir.Patina.PhantomData.MapIter':next(_iter@1_0)
-                of
-                nil ->
-                    _branch_value@6_0 = begin
-                                            '$patina_marker':break({break,
-                                                                    0,
-                                                                    {},
-                                                                    _iter@1_0,
-                                                                    _total@2_0}),
-                                            []
-                                        end,
-                    _iter@1_1 = _iter@1_0,
-                    _total@2_1 = _total@2_0,
-                    _branch_value@6_0;
-                _value@5_0 = {{_, _value@3_0}, _rest@4_0}
-                    when erlang:is_tuple(_value@5_0) andalso
-                             erlang:tuple_size(_value@5_0) =:= 2 ->
-                    _iter@1_1 = _rest@4_0,
-                    _total@2_1 = _total@2_0 + _value@3_0,
-                    {}
-            end
-        end,
-    begin
-        '$patina_marker':continue(_iter@1_1, _total@2_1), []
-    end.
-
 sum_values(_map@0_0) ->
     _iter@1_0 =
         'Elixir.Patina.PhantomData.MapIter':new(_map@0_0),
     _total@2_0 = 0,
-    case 'sum_values$patina_loop_1'(_iter@1_0, _total@2_0)
+    case fun _$patina_loop(_iter@1_0, _total@2_0) ->
+                 _ = begin
+                         case
+                             'Elixir.Patina.PhantomData.MapIter':next(_iter@1_0)
+                             of
+                             nil ->
+                                 _branch_value@6_0 = begin
+                                                         '$patina_marker':break({break,
+                                                                                 0,
+                                                                                 {},
+                                                                                 _iter@1_0,
+                                                                                 _total@2_0}),
+                                                         []
+                                                     end,
+                                 _iter@1_1 = _iter@1_0,
+                                 _total@2_1 = _total@2_0,
+                                 _branch_value@6_0;
+                             _value@5_0 = {{_, _value@3_0}, _rest@4_0}
+                                 when erlang:is_tuple(_value@5_0) andalso
+                                          erlang:tuple_size(_value@5_0) =:= 2 ->
+                                 _iter@1_1 = _rest@4_0,
+                                 _total@2_1 = _total@2_0 + _value@3_0,
+                                 {}
+                         end
+                     end,
+                 _$patina_loop(_iter@1_1, _total@2_1)
+         end(_iter@1_0, _total@2_0)
         of
         {break, 0, _loop_value@7_0, _iter@1_1, _total@2_1} ->
             _loop_value@7_0

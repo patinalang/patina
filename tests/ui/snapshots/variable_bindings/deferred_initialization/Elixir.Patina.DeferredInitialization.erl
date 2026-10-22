@@ -51,32 +51,33 @@ initialized_after_diverging_branch(_condition@0_0) ->
     _value@1_2 = 2,
     _value@1_2.
 
-'initialized_on_every_loop_exit$patina_loop_1'(_condition@0_0,
-                                               _value@1_0) ->
-    _ = begin
-            case _condition@0_0 of
-                true ->
-                    _value@1_1 = 1,
-                    begin
-                        '$patina_marker':break({break, 0, {}, _value@1_1}), []
-                    end;
-                _ ->
-                    _value@1_1 = 2,
-                    begin
-                        '$patina_marker':break({break, 0, {}, _value@1_1}), []
-                    end
-            end
-        end,
-    begin
-        '$patina_marker':continue(_condition@0_0, _value@1_1),
-        []
-    end.
-
 initialized_on_every_loop_exit(_condition@0_0) ->
     begin _value@1_0 = {} end,
-    case
-        'initialized_on_every_loop_exit$patina_loop_1'(_condition@0_0,
-                                                       _value@1_0)
+    case fun _$patina_loop(_value@1_0) ->
+                 _ = begin
+                         case _condition@0_0 of
+                             true ->
+                                 _value@1_1 = 1,
+                                 begin
+                                     '$patina_marker':break({break,
+                                                             0,
+                                                             {},
+                                                             _value@1_1}),
+                                     []
+                                 end;
+                             _ ->
+                                 _value@1_1 = 2,
+                                 begin
+                                     '$patina_marker':break({break,
+                                                             0,
+                                                             {},
+                                                             _value@1_1}),
+                                     []
+                                 end
+                         end
+                     end,
+                 _$patina_loop(_value@1_1)
+         end(_value@1_0)
         of
         {break, 0, _loop_value@2_0, _value@1_1} ->
             _loop_value@2_0

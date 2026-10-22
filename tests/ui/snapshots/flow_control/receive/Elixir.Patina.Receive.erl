@@ -61,29 +61,29 @@ echo() ->
             {}
     end.
 
-'sum_until_stop$patina_loop_1'(_total@0_0) ->
-    _ = begin
-            receive
-                _n@1_0 when erlang:is_integer(_n@1_0) ->
-                    _total@0_1 = _total@0_0 + _n@1_0,
-                    {};
-                stop ->
-                    _branch_value@2_0 = begin
-                                            '$patina_marker':break({break,
-                                                                    0,
-                                                                    {},
-                                                                    _total@0_0}),
-                                            []
-                                        end,
-                    _total@0_1 = _total@0_0,
-                    _branch_value@2_0
-            end
-        end,
-    begin '$patina_marker':continue(_total@0_1), [] end.
-
 sum_until_stop() ->
     _total@0_0 = 0,
-    case 'sum_until_stop$patina_loop_1'(_total@0_0) of
+    case fun _$patina_loop(_total@0_0) ->
+                 _ = begin
+                         receive
+                             _n@1_0 when erlang:is_integer(_n@1_0) ->
+                                 _total@0_1 = _total@0_0 + _n@1_0,
+                                 {};
+                             stop ->
+                                 _branch_value@2_0 = begin
+                                                         '$patina_marker':break({break,
+                                                                                 0,
+                                                                                 {},
+                                                                                 _total@0_0}),
+                                                         []
+                                                     end,
+                                 _total@0_1 = _total@0_0,
+                                 _branch_value@2_0
+                         end
+                     end,
+                 _$patina_loop(_total@0_1)
+         end(_total@0_0)
+        of
         {break, 0, _loop_value@3_0, _total@0_1} ->
             _loop_value@3_0
     end,

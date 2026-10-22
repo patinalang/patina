@@ -242,58 +242,57 @@ if_let_open(_value@0_0) ->
         _ -> other
     end.
 
-'while_let_open$patina_loop_1'(_current@1_0,
-                               _count@2_0) ->
-    _ = begin
-            case _current@1_0 of
-                {dynamic, _} ->
-                    _count@2_1 = _count@2_0 + 1,
-                    _current@1_1 = <<"stop"/utf8>>,
-                    {};
-                _value@3_0 = _
-                    when not
-                             ((erlang:is_tuple(_value@3_0) andalso
-                                   erlang:tuple_size(_value@3_0) =:= 2)
-                                  andalso
-                                  erlang:element(1, _value@3_0) =:= dynamic),
-                         not erlang:is_binary(_value@3_0),
-                         not
-                             erlang:is_record(_value@3_0,
-                                              'Elixir.Patina.ReprTransparent.NativeValue',
-                                              'NativeValue'),
-                         not
-                             ((erlang:is_tuple(_value@3_0) andalso
-                                   erlang:tuple_size(_value@3_0) =:= 2)
-                                  andalso
-                                  erlang:element(1, _value@3_0) =:= tagged) ->
-                    _count@2_1 = _count@2_0 + 1,
-                    _current@1_1 = <<"stop"/utf8>>,
-                    {};
-                _ ->
-                    _branch_value@4_0 = begin
-                                            begin
-                                                '$patina_marker':break({break,
-                                                                        0,
-                                                                        {},
-                                                                        _current@1_0,
-                                                                        _count@2_0}),
-                                                []
-                                            end
-                                        end,
-                    _count@2_1 = _count@2_0,
-                    _current@1_1 = _current@1_0,
-                    _branch_value@4_0
-            end
-        end,
-    begin
-        '$patina_marker':continue(_current@1_1, _count@2_1), []
-    end.
-
 while_let_open(_value@0_0) ->
     _current@1_0 = _value@0_0,
     _count@2_0 = 0,
-    case 'while_let_open$patina_loop_1'(_current@1_0,
-                                        _count@2_0)
+    case fun _$patina_loop(_current@1_0, _count@2_0) ->
+                 _ = begin
+                         case _current@1_0 of
+                             {dynamic, _} ->
+                                 _count@2_1 = _count@2_0 + 1,
+                                 _current@1_1 = <<"stop"/utf8>>,
+                                 {};
+                             _value@3_0 = _
+                                 when not
+                                          ((erlang:is_tuple(_value@3_0) andalso
+                                                erlang:tuple_size(_value@3_0)
+                                                    =:= 2)
+                                               andalso
+                                               erlang:element(1, _value@3_0) =:=
+                                                   dynamic),
+                                      not erlang:is_binary(_value@3_0),
+                                      not
+                                          erlang:is_record(_value@3_0,
+                                                           'Elixir.Patina.ReprTransparent.NativeValue',
+                                                           'NativeValue'),
+                                      not
+                                          ((erlang:is_tuple(_value@3_0) andalso
+                                                erlang:tuple_size(_value@3_0)
+                                                    =:= 2)
+                                               andalso
+                                               erlang:element(1, _value@3_0) =:=
+                                                   tagged) ->
+                                 _count@2_1 = _count@2_0 + 1,
+                                 _current@1_1 = <<"stop"/utf8>>,
+                                 {};
+                             _ ->
+                                 _branch_value@4_0 = begin
+                                                         begin
+                                                             '$patina_marker':break({break,
+                                                                                     0,
+                                                                                     {},
+                                                                                     _current@1_0,
+                                                                                     _count@2_0}),
+                                                             []
+                                                         end
+                                                     end,
+                                 _count@2_1 = _count@2_0,
+                                 _current@1_1 = _current@1_0,
+                                 _branch_value@4_0
+                         end
+                     end,
+                 _$patina_loop(_current@1_1, _count@2_1)
+         end(_current@1_0, _count@2_0)
         of
         {break, 0, _loop_value@5_0, _current@1_1, _count@2_1} ->
             _loop_value@5_0

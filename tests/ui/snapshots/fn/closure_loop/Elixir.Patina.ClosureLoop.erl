@@ -23,23 +23,27 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'closure_loop$patina_loop_1'(_i@2_0, _y@1_0) ->
-    _ = begin
-            _i@2_1 = _i@2_0 + _y@1_0,
-            case _i@2_1 > 3 of
-                true ->
-                    begin
-                        '$patina_marker':break({break, 0, {}, _i@2_1}), []
-                    end;
-                _ -> {}
-            end
-        end,
-    begin '$patina_marker':continue(_i@2_1, _y@1_0), [] end.
-
 closure_loop() ->
     _count@4_0 = fun (_x@0_0, _y@1_0) ->
                          _i@2_0 = _x@0_0,
-                         case 'closure_loop$patina_loop_1'(_i@2_0, _y@1_0) of
+                         case fun _$patina_loop(_i@2_0) ->
+                                      _ = begin
+                                              _i@2_1 = _i@2_0 + _y@1_0,
+                                              case _i@2_1 > 3 of
+                                                  true ->
+                                                      begin
+                                                          '$patina_marker':break({break,
+                                                                                  0,
+                                                                                  {},
+                                                                                  _i@2_1}),
+                                                          []
+                                                      end;
+                                                  _ -> {}
+                                              end
+                                          end,
+                                      _$patina_loop(_i@2_1)
+                              end(_i@2_0)
+                             of
                              {break, 0, _loop_value@3_0, _i@2_1} ->
                                  _loop_value@3_0
                          end,

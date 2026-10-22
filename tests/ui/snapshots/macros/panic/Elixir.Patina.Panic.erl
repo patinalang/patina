@@ -147,100 +147,87 @@ todo_in_let_else(_map@0_0) ->
     end,
     _value@1_1.
 
-'panic_in_loop$patina_loop_1'(_i@1_0, _limit@0_0) ->
-    _ = begin
-            case _i@1_0 =:= _limit@0_0 of
-                true ->
-                    begin
-                        erlang:error('Elixir.Patina.Core.Panic':new(<<"reached the limit"/utf8>>),
-                                     none,
-                                     begin
-                                         _element@3_0 = begin
-                                                            _element@2_0 =
-                                                                #{module =>
-                                                                      'Elixir.Patina.Core.Panic'},
-                                                            {error_info,
-                                                             _element@2_0}
-                                                        end,
-                                         [_element@3_0]
-                                     end)
-                    end;
-                _ -> {}
-            end,
-            _i@1_1 = _i@1_0 + 1,
-            {}
-        end,
-    begin
-        '$patina_marker':continue(_i@1_1, _limit@0_0), []
-    end.
-
 panic_in_loop(_limit@0_0) ->
     _i@1_0 = 0,
-    'panic_in_loop$patina_loop_1'(_i@1_0, _limit@0_0).
-
-'panic_in_nested_loop$patina_loop_2'(_j@2_0, _limit@0_0,
-                                     _i@1_0) ->
-    _ = begin
-            case _j@2_0 < _limit@0_0 of
-                true ->
+    fun _$patina_loop(_i@1_0) ->
+            _ = begin
                     case _i@1_0 =:= _limit@0_0 of
                         true ->
                             begin
                                 erlang:error('Elixir.Patina.Core.Panic':new(<<"reached the limit"/utf8>>),
                                              none,
                                              begin
-                                                 _element@4_0 = begin
-                                                                    _element@3_0 =
+                                                 _element@3_0 = begin
+                                                                    _element@2_0 =
                                                                         #{module
                                                                               =>
                                                                               'Elixir.Patina.Core.Panic'},
                                                                     {error_info,
-                                                                     _element@3_0}
+                                                                     _element@2_0}
                                                                 end,
-                                                 [_element@4_0]
+                                                 [_element@3_0]
                                              end)
                             end;
                         _ -> {}
                     end,
-                    _j@2_1 = _j@2_0 + 1,
-                    {};
-                _ ->
-                    _branch_value@5_0 = begin
-                                            begin
-                                                '$patina_marker':break({break,
-                                                                        1,
-                                                                        {},
-                                                                        _j@2_0}),
-                                                []
-                                            end
-                                        end,
-                    _j@2_1 = _j@2_0,
-                    _branch_value@5_0
-            end
-        end,
-    begin
-        '$patina_marker':continue(_j@2_1, _limit@0_0, _i@1_0),
-        []
-    end.
-
-'panic_in_nested_loop$patina_loop_1'(_limit@0_0,
-                                     _i@1_0) ->
-    _ = begin
-            _j@2_0 = 0,
-            case 'panic_in_nested_loop$patina_loop_2'(_j@2_0,
-                                                      _limit@0_0,
-                                                      _i@1_0)
-                of
-                {break, 1, _loop_value@6_0, _j@2_1} -> _loop_value@6_0
-            end,
-            _i@1_1 = _i@1_0 + 1,
-            {}
-        end,
-    begin
-        '$patina_marker':continue(_limit@0_0, _i@1_1), []
-    end.
+                    _i@1_1 = _i@1_0 + 1,
+                    {}
+                end,
+            _$patina_loop(_i@1_1)
+    end(_i@1_0).
 
 panic_in_nested_loop(_limit@0_0) ->
     _i@1_0 = 0,
-    'panic_in_nested_loop$patina_loop_1'(_limit@0_0,
-                                         _i@1_0).
+    fun _$patina_loop(_i@1_0) ->
+            _ = begin
+                    _j@2_0 = 0,
+                    case fun _$patina_loop(_j@2_0) ->
+                                 _ = begin
+                                         case _j@2_0 < _limit@0_0 of
+                                             true ->
+                                                 case _i@1_0 =:= _limit@0_0 of
+                                                     true ->
+                                                         begin
+                                                             erlang:error('Elixir.Patina.Core.Panic':new(<<"reached the limit"/utf8>>),
+                                                                          none,
+                                                                          begin
+                                                                              _element@4_0 =
+                                                                                  begin
+                                                                                      _element@3_0 =
+                                                                                          #{module
+                                                                                                =>
+                                                                                                'Elixir.Patina.Core.Panic'},
+                                                                                      {error_info,
+                                                                                       _element@3_0}
+                                                                                  end,
+                                                                              [_element@4_0]
+                                                                          end)
+                                                         end;
+                                                     _ -> {}
+                                                 end,
+                                                 _j@2_1 = _j@2_0 + 1,
+                                                 {};
+                                             _ ->
+                                                 _branch_value@5_0 = begin
+                                                                         begin
+                                                                             '$patina_marker':break({break,
+                                                                                                     1,
+                                                                                                     {},
+                                                                                                     _j@2_0}),
+                                                                             []
+                                                                         end
+                                                                     end,
+                                                 _j@2_1 = _j@2_0,
+                                                 _branch_value@5_0
+                                         end
+                                     end,
+                                 _$patina_loop(_j@2_1)
+                         end(_j@2_0)
+                        of
+                        {break, 1, _loop_value@6_0, _j@2_1} -> _loop_value@6_0
+                    end,
+                    _i@1_1 = _i@1_0 + 1,
+                    {}
+                end,
+            _$patina_loop(_i@1_1)
+    end(_i@1_0).

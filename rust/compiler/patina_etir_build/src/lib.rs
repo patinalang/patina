@@ -130,8 +130,9 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         self.cx.body.pats.push(etir::Pat { kind, ty, span })
     }
 
-    fn push_loop(&mut self, label: region::Scope, outer_vars: Box<[etir::LoopOuterVar]>) -> LoopId {
-        let loop_id = self.cx.body.loops.push(etir::Loop { outer_vars });
+    fn push_loop(&mut self, label: region::Scope) -> LoopId {
+        // `reassigned` vars are analyzed in a separate pass
+        let loop_id = self.cx.body.loops.push(etir::Loop { reassigned: Box::new([]) });
         self.cx.loop_ids.insert(label, loop_id);
         loop_id
     }

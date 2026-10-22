@@ -435,6 +435,16 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         eaf::Expr::ClausedFun(span.into_anno(self.source_map), eaf::Clauses { clauses })
     }
 
+    pub(crate) fn expr_named_fun(
+        &self,
+        span: impl IntoAnno,
+        name: Symbol,
+        clauses: impl IntoIterator<Item = eaf::Clause<'arena>>,
+    ) -> eaf::Expr<'arena> {
+        let clauses = self.arena.alloc_from_iter(clauses);
+        eaf::Expr::NamedFun(span.into_anno(self.source_map), name.into(), clauses)
+    }
+
     pub(crate) fn expr_map(
         &self,
         span: impl IntoAnno,

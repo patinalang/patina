@@ -27,36 +27,31 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Loops::Count::count<int>$patina_loop_1'(_n@3_0,
-                                         _limit@2_0) ->
-    _ = begin
-            case _n@3_0 < _limit@2_0 of
-                true ->
-                    _n@3_1 = _n@3_0 + 1,
-                    {};
-                _ ->
-                    _branch_value@4_0 = begin
-                                            begin
-                                                '$patina_marker':break({break,
-                                                                        0,
-                                                                        {},
-                                                                        _n@3_0}),
-                                                []
-                                            end
-                                        end,
-                    _n@3_1 = _n@3_0,
-                    _branch_value@4_0
-            end
-        end,
-    begin
-        '$patina_marker':continue(_n@3_1, _limit@2_0), []
-    end.
-
 'Loops::Count::count<int>'(_witness_Count@0_0,
                            _self@1_0, _limit@2_0) ->
     _n@3_0 = 0,
-    case 'Loops::Count::count<int>$patina_loop_1'(_n@3_0,
-                                                  _limit@2_0)
+    case fun _$patina_loop(_n@3_0) ->
+                 _ = begin
+                         case _n@3_0 < _limit@2_0 of
+                             true ->
+                                 _n@3_1 = _n@3_0 + 1,
+                                 {};
+                             _ ->
+                                 _branch_value@4_0 = begin
+                                                         begin
+                                                             '$patina_marker':break({break,
+                                                                                     0,
+                                                                                     {},
+                                                                                     _n@3_0}),
+                                                             []
+                                                         end
+                                                     end,
+                                 _n@3_1 = _n@3_0,
+                                 _branch_value@4_0
+                         end
+                     end,
+                 _$patina_loop(_n@3_1)
+         end(_n@3_0)
         of
         {break, 0, _loop_value@5_0, _n@3_1} -> _loop_value@5_0
     end,
@@ -67,36 +62,31 @@
      {},
      {}}.
 
-'Loops::Count::count<str>$patina_loop_1'(_n@3_0,
-                                         _limit@2_0) ->
-    _ = begin
-            case _n@3_0 < _limit@2_0 of
-                true ->
-                    _n@3_1 = _n@3_0 + 2,
-                    {};
-                _ ->
-                    _branch_value@4_0 = begin
-                                            begin
-                                                '$patina_marker':break({break,
-                                                                        0,
-                                                                        {},
-                                                                        _n@3_0}),
-                                                []
-                                            end
-                                        end,
-                    _n@3_1 = _n@3_0,
-                    _branch_value@4_0
-            end
-        end,
-    begin
-        '$patina_marker':continue(_n@3_1, _limit@2_0), []
-    end.
-
 'Loops::Count::count<str>'(_witness_Count@0_0,
                            _self@1_0, _limit@2_0) ->
     _n@3_0 = 0,
-    case 'Loops::Count::count<str>$patina_loop_1'(_n@3_0,
-                                                  _limit@2_0)
+    case fun _$patina_loop(_n@3_0) ->
+                 _ = begin
+                         case _n@3_0 < _limit@2_0 of
+                             true ->
+                                 _n@3_1 = _n@3_0 + 2,
+                                 {};
+                             _ ->
+                                 _branch_value@4_0 = begin
+                                                         begin
+                                                             '$patina_marker':break({break,
+                                                                                     0,
+                                                                                     {},
+                                                                                     _n@3_0}),
+                                                             []
+                                                         end
+                                                     end,
+                                 _n@3_1 = _n@3_0,
+                                 _branch_value@4_0
+                         end
+                     end,
+                 _$patina_loop(_n@3_1)
+         end(_n@3_0)
         of
         {break, 0, _loop_value@5_0, _n@3_1} -> _loop_value@5_0
     end,
