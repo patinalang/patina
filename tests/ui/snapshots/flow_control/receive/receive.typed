@@ -3,6 +3,8 @@
 
 
 
+// snapshot: core0, core
+
 #![allow(non_camel_case_types)]
 #![deny(unused_unsafe)]
 #![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
@@ -148,8 +150,8 @@ fn closure_receive(value: int)
         (||
             (receive { int(n) => ((n as int) + (value as int) as int), } as
                 int) as
-            {closure@tests/ui/src/flow_control/receive.pt:79:16: 79:18});
-    ((take as {closure@tests/ui/src/flow_control/receive.pt:79:16: 79:18})()
+            {closure@tests/ui/src/flow_control/receive.pt:81:16: 81:18});
+    ((take as {closure@tests/ui/src/flow_control/receive.pt:81:16: 81:18})()
         as int)
 } as int)
 

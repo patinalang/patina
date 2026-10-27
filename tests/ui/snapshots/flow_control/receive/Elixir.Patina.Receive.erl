@@ -1,4 +1,4 @@
--file("tests/ui/src/flow_control/receive.pt", 1).
+-file("tests/ui/src/flow_control/receive.pt", 3).
 
 -module('Elixir.Patina.Receive').
 
@@ -63,29 +63,33 @@ echo() ->
 
 sum_until_stop() ->
     _total@0_0 = 0,
-    case fun _$patina_loop(_total@0_0) ->
-                 _ = begin
-                         receive
-                             _n@1_0 when erlang:is_integer(_n@1_0) ->
-                                 _total@0_1 = _total@0_0 + _n@1_0,
-                                 {};
-                             stop ->
-                                 _branch_value@2_0 = begin
-                                                         '$patina_marker':break({break,
-                                                                                 0,
-                                                                                 {},
-                                                                                 _total@0_0}),
-                                                         []
-                                                     end,
-                                 _total@0_1 = _total@0_0,
-                                 _branch_value@2_0
-                         end
-                     end,
-                 _$patina_loop(_total@0_1)
-         end(_total@0_0)
-        of
-        {break, 0, _loop_value@3_0, _total@0_1} ->
-            _loop_value@3_0
+    begin
+        _total@0_1 = fun _$patina_loop(_total@0_0) ->
+                             case [] of
+                                 {'$patina_label_0', _total@0_2} -> _total@0_2;
+                                 _ ->
+                                     _ = begin
+                                             receive
+                                                 _n@1_0
+                                                     when
+                                                       erlang:is_integer(_n@1_0) ->
+                                                     _total@0_1 = _total@0_0 +
+                                                                      _n@1_0,
+                                                     {};
+                                                 stop ->
+                                                     _branch_value@2_0 = begin
+                                                                             '$patina_marker':jump('$patina_label_0',
+                                                                                                   _total@0_0),
+                                                                             []
+                                                                         end,
+                                                     _total@0_1 = _total@0_0,
+                                                     _branch_value@2_0
+                                             end
+                                         end,
+                                     _$patina_loop(_total@0_1)
+                             end
+                     end(_total@0_0),
+        {}
     end,
     _total@0_1.
 
@@ -165,10 +169,16 @@ closure_receive(_value@0_0) ->
     _take@2_0().
 
 diverging_timeout() ->
-    receive
-        _n@0_0 when erlang:is_integer(_n@0_0) ->
-            '$patina_marker':return(_n@0_0),
-            []
-        after 'Elixir.Patina.Core.Timeout':from_millis(0) ->
-                  begin '$patina_marker':return(-1), [] end
+    case [] of
+        {'$patina_label_0', _jump_value@1_0} -> _jump_value@1_0;
+        _ ->
+            receive
+                _n@0_0 when erlang:is_integer(_n@0_0) ->
+                    '$patina_marker':jump('$patina_label_0', _n@0_0),
+                    []
+                after 'Elixir.Patina.Core.Timeout':from_millis(0) ->
+                          begin
+                              '$patina_marker':jump('$patina_label_0', -1), []
+                          end
+            end
     end.

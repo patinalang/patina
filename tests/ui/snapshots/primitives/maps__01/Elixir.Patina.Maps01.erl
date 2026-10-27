@@ -114,61 +114,66 @@ main() ->
                                                                      _contacts@2_3)
             of
             _iter@15_0 ->
-                case fun _$patina_loop(_iter@15_0) ->
-                             _ = begin
-                                     case
-                                         'Elixir.Patina.Core.MapIter':'Core::Iterator::next'(_witness_Iterator@1_0,
-                                                                                             _iter@15_0)
-                                         of
-                                         nil ->
-                                             _branch_value@25_0 = begin
-                                                                      '$patina_marker':break({break,
-                                                                                              0,
-                                                                                              {},
-                                                                                              _iter@15_0}),
-                                                                      []
-                                                                  end,
-                                             _iter@15_1 = _iter@15_0,
-                                             _branch_value@25_0;
-                                         _value@19_0 = {{_contact@16_0,
-                                                         _number@17_0},
-                                                        _next@18_0}
-                                             when erlang:is_tuple(_value@19_0)
-                                                      andalso
-                                                      erlang:tuple_size(_value@19_0)
-                                                          =:= 2 ->
-                                             _iter@15_1 = _next@18_0,
-                                             begin
-                                                 begin
-                                                     io:put_chars(begin
-                                                                      _element@24_0 =
-                                                                          begin
-                                                                              _element@20_0 =
-                                                                                  <<"Calling "/utf8>>,
-                                                                              _element@21_0 =
-                                                                                  _contact@16_0,
-                                                                              _element@22_0 =
-                                                                                  <<": "/utf8>>,
-                                                                              _element@23_0 =
-                                                                                  call(_number@17_0),
-                                                                              [_element@20_0,
-                                                                               _element@21_0,
-                                                                               _element@22_0,
-                                                                               _element@23_0]
-                                                                          end,
-                                                                      [_element@24_0]
-                                                                  end),
-                                                     io:nl(),
-                                                     {}
-                                                 end
-                                             end
+                _iter@15_1 = fun _$patina_loop(_iter@15_0) ->
+                                     case [] of
+                                         {'$patina_label_0', _iter@15_2} ->
+                                             _iter@15_2;
+                                         _ ->
+                                             _ = begin
+                                                     case
+                                                         'Elixir.Patina.Core.MapIter':'Core::Iterator::next'(_witness_Iterator@1_0,
+                                                                                                             _iter@15_0)
+                                                         of
+                                                         nil ->
+                                                             _branch_value@25_0 =
+                                                                 begin
+                                                                     '$patina_marker':jump('$patina_label_0',
+                                                                                           _iter@15_0),
+                                                                     []
+                                                                 end,
+                                                             _iter@15_1 =
+                                                                 _iter@15_0,
+                                                             _branch_value@25_0;
+                                                         _value@19_0 =
+                                                             {{_contact@16_0,
+                                                               _number@17_0},
+                                                              _next@18_0}
+                                                             when
+                                                               erlang:is_tuple(_value@19_0)
+                                                                   andalso
+                                                                   erlang:tuple_size(_value@19_0)
+                                                                       =:= 2 ->
+                                                             _iter@15_1 =
+                                                                 _next@18_0,
+                                                             begin
+                                                                 begin
+                                                                     io:put_chars(begin
+                                                                                      _element@24_0 =
+                                                                                          begin
+                                                                                              _element@20_0 =
+                                                                                                  <<"Calling "/utf8>>,
+                                                                                              _element@21_0 =
+                                                                                                  _contact@16_0,
+                                                                                              _element@22_0 =
+                                                                                                  <<": "/utf8>>,
+                                                                                              _element@23_0 =
+                                                                                                  call(_number@17_0),
+                                                                                              [_element@20_0,
+                                                                                               _element@21_0,
+                                                                                               _element@22_0,
+                                                                                               _element@23_0]
+                                                                                          end,
+                                                                                      [_element@24_0]
+                                                                                  end),
+                                                                     io:nl(),
+                                                                     {}
+                                                                 end
+                                                             end
+                                                     end
+                                                 end,
+                                             _$patina_loop(_iter@15_1)
                                      end
-                                 end,
-                             _$patina_loop(_iter@15_1)
-                     end(_iter@15_0)
-                    of
-                    {break, 0, _loop_value@26_0, _iter@15_1} ->
-                        _loop_value@26_0
-                end
+                             end(_iter@15_0),
+                {}
         end
     end.

@@ -100,11 +100,6 @@ impl Scopes {
         self.last_scope_mut().bind_var(id, var)
     }
 
-    pub(super) fn rebind_var(&mut self, id: VarId) -> &PatinaVar {
-        let name = self.fetch_var(id).name;
-        self.bind_var(id, name)
-    }
-
     pub(super) fn push(&mut self) {
         self.scopes.push(Scope::new());
     }

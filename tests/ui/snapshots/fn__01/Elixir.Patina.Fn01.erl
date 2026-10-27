@@ -26,11 +26,18 @@
 main() -> fizzbuzz_to(100).
 
 is_divisible_by(_lhs@0_0, _rhs@1_0) ->
-    case _rhs@1_0 =:= 0 of
-        true -> begin '$patina_marker':return(false), [] end;
-        _ -> {}
-    end,
-    _lhs@0_0 rem _rhs@1_0 =:= 0.
+    case [] of
+        {'$patina_label_0', _jump_value@2_0} -> _jump_value@2_0;
+        _ ->
+            case _rhs@1_0 =:= 0 of
+                true ->
+                    begin
+                        '$patina_marker':jump('$patina_label_0', false), []
+                    end;
+                _ -> {}
+            end,
+            _lhs@0_0 rem _rhs@1_0 =:= 0
+    end.
 
 fizzbuzz(_n@0_0) ->
     case is_divisible_by(_n@0_0, 15) of
@@ -98,36 +105,43 @@ fizzbuzz_to(_n@0_0) ->
                                                                                                                _n@0_0))
             of
             _iter@4_0 ->
-                case fun _$patina_loop(_iter@4_0) ->
-                             _ = begin
-                                     case
-                                         'Elixir.Patina.Core.RangeInclusive':'Core::Iterator::next<int>'(_witness_Iterator@1_0,
-                                                                                                         _iter@4_0)
-                                         of
-                                         nil ->
-                                             _branch_value@8_0 = begin
-                                                                     '$patina_marker':break({break,
-                                                                                             0,
-                                                                                             {},
-                                                                                             _iter@4_0}),
-                                                                     []
-                                                                 end,
-                                             _iter@4_1 = _iter@4_0,
-                                             _branch_value@8_0;
-                                         _value@7_0 = {_n@5_0, _next@6_0}
-                                             when erlang:is_tuple(_value@7_0)
-                                                      andalso
-                                                      erlang:tuple_size(_value@7_0)
-                                                          =:= 2 ->
-                                             _iter@4_1 = _next@6_0,
-                                             begin fizzbuzz(_n@5_0) end
-                                     end
-                                 end,
-                             _$patina_loop(_iter@4_1)
-                     end(_iter@4_0)
-                    of
-                    {break, 0, _loop_value@9_0, _iter@4_1} ->
-                        _loop_value@9_0
-                end
+                _iter@4_1 = fun _$patina_loop(_iter@4_0) ->
+                                    case [] of
+                                        {'$patina_label_0', _iter@4_2} ->
+                                            _iter@4_2;
+                                        _ ->
+                                            _ = begin
+                                                    case
+                                                        'Elixir.Patina.Core.RangeInclusive':'Core::Iterator::next<int>'(_witness_Iterator@1_0,
+                                                                                                                        _iter@4_0)
+                                                        of
+                                                        nil ->
+                                                            _branch_value@8_0 =
+                                                                begin
+                                                                    '$patina_marker':jump('$patina_label_0',
+                                                                                          _iter@4_0),
+                                                                    []
+                                                                end,
+                                                            _iter@4_1 =
+                                                                _iter@4_0,
+                                                            _branch_value@8_0;
+                                                        _value@7_0 = {_n@5_0,
+                                                                      _next@6_0}
+                                                            when
+                                                              erlang:is_tuple(_value@7_0)
+                                                                  andalso
+                                                                  erlang:tuple_size(_value@7_0)
+                                                                      =:= 2 ->
+                                                            _iter@4_1 =
+                                                                _next@6_0,
+                                                            begin
+                                                                fizzbuzz(_n@5_0)
+                                                            end
+                                                    end
+                                                end,
+                                            _$patina_loop(_iter@4_1)
+                                    end
+                            end(_iter@4_0),
+                {}
         end
     end.

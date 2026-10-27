@@ -155,12 +155,9 @@ pub enum ExprKind<'tcx> {
     Match { scrutinee: ExprId, arms: Box<[Arm]> },
     Receive { arms: Box<[Arm]>, after: Option<ReceiveAfter> },
     TryCatch { body: ExprId, arms: Box<[CatchArm]>, after: Option<ExprId> },
-    Return { value: Option<ExprId> },
     Loop { id: LoopId, body: ExprId },
-    Break { target: LoopId, value: Option<ExprId> },
-    Continue { target: LoopId },
-    Join { joins: Box<[JoinId]>, body: ExprId },
-    Jump { target: JoinId },
+    Join { join: JoinId, body: ExprId },
+    Jump { target: JoinId, value: Option<ExprId> },
 }
 
 #[derive(Copy, Clone, Debug, TyEncodable, TyDecodable)]
@@ -309,6 +306,7 @@ pub struct Loop {
 #[derive(Debug, TyEncodable, TyDecodable)]
 pub struct Join {
     pub body: ExprId,
+    pub value: Option<VarId>,
     /// Outer variables that may have a different versions at each `Jump`.
     pub params: Box<[VarId]>,
 }

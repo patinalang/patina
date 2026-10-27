@@ -17,6 +17,8 @@ pub(crate) enum DumpStage {
     Expanded,
     Typed,
     Erl,
+    Core0,
+    Core,
 }
 
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]
@@ -34,6 +36,8 @@ pub(crate) enum Stage {
     Expanded,
     Typed,
     Erl,
+    Core0,
+    Core,
     Eaf,
     Abstr,
     Beam,
@@ -48,6 +52,8 @@ impl From<DumpStage> for Stage {
             DumpStage::Expanded => Stage::Expanded,
             DumpStage::Typed => Stage::Typed,
             DumpStage::Erl => Stage::Erl,
+            DumpStage::Core0 => Stage::Core0,
+            DumpStage::Core => Stage::Core,
         }
     }
 }

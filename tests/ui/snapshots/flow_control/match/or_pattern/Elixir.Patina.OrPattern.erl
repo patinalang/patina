@@ -31,61 +31,73 @@
 '__info__'(Key) -> module_info(Key).
 
 classify(_number@0_0) ->
-    case _number@0_0 of
-        1 ->
-            '$patina_marker':jump('$patina_label_0'),
-            [];
-        3 ->
-            '$patina_marker':jump('$patina_label_0'),
-            [];
-        5 ->
-            '$patina_marker':jump('$patina_label_0'),
-            [];
-        2 ->
-            '$patina_marker':jump('$patina_label_1'),
-            [];
-        4 ->
-            '$patina_marker':jump('$patina_label_1'),
-            [];
-        _ -> 0;
+    case [] of
         {'$patina_label_0'} -> 10;
-        {'$patina_label_1'} -> 20
+        _ ->
+            case [] of
+                {'$patina_label_1'} -> 20;
+                _ ->
+                    case _number@0_0 of
+                        1 ->
+                            '$patina_marker':jump('$patina_label_0'),
+                            [];
+                        3 ->
+                            '$patina_marker':jump('$patina_label_0'),
+                            [];
+                        5 ->
+                            '$patina_marker':jump('$patina_label_0'),
+                            [];
+                        2 ->
+                            '$patina_marker':jump('$patina_label_1'),
+                            [];
+                        4 ->
+                            '$patina_marker':jump('$patina_label_1'),
+                            [];
+                        _ -> 0
+                    end
+            end
     end.
 
 classify_nested(_pair@0_0) ->
-    case _pair@0_0 of
-        {0, 2} ->
-            '$patina_marker':jump('$patina_label_0'),
-            [];
-        {0, 3} ->
-            '$patina_marker':jump('$patina_label_0'),
-            [];
-        {1, 2} ->
-            '$patina_marker':jump('$patina_label_0'),
-            [];
-        {1, 3} ->
-            '$patina_marker':jump('$patina_label_0'),
-            [];
-        _ -> 0;
-        {'$patina_label_0'} -> 10
+    case [] of
+        {'$patina_label_0'} -> 10;
+        _ ->
+            case _pair@0_0 of
+                {0, 2} ->
+                    '$patina_marker':jump('$patina_label_0'),
+                    [];
+                {0, 3} ->
+                    '$patina_marker':jump('$patina_label_0'),
+                    [];
+                {1, 2} ->
+                    '$patina_marker':jump('$patina_label_0'),
+                    [];
+                {1, 3} ->
+                    '$patina_marker':jump('$patina_label_0'),
+                    [];
+                _ -> 0
+            end
     end.
 
 classify_nested_map(_map@0_0) ->
-    case _map@0_0 of
-        #{<<"first"/utf8>> := 0, <<"second"/utf8>> := 2} ->
-            '$patina_marker':jump('$patina_label_0'),
-            [];
-        #{<<"first"/utf8>> := 0, <<"second"/utf8>> := 3} ->
-            '$patina_marker':jump('$patina_label_0'),
-            [];
-        #{<<"first"/utf8>> := 1, <<"second"/utf8>> := 2} ->
-            '$patina_marker':jump('$patina_label_0'),
-            [];
-        #{<<"first"/utf8>> := 1, <<"second"/utf8>> := 3} ->
-            '$patina_marker':jump('$patina_label_0'),
-            [];
-        _ -> 0;
-        {'$patina_label_0'} -> 10
+    case [] of
+        {'$patina_label_0'} -> 10;
+        _ ->
+            case _map@0_0 of
+                #{<<"first"/utf8>> := 0, <<"second"/utf8>> := 2} ->
+                    '$patina_marker':jump('$patina_label_0'),
+                    [];
+                #{<<"first"/utf8>> := 0, <<"second"/utf8>> := 3} ->
+                    '$patina_marker':jump('$patina_label_0'),
+                    [];
+                #{<<"first"/utf8>> := 1, <<"second"/utf8>> := 2} ->
+                    '$patina_marker':jump('$patina_label_0'),
+                    [];
+                #{<<"first"/utf8>> := 1, <<"second"/utf8>> := 3} ->
+                    '$patina_marker':jump('$patina_label_0'),
+                    [];
+                _ -> 0
+            end
     end.
 
 classify_if_let(_number@0_0) ->
@@ -104,10 +116,17 @@ unwrap_zero_pair_if_let(_pair@0_0) ->
     end.
 
 classify_let_else(_number@0_0) ->
-    case _number@0_0 of
-        1 -> {};
-        3 -> {};
-        5 -> {};
-        _ -> begin '$patina_marker':return(0), [] end
-    end,
-    10.
+    case [] of
+        {'$patina_label_0', _jump_value@1_0} -> _jump_value@1_0;
+        _ ->
+            case _number@0_0 of
+                1 -> {};
+                3 -> {};
+                5 -> {};
+                _ ->
+                    begin
+                        '$patina_marker':jump('$patina_label_0', 0), []
+                    end
+            end,
+            10
+    end.

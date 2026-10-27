@@ -430,7 +430,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         tcx.erl_module_name(module_id)
     }
 
-    pub(super) fn record_module_for_access(&self, record_module: Symbol) -> Option<Symbol> {
+    fn record_module_for_access(&self, record_module: Symbol) -> Option<Symbol> {
         let tcx = self.tcx();
 
         if tcx.is_in_erl_inlined_const(self.owner) {

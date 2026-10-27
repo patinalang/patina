@@ -1,0 +1,95 @@
+module 'Elixir.Patina.Receive.receive' ['__info__'/1,
+					'module_info'/0,
+					'module_info'/1]
+    attributes [%% Line 73
+		'file' =
+		    %% Line 73
+		    [{[116|[101|[115|[116|[115|[47|[117|[105|[47|[115|[114|[99|[47|[102|[108|[111|[119|[95|[99|[111|[110|[116|[114|[111|[108|[47|[114|[101|[99|[101|[105|[118|[101|[46|[112|[116]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]],73}],
+		%% Line 73
+		'compile' =
+		    %% Line 73
+		    ['no_auto_import'],
+		%% Line 73
+		'export_record' =
+		    %% Line 73
+		    []]
+'__info__'/1 =
+    %% Line 73
+    ( fun (_0) ->
+	  ( case ( _0
+		   -| [{'function',{'__info__',1}}] ) of
+	      <'functions'> when 'true' ->
+		  let <_1> =
+		      apply 'module_info'/1
+			  ('exports')
+		  in  let <_2> =
+			  call 'lists':'sort'
+			      (_1)
+		      in  call 'ordsets':'subtract'
+			      (_2, [{'__info__',1}|[{'module_info',0}|[{'module_info',1}]]])
+	      <'macros'> when 'true' ->
+		  []
+	      <'struct'> when 'true' ->
+		  'nil'
+	      <'exports_md5'> when 'true' ->
+		  let <_4> =
+		      apply 'module_info'/1
+			  ('exports')
+		  in  let <_5> =
+			  call 'lists':'sort'
+			      (_4)
+		      in  let <_3> =
+			      apply '__info__'/1
+				  ('struct')
+			  in  let <_6> =
+				  call 'erlang':'term_to_binary'
+				      ({_5,[],_3}, ['deterministic'])
+			      in  call 'erlang':'md5'
+				      (_6)
+	      <'deprecated'> when 'true' ->
+		  []
+	      <Key> when 'true' ->
+		  apply 'module_info'/1
+		      (Key)
+	      ( <_7> when 'true' ->
+		    ( primop 'match_fail'
+			  (( {'function_clause',_7}
+			     -| [{'function',{'__info__',1}}] ))
+		      -| [{'function',{'__info__',1}}] )
+		-| ['compiler_generated'] )
+	    end
+	    -| [{'function',{'__info__',1}}] )
+      -| [{'function',{'__info__',1}}] )
+'module_info'/0 =
+    ( fun () ->
+	  ( case ( <>
+		   -| [{'function',{'module_info',0}}] ) of
+	      <> when 'true' ->
+		  call 'erlang':'get_module_info'
+		      ('Elixir.Patina.Receive.receive')
+	      ( <> when 'true' ->
+		    ( primop 'match_fail'
+			  (( {'function_clause'}
+			     -| [{'function',{'module_info',0}}] ))
+		      -| [{'function',{'module_info',0}}] )
+		-| ['compiler_generated'] )
+	    end
+	    -| [{'function',{'module_info',0}}] )
+      -| [{'function',{'module_info',0}}] )
+'module_info'/1 =
+    ( fun (_0) ->
+	  ( case ( _0
+		   -| [{'function',{'module_info',1}}] ) of
+	      <X> when 'true' ->
+		  call 'erlang':'get_module_info'
+		      ('Elixir.Patina.Receive.receive', X)
+	      ( <_1> when 'true' ->
+		    ( primop 'match_fail'
+			  (( {'function_clause',_1}
+			     -| [{'function',{'module_info',1}}] ))
+		      -| [{'function',{'module_info',1}}] )
+		-| ['compiler_generated'] )
+	    end
+	    -| [{'function',{'module_info',1}}] )
+      -| [{'function',{'module_info',1}}] )
+end

@@ -6,7 +6,8 @@ use libtest_mimic::Failed;
 
 use crate::snapshot;
 
-const TEXT_EXTENSIONS: &[&str] = &["tokens", "ast", "expanded", "typed", "erl", "abstr"];
+const TEXT_EXTENSIONS: &[&str] =
+    &["tokens", "ast", "expanded", "typed", "erl", "core0", "core", "abstr"];
 
 struct TextArtifact {
     file_name: String,
@@ -68,12 +69,15 @@ pub fn run_exs(pt_path: &Path, exs_path: &Path) -> Result<(), Failed> {
 
 fn compile(pt_path: &Path) -> CompileOutput {
     let out_dir = tempfile::tempdir().expect("create temp out dir");
-    let output = run_compile(
-        &["tokens", "ast", "expanded", "typed", "erl"],
-        &["abstr", "beam"],
-        pt_path,
-        out_dir.path(),
-    );
+    let source = std::fs::read_to_string(pt_path).expect("read test source");
+    let mut dumps = vec!["tokens", "ast", "expanded", "typed", "erl"];
+
+    let mut header = source.lines().take_while(|line| line.starts_with("//"));
+    if let Some(extra) = header.find_map(|line| line.strip_prefix("// snapshot:")) {
+        dumps.extend(extra.split(',').map(str::trim));
+    }
+
+    let output = run_compile(&dumps, &["abstr", "beam"], pt_path, out_dir.path());
     let text_extensions: HashSet<&str> = TEXT_EXTENSIONS.iter().copied().collect();
     let artifacts = read_text_artifacts(out_dir.path(), &text_extensions);
 

@@ -10,7 +10,7 @@ use rustc_middle::thir::{LocalVarId, Thir};
 use rustc_middle::ty::{self, Ty, TyCtxt};
 use rustc_middle::util::Providers;
 use rustc_middle::{bug, span_bug};
-use rustc_span::Span;
+use rustc_span::{Ident, Span};
 
 mod assigned_outer_vars;
 mod expr;
@@ -45,7 +45,8 @@ struct BodyBuildCx<'tcx> {
     tcx: TyCtxt<'tcx>,
     body: etir::Body<'tcx>,
     var_ids: FxHashMap<LocalVarId, VarId>,
-    loop_ids: FxHashMap<region::Scope, LoopId>,
+    break_joins: FxHashMap<region::Scope, JoinId>,
+    continue_joins: FxHashMap<region::Scope, JoinId>,
     reassign_count: usize,
 }
 
@@ -75,7 +76,8 @@ pub(crate) fn etir_body<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId) -> &'tcx et
         tcx,
         body: etir::Body::new(),
         var_ids: FxHashMap::default(),
-        loop_ids: FxHashMap::default(),
+        break_joins: FxHashMap::default(),
+        continue_joins: FxHashMap::default(),
         reassign_count: 0,
     };
 
@@ -94,6 +96,7 @@ struct ThirBodyCx<'a, 'tcx> {
     cx: &'a mut BodyBuildCx<'tcx>,
     owner: LocalDefId,
     thir: &'a Thir<'tcx>,
+    return_join: Option<JoinId>,
 }
 
 impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
@@ -101,7 +104,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         let (thir, root) = cx.tcx.thir_body(owner).unwrap_or_else(|guar| guar.raise_fatal());
         let thir = thir.borrow();
 
-        let mut cx = ThirBodyCx { cx, owner, thir: &thir };
+        let mut cx = ThirBodyCx { cx, owner, thir: &thir, return_join: None };
 
         let params = thir
             .params
@@ -118,6 +121,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             .collect();
 
         let value = cx.lower_expr(root);
+        let value = cx.wrap_in_joins(cx.return_join, value);
 
         (params, value)
     }
@@ -130,28 +134,38 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         self.cx.body.pats.push(etir::Pat { kind, ty, span })
     }
 
-    fn push_loop(&mut self, label: region::Scope) -> LoopId {
-        // `reassigned` vars are analyzed in a separate pass
-        let loop_id = self.cx.body.loops.push(etir::Loop { reassigned: Box::new([]) });
-        self.cx.loop_ids.insert(label, loop_id);
-        loop_id
+    fn push_var(&mut self, ident: Ident) -> VarId {
+        self.cx.body.vars.push(etir::Var { ident })
     }
 
-    fn push_join_and_replace(&mut self, expr: &mut ExprId) -> JoinId {
-        let etir::Expr { ty, span, .. } = self.cx.body[*expr];
-        let join = self.cx.body.joins.push(etir::Join { body: *expr, params: Box::new([]) });
-        *expr = self.push_expr(etir::ExprKind::Jump { target: join }, ty, span);
-        join
+    fn push_loop(&mut self) -> LoopId {
+        // `reassigned` vars are analyzed in a separate pass
+        self.cx.body.loops.push(etir::Loop { reassigned: Box::new([]) })
+    }
+
+    fn push_join(&mut self, body: ExprId, value: Option<VarId>) -> JoinId {
+        // `params` are analyzed in a separate pass
+        self.cx.body.joins.push(etir::Join { body, value, params: Box::new([]) })
+    }
+
+    fn wrap_in_joins<I>(&mut self, joins: I, body: ExprId) -> ExprId
+    where
+        I: IntoIterator<Item = JoinId>,
+        <I as IntoIterator>::IntoIter: DoubleEndedIterator,
+    {
+        joins.into_iter().rev().fold(body, |body, join| {
+            let etir::Expr { ty, span, kind: _ } = self.cx.body[body];
+            self.push_expr(etir::ExprKind::Join { join, body }, ty, span)
+        })
     }
 
     fn var(&mut self, id: LocalVarId) -> VarId {
-        let tcx = self.cx.tcx;
-        let vars = &mut self.cx.body.vars;
-        *self
-            .cx
-            .var_ids
-            .entry(id)
-            .or_insert_with(|| vars.push(etir::Var { ident: tcx.hir_ident(id.0) }))
+        if let Some(&var) = self.cx.var_ids.get(&id) {
+            return var;
+        }
+        let var = self.push_var(self.cx.tcx.hir_ident(id.0));
+        self.cx.var_ids.insert(id, var);
+        var
     }
 
     fn lower_adt_repr(

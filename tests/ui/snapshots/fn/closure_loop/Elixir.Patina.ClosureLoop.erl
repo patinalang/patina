@@ -24,29 +24,32 @@
 '__info__'(Key) -> module_info(Key).
 
 closure_loop() ->
-    _count@4_0 = fun (_x@0_0, _y@1_0) ->
+    _count@3_0 = fun (_x@0_0, _y@1_0) ->
                          _i@2_0 = _x@0_0,
-                         case fun _$patina_loop(_i@2_0) ->
-                                      _ = begin
-                                              _i@2_1 = _i@2_0 + _y@1_0,
-                                              case _i@2_1 > 3 of
-                                                  true ->
-                                                      begin
-                                                          '$patina_marker':break({break,
-                                                                                  0,
-                                                                                  {},
-                                                                                  _i@2_1}),
-                                                          []
-                                                      end;
-                                                  _ -> {}
+                         begin
+                             _i@2_1 = fun _$patina_loop(_i@2_0) ->
+                                              case [] of
+                                                  {'$patina_label_0', _i@2_2} ->
+                                                      _i@2_2;
+                                                  _ ->
+                                                      _ = begin
+                                                              _i@2_1 = _i@2_0 +
+                                                                           _y@1_0,
+                                                              case _i@2_1 > 3 of
+                                                                  true ->
+                                                                      begin
+                                                                          '$patina_marker':jump('$patina_label_0',
+                                                                                                _i@2_1),
+                                                                          []
+                                                                      end;
+                                                                  _ -> {}
+                                                              end
+                                                          end,
+                                                      _$patina_loop(_i@2_1)
                                               end
-                                          end,
-                                      _$patina_loop(_i@2_1)
-                              end(_i@2_0)
-                             of
-                             {break, 0, _loop_value@3_0, _i@2_1} ->
-                                 _loop_value@3_0
+                                      end(_i@2_0),
+                             {}
                          end,
                          _i@2_1
                  end,
-    _count@4_0(1, 2).
+    _count@3_0(1, 2).

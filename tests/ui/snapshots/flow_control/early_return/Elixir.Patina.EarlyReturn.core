@@ -1,0 +1,1158 @@
+module 'Elixir.Patina.EarlyReturn' ['__info__'/1,
+				    'closure_value'/1,
+				    'expression_value'/1,
+				    'if_condition_value'/1,
+				    'inlined_closure_value'/1,
+				    'is_negative'/1,
+				    'is_negative_implicit'/1,
+				    'match_continued'/0,
+				    'match_scrutinee_value'/1,
+				    'match_stopped'/0,
+				    'module_info'/0,
+				    'module_info'/1,
+				    'nested_value'/1,
+				    'passed_closure_value'/1,
+				    'return_from_inner_after'/1,
+				    'return_in_after'/2,
+				    'return_in_catch'/2,
+				    'return_in_large_after'/2,
+				    'return_in_try'/2,
+				    'return_in_try_and_after'/2,
+				    'return_in_try_without_after'/2,
+				    'return_through_nested_afters'/1]
+    attributes [%% Line 3
+		'file' =
+		    %% Line 3
+		    [{[116|[101|[115|[116|[115|[47|[117|[105|[47|[115|[114|[99|[47|[102|[108|[111|[119|[95|[99|[111|[110|[116|[114|[111|[108|[47|[101|[97|[114|[108|[121|[95|[114|[101|[116|[117|[114|[110|[46|[112|[116]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]],3}],
+		%% Line 3
+		'compile' =
+		    %% Line 3
+		    ['no_auto_import'],
+		%% Line 3
+		'export_record' =
+		    %% Line 3
+		    []]
+'__info__'/1 =
+    %% Line 3
+    ( fun (_0) ->
+	  ( case ( _0
+		   -| [{'function',{'__info__',1}}] ) of
+	      <'functions'> when 'true' ->
+		  let <_1> =
+		      apply 'module_info'/1
+			  ('exports')
+		  in  let <_2> =
+			  call 'lists':'sort'
+			      (_1)
+		      in  call 'ordsets':'subtract'
+			      (_2, [{'__info__',1}|[{'module_info',0}|[{'module_info',1}]]])
+	      <'macros'> when 'true' ->
+		  []
+	      <'struct'> when 'true' ->
+		  'nil'
+	      <'exports_md5'> when 'true' ->
+		  let <_4> =
+		      apply 'module_info'/1
+			  ('exports')
+		  in  let <_5> =
+			  call 'lists':'sort'
+			      (_4)
+		      in  let <_3> =
+			      apply '__info__'/1
+				  ('struct')
+			  in  let <_6> =
+				  call 'erlang':'term_to_binary'
+				      ({_5,[],_3}, ['deterministic'])
+			      in  call 'erlang':'md5'
+				      (_6)
+	      <'deprecated'> when 'true' ->
+		  []
+	      <Key> when 'true' ->
+		  apply 'module_info'/1
+		      (Key)
+	    end
+	    -| [{'function',{'__info__',1}}] )
+      -| [{'function',{'__info__',1}}] )
+'mark'/1 =
+    %% Line 5
+    ( fun (_0) ->
+	  let <_X_marks@1_0> =
+	      call %% Line 6
+		   ( 'erlang'
+		     -| ['result_not_wanted'] ):%% Line 6
+						( 'get'
+						  -| ['result_not_wanted'] )
+		  (%% Line 6
+		   ( 'marks'
+		     -| ['result_not_wanted'] ))
+	  in  do  %% Line 7
+		  call 'erlang':'put'
+		      ('marks', [( _0
+				   -| [{'function',{'mark',1}}] )|_X_marks@1_0])
+		  ( _0
+		    -| [{'function',{'mark',1}}] )
+      -| [{'function',{'mark',1}}] )
+'match_value'/1 =
+    %% Line 16
+    ( fun (_0) ->
+	  ( letrec
+		'$patina_label_0'/1 =
+		    fun (%% Line 18
+			 _X_jump_value@2_0) ->
+			%% Line 18
+			_X_jump_value@2_0
+	    in  let <_2> =
+		    case ( _0
+			   -| [{'function',{'match_value',1}}] ) of
+		      %% Line 18
+		      <'Elixir.Patina.EarlyReturn.Choice.Stop'> when 'true' ->
+			  apply '$patina_label_0'/1
+			      (( 10
+				 -| ['result_not_wanted'] ))
+		      %% Line 19
+		      <'Elixir.Patina.EarlyReturn.Choice.Continue'> when 'true' ->
+			  ( 20
+			    -| ['result_not_wanted'] )
+		      ( <_1> when 'true' ->
+			    %% Line 17
+			    primop 'match_fail'
+				({'case_clause',_1})
+			-| ['compiler_generated'] )
+		    end
+		in  %% Line 21
+		    call 'erlang':'+'
+			(_2, 1)
+	    -| ['letrec_goto','no_inline'] )
+      -| [{'function',{'match_value',1}}] )
+'is_negative'/1 =
+    %% Line 24
+    ( fun (_0) ->
+	  ( letrec
+		'$patina_label_0'/1 =
+		    fun (%% Line 26
+			 _X_jump_value@1_0) ->
+			%% Line 26
+			_X_jump_value@1_0
+	    in  do  %% Line 25
+		    case call 'erlang':'>='
+			     (( _0
+				-| [{'function',{'is_negative',1}}] ), 0) of
+		      <'true'> when 'true' ->
+			  apply '$patina_label_0'/1
+			      (%% Line 26
+			       'false')
+		      <_5> when 'true' ->
+			  'ok'
+		    end
+		    apply '$patina_label_0'/1
+			(%% Line 28
+			 'true')
+	    -| ['letrec_goto','no_inline'] )
+      -| [{'function',{'is_negative',1}}] )
+'is_negative_implicit'/1 =
+    %% Line 31
+    ( fun (_0) ->
+	  ( letrec
+		'$patina_label_0'/1 =
+		    fun (%% Line 33
+			 _X_jump_value@1_0) ->
+			%% Line 33
+			_X_jump_value@1_0
+	    in  do  %% Line 32
+		    case call 'erlang':'>='
+			     (( _0
+				-| [{'function',{'is_negative_implicit',1}}] ), 0) of
+		      <'true'> when 'true' ->
+			  apply '$patina_label_0'/1
+			      (%% Line 33
+			       'false')
+		      <_5> when 'true' ->
+			  'ok'
+		    end
+		    %% Line 35
+		    'true'
+	    -| ['letrec_goto','no_inline'] )
+      -| [{'function',{'is_negative_implicit',1}}] )
+'closure_value'/1 =
+    %% Line 38
+    ( fun (_0) ->
+	  %% Line 46
+	  10
+      -| [{'function',{'closure_value',1}}] )
+'inlined_closure_value'/1 =
+    %% Line 49
+    ( fun (_0) ->
+	  let <_4> =
+	      ( letrec
+		    '$patina_label_0'/1 =
+			fun (%% Line 52
+			     _X_jump_value@1_0) ->
+			    %% Line 52
+			    _X_jump_value@1_0
+		in  do  %% Line 51
+			case ( _0
+			       -| [{'function',{'inlined_closure_value',1}}] ) of
+			  <'true'> when 'true' ->
+			      apply '$patina_label_0'/1
+				  (%% Line 52
+				   ( 4
+				     -| ['result_not_wanted'] ))
+			  <_7> when 'true' ->
+			      'ok'
+			end
+			%% Line 54
+			( 5
+			  -| ['result_not_wanted'] )
+		-| ['letrec_goto'] )
+	  in  %% Line 57
+	      call 'erlang':'*'
+		  (_4, 10)
+      -| [{'function',{'inlined_closure_value',1}}] )
+'call_with'/2 =
+    %% Line 60
+    ( fun (_0,_1) ->
+	  let <_2> =
+	      apply _0
+		  (_1)
+	  in  %% Line 61
+	      call 'erlang':'*'
+		  (_2, 10)
+      -| [{'function',{'call_with',2}}] )
+'passed_closure_value'/1 =
+    %% Line 64
+    ( fun (_0) ->
+	  let <_5> =
+	      fun (_3) ->
+		  ( letrec
+			'$patina_label_0'/1 =
+			    fun (%% Line 67
+				 _X_jump_value@2_0) ->
+				%% Line 67
+				_X_jump_value@2_0
+		    in  do  %% Line 66
+			    case call 'erlang':'<'
+				     (_3, 0) of
+			      <'true'> when 'true' ->
+				  apply '$patina_label_0'/1
+				      (%% Line 67
+				       0)
+			      <_8> when 'true' ->
+				  'ok'
+			    end
+			    %% Line 69
+			    call 'erlang':'+'
+				(_3, 1)
+		    -| ['letrec_goto','no_inline'] )
+	  in  %% Line 65
+	      apply 'call_with'/2
+		  (_5, ( _0
+			 -| [{'function',{'passed_closure_value',1}}] ))
+      -| [{'function',{'passed_closure_value',1}}] )
+'expression_value'/1 =
+    %% Line 73
+    ( fun (_0) ->
+	  ( letrec
+		'$patina_label_0'/1 =
+		    fun (%% Line 76
+			 _X_jump_value@2_0) ->
+			%% Line 76
+			_X_jump_value@2_0
+	    in  let <_4> =
+		    apply %% Line 74
+			  'mark'/1
+			(%% Line 74
+			 1)
+		in  do  %% Line 75
+			case ( _0
+			       -| [{'function',{'expression_value',1}}] ) of
+			  <'true'> when 'true' ->
+			      let <_X_jump_value@1_0> =
+				  apply %% Line 76
+					'mark'/1
+				      (%% Line 76
+				       ( 2
+					 -| ['result_not_wanted'] ))
+			      in  apply '$patina_label_0'/1
+				      (%% Line 76
+				       _X_jump_value@1_0)
+			  <_8> when 'true' ->
+			      'ok'
+			end
+			let <_3> =
+			    apply %% Line 78
+				  'mark'/1
+				(%% Line 78
+				 3)
+			in  %% Line 74
+			    call 'erlang':'+'
+				(_4, %% Line 78
+				     _3)
+	    -| ['letrec_goto','no_inline'] )
+      -| [{'function',{'expression_value',1}}] )
+'match_stopped'/0 =
+    %% Line 82
+    ( fun () ->
+	  %% Line 83
+	  apply 'match_value'/1
+	      ('Elixir.Patina.EarlyReturn.Choice.Stop')
+      -| [{'function',{'match_stopped',0}}] )
+'match_continued'/0 =
+    %% Line 86
+    ( fun () ->
+	  %% Line 87
+	  apply 'match_value'/1
+	      ('Elixir.Patina.EarlyReturn.Choice.Continue')
+      -| [{'function',{'match_continued',0}}] )
+'match_scrutinee_value'/1 =
+    %% Line 90
+    ( fun (_0) ->
+	  ( letrec
+		'$patina_label_0'/1 =
+		    fun (%% Line 93
+			 _X_jump_value@1_0) ->
+			%% Line 93
+			_X_jump_value@1_0
+	    in  do  %% Line 92
+		    case ( _0
+			   -| [{'function',{'match_scrutinee_value',1}}] ) of
+		      <'true'> when 'true' ->
+			  apply '$patina_label_0'/1
+			      (%% Line 93
+			       40)
+		      <_6> when 'true' ->
+			  'ok'
+		    end
+		    %% Line 98
+		    60
+	    -| ['letrec_goto','no_inline'] )
+      -| [{'function',{'match_scrutinee_value',1}}] )
+'nested_value'/1 =
+    %% Line 102
+    ( fun (_0) ->
+	  ( letrec
+		'$patina_label_0'/1 =
+		    fun (%% Line 105
+			 _X_jump_value@2_0) ->
+			%% Line 105
+			_X_jump_value@2_0
+	    in  do  %% Line 104
+		    case ( call ( 'erlang'
+				  -| ['result_not_wanted'] ):( '=:='
+							       -| ['result_not_wanted'] )
+			       (( _0
+				  -| [{'function',{'nested_value',1}}] ), ( 0
+									    -| ['result_not_wanted'] ))
+			   -| ['result_not_wanted'] ) of
+		      <'true'> when 'true' ->
+			  apply '$patina_label_0'/1
+			      (%% Line 105
+			       ( 10
+				 -| ['result_not_wanted'] ))
+		      <_7> when 'true' ->
+			  'ok'
+		    end
+		    do  %% Line 109
+			case ( call ( 'erlang'
+				      -| ['result_not_wanted'] ):( '=:='
+								   -| ['result_not_wanted'] )
+				   (( _0
+				      -| [{'function',{'nested_value',1}}] ), ( 1
+										-| ['result_not_wanted'] ))
+			       -| ['result_not_wanted'] ) of
+			  <'true'> when 'true' ->
+			      apply '$patina_label_0'/1
+				  (%% Line 110
+				   ( 20
+				     -| ['result_not_wanted'] ))
+			  <_8> when 'true' ->
+			      'ok'
+			end
+			%% Line 116
+			31
+	    -| ['letrec_goto','no_inline'] )
+      -| [{'function',{'nested_value',1}}] )
+'if_condition_value'/1 =
+    %% Line 119
+    ( fun (_0) ->
+	  ( letrec
+		'$patina_label_0'/1 =
+		    fun (%% Line 122
+			 _X_jump_value@1_0) ->
+			%% Line 122
+			_X_jump_value@1_0
+	    in  do  %% Line 121
+		    case ( _0
+			   -| [{'function',{'if_condition_value',1}}] ) of
+		      <'true'> when 'true' ->
+			  apply '$patina_label_0'/1
+			      (%% Line 122
+			       10)
+		      <_6> when 'true' ->
+			  'ok'
+		    end
+		    %% Line 126
+		    20
+	    -| ['letrec_goto','no_inline'] )
+      -| [{'function',{'if_condition_value',1}}] )
+'return_in_try'/2 =
+    %% Line 132
+    ( fun (_0,_1) ->
+	  ( letrec
+		'$patina_label_0'/1 =
+		    fun (%% Line 135
+			 _X_jump_value@3_0) ->
+			%% Line 135
+			_X_jump_value@3_0
+	    in  let <_12> =
+		    let <_@patina_value> =
+			try
+			    ( letrec
+				  '$patina_forward'/1 =
+				      fun (_@patina_jump) ->
+					  _@patina_jump
+			      in  let <_@patina_value> =
+				      try
+					  ( letrec
+						'$patina_forward'/1 =
+						    fun (_@patina_jump) ->
+							_@patina_jump
+					    in  do  %% Line 134
+						    case _0 of
+						      <'true'> when 'true' ->
+							  apply '$patina_forward'/1
+							      ({'$patina_label_0',10})
+						      <_18> when 'true' ->
+							  'ok'
+						    end
+						    do  %% Line 137
+							apply _1
+							    ()
+							%% Line 138
+							( 20
+							  -| ['result_not_wanted'] )
+					    -| ['letrec_goto','no_inline'] )
+				      of <_3> ->
+					  _3
+				      catch <_6,_5,_4> ->
+					  %% Line 140
+					  case <_6,_5,_4> of
+					    <( 'error'
+					       -| ['compiler_generated'] ),_19,_20> when 'true' ->
+						( 30
+						  -| ['result_not_wanted'] )
+					    ( <_23,_24,_25> when 'true' ->
+						  primop 'raise'
+						      (_25, _24)
+					      -| ['compiler_generated'] )
+					  end
+				  in  case _@patina_value of
+					<_@patina_jump = {'$patina_label_0',_@patina_arg_1}> when 'true' ->
+					    apply '$patina_forward'/1
+						(_@patina_jump)
+					<_@patina_other> when 'true' ->
+					    _@patina_other
+				      end
+			      -| ['letrec_goto','no_inline'] )
+			of <_8> ->
+			    do  %% Line 142
+				apply 'mark'/1
+				    (( 0
+				       -| ['result_not_wanted'] ))
+				_8
+			catch <_11,_10,_9> ->
+			    do  %% Line 142
+				apply 'mark'/1
+				    (( 0
+				       -| ['result_not_wanted'] ))
+				primop 'raise'
+				    (_9, _10)
+		    in  case _@patina_value of
+			  <{'$patina_label_0',_@patina_arg_1}> when 'true' ->
+			      apply '$patina_label_0'/1
+				  (_@patina_arg_1)
+			  <_@patina_other> when 'true' ->
+			      _@patina_other
+			end
+		in  %% Line 144
+		    call 'erlang':'+'
+			(_12, 1)
+	    -| ['letrec_goto','no_inline'] )
+      -| [{'function',{'return_in_try',2}}] )
+'return_in_catch'/2 =
+    %% Line 147
+    ( fun (_0,_1) ->
+	  ( letrec
+		'$patina_label_0'/1 =
+		    fun (%% Line 154
+			 _X_jump_value@3_0) ->
+			%% Line 154
+			_X_jump_value@3_0
+	    in  let <_12> =
+		    let <_@patina_value> =
+			try
+			    ( letrec
+				  '$patina_forward'/1 =
+				      fun (_@patina_jump) ->
+					  _@patina_jump
+			      in  %% Line 148
+				  try
+				      do  %% Line 149
+					  apply _1
+					      ()
+					  %% Line 150
+					  ( 20
+					    -| ['result_not_wanted'] )
+				  of <_2> ->
+				      _2
+				  catch <_5,_4,_3> ->
+				      %% Line 152
+				      case <_5,_4,_3> of
+					<( 'error'
+					   -| ['compiler_generated'] ),_18,_19> when 'true' ->
+					    do  %% Line 153
+						case _0 of
+						  <'true'> when 'true' ->
+						      apply '$patina_forward'/1
+							  ({'$patina_label_0',10})
+						  <_20> when 'true' ->
+						      'ok'
+						end
+						%% Line 156
+						( 30
+						  -| ['result_not_wanted'] )
+					( <_23,_24,_25> when 'true' ->
+					      primop 'raise'
+						  (_25, _24)
+					  -| ['compiler_generated'] )
+				      end
+			      -| ['letrec_goto','no_inline'] )
+			of <_8> ->
+			    do  %% Line 159
+				apply 'mark'/1
+				    (( 0
+				       -| ['result_not_wanted'] ))
+				_8
+			catch <_11,_10,_9> ->
+			    do  %% Line 159
+				apply 'mark'/1
+				    (( 0
+				       -| ['result_not_wanted'] ))
+				primop 'raise'
+				    (_9, _10)
+		    in  case _@patina_value of
+			  <{'$patina_label_0',_@patina_arg_1}> when 'true' ->
+			      apply '$patina_label_0'/1
+				  (_@patina_arg_1)
+			  <_@patina_other> when 'true' ->
+			      _@patina_other
+			end
+		in  %% Line 161
+		    call 'erlang':'+'
+			(_12, 1)
+	    -| ['letrec_goto','no_inline'] )
+      -| [{'function',{'return_in_catch',2}}] )
+'return_in_after'/2 =
+    %% Line 164
+    ( fun (_0,_1) ->
+	  ( letrec
+		'$patina_label_0'/1 =
+		    fun (%% Line 173
+			 _X_jump_value@3_0) ->
+			%% Line 173
+			_X_jump_value@3_0
+	    in  let <_13> =
+		    try
+			%% Line 165
+			try
+			    do  %% Line 166
+				apply _1
+				    ()
+				%% Line 167
+				( 20
+				  -| ['result_not_wanted'] )
+			of <_2> ->
+			    _2
+			catch <_5,_4,_3> ->
+			    %% Line 169
+			    case <_5,_4,_3> of
+			      <( 'error'
+				 -| ['compiler_generated'] ),_19,_20> when 'true' ->
+				  ( 30
+				    -| ['result_not_wanted'] )
+			      ( <_25,_26,_27> when 'true' ->
+				    primop 'raise'
+					(_27, _26)
+				-| ['compiler_generated'] )
+			    end
+		    of <_9> ->
+			do  %% Line 171
+			    apply 'mark'/1
+				(( 0
+				   -| ['result_not_wanted'] ))
+			    do  %% Line 172
+				case _0 of
+				  <'true'> when 'true' ->
+				      apply '$patina_label_0'/1
+					  (%% Line 173
+					   ( 10
+					     -| ['result_not_wanted'] ))
+				  <_21> when 'true' ->
+				      'ok'
+				end
+				_9
+		    catch <_12,_11,_10> ->
+			do  %% Line 171
+			    apply 'mark'/1
+				(( 0
+				   -| ['result_not_wanted'] ))
+			    do  %% Line 172
+				case _0 of
+				  <'true'> when 'true' ->
+				      apply '$patina_label_0'/1
+					  (%% Line 173
+					   ( 10
+					     -| ['result_not_wanted'] ))
+				  <_23> when 'true' ->
+				      'ok'
+				end
+				primop 'raise'
+				    (_10, _11)
+		in  %% Line 176
+		    call 'erlang':'+'
+			(_13, 1)
+	    -| ['letrec_goto','no_inline'] )
+      -| [{'function',{'return_in_after',2}}] )
+'return_in_try_and_after'/2 =
+    %% Line 179
+    ( fun (_0,_1) ->
+	  ( letrec
+		'$patina_label_0'/1 =
+		    fun (%% Line 182
+			 _X_jump_value@4_0) ->
+			%% Line 182
+			_X_jump_value@4_0
+	    in  let <_@patina_value> =
+		    try
+			( letrec
+			      '$patina_forward'/1 =
+				  fun (_@patina_jump) ->
+				      _@patina_jump
+			  in  do  %% Line 181
+				  case _0 of
+				    <'true'> when 'true' ->
+					let <_X_jump_value@2_0> =
+					    apply %% Line 182
+						  'mark'/1
+						(%% Line 182
+						 ( 1
+						   -| ['result_not_wanted'] ))
+					in  apply '$patina_forward'/1
+						({'$patina_label_0',%% Line 182
+								    _X_jump_value@2_0})
+				    <_16> when 'true' ->
+					'ok'
+				  end
+				  %% Line 184
+				  2
+			  -| ['letrec_goto','no_inline'] )
+		    of <_8> ->
+			do  %% Line 186
+			    case _1 of
+			      <'true'> when 'true' ->
+				  let <_X_jump_value@3_0> =
+				      apply %% Line 187
+					    'mark'/1
+					  (%% Line 187
+					   ( 3
+					     -| ['result_not_wanted'] ))
+				  in  apply '$patina_label_0'/1
+					  (%% Line 187
+					   _X_jump_value@3_0)
+			      <_17> when 'true' ->
+				  'ok'
+			    end
+			    _8
+		    catch <_11,_10,_9> ->
+			do  %% Line 186
+			    case _1 of
+			      <'true'> when 'true' ->
+				  let <_X_jump_value@3_0> =
+				      apply %% Line 187
+					    'mark'/1
+					  (%% Line 187
+					   ( 3
+					     -| ['result_not_wanted'] ))
+				  in  apply '$patina_label_0'/1
+					  (%% Line 187
+					   _X_jump_value@3_0)
+			      <_19> when 'true' ->
+				  'ok'
+			    end
+			    primop 'raise'
+				(_9, _10)
+		in  case _@patina_value of
+		      <{'$patina_label_0',_@patina_arg_1}> when 'true' ->
+			  apply '$patina_label_0'/1
+			      (_@patina_arg_1)
+		      <_@patina_other> when 'true' ->
+			  _@patina_other
+		    end
+	    -| ['letrec_goto','no_inline'] )
+      -| [{'function',{'return_in_try_and_after',2}}] )
+'return_through_nested_afters'/1 =
+    %% Line 192
+    ( fun (_0) ->
+	  ( letrec
+		'$patina_label_0'/1 =
+		    fun (%% Line 196
+			 _X_jump_value@2_0) ->
+			%% Line 196
+			_X_jump_value@2_0
+	    in  let <_@patina_value> =
+		    try
+			( letrec
+			      '$patina_forward'/1 =
+				  fun (_@patina_jump) ->
+				      _@patina_jump
+			  in  let <_@patina_value> =
+				  try
+				      ( letrec
+					    '$patina_forward'/1 =
+						fun (_@patina_jump) ->
+						    _@patina_jump
+					in  do  %% Line 195
+						case ( _0
+						       -| [{'function',{'return_through_nested_afters',1}}] ) of
+						  <'true'> when 'true' ->
+						      let <_X_jump_value@1_0> =
+							  apply %% Line 196
+								'mark'/1
+							      (%% Line 196
+							       ( 1
+								 -| ['result_not_wanted'] ))
+						      in  apply '$patina_forward'/1
+							      ({'$patina_label_0',%% Line 196
+										  _X_jump_value@1_0})
+						  <_16> when 'true' ->
+						      'ok'
+						end
+						%% Line 198
+						2
+					-| ['letrec_goto','no_inline'] )
+				  of <_4> ->
+				      do  %% Line 200
+					  apply 'mark'/1
+					      (10)
+					  _4
+				  catch <_7,_6,_5> ->
+				      do  %% Line 200
+					  apply 'mark'/1
+					      (10)
+					  primop 'raise'
+					      (_5, _6)
+			      in  case _@patina_value of
+				    <_@patina_jump = {'$patina_label_0',_@patina_arg_1}> when 'true' ->
+					apply '$patina_forward'/1
+					    (_@patina_jump)
+				    <_@patina_other> when 'true' ->
+					_@patina_other
+				  end
+			  -| ['letrec_goto','no_inline'] )
+		    of <_9> ->
+			do  %% Line 203
+			    apply 'mark'/1
+				(20)
+			    _9
+		    catch <_12,_11,_10> ->
+			do  %% Line 203
+			    apply 'mark'/1
+				(20)
+			    primop 'raise'
+				(_10, _11)
+		in  case _@patina_value of
+		      <{'$patina_label_0',_@patina_arg_1}> when 'true' ->
+			  apply '$patina_label_0'/1
+			      (_@patina_arg_1)
+		      <_@patina_other> when 'true' ->
+			  _@patina_other
+		    end
+	    -| ['letrec_goto','no_inline'] )
+      -| [{'function',{'return_through_nested_afters',1}}] )
+'return_from_inner_after'/1 =
+    %% Line 207
+    ( fun (_0) ->
+	  ( letrec
+		'$patina_label_0'/1 =
+		    fun (%% Line 213
+			 _X_jump_value@1_0) ->
+			%% Line 213
+			_X_jump_value@1_0
+	    in  let <_@patina_value> =
+		    try
+			( letrec
+			      '$patina_forward'/1 =
+				  fun (_@patina_jump) ->
+				      _@patina_jump
+			  in  do  %% Line 212
+				  case ( _0
+					 -| [{'function',{'return_from_inner_after',1}}] ) of
+				    <'true'> when 'true' ->
+					apply '$patina_forward'/1
+					    ({'$patina_label_0',1})
+				    <_15> when 'true' ->
+					'ok'
+				  end
+				  do  %% Line 215
+				      apply 'mark'/1
+					  (10)
+				      %% Line 210
+				      2
+			  -| ['letrec_goto','no_inline'] )
+		    of <_8> ->
+			do  %% Line 218
+			    apply 'mark'/1
+				(20)
+			    _8
+		    catch <_11,_10,_9> ->
+			do  %% Line 218
+			    apply 'mark'/1
+				(20)
+			    primop 'raise'
+				(_9, _10)
+		in  case _@patina_value of
+		      <{'$patina_label_0',_@patina_arg_1}> when 'true' ->
+			  apply '$patina_label_0'/1
+			      (_@patina_arg_1)
+		      <_@patina_other> when 'true' ->
+			  _@patina_other
+		    end
+	    -| ['letrec_goto','no_inline'] )
+      -| [{'function',{'return_from_inner_after',1}}] )
+'return_in_try_without_after'/2 =
+    %% Line 222
+    ( fun (_0,_1) ->
+	  ( letrec
+		'$patina_label_0'/1 =
+		    fun (%% Line 225
+			 _X_jump_value@3_0) ->
+			%% Line 225
+			_X_jump_value@3_0
+	    in  let <_7> =
+		    let <_@patina_value> =
+			try
+			    ( letrec
+				  '$patina_forward'/1 =
+				      fun (_@patina_jump) ->
+					  _@patina_jump
+			      in  do  %% Line 224
+				      case _0 of
+					<'true'> when 'true' ->
+					    apply '$patina_forward'/1
+						({'$patina_label_0',10})
+					<_13> when 'true' ->
+					    'ok'
+				      end
+				      do  %% Line 227
+					  apply _1
+					      ()
+					  %% Line 228
+					  ( 20
+					    -| ['result_not_wanted'] )
+			      -| ['letrec_goto','no_inline'] )
+			of <_3> ->
+			    _3
+			catch <_6,_5,_4> ->
+			    %% Line 230
+			    case <_6,_5,_4> of
+			      <( 'error'
+				 -| ['compiler_generated'] ),_14,_15> when 'true' ->
+				  ( 30
+				    -| ['result_not_wanted'] )
+			      ( <_16,_17,_18> when 'true' ->
+				    primop 'raise'
+					(_18, _17)
+				-| ['compiler_generated'] )
+			    end
+		    in  case _@patina_value of
+			  <{'$patina_label_0',_@patina_arg_1}> when 'true' ->
+			      apply '$patina_label_0'/1
+				  (_@patina_arg_1)
+			  <_@patina_other> when 'true' ->
+			      _@patina_other
+			end
+		in  %% Line 232
+		    call 'erlang':'+'
+			(_7, 1)
+	    -| ['letrec_goto','no_inline'] )
+      -| [{'function',{'return_in_try_without_after',2}}] )
+'return_in_large_after'/2 =
+    %% Line 235
+    ( fun (_0,_1) ->
+	  ( letrec
+		'$patina_label_0'/1 =
+		    fun (%% Line 265
+			 _X_jump_value@28_0) ->
+			%% Line 265
+			_X_jump_value@28_0
+	    in  let <_33> =
+		    letrec
+			'after$^0'/0 =
+			    %% Line 236
+			    fun () ->
+				( letrec
+				      '$patina_forward'/1 =
+					  fun (_@patina_jump) ->
+					      _@patina_jump
+				  in  let <_X_v1@3_0> =
+					  call %% Line 240
+					       ( 'erlang'
+						 -| ['result_not_wanted'] ):%% Line 240
+									    ( '+'
+									      -| ['result_not_wanted'] )
+					      (_1, _1)
+				      in  let <_X_v2@4_0> =
+					      call %% Line 241
+						   ( 'erlang'
+						     -| ['result_not_wanted'] ):%% Line 241
+										( '+'
+										  -| ['result_not_wanted'] )
+						  (%% Line 241
+						   _X_v1@3_0, _1)
+					  in  let <_X_v3@5_0> =
+						  call %% Line 242
+						       ( 'erlang'
+							 -| ['result_not_wanted'] ):%% Line 242
+										    ( '+'
+										      -| ['result_not_wanted'] )
+						      (%% Line 242
+						       _X_v2@4_0, _1)
+					      in  let <_X_v4@6_0> =
+						      call %% Line 243
+							   ( 'erlang'
+							     -| ['result_not_wanted'] ):%% Line 243
+											( '+'
+											  -| ['result_not_wanted'] )
+							  (%% Line 243
+							   _X_v3@5_0, _1)
+						  in  let <_X_v5@7_0> =
+							  call %% Line 244
+							       ( 'erlang'
+								 -| ['result_not_wanted'] ):%% Line 244
+											    ( '+'
+											      -| ['result_not_wanted'] )
+							      (%% Line 244
+							       _X_v4@6_0, _1)
+						      in  let <_X_v6@8_0> =
+							      call %% Line 245
+								   ( 'erlang'
+								     -| ['result_not_wanted'] ):%% Line 245
+												( '+'
+												  -| ['result_not_wanted'] )
+								  (%% Line 245
+								   _X_v5@7_0, _1)
+							  in  let <_X_v7@9_0> =
+								  call %% Line 246
+								       ( 'erlang'
+									 -| ['result_not_wanted'] ):%% Line 246
+												    ( '+'
+												      -| ['result_not_wanted'] )
+								      (%% Line 246
+								       _X_v6@8_0, _1)
+							      in  let <_X_v8@10_0> =
+								      call %% Line 247
+									   ( 'erlang'
+									     -| ['result_not_wanted'] ):%% Line 247
+													( '+'
+													  -| ['result_not_wanted'] )
+									  (%% Line 247
+									   _X_v7@9_0, _1)
+								  in  let <_X_v9@11_0> =
+									  call %% Line 248
+									       ( 'erlang'
+										 -| ['result_not_wanted'] ):%% Line 248
+													    ( '+'
+													      -| ['result_not_wanted'] )
+									      (%% Line 248
+									       _X_v8@10_0, _1)
+								      in  let <_X_v10@12_0> =
+									      call %% Line 249
+										   ( 'erlang'
+										     -| ['result_not_wanted'] ):%% Line 249
+														( '+'
+														  -| ['result_not_wanted'] )
+										  (%% Line 249
+										   _X_v9@11_0, _1)
+									  in  let <_X_v11@13_0> =
+										  call %% Line 250
+										       ( 'erlang'
+											 -| ['result_not_wanted'] ):%% Line 250
+														    ( '+'
+														      -| ['result_not_wanted'] )
+										      (%% Line 250
+										       _X_v10@12_0, _1)
+									      in  let <_X_v12@14_0> =
+										      call %% Line 251
+											   ( 'erlang'
+											     -| ['result_not_wanted'] ):%% Line 251
+															( '+'
+															  -| ['result_not_wanted'] )
+											  (%% Line 251
+											   _X_v11@13_0, _1)
+										  in  let <_X_v13@15_0> =
+											  call %% Line 252
+											       ( 'erlang'
+												 -| ['result_not_wanted'] ):%% Line 252
+															    ( '+'
+															      -| ['result_not_wanted'] )
+											      (%% Line 252
+											       _X_v12@14_0, _1)
+										      in  let <_X_v14@16_0> =
+											      call %% Line 253
+												   ( 'erlang'
+												     -| ['result_not_wanted'] ):%% Line 253
+																( '+'
+																  -| ['result_not_wanted'] )
+												  (%% Line 253
+												   _X_v13@15_0, _1)
+											  in  let <_X_v15@17_0> =
+												  call %% Line 254
+												       ( 'erlang'
+													 -| ['result_not_wanted'] ):%% Line 254
+																    ( '+'
+																      -| ['result_not_wanted'] )
+												      (%% Line 254
+												       _X_v14@16_0, _1)
+											      in  let <_X_v16@18_0> =
+												      call %% Line 255
+													   ( 'erlang'
+													     -| ['result_not_wanted'] ):%% Line 255
+																	( '+'
+																	  -| ['result_not_wanted'] )
+													  (%% Line 255
+													   _X_v15@17_0, _1)
+												  in  let <_X_v17@19_0> =
+													  call %% Line 256
+													       ( 'erlang'
+														 -| ['result_not_wanted'] ):%% Line 256
+																	    ( '+'
+																	      -| ['result_not_wanted'] )
+													      (%% Line 256
+													       _X_v16@18_0, _1)
+												      in  let <_X_v18@20_0> =
+													      call %% Line 257
+														   ( 'erlang'
+														     -| ['result_not_wanted'] ):%% Line 257
+																		( '+'
+																		  -| ['result_not_wanted'] )
+														  (%% Line 257
+														   _X_v17@19_0, _1)
+													  in  let <_X_v19@21_0> =
+														  call %% Line 258
+														       ( 'erlang'
+															 -| ['result_not_wanted'] ):%% Line 258
+																		    ( '+'
+																		      -| ['result_not_wanted'] )
+														      (%% Line 258
+														       _X_v18@20_0, _1)
+													      in  let <_X_v20@22_0> =
+														      call %% Line 259
+															   ( 'erlang'
+															     -| ['result_not_wanted'] ):%% Line 259
+																			( '+'
+																			  -| ['result_not_wanted'] )
+															  (%% Line 259
+															   _X_v19@21_0, _1)
+														  in  let <_X_v21@23_0> =
+															  call %% Line 260
+															       ( 'erlang'
+																 -| ['result_not_wanted'] ):%% Line 260
+																			    ( '+'
+																			      -| ['result_not_wanted'] )
+															      (%% Line 260
+															       _X_v20@22_0, _1)
+														      in  let <_X_v22@24_0> =
+															      call %% Line 261
+																   ( 'erlang'
+																     -| ['result_not_wanted'] ):%% Line 261
+																				( '+'
+																				  -| ['result_not_wanted'] )
+																  (%% Line 261
+																   _X_v21@23_0, _1)
+															  in  let <_X_v23@25_0> =
+																  call %% Line 262
+																       ( 'erlang'
+																	 -| ['result_not_wanted'] ):%% Line 262
+																				    ( '+'
+																				      -| ['result_not_wanted'] )
+																      (%% Line 262
+																       _X_v22@24_0, _1)
+															      in  let <_X_v24@26_0> =
+																      call %% Line 263
+																	   ( 'erlang'
+																	     -| ['result_not_wanted'] ):%% Line 263
+																					( '+'
+																					  -| ['result_not_wanted'] )
+																	  (%% Line 263
+																	   _X_v23@25_0, _1)
+																  in  do  %% Line 264
+																	  case _0 of
+																	    <'true'> when 'true' ->
+																		apply '$patina_forward'/1
+																		    ({'$patina_label_0',%% Line 265
+																					_X_v24@26_0})
+																	    <_39> when 'true' ->
+																		'ok'
+																	  end
+																	  do  %% Line 267
+																	      apply 'mark'/1
+																		  (_X_v24@26_0)
+																	      %% Line 238
+																	      ( {}
+																		-| ['result_not_wanted'] )
+				  -| ['letrec_goto','no_inline'] )
+		    in  %% Line 236
+			try
+			    %% Line 237
+			    apply 'mark'/1
+				(( 1
+				   -| ['result_not_wanted'] ))
+			of <_29> ->
+			    do  case ( apply 'after$^0'/0
+					   ()
+				       -| [{'label',1146},'compiler_generated'] ) of
+				  <{'$patina_label_0',_@patina_arg_1}> when 'true' ->
+				      apply '$patina_label_0'/1
+					  (_@patina_arg_1)
+				  <_@patina_other> when 'true' ->
+				      'ok'
+				end
+				_29
+			catch <_32,_31,_30> ->
+			    do  case ( apply 'after$^0'/0
+					   ()
+				       -| [{'label',1156},'compiler_generated'] ) of
+				  <{'$patina_label_0',_@patina_arg_1}> when 'true' ->
+				      apply '$patina_label_0'/1
+					  (_@patina_arg_1)
+				  <_@patina_other> when 'true' ->
+				      'ok'
+				end
+				primop 'raise'
+				    (_30, _31)
+		in  %% Line 269
+		    call 'erlang':'+'
+			(_33, 1)
+	    -| ['letrec_goto','no_inline'] )
+      -| [{'function',{'return_in_large_after',2}}] )
+'module_info'/0 =
+    ( fun () ->
+	  call 'erlang':'get_module_info'
+	      ('Elixir.Patina.EarlyReturn')
+      -| [{'function',{'module_info',0}}] )
+'module_info'/1 =
+    ( fun (_0) ->
+	  call 'erlang':'get_module_info'
+	      ('Elixir.Patina.EarlyReturn', ( _0
+					      -| [{'function',{'module_info',1}}] ))
+      -| [{'function',{'module_info',1}}] )
+end

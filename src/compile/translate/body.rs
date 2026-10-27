@@ -10,7 +10,6 @@ use rustc_middle::span_bug;
 use rustc_middle::ty::{Ty, TyCtxt};
 use rustc_span::{Span, Symbol, kw, sym};
 
-use crate::compile::translate::loops::Loops;
 use crate::compile::translate::scopes::{PatinaVar, Scope, Scopes};
 use crate::compile::translate::{ModuleParts, Translator};
 use crate::erlang::abstract_format as eaf;
@@ -77,7 +76,6 @@ pub(super) struct BodyCx<'a, 'tcx, 'arena> {
     pub etir: &'tcx etir::Body<'tcx>,
     pub parts: &'a mut ModuleParts<'arena>,
     pub scopes: &'a mut Scopes,
-    pub loops: Loops,
 }
 
 impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
@@ -88,7 +86,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         parts: &'a mut ModuleParts<'arena>,
         scopes: &'a mut Scopes,
     ) -> Self {
-        BodyCx { translator, owner, etir, parts, scopes, loops: Loops::new() }
+        BodyCx { translator, owner, etir, parts, scopes }
     }
 
     pub(super) fn tcx(&self) -> TyCtxt<'tcx> {
@@ -176,16 +174,11 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
                 self.translate_try_catch(span, body, arms, after)
             }
 
-            ExprKind::Match { scrutinee, ref arms } => {
-                self.translate_match(span, scrutinee, arms, &[])
-            }
+            ExprKind::Match { scrutinee, ref arms } => self.translate_match(span, scrutinee, arms),
 
-            ExprKind::Return { value } => self.translate_return(span, value),
-            ExprKind::Loop { id, body } => self.translate_loop(expr, id, body),
-            ExprKind::Break { target, value } => self.translate_break(span, target, value),
-            ExprKind::Continue { target } => self.translate_continue(span, target),
-            ExprKind::Join { ref joins, body } => self.translate_join(span, joins, body),
-            ExprKind::Jump { target } => self.translate_jump(span, target),
+            ExprKind::Loop { id, body } => self.translate_loop(span, id, body, None),
+            ExprKind::Join { join, body } => self.translate_join(span, join, body),
+            ExprKind::Jump { target, value } => self.translate_jump(span, target, value),
         }
     }
 
@@ -382,50 +375,60 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         self.translator.afb.expr_unary_op(span, unary_op, operand)
     }
 
-    fn translate_return(&mut self, span: Span, value: Option<ExprId>) -> eaf::Expr<'arena> {
+    fn translate_join(&mut self, span: Span, join: JoinId, body: ExprId) -> eaf::Expr<'arena> {
         let afb = &self.translator.afb;
+        let body_span = self.etir[body].span;
 
-        let value =
-            value.map(|value| self.translate_expr(value)).unwrap_or_else(|| afb.expr_unit(span));
-
-        if self.loops.in_loop() {
-            self.loops.record_return();
-            self.loop_return_expr(span, value, self.loops.current())
-        } else {
-            self.marker_call(span, kw::Return, [value])
+        if let ExprKind::Loop { id, body: loop_body } = self.etir[body].kind {
+            // Optimization: a join around a loop is necessarily its exit;
+            // we can emit a better loop shape knowing that. See `translate_loop`.
+            return self.translate_loop(body_span, id, loop_body, Some(join));
         }
-    }
 
-    fn translate_join(&mut self, span: Span, joins: &[JoinId], body: ExprId) -> eaf::Expr<'arena> {
-        let ExprKind::Match { scrutinee, ref arms } = self.etir[body].kind else {
-            span_bug!(span, "`Join` body is not a `Match`")
+        let (body, scope) = self.with_scope(|cx| cx.translate_expr(body));
+        let body = TranslatedArm {
+            patterns: afb.pat_var(body_span, kw::Underscore).into(),
+            guard: None,
+            branch: Branch { span: body_span, body, scope },
         };
-        self.translate_match(span, scrutinee, arms, joins)
+
+        let mut translated = [self.translate_join_arm(join), body];
+        self.merge_branches(translated.iter_mut().map(|arm| &mut arm.branch));
+        afb.expr_case(span, afb.expr_nil(span), self.arm_clauses(translated))
     }
 
-    fn translate_jump(&mut self, span: Span, target: JoinId) -> eaf::Expr<'arena> {
-        let args = self.label_args(span, target);
-        self.marker_call(span, sym::jump, args)
-    }
-
-    fn label_args(&mut self, span: Span, join: JoinId) -> SmallVec<[eaf::Expr<'arena>; 1]> {
+    /// `'$patina_marker':jump('$patina_label_N', Value, ..Params)`.
+    fn translate_jump(
+        &mut self,
+        span: Span,
+        target: JoinId,
+        value: Option<ExprId>,
+    ) -> eaf::Expr<'arena> {
         let afb = &self.translator.afb;
-        let label = afb.expr_atom(span, label_name(join));
-        let params = self.etir[join].params.iter().map(|&var| self.translate_var_ref(span, var));
-        std::iter::once(label).chain(params).collect()
+
+        let label = afb.expr_atom(span, label_name(target));
+        let value = value.map(|value| self.translate_expr(value));
+        let params = self.etir[target].params.iter().map(|&var| self.translate_var_ref(span, var));
+        let args: SmallVec<[_; 4]> = std::iter::once(label).chain(value).chain(params).collect();
+
+        let call = afb.expr_remote_call(
+            span,
+            afb.expr_atom(span, sym::dollar_patina_marker),
+            afb.expr_atom(span, sym::jump),
+            args,
+        );
+        // Wrap the marker call with `begin $call, [] end` so the call is never treated as a value
+        // of an expression. We need that because otherwise, when we rewrite to jumps in core
+        // Erlang, some jumps can end up in positions that are annoying to fix at that stage.
+        afb.expr_block(span, [call, afb.expr_nil(span)])
     }
 
     fn translate_join_arm(&mut self, join: JoinId) -> TranslatedArm<'arena> {
-        let afb = &self.translator.afb;
         let body = self.etir[join].body;
         let span = self.etir[body].span;
 
-        // {$patina_label_XX, reassigned_arg1, reassigned_arg2, ...}
-        // This prepares fresh variables for our later Core Erlang rewriting.
         let ((pattern, body), scope) = self.with_scope(|cx| {
-            let label = afb.pat_atom(span, label_name(join));
-            let params = cx.etir[join].params.iter().map(|&var| cx.translate_assignee(span, var));
-            let pattern = afb.pat_tuple(span, std::iter::once(label).chain(params));
+            let pattern = cx.bind_join_args(span, join);
             (pattern, cx.translate_expr(body))
         });
 
@@ -436,23 +439,16 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         }
     }
 
-    pub(super) fn marker_call(
-        &self,
-        span: Span,
-        name: Symbol,
-        args: impl IntoIterator<Item = eaf::Expr<'arena>>,
-    ) -> eaf::Expr<'arena> {
+    /// `{'$patina_label_N', Value, ..Params}` pattern.
+    pub(super) fn bind_join_args(&mut self, span: Span, join: JoinId) -> eaf::Pattern<'arena> {
         let afb = &self.translator.afb;
-        let call = afb.expr_remote_call(
-            span,
-            afb.expr_atom(span, sym::dollar_patina_marker),
-            afb.expr_atom(span, name),
-            args,
-        );
-        // Wrap the marker call with `begin $call, [] end` so the call is never treated as a value
-        // of an expression. We need that because otherwise, when we rewrite to jumps in core
-        // Erlang, some jumps can end up in positions that are annoying to fix at that stage.
-        afb.expr_block(span, [call, afb.expr_nil(span)])
+        let etir::Join { value, ref params, .. } = self.etir[join];
+        let label = afb.pat_atom(span, label_name(join));
+        let args = value.into_iter().chain(params.iter().copied()).map(|var| {
+            let name = self.scopes.bind_var(var, self.etir[var].ident.name).erl_name;
+            afb.pat_var(span, name)
+        });
+        afb.pat_tuple(span, std::iter::once(label).chain(args))
     }
 
     fn translate_call(
@@ -543,10 +539,8 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let translated = self
             .with_scope(|cx| {
                 let owner = std::mem::replace(&mut cx.owner, def_id);
-                let loops = std::mem::replace(&mut cx.loops, Loops::new());
                 let translated = cx.translate_body_with_params(params, body);
                 cx.owner = owner;
-                cx.loops = loops;
                 translated
             })
             .0;
@@ -583,7 +577,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         self.translator.afb.expr_match(span, lhs, rhs)
     }
 
-    fn translate_assignee(&mut self, span: Span, var: VarId) -> eaf::Pattern<'arena> {
+    pub(super) fn translate_assignee(&mut self, span: Span, var: VarId) -> eaf::Pattern<'arena> {
         let erl_name = self.scopes.bind_var(var, self.etir[var].ident.name).erl_name;
         self.translator.afb.pat_var(span, erl_name)
     }
@@ -593,25 +587,28 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         span: Span,
         scrutinee: ExprId,
         arms: &[etir::Arm],
-        joins: &[JoinId],
     ) -> eaf::Expr<'arena> {
         let afb = &self.translator.afb;
         let scrutinee = self.translate_expr(scrutinee);
 
-        let mut translated: SmallVec<[TranslatedArm<'arena>; 4]> =
+        let mut translated: Box<[TranslatedArm<'arena>]> =
             arms.iter().map(|arm| self.translate_arm(arm)).collect();
 
-        translated.extend(joins.iter().map(|&join| self.translate_join_arm(join)));
-
         self.merge_branches(translated.iter_mut().map(|arm| &mut arm.branch));
+        afb.expr_case(span, scrutinee, self.arm_clauses(translated))
+    }
 
-        let clauses = translated.into_iter().flat_map(|arm| {
+    fn arm_clauses(
+        &self,
+        translated: impl IntoIterator<Item = TranslatedArm<'arena>>,
+    ) -> impl Iterator<Item = eaf::Clause<'arena>> {
+        let afb = &self.translator.afb;
+        translated.into_iter().flat_map(move |arm| {
             let TranslatedArm { patterns, guard, branch: Branch { span, body, .. } } = arm;
             patterns.into_iter().map(move |GuardedPattern(pattern, pattern_guards)| {
                 afb.clause(span, [pattern], pattern_guards.into_iter().chain(guard), body)
             })
-        });
-        afb.expr_case(span, scrutinee, clauses)
+        })
     }
 
     fn merge_branches<'b>(&mut self, branches: impl IntoIterator<Item = &'b mut Branch<'arena>>)
@@ -1090,7 +1087,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         afb.erlang_bif(span, name, [value])
     }
 
-    pub(super) fn translate_wild_pattern(
+    fn translate_wild_pattern(
         &mut self,
         span: Span,
         ty: Ty<'tcx>,

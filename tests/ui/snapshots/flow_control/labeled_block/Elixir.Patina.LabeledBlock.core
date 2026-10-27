@@ -1,0 +1,191 @@
+module 'Elixir.Patina.LabeledBlock' ['__info__'/1,
+				     'labeled'/1,
+				     'module_info'/0,
+				     'module_info'/1,
+				     'nested'/1]
+    attributes [%% Line 3
+		'file' =
+		    %% Line 3
+		    [{[116|[101|[115|[116|[115|[47|[117|[105|[47|[115|[114|[99|[47|[102|[108|[111|[119|[95|[99|[111|[110|[116|[114|[111|[108|[47|[108|[97|[98|[101|[108|[101|[100|[95|[98|[108|[111|[99|[107|[46|[112|[116]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]],3}],
+		%% Line 3
+		'compile' =
+		    %% Line 3
+		    ['no_auto_import'],
+		%% Line 3
+		'export_record' =
+		    %% Line 3
+		    []]
+'__info__'/1 =
+    %% Line 3
+    ( fun (_0) ->
+	  ( case ( _0
+		   -| [{'function',{'__info__',1}}] ) of
+	      <'functions'> when 'true' ->
+		  let <_1> =
+		      apply 'module_info'/1
+			  ('exports')
+		  in  let <_2> =
+			  call 'lists':'sort'
+			      (_1)
+		      in  call 'ordsets':'subtract'
+			      (_2, [{'__info__',1}|[{'module_info',0}|[{'module_info',1}]]])
+	      <'macros'> when 'true' ->
+		  []
+	      <'struct'> when 'true' ->
+		  'nil'
+	      <'exports_md5'> when 'true' ->
+		  let <_4> =
+		      apply 'module_info'/1
+			  ('exports')
+		  in  let <_5> =
+			  call 'lists':'sort'
+			      (_4)
+		      in  let <_3> =
+			      apply '__info__'/1
+				  ('struct')
+			  in  let <_6> =
+				  call 'erlang':'term_to_binary'
+				      ({_5,[],_3}, ['deterministic'])
+			      in  call 'erlang':'md5'
+				      (_6)
+	      <'deprecated'> when 'true' ->
+		  []
+	      <Key> when 'true' ->
+		  apply 'module_info'/1
+		      (Key)
+	    end
+	    -| [{'function',{'__info__',1}}] )
+      -| [{'function',{'__info__',1}}] )
+'labeled'/1 =
+    %% Line 3
+    ( fun (_0) ->
+	  let <_9,_X_y@1_2> =
+	      ( letrec
+		    '$patina_label_0'/2 =
+			fun (%% Line 8
+			     _X_jump_value@3_0,%% Line 8
+					       _X_y@1_1) ->
+			    %% Line 8
+			    <_X_jump_value@3_0,_X_y@1_1>
+		in  do  %% Line 7
+			case ( call ( 'erlang'
+				      -| ['result_not_wanted'] ):( '>'
+								   -| ['result_not_wanted'] )
+				   (( _0
+				      -| [{'function',{'labeled',1}}] ), ( 5
+									   -| ['result_not_wanted'] ))
+			       -| ['result_not_wanted'] ) of
+			  <'true'> when 'true' ->
+			      let <_X_jump_value@2_0> =
+				  call %% Line 8
+				       ( 'erlang'
+					 -| ['result_not_wanted'] ):%% Line 8
+								    ( '*'
+								      -| ['result_not_wanted'] )
+				      (( _0
+					 -| [{'function',{'labeled',1}}] ), %% Line 8
+									    ( 2
+									      -| ['result_not_wanted'] ))
+			      in  apply '$patina_label_0'/2
+				      (%% Line 8
+				       _X_jump_value@2_0, ( 1
+							    -| ['result_not_wanted'] ))
+			  <_13> when 'true' ->
+			      'ok'
+			end
+			%% Line 11
+			( <( call ( 'erlang'
+				    -| ['result_not_wanted'] ):( '+'
+								 -| ['result_not_wanted'] )
+				 (( _0
+				    -| [{'function',{'labeled',1}}] ), ( 11
+									 -| ['result_not_wanted'] ))
+			     -| ['result_not_wanted'] ),( 11
+							  -| ['result_not_wanted'] )>
+			  -| ['result_not_wanted'] )
+		-| ['letrec_goto'] )
+	  in  %% Line 13
+	      call 'erlang':'+'
+		  (_9, _X_y@1_2)
+      -| [{'function',{'labeled',1}}] )
+'nested'/1 =
+    %% Line 16
+    ( fun (_0) ->
+	  let <_18,_X_n@1_1> =
+	      ( letrec
+		    '$patina_label_0'/1 =
+			fun (%% Line 22
+			     _X_n@1_1) ->
+			    %% Line 22
+			    <{},_X_n@1_1>
+		in  let <_8> =
+			letrec
+			    '_$patina_loop'/1 =
+				%% Line 19
+				( fun (_6) ->
+				      ( letrec
+					    '$patina_forward'/1 =
+						fun (_@patina_jump) ->
+						    _@patina_jump
+					in  let <_X_$patina_loop> = '_$patina_loop'/1
+					    in  let <_X_n@1_1> =
+						    call %% Line 20
+							 ( 'erlang'
+							   -| ['result_not_wanted'] ):%% Line 20
+										      ( '+'
+											-| ['result_not_wanted'] )
+							(( _6
+							   -| ['result_not_wanted'] ), %% Line 20
+										       ( 1
+											 -| ['result_not_wanted'] ))
+						in  do  %% Line 21
+							case ( call ( 'erlang'
+								      -| ['result_not_wanted'] ):( '>'
+												   -| ['result_not_wanted'] )
+								   (_X_n@1_1, ( _0
+										-| [{'function',{'nested',1}}] ))
+							       -| ['result_not_wanted'] ) of
+							  <'true'> when 'true' ->
+							      apply '$patina_forward'/1
+								  ({'$patina_label_0',%% Line 22
+										      _X_n@1_1})
+							  <_15> when 'true' ->
+							      'ok'
+							end
+							apply _X_$patina_loop
+							    (_X_n@1_1)
+					-| ['letrec_goto','no_inline'] )
+				  -| [{'id',{0,0,'-nested/1-fun-0-'}},'result_not_wanted'] )
+			in  '_$patina_loop'/1
+		    in  let <_X_branch_value@2_0> =
+			    case %% Line 19
+				 ( apply ( _8
+					   -| ['result_not_wanted'] )
+				       (( 0
+					  -| ['result_not_wanted'] ))
+				   -| [{'label',143}] ) of
+			      <{'$patina_label_0',_@patina_arg_1}> when 'true' ->
+				  apply '$patina_label_0'/1
+				      (_@patina_arg_1)
+			      <_@patina_other> when 'true' ->
+				  _@patina_other
+			    end
+			in  %% Line 18
+			    <_X_branch_value@2_0,( 0
+						   -| ['result_not_wanted'] )>
+		-| ['letrec_goto'] )
+	  in  %% Line 26
+	      _X_n@1_1
+      -| [{'function',{'nested',1}}] )
+'module_info'/0 =
+    ( fun () ->
+	  call 'erlang':'get_module_info'
+	      ('Elixir.Patina.LabeledBlock')
+      -| [{'function',{'module_info',0}}] )
+'module_info'/1 =
+    ( fun (_0) ->
+	  call 'erlang':'get_module_info'
+	      ('Elixir.Patina.LabeledBlock', ( _0
+					       -| [{'function',{'module_info',1}}] ))
+      -| [{'function',{'module_info',1}}] )
+end

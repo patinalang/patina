@@ -141,20 +141,16 @@ pub fn walk_expr<'etir, 'tcx: 'etir, V: Visitor<'etir, 'tcx>>(
                 visitor.visit_catch_arm(arm);
             }
         }
-        Return { value } | Break { target: _, value } => {
+        Loop { id: _, body } => visit_expr_id(visitor, body),
+        Join { join, body } => {
+            visit_expr_id(visitor, body);
+            visit_expr_id(visitor, visitor.etir()[join].body);
+        }
+        Jump { target: _, value } => {
             if let Some(value) = value {
                 visit_expr_id(visitor, value);
             }
         }
-        Loop { id: _, body } => visit_expr_id(visitor, body),
-        Continue { target: _ } => {}
-        Join { ref joins, body } => {
-            visit_expr_id(visitor, body);
-            for &join in joins {
-                visit_expr_id(visitor, visitor.etir()[join].body);
-            }
-        }
-        Jump { target: _ } => {}
     }
 }
 

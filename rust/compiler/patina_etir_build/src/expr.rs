@@ -2,7 +2,7 @@ use rustc_hir::def::DefKind;
 use rustc_hir::{BinarySegmentTy, HirId};
 use rustc_middle::erl::binary_pattern::{BinaryEndianness, BinarySegmentLayout, BinarySegmentSize};
 use rustc_middle::erl::etir::visit::{self, Visitor, walk_pat};
-use rustc_middle::erl::etir::{self, ExprId, PatId, PatternInput};
+use rustc_middle::erl::etir::{self, ExprId, JoinId, PatId, PatternInput};
 use rustc_middle::erl::{ErlCallTarget, ErlModuleId, ErlModuleResolution};
 use rustc_middle::middle::region;
 use rustc_middle::mir::{BinOp, UnOp};
@@ -41,8 +41,7 @@ impl<'a, 'tcx> ExprBlock {
             return value;
         }
 
-        let vars = &mut cx.cx.body.vars;
-        let var = vars.push(etir::Var { ident: Ident { name, span } });
+        let var = cx.push_var(Ident { name, span });
 
         let binding = cx.push_pat(
             etir::PatKind::Binding {
@@ -156,7 +155,11 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             }) => {}
             None => exprs.push(self.unit_expr(block.span)),
         }
-        self.push_expr(etir::ExprKind::Block(exprs.into_boxed_slice()), ty, span)
+
+        let value = self.push_expr(etir::ExprKind::Block(exprs.into_boxed_slice()), ty, span);
+
+        let join = self.cx.break_joins.remove(&block.region_scope);
+        self.wrap_in_joins(join, value)
     }
 
     fn lower_stmt(&mut self, id: thir::StmtId) -> Option<ExprId> {
@@ -787,13 +790,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             None => self.unit_expr(expr.span),
         };
 
-        let mut joins = Vec::new();
-        let body = self.logical_match_expr(expr, cond, then_body, else_body, &mut joins);
-        if joins.is_empty() {
-            return body;
-        }
-        let kind = etir::ExprKind::Join { joins: joins.into(), body };
-        self.push_expr(kind, expr.ty, expr.span)
+        self.logical_match_expr(expr, cond, then_body, else_body)
     }
 
     fn lower_cond(&mut self, cond: thir::ExprId) -> Cond {
@@ -857,7 +854,6 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         cond: Cond,
         mut then_body: ExprId,
         mut else_body: ExprId,
-        joins: &mut Vec<etir::JoinId>,
     ) -> ExprId {
         match cond {
             Cond::Test { scrutinee, pattern } => {
@@ -865,25 +861,31 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             }
 
             Cond::And(lhs, rhs) => {
-                self.share_body(&mut else_body, joins);
-                let then = self.logical_match_expr(expr, *rhs, then_body, else_body, joins);
-                self.logical_match_expr(expr, *lhs, then, else_body, joins)
+                let join = self.outline_to_join(&mut else_body);
+                let then = self.logical_match_expr(expr, *rhs, then_body, else_body);
+                let value = self.logical_match_expr(expr, *lhs, then, else_body);
+                self.wrap_in_joins(join, value)
             }
 
             Cond::Or(lhs, rhs) => {
-                self.share_body(&mut then_body, joins);
-                let otherwise = self.logical_match_expr(expr, *rhs, then_body, else_body, joins);
-                self.logical_match_expr(expr, *lhs, then_body, otherwise, joins)
+                let join = self.outline_to_join(&mut then_body);
+                let otherwise = self.logical_match_expr(expr, *rhs, then_body, else_body);
+                let value = self.logical_match_expr(expr, *lhs, then_body, otherwise);
+                self.wrap_in_joins(join, value)
             }
 
-            Cond::Not(cond) => self.logical_match_expr(expr, *cond, else_body, then_body, joins),
+            Cond::Not(cond) => self.logical_match_expr(expr, *cond, else_body, then_body),
         }
     }
 
-    fn share_body(&mut self, body: &mut ExprId, joins: &mut Vec<etir::JoinId>) {
-        if !matches!(self.cx.body[*body].kind, etir::ExprKind::Jump { .. }) {
-            joins.push(self.push_join_and_replace(body));
+    fn outline_to_join(&mut self, expr: &mut ExprId) -> Option<JoinId> {
+        let etir::Expr { ty, span, ref kind } = self.cx.body[*expr];
+        if matches!(kind, etir::ExprKind::Jump { .. }) {
+            return None;
         }
+        let join = self.push_join(*expr, None);
+        *expr = self.push_expr(etir::ExprKind::Jump { target: join, value: None }, ty, span);
+        Some(join)
     }
 
     fn ifelse_match_expr(
@@ -937,18 +939,14 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             .map(|&arm| {
                 let mut arm = self.lower_arm(arm);
                 if self.has_or_pattern(arm.pattern) {
-                    joins.push(self.push_join_and_replace(&mut arm.body));
+                    joins.extend(self.outline_to_join(&mut arm.body));
                 }
                 arm
             })
             .collect();
 
-        let body = self.push_expr(etir::ExprKind::Match { scrutinee, arms }, expr.ty, expr.span);
-        if joins.is_empty() {
-            return body;
-        }
-        let kind = etir::ExprKind::Join { joins: joins.into(), body };
-        self.push_expr(kind, expr.ty, expr.span)
+        let value = self.push_expr(etir::ExprKind::Match { scrutinee, arms }, expr.ty, expr.span);
+        self.wrap_in_joins(joins, value)
     }
 
     fn has_or_pattern(&self, pat: PatId) -> bool {
@@ -1029,7 +1027,12 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         value: Option<thir::ExprId>,
     ) -> ExprId {
         let value = value.map(|value| self.lower_expr(value));
-        self.push_expr(etir::ExprKind::Return { value }, expr.ty, expr.span)
+        let join = self.return_join.unwrap_or_else(|| {
+            let join = self.push_value_join(value, expr.span);
+            self.return_join = Some(join);
+            join
+        });
+        self.jump(expr, join, value)
     }
 
     fn lower_expr_loop(
@@ -1042,9 +1045,16 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             span_bug!(expr.span, "HIR-derived loop has no outer Scope")
         };
 
-        let loop_id = self.push_loop(label);
+        let loop_id = self.push_loop();
         let body = self.lower_expr(body);
-        self.push_expr(etir::ExprKind::Loop { id: loop_id, body }, expr.ty, expr.span)
+        // `continue` results in a Join inside the loop body...
+        let continue_join = self.cx.continue_joins.remove(&label);
+        let body = self.wrap_in_joins(continue_join, body);
+
+        // ...while `break` builds a Join outside of it.
+        let value = self.push_expr(etir::ExprKind::Loop { id: loop_id, body }, expr.ty, expr.span);
+        let break_join = self.cx.break_joins.remove(&label);
+        self.wrap_in_joins(break_join, value)
     }
 
     fn lower_expr_break(
@@ -1053,19 +1063,50 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         label: region::Scope,
         value: Option<thir::ExprId>,
     ) -> ExprId {
-        let tcx = self.cx.tcx;
         let value = value.map(|value| self.lower_expr(value));
-        let Some(&target) = self.cx.loop_ids.get(&label) else {
-            not_implemented(tcx, expr.span, "break target outside of loop")
-        };
-        self.push_expr(etir::ExprKind::Break { target, value }, expr.ty, expr.span)
+        let join = self.cx.break_joins.get(&label).copied().unwrap_or_else(|| {
+            let join = self.push_value_join(value, expr.span);
+            self.cx.break_joins.insert(label, join);
+            join
+        });
+        self.jump(expr, join, value)
     }
 
     fn lower_expr_continue(&mut self, expr: &thir::Expr<'tcx>, label: region::Scope) -> ExprId {
-        let Some(&target) = self.cx.loop_ids.get(&label) else {
-            span_bug!(expr.span, "`continue` to something other than a loop")
-        };
-        self.push_expr(etir::ExprKind::Continue { target }, expr.ty, expr.span)
+        let join = self.cx.continue_joins.get(&label).copied().unwrap_or_else(|| {
+            // The join returns nothing, breaking out of `case` and into the loop tail call.
+            let unit = self.unit_expr(expr.span);
+            let join = self.push_join(unit, None);
+            self.cx.continue_joins.insert(label, join);
+            join
+        });
+        self.jump(expr, join, None)
+    }
+
+    fn push_value_join(&mut self, value: Option<ExprId>, span: Span) -> JoinId {
+        let ty = value.map_or(self.cx.tcx.types.unit, |value| self.cx.body[value].ty);
+
+        // unit return value is synthesized at the jump.
+        if ty.is_unit() || ty.is_never() {
+            let body = self.unit_expr(span);
+            return self.push_join(body, None);
+        }
+
+        let var = self.push_var(Ident { name: sym::jump_value, span });
+        let body = self.push_expr(etir::ExprKind::Var(var), ty, span);
+        self.push_join(body, Some(var))
+    }
+
+    fn jump(&mut self, expr: &thir::Expr<'tcx>, join: JoinId, value: Option<ExprId>) -> ExprId {
+        with_expr_block!(self, |block| {
+            let value = value.and_then(|value| {
+                // Possibly only for a side effect, if the join takes no value.
+                let var = block.maybe_bind(self, sym::jump_value, value);
+                self.cx.body[join].value.map(|_| var)
+            });
+
+            self.push_expr(etir::ExprKind::Jump { target: join, value }, expr.ty, expr.span)
+        })
     }
 
     fn call_io_lib_format(

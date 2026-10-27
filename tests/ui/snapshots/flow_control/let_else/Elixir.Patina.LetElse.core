@@ -1,0 +1,110 @@
+module 'Elixir.Patina.LetElse' ['__info__'/1,
+				'list_pattern'/1,
+				'module_info'/0,
+				'module_info'/1,
+				'tuple_pattern'/0]
+    attributes [%% Line 3
+		'file' =
+		    %% Line 3
+		    [{[116|[101|[115|[116|[115|[47|[117|[105|[47|[115|[114|[99|[47|[102|[108|[111|[119|[95|[99|[111|[110|[116|[114|[111|[108|[47|[108|[101|[116|[95|[101|[108|[115|[101|[46|[112|[116]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]],3}],
+		%% Line 3
+		'compile' =
+		    %% Line 3
+		    ['no_auto_import'],
+		%% Line 3
+		'export_record' =
+		    %% Line 3
+		    []]
+'__info__'/1 =
+    %% Line 3
+    ( fun (_0) ->
+	  ( case ( _0
+		   -| [{'function',{'__info__',1}}] ) of
+	      <'functions'> when 'true' ->
+		  let <_1> =
+		      apply 'module_info'/1
+			  ('exports')
+		  in  let <_2> =
+			  call 'lists':'sort'
+			      (_1)
+		      in  call 'ordsets':'subtract'
+			      (_2, [{'__info__',1}|[{'module_info',0}|[{'module_info',1}]]])
+	      <'macros'> when 'true' ->
+		  []
+	      <'struct'> when 'true' ->
+		  'nil'
+	      <'exports_md5'> when 'true' ->
+		  let <_4> =
+		      apply 'module_info'/1
+			  ('exports')
+		  in  let <_5> =
+			  call 'lists':'sort'
+			      (_4)
+		      in  let <_3> =
+			      apply '__info__'/1
+				  ('struct')
+			  in  let <_6> =
+				  call 'erlang':'term_to_binary'
+				      ({_5,[],_3}, ['deterministic'])
+			      in  call 'erlang':'md5'
+				      (_6)
+	      <'deprecated'> when 'true' ->
+		  []
+	      <Key> when 'true' ->
+		  apply 'module_info'/1
+		      (Key)
+	    end
+	    -| [{'function',{'__info__',1}}] )
+      -| [{'function',{'__info__',1}}] )
+'tuple_pattern'/0 =
+    %% Line 3
+    ( fun () ->
+	  ( letrec
+		'$patina_label_0'/1 =
+		    fun (%% Line 5
+			 _X_jump_value@2_0) ->
+			%% Line 5
+			_X_jump_value@2_0
+	    in  %% Line 7
+		42
+	    -| ['letrec_goto','no_inline'] )
+      -| [{'function',{'tuple_pattern',0}}] )
+'list_pattern'/1 =
+    %% Line 10
+    ( fun (_0) ->
+	  ( letrec
+		'$patina_label_0'/1 =
+		    fun (%% Line 12
+			 _X_jump_value@4_0) ->
+			%% Line 12
+			_X_jump_value@4_0
+	    in  let <_13,_X_first@1_1,_X_second@2_1> =
+		    case ( _0
+			   -| [{'function',{'list_pattern',1}}] ) of
+		      %% Line 11
+		      <[_X_first@1_1|[_X_second@2_1|_10]]> when 'true' ->
+			  <{},_X_first@1_1,_X_second@2_1>
+		      %% Line 11
+		      <_11> when 'true' ->
+			  apply '$patina_label_0'/1
+			      (%% Line 12
+			       ( 0
+				 -| ['result_not_wanted'] ))
+		    end
+		in  %% Line 14
+		    call 'erlang':'+'
+			(_X_first@1_1, _X_second@2_1)
+	    -| ['letrec_goto','no_inline'] )
+      -| [{'function',{'list_pattern',1}}] )
+'module_info'/0 =
+    ( fun () ->
+	  call 'erlang':'get_module_info'
+	      ('Elixir.Patina.LetElse')
+      -| [{'function',{'module_info',0}}] )
+'module_info'/1 =
+    ( fun (_0) ->
+	  call 'erlang':'get_module_info'
+	      ('Elixir.Patina.LetElse', ( _0
+					  -| [{'function',{'module_info',1}}] ))
+      -| [{'function',{'module_info',1}}] )
+end

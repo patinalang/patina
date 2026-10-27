@@ -1,4 +1,7 @@
+// snapshot: core0, core
+
 extern mod erlang;
+
 fn mark(value: int) -> int {
     let marks = unsafe { erlang::get(a"marks").cast_unchecked::<[int]>() };
     erlang::put(a"marks", [value, ..marks]);

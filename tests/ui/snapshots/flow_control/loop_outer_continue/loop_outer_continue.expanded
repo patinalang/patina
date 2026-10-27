@@ -14,6 +14,8 @@ use Core::Prelude::*;
 #[allow(unused)]
 extern mod patina_fmt;
 
+// snapshot: core0, core
+
 pub fn continue_outer_loop(limit: int) -> int {
     let mut outer = 0;
     let mut visits = 0;

@@ -1,0 +1,13 @@
+// snapshot: core0, core
+
+pub fn labeled(x: int) -> int {
+    let mut y = 0;
+    let r = 'a: { y += 1; if x > 5 { break 'a x * 2; } y += 10; x + y };
+    r + y
+}
+
+pub fn nested(x: int) -> int {
+    let mut n = 0;
+    'outer: { loop { n += 1; if n > x { break 'outer; } } }
+    n
+}

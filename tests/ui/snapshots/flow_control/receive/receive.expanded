@@ -6,6 +6,8 @@
 
 
 
+// snapshot: core0, core
+
 #![allow(non_camel_case_types)]
 #![deny(unused_unsafe)]
 #[allow(unused_imports)]

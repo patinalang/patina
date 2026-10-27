@@ -335,6 +335,34 @@ pub(crate) fn compile(
                 });
             });
 
+            consume_stage!(stages_left, Stage::Core0, {
+                server.with(dcx, |server| {
+                    for (mod_name, bytes) in &serialized_modules {
+                        let rendered = server.render_core0(dcx, bytes).unwrap_or_else(|e| {
+                            dcx.fatal(format!("erl backend failed: {}\n{}", e.errors, e.warnings));
+                        });
+                        write_file(out_dir, mod_name.as_str(), "core0", rendered.as_bytes())
+                            .unwrap_or_else(|e| {
+                                dcx.fatal(format!("failed to write core0 file: {e}"));
+                            });
+                    }
+                });
+            });
+
+            consume_stage!(stages_left, Stage::Core, {
+                server.with(dcx, |server| {
+                    for (mod_name, bytes) in &serialized_modules {
+                        let rendered = server.render_core(dcx, bytes).unwrap_or_else(|e| {
+                            dcx.fatal(format!("erl backend failed: {}\n{}", e.errors, e.warnings));
+                        });
+                        write_file(out_dir, mod_name.as_str(), "core", rendered.as_bytes())
+                            .unwrap_or_else(|e| {
+                                dcx.fatal(format!("failed to write core file: {e}"));
+                            });
+                    }
+                });
+            });
+
             consume_stage!(stages_left, Stage::Beam, {
                 server.with(dcx, |server| {
                     for (mod_name, bytes) in &serialized_modules {

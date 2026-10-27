@@ -14,6 +14,8 @@ use Core::Prelude::*;
 #[allow(unused)]
 extern mod patina_fmt;
 
+// snapshot: core0, core
+
 extern mod erlang;
 
 fn mark(value: int)
@@ -68,7 +70,7 @@ fn closure_value(stop: bool)
                 (if (stop as bool) { (return (4 as int) as !); } as ())
                 (5 as int)
             } as int) as
-            {closure@tests/ui/src/flow_control/early_return.pt:37:20: 37:29});
+            {closure@tests/ui/src/flow_control/early_return.pt:39:20: 39:29});
 
     (10 as int)
 } as int)
@@ -82,10 +84,10 @@ fn inlined_closure_value(stop: bool)
                 (if (stop as bool) { (return (4 as int) as !); } as ())
                 (5 as int)
             } as int) as
-            {closure@tests/ui/src/flow_control/early_return.pt:48:19: 48:28});
+            {closure@tests/ui/src/flow_control/early_return.pt:50:19: 50:28});
 
     (((closure as
-                {closure@tests/ui/src/flow_control/early_return.pt:48:19: 48:28})()
+                {closure@tests/ui/src/flow_control/early_return.pt:50:19: 50:28})()
             as int) * (10 as int) as int)
 } as int)
 
@@ -106,7 +108,7 @@ fn passed_closure_value(x: int)
                 } as ())
                 ((y as int) + (1 as int) as int)
             } as int) as
-            {closure@tests/ui/src/flow_control/early_return.pt:63:15: 63:30}),
+            {closure@tests/ui/src/flow_control/early_return.pt:65:15: 65:30}),
         (x as int)) as int)
 } as int)
 

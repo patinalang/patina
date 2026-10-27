@@ -17,6 +17,8 @@ const SERVER_BEAM: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/patina_comp
 const OP_COMPILE: &[u8] = b"compile";
 const OP_ABSTR: &[u8] = b"abstr";
 const OP_ERL: &[u8] = b"erl";
+const OP_CORE0: &[u8] = b"core0";
+const OP_CORE: &[u8] = b"core";
 const OP_CODE_PATH: &[u8] = b"code_path";
 const OP_MACRO: &[u8] = b"macro";
 #[cfg(test)]
@@ -180,6 +182,39 @@ impl CompileServer {
 
     pub(super) fn render_erl(&mut self, dcx: DiagCtxtHandle<'_>, eaf: &[u8]) -> String {
         self.render(dcx, OP_ERL, eaf)
+    }
+
+    pub(super) fn render_core0(
+        &mut self,
+        dcx: DiagCtxtHandle<'_>,
+        eaf: &[u8],
+    ) -> Result<String, CompileErr> {
+        self.compile_and_render(dcx, OP_CORE0, eaf)
+    }
+
+    pub(super) fn render_core(
+        &mut self,
+        dcx: DiagCtxtHandle<'_>,
+        eaf: &[u8],
+    ) -> Result<String, CompileErr> {
+        self.compile_and_render(dcx, OP_CORE, eaf)
+    }
+
+    fn compile_and_render(
+        &mut self,
+        dcx: DiagCtxtHandle<'_>,
+        op: &[u8],
+        eaf: &[u8],
+    ) -> Result<String, CompileErr> {
+        let parts = self.call(dcx, op, eaf);
+        match parts.as_slice() {
+            [status, render] if status == b"ok" => Ok(self.part_str(dcx, render)),
+            [status, errors, warnings] if status == b"error" => Err(CompileErr {
+                errors: self.part_str(dcx, errors),
+                warnings: self.part_str(dcx, warnings),
+            }),
+            parts => self.unexpected(dcx, parts),
+        }
     }
 
     fn render(&mut self, dcx: DiagCtxtHandle<'_>, op: &[u8], eaf: &[u8]) -> String {

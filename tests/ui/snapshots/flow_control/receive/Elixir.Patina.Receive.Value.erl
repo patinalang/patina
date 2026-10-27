@@ -1,4 +1,4 @@
--file("tests/ui/src/flow_control/receive.pt", 7).
+-file("tests/ui/src/flow_control/receive.pt", 9).
 
 -module('Elixir.Patina.Receive.Value').
 

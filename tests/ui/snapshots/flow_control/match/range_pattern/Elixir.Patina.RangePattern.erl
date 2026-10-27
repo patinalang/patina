@@ -59,18 +59,21 @@ classify_float(_value@0_0) ->
     end.
 
 matches_either_range(_value@0_0) ->
-    case _value@0_0 of
-        _range@1_0 when _range@1_0 >= 1, _range@1_0 =< 3 ->
-            '$patina_marker':jump('$patina_label_0'),
-            [];
-        _range@2_0 when _range@2_0 >= 7, _range@2_0 < 9 ->
-            '$patina_marker':jump('$patina_label_0'),
-            [];
-        11 ->
-            '$patina_marker':jump('$patina_label_0'),
-            [];
-        _ -> false;
-        {'$patina_label_0'} -> true
+    case [] of
+        {'$patina_label_0'} -> true;
+        _ ->
+            case _value@0_0 of
+                _range@1_0 when _range@1_0 >= 1, _range@1_0 =< 3 ->
+                    '$patina_marker':jump('$patina_label_0'),
+                    [];
+                _range@2_0 when _range@2_0 >= 7, _range@2_0 < 9 ->
+                    '$patina_marker':jump('$patina_label_0'),
+                    [];
+                11 ->
+                    '$patina_marker':jump('$patina_label_0'),
+                    [];
+                _ -> false
+            end
     end.
 
 match_bound_range(_value@0_0) ->
@@ -116,8 +119,15 @@ if_let_range(_value@0_0) ->
     end.
 
 let_else_range(_value@0_0) ->
-    case _value@0_0 of
-        _range@1_0 when _range@1_0 >= -1, _range@1_0 =< 1 -> {};
-        _ -> begin '$patina_marker':return(false), [] end
-    end,
-    true.
+    case [] of
+        {'$patina_label_0', _jump_value@2_0} -> _jump_value@2_0;
+        _ ->
+            case _value@0_0 of
+                _range@1_0 when _range@1_0 >= -1, _range@1_0 =< 1 -> {};
+                _ ->
+                    begin
+                        '$patina_marker':jump('$patina_label_0', false), []
+                    end
+            end,
+            true
+    end.

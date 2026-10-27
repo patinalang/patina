@@ -79,7 +79,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         }
     }
 
-    pub(super) fn translate_body(
+    fn translate_body(
         &self,
         owner: LocalDefId,
         parts: &mut ModuleParts<'arena>,
@@ -91,7 +91,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         cx.translate_body_with_params(&etir.params, etir.value)
     }
 
-    pub(super) fn translate_const(
+    fn translate_const(
         &self,
         span: Span,
         def_id: LocalDefId,

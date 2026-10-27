@@ -122,36 +122,50 @@ loop_late(_witnesses_where_loop_late@0_0, _x@1_0,
     begin
         _total@8_0 = 0,
         _i@9_0 = 0,
-        case fun _$patina_loop(_i@9_0, _total@8_0) ->
-                     _ = begin
-                             case _i@9_0 < _n@2_0 of
-                                 true ->
-                                     _total@8_1 = _total@8_0 +
-                                                      _fn_Value_value@7_0(_witness_Value@5_0,
-                                                                          _x@1_0),
-                                     _i@9_1 = _i@9_0 + 1,
-                                     {};
-                                 _ ->
-                                     _branch_value@10_0 = begin
-                                                              begin
-                                                                  '$patina_marker':break({break,
-                                                                                          0,
-                                                                                          {},
-                                                                                          _i@9_0,
-                                                                                          _total@8_0}),
-                                                                  []
-                                                              end
-                                                          end,
-                                     _total@8_1 = _total@8_0,
-                                     _i@9_1 = _i@9_0,
-                                     _branch_value@10_0
-                             end
-                         end,
-                     _$patina_loop(_i@9_1, _total@8_1)
-             end(_i@9_0, _total@8_0)
-            of
-            {break, 0, _loop_value@11_0, _i@9_1, _total@8_1} ->
-                _loop_value@11_0
+        begin
+            {_i@9_1, _total@8_1} = fun _$patina_loop(_i@9_0,
+                                                     _total@8_0) ->
+                                           case [] of
+                                               {'$patina_label_0',
+                                                _i@9_2,
+                                                _total@8_2} ->
+                                                   {_i@9_2, _total@8_2};
+                                               _ ->
+                                                   _ = begin
+                                                           case _i@9_0 < _n@2_0
+                                                               of
+                                                               true ->
+                                                                   _total@8_1 =
+                                                                       _total@8_0
+                                                                           +
+                                                                           _fn_Value_value@7_0(_witness_Value@5_0,
+                                                                                               _x@1_0),
+                                                                   _i@9_1 =
+                                                                       _i@9_0 +
+                                                                           1,
+                                                                   {};
+                                                               _ ->
+                                                                   _branch_value@10_0 =
+                                                                       begin
+                                                                           begin
+                                                                               '$patina_marker':jump('$patina_label_0',
+                                                                                                     _i@9_0,
+                                                                                                     _total@8_0),
+                                                                               []
+                                                                           end
+                                                                       end,
+                                                                   _total@8_1 =
+                                                                       _total@8_0,
+                                                                   _i@9_1 =
+                                                                       _i@9_0,
+                                                                   _branch_value@10_0
+                                                           end
+                                                       end,
+                                                   _$patina_loop(_i@9_1,
+                                                                 _total@8_1)
+                                           end
+                                   end(_i@9_0, _total@8_0),
+            {}
         end,
         _total@8_1 +
             'Elixir.Patina.SourcePlanning.Wrapped':'SourcePlanning::Direct::direct'(_witness_Direct@3_0,

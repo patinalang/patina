@@ -78,22 +78,24 @@ impl<'etir, 'tcx: 'etir> Visitor<'etir, 'tcx> for Captures<'etir, 'tcx> {
                 let captured = self.with_scope(|s| visit::walk_expr(s, expr)).0;
                 self.loop_reassigned[*id] = reassigned_vars(captured).collect();
             }
-            ExprKind::Join { joins, body } => {
+            ExprKind::Join { join, body } => {
                 let (used_in_body, bound_in_body) =
                     self.with_scope(|s| visit::visit_expr_id(s, *body));
 
-                let reassigned_in_body: Vec<VarId> = reassigned_vars(used_in_body).collect();
+                let used_in_join = self
+                    .with_scope(|s| {
+                        // Nobody cares that Join uses its own fresh var,
+                        // but we include it here for completeness.
+                        s.bound.extend(s.body[*join].value);
+                        visit::visit_expr_id(s, s.body[*join].body)
+                    })
+                    .0;
 
-                for &join in joins {
-                    let used_in_join =
-                        self.with_scope(|s| visit::visit_expr_id(s, s.body[join].body)).0;
-                    let read_body_bindings =
-                        used_in_join.into_keys().filter(|var| bound_in_body.contains(var));
-                    let params =
-                        reassigned_in_body.iter().copied().chain(read_body_bindings).collect();
+                let read_body_bindings =
+                    used_in_join.into_keys().filter(|var| bound_in_body.contains(var));
+                let params = reassigned_vars(used_in_body).chain(read_body_bindings).collect();
 
-                    self.join_params[join] = params;
-                }
+                self.join_params[*join] = params;
             }
             _ => visit::walk_expr(self, expr),
         }

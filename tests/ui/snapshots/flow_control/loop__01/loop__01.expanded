@@ -16,6 +16,7 @@ extern mod patina_fmt;
 
 // source: patina-by-example/src/flow_control/loop.md
 // block: 1/1
+// snapshot: core0, core
 
 pub fn main() {
     let mut count = 0;

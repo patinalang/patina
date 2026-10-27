@@ -1,0 +1,361 @@
+module 'Elixir.Patina.LoopOuterContinue' ['__info__'/1,
+					  'continue_outer_loop'/1,
+					  'continue_two_loops'/1,
+					  'module_info'/0,
+					  'module_info'/1]
+    attributes [%% Line 3
+		'file' =
+		    %% Line 3
+		    [{[116|[101|[115|[116|[115|[47|[117|[105|[47|[115|[114|[99|[47|[102|[108|[111|[119|[95|[99|[111|[110|[116|[114|[111|[108|[47|[108|[111|[111|[112|[95|[111|[117|[116|[101|[114|[95|[99|[111|[110|[116|[105|[110|[117|[101|[46|[112|[116]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]],3}],
+		%% Line 3
+		'compile' =
+		    %% Line 3
+		    ['no_auto_import'],
+		%% Line 3
+		'export_record' =
+		    %% Line 3
+		    []]
+'__info__'/1 =
+    %% Line 3
+    ( fun (_0) ->
+	  ( case ( _0
+		   -| [{'function',{'__info__',1}}] ) of
+	      <'functions'> when 'true' ->
+		  let <_1> =
+		      apply 'module_info'/1
+			  ('exports')
+		  in  let <_2> =
+			  call 'lists':'sort'
+			      (_1)
+		      in  call 'ordsets':'subtract'
+			      (_2, [{'__info__',1}|[{'module_info',0}|[{'module_info',1}]]])
+	      <'macros'> when 'true' ->
+		  []
+	      <'struct'> when 'true' ->
+		  'nil'
+	      <'exports_md5'> when 'true' ->
+		  let <_4> =
+		      apply 'module_info'/1
+			  ('exports')
+		  in  let <_5> =
+			  call 'lists':'sort'
+			      (_4)
+		      in  let <_3> =
+			      apply '__info__'/1
+				  ('struct')
+			  in  let <_6> =
+				  call 'erlang':'term_to_binary'
+				      ({_5,[],_3}, ['deterministic'])
+			      in  call 'erlang':'md5'
+				      (_6)
+	      <'deprecated'> when 'true' ->
+		  []
+	      <Key> when 'true' ->
+		  apply 'module_info'/1
+		      (Key)
+	    end
+	    -| [{'function',{'__info__',1}}] )
+      -| [{'function',{'__info__',1}}] )
+'continue_outer_loop'/1 =
+    %% Line 3
+    ( fun (_0) ->
+	  let <_22> =
+	      letrec
+		  '_$patina_loop'/2 =
+		      %% Line 7
+		      ( fun (_19,_18) ->
+			    let <_X_$patina_loop> = '_$patina_loop'/2
+			    in  ( letrec
+				      '$patina_label_1'/3 =
+					  fun (_X_jump_value@5_0,_X_outer@1_2,_X_visits@2_2) ->
+					      {_X_jump_value@5_0,_X_outer@1_2,_X_visits@2_2}
+				  in  let <_15,_X_outer@1_1,_X_visits@2_1> =
+					  ( letrec
+						'$patina_label_0'/2 =
+						    fun (%% Line 14
+							 _X_outer@1_1,%% Line 14
+								      _X_visits@2_1) ->
+							%% Line 14
+							( <( {}
+							     -| ['result_not_wanted'] ),_X_outer@1_1,_X_visits@2_1>
+							  -| ['result_not_wanted'] )
+					    in  let <_X_outer@1_1> =
+						    call %% Line 8
+							 ( 'erlang'
+							   -| ['result_not_wanted'] ):%% Line 8
+										      ( '+'
+											-| ['result_not_wanted'] )
+							(_19, %% Line 8
+							      ( 1
+								-| ['result_not_wanted'] ))
+						in  let <_11> =
+							letrec
+							    '_$patina_loop'/1 =
+								%% Line 10
+								( fun (_9) ->
+								      ( letrec
+									    '$patina_forward'/1 =
+										fun (_@patina_jump) ->
+										    _@patina_jump
+									in  let <_X_visits@2_1> =
+										call %% Line 11
+										     ( 'erlang'
+										       -| ['result_not_wanted'] ):%% Line 11
+														  ( '+'
+														    -| ['result_not_wanted'] )
+										    (( _9
+										       -| ['result_not_wanted'] ), %% Line 11
+														   ( 1
+														     -| ['result_not_wanted'] ))
+									    in  do  %% Line 13
+										    case ( call ( 'erlang'
+												  -| ['result_not_wanted'] ):( '<'
+															       -| ['result_not_wanted'] )
+											       (_X_outer@1_1, ( _0
+														-| [{'function',{'continue_outer_loop',1}}] ))
+											   -| ['result_not_wanted'] ) of
+										      <'true'> when 'true' ->
+											  apply '$patina_forward'/1
+											      ({'$patina_label_0',%% Line 14
+														  _X_outer@1_1,%% Line 14
+															       _X_visits@2_1})
+										      <_30> when 'true' ->
+											  'ok'
+										    end
+										    let <_6> =
+											call %% Line 17
+											     ( 'erlang'
+											       -| ['result_not_wanted'] ):%% Line 17
+															  ( '*'
+															    -| ['result_not_wanted'] )
+											    (%% Line 17
+											     _X_visits@2_1, %% Line 17
+													    ( 100
+													      -| ['result_not_wanted'] ))
+										    in  let <_X_jump_value@3_0> =
+											    call %% Line 17
+												 ( 'erlang'
+												   -| ['result_not_wanted'] ):%% Line 17
+															      ( '+'
+																-| ['result_not_wanted'] )
+												(%% Line 17
+												 ( _6
+												   -| ['result_not_wanted'] ), %% Line 17
+															       _X_outer@1_1)
+											in  apply '$patina_forward'/1
+												({'$patina_label_1',%% Line 17
+														    _X_jump_value@3_0,%% Line 17
+																      _X_outer@1_1,%% Line 17
+																		   _X_visits@2_1})
+									-| ['letrec_goto','no_inline'] )
+								  -| [{'id',{0,0,'-continue_outer_loop/1-fun-0-'}},'result_not_wanted'] )
+							in  '_$patina_loop'/1
+						    in  let <_X_branch_value@4_0> =
+							    case %% Line 10
+								 ( apply ( _11
+									   -| ['result_not_wanted'] )
+								       (_18)
+								   -| [{'label',111}] ) of
+							      <{'$patina_label_0',_@patina_arg_1,_@patina_arg_2}> when 'true' ->
+								  apply '$patina_label_0'/2
+								      (_@patina_arg_1, _@patina_arg_2)
+							      <{'$patina_label_1',_@patina_arg_1,_@patina_arg_2,_@patina_arg_3}> when 'true' ->
+								  apply '$patina_label_1'/3
+								      (_@patina_arg_1, _@patina_arg_2, _@patina_arg_3)
+							      <_@patina_other> when 'true' ->
+								  _@patina_other
+							    end
+							in  <_X_branch_value@4_0,_X_outer@1_1,_18>
+					    -| ['letrec_goto'] )
+				      in  apply _X_$patina_loop
+					      (_X_outer@1_1, _X_visits@2_1)
+				  -| ['letrec_goto','no_inline'] )
+			-| [{'id',{0,0,'-continue_outer_loop/1-fun-1-'}}] )
+	      in  '_$patina_loop'/2
+	  in  %% Line 7
+	      case apply _22
+		       (( 0
+			  -| ['result_not_wanted'] ), ( 0
+							-| ['result_not_wanted'] )) of
+		<{_X_jump_value@6_0,_X_outer@1_1,_X_visits@2_1}> when 'true' ->
+		    %% Line 17
+		    _X_jump_value@6_0
+		( <_23> when 'true' ->
+		      primop 'match_fail'
+			  ({'badmatch',_23})
+		  -| ['compiler_generated'] )
+	      end
+      -| [{'function',{'continue_outer_loop',1}}] )
+'continue_two_loops'/1 =
+    %% Line 22
+    ( fun (_0) ->
+	  let <_26> =
+	      letrec
+		  '_$patina_loop'/2 =
+		      %% Line 26
+		      ( fun (_23,_22) ->
+			    let <_X_$patina_loop> = '_$patina_loop'/2
+			    in  ( letrec
+				      '$patina_label_1'/3 =
+					  fun (_X_jump_value@5_0,_X_outer@1_2,_X_visits@2_2) ->
+					      {_X_jump_value@5_0,_X_outer@1_2,_X_visits@2_2}
+				  in  let <_19,_X_outer@1_1,_X_visits@2_1> =
+					  ( letrec
+						'$patina_label_0'/2 =
+						    fun (%% Line 34
+							 _X_outer@1_1,%% Line 34
+								      _X_visits@2_1) ->
+							%% Line 34
+							( <( {}
+							     -| ['result_not_wanted'] ),_X_outer@1_1,_X_visits@2_1>
+							  -| ['result_not_wanted'] )
+					    in  let <_X_outer@1_1> =
+						    call %% Line 27
+							 ( 'erlang'
+							   -| ['result_not_wanted'] ):%% Line 27
+										      ( '+'
+											-| ['result_not_wanted'] )
+							(_23, %% Line 27
+							      ( 1
+								-| ['result_not_wanted'] ))
+						in  let <_15> =
+							letrec
+							    '_$patina_loop'/1 =
+								%% Line 29
+								( fun (_13) ->
+								      ( letrec
+									    '$patina_forward'/1 =
+										fun (_@patina_jump) ->
+										    _@patina_jump
+									in  let <_41> = '_$patina_loop'/1
+									    in  let <_11> =
+										    letrec
+											'_$patina_loop'/1 =
+											    %% Line 30
+											    ( fun (_9) ->
+												  ( letrec
+													'$patina_forward'/1 =
+													    fun (_@patina_jump) ->
+														_@patina_jump
+												    in  let <_X_visits@2_1> =
+													    call %% Line 31
+														 ( 'erlang'
+														   -| ['result_not_wanted'] ):%% Line 31
+																	      ( '+'
+																		-| ['result_not_wanted'] )
+														(( _9
+														   -| ['result_not_wanted'] ), %% Line 31
+																	       ( 1
+																		 -| ['result_not_wanted'] ))
+													in  do  %% Line 33
+														case ( call ( 'erlang'
+															      -| ['result_not_wanted'] ):( '<'
+																			   -| ['result_not_wanted'] )
+															   (_X_outer@1_1, ( _0
+																	    -| [{'function',{'continue_two_loops',1}}] ))
+														       -| ['result_not_wanted'] ) of
+														  <'true'> when 'true' ->
+														      apply '$patina_forward'/1
+															  ({'$patina_label_0',%% Line 34
+																	      _X_outer@1_1,%% Line 34
+																			   _X_visits@2_1})
+														  <_35> when 'true' ->
+														      'ok'
+														end
+														let <_6> =
+														    call %% Line 37
+															 ( 'erlang'
+															   -| ['result_not_wanted'] ):%% Line 37
+																		      ( '*'
+																			-| ['result_not_wanted'] )
+															(%% Line 37
+															 _X_visits@2_1, %% Line 37
+																	( 100
+																	  -| ['result_not_wanted'] ))
+														in  let <_X_jump_value@3_0> =
+															call %% Line 37
+															     ( 'erlang'
+															       -| ['result_not_wanted'] ):%% Line 37
+																			  ( '+'
+																			    -| ['result_not_wanted'] )
+															    (%% Line 37
+															     ( _6
+															       -| ['result_not_wanted'] ), %% Line 37
+																			   _X_outer@1_1)
+														    in  apply '$patina_forward'/1
+															    ({'$patina_label_1',%% Line 37
+																		_X_jump_value@3_0,%% Line 37
+																				  _X_outer@1_1,%% Line 37
+																					       _X_visits@2_1})
+												    -| ['letrec_goto','no_inline'] )
+											      -| [{'id',{0,0,'-continue_two_loops/1-fun-0-'}},'result_not_wanted'] )
+										    in  '_$patina_loop'/1
+										in  do  case %% Line 30
+											     ( apply ( _11
+												       -| ['result_not_wanted'] )
+												   (( _13
+												      -| ['result_not_wanted'] ))
+											       -| [{'label',250}] ) of
+											  <_@patina_jump = {'$patina_label_0',_@patina_arg_1,_@patina_arg_2}> when 'true' ->
+											      apply '$patina_forward'/1
+												  (_@patina_jump)
+											  <_@patina_jump = {'$patina_label_1',_@patina_arg_1,_@patina_arg_2,_@patina_arg_3}> when 'true' ->
+											      apply '$patina_forward'/1
+												  (_@patina_jump)
+											  <_@patina_other> when 'true' ->
+											      'ok'
+											end
+											apply _41
+											    (( _13
+											       -| ['result_not_wanted'] ))
+									-| ['letrec_goto','no_inline'] )
+								  -| [{'id',{0,0,'-continue_two_loops/1-fun-1-'}},'result_not_wanted'] )
+							in  '_$patina_loop'/1
+						    in  let <_X_branch_value@4_0> =
+							    case %% Line 29
+								 ( apply ( _15
+									   -| ['result_not_wanted'] )
+								       (_22)
+								   -| [{'label',266}] ) of
+							      <{'$patina_label_0',_@patina_arg_1,_@patina_arg_2}> when 'true' ->
+								  apply '$patina_label_0'/2
+								      (_@patina_arg_1, _@patina_arg_2)
+							      <{'$patina_label_1',_@patina_arg_1,_@patina_arg_2,_@patina_arg_3}> when 'true' ->
+								  apply '$patina_label_1'/3
+								      (_@patina_arg_1, _@patina_arg_2, _@patina_arg_3)
+							      <_@patina_other> when 'true' ->
+								  _@patina_other
+							    end
+							in  <_X_branch_value@4_0,_X_outer@1_1,_22>
+					    -| ['letrec_goto'] )
+				      in  apply _X_$patina_loop
+					      (_X_outer@1_1, _X_visits@2_1)
+				  -| ['letrec_goto','no_inline'] )
+			-| [{'id',{0,0,'-continue_two_loops/1-fun-2-'}}] )
+	      in  '_$patina_loop'/2
+	  in  %% Line 26
+	      case apply _26
+		       (( 0
+			  -| ['result_not_wanted'] ), ( 0
+							-| ['result_not_wanted'] )) of
+		<{_X_jump_value@6_0,_X_outer@1_1,_X_visits@2_1}> when 'true' ->
+		    %% Line 37
+		    _X_jump_value@6_0
+		( <_27> when 'true' ->
+		      primop 'match_fail'
+			  ({'badmatch',_27})
+		  -| ['compiler_generated'] )
+	      end
+      -| [{'function',{'continue_two_loops',1}}] )
+'module_info'/0 =
+    ( fun () ->
+	  call 'erlang':'get_module_info'
+	      ('Elixir.Patina.LoopOuterContinue')
+      -| [{'function',{'module_info',0}}] )
+'module_info'/1 =
+    ( fun (_0) ->
+	  call 'erlang':'get_module_info'
+	      ('Elixir.Patina.LoopOuterContinue', ( _0
+						    -| [{'function',{'module_info',1}}] ))
+      -| [{'function',{'module_info',1}}] )
+end

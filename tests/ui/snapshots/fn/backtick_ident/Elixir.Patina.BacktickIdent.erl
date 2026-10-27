@@ -44,68 +44,79 @@
 type() -> 2.
 
 main() ->
-    _s@0_0 = 1,
-    _ = type(),
-    _value?@1_0 = true,
-    _type@2_0 = 2,
-    case not
-             'Elixir.Patina.BacktickIdent.S':'valid?'(_s@0_0)
-        of
-        true -> begin '$patina_marker':return({}), [] end;
-        _ -> {}
-    end,
-    case not
-             'Elixir.Patina.BacktickIdent.S':'valid?'(_s@0_0)
-        of
-        true -> begin '$patina_marker':return({}), [] end;
-        _ -> {}
-    end,
-    case not
-             'Elixir.Patina.BacktickIdent.S':check_via_self(_s@0_0)
-        of
-        true -> begin '$patina_marker':return({}), [] end;
-        _ -> {}
-    end,
-    case not 'exists?'(1) of
-        true -> begin '$patina_marker':return({}), [] end;
-        _ -> {}
-    end,
-    'exists?'(1),
-    'save!'(),
-    begin
-        io:put_chars(begin
-                         _element@4_0 = begin
-                                            _element@3_0 = <<"`a{b}`"/utf8>>,
-                                            [_element@3_0]
-                                        end,
-                         [_element@4_0]
-                     end),
-        io:nl(),
-        {}
-    end,
-    begin
-        io:put_chars(begin
-                         _element@6_0 = begin
-                                            _element@5_0 = io_lib:format("~ktp",
-                                                                         [_value?@1_0]),
-                                            [_element@5_0]
-                                        end,
-                         [_element@6_0]
-                     end),
-        io:nl(),
-        {}
-    end,
-    begin
-        io:put_chars(begin
-                         _element@8_0 = begin
-                                            _element@7_0 = io_lib:format("~ktp",
-                                                                         [_type@2_0]),
-                                            [_element@7_0]
-                                        end,
-                         [_element@8_0]
-                     end),
-        io:nl(),
-        {}
-    end,
-    _ = 'a{b}'(),
-    {}.
+    case [] of
+        {'$patina_label_0'} -> {};
+        _ ->
+            _s@0_0 = 1,
+            _ = type(),
+            _value?@1_0 = true,
+            _type@2_0 = 2,
+            case not
+                     'Elixir.Patina.BacktickIdent.S':'valid?'(_s@0_0)
+                of
+                true ->
+                    begin '$patina_marker':jump('$patina_label_0'), [] end;
+                _ -> {}
+            end,
+            case not
+                     'Elixir.Patina.BacktickIdent.S':'valid?'(_s@0_0)
+                of
+                true ->
+                    begin '$patina_marker':jump('$patina_label_0'), [] end;
+                _ -> {}
+            end,
+            case not
+                     'Elixir.Patina.BacktickIdent.S':check_via_self(_s@0_0)
+                of
+                true ->
+                    begin '$patina_marker':jump('$patina_label_0'), [] end;
+                _ -> {}
+            end,
+            case not 'exists?'(1) of
+                true ->
+                    begin '$patina_marker':jump('$patina_label_0'), [] end;
+                _ -> {}
+            end,
+            'exists?'(1),
+            'save!'(),
+            begin
+                io:put_chars(begin
+                                 _element@4_0 = begin
+                                                    _element@3_0 =
+                                                        <<"`a{b}`"/utf8>>,
+                                                    [_element@3_0]
+                                                end,
+                                 [_element@4_0]
+                             end),
+                io:nl(),
+                {}
+            end,
+            begin
+                io:put_chars(begin
+                                 _element@6_0 = begin
+                                                    _element@5_0 =
+                                                        io_lib:format("~ktp",
+                                                                      [_value?@1_0]),
+                                                    [_element@5_0]
+                                                end,
+                                 [_element@6_0]
+                             end),
+                io:nl(),
+                {}
+            end,
+            begin
+                io:put_chars(begin
+                                 _element@8_0 = begin
+                                                    _element@7_0 =
+                                                        io_lib:format("~ktp",
+                                                                      [_type@2_0]),
+                                                    [_element@7_0]
+                                                end,
+                                 [_element@8_0]
+                             end),
+                io:nl(),
+                {}
+            end,
+            _ = 'a{b}'(),
+            {}
+    end.

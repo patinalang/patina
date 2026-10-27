@@ -9,6 +9,10 @@
 -define(MACRO_TIMEOUT_SECONDS, 30).
 -define(MACRO_TIMEOUT, timer:seconds(?MACRO_TIMEOUT_SECONDS)).
 
+-define(COMPILE_OPTS, [
+    binary, return, nowarn_opportunistic, nowarn_underscore_match, nowarn_shadow_vars
+]).
+
 start_link(SockPath) ->
     gen_server:start_link(?MODULE, [SockPath], []).
 
@@ -72,7 +76,7 @@ handle_request(Sock, Op, Args) ->
     end.
 
 do_request(Sock, ~"compile", [Eaf]) ->
-    case compile_forms(binary_to_term(Eaf)) of
+    case compile_forms(binary_to_term(Eaf), []) of
         {ok, _Mod, Beam, Warnings} ->
             write_msg(Sock, [~"ok", Beam, Warnings]);
         {error, Errors, Warnings} ->
@@ -85,6 +89,19 @@ do_request(Sock, ~"erl", [Eaf]) ->
     Forms = binary_to_term(Eaf),
     Rendered = unicode:characters_to_binary([erl_prettypr:format(erl_syntax:form_list(Forms)), "\n"]),
     write_msg(Sock, [~"ok", Rendered]);
+do_request(Sock, <<"core", _/binary>> = Req, [Eaf]) ->
+    Forms = binary_to_term(Eaf),
+    Result =
+        case Req of
+            ~"core0" -> to_core0(Forms);
+            ~"core" -> to_core(Forms)
+        end,
+    case Result of
+        {ok, _Mod, Core, _Warnings} ->
+            write_msg(Sock, [~"ok", unicode:characters_to_binary([core_pp:format(Core), "\n"])]);
+        {error, Errors, Warnings} ->
+            write_msg(Sock, [~"error", Errors, Warnings])
+    end;
 do_request(Sock, ~"code_path", Dirs) ->
     lists:foreach(fun(Dir) -> code:add_pathz(binary_to_list(Dir)) end, Dirs),
     write_msg(Sock, [~"ok"]);
@@ -160,17 +177,24 @@ receive_run_macro_result(Ref) ->
         {error, timeout}
     end.
 
-compile_forms(Forms) ->
-    CompileOpts = [
-        binary, return, nowarn_opportunistic, nowarn_underscore_match, nowarn_shadow_vars
-    ],
+to_core0(Forms) ->
     %% We stop at `to_core0` specifically, so we can rewrite forms before lambdas get inlined.
-    case compile:noenv_forms(Forms, [to_core0 | CompileOpts]) of
+    case compile:noenv_forms(Forms, [to_core0 | ?COMPILE_OPTS]) of
+        {ok, Mod, Core0, Warnings} ->
+            {ok, Mod, core_transform(Core0), Warnings};
+        {error, Errors, Warnings} ->
+            {error, Errors, Warnings}
+    end.
+
+to_core(Forms) ->
+    compile_forms(Forms, [to_core]).
+
+compile_forms(Forms, Opts) ->
+    case to_core0(Forms) of
         {ok, _Mod, Core0, Warnings0} ->
-            Core1 = core_transform(Core0),
-            case compile:noenv_forms(Core1, [from_core | CompileOpts]) of
-                {ok, Mod, Beam, Warnings1} ->
-                    {ok, Mod, Beam, lists:uniq(Warnings0 ++ Warnings1)};
+            case compile:noenv_forms(Core0, [from_core | Opts ++ ?COMPILE_OPTS]) of
+                {ok, Mod, Result, Warnings1} ->
+                    {ok, Mod, Result, lists:uniq(Warnings0 ++ Warnings1)};
                 {error, Errors, Warnings1} ->
                     {error, Errors, lists:uniq(Warnings0 ++ Warnings1)}
             end;
@@ -209,46 +233,305 @@ write(Sock, Data) ->
 %% -----------------------------------------------------------------------------
 
 core_transform(Module0) ->
-    Module1 = cerl_trees:map(fun rewrite_labels/1, Module0),
-    cerl_trees:map(fun rewrite/1, gather(Module1)).
-
-%% Rewrites labels into `letrec_goto` join points. A label is scoped to one `case`, and jumps
-%% never cross a `try` or a function boundary.
-%%
-%% - A `case` clause matching `{'$patina_label_N', ...Vars}` is rewritten into `letrec` that
-%%   `'$patina_marker':jump('$patina_label_n', ...Vars)` jumps to.
-%%
-%% - `'$patina_marker:jump(Label, Args...)` jumps to `Label/N`.
-%%
-%% What's left should be just a case with a single `_ -> ...` clause that points to "real" body
-%% that uses the jumps.
-rewrite_labels(Expr) ->
-    case cerl:type(Expr) of
-        'case' -> rewrite_join_case(Expr);
-        call -> rewrite_label_jump(Expr);
-        seq -> rewrite_label_seq(Expr);
-        _ -> Expr
+    {Module, _NextLabel} = cerl_trees:label(Module0),
+    Table = ets:new(?MODULE, [set, private]),
+    try
+        gather(Module, Table),
+        cerl_trees:map(fun(Expr) -> rewrite(Expr, Table) end, Module)
+    after
+        ets:delete(Table)
     end.
 
-rewrite_join_case(Case) ->
-    {Clauses, Joins} = lists:foldl(fun rewrite_label_clause/2, {[], []}, cerl:case_clauses(Case)),
-    lists:foldl(
-        fun(Join, Acc) -> cerl:ann_c_letrec([letrec_goto], [Join], Acc) end,
-        cerl:update_c_case(Case, cerl:case_arg(Case), lists:reverse(Clauses)),
-        Joins
-    ).
+-record(gather, {
+    %% The table of gathered facts.
+    table,
+    %% A stack of the ordsets of labels in scope in each frame, innermost first.
+    scope_labels = []
+}).
 
-rewrite_label_clause(Clause, {Clauses, Joins}) ->
-    case label_clause(Clause) of
-        {Label, Vars} ->
-            Name = cerl:c_fname(cerl:atom_val(Label), length(Vars)),
-            Body = cerl:clause_body(Clause),
-            Join = {Name, cerl:c_fun(Vars, Body)},
-            {Clauses, [Join | Joins]};
+%% Gathers facts about the module's nodes.
+%%
+%% A "frame" is a language constructs we can't jump through. For a given top-level module function,
+%% effectively this is only `try`'s body and a local fun. To set up alternative forwarding through
+%% frames, we need to track which jumps escape the frame (i.e. their target is outside of the frame;
+%% no action is needed if the jump targets a label within its own frame).
+%%
+%% - `jump_escapes`: `[{Label, Arity}]`, the labels outside of the expression's frame that are
+%%   targeted by the jumps from within the expression.
+%%
+%% - `jump_dispatch`: `{[...Landing], [...Forward]}`, for an expression where we must build
+%%   a dispatching `case`. The `case` matches on `Landing` jump tuples (tuples built to pass jumps
+%%   through a frame) and sets up jumps to local labels. The `Forward` labels are ones that we need
+%%   to forward as they are to outside of our current frame. Anything else is a normal return value
+%%   of the expression.
+%%
+%% - `is_frame`: `true` if the expression is a frame.
+%%
+%% - `fun_type`:
+%%   - `{local, NameLabel}` for a local function (letrec's definition that's not a join point),
+%%     where `NameLabel` is the label of its name,
+%%   - `letrec_goto` for a letrec_goto body,
+%%   - `anonymous` for any other fun.
+%%
+%% - `callee`: for a variable bound to a local function, the label of the function's name.
+%%
+%% - `callee_jump_escapes`: for a local function's name, the `jump_escapes` of its body,
+%%   i.e. the labels it could jump to.
+%%
+%%   Note that the rewriting logic is built with an assumption that only named local funs have
+%%   any escapes - these are loop helpers with `return` or `break`/`continue` to an outer loop.
+%%   Also, no code binds a loop to a variable and calls it through the var, and all loops are built
+%%   as recursive functions (duh, but has to be stated - erlc only emits `letrec` for a local fun
+%%   if it calls itself).
+gather(Module, Table) ->
+    cerl_trees:mapfold(fun gather_pre/2, fun gather_post/2, #gather{table = Table}, Module),
+    ok.
+
+gather_pre(Expr, #gather{table = Table, scope_labels = Scopes} = State0) ->
+    State1 =
+        case is_frame(Expr, Table) of
+            true -> State0#gather{scope_labels = [ordsets:new() | Scopes]};
+            false -> State0
+        end,
+
+    State =
+        case cerl:type(Expr) of
+            'let' -> gather_pre_let(Expr, State1);
+            letrec -> gather_pre_letrec(Expr, State1);
+            'case' -> gather_pre_case(Expr, State1);
+            'fun' -> gather_pre_fun(Expr, State1);
+            'try' -> gather_pre_try(Expr, State1);
+            _ -> State1
+        end,
+
+    {Expr, State}.
+
+gather_pre_let(Let, #gather{table = Table} = State) ->
+    maybe
+        [Var] ?= cerl:let_vars(Let),
+        Arg = cerl:let_arg(Let),
+        letrec ?= cerl:type(Arg),
+        Name = cerl:letrec_body(Arg),
+        true ?= cerl:is_c_fname(Name),
+        add_fact(Table, callee, Var, label(Name))
+    end,
+    State.
+
+gather_pre_letrec(Letrec, #gather{table = Table} = State) ->
+    IsGoto = lists:member(letrec_goto, cerl:get_ann(Letrec)),
+    lists:foreach(
+        fun({Name, Fun}) ->
+            FunType =
+                case IsGoto of
+                    true -> letrec_goto;
+                    false -> {local, label(Name)}
+                end,
+            add_fact(Table, fun_type, Fun, FunType)
+        end,
+        cerl:letrec_defs(Letrec)
+    ),
+    State.
+
+gather_pre_case(Case, #gather{scope_labels = [Labels0 | Scopes]} = State) ->
+    Labels = ordsets:union(join_labels(Case), Labels0),
+    State#gather{scope_labels = [Labels | Scopes]}.
+
+gather_pre_fun(Fun, #gather{table = Table} = State) ->
+    case get_fact(Table, fun_type, Fun, anonymous) of
+        letrec_goto -> ok;
+        _ -> mark_frame(Table, cerl:fun_body(Fun))
+    end,
+    State.
+
+gather_pre_try(Try, #gather{table = Table} = State) ->
+    mark_frame(Table, cerl:try_arg(Try)),
+    State.
+
+%% A leaf can't contain a jump, so it doesn't need to be a frame.
+%% `cerl_trees:label` doesn't give labels to literals, and every `var`'s occurrence shares the same
+%% label, so it's simply convenient for us to not mark them as frames.
+mark_frame(Table, Expr) ->
+    cerl:is_leaf(Expr) orelse add_fact(Table, is_frame, Expr, true).
+
+gather_post(Expr, #gather{table = Table} = State0) ->
+    {OwnEscapes, State1} =
+        case cerl:type(Expr) of
+            call -> gather_post_call(Expr, State0);
+            'case' -> gather_post_case(Expr, State0);
+            'fun' -> gather_post_fun(Expr, State0);
+            'try' -> gather_post_try(Expr, State0);
+            apply -> gather_post_apply(Expr, State0);
+            _ -> {[], State0}
+        end,
+
+    ChildEscapes = [
+        get_fact(Table, jump_escapes, Child, [])
+     || Group <- cerl:subtrees(Expr),
+        Child <- Group,
+        %% Skips frame bodies: their escapes leave the frame only through a dispatch.
+        not is_frame(Child, Table)
+    ],
+    add_fact(Table, jump_escapes, Expr, ordsets:union([OwnEscapes | ChildEscapes])),
+
+    State =
+        case is_frame(Expr, Table) of
+            true -> State1#gather{scope_labels = tl(State1#gather.scope_labels)};
+            false -> State1
+        end,
+
+    {Expr, State}.
+
+gather_post_call(Call, State) ->
+    OwnEscapes =
+        maybe
+            {Label, Args} ?= jump_marker(Call),
+            false ?= in_scope(Label, State),
+            [{Label, length(Args)}]
+        else
+            _ -> []
+        end,
+    {OwnEscapes, State}.
+
+gather_post_case(Case, #gather{scope_labels = [Labels0 | Scopes]} = State) ->
+    Labels = ordsets:subtract(Labels0, join_labels(Case)),
+    {[], State#gather{scope_labels = [Labels | Scopes]}}.
+
+gather_post_fun(Fun, #gather{table = Table} = State) ->
+    case get_fact(Table, fun_type, Fun, anonymous) of
+        {local, NameLabel} ->
+            Escapes = get_fact(Table, jump_escapes, cerl:fun_body(Fun), []),
+            add_fact(Table, callee_jump_escapes, NameLabel, Escapes);
+        _ ->
+            ok
+    end,
+    {[], State}.
+
+gather_post_try(Try, #gather{table = Table} = State) ->
+    case get_fact(Table, jump_escapes, cerl:try_arg(Try), []) of
+        [] ->
+            {[], State};
+        FrameEscapes ->
+            OwnEscapes = add_jump_dispatch(Try, FrameEscapes, State),
+            {OwnEscapes, State}
+    end.
+
+gather_post_apply(Apply, #gather{table = Table} = State) ->
+    Op = cerl:apply_op(Apply),
+    CalleeLabel = get_fact(Table, callee, Op, label(Op)),
+    case get_fact(Table, callee_jump_escapes, CalleeLabel, []) of
+        [] ->
+            {[], State};
+        CalleeEscapes ->
+            OwnEscapes = add_jump_dispatch(Apply, CalleeEscapes, State),
+            {OwnEscapes, State}
+    end.
+
+%% Adds the `jump_dispatch` fact for the labels that escape a frame through `Node`: the ones that
+%% land in the current frame, and the ones that it forwards further. Returns the forwarded labels.
+add_jump_dispatch(Node, Escapes, #gather{table = Table} = State) ->
+    {Landing, Forward} = lists:partition(fun({Label, _}) -> in_scope(Label, State) end, Escapes),
+    add_fact(Table, jump_dispatch, Node, {Landing, Forward}),
+    Forward.
+
+in_scope(Label, #gather{scope_labels = [Labels | _]}) ->
+    ordsets:is_element(Label, Labels).
+
+%% Rewrites the '$patina_marker' control-flow markers into jumps.
+%%
+%% A jump is an apply of a `letrec_goto` join point. This transform is meant to run before
+%% any optimization, because the inlining opt can inline a lambda with `return` into parent body.
+%%
+%% - `jump(Label, Args...)` jumps to `Label/N`, a join point created from a `Join`'s `case`.
+%%
+%% Labels are unique within a function and its closures. A jump can't leave its frame
+%% (a function, or a `try` protected expression). So the same jump has a different effect in each
+%% scope:
+%%
+%% - If the label is defined in the same frame as the jump, it simply jumps there.
+%%
+%% - If the marker is inside a local function (e.g. an outlined `after` block, or a loop helper),
+%%   or inside `try` protected expression, and its label is defined outside, it can't jump out.
+%%   It jumps to the frame's `'$patina_forward'/1` join point with a tuple `{Label, Args...}`,
+%%   which returns it from the frame.
+%%
+%% - At call sites of local functions, and after `try`s, we have to have a `case` that peels out
+%%   these tuples, and jumps again.
+rewrite(Expr, Table) ->
+    Rewritten0 =
+        case cerl:type(Expr) of
+            call -> rewrite_call(Expr, Table);
+            seq -> rewrite_seq(Expr);
+            'case' -> rewrite_case(Expr);
+            apply -> rewrite_apply(Expr, Table);
+            'try' -> rewrite_try(Expr, Table);
+            _ -> Expr
+        end,
+
+    Rewritten = drop_cerl_labels(Rewritten0),
+
+    case is_frame(Expr, Table) andalso has_jump_escapes(Expr, Table) of
+        true ->
+            Var = cerl:c_var('@patina_jump'),
+            join_point('$patina_forward', [Var], Var, Rewritten);
         false ->
-            {[Clause | Clauses], Joins}
+            Rewritten
     end.
 
+drop_cerl_labels(Expr) ->
+    Anns = lists:filter(
+        fun
+            ({label, _}) -> false;
+            (_) -> true
+        end,
+        cerl:get_ann(Expr)
+    ),
+    cerl:set_ann(Expr, Anns).
+
+rewrite_call(Expr, Table) ->
+    case jump_marker(Expr) of
+        {Label, Args} ->
+            case has_jump_escapes(Expr, Table) of
+                true ->
+                    JumpTuple = cerl:c_tuple([cerl:c_atom(Label) | Args]),
+                    cerl:c_apply(cerl:c_fname('$patina_forward', 1), [JumpTuple]);
+                false ->
+                    cerl:c_apply(cerl:c_fname(Label, length(Args)), Args)
+            end;
+        false ->
+            Expr
+    end.
+
+rewrite_apply(Apply, Table) ->
+    case get_fact(Table, jump_dispatch, Apply, undefined) of
+        undefined -> Apply;
+        {Landing, Forward} -> dispatch_on_jump_tuple(Apply, Landing, Forward)
+    end.
+
+rewrite_try(Try, Table) ->
+    case get_fact(Table, jump_dispatch, Try, undefined) of
+        undefined -> Try;
+        {Landing, Forward} -> dispatch_on_jump_tuple(Try, Landing, Forward)
+    end.
+
+rewrite_seq(Expr) ->
+    case is_jump(cerl:seq_arg(Expr)) of
+        %% `do Jump Rest`: `Rest` cannot run.
+        true -> cerl:seq_arg(Expr);
+        false -> Expr
+    end.
+
+%% Rewrites a Join's `case` into its body wrapped with a letrec.
+rewrite_case(Case) ->
+    maybe
+        %% erlc may add a fail clause after the body clause.
+        [JoinClause, BodyClause | _] ?= cerl:case_clauses(Case),
+        {Label, Vars} ?= label_clause(JoinClause),
+        join_point(Label, Vars, cerl:clause_body(JoinClause), cerl:clause_body(BodyClause))
+    else
+        _ -> Case
+    end.
+
+%% The special `{'$patina_label_N', ..Args}` clause of a Join's `case`.
 label_clause(Clause) ->
     maybe
         [Pat] ?= cerl:clause_pats(Clause),
@@ -256,344 +539,102 @@ label_clause(Clause) ->
         [Label | Vars] ?= cerl:tuple_es(Pat),
         true ?= cerl:is_c_atom(Label),
         true ?= is_label(cerl:atom_val(Label)),
-        {Label, Vars}
+
+        {cerl:atom_val(Label), Vars}
     else
         _ -> false
     end.
 
-rewrite_label_jump(Call) ->
-    IsJump =
-        cerl:is_c_atom(cerl:call_module(Call)) andalso
-            cerl:atom_val(cerl:call_module(Call)) =:= '$patina_marker' andalso
-            cerl:concrete(cerl:call_name(Call)) =:= jump,
+is_jump(Expr) ->
+    cerl:is_c_apply(Expr) andalso cerl:is_c_fname(cerl:apply_op(Expr)) andalso
+        begin
+            Name = cerl:fname_id(cerl:apply_op(Expr)),
+            Name =:= '$patina_forward' orelse is_label(Name)
+        end.
 
-    case IsJump of
-        true ->
-            [Label | Args] = cerl:call_args(Call),
-            cerl:c_apply(cerl:c_fname(cerl:atom_val(Label), length(Args)), Args);
-        false ->
-            Call
+has_jump_escapes(Expr, Table) ->
+    get_fact(Table, jump_escapes, Expr, []) =/= [].
+
+join_point(Name, Vars, Body, WrappedBody) ->
+    Arity = length(Vars),
+    cerl:ann_c_letrec(
+        [letrec_goto, no_inline], [{cerl:c_fname(Name, Arity), cerl:c_fun(Vars, Body)}], WrappedBody
+    ).
+
+dispatch_on_jump_tuple(Expr, Landing, Forward) ->
+    LandingClauses = lists:map(
+        fun({Label, Arity}) ->
+            Vars = arg_vars(Arity),
+            Pattern = cerl:c_tuple([cerl:c_atom(Label) | Vars]),
+            Body = cerl:c_apply(cerl:c_fname(Label, Arity), Vars),
+            cerl:c_clause([Pattern], Body)
+        end,
+        Landing
+    ),
+
+    ForwardClauses = lists:map(
+        fun({Label, Arity}) ->
+            Jump = cerl:c_var('@patina_jump'),
+            Pattern = cerl:c_alias(Jump, cerl:c_tuple([cerl:c_atom(Label) | arg_vars(Arity)])),
+            Body = cerl:c_apply(cerl:c_fname('$patina_forward', 1), [Jump]),
+            cerl:c_clause([Pattern], Body)
+        end,
+        Forward
+    ),
+
+    Other = cerl:c_var('@patina_other'),
+    Clauses = LandingClauses ++ ForwardClauses ++ [cerl:c_clause([Other], Other)],
+
+    Value = cerl:c_var('@patina_value'),
+    cerl:c_let([Value], Expr, cerl:c_case(Value, Clauses)).
+
+jump_marker(Expr) ->
+    maybe
+        true ?= cerl:is_c_call(Expr),
+        true ?= cerl:is_c_atom(cerl:call_module(Expr)),
+        '$patina_marker' ?= cerl:atom_val(cerl:call_module(Expr)),
+        true ?= cerl:is_c_atom(cerl:call_name(Expr)),
+        jump ?= cerl:atom_val(cerl:call_name(Expr)),
+
+        [Label | Args] = cerl:call_args(Expr),
+        {cerl:atom_val(Label), Args}
+    else
+        _ -> false
     end.
 
-%% `do Jump Rest`: `Rest` cannot run.
-rewrite_label_seq(Seq) ->
-    Arg = cerl:seq_arg(Seq),
-    IsJump =
-        cerl:is_c_apply(Arg) andalso cerl:is_c_fname(cerl:apply_op(Arg)) andalso
-            is_label(cerl:fname_id(cerl:apply_op(Arg))),
-
-    case IsJump of
-        true -> Arg;
-        false -> Seq
+join_labels(Case) ->
+    maybe
+        [Clause | _] ?= cerl:case_clauses(Case),
+        {Label, _} ?= label_clause(Clause),
+        [Label]
+    else
+        _ -> []
     end.
 
 is_label(Name) ->
     lists:prefix("$patina_label_", atom_to_list(Name)).
 
-%% Adds annotations to the module.
-%% `MarkerJoins` is an ordset of `{MarkerTag, Arity}`.
-%%
-%% - `{{patina, jump_targets}, MarkerJoins}`: on an expression, these are the join points *outside*
-%%   of the expression that are targeted by the jumps from *within* the expression. In other words,
-%%   these are the outside join points that are "needed" (or targeted) by its jumps.
-%%   This annotation is only used within `gather`; it's a helper to compute the other annotations.
-%%
-%% - `{{patina, defined_joins}, MarkerJoins}`: on a fun, the join points targeted by the jumps
-%%   in its body. While `jump_targets` says "what join points are needed outside
-%%   of this expression", this says "what join points must I define around this body".
-%%
-%% - `{{patina, dispatch}, MarkerJoins}`: on a try or a local function call, when we create
-%%   the dispatching `case` that peels marker tuples, the join points targeted by those
-%%   `case` branches.
-%%
-%% - `{{patina, local}, Name}`: on a local function. A local function comes from a letrec that is
-%%   not a join point, and isn't a lambda (no `id` annotation). Whether a function is local,
-%%   module-level, or a letrec_goto body can only be determined from parent's point of view,
-%%   so we calculate that in preorder for later use in postorder. Local functions (like `try` exprs)
-%%   are special, because they need to return a marker and can't just jump out.
-%%
-%% - `{{patina, function}, Name}`: on a module-level function. Like `local`, it is marked in
-%%   preorder from the parent (the module). `rewrite` uses `Name` for the `'$patina_continue'`
-%%   self-call.
-%%
-%% - `{{patina, lambda}, Name}`: on a named lambda fun. Like `function`, `rewrite` uses `Name`
-%%   for the `'$patina_continue'` self-call.
-gather(Module0) ->
-    {Module, _Locals} = cerl_trees:mapfold(fun gather_pre/2, fun gather_post/2, #{}, Module0),
-    Module.
+is_frame(Expr, Table) ->
+    get_fact(Table, is_frame, Expr, false).
 
-gather_pre(Expr, Locals) ->
-    case cerl:type(Expr) of
-        module -> {annotate_functions(Expr), Locals};
-        letrec -> {annotate_locals(Expr), Locals};
-        _ -> {Expr, Locals}
+add_fact(_Table, _Key, _Node, []) ->
+    true;
+add_fact(Table, Key, Node, Value) ->
+    ets:insert(Table, {{Key, label(Node)}, Value}).
+
+get_fact(Table, Key, Node, Default) ->
+    case ets:lookup(Table, {Key, label(Node)}) of
+        [{_, Value}] -> Value;
+        [] -> Default
     end.
 
-annotate_functions(Module) ->
-    Defs = lists:map(
-        fun({Name, Fun}) -> {Name, put_annotation(function, cerl:var_name(Name), Fun)} end,
-        cerl:module_defs(Module)
-    ),
-    cerl:update_c_module(
-        Module,
-        cerl:module_name(Module),
-        cerl:module_exports(Module),
-        cerl:module_attrs(Module),
-        Defs
-    ).
-
-annotate_locals(Letrec) ->
-    case lists:member(letrec_goto, cerl:get_ann(Letrec)) of
-        true ->
-            Letrec;
-        false ->
-            Defs = lists:map(
-                fun({Name, Fun}) ->
-                    case is_lambda(Fun) of
-                        true -> {Name, put_annotation(lambda, cerl:var_name(Name), Fun)};
-                        false -> {Name, put_annotation(local, cerl:var_name(Name), Fun)}
-                    end
-                end,
-                cerl:letrec_defs(Letrec)
-            ),
-            cerl:update_c_letrec(Letrec, Defs, cerl:letrec_body(Letrec))
+label(Label) when is_integer(Label) ->
+    Label;
+label(Node) ->
+    case cerl:get_ann(Node) of
+        [{label, Label} | _] -> Label;
+        _ -> undefined
     end.
-
-gather_post(Expr, Locals) ->
-    case cerl:type(Expr) of
-        'fun' -> gather_post_fun(Expr, Locals);
-        _ -> gather_post_expr(Expr, Locals)
-    end.
-
-gather_post_fun(Fun0, Locals) ->
-    MarkerJoins = get_annotation(jump_targets, cerl:fun_body(Fun0), []),
-    Fun = put_annotation(defined_joins, MarkerJoins, Fun0),
-    case get_annotation(local, Fun) of
-        undefined ->
-            case is_lambda(Fun) of
-                true -> {Fun, Locals};
-                false -> {put_annotation(jump_targets, MarkerJoins, Fun), Locals}
-            end;
-        Name ->
-            {Fun, Locals#{Name => MarkerJoins}}
-    end.
-
-gather_post_expr(Expr0, Locals) ->
-    Dispatch = dispatch_marker_joins(Expr0, Locals),
-    Own =
-        case marker_tuple(Expr0) of
-            {MarkerTag, Args} -> [{MarkerTag, length(Args)}];
-            false -> []
-        end,
-    Children = [
-        get_annotation(jump_targets, Child, [])
-     || Group <- cerl:subtrees(Expr0), Child <- Group
-    ],
-    MarkerJoins = ordsets:union([Own, Dispatch | Children]),
-    Expr1 = put_annotation(dispatch, Dispatch, Expr0),
-    Expr = put_annotation(jump_targets, MarkerJoins, Expr1),
-    {Expr, Locals}.
-
-dispatch_marker_joins(Expr, Locals) ->
-    case cerl:type(Expr) of
-        'try' ->
-            get_annotation(jump_targets, cerl:try_arg(Expr), []);
-        apply ->
-            Op = cerl:apply_op(Expr),
-            case cerl:is_c_fname(Op) of
-                true -> maps:get(cerl:var_name(Op), Locals, []);
-                false -> []
-            end;
-        _ ->
-            []
-    end.
-
-%% Rewrites the '$patina_marker' control-flow markers into jumps.
-%%
-%% A jump is an apply of a `letrec_goto` join point. This transform is meant to run before
-%% any optimization, because the inlining opt can inline a lambda with `return` into parent body.
-%%
-%% - `return(Value)` and `break(Value)` jump to `'$patina_return'/1`.
-%% - `continue(Args...)` jumps to `'$patina_continue'/N`.
-%%
-%% A jump goes to the innermost join point with its name. The labels are always named the same
-%% (as above), so they follow lexical shadowing.
-%%
-%% The same jump has a different effect in each scope:
-%%
-%% - If the marker is inside a local function (e.g. an outlined `after` block), it can't jump
-%%   to the outer function, so it returns the marker as a tuple `{'$patina_return', Value}`
-%%   or `{$patina_continue, ..Args}`.
-%%
-%% - If the marker is inside `try` protected expression it also can't jump outside of `try` block,
-%%   so it likewise returns the tuple from the block.
-%%
-%% - At call sites for both of the scenarios above, we have to have a `case` that peels out markers,
-%%   and jumps again, starting this list from the top.
-%%
-%% - In a (non-local) function, a `continue` jumps to a tail-call-helper that calls self-function
-%%   again.
-%%
-%% - In a (non-local) function, a `return` or `break` simply `ret`.
-rewrite(Expr0) ->
-    Expr = drop_gather_annotations(Expr0),
-    case cerl:type(Expr) of
-        call -> rewrite_call(Expr);
-        seq -> rewrite_seq(Expr);
-        apply -> rewrite_apply(Expr0, Expr);
-        'try' -> rewrite_try(Expr0, Expr);
-        'fun' -> rewrite_fun(Expr0, Expr);
-        _ -> Expr
-    end.
-
-rewrite_call(Expr) ->
-    case marker_tuple(Expr) of
-        {MarkerTag, Args} -> cerl:c_apply(cerl:c_fname(MarkerTag, length(Args)), Args);
-        false -> Expr
-    end.
-
-rewrite_seq(Expr) ->
-    case is_marker_jump(cerl:seq_arg(Expr)) of
-        %% `do Jump Rest`: `Rest` cannot run.
-        true -> cerl:seq_arg(Expr);
-        false -> Expr
-    end.
-
-rewrite_apply(Expr0, Expr) ->
-    dispatch_on_marker_tuple(Expr, get_annotation(dispatch, Expr0, [])).
-
-rewrite_try(Expr0, Expr) ->
-    MarkerJoins = get_annotation(dispatch, Expr0, []),
-    Try = cerl:update_c_try(
-        Expr,
-        add_forwarding_join_points(cerl:try_arg(Expr), MarkerJoins),
-        cerl:try_vars(Expr),
-        cerl:try_body(Expr),
-        cerl:try_evars(Expr),
-        cerl:try_handler(Expr)
-    ),
-    dispatch_on_marker_tuple(Try, MarkerJoins).
-
-rewrite_fun(Expr0, Expr) ->
-    MarkerJoins = get_annotation(defined_joins, Expr0, []),
-    Function = get_annotation(function, Expr0),
-    Local = get_annotation(local, Expr0),
-    Lambda = get_annotation(lambda, Expr0),
-    if
-        Function =/= undefined ->
-            add_function_join_points(Expr, Function, MarkerJoins);
-        Local =/= undefined ->
-            cerl:update_c_fun(
-                Expr,
-                cerl:fun_vars(Expr),
-                add_forwarding_join_points(cerl:fun_body(Expr), MarkerJoins)
-            );
-        true ->
-            case is_lambda(Expr) of
-                true -> add_function_join_points(Expr, Lambda, MarkerJoins);
-                %% A `letrec_goto` label body is part of the enclosing scope.
-                false -> Expr
-            end
-    end.
-
-is_marker_jump(Expr) ->
-    cerl:is_c_apply(Expr) andalso cerl:is_c_fname(cerl:apply_op(Expr)) andalso
-        lists:member(cerl:fname_id(cerl:apply_op(Expr)), ['$patina_return', '$patina_continue']).
-
-is_lambda(Expr) ->
-    cerl:is_c_fun(Expr) andalso lists:keymember(id, 1, cerl:get_ann(Expr)).
-
-%% Wraps (non-local) function's body with join points that exit from the function.
-add_function_join_points(Fun, Self, MarkerJoins) ->
-    Body = lists:foldl(
-        fun
-            ({'$patina_return', 1} = MarkerJoin, Acc) ->
-                [Var] = arg_vars(1),
-                Join = cerl:c_fun([Var], Var),
-                join_point(MarkerJoin, Join, Acc);
-            ({'$patina_continue', Arity} = MarkerJoin, Acc) ->
-                {Name, Arity} = Self,
-                Vars = arg_vars(Arity),
-                Join = cerl:c_fun(Vars, cerl:c_apply(cerl:c_fname(Name, Arity), Vars)),
-                join_point(MarkerJoin, Join, Acc)
-        end,
-        cerl:fun_body(Fun),
-        MarkerJoins
-    ),
-    cerl:update_c_fun(Fun, cerl:fun_vars(Fun), Body).
-
-%% Wraps (local/try) body with join points that turn the jump into a tuple tagged with a marker.
-add_forwarding_join_points(Body, MarkerJoins) ->
-    lists:foldl(
-        fun({MarkerTag, Arity} = MarkerJoin, Acc) ->
-            Vars = arg_vars(Arity),
-            Tuple = cerl:c_tuple([cerl:c_atom(MarkerTag) | Vars]),
-            join_point(MarkerJoin, cerl:c_fun(Vars, Tuple), Acc)
-        end,
-        Body,
-        MarkerJoins
-    ).
-
-join_point({Name, Arity}, Fun, Body) ->
-    cerl:ann_c_letrec([letrec_goto, no_inline], [{cerl:c_fname(Name, Arity), Fun}], Body).
-
-dispatch_on_marker_tuple(Expr, []) ->
-    Expr;
-dispatch_on_marker_tuple(Expr, MarkerJoins) ->
-    Value = cerl:c_var('@patina_value'),
-    Other = cerl:c_var('@patina_other'),
-    Clauses = lists:map(
-        fun({MarkerTag, Arity}) ->
-            Vars = arg_vars(Arity),
-            cerl:c_clause(
-                [cerl:c_tuple([cerl:c_atom(MarkerTag) | Vars])],
-                cerl:c_apply(cerl:c_fname(MarkerTag, Arity), Vars)
-            )
-        end,
-        MarkerJoins
-    ),
-    Case = cerl:c_case(Value, Clauses ++ [cerl:c_clause([Other], Other)]),
-    cerl:c_let([Value], Expr, Case).
-
-marker_tuple(Expr) ->
-    IsMarker =
-        cerl:is_c_call(Expr) andalso
-            cerl:is_c_atom(cerl:call_module(Expr)) andalso
-            cerl:atom_val(cerl:call_module(Expr)) =:= '$patina_marker',
-    case IsMarker of
-        true ->
-            Marker =
-                case cerl:concrete(cerl:call_name(Expr)) of
-                    continue -> '$patina_continue';
-                    return -> '$patina_return';
-                    break -> '$patina_return'
-                end,
-            {Marker, cerl:call_args(Expr)};
-        false ->
-            false
-    end.
-
-put_annotation(_Key, [], Expr) -> Expr;
-put_annotation(Key, Value, Expr) -> cerl:add_ann([{{patina, Key}, Value}], Expr).
-
-get_annotation(Key, Expr) ->
-    get_annotation(Key, Expr, undefined).
-
-get_annotation(Key, Expr, Default) ->
-    case lists:keyfind({patina, Key}, 1, cerl:get_ann(Expr)) of
-        {{patina, Key}, Value} -> Value;
-        false -> Default
-    end.
-
-drop_gather_annotations(Expr) ->
-    Anns = lists:filter(
-        fun
-            ({{patina, _}, _}) -> false;
-            (_) -> true
-        end,
-        cerl:get_ann(Expr)
-    ),
-    cerl:set_ann(Expr, Anns).
 
 arg_vars(N) ->
     [cerl:c_var(list_to_atom("@patina_arg_" ++ integer_to_list(I))) || I <- lists:seq(1, N)].
