@@ -43,6 +43,7 @@
 #![feature(file_buffered)]
 #![feature(gen_blocks)]
 #![feature(iter_intersperse)]
+#![feature(macro_metavar_expr_concat)]
 #![feature(min_specialization)]
 #![feature(negative_impls)]
 #![feature(never_type)]

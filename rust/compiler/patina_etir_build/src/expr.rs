@@ -1,7 +1,7 @@
 use rustc_hir::def::DefKind;
 use rustc_hir::{BinarySegmentTy, HirId};
 use rustc_middle::erl::binary_pattern::{BinaryEndianness, BinarySegmentLayout, BinarySegmentSize};
-use rustc_middle::erl::etir::visit::{self, Visitor, walk_pat};
+use rustc_middle::erl::etir::visit::{Visitor, walk_pat};
 use rustc_middle::erl::etir::{self, ExprId, JoinId, PatId, PatternInput};
 use rustc_middle::erl::{ErlCallTarget, ErlModuleId};
 use rustc_middle::middle::region;
@@ -959,7 +959,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         }
 
         let mut visitor = FindOr { body: &self.cx.body, found: false };
-        visit::visit_pat_id(&mut visitor, pat);
+        visitor.visit_pat_id(&pat);
         visitor.found
     }
 

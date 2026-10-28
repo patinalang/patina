@@ -124,7 +124,7 @@ pub(super) fn lower<'tcx>(tcx: TyCtxt<'tcx>, owner: DefId, body: Body<'tcx>) -> 
             resolver: &mut resolver,
             sites: FxIndexMap::default(),
         };
-        visit::visit_expr_id(&mut collect, body.value);
+        collect.visit_expr_id(&body.value);
         collect.sites
     };
 

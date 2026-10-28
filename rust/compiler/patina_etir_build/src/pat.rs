@@ -2,7 +2,7 @@ use rustc_abi::FIRST_VARIANT;
 use rustc_data_structures::packed::Pu128;
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::TermClass;
-use rustc_middle::erl::etir::visit::{self, Visitor, walk_pat};
+use rustc_middle::erl::etir::visit::{Visitor, walk_pat};
 use rustc_middle::erl::etir::{self, ExprId, PatId, PatternInput, VarId};
 use rustc_middle::span_bug;
 use rustc_middle::thir::{self, LocalVarId, PatKind};
@@ -355,7 +355,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         }
 
         let mut visitor = BoundVars { body: &self.cx.body, vars: SmallVec::new() };
-        visit::visit_pat_id(&mut visitor, pattern);
+        visitor.visit_pat_id(&pattern);
         visitor.vars
     }
 

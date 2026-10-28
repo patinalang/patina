@@ -16,7 +16,7 @@ pub(super) fn analyze(body: &mut Body<'_>) {
         loop_reassigned: IndexVec::from_elem_n(Box::default(), body.loops.len()),
         join_params: IndexVec::from_elem_n(Box::default(), body.joins.len()),
     };
-    visit::visit_expr_id(&mut captures, body.value);
+    captures.visit_expr_id(&body.value);
     let Captures { loop_reassigned, join_params, .. } = captures;
     for (loop_, reassigned) in body.loops.iter_mut().zip(loop_reassigned) {
         loop_.reassigned = reassigned;
@@ -79,15 +79,15 @@ impl<'etir, 'tcx: 'etir> Visitor<'etir, 'tcx> for Captures<'etir, 'tcx> {
                 self.loop_reassigned[*id] = reassigned_vars(captured).collect();
             }
             ExprKind::Join { join, body } => {
-                let (used_in_body, bound_in_body) =
-                    self.with_scope(|s| visit::visit_expr_id(s, *body));
+                let (used_in_body, bound_in_body) = self.with_scope(|s| s.visit_expr_id(body));
 
                 let used_in_join = self
                     .with_scope(|s| {
                         // Nobody cares that Join uses its own fresh var,
                         // but we include it here for completeness.
-                        s.bound.extend(s.body[*join].value);
-                        visit::visit_expr_id(s, s.body[*join].body)
+                        let join = &s.body[*join];
+                        s.bound.extend(join.value);
+                        s.visit_expr_id(&join.body)
                     })
                     .0;
 
