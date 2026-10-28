@@ -103,7 +103,7 @@ pub fn walk_expr<'etir, 'tcx: 'etir, V: Visitor<'etir, 'tcx>>(
                 visit_expr_id(visitor, value);
             }
         }
-        Closure { def_id: _, ref params, body } => {
+        Closure { ref params, body } => {
             for &param in &**params {
                 visit_pat_id(visitor, param);
             }

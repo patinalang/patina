@@ -145,9 +145,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
             ExprKind::Adt(ref adt) => self.translate_adt(expr, adt),
 
-            ExprKind::Closure { def_id, ref params, body } => {
-                self.translate_closure(span, def_id, params, body)
-            }
+            ExprKind::Closure { ref params, body } => self.translate_closure(span, params, body),
 
             ExprKind::FnItem { .. } => span_bug!(span, "FnItem in lowered ETIR"),
 
@@ -532,18 +530,10 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     fn translate_closure(
         &mut self,
         span: Span,
-        def_id: DefId,
         params: &[PatId],
         body: ExprId,
     ) -> eaf::Expr<'arena> {
-        let translated = self
-            .with_scope(|cx| {
-                let owner = std::mem::replace(&mut cx.owner, def_id);
-                let translated = cx.translate_body_with_params(params, body);
-                cx.owner = owner;
-                translated
-            })
-            .0;
+        let translated = self.with_scope(|cx| cx.translate_body_with_params(params, body)).0;
 
         let afb = &self.translator.afb;
         let clause = afb.clause(span, translated.params, None, translated.value);

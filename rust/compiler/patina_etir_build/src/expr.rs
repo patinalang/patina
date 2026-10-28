@@ -652,7 +652,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         closure: &thir::ClosureExpr<'tcx>,
     ) -> ExprId {
         let (params, body) = ThirBodyCx::lower(self.cx, closure.closure_id);
-        let kind = etir::ExprKind::Closure { def_id: closure.closure_id.to_def_id(), params, body };
+        let kind = etir::ExprKind::Closure { params, body };
         self.push_expr(kind, expr.ty, expr.span)
     }
 

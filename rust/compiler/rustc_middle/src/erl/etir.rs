@@ -145,7 +145,7 @@ pub enum ExprKind<'tcx> {
     Cast { source: ExprId, kind: CastKind },
     Call { callee: Callee<'tcx>, args: Box<[ExprId]> },
     Adt(Box<AdtExpr>),
-    Closure { def_id: DefId, params: Box<[PatId]>, body: ExprId },
+    Closure { params: Box<[PatId]>, body: ExprId },
     // Only a thing between lowering passes; it gets lowered to a `Closure` over its witnesses.
     FnItem { item: Box<ItemRef<'tcx>>, arity: u32, forced_extern: bool },
     Fun { fun: ErlFun, forced_extern: bool },

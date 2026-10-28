@@ -616,7 +616,7 @@ impl<'tcx> Lower<'tcx> {
 
         let call = self.lower_call(item, witnesses, args.into(), span, forced_extern);
         let body = self.expr(call, span);
-        ExprKind::Closure { def_id: self.owner, params: params.into(), body }
+        ExprKind::Closure { params: params.into(), body }
     }
 
     fn bind(&mut self, prologue: &mut ExprBlock, node: VarNodeId, rhs: ExprId) {
