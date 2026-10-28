@@ -32,8 +32,10 @@ impl<'thir, 'tcx> Visitor<'thir, 'tcx> for FnrefVisitor<'thir, 'tcx> {
         } = expr.kind
             && expr.ty.is_fnref()
             && let ty::FnDef(def_id, args) = *self.thir[source].ty.kind()
-            && let ErlCallTarget::Item { def_id, .. } =
-                self.tcx.erl_call_target_for_def(self.owner.to_def_id(), def_id, args)
+            && let ErlCallTarget::Item { def_id, .. } = self.tcx.erl_resolve_trait_item_target(
+                self.owner.to_def_id(),
+                self.tcx.erl_call_target(def_id, args),
+            )
             && self.tcx.erl_needs_witnesses(def_id)
         {
             let item = self.tcx.def_path_str(def_id);

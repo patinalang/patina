@@ -10,15 +10,15 @@
 //! This module analyzes functions to prepare the witnesses needed, and lowers
 //! them as synthetic ETIR nodes so translation layer doesn't have to know.
 
-use rustc_data_structures::fx::FxHashMap;
+use rustc_data_structures::fx::{FxHashMap, FxIndexMap, IndexEntry};
 use rustc_data_structures::stack::ensure_sufficient_stack;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::DefId;
 use rustc_index::{IndexVec, newtype_index};
 use rustc_middle::erl::etir::visit::{self, Visitor};
 use rustc_middle::erl::etir::{
-    Body, Callee, ErlFun, Expr, ExprId, ExprKind, FieldIdx, ItemRef, Pat, PatId, PatKind,
-    PatternInput, Var, VarId,
+    Body, Callee, ErlFun, Expr, ExprId, ExprKind, FieldIdx, Pat, PatId, PatKind, PatternInput, Var,
+    VarId,
 };
 use rustc_middle::erl::witness::SupertraitIdx;
 use rustc_middle::erl::{ErlCallTarget, ErlModuleResolution};
@@ -76,10 +76,12 @@ enum VarNodeKey<'tcx> {
 }
 
 struct Collect<'a, 'tcx> {
+    tcx: TyCtxt<'tcx>,
+    owner: DefId,
     body: &'a Body<'tcx>,
     resolver: &'a mut WitnessResolver<'tcx>,
-    /// Every item reference that passes witnesses or dispatches through one, in post-order.
-    witness_sites: Vec<(ExprId, WitnessArgs<'tcx>)>,
+    /// Every item reference, with its target resolved from the owner of the body.
+    sites: FxIndexMap<ExprId, (ErlCallTarget<'tcx>, WitnessArgs<'tcx>)>,
 }
 
 impl<'a, 'tcx: 'a> Visitor<'a, 'tcx> for Collect<'a, 'tcx> {
@@ -90,52 +92,72 @@ impl<'a, 'tcx: 'a> Visitor<'a, 'tcx> for Collect<'a, 'tcx> {
     fn visit_expr(&mut self, expr_id: ExprId, expr: &'a Expr<'tcx>) {
         visit::walk_expr(self, expr);
 
-        let (ExprKind::Call { callee: Callee::Item { item, .. }, .. }
-        | ExprKind::FnItem { item, .. }) = &expr.kind
+        let (ExprKind::Call { callee: Callee::Item { target, .. }, .. }
+        | ExprKind::FnItem { target, .. }) = expr.kind
         else {
             return;
         };
+        let IndexEntry::Vacant(site) = self.sites.entry(expr_id) else { return };
 
-        let ErlCallTarget::Item { def_id, args } = item.target else {
-            span_bug!(expr.span, "reference to {:?} needs no witnesses", item.target)
+        let target = self.tcx.erl_resolve_trait_item_target(self.owner, target);
+        let witnesses = match target {
+            ErlCallTarget::Item { def_id, args } => {
+                self.resolver.require_witness_args(expr.span, def_id, args)
+            }
+            ErlCallTarget::Extern { .. } => WitnessArgs::default(),
+            ErlCallTarget::Constructor { .. } | ErlCallTarget::Dynamic => {
+                span_bug!(expr.span, "item reference to {target:?}")
+            }
         };
-        let args = self.resolver.require_witness_args(expr.span, def_id, args);
-        debug_assert!(!args.is_empty(), "reference to {def_id:?} passes no witnesses");
-        self.witness_sites.push((expr_id, args));
+        site.insert((target, witnesses));
     }
 }
 
 pub(super) fn lower<'tcx>(tcx: TyCtxt<'tcx>, owner: DefId, body: Body<'tcx>) -> Body<'tcx> {
     let mut resolver = WitnessResolver::new(tcx, owner, WitnessBuildSite::User);
 
-    let witness_sites = {
-        let mut collect =
-            Collect { body: &body, resolver: &mut resolver, witness_sites: Vec::new() };
+    let sites = {
+        let mut collect = Collect {
+            tcx,
+            owner,
+            body: &body,
+            resolver: &mut resolver,
+            sites: FxIndexMap::default(),
+        };
         visit::visit_expr_id(&mut collect, body.value);
-        collect.witness_sites
+        collect.sites
     };
 
     let witnesses = resolver.resolve_witnesses();
 
     let mut lower = Lower::new(tcx, owner, body, witnesses, tcx.def_span(owner));
 
-    for (id, witnesses) in witness_sites {
+    for (id, (target, witnesses)) in sites {
         let span = lower.body[id].span;
         let kind = std::mem::replace(&mut lower.body.exprs[id].kind, ExprKind::Block(Box::new([])));
         lower.body.exprs[id].kind = match kind {
-            ExprKind::Call { callee: Callee::Item { item, forced_extern }, args } => {
-                if lower.is_assoc_const(&item) {
-                    lower.lower_assoc_const(item, &witnesses, span, forced_extern)
-                } else {
-                    lower.lower_call(item, &witnesses, args, span, forced_extern)
-                }
+            ExprKind::Call { callee: Callee::Item { forced_extern, .. }, args }
+                if witnesses.is_empty() =>
+            {
+                let fun = lower.witnessless_erl_fun(target, args.len() as u32, span);
+                ExprKind::Call { callee: Callee::Fun { fun, forced_extern }, args }
             }
-            ExprKind::FnItem { item, arity, forced_extern } => {
-                lower.lower_fn_item(item, &witnesses, arity, span, forced_extern)
+            ExprKind::Call { callee: Callee::Item { forced_extern, .. }, args: _ }
+                if lower.is_assoc_const(target) =>
+            {
+                lower.lower_assoc_const(target, &witnesses, span, forced_extern)
             }
-            // An duplicated associated const node; converted to a var by the clause above.
-            ExprKind::Var(var) => ExprKind::Var(var),
-            kind => span_bug!(span, "only item calls and `FnItem`s pass witnesses, got {kind:?}"),
+            ExprKind::Call { callee: Callee::Item { forced_extern, .. }, args } => {
+                lower.lower_call(target, &witnesses, args, span, forced_extern)
+            }
+            ExprKind::FnItem { arity, forced_extern, .. } if witnesses.is_empty() => {
+                let fun = lower.witnessless_erl_fun(target, arity, span);
+                ExprKind::Fun { fun, forced_extern }
+            }
+            ExprKind::FnItem { arity, forced_extern, .. } => {
+                lower.lower_fn_item(target, &witnesses, arity, span, forced_extern)
+            }
+            kind => span_bug!(span, "item site is not an item reference: {kind:?}"),
         };
     }
     lower.finish()
@@ -530,15 +552,38 @@ impl<'tcx> Lower<'tcx> {
         self.element(vtable, slot, slot_name, span)
     }
 
+    fn witnessless_erl_fun(&self, target: ErlCallTarget<'tcx>, arity: u32, span: Span) -> ErlFun {
+        let (module, name) = self.target_module_and_name(target, span);
+        let module =
+            module.unwrap_or_else(|| span_bug!(span, "`{name}` dispatches without a self witness"));
+        ErlFun { module, name, arity }
+    }
+
+    fn target_module_and_name(
+        &self,
+        target: ErlCallTarget<'tcx>,
+        span: Span,
+    ) -> (Option<ErlModuleResolution>, Symbol) {
+        let module = self.tcx.erl_module_for_target(self.owner, target);
+        let name = match target {
+            ErlCallTarget::Item { def_id, .. } => self.tcx.erl_fn_name(def_id),
+            ErlCallTarget::Extern { function, .. } => self.tcx.item_name(function),
+            ErlCallTarget::Constructor { .. } | ErlCallTarget::Dynamic => {
+                span_bug!(span, "item reference to {target:?}")
+            }
+        };
+        (module, name)
+    }
+
     fn lower_call(
         &mut self,
-        item: Box<ItemRef<'tcx>>,
+        target: ErlCallTarget<'tcx>,
         witnesses: &WitnessArgs<'tcx>,
         args: Box<[ExprId]>,
         span: Span,
         forced_extern: bool,
     ) -> ExprKind<'tcx> {
-        let ItemRef { name, target, module } = *item;
+        let (module, name) = self.target_module_and_name(target, span);
 
         let self_witness = witnesses.self_witness.map(|bound| self.witness(bound, span));
 
@@ -572,9 +617,9 @@ impl<'tcx> Lower<'tcx> {
         ExprKind::Call { callee, args: witnesses.chain(args).collect() }
     }
 
-    fn is_assoc_const(&self, item: &ItemRef<'tcx>) -> bool {
+    fn is_assoc_const(&self, target: ErlCallTarget<'tcx>) -> bool {
         matches!(
-            item.target,
+            target,
             ErlCallTarget::Item { def_id, .. }
                 if matches!(self.tcx.def_kind(def_id), DefKind::AssocConst { .. })
         )
@@ -583,14 +628,14 @@ impl<'tcx> Lower<'tcx> {
     /// Lowers an associated const call into the witness prologue. From here on it will be a Var.
     fn lower_assoc_const(
         &mut self,
-        item: Box<ItemRef<'tcx>>,
+        target: ErlCallTarget<'tcx>,
         witnesses: &WitnessArgs<'tcx>,
         span: Span,
         forced_extern: bool,
     ) -> ExprKind<'tcx> {
-        let ErlCallTarget::Item { def_id, args } = item.target else { bug!("non-item const") };
+        let ErlCallTarget::Item { def_id, args } = target else { bug!("non-item const") };
         let node = self.intern(VarNodeKey::AssocConst { def_id, args }, |lower| {
-            let call_kind = lower.lower_call(item, witnesses, Box::new([]), span, forced_extern);
+            let call_kind = lower.lower_call(target, witnesses, Box::new([]), span, forced_extern);
             let call = lower.expr(call_kind, span);
             let name = var_name(lower.tcx, VarPrefix::Const, def_id);
             lower.var_node(name, NodeValueSource::Expr(call), span)
@@ -601,7 +646,7 @@ impl<'tcx> Lower<'tcx> {
     /// Lowers a fn item as a closure over already-bound witnesses and its dispatch fun.
     fn lower_fn_item(
         &mut self,
-        item: Box<ItemRef<'tcx>>,
+        target: ErlCallTarget<'tcx>,
         witnesses: &WitnessArgs<'tcx>,
         arity: u32,
         span: Span,
@@ -614,7 +659,7 @@ impl<'tcx> Lower<'tcx> {
             })
             .collect();
 
-        let call = self.lower_call(item, witnesses, args.into(), span, forced_extern);
+        let call = self.lower_call(target, witnesses, args.into(), span, forced_extern);
         let body = self.expr(call, span);
         ExprKind::Closure { params: params.into(), body }
     }

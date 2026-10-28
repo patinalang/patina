@@ -57,7 +57,7 @@ pub(super) enum WitnessTuple<'tcx> {
 
 /// Witnesses passed in by a user of an item (e.g. function caller).
 /// This is the user-side counterpart to the item-side `WitnessParams`.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub(super) struct WitnessArgs<'tcx> {
     pub self_witness: Option<ty::TraitRef<'tcx>>,
     pub bounds: IndexVec<BoundIdx, ty::TraitRef<'tcx>>,

@@ -1716,18 +1716,16 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     && let Res::Def(DefKind::Fn | DefKind::AssocFn | DefKind::ExternMod, def_id) =
                         typeck.qpath_res(qpath, callee.hir_id)
                 {
-                    self.tcx.erl_call_target_for_def(
-                        caller,
-                        def_id,
-                        typeck.node_args(callee.hir_id),
-                    )
+                    let target = self.tcx.erl_call_target(def_id, typeck.node_args(callee.hir_id));
+                    self.tcx.erl_resolve_trait_item_target(caller, target)
                 } else {
                     ErlCallTarget::Dynamic
                 }
             }
             hir::ExprKind::MethodCall(..) => {
                 if let Some(def_id) = typeck.type_dependent_def_id(expr.hir_id) {
-                    self.tcx.erl_call_target_for_def(caller, def_id, typeck.node_args(expr.hir_id))
+                    let target = self.tcx.erl_call_target(def_id, typeck.node_args(expr.hir_id));
+                    self.tcx.erl_resolve_trait_item_target(caller, target)
                 } else {
                     ErlCallTarget::Dynamic
                 }

@@ -351,26 +351,9 @@ impl<'tcx> TyCtxt<'tcx> {
         Some(kind)
     }
 
-    /// Classifies a statically resolved callable definition.
-    pub fn erl_call_target_for_def(
-        self,
-        caller: DefId,
-        def_id: DefId,
-        args: GenericArgsRef<'tcx>,
-    ) -> ErlCallTarget<'tcx> {
+    /// Classifies a callable definition, leaving a trait item unresolved.
+    pub fn erl_call_target(self, def_id: DefId, args: GenericArgsRef<'tcx>) -> ErlCallTarget<'tcx> {
         match self.def_kind(def_id) {
-            DefKind::AssocFn | DefKind::AssocConst { .. }
-                if self.trait_of_assoc(def_id).is_some() =>
-            {
-                let typing_env = TypingEnv::post_analysis(self, caller);
-                match ty::Instance::try_resolve(self, typing_env, def_id, args) {
-                    Ok(Some(ty::Instance { def: ty::InstanceKind::Item(def_id), args })) => {
-                        ErlCallTarget::Item { def_id, args }
-                    }
-                    _ => ErlCallTarget::Item { def_id, args },
-                }
-            }
-
             DefKind::Fn | DefKind::AssocFn | DefKind::AssocConst { .. } => {
                 ErlCallTarget::Item { def_id, args }
             }
@@ -384,6 +367,26 @@ impl<'tcx> TyCtxt<'tcx> {
             }
 
             kind => bug!("non-callable definition passed as an Erlang call target: {kind:?}"),
+        }
+    }
+
+    /// Resolves a trait item to the impl item which `caller` calls, if it's known statically.
+    pub fn erl_resolve_trait_item_target(
+        self,
+        caller: DefId,
+        target: ErlCallTarget<'tcx>,
+    ) -> ErlCallTarget<'tcx> {
+        let ErlCallTarget::Item { def_id, args } = target else { return target };
+        if self.trait_of_assoc(def_id).is_none() {
+            return target;
+        }
+
+        let typing_env = TypingEnv::post_analysis(self, caller);
+        match ty::Instance::try_resolve(self, typing_env, def_id, args) {
+            Ok(Some(ty::Instance { def: ty::InstanceKind::Item(def_id), args })) => {
+                ErlCallTarget::Item { def_id, args }
+            }
+            _ => target,
         }
     }
 

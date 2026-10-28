@@ -3,7 +3,7 @@ use rustc_hir::{BinarySegmentTy, HirId};
 use rustc_middle::erl::binary_pattern::{BinaryEndianness, BinarySegmentLayout, BinarySegmentSize};
 use rustc_middle::erl::etir::visit::{self, Visitor, walk_pat};
 use rustc_middle::erl::etir::{self, ExprId, JoinId, PatId, PatternInput};
-use rustc_middle::erl::{ErlCallTarget, ErlModuleId, ErlModuleResolution};
+use rustc_middle::erl::{ErlCallTarget, ErlModuleId};
 use rustc_middle::middle::region;
 use rustc_middle::mir::{BinOp, UnOp};
 use rustc_middle::span_bug;
@@ -538,7 +538,6 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         let tcx = self.cx.tcx;
         let span = expr.span;
 
-        let owner = self.owner.to_def_id();
         let target = if let ty::FnDef(callee_def_id, generic_args) = callable_ty.kind() {
             if tcx.is_fn_trait(tcx.parent(*callee_def_id)) {
                 return self.lower_expr_fn_trait_call(expr, args);
@@ -550,9 +549,9 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
                 return self.lower_expr_intrinsic_call(expr, intrinsic.name, args);
             }
 
-            tcx.erl_call_target_for_def(owner, *callee_def_id, generic_args)
+            tcx.erl_call_target(*callee_def_id, generic_args)
         } else if let thir::ExprKind::ExternMod { def_id } = &self.resolve(fun).kind {
-            tcx.erl_call_target_for_def(owner, *def_id, ty::GenericArgs::empty())
+            tcx.erl_call_target(*def_id, ty::GenericArgs::empty())
         } else {
             let callee = etir::Callee::Value(self.lower_expr(fun));
             let kind = etir::ExprKind::Call { callee, args: self.lower_exprs(args) };
@@ -568,10 +567,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             }
         }
 
-        let callee = match self.witnessless_erl_fun(span, target, args.len() as u32) {
-            Some(fun) => etir::Callee::Fun { fun, forced_extern },
-            None => etir::Callee::Item { item: self.item_ref(span, target), forced_extern },
-        };
+        let callee = etir::Callee::Item { target, forced_extern };
         let kind = etir::ExprKind::Call { callee, args: self.lower_exprs(args) };
         self.push_expr(kind, expr.ty, span)
     }
@@ -670,17 +666,11 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             not_implemented_kind(tcx, expr.span, "intrinsic as a value", intrinsic.name);
         }
 
-        let target = tcx.erl_call_target_for_def(self.owner.to_def_id(), def_id, args);
+        let target = tcx.erl_call_target(def_id, args);
         let arity = tcx.fn_sig(def_id).skip_binder().inputs().skip_binder().len() as u32;
 
         // TODO: add an attribute to allow forcing `fnref` to be an extern call
-        let kind = match self.witnessless_erl_fun(expr.span, target, arity) {
-            Some(fun) => etir::ExprKind::Fun { fun, forced_extern: false },
-            None => {
-                let item = self.item_ref(expr.span, target);
-                etir::ExprKind::FnItem { item, arity, forced_extern: false }
-            }
-        };
+        let kind = etir::ExprKind::FnItem { target, arity, forced_extern: false };
         self.push_expr(kind, expr.ty, expr.span)
     }
 
@@ -697,9 +687,8 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         if matches!(tcx.def_kind(def_id), DefKind::AssocConst { .. })
             && tcx.erl_entry_trait(def_id).is_some()
         {
-            let target = tcx.erl_call_target_for_def(self.owner.to_def_id(), def_id, args);
-            let item = self.item_ref(span, target);
-            let callee = etir::Callee::Item { item, forced_extern: false };
+            let target = tcx.erl_call_target(def_id, args);
+            let callee = etir::Callee::Item { target, forced_extern: false };
             let kind = etir::ExprKind::Call { callee, args: Box::new([]) };
             return self.push_expr(kind, expr.ty, span);
         }
@@ -1126,51 +1115,9 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         self.push_expr(unit, tcx.types.unit, span)
     }
 
-    fn item_ref(&self, span: Span, target: ErlCallTarget<'tcx>) -> Box<etir::ItemRef<'tcx>> {
-        let (module, name) = self.target_module_and_name(span, target);
-        Box::new(etir::ItemRef { name, target, module })
-    }
-
     fn bool_expr(&mut self, span: Span, value: bool) -> ExprId {
         let kind = etir::ExprKind::Literal(etir::Lit::Bool(value), span);
         self.push_expr(kind, self.cx.tcx.types.bool, span)
-    }
-
-    fn witnessless_erl_fun(
-        &self,
-        span: Span,
-        target: ErlCallTarget<'tcx>,
-        arity: u32,
-    ) -> Option<etir::ErlFun> {
-        if let ErlCallTarget::Item { def_id, .. } = target
-            && self.cx.tcx.erl_needs_witnesses(def_id)
-        {
-            return None;
-        }
-
-        let (module, name) = self.target_module_and_name(span, target);
-        let module =
-            module.unwrap_or_else(|| span_bug!(span, "`{name}` dispatches without a self witness"));
-
-        Some(etir::ErlFun { module, name, arity })
-    }
-
-    fn target_module_and_name(
-        &self,
-        span: Span,
-        target: ErlCallTarget<'tcx>,
-    ) -> (Option<ErlModuleResolution>, Symbol) {
-        let tcx = self.cx.tcx;
-        let owner = self.owner.to_def_id();
-        let module = tcx.erl_module_for_target(owner, target);
-        let name = match target {
-            ErlCallTarget::Item { def_id, .. } => tcx.erl_fn_name(def_id),
-            ErlCallTarget::Extern { function, .. } => tcx.item_name(function),
-            ErlCallTarget::Constructor { .. } | ErlCallTarget::Dynamic => {
-                span_bug!(span, "item reference to {target:?}")
-            }
-        };
-        (module, name)
     }
 
     fn resolve_expr_with_scope(

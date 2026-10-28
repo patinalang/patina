@@ -109,7 +109,7 @@ pub fn walk_expr<'etir, 'tcx: 'etir, V: Visitor<'etir, 'tcx>>(
             }
             visit_expr_id(visitor, body);
         }
-        FnItem { item: _, arity: _, forced_extern: _ } => {}
+        FnItem { target: _, arity: _, forced_extern: _ } => {}
         Fun { fun: _, forced_extern: _ } => {}
         Const { def_id: _ } => {}
         Assign { lhs, rhs } => {

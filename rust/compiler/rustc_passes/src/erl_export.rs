@@ -19,8 +19,9 @@ struct ExternalCallVisitor<'a, 'tcx> {
 
 impl<'tcx> ExternalCallVisitor<'_, 'tcx> {
     fn record_callee(&mut self, def_id: DefId, args: GenericArgsRef<'tcx>) {
-        let target @ ErlCallTarget::Item { def_id, args: _ } =
-            self.tcx.erl_call_target_for_def(self.owner, def_id, args)
+        let target @ ErlCallTarget::Item { def_id, args: _ } = self
+            .tcx
+            .erl_resolve_trait_item_target(self.owner, self.tcx.erl_call_target(def_id, args))
         else {
             return;
         };

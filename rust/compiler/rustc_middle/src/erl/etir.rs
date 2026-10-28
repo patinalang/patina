@@ -147,7 +147,7 @@ pub enum ExprKind<'tcx> {
     Adt(Box<AdtExpr>),
     Closure { params: Box<[PatId]>, body: ExprId },
     // Only a thing between lowering passes; it gets lowered to a `Closure` over its witnesses.
-    FnItem { item: Box<ItemRef<'tcx>>, arity: u32, forced_extern: bool },
+    FnItem { target: ErlCallTarget<'tcx>, arity: u32, forced_extern: bool },
     Fun { fun: ErlFun, forced_extern: bool },
     Const { def_id: DefId },
     Assign { lhs: PatId, rhs: ExprId },
@@ -225,19 +225,10 @@ pub enum CastKind {
 #[derive(Debug, TyEncodable, TyDecodable)]
 pub enum Callee<'tcx> {
     Value(ExprId),
-    // Only a thing between lowering passes; it gets lowered to `Fun`.
-    Item { item: Box<ItemRef<'tcx>>, forced_extern: bool },
+    // Only a thing between lowering passes; it gets lowered to `Fun` or dispatch through witness.
+    Item { target: ErlCallTarget<'tcx>, forced_extern: bool },
     Fun { fun: ErlFun, forced_extern: bool },
     Direct(Symbol, Symbol),
-}
-
-/// A function, or an associated const of a trait, which an expression refers to.
-#[derive(Debug, TyEncodable, TyDecodable)]
-pub struct ItemRef<'tcx> {
-    pub name: Symbol,
-    pub target: ErlCallTarget<'tcx>,
-    /// `None` if the reference dispatches through the self witness.
-    pub module: Option<ErlModuleResolution>,
 }
 
 /// An Erlang function.
