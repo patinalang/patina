@@ -594,7 +594,8 @@ doubled_k() ->
         'Elixir.Patina.Defaults.Holder':'Defaults::Konst::$patina_witness'(),
     _const_Konst_K@1_0 =
         'Elixir.Patina.Defaults.Holder':'Defaults::Konst::$patina_const::K'(_witness_Konst@0_0),
-    _const_Konst_K@1_0 * 2.
+    _const_DOUBLED@2_0 = _const_Konst_K@1_0 * 2,
+    _const_DOUBLED@2_0.
 
 differ(_witnesses_where_differ@0_0, _a@1_0, _b@2_0) ->
     _witness_PartialEq@3_0 = erlang:element(1,

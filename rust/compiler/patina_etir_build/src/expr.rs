@@ -22,6 +22,8 @@ macro_rules! with_expr_block {
     }};
 }
 
+pub(super) use with_expr_block;
+
 impl<'a, 'tcx> ExprBlock {
     /// `lower_expr` then run it through `maybe_bind` to ensure we got a variable or literal.
     fn lower_and_maybe_bind(
@@ -49,7 +51,7 @@ impl<'a, 'tcx> ExprBlock {
     }
 
     /// Emits an assignment of `value` to a `var`.
-    fn bind(&mut self, cx: &mut ThirBodyCx<'a, 'tcx>, var: VarId, value: ExprId) {
+    pub(super) fn bind(&mut self, cx: &mut ThirBodyCx<'a, 'tcx>, var: VarId, value: ExprId) {
         let etir::Expr { ty, span, kind: _ } = cx.cx.body[value];
 
         let binding = cx.push_pat(
@@ -704,7 +706,13 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             not_implemented_kind(tcx, span, "named constant without an inlinable body", def_id);
         }
 
-        self.cx.graft(self.cx.tcx.etir_template(def_id), args)
+        let const_body = self.cx.tcx.etir_template(def_id);
+        if const_body.is_erl_literal() {
+            self.cx.graft(const_body.clone(), args)
+        } else {
+            let var = self.const_var(span, def_id, const_body, args);
+            self.push_expr(etir::ExprKind::Var(var), expr.ty, span)
+        }
     }
 
     fn lower_expr_adt(

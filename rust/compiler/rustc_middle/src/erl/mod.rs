@@ -953,6 +953,12 @@ pub fn is_erl_literal(body: &etir::Body<'_>, expr: etir::ExprId) -> bool {
     visitor.is_literal
 }
 
+impl etir::Body<'_> {
+    pub fn is_erl_literal(&self) -> bool {
+        is_erl_literal(self, self.value)
+    }
+}
+
 /// The crate name followed by the definition path segments of `def_id`.
 fn erl_def_path_segments(tcx: TyCtxt<'_>, def_id: DefId) -> SmallVec<[String; 6]> {
     let path = tcx.def_path(def_id);

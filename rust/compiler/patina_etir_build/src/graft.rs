@@ -7,11 +7,10 @@ use crate::BodyBuildCx;
 
 impl<'tcx> BodyBuildCx<'tcx> {
     /// Appends a copy of `source` the current body, and returns the copy of its value.
-    pub(crate) fn graft(&mut self, source: &Body<'tcx>, args: GenericArgsRef<'tcx>) -> ExprId {
-        let mut copy = source.clone();
-        Rebaser::rebase(&mut copy, self, args);
+    pub(crate) fn graft(&mut self, mut source: Body<'tcx>, args: GenericArgsRef<'tcx>) -> ExprId {
+        Rebaser::rebase(&mut source, self, args);
 
-        let Body { params, value, exprs, pats, vars, loops, joins } = copy;
+        let Body { params, value, exprs, pats, vars, loops, joins } = source;
         if !params.is_empty() {
             bug!("grafted body has parameters");
         }

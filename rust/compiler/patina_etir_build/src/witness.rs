@@ -30,6 +30,7 @@ use self::resolve::{
     WitnessArgs, WitnessBuildSite, WitnessResolver, WitnessSource, WitnessTuple, witness_params,
 };
 use super::ExprBlock;
+use crate::VarPrefix;
 
 mod plan;
 mod resolve;
@@ -258,14 +259,14 @@ impl<'tcx> Lower<'tcx> {
         let params = witness_params(tcx, owner, ty::GenericArgs::identity_for_item(tcx, owner));
 
         let self_bound_pat = params.self_bound.map(|bound| {
-            let name = witness_var_name(tcx, bound.skip_normalization());
+            let name = VarPrefix::Witness.to_name(tcx, bound.skip_normalization().def_id);
             let node = lower.var_node(name, NodeValueSource::Param, span);
             lower.self_witness = Some(node);
             lower.binding_pat(lower.var_nodes[node].var, span)
         });
 
         let bounds_pat = (!params.bounds.is_empty()).then(|| {
-            let name = var_name(tcx, VarPrefix::WitnessesWhere, owner);
+            let name = VarPrefix::WitnessesWhere.to_name(tcx, owner);
             let node = lower.var_node(name, NodeValueSource::Param, span);
             lower.bounds = Some(node);
             lower.binding_pat(lower.var_nodes[node].var, span)
@@ -384,20 +385,19 @@ impl<'tcx> Lower<'tcx> {
     }
 
     fn witness_node(&mut self, bound: ty::TraitRef<'tcx>, span: Span) -> VarNodeId {
-        let name = witness_var_name(self.tcx, bound);
+        let name = VarPrefix::Witness.to_name(self.tcx, bound.def_id);
         match self.witnesses[&bound].clone() {
             WitnessSource::SelfParam => self.self_witness.unwrap(),
             WitnessSource::Element(tuple_source, index) => {
                 let tuple = match tuple_source {
                     WitnessTuple::ItemBounds => self.bounds.unwrap(),
                     WitnessTuple::ImplWhereClauses => {
-                        let name =
-                            var_name(self.tcx, VarPrefix::Where, self.tcx.parent(self.owner));
+                        let name = VarPrefix::Where.to_name(self.tcx, self.tcx.parent(self.owner));
                         self.element(self.self_witness.unwrap(), WHERE_CLAUSES_INDEX, name, span)
                     }
                     WitnessTuple::Supertraits { of: of_bound } => {
                         let of = self.witness(of_bound, span);
-                        let name = var_name(self.tcx, VarPrefix::Supertraits, of_bound.def_id);
+                        let name = VarPrefix::Supertraits.to_name(self.tcx, of_bound.def_id);
                         self.element(of, SUPERTRAITS_INDEX, name, span)
                     }
                     WitnessTuple::AssocTypeBounds { of, assoc_def_id, bounds } => {
@@ -487,7 +487,7 @@ impl<'tcx> Lower<'tcx> {
         let args = if where_clauses.is_empty() {
             Box::default()
         } else {
-            let name = var_name(self.tcx, VarPrefix::WitnessesWhere, impl_def_id);
+            let name = VarPrefix::WitnessesWhere.to_name(self.tcx, impl_def_id);
             let tuple = self.tuple(where_clauses, name, span);
             Box::from_iter([self.var_nodes[tuple].expr])
         };
@@ -517,7 +517,7 @@ impl<'tcx> Lower<'tcx> {
         let key = VarNodeKey::AssocTypeBounds { of, def_id, bounds: bounds.clone().into() };
         self.intern(key, |lower| {
             let bounds = (!bounds.is_empty()).then(|| {
-                let name = var_name(lower.tcx, VarPrefix::WitnessesWhere, def_id);
+                let name = VarPrefix::WitnessesWhere.to_name(lower.tcx, def_id);
                 lower.tuple(bounds, name, span)
             });
             let args: Box<[_]> =
@@ -528,7 +528,7 @@ impl<'tcx> Lower<'tcx> {
 
             let expr = lower.expr(ExprKind::Call { callee, args }, span);
 
-            let name = var_name(lower.tcx, VarPrefix::Where, lower.tcx.parent(def_id));
+            let name = VarPrefix::Where.to_name(lower.tcx, lower.tcx.parent(def_id));
             lower.var_node(name, NodeValueSource::Expr(expr), span)
         })
     }
@@ -542,12 +542,12 @@ impl<'tcx> Lower<'tcx> {
             .find(|(_, entry)| entry.def_id == item)
             .unwrap_or_else(|| span_bug!(span, "{item:?} has no vtable slot"));
         let slot_name = match entry.kind {
-            ty::AssocKind::Fn { .. } => var_name(self.tcx, VarPrefix::Fn, item),
-            ty::AssocKind::Type { .. } => var_name(self.tcx, VarPrefix::Type, item),
-            ty::AssocKind::Const { .. } => var_name(self.tcx, VarPrefix::ConstFn, item),
+            ty::AssocKind::Fn { .. } => VarPrefix::Fn.to_name(self.tcx, item),
+            ty::AssocKind::Type { .. } => VarPrefix::Type.to_name(self.tcx, item),
+            ty::AssocKind::Const { .. } => VarPrefix::ConstFn.to_name(self.tcx, item),
         };
 
-        let vtable_name = var_name(self.tcx, VarPrefix::Vtable, trait_def_id);
+        let vtable_name = VarPrefix::Vtable.to_name(self.tcx, trait_def_id);
         let vtable = self.element(witness, VTABLE_INDEX, vtable_name, span);
         self.element(vtable, slot, slot_name, span)
     }
@@ -591,7 +591,7 @@ impl<'tcx> Lower<'tcx> {
             let fields = witnesses.bounds.iter().map(|&bound| self.witness(bound, span)).collect();
             let name = match target {
                 ErlCallTarget::Item { def_id, .. } => {
-                    var_name(self.tcx, VarPrefix::WitnessesWhere, def_id)
+                    VarPrefix::WitnessesWhere.to_name(self.tcx, def_id)
                 }
                 _ => sym::witnesses_where,
             };
@@ -637,7 +637,7 @@ impl<'tcx> Lower<'tcx> {
         let node = self.intern(VarNodeKey::AssocConst { def_id, args }, |lower| {
             let call_kind = lower.lower_call(target, witnesses, Box::new([]), span, forced_extern);
             let call = lower.expr(call_kind, span);
-            let name = var_name(lower.tcx, VarPrefix::Const, def_id);
+            let name = VarPrefix::Const.to_name(lower.tcx, def_id);
             lower.var_node(name, NodeValueSource::Expr(call), span)
         });
         ExprKind::Var(self.var_nodes[node].var)
@@ -687,54 +687,6 @@ impl<'tcx> Lower<'tcx> {
 
         for (_, node) in elements {
             self.bind_tuple_elements(prologue, node);
-        }
-    }
-}
-
-/// Puts the trait name into witness variable name for debuggability.
-fn witness_var_name(tcx: TyCtxt<'_>, bound: ty::TraitRef<'_>) -> Symbol {
-    var_name(tcx, VarPrefix::Witness, bound.def_id)
-}
-
-fn var_name(tcx: TyCtxt<'_>, prefix: VarPrefix, def_id: DefId) -> Symbol {
-    let def_id = tcx.trait_item_of(def_id).unwrap_or(def_id);
-
-    let name = if let DefKind::Impl { of_trait: true } = tcx.def_kind(def_id) {
-        tcx.item_name(tcx.impl_trait_id(def_id)).to_string()
-    } else if let Some(trait_def_id) = tcx.trait_of_assoc(def_id) {
-        format!("{}_{}", tcx.item_name(trait_def_id), tcx.item_name(def_id))
-    } else {
-        tcx.item_name(def_id).to_string()
-    };
-
-    Symbol::intern(&format!("{}_{name}", prefix.as_str()))
-}
-
-#[derive(Clone, Copy)]
-enum VarPrefix {
-    Witness,
-    WitnessesWhere,
-    Where,
-    Supertraits,
-    Vtable,
-    Fn,
-    Type,
-    Const,
-    ConstFn,
-}
-
-impl VarPrefix {
-    fn as_str(self) -> &'static str {
-        match self {
-            VarPrefix::Witness => "witness",
-            VarPrefix::WitnessesWhere => "witnesses_where",
-            VarPrefix::Where => "where",
-            VarPrefix::Supertraits => "supertraits",
-            VarPrefix::Vtable => "vtable",
-            VarPrefix::Fn => "fn",
-            VarPrefix::Type => "type",
-            VarPrefix::Const => "const",
-            VarPrefix::ConstFn => "const_fn",
         }
     }
 }
