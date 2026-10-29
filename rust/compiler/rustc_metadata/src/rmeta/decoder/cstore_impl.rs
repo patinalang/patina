@@ -233,7 +233,7 @@ provide! { tcx, def_id, other, cdata,
     codegen_fn_attrs => { table }
     impl_trait_header => { table }
     erl_fn_name => { table }
-    etir_body => { table }
+    etir_template => { table }
     const_param_default => { table }
     object_lifetime_default => { table }
     thir_abstract_const => { table }

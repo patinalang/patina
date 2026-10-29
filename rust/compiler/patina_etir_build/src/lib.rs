@@ -68,6 +68,14 @@ pub(crate) fn etir_body<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId) -> &'tcx et
         _ => {}
     }
 
+    let body = tcx.etir_template(def_id).clone();
+    let mut body = witness::lower(tcx, def_id.to_def_id(), body);
+    assigned_outer_vars::analyze(&mut body);
+
+    tcx.arena.alloc(body)
+}
+
+pub(crate) fn etir_template<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId) -> &'tcx etir::Body<'tcx> {
     if tcx.is_typeck_child(def_id.to_def_id()) {
         bug!("{def_id:?} child has no ETIR body");
     }
@@ -86,10 +94,7 @@ pub(crate) fn etir_body<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId) -> &'tcx et
     cx.body.params = params;
     cx.body.value = value;
 
-    let mut body = witness::lower(tcx, def_id.to_def_id(), cx.body);
-    assigned_outer_vars::analyze(&mut body);
-
-    tcx.arena.alloc(body)
+    tcx.arena.alloc(cx.body)
 }
 
 struct ThirBodyCx<'a, 'tcx> {
@@ -211,5 +216,6 @@ fn not_implemented(tcx: TyCtxt<'_>, span: Span, what: &str) -> ! {
 }
 
 pub fn provide(providers: &mut Providers) {
+    providers.queries.etir_template = etir_template;
     providers.queries.etir_body = etir_body;
 }

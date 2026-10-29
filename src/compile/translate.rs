@@ -85,9 +85,8 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         parts: &mut ModuleParts<'arena>,
         scopes: &mut Scopes,
     ) -> TranslatedBody<'arena> {
-        let owner = owner.to_def_id();
         let etir = self.tcx.etir_body(owner);
-        let mut cx = BodyCx::new(self, owner, etir, parts, scopes);
+        let mut cx = BodyCx::new(self, owner.to_def_id(), etir, parts, scopes);
         cx.translate_body_with_params(&etir.params, etir.value)
     }
 

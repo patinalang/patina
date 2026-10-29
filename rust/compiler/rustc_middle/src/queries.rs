@@ -607,11 +607,19 @@ rustc_queries! {
         desc { "building THIR for `{}`", tcx.def_path_str(key) }
     }
 
-    /// Fetch the ETIR body for a given item.
-    query etir_body(key: DefId) -> &'tcx crate::erl::etir::Body<'tcx> {
+    /// Fetch the ETIR for a given body, as lowered from THIR.
+    /// This is a version of ETIR stored before resolving concrete types, preparing witnesses, etc.
+    /// Suitable for inlining.
+    query etir_template(key: DefId) -> &'tcx crate::erl::etir::Body<'tcx> {
+        no_hash
+        desc { "building the Erlang translation IR of `{}`", tcx.def_path_str(key) }
+        separate_provide_extern
+    }
+
+    /// The fully resolved ETIR body of an item.
+    query etir_body(key: LocalDefId) -> &'tcx crate::erl::etir::Body<'tcx> {
         no_hash
         desc { "lowering `{}` to the Erlang translation IR", tcx.def_path_str(key) }
-        separate_provide_extern
     }
 
     /// Set of all the `DefId`s in this crate that have MIR associated with

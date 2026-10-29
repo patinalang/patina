@@ -51,7 +51,7 @@ newtype_index! {
     pub struct FieldIdx {}
 }
 
-#[derive(Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable)]
 pub struct Body<'tcx> {
     pub params: Box<[PatId]>,
     pub value: ExprId,
@@ -116,19 +116,19 @@ impl<'tcx> std::ops::Index<JoinId> for Body<'tcx> {
     }
 }
 
-#[derive(Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable)]
 pub struct Var {
     pub ident: Ident,
 }
 
-#[derive(Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable)]
 pub struct Expr<'tcx> {
     pub kind: ExprKind<'tcx>,
     pub ty: Ty<'tcx>,
     pub span: Span,
 }
 
-#[derive(Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable)]
 pub enum ExprKind<'tcx> {
     Block(Box<[ExprId]>),
     Literal(Lit, Span),
@@ -172,7 +172,7 @@ pub enum Lit {
     Bool(bool),
 }
 
-#[derive(Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable)]
 pub struct BinarySegmentExpr {
     pub value: ExprId,
     pub layout: BinarySegmentLayout<ExprId>,
@@ -222,7 +222,7 @@ pub enum CastKind {
     FloatToInt,
 }
 
-#[derive(Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable)]
 pub enum Callee<'tcx> {
     Value(ExprId),
     // Only a thing between lowering passes; it gets lowered to `Fun` or dispatch through witness.
@@ -232,14 +232,14 @@ pub enum Callee<'tcx> {
 }
 
 /// An Erlang function.
-#[derive(Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable)]
 pub struct ErlFun {
     pub module: ErlModuleResolution,
     pub name: Symbol,
     pub arity: u32,
 }
 
-#[derive(Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable)]
 pub struct AdtExpr {
     pub repr: AdtRepr,
     pub base: Option<ExprId>,
@@ -247,7 +247,7 @@ pub struct AdtExpr {
     pub fields: Box<[FieldExpr]>,
 }
 
-#[derive(Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable)]
 pub struct FieldExpr {
     pub position: FieldIdx,
     pub name: Symbol,
@@ -264,7 +264,7 @@ pub enum AdtRepr {
     Transparent { tag: Symbol, variant: DefId, has_siblings: bool },
 }
 
-#[derive(Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable)]
 pub struct Arm {
     pub pattern: PatId,
     pub guard: Option<ExprId>,
@@ -272,7 +272,7 @@ pub struct Arm {
     pub span: Span,
 }
 
-#[derive(Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable)]
 pub struct CatchArm {
     pub class: PatId,
     pub reason: PatId,
@@ -282,19 +282,19 @@ pub struct CatchArm {
     pub span: Span,
 }
 
-#[derive(Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable)]
 pub struct ReceiveAfter {
     pub timeout: ExprId,
     pub body: ExprId,
 }
 
-#[derive(Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable)]
 pub struct Loop {
     /// Variables from the outer scope that are assigned to inside the loop.
     pub reassigned: Box<[VarId]>,
 }
 
-#[derive(Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable)]
 pub struct Join {
     pub body: ExprId,
     pub value: Option<VarId>,
@@ -310,14 +310,14 @@ pub enum PatternInput {
     UntrustedRepresentation,
 }
 
-#[derive(Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable)]
 pub struct Pat<'tcx> {
     pub kind: PatKind<'tcx>,
     pub ty: Ty<'tcx>,
     pub span: Span,
 }
 
-#[derive(Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable)]
 pub enum PatKind<'tcx> {
     Wild { input: PatternInput },
     Binding { var: VarId, is_primary: bool, subpattern: Option<PatId>, input: PatternInput },
@@ -340,14 +340,14 @@ impl<'tcx> PatKind<'tcx> {
     }
 }
 
-#[derive(Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable)]
 pub struct AdtPat<'tcx> {
     pub repr: AdtRepr,
     pub fields: IndexVec<FieldIdx, FieldPat<'tcx>>,
     pub input: PatternInput,
 }
 
-#[derive(Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable)]
 pub struct FieldPat<'tcx> {
     pub name: Symbol,
     pub ty: Ty<'tcx>,
@@ -355,7 +355,7 @@ pub struct FieldPat<'tcx> {
     pub pattern: PatId,
 }
 
-#[derive(Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable)]
 pub struct PatRange<'tcx> {
     pub lo: Option<ExprId>,
     pub hi: Option<ExprId>,
@@ -364,7 +364,7 @@ pub struct PatRange<'tcx> {
     pub input: PatternInput,
 }
 
-#[derive(Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable)]
 pub struct BinarySegmentPat {
     pub pattern: PatId,
     pub layout: BinarySegmentLayout<ExprId>,
