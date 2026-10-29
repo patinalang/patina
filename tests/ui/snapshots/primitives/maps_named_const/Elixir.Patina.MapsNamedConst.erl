@@ -33,7 +33,5 @@ named_const(_map@0_0) ->
     case _map@0_0 of
         #{<<"name"/utf8>> := _value@1_0} ->
             #{<<"hi"/utf8>> => _value@1_0};
-        _ ->
-            _key@0_0 = <<"name"/utf8>>,
-            #{_key@0_0 => 1}
+        _ -> #{<<"name"/utf8>> => 1}
     end.

@@ -5,12 +5,10 @@ mod elixir_compat;
 mod loops;
 mod scopes;
 
-use std::cell::RefCell;
 use std::path::PathBuf;
 
 use body::{BodyCx, TranslatedBody};
 use rustc_arena::DroplessArena;
-use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{LocalDefId, LocalModDefId};
@@ -49,12 +47,6 @@ pub(crate) struct ModuleParts<'arena> {
     last_file: Option<PathBuf>,
 }
 
-#[derive(Clone, Copy)]
-enum TranslatedConst<'arena> {
-    Translating,
-    Value(eaf::Expr<'arena>),
-}
-
 struct Function<'arena> {
     span: Span,
     name: Symbol,
@@ -66,7 +58,6 @@ pub(super) struct Translator<'tcx, 'arena> {
     tcx: TyCtxt<'tcx>,
     afb: EafBuilder<'tcx, 'arena>,
     impls: ImplCollector<'tcx>,
-    translated_consts: RefCell<FxHashMap<LocalDefId, TranslatedConst<'arena>>>,
 }
 
 impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
@@ -75,68 +66,16 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             tcx,
             afb: EafBuilder::new(tcx.sess.source_map(), arena),
             impls: ImplCollector::new(tcx),
-            translated_consts: RefCell::new(FxHashMap::default()),
         }
     }
 
-    fn translate_body(
-        &self,
-        owner: LocalDefId,
-        parts: &mut ModuleParts<'arena>,
-        scopes: &mut Scopes,
-    ) -> TranslatedBody<'arena> {
+    fn translate_body(&self, owner: LocalDefId, scopes: &mut Scopes) -> TranslatedBody<'arena> {
         let etir = self.tcx.etir_body(owner);
-        let mut cx = BodyCx::new(self, owner.to_def_id(), etir, parts, scopes);
+        let mut cx = BodyCx::new(self, owner.to_def_id(), etir, scopes);
         cx.translate_body_with_params(&etir.params, etir.value)
     }
 
-    fn translate_const(
-        &self,
-        span: Span,
-        def_id: LocalDefId,
-        parts: &mut ModuleParts<'arena>,
-    ) -> eaf::Expr<'arena> {
-        match self.translated_consts.borrow().get(&def_id) {
-            Some(TranslatedConst::Value(value)) => return *value,
-            Some(TranslatedConst::Translating) => span_fatal!(
-                self.tcx,
-                span,
-                "recursive named constant `{}`",
-                self.tcx.item_name(def_id)
-            ),
-            None => {}
-        }
-
-        self.translated_consts.borrow_mut().insert(def_id, TranslatedConst::Translating);
-        let value = self.translate_body(def_id, parts, &mut Scopes::new()).value;
-        self.translated_consts.borrow_mut().insert(def_id, TranslatedConst::Value(value));
-        value
-    }
-
-    fn translate_consts(&self) {
-        let mut parts = ModuleParts::default();
-
-        for owner in self.tcx.hir_crate_items(()).owners() {
-            let def_id = owner.def_id;
-            match self.tcx.def_kind(def_id) {
-                DefKind::Const { .. }
-                    if !self.tcx.generics_of(def_id).own_requires_monomorphization()
-                        && !self.tcx.is_type_const(def_id) =>
-                {
-                    self.translate_const(self.tcx.def_span(def_id), def_id, &mut parts);
-                }
-                _ => {}
-            }
-        }
-
-        if !parts.forms.is_empty() || !parts.exports.is_empty() {
-            bug!("named const translation emitted module forms or exports");
-        }
-    }
-
     pub fn translate(&self) -> Vec<(Symbol, eaf::Module<'arena>)> {
-        self.translate_consts();
-
         let mut modules = Vec::new();
 
         for owner in self.tcx.hir_crate_items(()).owners() {
@@ -229,9 +168,8 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         name: Symbol,
         span: Span,
         exported: bool,
-        parts: &mut ModuleParts<'arena>,
     ) -> Function<'arena> {
-        let translated = self.translate_body(owner, parts, &mut Scopes::new());
+        let translated = self.translate_body(owner, &mut Scopes::new());
         let clause = self.afb.clause(span, translated.params, None, translated.value);
 
         Function { span, name, clause, exported }
@@ -258,7 +196,6 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                         self.tcx.erl_fn_name(def_id),
                         sig.span,
                         self.tcx.is_erl_exported_fn(module_id, def_id.to_def_id()),
-                        &mut parts,
                     );
                     self.push_function(&mut parts, function);
                 }
@@ -268,8 +205,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                         if assoc_item.defaultness(tcx).has_value()
                             && !assoc_item.is_impl_trait_in_trait()
                         {
-                            let function =
-                                self.translate_assoc_item(module_id, assoc_item, &mut parts);
+                            let function = self.translate_assoc_item(module_id, assoc_item);
                             self.push_function(&mut parts, function);
                         }
                     }
@@ -286,7 +222,6 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         &self,
         module_id: ErlModuleId,
         item: &ty::AssocItem,
-        parts: &mut ModuleParts<'arena>,
     ) -> Function<'arena> {
         let tcx = self.tcx;
         let def_id = item.def_id.expect_local();
@@ -303,13 +238,13 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
             }
             ty::AssocKind::Fn { .. } | ty::AssocKind::Const { .. } => {
                 let exported = tcx.is_erl_exported_fn(module_id, def_id.to_def_id());
-                self.translate_callable(def_id, tcx.erl_fn_name(def_id), span, exported, parts)
+                self.translate_callable(def_id, tcx.erl_fn_name(def_id), span, exported)
             }
             ty::AssocKind::Type { .. } if item.trait_container(tcx).is_some() => {
                 not_implemented!(tcx, span, "associated type default");
             }
             ty::AssocKind::Type { .. } => {
-                self.translate_callable(def_id, tcx.erl_fn_name(def_id), span, true, parts)
+                self.translate_callable(def_id, tcx.erl_fn_name(def_id), span, true)
             }
         }
     }
@@ -483,7 +418,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                     && !item.is_impl_trait_in_trait()
                     && tcx.intrinsic(item.def_id).is_none()
                 {
-                    let function = self.translate_assoc_item(module_id, item, parts);
+                    let function = self.translate_assoc_item(module_id, item);
                     self.push_function(parts, function);
                 }
             }
@@ -496,7 +431,6 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
                     tcx.erl_impl_member_name(*impl_def_id, "$patina_witness"),
                     imp.self_ty.span,
                     true,
-                    parts,
                 );
                 self.push_function(parts, function);
             }

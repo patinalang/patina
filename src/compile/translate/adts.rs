@@ -433,10 +433,6 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     fn record_module_for_access(&self, record_module: Symbol) -> Option<Symbol> {
         let tcx = self.tcx();
 
-        if tcx.is_in_erl_inlined_const(self.owner) {
-            return Some(record_module);
-        }
-
         let current_module =
             tcx.erl_definition_module(self.owner).map(|module_id| tcx.erl_module_name(module_id));
 

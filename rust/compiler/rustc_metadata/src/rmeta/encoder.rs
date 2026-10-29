@@ -1449,7 +1449,7 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
             if tcx.erl_has_fn_name(def_id) {
                 record!(self.tables.erl_fn_name[def_id] <- tcx.erl_fn_name(def_id));
             }
-            if find_attr!(tcx, def_id, Inline(..)) {
+            if find_attr!(tcx, def_id, Inline(..)) || tcx.is_erl_inlinable_const(def_id) {
                 record!(self.tables.etir_template[def_id] <- tcx.etir_template(def_id));
             }
             if should_encode_generics(def_kind) {

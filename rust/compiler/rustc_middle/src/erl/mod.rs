@@ -312,14 +312,13 @@ impl<'tcx> TyCtxt<'tcx> {
         visible_outside_rust_module || self.fns_called_externally(()).contains(&(module, def_id))
     }
 
-    /// Returns whether `def_id` is, or is nested in, a constant whose value is inlined at each
-    /// use. Such a value can land in any module. Consts of traits and trait impls are
-    /// functions instead.
-    pub fn is_in_erl_inlined_const(self, def_id: DefId) -> bool {
-        let def_id = self.typeck_root_def_id(def_id);
+    /// Is `def_id` a constant that can be copied into ETIR?
+    pub fn is_erl_inlinable_const(self, def_id: DefId) -> bool {
         match self.def_kind(def_id) {
-            DefKind::Const { .. } => true,
-            DefKind::AssocConst { .. } => self.erl_entry_trait(def_id).is_none(),
+            DefKind::Const { is_type_const } => !is_type_const,
+            DefKind::AssocConst { is_type_const } => {
+                !is_type_const && self.erl_entry_trait(def_id).is_none()
+            }
             _ => false,
         }
     }
@@ -327,8 +326,7 @@ impl<'tcx> TyCtxt<'tcx> {
     /// Does `caller`->`callee` require an extern call?
     /// `None` when the `caller` has no module at all.
     pub fn is_erl_cross_module_call(self, caller: DefId, callee: ErlModuleId) -> Option<bool> {
-        // An inlined constant's calls land in whichever module uses its value.
-        Some(self.is_in_erl_inlined_const(caller) || callee != self.erl_definition_module(caller)?)
+        Some(callee != self.erl_definition_module(caller)?)
     }
 
     /// Classifies a call from `caller` to a function of `callee_module`.

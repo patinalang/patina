@@ -228,7 +228,6 @@ macro_rules! make_walkers {
                     ${concat(walk_call_target, $suffix)}(visitor, target)
                 }
                 Fun { fun: _, forced_extern: _ } => {}
-                Const { def_id: _ } => {}
                 Assign { lhs, rhs } => {
                     visitor.visit_expr_id(rhs);
                     visitor.visit_pat_id(lhs);

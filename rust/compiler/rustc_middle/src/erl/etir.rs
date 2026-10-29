@@ -149,7 +149,6 @@ pub enum ExprKind<'tcx> {
     // Only a thing between lowering passes; it gets lowered to a `Closure` over its witnesses.
     FnItem { target: ErlCallTarget<'tcx>, arity: u32, forced_extern: bool },
     Fun { fun: ErlFun, forced_extern: bool },
-    Const { def_id: DefId },
     Assign { lhs: PatId, rhs: ExprId },
     Declare { vars: Box<[VarId]> },
     Match { scrutinee: ExprId, arms: Box<[Arm]> },

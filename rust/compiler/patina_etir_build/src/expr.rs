@@ -1,4 +1,5 @@
 use rustc_hir::def::DefKind;
+use rustc_hir::def_id::DefId;
 use rustc_hir::{BinarySegmentTy, HirId};
 use rustc_middle::erl::binary_pattern::{BinaryEndianness, BinarySegmentLayout, BinarySegmentSize};
 use rustc_middle::erl::etir::visit::{Visitor, walk_pat};
@@ -683,7 +684,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
     fn lower_expr_named_const(
         &mut self,
         expr: &thir::Expr<'tcx>,
-        def_id: rustc_hir::def_id::DefId,
+        def_id: DefId,
         args: GenericArgsRef<'tcx>,
     ) -> ExprId {
         let tcx = self.cx.tcx;
@@ -699,15 +700,11 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             return self.push_expr(kind, expr.ty, span);
         }
 
-        if !args.is_empty() {
-            not_implemented_kind(tcx, span, "generic named constants", args);
+        if !tcx.is_erl_inlinable_const(def_id) {
+            not_implemented_kind(tcx, span, "named constant without an inlinable body", def_id);
         }
 
-        if !def_id.is_local() {
-            not_implemented_kind(tcx, span, "external named constants", def_id);
-        }
-
-        self.push_expr(etir::ExprKind::Const { def_id }, expr.ty, span)
+        self.cx.graft(self.cx.tcx.etir_template(def_id), args)
     }
 
     fn lower_expr_adt(

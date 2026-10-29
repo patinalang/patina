@@ -10,8 +10,8 @@ use rustc_middle::span_bug;
 use rustc_middle::ty::{Ty, TyCtxt};
 use rustc_span::{Span, Symbol, kw, sym};
 
+use crate::compile::translate::Translator;
 use crate::compile::translate::scopes::{PatinaVar, Scope, Scopes};
-use crate::compile::translate::{ModuleParts, Translator};
 use crate::erlang::abstract_format as eaf;
 use crate::{not_implemented, span_fatal};
 
@@ -74,7 +74,6 @@ pub(super) struct BodyCx<'a, 'tcx, 'arena> {
     pub translator: &'a Translator<'tcx, 'arena>,
     pub owner: DefId,
     pub etir: &'tcx etir::Body<'tcx>,
-    pub parts: &'a mut ModuleParts<'arena>,
     pub scopes: &'a mut Scopes,
 }
 
@@ -83,10 +82,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         translator: &'a Translator<'tcx, 'arena>,
         owner: DefId,
         etir: &'tcx etir::Body<'tcx>,
-        parts: &'a mut ModuleParts<'arena>,
         scopes: &'a mut Scopes,
     ) -> Self {
-        BodyCx { translator, owner, etir, parts, scopes }
+        BodyCx { translator, owner, etir, scopes }
     }
 
     pub(super) fn tcx(&self) -> TyCtxt<'tcx> {
@@ -151,13 +149,6 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
 
             ExprKind::Fun { ref fun, forced_extern } => {
                 self.translate_fun(expr, fun, forced_extern)
-            }
-
-            ExprKind::Const { def_id } => {
-                let Some(def_id) = def_id.as_local() else {
-                    span_bug!(span, "inlined constant `{def_id:?}` of another crate")
-                };
-                self.translator.translate_const(span, def_id, self.parts)
             }
 
             ExprKind::Assign { lhs, rhs } => self.translate_assign(span, lhs, rhs),

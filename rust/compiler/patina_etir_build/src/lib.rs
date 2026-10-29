@@ -14,6 +14,7 @@ use rustc_span::{Ident, Span};
 
 mod assigned_outer_vars;
 mod expr;
+mod graft;
 mod pat;
 mod witness;
 
@@ -43,6 +44,7 @@ impl ExprBlock {
 
 struct BodyBuildCx<'tcx> {
     tcx: TyCtxt<'tcx>,
+    typing_env: ty::TypingEnv<'tcx>,
     body: etir::Body<'tcx>,
     var_ids: FxHashMap<LocalVarId, VarId>,
     break_joins: FxHashMap<region::Scope, JoinId>,
@@ -82,6 +84,7 @@ pub(crate) fn etir_template<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId) -> &'tc
 
     let mut cx = BodyBuildCx {
         tcx,
+        typing_env: ty::TypingEnv::post_analysis(tcx, def_id),
         body: etir::Body::new(),
         var_ids: FxHashMap::default(),
         break_joins: FxHashMap::default(),
