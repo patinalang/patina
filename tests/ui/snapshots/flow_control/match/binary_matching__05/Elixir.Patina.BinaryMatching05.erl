@@ -32,77 +32,67 @@ main() ->
         <<_png_prefix@0_0:(erlang:byte_size(_png_prefix@0_0))/binary,
           _rest@2_0/binary>> ->
             io:put_chars(begin
-                             _element@5_0 = begin
+                             _element@4_0 = begin
                                                 _element@3_0 =
-                                                    <<"png data "/utf8>>,
-                                                _element@4_0 =
                                                     io_lib:format("~ktp",
                                                                   [_rest@2_0]),
-                                                [_element@3_0, _element@4_0]
+                                                [<<"png data "/utf8>>,
+                                                 _element@3_0]
                                             end,
-                             [_element@5_0]
+                             [_element@4_0]
                          end),
             io:nl(),
             {};
         <<_jpg_prefix@1_0:(erlang:byte_size(_jpg_prefix@1_0))/binary,
-          _rest@6_0/binary>> ->
+          _rest@5_0/binary>> ->
             io:put_chars(begin
-                             _element@9_0 = begin
-                                                _element@7_0 =
-                                                    <<"jpg data "/utf8>>,
-                                                _element@8_0 =
+                             _element@7_0 = begin
+                                                _element@6_0 =
                                                     io_lib:format("~ktp",
-                                                                  [_rest@6_0]),
-                                                [_element@7_0, _element@8_0]
+                                                                  [_rest@5_0]),
+                                                [<<"jpg data "/utf8>>,
+                                                 _element@6_0]
                                             end,
-                             [_element@9_0]
+                             [_element@7_0]
                          end),
             io:nl(),
             {};
         _ ->
-            io:put_chars(begin
-                             _element@10_0 = [<<"unknown data"/utf8>>],
-                             [_element@10_0]
-                         end),
+            io:put_chars([[<<"unknown data"/utf8>>]]),
             io:nl(),
             {}
     end,
-    _bit_prefix@11_0 = 7,
+    _bit_prefix@8_0 = 7,
     case <<119:8/integer>> of
-        <<_bit_prefix@11_0:16/integer-little,
-          _rest@12_0/binary>> ->
+        <<_bit_prefix@8_0:16/integer-little,
+          _rest@9_0/binary>> ->
             io:put_chars(begin
-                             _element@15_0 = begin
-                                                 _element@13_0 =
-                                                     <<"expected "/utf8>>,
-                                                 _element@14_0 =
+                             _element@11_0 = begin
+                                                 _element@10_0 =
                                                      io_lib:format("~ktp",
-                                                                   [_rest@12_0]),
-                                                 [_element@13_0, _element@14_0]
+                                                                   [_rest@9_0]),
+                                                 [<<"expected "/utf8>>,
+                                                  _element@10_0]
                                              end,
-                             [_element@15_0]
+                             [_element@11_0]
                          end),
             io:nl(),
             {};
-        <<_bit_prefix@11_0:4/integer, _rest@16_0/bitstring>> ->
+        <<_bit_prefix@8_0:4/integer, _rest@12_0/bitstring>> ->
             io:put_chars(begin
-                             _element@19_0 = begin
-                                                 _element@17_0 =
-                                                     <<"expected "/utf8>>,
-                                                 _element@18_0 =
+                             _element@14_0 = begin
+                                                 _element@13_0 =
                                                      io_lib:format("~ktp",
-                                                                   [_rest@16_0]),
-                                                 [_element@17_0, _element@18_0]
+                                                                   [_rest@12_0]),
+                                                 [<<"expected "/utf8>>,
+                                                  _element@13_0]
                                              end,
-                             [_element@19_0]
+                             [_element@14_0]
                          end),
             io:nl(),
             {};
         _ ->
-            io:put_chars(begin
-                             _element@20_0 = [<<"unexpected prefix"/utf8>>],
-                             [_element@20_0]
-                         end),
+            io:put_chars([[<<"unexpected prefix"/utf8>>]]),
             io:nl(),
             {}
     end.

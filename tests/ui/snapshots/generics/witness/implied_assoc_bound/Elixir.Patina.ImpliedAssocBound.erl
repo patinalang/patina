@@ -41,10 +41,8 @@ labelled(_witnesses_where_labelled@0_0, _t@1_0) ->
                                          _witness_HasItem@3_0),
     _fn_HasItem_item@7_0 = erlang:element(2,
                                           _vtable_HasItem@6_0),
-    begin
-        _fn_Label_label@5_0(_witness_Label@2_0,
-                            _fn_HasItem_item@7_0(_witness_HasItem@3_0, _t@1_0))
-    end.
+    _fn_Label_label@5_0(_witness_Label@2_0,
+                        _fn_HasItem_item@7_0(_witness_HasItem@3_0, _t@1_0)).
 
 labelled_with_items(_witnesses_where_labelled_with_items@0_0,
                     _t@1_0) ->
@@ -64,10 +62,8 @@ labelled_with_items(_witnesses_where_labelled_with_items@0_0,
                                          _witness_HasItem@5_0),
     _fn_HasItem_item@9_0 = erlang:element(2,
                                           _vtable_HasItem@8_0),
-    begin
-        _fn_Label_label@7_0(_witness_Label@4_0,
-                            _fn_HasItem_item@9_0(_witness_HasItem@5_0, _t@1_0))
-    end.
+    _fn_Label_label@7_0(_witness_Label@4_0,
+                        _fn_HasItem_item@9_0(_witness_HasItem@5_0, _t@1_0)).
 
 crate_labels() ->
     _witness_LabelledWithItems@0_0 =
@@ -82,13 +78,9 @@ crate_labels() ->
                                      _witness_Label@2_0},
     _witnesses_where_labelled_with_items@5_0 =
         {_witness_LabelledWithItems@0_0},
-    begin
-        begin
-            _element@6_0 = labelled(_witnesses_where_labelled@4_0,
-                                    'Elixir.Patina.ImpliedAssocBound.Crate'),
-            _element@7_0 =
-                labelled_with_items(_witnesses_where_labelled_with_items@5_0,
-                                    'Elixir.Patina.ImpliedAssocBound.Crate'),
-            {_element@6_0, _element@7_0}
-        end
-    end.
+    _element@6_0 = labelled(_witnesses_where_labelled@4_0,
+                            'Elixir.Patina.ImpliedAssocBound.Crate'),
+    _element@7_0 =
+        labelled_with_items(_witnesses_where_labelled_with_items@5_0,
+                            'Elixir.Patina.ImpliedAssocBound.Crate'),
+    {_element@6_0, _element@7_0}.

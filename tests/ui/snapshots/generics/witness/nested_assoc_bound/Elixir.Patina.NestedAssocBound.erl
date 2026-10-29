@@ -49,19 +49,15 @@ nested_label(_witnesses_where_nested_label@0_0,
                                           _witness_HasItem@8_0),
     _fn_HasItem_item@12_0 = erlang:element(2,
                                            _vtable_HasItem@11_0),
-    begin
-        _fn_Label_label@10_0(_witness_Label@7_0,
-                             _fn_HasItem_item@12_0(_witness_HasItem@8_0,
-                                                   _fn_Outer_inner@4_0(_witness_Outer@2_0,
-                                                                       _t@1_0)))
-    end.
+    _fn_Label_label@10_0(_witness_Label@7_0,
+                         _fn_HasItem_item@12_0(_witness_HasItem@8_0,
+                                               _fn_Outer_inner@4_0(_witness_Outer@2_0,
+                                                                   _t@1_0))).
 
 root_label() ->
     _witness_Outer@0_0 =
         'Elixir.Patina.NestedAssocBound.Root':'NestedAssocBound::Outer::$patina_witness'(),
     _witnesses_where_nested_label@1_0 =
         {_witness_Outer@0_0},
-    begin
-        nested_label(_witnesses_where_nested_label@1_0,
-                     'Elixir.Patina.NestedAssocBound.Root')
-    end.
+    nested_label(_witnesses_where_nested_label@1_0,
+                 'Elixir.Patina.NestedAssocBound.Root').

@@ -25,78 +25,54 @@
 
 main() ->
     _optional@0_0 = 0,
-    begin
-        _optional@0_1 = fun _$patina_loop(_optional@0_0) ->
-                                case [] of
-                                    {'$patina_label_0', _optional@0_2} ->
-                                        _optional@0_2;
-                                    _ ->
-                                        _ = begin
-                                                case _optional@0_0 of
-                                                    _value@2_0 = _i@1_0
-                                                        when
-                                                          erlang:is_integer(_value@2_0) ->
-                                                        case _i@1_0 > 9 of
-                                                            true ->
-                                                                begin
-                                                                    io:put_chars(begin
-                                                                                     _element@3_0 =
-                                                                                         [<<"Greater than 9, quit!"/utf8>>],
-                                                                                     [_element@3_0]
-                                                                                 end),
-                                                                    io:nl(),
-                                                                    {}
-                                                                end,
-                                                                _optional@0_1 =
-                                                                    nil,
-                                                                {};
-                                                            _ ->
-                                                                begin
-                                                                    io:put_chars(begin
-                                                                                     _element@7_0 =
-                                                                                         begin
-                                                                                             _element@4_0 =
-                                                                                                 <<"`i` is `"/utf8>>,
-                                                                                             _element@5_0 =
-                                                                                                 io_lib:format("~ktp",
-                                                                                                               [_i@1_0]),
-                                                                                             _element@6_0 =
-                                                                                                 <<"`. Try again."/utf8>>,
-                                                                                             [_element@4_0,
-                                                                                              _element@5_0,
-                                                                                              _element@6_0]
-                                                                                         end,
-                                                                                     [_element@7_0]
-                                                                                 end),
-                                                                    io:nl(),
-                                                                    {}
-                                                                end,
-                                                                _optional@0_1 =
-                                                                    begin
-                                                                        _0@8_0 =
+    _optional@0_1 = fun _$patina_loop(_optional@0_0) ->
+                            case [] of
+                                {'$patina_label_0', _optional@0_2} ->
+                                    _optional@0_2;
+                                _ ->
+                                    case _optional@0_0 of
+                                        _value@2_0 = _i@1_0
+                                            when
+                                              erlang:is_integer(_value@2_0) ->
+                                            case _i@1_0 > 9 of
+                                                true ->
+                                                    io:put_chars([[<<"Greater than 9, quit!"/utf8>>]]),
+                                                    io:nl(),
+                                                    _optional@0_1 = nil,
+                                                    {};
+                                                _ ->
+                                                    io:put_chars(begin
+                                                                     _element@4_0 =
+                                                                         begin
+                                                                             _element@3_0 =
+                                                                                 io_lib:format("~ktp",
+                                                                                               [_i@1_0]),
+                                                                             [<<"`i` is `"/utf8>>,
+                                                                              _element@3_0,
+                                                                              <<"`. Try again."/utf8>>]
+                                                                         end,
+                                                                     [_element@4_0]
+                                                                 end),
+                                                    io:nl(),
+                                                    _optional@0_1 = begin
+                                                                        _0@5_0 =
                                                                             _i@1_0
                                                                                 +
                                                                                 1,
-                                                                        _0@8_0
+                                                                        _0@5_0
                                                                     end,
-                                                                {}
-                                                        end;
-                                                    _ ->
-                                                        _branch_value@9_0 =
-                                                            begin
-                                                                begin
+                                                    {}
+                                            end;
+                                        _ ->
+                                            _branch_value@6_0 = begin
                                                                     '$patina_marker':jump('$patina_label_0',
                                                                                           _optional@0_0),
                                                                     []
-                                                                end
-                                                            end,
-                                                        _optional@0_1 =
-                                                            _optional@0_0,
-                                                        _branch_value@9_0
-                                                end
-                                            end,
-                                        _$patina_loop(_optional@0_1)
-                                end
-                        end(_optional@0_0),
-        {}
-    end.
+                                                                end,
+                                            _optional@0_1 = _optional@0_0,
+                                            _branch_value@6_0
+                                    end,
+                                    _$patina_loop(_optional@0_1)
+                            end
+                    end(_optional@0_0),
+    {}.

@@ -70,30 +70,28 @@ module 'Elixir.Patina.LoopOuterContinue' ['__info__'/1,
 	      <_X_limit@0_0> when 'true' ->
 		  let <_X_outer@1_0> = 0
 		  in  let <_X_visits@2_0> = 0
-		      in  let <_22> =
+		      in  let <_19> =
 			      letrec
 				  '_$patina_loop'/2 =
 				      %% Line 7
-				      ( fun (_19,_18) ->
+				      ( fun (_16,_15) ->
 					    let <_X_$patina_loop> = '_$patina_loop'/2
-					    in  case <_19,_18> of
-						  <_25,_26> when 'true' ->
-						      let <_X_visits@2_0> = _26
-						      in  let <_X_outer@1_0> = _25
+					    in  case <_16,_15> of
+						  <_22,_23> when 'true' ->
+						      let <_X_visits@2_0> = _23
+						      in  let <_X_outer@1_0> = _22
 							  in  ( letrec
 								    '$patina_label_1'/3 =
 									fun (_X_jump_value@5_0,_X_outer@1_2,_X_visits@2_2) ->
 									    {_X_jump_value@5_0,_X_outer@1_2,_X_visits@2_2}
-								in  let <_15,_X_outer@1_1,_X_visits@2_1> =
+								in  let <_29,_X_outer@1_1,_X_visits@2_1> =
 									( letrec
 									      '$patina_label_0'/2 =
 										  fun (%% Line 14
 										       _X_outer@1_1,%% Line 14
 												    _X_visits@2_1) ->
 										      %% Line 14
-										      ( <( {}
-											   -| ['result_not_wanted'] ),_X_outer@1_1,_X_visits@2_1>
-											-| ['result_not_wanted'] )
+										      <{},_X_outer@1_1,_X_visits@2_1>
 									  in  let <_X_outer@1_1> =
 										  call %% Line 8
 										       ( 'erlang'
@@ -104,20 +102,20 @@ module 'Elixir.Patina.LoopOuterContinue' ['__info__'/1,
 										       _X_outer@1_0, %% Line 8
 												     ( 1
 												       -| ['result_not_wanted'] ))
-									      in  let <_11> =
+									      in  let <_10> =
 										      letrec
 											  '_$patina_loop'/1 =
 											      %% Line 10
-											      ( fun (_9) ->
+											      ( fun (_8) ->
 												    ( letrec
 													  '$patina_forward'/1 =
 													      fun (_@patina_jump) ->
 														  _@patina_jump
 												      in  let <_X_$patina_loop> = '_$patina_loop'/1
-													  in  ( case ( _9
+													  in  ( case ( _8
 														       -| ['result_not_wanted'] ) of
-														  <_29> when 'true' ->
-														      let <_X_visits@2_0> = _29
+														  <_26> when 'true' ->
+														      let <_X_visits@2_0> = _26
 														      in  let <_X_visits@2_1> =
 															      call %% Line 11
 																   ( 'erlang'
@@ -139,7 +137,7 @@ module 'Elixir.Patina.LoopOuterContinue' ['__info__'/1,
 																	    ({'$patina_label_0',%% Line 14
 																				_X_outer@1_1,%% Line 14
 																					     _X_visits@2_1})
-																    <_30> when 'true' ->
+																    <_27> when 'true' ->
 																	( {}
 																	  -| ['result_not_wanted'] )
 																    ( <_5> when 'true' ->
@@ -172,9 +170,9 @@ module 'Elixir.Patina.LoopOuterContinue' ['__info__'/1,
 																				  _X_jump_value@3_0,%% Line 17
 																						    _X_outer@1_1,%% Line 17
 																								 _X_visits@2_1})
-														  ( <_10> when 'true' ->
+														  ( <_9> when 'true' ->
 															( primop 'match_fail'
-															      (( {'function_clause',_10}
+															      (( {'function_clause',_9}
 																 -| ['result_not_wanted'] ))
 															  -| ['result_not_wanted'] )
 														    -| ['compiler_generated'] )
@@ -186,7 +184,7 @@ module 'Elixir.Patina.LoopOuterContinue' ['__info__'/1,
 										  in  let <_X_branch_value@4_0> =
 											  let <_@patina_value> =
 											      apply %% Line 10
-												    ( _11
+												    ( _10
 												      -| ['result_not_wanted'] )
 												  (%% Line 10
 												   _X_visits@2_0)
@@ -203,31 +201,30 @@ module 'Elixir.Patina.LoopOuterContinue' ['__info__'/1,
 										      in  let <_X_visits@2_1> = _X_visits@2_0
 											  in  <_X_branch_value@4_0,_X_outer@1_1,_X_visits@2_1>
 									  -| ['letrec_goto'] )
-								    in  let <_32> = _15
-									in  apply _X_$patina_loop
-										(_X_outer@1_1, _X_visits@2_1)
+								    in  apply _X_$patina_loop
+									    (_X_outer@1_1, _X_visits@2_1)
 								-| ['letrec_goto','no_inline'] )
-						  ( <_21,_20> when 'true' ->
+						  ( <_18,_17> when 'true' ->
 							primop 'match_fail'
-							    ({'function_clause',_21,_20})
+							    ({'function_clause',_18,_17})
 						    -| ['compiler_generated'] )
 						end
 					-| [{'id',{0,0,'-continue_outer_loop/1-fun-1-'}}] )
 			      in  '_$patina_loop'/2
 			  in  %% Line 7
-			      case apply _22
+			      case apply _19
 				       (_X_outer@1_0, _X_visits@2_0) of
 				<{_X_jump_value@6_0,_X_outer@1_1,_X_visits@2_1}> when 'true' ->
 				    %% Line 17
 				    _X_jump_value@6_0
-				( <_23> when 'true' ->
+				( <_20> when 'true' ->
 				      primop 'match_fail'
-					  ({'badmatch',_23})
+					  ({'badmatch',_20})
 				  -| ['compiler_generated'] )
 			      end
-	      ( <_24> when 'true' ->
+	      ( <_21> when 'true' ->
 		    ( primop 'match_fail'
-			  (( {'function_clause',_24}
+			  (( {'function_clause',_21}
 			     -| [{'function',{'continue_outer_loop',1}}] ))
 		      -| [{'function',{'continue_outer_loop',1}}] )
 		-| ['compiler_generated'] )
@@ -242,30 +239,28 @@ module 'Elixir.Patina.LoopOuterContinue' ['__info__'/1,
 	      <_X_limit@0_0> when 'true' ->
 		  let <_X_outer@1_0> = 0
 		  in  let <_X_visits@2_0> = 0
-		      in  let <_26> =
+		      in  let <_22> =
 			      letrec
 				  '_$patina_loop'/2 =
 				      %% Line 26
-				      ( fun (_23,_22) ->
+				      ( fun (_19,_18) ->
 					    let <_X_$patina_loop> = '_$patina_loop'/2
-					    in  case <_23,_22> of
-						  <_29,_30> when 'true' ->
-						      let <_X_visits@2_0> = _30
-						      in  let <_X_outer@1_0> = _29
+					    in  case <_19,_18> of
+						  <_25,_26> when 'true' ->
+						      let <_X_visits@2_0> = _26
+						      in  let <_X_outer@1_0> = _25
 							  in  ( letrec
 								    '$patina_label_1'/3 =
 									fun (_X_jump_value@5_0,_X_outer@1_2,_X_visits@2_2) ->
 									    {_X_jump_value@5_0,_X_outer@1_2,_X_visits@2_2}
-								in  let <_19,_X_outer@1_1,_X_visits@2_1> =
+								in  let <_33,_X_outer@1_1,_X_visits@2_1> =
 									( letrec
 									      '$patina_label_0'/2 =
 										  fun (%% Line 34
 										       _X_outer@1_1,%% Line 34
 												    _X_visits@2_1) ->
 										      %% Line 34
-										      ( <( {}
-											   -| ['result_not_wanted'] ),_X_outer@1_1,_X_visits@2_1>
-											-| ['result_not_wanted'] )
+										      <{},_X_outer@1_1,_X_visits@2_1>
 									  in  let <_X_outer@1_1> =
 										  call %% Line 27
 										       ( 'erlang'
@@ -276,34 +271,34 @@ module 'Elixir.Patina.LoopOuterContinue' ['__info__'/1,
 										       _X_outer@1_0, %% Line 27
 												     ( 1
 												       -| ['result_not_wanted'] ))
-									      in  let <_15> =
+									      in  let <_13> =
 										      letrec
 											  '_$patina_loop'/1 =
 											      %% Line 29
-											      ( fun (_13) ->
+											      ( fun (_11) ->
 												    ( letrec
 													  '$patina_forward'/1 =
 													      fun (_@patina_jump) ->
 														  _@patina_jump
 												      in  let <_X_$patina_loop> = '_$patina_loop'/1
-													  in  ( case ( _13
+													  in  ( case ( _11
 														       -| ['result_not_wanted'] ) of
-														  <_33> when 'true' ->
-														      let <_X_visits@2_0> = _33
-														      in  let <_11> =
+														  <_29> when 'true' ->
+														      let <_X_visits@2_0> = _29
+														      in  let <_10> =
 															      letrec
 																  '_$patina_loop'/1 =
 																      %% Line 30
-																      ( fun (_9) ->
+																      ( fun (_8) ->
 																	    ( letrec
 																		  '$patina_forward'/1 =
 																		      fun (_@patina_jump) ->
 																			  _@patina_jump
 																	      in  let <_X_$patina_loop> = '_$patina_loop'/1
-																		  in  ( case ( _9
+																		  in  ( case ( _8
 																			       -| ['result_not_wanted'] ) of
-																			  <_34> when 'true' ->
-																			      let <_X_visits@2_0> = _34
+																			  <_30> when 'true' ->
+																			      let <_X_visits@2_0> = _30
 																			      in  let <_X_visits@2_1> =
 																				      call %% Line 31
 																					   ( 'erlang'
@@ -325,7 +320,7 @@ module 'Elixir.Patina.LoopOuterContinue' ['__info__'/1,
 																						    ({'$patina_label_0',%% Line 34
 																									_X_outer@1_1,%% Line 34
 																										     _X_visits@2_1})
-																					    <_35> when 'true' ->
+																					    <_31> when 'true' ->
 																						( {}
 																						  -| ['result_not_wanted'] )
 																					    ( <_5> when 'true' ->
@@ -358,9 +353,9 @@ module 'Elixir.Patina.LoopOuterContinue' ['__info__'/1,
 																									  _X_jump_value@3_0,%% Line 37
 																											    _X_outer@1_1,%% Line 37
 																													 _X_visits@2_1})
-																			  ( <_10> when 'true' ->
+																			  ( <_9> when 'true' ->
 																				( primop 'match_fail'
-																				      (( {'function_clause',_10}
+																				      (( {'function_clause',_9}
 																					 -| ['result_not_wanted'] ))
 																				  -| ['result_not_wanted'] )
 																			    -| ['compiler_generated'] )
@@ -369,10 +364,9 @@ module 'Elixir.Patina.LoopOuterContinue' ['__info__'/1,
 																	      -| ['letrec_goto','no_inline'] )
 																	-| [{'id',{0,0,'-continue_two_loops/1-fun-0-'}},'result_not_wanted'] )
 															      in  '_$patina_loop'/1
-															  in  let <_37> =
-																  let <_@patina_value> =
+															  in  do  let <_@patina_value> =
 																      apply %% Line 30
-																	    ( _11
+																	    ( _10
 																	      -| ['result_not_wanted'] )
 																	  (%% Line 30
 																	   _X_visits@2_0)
@@ -386,11 +380,11 @@ module 'Elixir.Patina.LoopOuterContinue' ['__info__'/1,
 																	<_@patina_other> when 'true' ->
 																	    _@patina_other
 																      end
-															      in  apply _X_$patina_loop
+																  apply _X_$patina_loop
 																      (_X_visits@2_0)
-														  ( <_14> when 'true' ->
+														  ( <_12> when 'true' ->
 															( primop 'match_fail'
-															      (( {'function_clause',_14}
+															      (( {'function_clause',_12}
 																 -| ['result_not_wanted'] ))
 															  -| ['result_not_wanted'] )
 														    -| ['compiler_generated'] )
@@ -402,7 +396,7 @@ module 'Elixir.Patina.LoopOuterContinue' ['__info__'/1,
 										  in  let <_X_branch_value@4_0> =
 											  let <_@patina_value> =
 											      apply %% Line 29
-												    ( _15
+												    ( _13
 												      -| ['result_not_wanted'] )
 												  (%% Line 29
 												   _X_visits@2_0)
@@ -419,31 +413,30 @@ module 'Elixir.Patina.LoopOuterContinue' ['__info__'/1,
 										      in  let <_X_visits@2_1> = _X_visits@2_0
 											  in  <_X_branch_value@4_0,_X_outer@1_1,_X_visits@2_1>
 									  -| ['letrec_goto'] )
-								    in  let <_38> = _19
-									in  apply _X_$patina_loop
-										(_X_outer@1_1, _X_visits@2_1)
+								    in  apply _X_$patina_loop
+									    (_X_outer@1_1, _X_visits@2_1)
 								-| ['letrec_goto','no_inline'] )
-						  ( <_25,_24> when 'true' ->
+						  ( <_21,_20> when 'true' ->
 							primop 'match_fail'
-							    ({'function_clause',_25,_24})
+							    ({'function_clause',_21,_20})
 						    -| ['compiler_generated'] )
 						end
 					-| [{'id',{0,0,'-continue_two_loops/1-fun-2-'}}] )
 			      in  '_$patina_loop'/2
 			  in  %% Line 26
-			      case apply _26
+			      case apply _22
 				       (_X_outer@1_0, _X_visits@2_0) of
 				<{_X_jump_value@6_0,_X_outer@1_1,_X_visits@2_1}> when 'true' ->
 				    %% Line 37
 				    _X_jump_value@6_0
-				( <_27> when 'true' ->
+				( <_23> when 'true' ->
 				      primop 'match_fail'
-					  ({'badmatch',_27})
+					  ({'badmatch',_23})
 				  -| ['compiler_generated'] )
 			      end
-	      ( <_28> when 'true' ->
+	      ( <_24> when 'true' ->
 		    ( primop 'match_fail'
-			  (( {'function_clause',_28}
+			  (( {'function_clause',_24}
 			     -| [{'function',{'continue_two_loops',1}}] ))
 		      -| [{'function',{'continue_two_loops',1}}] )
 		-| ['compiler_generated'] )

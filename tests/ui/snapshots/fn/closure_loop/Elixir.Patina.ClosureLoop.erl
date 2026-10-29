@@ -26,30 +26,22 @@
 closure_loop() ->
     _count@3_0 = fun (_x@0_0, _y@1_0) ->
                          _i@2_0 = _x@0_0,
-                         begin
-                             _i@2_1 = fun _$patina_loop(_i@2_0) ->
-                                              case [] of
-                                                  {'$patina_label_0', _i@2_2} ->
-                                                      _i@2_2;
-                                                  _ ->
-                                                      _ = begin
-                                                              _i@2_1 = _i@2_0 +
-                                                                           _y@1_0,
-                                                              case _i@2_1 > 3 of
-                                                                  true ->
-                                                                      begin
-                                                                          '$patina_marker':jump('$patina_label_0',
-                                                                                                _i@2_1),
-                                                                          []
-                                                                      end;
-                                                                  _ -> {}
-                                                              end
-                                                          end,
-                                                      _$patina_loop(_i@2_1)
-                                              end
-                                      end(_i@2_0),
-                             {}
-                         end,
+                         _i@2_1 = fun _$patina_loop(_i@2_0) ->
+                                          case [] of
+                                              {'$patina_label_0', _i@2_2} ->
+                                                  _i@2_2;
+                                              _ ->
+                                                  _i@2_1 = _i@2_0 + _y@1_0,
+                                                  case _i@2_1 > 3 of
+                                                      true ->
+                                                          '$patina_marker':jump('$patina_label_0',
+                                                                                _i@2_1),
+                                                          [];
+                                                      _ -> {}
+                                                  end,
+                                                  _$patina_loop(_i@2_1)
+                                          end
+                                  end(_i@2_0),
                          _i@2_1
                  end,
     _count@3_0(1, 2).

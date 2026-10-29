@@ -26,68 +26,45 @@
 '__info__'(Key) -> module_info(Key).
 
 main() ->
-    begin
-        receive
-            _n@1_0 when erlang:is_integer(_n@1_0) ->
-                io:put_chars(begin
-                                 _element@4_0 = begin
-                                                    _element@2_0 =
-                                                        <<"got integer "/utf8>>,
-                                                    _element@3_0 =
-                                                        io_lib:format("~ktp",
-                                                                      [_n@1_0]),
-                                                    [_element@2_0, _element@3_0]
-                                                end,
-                                 [_element@4_0]
-                             end),
-                io:nl(),
-                {};
-            _a@5_0 when erlang:is_atom(_a@5_0) ->
-                io:put_chars(begin
-                                 _element@8_0 = begin
-                                                    _element@6_0 =
-                                                        <<"got atom "/utf8>>,
-                                                    _element@7_0 =
-                                                        io_lib:format("~ktp",
-                                                                      [_a@5_0]),
-                                                    [_element@6_0, _element@7_0]
-                                                end,
-                                 [_element@8_0]
-                             end),
-                io:nl(),
-                {};
-            nil ->
-                io:put_chars(begin
-                                 _element@9_0 =
-                                     [<<"got an empty string option"/utf8>>],
-                                 [_element@9_0]
-                             end),
-                io:nl(),
-                {};
-            nil ->
-                io:put_chars(begin
-                                 _element@10_0 =
-                                     [<<"got an empty integer option"/utf8>>],
-                                 [_element@10_0]
-                             end),
-                io:nl(),
-                {};
-            _ ->
-                io:put_chars(begin
-                                 _element@11_0 =
-                                     [<<"got something else"/utf8>>],
-                                 [_element@11_0]
-                             end),
-                io:nl(),
-                {}
-            after 'Elixir.Patina.Core.Timeout':from_seconds(5) ->
-                      begin
-                          io:put_chars(begin
-                                           _element@0_0 = [<<"timeout"/utf8>>],
-                                           [_element@0_0]
-                                       end),
-                          io:nl(),
-                          {}
-                      end
-        end
+    receive
+        _n@0_0 when erlang:is_integer(_n@0_0) ->
+            io:put_chars(begin
+                             _element@2_0 = begin
+                                                _element@1_0 =
+                                                    io_lib:format("~ktp",
+                                                                  [_n@0_0]),
+                                                [<<"got integer "/utf8>>,
+                                                 _element@1_0]
+                                            end,
+                             [_element@2_0]
+                         end),
+            io:nl(),
+            {};
+        _a@3_0 when erlang:is_atom(_a@3_0) ->
+            io:put_chars(begin
+                             _element@5_0 = begin
+                                                _element@4_0 =
+                                                    io_lib:format("~ktp",
+                                                                  [_a@3_0]),
+                                                [<<"got atom "/utf8>>,
+                                                 _element@4_0]
+                                            end,
+                             [_element@5_0]
+                         end),
+            io:nl(),
+            {};
+        nil ->
+            io:put_chars([[<<"got an empty string option"/utf8>>]]),
+            io:nl(),
+            {};
+        nil ->
+            io:put_chars([[<<"got an empty integer option"/utf8>>]]),
+            io:nl(),
+            {};
+        _ ->
+            io:put_chars([[<<"got something else"/utf8>>]]),
+            io:nl(),
+            {}
+        after 'Elixir.Patina.Core.Timeout':from_seconds(5) ->
+                  io:put_chars([[<<"timeout"/utf8>>]]), io:nl(), {}
     end.

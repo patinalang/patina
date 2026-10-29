@@ -31,28 +31,21 @@ main() ->
                                     <<"some value (tagged?)"/utf8>>;
                                 _val@2_0 -> <<"some value (untagged?)"/utf8>>
                             end,
-    _unsafe_description@4_0 = begin
-                                  case _v@0_0 of
-                                      nil -> <<"an empty string option"/utf8>>;
-                                      nil -> <<"an empty integer option"/utf8>>;
-                                      nil -> <<"the atom nil"/utf8>>;
-                                      _ -> <<"something else"/utf8>>
-                                  end
+    _unsafe_description@4_0 = case _v@0_0 of
+                                  nil -> <<"an empty string option"/utf8>>;
+                                  nil -> <<"an empty integer option"/utf8>>;
+                                  nil -> <<"the atom nil"/utf8>>;
+                                  _ -> <<"something else"/utf8>>
                               end,
-    begin
-        io:put_chars(begin
-                         _element@8_0 = begin
-                                            _element@5_0 =
-                                                _safe_description@3_0,
-                                            _element@6_0 = <<", "/utf8>>,
-                                            _element@7_0 =
-                                                _unsafe_description@4_0,
-                                            [_element@5_0,
-                                             _element@6_0,
-                                             _element@7_0]
-                                        end,
-                         [_element@8_0]
-                     end),
-        io:nl(),
-        {}
-    end.
+    io:put_chars(begin
+                     _element@7_0 = begin
+                                        _element@5_0 = _safe_description@3_0,
+                                        _element@6_0 = _unsafe_description@4_0,
+                                        [_element@5_0,
+                                         <<", "/utf8>>,
+                                         _element@6_0]
+                                    end,
+                     [_element@7_0]
+                 end),
+    io:nl(),
+    {}.

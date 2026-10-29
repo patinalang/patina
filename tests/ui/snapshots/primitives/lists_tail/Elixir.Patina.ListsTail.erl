@@ -37,27 +37,20 @@ match_tail(_xs@0_0) ->
 
 let_else_tail(_xs@0_0) ->
     case [] of
-        {'$patina_label_0', _jump_value@5_0} -> _jump_value@5_0;
+        {'$patina_label_0', _jump_value@4_0} -> _jump_value@4_0;
         _ ->
             _more_xs@1_0 = [-1, 0 | _xs@0_0],
-            begin
-                begin _tail@2_0 = {} end,
-                case _more_xs@1_0 of
-                    [-1, 0 | _tail@2_1 = _] -> {};
-                    _ ->
-                        _branch_value@4_0 = begin
-                                                begin
-                                                    _jump_value@3_0 = [],
-                                                    begin
-                                                        '$patina_marker':jump('$patina_label_0',
-                                                                              _jump_value@3_0),
-                                                        []
-                                                    end
-                                                end
-                                            end,
-                        _tail@2_1 = _tail@2_0,
-                        _branch_value@4_0
-                end
+            _tail@2_0 = {},
+            case _more_xs@1_0 of
+                [-1, 0 | _tail@2_1 = _] -> {};
+                _ ->
+                    _branch_value@3_0 = begin
+                                            '$patina_marker':jump('$patina_label_0',
+                                                                  []),
+                                            []
+                                        end,
+                    _tail@2_1 = _tail@2_0,
+                    _branch_value@3_0
             end,
             _tail@2_1
     end.

@@ -42,34 +42,24 @@
                                        _witness_Score@3_0),
     _fn_Score_score@5_0 = erlang:element(1,
                                          _vtable_Score@4_0),
-    begin
-        _total@6_0 = 0,
-        begin
-            _total@6_1 = fun _$patina_loop(_total@6_0) ->
-                                 case [] of
-                                     {'$patina_label_0', _total@6_2} ->
-                                         _total@6_2;
-                                     _ ->
-                                         _ = begin
-                                                 _total@6_1 = _total@6_0 +
-                                                                  (_fn_Score_score@5_0(_witness_Score@3_0,
-                                                                                       _self@1_0#'Pair'.a)
-                                                                       +
-                                                                       _fn_Score_score@5_0(_witness_Score@3_0,
-                                                                                           _self@1_0#'Pair'.b)),
-                                                 begin
-                                                     '$patina_marker':jump('$patina_label_0',
-                                                                           _total@6_1),
-                                                     []
-                                                 end
-                                             end,
-                                         _$patina_loop(_total@6_1)
-                                 end
-                         end(_total@6_0),
-            {}
-        end,
-        _total@6_1
-    end.
+    _total@6_0 = 0,
+    _total@6_1 = fun _$patina_loop(_total@6_0) ->
+                         case [] of
+                             {'$patina_label_0', _total@6_2} -> _total@6_2;
+                             _ ->
+                                 _total@6_1 = _total@6_0 +
+                                                  (_fn_Score_score@5_0(_witness_Score@3_0,
+                                                                       _self@1_0#'Pair'.a)
+                                                       +
+                                                       _fn_Score_score@5_0(_witness_Score@3_0,
+                                                                           _self@1_0#'Pair'.b)),
+                                 '$patina_marker':jump('$patina_label_0',
+                                                       _total@6_1),
+                                 [],
+                                 _$patina_loop(_total@6_1)
+                         end
+                 end(_total@6_0),
+    _total@6_1.
 
 'LoopWitness::Score::$patina_witness'(_witnesses_where_Score@0_0) ->
     {{fun 'Elixir.Patina.LoopWitness.Pair':'LoopWitness::Score::score'/2,

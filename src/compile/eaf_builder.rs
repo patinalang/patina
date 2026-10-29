@@ -1,5 +1,6 @@
 //! Convenience functions for building Erlang Abstract Format (eaf) nodes.
 use rustc_arena::DroplessArena;
+use rustc_data_structures::flat_map_in_place::FlatMapInPlace;
 use rustc_span::source_map::SourceMap;
 use rustc_span::{ByteSymbol, Ident, Span, Symbol, sym};
 
@@ -554,11 +555,33 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
     }
 
     /// A block expression `begin ... end` over the given expressions.
+    /// Directly blocks are inlined into this block. Unit tuples are dropped from non-tail position.
+    /// If this block only has one expression, that expression is returned instead.
     pub(crate) fn expr_block(
         &self,
         span: impl IntoAnno,
         exprs: impl IntoIterator<Item = eaf::Expr<'arena>>,
     ) -> eaf::Expr<'arena> {
+        let mut exprs: Vec<_> = exprs.into_iter().collect();
+
+        exprs.flat_map_in_place(|expr| {
+            let (many, one) = match expr {
+                eaf::Expr::Block(_, body) => (body.0, None),
+                _ => (&[][..], Some(expr)),
+            };
+            many.iter().copied().chain(one)
+        });
+
+        let mut left = exprs.len();
+        exprs.flat_map_in_place(|expr| {
+            left -= 1;
+            if left > 0 && matches!(expr, eaf::Expr::Tuple(_, &[])) { None } else { Some(expr) }
+        });
+
+        if exprs.len() == 1 {
+            return exprs[0];
+        }
+
         let exprs = self.arena.alloc_from_iter(exprs);
         eaf::Expr::Block(span.into_anno(self.source_map), eaf::Body(exprs))
     }

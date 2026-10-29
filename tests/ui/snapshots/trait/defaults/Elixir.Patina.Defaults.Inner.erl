@@ -32,7 +32,5 @@ helper(_x@0_0) -> _x@0_0 * 2.
                                          _witness_Doubler@0_0),
     _fn_Doubler_base@3_0 = erlang:element(1,
                                           _vtable_Doubler@2_0),
-    begin
-        helper(_fn_Doubler_base@3_0(_witness_Doubler@0_0,
-                                    _self@1_0))
-    end.
+    helper(_fn_Doubler_base@3_0(_witness_Doubler@0_0,
+                                _self@1_0)).

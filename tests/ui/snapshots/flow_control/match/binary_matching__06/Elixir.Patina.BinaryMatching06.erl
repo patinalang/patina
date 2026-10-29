@@ -34,28 +34,21 @@ main() ->
                     1.5:32/float, $é/utf16>>,
     _flags@4_0 = <<1:1/integer, 0:1/integer,
                    (_version@1_0 + 1):3/integer>>,
-    begin
-        io:put_chars(begin
-                         _element@10_0 = begin
-                                             _element@5_0 =
-                                                 io_lib:format("~ktp",
-                                                               [_greeting@2_0]),
-                                             _element@6_0 = <<" "/utf8>>,
-                                             _element@7_0 =
-                                                 io_lib:format("~ktp",
-                                                               [_header@3_0]),
-                                             _element@8_0 = <<" "/utf8>>,
-                                             _element@9_0 =
-                                                 io_lib:format("~ktp",
-                                                               [_flags@4_0]),
-                                             [_element@5_0,
-                                              _element@6_0,
-                                              _element@7_0,
-                                              _element@8_0,
-                                              _element@9_0]
-                                         end,
-                         [_element@10_0]
-                     end),
-        io:nl(),
-        {}
-    end.
+    io:put_chars(begin
+                     _element@8_0 = begin
+                                        _element@5_0 = io_lib:format("~ktp",
+                                                                     [_greeting@2_0]),
+                                        _element@6_0 = io_lib:format("~ktp",
+                                                                     [_header@3_0]),
+                                        _element@7_0 = io_lib:format("~ktp",
+                                                                     [_flags@4_0]),
+                                        [_element@5_0,
+                                         <<" "/utf8>>,
+                                         _element@6_0,
+                                         <<" "/utf8>>,
+                                         _element@7_0]
+                                    end,
+                     [_element@8_0]
+                 end),
+    io:nl(),
+    {}.

@@ -29,90 +29,71 @@ open_resource() -> ok.
 main() ->
     try open_resource(), {} catch
         error:badarg ->
-            io:put_chars(begin
-                             _element@1_0 = [<<"badarg!"/utf8>>], [_element@1_0]
-                         end),
+            io:put_chars([[<<"badarg!"/utf8>>]]),
             io:nl(),
             {};
         error:(#{'__struct__' := 'Elixir.ArithmeticError'}) ->
+            io:put_chars([[<<"Elixir ArithmeticError"/utf8>>]]),
+            io:nl(),
+            {};
+        error:(_reason@0_0 = #{'__struct__' :=
+                                   'Elixir.ArgumentError'}) ->
             io:put_chars(begin
-                             _element@2_0 = [<<"Elixir ArithmeticError"/utf8>>],
+                             _element@2_0 = begin
+                                                _element@1_0 =
+                                                    io_lib:format("~ktp",
+                                                                  [_reason@0_0]),
+                                                [<<"Elixir ArgumentError "/utf8>>,
+                                                 _element@1_0]
+                                            end,
                              [_element@2_0]
                          end),
             io:nl(),
             {};
-        error:(_reason@3_0 = #{'__struct__' :=
-                                   'Elixir.ArgumentError'}) ->
+        error:_reason@4_0:_stacktrace@3_0 ->
             io:put_chars(begin
-                             _element@6_0 = begin
-                                                _element@4_0 =
-                                                    <<"Elixir ArgumentError "/utf8>>,
+                             _element@7_0 = begin
                                                 _element@5_0 =
                                                     io_lib:format("~ktp",
-                                                                  [_reason@3_0]),
-                                                [_element@4_0, _element@5_0]
+                                                                  [_reason@4_0]),
+                                                _element@6_0 =
+                                                    io_lib:format("~ktp",
+                                                                  [_stacktrace@3_0]),
+                                                [<<"other error: "/utf8>>,
+                                                 _element@5_0,
+                                                 <<" from "/utf8>>,
+                                                 _element@6_0]
                                             end,
-                             [_element@6_0]
+                             [_element@7_0]
                          end),
             io:nl(),
             {};
-        error:_reason@8_0:_stacktrace@7_0 ->
+        _value@8_0 ->
+            io:put_chars(begin
+                             _element@10_0 = begin
+                                                 _element@9_0 =
+                                                     io_lib:format("~ktp",
+                                                                   [_value@8_0]),
+                                                 [<<"thrown: "/utf8>>,
+                                                  _element@9_0]
+                                             end,
+                             [_element@10_0]
+                         end),
+            io:nl(),
+            {};
+        exit:_reason@11_0 ->
             io:put_chars(begin
                              _element@13_0 = begin
-                                                 _element@9_0 =
-                                                     <<"other error: "/utf8>>,
-                                                 _element@10_0 =
-                                                     io_lib:format("~ktp",
-                                                                   [_reason@8_0]),
-                                                 _element@11_0 =
-                                                     <<" from "/utf8>>,
                                                  _element@12_0 =
                                                      io_lib:format("~ktp",
-                                                                   [_stacktrace@7_0]),
-                                                 [_element@9_0,
-                                                  _element@10_0,
-                                                  _element@11_0,
+                                                                   [_reason@11_0]),
+                                                 [<<"exit: "/utf8>>,
                                                   _element@12_0]
                                              end,
                              [_element@13_0]
                          end),
             io:nl(),
-            {};
-        _value@14_0 ->
-            io:put_chars(begin
-                             _element@17_0 = begin
-                                                 _element@15_0 =
-                                                     <<"thrown: "/utf8>>,
-                                                 _element@16_0 =
-                                                     io_lib:format("~ktp",
-                                                                   [_value@14_0]),
-                                                 [_element@15_0, _element@16_0]
-                                             end,
-                             [_element@17_0]
-                         end),
-            io:nl(),
-            {};
-        exit:_reason@18_0 ->
-            io:put_chars(begin
-                             _element@21_0 = begin
-                                                 _element@19_0 =
-                                                     <<"exit: "/utf8>>,
-                                                 _element@20_0 =
-                                                     io_lib:format("~ktp",
-                                                                   [_reason@18_0]),
-                                                 [_element@19_0, _element@20_0]
-                                             end,
-                             [_element@21_0]
-                         end),
-            io:nl(),
             {}
     after
-        begin
-            io:put_chars(begin
-                             _element@0_0 = [<<"cleaning up"/utf8>>],
-                             [_element@0_0]
-                         end),
-            io:nl(),
-            {}
-        end
+        io:put_chars([[<<"cleaning up"/utf8>>]]), io:nl(), {}
     end.

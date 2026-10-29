@@ -30,33 +30,26 @@
 'Loops::Count::count<int>'(_witness_Count@0_0,
                            _self@1_0, _limit@2_0) ->
     _n@3_0 = 0,
-    begin
-        _n@3_1 = fun _$patina_loop(_n@3_0) ->
-                         case [] of
-                             {'$patina_label_0', _n@3_2} -> _n@3_2;
-                             _ ->
-                                 _ = begin
-                                         case _n@3_0 < _limit@2_0 of
-                                             true ->
-                                                 _n@3_1 = _n@3_0 + 1,
-                                                 {};
-                                             _ ->
-                                                 _branch_value@4_0 = begin
-                                                                         begin
-                                                                             '$patina_marker':jump('$patina_label_0',
-                                                                                                   _n@3_0),
-                                                                             []
-                                                                         end
-                                                                     end,
-                                                 _n@3_1 = _n@3_0,
-                                                 _branch_value@4_0
-                                         end
-                                     end,
-                                 _$patina_loop(_n@3_1)
-                         end
-                 end(_n@3_0),
-        {}
-    end,
+    _n@3_1 = fun _$patina_loop(_n@3_0) ->
+                     case [] of
+                         {'$patina_label_0', _n@3_2} -> _n@3_2;
+                         _ ->
+                             case _n@3_0 < _limit@2_0 of
+                                 true ->
+                                     _n@3_1 = _n@3_0 + 1,
+                                     {};
+                                 _ ->
+                                     _branch_value@4_0 = begin
+                                                             '$patina_marker':jump('$patina_label_0',
+                                                                                   _n@3_0),
+                                                             []
+                                                         end,
+                                     _n@3_1 = _n@3_0,
+                                     _branch_value@4_0
+                             end,
+                             _$patina_loop(_n@3_1)
+                     end
+             end(_n@3_0),
     _n@3_1.
 
 'Loops::Count::$patina_witness<int>'() ->
@@ -67,33 +60,26 @@
 'Loops::Count::count<str>'(_witness_Count@0_0,
                            _self@1_0, _limit@2_0) ->
     _n@3_0 = 0,
-    begin
-        _n@3_1 = fun _$patina_loop(_n@3_0) ->
-                         case [] of
-                             {'$patina_label_0', _n@3_2} -> _n@3_2;
-                             _ ->
-                                 _ = begin
-                                         case _n@3_0 < _limit@2_0 of
-                                             true ->
-                                                 _n@3_1 = _n@3_0 + 2,
-                                                 {};
-                                             _ ->
-                                                 _branch_value@4_0 = begin
-                                                                         begin
-                                                                             '$patina_marker':jump('$patina_label_0',
-                                                                                                   _n@3_0),
-                                                                             []
-                                                                         end
-                                                                     end,
-                                                 _n@3_1 = _n@3_0,
-                                                 _branch_value@4_0
-                                         end
-                                     end,
-                                 _$patina_loop(_n@3_1)
-                         end
-                 end(_n@3_0),
-        {}
-    end,
+    _n@3_1 = fun _$patina_loop(_n@3_0) ->
+                     case [] of
+                         {'$patina_label_0', _n@3_2} -> _n@3_2;
+                         _ ->
+                             case _n@3_0 < _limit@2_0 of
+                                 true ->
+                                     _n@3_1 = _n@3_0 + 2,
+                                     {};
+                                 _ ->
+                                     _branch_value@4_0 = begin
+                                                             '$patina_marker':jump('$patina_label_0',
+                                                                                   _n@3_0),
+                                                             []
+                                                         end,
+                                     _n@3_1 = _n@3_0,
+                                     _branch_value@4_0
+                             end,
+                             _$patina_loop(_n@3_1)
+                     end
+             end(_n@3_0),
     _n@3_1.
 
 'Loops::Count::$patina_witness<str>'() ->

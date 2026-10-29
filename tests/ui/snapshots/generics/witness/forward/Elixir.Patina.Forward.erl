@@ -28,18 +28,16 @@ b(_witnesses_where_b@0_0, _x@1_0) ->
                                      _witnesses_where_b@0_0),
     _vtable_Tr@3_0 = erlang:element(1, _witness_Tr@2_0),
     _fn_Tr_method@4_0 = erlang:element(1, _vtable_Tr@3_0),
-    begin _fn_Tr_method@4_0(_witness_Tr@2_0, _x@1_0) end.
+    _fn_Tr_method@4_0(_witness_Tr@2_0, _x@1_0).
 
 a(_witnesses_where_a@0_0, _x@1_0) ->
     _witness_Tr@2_0 = erlang:element(1,
                                      _witnesses_where_a@0_0),
     _witnesses_where_b@3_0 = {_witness_Tr@2_0},
-    begin b(_witnesses_where_b@3_0, _x@1_0) end.
+    b(_witnesses_where_b@3_0, _x@1_0).
 
 main() ->
     _witness_Tr@0_0 =
         'Elixir.Patina.Forward.S':'Forward::Tr::$patina_witness'(),
     _witnesses_where_a@1_0 = {_witness_Tr@0_0},
-    begin
-        a(_witnesses_where_a@1_0, 'Elixir.Patina.Forward.S')
-    end.
+    a(_witnesses_where_a@1_0, 'Elixir.Patina.Forward.S').

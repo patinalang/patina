@@ -26,134 +26,106 @@
 '__info__'(Key) -> module_info(Key).
 
 main() ->
-    _foo@1_0 = begin
-                   _x@0_0 = {1, 2},
-                   'Elixir.Patina.DestructureStructures01.main.Foo':'$patina_constructor__Foo'(_x@0_0,
-                                                                                               3)
-               end,
-    case _foo@1_0 of
+    _foo@0_0 =
+        'Elixir.Patina.DestructureStructures01.main.Foo':'$patina_constructor__Foo'({1,
+                                                                                     2},
+                                                                                    3),
+    case _foo@0_0 of
         #'Elixir.Patina.DestructureStructures01.main.Foo':'Foo'{x
                                                                     =
-                                                                    {1, _b@2_0},
-                                                                y = _y@3_0} ->
+                                                                    {1, _b@1_0},
+                                                                y = _y@2_0} ->
             io:put_chars(begin
-                             _element@9_0 = begin
+                             _element@5_0 = begin
+                                                _element@3_0 =
+                                                    io_lib:format("~ktp",
+                                                                  [_b@1_0]),
                                                 _element@4_0 =
-                                                    <<"First of x is 1, b = "/utf8>>,
-                                                _element@5_0 =
                                                     io_lib:format("~ktp",
-                                                                  [_b@2_0]),
-                                                _element@6_0 =
-                                                    <<",  y = "/utf8>>,
-                                                _element@7_0 =
-                                                    io_lib:format("~ktp",
-                                                                  [_y@3_0]),
-                                                _element@8_0 = <<" "/utf8>>,
-                                                [_element@4_0,
-                                                 _element@5_0,
-                                                 _element@6_0,
-                                                 _element@7_0,
-                                                 _element@8_0]
+                                                                  [_y@2_0]),
+                                                [<<"First of x is 1, b = "/utf8>>,
+                                                 _element@3_0,
+                                                 <<",  y = "/utf8>>,
+                                                 _element@4_0,
+                                                 <<" "/utf8>>]
                                             end,
-                             [_element@9_0]
+                             [_element@5_0]
                          end),
             io:nl(),
             {};
         #'Elixir.Patina.DestructureStructures01.main.Foo':'Foo'{x
-                                                                    = _i@10_0,
+                                                                    = _i@6_0,
                                                                 y = 2} ->
             io:put_chars(begin
-                             _element@13_0 = begin
-                                                 _element@11_0 =
-                                                     <<"y is 2, i = "/utf8>>,
-                                                 _element@12_0 =
-                                                     io_lib:format("~ktp",
-                                                                   [_i@10_0]),
-                                                 [_element@11_0, _element@12_0]
-                                             end,
-                             [_element@13_0]
+                             _element@8_0 = begin
+                                                _element@7_0 =
+                                                    io_lib:format("~ktp",
+                                                                  [_i@6_0]),
+                                                [<<"y is 2, i = "/utf8>>,
+                                                 _element@7_0]
+                                            end,
+                             [_element@8_0]
                          end),
             io:nl(),
             {};
         #'Elixir.Patina.DestructureStructures01.main.Foo':'Foo'{x
                                                                     = _,
-                                                                y = _y@14_0} ->
+                                                                y = _y@9_0} ->
             io:put_chars(begin
-                             _element@18_0 = begin
-                                                 _element@15_0 =
-                                                     <<"y = "/utf8>>,
-                                                 _element@16_0 =
+                             _element@11_0 = begin
+                                                 _element@10_0 =
                                                      io_lib:format("~ktp",
-                                                                   [_y@14_0]),
-                                                 _element@17_0 =
-                                                     <<", we don't care about x"/utf8>>,
-                                                 [_element@15_0,
-                                                  _element@16_0,
-                                                  _element@17_0]
+                                                                   [_y@9_0]),
+                                                 [<<"y = "/utf8>>,
+                                                  _element@10_0,
+                                                  <<", we don't care about x"/utf8>>]
                                              end,
-                             [_element@18_0]
+                             [_element@11_0]
                          end),
             io:nl(),
             {}
     end,
-    _faa@20_0 = begin
-                    _x@19_0 = {1, 2},
-                    'Elixir.Patina.DestructureStructures01.main.Foo':'$patina_constructor__Foo'(_x@19_0,
-                                                                                                3)
-                end,
+    _faa@12_0 =
+        'Elixir.Patina.DestructureStructures01.main.Foo':'$patina_constructor__Foo'({1,
+                                                                                     2},
+                                                                                    3),
     #'Elixir.Patina.DestructureStructures01.main.Foo':'Foo'{x
-                                                                = _x0@21_0,
-                                                            y = _y0@22_0} =
-        _faa@20_0,
-    begin
-        io:put_chars(begin
-                         _element@27_0 = begin
-                                             _element@23_0 =
-                                                 <<"Outside: x0 = "/utf8>>,
-                                             _element@24_0 =
-                                                 io_lib:format("~ktp",
-                                                               [_x0@21_0]),
-                                             _element@25_0 = <<", y0 = "/utf8>>,
-                                             _element@26_0 =
-                                                 io_lib:format("~ktp",
-                                                               [_y0@22_0]),
-                                             [_element@23_0,
-                                              _element@24_0,
-                                              _element@25_0,
-                                              _element@26_0]
-                                         end,
-                         [_element@27_0]
-                     end),
-        io:nl(),
-        {}
-    end,
-    _bar@28_0 = _faa@20_0,
+                                                                = _x0@13_0,
+                                                            y = _y0@14_0} =
+        _faa@12_0,
+    io:put_chars(begin
+                     _element@17_0 = begin
+                                         _element@15_0 = io_lib:format("~ktp",
+                                                                       [_x0@13_0]),
+                                         _element@16_0 = io_lib:format("~ktp",
+                                                                       [_y0@14_0]),
+                                         [<<"Outside: x0 = "/utf8>>,
+                                          _element@15_0,
+                                          <<", y0 = "/utf8>>,
+                                          _element@16_0]
+                                     end,
+                     [_element@17_0]
+                 end),
+    io:nl(),
+    _bar@18_0 = _faa@12_0,
     #'Elixir.Patina.DestructureStructures01.main.Foo':'Foo'{x
                                                                 =
-                                                                _nested_x@29_0,
+                                                                _nested_x@19_0,
                                                             y =
-                                                                _nested_y@30_0} =
-        _bar@28_0,
-    begin
-        io:put_chars(begin
-                         _element@35_0 = begin
-                                             _element@31_0 =
-                                                 <<"Nested: nested_x = "/utf8>>,
-                                             _element@32_0 =
-                                                 io_lib:format("~ktp",
-                                                               [_nested_x@29_0]),
-                                             _element@33_0 =
-                                                 <<", nested_y = "/utf8>>,
-                                             _element@34_0 =
-                                                 io_lib:format("~ktp",
-                                                               [_nested_y@30_0]),
-                                             [_element@31_0,
-                                              _element@32_0,
-                                              _element@33_0,
-                                              _element@34_0]
-                                         end,
-                         [_element@35_0]
-                     end),
-        io:nl(),
-        {}
-    end.
+                                                                _nested_y@20_0} =
+        _bar@18_0,
+    io:put_chars(begin
+                     _element@23_0 = begin
+                                         _element@21_0 = io_lib:format("~ktp",
+                                                                       [_nested_x@19_0]),
+                                         _element@22_0 = io_lib:format("~ktp",
+                                                                       [_nested_y@20_0]),
+                                         [<<"Nested: nested_x = "/utf8>>,
+                                          _element@21_0,
+                                          <<", nested_y = "/utf8>>,
+                                          _element@22_0]
+                                     end,
+                     [_element@23_0]
+                 end),
+    io:nl(),
+    {}.

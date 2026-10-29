@@ -36,9 +36,7 @@
                                        _witness_Value@3_0),
     _fn_Value_value@5_0 = erlang:element(1,
                                          _vtable_Value@4_0),
-    begin
-        _fn_Value_value@5_0(_witness_Value@3_0, _self@1_0) + 1
-    end.
+    _fn_Value_value@5_0(_witness_Value@3_0, _self@1_0) + 1.
 
 'Defaults::Value::$patina_witness'(_witnesses_where_Value@0_0) ->
     {{fun 'Elixir.Patina.Defaults.Pile':'Defaults::Value::value'/2},

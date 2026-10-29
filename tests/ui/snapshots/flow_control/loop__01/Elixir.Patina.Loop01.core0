@@ -68,228 +68,208 @@ module 'Elixir.Patina.Loop01' ['__info__'/1,
 		   -| [{'function',{'main',0}}] ) of
 	      <> when 'true' ->
 		  let <_X_count@0_0> = 0
-		  in  let <_X_element@1_0> =
-			  [#{#<76>(8,1,'integer',['unsigned'|['big']]),
-			     #<101>(8,1,'integer',['unsigned'|['big']]),
-			     #<116>(8,1,'integer',['unsigned'|['big']]),
-			     #<39>(8,1,'integer',['unsigned'|['big']]),
-			     #<115>(8,1,'integer',['unsigned'|['big']]),
-			     #<32>(8,1,'integer',['unsigned'|['big']]),
-			     #<99>(8,1,'integer',['unsigned'|['big']]),
-			     #<111>(8,1,'integer',['unsigned'|['big']]),
-			     #<117>(8,1,'integer',['unsigned'|['big']]),
-			     #<110>(8,1,'integer',['unsigned'|['big']]),
-			     #<116>(8,1,'integer',['unsigned'|['big']]),
-			     #<32>(8,1,'integer',['unsigned'|['big']]),
-			     #<117>(8,1,'integer',['unsigned'|['big']]),
-			     #<110>(8,1,'integer',['unsigned'|['big']]),
-			     #<116>(8,1,'integer',['unsigned'|['big']]),
-			     #<105>(8,1,'integer',['unsigned'|['big']]),
-			     #<108>(8,1,'integer',['unsigned'|['big']]),
-			     #<32>(8,1,'integer',['unsigned'|['big']]),
-			     #<105>(8,1,'integer',['unsigned'|['big']]),
-			     #<110>(8,1,'integer',['unsigned'|['big']]),
-			     #<102>(8,1,'integer',['unsigned'|['big']]),
-			     #<105>(8,1,'integer',['unsigned'|['big']]),
-			     #<110>(8,1,'integer',['unsigned'|['big']]),
-			     #<105>(8,1,'integer',['unsigned'|['big']]),
-			     #<116>(8,1,'integer',['unsigned'|['big']]),
-			     #<121>(8,1,'integer',['unsigned'|['big']]),
-			     #<33>(8,1,'integer',['unsigned'|['big']])}#]
-		      in  do  %% Line 8
-			      call 'io':'put_chars'
-				  ([_X_element@1_0|[]])
-			      do  %% Line 8
-				  call 'io':'nl'
-				      ()
-				  do  %% Line 8
-				      {}
-				      let <_15> =
-					  letrec
-					      '_$patina_loop'/1 =
-						  %% Line 11
-						  ( fun (_13) ->
-							let <_X_$patina_loop> = '_$patina_loop'/1
-							in  ( case ( _13
-								     -| ['result_not_wanted'] ) of
-								<_17> when 'true' ->
-								    let <_X_count@0_0> = _17
-								    in  ( letrec
-									      '$patina_label_1'/1 =
-										  fun (_X_count@0_2) ->
-										      _X_count@0_2
-									  in  let <_10,_X_count@0_1> =
-										  ( letrec
-											'$patina_label_0'/1 =
-											    fun (%% Line 18
-												 _X_count@0_1) ->
-												%% Line 18
-												( <( {}
-												     -| ['result_not_wanted'] ),_X_count@0_1>
-												  -| ['result_not_wanted'] )
-										    in  let <_X_count@0_1> =
-											    call %% Line 12
-												 ( 'erlang'
-												   -| ['result_not_wanted'] ):%% Line 12
-															      ( '+'
-																-| ['result_not_wanted'] )
-												(%% Line 12
-												 _X_count@0_0, %% Line 12
-													       ( 1
-														 -| ['result_not_wanted'] ))
-											in  do  %% Line 14
-												case ( call ( 'erlang'
-													      -| ['result_not_wanted'] ):( '=:='
-																	   -| ['result_not_wanted'] )
-													   (_X_count@0_1, ( 3
-															    -| ['result_not_wanted'] ))
-												       -| ['result_not_wanted'] ) of
-												  <'true'> when 'true' ->
-												      let <_X_element@2_0> =
-													  [#{#<116>(8,1,'integer',['unsigned'|['big']]),
-													     #<104>(8,1,'integer',['unsigned'|['big']]),
-													     #<114>(8,1,'integer',['unsigned'|['big']]),
-													     #<101>(8,1,'integer',['unsigned'|['big']]),
-													     #<101>(8,1,'integer',['unsigned'|['big']])}#]
-												      in  do  %% Line 15
-													      ( call ( 'io'
-														       -| ['result_not_wanted'] ):( 'put_chars'
-																		    -| ['result_not_wanted'] )
-														    (( [_X_element@2_0|( []
-																	 -| ['result_not_wanted'] )]
-														       -| ['result_not_wanted'] ))
-														-| ['result_not_wanted'] )
-													      do  %% Line 15
-														  ( call ( 'io'
-															   -| ['result_not_wanted'] ):( 'nl'
-																			-| ['result_not_wanted'] )
-															()
-														    -| ['result_not_wanted'] )
-														  do  %% Line 15
-														      ( {}
+		  in  do  %% Line 8
+			  call 'io':'put_chars'
+			      ([[#{#<76>(8,1,'integer',['unsigned'|['big']]),
+				   #<101>(8,1,'integer',['unsigned'|['big']]),
+				   #<116>(8,1,'integer',['unsigned'|['big']]),
+				   #<39>(8,1,'integer',['unsigned'|['big']]),
+				   #<115>(8,1,'integer',['unsigned'|['big']]),
+				   #<32>(8,1,'integer',['unsigned'|['big']]),
+				   #<99>(8,1,'integer',['unsigned'|['big']]),
+				   #<111>(8,1,'integer',['unsigned'|['big']]),
+				   #<117>(8,1,'integer',['unsigned'|['big']]),
+				   #<110>(8,1,'integer',['unsigned'|['big']]),
+				   #<116>(8,1,'integer',['unsigned'|['big']]),
+				   #<32>(8,1,'integer',['unsigned'|['big']]),
+				   #<117>(8,1,'integer',['unsigned'|['big']]),
+				   #<110>(8,1,'integer',['unsigned'|['big']]),
+				   #<116>(8,1,'integer',['unsigned'|['big']]),
+				   #<105>(8,1,'integer',['unsigned'|['big']]),
+				   #<108>(8,1,'integer',['unsigned'|['big']]),
+				   #<32>(8,1,'integer',['unsigned'|['big']]),
+				   #<105>(8,1,'integer',['unsigned'|['big']]),
+				   #<110>(8,1,'integer',['unsigned'|['big']]),
+				   #<102>(8,1,'integer',['unsigned'|['big']]),
+				   #<105>(8,1,'integer',['unsigned'|['big']]),
+				   #<110>(8,1,'integer',['unsigned'|['big']]),
+				   #<105>(8,1,'integer',['unsigned'|['big']]),
+				   #<116>(8,1,'integer',['unsigned'|['big']]),
+				   #<121>(8,1,'integer',['unsigned'|['big']]),
+				   #<33>(8,1,'integer',['unsigned'|['big']])}#]])
+			  do  %% Line 8
+			      call 'io':'nl'
+				  ()
+			      let <_10> =
+				  letrec
+				      '_$patina_loop'/1 =
+					  %% Line 11
+					  ( fun (_8) ->
+						let <_X_$patina_loop> = '_$patina_loop'/1
+						in  ( case ( _8
+							     -| ['result_not_wanted'] ) of
+							<_12> when 'true' ->
+							    let <_X_count@0_0> = _12
+							    in  ( letrec
+								      '$patina_label_1'/1 =
+									  fun (_X_count@0_2) ->
+									      _X_count@0_2
+								  in  let <_18,_X_count@0_1> =
+									  ( letrec
+										'$patina_label_0'/1 =
+										    fun (%% Line 18
+											 _X_count@0_1) ->
+											%% Line 18
+											( <( {}
+											     -| ['result_not_wanted'] ),_X_count@0_1>
+											  -| ['result_not_wanted'] )
+									    in  let <_X_count@0_1> =
+										    call %% Line 12
+											 ( 'erlang'
+											   -| ['result_not_wanted'] ):%% Line 12
+														      ( '+'
 															-| ['result_not_wanted'] )
-														      apply '$patina_label_0'/1
-															  (%% Line 18
-															   _X_count@0_1)
-												  <_20> when 'true' ->
-												      ( {}
-													-| ['result_not_wanted'] )
-												  ( <_4> when 'true' ->
-													primop 'match_fail'
-													    ({'case_clause',_4})
-												    -| ['compiler_generated'] )
-												end
-												let <_X_element@3_0> =
-												    call %% Line 21
-													 ( 'io_lib'
-													   -| ['result_not_wanted'] ):%% Line 21
-																      ( 'format'
+											(%% Line 12
+											 _X_count@0_0, %% Line 12
+												       ( 1
+													 -| ['result_not_wanted'] ))
+										in  do  %% Line 14
+											case ( call ( 'erlang'
+												      -| ['result_not_wanted'] ):( '=:='
+																   -| ['result_not_wanted'] )
+												   (_X_count@0_1, ( 3
+														    -| ['result_not_wanted'] ))
+											       -| ['result_not_wanted'] ) of
+											  <'true'> when 'true' ->
+											      do  %% Line 15
+												  ( call ( 'io'
+													   -| ['result_not_wanted'] ):( 'put_chars'
 																	-| ['result_not_wanted'] )
-													(%% Line 21
-													 ( [126|[107|[116|[112]]]]
-													   -| ['result_not_wanted'] ), %% Line 21
-																       ( [_X_count@0_1|( []
-																			 -| ['result_not_wanted'] )]
-																	 -| ['result_not_wanted'] ))
-												in  let <_X_element@4_0> =
-													[%% Line 21
-													 _X_element@3_0|%% Line 21
-															( []
-															  -| ['result_not_wanted'] )]
-												    in  do  %% Line 21
-													    ( call ( 'io'
-														     -| ['result_not_wanted'] ):( 'put_chars'
-																		  -| ['result_not_wanted'] )
-														  (( [_X_element@4_0|( []
-																       -| ['result_not_wanted'] )]
-														     -| ['result_not_wanted'] ))
-													      -| ['result_not_wanted'] )
-													    do  %% Line 21
-														( call ( 'io'
-															 -| ['result_not_wanted'] ):( 'nl'
-																		      -| ['result_not_wanted'] )
-														      ()
-														  -| ['result_not_wanted'] )
-														do  %% Line 21
-														    ( {}
-														      -| ['result_not_wanted'] )
-														    %% Line 23
-														    <case ( call ( 'erlang'
-																   -| ['result_not_wanted'] ):( '=:='
-																				-| ['result_not_wanted'] )
-																(_X_count@0_1, ( 5
-																		 -| ['result_not_wanted'] ))
-															    -| ['result_not_wanted'] ) of
-														       <'true'> when 'true' ->
-															   let <_X_element@5_0> =
-															       [#{#<79>(8,1,'integer',['unsigned'|['big']]),
-																  #<75>(8,1,'integer',['unsigned'|['big']]),
-																  #<44>(8,1,'integer',['unsigned'|['big']]),
-																  #<32>(8,1,'integer',['unsigned'|['big']]),
-																  #<116>(8,1,'integer',['unsigned'|['big']]),
-																  #<104>(8,1,'integer',['unsigned'|['big']]),
-																  #<97>(8,1,'integer',['unsigned'|['big']]),
-																  #<116>(8,1,'integer',['unsigned'|['big']]),
-																  #<39>(8,1,'integer',['unsigned'|['big']]),
-																  #<115>(8,1,'integer',['unsigned'|['big']]),
-																  #<32>(8,1,'integer',['unsigned'|['big']]),
-																  #<101>(8,1,'integer',['unsigned'|['big']]),
-																  #<110>(8,1,'integer',['unsigned'|['big']]),
-																  #<111>(8,1,'integer',['unsigned'|['big']]),
-																  #<117>(8,1,'integer',['unsigned'|['big']]),
-																  #<103>(8,1,'integer',['unsigned'|['big']]),
-																  #<104>(8,1,'integer',['unsigned'|['big']])}#]
-															   in  do  %% Line 24
-																   ( call ( 'io'
-																	    -| ['result_not_wanted'] ):( 'put_chars'
-																					 -| ['result_not_wanted'] )
-																	 (( [_X_element@5_0|( []
-																			      -| ['result_not_wanted'] )]
-																	    -| ['result_not_wanted'] ))
-																     -| ['result_not_wanted'] )
-																   do  %% Line 24
-																       ( call ( 'io'
-																		-| ['result_not_wanted'] ):( 'nl'
-																					     -| ['result_not_wanted'] )
-																	     ()
-																	 -| ['result_not_wanted'] )
-																       do  %% Line 24
-																	   ( {}
-																	     -| ['result_not_wanted'] )
-																	   apply '$patina_label_1'/1
-																	       (%% Line 27
-																		_X_count@0_1)
-														       <_21> when 'true' ->
-															   ( {}
-															     -| ['result_not_wanted'] )
-														       ( <_8> when 'true' ->
-															     primop 'match_fail'
-																 ({'case_clause',_8})
-															 -| ['compiler_generated'] )
-														     end,_X_count@0_1>
-										    -| ['letrec_goto'] )
-									      in  let <_22> = _10
-										  in  apply _X_$patina_loop
-											  (_X_count@0_1)
-									  -| ['letrec_goto','no_inline'] )
-								( <_14> when 'true' ->
-								      ( primop 'match_fail'
-									    (( {'function_clause',_14}
-									       -| ['result_not_wanted'] ))
-									-| ['result_not_wanted'] )
-								  -| ['compiler_generated'] )
-							      end
-							      -| ['result_not_wanted'] )
-						    -| [{'id',{0,0,'-main/0-fun-0-'}},'result_not_wanted'] )
-					  in  '_$patina_loop'/1
-				      in  let <_X_count@0_1> =
-					      apply %% Line 11
-						    ( _15
+													(( [[#{#<116>(8,1,'integer',['unsigned'|['big']]),
+													       #<104>(8,1,'integer',['unsigned'|['big']]),
+													       #<114>(8,1,'integer',['unsigned'|['big']]),
+													       #<101>(8,1,'integer',['unsigned'|['big']]),
+													       #<101>(8,1,'integer',['unsigned'|['big']])}#]]
+													   -| ['result_not_wanted'] ))
+												    -| ['result_not_wanted'] )
+												  do  %% Line 15
+												      ( call ( 'io'
+													       -| ['result_not_wanted'] ):( 'nl'
+																	    -| ['result_not_wanted'] )
+													    ()
+													-| ['result_not_wanted'] )
+												      apply '$patina_label_0'/1
+													  (%% Line 18
+													   _X_count@0_1)
+											  <_15> when 'true' ->
+											      ( {}
+												-| ['result_not_wanted'] )
+											  ( <_2> when 'true' ->
+												primop 'match_fail'
+												    ({'case_clause',_2})
+											    -| ['compiler_generated'] )
+											end
+											let <_X_element@1_0> =
+											    call %% Line 21
+												 ( 'io_lib'
+												   -| ['result_not_wanted'] ):%% Line 21
+															      ( 'format'
+																-| ['result_not_wanted'] )
+												(%% Line 21
+												 ( [126|[107|[116|[112]]]]
+												   -| ['result_not_wanted'] ), %% Line 21
+															       ( [_X_count@0_1|( []
+																		 -| ['result_not_wanted'] )]
+																 -| ['result_not_wanted'] ))
+											in  let <_X_element@2_0> =
+												[%% Line 21
+												 _X_element@1_0|%% Line 21
+														( []
+														  -| ['result_not_wanted'] )]
+											    in  do  %% Line 21
+												    ( call ( 'io'
+													     -| ['result_not_wanted'] ):( 'put_chars'
+																	  -| ['result_not_wanted'] )
+													  (( [_X_element@2_0|( []
+															       -| ['result_not_wanted'] )]
+													     -| ['result_not_wanted'] ))
+												      -| ['result_not_wanted'] )
+												    do  %% Line 21
+													( call ( 'io'
+														 -| ['result_not_wanted'] ):( 'nl'
+																	      -| ['result_not_wanted'] )
+													      ()
+													  -| ['result_not_wanted'] )
+													%% Line 23
+													<case ( call ( 'erlang'
+														       -| ['result_not_wanted'] ):( '=:='
+																		    -| ['result_not_wanted'] )
+														    (_X_count@0_1, ( 5
+																     -| ['result_not_wanted'] ))
+														-| ['result_not_wanted'] ) of
+													   <'true'> when 'true' ->
+													       do  %% Line 24
+														   ( call ( 'io'
+															    -| ['result_not_wanted'] ):( 'put_chars'
+																			 -| ['result_not_wanted'] )
+															 (( [[#{#<79>(8,1,'integer',['unsigned'|['big']]),
+																#<75>(8,1,'integer',['unsigned'|['big']]),
+																#<44>(8,1,'integer',['unsigned'|['big']]),
+																#<32>(8,1,'integer',['unsigned'|['big']]),
+																#<116>(8,1,'integer',['unsigned'|['big']]),
+																#<104>(8,1,'integer',['unsigned'|['big']]),
+																#<97>(8,1,'integer',['unsigned'|['big']]),
+																#<116>(8,1,'integer',['unsigned'|['big']]),
+																#<39>(8,1,'integer',['unsigned'|['big']]),
+																#<115>(8,1,'integer',['unsigned'|['big']]),
+																#<32>(8,1,'integer',['unsigned'|['big']]),
+																#<101>(8,1,'integer',['unsigned'|['big']]),
+																#<110>(8,1,'integer',['unsigned'|['big']]),
+																#<111>(8,1,'integer',['unsigned'|['big']]),
+																#<117>(8,1,'integer',['unsigned'|['big']]),
+																#<103>(8,1,'integer',['unsigned'|['big']]),
+																#<104>(8,1,'integer',['unsigned'|['big']])}#]]
+															    -| ['result_not_wanted'] ))
+														     -| ['result_not_wanted'] )
+														   do  %% Line 24
+														       ( call ( 'io'
+																-| ['result_not_wanted'] ):( 'nl'
+																			     -| ['result_not_wanted'] )
+															     ()
+															 -| ['result_not_wanted'] )
+														       apply '$patina_label_1'/1
+															   (%% Line 27
+															    _X_count@0_1)
+													   <_16> when 'true' ->
+													       ( {}
+														 -| ['result_not_wanted'] )
+													   ( <_5> when 'true' ->
+														 primop 'match_fail'
+														     ({'case_clause',_5})
+													     -| ['compiler_generated'] )
+													 end,_X_count@0_1>
+									    -| ['letrec_goto'] )
+								      in  apply _X_$patina_loop
+									      (_X_count@0_1)
+								  -| ['letrec_goto','no_inline'] )
+							( <_9> when 'true' ->
+							      ( primop 'match_fail'
+								    (( {'function_clause',_9}
+								       -| ['result_not_wanted'] ))
+								-| ['result_not_wanted'] )
+							  -| ['compiler_generated'] )
+						      end
 						      -| ['result_not_wanted'] )
-						  (%% Line 11
-						   _X_count@0_0)
-					  in  %% Line 27
-					      {}
+					    -| [{'id',{0,0,'-main/0-fun-0-'}},'result_not_wanted'] )
+				  in  '_$patina_loop'/1
+			      in  let <_X_count@0_1> =
+				      apply %% Line 11
+					    ( _10
+					      -| ['result_not_wanted'] )
+					  (%% Line 11
+					   _X_count@0_0)
+				  in  %% Line 27
+				      {}
 	      ( <> when 'true' ->
 		    ( primop 'match_fail'
 			  (( {'function_clause'}

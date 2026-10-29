@@ -33,10 +33,8 @@
                            _self@1_0) ->
     _witness_Container@2_0 =
         'Elixir.Patina.Defaults.Boxed':'Defaults::Container::$patina_witness'(),
-    begin
-        'Elixir.Patina.Defaults.Boxed':'Defaults::Container::get'(_witness_Container@2_0,
-                                                                  _self@1_0)
-    end.
+    'Elixir.Patina.Defaults.Boxed':'Defaults::Container::get'(_witness_Container@2_0,
+                                                              _self@1_0).
 
 'Defaults::Container::$patina_witness'() ->
     {{fun 'Elixir.Patina.Defaults.Rewrapped':'Defaults::Container::$patina_type::Item'/1,

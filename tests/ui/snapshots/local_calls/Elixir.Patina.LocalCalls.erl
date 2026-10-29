@@ -28,22 +28,18 @@ get_age(_age@0_0) -> _age@0_0.
 main() ->
     _age@0_0 = 'Elixir.Patina.LocalCalls.Years':new(25),
     _age_value@1_0 = get_age(_age@0_0),
-    begin
-        io:put_chars(begin
-                         _element@6_0 = begin
-                                            _element@2_0 = <<"Age "/utf8>>,
-                                            _element@3_0 = io_lib:format("~ktp",
-                                                                         [_age@0_0]),
-                                            _element@4_0 = <<" is "/utf8>>,
-                                            _element@5_0 = io_lib:format("~ktp",
-                                                                         [_age_value@1_0]),
-                                            [_element@2_0,
-                                             _element@3_0,
-                                             _element@4_0,
-                                             _element@5_0]
-                                        end,
-                         [_element@6_0]
-                     end),
-        io:nl(),
-        {}
-    end.
+    io:put_chars(begin
+                     _element@4_0 = begin
+                                        _element@2_0 = io_lib:format("~ktp",
+                                                                     [_age@0_0]),
+                                        _element@3_0 = io_lib:format("~ktp",
+                                                                     [_age_value@1_0]),
+                                        [<<"Age "/utf8>>,
+                                         _element@2_0,
+                                         <<" is "/utf8>>,
+                                         _element@3_0]
+                                    end,
+                     [_element@4_0]
+                 end),
+    io:nl(),
+    {}.

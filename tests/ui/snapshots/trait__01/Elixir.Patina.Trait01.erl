@@ -33,39 +33,31 @@
                                           _vtable_Animal@2_0),
     _fn_Animal_name@4_0 = erlang:element(2,
                                          _vtable_Animal@2_0),
-    begin
-        begin
-            io:put_chars(begin
-                             _element@8_0 = begin
-                                                _element@5_0 =
-                                                    _fn_Animal_name@4_0(_witness_Animal@0_0,
-                                                                        _self@1_0),
-                                                _element@6_0 =
-                                                    <<" says "/utf8>>,
-                                                _element@7_0 =
-                                                    _fn_Animal_noise@3_0(_witness_Animal@0_0,
-                                                                         _self@1_0),
-                                                [_element@5_0,
-                                                 _element@6_0,
-                                                 _element@7_0]
-                                            end,
-                             [_element@8_0]
-                         end),
-            io:nl(),
-            {}
-        end
-    end.
+    io:put_chars(begin
+                     _element@7_0 = begin
+                                        _element@5_0 =
+                                            _fn_Animal_name@4_0(_witness_Animal@0_0,
+                                                                _self@1_0),
+                                        _element@6_0 =
+                                            _fn_Animal_noise@3_0(_witness_Animal@0_0,
+                                                                 _self@1_0),
+                                        [_element@5_0,
+                                         <<" says "/utf8>>,
+                                         _element@6_0]
+                                    end,
+                     [_element@7_0]
+                 end),
+    io:nl(),
+    {}.
 
 main() ->
     _witness_Animal@0_0 =
         'Elixir.Patina.Trait01.Sheep':'Trait01::Animal::$patina_witness'(),
-    begin
-        _dolly@1_0 =
-            'Elixir.Patina.Trait01.Sheep':'Trait01::Animal::new'(_witness_Animal@0_0,
-                                                                 <<"Dolly"/utf8>>),
-        'Elixir.Patina.Trait01.Sheep':'Trait01::Animal::talk'(_witness_Animal@0_0,
-                                                              _dolly@1_0),
-        'Elixir.Patina.Trait01.Sheep':shear(_dolly@1_0),
-        'Elixir.Patina.Trait01.Sheep':'Trait01::Animal::talk'(_witness_Animal@0_0,
-                                                              _dolly@1_0)
-    end.
+    _dolly@1_0 =
+        'Elixir.Patina.Trait01.Sheep':'Trait01::Animal::new'(_witness_Animal@0_0,
+                                                             <<"Dolly"/utf8>>),
+    'Elixir.Patina.Trait01.Sheep':'Trait01::Animal::talk'(_witness_Animal@0_0,
+                                                          _dolly@1_0),
+    'Elixir.Patina.Trait01.Sheep':shear(_dolly@1_0),
+    'Elixir.Patina.Trait01.Sheep':'Trait01::Animal::talk'(_witness_Animal@0_0,
+                                                          _dolly@1_0).

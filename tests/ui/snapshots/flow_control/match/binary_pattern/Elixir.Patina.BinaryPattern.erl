@@ -71,10 +71,8 @@ shifts(_a@0_0) ->
     _shifted@1_0 = _a@0_0 bsl 2,
     _b@2_0 = <<(_a@0_0 bsr 2):8/integer,
                (_a@0_0 bsl 3):8/integer>>,
-    begin
-        _element@3_0 = <<1:8/integer>> =:= <<1:8/integer>>,
-        {_shifted@1_0, _b@2_0, _element@3_0}
-    end.
+    _element@3_0 = <<1:8/integer>> =:= <<1:8/integer>>,
+    {_shifted@1_0, _b@2_0, _element@3_0}.
 
 first_byte(_b@0_0) ->
     case _b@0_0 of
@@ -84,20 +82,15 @@ first_byte(_b@0_0) ->
     end.
 
 captured(_b@0_0) ->
-    begin
-        _element@2_0 = case _b@0_0 of
-                           <<_x@1_0:8/integer>> -> _x@1_0;
-                           _ -> -1
-                       end,
-        _element@4_0 = case _b@0_0 of
-                           <<_:8/integer, _x@3_0:8/integer>> -> _x@3_0;
-                           _ -> -1
-                       end,
-        _element@6_0 = begin
-                           _element@5_0 = <<1:8/integer>>, {_element@5_0, 2}
-                       end,
-        {_element@2_0, _element@4_0, _element@6_0}
-    end.
+    _element@2_0 = case _b@0_0 of
+                       <<_x@1_0:8/integer>> -> _x@1_0;
+                       _ -> -1
+                   end,
+    _element@4_0 = case _b@0_0 of
+                       <<_:8/integer, _x@3_0:8/integer>> -> _x@3_0;
+                       _ -> -1
+                   end,
+    {_element@2_0, _element@4_0, {<<1:8/integer>>, 2}}.
 
 term_matches_like_bits(_t@0_0) ->
     case _t@0_0 of
@@ -106,9 +99,7 @@ term_matches_like_bits(_t@0_0) ->
         <<_a@3_0:3/integer, _rest@4_0/bitstring>> ->
             _element@5_0 = _a@3_0 + 100,
             {_element@5_0, _rest@4_0};
-        _ ->
-            _element@6_0 = <<>>,
-            {-1, _element@6_0}
+        _ -> {-1, <<>>}
     end.
 
 decode(_b@0_0) ->
@@ -116,9 +107,7 @@ decode(_b@0_0) ->
         <<_x@1_0:8/integer-signed, _f@2_0:16/float,
           _rest@3_0/binary-unit:16>> ->
             {_x@1_0, _f@2_0, _rest@3_0};
-        _ ->
-            _element@4_0 = <<>>,
-            {0, 0.0, _element@4_0}
+        _ -> {0, 0.0, <<>>}
     end.
 
 chars(_b@0_0) ->
@@ -126,9 +115,7 @@ chars(_b@0_0) ->
         <<_a@1_0/utf16, _b@2_0/utf32-little,
           _rest@3_0/binary>> ->
             {_a@1_0, _b@2_0, _rest@3_0};
-        _ ->
-            _element@4_0 = <<>>,
-            {$?, $?, _element@4_0}
+        _ -> {$?, $?, <<>>}
     end.
 
 encoded_strings_make_bin() ->
@@ -153,10 +140,7 @@ bits_unit_is_binary_unit(_b@0_0) ->
         <<_first@1_0:1/binary-unit:4,
           _rest@2_0/binary-unit:4>> ->
             {_first@1_0, _rest@2_0};
-        _ ->
-            _element@3_0 = <<>>,
-            _element@4_0 = <<>>,
-            {_element@3_0, _element@4_0}
+        _ -> {<<>>, <<>>}
     end.
 
 str_rest(_s@0_0) ->

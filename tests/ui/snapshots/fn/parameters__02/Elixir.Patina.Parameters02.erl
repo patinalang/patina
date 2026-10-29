@@ -37,53 +37,35 @@ choose_op(_op@0_0) ->
     end.
 
 main() ->
-    _fx@1_0 = fun () ->
-                      begin
-                          io:put_chars(begin
-                                           _element@0_0 =
-                                               [<<"fx evaluated!"/utf8>>],
-                                           [_element@0_0]
-                                       end),
-                          io:nl(),
-                          {}
-                      end,
+    _fx@0_0 = fun () ->
+                      io:put_chars([[<<"fx evaluated!"/utf8>>]]),
+                      io:nl(),
                       3
               end,
-    _fy@3_0 = fun () ->
-                      begin
-                          io:put_chars(begin
-                                           _element@2_0 =
-                                               [<<"fy evaluated!"/utf8>>],
-                                           [_element@2_0]
-                                       end),
-                          io:nl(),
-                          {}
-                      end,
+    _fy@1_0 = fun () ->
+                      io:put_chars([[<<"fy evaluated!"/utf8>>]]),
+                      io:nl(),
                       5
               end,
-    _lazy_result@4_0 = lazy_add(_fx@1_0, _fy@3_0),
-    _op@5_0 =
+    _lazy_result@2_0 = lazy_add(_fx@0_0, _fy@1_0),
+    _op@3_0 =
         choose_op('Elixir.Patina.Parameters02.MathOp.Add'),
-    begin
-        io:put_chars(begin
-                         _element@11_0 = begin
-                                             _element@6_0 =
-                                                 io_lib:format("~ktp", [3]),
-                                             _element@7_0 = <<" op "/utf8>>,
-                                             _element@8_0 =
-                                                 io_lib:format("~ktp", [5]),
-                                             _element@9_0 = <<" = "/utf8>>,
-                                             _element@10_0 =
-                                                 io_lib:format("~ktp",
-                                                               [_op@5_0(3, 5)]),
-                                             [_element@6_0,
-                                              _element@7_0,
-                                              _element@8_0,
-                                              _element@9_0,
-                                              _element@10_0]
-                                         end,
-                         [_element@11_0]
-                     end),
-        io:nl(),
-        {}
-    end.
+    io:put_chars(begin
+                     _element@7_0 = begin
+                                        _element@4_0 = io_lib:format("~ktp",
+                                                                     [3]),
+                                        _element@5_0 = io_lib:format("~ktp",
+                                                                     [5]),
+                                        _element@6_0 = io_lib:format("~ktp",
+                                                                     [_op@3_0(3,
+                                                                              5)]),
+                                        [_element@4_0,
+                                         <<" op "/utf8>>,
+                                         _element@5_0,
+                                         <<" = "/utf8>>,
+                                         _element@6_0]
+                                    end,
+                     [_element@7_0]
+                 end),
+    io:nl(),
+    {}.

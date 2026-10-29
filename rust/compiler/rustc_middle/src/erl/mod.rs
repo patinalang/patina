@@ -21,6 +21,7 @@ use rustc_span::{Span, Symbol, kw};
 use smallvec::{SmallVec, smallvec};
 
 use self::shape::ErlShape;
+use crate::erl::etir::visit::Visitor;
 use crate::query::Providers;
 use crate::ty::print::PrintTraitRefExt as _;
 use crate::ty::{
@@ -907,6 +908,51 @@ pub fn to_atom_symbol(mut text: String) -> Symbol {
     let (end, _) = text.char_indices().nth(MAX_ATOM_CHARS - suffix.len()).unwrap();
     text.truncate(end);
     Symbol::intern(&(text + &suffix))
+}
+
+pub fn is_erl_literal(body: &etir::Body<'_>, expr: etir::ExprId) -> bool {
+    struct IsErlLiteral<'a, 'tcx> {
+        body: &'a etir::Body<'tcx>,
+        is_literal: bool,
+    }
+
+    impl<'a, 'tcx> etir::visit::Visitor<'a, 'tcx> for IsErlLiteral<'a, 'tcx> {
+        fn etir(&self) -> &'a etir::Body<'tcx> {
+            self.body
+        }
+
+        fn visit_expr(&mut self, _id: etir::ExprId, expr: &'a etir::Expr<'tcx>) {
+            if !self.is_literal {
+                return;
+            }
+
+            use etir::{AdtExpr, AdtRepr, ExprKind};
+            let allowed = matches!(expr.kind,
+                ExprKind::Literal(..)
+                | ExprKind::UnaryOp { op: etir::UnaryOp::Neg, .. }
+                | ExprKind::List { .. }
+                | ExprKind::Tuple { .. }
+                | ExprKind::BinaryPattern { .. }
+                | ExprKind::Map { base: None, .. }
+                | ExprKind::Cast { kind: etir::CastKind::Identity, .. }
+                | ExprKind::Adt(box AdtExpr {
+                    repr: AdtRepr::Atom { .. } | AdtRepr::Tagged { .. },
+                    base: None,
+                    ..
+                })
+            );
+
+            if allowed {
+                etir::visit::walk_expr(self, expr);
+            } else {
+                self.is_literal = false;
+            }
+        }
+    }
+
+    let mut visitor = IsErlLiteral { body, is_literal: true };
+    visitor.visit_expr_id(&expr);
+    visitor.is_literal
 }
 
 /// The crate name followed by the definition path segments of `def_id`.

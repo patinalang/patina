@@ -56,37 +56,19 @@
 '__info__'(Key) -> module_info(Key).
 
 atom_structs() ->
-    begin
-        _element@0_0 =
-            'Elixir.Patina.ReprPatinaDefault.AtomUnit',
-        _element@1_0 =
-            'Elixir.Patina.ReprPatinaDefault.AtomBraced',
-        _element@2_0 =
-            'Elixir.Patina.ReprPatinaDefault.AtomTuple',
-        {_element@0_0, _element@1_0, _element@2_0}
-    end.
+    {'Elixir.Patina.ReprPatinaDefault.AtomUnit',
+     'Elixir.Patina.ReprPatinaDefault.AtomBraced',
+     'Elixir.Patina.ReprPatinaDefault.AtomTuple'}.
 
 inherited_atoms() ->
-    begin
-        _element@0_0 =
-            'Elixir.Patina.ReprPatinaDefault.InheritedAtom.Unit',
-        _element@1_0 =
-            'Elixir.Patina.ReprPatinaDefault.InheritedAtom.Braced',
-        _element@2_0 =
-            'Elixir.Patina.ReprPatinaDefault.InheritedAtom.Tuple',
-        {_element@0_0, _element@1_0, _element@2_0}
-    end.
+    {'Elixir.Patina.ReprPatinaDefault.InheritedAtom.Unit',
+     'Elixir.Patina.ReprPatinaDefault.InheritedAtom.Braced',
+     'Elixir.Patina.ReprPatinaDefault.InheritedAtom.Tuple'}.
 
 explicit_atoms() ->
-    begin
-        _element@0_0 =
-            'Elixir.Patina.ReprPatinaDefault.ExplicitAtom.Unit',
-        _element@1_0 =
-            'Elixir.Patina.ReprPatinaDefault.ExplicitAtom.Braced',
-        _element@2_0 =
-            'Elixir.Patina.ReprPatinaDefault.ExplicitAtom.Tuple',
-        {_element@0_0, _element@1_0, _element@2_0}
-    end.
+    {'Elixir.Patina.ReprPatinaDefault.ExplicitAtom.Unit',
+     'Elixir.Patina.ReprPatinaDefault.ExplicitAtom.Braced',
+     'Elixir.Patina.ReprPatinaDefault.ExplicitAtom.Tuple'}.
 
 atom_patterns() ->
     'Elixir.Patina.ReprPatinaDefault.AtomUnit' =
@@ -95,30 +77,28 @@ atom_patterns() ->
         'Elixir.Patina.ReprPatinaDefault.AtomBraced',
     'Elixir.Patina.ReprPatinaDefault.AtomTuple' =
         'Elixir.Patina.ReprPatinaDefault.AtomTuple',
-    begin
-        _element@0_0 = case
-                           'Elixir.Patina.ReprPatinaDefault.InheritedAtom.Unit'
-                           of
-                           'Elixir.Patina.ReprPatinaDefault.InheritedAtom.Unit' ->
-                               true;
-                           _ -> false
-                       end,
-        _element@1_0 = case
-                           'Elixir.Patina.ReprPatinaDefault.InheritedAtom.Braced'
-                           of
-                           'Elixir.Patina.ReprPatinaDefault.InheritedAtom.Braced' ->
-                               true;
-                           _ -> false
-                       end,
-        _element@2_0 = case
-                           'Elixir.Patina.ReprPatinaDefault.InheritedAtom.Tuple'
-                           of
-                           'Elixir.Patina.ReprPatinaDefault.InheritedAtom.Tuple' ->
-                               true;
-                           _ -> false
-                       end,
-        {_element@0_0, _element@1_0, _element@2_0}
-    end.
+    _element@0_0 = case
+                       'Elixir.Patina.ReprPatinaDefault.InheritedAtom.Unit'
+                       of
+                       'Elixir.Patina.ReprPatinaDefault.InheritedAtom.Unit' ->
+                           true;
+                       _ -> false
+                   end,
+    _element@1_0 = case
+                       'Elixir.Patina.ReprPatinaDefault.InheritedAtom.Braced'
+                       of
+                       'Elixir.Patina.ReprPatinaDefault.InheritedAtom.Braced' ->
+                           true;
+                       _ -> false
+                   end,
+    _element@2_0 = case
+                       'Elixir.Patina.ReprPatinaDefault.InheritedAtom.Tuple'
+                       of
+                       'Elixir.Patina.ReprPatinaDefault.InheritedAtom.Tuple' ->
+                           true;
+                       _ -> false
+                   end,
+    {_element@0_0, _element@1_0, _element@2_0}.
 
 greedy_first(_value@0_0) -> _value@0_0.
 

@@ -28,39 +28,31 @@
 '__info__'(Key) -> module_info(Key).
 
 fields() ->
-    begin
-        _element@0_0 = 'Elixir.Patina.SideEffects':effect(x,
-                                                          10),
-        _element@1_0 = 'Elixir.Patina.SideEffects':effect(y,
-                                                          20),
-        _element@2_0 = 'Elixir.Patina.SideEffects':effect(z,
-                                                          30),
-        [_element@0_0, _element@1_0, _element@2_0]
-    end.
+    _element@0_0 = 'Elixir.Patina.SideEffects':effect(x,
+                                                      10),
+    _element@1_0 = 'Elixir.Patina.SideEffects':effect(y,
+                                                      20),
+    _element@2_0 = 'Elixir.Patina.SideEffects':effect(z,
+                                                      30),
+    [_element@0_0, _element@1_0, _element@2_0].
 
 base() ->
-    begin
-        _tail@0_0 = 'Elixir.Patina.SideEffects':effect(base,
-                                                       [1, 2, 3]),
-        [0 | _tail@0_0]
-    end.
+    _tail@0_0 = 'Elixir.Patina.SideEffects':effect(base,
+                                                   [1, 2, 3]),
+    [0 | _tail@0_0].
 
 mixed() ->
-    begin
-        _tail@0_0 = 'Elixir.Patina.SideEffects':effect(base,
-                                                       [3, 4]),
-        _element@1_0 = 'Elixir.Patina.SideEffects':effect(x,
-                                                          10),
-        _element@2_0 = 'Elixir.Patina.SideEffects':effect(y,
-                                                          20),
-        [_element@1_0, _element@2_0 | _tail@0_0]
-    end.
+    _tail@0_0 = 'Elixir.Patina.SideEffects':effect(base,
+                                                   [3, 4]),
+    _element@1_0 = 'Elixir.Patina.SideEffects':effect(x,
+                                                      10),
+    _element@2_0 = 'Elixir.Patina.SideEffects':effect(y,
+                                                      20),
+    [_element@1_0, _element@2_0 | _tail@0_0].
 
 empty_tail() ->
-    begin
-        _tail@0_0 = 'Elixir.Patina.SideEffects':effect(base,
-                                                       []),
-        _element@1_0 = 'Elixir.Patina.SideEffects':effect(field,
-                                                          10),
-        [_element@1_0 | _tail@0_0]
-    end.
+    _tail@0_0 = 'Elixir.Patina.SideEffects':effect(base,
+                                                   []),
+    _element@1_0 = 'Elixir.Patina.SideEffects':effect(field,
+                                                      10),
+    [_element@1_0 | _tail@0_0].

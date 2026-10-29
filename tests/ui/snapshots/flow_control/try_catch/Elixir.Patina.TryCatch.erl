@@ -163,12 +163,10 @@ guarded_stack(_f@0_0) ->
     end.
 
 unsafe_reason(_f@0_0) ->
-    begin
-        try _f@0_0(), 0 catch
-            {my_error, _code@1_0}
-                when erlang:is_integer(_code@1_0) ->
-                _code@1_0
-        end
+    try _f@0_0(), 0 catch
+        {my_error, _code@1_0}
+            when erlang:is_integer(_code@1_0) ->
+            _code@1_0
     end.
 
 catch_only() -> try 7 catch error:_ -> 0 end.

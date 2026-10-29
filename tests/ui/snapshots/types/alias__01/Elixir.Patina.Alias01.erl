@@ -26,31 +26,24 @@
 main() ->
     _nanoseconds@0_0 = 5,
     _inches@1_0 = 2,
-    begin
-        io:put_chars(begin
-                         _element@8_0 = begin
-                                            _element@2_0 = io_lib:format("~ktp",
-                                                                         [_nanoseconds@0_0]),
-                                            _element@3_0 =
-                                                <<" nanoseconds + "/utf8>>,
-                                            _element@4_0 = io_lib:format("~ktp",
-                                                                         [_inches@1_0]),
-                                            _element@5_0 =
-                                                <<" inches = "/utf8>>,
-                                            _element@6_0 = io_lib:format("~ktp",
-                                                                         [_nanoseconds@0_0
-                                                                              +
-                                                                              _inches@1_0]),
-                                            _element@7_0 = <<" unit?"/utf8>>,
-                                            [_element@2_0,
-                                             _element@3_0,
-                                             _element@4_0,
-                                             _element@5_0,
-                                             _element@6_0,
-                                             _element@7_0]
-                                        end,
-                         [_element@8_0]
-                     end),
-        io:nl(),
-        {}
-    end.
+    io:put_chars(begin
+                     _element@5_0 = begin
+                                        _element@2_0 = io_lib:format("~ktp",
+                                                                     [_nanoseconds@0_0]),
+                                        _element@3_0 = io_lib:format("~ktp",
+                                                                     [_inches@1_0]),
+                                        _element@4_0 = io_lib:format("~ktp",
+                                                                     [_nanoseconds@0_0
+                                                                          +
+                                                                          _inches@1_0]),
+                                        [_element@2_0,
+                                         <<" nanoseconds + "/utf8>>,
+                                         _element@3_0,
+                                         <<" inches = "/utf8>>,
+                                         _element@4_0,
+                                         <<" unit?"/utf8>>]
+                                    end,
+                     [_element@5_0]
+                 end),
+    io:nl(),
+    {}.

@@ -29,172 +29,143 @@
 continue_outer_loop(_limit@0_0) ->
     _outer@1_0 = 0,
     _visits@2_0 = 0,
-    begin
-        {_jump_value@6_0, _outer@1_1, _visits@2_1} = fun
-                                                         _$patina_loop(_outer@1_0,
-                                                                       _visits@2_0) ->
-                                                             case [] of
-                                                                 {'$patina_label_1',
-                                                                  _jump_value@5_0,
+    {_jump_value@6_0, _outer@1_1, _visits@2_1} = fun
+                                                     _$patina_loop(_outer@1_0,
+                                                                   _visits@2_0) ->
+                                                         case [] of
+                                                             {'$patina_label_1',
+                                                              _jump_value@5_0,
+                                                              _outer@1_2,
+                                                              _visits@2_2} ->
+                                                                 {_jump_value@5_0,
                                                                   _outer@1_2,
-                                                                  _visits@2_2} ->
-                                                                     {_jump_value@5_0,
-                                                                      _outer@1_2,
-                                                                      _visits@2_2};
-                                                                 _ ->
-                                                                     _ = case []
-                                                                             of
-                                                                             {'$patina_label_0',
-                                                                              _outer@1_1,
-                                                                              _visits@2_1} ->
-                                                                                 {};
-                                                                             _ ->
-                                                                                 _branch_value@4_0 =
-                                                                                     begin
-                                                                                         _outer@1_1 =
-                                                                                             _outer@1_0
+                                                                  _visits@2_2};
+                                                             _ ->
+                                                                 case [] of
+                                                                     {'$patina_label_0',
+                                                                      _outer@1_1,
+                                                                      _visits@2_1} ->
+                                                                         {};
+                                                                     _ ->
+                                                                         _branch_value@4_0 =
+                                                                             begin
+                                                                                 _outer@1_1 =
+                                                                                     _outer@1_0
+                                                                                         +
+                                                                                         1,
+                                                                                 fun
+                                                                                     _$patina_loop(_visits@2_0) ->
+                                                                                         _visits@2_1 =
+                                                                                             _visits@2_0
                                                                                                  +
                                                                                                  1,
-                                                                                         fun
-                                                                                             _$patina_loop(_visits@2_0) ->
-                                                                                                 _ =
-                                                                                                     begin
-                                                                                                         _visits@2_1 =
-                                                                                                             _visits@2_0
-                                                                                                                 +
-                                                                                                                 1,
-                                                                                                         case
-                                                                                                             _outer@1_1
-                                                                                                                 <
-                                                                                                                 _limit@0_0
-                                                                                                             of
-                                                                                                             true ->
-                                                                                                                 begin
-                                                                                                                     '$patina_marker':jump('$patina_label_0',
-                                                                                                                                           _outer@1_1,
-                                                                                                                                           _visits@2_1),
-                                                                                                                     []
-                                                                                                                 end;
-                                                                                                             _ ->
-                                                                                                                 {}
-                                                                                                         end,
-                                                                                                         begin
-                                                                                                             _jump_value@3_0 =
-                                                                                                                 _visits@2_1
-                                                                                                                     *
-                                                                                                                     100
-                                                                                                                     +
-                                                                                                                     _outer@1_1,
-                                                                                                             begin
-                                                                                                                 '$patina_marker':jump('$patina_label_1',
-                                                                                                                                       _jump_value@3_0,
-                                                                                                                                       _outer@1_1,
-                                                                                                                                       _visits@2_1),
-                                                                                                                 []
-                                                                                                             end
-                                                                                                         end
-                                                                                                     end,
-                                                                                                 _$patina_loop(_visits@2_1)
-                                                                                         end(_visits@2_0)
-                                                                                     end,
-                                                                                 _visits@2_1 =
-                                                                                     _visits@2_0,
-                                                                                 _branch_value@4_0
-                                                                         end,
-                                                                     _$patina_loop(_outer@1_1,
-                                                                                   _visits@2_1)
-                                                             end
-                                                     end(_outer@1_0,
-                                                         _visits@2_0),
-        _jump_value@6_0
-    end.
+                                                                                         case
+                                                                                             _outer@1_1
+                                                                                                 <
+                                                                                                 _limit@0_0
+                                                                                             of
+                                                                                             true ->
+                                                                                                 '$patina_marker':jump('$patina_label_0',
+                                                                                                                       _outer@1_1,
+                                                                                                                       _visits@2_1),
+                                                                                                 [];
+                                                                                             _ ->
+                                                                                                 {}
+                                                                                         end,
+                                                                                         _jump_value@3_0 =
+                                                                                             _visits@2_1
+                                                                                                 *
+                                                                                                 100
+                                                                                                 +
+                                                                                                 _outer@1_1,
+                                                                                         '$patina_marker':jump('$patina_label_1',
+                                                                                                               _jump_value@3_0,
+                                                                                                               _outer@1_1,
+                                                                                                               _visits@2_1),
+                                                                                         [],
+                                                                                         _$patina_loop(_visits@2_1)
+                                                                                 end(_visits@2_0)
+                                                                             end,
+                                                                         _visits@2_1 =
+                                                                             _visits@2_0,
+                                                                         _branch_value@4_0
+                                                                 end,
+                                                                 _$patina_loop(_outer@1_1,
+                                                                               _visits@2_1)
+                                                         end
+                                                 end(_outer@1_0, _visits@2_0),
+    _jump_value@6_0.
 
 continue_two_loops(_limit@0_0) ->
     _outer@1_0 = 0,
     _visits@2_0 = 0,
-    begin
-        {_jump_value@6_0, _outer@1_1, _visits@2_1} = fun
-                                                         _$patina_loop(_outer@1_0,
-                                                                       _visits@2_0) ->
-                                                             case [] of
-                                                                 {'$patina_label_1',
-                                                                  _jump_value@5_0,
+    {_jump_value@6_0, _outer@1_1, _visits@2_1} = fun
+                                                     _$patina_loop(_outer@1_0,
+                                                                   _visits@2_0) ->
+                                                         case [] of
+                                                             {'$patina_label_1',
+                                                              _jump_value@5_0,
+                                                              _outer@1_2,
+                                                              _visits@2_2} ->
+                                                                 {_jump_value@5_0,
                                                                   _outer@1_2,
-                                                                  _visits@2_2} ->
-                                                                     {_jump_value@5_0,
-                                                                      _outer@1_2,
-                                                                      _visits@2_2};
-                                                                 _ ->
-                                                                     _ = case []
-                                                                             of
-                                                                             {'$patina_label_0',
-                                                                              _outer@1_1,
-                                                                              _visits@2_1} ->
-                                                                                 {};
-                                                                             _ ->
-                                                                                 _branch_value@4_0 =
-                                                                                     begin
-                                                                                         _outer@1_1 =
-                                                                                             _outer@1_0
-                                                                                                 +
-                                                                                                 1,
+                                                                  _visits@2_2};
+                                                             _ ->
+                                                                 case [] of
+                                                                     {'$patina_label_0',
+                                                                      _outer@1_1,
+                                                                      _visits@2_1} ->
+                                                                         {};
+                                                                     _ ->
+                                                                         _branch_value@4_0 =
+                                                                             begin
+                                                                                 _outer@1_1 =
+                                                                                     _outer@1_0
+                                                                                         +
+                                                                                         1,
+                                                                                 fun
+                                                                                     _$patina_loop(_visits@2_0) ->
                                                                                          fun
                                                                                              _$patina_loop(_visits@2_0) ->
-                                                                                                 _ =
-                                                                                                     begin
-                                                                                                         fun
-                                                                                                             _$patina_loop(_visits@2_0) ->
-                                                                                                                 _ =
-                                                                                                                     begin
-                                                                                                                         _visits@2_1 =
-                                                                                                                             _visits@2_0
-                                                                                                                                 +
-                                                                                                                                 1,
-                                                                                                                         case
-                                                                                                                             _outer@1_1
-                                                                                                                                 <
-                                                                                                                                 _limit@0_0
-                                                                                                                             of
-                                                                                                                             true ->
-                                                                                                                                 begin
-                                                                                                                                     '$patina_marker':jump('$patina_label_0',
-                                                                                                                                                           _outer@1_1,
-                                                                                                                                                           _visits@2_1),
-                                                                                                                                     []
-                                                                                                                                 end;
-                                                                                                                             _ ->
-                                                                                                                                 {}
-                                                                                                                         end,
-                                                                                                                         begin
-                                                                                                                             _jump_value@3_0 =
-                                                                                                                                 _visits@2_1
-                                                                                                                                     *
-                                                                                                                                     100
-                                                                                                                                     +
-                                                                                                                                     _outer@1_1,
-                                                                                                                             begin
-                                                                                                                                 '$patina_marker':jump('$patina_label_1',
-                                                                                                                                                       _jump_value@3_0,
-                                                                                                                                                       _outer@1_1,
-                                                                                                                                                       _visits@2_1),
-                                                                                                                                 []
-                                                                                                                             end
-                                                                                                                         end
-                                                                                                                     end,
-                                                                                                                 _$patina_loop(_visits@2_1)
-                                                                                                         end(_visits@2_0)
-                                                                                                     end,
-                                                                                                 _$patina_loop(_visits@2_0)
-                                                                                         end(_visits@2_0)
-                                                                                     end,
-                                                                                 _visits@2_1 =
-                                                                                     _visits@2_0,
-                                                                                 _branch_value@4_0
-                                                                         end,
-                                                                     _$patina_loop(_outer@1_1,
-                                                                                   _visits@2_1)
-                                                             end
-                                                     end(_outer@1_0,
-                                                         _visits@2_0),
-        _jump_value@6_0
-    end.
+                                                                                                 _visits@2_1 =
+                                                                                                     _visits@2_0
+                                                                                                         +
+                                                                                                         1,
+                                                                                                 case
+                                                                                                     _outer@1_1
+                                                                                                         <
+                                                                                                         _limit@0_0
+                                                                                                     of
+                                                                                                     true ->
+                                                                                                         '$patina_marker':jump('$patina_label_0',
+                                                                                                                               _outer@1_1,
+                                                                                                                               _visits@2_1),
+                                                                                                         [];
+                                                                                                     _ ->
+                                                                                                         {}
+                                                                                                 end,
+                                                                                                 _jump_value@3_0 =
+                                                                                                     _visits@2_1
+                                                                                                         *
+                                                                                                         100
+                                                                                                         +
+                                                                                                         _outer@1_1,
+                                                                                                 '$patina_marker':jump('$patina_label_1',
+                                                                                                                       _jump_value@3_0,
+                                                                                                                       _outer@1_1,
+                                                                                                                       _visits@2_1),
+                                                                                                 [],
+                                                                                                 _$patina_loop(_visits@2_1)
+                                                                                         end(_visits@2_0),
+                                                                                         _$patina_loop(_visits@2_0)
+                                                                                 end(_visits@2_0)
+                                                                             end,
+                                                                         _visits@2_1 =
+                                                                             _visits@2_0,
+                                                                         _branch_value@4_0
+                                                                 end,
+                                                                 _$patina_loop(_outer@1_1,
+                                                                               _visits@2_1)
+                                                         end
+                                                 end(_outer@1_0, _visits@2_0),
+    _jump_value@6_0.

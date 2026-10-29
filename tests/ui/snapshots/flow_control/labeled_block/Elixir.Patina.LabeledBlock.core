@@ -111,18 +111,18 @@ module 'Elixir.Patina.LabeledBlock' ['__info__'/1,
 'nested'/1 =
     %% Line 16
     ( fun (_0) ->
-	  let <_18,_X_n@1_1> =
+	  let <_15,_X_n@1_1> =
 	      ( letrec
 		    '$patina_label_0'/1 =
 			fun (%% Line 22
 			     _X_n@1_1) ->
 			    %% Line 22
 			    <{},_X_n@1_1>
-		in  let <_8> =
+		in  let <_6> =
 			letrec
 			    '_$patina_loop'/1 =
 				%% Line 19
-				( fun (_6) ->
+				( fun (_4) ->
 				      ( letrec
 					    '$patina_forward'/1 =
 						fun (_@patina_jump) ->
@@ -134,7 +134,7 @@ module 'Elixir.Patina.LabeledBlock' ['__info__'/1,
 							   -| ['result_not_wanted'] ):%% Line 20
 										      ( '+'
 											-| ['result_not_wanted'] )
-							(( _6
+							(( _4
 							   -| ['result_not_wanted'] ), %% Line 20
 										       ( 1
 											 -| ['result_not_wanted'] ))
@@ -149,7 +149,7 @@ module 'Elixir.Patina.LabeledBlock' ['__info__'/1,
 							      apply '$patina_forward'/1
 								  ({'$patina_label_0',%% Line 22
 										      _X_n@1_1})
-							  <_15> when 'true' ->
+							  <_13> when 'true' ->
 							      'ok'
 							end
 							apply _X_$patina_loop
@@ -159,11 +159,11 @@ module 'Elixir.Patina.LabeledBlock' ['__info__'/1,
 			in  '_$patina_loop'/1
 		    in  let <_X_branch_value@2_0> =
 			    case %% Line 19
-				 ( apply ( _8
+				 ( apply ( _6
 					   -| ['result_not_wanted'] )
 				       (( 0
 					  -| ['result_not_wanted'] ))
-				   -| [{'label',143}] ) of
+				   -| [{'label',140}] ) of
 			      <{'$patina_label_0',_@patina_arg_1}> when 'true' ->
 				  apply '$patina_label_0'/1
 				      (_@patina_arg_1)

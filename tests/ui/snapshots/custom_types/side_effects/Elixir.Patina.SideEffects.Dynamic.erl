@@ -11,17 +11,15 @@
 -export([fields/1]).
 
 fields(_value@0_0) ->
-    begin
-        _value@1_0 = 'Elixir.Patina.SideEffects':effect(field,
-                                                        _value@0_0),
-        case _value@1_0 of
-            _value@2_0
-                when (erlang:is_tuple(_value@2_0) andalso
-                          erlang:tuple_size(_value@2_0) =:= 2)
-                         andalso erlang:element(1, _value@2_0) =:= dynamic ->
-                {dynamic, _value@2_0};
-            _value@2_0 when erlang:is_binary(_value@2_0) ->
-                {dynamic, _value@2_0};
-            _value@2_0 -> _value@2_0
-        end
+    _value@1_0 = 'Elixir.Patina.SideEffects':effect(field,
+                                                    _value@0_0),
+    case _value@1_0 of
+        _value@2_0
+            when (erlang:is_tuple(_value@2_0) andalso
+                      erlang:tuple_size(_value@2_0) =:= 2)
+                     andalso erlang:element(1, _value@2_0) =:= dynamic ->
+            {dynamic, _value@2_0};
+        _value@2_0 when erlang:is_binary(_value@2_0) ->
+            {dynamic, _value@2_0};
+        _value@2_0 -> _value@2_0
     end.

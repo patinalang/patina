@@ -33,70 +33,58 @@ main() ->
     case _text@0_0 of
         <<"Pa"/utf8, $t/utf8, _rest@3_0/binary>> ->
             io:put_chars(begin
-                             _element@6_0 = begin
+                             _element@5_0 = begin
                                                 _element@4_0 =
-                                                    <<"text rest "/utf8>>,
-                                                _element@5_0 =
                                                     io_lib:format("~ktp",
                                                                   [_rest@3_0]),
-                                                [_element@4_0, _element@5_0]
+                                                [<<"text rest "/utf8>>,
+                                                 _element@4_0]
                                             end,
-                             [_element@6_0]
+                             [_element@5_0]
                          end),
             io:nl(),
             {};
         _ ->
-            io:put_chars(begin
-                             _element@7_0 = [<<"unknown text"/utf8>>],
-                             [_element@7_0]
-                         end),
+            io:put_chars([[<<"unknown text"/utf8>>]]),
             io:nl(),
             {}
     end,
     case _bytes@1_0 of
-        <<80, 78, 71, $!/utf8, _rest@8_0/binary>> ->
+        <<80, 78, 71, $!/utf8, _rest@6_0/binary>> ->
+            io:put_chars(begin
+                             _element@8_0 = begin
+                                                _element@7_0 =
+                                                    io_lib:format("~ktp",
+                                                                  [_rest@6_0]),
+                                                [<<"png data "/utf8>>,
+                                                 _element@7_0]
+                                            end,
+                             [_element@8_0]
+                         end),
+            io:nl(),
+            {};
+        _ ->
+            io:put_chars([[<<"unknown binary"/utf8>>]]),
+            io:nl(),
+            {}
+    end,
+    case _packet@2_0 of
+        <<80, 84, $!/utf8, "ok"/utf8, 5:3/integer,
+          _rest@9_0/bitstring>> ->
             io:put_chars(begin
                              _element@11_0 = begin
-                                                 _element@9_0 =
-                                                     <<"png data "/utf8>>,
                                                  _element@10_0 =
                                                      io_lib:format("~ktp",
-                                                                   [_rest@8_0]),
-                                                 [_element@9_0, _element@10_0]
+                                                                   [_rest@9_0]),
+                                                 [<<"packet tail "/utf8>>,
+                                                  _element@10_0]
                                              end,
                              [_element@11_0]
                          end),
             io:nl(),
             {};
         _ ->
-            io:put_chars(begin
-                             _element@12_0 = [<<"unknown binary"/utf8>>],
-                             [_element@12_0]
-                         end),
-            io:nl(),
-            {}
-    end,
-    case _packet@2_0 of
-        <<80, 84, $!/utf8, "ok"/utf8, 5:3/integer,
-          _rest@13_0/bitstring>> ->
-            io:put_chars(begin
-                             _element@16_0 = begin
-                                                 _element@14_0 =
-                                                     <<"packet tail "/utf8>>,
-                                                 _element@15_0 =
-                                                     io_lib:format("~ktp",
-                                                                   [_rest@13_0]),
-                                                 [_element@14_0, _element@15_0]
-                                             end,
-                             [_element@16_0]
-                         end),
-            io:nl(),
-            {};
-        _ ->
-            io:put_chars(begin
-                             _element@17_0 = [<<"unknown packet"/utf8>>],
-                             [_element@17_0]
-                         end),
+            io:put_chars([[<<"unknown packet"/utf8>>]]),
             io:nl(),
             {}
     end.

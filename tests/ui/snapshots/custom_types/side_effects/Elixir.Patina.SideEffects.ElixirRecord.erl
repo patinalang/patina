@@ -44,50 +44,41 @@
                          fun ({Key, Value}, Acc) -> Acc#{Key := Value} end).
 
 fields() ->
-    begin
-        _x@0_0 = 'Elixir.Patina.SideEffects':effect(x, 10),
-        _y@1_0 = 'Elixir.Patina.SideEffects':effect(y, 20),
-        _z@2_0 = 'Elixir.Patina.SideEffects':effect(z, 30),
-        ('__struct__'())#{x := _x@0_0, y := _y@1_0, z := _z@2_0}
-    end.
+    _x@0_0 = 'Elixir.Patina.SideEffects':effect(x, 10),
+    _y@1_0 = 'Elixir.Patina.SideEffects':effect(y, 20),
+    _z@2_0 = 'Elixir.Patina.SideEffects':effect(z, 30),
+    ('__struct__'())#{x := _x@0_0, y := _y@1_0,
+                      z := _z@2_0}.
 
 base() ->
-    begin
-        _field_base@0_0 =
-            'Elixir.Patina.SideEffects':effect(base,
-                                               ('__struct__'())#{x := 1, y := 2,
-                                                                 z := 3}),
-        _field_base@0_0#{}
-    end.
+    _field_base@0_0 =
+        'Elixir.Patina.SideEffects':effect(base,
+                                           ('__struct__'())#{x := 1, y := 2,
+                                                             z := 3}),
+    _field_base@0_0#{}.
 
 update() ->
-    begin
-        _field_base@0_0 =
-            'Elixir.Patina.SideEffects':effect(base,
-                                               ('__struct__'())#{x := 1, y := 2,
-                                                                 z := 3}),
-        _field_base@0_0#{x := 10}
-    end.
+    _field_base@0_0 =
+        'Elixir.Patina.SideEffects':effect(base,
+                                           ('__struct__'())#{x := 1, y := 2,
+                                                             z := 3}),
+    _field_base@0_0#{x := 10}.
 
 mixed() ->
-    begin
-        _field_base@0_0 =
-            'Elixir.Patina.SideEffects':effect(base,
-                                               ('__struct__'())#{x := 1, y := 2,
-                                                                 z := 3}),
-        _x@1_0 = 'Elixir.Patina.SideEffects':effect(x, 10),
-        _z@2_0 = 'Elixir.Patina.SideEffects':effect(z, 30),
-        _field_base@0_0#{x := _x@1_0, z := _z@2_0}
-    end.
+    _field_base@0_0 =
+        'Elixir.Patina.SideEffects':effect(base,
+                                           ('__struct__'())#{x := 1, y := 2,
+                                                             z := 3}),
+    _x@1_0 = 'Elixir.Patina.SideEffects':effect(x, 10),
+    _z@2_0 = 'Elixir.Patina.SideEffects':effect(z, 30),
+    _field_base@0_0#{x := _x@1_0, z := _z@2_0}.
 
 replace() ->
-    begin
-        _field_base@0_0 =
-            'Elixir.Patina.SideEffects':effect(base,
-                                               ('__struct__'())#{x := 1, y := 2,
-                                                                 z := 3}),
-        _x@1_0 = 'Elixir.Patina.SideEffects':effect(x, 10),
-        _y@2_0 = 'Elixir.Patina.SideEffects':effect(y, 20),
-        _z@3_0 = 'Elixir.Patina.SideEffects':effect(z, 30),
-        _field_base@0_0#{x := _x@1_0, y := _y@2_0, z := _z@3_0}
-    end.
+    _field_base@0_0 =
+        'Elixir.Patina.SideEffects':effect(base,
+                                           ('__struct__'())#{x := 1, y := 2,
+                                                             z := 3}),
+    _x@1_0 = 'Elixir.Patina.SideEffects':effect(x, 10),
+    _y@2_0 = 'Elixir.Patina.SideEffects':effect(y, 20),
+    _z@3_0 = 'Elixir.Patina.SideEffects':effect(z, 30),
+    _field_base@0_0#{x := _x@1_0, y := _y@2_0, z := _z@3_0}.

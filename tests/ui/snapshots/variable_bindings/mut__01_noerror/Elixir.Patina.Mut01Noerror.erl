@@ -28,61 +28,47 @@
 main() ->
     __immutable_binding@0_0 = 1,
     _mutable_binding@1_0 = 1,
-    begin
-        io:put_chars(begin
-                         _element@4_0 = begin
-                                            _element@2_0 =
-                                                <<"Before mutating the binding: "/utf8>>,
-                                            _element@3_0 = io_lib:format("~ktp",
-                                                                         [_mutable_binding@1_0]),
-                                            [_element@2_0, _element@3_0]
-                                        end,
-                         [_element@4_0]
-                     end),
-        io:nl(),
-        {}
-    end,
+    io:put_chars(begin
+                     _element@3_0 = begin
+                                        _element@2_0 = io_lib:format("~ktp",
+                                                                     [_mutable_binding@1_0]),
+                                        [<<"Before mutating the binding: "/utf8>>,
+                                         _element@2_0]
+                                    end,
+                     [_element@3_0]
+                 end),
+    io:nl(),
     _mutable_binding@1_1 = _mutable_binding@1_0 + 1,
-    begin
-        io:put_chars(begin
-                         _element@7_0 = begin
-                                            _element@5_0 =
-                                                <<"After mutating the binding: "/utf8>>,
-                                            _element@6_0 = io_lib:format("~ktp",
-                                                                         [_mutable_binding@1_1]),
-                                            [_element@5_0, _element@6_0]
-                                        end,
-                         [_element@7_0]
-                     end),
-        io:nl(),
-        {}
-    end,
-    _my_fun@14_0 = fun () ->
-                           _inner_mutable_binding@8_0 = _mutable_binding@1_1,
-                           _inner_mutable_binding@8_1 =
-                               _inner_mutable_binding@8_0 + 1,
-                           begin
-                               io:put_chars(begin
-                                                _element@13_0 = begin
-                                                                    _element@9_0 =
-                                                                        io_lib:format("~ktp",
-                                                                                      [_inner_mutable_binding@8_1]),
-                                                                    _element@10_0 =
-                                                                        <<" == "/utf8>>,
-                                                                    _element@11_0 =
-                                                                        io_lib:format("~ktp",
-                                                                                      [_mutable_binding@1_1]),
-                                                                    _element@12_0 =
-                                                                        <<" + 1"/utf8>>,
-                                                                    [_element@9_0,
-                                                                     _element@10_0,
-                                                                     _element@11_0,
-                                                                     _element@12_0]
-                                                                end,
-                                                [_element@13_0]
-                                            end),
-                               io:nl(),
-                               {}
-                           end
+    io:put_chars(begin
+                     _element@5_0 = begin
+                                        _element@4_0 = io_lib:format("~ktp",
+                                                                     [_mutable_binding@1_1]),
+                                        [<<"After mutating the binding: "/utf8>>,
+                                         _element@4_0]
+                                    end,
+                     [_element@5_0]
+                 end),
+    io:nl(),
+    _my_fun@10_0 = fun () ->
+                           _inner_mutable_binding@6_0 = _mutable_binding@1_1,
+                           _inner_mutable_binding@6_1 =
+                               _inner_mutable_binding@6_0 + 1,
+                           io:put_chars(begin
+                                            _element@9_0 = begin
+                                                               _element@7_0 =
+                                                                   io_lib:format("~ktp",
+                                                                                 [_inner_mutable_binding@6_1]),
+                                                               _element@8_0 =
+                                                                   io_lib:format("~ktp",
+                                                                                 [_mutable_binding@1_1]),
+                                                               [_element@7_0,
+                                                                <<" == "/utf8>>,
+                                                                _element@8_0,
+                                                                <<" + 1"/utf8>>]
+                                                           end,
+                                            [_element@9_0]
+                                        end),
+                           io:nl(),
+                           {}
                    end,
     {}.

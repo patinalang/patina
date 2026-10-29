@@ -323,31 +323,31 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 		   -| [{'function',{'sum_until_stop',0}}] ) of
 	      <> when 'true' ->
 		  let <_X_total@0_0> = 0
-		  in  let <_9> =
+		  in  let <_7> =
 			  letrec
 			      '_$patina_loop'/1 =
 				  %% Line 29
-				  ( fun (_7) ->
+				  ( fun (_5) ->
 					let <_X_$patina_loop> = '_$patina_loop'/1
-					in  ( case ( _7
+					in  ( case ( _5
 						     -| ['result_not_wanted'] ) of
-						<_11> when 'true' ->
-						    let <_X_total@0_0> = _11
+						<_9> when 'true' ->
+						    let <_X_total@0_0> = _9
 						    in  ( letrec
 							      '$patina_label_0'/1 =
 								  fun (_X_total@0_2) ->
 								      _X_total@0_2
-							  in  let <_4,_X_total@0_1> =
+							  in  let <_11,_X_total@0_1> =
 								  ( letrec
 									'recv$^1'/0 =
 									    fun () ->
-										let <_16,_14> =
+										let <_14,_12> =
 										    primop 'recv_peek_message'
 											()
-										in  case _16 of
+										in  case _14 of
 										      <'true'> when 'true' ->
 											  %% Line 30
-											  case _14 of
+											  case _12 of
 											    %% Line 31
 											    <_X_n@1_0>
 												when ( call ( 'erlang'
@@ -380,10 +380,10 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 											      -| ['compiler_generated','dialyzer_ignore'] )
 											  end
 										      ( <'false'> when 'true' ->
-											    let <_15> =
+											    let <_13> =
 												primop 'recv_wait_timeout'
 												    ('infinity')
-											    in  case _15 of
+											    in  case _13 of
 												  <'true'> when 'true' ->
 												      <'true','true'>
 												  ( <'false'> when 'true' ->
@@ -398,13 +398,12 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 									      ()
 									  -| ['dialyzer_ignore'] )
 								    -| ['letrec_goto'] )
-							      in  let <_13> = _4
-								  in  apply _X_$patina_loop
-									  (_X_total@0_1)
+							      in  apply _X_$patina_loop
+								      (_X_total@0_1)
 							  -| ['letrec_goto','no_inline'] )
-						( <_8> when 'true' ->
+						( <_6> when 'true' ->
 						      ( primop 'match_fail'
-							    (( {'function_clause',_8}
+							    (( {'function_clause',_6}
 							       -| ['result_not_wanted'] ))
 							-| ['result_not_wanted'] )
 						  -| ['compiler_generated'] )
@@ -414,14 +413,12 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 			  in  '_$patina_loop'/1
 		      in  let <_X_total@0_1> =
 			      apply %% Line 29
-				    ( _9
+				    ( _7
 				      -| ['result_not_wanted'] )
 				  (%% Line 29
 				   _X_total@0_0)
-			  in  do  %% Line 32
-				  {}
-				  %% Line 35
-				  _X_total@0_1
+			  in  %% Line 35
+			      _X_total@0_1
 	      ( <> when 'true' ->
 		    ( primop 'match_fail'
 			  (( {'function_clause'}

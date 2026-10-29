@@ -23,6 +23,4 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-sibling_blocks() ->
-    begin {} end,
-    begin {} end.
+sibling_blocks() -> {}.

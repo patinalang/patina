@@ -32,38 +32,29 @@ main() ->
         <<_prefix@1_0:16/integer, _tag@2_0:8/integer,
           _rest@3_0/binary>> ->
             io:put_chars(begin
-                             _element@10_0 = begin
-                                                 _element@4_0 =
-                                                     <<"prefix = "/utf8>>,
-                                                 _element@5_0 =
-                                                     io_lib:format("~ktp",
-                                                                   [_prefix@1_0]),
-                                                 _element@6_0 =
-                                                     <<", tag = "/utf8>>,
-                                                 _element@7_0 =
-                                                     io_lib:format("~ktp",
-                                                                   [_tag@2_0]),
-                                                 _element@8_0 =
-                                                     <<", rest = "/utf8>>,
-                                                 _element@9_0 =
-                                                     io_lib:format("~ktp",
-                                                                   [_rest@3_0]),
-                                                 [_element@4_0,
-                                                  _element@5_0,
-                                                  _element@6_0,
-                                                  _element@7_0,
-                                                  _element@8_0,
-                                                  _element@9_0]
-                                             end,
-                             [_element@10_0]
+                             _element@7_0 = begin
+                                                _element@4_0 =
+                                                    io_lib:format("~ktp",
+                                                                  [_prefix@1_0]),
+                                                _element@5_0 =
+                                                    io_lib:format("~ktp",
+                                                                  [_tag@2_0]),
+                                                _element@6_0 =
+                                                    io_lib:format("~ktp",
+                                                                  [_rest@3_0]),
+                                                [<<"prefix = "/utf8>>,
+                                                 _element@4_0,
+                                                 <<", tag = "/utf8>>,
+                                                 _element@5_0,
+                                                 <<", rest = "/utf8>>,
+                                                 _element@6_0]
+                                            end,
+                             [_element@7_0]
                          end),
             io:nl(),
             {};
         _ ->
-            io:put_chars(begin
-                             _element@11_0 = [<<"did not match"/utf8>>],
-                             [_element@11_0]
-                         end),
+            io:put_chars([[<<"did not match"/utf8>>]]),
             io:nl(),
             {}
     end.

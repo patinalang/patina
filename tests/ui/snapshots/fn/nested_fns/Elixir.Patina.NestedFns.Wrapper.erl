@@ -32,10 +32,8 @@
 trait_in_method(_self@0_0) ->
     _witness_Base@1_0 =
         'NestedFns::{impl#1}::trait_in_method::Base::$patina_witness'(),
-    begin
-        'Elixir.Patina.NestedFns':'NestedFns::{impl#1}::trait_in_method::Base::base'(_witness_Base@1_0,
-                                                                                     _self@0_0)
-    end.
+    'Elixir.Patina.NestedFns':'NestedFns::{impl#1}::trait_in_method::Base::base'(_witness_Base@1_0,
+                                                                                 _self@0_0).
 
 'NestedFns::{impl#1}::trait_in_method::Base::$patina_witness'() ->
     {{fun 'Elixir.Patina.NestedFns':'NestedFns::{impl#1}::trait_in_method::Base::base'/2},

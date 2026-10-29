@@ -41,9 +41,7 @@
                                        _witness_Value@3_0),
     _fn_Value_value@5_0 = erlang:element(1,
                                          _vtable_Value@4_0),
-    begin
-        _fn_Value_value@5_0(_witness_Value@3_0, _self@1_0)
-    end.
+    _fn_Value_value@5_0(_witness_Value@3_0, _self@1_0).
 
 'SourcePlanning::Deep::deep'(_witness_Deep@0_0,
                              _self@1_0) ->
@@ -55,9 +53,7 @@
                                         _witness_Middle@3_0),
     _fn_Middle_middle@5_0 = erlang:element(1,
                                            _vtable_Middle@4_0),
-    begin
-        _fn_Middle_middle@5_0(_witness_Middle@3_0, _self@1_0)
-    end.
+    _fn_Middle_middle@5_0(_witness_Middle@3_0, _self@1_0).
 
 late(_witnesses_where_late@0_0, _x@1_0) ->
     _witness_Direct@2_0 =
@@ -70,18 +66,14 @@ late(_witnesses_where_late@0_0, _x@1_0) ->
                                        _witness_Value@4_0),
     _fn_Value_value@6_0 = erlang:element(1,
                                          _vtable_Value@5_0),
-    begin
-        _first@7_0 = _fn_Value_value@6_0(_witness_Value@4_0,
-                                         _x@1_0),
-        _direct@8_0 =
-            'Elixir.Patina.SourcePlanning.Wrapped':'SourcePlanning::Direct::direct'(_witness_Direct@2_0,
-                                                                                    _x@1_0),
-        begin
-            _element@9_0 = _fn_Value_value@6_0(_witness_Value@4_0,
-                                               _x@1_0),
-            {_first@7_0, _direct@8_0, _element@9_0}
-        end
-    end.
+    _first@7_0 = _fn_Value_value@6_0(_witness_Value@4_0,
+                                     _x@1_0),
+    _direct@8_0 =
+        'Elixir.Patina.SourcePlanning.Wrapped':'SourcePlanning::Direct::direct'(_witness_Direct@2_0,
+                                                                                _x@1_0),
+    _element@9_0 = _fn_Value_value@6_0(_witness_Value@4_0,
+                                       _x@1_0),
+    {_first@7_0, _direct@8_0, _element@9_0}.
 
 early(_witnesses_where_early@0_0, _x@1_0) ->
     _witness_Direct@2_0 =
@@ -94,18 +86,14 @@ early(_witnesses_where_early@0_0, _x@1_0) ->
                                        _witness_Value@4_0),
     _fn_Value_value@6_0 = erlang:element(1,
                                          _vtable_Value@5_0),
-    begin
-        _direct@7_0 =
-            'Elixir.Patina.SourcePlanning.Wrapped':'SourcePlanning::Direct::direct'(_witness_Direct@2_0,
-                                                                                    _x@1_0),
-        begin
-            _element@8_0 = _fn_Value_value@6_0(_witness_Value@4_0,
-                                               _x@1_0),
-            _element@9_0 = _fn_Value_value@6_0(_witness_Value@4_0,
-                                               _x@1_0),
-            {_element@8_0, _direct@7_0, _element@9_0}
-        end
-    end.
+    _direct@7_0 =
+        'Elixir.Patina.SourcePlanning.Wrapped':'SourcePlanning::Direct::direct'(_witness_Direct@2_0,
+                                                                                _x@1_0),
+    _element@8_0 = _fn_Value_value@6_0(_witness_Value@4_0,
+                                       _x@1_0),
+    _element@9_0 = _fn_Value_value@6_0(_witness_Value@4_0,
+                                       _x@1_0),
+    {_element@8_0, _direct@7_0, _element@9_0}.
 
 loop_late(_witnesses_where_loop_late@0_0, _x@1_0,
           _n@2_0) ->
@@ -119,58 +107,40 @@ loop_late(_witnesses_where_loop_late@0_0, _x@1_0,
                                        _witness_Value@5_0),
     _fn_Value_value@7_0 = erlang:element(1,
                                          _vtable_Value@6_0),
-    begin
-        _total@8_0 = 0,
-        _i@9_0 = 0,
-        begin
-            {_i@9_1, _total@8_1} = fun _$patina_loop(_i@9_0,
-                                                     _total@8_0) ->
-                                           case [] of
-                                               {'$patina_label_0',
-                                                _i@9_2,
-                                                _total@8_2} ->
-                                                   {_i@9_2, _total@8_2};
+    _total@8_0 = 0,
+    _i@9_0 = 0,
+    {_i@9_1, _total@8_1} = fun _$patina_loop(_i@9_0,
+                                             _total@8_0) ->
+                                   case [] of
+                                       {'$patina_label_0',
+                                        _i@9_2,
+                                        _total@8_2} ->
+                                           {_i@9_2, _total@8_2};
+                                       _ ->
+                                           case _i@9_0 < _n@2_0 of
+                                               true ->
+                                                   _total@8_1 = _total@8_0 +
+                                                                    _fn_Value_value@7_0(_witness_Value@5_0,
+                                                                                        _x@1_0),
+                                                   _i@9_1 = _i@9_0 + 1,
+                                                   {};
                                                _ ->
-                                                   _ = begin
-                                                           case _i@9_0 < _n@2_0
-                                                               of
-                                                               true ->
-                                                                   _total@8_1 =
-                                                                       _total@8_0
-                                                                           +
-                                                                           _fn_Value_value@7_0(_witness_Value@5_0,
-                                                                                               _x@1_0),
-                                                                   _i@9_1 =
-                                                                       _i@9_0 +
-                                                                           1,
-                                                                   {};
-                                                               _ ->
-                                                                   _branch_value@10_0 =
-                                                                       begin
-                                                                           begin
-                                                                               '$patina_marker':jump('$patina_label_0',
-                                                                                                     _i@9_0,
-                                                                                                     _total@8_0),
-                                                                               []
-                                                                           end
-                                                                       end,
-                                                                   _total@8_1 =
-                                                                       _total@8_0,
-                                                                   _i@9_1 =
-                                                                       _i@9_0,
-                                                                   _branch_value@10_0
-                                                           end
-                                                       end,
-                                                   _$patina_loop(_i@9_1,
-                                                                 _total@8_1)
-                                           end
-                                   end(_i@9_0, _total@8_0),
-            {}
-        end,
-        _total@8_1 +
-            'Elixir.Patina.SourcePlanning.Wrapped':'SourcePlanning::Direct::direct'(_witness_Direct@3_0,
-                                                                                    _x@1_0)
-    end.
+                                                   _branch_value@10_0 = begin
+                                                                            '$patina_marker':jump('$patina_label_0',
+                                                                                                  _i@9_0,
+                                                                                                  _total@8_0),
+                                                                            []
+                                                                        end,
+                                                   _total@8_1 = _total@8_0,
+                                                   _i@9_1 = _i@9_0,
+                                                   _branch_value@10_0
+                                           end,
+                                           _$patina_loop(_i@9_1, _total@8_1)
+                                   end
+                           end(_i@9_0, _total@8_0),
+    _total@8_1 +
+        'Elixir.Patina.SourcePlanning.Wrapped':'SourcePlanning::Direct::direct'(_witness_Direct@3_0,
+                                                                                _x@1_0).
 
 bounded(_witnesses_where_bounded@0_0, _x@1_0) ->
     _witness_Deep@2_0 = erlang:element(1,
@@ -190,16 +160,12 @@ bounded(_witnesses_where_bounded@0_0, _x@1_0) ->
     _witnesses_where_Direct@9_0 = {_witness_Value@6_0},
     _witness_Direct@10_0 =
         'Elixir.Patina.SourcePlanning.Bounded':'SourcePlanning::Direct::$patina_witness'(_witnesses_where_Direct@9_0),
-    begin
-        begin
-            _element@11_0 = _fn_Value_value@8_0(_witness_Value@6_0,
-                                                _x@1_0),
-            _element@12_0 =
-                'Elixir.Patina.SourcePlanning.Bounded':'SourcePlanning::Direct::direct'(_witness_Direct@10_0,
-                                                                                        _x@1_0),
-            {_element@11_0, _element@12_0}
-        end
-    end.
+    _element@11_0 = _fn_Value_value@8_0(_witness_Value@6_0,
+                                        _x@1_0),
+    _element@12_0 =
+        'Elixir.Patina.SourcePlanning.Bounded':'SourcePlanning::Direct::direct'(_witness_Direct@10_0,
+                                                                                _x@1_0),
+    {_element@11_0, _element@12_0}.
 
 associated(_witnesses_where_associated@0_0, _f@1_0) ->
     _witness_Factory@2_0 = erlang:element(1,
@@ -218,47 +184,40 @@ associated(_witnesses_where_associated@0_0, _f@1_0) ->
                                        _witness_Value@7_0),
     _fn_Value_value@9_0 = erlang:element(1,
                                          _vtable_Value@8_0),
-    begin
+    _fn_Value_value@9_0(_witness_Value@7_0,
+                        _fn_Factory_item@4_0(_witness_Factory@2_0, _f@1_0))
+        +
         _fn_Value_value@9_0(_witness_Value@7_0,
-                            _fn_Factory_item@4_0(_witness_Factory@2_0, _f@1_0))
-            +
-            _fn_Value_value@9_0(_witness_Value@7_0,
-                                _fn_Factory_item@4_0(_witness_Factory@2_0,
-                                                     _f@1_0))
-    end.
+                            _fn_Factory_item@4_0(_witness_Factory@2_0, _f@1_0)).
 
 late_source() ->
     _witness_Deep@0_0 =
         'Elixir.Patina.SourcePlanning.Wrapped':'SourcePlanning::Deep::$patina_witness<int>'(),
     _witnesses_where_late@1_0 = {_witness_Deep@0_0},
-    begin late(_witnesses_where_late@1_0, 0) end.
+    late(_witnesses_where_late@1_0, 0).
 
 early_source() ->
     _witness_Deep@0_0 =
         'Elixir.Patina.SourcePlanning.Wrapped':'SourcePlanning::Deep::$patina_witness<int>'(),
     _witnesses_where_early@1_0 = {_witness_Deep@0_0},
-    begin early(_witnesses_where_early@1_0, 0) end.
+    early(_witnesses_where_early@1_0, 0).
 
 loop_source(_n@0_0) ->
     _witness_Deep@1_0 =
         'Elixir.Patina.SourcePlanning.Wrapped':'SourcePlanning::Deep::$patina_witness<int>'(),
     _witnesses_where_loop_late@2_0 = {_witness_Deep@1_0},
-    begin
-        loop_late(_witnesses_where_loop_late@2_0, 0, _n@0_0)
-    end.
+    loop_late(_witnesses_where_loop_late@2_0, 0, _n@0_0).
 
 constructor_input() ->
     _witness_Deep@0_0 =
         'Elixir.Patina.SourcePlanning.Bounded':'SourcePlanning::Deep::$patina_witness<int>'(),
     _witnesses_where_bounded@1_0 = {_witness_Deep@0_0},
-    begin bounded(_witnesses_where_bounded@1_0, 0) end.
+    bounded(_witnesses_where_bounded@1_0, 0).
 
 associated_source() ->
     _witness_Factory@0_0 =
         'Elixir.Patina.SourcePlanning.Maker':'SourcePlanning::Factory::$patina_witness'(),
     _witnesses_where_associated@1_0 =
         {_witness_Factory@0_0},
-    begin
-        associated(_witnesses_where_associated@1_0,
-                   'Elixir.Patina.SourcePlanning.Maker')
-    end.
+    associated(_witnesses_where_associated@1_0,
+               'Elixir.Patina.SourcePlanning.Maker').

@@ -32,12 +32,8 @@ gen_spec_int(__s@0_0) -> {}.
 generic(__s@0_0) -> {}.
 
 main() ->
-    reg_fn(begin
-               _0@0_0 = 'Elixir.Patina.GenFn01.A', _0@0_0
-           end),
-    gen_spec_t(begin
-                   _0@1_0 = 'Elixir.Patina.GenFn01.A', _0@1_0
-               end),
+    reg_fn('Elixir.Patina.GenFn01.A'),
+    gen_spec_t('Elixir.Patina.GenFn01.A'),
     gen_spec_int(6),
     generic($a),
     generic($c).

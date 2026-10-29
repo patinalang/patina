@@ -30,30 +30,23 @@ compare(_witnesses_where_compare@0_0, _a@1_0, _b@2_0) ->
                                            _witness_PartialEq@3_0),
     _fn_PartialEq_eq@5_0 = erlang:element(1,
                                           _vtable_PartialEq@4_0),
-    begin
-        _fn_PartialEq_eq@5_0(_witness_PartialEq@3_0,
-                             _a@1_0,
-                             _b@2_0)
-    end.
+    _fn_PartialEq_eq@5_0(_witness_PartialEq@3_0,
+                         _a@1_0,
+                         _b@2_0).
 
 main() ->
     _witness_PartialEq@0_0 =
         'Elixir.Patina.Core.Int':'Core::PartialEq::$patina_witness'(),
     _witnesses_where_compare@1_0 = {_witness_PartialEq@0_0},
-    begin
-        begin
-            io:put_chars(begin
-                             _element@3_0 = begin
-                                                _element@2_0 =
-                                                    io_lib:format("~ktp",
-                                                                  [compare(_witnesses_where_compare@1_0,
-                                                                           1,
-                                                                           1)]),
-                                                [_element@2_0]
-                                            end,
-                             [_element@3_0]
-                         end),
-            io:nl(),
-            {}
-        end
-    end.
+    io:put_chars(begin
+                     _element@3_0 = begin
+                                        _element@2_0 = io_lib:format("~ktp",
+                                                                     [compare(_witnesses_where_compare@1_0,
+                                                                              1,
+                                                                              1)]),
+                                        [_element@2_0]
+                                    end,
+                     [_element@3_0]
+                 end),
+    io:nl(),
+    {}.

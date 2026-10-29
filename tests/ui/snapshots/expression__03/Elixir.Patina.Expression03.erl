@@ -31,44 +31,31 @@ main() ->
                  _x_cube@2_0 + _x_squared@1_0 + _x@0_0
              end,
     _z@4_0 = begin 2 * _x@0_0, {} end,
-    begin
-        io:put_chars(begin
-                         _element@7_0 = begin
-                                            _element@5_0 = <<"x is "/utf8>>,
-                                            _element@6_0 = io_lib:format("~ktp",
-                                                                         [_x@0_0]),
-                                            [_element@5_0, _element@6_0]
-                                        end,
-                         [_element@7_0]
-                     end),
-        io:nl(),
-        {}
-    end,
-    begin
-        io:put_chars(begin
-                         _element@10_0 = begin
-                                             _element@8_0 = <<"y is "/utf8>>,
-                                             _element@9_0 =
-                                                 io_lib:format("~ktp",
-                                                               [_y@3_0]),
-                                             [_element@8_0, _element@9_0]
-                                         end,
-                         [_element@10_0]
-                     end),
-        io:nl(),
-        {}
-    end,
-    begin
-        io:put_chars(begin
-                         _element@13_0 = begin
-                                             _element@11_0 = <<"z is "/utf8>>,
-                                             _element@12_0 =
-                                                 io_lib:format("~ktp",
-                                                               [_z@4_0]),
-                                             [_element@11_0, _element@12_0]
-                                         end,
-                         [_element@13_0]
-                     end),
-        io:nl(),
-        {}
-    end.
+    io:put_chars(begin
+                     _element@6_0 = begin
+                                        _element@5_0 = io_lib:format("~ktp",
+                                                                     [_x@0_0]),
+                                        [<<"x is "/utf8>>, _element@5_0]
+                                    end,
+                     [_element@6_0]
+                 end),
+    io:nl(),
+    io:put_chars(begin
+                     _element@8_0 = begin
+                                        _element@7_0 = io_lib:format("~ktp",
+                                                                     [_y@3_0]),
+                                        [<<"y is "/utf8>>, _element@7_0]
+                                    end,
+                     [_element@8_0]
+                 end),
+    io:nl(),
+    io:put_chars(begin
+                     _element@10_0 = begin
+                                         _element@9_0 = io_lib:format("~ktp",
+                                                                      [_z@4_0]),
+                                         [<<"z is "/utf8>>, _element@9_0]
+                                     end,
+                     [_element@10_0]
+                 end),
+    io:nl(),
+    {}.

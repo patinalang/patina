@@ -69,17 +69,12 @@ endless_tuple_field(_value@0_0) ->
     _next@1_0.
 
 struct_cycle() ->
-    begin
-        _0@2_0 = begin
-                     _0@1_0 = begin
-                                  _0@0_0 =
-                                      'Elixir.Patina.ReprRecursive.Inner.End',
-                                  'Elixir.Patina.ReprRecursive.Outer':'$patina_constructor__Outer'(_0@0_0)
-                              end,
-                     'Elixir.Patina.ReprRecursive.Inner':'$patina_constructor__Next'(_0@1_0)
-                 end,
-        'Elixir.Patina.ReprRecursive.Outer':'$patina_constructor__Outer'(_0@2_0)
-    end.
+    _0@1_0 = begin
+                 _0@0_0 =
+                     'Elixir.Patina.ReprRecursive.Outer':'$patina_constructor__Outer'('Elixir.Patina.ReprRecursive.Inner.End'),
+                 'Elixir.Patina.ReprRecursive.Inner':'$patina_constructor__Next'(_0@0_0)
+             end,
+    'Elixir.Patina.ReprRecursive.Outer':'$patina_constructor__Outer'(_0@1_0).
 
 struct_depth(_value@0_0) ->
     case
@@ -102,15 +97,11 @@ generic_empty(_value@0_0) -> _value@0_0.
 recursive_void(_value@0_0) -> case _value@0_0 of  end.
 
 list() ->
-    begin
-        _1@1_0 = begin
-                     _1@0_0 = 'Elixir.Patina.ReprRecursive.List.Nil',
-                     'Elixir.Patina.ReprRecursive.List':'$patina_constructor__Cons'(2,
-                                                                                    _1@0_0)
-                 end,
-        'Elixir.Patina.ReprRecursive.List':'$patina_constructor__Cons'(1,
-                                                                       _1@1_0)
-    end.
+    _1@0_0 =
+        'Elixir.Patina.ReprRecursive.List':'$patina_constructor__Cons'(2,
+                                                                       'Elixir.Patina.ReprRecursive.List.Nil'),
+    'Elixir.Patina.ReprRecursive.List':'$patina_constructor__Cons'(1,
+                                                                   _1@0_0).
 
 sum(_value@0_0) ->
     case _value@0_0 of
@@ -122,12 +113,10 @@ sum(_value@0_0) ->
     end.
 
 tree() ->
-    begin
-        _0@0_0 = 3,
-        _1@1_0 = 4,
-        'Elixir.Patina.ReprRecursive.Tree':'$patina_constructor__Branch'(_0@0_0,
-                                                                         _1@1_0)
-    end.
+    _0@0_0 = 3,
+    _1@1_0 = 4,
+    'Elixir.Patina.ReprRecursive.Tree':'$patina_constructor__Branch'(_0@0_0,
+                                                                     _1@1_0).
 
 tree_sum(_value@0_0) ->
     case _value@0_0 of
@@ -141,13 +130,9 @@ tree_sum(_value@0_0) ->
     end.
 
 chain() ->
-    begin
-        _0@1_0 = begin
-                     _0@0_0 = 'Elixir.Patina.ReprRecursive.Chain.End',
-                     'Elixir.Patina.ReprRecursive.Chain':'$patina_constructor__Next'(_0@0_0)
-                 end,
-        'Elixir.Patina.ReprRecursive.Chain':'$patina_constructor__Next'(_0@1_0)
-    end.
+    _0@0_0 =
+        'Elixir.Patina.ReprRecursive.Chain':'$patina_constructor__Next'('Elixir.Patina.ReprRecursive.Chain.End'),
+    'Elixir.Patina.ReprRecursive.Chain':'$patina_constructor__Next'(_0@0_0).
 
 depth(_value@0_0) ->
     case _value@0_0 of
@@ -158,13 +143,9 @@ depth(_value@0_0) ->
     end.
 
 mutual() ->
-    begin
-        _0@1_0 = begin
-                     _0@0_0 = 'Elixir.Patina.ReprRecursive.Left.End',
-                     'Elixir.Patina.ReprRecursive.Right':'$patina_constructor__Next'(_0@0_0)
-                 end,
-        'Elixir.Patina.ReprRecursive.Left':'$patina_constructor__Next'(_0@1_0)
-    end.
+    _0@0_0 =
+        'Elixir.Patina.ReprRecursive.Right':'$patina_constructor__Next'('Elixir.Patina.ReprRecursive.Left.End'),
+    'Elixir.Patina.ReprRecursive.Left':'$patina_constructor__Next'(_0@0_0).
 
 mutual_depth(_value@0_0) ->
     case _value@0_0 of
@@ -180,19 +161,13 @@ mutual_depth(_value@0_0) ->
     end.
 
 reverse_mutual() ->
-    begin
-        _0@1_0 = begin
-                     _0@0_0 = 'Elixir.Patina.ReprRecursive.RightFirst.End',
-                     'Elixir.Patina.ReprRecursive.LeftLater':'$patina_constructor__Next'(_0@0_0)
-                 end,
-        'Elixir.Patina.ReprRecursive.RightFirst':'$patina_constructor__Next'(_0@1_0)
-    end.
+    _0@0_0 =
+        'Elixir.Patina.ReprRecursive.LeftLater':'$patina_constructor__Next'('Elixir.Patina.ReprRecursive.RightFirst.End'),
+    'Elixir.Patina.ReprRecursive.RightFirst':'$patina_constructor__Next'(_0@0_0).
 
 generic() ->
-    begin
-        _0@1_0 = begin _0@0_0 = 9, _0@0_0 end,
-        'Elixir.Patina.ReprRecursive.Generic':'$patina_constructor__Next'(_0@1_0)
-    end.
+    _0@1_0 = begin _0@0_0 = 9, _0@0_0 end,
+    'Elixir.Patina.ReprRecursive.Generic':'$patina_constructor__Next'(_0@1_0).
 
 generic_value(_value@0_0) ->
     case _value@0_0 of
@@ -205,10 +180,8 @@ generic_value(_value@0_0) ->
     end.
 
 growing() ->
-    begin
-        _0@1_0 = begin _0@0_0 = [2], _0@0_0 end,
-        'Elixir.Patina.ReprRecursive.Growing':'$patina_constructor__Next'(_0@1_0)
-    end.
+    _0@0_0 = [2],
+    'Elixir.Patina.ReprRecursive.Growing':'$patina_constructor__Next'(_0@0_0).
 
 growing_field(_value@0_0) ->
     case _value@0_0 of
@@ -224,72 +197,39 @@ growing_field(_value@0_0) ->
     end.
 
 list_boundary() ->
-    begin
-        _0@2_0 = begin
-                     _element@1_0 = begin _0@0_0 = [], _0@0_0 end,
-                     [_element@1_0]
-                 end,
-        _0@2_0
-    end.
+    _0@1_0 = begin _element@0_0 = [], [_element@0_0] end,
+    _0@1_0.
 
 map_boundary() ->
-    begin
-        _0@2_0 = begin
-                     _value@1_0 = begin _0@0_0 = #{}, _0@0_0 end,
-                     #{child => _value@1_0}
-                 end,
-        _0@2_0
-    end.
+    _0@1_0 = begin
+                 _value@0_0 = #{}, #{child => _value@0_0}
+             end,
+    _0@1_0.
 
 function_boundary() ->
-    begin _0@0_0 = fun function_boundary/0, _0@0_0 end.
+    _0@0_0 = fun function_boundary/0,
+    _0@0_0.
 
 call_boundary(_value@0_0) -> _value@0_0().
 
 wrapped_tuple() ->
-    begin
-        _0@2_0 = begin
-                     _0@1_0 = begin
-                                  _element@0_0 =
-                                      'Elixir.Patina.ReprRecursive.WrappedTuple.End',
-                                  {6, _element@0_0}
-                              end,
-                     _0@1_0
-                 end,
-        _0@2_0
-    end.
+    _0@0_0 = {6,
+              'Elixir.Patina.ReprRecursive.WrappedTuple.End'},
+    _0@0_0.
 
 fixed_generic() ->
-    begin
-        _0@1_0 = begin
-                     _0@0_0 = 'Elixir.Patina.ReprRecursive.FixedGeneric.End',
-                     {wrapped, _0@0_0}
-                 end,
-        _0@1_0
-    end.
+    {wrapped,
+     'Elixir.Patina.ReprRecursive.FixedGeneric.End'}.
 
 fixed_record_generic() ->
-    begin
-        _0@1_0 = begin
-                     _0@0_0 =
-                         'Elixir.Patina.ReprRecursive.FixedRecordGeneric.End',
-                     'Elixir.Patina.ReprRecursive.NativeWrapper':'$patina_constructor__NativeWrapper'(_0@0_0)
-                 end,
-        _0@1_0
-    end.
+    _0@0_0 =
+        'Elixir.Patina.ReprRecursive.NativeWrapper':'$patina_constructor__NativeWrapper'('Elixir.Patina.ReprRecursive.FixedRecordGeneric.End'),
+    _0@0_0.
 
 tuple_boundary() ->
-    begin
-        _0@2_0 = begin
-                     _0@1_0 = begin
-                                  _element@0_0 =
-                                      'Elixir.Patina.ReprRecursive.TupleChain.End',
-                                  {5, _element@0_0}
-                              end,
-                     _0@1_0
-                 end,
-        _0@2_0
-    end.
+    _0@0_0 = {5,
+              'Elixir.Patina.ReprRecursive.TupleChain.End'},
+    _0@0_0.
 
 tuple_value(_value@0_0) ->
     case _value@0_0 of
@@ -302,10 +242,7 @@ tuple_value(_value@0_0) ->
     end.
 
 tagged() ->
-    begin
-        _0@0_0 = 'Elixir.Patina.ReprRecursive.TaggedChain.End',
-        {next, _0@0_0}
-    end.
+    {next, 'Elixir.Patina.ReprRecursive.TaggedChain.End'}.
 
 tagged_depth(_value@0_0) ->
     case _value@0_0 of
@@ -314,10 +251,7 @@ tagged_depth(_value@0_0) ->
     end.
 
 record() ->
-    begin
-        _0@0_0 = 'Elixir.Patina.ReprRecursive.RecordChain.End',
-        'Elixir.Patina.ReprRecursive.RecordChain':'$patina_constructor__Next'(_0@0_0)
-    end.
+    'Elixir.Patina.ReprRecursive.RecordChain':'$patina_constructor__Next'('Elixir.Patina.ReprRecursive.RecordChain.End').
 
 record_depth(_value@0_0) ->
     case _value@0_0 of
@@ -328,11 +262,7 @@ record_depth(_value@0_0) ->
     end.
 
 overridden() ->
-    begin
-        _0@0_0 =
-            'Elixir.Patina.ReprRecursive.OverriddenChain.End',
-        'Elixir.Patina.ReprRecursive.OverriddenChain':'$patina_constructor__Next'(_0@0_0)
-    end.
+    'Elixir.Patina.ReprRecursive.OverriddenChain':'$patina_constructor__Next'('Elixir.Patina.ReprRecursive.OverriddenChain.End').
 
 overridden_depth(_value@0_0) ->
     case _value@0_0 of

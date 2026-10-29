@@ -24,27 +24,13 @@
 '__info__'(Key) -> module_info(Key).
 
 some_fn() ->
-    begin
-        erlang:error('Elixir.Patina.Core.Panic':new(<<"This call never returns."/utf8>>),
-                     none,
-                     begin
-                         _element@1_0 = begin
-                                            _element@0_0 = #{module =>
-                                                                 'Elixir.Patina.Core.Panic'},
-                                            {error_info, _element@0_0}
-                                        end,
-                         [_element@1_0]
-                     end)
-    end.
+    erlang:error('Elixir.Patina.Core.Panic':new(<<"This call never returns."/utf8>>),
+                 none,
+                 [{error_info,
+                   #{module => 'Elixir.Patina.Core.Panic'}}]).
 
 main() ->
     __a@0_0 = some_fn(),
-    begin
-        io:put_chars(begin
-                         _element@1_0 =
-                             [<<"You will never see this line!"/utf8>>],
-                         [_element@1_0]
-                     end),
-        io:nl(),
-        {}
-    end.
+    io:put_chars([[<<"You will never see this line!"/utf8>>]]),
+    io:nl(),
+    {}.

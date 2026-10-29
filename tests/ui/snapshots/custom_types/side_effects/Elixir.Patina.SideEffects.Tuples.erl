@@ -24,30 +24,26 @@
 '__info__'(Key) -> module_info(Key).
 
 fields() ->
-    begin
-        _element@0_0 = 'Elixir.Patina.SideEffects':effect(x,
-                                                          10),
-        _element@1_0 = 'Elixir.Patina.SideEffects':effect(y,
-                                                          20),
-        _element@2_0 = 'Elixir.Patina.SideEffects':effect(z,
-                                                          30),
-        {_element@0_0, _element@1_0, _element@2_0}
-    end.
+    _element@0_0 = 'Elixir.Patina.SideEffects':effect(x,
+                                                      10),
+    _element@1_0 = 'Elixir.Patina.SideEffects':effect(y,
+                                                      20),
+    _element@2_0 = 'Elixir.Patina.SideEffects':effect(z,
+                                                      30),
+    {_element@0_0, _element@1_0, _element@2_0}.
 
 base() ->
     erlang:element(2,
                    'Elixir.Patina.SideEffects':effect(base, {1, 2, 3})).
 
 mixed() ->
-    begin
-        _element@0_0 = 'Elixir.Patina.SideEffects':effect(x,
-                                                          10),
-        _element@1_0 = erlang:element(2,
-                                      'Elixir.Patina.SideEffects':effect(base,
-                                                                         {1,
-                                                                          2,
-                                                                          3})),
-        _element@2_0 = 'Elixir.Patina.SideEffects':effect(z,
-                                                          30),
-        {_element@0_0, _element@1_0, _element@2_0}
-    end.
+    _element@0_0 = 'Elixir.Patina.SideEffects':effect(x,
+                                                      10),
+    _element@1_0 = erlang:element(2,
+                                  'Elixir.Patina.SideEffects':effect(base,
+                                                                     {1,
+                                                                      2,
+                                                                      3})),
+    _element@2_0 = 'Elixir.Patina.SideEffects':effect(z,
+                                                      30),
+    {_element@0_0, _element@1_0, _element@2_0}.

@@ -72,14 +72,14 @@ assign_as_match_scrutinee() ->
     end.
 
 destructuring_assign() ->
-    begin _first@0_0 = {} end,
-    begin _second@1_0 = {} end,
+    _first@0_0 = {},
+    _second@1_0 = {},
     {_first@0_1, _second@1_1} = {40, 2},
     _first@0_1 + _second@1_1.
 
 destructuring_assign_value() ->
-    begin _first@0_0 = {} end,
-    begin _second@1_0 = {} end,
+    _first@0_0 = {},
+    _second@1_0 = {},
     {_first@0_1, _second@1_1} = {40, 2}.
 
 swap() ->
@@ -89,16 +89,16 @@ swap() ->
     {_first@0_1, _second@1_1}.
 
 nested(_value@0_0) ->
-    begin _first@1_0 = {} end,
-    begin _second@2_0 = {} end,
-    begin _third@3_0 = {} end,
+    _first@1_0 = {},
+    _second@2_0 = {},
+    _third@3_0 = {},
     {{_first@1_1, _second@2_1}, {_third@3_1, _}} =
         _value@0_0,
     _first@1_1 + _second@2_1 + _third@3_1.
 
 struct_fields() ->
-    begin _x@0_0 = {} end,
-    begin _y@1_0 = {} end,
+    _x@0_0 = {},
+    _y@1_0 = {},
     #'Elixir.Patina.AssignmentType.Point':'Point'{x =
                                                       _x@0_1,
                                                   y = _y@1_1} =
@@ -107,8 +107,8 @@ struct_fields() ->
     _x@0_1 + _y@1_1.
 
 assign_coerces_to_var_type() ->
-    begin _first@0_0 = {} end,
-    begin _second@1_0 = {} end,
+    _first@0_0 = {},
+    _second@1_0 = {},
     {_first@0_1, _second@1_1} = {40, 2},
     {_first@0_1, _second@1_1}.
 
@@ -116,77 +116,62 @@ fibonacci(_n@0_0) ->
     _current@1_0 = 0,
     _next@2_0 = 1,
     _i@3_0 = 0,
-    begin
-        {_i@3_1, _current@1_1, _next@2_1} = fun
-                                                _$patina_loop(_i@3_0,
-                                                              _current@1_0,
-                                                              _next@2_0) ->
-                                                    case [] of
-                                                        {'$patina_label_0',
-                                                         _i@3_2,
+    {_i@3_1, _current@1_1, _next@2_1} = fun
+                                            _$patina_loop(_i@3_0, _current@1_0,
+                                                          _next@2_0) ->
+                                                case [] of
+                                                    {'$patina_label_0',
+                                                     _i@3_2,
+                                                     _current@1_2,
+                                                     _next@2_2} ->
+                                                        {_i@3_2,
                                                          _current@1_2,
-                                                         _next@2_2} ->
-                                                            {_i@3_2,
-                                                             _current@1_2,
-                                                             _next@2_2};
-                                                        _ ->
-                                                            _ = begin
-                                                                    case _i@3_0
-                                                                             <
-                                                                             _n@0_0
-                                                                        of
-                                                                        true ->
-                                                                            {_current@1_1,
-                                                                             _next@2_1} =
-                                                                                begin
-                                                                                    _element@4_0 =
-                                                                                        _current@1_0
-                                                                                            +
-                                                                                            _next@2_0,
-                                                                                    {_next@2_0,
-                                                                                     _element@4_0}
-                                                                                end,
-                                                                            _i@3_1 =
-                                                                                _i@3_0
-                                                                                    +
-                                                                                    1,
-                                                                            {};
-                                                                        _ ->
-                                                                            _branch_value@5_0 =
-                                                                                begin
-                                                                                    begin
-                                                                                        '$patina_marker':jump('$patina_label_0',
-                                                                                                              _i@3_0,
-                                                                                                              _current@1_0,
-                                                                                                              _next@2_0),
-                                                                                        []
-                                                                                    end
-                                                                                end,
-                                                                            _current@1_1 =
-                                                                                _current@1_0,
-                                                                            _next@2_1 =
+                                                         _next@2_2};
+                                                    _ ->
+                                                        case _i@3_0 < _n@0_0 of
+                                                            true ->
+                                                                {_current@1_1,
+                                                                 _next@2_1} =
+                                                                    begin
+                                                                        _element@4_0 =
+                                                                            _current@1_0
+                                                                                +
                                                                                 _next@2_0,
-                                                                            _i@3_1 =
-                                                                                _i@3_0,
-                                                                            _branch_value@5_0
-                                                                    end
-                                                                end,
-                                                            _$patina_loop(_i@3_1,
-                                                                          _current@1_1,
-                                                                          _next@2_1)
-                                                    end
-                                            end(_i@3_0,
-                                                _current@1_0,
-                                                _next@2_0),
-        {}
-    end,
+                                                                        {_next@2_0,
+                                                                         _element@4_0}
+                                                                    end,
+                                                                _i@3_1 = _i@3_0
+                                                                             +
+                                                                             1,
+                                                                {};
+                                                            _ ->
+                                                                _branch_value@5_0 =
+                                                                    begin
+                                                                        '$patina_marker':jump('$patina_label_0',
+                                                                                              _i@3_0,
+                                                                                              _current@1_0,
+                                                                                              _next@2_0),
+                                                                        []
+                                                                    end,
+                                                                _current@1_1 =
+                                                                    _current@1_0,
+                                                                _next@2_1 =
+                                                                    _next@2_0,
+                                                                _i@3_1 = _i@3_0,
+                                                                _branch_value@5_0
+                                                        end,
+                                                        _$patina_loop(_i@3_1,
+                                                                      _current@1_1,
+                                                                      _next@2_1)
+                                                end
+                                        end(_i@3_0, _current@1_0, _next@2_0),
     _current@1_1.
 
 discard() -> _ = 42.
 
 parenthesized_struct_in_scrutinee() ->
-    begin _x@0_0 = {} end,
-    begin _y@1_0 = {} end,
+    _x@0_0 = {},
+    _y@1_0 = {},
     case #'Elixir.Patina.AssignmentType.Point':'Point'{x =
                                                            _x@0_1,
                                                        y = _y@1_1} =
@@ -212,8 +197,7 @@ block_ending_in_let() ->
     __value@0_0 = 42,
     {}.
 
-block_ending_in_uninitialized_let() ->
-    begin __value@0_0 = {} end.
+block_ending_in_uninitialized_let() -> __value@0_0 = {}.
 
 block_ending_in_let_else(_value@0_0) ->
     case [] of
@@ -222,7 +206,8 @@ block_ending_in_let_else(_value@0_0) ->
             case _value@0_0 of
                 42 -> {};
                 _ ->
-                    begin '$patina_marker':jump('$patina_label_0'), [] end
+                    '$patina_marker':jump('$patina_label_0'),
+                    []
             end
     end.
 
@@ -234,6 +219,6 @@ block_ending_in_assignment() ->
     {}.
 
 block_ending_in_destructuring_assignment() ->
-    begin __first@0_0 = {} end,
+    __first@0_0 = {},
     {__first@0_1, _} = {1, 2},
     {}.

@@ -2,8 +2,8 @@ use rustc_hir::def::DefKind;
 use rustc_hir::{BinarySegmentTy, HirId};
 use rustc_middle::erl::binary_pattern::{BinaryEndianness, BinarySegmentLayout, BinarySegmentSize};
 use rustc_middle::erl::etir::visit::{Visitor, walk_pat};
-use rustc_middle::erl::etir::{self, ExprId, JoinId, PatId, PatternInput};
-use rustc_middle::erl::{ErlCallTarget, ErlModuleId};
+use rustc_middle::erl::etir::{self, ExprId, JoinId, PatId, PatternInput, VarId};
+use rustc_middle::erl::{ErlCallTarget, ErlModuleId, is_erl_literal};
 use rustc_middle::middle::region;
 use rustc_middle::mir::{BinOp, UnOp};
 use rustc_middle::span_bug;
@@ -36,12 +36,20 @@ impl<'a, 'tcx> ExprBlock {
     /// Emits an assignment of `value` to a fresh var named `name`, and returns the var expr.
     /// If `value` is already a var or a literal, does nothing.
     fn maybe_bind(&mut self, cx: &mut ThirBodyCx<'a, 'tcx>, name: Symbol, value: ExprId) -> ExprId {
-        let etir::Expr { ty, span, ref kind } = cx.cx.body[value];
-        if matches!(kind, etir::ExprKind::Var(_) | etir::ExprKind::Literal(_, _)) {
-            return value;
+        let body = &cx.cx.body;
+        let etir::Expr { ty, span, ref kind } = body[value];
+        if matches!(kind, etir::ExprKind::Var(_)) || is_erl_literal(body, value) {
+            value
+        } else {
+            let var = cx.push_var(Ident { name, span });
+            self.bind(cx, var, value);
+            cx.push_expr(etir::ExprKind::Var(var), ty, span)
         }
+    }
 
-        let var = cx.push_var(Ident { name, span });
+    /// Emits an assignment of `value` to a `var`.
+    fn bind(&mut self, cx: &mut ThirBodyCx<'a, 'tcx>, var: VarId, value: ExprId) {
+        let etir::Expr { ty, span, kind: _ } = cx.cx.body[value];
 
         let binding = cx.push_pat(
             etir::PatKind::Binding {
@@ -58,8 +66,6 @@ impl<'a, 'tcx> ExprBlock {
             cx.push_expr(etir::ExprKind::Assign { lhs: binding, rhs: value }, ty, span);
 
         self.0.push(assign_expr);
-
-        cx.push_expr(etir::ExprKind::Var(var), ty, span)
     }
 }
 

@@ -26,54 +26,41 @@
 main() ->
     _name@0_0 = <<"world"/utf8>>,
     _n@1_0 = 42,
-    begin
-        io:put_chars(begin
-                         _element@5_0 = begin
-                                            _element@2_0 = <<"hello, "/utf8>>,
-                                            _element@3_0 = _name@0_0,
-                                            _element@4_0 = <<"!"/utf8>>,
-                                            [_element@2_0,
-                                             _element@3_0,
-                                             _element@4_0]
-                                        end,
-                         [_element@5_0]
-                     end),
-        io:nl(),
-        {}
-    end,
-    begin
-        io:put_chars(begin
-                         _element@9_0 = begin
-                                            _element@6_0 = _name@0_0,
-                                            _element@7_0 = <<" = "/utf8>>,
-                                            _element@8_0 = io_lib:format("~ktp",
-                                                                         [_n@1_0]),
-                                            [_element@6_0,
-                                             _element@7_0,
-                                             _element@8_0]
-                                        end,
-                         [_element@9_0]
-                     end),
-        io:nl(),
-        {}
-    end,
-    begin
-        io:put_chars(begin
-                         _element@13_0 = begin
-                                             _element@10_0 = _name@0_0,
-                                             _element@11_0 = <<" and "/utf8>>,
-                                             _element@12_0 =
-                                                 io_lib:format("~ktp",
-                                                               [_n@1_0]),
-                                             [_element@10_0,
-                                              _element@11_0,
-                                              _element@12_0]
-                                         end,
-                         [_element@13_0]
-                     end),
-        io:nl(),
-        {}
-    end,
-    begin io:put_chars([<<"no "/utf8>>]), {} end,
-    begin io:put_chars([<<"newline"/utf8>>]), {} end,
-    begin io:nl(), {} end.
+    io:put_chars(begin
+                     _element@3_0 = begin
+                                        _element@2_0 = _name@0_0,
+                                        [<<"hello, "/utf8>>,
+                                         _element@2_0,
+                                         <<"!"/utf8>>]
+                                    end,
+                     [_element@3_0]
+                 end),
+    io:nl(),
+    io:put_chars(begin
+                     _element@6_0 = begin
+                                        _element@4_0 = _name@0_0,
+                                        _element@5_0 = io_lib:format("~ktp",
+                                                                     [_n@1_0]),
+                                        [_element@4_0,
+                                         <<" = "/utf8>>,
+                                         _element@5_0]
+                                    end,
+                     [_element@6_0]
+                 end),
+    io:nl(),
+    io:put_chars(begin
+                     _element@9_0 = begin
+                                        _element@7_0 = _name@0_0,
+                                        _element@8_0 = io_lib:format("~ktp",
+                                                                     [_n@1_0]),
+                                        [_element@7_0,
+                                         <<" and "/utf8>>,
+                                         _element@8_0]
+                                    end,
+                     [_element@9_0]
+                 end),
+    io:nl(),
+    io:put_chars([<<"no "/utf8>>]),
+    io:put_chars([<<"newline"/utf8>>]),
+    io:nl(),
+    {}.

@@ -43,7 +43,7 @@
 '__info__'(Key) -> module_info(Key).
 
 mark(_value@0_0) ->
-    _marks@1_0 = begin erlang:get(marks) end,
+    _marks@1_0 = erlang:get(marks),
     erlang:put(marks, [_value@0_0 | _marks@1_0]),
     _value@0_0.
 
@@ -66,14 +66,12 @@ is_negative(_x@0_0) ->
         _ ->
             case _x@0_0 >= 0 of
                 true ->
-                    begin
-                        '$patina_marker':jump('$patina_label_0', false), []
-                    end;
+                    '$patina_marker':jump('$patina_label_0', false),
+                    [];
                 _ -> {}
             end,
-            begin
-                '$patina_marker':jump('$patina_label_0', true), []
-            end
+            '$patina_marker':jump('$patina_label_0', true),
+            []
     end.
 
 is_negative_implicit(_x@0_0) ->
@@ -82,9 +80,8 @@ is_negative_implicit(_x@0_0) ->
         _ ->
             case _x@0_0 >= 0 of
                 true ->
-                    begin
-                        '$patina_marker':jump('$patina_label_0', false), []
-                    end;
+                    '$patina_marker':jump('$patina_label_0', false),
+                    [];
                 _ -> {}
             end,
             true
@@ -98,11 +95,9 @@ closure_value(_stop@0_0) ->
                                 _ ->
                                     case _stop@0_0 of
                                         true ->
-                                            begin
-                                                '$patina_marker':jump('$patina_label_0',
-                                                                      4),
-                                                []
-                                            end;
+                                            '$patina_marker':jump('$patina_label_0',
+                                                                  4),
+                                            [];
                                         _ -> {}
                                     end,
                                     5
@@ -118,11 +113,9 @@ inlined_closure_value(_stop@0_0) ->
                                _ ->
                                    case _stop@0_0 of
                                        true ->
-                                           begin
-                                               '$patina_marker':jump('$patina_label_0',
-                                                                     4),
-                                               []
-                                           end;
+                                           '$patina_marker':jump('$patina_label_0',
+                                                                 4),
+                                           [];
                                        _ -> {}
                                    end,
                                    5
@@ -140,11 +133,9 @@ passed_closure_value(_x@0_0) ->
                           _ ->
                               case _y@1_0 < 0 of
                                   true ->
-                                      begin
-                                          '$patina_marker':jump('$patina_label_0',
-                                                                0),
-                                          []
-                                      end;
+                                      '$patina_marker':jump('$patina_label_0',
+                                                            0),
+                                      [];
                                   _ -> {}
                               end,
                               _y@1_0 + 1
@@ -160,14 +151,10 @@ expression_value(_stop@0_0) ->
                 begin
                     case _stop@0_0 of
                         true ->
-                            begin
-                                _jump_value@1_0 = mark(2),
-                                begin
-                                    '$patina_marker':jump('$patina_label_0',
-                                                          _jump_value@1_0),
-                                    []
-                                end
-                            end;
+                            _jump_value@1_0 = mark(2),
+                            '$patina_marker':jump('$patina_label_0',
+                                                  _jump_value@1_0),
+                            [];
                         _ -> {}
                     end,
                     mark(3)
@@ -187,10 +174,8 @@ match_scrutinee_value(_stop@0_0) ->
             case begin
                      case _stop@0_0 of
                          true ->
-                             begin
-                                 '$patina_marker':jump('$patina_label_0', 40),
-                                 []
-                             end;
+                             '$patina_marker':jump('$patina_label_0', 40),
+                             [];
                          _ -> {}
                      end,
                      'Elixir.Patina.EarlyReturn.Choice.Continue'
@@ -208,25 +193,19 @@ nested_value(_x@0_0) ->
             _result@1_0 = begin
                               case _x@0_0 =:= 0 of
                                   true ->
-                                      begin
-                                          '$patina_marker':jump('$patina_label_0',
-                                                                10),
-                                          []
-                                      end;
+                                      '$patina_marker':jump('$patina_label_0',
+                                                            10),
+                                      [];
                                   _ -> {}
                               end,
-                              begin
-                                  case _x@0_0 =:= 1 of
-                                      true ->
-                                          begin
-                                              '$patina_marker':jump('$patina_label_0',
-                                                                    20),
-                                              []
-                                          end;
-                                      _ -> {}
-                                  end,
-                                  30
-                              end
+                              case _x@0_0 =:= 1 of
+                                  true ->
+                                      '$patina_marker':jump('$patina_label_0',
+                                                            20),
+                                      [];
+                                  _ -> {}
+                              end,
+                              30
                           end,
             _result@1_0 + 1
     end.
@@ -238,10 +217,8 @@ if_condition_value(_stop@0_0) ->
             case begin
                      case _stop@0_0 of
                          true ->
-                             begin
-                                 '$patina_marker':jump('$patina_label_0', 10),
-                                 []
-                             end;
+                             '$patina_marker':jump('$patina_label_0', 10),
+                             [];
                          _ -> {}
                      end,
                      true
@@ -258,11 +235,9 @@ return_in_try(_stop@0_0, _f@1_0) ->
         _ ->
             _value@2_0 = try case _stop@0_0 of
                                  true ->
-                                     begin
-                                         '$patina_marker':jump('$patina_label_0',
-                                                               10),
-                                         []
-                                     end;
+                                     '$patina_marker':jump('$patina_label_0',
+                                                           10),
+                                     [];
                                  _ -> {}
                              end,
                              _f@1_0(),
@@ -283,11 +258,9 @@ return_in_catch(_stop@0_0, _f@1_0) ->
                              error:_ ->
                                  case _stop@0_0 of
                                      true ->
-                                         begin
-                                             '$patina_marker':jump('$patina_label_0',
-                                                                   10),
-                                             []
-                                         end;
+                                         '$patina_marker':jump('$patina_label_0',
+                                                               10),
+                                         [];
                                      _ -> {}
                                  end,
                                  30
@@ -307,11 +280,9 @@ return_in_after(_stop@0_0, _f@1_0) ->
                              mark(0),
                              case _stop@0_0 of
                                  true ->
-                                     begin
-                                         '$patina_marker':jump('$patina_label_0',
-                                                               10),
-                                         []
-                                     end;
+                                     '$patina_marker':jump('$patina_label_0',
+                                                           10),
+                                     [];
                                  _ -> {}
                              end
                          end,
@@ -325,28 +296,20 @@ return_in_try_and_after(_stop_try@0_0,
         _ ->
             try case _stop_try@0_0 of
                     true ->
-                        begin
-                            _jump_value@2_0 = mark(1),
-                            begin
-                                '$patina_marker':jump('$patina_label_0',
-                                                      _jump_value@2_0),
-                                []
-                            end
-                        end;
+                        _jump_value@2_0 = mark(1),
+                        '$patina_marker':jump('$patina_label_0',
+                                              _jump_value@2_0),
+                        [];
                     _ -> {}
                 end,
                 2
             after
                 case _stop_after@1_0 of
                     true ->
-                        begin
-                            _jump_value@3_0 = mark(3),
-                            begin
-                                '$patina_marker':jump('$patina_label_0',
-                                                      _jump_value@3_0),
-                                []
-                            end
-                        end;
+                        _jump_value@3_0 = mark(3),
+                        '$patina_marker':jump('$patina_label_0',
+                                              _jump_value@3_0),
+                        [];
                     _ -> {}
                 end
             end
@@ -358,14 +321,10 @@ return_through_nested_afters(_stop@0_0) ->
         _ ->
             try try case _stop@0_0 of
                         true ->
-                            begin
-                                _jump_value@1_0 = mark(1),
-                                begin
-                                    '$patina_marker':jump('$patina_label_0',
-                                                          _jump_value@1_0),
-                                    []
-                                end
-                            end;
+                            _jump_value@1_0 = mark(1),
+                            '$patina_marker':jump('$patina_label_0',
+                                                  _jump_value@1_0),
+                            [];
                         _ -> {}
                     end,
                     2
@@ -384,9 +343,8 @@ return_from_inner_after(_stop@0_0) ->
             try try 2 after
                     case _stop@0_0 of
                         true ->
-                            begin
-                                '$patina_marker':jump('$patina_label_0', 1), []
-                            end;
+                            '$patina_marker':jump('$patina_label_0', 1),
+                            [];
                         _ -> {}
                     end,
                     mark(10),
@@ -403,11 +361,9 @@ return_in_try_without_after(_stop@0_0, _f@1_0) ->
         _ ->
             _value@2_0 = try case _stop@0_0 of
                                  true ->
-                                     begin
-                                         '$patina_marker':jump('$patina_label_0',
-                                                               10),
-                                         []
-                                     end;
+                                     '$patina_marker':jump('$patina_label_0',
+                                                           10),
+                                     [];
                                  _ -> {}
                              end,
                              _f@1_0(),
@@ -451,11 +407,9 @@ return_in_large_after(_stop@0_0, _x@1_0) ->
                               _v24@26_0 = _v23@25_0 + _x@1_0,
                               case _stop@0_0 of
                                   true ->
-                                      begin
-                                          '$patina_marker':jump('$patina_label_0',
-                                                                _v24@26_0),
-                                          []
-                                      end;
+                                      '$patina_marker':jump('$patina_label_0',
+                                                            _v24@26_0),
+                                      [];
                                   _ -> {}
                               end,
                               mark(_v24@26_0),

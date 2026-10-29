@@ -51,52 +51,39 @@ if_let_pin(_actual@0_0, _expected@1_0) ->
 while_let_pin(_start@0_0, _expected@1_0) ->
     _current@2_0 = _start@0_0,
     _count@3_0 = 0,
-    begin
-        {_current@2_1, _count@3_1} = fun
-                                         _$patina_loop(_current@2_0,
-                                                       _count@3_0) ->
-                                             case [] of
-                                                 {'$patina_label_0',
-                                                  _current@2_2,
-                                                  _count@3_2} ->
-                                                     {_current@2_2, _count@3_2};
-                                                 _ ->
-                                                     _ = begin
-                                                             case _current@2_0
-                                                                 of
-                                                                 _expected@1_0 ->
-                                                                     _count@3_1 =
-                                                                         _count@3_0
-                                                                             +
-                                                                             1,
-                                                                     _current@2_1 =
-                                                                         _current@2_0
-                                                                             +
-                                                                             1,
-                                                                     {};
-                                                                 _ ->
-                                                                     _branch_value@4_0 =
-                                                                         begin
-                                                                             begin
-                                                                                 '$patina_marker':jump('$patina_label_0',
-                                                                                                       _current@2_0,
-                                                                                                       _count@3_0),
-                                                                                 []
-                                                                             end
-                                                                         end,
-                                                                     _count@3_1 =
-                                                                         _count@3_0,
-                                                                     _current@2_1 =
-                                                                         _current@2_0,
-                                                                     _branch_value@4_0
-                                                             end
-                                                         end,
-                                                     _$patina_loop(_current@2_1,
-                                                                   _count@3_1)
-                                             end
-                                     end(_current@2_0, _count@3_0),
-        {}
-    end,
+    {_current@2_1, _count@3_1} = fun
+                                     _$patina_loop(_current@2_0, _count@3_0) ->
+                                         case [] of
+                                             {'$patina_label_0',
+                                              _current@2_2,
+                                              _count@3_2} ->
+                                                 {_current@2_2, _count@3_2};
+                                             _ ->
+                                                 case _current@2_0 of
+                                                     _expected@1_0 ->
+                                                         _count@3_1 = _count@3_0
+                                                                          + 1,
+                                                         _current@2_1 =
+                                                             _current@2_0 + 1,
+                                                         {};
+                                                     _ ->
+                                                         _branch_value@4_0 =
+                                                             begin
+                                                                 '$patina_marker':jump('$patina_label_0',
+                                                                                       _current@2_0,
+                                                                                       _count@3_0),
+                                                                 []
+                                                             end,
+                                                         _count@3_1 =
+                                                             _count@3_0,
+                                                         _current@2_1 =
+                                                             _current@2_0,
+                                                         _branch_value@4_0
+                                                 end,
+                                                 _$patina_loop(_current@2_1,
+                                                               _count@3_1)
+                                         end
+                                 end(_current@2_0, _count@3_0),
     _count@3_1 * 10 + _current@2_1.
 
 let_else_pin(_actual@0_0, _expected@1_0) ->
@@ -106,9 +93,8 @@ let_else_pin(_actual@0_0, _expected@1_0) ->
             case _actual@0_0 of
                 _expected@1_0 -> {};
                 _ ->
-                    begin
-                        '$patina_marker':jump('$patina_label_0', false), []
-                    end
+                    '$patina_marker':jump('$patina_label_0', false),
+                    []
             end,
             true
     end.
@@ -162,44 +148,36 @@ mutable_closure_pin(_actual@0_0, _initial@1_0) ->
 
 loop_rebound_pin(_target@0_0) ->
     _expected@1_0 = 1,
-    begin
-        {_jump_value@4_0, _expected@1_1} = fun
-                                               _$patina_loop(_expected@1_0) ->
-                                                   case [] of
-                                                       {'$patina_label_0',
-                                                        _jump_value@3_0,
-                                                        _expected@1_2} ->
-                                                           {_jump_value@3_0,
-                                                            _expected@1_2};
-                                                       _ ->
-                                                           _ = begin
-                                                                   case
-                                                                       _target@0_0
-                                                                       of
-                                                                       _expected@1_0 ->
-                                                                           _branch_value@2_0 =
-                                                                               begin
-                                                                                   '$patina_marker':jump('$patina_label_0',
-                                                                                                         _expected@1_0,
-                                                                                                         _expected@1_0),
-                                                                                   []
-                                                                               end,
-                                                                           _expected@1_1 =
-                                                                               _expected@1_0,
-                                                                           _branch_value@2_0;
-                                                                       _ ->
-                                                                           _expected@1_1 =
-                                                                               _expected@1_0
-                                                                                   +
-                                                                                   1
+    {_jump_value@4_0, _expected@1_1} = fun
+                                           _$patina_loop(_expected@1_0) ->
+                                               case [] of
+                                                   {'$patina_label_0',
+                                                    _jump_value@3_0,
+                                                    _expected@1_2} ->
+                                                       {_jump_value@3_0,
+                                                        _expected@1_2};
+                                                   _ ->
+                                                       case _target@0_0 of
+                                                           _expected@1_0 ->
+                                                               _branch_value@2_0 =
+                                                                   begin
+                                                                       '$patina_marker':jump('$patina_label_0',
+                                                                                             _expected@1_0,
+                                                                                             _expected@1_0),
+                                                                       []
                                                                    end,
-                                                                   {}
-                                                               end,
-                                                           _$patina_loop(_expected@1_1)
-                                                   end
-                                           end(_expected@1_0),
-        _jump_value@4_0
-    end.
+                                                               _expected@1_1 =
+                                                                   _expected@1_0,
+                                                               _branch_value@2_0;
+                                                           _ ->
+                                                               _expected@1_1 =
+                                                                   _expected@1_0
+                                                                       + 1
+                                                       end,
+                                                       _$patina_loop(_expected@1_1)
+                                               end
+                                       end(_expected@1_0),
+    _jump_value@4_0.
 
 sibling_shadow_pin(_first@0_0, _second@1_0,
                    _outer@2_0) ->

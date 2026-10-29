@@ -31,15 +31,13 @@
         'Elixir.Patina.BlanketImpl.$impl.Core.Int':'BlanketImpl::Show::$patina_witness'(),
     _witness_Show@3_0 =
         'Elixir.Patina.BlanketImpl.$impl.Core.Str':'BlanketImpl::Show::$patina_witness'(),
-    begin
-        <<<<('Elixir.Patina.BlanketImpl.$impl.Core.Int':'BlanketImpl::Show::show'(_witness_Show@2_0,
-                                                                                  erlang:element(1,
-                                                                                                 _self@1_0)))/binary,
-            " and "/utf8>>/binary,
-          ('Elixir.Patina.BlanketImpl.$impl.Core.Str':'BlanketImpl::Show::show'(_witness_Show@3_0,
-                                                                                erlang:element(2,
-                                                                                               _self@1_0)))/binary>>
-    end.
+    <<<<('Elixir.Patina.BlanketImpl.$impl.Core.Int':'BlanketImpl::Show::show'(_witness_Show@2_0,
+                                                                              erlang:element(1,
+                                                                                             _self@1_0)))/binary,
+        " and "/utf8>>/binary,
+      ('Elixir.Patina.BlanketImpl.$impl.Core.Str':'BlanketImpl::Show::show'(_witness_Show@3_0,
+                                                                            erlang:element(2,
+                                                                                           _self@1_0)))/binary>>.
 
 'BlanketImpl::Describe::$patina_witness<(int, str)>'() ->
     {{fun 'Elixir.Patina.BlanketImpl.$impl.Core.Tuple':'BlanketImpl::Describe::describe<(int, str)>'/2,

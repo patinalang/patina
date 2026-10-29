@@ -63,44 +63,34 @@ echo() ->
 
 sum_until_stop() ->
     _total@0_0 = 0,
-    begin
-        _total@0_1 = fun _$patina_loop(_total@0_0) ->
-                             case [] of
-                                 {'$patina_label_0', _total@0_2} -> _total@0_2;
-                                 _ ->
-                                     _ = begin
-                                             receive
-                                                 _n@1_0
-                                                     when
-                                                       erlang:is_integer(_n@1_0) ->
-                                                     _total@0_1 = _total@0_0 +
-                                                                      _n@1_0,
-                                                     {};
-                                                 stop ->
-                                                     _branch_value@2_0 = begin
-                                                                             '$patina_marker':jump('$patina_label_0',
-                                                                                                   _total@0_0),
-                                                                             []
-                                                                         end,
-                                                     _total@0_1 = _total@0_0,
-                                                     _branch_value@2_0
-                                             end
-                                         end,
-                                     _$patina_loop(_total@0_1)
-                             end
-                     end(_total@0_0),
-        {}
-    end,
+    _total@0_1 = fun _$patina_loop(_total@0_0) ->
+                         case [] of
+                             {'$patina_label_0', _total@0_2} -> _total@0_2;
+                             _ ->
+                                 receive
+                                     _n@1_0 when erlang:is_integer(_n@1_0) ->
+                                         _total@0_1 = _total@0_0 + _n@1_0,
+                                         {};
+                                     stop ->
+                                         _branch_value@2_0 = begin
+                                                                 '$patina_marker':jump('$patina_label_0',
+                                                                                       _total@0_0),
+                                                                 []
+                                                             end,
+                                         _total@0_1 = _total@0_0,
+                                         _branch_value@2_0
+                                 end,
+                                 _$patina_loop(_total@0_1)
+                         end
+                 end(_total@0_0),
     _total@0_1.
 
 unsafe_value() ->
-    begin
-        receive
-            {value, _number@0_0}
-                when erlang:is_integer(_number@0_0) ->
-                _number@0_0
-            after 'Elixir.Patina.Core.Timeout':from_millis(0) -> -1
-        end
+    receive
+        {value, _number@0_0}
+            when erlang:is_integer(_number@0_0) ->
+            _number@0_0
+        after 'Elixir.Patina.Core.Timeout':from_millis(0) -> -1
     end.
 
 only_timeout() ->
@@ -136,20 +126,18 @@ unchanged_timeout() ->
             _value@0_1 = _n@1_0,
             {}
         after 'Elixir.Patina.Core.Timeout':from_millis(0) ->
-                  _branch_value@2_0 = begin {} end,
+                  _branch_value@2_0 = {},
                   _value@0_1 = _value@0_0,
                   _branch_value@2_0
     end,
     _value@0_1.
 
 durations() ->
-    begin
-        _element@0_0 =
-            'Elixir.Patina.Core.Timeout':from_seconds(2),
-        _element@1_0 =
-            'Elixir.Patina.Core.Timeout':from_minutes(3),
-        {_element@0_0, _element@1_0}
-    end.
+    _element@0_0 =
+        'Elixir.Patina.Core.Timeout':from_seconds(2),
+    _element@1_0 =
+        'Elixir.Patina.Core.Timeout':from_minutes(3),
+    {_element@0_0, _element@1_0}.
 
 contextual_after() ->
     _after@0_0 = 4,
@@ -177,8 +165,6 @@ diverging_timeout() ->
                     '$patina_marker':jump('$patina_label_0', _n@0_0),
                     []
                 after 'Elixir.Patina.Core.Timeout':from_millis(0) ->
-                          begin
-                              '$patina_marker':jump('$patina_label_0', -1), []
-                          end
+                          '$patina_marker':jump('$patina_label_0', -1), []
             end
     end.

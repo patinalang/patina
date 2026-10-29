@@ -38,11 +38,9 @@
                                           _witness_Describe@0_0),
     _fn_Describe_describe@3_0 = erlang:element(1,
                                                _vtable_Describe@2_0),
-    begin
-        <<(_fn_Describe_describe@3_0(_witness_Describe@0_0,
-                                     _self@1_0))/binary,
-          "!"/utf8>>
-    end.
+    <<(_fn_Describe_describe@3_0(_witness_Describe@0_0,
+                                 _self@1_0))/binary,
+      "!"/utf8>>.
 
 wrap(_s@0_0) ->
     <<<<"<"/utf8, _s@0_0/binary>>/binary, ">"/utf8>>.
@@ -55,9 +53,8 @@ describe_generic(_witnesses_where_describe_generic@0_0,
                                           _witness_Describe@2_0),
     _fn_Describe_describe@4_0 = erlang:element(1,
                                                _vtable_Describe@3_0),
-    begin
-        _fn_Describe_describe@4_0(_witness_Describe@2_0, _t@1_0)
-    end.
+    _fn_Describe_describe@4_0(_witness_Describe@2_0,
+                              _t@1_0).
 
 twice_generic(_witnesses_where_twice_generic@0_0,
               _t@1_0) ->
@@ -67,9 +64,7 @@ twice_generic(_witnesses_where_twice_generic@0_0,
                                        _witness_Twice@2_0),
     _fn_Twice_twice@4_0 = erlang:element(1,
                                          _vtable_Twice@3_0),
-    begin
-        _fn_Twice_twice@4_0(_witness_Twice@2_0, _t@1_0)
-    end.
+    _fn_Twice_twice@4_0(_witness_Twice@2_0, _t@1_0).
 
 describe_int(_n@0_0) ->
     _witness_Show@1_0 =
@@ -77,10 +72,8 @@ describe_int(_n@0_0) ->
     _witnesses_where_Describe@2_0 = {_witness_Show@1_0},
     _witness_Describe@3_0 =
         'Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Describe::$patina_witness'(_witnesses_where_Describe@2_0),
-    begin
-        'Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Describe::describe'(_witness_Describe@3_0,
-                                                                            _n@0_0)
-    end.
+    'Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Describe::describe'(_witness_Describe@3_0,
+                                                                        _n@0_0).
 
 shout_str(_s@0_0) ->
     _witness_Show@1_0 =
@@ -88,10 +81,8 @@ shout_str(_s@0_0) ->
     _witnesses_where_Describe@2_0 = {_witness_Show@1_0},
     _witness_Describe@3_0 =
         'Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Describe::$patina_witness'(_witnesses_where_Describe@2_0),
-    begin
-        'BlanketImpl::Describe::shout'(_witness_Describe@3_0,
-                                       _s@0_0)
-    end.
+    'BlanketImpl::Describe::shout'(_witness_Describe@3_0,
+                                   _s@0_0).
 
 describe_generic_int(_n@0_0) ->
     _witness_Show@1_0 =
@@ -101,31 +92,25 @@ describe_generic_int(_n@0_0) ->
         'Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Describe::$patina_witness'(_witnesses_where_Describe@2_0),
     _witnesses_where_describe_generic@4_0 =
         {_witness_Describe@3_0},
-    begin
-        describe_generic(_witnesses_where_describe_generic@4_0,
-                         _n@0_0)
-    end.
+    describe_generic(_witnesses_where_describe_generic@4_0,
+                     _n@0_0).
 
 describe_pair(_n@0_0, _s@1_0) ->
     _witness_Describe@2_0 =
         'Elixir.Patina.BlanketImpl.$impl.Core.Tuple':'BlanketImpl::Describe::$patina_witness<(int, str)>'(),
-    begin
-        'Elixir.Patina.BlanketImpl.$impl.Core.Tuple':'BlanketImpl::Describe::describe<(int, str)>'(_witness_Describe@2_0,
-                                                                                                   {_n@0_0,
-                                                                                                    _s@1_0})
-    end.
+    'Elixir.Patina.BlanketImpl.$impl.Core.Tuple':'BlanketImpl::Describe::describe<(int, str)>'(_witness_Describe@2_0,
+                                                                                               {_n@0_0,
+                                                                                                _s@1_0}).
 
 shout_pair_generic(_n@0_0, _s@1_0) ->
     _witness_Describe@2_0 =
         'Elixir.Patina.BlanketImpl.$impl.Core.Tuple':'BlanketImpl::Describe::$patina_witness<(int, str)>'(),
     _witnesses_where_describe_generic@3_0 =
         {_witness_Describe@2_0},
-    begin
-        <<(describe_generic(_witnesses_where_describe_generic@3_0,
-                            {_n@0_0, _s@1_0}))/binary,
-          ('BlanketImpl::Describe::shout'(_witness_Describe@2_0,
-                                          {_n@0_0, _s@1_0}))/binary>>
-    end.
+    <<(describe_generic(_witnesses_where_describe_generic@3_0,
+                        {_n@0_0, _s@1_0}))/binary,
+      ('BlanketImpl::Describe::shout'(_witness_Describe@2_0,
+                                      {_n@0_0, _s@1_0}))/binary>>.
 
 twice_str(_s@0_0) ->
     _witness_Show@1_0 =
@@ -136,10 +121,8 @@ twice_str(_s@0_0) ->
     _witnesses_where_Twice@4_0 = {_witness_Describe@3_0},
     _witness_Twice@5_0 =
         'Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Nested::Twice::$patina_witness'(_witnesses_where_Twice@4_0),
-    begin
-        'Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Nested::Twice::twice'(_witness_Twice@5_0,
-                                                                              _s@0_0)
-    end.
+    'Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Nested::Twice::twice'(_witness_Twice@5_0,
+                                                                          _s@0_0).
 
 twice_generic_pair(_n@0_0, _s@1_0) ->
     _witness_Describe@2_0 =
@@ -149,7 +132,5 @@ twice_generic_pair(_n@0_0, _s@1_0) ->
         'Elixir.Patina.BlanketImpl.$impl':'BlanketImpl::Nested::Twice::$patina_witness'(_witnesses_where_Twice@3_0),
     _witnesses_where_twice_generic@5_0 =
         {_witness_Twice@4_0},
-    begin
-        twice_generic(_witnesses_where_twice_generic@5_0,
-                      {_n@0_0, _s@1_0})
-    end.
+    twice_generic(_witnesses_where_twice_generic@5_0,
+                  {_n@0_0, _s@1_0}).

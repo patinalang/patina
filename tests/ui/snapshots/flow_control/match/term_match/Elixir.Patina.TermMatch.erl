@@ -143,9 +143,8 @@ let_else_term(_value@0_0) ->
             case _value@0_0 of
                 [_ | _] -> {};
                 _ ->
-                    begin
-                        '$patina_marker':jump('$patina_label_0', false), []
-                    end
+                    '$patina_marker':jump('$patina_label_0', false),
+                    []
             end,
             true
     end.
@@ -343,184 +342,152 @@ struct_term(_value@0_0) ->
     end.
 
 option_none(_value@0_0) ->
-    begin
-        case _value@0_0 of
-            nil -> 1;
-            nil -> 2;
-            _ -> 0
-        end
+    case _value@0_0 of
+        nil -> 1;
+        nil -> 2;
+        _ -> 0
     end.
 
 option_some(_value@0_0) ->
-    begin
-        case _value@0_0 of
-            _value@2_0 = _n@1_0 when erlang:is_integer(_n@1_0) ->
-                _n@1_0;
-            _ -> 0
-        end
+    case _value@0_0 of
+        _value@2_0 = _n@1_0 when erlang:is_integer(_n@1_0) ->
+            _n@1_0;
+        _ -> 0
     end.
 
 inferred_some(_value@0_0) ->
-    begin
-        case _value@0_0 of
-            _value@2_0 = _n@1_0 when erlang:is_integer(_n@1_0) ->
-                use_int(_n@1_0);
-            _ -> 0
-        end
+    case _value@0_0 of
+        _value@2_0 = _n@1_0 when erlang:is_integer(_n@1_0) ->
+            use_int(_n@1_0);
+        _ -> 0
     end.
 
 nested_some(_value@0_0) ->
-    begin
-        case _value@0_0 of
-            {some, _value@2_0 = _n@1_0}
-                when erlang:is_integer(_n@1_0) ->
-                use_int(_n@1_0);
-            _value@3_0 = _value@2_0 = _n@1_0
-                when erlang:is_integer(_n@1_0),
-                     not (_value@3_0 =:= nil) ->
-                use_int(_n@1_0);
-            _ -> 0
-        end
+    case _value@0_0 of
+        {some, _value@2_0 = _n@1_0}
+            when erlang:is_integer(_n@1_0) ->
+            use_int(_n@1_0);
+        _value@3_0 = _value@2_0 = _n@1_0
+            when erlang:is_integer(_n@1_0),
+                 not (_value@3_0 =:= nil) ->
+            use_int(_n@1_0);
+        _ -> 0
     end.
 
 point(_value@0_0) ->
-    begin
-        case _value@0_0 of
-            #'Elixir.Patina.TermMatch.Point':'Point'{x = _x@1_0,
-                                                     y = _y@2_0}
-                when erlang:is_integer(_x@1_0),
-                     erlang:is_integer(_y@2_0) ->
-                _x@1_0 + _y@2_0;
-            _ -> 0
-        end
+    case _value@0_0 of
+        #'Elixir.Patina.TermMatch.Point':'Point'{x = _x@1_0,
+                                                 y = _y@2_0}
+            when erlang:is_integer(_x@1_0),
+                 erlang:is_integer(_y@2_0) ->
+            _x@1_0 + _y@2_0;
+        _ -> 0
     end.
 
 point_rest(_value@0_0) ->
-    begin
-        case _value@0_0 of
-            #'Elixir.Patina.TermMatch.Point':'Point'{x = _x@1_0,
-                                                     y = _value@2_0}
-                when erlang:is_integer(_x@1_0),
-                     erlang:is_integer(_value@2_0) ->
-                _x@1_0;
-            _ -> 0
-        end
+    case _value@0_0 of
+        #'Elixir.Patina.TermMatch.Point':'Point'{x = _x@1_0,
+                                                 y = _value@2_0}
+            when erlang:is_integer(_x@1_0),
+                 erlang:is_integer(_value@2_0) ->
+            _x@1_0;
+        _ -> 0
     end.
 
 point_range(_value@0_0) ->
-    begin
-        case _value@0_0 of
-            #'Elixir.Patina.TermMatch.Point':'Point'{x = _range@1_0,
-                                                     y = _value@2_0}
-                when erlang:is_integer(_range@1_0), _range@1_0 >= 1,
-                     _range@1_0 =< 3, erlang:is_integer(_value@2_0) ->
-                true;
-            _ -> false
-        end
+    case _value@0_0 of
+        #'Elixir.Patina.TermMatch.Point':'Point'{x = _range@1_0,
+                                                 y = _value@2_0}
+            when erlang:is_integer(_range@1_0), _range@1_0 >= 1,
+                 _range@1_0 =< 3, erlang:is_integer(_value@2_0) ->
+            true;
+        _ -> false
     end.
 
 celsius(_value@0_0) ->
-    begin
-        case _value@0_0 of
-            _c@1_0 when erlang:is_float(_c@1_0) -> _c@1_0;
-            _ -> 0.0
-        end
+    case _value@0_0 of
+        _c@1_0 when erlang:is_float(_c@1_0) -> _c@1_0;
+        _ -> 0.0
     end.
 
 celsius_any(_value@0_0) ->
-    begin
-        case _value@0_0 of
-            _value@1_0 when erlang:is_float(_value@1_0) -> true;
-            _ -> false
-        end
+    case _value@0_0 of
+        _value@1_0 when erlang:is_float(_value@1_0) -> true;
+        _ -> false
     end.
 
 tagged(_value@0_0) ->
-    begin
-        case _value@0_0 of
-            {tagged, _value@1_0, _value@2_0}
-                when erlang:is_integer(_value@1_0),
-                     erlang:is_binary(_value@2_0) ->
-                _value@1_0;
-            _ -> 0
-        end
+    case _value@0_0 of
+        {tagged, _value@1_0, _value@2_0}
+            when erlang:is_integer(_value@1_0),
+                 erlang:is_binary(_value@2_0) ->
+            _value@1_0;
+        _ -> 0
     end.
 
 elixir(_value@0_0) ->
-    begin
-        case _value@0_0 of
-            #{'__struct__' := 'Elixir.Patina.TermMatch.ElixirPoint',
-              x := _x@1_0, y := _y@2_0}
-                when erlang:is_integer(_x@1_0),
-                     erlang:is_integer(_y@2_0) ->
-                _x@1_0 + _y@2_0;
-            _ -> 0
-        end
+    case _value@0_0 of
+        #{'__struct__' := 'Elixir.Patina.TermMatch.ElixirPoint',
+          x := _x@1_0, y := _y@2_0}
+            when erlang:is_integer(_x@1_0),
+                 erlang:is_integer(_y@2_0) ->
+            _x@1_0 + _y@2_0;
+        _ -> 0
     end.
 
 elixir_rest(_value@0_0) ->
-    begin
-        case _value@0_0 of
-            #{'__struct__' := 'Elixir.Patina.TermMatch.ElixirPoint',
-              x := _x@1_0, y := _value@2_0}
-                when erlang:is_integer(_x@1_0),
-                     erlang:is_integer(_value@2_0) ->
-                _x@1_0;
-            _ -> 0
-        end
+    case _value@0_0 of
+        #{'__struct__' := 'Elixir.Patina.TermMatch.ElixirPoint',
+          x := _x@1_0, y := _value@2_0}
+            when erlang:is_integer(_x@1_0),
+                 erlang:is_integer(_value@2_0) ->
+            _x@1_0;
+        _ -> 0
     end.
 
 nested_in_tuple(_value@0_0) ->
-    begin
-        case _value@0_0 of
-            {point,
-             #'Elixir.Patina.TermMatch.Point':'Point'{x = _x@1_0,
-                                                      y = _y@2_0}}
-                when erlang:is_integer(_x@1_0),
-                     erlang:is_integer(_y@2_0) ->
-                _x@1_0 + _y@2_0;
-            _ -> 0
-        end
+    case _value@0_0 of
+        {point,
+         #'Elixir.Patina.TermMatch.Point':'Point'{x = _x@1_0,
+                                                  y = _y@2_0}}
+            when erlang:is_integer(_x@1_0),
+                 erlang:is_integer(_y@2_0) ->
+            _x@1_0 + _y@2_0;
+        _ -> 0
     end.
 
 wrapped_term(_value@0_0) ->
-    begin
-        case _value@0_0 of
-            {wrapper, {_value@1_0, _value@2_0}}
-                when erlang:is_integer(_value@1_0),
-                     erlang:is_atom(_value@2_0) ->
-                true;
-            _ -> false
-        end
+    case _value@0_0 of
+        {wrapper, {_value@1_0, _value@2_0}}
+            when erlang:is_integer(_value@1_0),
+                 erlang:is_atom(_value@2_0) ->
+            true;
+        _ -> false
     end.
 
 wrapped_int(_value@0_0) ->
-    begin
-        case _value@0_0 of
-            {wrapper, _value@1_0}
-                when erlang:is_integer(_value@1_0) ->
-                true;
-            _ -> false
-        end
+    case _value@0_0 of
+        {wrapper, _value@1_0}
+            when erlang:is_integer(_value@1_0) ->
+            true;
+        _ -> false
     end.
 
 literal_or_point(_value@0_0) ->
-    begin
-        case [] of
-            {'$patina_label_0'} -> true;
-            _ ->
-                case _value@0_0 of
-                    0 ->
-                        '$patina_marker':jump('$patina_label_0'),
-                        [];
-                    #'Elixir.Patina.TermMatch.Point':'Point'{x = 0,
-                                                             y = _value@1_0}
-                        when erlang:is_integer(_value@1_0) ->
-                        '$patina_marker':jump('$patina_label_0'),
-                        [];
-                    _ -> false
-                end
-        end
+    case [] of
+        {'$patina_label_0'} -> true;
+        _ ->
+            case _value@0_0 of
+                0 ->
+                    '$patina_marker':jump('$patina_label_0'),
+                    [];
+                #'Elixir.Patina.TermMatch.Point':'Point'{x = 0,
+                                                         y = _value@1_0}
+                    when erlang:is_integer(_value@1_0) ->
+                    '$patina_marker':jump('$patina_label_0'),
+                    [];
+                _ -> false
+            end
     end.
 
 raw_constructor(_value@0_0) ->

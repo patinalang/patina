@@ -24,73 +24,40 @@
 '__info__'(Key) -> module_info(Key).
 
 main() ->
-    begin
-        begin
-            _val@0_0 = 1 + 2,
-            begin
-                io:put_chars(begin
-                                 _element@4_0 = begin
-                                                    _element@1_0 =
-                                                        <<"1 + 2"/utf8>>,
-                                                    _element@2_0 =
-                                                        <<" = "/utf8>>,
-                                                    _element@3_0 =
-                                                        io_lib:format("~ktp",
-                                                                      [_val@0_0]),
-                                                    [_element@1_0,
-                                                     _element@2_0,
-                                                     _element@3_0]
-                                                end,
-                                 [_element@4_0]
-                             end),
-                io:nl(),
-                {}
-            end
-        end,
-        begin
-            begin
-                _val@5_0 = 3 + 4,
-                begin
-                    io:put_chars(begin
-                                     _element@9_0 = begin
-                                                        _element@6_0 =
-                                                            <<"3 + 4"/utf8>>,
-                                                        _element@7_0 =
-                                                            <<" = "/utf8>>,
-                                                        _element@8_0 =
-                                                            io_lib:format("~ktp",
-                                                                          [_val@5_0]),
-                                                        [_element@6_0,
-                                                         _element@7_0,
-                                                         _element@8_0]
-                                                    end,
-                                     [_element@9_0]
-                                 end),
-                    io:nl(),
-                    {}
-                end
-            end,
-            begin
-                _val@10_0 = 2 * 3 + 1,
-                begin
-                    io:put_chars(begin
-                                     _element@14_0 = begin
-                                                         _element@11_0 =
-                                                             <<"(2 * 3) + 1"/utf8>>,
-                                                         _element@12_0 =
-                                                             <<" = "/utf8>>,
-                                                         _element@13_0 =
-                                                             io_lib:format("~ktp",
-                                                                           [_val@10_0]),
-                                                         [_element@11_0,
-                                                          _element@12_0,
-                                                          _element@13_0]
-                                                     end,
-                                     [_element@14_0]
-                                 end),
-                    io:nl(),
-                    {}
-                end
-            end
-        end
-    end.
+    _val@0_0 = 1 + 2,
+    io:put_chars(begin
+                     _element@2_0 = begin
+                                        _element@1_0 = io_lib:format("~ktp",
+                                                                     [_val@0_0]),
+                                        [<<"1 + 2"/utf8>>,
+                                         <<" = "/utf8>>,
+                                         _element@1_0]
+                                    end,
+                     [_element@2_0]
+                 end),
+    io:nl(),
+    _val@3_0 = 3 + 4,
+    io:put_chars(begin
+                     _element@5_0 = begin
+                                        _element@4_0 = io_lib:format("~ktp",
+                                                                     [_val@3_0]),
+                                        [<<"3 + 4"/utf8>>,
+                                         <<" = "/utf8>>,
+                                         _element@4_0]
+                                    end,
+                     [_element@5_0]
+                 end),
+    io:nl(),
+    _val@6_0 = 2 * 3 + 1,
+    io:put_chars(begin
+                     _element@8_0 = begin
+                                        _element@7_0 = io_lib:format("~ktp",
+                                                                     [_val@6_0]),
+                                        [<<"(2 * 3) + 1"/utf8>>,
+                                         <<" = "/utf8>>,
+                                         _element@7_0]
+                                    end,
+                     [_element@8_0]
+                 end),
+    io:nl(),
+    {}.

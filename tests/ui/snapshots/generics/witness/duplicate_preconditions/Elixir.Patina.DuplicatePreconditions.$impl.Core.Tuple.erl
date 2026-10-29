@@ -36,11 +36,9 @@
     _fn_Bar_bar@6_0 = erlang:element(1, _vtable_Bar@5_0),
     _vtable_Bar@7_0 = erlang:element(1, _witness_Bar@4_0),
     _fn_Bar_bar@8_0 = erlang:element(1, _vtable_Bar@7_0),
-    begin
-        {_a@9_0, _b@10_0} = _self@1_0,
-        _fn_Bar_bar@8_0(_witness_Bar@4_0, _a@9_0) +
-            _fn_Bar_bar@6_0(_witness_Bar@3_0, _b@10_0)
-    end.
+    {_a@9_0, _b@10_0} = _self@1_0,
+    _fn_Bar_bar@8_0(_witness_Bar@4_0, _a@9_0) +
+        _fn_Bar_bar@6_0(_witness_Bar@3_0, _b@10_0).
 
 'DuplicatePreconditions::Foo::$patina_witness<(_, _)>'(_witnesses_where_Foo@0_0) ->
     {{fun 'Elixir.Patina.DuplicatePreconditions.$impl.Core.Tuple':'DuplicatePreconditions::Foo::foo<(_, _)>'/2},

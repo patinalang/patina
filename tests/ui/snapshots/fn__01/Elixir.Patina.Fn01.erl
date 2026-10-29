@@ -31,9 +31,8 @@ is_divisible_by(_lhs@0_0, _rhs@1_0) ->
         _ ->
             case _rhs@1_0 =:= 0 of
                 true ->
-                    begin
-                        '$patina_marker':jump('$patina_label_0', false), []
-                    end;
+                    '$patina_marker':jump('$patina_label_0', false),
+                    [];
                 _ -> {}
             end,
             _lhs@0_0 rem _rhs@1_0 =:= 0
@@ -42,51 +41,33 @@ is_divisible_by(_lhs@0_0, _rhs@1_0) ->
 fizzbuzz(_n@0_0) ->
     case is_divisible_by(_n@0_0, 15) of
         true ->
-            begin
-                io:put_chars(begin
-                                 _element@1_0 = [<<"fizzbuzz"/utf8>>],
-                                 [_element@1_0]
-                             end),
-                io:nl(),
-                {}
-            end;
+            io:put_chars([[<<"fizzbuzz"/utf8>>]]),
+            io:nl(),
+            {};
         _ ->
             case is_divisible_by(_n@0_0, 3) of
                 true ->
-                    begin
-                        io:put_chars(begin
-                                         _element@2_0 = [<<"fizz"/utf8>>],
-                                         [_element@2_0]
-                                     end),
-                        io:nl(),
-                        {}
-                    end;
+                    io:put_chars([[<<"fizz"/utf8>>]]),
+                    io:nl(),
+                    {};
                 _ ->
                     case is_divisible_by(_n@0_0, 5) of
                         true ->
-                            begin
-                                io:put_chars(begin
-                                                 _element@3_0 =
-                                                     [<<"buzz"/utf8>>],
-                                                 [_element@3_0]
-                                             end),
-                                io:nl(),
-                                {}
-                            end;
+                            io:put_chars([[<<"buzz"/utf8>>]]),
+                            io:nl(),
+                            {};
                         _ ->
-                            begin
-                                io:put_chars(begin
-                                                 _element@5_0 = begin
-                                                                    _element@4_0 =
-                                                                        io_lib:format("~ktp",
-                                                                                      [_n@0_0]),
-                                                                    [_element@4_0]
-                                                                end,
-                                                 [_element@5_0]
-                                             end),
-                                io:nl(),
-                                {}
-                            end
+                            io:put_chars(begin
+                                             _element@2_0 = begin
+                                                                _element@1_0 =
+                                                                    io_lib:format("~ktp",
+                                                                                  [_n@0_0]),
+                                                                [_element@1_0]
+                                                            end,
+                                             [_element@2_0]
+                                         end),
+                            io:nl(),
+                            {}
                     end
             end
     end.
@@ -98,50 +79,38 @@ fizzbuzz_to(_n@0_0) ->
         {_witness_Iterator@1_0},
     _witness_IntoIterator@3_0 =
         'Elixir.Patina.Core.$impl':'Core::IntoIterator::$patina_witness'(_witnesses_where_IntoIterator@2_0),
-    begin
-        case
-            'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'(_witness_IntoIterator@3_0,
-                                                                       'Elixir.Patina.Core.RangeInclusive':new(1,
-                                                                                                               _n@0_0))
-            of
-            _iter@4_0 ->
-                _iter@4_1 = fun _$patina_loop(_iter@4_0) ->
-                                    case [] of
-                                        {'$patina_label_0', _iter@4_2} ->
-                                            _iter@4_2;
-                                        _ ->
-                                            _ = begin
-                                                    case
-                                                        'Elixir.Patina.Core.RangeInclusive':'Core::Iterator::next<int>'(_witness_Iterator@1_0,
-                                                                                                                        _iter@4_0)
-                                                        of
-                                                        nil ->
-                                                            _branch_value@8_0 =
-                                                                begin
-                                                                    '$patina_marker':jump('$patina_label_0',
-                                                                                          _iter@4_0),
-                                                                    []
-                                                                end,
-                                                            _iter@4_1 =
-                                                                _iter@4_0,
-                                                            _branch_value@8_0;
-                                                        _value@7_0 = {_n@5_0,
-                                                                      _next@6_0}
-                                                            when
-                                                              erlang:is_tuple(_value@7_0)
-                                                                  andalso
-                                                                  erlang:tuple_size(_value@7_0)
-                                                                      =:= 2 ->
-                                                            _iter@4_1 =
-                                                                _next@6_0,
-                                                            begin
-                                                                fizzbuzz(_n@5_0)
-                                                            end
-                                                    end
-                                                end,
-                                            _$patina_loop(_iter@4_1)
-                                    end
-                            end(_iter@4_0),
-                {}
-        end
+    case
+        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'(_witness_IntoIterator@3_0,
+                                                                   'Elixir.Patina.Core.RangeInclusive':new(1,
+                                                                                                           _n@0_0))
+        of
+        _iter@4_0 ->
+            _iter@4_1 = fun _$patina_loop(_iter@4_0) ->
+                                case [] of
+                                    {'$patina_label_0', _iter@4_2} -> _iter@4_2;
+                                    _ ->
+                                        case
+                                            'Elixir.Patina.Core.RangeInclusive':'Core::Iterator::next<int>'(_witness_Iterator@1_0,
+                                                                                                            _iter@4_0)
+                                            of
+                                            nil ->
+                                                _branch_value@8_0 = begin
+                                                                        '$patina_marker':jump('$patina_label_0',
+                                                                                              _iter@4_0),
+                                                                        []
+                                                                    end,
+                                                _iter@4_1 = _iter@4_0,
+                                                _branch_value@8_0;
+                                            _value@7_0 = {_n@5_0, _next@6_0}
+                                                when erlang:is_tuple(_value@7_0)
+                                                         andalso
+                                                         erlang:tuple_size(_value@7_0)
+                                                             =:= 2 ->
+                                                _iter@4_1 = _next@6_0,
+                                                fizzbuzz(_n@5_0)
+                                        end,
+                                        _$patina_loop(_iter@4_1)
+                                end
+                        end(_iter@4_0),
+            {}
     end.

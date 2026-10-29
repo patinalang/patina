@@ -63,15 +63,11 @@ degrees(_value@0_0) -> _value@0_0.
 integer(_value@0_0) -> _value@0_0.
 
 point(_x@0_0, _y@1_0) ->
-    begin
-        _0@2_0 =
-            ('Elixir.Patina.ReprTransparent.Point':'__struct__'())#{x
-                                                                        :=
-                                                                        _x@0_0,
-                                                                    y :=
-                                                                        _y@1_0},
-        _0@2_0
-    end.
+    _0@2_0 =
+        ('Elixir.Patina.ReprTransparent.Point':'__struct__'())#{x
+                                                                    := _x@0_0,
+                                                                y := _y@1_0},
+    _0@2_0.
 
 classify(_value@0_0) ->
     case _value@0_0 of
@@ -111,11 +107,9 @@ open_text(_value@0_0) -> _value@0_0.
 open_tagged(_value@0_0) -> {tagged, _value@0_0}.
 
 open_record(_value@0_0) ->
-    begin
-        _0@1_0 =
-            'Elixir.Patina.ReprTransparent.NativeValue':'$patina_constructor__NativeValue'(_value@0_0),
-        _0@1_0
-    end.
+    _0@1_0 =
+        'Elixir.Patina.ReprTransparent.NativeValue':'$patina_constructor__NativeValue'(_value@0_0),
+    _0@1_0.
 
 classify_open(_value@0_0) ->
     case _value@0_0 of
@@ -146,18 +140,16 @@ classify_open(_value@0_0) ->
     end.
 
 nested_open(_value@0_0) ->
-    begin
-        _0@1_0 = _value@0_0,
-        case _0@1_0 of
-            _value@2_0
-                when (erlang:is_tuple(_value@2_0) andalso
-                          erlang:tuple_size(_value@2_0) =:= 2)
-                         andalso erlang:element(1, _value@2_0) =:= nested ->
-                {nested, _value@2_0};
-            _value@2_0 when erlang:is_binary(_value@2_0) ->
-                {nested, _value@2_0};
-            _value@2_0 -> _value@2_0
-        end
+    _0@1_0 = _value@0_0,
+    case _0@1_0 of
+        _value@2_0
+            when (erlang:is_tuple(_value@2_0) andalso
+                      erlang:tuple_size(_value@2_0) =:= 2)
+                     andalso erlang:element(1, _value@2_0) =:= nested ->
+            {nested, _value@2_0};
+        _value@2_0 when erlang:is_binary(_value@2_0) ->
+            {nested, _value@2_0};
+        _value@2_0 -> _value@2_0
     end.
 
 nested_text(_value@0_0) -> _value@0_0.
@@ -176,7 +168,8 @@ classify_nested(_value@0_0) ->
     end.
 
 concrete_nested(_value@0_0) ->
-    begin _0@1_0 = _value@0_0, _0@1_0 end.
+    _0@1_0 = _value@0_0,
+    _0@1_0.
 
 concrete_text(_value@0_0) -> _value@0_0.
 
@@ -245,86 +238,73 @@ if_let_open(_value@0_0) ->
 while_let_open(_value@0_0) ->
     _current@1_0 = _value@0_0,
     _count@2_0 = 0,
-    begin
-        {_current@1_1, _count@2_1} = fun
-                                         _$patina_loop(_current@1_0,
-                                                       _count@2_0) ->
-                                             case [] of
-                                                 {'$patina_label_0',
-                                                  _current@1_2,
-                                                  _count@2_2} ->
-                                                     {_current@1_2, _count@2_2};
-                                                 _ ->
-                                                     _ = begin
-                                                             case _current@1_0
-                                                                 of
-                                                                 {dynamic, _} ->
-                                                                     _count@2_1 =
-                                                                         _count@2_0
-                                                                             +
-                                                                             1,
-                                                                     _current@1_1 =
-                                                                         <<"stop"/utf8>>,
-                                                                     {};
-                                                                 _value@3_0 = _
-                                                                     when not
-                                                                              ((erlang:is_tuple(_value@3_0)
-                                                                                    andalso
-                                                                                    erlang:tuple_size(_value@3_0)
-                                                                                        =:=
-                                                                                        2)
-                                                                                   andalso
-                                                                                   erlang:element(1,
-                                                                                                  _value@3_0)
-                                                                                       =:=
-                                                                                       dynamic),
-                                                                          not
-                                                                              erlang:is_binary(_value@3_0),
-                                                                          not
-                                                                              erlang:is_record(_value@3_0,
-                                                                                               'Elixir.Patina.ReprTransparent.NativeValue',
-                                                                                               'NativeValue'),
-                                                                          not
-                                                                              ((erlang:is_tuple(_value@3_0)
-                                                                                    andalso
-                                                                                    erlang:tuple_size(_value@3_0)
-                                                                                        =:=
-                                                                                        2)
-                                                                                   andalso
-                                                                                   erlang:element(1,
-                                                                                                  _value@3_0)
-                                                                                       =:=
-                                                                                       tagged) ->
-                                                                     _count@2_1 =
-                                                                         _count@2_0
-                                                                             +
-                                                                             1,
-                                                                     _current@1_1 =
-                                                                         <<"stop"/utf8>>,
-                                                                     {};
-                                                                 _ ->
-                                                                     _branch_value@4_0 =
-                                                                         begin
-                                                                             begin
-                                                                                 '$patina_marker':jump('$patina_label_0',
-                                                                                                       _current@1_0,
-                                                                                                       _count@2_0),
-                                                                                 []
-                                                                             end
-                                                                         end,
-                                                                     _count@2_1 =
-                                                                         _count@2_0,
-                                                                     _current@1_1 =
-                                                                         _current@1_0,
-                                                                     _branch_value@4_0
-                                                             end
-                                                         end,
-                                                     _$patina_loop(_current@1_1,
-                                                                   _count@2_1)
-                                             end
-                                     end(_current@1_0, _count@2_0),
-        {}
-    end,
+    {_current@1_1, _count@2_1} = fun
+                                     _$patina_loop(_current@1_0, _count@2_0) ->
+                                         case [] of
+                                             {'$patina_label_0',
+                                              _current@1_2,
+                                              _count@2_2} ->
+                                                 {_current@1_2, _count@2_2};
+                                             _ ->
+                                                 case _current@1_0 of
+                                                     {dynamic, _} ->
+                                                         _count@2_1 = _count@2_0
+                                                                          + 1,
+                                                         _current@1_1 =
+                                                             <<"stop"/utf8>>,
+                                                         {};
+                                                     _value@3_0 = _
+                                                         when not
+                                                                  ((erlang:is_tuple(_value@3_0)
+                                                                        andalso
+                                                                        erlang:tuple_size(_value@3_0)
+                                                                            =:=
+                                                                            2)
+                                                                       andalso
+                                                                       erlang:element(1,
+                                                                                      _value@3_0)
+                                                                           =:=
+                                                                           dynamic),
+                                                              not
+                                                                  erlang:is_binary(_value@3_0),
+                                                              not
+                                                                  erlang:is_record(_value@3_0,
+                                                                                   'Elixir.Patina.ReprTransparent.NativeValue',
+                                                                                   'NativeValue'),
+                                                              not
+                                                                  ((erlang:is_tuple(_value@3_0)
+                                                                        andalso
+                                                                        erlang:tuple_size(_value@3_0)
+                                                                            =:=
+                                                                            2)
+                                                                       andalso
+                                                                       erlang:element(1,
+                                                                                      _value@3_0)
+                                                                           =:=
+                                                                           tagged) ->
+                                                         _count@2_1 = _count@2_0
+                                                                          + 1,
+                                                         _current@1_1 =
+                                                             <<"stop"/utf8>>,
+                                                         {};
+                                                     _ ->
+                                                         _branch_value@4_0 =
+                                                             begin
+                                                                 '$patina_marker':jump('$patina_label_0',
+                                                                                       _current@1_0,
+                                                                                       _count@2_0),
+                                                                 []
+                                                             end,
+                                                         _count@2_1 =
+                                                             _count@2_0,
+                                                         _current@1_1 =
+                                                             _current@1_0,
+                                                         _branch_value@4_0
+                                                 end,
+                                                 _$patina_loop(_current@1_1,
+                                                               _count@2_1)
+                                         end
+                                 end(_current@1_0, _count@2_0),
     _count@2_1.
 
 let_else_open(_value@0_0) ->
@@ -351,9 +331,8 @@ let_else_open(_value@0_0) ->
                                   erlang:element(1, _value@1_0) =:= tagged) ->
                     {};
                 _ ->
-                    begin
-                        '$patina_marker':jump('$patina_label_0', other), []
-                    end
+                    '$patina_marker':jump('$patina_label_0', other),
+                    []
             end,
             dynamic
     end.
@@ -367,32 +346,30 @@ unwrap_inner_let(_value@0_0) ->
     _payload@1_0.
 
 nested_wrapper(_value@0_0) ->
-    begin
-        _0@2_0 = case _value@0_0 of
-                     _value@1_0 when erlang:is_binary(_value@1_0) ->
-                         {dynamic, _value@1_0};
-                     _value@1_0 -> _value@1_0
-                 end,
-        case _0@2_0 of
-            _value@3_0
-                when (erlang:is_tuple(_value@3_0) andalso
-                          erlang:tuple_size(_value@3_0) =:= 2)
-                         andalso erlang:element(1, _value@3_0) =:= dynamic ->
-                {dynamic, _value@3_0};
-            _value@3_0 when erlang:is_binary(_value@3_0) ->
-                {dynamic, _value@3_0};
-            _value@3_0
-                when erlang:is_record(_value@3_0,
-                                      'Elixir.Patina.ReprTransparent.NativeValue',
-                                      'NativeValue') ->
-                {dynamic, _value@3_0};
-            _value@3_0
-                when (erlang:is_tuple(_value@3_0) andalso
-                          erlang:tuple_size(_value@3_0) =:= 2)
-                         andalso erlang:element(1, _value@3_0) =:= tagged ->
-                {dynamic, _value@3_0};
-            _value@3_0 -> _value@3_0
-        end
+    _0@2_0 = case _value@0_0 of
+                 _value@1_0 when erlang:is_binary(_value@1_0) ->
+                     {dynamic, _value@1_0};
+                 _value@1_0 -> _value@1_0
+             end,
+    case _0@2_0 of
+        _value@3_0
+            when (erlang:is_tuple(_value@3_0) andalso
+                      erlang:tuple_size(_value@3_0) =:= 2)
+                     andalso erlang:element(1, _value@3_0) =:= dynamic ->
+            {dynamic, _value@3_0};
+        _value@3_0 when erlang:is_binary(_value@3_0) ->
+            {dynamic, _value@3_0};
+        _value@3_0
+            when erlang:is_record(_value@3_0,
+                                  'Elixir.Patina.ReprTransparent.NativeValue',
+                                  'NativeValue') ->
+            {dynamic, _value@3_0};
+        _value@3_0
+            when (erlang:is_tuple(_value@3_0) andalso
+                      erlang:tuple_size(_value@3_0) =:= 2)
+                     andalso erlang:element(1, _value@3_0) =:= tagged ->
+            {dynamic, _value@3_0};
+        _value@3_0 -> _value@3_0
     end.
 
 classify_nested_wrapper(_value@0_0) ->

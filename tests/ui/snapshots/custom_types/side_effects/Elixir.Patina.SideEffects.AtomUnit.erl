@@ -24,9 +24,7 @@
 '__info__'(Key) -> module_info(Key).
 
 base() ->
-    begin
-        _field_base@0_0 =
-            'Elixir.Patina.SideEffects':effect(base,
-                                               'Elixir.Patina.SideEffects.AtomUnit'),
-        'Elixir.Patina.SideEffects.AtomUnit'
-    end.
+    _field_base@0_0 =
+        'Elixir.Patina.SideEffects':effect(base,
+                                           'Elixir.Patina.SideEffects.AtomUnit'),
+    'Elixir.Patina.SideEffects.AtomUnit'.

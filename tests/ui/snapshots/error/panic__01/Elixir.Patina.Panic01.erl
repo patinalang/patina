@@ -26,37 +26,23 @@
 drink(_beverage@0_0) ->
     case _beverage@0_0 =:= <<"lemonade"/utf8>> of
         true ->
-            begin
-                erlang:error('Elixir.Patina.Core.Panic':new(<<"AAAaaaaa!!!!"/utf8>>),
-                             none,
-                             begin
-                                 _element@2_0 = begin
-                                                    _element@1_0 = #{module =>
-                                                                         'Elixir.Patina.Core.Panic'},
-                                                    {error_info, _element@1_0}
-                                                end,
-                                 [_element@2_0]
-                             end)
-            end;
+            erlang:error('Elixir.Patina.Core.Panic':new(<<"AAAaaaaa!!!!"/utf8>>),
+                         none,
+                         [{error_info,
+                           #{module => 'Elixir.Patina.Core.Panic'}}]);
         _ -> {}
     end,
-    begin
-        io:put_chars(begin
-                         _element@6_0 = begin
-                                            _element@3_0 =
-                                                <<"Some refreshing "/utf8>>,
-                                            _element@4_0 = _beverage@0_0,
-                                            _element@5_0 =
-                                                <<" is all I need."/utf8>>,
-                                            [_element@3_0,
-                                             _element@4_0,
-                                             _element@5_0]
-                                        end,
-                         [_element@6_0]
-                     end),
-        io:nl(),
-        {}
-    end.
+    io:put_chars(begin
+                     _element@2_0 = begin
+                                        _element@1_0 = _beverage@0_0,
+                                        [<<"Some refreshing "/utf8>>,
+                                         _element@1_0,
+                                         <<" is all I need."/utf8>>]
+                                    end,
+                     [_element@2_0]
+                 end),
+    io:nl(),
+    {}.
 
 main() ->
     drink(<<"water"/utf8>>),

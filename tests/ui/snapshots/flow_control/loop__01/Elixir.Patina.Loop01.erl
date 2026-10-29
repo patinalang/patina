@@ -25,78 +25,46 @@
 
 main() ->
     _count@0_0 = 0,
-    begin
-        io:put_chars(begin
-                         _element@1_0 =
-                             [<<"Let's count until infinity!"/utf8>>],
-                         [_element@1_0]
-                     end),
-        io:nl(),
-        {}
-    end,
-    begin
-        _count@0_1 = fun _$patina_loop(_count@0_0) ->
-                             case [] of
-                                 {'$patina_label_1', _count@0_2} -> _count@0_2;
-                                 _ ->
-                                     _ = case [] of
-                                             {'$patina_label_0', _count@0_1} ->
-                                                 {};
-                                             _ ->
-                                                 _count@0_1 = _count@0_0 + 1,
-                                                 case _count@0_1 =:= 3 of
-                                                     true ->
-                                                         begin
-                                                             io:put_chars(begin
-                                                                              _element@2_0 =
-                                                                                  [<<"three"/utf8>>],
-                                                                              [_element@2_0]
-                                                                          end),
-                                                             io:nl(),
-                                                             {}
-                                                         end,
-                                                         begin
-                                                             '$patina_marker':jump('$patina_label_0',
-                                                                                   _count@0_1),
-                                                             []
-                                                         end;
-                                                     _ -> {}
-                                                 end,
-                                                 begin
-                                                     io:put_chars(begin
-                                                                      _element@4_0 =
-                                                                          begin
-                                                                              _element@3_0 =
-                                                                                  io_lib:format("~ktp",
-                                                                                                [_count@0_1]),
-                                                                              [_element@3_0]
-                                                                          end,
-                                                                      [_element@4_0]
-                                                                  end),
-                                                     io:nl(),
-                                                     {}
-                                                 end,
-                                                 case _count@0_1 =:= 5 of
-                                                     true ->
-                                                         begin
-                                                             io:put_chars(begin
-                                                                              _element@5_0 =
-                                                                                  [<<"OK, that's enough"/utf8>>],
-                                                                              [_element@5_0]
-                                                                          end),
-                                                             io:nl(),
-                                                             {}
-                                                         end,
-                                                         begin
-                                                             '$patina_marker':jump('$patina_label_1',
-                                                                                   _count@0_1),
-                                                             []
-                                                         end;
-                                                     _ -> {}
-                                                 end
+    io:put_chars([[<<"Let's count until infinity!"/utf8>>]]),
+    io:nl(),
+    _count@0_1 = fun _$patina_loop(_count@0_0) ->
+                         case [] of
+                             {'$patina_label_1', _count@0_2} -> _count@0_2;
+                             _ ->
+                                 case [] of
+                                     {'$patina_label_0', _count@0_1} -> {};
+                                     _ ->
+                                         _count@0_1 = _count@0_0 + 1,
+                                         case _count@0_1 =:= 3 of
+                                             true ->
+                                                 io:put_chars([[<<"three"/utf8>>]]),
+                                                 io:nl(),
+                                                 '$patina_marker':jump('$patina_label_0',
+                                                                       _count@0_1),
+                                                 [];
+                                             _ -> {}
                                          end,
-                                     _$patina_loop(_count@0_1)
-                             end
-                     end(_count@0_0),
-        {}
-    end.
+                                         io:put_chars(begin
+                                                          _element@2_0 = begin
+                                                                             _element@1_0 =
+                                                                                 io_lib:format("~ktp",
+                                                                                               [_count@0_1]),
+                                                                             [_element@1_0]
+                                                                         end,
+                                                          [_element@2_0]
+                                                      end),
+                                         io:nl(),
+                                         case _count@0_1 =:= 5 of
+                                             true ->
+                                                 io:put_chars([[<<"OK, that's enough"/utf8>>]]),
+                                                 io:nl(),
+                                                 '$patina_marker':jump('$patina_label_1',
+                                                                       _count@0_1),
+                                                 [];
+                                             _ -> {}
+                                         end
+                                 end,
+                                 _$patina_loop(_count@0_1)
+                         end
+                 end(_count@0_0),
+    {}.

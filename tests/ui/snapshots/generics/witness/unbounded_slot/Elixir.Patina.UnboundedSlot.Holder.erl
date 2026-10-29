@@ -28,23 +28,18 @@
 
 'UnboundedSlot::Tr::method'(_witness_Tr@0_0,
                             _self@1_0) ->
-    begin
-        io:put_chars(begin
-                         _element@5_0 = begin
-                                            _element@2_0 =
-                                                <<"Tr::method("/utf8>>,
-                                            _element@3_0 = io_lib:format("~ktp",
-                                                                         [_self@1_0]),
-                                            _element@4_0 = <<")"/utf8>>,
-                                            [_element@2_0,
-                                             _element@3_0,
-                                             _element@4_0]
-                                        end,
-                         [_element@5_0]
-                     end),
-        io:nl(),
-        {}
-    end.
+    io:put_chars(begin
+                     _element@3_0 = begin
+                                        _element@2_0 = io_lib:format("~ktp",
+                                                                     [_self@1_0]),
+                                        [<<"Tr::method("/utf8>>,
+                                         _element@2_0,
+                                         <<")"/utf8>>]
+                                    end,
+                     [_element@3_0]
+                 end),
+    io:nl(),
+    {}.
 
 'UnboundedSlot::Tr::$patina_witness'() ->
     {{fun 'Elixir.Patina.UnboundedSlot.Holder':'UnboundedSlot::Tr::method'/2},

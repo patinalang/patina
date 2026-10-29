@@ -24,14 +24,9 @@
 '__info__'(Key) -> module_info(Key).
 
 function() ->
-    begin
-        io:put_chars(begin
-                         _element@0_0 = [<<"called `function()`"/utf8>>],
-                         [_element@0_0]
-                     end),
-        io:nl(),
-        {}
-    end.
+    io:put_chars([[<<"called `function()`"/utf8>>]]),
+    io:nl(),
+    {}.
 
 main() ->
     'Elixir.Patina.Split01.MyMod':function(),

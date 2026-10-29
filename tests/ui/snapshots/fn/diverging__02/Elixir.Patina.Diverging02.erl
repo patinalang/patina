@@ -27,13 +27,7 @@ some_fn() -> {}.
 
 main() ->
     __a@0_0 = some_fn(),
-    begin
-        io:put_chars(begin
-                         _element@1_0 =
-                             [<<"This function returns and you can see "
-                                "this line."/utf8>>],
-                         [_element@1_0]
-                     end),
-        io:nl(),
-        {}
-    end.
+    io:put_chars([[<<"This function returns and you can see "
+                     "this line."/utf8>>]]),
+    io:nl(),
+    {}.

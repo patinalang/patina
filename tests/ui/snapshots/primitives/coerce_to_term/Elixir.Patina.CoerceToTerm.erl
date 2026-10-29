@@ -37,11 +37,8 @@ coerce_map_value(_base@0_0) -> _base@0_0.
 coerce_map_key(_base@0_0) -> _base@0_0.
 
 update_map(_base@0_0) ->
-    begin
-        _field_base@1_0 = _base@0_0,
-        _value@2_0 = true,
-        _field_base@1_0#{<<"enabled"/utf8>> => _value@2_0}
-    end.
+    _field_base@1_0 = _base@0_0,
+    _field_base@1_0#{<<"enabled"/utf8>> => true}.
 
 coerce_slice(_values@0_0) -> _values@0_0.
 

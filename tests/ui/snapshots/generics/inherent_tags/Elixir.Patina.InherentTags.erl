@@ -37,14 +37,8 @@ name_f() ->
     _witness_Show@0_0 =
         'Elixir.Patina.InherentTags.Name':'InherentTags::Show::$patina_witness'(),
     _witnesses_where_f@1_0 = {_witness_Show@0_0},
-    begin
-        'Elixir.Patina.InherentTags.GenVal':f(_witnesses_where_f@1_0,
-                                              begin
-                                                  _gen_val@2_0 =
-                                                      'Elixir.Patina.InherentTags.Name',
-                                                  _gen_val@2_0
-                                              end)
-    end.
+    'Elixir.Patina.InherentTags.GenVal':f(_witnesses_where_f@1_0,
+                                          'Elixir.Patina.InherentTags.Name').
 
 int_f(_n@0_0, _x@1_0) ->
     'Elixir.Patina.InherentTags.GenVal':'f<int>'(_n@0_0,

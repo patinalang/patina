@@ -32,9 +32,7 @@
     _witness_Show@3_0 = erlang:element(1, _where_Show@2_0),
     _vtable_Show@4_0 = erlang:element(1, _witness_Show@3_0),
     _fn_Show_show@5_0 = erlang:element(1, _vtable_Show@4_0),
-    begin
-        _fn_Show_show@5_0(_witness_Show@3_0, _self@1_0)
-    end.
+    _fn_Show_show@5_0(_witness_Show@3_0, _self@1_0).
 
 'AssocBound::Show::$patina_witness'(_witnesses_where_Show@0_0) ->
     {{fun 'Elixir.Patina.AssocBound.Pair':'AssocBound::Show::show'/2},

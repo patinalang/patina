@@ -24,4 +24,5 @@
 '__info__'(Key) -> module_info(Key).
 
 to_days(_self@0_0) ->
-    begin _0@1_0 = _self@0_0 * 365, _0@1_0 end.
+    _0@1_0 = _self@0_0 * 365,
+    _0@1_0.

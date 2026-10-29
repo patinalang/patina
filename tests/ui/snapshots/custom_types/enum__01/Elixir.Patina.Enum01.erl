@@ -26,81 +26,60 @@
 inspect(_event@0_0) ->
     case _event@0_0 of
         'Elixir.Patina.Enum01.WebEvent.PageLoad' ->
-            io:put_chars(begin
-                             _element@1_0 = [<<"page loaded"/utf8>>],
-                             [_element@1_0]
-                         end),
+            io:put_chars([[<<"page loaded"/utf8>>]]),
             io:nl(),
             {};
         'Elixir.Patina.Enum01.WebEvent.PageUnload' ->
+            io:put_chars([[<<"page unloaded"/utf8>>]]),
+            io:nl(),
+            {};
+        _value@2_0 = _c@1_0
+            when erlang:is_integer(_value@2_0) ->
             io:put_chars(begin
-                             _element@2_0 = [<<"page unloaded"/utf8>>],
-                             [_element@2_0]
+                             _element@4_0 = begin
+                                                _element@3_0 =
+                                                    io_lib:format("~ktp",
+                                                                  [_c@1_0]),
+                                                [<<"pressed '"/utf8>>,
+                                                 _element@3_0,
+                                                 <<"'."/utf8>>]
+                                            end,
+                             [_element@4_0]
                          end),
             io:nl(),
             {};
-        _value@4_0 = _c@3_0
-            when erlang:is_integer(_value@4_0) ->
+        _value@6_0 = _s@5_0 when erlang:is_binary(_value@6_0) ->
             io:put_chars(begin
                              _element@8_0 = begin
-                                                _element@5_0 =
-                                                    <<"pressed '"/utf8>>,
-                                                _element@6_0 =
-                                                    io_lib:format("~ktp",
-                                                                  [_c@3_0]),
-                                                _element@7_0 = <<"'."/utf8>>,
-                                                [_element@5_0,
-                                                 _element@6_0,
-                                                 _element@7_0]
+                                                _element@7_0 = _s@5_0,
+                                                [<<"pasted \""/utf8>>,
+                                                 _element@7_0,
+                                                 <<"\"."/utf8>>]
                                             end,
                              [_element@8_0]
                          end),
             io:nl(),
             {};
-        _value@10_0 = _s@9_0
-            when erlang:is_binary(_value@10_0) ->
+        #'Elixir.Patina.Enum01.WebEvent':'Click'{x = _x@9_0,
+                                                 y = _y@10_0} ->
             io:put_chars(begin
-                             _element@14_0 = begin
+                             _element@13_0 = begin
                                                  _element@11_0 =
-                                                     <<"pasted \""/utf8>>,
-                                                 _element@12_0 = _s@9_0,
-                                                 _element@13_0 = <<"\"."/utf8>>,
-                                                 [_element@11_0,
+                                                     io_lib:format("~ktp",
+                                                                   [_x@9_0]),
+                                                 _element@12_0 =
+                                                     io_lib:format("~ktp",
+                                                                   [_y@10_0]),
+                                                 [<<"clicked at x="/utf8>>,
+                                                  _element@11_0,
+                                                  <<", y="/utf8>>,
                                                   _element@12_0,
-                                                  _element@13_0]
+                                                  <<"."/utf8>>]
                                              end,
-                             [_element@14_0]
+                             [_element@13_0]
                          end),
             io:nl(),
-            {};
-        #'Elixir.Patina.Enum01.WebEvent':'Click'{x = _x@15_0,
-                                                 y = _y@16_0} ->
-            begin
-                io:put_chars(begin
-                                 _element@22_0 = begin
-                                                     _element@17_0 =
-                                                         <<"clicked at x="/utf8>>,
-                                                     _element@18_0 =
-                                                         io_lib:format("~ktp",
-                                                                       [_x@15_0]),
-                                                     _element@19_0 =
-                                                         <<", y="/utf8>>,
-                                                     _element@20_0 =
-                                                         io_lib:format("~ktp",
-                                                                       [_y@16_0]),
-                                                     _element@21_0 =
-                                                         <<"."/utf8>>,
-                                                     [_element@17_0,
-                                                      _element@18_0,
-                                                      _element@19_0,
-                                                      _element@20_0,
-                                                      _element@21_0]
-                                                 end,
-                                 [_element@22_0]
-                             end),
-                io:nl(),
-                {}
-            end
+            {}
     end.
 
 main() ->

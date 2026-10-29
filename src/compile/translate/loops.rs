@@ -44,9 +44,6 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let reassigned = &self.etir[id].reassigned;
 
         let body = self.translate_expr(body);
-
-        // The body is not a tail expression, so Erlang would warn that its value is unused.
-        let body = afb.expr_match(span, afb.pat_var(span, kw::Underscore), body);
         let self_fun = afb.expr_var(span, sym::_dollar_patina_loop);
         let recurse = afb.expr_local_call(span, self_fun, self.var_exprs(span, reassigned));
         let body = afb.expr_block(span, [body, recurse]);

@@ -31,28 +31,22 @@ to_celsius(_witnesses_where_to_celsius@0_0, _t@1_0) ->
                                        _witnesses_where_to_celsius@0_0),
     _vtable_From@3_0 = erlang:element(1, _witness_From@2_0),
     _fn_From_from@4_0 = erlang:element(1, _vtable_From@3_0),
-    begin _fn_From_from@4_0(_witness_From@2_0, _t@1_0) end.
+    _fn_From_from@4_0(_witness_From@2_0, _t@1_0).
 
 from_fahrenheit(_f@0_0) ->
     _witness_From@1_0 =
         'Elixir.Patina.MultiImpl.Celsius':'MultiImpl::From<MultiImpl::Fahrenheit>::$patina_witness'(),
     _witnesses_where_to_celsius@2_0 = {_witness_From@1_0},
-    begin
-        to_celsius(_witnesses_where_to_celsius@2_0, _f@0_0)
-    end.
+    to_celsius(_witnesses_where_to_celsius@2_0, _f@0_0).
 
 from_kelvin(_k@0_0) ->
     _witness_From@1_0 =
         'Elixir.Patina.MultiImpl.Celsius':'MultiImpl::From<MultiImpl::Kelvin>::$patina_witness'(),
     _witnesses_where_to_celsius@2_0 = {_witness_From@1_0},
-    begin
-        to_celsius(_witnesses_where_to_celsius@2_0, _k@0_0)
-    end.
+    to_celsius(_witnesses_where_to_celsius@2_0, _k@0_0).
 
 from_kelvin_static(_k@0_0) ->
     _witness_From@1_0 =
         'Elixir.Patina.MultiImpl.Celsius':'MultiImpl::From<MultiImpl::Kelvin>::$patina_witness'(),
-    begin
-        'Elixir.Patina.MultiImpl.Celsius':'MultiImpl::From<MultiImpl::Kelvin>::from'(_witness_From@1_0,
-                                                                                     _k@0_0)
-    end.
+    'Elixir.Patina.MultiImpl.Celsius':'MultiImpl::From<MultiImpl::Kelvin>::from'(_witness_From@1_0,
+                                                                                 _k@0_0).

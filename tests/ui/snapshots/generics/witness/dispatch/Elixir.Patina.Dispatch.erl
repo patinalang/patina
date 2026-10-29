@@ -28,28 +28,23 @@ total_area(_witnesses_where_total_area@0_0, _t@1_0) ->
                                        _witnesses_where_total_area@0_0),
     _vtable_Area@3_0 = erlang:element(1, _witness_Area@2_0),
     _fn_Area_area@4_0 = erlang:element(1, _vtable_Area@3_0),
-    begin _fn_Area_area@4_0(_witness_Area@2_0, _t@1_0) end.
+    _fn_Area_area@4_0(_witness_Area@2_0, _t@1_0).
 
 main() ->
     _witness_Area@0_0 =
         'Elixir.Patina.Dispatch.Point':'Dispatch::Area::$patina_witness'(),
     _witnesses_where_total_area@1_0 = {_witness_Area@0_0},
-    begin
-        _p@2_0 =
-            'Elixir.Patina.Dispatch.Point':'$patina_constructor__Point'(3,
-                                                                        4),
-        begin
-            io:put_chars(begin
-                             _element@4_0 = begin
-                                                _element@3_0 =
-                                                    io_lib:format("~ktp",
-                                                                  [total_area(_witnesses_where_total_area@1_0,
-                                                                              _p@2_0)]),
-                                                [_element@3_0]
-                                            end,
-                             [_element@4_0]
-                         end),
-            io:nl(),
-            {}
-        end
-    end.
+    _p@2_0 =
+        'Elixir.Patina.Dispatch.Point':'$patina_constructor__Point'(3,
+                                                                    4),
+    io:put_chars(begin
+                     _element@4_0 = begin
+                                        _element@3_0 = io_lib:format("~ktp",
+                                                                     [total_area(_witnesses_where_total_area@1_0,
+                                                                                 _p@2_0)]),
+                                        [_element@3_0]
+                                    end,
+                     [_element@4_0]
+                 end),
+    io:nl(),
+    {}.

@@ -26,7 +26,7 @@
 '__info__'(Key) -> module_info(Key).
 
 initialized_in_branches(_condition@0_0) ->
-    begin _value@1_0 = {} end,
+    _value@1_0 = {},
     case _condition@0_0 of
         true ->
             _value@1_1 = 1,
@@ -41,13 +41,12 @@ initialized_after_diverging_branch(_condition@0_0) ->
     case [] of
         {'$patina_label_0', _jump_value@3_0} -> _jump_value@3_0;
         _ ->
-            begin _value@1_0 = {} end,
+            _value@1_0 = {},
             case _condition@0_0 of
                 true ->
                     _value@1_1 = 1,
-                    begin
-                        '$patina_marker':jump('$patina_label_0', _value@1_1), []
-                    end;
+                    '$patina_marker':jump('$patina_label_0', _value@1_1),
+                    [];
                 _ ->
                     _branch_value@2_0 = {},
                     _value@1_1 = _value@1_0,
@@ -58,71 +57,54 @@ initialized_after_diverging_branch(_condition@0_0) ->
     end.
 
 initialized_on_every_loop_exit(_condition@0_0) ->
-    begin _value@1_0 = {} end,
-    begin
-        _value@1_1 = fun _$patina_loop(_value@1_0) ->
-                             case [] of
-                                 {'$patina_label_0', _value@1_2} -> _value@1_2;
-                                 _ ->
-                                     _ = begin
-                                             case _condition@0_0 of
-                                                 true ->
-                                                     _value@1_1 = 1,
-                                                     begin
-                                                         '$patina_marker':jump('$patina_label_0',
-                                                                               _value@1_1),
-                                                         []
-                                                     end;
-                                                 _ ->
-                                                     _value@1_1 = 2,
-                                                     begin
-                                                         '$patina_marker':jump('$patina_label_0',
-                                                                               _value@1_1),
-                                                         []
-                                                     end
-                                             end
-                                         end,
-                                     _$patina_loop(_value@1_1)
-                             end
-                     end(_value@1_0),
-        {}
-    end,
+    _value@1_0 = {},
+    _value@1_1 = fun _$patina_loop(_value@1_0) ->
+                         case [] of
+                             {'$patina_label_0', _value@1_2} -> _value@1_2;
+                             _ ->
+                                 case _condition@0_0 of
+                                     true ->
+                                         _value@1_1 = 1,
+                                         '$patina_marker':jump('$patina_label_0',
+                                                               _value@1_1),
+                                         [];
+                                     _ ->
+                                         _value@1_1 = 2,
+                                         '$patina_marker':jump('$patina_label_0',
+                                                               _value@1_1),
+                                         []
+                                 end,
+                                 _$patina_loop(_value@1_1)
+                         end
+                 end(_value@1_0),
     _value@1_1.
 
 main() ->
-    begin
-        io:put_chars(begin
-                         _element@1_0 = begin
-                                            _element@0_0 = io_lib:format("~ktp",
-                                                                         [initialized_in_branches(true)]),
-                                            [_element@0_0]
-                                        end,
-                         [_element@1_0]
-                     end),
-        io:nl(),
-        {}
-    end,
-    begin
-        io:put_chars(begin
-                         _element@3_0 = begin
-                                            _element@2_0 = io_lib:format("~ktp",
-                                                                         [initialized_after_diverging_branch(false)]),
-                                            [_element@2_0]
-                                        end,
-                         [_element@3_0]
-                     end),
-        io:nl(),
-        {}
-    end,
-    begin
-        io:put_chars(begin
-                         _element@5_0 = begin
-                                            _element@4_0 = io_lib:format("~ktp",
-                                                                         [initialized_on_every_loop_exit(true)]),
-                                            [_element@4_0]
-                                        end,
-                         [_element@5_0]
-                     end),
-        io:nl(),
-        {}
-    end.
+    io:put_chars(begin
+                     _element@1_0 = begin
+                                        _element@0_0 = io_lib:format("~ktp",
+                                                                     [initialized_in_branches(true)]),
+                                        [_element@0_0]
+                                    end,
+                     [_element@1_0]
+                 end),
+    io:nl(),
+    io:put_chars(begin
+                     _element@3_0 = begin
+                                        _element@2_0 = io_lib:format("~ktp",
+                                                                     [initialized_after_diverging_branch(false)]),
+                                        [_element@2_0]
+                                    end,
+                     [_element@3_0]
+                 end),
+    io:nl(),
+    io:put_chars(begin
+                     _element@5_0 = begin
+                                        _element@4_0 = io_lib:format("~ktp",
+                                                                     [initialized_on_every_loop_exit(true)]),
+                                        [_element@4_0]
+                                    end,
+                     [_element@5_0]
+                 end),
+    io:nl(),
+    {}.

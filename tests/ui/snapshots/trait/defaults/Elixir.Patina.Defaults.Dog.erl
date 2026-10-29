@@ -37,10 +37,8 @@
 
 'Defaults::Animal::calls_required'(_witness_Animal@0_0,
                                    _self@1_0) ->
-    begin
-        _element@2_0 = _self@1_0,
-        {_element@2_0, <<"barks"/utf8>>}
-    end.
+    _element@2_0 = _self@1_0,
+    {_element@2_0, <<"barks"/utf8>>}.
 
 'Defaults::Animal::$patina_witness'() ->
     {{fun 'Elixir.Patina.Defaults.Dog':'Defaults::Animal::name'/2,

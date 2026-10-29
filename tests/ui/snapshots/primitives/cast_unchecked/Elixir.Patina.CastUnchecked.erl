@@ -27,17 +27,16 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-inferred_target(_map@0_0) ->
-    begin maps:keys(_map@0_0) end.
+inferred_target(_map@0_0) -> maps:keys(_map@0_0).
 
 explicit_target(_xs@0_0) ->
-    _len@1_0 = begin erlang:length(_xs@0_0) end,
+    _len@1_0 = erlang:length(_xs@0_0),
     _len@1_0 * 2.
 
 term_into_struct(_point@0_0) ->
     #'Elixir.Patina.CastUnchecked.Point':'Point'{x = _x@1_0,
                                                  y = _y@2_0} =
-        begin _point@0_0 end,
+        _point@0_0,
     _x@1_0 + _y@2_0.
 
 round_trip() ->

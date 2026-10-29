@@ -90,17 +90,17 @@ module 'Elixir.Patina.Loop01' ['__info__'/1,
 	      do  %% Line 8
 		  call 'io':'nl'
 		      ()
-		  let <_15> =
+		  let <_10> =
 		      letrec
 			  '_$patina_loop'/1 =
 			      %% Line 11
-			      ( fun (_13) ->
+			      ( fun (_8) ->
 				    let <_X_$patina_loop> = '_$patina_loop'/1
 				    in  ( letrec
 					      '$patina_label_1'/1 =
 						  fun (_X_count@0_2) ->
 						      _X_count@0_2
-					  in  let <_10,_X_count@0_1> =
+					  in  let <_18,_X_count@0_1> =
 						  ( letrec
 							'$patina_label_0'/1 =
 							    fun (%% Line 18
@@ -115,7 +115,7 @@ module 'Elixir.Patina.Loop01' ['__info__'/1,
 								   -| ['result_not_wanted'] ):%% Line 12
 											      ( '+'
 												-| ['result_not_wanted'] )
-								(( _13
+								(( _8
 								   -| ['result_not_wanted'] ), %% Line 12
 											       ( 1
 												 -| ['result_not_wanted'] ))
@@ -147,10 +147,10 @@ module 'Elixir.Patina.Loop01' ['__info__'/1,
 									      apply '$patina_label_0'/1
 										  (%% Line 18
 										   _X_count@0_1)
-								  <_20> when 'true' ->
+								  <_15> when 'true' ->
 								      'ok'
 								end
-								let <_X_element@3_0> =
+								let <_X_element@1_0> =
 								    call %% Line 21
 									 ( 'io_lib'
 									   -| ['result_not_wanted'] ):%% Line 21
@@ -162,16 +162,16 @@ module 'Elixir.Patina.Loop01' ['__info__'/1,
 												       ( [_X_count@0_1|( []
 															 -| ['result_not_wanted'] )]
 													 -| ['result_not_wanted'] ))
-								in  let <_X_element@4_0> =
+								in  let <_X_element@2_0> =
 									[%% Line 21
-									 _X_element@3_0|%% Line 21
+									 _X_element@1_0|%% Line 21
 											( []
 											  -| ['result_not_wanted'] )]
 								    in  do  %% Line 21
 									    ( call ( 'io'
 										     -| ['result_not_wanted'] ):( 'put_chars'
 														  -| ['result_not_wanted'] )
-										  (( [_X_element@4_0|( []
+										  (( [_X_element@2_0|( []
 												       -| ['result_not_wanted'] )]
 										     -| ['result_not_wanted'] ))
 									      -| ['result_not_wanted'] )
@@ -221,7 +221,7 @@ module 'Elixir.Patina.Loop01' ['__info__'/1,
 											       apply '$patina_label_1'/1
 												   (%% Line 27
 												    _X_count@0_1)
-										   <_21> when 'true' ->
+										   <_16> when 'true' ->
 										       ( {}
 											 -| ['result_not_wanted'] )
 										 end,_X_count@0_1>
@@ -232,7 +232,7 @@ module 'Elixir.Patina.Loop01' ['__info__'/1,
 				-| [{'id',{0,0,'-main/0-fun-0-'}},'result_not_wanted'] )
 		      in  '_$patina_loop'/1
 		  in  do  %% Line 11
-			  apply ( _15
+			  apply ( _10
 				  -| ['result_not_wanted'] )
 			      (( 0
 				 -| ['result_not_wanted'] ))

@@ -58,10 +58,7 @@
 
 id(_value@0_0) -> _value@0_0.
 
-typed(_n@0_0) ->
-    begin
-        _1@1_0 = 'Elixir.Patina.Core.PhantomData', _n@0_0
-    end.
+typed(_n@0_0) -> _n@0_0.
 
 typed_value(_value@0_0) -> _value@0_0.
 
@@ -101,65 +98,48 @@ marker_with_side_effect() ->
     'Elixir.Patina.Core.PhantomData'.
 
 typed_effect(_n@0_0) ->
-    begin _1@1_0 = marker_with_side_effect(), _n@0_0 end.
+    _1@1_0 = marker_with_side_effect(),
+    _n@0_0.
 
 marker_effect() ->
-    begin
-        _field_base@0_0 = typed_effect(1),
-        'Elixir.Patina.Core.PhantomData'
-    end.
+    _field_base@0_0 = typed_effect(1),
+    'Elixir.Patina.Core.PhantomData'.
 
 phantom_in_loop_and_closure(_n@0_0) ->
     _ = 'Elixir.Patina.Core.PhantomData',
     _count@1_0 = 0,
-    _last@3_0 = begin
-                    _1@2_0 = 'Elixir.Patina.Core.PhantomData', 0
-                end,
-    begin
-        {_count@1_1, _last@3_1} = fun _$patina_loop(_count@1_0,
-                                                    _last@3_0) ->
-                                          case [] of
-                                              {'$patina_label_0',
-                                               _count@1_2,
-                                               _last@3_2} ->
-                                                  {_count@1_2, _last@3_2};
-                                              _ ->
-                                                  _ = begin
-                                                          case _count@1_0 <
-                                                                   _n@0_0
-                                                              of
-                                                              true ->
-                                                                  _last@3_1 =
-                                                                      _count@1_0,
-                                                                  _count@1_1 =
-                                                                      _count@1_0
-                                                                          + 1,
-                                                                  {};
-                                                              _ ->
-                                                                  _branch_value@4_0 =
-                                                                      begin
-                                                                          begin
+    _last@2_0 = 0,
+    {_count@1_1, _last@2_1} = fun _$patina_loop(_count@1_0,
+                                                _last@2_0) ->
+                                      case [] of
+                                          {'$patina_label_0',
+                                           _count@1_2,
+                                           _last@2_2} ->
+                                              {_count@1_2, _last@2_2};
+                                          _ ->
+                                              case _count@1_0 < _n@0_0 of
+                                                  true ->
+                                                      _last@2_1 = _count@1_0,
+                                                      _count@1_1 = _count@1_0 +
+                                                                       1,
+                                                      {};
+                                                  _ ->
+                                                      _branch_value@3_0 = begin
                                                                               '$patina_marker':jump('$patina_label_0',
                                                                                                     _count@1_0,
-                                                                                                    _last@3_0),
+                                                                                                    _last@2_0),
                                                                               []
-                                                                          end
-                                                                      end,
-                                                                  _last@3_1 =
-                                                                      _last@3_0,
-                                                                  _count@1_1 =
-                                                                      _count@1_0,
-                                                                  _branch_value@4_0
-                                                          end
-                                                      end,
-                                                  _$patina_loop(_count@1_1,
-                                                                _last@3_1)
-                                          end
-                                  end(_count@1_0, _last@3_0),
-        {}
-    end,
-    _make@6_0 = fun (_value@5_0) -> _value@5_0 end,
-    _make@6_0(_last@3_1).
+                                                                          end,
+                                                      _last@2_1 = _last@2_0,
+                                                      _count@1_1 = _count@1_0,
+                                                      _branch_value@3_0
+                                              end,
+                                              _$patina_loop(_count@1_1,
+                                                            _last@2_1)
+                                      end
+                              end(_count@1_0, _last@2_0),
+    _make@5_0 = fun (_value@4_0) -> _value@4_0 end,
+    _make@5_0(_last@2_1).
 
 map_iter(_map@0_0) ->
     'Elixir.Patina.PhantomData.MapIter':new(_map@0_0).
@@ -168,56 +148,43 @@ sum_values(_map@0_0) ->
     _iter@1_0 =
         'Elixir.Patina.PhantomData.MapIter':new(_map@0_0),
     _total@2_0 = 0,
-    begin
-        {_iter@1_1, _total@2_1} = fun _$patina_loop(_iter@1_0,
-                                                    _total@2_0) ->
-                                          case [] of
-                                              {'$patina_label_0',
-                                               _iter@1_2,
-                                               _total@2_2} ->
-                                                  {_iter@1_2, _total@2_2};
-                                              _ ->
-                                                  _ = begin
-                                                          case
-                                                              'Elixir.Patina.PhantomData.MapIter':next(_iter@1_0)
-                                                              of
-                                                              nil ->
-                                                                  _branch_value@6_0 =
-                                                                      begin
-                                                                          '$patina_marker':jump('$patina_label_0',
-                                                                                                _iter@1_0,
-                                                                                                _total@2_0),
-                                                                          []
-                                                                      end,
-                                                                  _iter@1_1 =
-                                                                      _iter@1_0,
-                                                                  _total@2_1 =
-                                                                      _total@2_0,
-                                                                  _branch_value@6_0;
-                                                              _value@5_0 = {{_,
-                                                                             _value@3_0},
-                                                                            _rest@4_0}
-                                                                  when
-                                                                    erlang:is_tuple(_value@5_0)
-                                                                        andalso
-                                                                        erlang:tuple_size(_value@5_0)
-                                                                            =:=
-                                                                            2 ->
-                                                                  _iter@1_1 =
-                                                                      _rest@4_0,
-                                                                  _total@2_1 =
-                                                                      _total@2_0
-                                                                          +
-                                                                          _value@3_0,
-                                                                  {}
-                                                          end
-                                                      end,
-                                                  _$patina_loop(_iter@1_1,
-                                                                _total@2_1)
-                                          end
-                                  end(_iter@1_0, _total@2_0),
-        {}
-    end,
+    {_iter@1_1, _total@2_1} = fun _$patina_loop(_iter@1_0,
+                                                _total@2_0) ->
+                                      case [] of
+                                          {'$patina_label_0',
+                                           _iter@1_2,
+                                           _total@2_2} ->
+                                              {_iter@1_2, _total@2_2};
+                                          _ ->
+                                              case
+                                                  'Elixir.Patina.PhantomData.MapIter':next(_iter@1_0)
+                                                  of
+                                                  nil ->
+                                                      _branch_value@6_0 = begin
+                                                                              '$patina_marker':jump('$patina_label_0',
+                                                                                                    _iter@1_0,
+                                                                                                    _total@2_0),
+                                                                              []
+                                                                          end,
+                                                      _iter@1_1 = _iter@1_0,
+                                                      _total@2_1 = _total@2_0,
+                                                      _branch_value@6_0;
+                                                  _value@5_0 = {{_, _value@3_0},
+                                                                _rest@4_0}
+                                                      when
+                                                        erlang:is_tuple(_value@5_0)
+                                                            andalso
+                                                            erlang:tuple_size(_value@5_0)
+                                                                =:= 2 ->
+                                                      _iter@1_1 = _rest@4_0,
+                                                      _total@2_1 = _total@2_0 +
+                                                                       _value@3_0,
+                                                      {}
+                                              end,
+                                              _$patina_loop(_iter@1_1,
+                                                            _total@2_1)
+                                      end
+                              end(_iter@1_0, _total@2_0),
     _total@2_1.
 
 first_entry(_iter@0_0) ->
@@ -231,11 +198,8 @@ first_entry(_iter@0_0) ->
     end.
 
 record(_a@0_0, _b@1_0) ->
-    begin
-        _marker@2_0 = 'Elixir.Patina.Core.PhantomData',
-        'Elixir.Patina.PhantomData.Record':'$patina_constructor__Record'(_a@0_0,
-                                                                         _b@1_0)
-    end.
+    'Elixir.Patina.PhantomData.Record':'$patina_constructor__Record'(_a@0_0,
+                                                                     _b@1_0).
 
 record_b(_value@0_0) ->
     _value@0_0#'Elixir.Patina.PhantomData.Record':'Record'.b.
@@ -246,10 +210,8 @@ record_update(_value@0_0) ->
                                                                <<"updated"/utf8>>}.
 
 record_update_marker(_value@0_0) ->
-    begin
-        _marker@1_0 = marker_with_side_effect(),
-        _value@0_0#'Elixir.Patina.PhantomData.Record':'Record'{}
-    end.
+    _marker@1_0 = marker_with_side_effect(),
+    _value@0_0#'Elixir.Patina.PhantomData.Record':'Record'{}.
 
 record_destructure(_value@0_0) ->
     #'Elixir.Patina.PhantomData.Record':'Record'{a = _a@1_0,
@@ -259,10 +221,9 @@ record_destructure(_value@0_0) ->
     _a@1_0.
 
 pair(_a@0_0, _b@1_0) ->
-    begin
-        _1@2_0 = 'Elixir.Patina.Core.PhantomData',
-        {'Elixir.Patina.PhantomData.Shape.Pair', _a@0_0, _b@1_0}
-    end.
+    {'Elixir.Patina.PhantomData.Shape.Pair',
+     _a@0_0,
+     _b@1_0}.
 
 pair_second(_value@0_0) ->
     case _value@0_0 of
@@ -271,10 +232,9 @@ pair_second(_value@0_0) ->
     end.
 
 tagged_pair(_a@0_0, _b@1_0) ->
-    begin
-        _marker@2_0 = 'Elixir.Patina.Core.PhantomData',
-        {'Elixir.Patina.PhantomData.TaggedPair', _a@0_0, _b@1_0}
-    end.
+    {'Elixir.Patina.PhantomData.TaggedPair',
+     _a@0_0,
+     _b@1_0}.
 
 tagged_pair_b(_value@0_0) ->
     erlang:element(3, _value@0_0).
@@ -283,12 +243,9 @@ tagged_pair_update(_value@0_0) ->
     erlang:setelement(3, _value@0_0, 99).
 
 elixir_point(_x@0_0, _y@1_0) ->
-    begin
-        _unit@2_0 = 'Elixir.Patina.Core.PhantomData',
-        ('Elixir.Patina.PhantomData.ElixirPoint':'__struct__'())#{x
-                                                                      := _x@0_0,
-                                                                  y := _y@1_0}
-    end.
+    ('Elixir.Patina.PhantomData.ElixirPoint':'__struct__'())#{x
+                                                                  := _x@0_0,
+                                                              y := _y@1_0}.
 
 elixir_point_sum(_value@0_0) ->
     #{'__struct__' :=
@@ -297,19 +254,13 @@ elixir_point_sum(_value@0_0) ->
         _value@0_0,
     _x@1_0 + _y@2_0.
 
-marker() ->
-    begin
-        _0@0_0 = 'Elixir.Patina.Core.PhantomData',
-        'Elixir.Patina.PhantomData.Marker'
-    end.
+marker() -> 'Elixir.Patina.PhantomData.Marker'.
 
 marker_inner(_value@0_0) ->
     'Elixir.Patina.Core.PhantomData'.
 
 materialized_marker() ->
-    begin
-        _0@0_0 = 'Elixir.Patina.Core.PhantomData', _0@0_0
-    end.
+    'Elixir.Patina.Core.PhantomData'.
 
 is_some_marker(_value@0_0) ->
     case _value@0_0 of
@@ -320,15 +271,13 @@ is_some_marker(_value@0_0) ->
     end.
 
 term_matches_phantom_struct(_value@0_0) ->
-    begin
-        case _value@0_0 of
-            #'Elixir.Patina.PhantomData.Record':'Record'{a = _a@1_0,
-                                                         b = _value@2_0}
-                when erlang:is_integer(_a@1_0),
-                     erlang:is_binary(_value@2_0) ->
-                _a@1_0;
-            _ -> -1
-        end
+    case _value@0_0 of
+        #'Elixir.Patina.PhantomData.Record':'Record'{a = _a@1_0,
+                                                     b = _value@2_0}
+            when erlang:is_integer(_a@1_0),
+                 erlang:is_binary(_value@2_0) ->
+            _a@1_0;
+        _ -> -1
     end.
 
 widen_source(_source@0_0) -> _source@0_0.

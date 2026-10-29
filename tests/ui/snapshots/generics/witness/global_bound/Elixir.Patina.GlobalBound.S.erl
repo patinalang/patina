@@ -45,11 +45,9 @@
                           _self@1_0) ->
     _witness_Derived@2_0 =
         'GlobalBound::Derived::$patina_witness'(),
-    begin
-        'GlobalBound::Derived::derived'(_witness_Derived@2_0,
-                                        _self@1_0)
-            + 1
-    end.
+    'GlobalBound::Derived::derived'(_witness_Derived@2_0,
+                                    _self@1_0)
+        + 1.
 
 'GlobalBound::Base::$patina_witness'() ->
     {{fun 'Elixir.Patina.GlobalBound.S':'GlobalBound::Base::base'/2},

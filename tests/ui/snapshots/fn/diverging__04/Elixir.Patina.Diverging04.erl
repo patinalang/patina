@@ -24,20 +24,17 @@
 '__info__'(Key) -> module_info(Key).
 
 main() ->
-    begin
-        io:put_chars(begin
-                         _element@2_0 = begin
-                                            _element@0_0 =
-                                                <<"Sum of odd numbers up to 9 (excluding): "/utf8>>,
-                                            _element@1_0 = io_lib:format("~ktp",
-                                                                         ['main::sum_odd_numbers'(9)]),
-                                            [_element@0_0, _element@1_0]
-                                        end,
-                         [_element@2_0]
-                     end),
-        io:nl(),
-        {}
-    end.
+    io:put_chars(begin
+                     _element@1_0 = begin
+                                        _element@0_0 = io_lib:format("~ktp",
+                                                                     ['main::sum_odd_numbers'(9)]),
+                                        [<<"Sum of odd numbers up to 9 (excluding): "/utf8>>,
+                                         _element@0_0]
+                                    end,
+                     [_element@1_0]
+                 end),
+    io:nl(),
+    {}.
 
 'main::sum_odd_numbers'(_up_to@0_0) ->
     _witness_Iterator@1_0 =
@@ -46,86 +43,82 @@ main() ->
         {_witness_Iterator@1_0},
     _witness_IntoIterator@3_0 =
         'Elixir.Patina.Core.$impl':'Core::IntoIterator::$patina_witness'(_witnesses_where_IntoIterator@2_0),
-    begin
-        _acc@4_0 = 0,
-        case
-            'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'(_witness_IntoIterator@3_0,
-                                                                       'Elixir.Patina.Core.Range':'$patina_constructor__Range'(0,
-                                                                                                                               _up_to@0_0))
-            of
-            _iter@5_0 ->
-                {_iter@5_1, _acc@4_1} = fun _$patina_loop(_iter@5_0,
-                                                          _acc@4_0) ->
-                                                case [] of
-                                                    {'$patina_label_0',
-                                                     _iter@5_2,
-                                                     _acc@4_2} ->
-                                                        {_iter@5_2, _acc@4_2};
-                                                    _ ->
-                                                        _ = case [] of
-                                                                {'$patina_label_1',
-                                                                 _iter@5_1,
-                                                                 _acc@4_1} ->
-                                                                    {};
-                                                                _ ->
-                                                                    case
-                                                                        'Elixir.Patina.Core.Range':'Core::Iterator::next<int>'(_witness_Iterator@1_0,
-                                                                                                                               _iter@5_0)
-                                                                        of
-                                                                        nil ->
-                                                                            _branch_value@10_0 =
-                                                                                begin
-                                                                                    '$patina_marker':jump('$patina_label_0',
-                                                                                                          _iter@5_0,
-                                                                                                          _acc@4_0),
-                                                                                    []
-                                                                                end,
-                                                                            _iter@5_1 =
-                                                                                _iter@5_0,
-                                                                            _acc@4_1 =
-                                                                                _acc@4_0,
-                                                                            _branch_value@10_0;
-                                                                        _value@8_0 =
-                                                                            {_i@6_0,
-                                                                             _next@7_0}
-                                                                            when
-                                                                              erlang:is_tuple(_value@8_0)
-                                                                                  andalso
-                                                                                  erlang:tuple_size(_value@8_0)
-                                                                                      =:=
-                                                                                      2 ->
-                                                                            _iter@5_1 =
-                                                                                _next@7_0,
-                                                                            begin
-                                                                                _addition@9_0 =
-                                                                                    case
-                                                                                        _i@6_0
-                                                                                            rem
-                                                                                            2
-                                                                                            =:=
-                                                                                            1
-                                                                                        of
-                                                                                        true ->
-                                                                                            _i@6_0;
-                                                                                        false ->
-                                                                                            '$patina_marker':jump('$patina_label_1',
-                                                                                                                  _iter@5_1,
-                                                                                                                  _acc@4_0),
-                                                                                            []
-                                                                                    end,
-                                                                                _acc@4_1 =
-                                                                                    _acc@4_0
-                                                                                        +
-                                                                                        _addition@9_0,
-                                                                                {}
-                                                                            end
-                                                                    end
-                                                            end,
-                                                        _$patina_loop(_iter@5_1,
-                                                                      _acc@4_1)
-                                                end
-                                        end(_iter@5_0, _acc@4_0),
-                {}
-        end,
-        _acc@4_1
-    end.
+    _acc@4_0 = 0,
+    case
+        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'(_witness_IntoIterator@3_0,
+                                                                   'Elixir.Patina.Core.Range':'$patina_constructor__Range'(0,
+                                                                                                                           _up_to@0_0))
+        of
+        _iter@5_0 ->
+            {_iter@5_1, _acc@4_1} = fun _$patina_loop(_iter@5_0,
+                                                      _acc@4_0) ->
+                                            case [] of
+                                                {'$patina_label_0',
+                                                 _iter@5_2,
+                                                 _acc@4_2} ->
+                                                    {_iter@5_2, _acc@4_2};
+                                                _ ->
+                                                    case [] of
+                                                        {'$patina_label_1',
+                                                         _iter@5_1,
+                                                         _acc@4_1} ->
+                                                            {};
+                                                        _ ->
+                                                            case
+                                                                'Elixir.Patina.Core.Range':'Core::Iterator::next<int>'(_witness_Iterator@1_0,
+                                                                                                                       _iter@5_0)
+                                                                of
+                                                                nil ->
+                                                                    _branch_value@10_0 =
+                                                                        begin
+                                                                            '$patina_marker':jump('$patina_label_0',
+                                                                                                  _iter@5_0,
+                                                                                                  _acc@4_0),
+                                                                            []
+                                                                        end,
+                                                                    _iter@5_1 =
+                                                                        _iter@5_0,
+                                                                    _acc@4_1 =
+                                                                        _acc@4_0,
+                                                                    _branch_value@10_0;
+                                                                _value@8_0 =
+                                                                    {_i@6_0,
+                                                                     _next@7_0}
+                                                                    when
+                                                                      erlang:is_tuple(_value@8_0)
+                                                                          andalso
+                                                                          erlang:tuple_size(_value@8_0)
+                                                                              =:=
+                                                                              2 ->
+                                                                    _iter@5_1 =
+                                                                        _next@7_0,
+                                                                    _addition@9_0 =
+                                                                        case
+                                                                            _i@6_0
+                                                                                rem
+                                                                                2
+                                                                                =:=
+                                                                                1
+                                                                            of
+                                                                            true ->
+                                                                                _i@6_0;
+                                                                            false ->
+                                                                                '$patina_marker':jump('$patina_label_1',
+                                                                                                      _iter@5_1,
+                                                                                                      _acc@4_0),
+                                                                                []
+                                                                        end,
+                                                                    _acc@4_1 =
+                                                                        _acc@4_0
+                                                                            +
+                                                                            _addition@9_0,
+                                                                    {}
+                                                            end
+                                                    end,
+                                                    _$patina_loop(_iter@5_1,
+                                                                  _acc@4_1)
+                                            end
+                                    end(_iter@5_0, _acc@4_0),
+            {}
+    end,
+    _acc@4_1.

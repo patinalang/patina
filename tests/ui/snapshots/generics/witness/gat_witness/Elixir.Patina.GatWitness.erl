@@ -38,9 +38,7 @@ describe_member(_witnesses_where_describe_member@0_0,
                                         _witness_Family@3_0),
     _fn_Family_member@7_0 = erlang:element(2,
                                            _vtable_Family@6_0),
-    begin
-        _fn_Describe_describe@5_0(_witness_Describe@2_0,
-                                  _fn_Family_member@7_0(_witness_Family@3_0,
-                                                        _family@1_0,
-                                                        1))
-    end.
+    _fn_Describe_describe@5_0(_witness_Describe@2_0,
+                              _fn_Family_member@7_0(_witness_Family@3_0,
+                                                    _family@1_0,
+                                                    1)).

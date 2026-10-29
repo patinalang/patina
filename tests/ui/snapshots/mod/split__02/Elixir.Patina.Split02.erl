@@ -24,29 +24,15 @@
 '__info__'(Key) -> module_info(Key).
 
 function() ->
-    begin
-        io:put_chars(begin
-                         _element@0_0 = [<<"called `MyMod::function()`"/utf8>>],
-                         [_element@0_0]
-                     end),
-        io:nl(),
-        {}
-    end.
+    io:put_chars([[<<"called `MyMod::function()`"/utf8>>]]),
+    io:nl(),
+    {}.
 
 private_function() ->
-    begin
-        io:put_chars(begin
-                         _element@0_0 =
-                             [<<"called `MyMod::private_function()`"/utf8>>],
-                         [_element@0_0]
-                     end),
-        io:nl(),
-        {}
-    end.
+    io:put_chars([[<<"called `MyMod::private_function()`"/utf8>>]]),
+    io:nl(),
+    {}.
 
 indirect_access() ->
-    begin
-        io:put_chars([<<"called `MyMod::indirect_access()`, that\n> "/utf8>>]),
-        {}
-    end,
+    io:put_chars([<<"called `MyMod::indirect_access()`, that\n> "/utf8>>]),
     private_function().

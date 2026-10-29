@@ -26,20 +26,17 @@
 main() ->
     _x@0_0 = 3,
     _y@1_0 = 42,
-    begin
-        io:put_chars(begin
-                         _element@5_0 = begin
-                                            _element@2_0 = io_lib:format("~ktp",
-                                                                         ['Elixir.Patina.Impl02.Val':value(_x@0_0)]),
-                                            _element@3_0 = <<", "/utf8>>,
-                                            _element@4_0 = io_lib:format("~ktp",
-                                                                         ['Elixir.Patina.Impl02.GenVal':value(_y@1_0)]),
-                                            [_element@2_0,
-                                             _element@3_0,
-                                             _element@4_0]
-                                        end,
-                         [_element@5_0]
-                     end),
-        io:nl(),
-        {}
-    end.
+    io:put_chars(begin
+                     _element@4_0 = begin
+                                        _element@2_0 = io_lib:format("~ktp",
+                                                                     ['Elixir.Patina.Impl02.Val':value(_x@0_0)]),
+                                        _element@3_0 = io_lib:format("~ktp",
+                                                                     ['Elixir.Patina.Impl02.GenVal':value(_y@1_0)]),
+                                        [_element@2_0,
+                                         <<", "/utf8>>,
+                                         _element@3_0]
+                                    end,
+                     [_element@4_0]
+                 end),
+    io:nl(),
+    {}.

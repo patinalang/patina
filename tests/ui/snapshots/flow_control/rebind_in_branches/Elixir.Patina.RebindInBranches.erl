@@ -69,7 +69,7 @@ latest_version_wins(_take_then@0_0) ->
     _value@1_2.
 
 initialize_in_branches(_take_then@0_0) ->
-    begin _value@1_0 = {} end,
+    _value@1_0 = {},
     case _take_then@0_0 of
         true ->
             _value@1_1 = 10,
@@ -84,18 +84,16 @@ initialize_or_return(_take_then@0_0) ->
     case [] of
         {'$patina_label_0', _jump_value@3_0} -> _jump_value@3_0;
         _ ->
-            begin _value@1_0 = {} end,
+            _value@1_0 = {},
             case _take_then@0_0 of
                 true ->
                     _value@1_1 = 30,
                     {};
                 _ ->
                     _branch_value@2_0 = begin
-                                            begin
-                                                '$patina_marker':jump('$patina_label_0',
-                                                                      40),
-                                                []
-                                            end
+                                            '$patina_marker':jump('$patina_label_0',
+                                                                  40),
+                                            []
                                         end,
                     _value@1_1 = _value@1_0,
                     _branch_value@2_0
@@ -145,18 +143,16 @@ nested_diverging_rebind(_take_outer@0_0,
                     case _take_inner@1_0 of
                         true ->
                             _value@2_1 = 1,
-                            begin
-                                '$patina_marker':jump('$patina_label_0',
-                                                      _value@2_1),
-                                []
-                            end;
+                            '$patina_marker':jump('$patina_label_0',
+                                                  _value@2_1),
+                            [];
                         _ ->
-                            _branch_value@3_0 = begin {} end,
+                            _branch_value@3_0 = {},
                             _value@2_1 = _value@2_0,
                             _branch_value@3_0
                     end;
                 _ ->
-                    _branch_value@4_0 = begin {} end,
+                    _branch_value@4_0 = {},
                     _value@2_1 = _value@2_0,
                     _branch_value@4_0
             end,
@@ -423,69 +419,62 @@ and_then_or(_a@0_0, _b@1_0, _c@2_0) ->
 while_or(_n@0_0) ->
     _i@1_0 = 0,
     _steps@2_0 = 0,
-    begin
-        {_i@1_1, _steps@2_1} = fun _$patina_loop(_i@1_0,
-                                                 _steps@2_0) ->
-                                       case [] of
-                                           {'$patina_label_0',
-                                            _i@1_2,
-                                            _steps@2_2} ->
-                                               {_i@1_2, _steps@2_2};
-                                           _ ->
-                                               _ = begin
-                                                       case [] of
-                                                           {'$patina_label_1',
-                                                            _steps@2_1} ->
-                                                               _i@1_1 = _i@1_0 +
-                                                                            1,
-                                                               {};
-                                                           _ ->
-                                                               _branch_value@4_0 =
-                                                                   case _i@1_0 <
-                                                                            3
-                                                                       of
-                                                                       true ->
-                                                                           _branch_value@3_0 =
-                                                                               begin
-                                                                                   '$patina_marker':jump('$patina_label_1',
-                                                                                                         _steps@2_0),
-                                                                                   []
-                                                                               end,
-                                                                           _steps@2_1 =
-                                                                               _steps@2_0,
-                                                                           _branch_value@3_0;
-                                                                       _ ->
-                                                                           case
-                                                                               begin
-                                                                                   _steps@2_1 =
-                                                                                       _steps@2_0
-                                                                                           +
-                                                                                           1,
-                                                                                   _i@1_0
-                                                                                       <
-                                                                                       _n@0_0
-                                                                               end
-                                                                               of
-                                                                               true ->
-                                                                                   '$patina_marker':jump('$patina_label_1',
-                                                                                                         _steps@2_1),
-                                                                                   [];
-                                                                               _ ->
+    {_i@1_1, _steps@2_1} = fun _$patina_loop(_i@1_0,
+                                             _steps@2_0) ->
+                                   case [] of
+                                       {'$patina_label_0',
+                                        _i@1_2,
+                                        _steps@2_2} ->
+                                           {_i@1_2, _steps@2_2};
+                                       _ ->
+                                           case [] of
+                                               {'$patina_label_1',
+                                                _steps@2_1} ->
+                                                   _i@1_1 = _i@1_0 + 1,
+                                                   {};
+                                               _ ->
+                                                   _branch_value@4_0 = case
+                                                                           _i@1_0
+                                                                               <
+                                                                               3
+                                                                           of
+                                                                           true ->
+                                                                               _branch_value@3_0 =
                                                                                    begin
+                                                                                       '$patina_marker':jump('$patina_label_1',
+                                                                                                             _steps@2_0),
+                                                                                       []
+                                                                                   end,
+                                                                               _steps@2_1 =
+                                                                                   _steps@2_0,
+                                                                               _branch_value@3_0;
+                                                                           _ ->
+                                                                               case
+                                                                                   begin
+                                                                                       _steps@2_1 =
+                                                                                           _steps@2_0
+                                                                                               +
+                                                                                               1,
+                                                                                       _i@1_0
+                                                                                           <
+                                                                                           _n@0_0
+                                                                                   end
+                                                                                   of
+                                                                                   true ->
+                                                                                       '$patina_marker':jump('$patina_label_1',
+                                                                                                             _steps@2_1),
+                                                                                       [];
+                                                                                   _ ->
                                                                                        '$patina_marker':jump('$patina_label_0',
                                                                                                              _i@1_0,
                                                                                                              _steps@2_1),
                                                                                        []
-                                                                                   end
-                                                                           end
-                                                                   end,
-                                                               _i@1_1 = _i@1_0,
-                                                               _branch_value@4_0
-                                                       end
-                                                   end,
-                                               _$patina_loop(_i@1_1, _steps@2_1)
-                                       end
-                               end(_i@1_0, _steps@2_0),
-        {}
-    end,
+                                                                               end
+                                                                       end,
+                                                   _i@1_1 = _i@1_0,
+                                                   _branch_value@4_0
+                                           end,
+                                           _$patina_loop(_i@1_1, _steps@2_1)
+                                   end
+                           end(_i@1_0, _steps@2_0),
     _i@1_1 * 100 + _steps@2_1.

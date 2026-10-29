@@ -24,67 +24,53 @@
 '__info__'(Key) -> module_info(Key).
 
 main() ->
-    begin
-        io:put_chars(begin
-                         _element@1_0 = begin
-                                            _element@0_0 = io_lib:format("~ktp",
-                                                                         [{'Elixir.Patina.Repr05.TaggedEnum.Unit'}]),
-                                            [_element@0_0]
-                                        end,
-                         [_element@1_0]
-                     end),
-        io:nl(),
-        {}
-    end,
-    begin
-        io:put_chars(begin
-                         _element@3_0 = begin
-                                            _element@2_0 = io_lib:format("~ktp",
-                                                                         ['Elixir.Patina.Repr05.TaggedEnum.UnitWithAtomOverride']),
-                                            [_element@2_0]
-                                        end,
-                         [_element@3_0]
-                     end),
-        io:nl(),
-        {}
-    end,
-    begin
-        io:put_chars(begin
-                         _element@5_0 = begin
-                                            _element@4_0 = io_lib:format("~ktp",
-                                                                         [{'Elixir.Patina.Repr05.TaggedEnum.TupleStyle',
-                                                                           <<"hello"/utf8>>}]),
-                                            [_element@4_0]
-                                        end,
-                         [_element@5_0]
-                     end),
-        io:nl(),
-        {}
-    end,
-    begin
-        io:put_chars(begin
-                         _element@7_0 = begin
-                                            _element@6_0 = io_lib:format("~ktp",
-                                                                         [{'Elixir.Patina.Repr05.TaggedEnum.StructStyle',
-                                                                           1,
-                                                                           2}]),
-                                            [_element@6_0]
-                                        end,
-                         [_element@7_0]
-                     end),
-        io:nl(),
-        {}
-    end,
-    begin
-        io:put_chars(begin
-                         _element@9_0 = begin
-                                            _element@8_0 = io_lib:format("~ktp",
-                                                                         [{custom_tag,
-                                                                           42}]),
-                                            [_element@8_0]
-                                        end,
-                         [_element@9_0]
-                     end),
-        io:nl(),
-        {}
-    end.
+    io:put_chars(begin
+                     _element@1_0 = begin
+                                        _element@0_0 = io_lib:format("~ktp",
+                                                                     [{'Elixir.Patina.Repr05.TaggedEnum.Unit'}]),
+                                        [_element@0_0]
+                                    end,
+                     [_element@1_0]
+                 end),
+    io:nl(),
+    io:put_chars(begin
+                     _element@3_0 = begin
+                                        _element@2_0 = io_lib:format("~ktp",
+                                                                     ['Elixir.Patina.Repr05.TaggedEnum.UnitWithAtomOverride']),
+                                        [_element@2_0]
+                                    end,
+                     [_element@3_0]
+                 end),
+    io:nl(),
+    io:put_chars(begin
+                     _element@5_0 = begin
+                                        _element@4_0 = io_lib:format("~ktp",
+                                                                     [{'Elixir.Patina.Repr05.TaggedEnum.TupleStyle',
+                                                                       <<"hello"/utf8>>}]),
+                                        [_element@4_0]
+                                    end,
+                     [_element@5_0]
+                 end),
+    io:nl(),
+    io:put_chars(begin
+                     _element@7_0 = begin
+                                        _element@6_0 = io_lib:format("~ktp",
+                                                                     [{'Elixir.Patina.Repr05.TaggedEnum.StructStyle',
+                                                                       1,
+                                                                       2}]),
+                                        [_element@6_0]
+                                    end,
+                     [_element@7_0]
+                 end),
+    io:nl(),
+    io:put_chars(begin
+                     _element@9_0 = begin
+                                        _element@8_0 = io_lib:format("~ktp",
+                                                                     [{custom_tag,
+                                                                       42}]),
+                                        [_element@8_0]
+                                    end,
+                     [_element@9_0]
+                 end),
+    io:nl(),
+    {}.

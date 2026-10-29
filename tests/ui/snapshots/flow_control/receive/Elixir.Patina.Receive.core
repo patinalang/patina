@@ -268,33 +268,33 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 'sum_until_stop'/0 =
     %% Line 27
     ( fun () ->
-	  let <_9> =
+	  let <_7> =
 	      letrec
 		  '_$patina_loop'/1 =
 		      %% Line 29
-		      ( fun (_7) ->
+		      ( fun (_5) ->
 			    let <_X_$patina_loop> = '_$patina_loop'/1
 			    in  ( letrec
 				      '$patina_label_0'/1 =
 					  fun (_X_total@0_2) ->
 					      _X_total@0_2
-				  in  let <_4,_X_total@0_1> =
+				  in  let <_11,_X_total@0_1> =
 					  ( letrec
 						'recv$^1'/0 =
 						    fun () ->
-							let <_16,_14> =
+							let <_14,_12> =
 							    primop 'recv_peek_message'
 								()
-							in  case _16 of
+							in  case _14 of
 							      <'true'> when 'true' ->
 								  %% Line 30
-								  case _14 of
+								  case _12 of
 								    %% Line 31
 								    <_X_n@1_0>
 									when ( call ( 'erlang'
 										   -| ['result_not_wanted'] ):( 'is_integer'
 														-| ['result_not_wanted'] )
-										(_14)
+										(_12)
 									    -| ['result_not_wanted'] ) ->
 									do  primop 'remove_message'
 										()
@@ -302,7 +302,7 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 										call ( 'erlang'
 										       -| ['result_not_wanted'] ):( '+'
 														    -| ['result_not_wanted'] )
-										    (( _7
+										    (( _5
 										       -| ['result_not_wanted'] ), _X_n@1_0)
 									    in  ( <( {}
 										     -| ['result_not_wanted'] ),_X_total@0_1>
@@ -312,7 +312,7 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 									do  primop 'remove_message'
 										()
 									    apply '$patina_label_0'/1
-										(( _7
+										(( _5
 										   -| ['result_not_wanted'] ))
 								    ( <Other> when 'true' ->
 									  do  primop 'recv_next'
@@ -323,10 +323,10 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 								      -| ['compiler_generated','dialyzer_ignore'] )
 								  end
 							      ( <'false'> when 'true' ->
-								    let <_15> =
+								    let <_13> =
 									primop 'recv_wait_timeout'
 									    ('infinity')
-								    in  case _15 of
+								    in  case _13 of
 									  <'true'> when 'true' ->
 									      <'true','true'>
 									  ( <'false'> when 'true' ->
@@ -347,7 +347,7 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 			-| [{'id',{0,0,'-sum_until_stop/0-fun-0-'}},'result_not_wanted'] )
 	      in  '_$patina_loop'/1
 	  in  %% Line 29
-	      apply ( _9
+	      apply ( _7
 		      -| ['result_not_wanted'] )
 		  (( 0
 		     -| ['result_not_wanted'] ))

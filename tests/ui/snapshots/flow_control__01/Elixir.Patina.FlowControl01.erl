@@ -34,15 +34,13 @@ main() ->
             _n@0_1 = _n@0_0,
             _branch_value@1_0
     end,
-    begin
-        io:put_chars(begin
-                         _element@3_0 = begin
-                                            _element@2_0 = io_lib:format("~ktp",
-                                                                         [_n@0_1]),
-                                            [_element@2_0]
-                                        end,
-                         [_element@3_0]
-                     end),
-        io:nl(),
-        {}
-    end.
+    io:put_chars(begin
+                     _element@3_0 = begin
+                                        _element@2_0 = io_lib:format("~ktp",
+                                                                     [_n@0_1]),
+                                        [_element@2_0]
+                                    end,
+                     [_element@3_0]
+                 end),
+    io:nl(),
+    {}.

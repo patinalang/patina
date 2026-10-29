@@ -25,35 +25,25 @@
 
 main() ->
     _number@0_0 = 13,
-    begin
-        io:put_chars(begin
-                         _element@3_0 = begin
-                                            _element@1_0 =
-                                                <<"Tell me about "/utf8>>,
-                                            _element@2_0 = io_lib:format("~ktp",
-                                                                         [_number@0_0]),
-                                            [_element@1_0, _element@2_0]
-                                        end,
-                         [_element@3_0]
-                     end),
-        io:nl(),
-        {}
-    end,
+    io:put_chars(begin
+                     _element@2_0 = begin
+                                        _element@1_0 = io_lib:format("~ktp",
+                                                                     [_number@0_0]),
+                                        [<<"Tell me about "/utf8>>,
+                                         _element@1_0]
+                                    end,
+                     [_element@2_0]
+                 end),
+    io:nl(),
     case [] of
         {'$patina_label_0'} ->
-            io:put_chars(begin
-                             _element@8_0 = [<<"This is a prime"/utf8>>],
-                             [_element@8_0]
-                         end),
+            io:put_chars([[<<"This is a prime"/utf8>>]]),
             io:nl(),
             {};
         _ ->
             case _number@0_0 of
                 1 ->
-                    io:put_chars(begin
-                                     _element@4_0 = [<<"One!"/utf8>>],
-                                     [_element@4_0]
-                                 end),
+                    io:put_chars([[<<"One!"/utf8>>]]),
                     io:nl(),
                     {};
                 2 ->
@@ -71,66 +61,50 @@ main() ->
                 11 ->
                     '$patina_marker':jump('$patina_label_0'),
                     [];
-                _range@5_0 when _range@5_0 >= 13, _range@5_0 =< 19 ->
-                    io:put_chars(begin
-                                     _element@6_0 = [<<"A teen"/utf8>>],
-                                     [_element@6_0]
-                                 end),
+                _range@3_0 when _range@3_0 >= 13, _range@3_0 =< 19 ->
+                    io:put_chars([[<<"A teen"/utf8>>]]),
                     io:nl(),
                     {};
                 _ ->
-                    io:put_chars(begin
-                                     _element@7_0 = [<<"Ain't special"/utf8>>],
-                                     [_element@7_0]
-                                 end),
+                    io:put_chars([[<<"Ain't special"/utf8>>]]),
                     io:nl(),
                     {}
             end
     end,
-    _boolean@9_0 = true,
-    _binary@10_0 = case _boolean@9_0 of
-                       false -> 0;
-                       true -> 1
-                   end,
-    begin
-        io:put_chars(begin
-                         _element@14_0 = begin
-                                             _element@11_0 =
-                                                 io_lib:format("~ktp",
-                                                               [_boolean@9_0]),
-                                             _element@12_0 = <<" -> "/utf8>>,
-                                             _element@13_0 =
-                                                 io_lib:format("~ktp",
-                                                               [_binary@10_0]),
-                                             [_element@11_0,
-                                              _element@12_0,
-                                              _element@13_0]
-                                         end,
-                         [_element@14_0]
-                     end),
-        io:nl(),
-        {}
-    end,
-    _expected_value@15_0 = 42,
+    _boolean@4_0 = true,
+    _binary@5_0 = case _boolean@4_0 of
+                      false -> 0;
+                      true -> 1
+                  end,
+    io:put_chars(begin
+                     _element@8_0 = begin
+                                        _element@6_0 = io_lib:format("~ktp",
+                                                                     [_boolean@4_0]),
+                                        _element@7_0 = io_lib:format("~ktp",
+                                                                     [_binary@5_0]),
+                                        [_element@6_0,
+                                         <<" -> "/utf8>>,
+                                         _element@7_0]
+                                    end,
+                     [_element@8_0]
+                 end),
+    io:nl(),
+    _expected_value@9_0 = 42,
     case 123 of
-        _expected_value@15_0 ->
-            io:put_chars(begin
-                             _element@16_0 = [<<"found expected value"/utf8>>],
-                             [_element@16_0]
-                         end),
+        _expected_value@9_0 ->
+            io:put_chars([[<<"found expected value"/utf8>>]]),
             io:nl(),
             {};
-        _value@17_0 ->
+        _value@10_0 ->
             io:put_chars(begin
-                             _element@20_0 = begin
-                                                 _element@18_0 =
-                                                     <<"found unexpected value "/utf8>>,
-                                                 _element@19_0 =
+                             _element@12_0 = begin
+                                                 _element@11_0 =
                                                      io_lib:format("~ktp",
-                                                                   [_value@17_0]),
-                                                 [_element@18_0, _element@19_0]
+                                                                   [_value@10_0]),
+                                                 [<<"found unexpected value "/utf8>>,
+                                                  _element@11_0]
                                              end,
-                             [_element@20_0]
+                             [_element@12_0]
                          end),
             io:nl(),
             {}

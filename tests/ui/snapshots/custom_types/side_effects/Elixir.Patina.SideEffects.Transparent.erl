@@ -28,31 +28,23 @@
 '__info__'(Key) -> module_info(Key).
 
 fields() ->
-    begin
-        _value@0_0 = 'Elixir.Patina.SideEffects':effect(field,
-                                                        10),
-        _value@0_0
-    end.
+    _value@0_0 = 'Elixir.Patina.SideEffects':effect(field,
+                                                    10),
+    _value@0_0.
 
 base() ->
-    begin
-        _field_base@0_0 =
-            'Elixir.Patina.SideEffects':effect(base, 1),
-        _field_base@0_0
-    end.
+    _field_base@0_0 =
+        'Elixir.Patina.SideEffects':effect(base, 1),
+    _field_base@0_0.
 
 update() ->
-    begin
-        _field_base@0_0 =
-            'Elixir.Patina.SideEffects':effect(base, 1),
-        10
-    end.
+    _field_base@0_0 =
+        'Elixir.Patina.SideEffects':effect(base, 1),
+    10.
 
 mixed() ->
-    begin
-        _field_base@0_0 =
-            'Elixir.Patina.SideEffects':effect(base, 1),
-        _value@1_0 = 'Elixir.Patina.SideEffects':effect(field,
-                                                        10),
-        _value@1_0
-    end.
+    _field_base@0_0 =
+        'Elixir.Patina.SideEffects':effect(base, 1),
+    _value@1_0 = 'Elixir.Patina.SideEffects':effect(field,
+                                                    10),
+    _value@1_0.

@@ -27,15 +27,13 @@ main() ->
     _p@0_0 =
         'Elixir.Patina.Unbounded.Pair':'$patina_constructor__Pair'(1,
                                                                    2),
-    begin
-        io:put_chars(begin
-                         _element@2_0 = begin
-                                            _element@1_0 = io_lib:format("~ktp",
-                                                                         ['Elixir.Patina.Unbounded.Pair':len(_p@0_0)]),
-                                            [_element@1_0]
-                                        end,
-                         [_element@2_0]
-                     end),
-        io:nl(),
-        {}
-    end.
+    io:put_chars(begin
+                     _element@2_0 = begin
+                                        _element@1_0 = io_lib:format("~ktp",
+                                                                     ['Elixir.Patina.Unbounded.Pair':len(_p@0_0)]),
+                                        [_element@1_0]
+                                    end,
+                     [_element@2_0]
+                 end),
+    io:nl(),
+    {}.

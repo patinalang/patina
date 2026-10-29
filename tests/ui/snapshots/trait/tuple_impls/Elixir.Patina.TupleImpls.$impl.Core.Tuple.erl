@@ -46,14 +46,12 @@
     _witness_Show@3_0 = erlang:element(1, _where_Show@2_0),
     _vtable_Show@4_0 = erlang:element(1, _witness_Show@3_0),
     _fn_Show_show@5_0 = erlang:element(1, _vtable_Show@4_0),
-    begin
-        {_A@6_0} = _self@1_0,
-        <<<<<<"("/utf8,
-              (_fn_Show_show@5_0(_witness_Show@3_0,
-                                 _A@6_0))/binary>>/binary,
-            ","/utf8>>/binary,
-          ")"/utf8>>
-    end.
+    {_A@6_0} = _self@1_0,
+    <<<<<<"("/utf8,
+          (_fn_Show_show@5_0(_witness_Show@3_0,
+                             _A@6_0))/binary>>/binary,
+        ","/utf8>>/binary,
+      ")"/utf8>>.
 
 'TupleImpls::Show::$patina_witness<(_,)>'(_witnesses_where_Show@0_0) ->
     {{fun 'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::show<(_,)>'/2},
@@ -69,17 +67,15 @@
     _fn_Show_show@6_0 = erlang:element(1, _vtable_Show@5_0),
     _vtable_Show@7_0 = erlang:element(1, _witness_Show@4_0),
     _fn_Show_show@8_0 = erlang:element(1, _vtable_Show@7_0),
-    begin
-        {_A@9_0, _B@10_0} = _self@1_0,
-        <<<<<<<<<<"("/utf8,
-                  (_fn_Show_show@8_0(_witness_Show@4_0,
-                                     _A@9_0))/binary>>/binary,
-                ","/utf8>>/binary,
-              (_fn_Show_show@6_0(_witness_Show@3_0,
-                                 _B@10_0))/binary>>/binary,
+    {_A@9_0, _B@10_0} = _self@1_0,
+    <<<<<<<<<<"("/utf8,
+              (_fn_Show_show@8_0(_witness_Show@4_0,
+                                 _A@9_0))/binary>>/binary,
             ","/utf8>>/binary,
-          ")"/utf8>>
-    end.
+          (_fn_Show_show@6_0(_witness_Show@3_0,
+                             _B@10_0))/binary>>/binary,
+        ","/utf8>>/binary,
+      ")"/utf8>>.
 
 'TupleImpls::Show::$patina_witness<(_, _)>'(_witnesses_where_Show@0_0) ->
     {{fun 'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::show<(_, _)>'/2},
@@ -100,20 +96,18 @@
                                        _witness_Show@5_0),
     _fn_Show_show@11_0 = erlang:element(1,
                                         _vtable_Show@10_0),
-    begin
-        {_A@12_0, _B@13_0, _C@14_0} = _self@1_0,
-        <<<<<<<<<<<<<<"("/utf8,
-                      (_fn_Show_show@11_0(_witness_Show@5_0,
-                                          _A@12_0))/binary>>/binary,
-                    ","/utf8>>/binary,
-                  (_fn_Show_show@9_0(_witness_Show@4_0,
-                                     _B@13_0))/binary>>/binary,
+    {_A@12_0, _B@13_0, _C@14_0} = _self@1_0,
+    <<<<<<<<<<<<<<"("/utf8,
+                  (_fn_Show_show@11_0(_witness_Show@5_0,
+                                      _A@12_0))/binary>>/binary,
                 ","/utf8>>/binary,
-              (_fn_Show_show@7_0(_witness_Show@3_0,
-                                 _C@14_0))/binary>>/binary,
+              (_fn_Show_show@9_0(_witness_Show@4_0,
+                                 _B@13_0))/binary>>/binary,
             ","/utf8>>/binary,
-          ")"/utf8>>
-    end.
+          (_fn_Show_show@7_0(_witness_Show@3_0,
+                             _C@14_0))/binary>>/binary,
+        ","/utf8>>/binary,
+      ")"/utf8>>.
 
 'TupleImpls::Show::$patina_witness<(_, _, _)>'(_witnesses_where_Show@0_0) ->
     {{fun 'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::show<(_, _, _)>'/2},

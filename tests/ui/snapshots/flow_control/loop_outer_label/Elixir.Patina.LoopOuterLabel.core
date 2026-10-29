@@ -60,21 +60,21 @@ module 'Elixir.Patina.LoopOuterLabel' ['__info__'/1,
 'break_outer_loop'/0 =
     %% Line 3
     ( fun () ->
-	  let <_10> =
+	  let <_8> =
 	      letrec
 		  '_$patina_loop'/1 =
 		      %% Line 6
-		      ( fun (_8) ->
+		      ( fun (_6) ->
 			    let <_X_$patina_loop> = '_$patina_loop'/1
 			    in  ( letrec
 				      '$patina_label_0'/2 =
 					  fun (_X_jump_value@1_0,_X_value@0_1) ->
 					      {_X_jump_value@1_0,_X_value@0_1}
-				  in  let <_5> =
+				  in  let <_4> =
 					  letrec
 					      '_$patina_loop'/1 =
 						  %% Line 7
-						  ( fun (_3) ->
+						  ( fun (_2) ->
 							( letrec
 							      '$patina_forward'/1 =
 								  fun (_@patina_jump) ->
@@ -85,22 +85,20 @@ module 'Elixir.Patina.LoopOuterLabel' ['__info__'/1,
 									 -| ['result_not_wanted'] ):%% Line 8
 												    ( '+'
 												      -| ['result_not_wanted'] )
-								      (( _3
-									 -| ['result_not_wanted'] ), %% Line 8
-												     ( 1
-												       -| ['result_not_wanted'] ))
+								      (_2, %% Line 8
+									   ( 1
+									     -| ['result_not_wanted'] ))
 							      in  apply '$patina_forward'/1
 								      ({'$patina_label_0',%% Line 9
 											  _X_value@0_1,%% Line 9
 												       _X_value@0_1})
 							  -| ['letrec_goto','no_inline'] )
-						    -| [{'id',{0,0,'-break_outer_loop/0-fun-0-'}},'result_not_wanted'] )
+						    -| [{'id',{0,0,'-break_outer_loop/0-fun-0-'}}] )
 					  in  '_$patina_loop'/1
 				      in  do  case %% Line 7
-						   ( apply ( _5
-							     -| ['result_not_wanted'] )
-							 (_8)
-						     -| [{'label',79}] ) of
+						   ( apply _4
+							 (_6)
+						     -| [{'label',78}] ) of
 						<{'$patina_label_0',_@patina_arg_1,_@patina_arg_2}> when 'true' ->
 						    apply '$patina_label_0'/2
 							(_@patina_arg_1, _@patina_arg_2)
@@ -108,73 +106,68 @@ module 'Elixir.Patina.LoopOuterLabel' ['__info__'/1,
 						    'ok'
 					      end
 					      apply _X_$patina_loop
-						  (_8)
+						  (_6)
 				  -| ['letrec_goto','no_inline'] )
 			-| [{'id',{0,0,'-break_outer_loop/0-fun-1-'}}] )
 	      in  '_$patina_loop'/1
 	  in  %% Line 6
-	      case apply _10
+	      case apply _8
 		       (( 0
 			  -| ['result_not_wanted'] )) of
 		<{_X_jump_value@2_0,_X_value@0_1}> when 'true' ->
 		    %% Line 9
 		    _X_jump_value@2_0
-		( <_11> when 'true' ->
+		( <_9> when 'true' ->
 		      primop 'match_fail'
-			  ({'badmatch',_11})
+			  ({'badmatch',_9})
 		  -| ['compiler_generated'] )
 	      end
       -| [{'function',{'break_outer_loop',0}}] )
 'break_two_loops'/0 =
     %% Line 14
     ( fun () ->
-	  let <_17> =
+	  let <_13> =
 	      letrec
 		  '_$patina_loop'/1 =
 		      %% Line 17
-		      ( fun (_15) ->
+		      ( fun (_11) ->
 			    let <_X_$patina_loop> = '_$patina_loop'/1
 			    in  ( letrec
 				      '$patina_label_0'/2 =
 					  fun (_X_jump_value@2_0,_X_value@0_1) ->
 					      {_X_jump_value@2_0,_X_value@0_1}
-				  in  let <_12> =
+				  in  let <_9> =
 					  letrec
 					      '_$patina_loop'/1 =
 						  %% Line 18
-						  ( fun (_10) ->
+						  ( fun (_7) ->
 							( letrec
 							      '$patina_forward'/1 =
 								  fun (_@patina_jump) ->
 								      _@patina_jump
-							  in  let <_28> = '_$patina_loop'/1
-							      in  let <_8> =
+							  in  let <_21> = '_$patina_loop'/1
+							      in  let <_6> =
 								      letrec
 									  '_$patina_loop'/1 =
 									      %% Line 19
-									      ( fun (_6) ->
+									      ( fun (_4) ->
 										    ( letrec
 											  '$patina_forward'/1 =
 											      fun (_@patina_jump) ->
 												  _@patina_jump
-										      in  let <_30> = '_$patina_loop'/1
+										      in  let <_23> = '_$patina_loop'/1
 											  in  let <_X_value@0_1> =
 												  call %% Line 20
 												       ( 'erlang'
 													 -| ['result_not_wanted'] ):%% Line 20
 																    ( '+'
 																      -| ['result_not_wanted'] )
-												      (( _6
-													 -| ['result_not_wanted'] ), %% Line 20
-																     ( 1
-																       -| ['result_not_wanted'] ))
+												      (_4, %% Line 20
+													   ( 1
+													     -| ['result_not_wanted'] ))
 											      in  do  %% Line 22
-												      case ( call ( 'erlang'
-														    -| ['result_not_wanted'] ):( '=:='
-																		 -| ['result_not_wanted'] )
-														 (_X_value@0_1, ( 3
-																  -| ['result_not_wanted'] ))
-													     -| ['result_not_wanted'] ) of
+												      case call 'erlang':'=:='
+													       (_X_value@0_1, 3) of
 													<'true'> when 'true' ->
 													    let <_X_jump_value@1_0> =
 														call %% Line 23
@@ -190,37 +183,33 @@ module 'Elixir.Patina.LoopOuterLabel' ['__info__'/1,
 														    ({'$patina_label_0',%% Line 23
 																	_X_jump_value@1_0,%% Line 23
 																			  _X_value@0_1})
-													<_23> when 'true' ->
+													<_19> when 'true' ->
 													    'ok'
 												      end
-												      apply _30
+												      apply _23
 													  (_X_value@0_1)
 										      -| ['letrec_goto','no_inline'] )
-										-| [{'id',{0,0,'-break_two_loops/0-fun-0-'}},'result_not_wanted'] )
+										-| [{'id',{0,0,'-break_two_loops/0-fun-0-'}}] )
 								      in  '_$patina_loop'/1
 								  in  do  case %% Line 19
-									       ( apply ( _8
-											 -| ['result_not_wanted'] )
-										     (( _10
-											-| ['result_not_wanted'] ))
-										 -| [{'label',174}] ) of
+									       ( apply _6
+										     (_7)
+										 -| [{'label',169}] ) of
 									    <_@patina_jump = {'$patina_label_0',_@patina_arg_1,_@patina_arg_2}> when 'true' ->
 										apply '$patina_forward'/1
 										    (_@patina_jump)
 									    <_@patina_other> when 'true' ->
 										'ok'
 									  end
-									  apply _28
-									      (( _10
-										 -| ['result_not_wanted'] ))
+									  apply _21
+									      (_7)
 							  -| ['letrec_goto','no_inline'] )
-						    -| [{'id',{0,0,'-break_two_loops/0-fun-1-'}},'result_not_wanted'] )
+						    -| [{'id',{0,0,'-break_two_loops/0-fun-1-'}}] )
 					  in  '_$patina_loop'/1
 				      in  do  case %% Line 18
-						   ( apply ( _12
-							     -| ['result_not_wanted'] )
-							 (_15)
-						     -| [{'label',190}] ) of
+						   ( apply _9
+							 (_11)
+						     -| [{'label',184}] ) of
 						<{'$patina_label_0',_@patina_arg_1,_@patina_arg_2}> when 'true' ->
 						    apply '$patina_label_0'/2
 							(_@patina_arg_1, _@patina_arg_2)
@@ -228,41 +217,41 @@ module 'Elixir.Patina.LoopOuterLabel' ['__info__'/1,
 						    'ok'
 					      end
 					      apply _X_$patina_loop
-						  (_15)
+						  (_11)
 				  -| ['letrec_goto','no_inline'] )
 			-| [{'id',{0,0,'-break_two_loops/0-fun-2-'}}] )
 	      in  '_$patina_loop'/1
 	  in  %% Line 17
-	      case apply _17
+	      case apply _13
 		       (( 0
 			  -| ['result_not_wanted'] )) of
 		<{_X_jump_value@3_0,_X_value@0_1}> when 'true' ->
 		    %% Line 23
 		    _X_jump_value@3_0
-		( <_18> when 'true' ->
+		( <_14> when 'true' ->
 		      primop 'match_fail'
-			  ({'badmatch',_18})
+			  ({'badmatch',_14})
 		  -| ['compiler_generated'] )
 	      end
       -| [{'function',{'break_two_loops',0}}] )
 'outer_break_initializes'/0 =
     %% Line 30
     ( fun () ->
-	  let <_10> =
+	  let <_8> =
 	      letrec
 		  '_$patina_loop'/1 =
 		      %% Line 33
-		      ( fun (_8) ->
+		      ( fun (_6) ->
 			    let <_X_$patina_loop> = '_$patina_loop'/1
 			    in  ( letrec
 				      '$patina_label_0'/1 =
 					  fun (_X_value@0_1) ->
 					      _X_value@0_1
-				  in  let <_5> =
+				  in  let <_4> =
 					  letrec
 					      '_$patina_loop'/1 =
 						  %% Line 34
-						  ( fun (_3) ->
+						  ( fun (_2) ->
 							( letrec
 							      '$patina_forward'/1 =
 								  fun (_@patina_jump) ->
@@ -273,11 +262,11 @@ module 'Elixir.Patina.LoopOuterLabel' ['__info__'/1,
 						    -| [{'id',{0,0,'-outer_break_initializes/0-fun-0-'}},'result_not_wanted'] )
 					  in  '_$patina_loop'/1
 				      in  do  case %% Line 34
-						   ( apply ( _5
+						   ( apply ( _4
 							     -| ['result_not_wanted'] )
-							 (( _8
+							 (( _6
 							    -| ['result_not_wanted'] ))
-						     -| [{'label',263}] ) of
+						     -| [{'label',255}] ) of
 						<{'$patina_label_0',_@patina_arg_1}> when 'true' ->
 						    apply '$patina_label_0'/1
 							(_@patina_arg_1)
@@ -285,13 +274,13 @@ module 'Elixir.Patina.LoopOuterLabel' ['__info__'/1,
 						    'ok'
 					      end
 					      apply _X_$patina_loop
-						  (( _8
+						  (( _6
 						     -| ['result_not_wanted'] ))
 				  -| ['letrec_goto','no_inline'] )
 			-| [{'id',{0,0,'-outer_break_initializes/0-fun-1-'}},'result_not_wanted'] )
 	      in  '_$patina_loop'/1
 	  in  %% Line 33
-	      apply ( _10
+	      apply ( _8
 		      -| ['result_not_wanted'] )
 		  (( {}
 		     -| ['result_not_wanted'] ))

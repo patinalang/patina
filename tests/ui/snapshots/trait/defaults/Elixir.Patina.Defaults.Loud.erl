@@ -31,7 +31,7 @@
                                       _witnesses_where_Ring_ring@1_0),
     _vtable_Tag@5_0 = erlang:element(1, _witness_Tag@4_0),
     _fn_Tag_tag@6_0 = erlang:element(1, _vtable_Tag@5_0),
-    begin _fn_Tag_tag@6_0(_witness_Tag@4_0, _t@3_0) end.
+    _fn_Tag_tag@6_0(_witness_Tag@4_0, _t@3_0).
 
 'Defaults::Ring::$patina_witness'() ->
     {{fun 'Elixir.Patina.Defaults.Loud':'Defaults::Ring::ring'/4},

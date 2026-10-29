@@ -124,9 +124,8 @@ classify_let_else(_number@0_0) ->
                 3 -> {};
                 5 -> {};
                 _ ->
-                    begin
-                        '$patina_marker':jump('$patina_label_0', 0), []
-                    end
+                    '$patina_marker':jump('$patina_label_0', 0),
+                    []
             end,
             10
     end.

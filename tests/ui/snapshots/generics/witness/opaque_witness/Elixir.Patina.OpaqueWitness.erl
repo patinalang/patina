@@ -33,12 +33,11 @@ show(_witnesses_where_show@0_0, _t@1_0) ->
                                           _witness_Describe@2_0),
     _fn_Describe_describe@4_0 = erlang:element(1,
                                                _vtable_Describe@3_0),
-    begin
-        _fn_Describe_describe@4_0(_witness_Describe@2_0, _t@1_0)
-    end.
+    _fn_Describe_describe@4_0(_witness_Describe@2_0,
+                              _t@1_0).
 
 show_opaque_return() ->
     _witness_Describe@0_0 =
         'Elixir.Patina.OpaqueWitness.Name':'OpaqueWitness::Describe::$patina_witness'(),
     _witnesses_where_show@1_0 = {_witness_Describe@0_0},
-    begin show(_witnesses_where_show@1_0, make()) end.
+    show(_witnesses_where_show@1_0, make()).

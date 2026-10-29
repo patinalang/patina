@@ -24,13 +24,9 @@
 '__info__'(Key) -> module_info(Key).
 
 main() ->
-    __s@1_0 = begin
-                  _0@0_0 = 'Elixir.Patina.Generics02.A', _0@0_0
-              end,
-    __char@2_0 = $a,
-    __t@4_0 = begin
-                  _0@3_0 = 'Elixir.Patina.Generics02.A', _0@3_0
-              end,
-    __int@5_0 = 6,
-    __char@6_0 = $a,
+    __s@0_0 = 'Elixir.Patina.Generics02.A',
+    __char@1_0 = $a,
+    __t@2_0 = 'Elixir.Patina.Generics02.A',
+    __int@3_0 = 6,
+    __char@4_0 = $a,
     {}.

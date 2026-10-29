@@ -24,15 +24,13 @@
 '__info__'(Key) -> module_info(Key).
 
 main() ->
-    begin
-        io:put_chars(begin
-                         _element@1_0 = begin
-                                            _element@0_0 = io_lib:format("~ktp",
-                                                                         [2.345]),
-                                            [_element@0_0]
-                                        end,
-                         [_element@1_0]
-                     end),
-        io:nl(),
-        {}
-    end.
+    io:put_chars(begin
+                     _element@1_0 = begin
+                                        _element@0_0 = io_lib:format("~ktp",
+                                                                     [2.345]),
+                                        [_element@0_0]
+                                    end,
+                     [_element@1_0]
+                 end),
+    io:nl(),
+    {}.

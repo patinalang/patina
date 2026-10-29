@@ -24,36 +24,31 @@
 '__info__'(Key) -> module_info(Key).
 
 main() ->
-    begin
-        io:put_chars(begin
-                         _element@1_0 = begin
-                                            _element@0_0 = io_lib:format("~ktp",
-                                                                         [200]),
-                                            [_element@0_0]
-                                        end,
-                         [_element@1_0]
-                     end),
-        io:nl(),
-        {}
-    end,
-    begin
-        io:put_chars(begin
-                         _element@4_0 = begin
-                                            _element@3_0 = io_lib:format("~ktp",
-                                                                         [begin
-                                                                              _point@2_0 =
-                                                                                  ('Elixir.Patina.Repr08.Point':'__struct__'())#{x
-                                                                                                                                     :=
-                                                                                                                                     1,
-                                                                                                                                 y
-                                                                                                                                     :=
-                                                                                                                                     2},
-                                                                              _point@2_0
-                                                                          end]),
-                                            [_element@3_0]
-                                        end,
-                         [_element@4_0]
-                     end),
-        io:nl(),
-        {}
-    end.
+    io:put_chars(begin
+                     _element@1_0 = begin
+                                        _element@0_0 = io_lib:format("~ktp",
+                                                                     [200]),
+                                        [_element@0_0]
+                                    end,
+                     [_element@1_0]
+                 end),
+    io:nl(),
+    io:put_chars(begin
+                     _element@4_0 = begin
+                                        _element@3_0 = io_lib:format("~ktp",
+                                                                     [begin
+                                                                          _point@2_0 =
+                                                                              ('Elixir.Patina.Repr08.Point':'__struct__'())#{x
+                                                                                                                                 :=
+                                                                                                                                 1,
+                                                                                                                             y
+                                                                                                                                 :=
+                                                                                                                                 2},
+                                                                          _point@2_0
+                                                                      end]),
+                                        [_element@3_0]
+                                    end,
+                     [_element@4_0]
+                 end),
+    io:nl(),
+    {}.

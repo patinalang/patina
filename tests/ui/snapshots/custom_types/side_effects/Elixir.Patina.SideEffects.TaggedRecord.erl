@@ -29,54 +29,44 @@
 '__info__'(Key) -> module_info(Key).
 
 fields() ->
-    begin
-        _x@0_0 = 'Elixir.Patina.SideEffects':effect(x, 10),
-        _y@1_0 = 'Elixir.Patina.SideEffects':effect(y, 20),
-        _z@2_0 = 'Elixir.Patina.SideEffects':effect(z, 30),
-        {tagged, _x@0_0, _y@1_0, _z@2_0}
-    end.
+    _x@0_0 = 'Elixir.Patina.SideEffects':effect(x, 10),
+    _y@1_0 = 'Elixir.Patina.SideEffects':effect(y, 20),
+    _z@2_0 = 'Elixir.Patina.SideEffects':effect(z, 30),
+    {tagged, _x@0_0, _y@1_0, _z@2_0}.
 
 base() ->
-    begin
-        _field_base@0_0 =
-            'Elixir.Patina.SideEffects':effect(base,
-                                               {tagged, 1, 2, 3}),
-        _field_base@0_0
-    end.
+    _field_base@0_0 =
+        'Elixir.Patina.SideEffects':effect(base,
+                                           {tagged, 1, 2, 3}),
+    _field_base@0_0.
 
 update() ->
-    begin
-        _field_base@0_0 =
-            'Elixir.Patina.SideEffects':effect(base,
-                                               {tagged, 1, 2, 3}),
-        erlang:setelement(2, _field_base@0_0, 10)
-    end.
+    _field_base@0_0 =
+        'Elixir.Patina.SideEffects':effect(base,
+                                           {tagged, 1, 2, 3}),
+    erlang:setelement(2, _field_base@0_0, 10).
 
 mixed() ->
-    begin
-        _field_base@0_0 =
-            'Elixir.Patina.SideEffects':effect(base,
-                                               {tagged, 1, 2, 3}),
-        _x@1_0 = 'Elixir.Patina.SideEffects':effect(x, 10),
-        _z@2_0 = 'Elixir.Patina.SideEffects':effect(z, 30),
-        erlang:setelement(4,
-                          erlang:setelement(2, _field_base@0_0, _x@1_0),
-                          _z@2_0)
-    end.
+    _field_base@0_0 =
+        'Elixir.Patina.SideEffects':effect(base,
+                                           {tagged, 1, 2, 3}),
+    _x@1_0 = 'Elixir.Patina.SideEffects':effect(x, 10),
+    _z@2_0 = 'Elixir.Patina.SideEffects':effect(z, 30),
+    erlang:setelement(4,
+                      erlang:setelement(2, _field_base@0_0, _x@1_0),
+                      _z@2_0).
 
 replace() ->
-    begin
-        _field_base@0_0 =
-            'Elixir.Patina.SideEffects':effect(base,
-                                               {tagged, 1, 2, 3}),
-        _x@1_0 = 'Elixir.Patina.SideEffects':effect(x, 10),
-        _y@2_0 = 'Elixir.Patina.SideEffects':effect(y, 20),
-        _z@3_0 = 'Elixir.Patina.SideEffects':effect(z, 30),
-        erlang:setelement(4,
-                          erlang:setelement(3,
-                                            erlang:setelement(2,
-                                                              _field_base@0_0,
-                                                              _x@1_0),
-                                            _y@2_0),
-                          _z@3_0)
-    end.
+    _field_base@0_0 =
+        'Elixir.Patina.SideEffects':effect(base,
+                                           {tagged, 1, 2, 3}),
+    _x@1_0 = 'Elixir.Patina.SideEffects':effect(x, 10),
+    _y@2_0 = 'Elixir.Patina.SideEffects':effect(y, 20),
+    _z@3_0 = 'Elixir.Patina.SideEffects':effect(z, 30),
+    erlang:setelement(4,
+                      erlang:setelement(3,
+                                        erlang:setelement(2,
+                                                          _field_base@0_0,
+                                                          _x@1_0),
+                                        _y@2_0),
+                      _z@3_0).

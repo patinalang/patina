@@ -30,106 +30,71 @@ main() ->
     case _number@0_0 of
         _value@4_0 = _i@3_0
             when erlang:is_integer(_value@4_0) ->
-            begin
-                io:put_chars(begin
-                                 _element@8_0 = begin
-                                                    _element@5_0 =
-                                                        <<"Matched "/utf8>>,
-                                                    _element@6_0 =
-                                                        io_lib:format("~ktp",
-                                                                      [_i@3_0]),
-                                                    _element@7_0 = <<"!"/utf8>>,
-                                                    [_element@5_0,
-                                                     _element@6_0,
-                                                     _element@7_0]
-                                                end,
-                                 [_element@8_0]
-                             end),
-                io:nl(),
-                {}
-            end;
+            io:put_chars(begin
+                             _element@6_0 = begin
+                                                _element@5_0 =
+                                                    io_lib:format("~ktp",
+                                                                  [_i@3_0]),
+                                                [<<"Matched "/utf8>>,
+                                                 _element@5_0,
+                                                 <<"!"/utf8>>]
+                                            end,
+                             [_element@6_0]
+                         end),
+            io:nl(),
+            {};
         _ -> {}
     end,
     case _letter@1_0 of
-        _value@10_0 = _i@9_0
-            when erlang:is_integer(_value@10_0) ->
-            begin
-                io:put_chars(begin
-                                 _element@14_0 = begin
-                                                     _element@11_0 =
-                                                         <<"Matched "/utf8>>,
-                                                     _element@12_0 =
-                                                         io_lib:format("~ktp",
-                                                                       [_i@9_0]),
-                                                     _element@13_0 =
-                                                         <<"!"/utf8>>,
-                                                     [_element@11_0,
-                                                      _element@12_0,
-                                                      _element@13_0]
-                                                 end,
-                                 [_element@14_0]
-                             end),
-                io:nl(),
-                {}
-            end;
+        _value@8_0 = _i@7_0
+            when erlang:is_integer(_value@8_0) ->
+            io:put_chars(begin
+                             _element@10_0 = begin
+                                                 _element@9_0 =
+                                                     io_lib:format("~ktp",
+                                                                   [_i@7_0]),
+                                                 [<<"Matched "/utf8>>,
+                                                  _element@9_0,
+                                                  <<"!"/utf8>>]
+                                             end,
+                             [_element@10_0]
+                         end),
+            io:nl(),
+            {};
         _ ->
-            begin
-                io:put_chars(begin
-                                 _element@15_0 =
-                                     [<<"Didn't match a number. Let's go with "
-                                        "a letter!"/utf8>>],
-                                 [_element@15_0]
-                             end),
-                io:nl(),
-                {}
-            end
+            io:put_chars([[<<"Didn't match a number. Let's go with "
+                             "a letter!"/utf8>>]]),
+            io:nl(),
+            {}
     end,
-    _i_like_letters@16_0 = false,
+    _i_like_letters@11_0 = false,
     case _emoticon@2_0 of
-        _value@18_0 = _i@17_0
-            when erlang:is_integer(_value@18_0) ->
-            begin
-                io:put_chars(begin
-                                 _element@22_0 = begin
-                                                     _element@19_0 =
-                                                         <<"Matched "/utf8>>,
-                                                     _element@20_0 =
-                                                         io_lib:format("~ktp",
-                                                                       [_i@17_0]),
-                                                     _element@21_0 =
-                                                         <<"!"/utf8>>,
-                                                     [_element@19_0,
-                                                      _element@20_0,
-                                                      _element@21_0]
-                                                 end,
-                                 [_element@22_0]
-                             end),
-                io:nl(),
-                {}
-            end;
+        _value@13_0 = _i@12_0
+            when erlang:is_integer(_value@13_0) ->
+            io:put_chars(begin
+                             _element@15_0 = begin
+                                                 _element@14_0 =
+                                                     io_lib:format("~ktp",
+                                                                   [_i@12_0]),
+                                                 [<<"Matched "/utf8>>,
+                                                  _element@14_0,
+                                                  <<"!"/utf8>>]
+                                             end,
+                             [_element@15_0]
+                         end),
+            io:nl(),
+            {};
         _ ->
-            case _i_like_letters@16_0 of
+            case _i_like_letters@11_0 of
                 true ->
-                    begin
-                        io:put_chars(begin
-                                         _element@23_0 =
-                                             [<<"Didn't match a number. Let's go with "
-                                                "a letter!"/utf8>>],
-                                         [_element@23_0]
-                                     end),
-                        io:nl(),
-                        {}
-                    end;
+                    io:put_chars([[<<"Didn't match a number. Let's go with "
+                                     "a letter!"/utf8>>]]),
+                    io:nl(),
+                    {};
                 _ ->
-                    begin
-                        io:put_chars(begin
-                                         _element@24_0 =
-                                             [<<"I don't like letters. Let's go with "
-                                                "an emoticon :)!"/utf8>>],
-                                         [_element@24_0]
-                                     end),
-                        io:nl(),
-                        {}
-                    end
+                    io:put_chars([[<<"I don't like letters. Let's go with "
+                                     "an emoticon :)!"/utf8>>]]),
+                    io:nl(),
+                    {}
             end
     end.
