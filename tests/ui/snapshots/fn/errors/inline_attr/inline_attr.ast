@@ -1,0 +1,32 @@
+pub trait Shape {
+    // A required method has no body to inline.
+    #[inline]
+    fn area(self)
+    -> int;
+
+    // A provided method can be inlined, where an impl doesn't override it.
+    #[inline]
+    fn double_area(self) -> int { self.area() * 2 }
+}
+
+pub struct Square(pub int);
+
+impl Shape for Square {
+    // An impl item can be inlined.
+    #[inline]
+    fn area(self) -> int { self.0 * self.0 }
+}
+
+impl Square {
+    #[inline]
+    pub fn side(self) -> int { self.0 }
+}
+
+#[inline(always)]
+pub fn always(x: int) -> int { x }
+
+#[inline(never)]
+pub fn never(x: int) -> int { x }
+
+#[inline]
+pub struct NotAFunction;

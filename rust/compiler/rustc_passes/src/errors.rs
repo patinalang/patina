@@ -666,11 +666,11 @@ pub(crate) struct UselessAssignment<'a> {
 }
 
 #[derive(Diagnostic)]
-#[diag("`#[inline]` is ignored on externally exported functions")]
-#[help(
-    "externally exported functions are functions with `#[no_mangle]`, `#[export_name]`, or `#[linkage]`"
-)]
-pub(crate) struct InlineIgnoredForExported;
+#[diag("an intrinsic cannot be `#[inline]`")]
+pub(crate) struct InlineIntrinsic {
+    #[primary_span]
+    pub attr_span: Span,
+}
 
 #[derive(Diagnostic)]
 pub(crate) enum AttrApplication {

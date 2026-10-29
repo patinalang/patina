@@ -50,7 +50,7 @@ impl AttributeKind {
             FfiPure(..) => No,
             Fundamental { .. } => Yes,
             Ignore { .. } => No,
-            Inline(..) => No,
+            Inline(..) => Yes,
             InstructionSet(..) => No,
             Lang(..) => Yes,
             Link(..) => No,

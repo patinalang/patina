@@ -136,9 +136,8 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                 Attribute::Parsed(AttributeKind::ProcMacroDerive { .. }) => {
                     self.check_proc_macro(hir_id, target, ProcMacroKind::Derive)
                 }
-                Attribute::Parsed(AttributeKind::Inline(InlineAttr::Force { .. }, ..)) => {} // handled separately below
-                Attribute::Parsed(AttributeKind::Inline(kind, attr_span)) => {
-                    self.check_inline(hir_id, *attr_span, kind, target)
+                Attribute::Parsed(AttributeKind::Inline(_, attr_span)) => {
+                    self.check_inline(hir_id, *attr_span, target)
                 }
                 Attribute::Parsed(AttributeKind::LoopMatch(attr_span)) => {
                     self.check_loop_match(hir_id, *attr_span, target)
@@ -597,30 +596,21 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
         }
     }
 
-    /// Checks if an `#[inline]` is applied to a function or a closure.
-    fn check_inline(&self, hir_id: HirId, attr_span: Span, kind: &InlineAttr, target: Target) {
-        match target {
+    /// Checks that an `#[inline]` function isn't an intrinsic.
+    fn check_inline(&self, hir_id: HirId, attr_span: Span, target: Target) {
+        if !matches!(
+            target,
             Target::Fn
-            | Target::Closure
-            | Target::Method(MethodKind::Trait { body: true } | MethodKind::Inherent) => {
-                // `#[inline]` is ignored if the symbol must be codegened upstream because it's exported.
-                if let Some(did) = hir_id.as_owner()
-                    && self.tcx.def_kind(did).has_codegen_attrs()
-                    && kind != &InlineAttr::Never
-                {
-                    let attrs = self.tcx.codegen_fn_attrs(did);
-                    // Not checking naked as `#[inline]` is forbidden for naked functions anyways.
-                    if attrs.contains_extern_indicator() {
-                        self.tcx.emit_node_span_lint(
-                            UNUSED_ATTRIBUTES,
-                            hir_id,
-                            attr_span,
-                            errors::InlineIgnoredForExported,
-                        );
-                    }
-                }
-            }
-            _ => {}
+                | Target::Method(
+                    MethodKind::Inherent | MethodKind::Trait { body: true } | MethodKind::TraitImpl
+                )
+        ) {
+            return;
+        }
+        let Some(owner) = hir_id.as_owner() else { return };
+
+        if self.tcx.intrinsic(owner.def_id).is_some() {
+            self.dcx().emit_err(errors::InlineIntrinsic { attr_span });
         }
     }
 

@@ -3,7 +3,6 @@
 //                      SingleAttributeParser which is what we have two of here.
 
 use rustc_hir::attrs::{AttributeKind, InlineAttr};
-use rustc_session::lint::builtin::ILL_FORMED_ATTRIBUTE_INPUT;
 
 use super::prelude::*;
 
@@ -17,44 +16,20 @@ impl SingleAttributeParser for InlineParser {
         Allow(Target::Method(MethodKind::Inherent)),
         Allow(Target::Method(MethodKind::Trait { body: true })),
         Allow(Target::Method(MethodKind::TraitImpl)),
-        Allow(Target::Closure),
-        Allow(Target::Delegation { mac: false }),
-        Warn(Target::Method(MethodKind::Trait { body: false })),
-        Warn(Target::ForeignFn),
-        Warn(Target::Field),
-        Warn(Target::MacroDef),
-        Warn(Target::Arm),
-        Warn(Target::AssocConst),
-        Warn(Target::MacroCall),
     ]);
-    const TEMPLATE: AttributeTemplate = template!(
-        Word,
-        List: &["always", "never"],
-        "https://doc.rust-lang.org/reference/attributes/codegen.html#the-inline-attribute"
-    );
+    const TEMPLATE: AttributeTemplate = template!(Word);
 
     fn convert(cx: &mut AcceptContext<'_, '_>, args: &ArgParser) -> Option<AttributeKind> {
         match args {
             ArgParser::NoArgs => Some(AttributeKind::Inline(InlineAttr::Hint, cx.attr_span)),
             ArgParser::List(list) => {
-                let l = cx.expect_single(list)?;
-
-                match l.meta_item().and_then(|i| i.path().word_sym()) {
-                    Some(sym::always) => {
-                        Some(AttributeKind::Inline(InlineAttr::Always, cx.attr_span))
-                    }
-                    Some(sym::never) => {
-                        Some(AttributeKind::Inline(InlineAttr::Never, cx.attr_span))
-                    }
-                    _ => {
-                        cx.adcx().expected_specific_argument(l.span(), &[sym::always, sym::never]);
-                        return None;
-                    }
-                }
+                cx.adcx().expected_no_args(list.span);
+                None
             }
             ArgParser::NameValue(_) => {
-                cx.adcx().warn_ill_formed_attribute_input(ILL_FORMED_ATTRIBUTE_INPUT);
-                return None;
+                let span = cx.attr_span;
+                cx.adcx().expected_no_args(span);
+                None
             }
         }
     }

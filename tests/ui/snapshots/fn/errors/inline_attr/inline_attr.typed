@@ -1,0 +1,53 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+trait Shape {
+    // A required method has no body to inline.
+    #[attr = Inline(Hint)]
+    fn area(self)
+    -> int;
+
+    // A provided method can be inlined, where an impl doesn't override it.
+    #[attr = Inline(Hint)]
+    fn double_area(self)
+        ->
+            int ({ (((self as Self).area() as int) * (2 as int) as int) } as
+        int)
+}
+
+struct Square(int);
+
+impl Shape for Square {
+    // An impl item can be inlined.
+    #[attr = Inline(Hint)]
+    fn area(self)
+        ->
+            int ({
+        (((self as Square).0 as int) * ((self as Square).0 as int) as int)
+    } as int)
+}
+
+impl Square {
+    #[attr = Inline(Hint)]
+    fn side(self) -> int ({ ((self as Square).0 as int) } as int)
+}
+
+fn always(x: int) -> int ({ (x as int) } as int)
+
+fn never(x: int) -> int ({ (x as int) } as int)
+
+#[attr = Inline(Hint)]
+struct NotAFunction;

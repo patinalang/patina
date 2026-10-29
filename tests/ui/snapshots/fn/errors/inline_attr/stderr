@@ -1,0 +1,47 @@
+error: `#[inline]` attribute cannot be used on required trait methods
+  --> tests/ui/src/fn/errors/inline_attr.pt:3:5
+   |
+LL |     #[inline]
+   |     ^^^^^^^^^
+   |
+   = help: `#[inline]` can be applied to functions, inherent methods, provided trait methods, and trait methods in impl blocks
+
+error[E0565]: malformed `inline` attribute input
+  --> tests/ui/src/fn/errors/inline_attr.pt:30:1
+   |
+LL | #[inline(always)]
+   | ^^^^^^^^--------^
+   |         |
+   |         didn't expect any arguments here
+   |
+help: must be of the form
+   |
+LL - #[inline(always)]
+LL + #[inline]
+   |
+
+error[E0565]: malformed `inline` attribute input
+  --> tests/ui/src/fn/errors/inline_attr.pt:35:1
+   |
+LL | #[inline(never)]
+   | ^^^^^^^^-------^
+   |         |
+   |         didn't expect any arguments here
+   |
+help: must be of the form
+   |
+LL - #[inline(never)]
+LL + #[inline]
+   |
+
+error: `#[inline]` attribute cannot be used on structs
+  --> tests/ui/src/fn/errors/inline_attr.pt:40:1
+   |
+LL | #[inline]
+   | ^^^^^^^^^
+   |
+   = help: `#[inline]` can only be applied to functions
+
+error: aborting due to 4 previous errors
+
+For more information about this error, try `rustc --explain E0565`.
