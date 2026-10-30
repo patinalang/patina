@@ -2748,6 +2748,15 @@ impl Expr<'_> {
         matches!(self.kind, ExprKind::Lit(Lit { node: LitKind::Int(_), .. }))
     }
 
+    /// If the expression is a (negated?) literal, returns it and whether it's negated.
+    pub fn as_maybe_negated_lit(&self) -> Option<(&Lit, bool)> {
+        match self.kind {
+            ExprKind::Lit(ref lit) => Some((lit, false)),
+            ExprKind::Unary(UnOp::Neg, Expr { kind: ExprKind::Lit(lit), .. }) => Some((lit, true)),
+            _ => None,
+        }
+    }
+
     /// If `Self.kind` is `ExprKind::DropTemps(expr)`, drill down until we get a non-`DropTemps`
     /// `Expr`. This is used in suggestions to ignore this `ExprKind` as it is semantically
     /// silent, only signaling the ownership system. By doing this, suggestions that check the

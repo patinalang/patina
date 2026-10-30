@@ -14,6 +14,9 @@ use Core::Prelude::*;
 #[allow(unused)]
 extern mod patina_fmt;
 
-const BLOCK_VALUE: int = { let value = 1; value };
+// A constant can't be defined in terms of itself.
 
-pub fn const_value_block() -> int { BLOCK_VALUE }
+const A: int = B + 1;
+const B: int = A;
+
+pub fn a() -> int { A }

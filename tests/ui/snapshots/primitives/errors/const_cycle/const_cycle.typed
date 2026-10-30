@@ -14,10 +14,9 @@ use Core::Prelude::*;
 #[allow(unused)]
 extern mod patina_fmt;
 
-const NESTED_BLOCK: #{str => int} =
-    (#{("value" as str) =>
-            ({ let value = (1 as int); (value as int) } as int)} as
-        #{str => int});
+// A constant can't be defined in terms of itself.
 
-fn const_value_nested_block()
-    -> #{str => int} ({ (NESTED_BLOCK as #{str => int}) } as #{str => int})
+const A: int = ((B as int) + (1 as int) as int);
+const B: int = (A as int);
+
+fn a() -> int ({ (A as int) } as int)

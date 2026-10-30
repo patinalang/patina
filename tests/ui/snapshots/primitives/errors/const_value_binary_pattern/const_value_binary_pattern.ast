@@ -1,8 +1,0 @@
-// Every segment of a constant binary pattern, and its size, must be a constant value.
-
-fn size() -> int { 8 }
-
-const CALL_SIZE: bits = <<1: int(size = size())>>;
-const ARITHMETIC: bin = <<(1 + 1): int(size = 8)>>;
-
-pub fn values() -> (bits, bin) { (CALL_SIZE, ARITHMETIC) }

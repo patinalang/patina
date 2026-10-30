@@ -1,0 +1,64 @@
+error: unsupported expression in constant value
+  --> tests/ui/src/primitives/errors/const_errors.pt:13:19
+   |
+LL | const CALL: int = one();
+   |                   ^^^^^
+   |
+   = note: constant values may not call nor refer to functions or closures
+
+error: unsupported expression in constant value
+  --> tests/ui/src/primitives/errors/const_errors.pt:14:26
+   |
+LL | const METHOD_CALL: int = Num(1).get();
+   |                          ^^^^^^^^^^^^
+   |
+   = note: constant values may not call nor refer to functions or closures
+
+error: unsupported expression in constant value
+  --> tests/ui/src/primitives/errors/const_errors.pt:15:38
+   |
+LL | const FN_REFERENCE: fnref() -> int = one;
+   |                                      ^^^
+   |
+   = note: constant values may not call nor refer to functions or closures
+
+error: unsupported expression in constant value
+  --> tests/ui/src/primitives/errors/const_errors.pt:16:30
+   |
+LL | const CLOSURE: fn() -> int = || 1;
+   |                              ^^^^
+   |
+   = note: constant values may not call nor refer to functions or closures
+
+error: unsupported expression in constant value
+  --> tests/ui/src/primitives/errors/const_errors.pt:17:45
+   |
+LL | const CALL_IN_SEGMENT_SIZE: bits = <<1: int(one())>>;
+   |                                             ^^^^^
+   |
+   = note: constant values may not call nor refer to functions or closures
+
+error: unsupported expression in constant value
+  --> tests/ui/src/primitives/errors/const_errors.pt:22:23
+   |
+LL |     const CALL: int = one();
+   |                       ^^^^^
+   |
+   = note: constant values may not call nor refer to functions or closures
+
+error: unsupported expression in constant value
+  --> tests/ui/src/primitives/errors/const_errors.pt:30:20
+   |
+LL |     const K: int = one();
+   |                    ^^^^^
+   |
+   = note: constant values may not call nor refer to functions or closures
+
+error: named constant without a literal body as a range endpoint not yet implemented
+  --> tests/ui/src/primitives/errors/const_errors.pt:45:12
+   |
+LL |         0..LIMIT => true,
+   |            ^^^^^
+
+error: aborting due to 8 previous errors
+

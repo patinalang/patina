@@ -1,7 +1,6 @@
 use rustc_apfloat::Float;
 use rustc_apfloat::ieee::Double;
 use rustc_ast::{self as ast};
-use rustc_hir as hir;
 use rustc_hir::LangItem;
 use rustc_hir::def::DefKind;
 use rustc_middle::mir::ConstValue;
@@ -152,14 +151,8 @@ pub(crate) fn eval_to_valtree<'tcx>(
     let Some(body) = tcx.hir_maybe_body_owned_by(local_def_id) else {
         return Err(ValTreeCreationError::Unevaluable);
     };
-    let expr = body.value;
-
-    let (expr, neg) = match expr.kind {
-        hir::ExprKind::Unary(hir::UnOp::Neg, inner) => (inner, true),
-        _ => (expr, false),
-    };
-    let hir::ExprKind::Lit(lit) = expr.kind else {
-        debug!(?expr.kind, "const body is not a literal; CTFE not available");
+    let Some((lit, neg)) = body.value.as_maybe_negated_lit() else {
+        debug!(?body.value.kind, "const body is not a literal; CTFE not available");
         return Err(ValTreeCreationError::Unevaluable);
     };
     let lit_input = LitToConstInput { lit: lit.node, ty: Some(ty), neg };

@@ -1,0 +1,48 @@
+fn one() -> int {
+    1
+}
+
+pub struct Num(int);
+
+impl Num {
+    fn get(self) -> int {
+        self.0
+    }
+}
+
+const CALL: int = one();
+const METHOD_CALL: int = Num(1).get();
+const FN_REFERENCE: fnref() -> int = one;
+const CLOSURE: fn() -> int = || 1;
+const CALL_IN_SEGMENT_SIZE: bits = <<1: int(one())>>;
+
+const TUPLE_STRUCT_VALUE: Num = Num(1);
+
+impl Num {
+    const CALL: int = one();
+}
+
+pub trait Konst {
+    const K: int;
+}
+
+impl Konst for Num {
+    const K: int = one();
+}
+
+pub fn values() -> (int, int, fnref() -> int, fn() -> int, bits, Num, int, int) {
+    (CALL, METHOD_CALL, FN_REFERENCE, CLOSURE, CALL_IN_SEGMENT_SIZE, TUPLE_STRUCT_VALUE, Num::CALL, Num::K)
+}
+
+// A range pattern (currently) needs the values of its endpoints, which only a literal constant has.
+const LIMIT: int = {
+    let limit = 10;
+    limit
+};
+
+pub fn below_limit(n: int) -> bool {
+    match n {
+        0..LIMIT => true,
+        _ => false,
+    }
+}

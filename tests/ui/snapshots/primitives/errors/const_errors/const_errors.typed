@@ -1,0 +1,79 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+fn one() -> int ({ (1 as int) } as int)
+
+struct Num(int);
+
+impl Num {
+    fn get(self) -> int ({ ((self as Num).0 as int) } as int)
+}
+
+const CALL: int = ((one as fn() -> int {one})() as int);
+const METHOD_CALL: int =
+    (((Num as fn(int) -> Num {Num})((1 as int)) as Num).get() as int);
+const FN_REFERENCE: fn() -> int = (one as fn() -> int {one});
+const CLOSURE: fn() -> int =
+    (|| (1 as int) as
+        {closure@tests/ui/src/primitives/errors/const_errors.pt:16:30: 16:32});
+const CALL_IN_SEGMENT_SIZE: bits =
+    (<<(1 as int): int(size = ((one as fn() -> int {one})() as int))>> as
+        bits);
+
+const TUPLE_STRUCT_VALUE: Num =
+    ((Num as fn(int) -> Num {Num})((1 as int)) as Num);
+
+impl Num {
+    const
+    CALL:
+    int
+    =
+    ((one as fn() -> int {one})() as int);
+}
+
+trait Konst {
+    const
+    K:
+    int;
+}
+
+impl Konst for Num {
+    const
+    K:
+    int
+    =
+    ((one as fn() -> int {one})() as int);
+}
+
+fn values()
+    ->
+        (int, int, fn() -> int, fn() -> int, bits, Num, int,
+        int) ({
+    (((CALL as int), (METHOD_CALL as int), (FN_REFERENCE as fnref() -> int),
+        (CLOSURE as fn() -> int), (CALL_IN_SEGMENT_SIZE as bits),
+        (TUPLE_STRUCT_VALUE as Num), (Num::CALL as int), (Num::K as int)) as
+        (int, int, fnref() -> int, fn() -> int, bits, Num, int, int))
+} as (int, int, fnref() -> int, fn() -> int, bits, Num, int, int))
+
+// A range pattern (currently) needs the values of its endpoints, which only a literal constant has.
+const LIMIT: int = ({ let limit = (10 as int); (limit as int) } as int);
+
+fn below_limit(n: int)
+    ->
+        bool ({
+    (match (n as int) { 0..LIMIT => (true as bool), _ => (false as bool), } as
+        bool)
+} as bool)

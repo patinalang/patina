@@ -1,0 +1,106 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+const BLOCK_VALUE: int = ({ let value = (1 as int); (value as int) } as int);
+
+const NESTED_BLOCK: #{str => int} =
+    (#{("value" as str) =>
+            ({ let value = (1 as int); (value as int) } as int)} as
+        #{str => int});
+
+const ARITHMETIC: bin =
+    (<<(((1 as int) + (1 as int) as int)): int(size = (8 as int))>> as bin);
+
+fn block_value() -> int ({ (BLOCK_VALUE as int) } as int)
+
+fn nested_block()
+    -> #{str => int} ({ (NESTED_BLOCK as #{str => int}) } as #{str => int})
+
+fn arithmetic() -> bin ({ (ARITHMETIC as bin) } as bin)
+
+fn two_uses_share_var()
+    ->
+        (int,
+        int) ({ (((BLOCK_VALUE as int), (BLOCK_VALUE as int)) as (int, int)) }
+    as (int, int))
+
+fn closure_binds_own_consts()
+    ->
+        int ({
+    let f =
+        (|| ((BLOCK_VALUE as int) + (1 as int) as int) as
+            {closure@tests/ui/src/primitives/const_bodies.pt:32:13: 32:15});
+    ((f as {closure@tests/ui/src/primitives/const_bodies.pt:32:13: 32:15})()
+        as int)
+} as int)
+
+const NAME_KEY: str = ("name" as str);
+const COMPUTED_KEY: str =
+    ({ let key = ("name" as str); (key as str) } as str);
+const MAP: #{str => int} =
+    (#{(NAME_KEY as str) => (1 as int)} as #{str => int});
+const LIST: [int] = ([(1 as int), (2 as int)] as [int]);
+const PAIR: (int, str) = (((1 as int), (NAME_KEY as str)) as (int, str));
+const HEADER: bin =
+    (<<(b"PT" as bin), (2 as int): int(size = (16 as int))>> as bin);
+
+fn is_list(list: [int])
+    ->
+        bool ({
+    (match (list as [int]) { LIST => (true as bool), _ => (false as bool), }
+        as bool)
+} as bool)
+
+fn is_pair(pair: (int, str))
+    ->
+        bool ({
+    (match (pair as (int, str)) {
+        PAIR => (true as bool),
+        _ => (false as bool),
+    } as bool)
+} as bool)
+
+fn is_header(header: bin)
+    ->
+        bool ({
+    (match (header as bin) { HEADER => (true as bool), _ => (false as bool), }
+        as bool)
+} as bool)
+
+fn is_exactly_map(map: #{str => int})
+    ->
+        bool ({
+    (match (map as #{str => int}) {
+        MAP => (true as bool),
+        _ => (false as bool),
+    } as bool)
+} as bool)
+
+fn is_block_value(n: int)
+    ->
+        bool ({
+    (match (n as int) { BLOCK_VALUE => (true as bool), _ => (false as bool), }
+        as bool)
+} as bool)
+
+fn computed_key(map: #{str => int})
+    ->
+        int ({
+    (match (map as #{str => int}) {
+        #{(COMPUTED_KEY as str) => value, ..} => (value as int),
+        _ => (0 as int),
+    } as int)
+} as int)

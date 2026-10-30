@@ -1154,6 +1154,11 @@ rustc_queries! {
         desc { "fnref-checking `{}`", tcx.def_path_str(key) }
     }
 
+    /// Check that the value of the const `LocalDefId` doesn't call or refer to a function.
+    query check_const_value(key: LocalDefId) {
+        desc { "checking the value of `{}`", tcx.def_path_str(key) }
+    }
+
     /// Checks well-formedness of tail calls (`become f()`).
     query check_tail_calls(key: LocalDefId) -> Result<(), ErrorGuaranteed> {
         desc { "tail-call-checking `{}`", tcx.def_path_str(key) }

@@ -1,0 +1,8 @@
+// A constant can't be defined in terms of itself.
+
+const A: int = B + 1;
+const B: int = A;
+
+pub fn a() -> int {
+    A
+}

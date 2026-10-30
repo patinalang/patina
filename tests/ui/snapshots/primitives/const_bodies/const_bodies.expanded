@@ -1,0 +1,62 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro, prelude_import)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[prelude_import]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+const BLOCK_VALUE: int = { let value = 1; value };
+
+const NESTED_BLOCK: #{str => int} = #{"value" => { let value = 1; value }};
+
+const ARITHMETIC: bin = <<(1 + 1): int(size = 8)>>;
+
+pub fn block_value() -> int { BLOCK_VALUE }
+
+pub fn nested_block() -> #{str => int} { NESTED_BLOCK }
+
+pub fn arithmetic() -> bin { ARITHMETIC }
+
+pub fn two_uses_share_var() -> (int, int) { (BLOCK_VALUE, BLOCK_VALUE) }
+
+pub fn closure_binds_own_consts() -> int { let f = || BLOCK_VALUE + 1; f() }
+
+const NAME_KEY: str = "name";
+const COMPUTED_KEY: str = { let key = "name"; key };
+const MAP: #{str => int} = #{NAME_KEY => 1};
+const LIST: [int] = [1, 2];
+const PAIR: (int, str) = (1, NAME_KEY);
+const HEADER: bin = <<b"PT", 2: int(size = 16)>>;
+
+pub fn is_list(list: [int]) -> bool {
+    match list { LIST => true, _ => false, }
+}
+
+pub fn is_pair(pair: (int, str)) -> bool {
+    match pair { PAIR => true, _ => false, }
+}
+
+pub fn is_header(header: bin) -> bool {
+    match header { HEADER => true, _ => false, }
+}
+
+pub fn is_exactly_map(map: #{str => int}) -> bool {
+    match map { MAP => true, _ => false, }
+}
+
+pub fn is_block_value(n: int) -> bool {
+    match n { BLOCK_VALUE => true, _ => false, }
+}
+
+pub fn computed_key(map: #{str => int}) -> int {
+    match map { #{COMPUTED_KEY => value, ..} => value, _ => 0, }
+}

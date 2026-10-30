@@ -182,6 +182,7 @@ impl<'tcx> UnsafetyVisitor<'_, 'tcx> {
             self.tcx.ensure_done().check_match(def);
             self.tcx.ensure_done().check_mutability(def);
             self.tcx.ensure_done().check_fnrefs(def);
+            self.tcx.ensure_done().check_const_value(def);
             self.tcx.ensure_done().check_tail_calls(def);
             let inner_thir = if self.tcx.sess.opts.unstable_opts.no_steal_thir {
                 &inner_thir.borrow()
@@ -1000,6 +1001,7 @@ pub(crate) fn check_unsafety(tcx: TyCtxt<'_>, def: LocalDefId) {
     tcx.ensure_done().check_match(def);
     tcx.ensure_done().check_mutability(def);
     tcx.ensure_done().check_fnrefs(def);
+    tcx.ensure_done().check_const_value(def);
     tcx.ensure_done().check_tail_calls(def);
     let thir = if tcx.sess.opts.unstable_opts.no_steal_thir {
         &thir.borrow()

@@ -89,6 +89,14 @@ pub(crate) struct FnrefNeedsWitness {
 }
 
 #[derive(Diagnostic)]
+#[diag("unsupported expression in constant value")]
+#[note("constant values may not call nor refer to functions or closures")]
+pub(crate) struct UnsupportedConstValueExpr {
+    #[primary_span]
+    pub(crate) span: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag("call to deprecated safe function `{$function}` is unsafe and requires unsafe block")]
 pub(crate) struct CallToDeprecatedSafeFnRequiresUnsafe {
     #[label("call to unsafe function")]
