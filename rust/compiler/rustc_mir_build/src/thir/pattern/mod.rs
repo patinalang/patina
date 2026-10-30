@@ -11,9 +11,11 @@ use std::sync::Arc;
 use rustc_abi::FieldIdx;
 use rustc_errors::codes::*;
 use rustc_hir::def::{CtorOf, DefKind, Res};
+use rustc_hir::def_id::DefId;
 use rustc_hir::pat_util::EnumerateAndAdjustIterator;
 use rustc_hir::{self as hir, RangeEnd};
 use rustc_index::Idx;
+use rustc_middle::mir::interpret::{GlobalId, ValTreeCreationError};
 use rustc_middle::thir::{
     Ascription, BinarySegmentPat, DerefPatBorrowMode, FieldPat, LocalVarId, MapFieldPat, Pat,
     PatKind, PatRange, PatRangeBoundary,
@@ -191,6 +193,12 @@ impl<'tcx, 'ptcx> PatCtxt<'tcx, 'ptcx> {
         // Preserve any ascriptions from endpoint constants.
         if let Some(extra) = extra {
             ascriptions.extend(extra.ascriptions);
+        }
+
+        if let PatKind::NamedConst { .. } = kind {
+            let msg =
+                "named constant without a literal body as a range endpoint not yet implemented";
+            return Err(self.tcx.dcx().span_err(expr.span, msg));
         }
 
         // The unpeeled kind should now be a constant, giving us the endpoint value.
@@ -713,6 +721,11 @@ impl<'tcx, 'ptcx> PatCtxt<'tcx, 'ptcx> {
         };
 
         let args = self.typeck_results.node_args(id);
+        if self.is_opaque_named_const(def_id, args) {
+            let kind = PatKind::NamedConst { def_id, args };
+            return Some(Box::new(Pat { span, ty, kind, extra: None }));
+        }
+
         // FIXME(mgca): we will need to special case IACs here to have type system compatible
         // generic args, instead of how we represent them in body expressions.
         let c = ty::Const::new_unevaluated(self.tcx, ty::UnevaluatedConst { def: def_id, args });
@@ -736,6 +749,23 @@ impl<'tcx, 'ptcx> PatCtxt<'tcx, 'ptcx> {
         }
 
         Some(pattern)
+    }
+
+    fn is_opaque_named_const(&self, def_id: DefId, args: ty::GenericArgsRef<'tcx>) -> bool {
+        if !self.tcx.is_erl_inlinable_const(def_id) {
+            return false;
+        }
+
+        // Trait consts don't make it to here, because they're not inlineable.
+        let instance = ty::Instance::new_raw(def_id, args);
+        let input = self
+            .typing_env
+            .with_post_analysis_normalized(self.tcx)
+            .as_query_input(GlobalId { instance, promoted: None });
+        matches!(
+            self.tcx.eval_to_valtree(self.tcx.erase_and_anonymize_regions(input)),
+            Err(ValTreeCreationError::Unevaluable)
+        )
     }
 
     /// Lowers the kinds of "expression" that can appear in a HIR pattern:

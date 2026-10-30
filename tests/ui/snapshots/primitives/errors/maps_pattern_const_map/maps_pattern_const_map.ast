@@ -1,7 +1,0 @@
-const NAME_KEY: str = "name";
-
-const MAP: #{str => int} = #{NAME_KEY => 1};
-
-pub fn const_map_pattern(map: #{str => int}) -> bool {
-    match map { MAP => true, _ => false, }
-}

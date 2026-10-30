@@ -339,6 +339,7 @@ pub(crate) fn for_each_immediate_subpat<'a, 'tcx>(
         | PatKind::Pin { var: _ }
         | PatKind::Assignee { var: _ }
         | PatKind::Constant { value: _ }
+        | PatKind::NamedConst { def_id: _, args: _ }
         | PatKind::Range(_)
         | PatKind::Never
         | PatKind::Error(_) => {}

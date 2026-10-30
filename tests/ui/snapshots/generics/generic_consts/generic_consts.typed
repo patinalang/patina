@@ -1,0 +1,75 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+trait Konst {
+    const
+    K:
+    int;
+}
+
+impl Konst for int {
+    const
+    K:
+    int
+    =
+    (7 as int);
+}
+
+struct Holder<T>(T);
+
+impl <T> Holder<T> where T: Konst {
+    const
+    DOUBLED:
+    int
+    =
+    ((T::K as int) * (2 as int) as int);
+    const
+    QUADRUPLED:
+    int
+    =
+    ((Self::DOUBLED as int) * (2 as int) as int);
+    const
+    NONE:
+    [T]
+    =
+    ([] as [T]);
+}
+
+fn quadrupled() -> int ({ (Holder<int>::QUADRUPLED as int) } as int)
+
+fn none() -> [int] ({ (Holder<int>::NONE as [int]) } as [int])
+
+fn doubled<U>() -> int where U: Konst ({ (Holder<U>::DOUBLED as int) } as int)
+
+fn is_doubled<U>(n: int) -> bool where
+    U: Konst ({
+    (match (n as int) {
+        Holder<U>::DOUBLED => (true as bool),
+        _ => (false as bool),
+    } as bool)
+} as bool)
+
+fn doubled_int()
+    ->
+        int ({ ((doubled::<int> as fn() -> int {doubled::<int>})() as int) }
+    as int)
+
+fn is_doubled_int(n: int)
+    ->
+        bool ({
+    ((is_doubled::<int> as fn(int) -> bool {is_doubled::<int>})((n as int)) as
+        bool)
+} as bool)

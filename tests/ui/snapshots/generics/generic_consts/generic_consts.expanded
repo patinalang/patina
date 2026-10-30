@@ -1,0 +1,45 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro, prelude_import)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[prelude_import]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+pub trait Konst {
+    const K: int;
+}
+
+impl Konst for int {
+    const K: int = 7;
+}
+
+pub struct Holder<T>(T);
+
+impl<T: Konst> Holder<T> {
+    const DOUBLED: int = T::K * 2;
+    const QUADRUPLED: int = Self::DOUBLED * 2;
+    const NONE: [T] = [];
+}
+
+pub fn quadrupled() -> int { Holder::<int>::QUADRUPLED }
+
+pub fn none() -> [int] { Holder::<int>::NONE }
+
+pub fn doubled<U: Konst>() -> int { Holder::<U>::DOUBLED }
+
+pub fn is_doubled<U: Konst>(n: int) -> bool {
+    match n { Holder::<U>::DOUBLED => true, _ => false, }
+}
+
+pub fn doubled_int() -> int { doubled::<int>() }
+
+pub fn is_doubled_int(n: int) -> bool { is_doubled::<int>(n) }

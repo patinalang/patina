@@ -636,6 +636,11 @@ impl<'p, 'tcx: 'p> RustcPatCtxt<'p, 'tcx> {
                     .collect();
                 arity = kind.arity();
             }
+            PatKind::NamedConst { .. } => {
+                ctor = Opaque(OpaqueId::new());
+                fields = vec![];
+                arity = 0;
+            }
             PatKind::Map { fields: map_fields } => {
                 ctor = if map_fields.is_empty() { Wildcard } else { Opaque(OpaqueId::new()) };
                 fields = vec![];

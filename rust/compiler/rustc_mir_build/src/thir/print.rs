@@ -883,6 +883,12 @@ impl<'a, 'tcx> ThirPrinter<'a, 'tcx> {
                 print_indented!(self, format!("value: {}", value), depth_lvl + 2);
                 print_indented!(self, "}", depth_lvl + 1);
             }
+            PatKind::NamedConst { def_id, args } => {
+                print_indented!(self, "NamedConst {", depth_lvl + 1);
+                print_indented!(self, format!("def_id: {:?}", def_id), depth_lvl + 2);
+                print_indented!(self, format!("args: {:?}", args), depth_lvl + 2);
+                print_indented!(self, "}", depth_lvl + 1);
+            }
             PatKind::Range(pat_range) => {
                 print_indented!(self, format!("Range ( {:?} )", pat_range), depth_lvl + 1);
             }

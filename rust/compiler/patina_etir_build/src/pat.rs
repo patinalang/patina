@@ -2,11 +2,12 @@ use rustc_abi::FIRST_VARIANT;
 use rustc_data_structures::packed::Pu128;
 use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::TermClass;
+use rustc_hir::def_id::DefId;
 use rustc_middle::erl::etir::visit::{Visitor, walk_pat};
 use rustc_middle::erl::etir::{self, ExprId, PatId, PatternInput, VarId};
 use rustc_middle::span_bug;
 use rustc_middle::thir::{self, LocalVarId, PatKind};
-use rustc_middle::ty::{self, Ty};
+use rustc_middle::ty::{self, GenericArgsRef, Ty};
 use rustc_span::{ByteSymbol, Span, Symbol};
 
 use super::{ThirBodyCx, not_implemented_kind};
@@ -56,6 +57,8 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             }
 
             PatKind::Constant { value } => self.lower_pat_constant(pat, *value),
+
+            PatKind::NamedConst { def_id, args } => self.lower_pat_named_const(pat, *def_id, args),
 
             PatKind::Map { fields } => self.lower_pat_map(pat, fields, input),
 
@@ -279,6 +282,17 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         };
 
         self.push_pat(etir::PatKind::Literal(lit), pat.ty, span)
+    }
+
+    fn lower_pat_named_const(
+        &mut self,
+        pat: &thir::Pat<'tcx>,
+        def_id: DefId,
+        args: GenericArgsRef<'tcx>,
+    ) -> PatId {
+        let const_body = self.cx.tcx.etir_template(def_id);
+        let var = self.const_var(pat.span, def_id, const_body, args);
+        self.push_pat(etir::PatKind::Pin { var }, pat.ty, pat.span)
     }
 
     fn lower_pat_map(

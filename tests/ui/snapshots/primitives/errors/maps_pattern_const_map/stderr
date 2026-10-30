@@ -1,8 +1,0 @@
-error: constant evaluation is not yet supported here; only local constants with literal bodies can be evaluated
-  --> tests/ui/src/primitives/errors/maps_pattern_const_map.pt:7:9
-   |
-LL |         MAP => true,
-   |         ^^^
-
-error: aborting due to 1 previous error
-

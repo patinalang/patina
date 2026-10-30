@@ -917,6 +917,14 @@ pub enum PatKind<'tcx> {
         value: ty::Value<'tcx>,
     },
 
+    /// Matches against a named constant by equality.
+    /// Exhaustiveness checking treats it as opaque.
+    NamedConst {
+        #[type_visitable(ignore)]
+        def_id: DefId,
+        args: GenericArgsRef<'tcx>,
+    },
+
     Range(Arc<PatRange<'tcx>>),
 
     /// Matches against a slice, checking the length and extracting elements.
