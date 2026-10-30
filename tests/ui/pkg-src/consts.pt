@@ -1,0 +1,28 @@
+const KEY: str = "answer";
+
+pub const PAIR: ([int], #{str => int}) = ([1, 2, 3], #{KEY => 42});
+pub const HEADER: bin = <<b"PT", 2:16>>;
+
+pub struct Point {
+    pub x: int,
+    pub y: int,
+}
+
+impl Point {
+    pub const ORIGIN: Point = Point { x: 0, y: 0 };
+    pub const COMPUTED_UNIT: Point = Point { x: 2 - 1, y: 1 };
+}
+
+pub trait HasValue {
+    const VALUE: int;
+}
+
+pub struct Generic<T>(pub T, pub T);
+
+impl<T> Generic<T> {
+    pub const EMPTY: [T] = [];
+}
+
+impl<T: HasValue> Generic<T> {
+    pub const DOUBLED: int = T::VALUE * 2;
+}

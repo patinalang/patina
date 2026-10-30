@@ -1,0 +1,51 @@
+use ProcMacro::*;
+
+pub trait Describe {
+    fn describe(self) -> int;
+}
+
+pub struct Plain {
+    pub value: int,
+}
+
+impl Describe for Plain {
+    fn describe(self) -> int {
+        self.value
+    }
+}
+
+pub fn plain() -> int {
+    7
+}
+
+// A derive for a trait defined in the same package, alongside ordinary items.
+// This is the combination that used to be rejected for `proc-macro` crates.
+#[proc_macro_derive(Describe)]
+pub fn describe_derive(_input: TokenStream) -> TokenStream {
+    TokenStream::from_trees([
+        TokenTree::Ident(Ident::new("fn", Span::call_site())),
+        TokenTree::Ident(Ident::new("derived_value", Span::call_site())),
+        TokenTree::Group(Group::new(Delimiter::Parenthesis, TokenStream::new())),
+        TokenTree::Punct(Punct::new('-', Spacing::Joint)),
+        TokenTree::Punct(Punct::new('>', Spacing::Alone)),
+        TokenTree::Ident(Ident::new("int", Span::call_site())),
+        TokenTree::Group(Group::new(
+            Delimiter::Brace,
+            TokenStream::from_trees([TokenTree::Literal(Literal::int(42))]),
+        )),
+    ])
+}
+
+// An exported `macro_rules!` macro and a `#[proc_macro]` in the same package,
+// to exercise the per-item macro loading dispatch.
+#[macro_export]
+macro_rules! doubled {
+    ($x:expr) => {
+        $x + $x
+    };
+}
+
+#[proc_macro]
+pub fn echo(input: TokenStream) -> TokenStream {
+    input
+}

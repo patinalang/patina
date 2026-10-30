@@ -1,0 +1,15 @@
+use Traits::Label;
+
+pub trait Whisper {
+    fn whisper(self) -> str;
+}
+
+impl Whisper for Label {
+    fn whisper(self) -> str {
+        "whisper"
+    }
+}
+
+pub fn whisper<T: Whisper>(t: T) -> str {
+    t.whisper()
+}

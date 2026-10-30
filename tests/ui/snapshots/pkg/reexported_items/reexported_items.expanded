@@ -1,0 +1,39 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro, prelude_import)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[prelude_import]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+use Reexports::{Hello, Wrapper, identity};
+
+pub struct Relayed {
+    pub value: int,
+}
+pub fn hello_from_derive() -> int { 7 }
+
+pub fn proc_macros() {
+    let relayed = Relayed { value: 3 };
+
+    {
+        ::Core::io::put_chars([[patina_fmt::display(relayed.value + 1), " ",
+                            patina_fmt::display(hello_from_derive())]]);
+        ::Core::io::nl();
+    };
+}
+pub fn wrapper() {
+    let w = Wrapper(9);
+    {
+        ::Core::io::put_chars([[patina_fmt::display(w.0)]]);
+        ::Core::io::nl();
+    };
+}

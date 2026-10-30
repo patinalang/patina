@@ -1,0 +1,30 @@
+use Traits::{Greet, Label, Robot, greet_all};
+
+struct Person(str);
+
+impl Greet for Person {
+    type Name = Label;
+
+    const PREFIX: str = "Hello";
+
+    fn name(self) -> Label { Label(self.0) }
+}
+
+struct Cat;
+
+impl Greet for Cat {
+    type Name = Label;
+
+    fn name(self) -> Label { Label("cat") }
+}
+
+fn local_greet<T: Greet>(greeter: T) { greeter.greet(); }
+
+pub fn main() {
+    Person("Ann").greet();
+    Cat.greet();
+    local_greet(Cat);
+    greet_all(Person("Bob"));
+    greet_all(Cat);
+    Robot.greet();
+}

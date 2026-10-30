@@ -1,0 +1,64 @@
+use MoreTemperatures::{Kelvin, Rankine};
+use Temperatures::{Celsius, From};
+use Traits::{Label, Loud, Show};
+
+// A local trait on a foreign type.
+trait Size {
+    fn size(self)
+    -> int;
+}
+
+impl Size for Label {
+    fn size(self) -> int { 5 }
+}
+
+fn size_of<T: Size>(t: T) -> int { t.size() }
+
+// A foreign trait with a local argument, on a foreign type.
+pub struct LocalDegrees(pub int);
+
+impl From<LocalDegrees> for Celsius {
+    fn from(d: LocalDegrees) -> Celsius { Celsius(d.0) }
+}
+
+pub fn label_size() -> int { size_of(Label("abcde")) }
+
+pub fn local_to_celsius(n: int) -> int {
+    Temperatures::to_celsius(LocalDegrees(n))
+}
+
+pub fn fahrenheit_to_celsius(f: int) -> int {
+    Temperatures::to_celsius(Temperatures::Fahrenheit(f))
+}
+
+pub fn kelvin_to_celsius(k: int) -> int {
+    Temperatures::to_celsius(Kelvin(k))
+}
+
+pub fn rankine_to_celsius(r: int) -> int {
+    Temperatures::to_celsius(Rankine(r))
+}
+
+// Two independent packages implement different traits for `Traits::Label`.
+pub fn label_shout() -> str { LabelShout::shout(Label("x")) }
+
+pub fn label_whisper() -> str { LabelWhisper::whisper(Label("x")) }
+
+pub fn label_show() -> str { Label("shown").show() }
+
+// A blanket impl from another package, on a foreign and on a local type.
+struct Local;
+
+impl Show for Local {
+    fn show(self) -> str { "local" }
+}
+
+fn loud_generic<T: Loud>(t: T) -> str { t.loud() }
+
+pub fn blanket_on_foreign_type(s: str) -> str { Label(s).loud() }
+
+pub fn blanket_on_local_type() -> str { Local.loud() }
+
+pub fn blanket_generic_both(s: str) -> str {
+    loud_generic(Label(s)) + loud_generic(Local)
+}

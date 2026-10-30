@@ -1,0 +1,46 @@
+#![allow(private_interfaces)]
+
+use Core::PhantomData;
+use Wrappers::{Nested, PhantomRecord, PhantomTuple, Wrapper};
+
+// `PhantomData` fields of structs from another package are left out too.
+
+pub fn phantom_tuple(n: int) -> PhantomTuple<str> {
+    PhantomTuple(n, PhantomData)
+}
+
+pub fn phantom_tuple_value(value: PhantomTuple<str>) -> int {
+    let PhantomTuple(n, _) = value;
+    n
+}
+
+pub fn phantom_record(id: int, name: str) -> PhantomRecord<int> {
+    PhantomRecord { id, marker: PhantomData, name }
+}
+
+pub fn phantom_record_name(value: PhantomRecord<int>) -> str { value.name }
+
+pub fn phantom_record_marker(value: PhantomRecord<int>) -> PhantomData<int> {
+    let PhantomRecord { marker, .. } = value;
+    marker
+}
+
+pub fn rename_phantom_record(value: PhantomRecord<int>)
+    -> PhantomRecord<int> {
+    PhantomRecord { name: "renamed", ..value }
+}
+
+// A local type nested in generic wrappers from another package.
+
+enum Recursive { End(int), Next(Nested<Recursive>), }
+
+pub fn recursive() -> Recursive {
+    Recursive::Next(Nested(Wrapper(Recursive::End(17))))
+}
+
+pub fn unwrap_recursive(value: Recursive) -> int {
+    match value {
+        Recursive::End(n) => n,
+        Recursive::Next(wrapper) => unwrap_recursive(wrapper.0.0),
+    }
+}

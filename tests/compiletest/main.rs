@@ -10,6 +10,7 @@ use walkdir::WalkDir;
 
 pub(crate) const UI_ROOT: &str = "tests/ui/src";
 pub(crate) const SNAPSHOTS_ROOT: &str = "tests/ui/snapshots";
+pub(crate) const PKG_SRC_ROOT: &str = "tests/ui/pkg-src";
 
 #[derive(Parser, Debug)]
 #[command(

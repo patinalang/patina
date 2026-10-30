@@ -1,0 +1,75 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// Name resolution errors involving other packages. They are not reported once
+// proc macro expansion has failed, so they cannot share a file with
+// `proc_macros.pt`.
+
+// A derive is exported under its trait name, so the function implementing it is
+// not nameable from another package -- by either name.
+use Macros::hello;
+use ::{};
+use Macros::Hello;
+use Macros::def_site_by_set_span;
+use Macros::def_site_ident;
+use Macros::group_spans;
+use Macros::mixed_site_ident;
+use Macros::set_group_span;
+
+fn spans() ({
+    let local = (5 as int);
+    // A definition-site identifier does not resolve to the caller's `local`...
+    // ...and neither does a mixed-site one: Patina treats it as hygienic too.
+    // A call-site identifier moved to the definition site with `set_span`.
+
+    // Each missing value is reported at the group span it was given: the
+    // opening delimiter, the closing delimiter and the whole group.
+    // After `set_span`, all three group spans and the tree span point at
+    // `marker`, but `inner` inside the group still points at itself.
+
+    // A path that does not resolve in another package is an ordinary error.
+    ({
+        ((::Core::io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::display as
+                                    fn(term) -> term)((local as {type error})) as term)] as
+                        [term])] as [[term]])) as term);
+        ((::Core::io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((::Core::io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::display as
+                                    fn(term) -> term)((local as {type error})) as term)] as
+                        [term])] as [[term]])) as term);
+        ((::Core::io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((::Core::io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::display as
+                                    fn(term) -> term)((local as {type error})) as term)] as
+                        [term])] as [[term]])) as term);
+        ((::Core::io::nl as fn() -> term)() as term);
+    } as ());
+    let _a =
+        (((missing_open as {type error}), (missing_close as {type error}),
+            (missing_entire as {type error})) as
+            ({type error}, {type error}, {type error}));
+    let _b =
+        (((missing_open as {type error}), (missing_close as {type error}),
+            (missing_entire as {type error}), (missing_tree as {type error}),
+            (inner as {type error})) as
+            ({type error}, {type error}, {type error}, {type error}, {type error}));
+} as ())
+fn missing_item() ({ let _x = (Wrappers::Nope as {type error}); } as ())

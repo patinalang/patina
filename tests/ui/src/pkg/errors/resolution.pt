@@ -1,0 +1,32 @@
+// Name resolution errors involving other packages. They are not reported once
+// proc macro expansion has failed, so they cannot share a file with
+// `proc_macros.pt`.
+
+// A derive is exported under its trait name, so the function implementing it is
+// not nameable from another package -- by either name.
+use Macros::hello;
+use Macros::{
+    Hello, def_site_by_set_span, def_site_ident, group_spans, mixed_site_ident, set_group_span,
+};
+
+pub fn spans() {
+    let local = 5;
+    // A definition-site identifier does not resolve to the caller's `local`...
+    println!("{}", def_site_ident!());
+    // ...and neither does a mixed-site one: Patina treats it as hygienic too.
+    println!("{}", mixed_site_ident!());
+    // A call-site identifier moved to the definition site with `set_span`.
+    println!("{}", def_site_by_set_span!());
+
+    // Each missing value is reported at the group span it was given: the
+    // opening delimiter, the closing delimiter and the whole group.
+    let _a = group_spans!((1 + 2));
+    // After `set_span`, all three group spans and the tree span point at
+    // `marker`, but `inner` inside the group still points at itself.
+    let _b = set_group_span!(marker(inner));
+}
+
+// A path that does not resolve in another package is an ordinary error.
+pub fn missing_item() {
+    let _x = Wrappers::Nope;
+}

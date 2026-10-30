@@ -1,0 +1,16 @@
+use Reexports::{Hello, Wrapper, identity};
+
+#[derive(Hello)]
+pub struct Relayed {
+    pub value: int,
+}
+
+pub fn proc_macros() {
+    let relayed = Relayed { value: 3 };
+    println!("{} {}", identity!(relayed.value + 1), hello_from_derive());
+}
+
+pub fn wrapper() {
+    let w = Wrapper(9);
+    println!("{}", w.0);
+}

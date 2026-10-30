@@ -1,0 +1,15 @@
+use Traits::Label;
+
+pub trait Shout {
+    fn shout(self) -> str;
+}
+
+impl Shout for Label {
+    fn shout(self) -> str {
+        "SHOUT"
+    }
+}
+
+pub fn shout<T: Shout>(t: T) -> str {
+    t.shout()
+}

@@ -1,0 +1,14 @@
+#[repr(transparent)]
+pub struct Wrapper<T>(pub T);
+
+pub struct Nested<T>(pub Wrapper<T>);
+
+use Core::PhantomData;
+
+pub struct PhantomTuple<T>(pub int, pub PhantomData<T>);
+
+pub struct PhantomRecord<T> {
+    pub id: int,
+    pub marker: PhantomData<T>,
+    pub name: str,
+}

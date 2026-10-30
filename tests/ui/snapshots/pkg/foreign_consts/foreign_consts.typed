@@ -1,0 +1,76 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+use ::{};
+use Consts::Generic;
+use Consts::HEADER;
+use Consts::HasValue;
+use Consts::PAIR;
+use Consts::Point;
+
+const LOCAL_PAIRS: [([int], #{str => int})] =
+    ([(PAIR as ([int], #{str => int})), (PAIR as ([int], #{str => int}))] as
+        [([int], #{str => int})]);
+
+fn pair()
+    ->
+        ([int],
+        #{str => int}) ({ (PAIR as ([int], #{str => int})) } as
+    ([int], #{str => int}))
+
+fn local_pairs()
+    ->
+        [([int],
+        #{str => int})] ({ (LOCAL_PAIRS as [([int], #{str => int})]) } as
+    [([int], #{str => int})])
+
+fn header() -> bin ({ (HEADER as bin) } as bin)
+
+fn origin_y() -> int ({ ((Point::ORIGIN as Consts::Point).y as int) } as int)
+
+fn computed_unit_x()
+    -> int ({ ((Point::COMPUTED_UNIT as Consts::Point).x as int) } as int)
+
+struct Three;
+
+impl HasValue for Three {
+    const
+    VALUE:
+    int
+    =
+    (3 as int);
+}
+
+fn foreign_doubled_of_local_impl()
+    -> int ({ (Generic<Three>::DOUBLED as int) } as int)
+
+fn generic_empty() -> [int] ({ (Generic<int>::EMPTY as [int]) } as [int])
+
+fn is_pair(value: ([int], #{str => int}))
+    ->
+        bool ({
+    (match (value as ([int], #{str => int})) {
+        PAIR => (true as bool),
+        _ => (false as bool),
+    } as bool)
+} as bool)
+
+fn is_header(value: bin)
+    ->
+        bool ({
+    (match (value as bin) { HEADER => (true as bool), _ => (false as bool), }
+        as bool)
+} as bool)

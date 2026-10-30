@@ -1,0 +1,17 @@
+use Temperatures::{Celsius, From};
+
+pub struct Kelvin(pub int);
+pub struct Rankine(pub int);
+
+// Impls of a foreign trait with a local argument, for a foreign type.
+impl From<Kelvin> for Celsius {
+    fn from(k: Kelvin) -> Celsius {
+        Celsius(k.0 - 273)
+    }
+}
+
+impl From<Rankine> for Celsius {
+    fn from(r: Rankine) -> Celsius {
+        Celsius(r.0 * 5 / 9 - 273)
+    }
+}

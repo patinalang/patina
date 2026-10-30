@@ -1,0 +1,60 @@
+pub trait Show {
+    fn show(self) -> str;
+}
+
+pub struct Label(pub str);
+
+// Private to the package; called from the default body in `Inner`.
+fn say(prefix: str, name: str) {
+    println!("{}, {}!", prefix, name);
+}
+
+impl Show for Label {
+    fn show(self) -> str {
+        self.0
+    }
+}
+
+pub mod Inner {
+    use super::{Show, say};
+
+    pub trait Greet {
+        type Name: Show;
+
+        const PREFIX: str = "Hi";
+
+        fn name(self) -> Self::Name;
+
+        fn greet(self) {
+            say(Self::PREFIX, self.name().show());
+        }
+    }
+}
+
+// Downstream packages reach the trait through this re-export, but its functions are named after
+// its canonical path.
+pub use Inner::Greet;
+
+pub struct Robot;
+
+impl Greet for Robot {
+    type Name = Label;
+
+    fn name(self) -> Label {
+        Label("robot")
+    }
+}
+
+pub fn greet_all<T: Greet>(greeter: T) {
+    greeter.greet();
+}
+
+pub trait Loud {
+    fn loud(self) -> str;
+}
+
+impl<T: Show> Loud for T {
+    fn loud(self) -> str {
+        self.show() + "!"
+    }
+}

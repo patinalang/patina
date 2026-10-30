@@ -1,0 +1,144 @@
+error[E0432]: unresolved import `Macros::hello`
+  --> tests/ui/src/pkg/errors/resolution.pt:7:5
+   |
+LL | use Macros::hello;
+   |     ^^^^^^^^^^^^^ no `hello` in the root
+   |
+help: a similar name exists in the module
+   |
+LL - use Macros::hello;
+LL + use Macros::Hello;
+   |
+
+error[E0425]: cannot find value `local` in this scope
+  --> tests/ui/src/pkg/errors/resolution.pt:15:20
+   |
+LL |     println!("{}", def_site_ident!());
+   |                    ^^^^^^^^^^^^^^^^^ not found in this scope
+   |
+help: an identifier with the same name exists, but is not accessible due to macro hygiene
+  --> tests/ui/src/pkg/errors/resolution.pt:13:9
+   |
+LL |     let local = 5;
+   |         ^^^^^
+   = note: this error originates in the macro `def_site_ident` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0425]: cannot find value `local` in this scope
+  --> tests/ui/src/pkg/errors/resolution.pt:17:20
+   |
+LL |     println!("{}", mixed_site_ident!());
+   |                    ^^^^^^^^^^^^^^^^^^^ not found in this scope
+   |
+help: an identifier with the same name exists, but is not accessible due to macro hygiene
+  --> tests/ui/src/pkg/errors/resolution.pt:13:9
+   |
+LL |     let local = 5;
+   |         ^^^^^
+   = note: this error originates in the macro `mixed_site_ident` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0425]: cannot find value `local` in this scope
+  --> tests/ui/src/pkg/errors/resolution.pt:19:20
+   |
+LL |     println!("{}", def_site_by_set_span!());
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^ not found in this scope
+   |
+help: an identifier with the same name exists, but is not accessible due to macro hygiene
+  --> tests/ui/src/pkg/errors/resolution.pt:13:9
+   |
+LL |     let local = 5;
+   |         ^^^^^
+   = note: this error originates in the macro `def_site_by_set_span` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0425]: cannot find value `missing_open` in this scope
+  --> tests/ui/src/pkg/errors/resolution.pt:23:27
+   |
+LL |     let _a = group_spans!((1 + 2));
+   |                           ^
+...
+LL | pub fn missing_item() {
+   | --------------------- similarly named function `missing_item` defined here
+   |
+help: a function with a similar name exists
+   |
+LL -     let _a = group_spans!((1 + 2));
+LL +     let _a = group_spans!(missing_item1 + 2));
+   |
+
+error[E0425]: cannot find value `missing_close` in this scope
+  --> tests/ui/src/pkg/errors/resolution.pt:23:33
+   |
+LL |     let _a = group_spans!((1 + 2));
+   |                                 ^ not found in this scope
+
+error[E0425]: cannot find value `missing_entire` in this scope
+  --> tests/ui/src/pkg/errors/resolution.pt:23:27
+   |
+LL |     let _a = group_spans!((1 + 2));
+   |                           ^^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `missing_open` in this scope
+  --> tests/ui/src/pkg/errors/resolution.pt:26:30
+   |
+LL |     let _b = set_group_span!(marker(inner));
+   |                              ^^^^^^
+...
+LL | pub fn missing_item() {
+   | --------------------- similarly named function `missing_item` defined here
+   |
+help: a function with a similar name exists
+   |
+LL -     let _b = set_group_span!(marker(inner));
+LL +     let _b = set_group_span!(missing_item(inner));
+   |
+
+error[E0425]: cannot find value `missing_close` in this scope
+  --> tests/ui/src/pkg/errors/resolution.pt:26:30
+   |
+LL |     let _b = set_group_span!(marker(inner));
+   |                              ^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `missing_entire` in this scope
+  --> tests/ui/src/pkg/errors/resolution.pt:26:30
+   |
+LL |     let _b = set_group_span!(marker(inner));
+   |                              ^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `missing_tree` in this scope
+  --> tests/ui/src/pkg/errors/resolution.pt:26:30
+   |
+LL |     let _b = set_group_span!(marker(inner));
+   |                              ^^^^^^
+...
+LL | pub fn missing_item() {
+   | --------------------- similarly named function `missing_item` defined here
+   |
+help: a function with a similar name exists
+   |
+LL -     let _b = set_group_span!(marker(inner));
+LL +     let _b = set_group_span!(missing_item(inner));
+   |
+
+error[E0425]: cannot find value `inner` in this scope
+  --> tests/ui/src/pkg/errors/resolution.pt:26:37
+   |
+LL |     let _b = set_group_span!(marker(inner));
+   |                                     ^^^^^ not found in this scope
+
+error[E0425]: cannot find value `Nope` in crate `Wrappers`
+  --> tests/ui/src/pkg/errors/resolution.pt:31:24
+   |
+LL |     let _x = Wrappers::Nope;
+   |                        ^^^^ not found in `Wrappers`
+
+warning: unused import: `Hello`
+  --> tests/ui/src/pkg/errors/resolution.pt:9:5
+   |
+LL |     Hello, def_site_by_set_span, def_site_ident, group_spans, mixed_site_ident, set_group_span,
+   |     ^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+error: aborting due to 13 previous errors; 1 warning emitted
+
+Some errors have detailed explanations: E0425, E0432.
+For more information about an error, try `rustc --explain E0425`.

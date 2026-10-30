@@ -1,0 +1,8 @@
+// Reexports another package's proc macros, so a consumer reaches them two hops
+// from where they are defined. Neither reexport names an implementation
+// function: a bang macro is exported under the function's name, a derive under
+// its trait's.
+pub use Macros::{Hello, identity};
+
+// Reexports a type from another package.
+pub use Wrappers::Wrapper;

@@ -1,0 +1,76 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+use ::{};
+use Traits::Greet;
+use Traits::Label;
+use Traits::Robot;
+use Traits::greet_all;
+
+struct Person(str);
+
+impl Greet for Person {
+    type
+    Name
+    =
+    Label;
+
+    const
+    PREFIX:
+    str
+    =
+    ("Hello" as str);
+
+    fn name(self)
+        ->
+            Label ({
+        ((Label as
+                fn(str) -> Traits::Label {Traits::Label})(((self as Person).0
+                as str)) as Traits::Label)
+    } as Traits::Label)
+}
+
+struct Cat;
+
+impl Greet for Cat {
+    type
+    Name
+    =
+    Label;
+
+    fn name(self)
+        ->
+            Label ({
+        ((Label as fn(str) -> Traits::Label {Traits::Label})(("cat" as str))
+            as Traits::Label)
+    } as Traits::Label)
+}
+
+fn local_greet<T>(greeter: T) where
+    T: Greet ({ ((greeter as T).greet() as ()); } as ())
+
+fn main() ({
+    (((Person as fn(str) -> Person {Person})(("Ann" as str)) as
+            Person).greet() as ());
+    ((Cat as Cat).greet() as ());
+    ((local_greet as fn(Cat) {local_greet::<Cat>})((Cat as Cat)) as ());
+    ((greet_all as
+            fn(Person) {Traits::greet_all::<Person>})(((Person as
+                fn(str) -> Person {Person})(("Bob" as str)) as Person)) as
+        ());
+    ((greet_all as fn(Cat) {Traits::greet_all::<Cat>})((Cat as Cat)) as ());
+    ((Robot as Traits::Robot).greet() as ());
+} as ())

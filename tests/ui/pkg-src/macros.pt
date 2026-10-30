@@ -1,0 +1,433 @@
+use ProcMacro::*;
+use Wrappers::Wrapper;
+
+// A bang macro that returns its input unchanged.
+#[proc_macro]
+pub fn identity(input: TokenStream) -> TokenStream {
+    input
+}
+
+// Proc-macro functions are macro-only downstream, including through aliases
+// and reexports from nested modules.
+pub use identity as identity_alias;
+
+pub mod Nested {
+    pub use super::identity as nested_identity;
+}
+
+// A bang macro that uses another Patina package at compile time, and whose
+// output contains a nested macro invocation.
+#[proc_macro]
+pub fn wrapped(input: TokenStream) -> TokenStream {
+    let wrapper = Wrapper(input);
+    match wrapper {
+        Wrapper(stream) => stream,
+    }
+}
+
+// A bang macro that ignores its input and produces a new literal token.
+#[proc_macro]
+pub fn forty_two(_input: TokenStream) -> TokenStream {
+    TokenStream::from_trees([TokenTree::Literal(Literal::int(42))])
+}
+
+// Wraps its input in a brace group, exercising group and delimiter fidelity.
+#[proc_macro]
+pub fn braces(input: TokenStream) -> TokenStream {
+    TokenStream::from_trees([TokenTree::Group(Group::new(Delimiter::Brace, input))])
+}
+
+// An attribute macro that leaves the annotated item untouched.
+#[proc_macro_attribute]
+pub fn passthrough(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    item
+}
+
+// A derive macro that accepts a helper attribute and generates a function.
+#[proc_macro_derive(Hello, attributes(helper))]
+pub fn hello(_input: TokenStream) -> TokenStream {
+    TokenStream::from_trees([
+        TokenTree::Ident(Ident::new("pub", Span::call_site())),
+        TokenTree::Ident(Ident::new("fn", Span::call_site())),
+        TokenTree::Ident(Ident::new("hello_from_derive", Span::call_site())),
+        TokenTree::Group(Group::new(Delimiter::Parenthesis, TokenStream::new())),
+        TokenTree::Punct(Punct::new('-', Spacing::Joint)),
+        TokenTree::Punct(Punct::new('>', Spacing::Alone)),
+        TokenTree::Ident(Ident::new("int", Span::call_site())),
+        TokenTree::Group(Group::new(
+            Delimiter::Brace,
+            TokenStream::from_trees([TokenTree::Literal(Literal::int(7))]),
+        )),
+    ])
+}
+
+// Hygiene: an identifier introduced at the call site resolves in the caller.
+#[proc_macro]
+pub fn call_site_ident(_input: TokenStream) -> TokenStream {
+    TokenStream::from_trees([TokenTree::Ident(Ident::new("local", Span::call_site()))])
+}
+
+// Hygiene: an identifier introduced at the definition site does not.
+#[proc_macro]
+pub fn def_site_ident(_input: TokenStream) -> TokenStream {
+    TokenStream::from_trees([TokenTree::Ident(Ident::new("local", Span::def_site()))])
+}
+
+// Hygiene: an identifier introduced at the mixed site.
+#[proc_macro]
+pub fn mixed_site_ident(_input: TokenStream) -> TokenStream {
+    TokenStream::from_trees([TokenTree::Ident(Ident::new("local", Span::mixed_site()))])
+}
+
+// A raw identifier at the call site. `` `x` `` and `x` name the same binding, so it
+// resolves to the caller's local.
+#[proc_macro]
+pub fn raw_ident(_input: TokenStream) -> TokenStream {
+    TokenStream::from_trees([TokenTree::Ident(Ident::new_raw("x", Span::call_site()))])
+}
+
+// A bang macro that produces unparsable tokens.
+#[proc_macro]
+pub fn stray(_input: TokenStream) -> TokenStream {
+    TokenStream::from_trees([TokenTree::Ident(Ident::new("let", Span::call_site()))])
+}
+
+// A bang macro that returns a structurally valid token tree containing an
+// invalid identifier.
+#[proc_macro]
+pub fn invalid_ident(_input: TokenStream) -> TokenStream {
+    TokenStream::from_trees([TokenTree::Ident(Ident::new("not valid", Span::call_site()))])
+}
+
+// A bang macro that raises a BEAM exception at expansion time.
+#[proc_macro]
+pub fn boom(_input: TokenStream) -> TokenStream {
+    let _ = 1 / 0;
+    TokenStream::new()
+}
+
+// A bang macro that raises from `Punct::new`, because the character is not
+// punctuation rustc can decode.
+#[proc_macro]
+pub fn bad_punct(_input: TokenStream) -> TokenStream {
+    TokenStream::from_trees([TokenTree::Punct(Punct::new('(', Spacing::Alone))])
+}
+
+// A bang macro that builds a negative literal. The decoder splits it into a
+// joint-hidden minus and the literal, so one wire tree becomes two tokens.
+#[proc_macro]
+pub fn negative(_input: TokenStream) -> TokenStream {
+    TokenStream::from_trees([TokenTree::Literal(Literal::int(-5))])
+}
+
+// A bang macro whose output contains a lifetime. Patina has none, so this is
+// rejected -- and must point at the lifetime, not at the invocation, just like
+// a lifetime in a macro's input.
+#[proc_macro]
+pub fn lifetime_output(_input: TokenStream) -> TokenStream {
+    TokenStream::from_trees([
+        TokenTree::Punct(Punct::new('\'', Spacing::Joint)),
+        TokenTree::Ident(Ident::new("a", Span::call_site())),
+    ])
+}
+
+// Exercises the `TokenStream` adapters on streams it builds itself. The result
+// is `1 + 2`, or `2` when `is_empty` misreports.
+#[proc_macro]
+pub fn stream_ops(_input: TokenStream) -> TokenStream {
+    let empty = TokenStream::new();
+    let is_empty = empty.is_empty();
+    let one = TokenStream::from_tree(TokenTree::Literal(Literal::int(1)));
+    let two = TokenStream::from_tree(TokenTree::Literal(Literal::int(2)));
+    let plus = TokenStream::from_tree(TokenTree::Punct(Punct::new('+', Spacing::Alone)));
+    let sum = if is_empty { one.concat(plus).concat(two) } else { two };
+    TokenStream::from_trees(sum.into_trees())
+}
+
+// Rebuilds a stream by matching every variant and reconstructing it through the
+// wrapper accessors.
+fn rebuild_trees(trees: [TokenTree]) -> [TokenTree] {
+    match trees {
+        [] => [],
+        [head, tail @ ..] => {
+            let rebuilt = match head {
+                TokenTree::Group(group) => {
+                    let delimiter = group.delimiter();
+                    let stream = group.stream();
+                    let span = group.span();
+                    let inner = TokenStream::from_trees(rebuild_trees(stream.into_trees()));
+                    TokenTree::Group(Group::new(delimiter, inner).set_span(span))
+                }
+                TokenTree::Ident(ident) => {
+                    let span = ident.span();
+                    TokenTree::Ident(ident.set_span(span))
+                }
+                TokenTree::Punct(punct) => {
+                    let ch = punct.as_char();
+                    let spacing = punct.spacing();
+                    let span = punct.span();
+                    TokenTree::Punct(Punct::new(ch, spacing).set_span(span))
+                }
+                TokenTree::Literal(literal) => {
+                    let span = literal.span();
+                    TokenTree::Literal(literal.set_span(span))
+                }
+            };
+            [rebuilt, ..rebuild_trees(tail)]
+        }
+    }
+}
+
+// Takes its input apart and builds each tree anew from its parts.
+#[proc_macro]
+pub fn rebuild(input: TokenStream) -> TokenStream {
+    TokenStream::from_trees(rebuild_trees(input.into_trees()))
+}
+
+// Builds a tuple of one literal per typeable constructor, so every one is
+// rendered and decoded.
+#[proc_macro]
+pub fn literal_factories(_input: TokenStream) -> TokenStream {
+    let body = TokenStream::from_trees([
+        TokenTree::Literal(Literal::character('a')),
+        TokenTree::Punct(Punct::new(',', Spacing::Alone)),
+        TokenTree::Literal(Literal::int(1)),
+        TokenTree::Punct(Punct::new(',', Spacing::Alone)),
+        TokenTree::Literal(Literal::int(123456789012345678901234567890)),
+        TokenTree::Punct(Punct::new(',', Spacing::Alone)),
+        TokenTree::Literal(Literal::float(0.25)),
+        TokenTree::Punct(Punct::new(',', Spacing::Alone)),
+        TokenTree::Literal(Literal::string("s")),
+        TokenTree::Punct(Punct::new(',', Spacing::Alone)),
+        TokenTree::Literal(Literal::atom(a"a")),
+    ]);
+    TokenStream::from_trees([TokenTree::Group(Group::new(
+        Delimiter::Parenthesis,
+        body,
+    ))])
+}
+
+// Literals whose value needs escaping, to check they read back unchanged.
+#[proc_macro]
+pub fn escapes(_input: TokenStream) -> TokenStream {
+    let body = TokenStream::from_trees([
+        TokenTree::Literal(Literal::string("a\"b\\c\nd'e")),
+        TokenTree::Punct(Punct::new(',', Spacing::Alone)),
+        TokenTree::Literal(Literal::character('\'')),
+        TokenTree::Punct(Punct::new(',', Spacing::Alone)),
+        TokenTree::Literal(Literal::character('\\')),
+        TokenTree::Punct(Punct::new(',', Spacing::Alone)),
+        TokenTree::Literal(Literal::character('"')),
+        TokenTree::Punct(Punct::new(',', Spacing::Alone)),
+        TokenTree::Literal(Literal::character('ż')),
+        TokenTree::Punct(Punct::new(',', Spacing::Alone)),
+        TokenTree::Literal(Literal::atom(a"x \"y\"")),
+    ]);
+    TokenStream::from_tree(TokenTree::Group(Group::new(Delimiter::Parenthesis, body)))
+}
+
+// A byte character outside `0..=255` raises.
+#[proc_macro]
+pub fn bad_byte(_input: TokenStream) -> TokenStream {
+    TokenStream::from_tree(TokenTree::Literal(Literal::byte_character(256)))
+}
+
+fn comma() -> TokenTree {
+    TokenTree::Punct(Punct::new(',', Spacing::Alone))
+}
+
+fn ident_at(name: str, span: Span) -> TokenTree {
+    TokenTree::Ident(Ident::new(name, span))
+}
+
+// Hygiene through `set_span`: a definition-site identifier moved to the call
+// site resolves in the caller.
+#[proc_macro]
+pub fn call_site_by_set_span(_input: TokenStream) -> TokenStream {
+    let tree = TokenTree::Ident(Ident::new("local", Span::def_site()));
+    TokenStream::from_tree(tree.set_span(Span::call_site()))
+}
+
+// Hygiene through `set_span`: a call-site identifier moved to the definition
+// site no longer resolves in the caller.
+#[proc_macro]
+pub fn def_site_by_set_span(_input: TokenStream) -> TokenStream {
+    let tree = TokenTree::Ident(Ident::new("local", Span::call_site()));
+    TokenStream::from_tree(tree.set_span(Span::def_site()))
+}
+
+fn respan_trees(trees: [TokenTree]) -> [TokenTree] {
+    match trees {
+        [] => [],
+        [head, tail @ ..] => [head.set_span(Span::call_site()), ..respan_trees(tail)],
+    }
+}
+
+// Moves every top-level tree of its input to the call site. `TokenTree::set_span`
+// must keep each variant and its payload, groups included.
+#[proc_macro]
+pub fn respan(input: TokenStream) -> TokenStream {
+    TokenStream::from_trees(respan_trees(input.into_trees()))
+}
+
+// Takes one group and names three missing values at its opening, closing and
+// entire spans, so the diagnostics show where each accessor points.
+#[proc_macro]
+pub fn group_spans(input: TokenStream) -> TokenStream {
+    match input.into_trees() {
+        [TokenTree::Group(group)] => {
+            let body = TokenStream::from_trees([
+                ident_at("missing_open", group.span_open()),
+                comma(),
+                ident_at("missing_close", group.span_close()),
+                comma(),
+                ident_at("missing_entire", group.span()),
+            ]);
+            TokenStream::from_tree(TokenTree::Group(Group::new(Delimiter::Parenthesis, body)))
+        }
+        _ => TokenStream::new(),
+    }
+}
+
+// Takes a marker identifier and a group, and moves the group to the marker
+// through `TokenTree::set_span`. The group's three spans then all point at the
+// marker, while the tokens inside it keep pointing at themselves.
+#[proc_macro]
+pub fn set_group_span(input: TokenStream) -> TokenStream {
+    match input.into_trees() {
+        [TokenTree::Ident(marker), TokenTree::Group(group)] => {
+            let moved = TokenTree::Group(group).set_span(marker.span());
+            let tree_span = moved.span();
+            match moved {
+                TokenTree::Group(moved) => {
+                    let body = TokenStream::from_trees([
+                        ident_at("missing_open", moved.span_open()),
+                        comma(),
+                        ident_at("missing_close", moved.span_close()),
+                        comma(),
+                        ident_at("missing_entire", moved.span()),
+                        comma(),
+                        ident_at("missing_tree", tree_span),
+                        comma(),
+                    ]);
+                    let body = body.concat(moved.stream());
+                    TokenStream::from_tree(TokenTree::Group(Group::new(Delimiter::Parenthesis, body)))
+                }
+                _ => TokenStream::new(),
+            }
+        }
+        _ => TokenStream::new(),
+    }
+}
+
+// Builds `([1, 2], <1 + 2> * 3)`, where `<...>` is an invisible group. Like
+// rustc (rust-lang/rust#67062), the parser flattens an invisible group from a
+// proc macro in expression position, so the product is 7; a parenthesized
+// group would give 9.
+#[proc_macro]
+pub fn delimiters(_input: TokenStream) -> TokenStream {
+    let list = Group::new(
+        Delimiter::Bracket,
+        TokenStream::from_trees([
+            TokenTree::Literal(Literal::int(1)),
+            comma(),
+            TokenTree::Literal(Literal::int(2)),
+        ]),
+    );
+    let sum = Group::new(
+        Delimiter::None,
+        TokenStream::from_trees([
+            TokenTree::Literal(Literal::int(1)),
+            TokenTree::Punct(Punct::new('+', Spacing::Alone)),
+            TokenTree::Literal(Literal::int(2)),
+        ]),
+    );
+    let body = TokenStream::from_trees([
+        TokenTree::Group(list),
+        comma(),
+        TokenTree::Group(sum),
+        TokenTree::Punct(Punct::new('*', Spacing::Alone)),
+        TokenTree::Literal(Literal::int(3)),
+    ]);
+    TokenStream::from_tree(TokenTree::Group(Group::new(Delimiter::Parenthesis, body)))
+}
+
+// Emits `discard! { ... }` around byte literals, which Patina cannot
+// type-check, so rustc still decodes each wire kind but nothing evaluates them.
+#[proc_macro]
+pub fn untyped_literals(_input: TokenStream) -> TokenStream {
+    let body = TokenStream::from_trees([
+        TokenTree::Literal(Literal::byte_character(97)),
+        TokenTree::Literal(Literal::byte_character(39)),
+        TokenTree::Literal(Literal::byte_character(200)),
+        TokenTree::Literal(Literal::byte_string([98, 34, 10, 255])),
+    ]);
+    TokenStream::from_trees([
+        ident_at("discard", Span::call_site()),
+        TokenTree::Punct(Punct::new('!', Spacing::Alone)),
+        TokenTree::Group(Group::new(Delimiter::Brace, body)),
+    ])
+}
+
+// Renders its input with `to_string` and returns it as a string literal.
+#[proc_macro]
+pub fn render(input: TokenStream) -> TokenStream {
+    TokenStream::from_tree(TokenTree::Literal(Literal::string(input.to_string())))
+}
+
+fn type_name(trees: [TokenTree]) -> str {
+    match trees {
+        [] => "",
+        [TokenTree::Ident(keyword), tail @ ..] => {
+            let is_struct = keyword.to_string() == "struct";
+            match tail {
+                [TokenTree::Ident(name), ..] if is_struct => name.to_string(),
+                _ => type_name(tail),
+            }
+        }
+        [_, tail @ ..] => type_name(tail),
+    }
+}
+
+// A derive that reads the name of the type it is applied to and generates
+// `pub fn type_name() -> str { "<name>" }`.
+#[proc_macro_derive(TypeName)]
+pub fn derive_type_name(input: TokenStream) -> TokenStream {
+    let name = type_name(input.into_trees());
+    TokenStream::from_trees([
+        ident_at("pub", Span::call_site()),
+        ident_at("fn", Span::call_site()),
+        ident_at("type_name", Span::call_site()),
+        TokenTree::Group(Group::new(Delimiter::Parenthesis, TokenStream::new())),
+        TokenTree::Punct(Punct::new('-', Spacing::Joint)),
+        TokenTree::Punct(Punct::new('>', Spacing::Alone)),
+        ident_at("str", Span::call_site()),
+        TokenTree::Group(Group::new(
+            Delimiter::Brace,
+            TokenStream::from_tree(TokenTree::Literal(Literal::string(name))),
+        )),
+    ])
+}
+
+// An attribute macro that replaces the item with a new function built from
+// every kind of token tree: `pub fn from_attr() -> int { 40 + 2 }`.
+#[proc_macro_attribute]
+pub fn replace_with_answer(_attr: TokenStream, _item: TokenStream) -> TokenStream {
+    TokenStream::from_trees([
+        ident_at("pub", Span::call_site()),
+        ident_at("fn", Span::call_site()),
+        ident_at("from_attr", Span::call_site()),
+        TokenTree::Group(Group::new(Delimiter::Parenthesis, TokenStream::new())),
+        TokenTree::Punct(Punct::new('-', Spacing::Joint)),
+        TokenTree::Punct(Punct::new('>', Spacing::Alone)),
+        ident_at("int", Span::call_site()),
+        TokenTree::Group(Group::new(
+            Delimiter::Brace,
+            TokenStream::from_trees([
+                TokenTree::Literal(Literal::int(40)),
+                TokenTree::Punct(Punct::new('+', Spacing::Alone)),
+                TokenTree::Literal(Literal::int(2)),
+            ]),
+        )),
+    ])
+}

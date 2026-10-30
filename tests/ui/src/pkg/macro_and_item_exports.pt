@@ -1,0 +1,13 @@
+use MacrosAndItems::{Describe, Plain, doubled, echo, plain};
+
+#[derive(Describe)]
+pub struct Marker;
+
+pub fn items() {
+    let n = Plain { value: 5 };
+    println!("{} {} {}", n.describe(), plain(), derived_value());
+}
+
+pub fn macros() {
+    println!("{} {}", doubled!(5), echo!(7));
+}

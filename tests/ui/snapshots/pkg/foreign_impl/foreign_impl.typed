@@ -1,0 +1,157 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+use ::{};
+use MoreTemperatures::Kelvin;
+use MoreTemperatures::Rankine;
+use ::{};
+use Temperatures::Celsius;
+use Temperatures::From;
+use ::{};
+use Traits::Label;
+use Traits::Loud;
+use Traits::Show;
+
+// A local trait on a foreign type.
+trait Size {
+    fn size(self)
+    -> int;
+}
+
+impl Size for Label {
+    fn size(self) -> int ({ (5 as int) } as int)
+}
+
+fn size_of<T>(t: T) -> int where T: Size ({ ((t as T).size() as int) } as int)
+
+// A foreign trait with a local argument, on a foreign type.
+struct LocalDegrees(int);
+
+impl From<LocalDegrees> for Celsius {
+    fn from(d: LocalDegrees)
+        ->
+            Celsius ({
+        ((Celsius as
+                fn(int) -> Temperatures::Celsius {Temperatures::Celsius})(((d
+                    as LocalDegrees).0 as int)) as Temperatures::Celsius)
+    } as Temperatures::Celsius)
+}
+
+fn label_size()
+    ->
+        int ({
+    ((size_of as
+            fn(Traits::Label) -> int {size_of::<Traits::Label>})(((Label as
+                fn(str) -> Traits::Label {Traits::Label})(("abcde" as str)) as
+            Traits::Label)) as int)
+} as int)
+
+fn local_to_celsius(n: int)
+    ->
+        int ({
+    ((Temperatures::to_celsius as
+            fn(LocalDegrees) -> int {Temperatures::to_celsius::<LocalDegrees>})(((LocalDegrees
+                as fn(int) -> LocalDegrees {LocalDegrees})((n as int)) as
+            LocalDegrees)) as int)
+} as int)
+
+fn fahrenheit_to_celsius(f: int)
+    ->
+        int ({
+    ((Temperatures::to_celsius as
+            fn(Temperatures::Fahrenheit) -> int {Temperatures::to_celsius::<Temperatures::Fahrenheit>})(((Temperatures::Fahrenheit
+                as
+                fn(int) -> Temperatures::Fahrenheit {Temperatures::Fahrenheit})((f
+                as int)) as Temperatures::Fahrenheit)) as int)
+} as int)
+
+fn kelvin_to_celsius(k: int)
+    ->
+        int ({
+    ((Temperatures::to_celsius as
+            fn(MoreTemperatures::Kelvin) -> int {Temperatures::to_celsius::<MoreTemperatures::Kelvin>})(((Kelvin
+                as
+                fn(int) -> MoreTemperatures::Kelvin {MoreTemperatures::Kelvin})((k
+                as int)) as MoreTemperatures::Kelvin)) as int)
+} as int)
+
+fn rankine_to_celsius(r: int)
+    ->
+        int ({
+    ((Temperatures::to_celsius as
+            fn(MoreTemperatures::Rankine) -> int {Temperatures::to_celsius::<MoreTemperatures::Rankine>})(((Rankine
+                as
+                fn(int) -> MoreTemperatures::Rankine {MoreTemperatures::Rankine})((r
+                as int)) as MoreTemperatures::Rankine)) as int)
+} as int)
+
+// Two independent packages implement different traits for `Traits::Label`.
+fn label_shout()
+    ->
+        str ({
+    ((LabelShout::shout as
+            fn(Traits::Label) -> str {LabelShout::shout::<Traits::Label>})(((Label
+                as fn(str) -> Traits::Label {Traits::Label})(("x" as str)) as
+            Traits::Label)) as str)
+} as str)
+
+fn label_whisper()
+    ->
+        str ({
+    ((LabelWhisper::whisper as
+            fn(Traits::Label) -> str {LabelWhisper::whisper::<Traits::Label>})(((Label
+                as fn(str) -> Traits::Label {Traits::Label})(("x" as str)) as
+            Traits::Label)) as str)
+} as str)
+
+fn label_show()
+    ->
+        str ({
+    (((Label as fn(str) -> Traits::Label {Traits::Label})(("shown" as str)) as
+            Traits::Label).show() as str)
+} as str)
+
+// A blanket impl from another package, on a foreign and on a local type.
+struct Local;
+
+impl Show for Local {
+    fn show(self) -> str ({ ("local" as str) } as str)
+}
+
+fn loud_generic<T>(t: T) -> str where
+    T: Loud ({ ((t as T).loud() as str) } as str)
+
+fn blanket_on_foreign_type(s: str)
+    ->
+        str ({
+    (((Label as fn(str) -> Traits::Label {Traits::Label})((s as str)) as
+            Traits::Label).loud() as str)
+} as str)
+
+fn blanket_on_local_type()
+    -> str ({ ((Local as Local).loud() as str) } as str)
+
+fn blanket_generic_both(s: str)
+    ->
+        str ({
+    (((loud_generic as
+                fn(Traits::Label) -> str {loud_generic::<Traits::Label>})(((Label
+                    as fn(str) -> Traits::Label {Traits::Label})((s as str)) as
+                Traits::Label)) as str) +
+        ((loud_generic as
+                fn(Local) -> str {loud_generic::<Local>})((Local as Local)) as
+            str) as str)
+} as str)

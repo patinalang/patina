@@ -1,0 +1,156 @@
+use Macros::{
+    braces, call_site_by_set_span, call_site_ident, delimiters, escapes,
+    forty_two, identity, identity_alias, literal_factories, negative,
+    passthrough, raw_ident, rebuild, render, replace_with_answer, respan,
+    stream_ops, untyped_literals, wrapped, Hello, TypeName,
+};
+use Macros::Nested::nested_identity;
+
+// Macro kinds.
+
+// Proc macros are macro-only downstream, so functions of the same names do not
+// clash with them.
+fn identity() -> int { 10 }
+fn identity_alias() -> int { 20 }
+fn nested_identity() -> int { 30 }
+
+#[passthrough]
+pub fn answer() -> int { 42 }
+
+// Replaced by `pub fn from_attr() -> int { 40 + 2 }`.
+#[replace_with_answer]
+pub fn ignored() {}
+
+#[derive(Hello, TypeName)]
+#[repr(tagged, tag = "point")]
+pub struct Point {
+    #[helper]
+    pub x: int,
+    pub y: int,
+}
+
+pub fn bang() {
+    println!("{}", identity!(1 + 2));
+    println!("{}", identity_alias!(4 + 1));
+    println!("{}", nested_identity!(5 + 2));
+    println!("{} {} {}", identity(), identity_alias(), nested_identity());
+    println!("{}", forty_two!());
+}
+
+pub fn attribute() { println!("{} {}", answer(), from_attr()); }
+
+pub fn derive() {
+    let point = Point { x: 1, y: 2 };
+    println!("{} {} {}", point.x + point.y, hello_from_derive(), type_name());
+}
+
+// Token streams.
+
+/// An outer doc comment reaches the macro as tokens, where it is a `#` punct
+/// followed by a bracketed `doc` attribute.
+#[passthrough]
+pub fn documented() -> int { 1 }
+
+/// An inner doc comment is a `#`, a `!` and the group, one tree more than an
+/// outer one.
+#[passthrough]
+pub mod Documented {
+    //! Inner documentation.
+    pub fn value() -> int { 2 }
+}
+
+// A declarative macro forwards a captured expression into a proc macro, so the
+// input arrives wrapped in an invisible metavariable group.
+macro_rules! forward { ($e:expr) => { identity!($e) }; }
+
+pub fn round_trip() {
+    let a = wrapped!(identity!(1 + 2 * 3));
+    let b = identity!({ let inner = 10; inner * 2 });
+    let c = braces!(1 + 2);
+    println!("{} {} {}", a, b, c);
+}
+
+pub fn token_zoo() {
+    // Operators of three characters, split into one punct each on the wire
+    // and glued back together on the way in.
+    let shifted = identity!({ let mut x = 1; x <<= 3; x >>= 1; x });
+
+    // Groups nested well past anything the other tests reach, in all three
+    // delimiters.
+    let nested =
+        identity!({
+                let deep = (1, (2, (3, (4, 5)))); let lists =
+                [[1, 2], [3, 4]]; match deep
+                { (a, (b, (c, (d, e)))) => a + b + c + d + e, }
+            });
+
+    // Literal kinds beyond the integers and strings the other tests cover.
+    let float = identity!(2.5e-1);
+    let text = identity!("a \"quoted\" string");
+    let raw = identity!(r#"no \escapes"#);
+    let atom = identity!(a"atom");
+    let raw_atom = identity!(ar#"raw \atom"#);
+    let bits = identity!(0b0011 & 0x0f);
+
+    // An inclusive range, for the `..=` operator.
+    let ranged = identity!(match 3 { 1..=5 => true, _ => false });
+
+    // A literal whose text is negative: one wire tree, two tokens.
+    let neg = negative!();
+
+    println!("{} {} {} {} {} {} {} {} {} {}", shifted, nested, float, text,
+    raw, atom, raw_atom, bits, ranged, neg);
+    println!("{} {}", documented(), Documented::value());
+}
+
+pub fn forwarded() { println!("{}", forward!(1 + 2)); }
+
+pub fn rebuilt() { println!("{}", rebuild!((1 + 2) * 3)); }
+
+pub fn built_streams() {
+    println!("{}", stream_ops!());
+    // `delimiters!()` is `([1, 2], <1 + 2> * 3)` with an invisible group.
+    let (list, product) = delimiters!();
+    match list {
+        [a, b] => println!("{} {} {}", a, b, product),
+        _ => println!("unexpected"),
+    }
+}
+
+pub fn rendered() {
+    println!("{}",
+    render!(`x` += f(1, "q\n") r#"raw"# a"at" 'c' #[z] a.b if (y) m!(1) if !w
+    receive (v) `if`(u) fn(t)));
+}
+
+// Literals.
+
+macro_rules! discard { ($($t:tt)*) => {}; }
+
+pub fn constructors() {
+    let (c, i, big, f, s, a) = literal_factories!();
+    println!("{} {} {} {} {} {}", c, i, big, f, s, a);
+    // Byte literals are only decoded, never type-checked.
+    untyped_literals!();
+}
+
+pub fn escaped() {
+    let (s, quote, backslash, double, non_ascii, a) = escapes!();
+    println!("{} {} {} {} {} {}", s, quote, backslash, double, non_ascii, a);
+}
+
+// Hygiene.
+
+pub fn call_site() { let local = 5; println!("{}", call_site_ident!()); }
+
+// `` `x` `` and `x` name the same binding.
+pub fn raw_identifier() { let x = 7; println!("{}", raw_ident!()); }
+
+pub fn set_span() {
+    let local = 5;
+    // A definition-site identifier moved to the call site with `set_span`.
+    println!("{}", call_site_by_set_span!());
+    // Every variant keeps its payload when moved: an identifier, punctuation,
+    // a literal and a group with its contents.
+    println!("{}", respan!(local + 1 - (local * 2)));
+}

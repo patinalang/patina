@@ -1,0 +1,47 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro, prelude_import)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[prelude_import]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+use Consts::{Generic, HEADER, HasValue, PAIR, Point};
+
+const LOCAL_PAIRS: [([int], #{str => int})] = [PAIR, PAIR];
+
+pub fn pair() -> ([int], #{str => int}) { PAIR }
+
+pub fn local_pairs() -> [([int], #{str => int})] { LOCAL_PAIRS }
+
+pub fn header() -> bin { HEADER }
+
+pub fn origin_y() -> int { Point::ORIGIN.y }
+
+pub fn computed_unit_x() -> int { Point::COMPUTED_UNIT.x }
+
+struct Three;
+
+impl HasValue for Three {
+    const VALUE: int = 3;
+}
+
+pub fn foreign_doubled_of_local_impl() -> int { Generic::<Three>::DOUBLED }
+
+pub fn generic_empty() -> [int] { Generic::<int>::EMPTY }
+
+pub fn is_pair(value: ([int], #{str => int})) -> bool {
+    match value { PAIR => true, _ => false, }
+}
+
+pub fn is_header(value: bin) -> bool {
+    match value { HEADER => true, _ => false, }
+}

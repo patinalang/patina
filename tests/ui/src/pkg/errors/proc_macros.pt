@@ -1,0 +1,21 @@
+// Errors raised while expanding proc macros. Once expansion fails, name
+// resolution errors are no longer reported, so those are in `resolution.pt`.
+
+use Macros::{bad_byte, bad_punct, boom, identity, invalid_ident, lifetime_output, stray};
+
+pub fn expansion() {
+    // Tokens that do not parse where the macro is used.
+    let _a = stray!();
+    // A structurally valid token tree holding an invalid identifier.
+    let _b = invalid_ident!();
+    // A macro that raises.
+    let _c = boom!();
+    // Patina has no lifetimes, so one in macro input cannot be encoded...
+    let _d = identity!('a);
+    // ...and one in the output is reported the same way, at the lifetime.
+    let _e = lifetime_output!();
+    // Constructors raise on values rustc's would reject: punctuation it cannot
+    // decode and a byte outside `0..=255`.
+    let _f = bad_punct!();
+    let _g = bad_byte!();
+}
