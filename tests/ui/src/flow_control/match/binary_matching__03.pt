@@ -6,7 +6,7 @@ pub fn main() {
 
     match bin {
         // Bind `len`, then use it as the size of `payload`
-        <<kind:8, len: int(8), payload: bin(len), rest @ ..>> =>
+        <<kind:8, len: int(8), payload: bin(^len), rest @ ..>> =>
             println!("kind = {}, payload = {:?}, rest = {:?}", kind, payload, rest),
         
         // The size can also be a guard expression

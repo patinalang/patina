@@ -8,7 +8,7 @@ pub fn main() {
 
             // Bind `len`, then use it as the size of `payload`
             <<kind: int(size = 8), len: int(size = 8), payload:
-            bin(size = len), rest @ ..>> =>
+            bin(size = ^len), rest @ ..>> =>
             println!("kind = {}, payload = {:?}, rest = {:?}", kind, payload,
                 rest),
 

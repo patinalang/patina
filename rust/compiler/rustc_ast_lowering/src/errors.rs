@@ -257,6 +257,21 @@ pub(crate) struct UnpinnedLocalInMapPatternKey {
 }
 
 #[derive(Diagnostic)]
+#[diag("local variable `{$ident}` in a binary segment size must be pinned in pattern match")]
+#[note("a binary segment size expression never binds variables")]
+pub(crate) struct UnpinnedLocalInBinarySegmentSize {
+    #[primary_span]
+    #[suggestion(
+        "pin the variable",
+        code = "^{ident}",
+        applicability = "machine-applicable",
+        style = "verbose"
+    )]
+    pub span: Span,
+    pub ident: Ident,
+}
+
+#[derive(Diagnostic)]
 #[diag("a variable cannot be pinned in this expression")]
 pub(crate) struct PinNotAllowedInExpr {
     #[primary_span]

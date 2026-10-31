@@ -31,6 +31,8 @@
          bits_rest/1,
          term_rest/1,
          split/1,
+         split_scaled/3,
+         sized_map_key/2,
          rotate/1,
          has_magic/1,
          main/0]).
@@ -173,6 +175,20 @@ split(_b@0_0) ->
           _rest@3_0/binary>> ->
             {_payload@2_0, _rest@3_0};
         _ -> {<<>>, <<>>}
+    end.
+
+split_scaled(_b@0_0, _n@1_0, _k@2_0) ->
+    case _b@0_0 of
+        <<_payload@3_0:(_n@1_0 * _k@2_0)/binary,
+          _rest@4_0/binary>> ->
+            {_payload@3_0, _rest@4_0};
+        _ -> {<<>>, <<>>}
+    end.
+
+sized_map_key(_m@0_0, _n@1_0) ->
+    case _m@0_0 of
+        #{<<1:_n@1_0/integer>> := _v@2_0} -> _v@2_0;
+        _ -> -1
     end.
 
 rotate(_b@0_0) ->

@@ -58,7 +58,8 @@ impl<'v> rustc_ast::visit::Visitor<'v> for WillCreateDefIdsVisitor {
 }
 
 impl<'hir> LoweringContext<'_, 'hir> {
-    /// Lowers the type of a binary segment, e.g. `int(size = n, little)`.
+    /// Lowers the type of a binary segment, e.g. `int(size = n, little)`. In a pattern, the size's
+    /// locals must be pinned, e.g. `int(size = ^n)`.
     pub(crate) fn lower_binary_segment_spec(
         &mut self,
         spec: &ast::BinarySegmentSpec,
@@ -66,6 +67,9 @@ impl<'hir> LoweringContext<'_, 'hir> {
         let args = self.arena.alloc_from_iter(spec.args.iter().map(|arg| {
             let kind = match &arg.kind {
                 ast::BinarySegmentArgKind::Size(expr) => {
+                    if self.in_pattern {
+                        self.check_binary_segment_size_pins(expr);
+                    }
                     hir::BinarySegmentArgKind::Size(self.lower_expr(expr))
                 }
                 ast::BinarySegmentArgKind::Unit(expr) => {
@@ -93,7 +97,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
 
     fn check_pin(&self, pin: &Expr, operand: &Expr) -> Option<ErrorGuaranteed> {
         let unpin = pin.span.until(operand.span);
-        if !self.is_in_map_key {
+        if !self.in_pattern {
             return Some(self.dcx().emit_err(PinNotAllowedInExpr { span: pin.span, unpin }));
         }
 

@@ -123,7 +123,7 @@ struct LoweringContext<'a, 'hir> {
     try_block_scope: TryBlockScope,
     loop_scope: Option<HirId>,
     is_in_loop_condition: bool,
-    is_in_map_key: bool,
+    in_pattern: bool,
     is_in_dyn_type: bool,
 
     current_hir_id_owner: hir::OwnerId,
@@ -191,7 +191,7 @@ impl<'a, 'hir> LoweringContext<'a, 'hir> {
             try_block_scope: TryBlockScope::Function,
             loop_scope: None,
             is_in_loop_condition: false,
-            is_in_map_key: false,
+            in_pattern: false,
             is_in_dyn_type: false,
             coroutine_kind: None,
             task_context: None,
@@ -1017,6 +1017,13 @@ impl<'hir> LoweringContext<'_, 'hir> {
 
         self.is_in_dyn_type = was_in_dyn_type;
 
+        result
+    }
+
+    fn with_in_pattern<T>(&mut self, f: impl FnOnce(&mut Self) -> T) -> T {
+        let was_in_pattern = mem::replace(&mut self.in_pattern, true);
+        let result = f(self);
+        self.in_pattern = was_in_pattern;
         result
     }
 

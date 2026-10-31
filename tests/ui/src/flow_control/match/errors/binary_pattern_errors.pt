@@ -40,7 +40,7 @@ fn arguments(b: bin) {
     match b {
         // Size on `str` and `char`, unit on `float`.
         <<x: str(3), c: char(size = 8), f: float(unit = 8)>> => {}
-        <<n:8, x: str(size = n), rest @ ..>> => {}
+        <<n:8, x: str(size = ^n), rest @ ..>> => {}
         // A literal has the size of its bytes.
         <<"ab": str(2)>> => {}
         <<"ł": str(utf16, 2), "ł": str(size = 2, utf16)>> => {}
@@ -50,6 +50,20 @@ fn arguments(b: bin) {
         <<a: bin(little), c: char(signed), d: int(8, big, little), e: char(utf8, big)>> => {}
         // A string or binary literal takes the size of its bytes.
         <<"abc": str, b"ab": bin(2)>> => {}
+        _ => {}
+    }
+}
+
+fn unpinned_sizes(b: bin, m: #{bits => int}, n: int) {
+    match b {
+        // A local that is the whole size must be pinned.
+        <<x: bin(n)>> => {}
+        <<x: bin(size = (n))>> => {}
+        <<len:8, x: bin(len), rest @ ..>> => {}
+        _ => {}
+    }
+    match m {
+        #{<<1: int(n)>> => v, ..} => {}
         _ => {}
     }
 }
@@ -67,8 +81,10 @@ fn types(b: bin, n: int) {
     }
 }
 
-fn construction(b: bits, x: bool, s: str) {
+fn construction(b: bits, x: bool, s: str, n: int) {
     let _ = <<b: bin>>;
+    // In construction, a size is an ordinary expression.
+    let _ = <<1: int(^n)>>;
     let _ = <<x>>;
     let _ = <<1: bin()>>;
     // Only a string literal can be re-encoded; a `str` value is UTF-8 bytes.

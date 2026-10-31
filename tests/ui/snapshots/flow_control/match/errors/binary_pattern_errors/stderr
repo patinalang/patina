@@ -1,3 +1,63 @@
+error: local variable `n` in a binary segment size must be pinned in pattern match
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:60:18
+   |
+LL |         <<x: bin(n)>> => {}
+   |                  ^
+   |
+   = note: a binary segment size expression never binds variables
+help: pin the variable
+   |
+LL |         <<x: bin(^n)>> => {}
+   |                  +
+
+error: local variable `n` in a binary segment size must be pinned in pattern match
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:61:26
+   |
+LL |         <<x: bin(size = (n))>> => {}
+   |                          ^
+   |
+   = note: a binary segment size expression never binds variables
+help: pin the variable
+   |
+LL |         <<x: bin(size = (^n))>> => {}
+   |                          +
+
+error: local variable `len` in a binary segment size must be pinned in pattern match
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:62:25
+   |
+LL |         <<len:8, x: bin(len), rest @ ..>> => {}
+   |                         ^^^
+   |
+   = note: a binary segment size expression never binds variables
+help: pin the variable
+   |
+LL |         <<len:8, x: bin(^len), rest @ ..>> => {}
+   |                         +
+
+error: local variable `n` in a binary segment size must be pinned in pattern match
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:66:20
+   |
+LL |         #{<<1: int(n)>> => v, ..} => {}
+   |                    ^
+   |
+   = note: a binary segment size expression never binds variables
+help: pin the variable
+   |
+LL |         #{<<1: int(^n)>> => v, ..} => {}
+   |                    +
+
+error: a variable cannot be pinned in this expression
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:87:22
+   |
+LL |     let _ = <<1: int(^n)>>;
+   |                      ^^
+   |
+help: use the variable directly
+   |
+LL -     let _ = <<1: int(^n)>>;
+LL +     let _ = <<1: int(n)>>;
+   |
+
 error: only the last segment of a binary pattern can be unsized
   --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:6:11
    |
@@ -124,15 +184,15 @@ LL |         <<x: str(3), c: char(size = 8), f: float(unit = 8)>> => {}
    |                                                         ^
 
 error: `size` isn't allowed on a `str` segment
-  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:43:30
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:43:31
    |
-LL |         <<n:8, x: str(size = n), rest @ ..>> => {}
-   |                              ^
+LL |         <<n:8, x: str(size = ^n), rest @ ..>> => {}
+   |                               ^
    |
 help: use `bin` instead
    |
-LL -         <<n:8, x: str(size = n), rest @ ..>> => {}
-LL +         <<n:8, x: bin(size = n), rest @ ..>> => {}
+LL -         <<n:8, x: str(size = ^n), rest @ ..>> => {}
+LL +         <<n:8, x: bin(size = ^n), rest @ ..>> => {}
    |
 
 error: `size` isn't allowed on a `str` segment
@@ -228,7 +288,7 @@ LL |         <<"abc": str, b"ab": bin(2)>> => {}
    = note: the size of the segment is the length of the literal
 
 error[E0308]: mismatched types
-  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:60:9
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:74:9
    |
 LL |     match n {
    |           - this expression has type `int`
@@ -237,13 +297,13 @@ LL |         <<x:8>> => {}
    |         ^^^^^^^ expected `int`, found `bits`
 
 error[E0308]: mismatched types
-  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:65:11
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:79:11
    |
 LL |         <<^n: float, 5: float(), true>> => {}
    |           ^^ expected `float`, found `int`
 
 error[E0308]: mismatched types
-  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:65:22
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:79:22
    |
 LL |         <<^n: float, 5: float(), true>> => {}
    |                      ^ expected `float`, found `int`
@@ -254,19 +314,19 @@ LL |         <<^n: float, 5.0: float(), true>> => {}
    |                       ++
 
 error: boolean literals can't be binary pattern segments
-  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:65:34
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:79:34
    |
 LL |         <<^n: float, 5: float(), true>> => {}
    |                                  ^^^^
 
 error[E0308]: mismatched types
-  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:71:15
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:85:15
    |
 LL |     let _ = <<b: bin>>;
    |               ^ expected `bin`, found `bits`
 
 error: a value of type `bool` can't be a binary pattern segment
-  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:72:15
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:88:15
    |
 LL |     let _ = <<x>>;
    |               ^
@@ -274,19 +334,19 @@ LL |     let _ = <<x>>;
    = note: binary pattern segments hold `int`, `float`, `char`, `str`, `bin` or `bits` values
 
 error[E0308]: mismatched types
-  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:73:15
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:89:15
    |
 LL |     let _ = <<1: bin()>>;
    |               ^ expected `bin`, found `int`
 
 error: only string literals can be encoded as `utf16` or `utf32`
-  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:75:36
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:91:36
    |
 LL |     let _ = <<s: str(utf8), s: str(utf16)>>;
    |                                    ^^^^^
 
 error: endianness isn't allowed on a `utf8` segment
-  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:76:30
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:92:30
    |
 LL |     let _ = <<"a": str(utf8, little), "a": bin(utf16)>>;
    |                              ^^^^^^
@@ -294,13 +354,13 @@ LL |     let _ = <<"a": str(utf8, little), "a": bin(utf16)>>;
    = help: endianness only applies to the `utf16` and `utf32` encodings
 
 error: `utf16` isn't allowed on a `bin` segment
-  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:76:48
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:92:48
    |
 LL |     let _ = <<"a": str(utf8, little), "a": bin(utf16)>>;
    |                                                ^^^^^
 
 error[E0308]: mismatched types
-  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:78:18
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:94:18
    |
 LL |     let _: str = <<"ł": str(utf16)>>;
    |            ---   ^^^^^^^^^^^^^^^^^^^ expected `str`, found `bin`
@@ -308,13 +368,13 @@ LL |     let _: str = <<"ł": str(utf16)>>;
    |            expected due to this
 
 error[E0308]: mismatched types
-  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:85:26
+  --> tests/ui/src/flow_control/match/errors/binary_pattern_errors.pt:101:26
    |
 LL |             let _: bin = rest;
    |                    ---   ^^^^ expected `bin`, found `bits`
    |                    |
    |                    expected due to this
 
-error: aborting due to 35 previous errors
+error: aborting due to 40 previous errors
 
 For more information about this error, try `rustc --explain E0308`.

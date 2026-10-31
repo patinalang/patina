@@ -9,7 +9,8 @@ use rustc_span::{DesugaringKind, ErrorGuaranteed, Ident, Span, Spanned, respan};
 
 use super::errors::{
     ArbitraryExpressionInPattern, ExtraDoubleDot, InvalidMapPatternKey, InvalidMapPatternKeyHelp,
-    MisplacedDoubleDot, SubTupleBinding, UnpinnedLocalInMapPatternKey,
+    MisplacedDoubleDot, SubTupleBinding, UnpinnedLocalInBinarySegmentSize,
+    UnpinnedLocalInMapPatternKey,
 };
 use super::{
     AllowReturnTypeNotation, ImplTraitContext, ImplTraitPosition, LoweringContext, ParamMode,
@@ -176,9 +177,9 @@ impl<'hir> LoweringContext<'_, 'hir> {
                                         hir::PatBinarySegmentKind::Default
                                     }
                                     PatBinarySegmentKind::Spec(spec) => {
-                                        hir::PatBinarySegmentKind::Spec(
-                                            self.lower_binary_segment_spec(spec),
-                                        )
+                                        hir::PatBinarySegmentKind::Spec(self.with_in_pattern(
+                                            |this| this.lower_binary_segment_spec(spec),
+                                        ))
                                     }
                                     PatBinarySegmentKind::Rest => hir::PatBinarySegmentKind::Rest,
                                     PatBinarySegmentKind::Recovered(guar) => {
@@ -536,10 +537,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
         if let Err(guar) = self.check_map_key(key, ctx) {
             return self.arena.alloc(self.expr_err(self.lower_span(key.span), guar));
         }
-        let was_in_map_key = std::mem::replace(&mut self.is_in_map_key, true);
-        let key = self.lower_expr(key);
-        self.is_in_map_key = was_in_map_key;
-        key
+        self.with_in_pattern(|this| this.lower_expr(key))
     }
 
     fn check_map_key(&self, expr: &Expr, ctx: MapKeyContext) -> Result<(), ErrorGuaranteed> {
@@ -611,6 +609,19 @@ impl<'hir> LoweringContext<'_, 'hir> {
             _ => (expr.span, None),
         };
         Err(self.dcx().emit_err(InvalidMapPatternKey { span, help }))
+    }
+
+    pub(super) fn check_binary_segment_size_pins(&self, size: &Expr) {
+        let size = size.peel_parens();
+        if let ExprKind::Path(None, path) = &size.kind
+            && let Some(Res::Local(_)) =
+                self.get_partial_res(size.id).and_then(|res| res.full_res())
+        {
+            // Bare `var` in `<<a: bin(var)>> = ...` pattern must be pinned,
+            // so it's clear that it doesn't bind.
+            let ident = path.segments[0].ident;
+            self.dcx().emit_err(UnpinnedLocalInBinarySegmentSize { span: size.span, ident });
+        }
     }
 
     fn check_map_keys<'a>(

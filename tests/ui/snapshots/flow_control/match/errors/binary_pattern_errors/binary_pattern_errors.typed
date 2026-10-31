@@ -101,6 +101,26 @@ fn arguments(b:
     } as ())
 } as ())
 
+fn unpinned_sizes(b: bin, m: #{bits => int},
+    n:
+        int) ({
+    (match (b as bin) {
+
+            // A local that is the whole size must be pinned.
+            <<x: bin(size = (n as int))>> => {
+        }
+        <<x: bin(size = (n as int))>> => { }
+        <<len: int(size = (8 as int)), x: bin(size = (len as int)), rest @
+            ..>> => {
+        }
+        _ => { }
+    } as ())
+    (match (m as #{bits => int}) {
+        #{(<<(1 as int): int(size = (n as int))>> as bits) => v, ..} => { }
+        _ => { }
+    } as ())
+} as ())
+
 fn types(b: bin,
     n:
         int) ({
@@ -120,10 +140,13 @@ fn types(b: bin,
     } as ())
 } as ())
 
-fn construction(b: bits, x: bool,
-    s:
-        str) ({
+fn construction(b: bits, x: bool, s: str,
+    n:
+        int) ({
     let _ = (<<(b as bits): bin>> as bin);
+    // In construction, a size is an ordinary expression.
+    let _ =
+        (<<(1 as int): int(size = ((/*ERROR*/) as {type error}))>> as bits);
     let _ = (<<(x as bool)>> as {type error});
     let _ = (<<(1 as int): bin>> as bin);
     // Only a string literal can be re-encoded; a `str` value is UTF-8 bytes.

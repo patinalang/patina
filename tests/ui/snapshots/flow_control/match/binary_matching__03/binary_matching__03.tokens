@@ -63,6 +63,7 @@ Colon
 Whitespace
 Ident
 OpenParen
+Caret
 Ident
 CloseParen
 Comma

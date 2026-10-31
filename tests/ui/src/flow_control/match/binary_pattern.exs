@@ -66,6 +66,13 @@ defmodule BinaryPatternTest do
   test "the rest after a sized segment" do
     assert B.split(<<2, 1, 2, 3, 4>>) == {<<1, 2>>, <<3, 4>>}
     assert B.split(<<5, 1>>) == {<<>>, <<>>}
+    assert B.split_scaled(<<1, 2, 3, 4, 5>>, 2, 2) == {<<1, 2, 3, 4>>, <<5>>}
+    assert B.split_scaled(<<1, 2, 3>>, 2, 2) == {<<>>, <<>>}
+  end
+
+  test "a sized binary pattern in a map key" do
+    assert B.sized_map_key(%{<<1::4>> => 7}, 4) == 7
+    assert B.sized_map_key(%{<<1::4>> => 7}, 8) == -1
   end
 
   test "a mutable rest" do

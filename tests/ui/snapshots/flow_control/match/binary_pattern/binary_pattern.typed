@@ -231,6 +231,29 @@ fn split(b: bin)
     } as (bin, bin))
 } as (bin, bin))
 
+// A computation in a size doesn't look like it binds, so its locals don't need
+// one, but they can have one.
+fn split_scaled(b: bin, n: int, k: int)
+    ->
+        (bin,
+        bin) ({
+    (match (b as bin) {
+        <<payload: bin(size = ((n as int) * (k as int) as int)), rest @ ..>>
+            => (((payload as bin), (rest as bin)) as (bin, bin)),
+        _ => (((b"" as bin), (b"" as bin)) as (bin, bin)),
+    } as (bin, bin))
+} as (bin, bin))
+
+fn sized_map_key(m: #{bits => int}, n: int)
+    ->
+        int ({
+    (match (m as #{bits => int}) {
+        #{(<<(1 as int): int(size = (n as int))>> as bits) => v, ..} =>
+            (v as int),
+        _ => (-(1 as int) as int),
+    } as int)
+} as int)
+
 fn rotate(b: bin)
     ->
         bin ({
