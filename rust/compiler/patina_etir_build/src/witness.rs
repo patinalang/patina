@@ -17,8 +17,7 @@ use rustc_hir::def_id::DefId;
 use rustc_index::{IndexVec, newtype_index};
 use rustc_middle::erl::etir::visit::{self, Visitor};
 use rustc_middle::erl::etir::{
-    Body, Callee, ErlFun, Expr, ExprId, ExprKind, FieldIdx, Pat, PatId, PatKind, PatternInput, Var,
-    VarId,
+    Body, Callee, ErlFun, Expr, ExprId, ExprKind, FieldIdx, PatId, PatKind, PatternInput, VarId,
 };
 use rustc_middle::erl::witness::SupertraitIdx;
 use rustc_middle::erl::{ErlCallTarget, ErlModuleResolution};
@@ -30,7 +29,7 @@ use self::resolve::{
     WitnessArgs, WitnessBuildSite, WitnessResolver, WitnessSource, WitnessTuple, witness_params,
 };
 use super::ExprBlock;
-use crate::VarPrefix;
+use crate::{BodyBuildCx, VarPrefix};
 
 mod plan;
 mod resolve;
@@ -114,122 +113,127 @@ impl<'a, 'tcx: 'a> Visitor<'a, 'tcx> for Collect<'a, 'tcx> {
     }
 }
 
-pub(super) fn lower<'tcx>(tcx: TyCtxt<'tcx>, owner: DefId, body: Body<'tcx>) -> Body<'tcx> {
-    let mut resolver = WitnessResolver::new(tcx, owner, WitnessBuildSite::User);
+impl<'tcx> BodyBuildCx<'tcx> {
+    pub(super) fn lower_witnesses(&mut self) {
+        let BodyBuildCx { tcx, owner, ref body } = *self;
+        let mut resolver = WitnessResolver::new(tcx, owner, WitnessBuildSite::User);
 
-    let sites = {
-        let mut collect = Collect {
-            tcx,
-            owner,
-            body: &body,
-            resolver: &mut resolver,
-            sites: FxIndexMap::default(),
+        let sites = {
+            let mut collect = Collect {
+                tcx,
+                owner,
+                body: &body,
+                resolver: &mut resolver,
+                sites: FxIndexMap::default(),
+            };
+            collect.visit_expr_id(&body.value);
+            collect.sites
         };
-        collect.visit_expr_id(&body.value);
-        collect.sites
-    };
 
-    let witnesses = resolver.resolve_witnesses();
+        let witnesses = resolver.resolve_witnesses();
 
-    let mut lower = Lower::new(tcx, owner, body, witnesses, tcx.def_span(owner));
+        let mut lower = Lower::new(self, witnesses, tcx.def_span(owner));
 
-    for (id, (target, witnesses)) in sites {
-        let span = lower.body[id].span;
-        let kind = std::mem::replace(&mut lower.body.exprs[id].kind, ExprKind::Block(Box::new([])));
-        lower.body.exprs[id].kind = match kind {
-            ExprKind::Call { callee: Callee::Item { forced_extern, .. }, args }
-                if witnesses.is_empty() =>
-            {
-                let fun = lower.witnessless_erl_fun(target, args.len() as u32, span);
-                ExprKind::Call { callee: Callee::Fun { fun, forced_extern }, args }
-            }
-            ExprKind::Call { callee: Callee::Item { forced_extern, .. }, args: _ }
-                if lower.is_assoc_const(target) =>
-            {
-                lower.lower_assoc_const(target, &witnesses, span, forced_extern)
-            }
-            ExprKind::Call { callee: Callee::Item { forced_extern, .. }, args } => {
-                lower.lower_call(target, &witnesses, args, span, forced_extern)
-            }
-            ExprKind::FnItem { arity, forced_extern, .. } if witnesses.is_empty() => {
-                let fun = lower.witnessless_erl_fun(target, arity, span);
-                ExprKind::Fun { fun, forced_extern }
-            }
-            ExprKind::FnItem { arity, forced_extern, .. } => {
-                lower.lower_fn_item(target, &witnesses, arity, span, forced_extern)
-            }
-            kind => span_bug!(span, "item site is not an item reference: {kind:?}"),
-        };
+        for (id, (target, witnesses)) in sites {
+            let span = lower.cx.body[id].span;
+            let kind =
+                std::mem::replace(&mut lower.cx.body.exprs[id].kind, ExprKind::Block(Box::new([])));
+
+            lower.cx.body.exprs[id].kind = match kind {
+                ExprKind::Call { callee: Callee::Item { forced_extern, .. }, args }
+                    if witnesses.is_empty() =>
+                {
+                    let fun = lower.witnessless_erl_fun(target, args.len() as u32, span);
+                    ExprKind::Call { callee: Callee::Fun { fun, forced_extern }, args }
+                }
+                ExprKind::Call { callee: Callee::Item { forced_extern, .. }, args: _ }
+                    if lower.is_assoc_const(target) =>
+                {
+                    lower.lower_assoc_const(target, &witnesses, span, forced_extern)
+                }
+                ExprKind::Call { callee: Callee::Item { forced_extern, .. }, args } => {
+                    lower.lower_call(target, &witnesses, args, span, forced_extern)
+                }
+                ExprKind::FnItem { arity, forced_extern, .. } if witnesses.is_empty() => {
+                    let fun = lower.witnessless_erl_fun(target, arity, span);
+                    ExprKind::Fun { fun, forced_extern }
+                }
+                ExprKind::FnItem { arity, forced_extern, .. } => {
+                    lower.lower_fn_item(target, &witnesses, arity, span, forced_extern)
+                }
+                kind => span_bug!(span, "item site is not an item reference: {kind:?}"),
+            };
+        }
+
+        lower.finish();
     }
-    lower.finish()
+
+    pub(super) fn build_witness_constructor(tcx: TyCtxt<'tcx>, owner: DefId, span: Span) -> Self {
+        let mut cx = BodyBuildCx::new(tcx, owner);
+        let mut resolver = WitnessResolver::new(tcx, owner, WitnessBuildSite::WitnessConstructor);
+
+        let trait_ref = tcx.impl_trait_ref(owner).instantiate_identity().skip_normalization();
+        let supertraits = tcx
+            .erl_trait_supertraits(trait_ref.def_id)
+            .iter_instantiated_copied(tcx, trait_ref.args);
+        let supertraits: Vec<_> =
+            supertraits.map(|bound| resolver.require_witness(span, bound)).collect();
+
+        let witnesses = resolver.resolve_witnesses();
+        let mut lower = Lower::new(&mut cx, witnesses, span);
+
+        let supertraits = supertraits
+            .into_iter()
+            .map(|bound| {
+                let node = lower.witness(bound, span);
+                lower.var_nodes[node].expr
+            })
+            .collect();
+
+        let vtable = lower.vtable(owner, trait_ref.def_id, span);
+        let supertraits = lower.expr(ExprKind::Tuple { fields: supertraits }, span);
+        let bounds = match lower.bounds {
+            Some(node) => lower.var_nodes[node].expr,
+            None => lower.expr(ExprKind::Tuple { fields: Box::new([]) }, span),
+        };
+
+        lower.cx.body.value = lower.witness_tuple(vtable, supertraits, bounds, span);
+        lower.finish();
+        cx
+    }
+
+    pub(super) fn build_assoc_type(
+        tcx: TyCtxt<'tcx>,
+        owner: DefId,
+        trait_item: DefId,
+        span: Span,
+    ) -> Self {
+        let mut cx = BodyBuildCx::new(tcx, owner);
+        let args = tcx.erl_trait_item_args_for_impl_item(owner);
+        let bounds = tcx.erl_assoc_type_bounds(trait_item).iter_instantiated_copied(tcx, args);
+
+        let mut resolver = WitnessResolver::new(tcx, owner, WitnessBuildSite::WitnessConstructor);
+        let bounds: Vec<_> = bounds.map(|bound| resolver.require_witness(span, bound)).collect();
+
+        let witnesses = resolver.resolve_witnesses();
+        let mut lower = Lower::new(&mut cx, witnesses, span);
+
+        let bounds = bounds
+            .into_iter()
+            .map(|bound| {
+                let node = lower.witness(bound, span);
+                lower.var_nodes[node].expr
+            })
+            .collect();
+
+        lower.cx.body.value = lower.expr(ExprKind::Tuple { fields: bounds }, span);
+        lower.finish();
+        cx
+    }
 }
 
-pub(super) fn build_witness_constructor<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    owner: DefId,
-    span: Span,
-) -> Body<'tcx> {
-    let mut resolver = WitnessResolver::new(tcx, owner, WitnessBuildSite::WitnessConstructor);
-
-    let trait_ref = tcx.impl_trait_ref(owner).instantiate_identity().skip_normalization();
-    let supertraits =
-        tcx.erl_trait_supertraits(trait_ref.def_id).iter_instantiated_copied(tcx, trait_ref.args);
-    let supertraits: Vec<_> =
-        supertraits.map(|bound| resolver.require_witness(span, bound)).collect();
-
-    let witnesses = resolver.resolve_witnesses();
-    let mut lower = Lower::new(tcx, owner, Body::new(), witnesses, span);
-
-    let supertraits = supertraits
-        .into_iter()
-        .map(|bound| {
-            let node = lower.witness(bound, span);
-            lower.var_nodes[node].expr
-        })
-        .collect();
-
-    let vtable = lower.vtable(owner, trait_ref.def_id, span);
-    let supertraits = lower.expr(ExprKind::Tuple { fields: supertraits }, span);
-    let bounds = match lower.bounds {
-        Some(node) => lower.var_nodes[node].expr,
-        None => lower.expr(ExprKind::Tuple { fields: Box::new([]) }, span),
-    };
-
-    lower.body.value = lower.witness_tuple(vtable, supertraits, bounds, span);
-    lower.finish()
-}
-
-pub(super) fn build_assoc_type<'tcx>(
-    tcx: TyCtxt<'tcx>,
-    owner: DefId,
-    trait_item: DefId,
-    span: Span,
-) -> Body<'tcx> {
-    let args = tcx.erl_trait_item_args_for_impl_item(owner);
-    let bounds = tcx.erl_assoc_type_bounds(trait_item).iter_instantiated_copied(tcx, args);
-
-    let mut resolver = WitnessResolver::new(tcx, owner, WitnessBuildSite::WitnessConstructor);
-    let bounds: Vec<_> = bounds.map(|bound| resolver.require_witness(span, bound)).collect();
-
-    let witnesses = resolver.resolve_witnesses();
-    let mut lower = Lower::new(tcx, owner, Body::new(), witnesses, span);
-
-    let bounds = bounds
-        .into_iter()
-        .map(|bound| {
-            let node = lower.witness(bound, span);
-            lower.var_nodes[node].expr
-        })
-        .collect();
-
-    lower.body.value = lower.expr(ExprKind::Tuple { fields: bounds }, span);
-    lower.finish()
-}
-
-struct Lower<'tcx> {
-    tcx: TyCtxt<'tcx>,
-    owner: DefId,
-    body: Body<'tcx>,
+struct Lower<'a, 'tcx> {
+    cx: &'a mut BodyBuildCx<'tcx>,
     witnesses: FxHashMap<ty::TraitRef<'tcx>, WitnessSource<'tcx>>,
     self_witness: Option<VarNodeId>,
     bounds: Option<VarNodeId>,
@@ -237,18 +241,15 @@ struct Lower<'tcx> {
     var_nodes: IndexVec<VarNodeId, VarNode>,
 }
 
-impl<'tcx> Lower<'tcx> {
+impl<'a, 'tcx> Lower<'a, 'tcx> {
     fn new(
-        tcx: TyCtxt<'tcx>,
-        owner: DefId,
-        body: Body<'tcx>,
+        cx: &'a mut BodyBuildCx<'tcx>,
         witnesses: FxHashMap<ty::TraitRef<'tcx>, WitnessSource<'tcx>>,
         span: Span,
     ) -> Self {
+        let BodyBuildCx { tcx, owner, .. } = *cx;
         let mut lower = Self {
-            tcx,
-            owner,
-            body,
+            cx,
             witnesses,
             self_witness: None,
             bounds: None,
@@ -272,31 +273,33 @@ impl<'tcx> Lower<'tcx> {
             lower.binding_pat(lower.var_nodes[node].var, span)
         });
 
-        lower.body.params =
-            self_bound_pat.into_iter().chain(bounds_pat).chain(lower.body.params).collect();
+        lower.cx.body.params = self_bound_pat
+            .into_iter()
+            .chain(bounds_pat)
+            .chain(std::mem::take(&mut lower.cx.body.params))
+            .collect();
 
         lower
     }
 
-    fn finish(mut self) -> Body<'tcx> {
-        let mut prologue = ExprBlock::default();
-        for node in self.var_nodes.indices() {
-            match self.var_nodes[node].value_source {
-                NodeValueSource::Element => continue,
-                NodeValueSource::Param => {}
-                NodeValueSource::Expr(rhs) => self.bind(&mut prologue, node, rhs),
+    fn finish(mut self) {
+        self.cx.body.value = with_expr_block!(self.cx, |prologue| {
+            for node in self.var_nodes.indices() {
+                match self.var_nodes[node].value_source {
+                    NodeValueSource::Element => continue,
+                    NodeValueSource::Param => {}
+                    NodeValueSource::Expr(rhs) => self.bind(&mut prologue, node, rhs),
+                }
+                // We bind tuple elements in `finish`,
+                // because only now we know which ones are needed.
+                self.bind_tuple_elements(&mut prologue, node)
             }
-            // We bind tuple elements in `finish`, because only now we know which ones are needed.
-            self.bind_tuple_elements(&mut prologue, node)
-        }
-
-        let value = self.body.value;
-        self.body.value = prologue.emit(&mut self.body, value);
-        self.body
+            self.cx.body.value
+        });
     }
 
     fn vtable(&mut self, impl_def_id: DefId, trait_def_id: DefId, span: Span) -> ExprId {
-        let tcx = self.tcx;
+        let tcx = self.cx.tcx;
         let implementors = tcx.impl_item_implementor_ids(impl_def_id);
 
         let fields = tcx
@@ -321,24 +324,24 @@ impl<'tcx> Lower<'tcx> {
     }
 
     fn expr(&mut self, kind: ExprKind<'tcx>, span: Span) -> ExprId {
-        self.body.exprs.push(Expr { kind, ty: self.tcx.types.term, span })
+        self.cx.push_expr(kind, self.cx.tcx.types.term, span)
     }
 
     fn binding_pat(&mut self, var: VarId, span: Span) -> PatId {
-        self.body.pats.push(Pat {
-            kind: PatKind::Binding {
+        self.cx.push_pat(
+            PatKind::Binding {
                 var,
                 is_primary: true,
                 subpattern: None,
                 input: PatternInput::Typed,
             },
-            ty: self.tcx.types.term,
+            self.cx.tcx.types.term,
             span,
-        })
+        )
     }
 
     fn var_node(&mut self, name: Symbol, source: NodeValueSource, span: Span) -> VarNodeId {
-        let var = self.body.vars.push(Var { ident: Ident::new(name, span) });
+        let var = self.cx.push_var(Ident::new(name, span));
         let value = self.expr(ExprKind::Var(var), span);
         self.var_nodes.push(VarNode {
             var,
@@ -385,19 +388,20 @@ impl<'tcx> Lower<'tcx> {
     }
 
     fn witness_node(&mut self, bound: ty::TraitRef<'tcx>, span: Span) -> VarNodeId {
-        let name = VarPrefix::Witness.to_name(self.tcx, bound.def_id);
+        let tcx = self.cx.tcx;
+        let name = VarPrefix::Witness.to_name(tcx, bound.def_id);
         match self.witnesses[&bound].clone() {
             WitnessSource::SelfParam => self.self_witness.unwrap(),
             WitnessSource::Element(tuple_source, index) => {
                 let tuple = match tuple_source {
                     WitnessTuple::ItemBounds => self.bounds.unwrap(),
                     WitnessTuple::ImplWhereClauses => {
-                        let name = VarPrefix::Where.to_name(self.tcx, self.tcx.parent(self.owner));
+                        let name = VarPrefix::Where.to_name(tcx, tcx.parent(self.cx.owner));
                         self.element(self.self_witness.unwrap(), WHERE_CLAUSES_INDEX, name, span)
                     }
                     WitnessTuple::Supertraits { of: of_bound } => {
                         let of = self.witness(of_bound, span);
-                        let name = VarPrefix::Supertraits.to_name(self.tcx, of_bound.def_id);
+                        let name = VarPrefix::Supertraits.to_name(tcx, of_bound.def_id);
                         self.element(of, SUPERTRAITS_INDEX, name, span)
                     }
                     WitnessTuple::AssocTypeBounds { of, assoc_def_id, bounds } => {
@@ -484,22 +488,22 @@ impl<'tcx> Lower<'tcx> {
         where_clauses: Vec<VarNodeId>,
         span: Span,
     ) -> ExprId {
+        let tcx = self.cx.tcx;
         let args = if where_clauses.is_empty() {
             Box::default()
         } else {
-            let name = VarPrefix::WitnessesWhere.to_name(self.tcx, impl_def_id);
+            let name = VarPrefix::WitnessesWhere.to_name(tcx, impl_def_id);
             let tuple = self.tuple(where_clauses, name, span);
             Box::from_iter([self.var_nodes[tuple].expr])
         };
 
-        let host = self
-            .tcx
+        let host = tcx
             .erl_definition_module(impl_def_id)
             .unwrap_or_else(|| span_bug!(span, "impl {impl_def_id:?} has no witness host"));
 
         let fun = ErlFun {
             module: ErlModuleResolution::Static(host),
-            name: self.tcx.erl_impl_member_name(impl_def_id, "$patina_witness"),
+            name: tcx.erl_impl_member_name(impl_def_id, "$patina_witness"),
             arity: args.len() as u32,
         };
 
@@ -514,10 +518,11 @@ impl<'tcx> Lower<'tcx> {
         bounds: Vec<VarNodeId>,
         span: Span,
     ) -> VarNodeId {
+        let tcx = self.cx.tcx;
         let key = VarNodeKey::AssocTypeBounds { of, def_id, bounds: bounds.clone().into() };
         self.intern(key, |lower| {
             let bounds = (!bounds.is_empty()).then(|| {
-                let name = VarPrefix::WitnessesWhere.to_name(lower.tcx, def_id);
+                let name = VarPrefix::WitnessesWhere.to_name(tcx, def_id);
                 lower.tuple(bounds, name, span)
             });
             let args: Box<[_]> =
@@ -528,26 +533,26 @@ impl<'tcx> Lower<'tcx> {
 
             let expr = lower.expr(ExprKind::Call { callee, args }, span);
 
-            let name = VarPrefix::Where.to_name(lower.tcx, lower.tcx.parent(def_id));
+            let name = VarPrefix::Where.to_name(tcx, tcx.parent(def_id));
             lower.var_node(name, NodeValueSource::Expr(expr), span)
         })
     }
 
     fn dispatch(&mut self, witness: VarNodeId, item: DefId, span: Span) -> VarNodeId {
-        let trait_def_id = self.tcx.parent(item);
-        let (slot, entry) = self
-            .tcx
+        let tcx = self.cx.tcx;
+        let trait_def_id = tcx.parent(item);
+        let (slot, entry) = tcx
             .erl_vtable_items(trait_def_id)
             .enumerate()
             .find(|(_, entry)| entry.def_id == item)
             .unwrap_or_else(|| span_bug!(span, "{item:?} has no vtable slot"));
         let slot_name = match entry.kind {
-            ty::AssocKind::Fn { .. } => VarPrefix::Fn.to_name(self.tcx, item),
-            ty::AssocKind::Type { .. } => VarPrefix::Type.to_name(self.tcx, item),
-            ty::AssocKind::Const { .. } => VarPrefix::ConstFn.to_name(self.tcx, item),
+            ty::AssocKind::Fn { .. } => VarPrefix::Fn.to_name(tcx, item),
+            ty::AssocKind::Type { .. } => VarPrefix::Type.to_name(tcx, item),
+            ty::AssocKind::Const { .. } => VarPrefix::ConstFn.to_name(tcx, item),
         };
 
-        let vtable_name = VarPrefix::Vtable.to_name(self.tcx, trait_def_id);
+        let vtable_name = VarPrefix::Vtable.to_name(tcx, trait_def_id);
         let vtable = self.element(witness, VTABLE_INDEX, vtable_name, span);
         self.element(vtable, slot, slot_name, span)
     }
@@ -564,10 +569,11 @@ impl<'tcx> Lower<'tcx> {
         target: ErlCallTarget<'tcx>,
         span: Span,
     ) -> (Option<ErlModuleResolution>, Symbol) {
-        let module = self.tcx.erl_module_for_target(self.owner, target);
+        let tcx = self.cx.tcx;
+        let module = tcx.erl_module_for_target(self.cx.owner, target);
         let name = match target {
-            ErlCallTarget::Item { def_id, .. } => self.tcx.erl_fn_name(def_id),
-            ErlCallTarget::Extern { function, .. } => self.tcx.item_name(function),
+            ErlCallTarget::Item { def_id, .. } => tcx.erl_fn_name(def_id),
+            ErlCallTarget::Extern { function, .. } => tcx.item_name(function),
             ErlCallTarget::Constructor { .. } | ErlCallTarget::Dynamic => {
                 span_bug!(span, "item reference to {target:?}")
             }
@@ -591,7 +597,7 @@ impl<'tcx> Lower<'tcx> {
             let fields = witnesses.bounds.iter().map(|&bound| self.witness(bound, span)).collect();
             let name = match target {
                 ErlCallTarget::Item { def_id, .. } => {
-                    VarPrefix::WitnessesWhere.to_name(self.tcx, def_id)
+                    VarPrefix::WitnessesWhere.to_name(self.cx.tcx, def_id)
                 }
                 _ => sym::witnesses_where,
             };
@@ -621,7 +627,7 @@ impl<'tcx> Lower<'tcx> {
         matches!(
             target,
             ErlCallTarget::Item { def_id, .. }
-                if matches!(self.tcx.def_kind(def_id), DefKind::AssocConst { .. })
+                if matches!(self.cx.tcx.def_kind(def_id), DefKind::AssocConst { .. })
         )
     }
 
@@ -637,7 +643,7 @@ impl<'tcx> Lower<'tcx> {
         let node = self.intern(VarNodeKey::AssocConst { def_id, args }, |lower| {
             let call_kind = lower.lower_call(target, witnesses, Box::new([]), span, forced_extern);
             let call = lower.expr(call_kind, span);
-            let name = VarPrefix::Const.to_name(lower.tcx, def_id);
+            let name = VarPrefix::Const.to_name(lower.cx.tcx, def_id);
             lower.var_node(name, NodeValueSource::Expr(call), span)
         });
         ExprKind::Var(self.var_nodes[node].var)
@@ -654,7 +660,7 @@ impl<'tcx> Lower<'tcx> {
     ) -> ExprKind<'tcx> {
         let (params, args): (Vec<_>, Vec<_>) = (0..arity)
             .map(|_| {
-                let var = self.body.vars.push(Var { ident: Ident::new(sym::arg, span) });
+                let var = self.cx.push_var(Ident::new(sym::arg, span));
                 (self.binding_pat(var, span), self.expr(ExprKind::Var(var), span))
             })
             .collect();

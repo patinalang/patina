@@ -1,0 +1,22 @@
+error[E0391]: cycle detected when building the Erlang translation IR of `A`
+  --> tests/ui/src/primitives/errors/const_pattern_cycle.pt:1:1
+   |
+LL | const A: int = match 1 {
+   | ^^^^^^^^^^^^
+   |
+note: ...which requires building the Erlang translation IR of `B`...
+  --> tests/ui/src/primitives/errors/const_pattern_cycle.pt:5:1
+   |
+LL | const B: int = A + 1;
+   | ^^^^^^^^^^^^
+   = note: ...which again requires building the Erlang translation IR of `A`, completing the cycle
+note: cycle used when building the Erlang translation IR of `a`
+  --> tests/ui/src/primitives/errors/const_pattern_cycle.pt:7:1
+   |
+LL | pub fn a() -> int {
+   | ^^^^^^^^^^^^^^^^^
+   = note: see https://rustc-dev-guide.rust-lang.org/overview.html#queries and https://rustc-dev-guide.rust-lang.org/query.html for more information
+
+error: aborting due to 1 previous error
+
+For more information about this error, try `rustc --explain E0391`.

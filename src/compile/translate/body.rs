@@ -146,6 +146,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             ExprKind::Closure { ref params, body } => self.translate_closure(span, params, body),
 
             ExprKind::FnItem { .. } => span_bug!(span, "FnItem in lowered ETIR"),
+            ExprKind::Const { .. } => span_bug!(span, "Const in lowered ETIR"),
 
             ExprKind::Fun { ref fun, forced_extern } => {
                 self.translate_fun(expr, fun, forced_extern)
@@ -842,6 +843,8 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             }
 
             PatKind::Pin { var } => self.translate_pin_var_ref(pat.span, var).into(),
+
+            PatKind::Const { .. } => span_bug!(pat.span, "Const in lowered ETIR"),
 
             PatKind::Assignee { var } => self.translate_assignee(pat.span, var).into(),
 

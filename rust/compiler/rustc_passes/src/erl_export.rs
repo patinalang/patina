@@ -40,7 +40,9 @@ impl<'tcx> ExternalCallVisitor<'_, 'tcx> {
             return;
         };
 
-        if self.tcx.is_erl_cross_module_call(self.owner, callee_module) == Some(true) {
+        if self.tcx.has_inline_attr(self.tcx.typeck_root_def_id(self.owner))
+            || self.tcx.is_erl_cross_module_call(self.owner, callee_module) == Some(true)
+        {
             self.called_externally.insert((callee_module, def_id));
         }
     }

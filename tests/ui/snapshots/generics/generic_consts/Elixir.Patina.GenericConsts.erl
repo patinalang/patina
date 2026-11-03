@@ -34,10 +34,8 @@ quadrupled() ->
         'Elixir.Patina.GenericConsts.$impl.Core.Int':'GenericConsts::Konst::$patina_witness'(),
     _const_Konst_K@1_0 =
         'Elixir.Patina.GenericConsts.$impl.Core.Int':'GenericConsts::Konst::$patina_const::K'(_witness_Konst@0_0),
-    _const_QUADRUPLED@3_0 = begin
-                                _const_DOUBLED@2_0 = _const_Konst_K@1_0 * 2,
-                                _const_DOUBLED@2_0 * 2
-                            end,
+    _const_DOUBLED@2_0 = _const_Konst_K@1_0 * 2,
+    _const_QUADRUPLED@3_0 = _const_DOUBLED@2_0 * 2,
     _const_QUADRUPLED@3_0.
 
 none() -> [].

@@ -6,8 +6,5 @@ LL | fn foo() -> ! {
    |
    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
 
-warning: [{"tests/ui/src/fn/diverging__01.pt",
-           [{{4,1},erl_lint,{unused_function,{foo,0}}}]}]
-
-warning: 2 warnings emitted
+warning: 1 warning emitted
 

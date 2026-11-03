@@ -1,24 +1,31 @@
 use std::fmt::Debug;
 
-use rustc_data_structures::fx::{FxHashMap, FxIndexMap};
+use rustc_data_structures::fx::FxHashMap;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{DefId, LocalDefId};
 use rustc_middle::erl::ErlReprKind;
 use rustc_middle::erl::etir::{self, ExprId, JoinId, LoopId, PatId, PatternInput, VarId};
 use rustc_middle::middle::region;
 use rustc_middle::thir::{LocalVarId, Thir};
-use rustc_middle::ty::{self, GenericArgsRef, Ty, TyCtxt};
+use rustc_middle::ty::{self, Ty, TyCtxt};
 use rustc_middle::util::Providers;
 use rustc_middle::{bug, span_bug};
 use rustc_span::{Ident, Span, Symbol};
 
+macro_rules! with_expr_block {
+    ($cx:expr, |$block:ident| $body:block) => {{
+        let mut $block = $crate::ExprBlock::default();
+        let result = (|| $body)();
+        $block.emit(&mut $cx.body, result)
+    }};
+}
+
 mod assigned_outer_vars;
 mod expr;
 mod graft;
+mod inline;
 mod pat;
 mod witness;
-
-use expr::with_expr_block;
 
 /// Some expressions that we translate result in a whole block being emitted.
 /// This helper structure collects additional exprs that should be emitted before
@@ -42,42 +49,83 @@ impl ExprBlock {
             })
         }
     }
+
+    /// Emits an assignment of `rhs` to the pattern `lhs`.
+    fn assign<'tcx>(&mut self, cx: &mut BodyBuildCx<'tcx>, lhs: PatId, rhs: ExprId) {
+        let etir::Expr { ty, span, kind: _ } = cx.body[rhs];
+        let assign_expr = cx.push_expr(etir::ExprKind::Assign { lhs, rhs }, ty, span);
+        self.0.push(assign_expr);
+    }
+
+    /// Emits an assignment of `value` to a `var`.
+    fn bind<'tcx>(&mut self, cx: &mut BodyBuildCx<'tcx>, var: VarId, value: ExprId) {
+        let etir::Expr { ty, span, kind: _ } = cx.body[value];
+
+        let binding = cx.push_pat(
+            etir::PatKind::Binding {
+                var,
+                is_primary: true,
+                subpattern: None,
+                input: PatternInput::Typed,
+            },
+            ty,
+            span,
+        );
+
+        self.assign(cx, binding, value);
+    }
 }
 
 struct BodyBuildCx<'tcx> {
     tcx: TyCtxt<'tcx>,
-    typing_env: ty::TypingEnv<'tcx>,
+    owner: DefId,
     body: etir::Body<'tcx>,
-    var_ids: FxHashMap<LocalVarId, VarId>,
-    break_joins: FxHashMap<region::Scope, JoinId>,
-    continue_joins: FxHashMap<region::Scope, JoinId>,
-    reassign_count: usize,
-    const_vars: FxIndexMap<(DefId, GenericArgsRef<'tcx>), (VarId, etir::Body<'tcx>)>,
+}
+
+impl<'tcx> BodyBuildCx<'tcx> {
+    fn new(tcx: TyCtxt<'tcx>, owner: DefId) -> Self {
+        BodyBuildCx { tcx, owner, body: etir::Body::new() }
+    }
+
+    fn push_expr(&mut self, kind: etir::ExprKind<'tcx>, ty: Ty<'tcx>, span: Span) -> ExprId {
+        self.body.exprs.push(etir::Expr { kind, ty, span })
+    }
+
+    fn push_pat(&mut self, kind: etir::PatKind<'tcx>, ty: Ty<'tcx>, span: Span) -> PatId {
+        self.body.pats.push(etir::Pat { kind, ty, span })
+    }
+
+    fn push_var(&mut self, ident: Ident) -> VarId {
+        self.body.vars.push(etir::Var { ident })
+    }
 }
 
 pub(crate) fn etir_body<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId) -> &'tcx etir::Body<'tcx> {
-    match tcx.def_kind(def_id) {
+    let owner = def_id.to_def_id();
+
+    let cx = match tcx.def_kind(def_id) {
         DefKind::Impl { .. } => {
             let span = tcx.hir_expect_item(def_id).expect_impl().self_ty.span;
-            let body = witness::build_witness_constructor(tcx, def_id.to_def_id(), span);
-            return tcx.arena.alloc(body);
+            BodyBuildCx::build_witness_constructor(tcx, owner, span)
         }
         DefKind::AssocTy => {
             let span = tcx.def_span(def_id);
             let trait_item = tcx
                 .trait_item_of(def_id)
                 .unwrap_or_else(|| span_bug!(span, "associated type witness outside a trait impl"));
-            let body = witness::build_assoc_type(tcx, def_id.to_def_id(), trait_item, span);
-            return tcx.arena.alloc(body);
+            BodyBuildCx::build_assoc_type(tcx, owner, trait_item, span)
         }
-        _ => {}
-    }
+        _ => {
+            let body = tcx.etir_template(def_id).clone();
+            let mut cx = BodyBuildCx { tcx, owner, body };
+            cx.inline();
+            cx.lower_witnesses();
+            cx.analyze_assigned_outer_vars();
+            cx
+        }
+    };
 
-    let body = tcx.etir_template(def_id).clone();
-    let mut body = witness::lower(tcx, def_id.to_def_id(), body);
-    assigned_outer_vars::analyze(&mut body);
-
-    tcx.arena.alloc(body)
+    tcx.arena.alloc(cx.body)
 }
 
 pub(crate) fn etir_template<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId) -> &'tcx etir::Body<'tcx> {
@@ -85,18 +133,9 @@ pub(crate) fn etir_template<'tcx>(tcx: TyCtxt<'tcx>, def_id: LocalDefId) -> &'tc
         bug!("{def_id:?} child has no ETIR body");
     }
 
-    let mut cx = BodyBuildCx {
-        tcx,
-        typing_env: ty::TypingEnv::post_analysis(tcx, def_id),
-        body: etir::Body::new(),
-        var_ids: FxHashMap::default(),
-        break_joins: FxHashMap::default(),
-        continue_joins: FxHashMap::default(),
-        const_vars: FxIndexMap::default(),
-        reassign_count: 0,
-    };
-
-    let (params, value) = ThirBodyCx::lower(&mut cx, def_id);
+    let mut cx = BodyBuildCx::new(tcx, def_id.to_def_id());
+    let mut var_ids = FxHashMap::default();
+    let (params, value) = ThirBodyCx::lower(&mut cx, &mut var_ids, def_id);
 
     cx.body.params = params;
     cx.body.value = value;
@@ -109,14 +148,31 @@ struct ThirBodyCx<'a, 'tcx> {
     owner: LocalDefId,
     thir: &'a Thir<'tcx>,
     return_join: Option<JoinId>,
+    break_joins: FxHashMap<region::Scope, JoinId>,
+    continue_joins: FxHashMap<region::Scope, JoinId>,
+    var_ids: &'a mut FxHashMap<LocalVarId, VarId>,
+    reassign_count: usize,
 }
 
 impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
-    fn lower(cx: &mut BodyBuildCx<'tcx>, owner: LocalDefId) -> (Box<[PatId]>, ExprId) {
+    fn lower(
+        cx: &mut BodyBuildCx<'tcx>,
+        var_ids: &mut FxHashMap<LocalVarId, VarId>,
+        owner: LocalDefId,
+    ) -> (Box<[PatId]>, ExprId) {
         let (thir, root) = cx.tcx.thir_body(owner).unwrap_or_else(|guar| guar.raise_fatal());
         let thir = thir.borrow();
 
-        let mut cx = ThirBodyCx { cx, owner, thir: &thir, return_join: None };
+        let mut cx = ThirBodyCx {
+            cx,
+            owner,
+            thir: &thir,
+            return_join: None,
+            break_joins: FxHashMap::default(),
+            continue_joins: FxHashMap::default(),
+            var_ids,
+            reassign_count: 0,
+        };
 
         let params = thir
             .params
@@ -135,28 +191,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         let value = cx.lower_expr(root);
         let value = cx.wrap_in_joins(cx.return_join, value);
 
-        let value = if cx.cx.tcx.is_typeck_child(owner.to_def_id()) {
-            // This thir body is inline in another thir body.
-            // We'll bind the constants in the parent.
-            value
-        } else {
-            let const_vars = std::mem::take(&mut cx.cx.const_vars);
-            cx.bind_consts(const_vars, value)
-        };
-
         (params, value)
-    }
-
-    fn push_expr(&mut self, kind: etir::ExprKind<'tcx>, ty: Ty<'tcx>, span: Span) -> ExprId {
-        self.cx.body.exprs.push(etir::Expr { kind, ty, span })
-    }
-
-    fn push_pat(&mut self, kind: etir::PatKind<'tcx>, ty: Ty<'tcx>, span: Span) -> PatId {
-        self.cx.body.pats.push(etir::Pat { kind, ty, span })
-    }
-
-    fn push_var(&mut self, ident: Ident) -> VarId {
-        self.cx.body.vars.push(etir::Var { ident })
     }
 
     fn push_loop(&mut self) -> LoopId {
@@ -169,36 +204,6 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         self.cx.body.joins.push(etir::Join { body, value, params: Box::new([]) })
     }
 
-    fn bind_consts(
-        &mut self,
-        const_vars: FxIndexMap<(DefId, GenericArgsRef<'tcx>), (VarId, etir::Body<'tcx>)>,
-        tail_value: ExprId,
-    ) -> ExprId {
-        with_expr_block!(self, |prelude| {
-            for ((_def_id, args), (var, const_body)) in const_vars {
-                let rhs = self.cx.graft(const_body, args);
-                prelude.bind(self, var, rhs)
-            }
-            tail_value
-        })
-    }
-
-    fn const_var(
-        &mut self,
-        span: Span,
-        def_id: DefId,
-        const_body: &etir::Body<'tcx>,
-        args: GenericArgsRef<'tcx>,
-    ) -> VarId {
-        if let Some(&(var, _)) = self.cx.const_vars.get(&(def_id, args)) {
-            return var;
-        }
-        let name = VarPrefix::Const.to_name(self.cx.tcx, def_id);
-        let var = self.push_var(Ident::new(name, span));
-        self.cx.const_vars.insert((def_id, args), (var, const_body.clone()));
-        var
-    }
-
     fn wrap_in_joins<I>(&mut self, joins: I, body: ExprId) -> ExprId
     where
         I: IntoIterator<Item = JoinId>,
@@ -206,16 +211,16 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
     {
         joins.into_iter().rev().fold(body, |body, join| {
             let etir::Expr { ty, span, kind: _ } = self.cx.body[body];
-            self.push_expr(etir::ExprKind::Join { join, body }, ty, span)
+            self.cx.push_expr(etir::ExprKind::Join { join, body }, ty, span)
         })
     }
 
     fn var(&mut self, id: LocalVarId) -> VarId {
-        if let Some(&var) = self.cx.var_ids.get(&id) {
+        if let Some(&var) = self.var_ids.get(&id) {
             return var;
         }
-        let var = self.push_var(self.cx.tcx.hir_ident(id.0));
-        self.cx.var_ids.insert(id, var);
+        let var = self.cx.push_var(self.cx.tcx.hir_ident(id.0));
+        self.var_ids.insert(id, var);
         var
     }
 
@@ -246,9 +251,9 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
     }
 
     fn track_reassigns<T>(&mut self, f: impl FnOnce(&mut Self) -> T) -> (T, bool) {
-        let prev = self.cx.reassign_count;
+        let prev = self.reassign_count;
         let result = f(self);
-        let reassigned = self.cx.reassign_count != prev;
+        let reassigned = self.reassign_count != prev;
         (result, reassigned)
     }
 }

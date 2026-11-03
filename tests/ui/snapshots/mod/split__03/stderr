@@ -1,5 +1,0 @@
-warning: [{"tests/ui/src/mod/split__03.pt",
-           [{{9,1},erl_lint,{unused_function,{private_function,0}}}]}]
-
-warning: 1 warning emitted
-

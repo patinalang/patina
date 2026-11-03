@@ -10,7 +10,12 @@
 -define(MACRO_TIMEOUT, timer:seconds(?MACRO_TIMEOUT_SECONDS)).
 
 -define(COMPILE_OPTS, [
-    binary, return, nowarn_opportunistic, nowarn_underscore_match, nowarn_shadow_vars
+    binary,
+    return,
+    nowarn_opportunistic,
+    nowarn_underscore_match,
+    nowarn_shadow_vars,
+    nowarn_unused_function
 ]).
 
 start_link(SockPath) ->

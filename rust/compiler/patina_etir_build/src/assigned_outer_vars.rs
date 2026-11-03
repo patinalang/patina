@@ -5,24 +5,29 @@ use rustc_middle::erl::etir::{
     Body, CatchArm, Expr, ExprId, ExprKind, JoinId, LoopId, Pat, PatId, PatKind, VarId,
 };
 
-/// Analyzes which parameters have to be passed in to loop helpers / joins, and which vars have
-/// to be returned out of loop helpers.
-/// Fills in `etir::Loop.reassigned` and `etir::Join.params`.
-pub(super) fn analyze(body: &mut Body<'_>) {
-    let mut captures = Captures {
-        body,
-        used: FxIndexMap::default(),
-        bound: FxHashSet::default(),
-        loop_reassigned: IndexVec::from_elem_n(Box::default(), body.loops.len()),
-        join_params: IndexVec::from_elem_n(Box::default(), body.joins.len()),
-    };
-    captures.visit_expr_id(&body.value);
-    let Captures { loop_reassigned, join_params, .. } = captures;
-    for (loop_, reassigned) in body.loops.iter_mut().zip(loop_reassigned) {
-        loop_.reassigned = reassigned;
-    }
-    for (join, params) in body.joins.iter_mut().zip(join_params) {
-        join.params = params;
+use crate::BodyBuildCx;
+
+impl BodyBuildCx<'_> {
+    /// Analyzes which parameters have to be passed in to loop helpers / joins, and which vars have
+    /// to be returned out of loop helpers.
+    /// Fills in `etir::Loop.reassigned` and `etir::Join.params`.
+    pub(super) fn analyze_assigned_outer_vars(&mut self) {
+        let body = &mut self.body;
+        let mut captures = Captures {
+            body,
+            used: FxIndexMap::default(),
+            bound: FxHashSet::default(),
+            loop_reassigned: IndexVec::from_elem_n(Box::default(), body.loops.len()),
+            join_params: IndexVec::from_elem_n(Box::default(), body.joins.len()),
+        };
+        captures.visit_expr_id(&body.value);
+        let Captures { loop_reassigned, join_params, .. } = captures;
+        for (loop_, reassigned) in body.loops.iter_mut().zip(loop_reassigned) {
+            loop_.reassigned = reassigned;
+        }
+        for (join, params) in body.joins.iter_mut().zip(join_params) {
+            join.params = params;
+        }
     }
 }
 

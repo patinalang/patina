@@ -162,6 +162,7 @@ macro_rules! make_walkers {
                 }
                 Literal(_, _) => {}
                 Var(var) => visitor.visit_var_id(var),
+                Const { def_id: _, args } => visitor.visit_args(args),
                 List { items, tail } => {
                     if let Some(tail) = tail {
                         visitor.visit_expr_id(tail);
@@ -322,6 +323,7 @@ macro_rules! make_walkers {
                     }
                 }
                 Pin { var } | Assignee { var } => visitor.visit_var_id(var),
+                Const { def_id: _, args } => visitor.visit_args(args),
                 TermClass { class: _, subpattern } => visitor.visit_pat_id(subpattern),
                 Tuple { fields } => {
                     for field in fields {

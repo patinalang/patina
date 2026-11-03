@@ -634,6 +634,12 @@ impl<'tcx> TyCtxt<'tcx> {
         matches!(self.def_kind(def_id), DefKind::Ctor(..))
     }
 
+    /// Returns `true` if `def_id` is annotated with `#[inline]`
+    /// and `false` otherwise.
+    pub fn has_inline_attr(self, def_id: DefId) -> bool {
+        find_attr!(self, def_id, Inline(..))
+    }
+
     /// Given the `DefId`, returns the `DefId` of the innermost item that
     /// has its own type-checking context or "inference environment".
     ///

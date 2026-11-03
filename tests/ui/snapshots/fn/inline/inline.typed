@@ -1,0 +1,302 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+#[attr = Inline(Hint)]
+fn add(a: int, b: int) -> int ({ ((a as int) + (b as int) as int) } as int)
+
+fn inlines_free_fn()
+    ->
+        int ({
+    ((add as fn(int, int) -> int {add})((1 as int), (2 as int)) as int)
+} as int)
+
+#[attr = Inline(Hint)]
+fn swap((a, b): (int, int))
+    -> (int, int) ({ (((b as int), (a as int)) as (int, int)) } as (int, int))
+
+fn binds_pattern_param()
+    ->
+        (int,
+        int) ({
+    ((swap as
+            fn((int, int)) -> (int, int) {swap})((((1 as int), (2 as int)) as
+            (int, int))) as (int, int))
+} as (int, int))
+
+#[attr = Inline(Hint)]
+fn add_twice(a: int, b: int)
+    ->
+        int ({
+    ((add as
+            fn(int, int) -> int {add})(((add as
+                fn(int, int) -> int {add})((a as int), (b as int)) as int),
+        (b as int)) as int)
+} as int)
+
+fn inlines_nested_inline_calls()
+    ->
+        int ({
+    ((add_twice as fn(int, int) -> int {add_twice})((1 as int), (2 as int)) as
+        int)
+} as int)
+
+fn inlines_each_call_separately()
+    ->
+        int ({
+    (((add as fn(int, int) -> int {add})((1 as int), (2 as int)) as int) *
+        ((add as fn(int, int) -> int {add})((3 as int), (4 as int)) as int) as
+        int)
+} as int)
+
+#[attr = Inline(Hint)]
+fn clamp(x: int)
+    ->
+        int ({
+    (if ((x as int) > (10 as int) as bool) { (return (10 as int) as !); } as
+        ())
+    (x as int)
+} as int)
+
+fn return_leaves_only_the_copy(x: int)
+    ->
+        int ({
+    (((clamp as fn(int) -> int {clamp})((x as int)) as int) + (1 as int) as
+        int)
+} as int)
+
+#[attr = Inline(Hint)]
+fn sum_to(n: int)
+    ->
+        int ({
+    let mut total = (0 as int);
+    ({
+        let _t =
+            (match ((into_iter as
+                        fn(Core::Range<int>) -> <Core::Range<int> as Core::IntoIterator>::IntoIter {<Core::Range<int> as Core::IntoIterator>::into_iter})((Range {
+                        start: (0 as int), end: (n as int) } as Core::Range<int>))
+                    as Core::Range<int>) {
+                mut iter =>
+                    (loop {
+                        (match ((next as
+                                    fn(Core::Range<int>) -> Core::Option<(<Core::Range<int> as Core::Iterator>::Item, Core::Range<int>)> {<Core::Range<int> as Core::Iterator>::next})((iter
+                                    as Core::Range<int>)) as
+                                Core::Option<(int, Core::Range<int>)>) {
+                            None {} => (break as !),
+                            Some {  0: (i, next) } => {
+                                (iter = (next as Core::Range<int>) as Core::Range<int>);
+                                ({ ((total as int) += (i as int) as int); } as ())
+                            }
+                        } as ())
+                    } as ()),
+            } as ());
+        _t
+    } as ());
+    (total as int)
+} as int)
+
+fn inlines_loop()
+    ->
+        int ({ ((sum_to as fn(int) -> int {sum_to})((4 as int)) as int) } as
+    int)
+
+#[attr = Inline(Hint)]
+fn adder(n: int)
+    ->
+        fn(int)
+            ->
+                int ({
+    (|x| ((x as int) + (n as int) as int) as
+        {closure@tests/ui/src/fn/inline.pt:59:5: 59:8})
+} as fn(int) -> int)
+
+fn inlines_closure()
+    ->
+        int ({
+    (((adder as fn(int) -> fn(int) -> int {adder})((1 as int)) as
+            fn(int) -> int)((2 as int)) as int)
+} as int)
+
+#[attr = Inline(Hint)]
+fn countdown(n: int)
+    ->
+        int ({
+    (if ((n as int) == (0 as int) as bool) {
+        (0 as int)
+    } else {
+        (((countdown as
+                    fn(int) -> int {countdown})(((n as int) - (1 as int) as
+                    int)) as int) + (1 as int) as int)
+    } as int)
+} as int)
+
+fn recursion_inlines_once()
+    ->
+        int ({
+    ((countdown as fn(int) -> int {countdown})((3 as int)) as int)
+} as int)
+
+fn fn_item_value_stays_reference()
+    ->
+        fn(int, int)
+            ->
+                int ({ (add as fn(int, int) -> int {add}) } as
+    fn(int, int) -> int)
+
+fn call_through_fn_item_inlines()
+    ->
+        int ({
+    let f = (add as fn(int, int) -> int {add});
+    ((f as fn(int, int) -> int {add})((5 as int), (6 as int)) as int)
+} as int)
+
+trait Shape {
+    fn area(self)
+    -> int;
+
+    #[attr = Inline(Hint)]
+    fn double_area(self)
+        ->
+            int ({ (((self as Self).area() as int) * (2 as int) as int) } as
+        int)
+}
+
+struct Square(int);
+
+impl Shape for Square {
+    #[attr = Inline(Hint)]
+    fn area(self)
+        ->
+            int ({
+        (((self as Square).0 as int) * ((self as Square).0 as int) as int)
+    } as int)
+}
+
+impl Square {
+    #[attr = Inline(Hint)]
+    fn side(self) -> int ({ ((self as Square).0 as int) } as int)
+}
+
+fn inlines_inherent_method()
+    ->
+        int ({
+    (((Square as fn(int) -> Square {Square})((3 as int)) as Square).side() as
+        int)
+} as int)
+
+fn inlines_impl_method()
+    ->
+        int ({
+    (((Square as fn(int) -> Square {Square})((3 as int)) as Square).area() as
+        int)
+} as int)
+
+fn inlines_default_method()
+    ->
+        int ({
+    (((Square as fn(int) -> Square {Square})((3 as int)) as
+            Square).double_area() as int)
+} as int)
+
+struct Circle(int);
+
+impl Shape for Circle {
+    fn area(self)
+        ->
+            int ({
+        ((((self as Circle).0 as int) * ((self as Circle).0 as int) as int) *
+            (3 as int) as int)
+    } as int)
+}
+
+fn copy_calls_impl_method_statically()
+    ->
+        int ({
+    (((Circle as fn(int) -> Circle {Circle})((1 as int)) as
+            Circle).double_area() as int)
+} as int)
+
+#[attr = Inline(Hint)]
+fn area_of<T>(shape: T) -> int where
+    T: Shape ({ ((shape as T).area() as int) } as int)
+
+fn copy_inlines_resolved_trait_method()
+    ->
+        int ({
+    ((area_of as
+            fn(Square) -> int {area_of::<Square>})(((Square as
+                fn(int) -> Square {Square})((4 as int)) as Square)) as int)
+} as int)
+
+fn generic_caller<T>(shape: T) -> int where
+    T: Shape ({
+    ((area_of as fn(T) -> int {area_of::<T>})((shape as T)) as int)
+} as int)
+
+fn generic_caller_dispatches_through_witness()
+    ->
+        int ({
+    ((generic_caller as
+            fn(Square) -> int {generic_caller::<Square>})(((Square as
+                fn(int) -> Square {Square})((5 as int)) as Square)) as int)
+} as int)
+
+fn area_plus_one<T>(shape: T) -> int where
+    T: Shape ({ (((shape as T).area() as int) + (1 as int) as int) } as int)
+
+#[attr = Inline(Hint)]
+fn twice_area_plus_one<T>(shape: T) -> int where
+    T: Shape ({
+    (((area_plus_one as fn(T) -> int {area_plus_one::<T>})((shape as T)) as
+            int) * (2 as int) as int)
+} as int)
+
+fn copy_builds_witness_for_generic_call()
+    ->
+        int ({
+    ((twice_area_plus_one as
+            fn(Square) -> int {twice_area_plus_one::<Square>})(((Square as
+                fn(int) -> Square {Square})((2 as int)) as Square)) as int)
+} as int)
+
+const LIMIT: int = ((2 as int) + (3 as int) as int);
+
+#[attr = Inline(Hint)]
+fn plus_limit(x: int) -> int ({ ((x as int) + (LIMIT as int) as int) } as int)
+
+fn binds_const_once_for_all_copies()
+    ->
+        int ({
+    ((((plus_limit as fn(int) -> int {plus_limit})((1 as int)) as int) +
+            ((plus_limit as fn(int) -> int {plus_limit})((2 as int)) as int)
+            as int) + (LIMIT as int) as int)
+} as int)
+
+mod Helpers {
+    fn secret(x: int) -> int ({ ((x as int) * (10 as int) as int) } as int)
+
+    #[attr = Inline(Hint)]
+    fn reveal(x: int)
+        ->
+            int ({
+        ((secret as fn(int) -> int {Helpers::secret})((x as int)) as int)
+    } as int)
+}
+
+fn exports_helpers_of_inline_fns()
+    ->
+        int ({
+    ((Helpers::reveal as fn(int) -> int {Helpers::reveal})((4 as int)) as int)
+} as int)

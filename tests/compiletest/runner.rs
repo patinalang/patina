@@ -22,6 +22,7 @@ const PACKAGES: &[&str] = &[
     "label_whisper",
     "macros",
     "reexports",
+    "inlines",
 ];
 
 struct TextArtifact {

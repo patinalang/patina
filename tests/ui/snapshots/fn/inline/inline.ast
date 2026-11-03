@@ -1,0 +1,116 @@
+#[inline]
+fn add(a: int, b: int) -> int { a + b }
+
+pub fn inlines_free_fn() -> int { add(1, 2) }
+
+#[inline]
+fn swap((a, b): (int, int)) -> (int, int) { (b, a) }
+
+pub fn binds_pattern_param() -> (int, int) { swap((1, 2)) }
+
+#[inline]
+fn add_twice(a: int, b: int) -> int { add(add(a, b), b) }
+
+pub fn inlines_nested_inline_calls() -> int { add_twice(1, 2) }
+
+pub fn inlines_each_call_separately() -> int { add(1, 2) * add(3, 4) }
+
+#[inline]
+fn clamp(x: int) -> int { if x > 10 { return 10; } x }
+
+pub fn return_leaves_only_the_copy(x: int) -> int { clamp(x) + 1 }
+
+#[inline]
+fn sum_to(n: int) -> int {
+    let mut total = 0;
+    for i in 0..n { total += i; }
+    total
+}
+
+pub fn inlines_loop() -> int { sum_to(4) }
+
+#[inline]
+fn adder(n: int) -> fn(int) -> int { |x| x + n }
+
+pub fn inlines_closure() -> int { adder(1)(2) }
+
+#[inline]
+fn countdown(n: int) -> int { if n == 0 { 0 } else { countdown(n - 1) + 1 } }
+
+pub fn recursion_inlines_once() -> int { countdown(3) }
+
+pub fn fn_item_value_stays_reference() -> fn(int, int) -> int { add }
+
+pub fn call_through_fn_item_inlines() -> int { let f = add; f(5, 6) }
+
+pub trait Shape {
+    fn area(self)
+    -> int;
+
+    #[inline]
+    fn double_area(self) -> int { self.area() * 2 }
+}
+
+pub struct Square(pub int);
+
+impl Shape for Square {
+    #[inline]
+    fn area(self) -> int { self.0 * self.0 }
+}
+
+impl Square {
+    #[inline]
+    pub fn side(self) -> int { self.0 }
+}
+
+pub fn inlines_inherent_method() -> int { Square(3).side() }
+
+pub fn inlines_impl_method() -> int { Square(3).area() }
+
+pub fn inlines_default_method() -> int { Square(3).double_area() }
+
+pub struct Circle(pub int);
+
+impl Shape for Circle {
+    fn area(self) -> int { self.0 * self.0 * 3 }
+}
+
+pub fn copy_calls_impl_method_statically() -> int { Circle(1).double_area() }
+
+#[inline]
+fn area_of<T: Shape>(shape: T) -> int { shape.area() }
+
+pub fn copy_inlines_resolved_trait_method() -> int { area_of(Square(4)) }
+
+fn generic_caller<T: Shape>(shape: T) -> int { area_of(shape) }
+
+pub fn generic_caller_dispatches_through_witness() -> int {
+    generic_caller(Square(5))
+}
+
+fn area_plus_one<T: Shape>(shape: T) -> int { shape.area() + 1 }
+
+#[inline]
+fn twice_area_plus_one<T: Shape>(shape: T) -> int { area_plus_one(shape) * 2 }
+
+pub fn copy_builds_witness_for_generic_call() -> int {
+    twice_area_plus_one(Square(2))
+}
+
+const LIMIT: int = 2 + 3;
+
+#[inline]
+fn plus_limit(x: int) -> int { x + LIMIT }
+
+pub fn binds_const_once_for_all_copies() -> int {
+    plus_limit(1) + plus_limit(2) + LIMIT
+}
+
+mod Helpers {
+    fn secret(x: int) -> int { x * 10 }
+
+    #[inline]
+    pub fn reveal(x: int) -> int { secret(x) }
+}
+
+pub fn exports_helpers_of_inline_fns() -> int { Helpers::reveal(4) }

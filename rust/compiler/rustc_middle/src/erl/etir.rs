@@ -9,18 +9,20 @@ use rustc_span::{ByteSymbol, Ident, Span, Symbol};
 
 use crate::erl::binary_pattern::BinarySegmentLayout;
 use crate::erl::{ErlCallTarget, ErlModuleResolution};
-use crate::ty::Ty;
+use crate::ty::{GenericArgsRef, Ty};
 
 pub mod visit;
 
 newtype_index! {
     #[encodable]
+    #[orderable]
     #[debug_format = "e{}"]
     pub struct ExprId {}
 }
 
 newtype_index! {
     #[encodable]
+    #[orderable]
     #[debug_format = "p{}"]
     pub struct PatId {}
 }
@@ -133,6 +135,8 @@ pub enum ExprKind<'tcx> {
     Block(Box<[ExprId]>),
     Literal(Lit, Span),
     Var(VarId),
+    // Only a thing between lowering passes; lowered to a shared var.
+    Const { def_id: DefId, args: GenericArgsRef<'tcx> },
     List { items: Box<[ExprId]>, tail: Option<ExprId> },
     Map { fields: Box<[(ExprId, ExprId)]>, base: Option<ExprId> },
     Tuple { fields: Box<[ExprId]> },
@@ -321,6 +325,8 @@ pub enum PatKind<'tcx> {
     Wild { input: PatternInput },
     Binding { var: VarId, is_primary: bool, subpattern: Option<PatId>, input: PatternInput },
     Pin { var: VarId },
+    // Only a thing between lowering passes; lowered to a shared var.
+    Const { def_id: DefId, args: GenericArgsRef<'tcx> },
     Assignee { var: VarId },
     TermClass { class: TermClass, subpattern: PatId },
     Tuple { fields: Box<[PatId]> },

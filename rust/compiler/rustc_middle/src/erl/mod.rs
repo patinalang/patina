@@ -369,6 +369,26 @@ impl<'tcx> TyCtxt<'tcx> {
         }
     }
 
+    /// The item which `caller` runs when it refers to `def_id`, if it's known statically.
+    pub fn erl_try_resolve_item(
+        self,
+        caller: DefId,
+        def_id: DefId,
+        args: GenericArgsRef<'tcx>,
+    ) -> Option<(DefId, GenericArgsRef<'tcx>)> {
+        if self.trait_of_assoc(def_id).is_none() {
+            return Some((def_id, args));
+        }
+
+        let typing_env = TypingEnv::post_analysis(self, caller);
+        match ty::Instance::try_resolve(self, typing_env, def_id, args) {
+            Ok(Some(ty::Instance { def: ty::InstanceKind::Item(def_id), args })) => {
+                Some((def_id, args))
+            }
+            _ => None,
+        }
+    }
+
     /// Resolves a trait item to the impl item which `caller` calls, if it's known statically.
     pub fn erl_resolve_trait_item_target(
         self,
@@ -376,16 +396,9 @@ impl<'tcx> TyCtxt<'tcx> {
         target: ErlCallTarget<'tcx>,
     ) -> ErlCallTarget<'tcx> {
         let ErlCallTarget::Item { def_id, args } = target else { return target };
-        if self.trait_of_assoc(def_id).is_none() {
-            return target;
-        }
-
-        let typing_env = TypingEnv::post_analysis(self, caller);
-        match ty::Instance::try_resolve(self, typing_env, def_id, args) {
-            Ok(Some(ty::Instance { def: ty::InstanceKind::Item(def_id), args })) => {
-                ErlCallTarget::Item { def_id, args }
-            }
-            _ => target,
+        match self.erl_try_resolve_item(caller, def_id, args) {
+            Some((def_id, args)) => ErlCallTarget::Item { def_id, args },
+            None => target,
         }
     }
 

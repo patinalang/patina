@@ -3,7 +3,7 @@ use rustc_hir::def_id::DefId;
 use rustc_hir::{BinarySegmentTy, HirId};
 use rustc_middle::erl::binary_pattern::{BinaryEndianness, BinarySegmentLayout, BinarySegmentSize};
 use rustc_middle::erl::etir::visit::{Visitor, walk_pat};
-use rustc_middle::erl::etir::{self, ExprId, JoinId, PatId, PatternInput, VarId};
+use rustc_middle::erl::etir::{self, ExprId, JoinId, PatId, PatternInput};
 use rustc_middle::erl::{ErlCallTarget, ErlModuleId, is_erl_literal};
 use rustc_middle::middle::region;
 use rustc_middle::mir::{BinOp, UnOp};
@@ -13,16 +13,7 @@ use rustc_middle::ty::{self, GenericArgsRef, Ty};
 use rustc_span::{Ident, Span, Symbol, sym};
 
 use super::{ExprBlock, ThirBodyCx, not_implemented, not_implemented_kind};
-
-macro_rules! with_expr_block {
-    ($cx:ident, |$block:ident| $body:block) => {{
-        let mut $block = ExprBlock::default();
-        let result = (|| $body)();
-        $block.emit(&mut $cx.cx.body, result)
-    }};
-}
-
-pub(super) use with_expr_block;
+use crate::graft::Graft;
 
 impl<'a, 'tcx> ExprBlock {
     /// `lower_expr` then run it through `maybe_bind` to ensure we got a variable or literal.
@@ -37,38 +28,19 @@ impl<'a, 'tcx> ExprBlock {
     }
 
     /// Emits an assignment of `value` to a fresh var named `name`, and returns the var expr.
-    /// If `value` is already a var or a literal, does nothing.
+    /// If `value` is already a var (or a constant, which becomes one) or a literal, does nothing.
     fn maybe_bind(&mut self, cx: &mut ThirBodyCx<'a, 'tcx>, name: Symbol, value: ExprId) -> ExprId {
         let body = &cx.cx.body;
         let etir::Expr { ty, span, ref kind } = body[value];
-        if matches!(kind, etir::ExprKind::Var(_)) || is_erl_literal(body, value) {
+        if matches!(kind, etir::ExprKind::Var(_) | etir::ExprKind::Const { .. })
+            || is_erl_literal(body, value)
+        {
             value
         } else {
-            let var = cx.push_var(Ident { name, span });
-            self.bind(cx, var, value);
-            cx.push_expr(etir::ExprKind::Var(var), ty, span)
+            let var = cx.cx.push_var(Ident { name, span });
+            self.bind(cx.cx, var, value);
+            cx.cx.push_expr(etir::ExprKind::Var(var), ty, span)
         }
-    }
-
-    /// Emits an assignment of `value` to a `var`.
-    pub(super) fn bind(&mut self, cx: &mut ThirBodyCx<'a, 'tcx>, var: VarId, value: ExprId) {
-        let etir::Expr { ty, span, kind: _ } = cx.cx.body[value];
-
-        let binding = cx.push_pat(
-            etir::PatKind::Binding {
-                var,
-                is_primary: true,
-                subpattern: None,
-                input: PatternInput::Typed,
-            },
-            ty,
-            span,
-        );
-
-        let assign_expr =
-            cx.push_expr(etir::ExprKind::Assign { lhs: binding, rhs: value }, ty, span);
-
-        self.0.push(assign_expr);
     }
 }
 
@@ -165,9 +137,9 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             None => exprs.push(self.unit_expr(block.span)),
         }
 
-        let value = self.push_expr(etir::ExprKind::Block(exprs.into_boxed_slice()), ty, span);
+        let value = self.cx.push_expr(etir::ExprKind::Block(exprs.into_boxed_slice()), ty, span);
 
-        let join = self.cx.break_joins.remove(&block.region_scope);
+        let join = self.break_joins.remove(&block.region_scope);
         self.wrap_in_joins(join, value)
     }
 
@@ -201,7 +173,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
 
         let Some(else_block) = else_block else {
             let kind = etir::ExprKind::Assign { lhs: pattern, rhs: initializer };
-            return Some(self.push_expr(kind, ty, span));
+            return Some(self.cx.push_expr(kind, ty, span));
         };
 
         let else_span = self.thir[else_block].span;
@@ -209,7 +181,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         let success_arm = etir::Arm { pattern, guard: None, body: self.unit_expr(span), span };
 
         let else_arm = etir::Arm {
-            pattern: self.push_pat(
+            pattern: self.cx.push_pat(
                 etir::PatKind::Wild { input: PatternInput::Typed },
                 ty,
                 else_span,
@@ -220,7 +192,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         };
 
         let declare = self.declare_from_pattern(span, pattern);
-        let matched = self.push_expr(
+        let matched = self.cx.push_expr(
             etir::ExprKind::Match {
                 scrutinee: initializer,
                 arms: Box::new([success_arm, else_arm]),
@@ -230,7 +202,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         );
 
         let Some(declare) = declare else { return Some(matched) };
-        Some(self.push_expr(etir::ExprKind::Block(Box::new([declare, matched])), unit, span))
+        Some(self.cx.push_expr(etir::ExprKind::Block(Box::new([declare, matched])), unit, span))
     }
 
     fn declare_from_pattern(&mut self, span: Span, pattern: PatId) -> Option<ExprId> {
@@ -239,7 +211,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             return None;
         }
         let kind = etir::ExprKind::Declare { vars: vars.into_iter().collect() };
-        Some(self.push_expr(kind, self.cx.tcx.types.unit, span))
+        Some(self.cx.push_expr(kind, self.cx.tcx.types.unit, span))
     }
 
     fn lower_expr_literal(
@@ -274,7 +246,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             ),
         };
         let kind = etir::ExprKind::Literal(value, lit.span);
-        self.push_expr(kind, expr.ty, expr.span)
+        self.cx.push_expr(kind, expr.ty, expr.span)
     }
 
     fn lower_expr_phantom_data(&mut self, expr: &thir::Expr<'tcx>) -> ExprId {
@@ -285,12 +257,12 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         };
         let tag = tcx.erl_variant_repr(adt_def.non_enum_variant().def_id).tag;
         let kind = etir::ExprKind::Literal(etir::Lit::Atom(tag), span);
-        self.push_expr(kind, expr.ty, span)
+        self.cx.push_expr(kind, expr.ty, span)
     }
 
     fn lower_expr_var_ref(&mut self, expr: &thir::Expr<'tcx>, id: LocalVarId) -> ExprId {
         let var = self.var(id);
-        self.push_expr(etir::ExprKind::Var(var), expr.ty, expr.span)
+        self.cx.push_expr(etir::ExprKind::Var(var), expr.ty, expr.span)
     }
 
     fn lower_expr_list(
@@ -299,14 +271,14 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         items: &[thir::ExprId],
         tail: Option<thir::ExprId>,
     ) -> ExprId {
-        with_expr_block!(self, |expr_body| {
+        with_expr_block!(self.cx, |expr_body| {
             let tail = tail.map(|tail| expr_body.lower_and_maybe_bind(self, sym::tail, tail));
             let items = items
                 .iter()
                 .map(|&item| expr_body.lower_and_maybe_bind(self, sym::element, item))
                 .collect();
 
-            self.push_expr(etir::ExprKind::List { items, tail }, expr.ty, expr.span)
+            self.cx.push_expr(etir::ExprKind::List { items, tail }, expr.ty, expr.span)
         })
     }
 
@@ -316,7 +288,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         fields: &[thir::MapFieldExpr],
         base: Option<thir::ExprId>,
     ) -> ExprId {
-        with_expr_block!(self, |expr_body| {
+        with_expr_block!(self.cx, |expr_body| {
             let base = base.map(|base| expr_body.lower_and_maybe_bind(self, sym::field_base, base));
             let fields = fields
                 .iter()
@@ -327,7 +299,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
                 })
                 .collect();
 
-            self.push_expr(etir::ExprKind::Map { fields, base }, expr.ty, expr.span)
+            self.cx.push_expr(etir::ExprKind::Map { fields, base }, expr.ty, expr.span)
         })
     }
 
@@ -338,7 +310,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
     ) -> ExprId {
         let segments =
             segments.iter().map(|segment| self.lower_expr_binary_segment(segment)).collect();
-        self.push_expr(etir::ExprKind::BinaryPattern { segments }, expr.ty, expr.span)
+        self.cx.push_expr(etir::ExprKind::BinaryPattern { segments }, expr.ty, expr.span)
     }
 
     fn lower_expr_binary_segment(
@@ -351,13 +323,13 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
     }
 
     fn lower_expr_tuple(&mut self, expr: &thir::Expr<'tcx>, fields: &[thir::ExprId]) -> ExprId {
-        with_expr_block!(self, |expr_body| {
+        with_expr_block!(self.cx, |expr_body| {
             let fields = fields
                 .iter()
                 .map(|&field| expr_body.lower_and_maybe_bind(self, sym::element, field))
                 .collect();
 
-            self.push_expr(etir::ExprKind::Tuple { fields }, expr.ty, expr.span)
+            self.cx.push_expr(etir::ExprKind::Tuple { fields }, expr.ty, expr.span)
         })
     }
 
@@ -375,7 +347,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         if let ty::Tuple(_) = ty.kind() {
             let position = etir::FieldIdx::from_u32(name.as_u32());
             let kind = etir::ExprKind::TupleField { lhs: self.lower_expr(lhs), position };
-            return self.push_expr(kind, expr.ty, span);
+            return self.cx.push_expr(kind, expr.ty, span);
         }
 
         let ty::Adt(adt_def, _) = *ty.kind() else {
@@ -390,7 +362,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
                 span_bug!(span, "field without a runtime value has type {}", expr.ty)
             }
             let tag = self.lower_expr_phantom_data(expr);
-            return with_expr_block!(self, |expr_body| {
+            return with_expr_block!(self.cx, |expr_body| {
                 // The lhs may have side effects, such as in `fetch_struct().phantom`.
                 expr_body.maybe_bind(self, sym::field_base, lhs);
                 tag
@@ -403,7 +375,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             position: etir::FieldIdx::from_usize(position),
             name: variant.fields[name].name,
         };
-        self.push_expr(kind, expr.ty, span)
+        self.cx.push_expr(kind, expr.ty, span)
     }
 
     fn lower_expr_binary_op(
@@ -436,7 +408,11 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
                 etir::BinarySegmentExpr { value: lhs, layout, span: self.cx.body[lhs].span },
                 etir::BinarySegmentExpr { value: rhs, layout, span: self.cx.body[rhs].span },
             ]);
-            return self.push_expr(etir::ExprKind::BinaryPattern { segments }, expr.ty, expr.span);
+            return self.cx.push_expr(
+                etir::ExprKind::BinaryPattern { segments },
+                expr.ty,
+                expr.span,
+            );
         }
 
         use BinOp::*;
@@ -469,7 +445,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             }
         };
 
-        self.push_expr(etir::ExprKind::BinaryOp { op, lhs, rhs }, expr.ty, expr.span)
+        self.cx.push_expr(etir::ExprKind::BinaryOp { op, lhs, rhs }, expr.ty, expr.span)
     }
 
     fn lower_expr_logical_op(
@@ -489,7 +465,11 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
                 thir::LogicalOp::And => etir::LogicalOp::And,
                 thir::LogicalOp::Or => etir::LogicalOp::Or,
             };
-            return self.push_expr(etir::ExprKind::LogicalOp { op, lhs, rhs }, expr.ty, expr.span);
+            return self.cx.push_expr(
+                etir::ExprKind::LogicalOp { op, lhs, rhs },
+                expr.ty,
+                expr.span,
+            );
         }
 
         let then_pattern = self.bool_pat(span, true);
@@ -519,7 +499,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             }
         };
         let kind = etir::ExprKind::UnaryOp { op, arg: self.lower_expr(arg) };
-        self.push_expr(kind, expr.ty, expr.span)
+        self.cx.push_expr(kind, expr.ty, expr.span)
     }
 
     fn lower_expr_cast(&mut self, expr: &thir::Expr<'tcx>, source: thir::ExprId) -> ExprId {
@@ -533,7 +513,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         } else {
             etir::CastKind::Identity
         };
-        self.push_expr(etir::ExprKind::Cast { source, kind }, expr.ty, expr.span)
+        self.cx.push_expr(etir::ExprKind::Cast { source, kind }, expr.ty, expr.span)
     }
 
     fn lower_expr_call(
@@ -564,7 +544,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         } else {
             let callee = etir::Callee::Value(self.lower_expr(fun));
             let kind = etir::ExprKind::Call { callee, args: self.lower_exprs(args) };
-            return self.push_expr(kind, expr.ty, span);
+            return self.cx.push_expr(kind, expr.ty, span);
         };
 
         // Temporary before we actually ship runtime modules (like `patina_fmt` could've been)
@@ -578,7 +558,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
 
         let callee = etir::Callee::Item { target, forced_extern };
         let kind = etir::ExprKind::Call { callee, args: self.lower_exprs(args) };
-        self.push_expr(kind, expr.ty, span)
+        self.cx.push_expr(kind, expr.ty, span)
     }
 
     fn lower_expr_intrinsic_call(
@@ -594,7 +574,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
                     source: self.lower_expr(value),
                     kind: etir::CastKind::Identity,
                 };
-                self.push_expr(kind, expr.ty, expr.span)
+                self.cx.push_expr(kind, expr.ty, expr.span)
             }
             _ => not_implemented_kind(tcx, expr.span, "intrinsic", name),
         }
@@ -615,7 +595,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
 
         let callee = etir::Callee::Value(self.lower_expr(callee));
         let kind = etir::ExprKind::Call { callee, args: self.lower_exprs(fields) };
-        self.push_expr(kind, expr.ty, expr.span)
+        self.cx.push_expr(kind, expr.ty, expr.span)
     }
 
     fn lower_expr_format_render(
@@ -636,13 +616,13 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             return arg;
         }
 
-        let format = self.push_expr(
+        let format = self.cx.push_expr(
             etir::ExprKind::Literal(etir::Lit::Charlist(sym::debug_format_str), span),
             Ty::new_slice(tcx, tcx.types.char),
             span,
         );
 
-        let args = self.push_expr(
+        let args = self.cx.push_expr(
             etir::ExprKind::List { items: Box::new([arg]), tail: None },
             Ty::new_slice(tcx, self.cx.body[arg].ty),
             span,
@@ -656,9 +636,9 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         expr: &thir::Expr<'tcx>,
         closure: &thir::ClosureExpr<'tcx>,
     ) -> ExprId {
-        let (params, body) = ThirBodyCx::lower(self.cx, closure.closure_id);
+        let (params, body) = ThirBodyCx::lower(self.cx, self.var_ids, closure.closure_id);
         let kind = etir::ExprKind::Closure { params, body };
-        self.push_expr(kind, expr.ty, expr.span)
+        self.cx.push_expr(kind, expr.ty, expr.span)
     }
 
     fn lower_expr_zst_literal(&mut self, expr: &thir::Expr<'tcx>) -> ExprId {
@@ -680,7 +660,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
 
         // TODO: add an attribute to allow forcing `fnref` to be an extern call
         let kind = etir::ExprKind::FnItem { target, arity, forced_extern: false };
-        self.push_expr(kind, expr.ty, expr.span)
+        self.cx.push_expr(kind, expr.ty, expr.span)
     }
 
     fn lower_expr_named_const(
@@ -699,7 +679,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             let target = tcx.erl_call_target(def_id, args);
             let callee = etir::Callee::Item { target, forced_extern: false };
             let kind = etir::ExprKind::Call { callee, args: Box::new([]) };
-            return self.push_expr(kind, expr.ty, span);
+            return self.cx.push_expr(kind, expr.ty, span);
         }
 
         if !tcx.is_erl_inlinable_const(def_id) {
@@ -708,10 +688,10 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
 
         let const_body = self.cx.tcx.etir_template(def_id);
         if const_body.is_erl_literal() {
-            self.cx.graft(const_body.clone(), args)
+            let Graft { value, .. } = self.cx.graft(const_body.clone(), args, &[]);
+            value
         } else {
-            let var = self.const_var(span, def_id, const_body, args);
-            self.push_expr(etir::ExprKind::Var(var), expr.ty, span)
+            self.cx.push_expr(etir::ExprKind::Const { def_id, args }, expr.ty, span)
         }
     }
 
@@ -725,7 +705,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         let adt_def = adt_expr.adt_def;
         let variant = adt_def.variant(adt_expr.variant_index);
 
-        with_expr_block!(self, |expr_body| {
+        with_expr_block!(self.cx, |expr_body| {
             let repr = self.lower_adt_repr(span, adt_def, variant);
 
             let base = match &adt_expr.base {
@@ -759,7 +739,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
                 .collect();
 
             let adt = etir::AdtExpr { repr, base, fields };
-            self.push_expr(etir::ExprKind::Adt(Box::new(adt)), expr.ty, span)
+            self.cx.push_expr(etir::ExprKind::Adt(Box::new(adt)), expr.ty, span)
         })
     }
 
@@ -771,8 +751,8 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
     ) -> ExprId {
         let rhs = self.lower_expr(rhs);
         let lhs = self.lower_pat(lhs, PatternInput::Typed);
-        self.cx.reassign_count += 1;
-        self.push_expr(etir::ExprKind::Assign { lhs, rhs }, expr.ty, expr.span)
+        self.reassign_count += 1;
+        self.cx.push_expr(etir::ExprKind::Assign { lhs, rhs }, expr.ty, expr.span)
     }
 
     fn lower_expr_if(
@@ -818,7 +798,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
                             thir::LogicalOp::And => etir::LogicalOp::And,
                             thir::LogicalOp::Or => etir::LogicalOp::Or,
                         };
-                        let scrutinee = self.push_expr(
+                        let scrutinee = self.cx.push_expr(
                             etir::ExprKind::LogicalOp { op, lhs, rhs },
                             expr.ty,
                             expr.span,
@@ -836,7 +816,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             thir::ExprKind::Unary { op: UnOp::Not, arg } => match self.lower_cond(arg) {
                 Cond::Test { scrutinee, pattern } if self.is_literal_bool_pat(pattern, true) => {
                     let kind = etir::ExprKind::UnaryOp { op: etir::UnaryOp::Not, arg: scrutinee };
-                    Cond::Test { scrutinee: self.push_expr(kind, expr.ty, expr.span), pattern }
+                    Cond::Test { scrutinee: self.cx.push_expr(kind, expr.ty, expr.span), pattern }
                 }
                 arg => Cond::Not(Box::new(arg)),
             },
@@ -884,7 +864,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             return None;
         }
         let join = self.push_join(*expr, None);
-        *expr = self.push_expr(etir::ExprKind::Jump { target: join, value: None }, ty, span);
+        *expr = self.cx.push_expr(etir::ExprKind::Jump { target: join, value: None }, ty, span);
         Some(join)
     }
 
@@ -901,13 +881,13 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         let else_span = self.cx.body[else_body].span;
 
         let wild = etir::PatKind::Wild { input: PatternInput::Typed };
-        let else_pattern = self.push_pat(wild, self.cx.body[scrutinee].ty, else_span);
+        let else_pattern = self.cx.push_pat(wild, self.cx.body[scrutinee].ty, else_span);
 
         let arms = Box::new([
             etir::Arm { pattern: then_pattern, guard: None, body: then_body, span: then_span },
             etir::Arm { pattern: else_pattern, guard: None, body: else_body, span: else_span },
         ]);
-        self.push_expr(etir::ExprKind::Match { scrutinee, arms }, expr.ty, span)
+        self.cx.push_expr(etir::ExprKind::Match { scrutinee, arms }, expr.ty, span)
     }
 
     fn lower_expr_receive(
@@ -922,7 +902,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         });
         let arms = arms.iter().map(|&arm| self.lower_arm(arm)).collect();
         let kind = etir::ExprKind::Receive { arms, after };
-        self.push_expr(kind, expr.ty, expr.span)
+        self.cx.push_expr(kind, expr.ty, expr.span)
     }
 
     fn lower_expr_match(
@@ -945,7 +925,8 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             })
             .collect();
 
-        let value = self.push_expr(etir::ExprKind::Match { scrutinee, arms }, expr.ty, expr.span);
+        let value =
+            self.cx.push_expr(etir::ExprKind::Match { scrutinee, arms }, expr.ty, expr.span);
         self.wrap_in_joins(joins, value)
     }
 
@@ -995,7 +976,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         let after = after.map(|after| self.lower_expr(after));
         let arms = arms.iter().map(|&arm| self.lower_catch_arm(arm)).collect();
         let kind = etir::ExprKind::TryCatch { body, arms, after };
-        self.push_expr(kind, expr.ty, expr.span)
+        self.cx.push_expr(kind, expr.ty, expr.span)
     }
 
     fn lower_catch_arm(&mut self, arm: thir::ArmId) -> etir::CatchArm {
@@ -1048,12 +1029,13 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         let loop_id = self.push_loop();
         let body = self.lower_expr(body);
         // `continue` results in a Join inside the loop body...
-        let continue_join = self.cx.continue_joins.remove(&label);
+        let continue_join = self.continue_joins.remove(&label);
         let body = self.wrap_in_joins(continue_join, body);
 
         // ...while `break` builds a Join outside of it.
-        let value = self.push_expr(etir::ExprKind::Loop { id: loop_id, body }, expr.ty, expr.span);
-        let break_join = self.cx.break_joins.remove(&label);
+        let value =
+            self.cx.push_expr(etir::ExprKind::Loop { id: loop_id, body }, expr.ty, expr.span);
+        let break_join = self.break_joins.remove(&label);
         self.wrap_in_joins(break_join, value)
     }
 
@@ -1064,20 +1046,20 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         value: Option<thir::ExprId>,
     ) -> ExprId {
         let value = value.map(|value| self.lower_expr(value));
-        let join = self.cx.break_joins.get(&label).copied().unwrap_or_else(|| {
+        let join = self.break_joins.get(&label).copied().unwrap_or_else(|| {
             let join = self.push_value_join(value, expr.span);
-            self.cx.break_joins.insert(label, join);
+            self.break_joins.insert(label, join);
             join
         });
         self.jump(expr, join, value)
     }
 
     fn lower_expr_continue(&mut self, expr: &thir::Expr<'tcx>, label: region::Scope) -> ExprId {
-        let join = self.cx.continue_joins.get(&label).copied().unwrap_or_else(|| {
+        let join = self.continue_joins.get(&label).copied().unwrap_or_else(|| {
             // The join returns nothing, breaking out of `case` and into the loop tail call.
             let unit = self.unit_expr(expr.span);
             let join = self.push_join(unit, None);
-            self.cx.continue_joins.insert(label, join);
+            self.continue_joins.insert(label, join);
             join
         });
         self.jump(expr, join, None)
@@ -1092,20 +1074,20 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             return self.push_join(body, None);
         }
 
-        let var = self.push_var(Ident { name: sym::jump_value, span });
-        let body = self.push_expr(etir::ExprKind::Var(var), ty, span);
+        let var = self.cx.push_var(Ident { name: sym::jump_value, span });
+        let body = self.cx.push_expr(etir::ExprKind::Var(var), ty, span);
         self.push_join(body, Some(var))
     }
 
     fn jump(&mut self, expr: &thir::Expr<'tcx>, join: JoinId, value: Option<ExprId>) -> ExprId {
-        with_expr_block!(self, |block| {
+        with_expr_block!(self.cx, |block| {
             let value = value.and_then(|value| {
                 // Possibly only for a side effect, if the join takes no value.
                 let var = block.maybe_bind(self, sym::jump_value, value);
                 self.cx.body[join].value.map(|_| var)
             });
 
-            self.push_expr(etir::ExprKind::Jump { target: join, value }, expr.ty, expr.span)
+            self.cx.push_expr(etir::ExprKind::Jump { target: join, value }, expr.ty, expr.span)
         })
     }
 
@@ -1117,18 +1099,18 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
     ) -> ExprId {
         let callee = etir::Callee::Direct(sym::io_lib, sym::format);
         let kind = etir::ExprKind::Call { callee, args: Box::new([format, args]) };
-        self.push_expr(kind, expr.ty, expr.span)
+        self.cx.push_expr(kind, expr.ty, expr.span)
     }
 
     fn unit_expr(&mut self, span: Span) -> ExprId {
         let tcx = self.cx.tcx;
         let unit = etir::ExprKind::Tuple { fields: Box::new([]) };
-        self.push_expr(unit, tcx.types.unit, span)
+        self.cx.push_expr(unit, tcx.types.unit, span)
     }
 
     fn bool_expr(&mut self, span: Span, value: bool) -> ExprId {
         let kind = etir::ExprKind::Literal(etir::Lit::Bool(value), span);
-        self.push_expr(kind, self.cx.tcx.types.bool, span)
+        self.cx.push_expr(kind, self.cx.tcx.types.bool, span)
     }
 
     fn resolve_expr_with_scope(

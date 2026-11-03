@@ -1,0 +1,26 @@
+fn private_fn(x: int) -> int {
+    x * 10
+}
+
+#[inline]
+pub fn calls_private_fn(x: int) -> int {
+    private_fn(x)
+}
+
+pub trait Trait {
+    fn method(self) -> int;
+}
+
+pub struct InlineImpl(pub int);
+
+impl Trait for InlineImpl {
+    #[inline]
+    fn method(self) -> int {
+        self.0 + 1
+    }
+}
+
+#[inline]
+pub fn generic_calls_method<T: Trait>(x: T) -> int {
+    x.method() * 2
+}

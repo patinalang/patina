@@ -79,7 +79,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         input: PatternInput,
     ) -> PatId {
         let pats = pats.iter().map(|pat| self.lower_pat(pat, input)).collect();
-        self.push_pat(etir::PatKind::Or { pats }, pat.ty, pat.span)
+        self.cx.push_pat(etir::PatKind::Or { pats }, pat.ty, pat.span)
     }
 
     fn lower_pat_range(
@@ -92,7 +92,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         let lo = range.lo.as_finite().map(|value| self.range_bound(span, range.ty, value));
         let hi = range.hi.as_finite().map(|value| self.range_bound(span, range.ty, value));
         let range = etir::PatRange { lo, hi, end: range.end, ty: range.ty, input };
-        self.push_pat(etir::PatKind::Range(Box::new(range)), pat.ty, span)
+        self.cx.push_pat(etir::PatKind::Range(Box::new(range)), pat.ty, span)
     }
 
     fn range_bound(&mut self, span: Span, ty: Ty<'tcx>, value: ty::ValTree<'tcx>) -> ExprId {
@@ -110,11 +110,11 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             ty::Float => etir::Lit::Float(value.to_leaf().to_u64()),
             _ => not_implemented_kind(tcx, span, "range pattern type", ty),
         };
-        self.push_expr(etir::ExprKind::Literal(lit, span), ty, span)
+        self.cx.push_expr(etir::ExprKind::Literal(lit, span), ty, span)
     }
 
     fn lower_pat_wild(&mut self, pat: &thir::Pat<'tcx>, input: PatternInput) -> PatId {
-        self.push_pat(etir::PatKind::Wild { input }, pat.ty, pat.span)
+        self.cx.push_pat(etir::PatKind::Wild { input }, pat.ty, pat.span)
     }
 
     fn lower_pat_phantom(&mut self, pat: &thir::Pat<'tcx>, input: PatternInput) -> PatId {
@@ -137,17 +137,17 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         let var = self.var(var);
         let subpattern = subpattern.map(|sub| self.lower_pat(sub, input));
         let kind = etir::PatKind::Binding { var, is_primary, subpattern, input };
-        self.push_pat(kind, pat.ty, pat.span)
+        self.cx.push_pat(kind, pat.ty, pat.span)
     }
 
     fn lower_pat_pin(&mut self, pat: &thir::Pat<'tcx>, var: LocalVarId) -> PatId {
         let var = self.var(var);
-        self.push_pat(etir::PatKind::Pin { var }, pat.ty, pat.span)
+        self.cx.push_pat(etir::PatKind::Pin { var }, pat.ty, pat.span)
     }
 
     fn lower_pat_assignee(&mut self, pat: &thir::Pat<'tcx>, var: LocalVarId) -> PatId {
         let var = self.var(var);
-        self.push_pat(etir::PatKind::Assignee { var }, pat.ty, pat.span)
+        self.cx.push_pat(etir::PatKind::Assignee { var }, pat.ty, pat.span)
     }
 
     fn lower_pat_term_class(
@@ -157,7 +157,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         subpattern: &thir::Pat<'tcx>,
     ) -> PatId {
         let subpattern = self.lower_pat(subpattern, PatternInput::Typed);
-        self.push_pat(etir::PatKind::TermClass { class, subpattern }, pat.ty, pat.span)
+        self.cx.push_pat(etir::PatKind::TermClass { class, subpattern }, pat.ty, pat.span)
     }
 
     fn lower_pat_term(&mut self, subpattern: &thir::Pat<'tcx>, adt_repr_match: bool) -> PatId {
@@ -200,12 +200,12 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             .map(|(idx, field_ty)| {
                 match subpatterns.iter().find(|field| field.field.index() == idx) {
                     Some(field) => self.lower_pat(&field.pattern, input),
-                    None => self.push_pat(etir::PatKind::Wild { input }, field_ty, pat.span),
+                    None => self.cx.push_pat(etir::PatKind::Wild { input }, field_ty, pat.span),
                 }
             })
             .collect();
 
-        self.push_pat(etir::PatKind::Tuple { fields }, pat.ty, pat.span)
+        self.cx.push_pat(etir::PatKind::Tuple { fields }, pat.ty, pat.span)
     }
 
     fn lower_pat_adt(
@@ -232,14 +232,14 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
                 let ty = field_def.ty(tcx, args);
                 let pattern = match subpatterns.iter().find(|field| field.field == idx) {
                     Some(field) => self.lower_pat(&field.pattern, input),
-                    None => self.push_pat(etir::PatKind::Wild { input }, ty, span),
+                    None => self.cx.push_pat(etir::PatKind::Wild { input }, ty, span),
                 };
                 etir::FieldPat { name: field_def.name, ty, pattern }
             })
             .collect();
 
         let adt = etir::AdtPat { repr, fields, input };
-        self.push_pat(etir::PatKind::Adt(Box::new(adt)), pat.ty, span)
+        self.cx.push_pat(etir::PatKind::Adt(Box::new(adt)), pat.ty, span)
     }
 
     fn lower_pat_constant(&mut self, pat: &thir::Pat<'tcx>, value: ty::Value<'tcx>) -> PatId {
@@ -281,7 +281,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             _ => not_implemented_kind(tcx, span, "constant pattern type", value.ty),
         };
 
-        self.push_pat(etir::PatKind::Literal(lit), pat.ty, span)
+        self.cx.push_pat(etir::PatKind::Literal(lit), pat.ty, span)
     }
 
     fn lower_pat_named_const(
@@ -290,9 +290,9 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         def_id: DefId,
         args: GenericArgsRef<'tcx>,
     ) -> PatId {
-        let const_body = self.cx.tcx.etir_template(def_id);
-        let var = self.const_var(pat.span, def_id, const_body, args);
-        self.push_pat(etir::PatKind::Pin { var }, pat.ty, pat.span)
+        // Reports a cycle between constants as a query cycle, for consistency with expr side.
+        self.cx.tcx.ensure_ok().etir_template(def_id);
+        self.cx.push_pat(etir::PatKind::Const { def_id, args }, pat.ty, pat.span)
     }
 
     fn lower_pat_map(
@@ -306,7 +306,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             .map(|field| (self.lower_expr(field.key), self.lower_pat(&field.pattern, input)))
             .collect();
 
-        self.push_pat(etir::PatKind::Map { fields }, pat.ty, pat.span)
+        self.cx.push_pat(etir::PatKind::Map { fields }, pat.ty, pat.span)
     }
 
     fn lower_pat_binary_pattern(
@@ -316,7 +316,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
     ) -> PatId {
         let segments =
             segments.iter().map(|segment| self.lower_pat_binary_segment(segment)).collect();
-        self.push_pat(etir::PatKind::BinaryPattern { segments }, pat.ty, pat.span)
+        self.cx.push_pat(etir::PatKind::BinaryPattern { segments }, pat.ty, pat.span)
     }
 
     fn lower_pat_binary_segment(
@@ -341,7 +341,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
         }
         let items = prefix.iter().map(|pat| self.lower_pat(pat, input)).collect();
         let tail = slice.map(|tail| self.lower_pat(tail, input));
-        self.push_pat(etir::PatKind::List { items, tail }, pat.ty, pat.span)
+        self.cx.push_pat(etir::PatKind::List { items, tail }, pat.ty, pat.span)
     }
 
     /// Walks `pattern` and list all variables it binds.
@@ -375,7 +375,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
 
     pub(super) fn bool_pat(&mut self, span: Span, value: bool) -> PatId {
         let kind = etir::PatKind::Literal(etir::Lit::Bool(value));
-        self.push_pat(kind, self.cx.tcx.types.bool, span)
+        self.cx.push_pat(kind, self.cx.tcx.types.bool, span)
     }
 
     pub(super) fn is_literal_bool_pat(&self, pattern: PatId, value: bool) -> bool {

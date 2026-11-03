@@ -14,8 +14,5 @@ LL | impl VeryVerboseEnumOfThingsToDoWithNumbers {
 LL |     fn run(self, x: int, y: int) -> int {
    |        ^^^
 
-warning: [{"tests/ui/src/custom_types/enum__03.pt",
-           [{{10,5},erl_lint,{unused_function,{run,3}}}]}]
-
-warning: 3 warnings emitted
+warning: 2 warnings emitted
 

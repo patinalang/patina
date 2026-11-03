@@ -1,0 +1,61 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+use ::{};
+use Inlines::InlineImpl;
+use Inlines::Trait;
+use Inlines::calls_private_fn;
+use Inlines::generic_calls_method;
+
+struct LocalImpl(int);
+
+impl Trait for LocalImpl {
+    fn method(self) -> int ({ ((self as LocalImpl).0 as int) } as int)
+}
+
+fn copy_calls_private_fn()
+    ->
+        int ({
+    ((calls_private_fn as
+            fn(int) -> int {Inlines::calls_private_fn})((1 as int)) as int)
+} as int)
+
+fn inlines_foreign_impl_method()
+    ->
+        int ({
+    (((InlineImpl as
+                fn(int) -> Inlines::InlineImpl {Inlines::InlineImpl})((2 as
+                int)) as Inlines::InlineImpl).method() as int)
+} as int)
+
+fn inlines_foreign_generic_with_foreign_impl()
+    ->
+        int ({
+    ((generic_calls_method as
+            fn(Inlines::InlineImpl) -> int {Inlines::generic_calls_method::<Inlines::InlineImpl>})(((InlineImpl
+                as
+                fn(int) -> Inlines::InlineImpl {Inlines::InlineImpl})((2 as
+                int)) as Inlines::InlineImpl)) as int)
+} as int)
+
+fn foreign_generic_calls_local_impl_statically()
+    ->
+        int ({
+    ((generic_calls_method as
+            fn(LocalImpl) -> int {Inlines::generic_calls_method::<LocalImpl>})(((LocalImpl
+                as fn(int) -> LocalImpl {LocalImpl})((5 as int)) as
+            LocalImpl)) as int)
+} as int)
