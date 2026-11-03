@@ -42,34 +42,56 @@ trait CompSciStudent: Programmer + Student {
 }
 
 fn comp_sci_student_greeting(student: dyn CompSciStudent)
-    -> str ({ ((/*ERROR*/) as {type error}) } as {type error})
+    ->
+        str ({
 
+
+
+
+
+
+
+    (unsafe {
+        (((::Core::unicode::characters_to_binary as
+                    fn(term) -> term)(([("My name is " as str),
+                        ((patina_fmt::display as
+                                fn(term) -> term)(((student as dyn CompSciStudent).name() as
+                                str)) as term), (" and I attend " as str),
+                        ((patina_fmt::display as
+                                fn(term) -> term)(((student as
+                                    dyn CompSciStudent).university() as str)) as term),
+                        (". My favorite language is " as str),
+                        ((patina_fmt::display as
+                                fn(term) -> term)(((student as
+                                    dyn CompSciStudent).fav_language() as str)) as term),
+                        (". My Git username is " as str),
+                        ((patina_fmt::display as
+                                fn(term) -> term)(((student as
+                                    dyn CompSciStudent).git_username() as str)) as term)] as
+                    [term])) as term).cast_unchecked::<str>() as str)
+    } as str)
+} as str)
 struct CSStudent {
     name: str,
     university: str,
     fav_language: str,
     git_username: str,
 }
-
 impl Programmer for CSStudent {
     fn fav_language(self)
         -> str ({ ((self as CSStudent).fav_language as str) } as str)
 }
-
 impl Student for CSStudent {
     fn university(self)
         -> str ({ ((self as CSStudent).university as str) } as str)
 }
-
 impl Person for CSStudent {
     fn name(self) -> str ({ ((self as CSStudent).name as str) } as str)
 }
-
 impl CompSciStudent for CSStudent {
     fn git_username(self)
         -> str ({ ((self as CSStudent).git_username as str) } as str)
 }
-
 fn main() ({
     let student =
         (CSStudent {
@@ -77,7 +99,6 @@ fn main() ({
             university: ("MIT" as str),
             fav_language: ("Rust" as str),
             git_username: ("alice_codes" as str) } as CSStudent);
-
     let greeting =
         ((comp_sci_student_greeting as
                 fn((dyn CompSciStudent + 'static)) -> str {comp_sci_student_greeting})((student

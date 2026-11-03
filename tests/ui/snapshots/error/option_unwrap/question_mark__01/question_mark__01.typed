@@ -36,6 +36,12 @@ fn next_birthday(current_age: Option<int>)
                     (val as int),
             } as int) + (1 as int) as int);
     ((Some as
-            fn({type error}) -> Core::Option<{type error}> {Core::Option::<{type error}>::Some})(((/*ERROR*/)
-            as {type error})) as Core::Option<{type error}>)
-} as {type error})
+            fn(str) -> Core::Option<str> {Core::Option::<str>::Some})((unsafe
+            {
+            (((::Core::unicode::characters_to_binary as
+                        fn(term) -> term)(([("Next year I will be " as str),
+                            ((patina_fmt::display as
+                                    fn(term) -> term)((next_age as int)) as term)] as [term]))
+                    as term).cast_unchecked::<str>() as str)
+        } as str)) as Core::Option<str>)
+} as Core::Option<str>)

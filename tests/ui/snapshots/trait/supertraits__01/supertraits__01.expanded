@@ -42,32 +42,41 @@ trait CompSciStudent: Programmer + Student {
 }
 
 fn comp_sci_student_greeting(student: dyn CompSciStudent) -> str {
-    (/*ERROR*/)
-}
 
+
+
+
+
+
+
+    unsafe {
+        ::Core::unicode::characters_to_binary(["My name is ",
+                        patina_fmt::display(student.name()), " and I attend ",
+                        patina_fmt::display(student.university()),
+                        ". My favorite language is ",
+                        patina_fmt::display(student.fav_language()),
+                        ". My Git username is ",
+                        patina_fmt::display(student.git_username())]).cast_unchecked::<str>()
+    }
+}
 struct CSStudent {
     name: str,
     university: str,
     fav_language: str,
     git_username: str,
 }
-
 impl Programmer for CSStudent {
     fn fav_language(self) -> str { self.fav_language }
 }
-
 impl Student for CSStudent {
     fn university(self) -> str { self.university }
 }
-
 impl Person for CSStudent {
     fn name(self) -> str { self.name }
 }
-
 impl CompSciStudent for CSStudent {
     fn git_username(self) -> str { self.git_username }
 }
-
 pub fn main() {
     let student =
         CSStudent {
@@ -76,7 +85,6 @@ pub fn main() {
             fav_language: "Rust",
             git_username: "alice_codes",
         };
-
     let greeting = comp_sci_student_greeting(student);
     {
         ::Core::io::put_chars([[patina_fmt::display(greeting)]]);

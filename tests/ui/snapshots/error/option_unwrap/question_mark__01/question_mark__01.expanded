@@ -22,5 +22,8 @@ fn next_birthday(current_age: Option<int>) -> Option<str> {
     // If `current_age` is `Some`, the inner `int` value + 1
     // gets assigned to `next_age`
     let next_age: int = current_age? + 1;
-    Some((/*ERROR*/))
+    Some(unsafe {
+            ::Core::unicode::characters_to_binary(["Next year I will be ",
+                            patina_fmt::display(next_age)]).cast_unchecked::<str>()
+        })
 }
