@@ -28,11 +28,17 @@ error[E0531]: cannot find tuple struct or tuple variant `Err` in this scope
 LL |         Err(e) => println!("Error: {}", e),
    |         ^^^ not found in this scope
 
-error: requires `branch` lang_item
-  --> tests/ui/src/error/result/enter_question_mark__01.pt:7:24
+error[E0599]: no method named `parse` found for type `str` in the current scope
+  --> tests/ui/src/error/result/enter_question_mark__01.pt:7:41
    |
 LL |     let first_number = first_number_str.parse::<int>()?;
-   |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |                                         ^^^^^ method not found in `str`
+
+error[E0599]: no method named `parse` found for type `str` in the current scope
+  --> tests/ui/src/error/result/enter_question_mark__01.pt:8:43
+   |
+LL |     let second_number = second_number_str.parse::<int>()?;
+   |                                           ^^^^^ method not found in `str`
 
 error[E0425]: cannot find function, tuple struct or tuple variant `Ok` in this scope
   --> tests/ui/src/error/result/enter_question_mark__01.pt:10:5
@@ -40,7 +46,7 @@ error[E0425]: cannot find function, tuple struct or tuple variant `Ok` in this s
 LL |     Ok(first_number * second_number)
    |     ^^ not found in this scope
 
-error: aborting due to 7 previous errors
+error: aborting due to 8 previous errors
 
-Some errors have detailed explanations: E0425, E0433, E0531.
+Some errors have detailed explanations: E0425, E0433, E0531, E0599.
 For more information about an error, try `rustc --explain E0425`.

@@ -4,11 +4,5 @@ error: cannot find macro `format` in this scope
 LL |     Some(format!("Next year I will be {}", next_age))
    |          ^^^^^^
 
-error: requires `branch` lang_item
-  --> tests/ui/src/error/option_unwrap/question_mark__01.pt:8:25
-   |
-LL |     let next_age: int = current_age? + 1;
-   |                         ^^^^^^^^^^^^
-
-error: aborting due to 2 previous errors
+error: aborting due to 1 previous error
 

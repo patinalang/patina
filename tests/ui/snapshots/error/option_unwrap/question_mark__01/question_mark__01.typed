@@ -1,0 +1,41 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// source: patina-by-example/src/error/option_unwrap/question_mark.md
+// block: 1/2
+
+fn next_birthday(current_age: Option<int>)
+    ->
+        Option<str> ({
+    // If `current_age` is `None`, this returns `None`.
+    // If `current_age` is `Some`, the inner `int` value + 1
+    // gets assigned to `next_age`
+    let next_age: int =
+        ((match ((branch as
+                        fn(Core::Option<int>) -> Core::ControlFlow<<Core::Option<int> as Core::Try>::Residual, <Core::Option<int> as Core::Try>::Output> {<Core::Option<int> as Core::Try>::branch})((current_age
+                        as Core::Option<int>)) as
+                    Core::ControlFlow<Core::Option<!>, int>) {
+                Break {  0: residual } => #[allow(unreachable_code)]
+                    (return ((from_residual as
+                                fn(Core::Option<!>) -> Core::Option<str> {<Core::Option<str> as Core::FromResidual<Core::Option<!>>>::from_residual})((residual
+                                as Core::Option<!>)) as Core::Option<str>) as !),
+                Continue {  0: val } => #[allow(unreachable_code)]
+                    (val as int),
+            } as int) + (1 as int) as int);
+    ((Some as
+            fn({type error}) -> Core::Option<{type error}> {Core::Option::<{type error}>::Some})(((/*ERROR*/)
+            as {type error})) as Core::Option<{type error}>)
+} as {type error})

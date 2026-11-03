@@ -64,19 +64,13 @@ error[E0531]: cannot find tuple struct or tuple variant `Err` in this scope
 LL |         Err(e) => {
    |         ^^^ not found in this scope
 
-error: requires `branch` lang_item
-  --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:54:17
-   |
-LL |     let first = list.first().ok_or(DoubleError::EmptyList)?;
-   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 error[E0425]: cannot find function, tuple struct or tuple variant `Ok` in this scope
   --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:59:5
    |
 LL |     Ok(2 * parsed)
    |     ^^ not found in this scope
 
-error: aborting due to 13 previous errors
+error: aborting due to 12 previous errors
 
 Some errors have detailed explanations: E0405, E0425, E0432, E0433, E0531.
 For more information about an error, try `rustc --explain E0405`.

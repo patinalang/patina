@@ -4,11 +4,5 @@ error: cannot find macro `assert_eq` in this scope
 LL |     assert_eq!(p.work_phone_area_code(), Some(61));
    |     ^^^^^^^^^
 
-error: requires `branch` lang_item
-  --> tests/ui/src/error/option_unwrap/question_mark__02.pt:24:9
-   |
-LL |         self.job?.phone_number?.area_code
-   |         ^^^^^^^^^
-
-error: aborting due to 2 previous errors
+error: aborting due to 1 previous error
 
