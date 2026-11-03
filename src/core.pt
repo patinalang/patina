@@ -428,7 +428,7 @@ macro_rules! partial_eq_impl {
         }
     )*)
 }
-partial_eq_impl! { bool int float str atom bin bits char }
+partial_eq_impl! { bool int float str atom bin bits char term }
 
 #[lang = "partial_ord"]
 pub trait PartialOrd<Rhs = Self> {

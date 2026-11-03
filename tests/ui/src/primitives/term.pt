@@ -1,0 +1,17 @@
+// Operators.
+
+pub fn equal(left: term, right: term) -> bool {
+    left == right
+}
+
+pub fn not_equal(left: term, right: term) -> bool {
+    left != right
+}
+
+fn generic_equal<T: PartialEq>(left: T, right: T) -> bool {
+    left == right
+}
+
+pub fn partial_eq_equal(left: term, right: term) -> bool {
+    generic_equal(left, right)
+}
