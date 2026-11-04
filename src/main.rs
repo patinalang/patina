@@ -83,7 +83,13 @@ struct Args {
     dump: Vec<DumpStage>,
 
     /// Source file to compile.
-    file: std::path::PathBuf,
+    #[arg(required_unless_present = "serve")]
+    file: Option<std::path::PathBuf>,
+
+    /// Run a compile server that can be used with other processes' `--compile-server` option.
+    /// Prints the server's socket path as the first line on stdout, and stops once stdin closes.
+    #[arg(long, conflicts_with = "compile_server")]
+    serve: bool,
 
     /// Output directory.
     #[arg(long, value_name = "DIR", default_value = ".")]
@@ -92,6 +98,10 @@ struct Args {
     /// Package name (defaults to PascalCase of the source filename).
     #[arg(long, value_name = "NAME")]
     pkg_name: Option<String>,
+
+    /// Path to a running compile server's socket. If not given, patina starts a temporary one.
+    #[arg(long, value_name = "SOCKET_PATH")]
+    compile_server: Option<std::path::PathBuf>,
 
     /// Package dependency as NAME=RMETA (may be repeated).
     /// If `=RMETA` is omitted, the package is assumed to be in the library
@@ -106,7 +116,21 @@ fn main() -> ExitCode {
         Err(err) => err.exit(),
     };
 
-    let server = compile::compile_server::SyncServer::start();
+    if args.serve {
+        return match compile::compile_server::serve() {
+            Ok(()) => ExitCode::SUCCESS,
+            Err(e) => {
+                eprintln!("error: failed to run compile server: {e}");
+                ExitCode::FAILURE
+            }
+        };
+    }
+    let file = args.file.expect("a file is required without `--serve`");
+
+    let server =
+        compile::compile_server::SyncServer::start(compile::compile_server::SyncServerOpts {
+            sock_path: args.compile_server.clone(),
+        });
 
     let stages = args
         .dump
@@ -117,15 +141,15 @@ fn main() -> ExitCode {
 
     let stages = if stages.is_empty() { vec![Stage::Meta, Stage::Beam] } else { stages };
 
-    let src = match std::fs::read_to_string(&args.file) {
+    let src = match std::fs::read_to_string(&file) {
         Ok(src) => src,
         Err(e) => {
-            eprintln!("error reading {}: {e}", args.file.display());
+            eprintln!("error reading {}: {e}", file.display());
             return ExitCode::FAILURE;
         }
     };
 
-    let pkg_name = match package::resolve_package_name(args.pkg_name.as_deref(), &args.file) {
+    let pkg_name = match package::resolve_package_name(args.pkg_name.as_deref(), &file) {
         Ok(name) => name,
         Err(err) => {
             eprintln!("error: {err}");
@@ -139,15 +163,7 @@ fn main() -> ExitCode {
     }
 
     match catch_fatal_errors(|| {
-        compile::compile(
-            &stages,
-            &args.file,
-            &src,
-            &args.out_dir,
-            &pkg_name,
-            &args.externs,
-            &server,
-        )
+        compile::compile(&stages, &file, &src, &args.out_dir, &pkg_name, &args.externs, &server)
     }) {
         Ok(()) => ExitCode::SUCCESS,
         Err(_) => ExitCode::FAILURE,

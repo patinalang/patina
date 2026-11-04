@@ -1,10 +1,10 @@
 use std::sync::{Arc, OnceLock};
 
-use super::SyncServer;
+use super::{SyncServer, SyncServerOpts};
 
 fn server() -> &'static Arc<SyncServer> {
     static SERVER: OnceLock<Arc<SyncServer>> = OnceLock::new();
-    SERVER.get_or_init(SyncServer::start)
+    SERVER.get_or_init(|| SyncServer::start(SyncServerOpts::default()))
 }
 
 /// Encodes `term`, echoes it through the VM, and returns what comes back.

@@ -1,11 +1,12 @@
-use std::io::{self, Read, Write};
+use std::io::{self, BufRead, BufReader, Read, Write};
 use std::net::Shutdown;
 use std::os::unix::net::UnixStream;
 use std::path::{Path, PathBuf};
-use std::process::{Child, Command, Stdio};
+use std::process::{Child, ChildStdout, Command, Stdio};
+use std::sync::mpsc::{self, RecvTimeoutError};
 use std::sync::{Arc, Mutex};
 use std::thread::JoinHandle;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 use std::{fs, mem, thread};
 
 use rustc_data_structures::marker::IntoDynSyncSend;
@@ -25,7 +26,6 @@ const OP_MACRO: &[u8] = b"macro";
 const OP_ECHO: &[u8] = b"echo";
 
 const CONNECT_TIMEOUT: Duration = Duration::from_secs(60);
-const CONNECT_RETRY: Duration = Duration::from_millis(5);
 
 /// How long to wait for a reply to a macro invocation.
 /// There's a shorter timeout on the `patina_compile_server` side.
@@ -33,9 +33,10 @@ const MACRO_REPLY_TIMEOUT: Duration = Duration::from_secs(120);
 
 const ERL_INIT: &str = "\
 spawn(fun() -> io:get_line([]), erlang:halt(0) end), \
-[BeamPath, SockPath] = init:get_plain_arguments(), \
+[BeamPath] = init:get_plain_arguments(), \
 {module, patina_compile_server} = code:load_abs(BeamPath), \
-patina_compile_server:start_link(SockPath)";
+{ok, _} = patina_compile_server:ensure_started(), \
+io:format(\"~ts~n\", [patina_compile_server:socket_path()])";
 
 pub(super) struct CompileOk {
     pub beam: Vec<u8>,
@@ -53,7 +54,7 @@ struct TmpDir {
 
 impl TmpDir {
     fn new() -> io::Result<TmpDir> {
-        let path = std::env::temp_dir().join(format!("patina-compile-{}", std::process::id()));
+        let path = std::env::temp_dir().join(format!("patina-{}", std::process::id()));
 
         match fs::remove_dir_all(&path) {
             Ok(()) => {}
@@ -103,10 +104,19 @@ pub(crate) enum StartupError {
 }
 
 pub(crate) struct CompileServer {
-    #[allow(unused)]
-    tmpdir: TmpDir,
-    child: Child,
+    _vm: BeamVm,
     stream: UnixStream,
+}
+
+enum BeamVm {
+    /// A VM we started, which goes away with us.
+    Own {
+        /// Removed on drop, after the VM is reaped.
+        _tmpdir: TmpDir,
+        child: Child,
+    },
+    /// A VM that was already running, which we only connected to.
+    Shared,
 }
 
 pub(crate) struct SyncServer {
@@ -120,42 +130,15 @@ enum State {
 }
 
 impl CompileServer {
+    fn connect(sock_path: &Path) -> Result<CompileServer, SpawnError> {
+        let stream = UnixStream::connect(sock_path).map_err(SpawnError::Connect)?;
+        Ok(CompileServer { _vm: BeamVm::Shared, stream })
+    }
+
     fn spawn() -> Result<CompileServer, SpawnError> {
-        let tmpdir = TmpDir::new().map_err(SpawnError::TmpDir)?;
-
-        let beam_path = tmpdir.path().join("patina_compile_server.beam");
-        fs::write(&beam_path, SERVER_BEAM).map_err(SpawnError::WriteBeam)?;
-
-        let sock_path = tmpdir.path().join("srv.sock");
-
-        let mut child = Command::new("erl")
-            .args([
-                "-noshell",
-                "-eval",
-                ERL_INIT,
-                "-extra",
-                &beam_path.with_extension("").to_string_lossy(),
-                &sock_path.to_string_lossy(),
-            ])
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .spawn()
-            .map_err(SpawnError::Erl)?;
-
-        forward_output_to_stderr(child.stdout.take());
-        forward_output_to_stderr(child.stderr.take());
-
-        let stream = match connect_with_retry(&sock_path, &mut child) {
-            Ok(stream) => stream,
-            Err(e) => {
-                // There is no `CompileServer` to drop yet, so reap by hand.
-                reap(&mut child);
-                return Err(SpawnError::Connect(e));
-            }
-        };
-
-        Ok(CompileServer { tmpdir, child, stream })
+        let (vm, sock_path) = BeamVm::start()?;
+        let stream = UnixStream::connect(sock_path).map_err(SpawnError::Connect)?;
+        Ok(CompileServer { _vm: vm, stream })
     }
 
     pub(super) fn compile(
@@ -269,7 +252,7 @@ impl CompileServer {
                 let stack = String::from_utf8_lossy(stack);
                 Err(MacroRunError::Raised(format!("{class}: {reason}\n{stack}")))
             }
-            [status, reason] if status == b"down" => Err(MacroRunError::Transport(format!(
+            [status, reason] if status == b"down" => Err(MacroRunError::Raised(format!(
                 "the proc macro's process died: {}",
                 String::from_utf8_lossy(reason)
             ))),
@@ -321,7 +304,6 @@ impl CompileServer {
         if result.is_err() {
             // Any failure leaves the stream positioned mid-frame
             let _ = self.stream.shutdown(Shutdown::Both);
-            reap(&mut self.child);
         }
         result
     }
@@ -363,17 +345,69 @@ impl CompileServer {
     }
 }
 
-impl Drop for CompileServer {
-    fn drop(&mut self) {
-        reap(&mut self.child);
+impl BeamVm {
+    fn start() -> Result<(BeamVm, PathBuf), SpawnError> {
+        let tmpdir = TmpDir::new().map_err(SpawnError::TmpDir)?;
+
+        let beam_path = tmpdir.path().join("patina_compile_server.beam");
+        fs::write(&beam_path, SERVER_BEAM).map_err(SpawnError::WriteBeam)?;
+
+        let mut child = Command::new("erl")
+            .args([
+                "-noshell",
+                "-eval",
+                ERL_INIT,
+                "-extra",
+                &beam_path.with_extension("").to_string_lossy(),
+            ])
+            .env("TMPDIR", tmpdir.path())
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .map_err(SpawnError::Erl)?;
+
+        let sock_path = start_stdout_handler(child.stdout.take().expect("stdout is piped"));
+        forward_output_to_stderr(child.stderr.take());
+        let vm = BeamVm::Own { _tmpdir: tmpdir, child };
+
+        let sock_path = match sock_path.recv_timeout(CONNECT_TIMEOUT) {
+            Ok(sock_path) => sock_path,
+            Err(RecvTimeoutError::Timeout) => Err(io::Error::new(
+                io::ErrorKind::TimedOut,
+                "compile server didn't report its socket in time",
+            )),
+            Err(RecvTimeoutError::Disconnected) => {
+                Err(io::Error::other("compile server's stdout handler panicked"))
+            }
+        };
+        let sock_path = sock_path.map_err(SpawnError::Connect)?;
+        Ok((vm, sock_path))
     }
 }
 
-/// Stop the VM and wait for it to be gone.
-fn reap(child: &mut Child) {
-    drop(child.stdin.take());
-    let _ = child.kill();
-    let _ = child.wait();
+/// Runs a compile server for other patinas to connect to, until our stdin closes. Prints the
+/// server's socket path as the first line on stdout.
+pub(crate) fn serve() -> Result<(), SpawnError> {
+    let (vm, sock_path) = BeamVm::start()?;
+    println!("{}", sock_path.display());
+    // Any error means there's no stdin to wait on anymore, so stop all the same.
+    let _ = io::copy(&mut io::stdin().lock(), &mut io::sink());
+    drop(vm);
+    Ok(())
+}
+
+impl Drop for BeamVm {
+    fn drop(&mut self) {
+        match self {
+            BeamVm::Own { child, .. } => {
+                drop(child.stdin.take());
+                let _ = child.kill();
+                let _ = child.wait();
+            }
+            BeamVm::Shared => {}
+        }
+    }
 }
 
 /// Drain one of the VM's output pipes onto our own stderr.
@@ -398,9 +432,17 @@ impl BeamMacroRunner for SyncServer {
     }
 }
 
+#[derive(Debug, Default)]
+pub(crate) struct SyncServerOpts {
+    pub(crate) sock_path: Option<PathBuf>,
+}
+
 impl SyncServer {
-    pub(crate) fn start() -> Arc<SyncServer> {
-        let startup = State::Starting(thread::spawn(CompileServer::spawn));
+    pub(crate) fn start(opts: SyncServerOpts) -> Arc<SyncServer> {
+        let startup = State::Starting(thread::spawn(move || match opts.sock_path {
+            Some(sock_path) => CompileServer::connect(&sock_path),
+            None => CompileServer::spawn(),
+        }));
         Arc::new(SyncServer { state: IntoDynSyncSend(Mutex::new(startup)) })
     }
 
@@ -487,24 +529,23 @@ fn invalid(msg: String) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidInput, msg)
 }
 
-fn connect_with_retry(sock_path: &Path, child: &mut Child) -> io::Result<UnixStream> {
-    let deadline = Instant::now() + CONNECT_TIMEOUT;
-    loop {
-        match UnixStream::connect(sock_path) {
-            Ok(stream) => return Ok(stream),
-            Err(e) => {
-                if let Ok(Some(status)) = child.try_wait() {
-                    return Err(io::Error::other(format!(
-                        "compile server exited before accepting a connection ({status})"
-                    )));
-                }
-                if Instant::now() >= deadline {
-                    return Err(e);
-                }
-                thread::sleep(CONNECT_RETRY);
-            }
-        }
-    }
+/// Starts a thread that reads our VM's stdout: first the socket path the VM prints as its first
+/// line, which it sends on the returned channel, then the rest, drained onto our stderr.
+/// The server listens on the socket before the VM prints it.
+fn start_stdout_handler(stdout: ChildStdout) -> mpsc::Receiver<io::Result<PathBuf>> {
+    let (tx, rx) = mpsc::channel();
+    thread::spawn(move || {
+        let mut reader = BufReader::new(stdout);
+        let mut line = String::new();
+        let sock_path = match reader.read_line(&mut line) {
+            Ok(0) => Err(io::Error::other("compile server exited before reporting its socket")),
+            Ok(_) => Ok(PathBuf::from(line.trim_end_matches('\n'))),
+            Err(e) => Err(e),
+        };
+        let _ = tx.send(sock_path);
+        let _ = io::copy(&mut reader, &mut io::stderr());
+    });
+    rx
 }
 
 #[cfg(test)]

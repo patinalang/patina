@@ -1,13 +1,15 @@
 -module(patina_compile_server).
 
--export([start_link/1]).
+-export([ensure_started/0, socket_path/0]).
 
 -behaviour(gen_server).
--export([init/1, handle_call/3, handle_cast/2, handle_continue/2]).
+-export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2]).
 
--define(ACCEPT_TIMEOUT, timer:seconds(30)).
+-include_lib("kernel/include/file.hrl").
+
 -define(MACRO_TIMEOUT_SECONDS, 30).
 -define(MACRO_TIMEOUT, timer:seconds(?MACRO_TIMEOUT_SECONDS)).
+-define(LISTEN_BACKLOG, 1024).
 
 -define(COMPILE_OPTS, [
     binary,
@@ -18,49 +20,76 @@
     nowarn_unused_function
 ]).
 
-start_link(SockPath) ->
-    gen_server:start_link(?MODULE, [SockPath], []).
+-doc """
+Starts the server, unless it's already running.
+It listens on an Unix socket created in `tmp_dir/0`.
+""".
+-spec ensure_started() -> {ok, pid()} | {error, term()}.
+ensure_started() ->
+    SockPath = filename:join(tmp_dir(), "patina-compile-" ++ os:getpid() ++ ".sock"),
+    case gen_server:start({local, ?MODULE}, ?MODULE, SockPath, []) of
+        {ok, Pid} -> {ok, Pid};
+        {error, {already_started, Pid}} -> {ok, Pid};
+        {error, Reason} -> {error, Reason}
+    end.
 
-init([SockPath]) ->
+-spec socket_path() -> file:filename_all().
+socket_path() ->
+    gen_server:call(?MODULE, socket_path).
+
+-spec init(file:filename_all()) -> {ok, socket:socket()}.
+init(SockPath) ->
+    process_flag(trap_exit, true),
+
+    %% A stale file from an earlier VM with the same OS pid.
+    _ = file:delete(SockPath),
+
     {ok, Socket} = socket:open(local, stream, default, #{}),
     ok = socket:bind(Socket, #{family => local, path => SockPath}),
-    ok = socket:listen(Socket),
-    {ok, Socket, {continue, accept}}.
+    ok = socket:listen(Socket, ?LISTEN_BACKLOG),
 
-handle_call(_Request, _From, Socket) ->
-    {reply, ok, Socket}.
+    spawn_handler(Socket),
+    {ok, Socket}.
 
-handle_cast(_Msg, Socket) ->
-    {noreply, Socket}.
+handle_call(socket_path, _From, Socket) ->
+    {reply, sock_path(Socket), Socket};
+handle_call(_Request, _From, State) ->
+    {reply, ok, State}.
 
-handle_continue(accept, Socket) ->
-    Deadline = erlang:monotonic_time(millisecond) + ?ACCEPT_TIMEOUT,
-    case accept_client(Socket, Deadline) of
+handle_cast(_Msg, State) ->
+    {noreply, State}.
+
+handle_info({accepted, _Handler}, Socket) ->
+    spawn_handler(Socket),
+    {noreply, Socket};
+handle_info({'EXIT', _Handler, {accept_failed, _} = Reason}, Socket) ->
+    {stop, Reason, Socket};
+handle_info(_Msg, State) ->
+    {noreply, State}.
+
+terminate(_Reason, Socket) ->
+    Path = sock_path(Socket),
+    socket:close(Socket),
+    _ = file:delete(Path),
+    ok.
+
+sock_path(Socket) ->
+    {ok, #{path := Path}} = socket:sockname(Socket),
+    Path.
+
+spawn_handler(Socket) ->
+    Parent = self(),
+    proc_lib:spawn_link(fun() -> handler(Parent, Socket) end).
+
+handler(Parent, Socket) ->
+    case socket:accept(Socket) of
         {ok, ClientSock} ->
-            socket_loop(ClientSock),
-            socket:close(ClientSock);
+            Parent ! {accepted, self()},
+            socket_loop(ClientSock);
+        {error, closed} ->
+            ok;
         {error, Reason} ->
-            io:format(standard_error, "patina compile server cannot accept: ~tp~n", [Reason])
-    end,
-    erlang:halt(0).
-
-accept_client(Sock, Deadline) ->
-    case Deadline - erlang:monotonic_time(millisecond) of
-        Remaining when Remaining =< 0 ->
-            {error, timeout};
-        Remaining ->
-            case socket:accept(Sock, Remaining) of
-                {ok, ClientSock} ->
-                    {ok, ClientSock};
-                {error, timeout} ->
-                    {error, timeout};
-                {error, Reason} ->
-                    timer:sleep(1),
-                    case Deadline - erlang:monotonic_time(millisecond) =< 0 of
-                        true -> {error, Reason};
-                        false -> accept_client(Sock, Deadline)
-                    end
-            end
+            exit({accept_failed, Reason})
     end.
 
 socket_loop(Sock) ->
@@ -643,3 +672,42 @@ label(Node) ->
 
 arg_vars(N) ->
     [cerl:c_var(list_to_atom("@patina_arg_" ++ integer_to_list(I))) || I <- lists:seq(1, N)].
+
+-spec tmp_dir() -> file:filename() | no_return().
+tmp_dir() ->
+    Candidates = [
+        {env, "TMPDIR"}, {env, "TEMP"}, {env, "TMP"}, {dir, "/tmp"}, {dir, "/var/tmp"}, cwd
+    ],
+    case find_writable_tmp_dir(Candidates) of
+        false -> error({no_writable_tmp_dir, Candidates});
+        TmpDir -> TmpDir
+    end.
+
+find_writable_tmp_dir([Candidate | Candidates]) ->
+    maybe
+        [_ | _] = Dir ?= resolve_tmp_dir(Candidate),
+        true ?= is_writable_dir(Dir),
+        Dir
+    else
+        _ -> find_writable_tmp_dir(Candidates)
+    end;
+find_writable_tmp_dir([]) ->
+    false.
+
+resolve_tmp_dir({env, Var}) ->
+    os:getenv(Var);
+resolve_tmp_dir({dir, Dir}) ->
+    Dir;
+resolve_tmp_dir(cwd) ->
+    case file:get_cwd() of
+        {ok, Dir} -> Dir;
+        {error, _} -> false
+    end.
+
+is_writable_dir(Dir) ->
+    case file:read_file_info(Dir) of
+        {ok, #file_info{type = directory, access = Access}} ->
+            Access =:= read_write orelse Access =:= write;
+        {error, _} ->
+            false
+    end.

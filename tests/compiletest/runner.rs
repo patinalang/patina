@@ -35,121 +35,136 @@ struct CompileOutput {
     stderr: String,
 }
 
-pub fn run(pt_path: &Path, bless: bool) -> Result<(), Failed> {
-    let output = compile(pt_path);
-    let dir = snapshot_base(pt_path);
-
-    for artifact in &output.artifacts {
-        snapshot::check_required(&dir.join(&artifact.file_name), &artifact.content, bless)?;
-    }
-
-    snapshot::check_optional(&dir.join("stderr"), &output.stderr, bless)
+pub struct Runner {
+    pub compile_server: PathBuf,
+    pub bless: bool,
 }
 
-pub fn run_exs(pt_path: &Path, exs_path: &Path) -> Result<(), Failed> {
-    let out_dir = tempfile::tempdir().expect("create temp out dir");
-    let externs = package_deps(pt_path, out_dir.path());
-    let compiled = run_compile(&[], &["beam"], pt_path, out_dir.path(), &externs, false);
+impl Runner {
+    pub fn run(&self, pt_path: &Path) -> Result<(), Failed> {
+        let output = self.compile(pt_path);
+        let dir = snapshot_base(pt_path);
 
-    if !compiled.status.success() {
-        return Err(Failed::from(format!(
-            "failed to compile {}\nstatus: {}\nstdout:\n{}stderr:\n{}",
-            pt_path.display(),
-            compiled.status,
-            String::from_utf8_lossy(&compiled.stdout),
-            String::from_utf8_lossy(&compiled.stderr),
-        )));
+        for artifact in &output.artifacts {
+            snapshot::check_required(
+                &dir.join(&artifact.file_name),
+                &artifact.content,
+                self.bless,
+            )?;
+        }
+
+        snapshot::check_optional(&dir.join("stderr"), &output.stderr, self.bless)
     }
 
-    let output = Command::new("elixir")
-        .arg(
-            exs_path
-                .canonicalize()
-                .unwrap_or_else(|_| panic!("canonicalize elixir test {}", exs_path.display())),
-        )
-        .current_dir(out_dir.path())
-        .output()
-        .expect("run elixir");
+    pub fn run_exs(&self, pt_path: &Path, exs_path: &Path) -> Result<(), Failed> {
+        let out_dir = tempfile::tempdir().expect("create temp out dir");
+        let externs = self.package_deps(pt_path, out_dir.path());
+        let compiled = self.run_compile(&[], &["beam"], pt_path, out_dir.path(), &externs, false);
 
-    if output.status.success() {
-        Ok(())
-    } else {
-        Err(Failed::from(format!(
-            "elixir test failed: {}\nstatus: {}\nstdout:\n{}stderr:\n{}",
-            exs_path.display(),
-            output.status,
-            String::from_utf8_lossy(&output.stdout),
-            String::from_utf8_lossy(&output.stderr),
-        )))
-    }
-}
+        if !compiled.status.success() {
+            return Err(Failed::from(format!(
+                "failed to compile {}\nstatus: {}\nstdout:\n{}stderr:\n{}",
+                pt_path.display(),
+                compiled.status,
+                String::from_utf8_lossy(&compiled.stdout),
+                String::from_utf8_lossy(&compiled.stderr),
+            )));
+        }
 
-fn compile(pt_path: &Path) -> CompileOutput {
-    let out_dir = tempfile::tempdir().expect("create temp out dir");
-    let externs = package_deps(pt_path, out_dir.path());
-    let source = std::fs::read_to_string(pt_path).expect("read test source");
-    let mut dumps = vec!["tokens", "ast", "expanded", "typed", "erl"];
+        let output = Command::new("elixir")
+            .arg(
+                exs_path
+                    .canonicalize()
+                    .unwrap_or_else(|_| panic!("canonicalize elixir test {}", exs_path.display())),
+            )
+            .current_dir(out_dir.path())
+            .output()
+            .expect("run elixir");
 
-    let mut header = source.lines().take_while(|line| line.starts_with("//"));
-    if let Some(extra) = header.find_map(|line| line.strip_prefix("// snapshot:")) {
-        dumps.extend(extra.split(',').map(str::trim));
-    }
-
-    let output = run_compile(&dumps, &["abstr", "beam"], pt_path, out_dir.path(), &externs, false);
-    let text_extensions: HashSet<&str> = TEXT_EXTENSIONS.iter().copied().collect();
-    let artifacts = read_text_artifacts(out_dir.path(), &text_extensions);
-
-    CompileOutput { artifacts, stderr: String::from_utf8_lossy(&output.stderr).into_owned() }
-}
-
-fn package_deps(pt_path: &Path, out_dir: &Path) -> Vec<String> {
-    let mut deps = Vec::new();
-    let is_pkg_test = pt_path.strip_prefix(crate::UI_ROOT).is_ok_and(|rel| rel.starts_with("pkg"));
-    if !is_pkg_test {
-        return deps;
+        if output.status.success() {
+            Ok(())
+        } else {
+            Err(Failed::from(format!(
+                "elixir test failed: {}\nstatus: {}\nstdout:\n{}stderr:\n{}",
+                exs_path.display(),
+                output.status,
+                String::from_utf8_lossy(&output.stdout),
+                String::from_utf8_lossy(&output.stderr),
+            )))
+        }
     }
 
-    for package in PACKAGES {
-        let src = Path::new(crate::PKG_SRC_ROOT).join(format!("{package}.pt"));
-        let source = std::fs::read_to_string(&src)
-            .unwrap_or_else(|_| panic!("read dependency package {}", src.display()));
-        let proc_macro = source.contains("ProcMacro");
-        let output = run_compile(&[], &["meta", "beam"], &src, out_dir, &deps, proc_macro);
-        assert!(
-            output.status.success(),
-            "failed to build dependency package {}:\nstdout:\n{}stderr:\n{}",
-            src.display(),
-            String::from_utf8_lossy(&output.stdout),
-            String::from_utf8_lossy(&output.stderr),
-        );
-        deps.push(package.to_case(Case::Pascal));
-    }
-    deps
-}
+    fn compile(&self, pt_path: &Path) -> CompileOutput {
+        let out_dir = tempfile::tempdir().expect("create temp out dir");
+        let externs = self.package_deps(pt_path, out_dir.path());
+        let source = std::fs::read_to_string(pt_path).expect("read test source");
+        let mut dumps = vec!["tokens", "ast", "expanded", "typed", "erl"];
 
-fn run_compile(
-    dumps: &[&str],
-    emits: &[&str],
-    pt_path: &Path,
-    out_dir: &Path,
-    externs: &[String],
-    proc_macro: bool,
-) -> Output {
-    let mut cmd = Command::new(env!("CARGO_BIN_EXE_patina"));
-    for dump in dumps {
-        cmd.arg("--dump").arg(*dump);
+        let mut header = source.lines().take_while(|line| line.starts_with("//"));
+        if let Some(extra) = header.find_map(|line| line.strip_prefix("// snapshot:")) {
+            dumps.extend(extra.split(',').map(str::trim));
+        }
+
+        let output =
+            self.run_compile(&dumps, &["abstr", "beam"], pt_path, out_dir.path(), &externs, false);
+        let text_extensions: HashSet<&str> = TEXT_EXTENSIONS.iter().copied().collect();
+        let artifacts = read_text_artifacts(out_dir.path(), &text_extensions);
+
+        CompileOutput { artifacts, stderr: String::from_utf8_lossy(&output.stderr).into_owned() }
     }
-    for emit in emits {
-        cmd.arg("--emit").arg(*emit);
+
+    fn package_deps(&self, pt_path: &Path, out_dir: &Path) -> Vec<String> {
+        let mut deps = Vec::new();
+        let is_pkg_test =
+            pt_path.strip_prefix(crate::UI_ROOT).is_ok_and(|rel| rel.starts_with("pkg"));
+        if !is_pkg_test {
+            return deps;
+        }
+
+        for package in PACKAGES {
+            let src = Path::new(crate::PKG_SRC_ROOT).join(format!("{package}.pt"));
+            let source = std::fs::read_to_string(&src)
+                .unwrap_or_else(|_| panic!("read dependency package {}", src.display()));
+            let proc_macro = source.contains("ProcMacro");
+            let output = self.run_compile(&[], &["meta", "beam"], &src, out_dir, &deps, proc_macro);
+            assert!(
+                output.status.success(),
+                "failed to build dependency package {}:\nstdout:\n{}stderr:\n{}",
+                src.display(),
+                String::from_utf8_lossy(&output.stdout),
+                String::from_utf8_lossy(&output.stderr),
+            );
+            deps.push(package.to_case(Case::Pascal));
+        }
+        deps
     }
-    for name in externs {
-        cmd.arg("--extern").arg(name);
+
+    fn run_compile(
+        &self,
+        dumps: &[&str],
+        emits: &[&str],
+        pt_path: &Path,
+        out_dir: &Path,
+        externs: &[String],
+        proc_macro: bool,
+    ) -> Output {
+        let mut cmd = Command::new(env!("CARGO_BIN_EXE_patina"));
+        for dump in dumps {
+            cmd.arg("--dump").arg(*dump);
+        }
+        for emit in emits {
+            cmd.arg("--emit").arg(*emit);
+        }
+        for name in externs {
+            cmd.arg("--extern").arg(name);
+        }
+        if proc_macro {
+            cmd.arg("--extern").arg("ProcMacro");
+        }
+        cmd.arg("--compile-server").arg(&self.compile_server);
+        cmd.arg("--out-dir").arg(out_dir).arg(pt_path);
+        cmd.output().expect("run patina")
     }
-    if proc_macro {
-        cmd.arg("--extern").arg("ProcMacro");
-    }
-    cmd.arg("--out-dir").arg(out_dir).arg(pt_path);
-    cmd.output().expect("run patina")
 }
 
 fn read_text_artifacts(out_dir: &Path, extensions: &HashSet<&str>) -> Vec<TextArtifact> {

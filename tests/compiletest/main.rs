@@ -1,8 +1,10 @@
+mod compile_server;
 mod runner;
 mod snapshot;
 
 use std::path::Path;
 use std::process::ExitCode;
+use std::sync::Arc;
 
 use clap::Parser;
 use libtest_mimic::Trial;
@@ -30,7 +32,20 @@ struct Args {
 fn main() -> ExitCode {
     let args = Args::parse();
 
-    let trials = match collect_snapshot_trials(args.bless) {
+    let server = match compile_server::CompileServer::start() {
+        Ok(server) => server,
+        Err(e) => {
+            eprintln!("compiletest: failed to start the compile server: {e}");
+            return ExitCode::FAILURE;
+        }
+    };
+
+    let runner = Arc::new(runner::Runner {
+        compile_server: server.sock_path().to_owned(),
+        bless: args.bless,
+    });
+
+    let trials = match collect_snapshot_trials(&runner) {
         Ok(t) => t,
         Err(e) => {
             eprintln!("compiletest: failed to collect snapshot trials: {e:#}");
@@ -42,7 +57,7 @@ fn main() -> ExitCode {
         return ExitCode::FAILURE;
     }
 
-    let trials = match collect_elixir_trials() {
+    let trials = match collect_elixir_trials(&runner) {
         Ok(t) => t,
         Err(e) => {
             eprintln!("compiletest: failed to collect elixir trials: {e:#}");
@@ -53,7 +68,7 @@ fn main() -> ExitCode {
     libtest_mimic::run(&args.mimic, trials).exit_code()
 }
 
-fn collect_snapshot_trials(bless: bool) -> anyhow::Result<Vec<Trial>> {
+fn collect_snapshot_trials(runner: &Arc<runner::Runner>) -> anyhow::Result<Vec<Trial>> {
     let ui_root = Path::new(UI_ROOT);
     if !ui_root.is_dir() {
         anyhow::bail!("{UI_ROOT} does not exist");
@@ -75,13 +90,14 @@ fn collect_snapshot_trials(bless: bool) -> anyhow::Result<Vec<Trial>> {
             path.strip_prefix(ui_root).expect("walkdir paths are under ui_root").to_path_buf();
 
         let test_name = rel.display().to_string();
-        trials.push(Trial::test(test_name, move || runner::run(&path, bless)));
+        let runner = Arc::clone(runner);
+        trials.push(Trial::test(test_name, move || runner.run(&path)));
     }
 
     Ok(trials)
 }
 
-fn collect_elixir_trials() -> anyhow::Result<Vec<Trial>> {
+fn collect_elixir_trials(runner: &Arc<runner::Runner>) -> anyhow::Result<Vec<Trial>> {
     let ui_root = Path::new(UI_ROOT);
     if !ui_root.is_dir() {
         anyhow::bail!("{UI_ROOT} does not exist");
@@ -108,7 +124,8 @@ fn collect_elixir_trials() -> anyhow::Result<Vec<Trial>> {
             exs_path.strip_prefix(ui_root).expect("walkdir paths are under ui_root").to_path_buf();
 
         let test_name = format!("{}::run", rel.display());
-        trials.push(Trial::test(test_name, move || runner::run_exs(&pt_path, &exs_path)));
+        let runner = Arc::clone(runner);
+        trials.push(Trial::test(test_name, move || runner.run_exs(&pt_path, &exs_path)));
     }
 
     Ok(trials)

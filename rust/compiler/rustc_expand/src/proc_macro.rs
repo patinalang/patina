@@ -27,11 +27,12 @@ use crate::errors;
 /// A failure reported by the macro runner.
 #[derive(Debug, Clone)]
 pub enum MacroRunError {
-    /// The macro raised an exception in the VM.
+    /// The macro raised an exception in the VM, or its process died.
     Raised(String),
     /// The macro exceeded the runner's execution timeout.
     Timeout,
     /// The runner itself failed: setup, I/O, or protocol handling.
+    /// We assume that the transport is unusable from then on.
     Transport(String),
 }
 
@@ -96,7 +97,9 @@ fn emit_expansion_failure(
         ExpansionFailure::Run(MacroRunError::Timeout) => {
             ecx.dcx().emit_err(errors::ProcMacroTimeout { span })
         }
-        ExpansionFailure::Run(MacroRunError::Transport(reason)) => execution_error(reason),
+        ExpansionFailure::Run(MacroRunError::Transport(reason)) => {
+            ecx.dcx().emit_fatal(errors::ProcMacroExecutionError { span, reason })
+        }
         ExpansionFailure::Encode(TokenEncodeError::Lifetime { span }) => lifetime(span),
         ExpansionFailure::Encode(TokenEncodeError::Etf { details }) => execution_error(details),
         ExpansionFailure::Decode(TokenDecodeError::Lifetime { span }) => lifetime(span),
