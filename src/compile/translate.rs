@@ -13,14 +13,13 @@ use rustc_data_structures::smallvec::SmallVec;
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{LocalDefId, LocalModDefId};
 use rustc_hir::{FieldDef, ItemKind, Mod};
-use rustc_middle::erl::{ErlModuleId, ErlReprKind, ErlVariantRepr};
+use rustc_middle::erl::{ErlImplFn, ErlModuleId, ErlReprKind, ErlVariantRepr};
 use rustc_middle::ty::{self, TyCtxt};
 use rustc_middle::{bug, span_bug};
 use rustc_span::{Span, Symbol, sym};
 use scopes::Scopes;
 
 use crate::compile::eaf_builder::EafBuilder;
-use crate::compile::impl_collector::ImplCollector;
 use crate::erlang::abstract_format as eaf;
 
 #[macro_export]
@@ -57,16 +56,11 @@ struct Function<'arena> {
 pub(super) struct Translator<'tcx, 'arena> {
     tcx: TyCtxt<'tcx>,
     afb: EafBuilder<'tcx, 'arena>,
-    impls: ImplCollector<'tcx>,
 }
 
 impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
     pub fn new(tcx: TyCtxt<'tcx>, arena: &'arena DroplessArena) -> Translator<'tcx, 'arena> {
-        Translator {
-            tcx,
-            afb: EafBuilder::new(tcx.sess.source_map(), arena),
-            impls: ImplCollector::new(tcx),
-        }
+        Translator { tcx, afb: EafBuilder::new(tcx.sess.source_map(), arena) }
     }
 
     fn translate_body(&self, owner: LocalDefId, scopes: &mut Scopes) -> TranslatedBody<'arena> {
@@ -76,26 +70,26 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
     }
 
     pub fn translate(&self) -> Vec<(Symbol, eaf::Module<'arena>)> {
-        let mut modules = Vec::new();
+        self.tcx
+            .erl_local_modules(())
+            .keys()
+            .map(|&module_id| match module_id {
+                ErlModuleId::Mod(def_id) => self.translate_module(def_id.expect_local()),
 
-        for owner in self.tcx.hir_crate_items(()).owners() {
-            let def_id = owner.def_id;
+                ErlModuleId::Adt(def_id) => match self.tcx.def_kind(def_id) {
+                    DefKind::Struct => self.translate_struct(def_id.expect_local()),
+                    DefKind::Enum => self.translate_enum(def_id.expect_local()),
+                    kind => bug!("Erlang module for a {kind:?}"),
+                },
 
-            let form = match self.tcx.def_kind(def_id) {
-                DefKind::Mod => self.translate_module(def_id),
-                DefKind::Struct => self.translate_struct(def_id),
-                DefKind::Enum => self.translate_enum(def_id),
-                _ => continue,
-            };
+                ErlModuleId::Prim(_)
+                | ErlModuleId::AdtImplHost(..)
+                | ErlModuleId::PrimImplHost(..)
+                | ErlModuleId::BlanketImplHost(_) => self.translate_impl_only_module(module_id),
 
-            modules.push(form);
-        }
-
-        for module_id in self.impls.impl_only_modules() {
-            modules.push(self.translate_impl_only_module(*module_id));
-        }
-
-        modules
+                ErlModuleId::Extern(_) => bug!("local Erlang module {module_id:?} is extern"),
+            })
+            .collect()
     }
 
     fn translate_module(&self, def_id: LocalDefId) -> (Symbol, eaf::Module<'arena>) {
@@ -406,32 +400,20 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
     }
 
     fn collect_impl_fns(&self, module_id: ErlModuleId, parts: &mut ModuleParts<'arena>) {
-        let Some(impls) = self.impls.impls_for(module_id) else { return };
         let tcx = self.tcx;
+        let Some(impls) = tcx.erl_local_modules(()).get(&module_id) else { return };
 
-        for (impl_def_id, imp) in impls {
-            let trait_def_id = tcx.impl_opt_trait_id(*impl_def_id);
-
-            // Inherent consts and types don't become functions, and neither do intrinsics.
-            for item in tcx.associated_items(*impl_def_id).in_definition_order() {
-                if (trait_def_id.is_some() || item.is_fn())
-                    && !item.is_impl_trait_in_trait()
-                    && tcx.intrinsic(item.def_id).is_none()
-                {
-                    let function = self.translate_assoc_item(module_id, item);
-                    self.push_function(parts, function);
-                }
-            }
-
-            if let Some(trait_def_id) = trait_def_id
-                && tcx.erl_trait_needs_witness(trait_def_id)
-            {
-                let function = self.translate_callable(
-                    impl_def_id.expect_local(),
-                    tcx.erl_impl_member_name(*impl_def_id, "$patina_witness"),
-                    imp.self_ty.span,
-                    true,
-                );
+        for &impl_def_id in *impls {
+            for impl_fn in tcx.erl_impl_fns(impl_def_id) {
+                let function = match impl_fn {
+                    ErlImplFn::Item(item) => self.translate_assoc_item(module_id, item),
+                    ErlImplFn::Witness => self.translate_callable(
+                        impl_def_id,
+                        tcx.erl_impl_member_name(impl_def_id.to_def_id(), "$patina_witness"),
+                        self.impl_self_ty_span(impl_def_id),
+                        true,
+                    ),
+                };
                 self.push_function(parts, function);
             }
         }
@@ -440,12 +422,10 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
     fn translate_impl_only_module(&self, module_id: ErlModuleId) -> (Symbol, eaf::Module<'arena>) {
         let mod_name = self.tcx.erl_module_name(module_id);
 
-        let impls = self
-            .impls
-            .impls_for(module_id)
-            .unwrap_or_else(|| bug!("impl-only module has no impls"));
-
-        let span = impls[0].1.self_ty.span;
+        let span = match self.tcx.erl_local_modules(()).get(&module_id) {
+            Some(&&[first, ..]) => self.impl_self_ty_span(first),
+            _ => bug!("impl-only module has no impls"),
+        };
 
         let mut parts = self.module_parts(span);
         parts.forms.push(elixir_compat::info_function(&self.afb, span, None));
@@ -453,6 +433,10 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
 
         self.collect_impl_fns(module_id, &mut parts);
         self.assemble_module(span, mod_name, [], parts)
+    }
+
+    fn impl_self_ty_span(&self, impl_def_id: LocalDefId) -> Span {
+        self.tcx.hir_expect_item(impl_def_id).expect_impl().self_ty.span
     }
 }
 

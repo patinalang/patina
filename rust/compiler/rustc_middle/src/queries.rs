@@ -1291,6 +1291,13 @@ rustc_queries! {
         desc { "computing the Erlang module name for `{module:?}`" }
     }
 
+    /// Every Erlang module emitted by the local crate, mapped to the impls hosted by that module.
+    /// Impls that produce no Erlang functions are left out.
+    query erl_local_modules(_: ()) -> &'tcx FxIndexMap<crate::erl::ErlModuleId, &'tcx [LocalDefId]> {
+        arena_cache
+        desc { "collecting the Erlang modules of the local crate" }
+    }
+
     /// The runtime representation of every variant of an ADT, indexed by `VariantIdx`.
     query erl_adt_reprs(def_id: DefId) -> &'tcx [crate::erl::ErlVariantRepr] {
         desc { "computing the Erlang representations of `{}`", tcx.def_path_str(def_id) }

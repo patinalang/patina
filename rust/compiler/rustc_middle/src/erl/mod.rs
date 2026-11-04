@@ -9,6 +9,7 @@ use std::hash::Hash as _;
 
 use convert_case::{Case, Casing};
 use rustc_abi::{FIRST_VARIANT, FieldIdx};
+use rustc_data_structures::fx::FxIndexMap;
 use rustc_data_structures::stable_hasher::StableHasher;
 use rustc_hashes::Hash128;
 use rustc_hir::attrs::{AttributeKind, ErlTagStyle, ReprAttr, ReprAttrModifier};
@@ -46,6 +47,15 @@ pub enum ErlModuleId {
     PrimImplHost(CrateNum, PrimTy),
     /// Impls without a host type land here, e.g. `impl<T: Show> Display for T`.
     BlanketImplHost(CrateNum),
+}
+
+/// An Erlang function produced by an impl.
+#[derive(Copy, Clone, Debug)]
+pub enum ErlImplFn<'tcx> {
+    /// An associated item of the impl.
+    Item(&'tcx ty::AssocItem),
+    /// The impl's witness, `$patina_witness`.
+    Witness,
 }
 
 /// The semantic target of an Erlang call.
@@ -111,6 +121,21 @@ enum ErlTag {
 }
 
 impl<'tcx> TyCtxt<'tcx> {
+    /// The Erlang functions produced by an impl.
+    pub fn erl_impl_fns(self, impl_def_id: LocalDefId) -> impl Iterator<Item = ErlImplFn<'tcx>> {
+        let trait_def_id = self.impl_opt_trait_id(impl_def_id);
+        let items = self.associated_items(impl_def_id).in_definition_order().filter(move |item| {
+            (trait_def_id.is_some() || item.is_fn())
+                && !item.is_impl_trait_in_trait()
+                && self.intrinsic(item.def_id).is_none()
+        });
+        let witness = trait_def_id
+            .is_some_and(|trait_def_id| self.erl_trait_needs_witness(trait_def_id))
+            .then_some(ErlImplFn::Witness);
+
+        items.map(ErlImplFn::Item).chain(witness)
+    }
+
     /// Determines the generated module in which a Rust definition is emitted.
     pub fn erl_definition_module(self, def_id: impl Into<DefId>) -> Option<ErlModuleId> {
         let mut def_id = def_id.into();
@@ -1038,6 +1063,39 @@ fn erl_module_name(tcx: TyCtxt<'_>, module: ErlModuleId) -> Symbol {
     }
 }
 
+/// Provider for [`TyCtxt::erl_local_modules`].
+fn erl_local_modules(tcx: TyCtxt<'_>, (): ()) -> FxIndexMap<ErlModuleId, &[LocalDefId]> {
+    let mut hosted = FxIndexMap::<ErlModuleId, Vec<LocalDefId>>::default();
+
+    for owner in tcx.hir_crate_items(()).owners() {
+        let def_id = owner.to_def_id();
+        let module = match tcx.def_kind(def_id) {
+            DefKind::Mod => ErlModuleId::Mod(def_id),
+            DefKind::Struct | DefKind::Enum => ErlModuleId::Adt(def_id),
+            _ => continue,
+        };
+        hosted.insert(module, Vec::new());
+    }
+
+    for item_id in tcx.hir_free_items() {
+        let def_id = item_id.owner_id.def_id;
+        if !matches!(tcx.def_kind(def_id), DefKind::Impl { .. })
+            || tcx.erl_impl_fns(def_id).next().is_none()
+        {
+            continue;
+        }
+
+        let Some(module) = tcx.erl_definition_module(def_id) else {
+            let span = tcx.hir_expect_item(def_id).expect_impl().self_ty.span;
+            tcx.dcx()
+                .span_fatal(span, "inherent impl on a type without a module not yet implemented");
+        };
+        hosted.entry(module).or_default().push(def_id);
+    }
+
+    hosted.into_iter().map(|(module, impls)| (module, &*tcx.arena.alloc_slice(&impls))).collect()
+}
+
 /// `Elixir.Patina.<Crate>.$impl.<SelfTypePath>`
 fn erl_impl_host_name(tcx: TyCtxt<'_>, krate: CrateNum, self_module: Symbol) -> Symbol {
     let self_module = self_module.as_str();
@@ -1069,6 +1127,7 @@ pub fn provide(providers: &mut Providers) {
         erl_assoc_type_bounds: witness::erl_assoc_type_bounds,
         erl_bounds: witness::erl_bounds,
         erl_module_name,
+        erl_local_modules,
         erl_shape_of_ty: shape::erl_shape_of_ty,
         erl_variant_wrap_guards: shape::erl_variant_wrap_guards,
         ..*providers
