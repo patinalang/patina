@@ -1298,6 +1298,18 @@ rustc_queries! {
         desc { "collecting the Erlang modules of the local crate" }
     }
 
+    /// The names of every BEAM module emitted by a crate.
+    query beam_modules(_: CrateNum) -> &'tcx FxIndexSet<Symbol> {
+        arena_cache
+        desc { "listing the BEAM modules of a crate" }
+        separate_provide_extern
+    }
+
+    /// Reject local Erlang modules with the same name, and lint against deps' modules.
+    query check_erl_module_clashes(_: ()) {
+        desc { "checking Erlang modules against the modules of dependencies" }
+    }
+
     /// The runtime representation of every variant of an ADT, indexed by `VariantIdx`.
     query erl_adt_reprs(def_id: DefId) -> &'tcx [crate::erl::ErlVariantRepr] {
         desc { "computing the Erlang representations of `{}`", tcx.def_path_str(def_id) }

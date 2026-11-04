@@ -326,6 +326,7 @@ provide! { tcx, def_id, other, cdata,
     dylib_dependency_formats => { cdata.get_dylib_dependency_formats(tcx) }
     is_private_dep => { cdata.private_dep }
     is_panic_runtime => { cdata.root.panic_runtime }
+    beam_modules => { cdata.root.beam_modules.decode((cdata, tcx)).collect() }
     is_compiler_builtins => { cdata.root.compiler_builtins }
 
     // FIXME: to be replaced with externally_implementable_items below

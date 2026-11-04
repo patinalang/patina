@@ -48,7 +48,10 @@ impl From<&PackageDependency> for ExternEntry {
             is_private_dep: false,
             add_prelude: dep.name != CORE_PACKAGE_NAME,
             nounused_dep: dep.name == CORE_PACKAGE_NAME,
-            force: dep.name == CORE_PACKAGE_NAME,
+            // Even if no code uses a dependency, specifying it still causes
+            // its Erlang app to be loaded. By marking `force: true` we're
+            // making sure unused dependencies are still processed.
+            force: true,
         }
     }
 }

@@ -1,0 +1,18 @@
+Pound
+OpenBracket
+Ident
+Whitespace
+Eq
+Whitespace
+Literal { kind: Str { terminated: true }, suffix_start: 15 }
+CloseBracket
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+OpenBrace
+CloseBrace
+Whitespace

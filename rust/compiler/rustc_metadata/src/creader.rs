@@ -1106,7 +1106,7 @@ impl CStore {
                 // Don't worry about pathless `--extern foo` sysroot references
                 continue;
             }
-            if entry.nounused_dep || entry.force {
+            if entry.nounused_dep {
                 // We're not worried about this one
                 continue;
             }
@@ -1168,12 +1168,13 @@ impl CStore {
 
     pub fn postprocess(&mut self, tcx: TyCtxt<'_>, krate: &ast::Crate) {
         self.inject_compiler_builtins(tcx, krate);
+        // Run before injecting forced externs, which marks them as used.
+        self.report_unused_deps_in_crate(tcx, krate);
         self.inject_forced_externs(tcx);
         self.inject_profiler_runtime(tcx);
         self.inject_allocator_crate(tcx, krate);
         self.inject_panic_runtime(tcx, krate);
 
-        self.report_unused_deps_in_crate(tcx, krate);
         self.report_future_incompatible_deps(tcx, krate);
 
         info!("{:?}", CrateDump(self));

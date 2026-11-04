@@ -704,6 +704,9 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
         // Encode the proc macro data. This affects `tables`, so we need to do this before we
         // encode the tables.
         let proc_macros = stat!("proc-macro-data", || self.encode_proc_macros());
+        let beam_modules = stat!("beam-modules", || {
+            self.lazy_array(tcx.beam_modules(LOCAL_CRATE).iter().copied())
+        });
 
         let tables = stat!("tables", || self.tables.encode(&mut self.opaque));
 
@@ -762,6 +765,7 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
                 has_default_lib_allocator: find_attr!(attrs, DefaultLibAllocator),
                 externally_implementable_items,
                 proc_macros,
+                beam_modules,
                 debugger_visualizers,
                 compiler_builtins: find_attr!(attrs, CompilerBuiltins),
                 needs_allocator: find_attr!(attrs, NeedsAllocator),

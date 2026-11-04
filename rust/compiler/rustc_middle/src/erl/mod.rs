@@ -9,21 +9,23 @@ use std::hash::Hash as _;
 
 use convert_case::{Case, Casing};
 use rustc_abi::{FIRST_VARIANT, FieldIdx};
-use rustc_data_structures::fx::FxIndexMap;
+use rustc_data_structures::fx::{FxHashMap, FxIndexMap, FxIndexSet};
 use rustc_data_structures::stable_hasher::StableHasher;
 use rustc_hashes::Hash128;
 use rustc_hir::attrs::{AttributeKind, ErlTagStyle, ReprAttr, ReprAttrModifier};
 use rustc_hir::def::DefKind;
 use rustc_hir::def_id::{CrateNum, DefId, LocalDefId};
 use rustc_hir::definitions::DefPathData;
-use rustc_hir::{Attribute, HirId, PrimTy};
+use rustc_hir::{Attribute, CRATE_HIR_ID, HirId, PrimTy};
 use rustc_macros::{StableHash, TyDecodable, TyEncodable};
+use rustc_session::lint::builtin::CLASHING_ERLANG_MODULES;
 use rustc_span::{Span, Symbol, kw};
 use smallvec::{SmallVec, smallvec};
 
 use self::shape::ErlShape;
 use crate::erl::etir::visit::Visitor;
-use crate::query::Providers;
+use crate::error::{DuplicateDependencyErlModule, DuplicateErlModule, PreviousErlModule};
+use crate::query::{LocalCrate, Providers};
 use crate::ty::print::PrintTraitRefExt as _;
 use crate::ty::{
     self, AdtDef, FieldDef, GenericArgsRef, Ty, TyCtxt, TypingEnv, Unnormalized, VariantDef,
@@ -1096,6 +1098,76 @@ fn erl_local_modules(tcx: TyCtxt<'_>, (): ()) -> FxIndexMap<ErlModuleId, &[Local
     hosted.into_iter().map(|(module, impls)| (module, &*tcx.arena.alloc_slice(&impls))).collect()
 }
 
+/// Provider for [`TyCtxt::beam_modules`] of the local crate.
+fn beam_modules(tcx: TyCtxt<'_>, LocalCrate: LocalCrate) -> FxIndexSet<Symbol> {
+    tcx.erl_local_modules(()).keys().map(|&module| tcx.erl_module_name(module)).collect()
+}
+
+/// Provider for [`TyCtxt::check_erl_module_clashes`].
+fn check_erl_module_clashes(tcx: TyCtxt<'_>, (): ()) {
+    #[derive(Clone, Copy)]
+    enum Emitter {
+        Local(LocalDefId),
+        Dependency(CrateNum),
+    }
+
+    let mut seen = FxHashMap::<Symbol, Emitter>::default();
+
+    for &krate in tcx.crates(()) {
+        for &name in tcx.beam_modules(krate) {
+            let Some(&Emitter::Dependency(previous)) = seen.get(&name) else {
+                seen.insert(name, Emitter::Dependency(krate));
+                continue;
+            };
+            tcx.emit_node_lint(
+                CLASHING_ERLANG_MODULES,
+                CRATE_HIR_ID,
+                DuplicateDependencyErlModule {
+                    name,
+                    package: tcx.crate_name(krate),
+                    previous_package: tcx.crate_name(previous),
+                },
+            );
+        }
+    }
+
+    for (&module, impls) in tcx.erl_local_modules(()) {
+        let name = tcx.erl_module_name(module);
+
+        let def_id = match module {
+            ErlModuleId::Mod(def_id) | ErlModuleId::Adt(def_id) => def_id.expect_local(),
+            // Impl-only modules have no item of their own, so report them at their first impl.
+            _ => impls[0],
+        };
+        let span = tcx.def_span(def_id);
+
+        match seen.get(&name).copied() {
+            Some(Emitter::Local(previous)) => {
+                tcx.dcx().emit_err(DuplicateErlModule {
+                    span,
+                    name,
+                    previous: PreviousErlModule::Local { span: tcx.def_span(previous) },
+                });
+                continue;
+            }
+            Some(Emitter::Dependency(krate)) => tcx.emit_node_span_lint(
+                CLASHING_ERLANG_MODULES,
+                tcx.local_def_id_to_hir_id(def_id),
+                span,
+                DuplicateErlModule {
+                    span,
+                    name,
+                    previous: PreviousErlModule::Dependency {
+                        previous_package: tcx.crate_name(krate),
+                    },
+                },
+            ),
+            None => {}
+        }
+        seen.insert(name, Emitter::Local(def_id));
+    }
+}
+
 /// `Elixir.Patina.<Crate>.$impl.<SelfTypePath>`
 fn erl_impl_host_name(tcx: TyCtxt<'_>, krate: CrateNum, self_module: Symbol) -> Symbol {
     let self_module = self_module.as_str();
@@ -1128,6 +1200,8 @@ pub fn provide(providers: &mut Providers) {
         erl_bounds: witness::erl_bounds,
         erl_module_name,
         erl_local_modules,
+        beam_modules,
+        check_erl_module_clashes,
         erl_shape_of_ty: shape::erl_shape_of_ty,
         erl_variant_wrap_guards: shape::erl_variant_wrap_guards,
         ..*providers

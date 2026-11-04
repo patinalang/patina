@@ -115,6 +115,7 @@ const ALLOWED_CAPITALIZED_WORDS: &[&str] = &[
     "C-variadic",
     "CGU-reuse",
     "Cargo",
+    "Erlang",
     "Ferris",
     "GCC",
     "MIR",

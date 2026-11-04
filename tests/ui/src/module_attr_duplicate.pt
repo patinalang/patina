@@ -1,0 +1,10 @@
+#![allow(dead_code)]
+
+#[module = "duplicated_module"]
+mod First {}
+
+#[module = "duplicated_module"]
+struct Second;
+
+#[module = "other_module"]
+mod Third {}

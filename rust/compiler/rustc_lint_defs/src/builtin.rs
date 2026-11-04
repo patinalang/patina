@@ -29,6 +29,7 @@ declare_lint_pass! {
         BARE_TRAIT_OBJECTS,
         BINDINGS_WITH_VARIANT_NAME,
         BREAK_WITH_LABEL_AND_LOOP,
+        CLASHING_ERLANG_MODULES,
         COHERENCE_LEAK_CHECK,
         CONFLICTING_REPR_HINTS,
         CONST_EVALUATABLE_UNCHECKED,
@@ -5636,4 +5637,17 @@ declare_lint! {
         reason: fcw!(FutureReleaseError #154024),
         report_in_deps: false,
     };
+}
+
+declare_lint! {
+    /// The `clashing_erlang_modules` lint detects an Erlang module that is also emitted by one of
+    /// the package's dependencies, e.g. because both name it with `#[module = "..."]`.
+    ///
+    /// ### Explanation
+    ///
+    /// The BEAM has one global namespace of modules. When both packages are loaded, one of the
+    /// modules replaces the other, and calls meant for one of them reach the other.
+    pub CLASHING_ERLANG_MODULES,
+    Warn,
+    "detects Erlang modules that are also emitted by a dependency"
 }

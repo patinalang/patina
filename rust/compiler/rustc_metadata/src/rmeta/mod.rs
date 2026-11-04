@@ -274,6 +274,7 @@ pub(crate) struct CrateRoot {
     incoherent_impls: LazyArray<IncoherentImpls>,
     interpret_alloc_index: LazyArray<u64>,
     proc_macros: LazyArray<DefIndex>,
+    beam_modules: LazyArray<Symbol>,
 
     tables: LazyTables,
     debugger_visualizers: LazyArray<DebuggerVisualizerFile>,

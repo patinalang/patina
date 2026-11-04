@@ -157,3 +157,34 @@ pub(crate) struct IncrementCompilation {
     pub run_cmd: String,
     pub dep_node: String,
 }
+
+#[derive(Diagnostic)]
+#[diag("Erlang module `{$name}` is emitted more than once")]
+pub(crate) struct DuplicateErlModule {
+    #[primary_span]
+    pub span: Span,
+    pub name: Symbol,
+    #[subdiagnostic]
+    pub previous: PreviousErlModule,
+}
+
+#[derive(Subdiagnostic)]
+pub(crate) enum PreviousErlModule {
+    #[label("first emitted here")]
+    Local {
+        #[primary_span]
+        span: Span,
+    },
+    #[note("also emitted by package `{$previous_package}`")]
+    Dependency { previous_package: Symbol },
+}
+
+#[derive(Diagnostic)]
+#[diag("Erlang module `{$name}` is emitted by more than one dependency")]
+#[note("emitted by package `{$package}`")]
+#[note("also emitted by package `{$previous_package}`")]
+pub(crate) struct DuplicateDependencyErlModule {
+    pub name: Symbol,
+    pub package: Symbol,
+    pub previous_package: Symbol,
+}

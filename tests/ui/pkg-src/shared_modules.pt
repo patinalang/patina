@@ -1,0 +1,6 @@
+#[module = "shared_module"]
+pub mod Shared {
+    pub fn answer() -> int {
+        42
+    }
+}

@@ -1190,6 +1190,9 @@ fn analysis(tcx: TyCtxt<'_>, (): ()) {
                     &mut || {
                         tcx.ensure_ok().clashing_extern_declarations(());
                     },
+                    &mut || {
+                        tcx.ensure_ok().check_erl_module_clashes(());
+                    },
                 ]);
             },
             &mut || {

@@ -1,0 +1,11 @@
+warning: Erlang module `shared_module` is emitted more than once
+  --> tests/ui/src/pkg/module_clash.pt:2:1
+   |
+LL | pub mod Mine {}
+   | ^^^^^^^^^^^^
+   |
+   = note: also emitted by package `SharedModules`
+   = note: `#[warn(clashing_erlang_modules)]` on by default
+
+warning: 1 warning emitted
+

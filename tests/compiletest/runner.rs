@@ -23,6 +23,7 @@ const PACKAGES: &[&str] = &[
     "macros",
     "reexports",
     "inlines",
+    "shared_modules",
 ];
 
 struct TextArtifact {

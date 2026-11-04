@@ -1,0 +1,11 @@
+error: Erlang module `duplicated_module` is emitted more than once
+  --> tests/ui/src/module_attr_duplicate.pt:7:1
+   |
+LL | mod First {}
+   | --------- first emitted here
+...
+LL | struct Second;
+   | ^^^^^^^^^^^^^
+
+error: aborting due to 1 previous error
+
