@@ -10,30 +10,6 @@ error[E0433]: cannot find type `Std` in this scope
 LL | use Std::Convert::TryInto;
    |     ^^^ use of undeclared type `Std`
 
-error: cannot find macro `assert_eq` in this scope
-  --> tests/ui/src/conversion/try_from_try_into__01.pt:33:5
-   |
-LL |     assert_eq!(result, Err(()));
-   |     ^^^^^^^^^
-
-error: cannot find macro `assert_eq` in this scope
-  --> tests/ui/src/conversion/try_from_try_into__01.pt:31:5
-   |
-LL |     assert_eq!(result, Ok(EvenNumber(8)));
-   |     ^^^^^^^^^
-
-error: cannot find macro `assert_eq` in this scope
-  --> tests/ui/src/conversion/try_from_try_into__01.pt:26:5
-   |
-LL |     assert_eq!(EvenNumber::try_from(5), Err(()));
-   |     ^^^^^^^^^
-
-error: cannot find macro `assert_eq` in this scope
-  --> tests/ui/src/conversion/try_from_try_into__01.pt:25:5
-   |
-LL |     assert_eq!(EvenNumber::try_from(8), Ok(EvenNumber(8)));
-   |     ^^^^^^^^^
-
 error: cannot find derive macro `Debug` in this scope
   --> tests/ui/src/conversion/try_from_try_into__01.pt:7:10
    |
@@ -77,6 +53,30 @@ error[E0425]: cannot find function, tuple struct or tuple variant `Err` in this 
    |
 LL |             Err(())
    |             ^^^ not found in this scope
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Ok` in this scope
+  --> tests/ui/src/conversion/try_from_try_into__01.pt:25:41
+   |
+LL |     assert_eq!(EvenNumber::try_from(8), Ok(EvenNumber(8)));
+   |                                         ^^ not found in this scope
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Err` in this scope
+  --> tests/ui/src/conversion/try_from_try_into__01.pt:26:41
+   |
+LL |     assert_eq!(EvenNumber::try_from(5), Err(()));
+   |                                         ^^^ not found in this scope
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Ok` in this scope
+  --> tests/ui/src/conversion/try_from_try_into__01.pt:31:24
+   |
+LL |     assert_eq!(result, Ok(EvenNumber(8)));
+   |                        ^^ not found in this scope
+
+error[E0425]: cannot find function, tuple struct or tuple variant `Err` in this scope
+  --> tests/ui/src/conversion/try_from_try_into__01.pt:33:24
+   |
+LL |     assert_eq!(result, Err(()));
+   |                        ^^^ not found in this scope
 
 error: aborting due to 13 previous errors
 

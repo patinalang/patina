@@ -1,8 +1,0 @@
-error: cannot find macro `assert_eq` in this scope
-  --> tests/ui/src/error/option_unwrap/question_mark__02.pt:38:5
-   |
-LL |     assert_eq!(p.work_phone_area_code(), Some(61));
-   |     ^^^^^^^^^
-
-error: aborting due to 1 previous error
-

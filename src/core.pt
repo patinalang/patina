@@ -63,6 +63,30 @@ macro_rules! format {
     };
 }
 
+#[macro_export]
+macro_rules! assert_eq {
+    (@impl $left:expr, $right:expr, $message:expr) => {
+        match ($left, $right) {
+            (left_val, right_val) => {
+                if !(left_val == right_val) {
+                    $crate::panic!(@raise $crate::format!(
+                        "assertion `left == right` failed{}\n  left: {:?}\n right: {:?}",
+                        $message,
+                        left_val,
+                        right_val,
+                    ))
+                }
+            }
+        }
+    };
+    ($left:expr, $right:expr $(,)?) => {
+        $crate::assert_eq!(@impl $left, $right, "")
+    };
+    ($left:expr, $right:expr, $($arg:tt)+) => {
+        $crate::assert_eq!(@impl $left, $right, $crate::format!(": {}", $crate::format!($($arg)+)))
+    };
+}
+
 #[repr(Elixir)]
 pub struct Panic {
     __exception__: bool,

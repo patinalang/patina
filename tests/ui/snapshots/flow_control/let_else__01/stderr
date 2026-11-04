@@ -4,12 +4,6 @@ error[E0432]: unresolved import `str`
 LL | use str::FromStr;
    |     ^^^ `str` is a builtin type, not a module
 
-error: cannot find macro `assert_eq` in this scope
-  --> tests/ui/src/flow_control/let_else__01.pt:21:5
-   |
-LL |     assert_eq!(get_count_item("3 chairs"), (3, "chairs"));
-   |     ^^^^^^^^^
-
 error[E0531]: cannot find tuple struct or tuple variant `Ok` in this scope
   --> tests/ui/src/flow_control/let_else__01.pt:14:9
    |
@@ -28,7 +22,7 @@ error[E0599]: no associated function or constant named `from_str` found for type
 LL |     let Ok(count) = int::from_str(count_str) else {
    |                          ^^^^^^^^ associated function or constant not found in `int`
 
-error: aborting due to 5 previous errors
+error: aborting due to 4 previous errors
 
 Some errors have detailed explanations: E0432, E0531, E0599.
 For more information about an error, try `rustc --explain E0432`.

@@ -63,4 +63,38 @@ fn get_count_item(s: str)
     };
     (((count as {type error}), (item as str)) as (int, str))
 } as (int, str))
-fn main() ({ ((/*ERROR*/) as {type error}); } as ())
+fn main() ({
+    (match ((((get_count_item as
+                    fn(str) -> (int, str) {get_count_item})(("3 chairs" as str))
+                as (int, str)),
+            (((3 as int), ("chairs" as str)) as (int, str))) as
+            ((int, str), (int, str))) {
+        (left_val, right_val) => {
+            (if (!(((left_val as (int, str)) == (right_val as (int, str)) as
+                        bool)) as bool) {
+                (unsafe {
+                    (((::Core::erlang::error as
+                                fn(term, term, term) -> term)(((::Core::Panic::new as
+                                    fn(str) -> Core::Panic {Core::Panic::new})((unsafe {
+                                    (((::Core::unicode::characters_to_binary as
+                                                fn(term) -> term)(([("assertion `left == right` failed" as
+                                                        str),
+                                                    ((patina_fmt::display as fn(term) -> term)(("" as str)) as
+                                                        term), ("\n  left: " as str),
+                                                    ((patina_fmt::debug as
+                                                            fn(term) -> term)((left_val as (int, str))) as term),
+                                                    ("\n right: " as str),
+                                                    ((patina_fmt::debug as
+                                                            fn(term) -> term)((right_val as (int, str))) as term)] as
+                                                [term])) as term).cast_unchecked::<str>() as str)
+                                } as str)) as Core::Panic), (a"none" as atom),
+                            ([(((a"error_info" as atom),
+                                        (#{(a"module" as atom) =>
+                                                (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
+                                        as (atom, #{atom => atom}))] as [(atom, #{atom => atom})]))
+                            as term).cast_unchecked::<!>() as !)
+                } as ())
+            } as ())
+        }
+    } as ());
+} as ())

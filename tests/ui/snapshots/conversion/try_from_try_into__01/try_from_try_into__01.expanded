@@ -33,13 +33,77 @@ impl TryFrom<int> for EvenNumber {
 pub fn main() {
     // TryFrom
 
-    (/*ERROR*/);
-    (/*ERROR*/);
 
     // TryInto
 
+    match (EvenNumber::try_from(8), Ok(EvenNumber(8))) {
+        (left_val, right_val) => {
+            if !(left_val == right_val) {
+                unsafe {
+                    ::Core::erlang::error(::Core::Panic::new(unsafe {
+                                    ::Core::unicode::characters_to_binary(["assertion `left == right` failed",
+                                                    patina_fmt::display(""), "\n  left: ",
+                                                    patina_fmt::debug(left_val), "\n right: ",
+                                                    patina_fmt::debug(right_val)]).cast_unchecked::<str>()
+                                }), a"none",
+                            [(a"error_info",
+                                        #{a"module" =>
+                                                a"Elixir.Patina.Core.Panic"})]).cast_unchecked::<!>()
+                }
+            }
+        }
+    };
+    match (EvenNumber::try_from(5), Err(())) {
+        (left_val, right_val) => {
+            if !(left_val == right_val) {
+                unsafe {
+                    ::Core::erlang::error(::Core::Panic::new(unsafe {
+                                    ::Core::unicode::characters_to_binary(["assertion `left == right` failed",
+                                                    patina_fmt::display(""), "\n  left: ",
+                                                    patina_fmt::debug(left_val), "\n right: ",
+                                                    patina_fmt::debug(right_val)]).cast_unchecked::<str>()
+                                }), a"none",
+                            [(a"error_info",
+                                        #{a"module" =>
+                                                a"Elixir.Patina.Core.Panic"})]).cast_unchecked::<!>()
+                }
+            }
+        }
+    };
     let result: Result<EvenNumber, ()> = 8.try_into();
-    (/*ERROR*/);
+    match (result, Ok(EvenNumber(8))) {
+        (left_val, right_val) => {
+            if !(left_val == right_val) {
+                unsafe {
+                    ::Core::erlang::error(::Core::Panic::new(unsafe {
+                                    ::Core::unicode::characters_to_binary(["assertion `left == right` failed",
+                                                    patina_fmt::display(""), "\n  left: ",
+                                                    patina_fmt::debug(left_val), "\n right: ",
+                                                    patina_fmt::debug(right_val)]).cast_unchecked::<str>()
+                                }), a"none",
+                            [(a"error_info",
+                                        #{a"module" =>
+                                                a"Elixir.Patina.Core.Panic"})]).cast_unchecked::<!>()
+                }
+            }
+        }
+    };
     let result: Result<EvenNumber, ()> = 5.try_into();
-    (/*ERROR*/);
+    match (result, Err(())) {
+        (left_val, right_val) => {
+            if !(left_val == right_val) {
+                unsafe {
+                    ::Core::erlang::error(::Core::Panic::new(unsafe {
+                                    ::Core::unicode::characters_to_binary(["assertion `left == right` failed",
+                                                    patina_fmt::display(""), "\n  left: ",
+                                                    patina_fmt::debug(left_val), "\n right: ",
+                                                    patina_fmt::debug(right_val)]).cast_unchecked::<str>()
+                                }), a"none",
+                            [(a"error_info",
+                                        #{a"module" =>
+                                                a"Elixir.Patina.Core.Panic"})]).cast_unchecked::<!>()
+                }
+            }
+        }
+    };
 }
