@@ -170,10 +170,14 @@ Whitespace
 Ident
 Bang
 OpenParen
-Literal { kind: Str { terminated: true }, suffix_start: 33 }
+Literal { kind: Str { terminated: true }, suffix_start: 42 }
 Comma
 Whitespace
 Ident
+Dot
+Ident
+OpenParen
+CloseParen
 Dot
 Ident
 OpenParen

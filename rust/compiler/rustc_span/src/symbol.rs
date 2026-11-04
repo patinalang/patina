@@ -1414,6 +1414,7 @@ symbols! {
         name,
         names,
         native,
+        native_eq,
         native_link_modifiers,
         native_link_modifiers_as_needed,
         native_link_modifiers_bundle,

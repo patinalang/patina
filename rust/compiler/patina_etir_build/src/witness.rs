@@ -300,12 +300,16 @@ impl<'a, 'tcx> Lower<'a, 'tcx> {
 
     fn vtable(&mut self, impl_def_id: DefId, trait_def_id: DefId, span: Span) -> ExprId {
         let tcx = self.cx.tcx;
-        let implementors = tcx.impl_item_implementor_ids(impl_def_id);
 
         let fields = tcx
             .erl_vtable_items(trait_def_id)
             .map(|item| {
-                let &def_id = implementors.get(&item.def_id).unwrap_or(&item.def_id);
+                let def_id = tcx
+                    .trait_def(trait_def_id)
+                    .ancestors(tcx, impl_def_id)
+                    .ok()
+                    .and_then(|ancestors| ancestors.leaf_def(tcx, item.def_id))
+                    .map_or(item.def_id, |leaf| leaf.item.def_id);
 
                 let module = tcx.erl_definition_module(def_id).unwrap_or_else(|| {
                     span_bug!(span, "`{}` has no definition module", tcx.def_path_str(def_id))

@@ -1,0 +1,14 @@
+warning: fields `x` and `y` are never read
+  --> tests/ui/src/trait/native_eq.pt:20:5
+   |
+LL | struct HandWrittenNativeEq {
+   |        ------------------- fields in this struct
+LL |     x: int,
+   |     ^
+LL |     y: int,
+   |     ^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: 1 warning emitted
+

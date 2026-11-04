@@ -8,6 +8,8 @@
     arbitrary_self_types,
     decl_macro,
     intrinsics,
+    macro_metavar_expr,
+    min_specialization,
     never_type,
     allow_internal_unstable
 )]
@@ -414,6 +416,7 @@ pub trait PartialEq<Rhs = Self> {
     #[must_use]
     fn eq(self, other: Rhs) -> bool;
 
+    #[inline]
     #[must_use]
     fn ne(self, other: Rhs) -> bool {
         !self.eq(other)
@@ -423,12 +426,104 @@ pub trait PartialEq<Rhs = Self> {
 macro_rules! partial_eq_impl {
     ($($t:ty)*) => ($(
         impl PartialEq for $t {
+            #[inline]
             fn eq(self, other: $t) -> bool { self == other }
-            fn ne(self, other: $t) -> bool { self != other }
         }
     )*)
 }
 partial_eq_impl! { bool int float str atom bin bits char term }
+
+/// `T: NativeEq` means that `==` on `T` is exact term matching (`=:=`).
+///
+/// Implementing `NativeEq` for a type whose `PartialEq` isn't `=:=` is a logic error.
+#[lang = "native_eq"]
+pub trait NativeEq: PartialEq {}
+
+macro_rules! native_eq_impl {
+    ($($t:ty)*) => ($(
+        impl NativeEq for $t {}
+    )*)
+}
+native_eq_impl! { bool int float str atom bin bits char term }
+impl NativeEq for () {}
+
+impl PartialEq for () {
+    fn eq(self, _other: ()) -> bool {
+        true
+    }
+}
+
+macro_rules! tuple_partial_eq_impls {
+    ($T:ident) => {
+        tuple_partial_eq_impls!(@impl $T);
+    };
+    ($T:ident $($U:ident)+) => {
+        tuple_partial_eq_impls!($($U)+);
+        tuple_partial_eq_impls!(@impl $T $($U)+);
+    };
+    (@impl $($T:ident)+) => {
+        impl<$($T: PartialEq),+> PartialEq for ($($T,)+) {
+            default fn eq(self, other: ($($T,)+)) -> bool {
+                $( ${ignore($T)} self.${index()} == other.${index()} )&&+
+            }
+        }
+
+        impl<$($T: NativeEq),+> NativeEq for ($($T,)+) {}
+
+        impl<$($T: NativeEq),+> PartialEq for ($($T,)+) {
+            #[inline]
+            fn eq(self, other: ($($T,)+)) -> bool {
+                self as term == other as term
+            }
+        }
+    };
+}
+tuple_partial_eq_impls! { A B C D E F G H I J K L }
+
+impl<T: PartialEq> PartialEq for [T] {
+    default fn eq(self, other: [T]) -> bool {
+        match (self, other) {
+            ([left, left_tail @ ..], [right, right_tail @ ..]) => {
+                left == right && left_tail == right_tail
+            }
+            ([], []) => true,
+            _ => false,
+        }
+    }
+}
+
+impl<T: NativeEq> NativeEq for [T] {}
+
+impl<T: NativeEq> PartialEq for [T] {
+    #[inline]
+    fn eq(self, other: [T]) -> bool {
+        self as term == other as term
+    }
+}
+
+impl<K, V: PartialEq> PartialEq for #{K => V} {
+    default fn eq(self, other: #{K => V}) -> bool {
+        if self.size() != other.size() {
+            return false;
+        }
+        for (key, value) in self {
+            if other.get(key) != Some(value) {
+                return false;
+            }
+        }
+        true
+    }
+}
+
+// Keys need no bound: map keys are always compared as exact terms.
+impl<K, V: NativeEq> NativeEq for #{K => V} {}
+
+impl<K, V: NativeEq> PartialEq for #{K => V} {
+    #[inline]
+    fn eq(self, other: #{K => V}) -> bool {
+        self as term == other as term
+    }
+}
 
 #[lang = "partial_ord"]
 pub trait PartialOrd<Rhs = Self> {
@@ -467,6 +562,25 @@ pub enum Option<T> {
     #[lang = "Some"]
     #[repr(dynamic_wrap, tag = "some")]
     Some(T),
+}
+
+impl<T: PartialEq> PartialEq for Option<T> {
+    default fn eq(self, other: Option<T>) -> bool {
+        match (self, other) {
+            (Some(left), Some(right)) => left == right,
+            (None, None) => true,
+            _ => false,
+        }
+    }
+}
+
+impl<T: NativeEq> NativeEq for Option<T> {}
+
+impl<T: NativeEq> PartialEq for Option<T> {
+    #[inline]
+    fn eq(self, other: Option<T>) -> bool {
+        self as term == other as term
+    }
 }
 
 impl<T> Try for Option<T> {
@@ -860,6 +974,7 @@ impl Timeout {
 pub mod Prelude {
     pub use crate::Option::{None, Some};
     pub use crate::{
-        Copy, Fn, FnOnce, IntoIterator, Iterator, Option, PartialEq, PartialOrd, Timeout, derive,
+        Copy, Fn, FnOnce, IntoIterator, Iterator, NativeEq, Option, PartialEq, PartialOrd, Timeout,
+        derive,
     };
 }

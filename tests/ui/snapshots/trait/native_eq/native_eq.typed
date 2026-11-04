@@ -1,0 +1,183 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+struct EqByParity(int);
+
+impl PartialEq for EqByParity {
+    fn eq(self, other: EqByParity)
+        ->
+            bool ({
+        let EqByParity(a) = (self as EqByParity);
+        let EqByParity(b) = (other as EqByParity);
+        (((a as int) % (2 as int) as int) == ((b as int) % (2 as int) as int)
+            as bool)
+    } as bool)
+}
+
+fn eq_by_parity_eq(a: int, b: int)
+    ->
+        bool ({
+    (((EqByParity as fn(int) -> EqByParity {EqByParity})((a as int)) as
+            EqByParity) ==
+        ((EqByParity as fn(int) -> EqByParity {EqByParity})((b as int)) as
+            EqByParity) as bool)
+} as bool)
+
+fn eq_by_parity_terms_eq(a: int, b: int)
+    ->
+        bool ({
+    ((((EqByParity as fn(int) -> EqByParity {EqByParity})((a as int)) as
+                EqByParity) as term as term) ==
+        (((EqByParity as fn(int) -> EqByParity {EqByParity})((b as int)) as
+                EqByParity) as term as term) as bool)
+} as bool)
+
+struct HandWrittenNativeEq {
+    x: int,
+    y: int,
+}
+
+impl NativeEq for HandWrittenNativeEq { }
+
+impl PartialEq for HandWrittenNativeEq {
+    #[attr = Inline(Hint)]
+    fn eq(self, other: HandWrittenNativeEq)
+        ->
+            bool ({
+        (((self as HandWrittenNativeEq) as term as term) ==
+            ((other as HandWrittenNativeEq) as term as term) as bool)
+    } as bool)
+}
+
+// Resolved statically to the specializing impls and inlined.
+
+fn int_lists_eq(a: [int], b: [int])
+    -> bool ({ ((a as [int]) == (b as [int]) as bool) } as bool)
+
+fn tuples_eq(a: (int, str), b: (int, str))
+    -> bool ({ ((a as (int, str)) == (b as (int, str)) as bool) } as bool)
+
+fn maps_eq(a: #{atom => [int]}, b: #{atom => [int]})
+    ->
+        bool ({ ((a as #{atom => [int]}) == (b as #{atom => [int]}) as bool) }
+    as bool)
+
+fn int_options_eq(a: int, b: int)
+    ->
+        bool ({
+    (((Some as
+                fn(int) -> Core::Option<int> {Core::Option::<int>::Some})((a
+                as int)) as Core::Option<int>) ==
+        ((Some as
+                fn(int) -> Core::Option<int> {Core::Option::<int>::Some})((b
+                as int)) as Core::Option<int>) as bool)
+} as bool)
+
+fn hand_written_native_eq_lists_eq(a: int, b: int)
+    ->
+        bool ({
+    (([(HandWrittenNativeEq { x: (a as int), y: (0 as int) } as
+                    HandWrittenNativeEq)] as [HandWrittenNativeEq]) ==
+        ([(HandWrittenNativeEq { x: (b as int), y: (0 as int) } as
+                    HandWrittenNativeEq)] as [HandWrittenNativeEq]) as bool)
+} as bool)
+
+// Resolved statically to the general impls.
+
+fn eq_by_parity_lists_eq(a: int, b: int)
+    ->
+        bool ({
+    (([((EqByParity as fn(int) -> EqByParity {EqByParity})((a as int)) as
+                    EqByParity)] as [EqByParity]) ==
+        ([((EqByParity as fn(int) -> EqByParity {EqByParity})((b as int)) as
+                    EqByParity)] as [EqByParity]) as bool)
+} as bool)
+
+fn eq_by_parity_tuples_eq(a: int, b: int)
+    ->
+        bool ({
+    ((((0 as int),
+            ((EqByParity as fn(int) -> EqByParity {EqByParity})((a as int)) as
+                EqByParity)) as (int, EqByParity)) ==
+        (((0 as int),
+            ((EqByParity as fn(int) -> EqByParity {EqByParity})((b as int)) as
+                EqByParity)) as (int, EqByParity)) as bool)
+} as bool)
+
+fn eq_by_parity_maps_eq(a: int, b: int)
+    ->
+        bool ({
+    ((#{(a"k" as atom) =>
+                ((EqByParity as
+                        fn(int) -> EqByParity {EqByParity})((a as int)) as
+                    EqByParity)} as #{atom => EqByParity}) ==
+        (#{(a"k" as atom) =>
+                ((EqByParity as
+                        fn(int) -> EqByParity {EqByParity})((b as int)) as
+                    EqByParity)} as #{atom => EqByParity}) as bool)
+} as bool)
+
+fn eq_by_parity_options_eq(a: int, b: int)
+    ->
+        bool ({
+    (((Some as
+                fn(EqByParity) -> Core::Option<EqByParity> {Core::Option::<EqByParity>::Some})(((EqByParity
+                    as fn(int) -> EqByParity {EqByParity})((a as int)) as
+                EqByParity)) as Core::Option<EqByParity>) ==
+        ((Some as
+                fn(EqByParity) -> Core::Option<EqByParity> {Core::Option::<EqByParity>::Some})(((EqByParity
+                    as fn(int) -> EqByParity {EqByParity})((b as int)) as
+                EqByParity)) as Core::Option<EqByParity>) as bool)
+} as bool)
+
+fn generic_eq<T>(a: T, b: T) -> bool where
+    T: PartialEq ({ ((a as T) == (b as T) as bool) } as bool)
+
+// The witness for `[int]: PartialEq` comes from the specializing impl.
+fn int_lists_eq_through_witness(a: [int], b: [int])
+    ->
+        bool ({
+    ((generic_eq as
+            fn([int], [int]) -> bool {generic_eq::<[int]>})((a as [int]),
+        (b as [int])) as bool)
+} as bool)
+
+// The witness for `[EqByParity]: PartialEq` comes from the general impl.
+fn eq_by_parity_lists_eq_through_witness(a: int, b: int)
+    ->
+        bool ({
+    ((generic_eq as
+            fn([EqByParity], [EqByParity]) -> bool {generic_eq::<[EqByParity]>})(([((EqByParity
+                        as fn(int) -> EqByParity {EqByParity})((a as int)) as
+                    EqByParity)] as [EqByParity]),
+        ([((EqByParity as fn(int) -> EqByParity {EqByParity})((b as int)) as
+                    EqByParity)] as [EqByParity])) as bool)
+} as bool)
+
+// Only `T: PartialEq` is known, so the witness comes from the general impl.
+fn generic_lists_eq<T>(a: [T], b: [T]) -> bool where
+    T: PartialEq ({ ((a as [T]) == (b as [T]) as bool) } as bool)
+
+fn eq_by_parity_lists_eq_in_generic_fn(a: int, b: int)
+    ->
+        bool ({
+    ((generic_lists_eq as
+            fn([EqByParity], [EqByParity]) -> bool {generic_lists_eq::<EqByParity>})(([((EqByParity
+                        as fn(int) -> EqByParity {EqByParity})((a as int)) as
+                    EqByParity)] as [EqByParity]),
+        ([((EqByParity as fn(int) -> EqByParity {EqByParity})((b as int)) as
+                    EqByParity)] as [EqByParity])) as bool)
+} as bool)

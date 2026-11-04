@@ -686,13 +686,6 @@ pub(crate) struct ManualImplementation {
 }
 
 #[derive(Diagnostic)]
-#[diag("could not resolve generic parameters on overridden impl")]
-pub(crate) struct GenericArgsOnOverriddenImpl {
-    #[primary_span]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
 #[diag("const `impl` for trait `{$trait_name}` which is not `const`")]
 pub(crate) struct ConstImplForNonConstTrait {
     #[primary_span]
@@ -1112,13 +1105,6 @@ pub(crate) struct EmptySpecialization {
     pub span: Span,
     #[note("impl is a specialization of this impl")]
     pub base_impl_span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag("cannot specialize on `'static` lifetime")]
-pub(crate) struct StaticSpecialize {
-    #[primary_span]
-    pub span: Span,
 }
 
 #[derive(Diagnostic)]

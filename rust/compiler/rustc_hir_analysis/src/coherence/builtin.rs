@@ -20,7 +20,8 @@ use rustc_span::{DUMMY_SP, Span, sym};
 use rustc_trait_selection::error_reporting::InferCtxtErrorExt;
 use rustc_trait_selection::traits::misc::{
     ConstParamTyImplementationError, CopyImplementationError, InfringingFieldsReason,
-    type_allowed_to_implement_const_param_ty, type_allowed_to_implement_copy,
+    NativeEqImplementationError, type_allowed_to_implement_const_param_ty,
+    type_allowed_to_implement_copy, type_allowed_to_implement_native_eq,
 };
 use rustc_trait_selection::traits::{self, ObligationCause, ObligationCtxt};
 use tracing::debug;
@@ -38,6 +39,7 @@ pub(super) fn check_trait<'tcx>(
     checker.check(lang_items.drop_trait(), visit_implementation_of_drop)?;
     checker.check(lang_items.async_drop_trait(), visit_implementation_of_drop)?;
     checker.check(lang_items.copy_trait(), visit_implementation_of_copy)?;
+    checker.check(lang_items.native_eq_trait(), visit_implementation_of_native_eq)?;
     checker.check(lang_items.unpin_trait(), visit_implementation_of_unpin)?;
     checker.check(lang_items.const_param_ty_trait(), |checker| {
         visit_implementation_of_const_param_ty(checker)
@@ -132,6 +134,49 @@ fn visit_implementation_of_copy(checker: &Checker<'_>) -> Result<(), ErrorGuaran
             Err(tcx
                 .dcx()
                 .span_delayed_bug(span, format!("cannot implement `Copy` for `{}`", self_type)))
+        }
+    }
+}
+
+fn visit_implementation_of_native_eq(checker: &Checker<'_>) -> Result<(), ErrorGuaranteed> {
+    let tcx = checker.tcx;
+    let impl_did = checker.impl_def_id;
+    let self_type = checker.impl_header.trait_ref.instantiate_identity().skip_norm_wip().self_ty();
+    assert!(!self_type.has_escaping_bound_vars());
+
+    if let ty::ImplPolarity::Negative = checker.impl_header.polarity {
+        return Ok(());
+    }
+
+    // A derived `PartialEq` is `=:=`, so a derived `NativeEq` needs every field
+    // to be `NativeEq`. A hand-written `NativeEq` is trusted.
+    if !tcx.is_builtin_derived(impl_did.into()) {
+        return Ok(());
+    }
+
+    let param_env = tcx.param_env(impl_did);
+    let cause = traits::ObligationCause::misc(DUMMY_SP, impl_did);
+    match type_allowed_to_implement_native_eq(tcx, param_env, self_type, cause) {
+        Ok(()) => Ok(()),
+        Err(NativeEqImplementationError::InfringingFields(fields)) => {
+            let span = tcx.hir_expect_item(impl_did).expect_impl().self_ty.span;
+            Err(infringing_fields_error(
+                tcx,
+                fields.into_iter().map(|(field, ty, reason)| (tcx.def_span(field.did), ty, reason)),
+                LangItem::NativeEq,
+                impl_did,
+                span,
+            ))
+        }
+        Err(NativeEqImplementationError::InvalidInnerTyOfBuiltinTy(infringing_tys)) => {
+            let span = tcx.hir_expect_item(impl_did).expect_impl().self_ty.span;
+            Err(infringing_fields_error(
+                tcx,
+                infringing_tys.into_iter().map(|(ty, reason)| (span, ty, reason)),
+                LangItem::NativeEq,
+                impl_did,
+                span,
+            ))
         }
     }
 }

@@ -24,9 +24,10 @@ pub fn main() {
 
     // Lists can be prepended in constant time using the following syntax:
     let more_xs = [-1, 0, ..xs];
-    // This creates a new list, but the tail is not duplicated - both `xs`
-    // and `more_xs` are internally the same VM object.
-    println!("more_xs tail is equal to xs: {}", more_xs.tail() == xs);
+    // This creates a new list, but the tail is not duplicated - `xs`
+    // and `more_xs.tail().tail()` are internally the same VM object.
+    println!("more_xs.tail().tail() is equal to xs: {}", more_xs.tail().tail()
+    == xs);
 
     // Lists can also be destructured using a similar syntax
     let [first, second, third, rest @ ..] = more_xs else { return };

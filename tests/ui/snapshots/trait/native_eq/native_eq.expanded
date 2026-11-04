@@ -1,0 +1,99 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro, prelude_import)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[prelude_import]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+struct EqByParity(int);
+
+impl PartialEq for EqByParity {
+    fn eq(self, other: EqByParity) -> bool {
+        let EqByParity(a) = self;
+        let EqByParity(b) = other;
+        a % 2 == b % 2
+    }
+}
+
+pub fn eq_by_parity_eq(a: int, b: int) -> bool {
+    EqByParity(a) == EqByParity(b)
+}
+
+pub fn eq_by_parity_terms_eq(a: int, b: int) -> bool {
+    EqByParity(a) as term == EqByParity(b) as term
+}
+
+struct HandWrittenNativeEq {
+    x: int,
+    y: int,
+}
+
+impl NativeEq for HandWrittenNativeEq {}
+
+impl PartialEq for HandWrittenNativeEq {
+    #[inline]
+    fn eq(self, other: HandWrittenNativeEq) -> bool {
+        self as term == other as term
+    }
+}
+
+// Resolved statically to the specializing impls and inlined.
+
+pub fn int_lists_eq(a: [int], b: [int]) -> bool { a == b }
+
+pub fn tuples_eq(a: (int, str), b: (int, str)) -> bool { a == b }
+
+pub fn maps_eq(a: #{atom => [int]}, b: #{atom => [int]}) -> bool { a == b }
+
+pub fn int_options_eq(a: int, b: int) -> bool { Some(a) == Some(b) }
+
+pub fn hand_written_native_eq_lists_eq(a: int, b: int) -> bool {
+    [HandWrittenNativeEq { x: a, y: 0 }] ==
+        [HandWrittenNativeEq { x: b, y: 0 }]
+}
+
+// Resolved statically to the general impls.
+
+pub fn eq_by_parity_lists_eq(a: int, b: int) -> bool {
+    [EqByParity(a)] == [EqByParity(b)]
+}
+
+pub fn eq_by_parity_tuples_eq(a: int, b: int) -> bool {
+    (0, EqByParity(a)) == (0, EqByParity(b))
+}
+
+pub fn eq_by_parity_maps_eq(a: int, b: int) -> bool {
+    #{a"k" => EqByParity(a)} == #{a"k" => EqByParity(b)}
+}
+
+pub fn eq_by_parity_options_eq(a: int, b: int) -> bool {
+    Some(EqByParity(a)) == Some(EqByParity(b))
+}
+
+fn generic_eq<T: PartialEq>(a: T, b: T) -> bool { a == b }
+
+// The witness for `[int]: PartialEq` comes from the specializing impl.
+pub fn int_lists_eq_through_witness(a: [int], b: [int]) -> bool {
+    generic_eq(a, b)
+}
+
+// The witness for `[EqByParity]: PartialEq` comes from the general impl.
+pub fn eq_by_parity_lists_eq_through_witness(a: int, b: int) -> bool {
+    generic_eq([EqByParity(a)], [EqByParity(b)])
+}
+
+// Only `T: PartialEq` is known, so the witness comes from the general impl.
+fn generic_lists_eq<T: PartialEq>(a: [T], b: [T]) -> bool { a == b }
+
+pub fn eq_by_parity_lists_eq_in_generic_fn(a: int, b: int) -> bool {
+    generic_lists_eq([EqByParity(a)], [EqByParity(b)])
+}

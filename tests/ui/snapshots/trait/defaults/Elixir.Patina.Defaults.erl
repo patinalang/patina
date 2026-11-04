@@ -609,25 +609,34 @@ differ(_witnesses_where_differ@0_0, _a@1_0, _b@2_0) ->
                          _b@2_0).
 
 int_ne(_a@0_0, _b@1_0) ->
-    _witness_PartialEq@2_0 =
-        'Elixir.Patina.Core.Int':'Core::PartialEq::$patina_witness'(),
-    'Elixir.Patina.Core.Int':'Core::PartialEq::ne'(_witness_PartialEq@2_0,
-                                                   _a@0_0,
-                                                   _b@1_0).
+    _self@2_0 = _a@0_0,
+    _other@3_0 = _b@1_0,
+    not
+        begin
+            _self@4_0 = _self@2_0,
+            _other@5_0 = _other@3_0,
+            _self@4_0 =:= _other@5_0
+        end.
 
 str_ne(_a@0_0, _b@1_0) ->
-    _witness_PartialEq@2_0 =
-        'Elixir.Patina.Core.Str':'Core::PartialEq::$patina_witness'(),
-    'Elixir.Patina.Core.Str':'Core::PartialEq::ne'(_witness_PartialEq@2_0,
-                                                   _a@0_0,
-                                                   _b@1_0).
+    _self@2_0 = _a@0_0,
+    _other@3_0 = _b@1_0,
+    not
+        begin
+            _self@4_0 = _self@2_0,
+            _other@5_0 = _other@3_0,
+            _self@4_0 =:= _other@5_0
+        end.
 
 p_ne(_a@0_0, _b@1_0) ->
     _witness_PartialEq@2_0 =
         'Elixir.Patina.Defaults.P':'Core::PartialEq::$patina_witness'(),
-    'Elixir.Patina.Core':'Core::PartialEq::ne'(_witness_PartialEq@2_0,
-                                               _a@0_0,
-                                               _b@1_0).
+    _self@3_0 = _a@0_0,
+    _other@4_0 = _b@1_0,
+    not
+        'Elixir.Patina.Defaults.P':'Core::PartialEq::eq'(_witness_PartialEq@2_0,
+                                                         _self@3_0,
+                                                         _other@4_0).
 
 p_differ(_a@0_0, _b@1_0) ->
     _witness_PartialEq@2_0 =

@@ -865,7 +865,17 @@ fn erl_fn_name(tcx: TyCtxt<'_>, def_id: LocalDefId) -> Symbol {
 /// the functions would be defined as `From<int>::from<int>` and `From<int>::from<str>`.
 /// This function you're looking at is responsible for figuring out the tag in the suffix.
 /// The prefix tag comes from the trait path.
+///
+/// An impl that specializes another impl can share its self type, so its tag is the
+/// impl's disambiguated path instead (e.g. `Core::{impl#3}`).
 fn erl_impl_self_tag(tcx: TyCtxt<'_>, impl_def_id: DefId) -> Option<String> {
+    if let Some(trait_def_id) = tcx.impl_opt_trait_id(impl_def_id)
+        && let Ok(mut ancestors) = tcx.trait_def(trait_def_id).ancestors(tcx, impl_def_id)
+        && let Some(crate::traits::specialization_graph::Node::Impl(_)) = ancestors.nth(1)
+    {
+        return Some(with_erl_paths(|| tcx.def_path_str(impl_def_id)));
+    }
+
     let self_ty = tcx
         .type_of(impl_def_id)
         .instantiate(tcx, tcx.erl_tag_args(impl_def_id))

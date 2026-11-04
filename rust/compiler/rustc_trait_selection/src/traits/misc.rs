@@ -26,6 +26,11 @@ pub enum ConstParamTyImplementationError<'tcx> {
     NonExhaustive(Span),
 }
 
+pub enum NativeEqImplementationError<'tcx> {
+    InvalidInnerTyOfBuiltinTy(Vec<(Ty<'tcx>, InfringingFieldsReason<'tcx>)>),
+    InfringingFields(Vec<(&'tcx ty::FieldDef, Ty<'tcx>, InfringingFieldsReason<'tcx>)>),
+}
+
 pub enum InfringingFieldsReason<'tcx> {
     Fulfill(Vec<FulfillmentError<'tcx>>),
     Regions(Vec<RegionResolutionError<'tcx>>),
@@ -200,6 +205,77 @@ pub fn type_allowed_to_implement_const_param_ty<'tcx>(
         return Err(ConstParamTyImplementationError::InvalidInnerTyOfBuiltinTy(
             infringing_inner_tys,
         ));
+    }
+
+    Ok(())
+}
+
+/// Checks that the fields of the type (an ADT), or the elements of a tuple, list or map,
+/// all implement `NativeEq`.
+///
+/// If they don't implement `NativeEq`, return an error containing a list of those
+/// violating fields or elements.
+///
+/// Any other type is allowed.
+pub fn type_allowed_to_implement_native_eq<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    param_env: ty::ParamEnv<'tcx>,
+    self_type: Ty<'tcx>,
+    parent_cause: ObligationCause<'tcx>,
+) -> Result<(), NativeEqImplementationError<'tcx>> {
+    let inner_tys: Vec<_> = match *self_type.kind() {
+        ty::Tuple(inner_tys) => inner_tys.into_iter().collect(),
+        ty::Slice(inner_ty) => vec![inner_ty],
+        // Map keys are always compared as exact terms.
+        ty::Map(_, value_ty) => vec![value_ty],
+
+        ty::Adt(adt, args) => {
+            all_fields_implement_trait(
+                tcx,
+                param_env,
+                self_type,
+                adt,
+                args,
+                parent_cause.clone(),
+                LangItem::NativeEq,
+            )
+            .map_err(NativeEqImplementationError::InfringingFields)?;
+
+            vec![]
+        }
+
+        _ => return Ok(()),
+    };
+
+    let mut infringing_inner_tys = vec![];
+    for inner_ty in inner_tys {
+        // We use an ocx per inner ty for better diagnostics
+        let infcx = tcx.infer_ctxt().build(TypingMode::non_body_analysis());
+        let ocx = traits::ObligationCtxt::new_with_diagnostics(&infcx);
+
+        ocx.register_bound(
+            parent_cause.clone(),
+            param_env,
+            inner_ty,
+            tcx.require_lang_item(LangItem::NativeEq, parent_cause.span),
+        );
+
+        let errors = ocx.evaluate_obligations_error_on_ambiguity();
+        if !errors.is_empty() {
+            infringing_inner_tys.push((inner_ty, InfringingFieldsReason::Fulfill(errors)));
+            continue;
+        }
+
+        // Check regions assuming the self type of the impl is WF
+        let errors = infcx.resolve_regions(parent_cause.body_id, param_env, [self_type]);
+        if !errors.is_empty() {
+            infringing_inner_tys.push((inner_ty, InfringingFieldsReason::Regions(errors)));
+            continue;
+        }
+    }
+
+    if !infringing_inner_tys.is_empty() {
+        return Err(NativeEqImplementationError::InvalidInnerTyOfBuiltinTy(infringing_inner_tys));
     }
 
     Ok(())

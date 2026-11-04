@@ -33,8 +33,8 @@ pub fn main() {
             // `head` is an `Option`, and is None for empty lists; `tail` always succeeds.
 
             // Lists can be prepended in constant time using the following syntax:
-            // This creates a new list, but the tail is not duplicated - both `xs`
-            // and `more_xs` are internally the same VM object.
+            // This creates a new list, but the tail is not duplicated - `xs`
+            // and `more_xs.tail().tail()` are internally the same VM object.
 
             // Lists can also be destructured using a similar syntax
             {
@@ -63,8 +63,8 @@ pub fn main() {
     };
     let more_xs = [-1, 0, ..xs];
     {
-        ::Core::io::put_chars([["more_xs tail is equal to xs: ",
-                            patina_fmt::display(more_xs.tail() == xs)]]);
+        ::Core::io::put_chars([["more_xs.tail().tail() is equal to xs: ",
+                            patina_fmt::display(more_xs.tail().tail() == xs)]]);
         ::Core::io::nl();
     };
     let [first, second, third, rest @ ..] = more_xs else { return };
