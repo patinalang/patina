@@ -10,6 +10,30 @@ pub(crate) const CORE_PACKAGE_NAME: &str = "Core";
 pub(crate) const STD_PACKAGE_NAME: &str = "Std";
 pub(crate) const PROC_MACRO_PACKAGE_NAME: &str = "ProcMacro";
 
+#[derive(Debug, thiserror::Error)]
+pub(crate) enum DependencySpecError {
+    #[error("missing dependency name")]
+    MissingName,
+    #[error("missing metadata path")]
+    MissingPath,
+}
+
+#[derive(Debug, thiserror::Error)]
+pub(crate) enum PackageNameError {
+    #[error("cannot derive a package name from {}", .0.display())]
+    NoFileStem(PathBuf),
+    #[error("package name `{0}` is reserved")]
+    Reserved(String),
+}
+
+#[derive(Debug, thiserror::Error)]
+pub(crate) enum DependencyError {
+    #[error("duplicate package dependency `{0}`")]
+    Duplicate(String),
+    #[error("package dependency `{name}` metadata file does not exist at {}", path.display())]
+    MissingMetadata { name: String, path: PathBuf },
+}
+
 #[derive(Debug, Clone)]
 pub(crate) struct PackageDependency {
     pub name: String,
@@ -17,15 +41,15 @@ pub(crate) struct PackageDependency {
 }
 
 impl FromStr for PackageDependency {
-    type Err = &'static str;
+    type Err = DependencySpecError;
 
     fn from_str(raw: &str) -> Result<Self, Self::Err> {
         if raw.is_empty() {
-            return Err("missing dependency name");
+            return Err(DependencySpecError::MissingName);
         }
         match raw.split_once('=') {
-            Some(("", _)) => Err("missing dependency name"),
-            Some((_, "")) => Err("missing metadata path"),
+            Some(("", _)) => Err(DependencySpecError::MissingName),
+            Some((_, "")) => Err(DependencySpecError::MissingPath),
             Some((name, path)) => {
                 Ok(Self { name: name.to_owned(), path: Some(PathBuf::from(path)) })
             }
@@ -56,38 +80,56 @@ impl From<&PackageDependency> for ExternEntry {
     }
 }
 
+pub(crate) fn snake_case(name: &str) -> String {
+    name.to_case(Case::Snake)
+}
+
 pub(crate) fn resolve_package_name(
     explicit: Option<&str>,
     source: &Path,
-) -> Result<String, &'static str> {
-    let name = explicit.map(str::to_owned).unwrap_or_else(|| {
-        let stem = source.file_stem().and_then(|s| s.to_str()).expect("source file to have stem");
-        stem.to_case(Case::Pascal)
-    });
+) -> Result<String, PackageNameError> {
+    let name = match explicit {
+        Some(name) => name.to_owned(),
+        None => match source.file_stem().and_then(|stem| stem.to_str()) {
+            Some(stem) => stem.to_case(Case::Pascal),
+            None => return Err(PackageNameError::NoFileStem(source.to_owned())),
+        },
+    };
 
     match name.as_str() {
         CORE_PACKAGE_NAME | STD_PACKAGE_NAME | PROC_MACRO_PACKAGE_NAME => {
-            Err("package name is reserved")
+            Err(PackageNameError::Reserved(name))
         }
         _ => Ok(name),
     }
 }
 
-pub(crate) fn validate_dependencies(deps: &[PackageDependency]) -> Result<(), String> {
+pub(crate) fn validate_dependencies(deps: &[PackageDependency]) -> Result<(), DependencyError> {
     let mut seen = FxHashSet::default();
     for dep in deps {
         if !seen.insert(&dep.name) {
-            return Err(format!("duplicate package dependency `{}`", dep.name));
+            return Err(DependencyError::Duplicate(dep.name.clone()));
         }
         if let Some(path) = &dep.path
             && !path.is_file()
         {
-            return Err(format!(
-                "package dependency `{}` metadata file does not exist at {}",
-                dep.name,
-                path.display()
-            ));
+            return Err(DependencyError::MissingMetadata {
+                name: dep.name.clone(),
+                path: path.clone(),
+            });
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn snake_case_keeps_acronyms_together() {
+        assert_eq!(snake_case("MyJsonLib"), "my_json_lib");
+        assert_eq!(snake_case("MyJSONLib"), "my_json_lib");
+        assert_eq!(snake_case("Core"), "core");
+    }
 }

@@ -10,7 +10,7 @@ use crate::snapshot;
 const TEXT_EXTENSIONS: &[&str] =
     &["tokens", "ast", "expanded", "typed", "erl", "core0", "core", "abstr"];
 
-/// The library packages under `pkg-src/`, in build order: each may use only the previous.
+/// The package directories under `pkg-src/`, in build order: each may use only the previous.
 const PACKAGES: &[&str] = &[
     "consts",
     "temperatures",
@@ -123,15 +123,16 @@ impl Runner {
         }
 
         for package in PACKAGES {
-            let src = Path::new(crate::PKG_SRC_ROOT).join(format!("{package}.pt"));
+            let dir = Path::new(crate::PKG_SRC_ROOT).join(package);
+            let src = dir.join("src").join(format!("{package}.pt"));
             let source = std::fs::read_to_string(&src)
                 .unwrap_or_else(|_| panic!("read dependency package {}", src.display()));
             let proc_macro = source.contains("ProcMacro");
-            let output = self.run_compile(&[], &["meta", "beam"], &src, out_dir, &deps, proc_macro);
+            let output = self.run_compile(&[], &["meta", "beam"], &dir, out_dir, &deps, proc_macro);
             assert!(
                 output.status.success(),
                 "failed to build dependency package {}:\nstdout:\n{}stderr:\n{}",
-                src.display(),
+                dir.display(),
                 String::from_utf8_lossy(&output.stdout),
                 String::from_utf8_lossy(&output.stderr),
             );
@@ -150,7 +151,8 @@ impl Runner {
         proc_macro: bool,
     ) -> Output {
         let mut cmd = Command::new(env!("CARGO_BIN_EXE_patina"));
-        cmd.arg("compile");
+        // A package directory is built from its `Patina.toml`.
+        cmd.arg(if pt_path.is_dir() { "build" } else { "compile" });
         for dump in dumps {
             cmd.arg("--dump").arg(*dump);
         }

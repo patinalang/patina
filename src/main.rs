@@ -2,6 +2,7 @@
 
 mod compile;
 mod erlang;
+mod manifest;
 mod num_utils;
 mod package;
 
@@ -10,6 +11,8 @@ use std::process::ExitCode;
 
 use clap::Parser;
 use rustc_errors::catch_fatal_errors;
+
+use crate::manifest::Manifest;
 
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]
 pub(crate) enum DumpStage {
@@ -79,6 +82,15 @@ struct Args {
 
 #[derive(clap::Subcommand, Debug)]
 enum Command {
+    /// Compile the package in DIR, as described by its `Patina.toml`.
+    Build {
+        /// Package directory.
+        dir: PathBuf,
+
+        #[command(flatten)]
+        common: CommonArgs,
+    },
+
     /// Compile a single source file as a package.
     Compile {
         /// Source file to compile.
@@ -133,6 +145,17 @@ fn main() -> ExitCode {
     };
 
     match args.command {
+        Command::Build { dir, common } => {
+            let manifest = match Manifest::read(&dir) {
+                Ok(manifest) => manifest,
+                Err(err) => {
+                    eprintln!("error: {err}");
+                    return ExitCode::FAILURE;
+                }
+            };
+            let file = manifest.source_path(&dir);
+            run(common, &file, Some(&manifest.package.name))
+        }
         Command::Compile { file, pkg_name, common } => run(common, &file, pkg_name.as_deref()),
         Command::Serve => match compile::compile_server::serve() {
             Ok(()) => ExitCode::SUCCESS,
