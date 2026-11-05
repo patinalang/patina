@@ -10,7 +10,7 @@ pub(crate) struct CompileServer {
 impl CompileServer {
     pub(crate) fn start() -> io::Result<CompileServer> {
         let mut serve = Command::new(env!("CARGO_BIN_EXE_patina"))
-            .arg("--serve")
+            .arg("serve")
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .spawn()?;
@@ -20,7 +20,7 @@ impl CompileServer {
         if BufReader::new(stdout).read_line(&mut line)? == 0 {
             let status = serve.wait()?;
             return Err(io::Error::other(format!(
-                "`patina --serve` exited before reporting its socket ({status})"
+                "`patina serve` exited before reporting its socket ({status})"
             )));
         }
         let sock_path = PathBuf::from(line.trim_end_matches('\n'));

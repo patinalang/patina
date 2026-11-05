@@ -150,6 +150,7 @@ impl Runner {
         proc_macro: bool,
     ) -> Output {
         let mut cmd = Command::new(env!("CARGO_BIN_EXE_patina"));
+        cmd.arg("compile");
         for dump in dumps {
             cmd.arg("--dump").arg(*dump);
         }

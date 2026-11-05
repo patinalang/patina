@@ -6,6 +6,7 @@ use std::process::{Command, Output};
 fn run(source: &Path, out_dir: &Path, package: &str, externs: &[(&str, Option<&Path>)]) -> Output {
     let mut command = Command::new(env!("CARGO_BIN_EXE_patina"));
     command
+        .arg("compile")
         .arg("--emit")
         .arg("meta")
         .arg("--emit")

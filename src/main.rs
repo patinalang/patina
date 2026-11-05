@@ -5,6 +5,7 @@ mod erlang;
 mod num_utils;
 mod package;
 
+use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use clap::Parser;
@@ -70,8 +71,36 @@ impl From<EmitStage> for Stage {
 }
 
 #[derive(Parser, Debug)]
-#[command(name = "patina", about = "Compile Patina source files.")]
+#[command(name = "patina", about = "Compile Patina packages.")]
 struct Args {
+    #[command(subcommand)]
+    command: Command,
+}
+
+#[derive(clap::Subcommand, Debug)]
+enum Command {
+    /// Compile a single source file as a package.
+    Compile {
+        /// Source file to compile.
+        file: PathBuf,
+
+        /// Package name (defaults to PascalCase of the source filename).
+        #[arg(long, value_name = "NAME")]
+        pkg_name: Option<String>,
+
+        #[command(flatten)]
+        common: CommonArgs,
+    },
+
+    /// Run a compile server to be used with Patina's `--compile-server` option.
+    ///
+    /// The server's socket path is printed as the first line on stdout.
+    Serve,
+}
+
+/// Options for compiling a package.
+#[derive(clap::Args, Debug)]
+struct CommonArgs {
     /// Emit compiled output.
     #[arg(long, value_name = "STAGE")]
     emit: Vec<EmitStage>,
@@ -82,26 +111,13 @@ struct Args {
     #[arg(long, value_name = "STAGE")]
     dump: Vec<DumpStage>,
 
-    /// Source file to compile.
-    #[arg(required_unless_present = "serve")]
-    file: Option<std::path::PathBuf>,
-
-    /// Run a compile server that can be used with other processes' `--compile-server` option.
-    /// Prints the server's socket path as the first line on stdout, and stops once stdin closes.
-    #[arg(long, conflicts_with = "compile_server")]
-    serve: bool,
-
     /// Output directory.
     #[arg(long, value_name = "DIR", default_value = ".")]
-    out_dir: std::path::PathBuf,
-
-    /// Package name (defaults to PascalCase of the source filename).
-    #[arg(long, value_name = "NAME")]
-    pkg_name: Option<String>,
+    out_dir: PathBuf,
 
     /// Path to a running compile server's socket. If not given, patina starts a temporary one.
     #[arg(long, value_name = "SOCKET_PATH")]
-    compile_server: Option<std::path::PathBuf>,
+    compile_server: Option<PathBuf>,
 
     /// Package dependency as NAME=RMETA (may be repeated).
     /// If `=RMETA` is omitted, the package is assumed to be in the library
@@ -116,17 +132,19 @@ fn main() -> ExitCode {
         Err(err) => err.exit(),
     };
 
-    if args.serve {
-        return match compile::compile_server::serve() {
+    match args.command {
+        Command::Compile { file, pkg_name, common } => run(common, &file, pkg_name.as_deref()),
+        Command::Serve => match compile::compile_server::serve() {
             Ok(()) => ExitCode::SUCCESS,
             Err(e) => {
                 eprintln!("error: failed to run compile server: {e}");
                 ExitCode::FAILURE
             }
-        };
+        },
     }
-    let file = args.file.expect("a file is required without `--serve`");
+}
 
+fn run(args: CommonArgs, file: &Path, pkg_name: Option<&str>) -> ExitCode {
     let server =
         compile::compile_server::SyncServer::start(compile::compile_server::SyncServerOpts {
             sock_path: args.compile_server.clone(),
@@ -141,7 +159,7 @@ fn main() -> ExitCode {
 
     let stages = if stages.is_empty() { vec![Stage::Meta, Stage::Beam] } else { stages };
 
-    let src = match std::fs::read_to_string(&file) {
+    let src = match std::fs::read_to_string(file) {
         Ok(src) => src,
         Err(e) => {
             eprintln!("error reading {}: {e}", file.display());
@@ -149,7 +167,7 @@ fn main() -> ExitCode {
         }
     };
 
-    let pkg_name = match package::resolve_package_name(args.pkg_name.as_deref(), &file) {
+    let pkg_name = match package::resolve_package_name(pkg_name, file) {
         Ok(name) => name,
         Err(err) => {
             eprintln!("error: {err}");
@@ -163,7 +181,7 @@ fn main() -> ExitCode {
     }
 
     match catch_fatal_errors(|| {
-        compile::compile(&stages, &file, &src, &args.out_dir, &pkg_name, &args.externs, &server)
+        compile::compile(&stages, file, &src, &args.out_dir, &pkg_name, &args.externs, &server)
     }) {
         Ok(()) => ExitCode::SUCCESS,
         Err(_) => ExitCode::FAILURE,
