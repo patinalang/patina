@@ -920,27 +920,6 @@ fn get_rmeta_metadata_section<'a, 'p>(filename: &'p Path) -> Result<OwnedSlice, 
     Ok(slice_owned(mmap, Deref::deref))
 }
 
-/// Whether the package whose metadata is in the rmeta file at `path` exports
-/// any procedural macros.
-///
-/// Returns `false` when the file cannot be read or was produced by a different
-/// metadata version. Callers use this as a hint, so an unreadable dependency is
-/// simply not a macro provider.
-pub fn exports_proc_macros(path: &Path) -> bool {
-    let Ok(slice) = get_rmeta_metadata_section(path) else {
-        return false;
-    };
-    let Ok(blob) = MetadataBlob::new(slice) else {
-        return false;
-    };
-    // The version byte lives in `METADATA_HEADER`, so this guards against
-    // decoding a header whose layout has since changed.
-    if !blob.starts_with(METADATA_HEADER) {
-        return false;
-    }
-    blob.get_header().has_proc_macros
-}
-
 /// A diagnostic function for dumping crate metadata to an output stream.
 pub fn list_file_metadata(
     target: &Target,

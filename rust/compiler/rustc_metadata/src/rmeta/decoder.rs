@@ -751,7 +751,6 @@ impl MetadataBlob {
                         root.hash(),
                         root.stable_crate_id
                     )?;
-                    writeln!(out, "has_proc_macros {:?}", root.header.has_proc_macros)?;
                     writeln!(out, "triple {}", root.header.triple.tuple())?;
                     writeln!(out, "edition {}", root.edition)?;
                     writeln!(out, "symbol_mangling_version {:?}", root.symbol_mangling_version)?;

@@ -6,8 +6,8 @@ mod translate;
 use std::cell::Cell;
 use std::collections::BTreeMap;
 use std::fs::File;
-use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::io::{self, Write};
+use std::path::{self, Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
@@ -166,6 +166,22 @@ pub(crate) struct CompileOptions {
     pub externs: Vec<PackageDependency>,
 }
 
+impl CompileOptions {
+    fn code_path(&self) -> io::Result<FxIndexSet<PathBuf>> {
+        // `ensure_core` and `ensure_proc_macro` currently write to `out_dir`.
+        let mut dirs = FxIndexSet::from_iter([path::absolute(&self.out_dir)?]);
+        for dir in &self.lib_dirs {
+            dirs.insert(path::absolute(dir)?);
+        }
+        for rmeta in self.externs.iter().filter_map(|dep| dep.path.as_ref()) {
+            if let Some(dir) = path::absolute(rmeta)?.parent() {
+                dirs.insert(dir.to_owned());
+            }
+        }
+        Ok(dirs)
+    }
+}
+
 pub(crate) fn compile(
     stages: &[Stage],
     filename: &Path,
@@ -173,7 +189,7 @@ pub(crate) fn compile(
     opts: &CompileOptions,
     server: &Arc<SyncServer>,
 ) {
-    let CompileOptions { out_dir, package: pkg, externs, .. } = opts;
+    let CompileOptions { out_dir, package: pkg, .. } = opts;
     let filename_stem = filename
         .file_stem()
         .expect("filename to have a stem")
@@ -232,19 +248,11 @@ pub(crate) fn compile(
         passes::create_and_enter_global_ctxt(compiler, krate, |tcx| {
             let dcx = tcx.sess.dcx();
 
-            // Reading the metadata interns symbols, so this has to happen inside
-            // the compiler session, where `rustc_span`'s globals are set.
-            let mut macro_paths = FxIndexSet::from_iter([out_dir.to_owned()]);
-            for dep in externs {
-                if let Some(path) = dep.path.as_ref()
-                    && rustc_metadata::locator::exports_proc_macros(path)
-                    && let Some(parent) = path.parent()
-                    && !macro_paths.contains(parent)
-                {
-                    macro_paths.insert(parent.to_owned());
-                }
-            }
-            server.with(dcx, |server| server.extend_code_path(dcx, macro_paths.into_iter()));
+            // Expansion runs proc macros, so this has to happen before it.
+            let code_path = opts.code_path().unwrap_or_else(|e| {
+                dcx.fatal(format!("failed to resolve the compile server's code path: {e}"));
+            });
+            server.with(dcx, |server| server.extend_code_path(dcx, code_path));
 
             consume_stage!(stages_left, Stage::Expanded, {
                 let expanded = pprust::print_crate(

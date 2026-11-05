@@ -211,10 +211,12 @@ impl CompileServer {
     pub(super) fn extend_code_path(
         &mut self,
         dcx: DiagCtxtHandle<'_>,
-        dirs: impl Iterator<Item = PathBuf>,
+        dirs: impl IntoIterator<Item = PathBuf>,
     ) {
-        let parts =
-            dirs.map(|dir| dir.to_string_lossy().into_owned().into_bytes()).collect::<Vec<_>>();
+        let parts = dirs
+            .into_iter()
+            .map(|dir| dir.to_string_lossy().into_owned().into_bytes())
+            .collect::<Vec<_>>();
 
         let request: Box<[&[u8]]> =
             std::iter::once(OP_CODE_PATH).chain(parts.iter().map(Vec::as_slice)).collect();

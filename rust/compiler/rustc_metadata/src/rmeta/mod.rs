@@ -211,11 +211,6 @@ pub(crate) struct CrateHeader {
     pub(crate) triple: TargetTuple,
     pub(crate) hash: Svh,
     pub(crate) name: Symbol,
-    /// Whether this crate exports any proc macros.
-    ///
-    /// This is separate from [`ProcMacroExport`] to avoid having to update `METADATA_VERSION`
-    /// every time that record changes.
-    pub(crate) has_proc_macros: bool,
     /// Whether this crate metadata section is just a stub.
     /// Stubs do not contain the full metadata (it will be typically stored
     /// in a separate rmeta file).

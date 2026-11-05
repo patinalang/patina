@@ -5,7 +5,7 @@ use std::io::{Read, Seek, Write};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
-use rustc_data_structures::fx::{FxHashSet, FxIndexMap, FxIndexSet};
+use rustc_data_structures::fx::{FxIndexMap, FxIndexSet};
 use rustc_data_structures::memmap::{Mmap, MmapMut};
 use rustc_data_structures::sync::par_join;
 use rustc_data_structures::temp_dir::MaybeTempDir;
@@ -36,7 +36,6 @@ use rustc_span::{
 };
 use tracing::{debug, instrument, trace};
 
-use crate::creader::CStore;
 use crate::eii::EiiMapEncodedKeyValue;
 use crate::errors::{FailCreateFileEncoder, FailWriteFile};
 use crate::rmeta::*;
@@ -253,47 +252,6 @@ impl<'a, 'tcx> SpanEncoder for EncodeContext<'a, 'tcx> {
 
 fn bytes_needed(n: usize) -> usize {
     (usize::BITS - n.leading_zeros()).div_ceil(u8::BITS) as usize
-}
-
-/// Whether this crate makes a procedural macro available through its public API.
-fn crate_exports_proc_macros(
-    tcx: TyCtxt<'_>,
-    proc_macro_exports: &FxIndexMap<LocalDefId, ProcMacroExportData>,
-) -> bool {
-    let mut proc_macros: FxHashSet<DefId> = {
-        let cstore = CStore::from_tcx(tcx);
-        cstore.all_proc_macro_def_ids(tcx).collect()
-    };
-    proc_macros.extend(proc_macro_exports.keys().map(|local_def_id| local_def_id.to_def_id()));
-
-    let mut modules = vec![CRATE_DEF_ID.to_def_id()];
-    let mut visited = FxHashSet::default();
-    while let Some(module) = modules.pop() {
-        if !visited.insert(module) {
-            continue;
-        }
-
-        let children = if let Some(module) = module.as_local() {
-            tcx.module_children_local(module)
-        } else {
-            tcx.module_children(module)
-        };
-        for child in children {
-            if !child.vis.is_public() {
-                continue;
-            }
-            let Res::Def(kind, def_id) = child.res else {
-                continue;
-            };
-            match kind {
-                DefKind::Macro(_) if proc_macros.contains(&def_id) => return true,
-                DefKind::Mod => modules.push(def_id),
-                _ => {}
-            }
-        }
-    }
-
-    false
 }
 
 impl<'a, 'tcx> Encodable<EncodeContext<'a, 'tcx>> for SpanData {
@@ -696,11 +654,6 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
             self.lazy_array(interpret_alloc_index)
         });
 
-        // This reads the export view, which `encode_proc_macros` then consumes,
-        // so it has to come first.
-        let has_proc_macros = stat!("exported-proc-macros", || {
-            crate_exports_proc_macros(tcx, &self.proc_macro_exports)
-        });
         // Encode the proc macro data. This affects `tables`, so we need to do this before we
         // encode the tables.
         let proc_macros = stat!("proc-macro-data", || self.encode_proc_macros());
@@ -751,7 +704,6 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
                     name: tcx.crate_name(LOCAL_CRATE),
                     triple: tcx.sess.opts.target_triple.clone(),
                     hash: tcx.crate_hash(LOCAL_CRATE),
-                    has_proc_macros,
                     is_stub: false,
                 },
                 extra_filename: tcx.sess.opts.cg.extra_filename.clone(),
@@ -2225,7 +2177,6 @@ pub fn encode_metadata(tcx: TyCtxt<'_>, path: &Path, ref_path: Option<&Path>) {
                 name: tcx.crate_name(LOCAL_CRATE),
                 triple: tcx.sess.opts.target_triple.clone(),
                 hash: tcx.crate_hash(LOCAL_CRATE),
-                has_proc_macros: false,
                 is_stub: true,
             });
             header.position.get()

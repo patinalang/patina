@@ -1,5 +1,3 @@
-#![feature(rustc_private)]
-
 use std::path::Path;
 use std::process::{Command, Output};
 
@@ -23,56 +21,6 @@ fn run(source: &Path, out_dir: &Path, package: &str, externs: &[(&str, Option<&P
     }
     command.arg(source);
     command.output().expect("run patina")
-}
-
-fn compile(source: &Path, out_dir: &Path, package: &str, externs: &[(&str, Option<&Path>)]) {
-    let output = run(source, out_dir, package, externs);
-    assert!(
-        output.status.success(),
-        "failed to compile {}:\nstdout:\n{}\nstderr:\n{}",
-        source.display(),
-        String::from_utf8_lossy(&output.stdout),
-        String::from_utf8_lossy(&output.stderr),
-    );
-}
-
-#[test]
-fn facade_reports_reexported_proc_macro() {
-    let temp = tempfile::tempdir().expect("create temp dir");
-    let out_dir = temp.path().join("out");
-    std::fs::create_dir_all(&out_dir).expect("create output dir");
-
-    let provider_source = temp.path().join("provider.pt");
-    std::fs::write(
-        &provider_source,
-        r#"
-use ProcMacro::*;
-
-#[proc_macro]
-pub fn identity(input: TokenStream) -> TokenStream {
-    input
-}
-"#,
-    )
-    .expect("write provider source");
-    compile(&provider_source, &out_dir, "Provider", &[("ProcMacro", None)]);
-
-    let provider_rmeta = out_dir.join("libProvider.rmeta");
-    let proc_macro_rmeta = out_dir.join("libProcMacro.rmeta");
-    let facade_source = temp.path().join("facade.pt");
-    std::fs::write(&facade_source, "pub use Provider::identity;\n").expect("write facade source");
-    compile(
-        &facade_source,
-        &out_dir,
-        "Facade",
-        &[("Provider", Some(&provider_rmeta)), ("ProcMacro", Some(&proc_macro_rmeta))],
-    );
-
-    let facade_rmeta = out_dir.join("libFacade.rmeta");
-    rustc_span::create_default_session_globals_then(|| {
-        assert!(rustc_metadata::locator::exports_proc_macros(&provider_rmeta));
-        assert!(rustc_metadata::locator::exports_proc_macros(&facade_rmeta));
-    });
 }
 
 #[test]
