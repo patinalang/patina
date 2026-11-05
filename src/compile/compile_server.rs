@@ -354,6 +354,8 @@ impl BeamVm {
 
         let mut child = Command::new("erl")
             .args([
+                "+pc",
+                "unicode",
                 "-noshell",
                 "-eval",
                 ERL_INIT,
