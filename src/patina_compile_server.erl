@@ -246,8 +246,13 @@ read_msg(Sock) ->
 
 read_bin(Sock) ->
     {ok, <<Len:32/unsigned-integer>>} = socket:recv(Sock, 4),
-    {ok, Data} = socket:recv(Sock, Len),
-    Data.
+    case Len of
+        0 ->
+            <<>>;
+        _ ->
+            {ok, Data} = socket:recv(Sock, Len),
+            Data
+    end.
 
 write_msg(Sock, [_ | _] = Msg) ->
     Len = length(Msg),

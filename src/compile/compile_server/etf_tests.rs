@@ -1,6 +1,7 @@
 use std::sync::{Arc, OnceLock};
+use std::time::Duration;
 
-use super::{SyncServer, SyncServerOpts};
+use super::{OP_CODE_PATH, SyncServer, SyncServerOpts};
 
 fn server() -> &'static Arc<SyncServer> {
     static SERVER: OnceLock<Arc<SyncServer>> = OnceLock::new();
@@ -144,4 +145,15 @@ fn large_tuples_round_trip() {
         }
     });
     assert_stable("a 300-element tuple", large);
+}
+
+#[test]
+fn empty_message_part_gets_a_reply() {
+    let reply = server()
+        .try_with(|server| {
+            server.transact_within(&[OP_CODE_PATH, b""], Some(Duration::from_secs(10)))
+        })
+        .expect("start the compile server")
+        .expect("get a reply");
+    assert_eq!(reply, [b"ok"]);
 }
