@@ -1,3 +1,5 @@
+LineComment { doc_style: None }
+Whitespace
 Pound
 Bang
 OpenBracket

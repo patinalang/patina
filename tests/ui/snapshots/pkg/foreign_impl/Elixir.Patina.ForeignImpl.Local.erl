@@ -1,4 +1,4 @@
--file("tests/ui/src/pkg/foreign_impl.pt", 63).
+-file("tests/ui/src/pkg/foreign_impl.pt", 64).
 
 -module('Elixir.Patina.ForeignImpl.Local').
 

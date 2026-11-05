@@ -1,4 +1,4 @@
--file("tests/ui/src/module_attr.pt", 4).
+-file("tests/ui/src/module_attr.pt", 5).
 
 -module('Elixir.ModuleAttr.Person').
 

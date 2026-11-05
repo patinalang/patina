@@ -1305,6 +1305,11 @@ rustc_queries! {
         separate_provide_extern
     }
 
+    query otp_application_name(_: CrateNum) -> Symbol {
+        desc { "getting the OTP application name of a crate" }
+        separate_provide_extern
+    }
+
     /// Reject local Erlang modules with the same name, and lint against deps' modules.
     query check_erl_module_clashes(_: ()) {
         desc { "checking Erlang modules against the modules of dependencies" }

@@ -70,6 +70,25 @@ impl<'a> Serialize for BigUInt<'a> {
     }
 }
 
+/// An Erlang string (a list of code points).
+#[derive(Clone, Copy, Debug)]
+pub(crate) struct Charlist<'a>(pub &'a str);
+
+impl<'a> Serialize for Charlist<'a> {
+    fn serialize<S: serde::Serializer>(
+        &self,
+        serializer: S,
+    ) -> std::result::Result<S::Ok, S::Error> {
+        use serde::ser::SerializeSeq;
+
+        let mut seq = serializer.serialize_seq(Some(self.0.chars().count()))?;
+        for char in self.0.chars() {
+            seq.serialize_element(&char)?;
+        }
+        seq.end()
+    }
+}
+
 impl<'a> ser::Serializer for &'a mut Serializer {
     type Ok = ();
     type Error = Error;

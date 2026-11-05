@@ -6,7 +6,7 @@
 
 use serde::{Serialize, Serializer};
 
-pub(crate) use super::etf_serde::BigUInt;
+pub(crate) use super::etf_serde::{BigUInt, Charlist};
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) struct Symbol(pub rustc_span::Symbol);
@@ -109,7 +109,7 @@ pub(crate) struct NameArity(pub Symbol, pub u32);
 
 #[derive(serde::Serialize, Debug, Clone, Copy)]
 #[serde(rename = "__elide__")]
-pub(crate) struct FileLine<'a>(pub &'a [char], pub u32);
+pub(crate) struct FileLine<'a>(pub Charlist<'a>, pub u32);
 
 #[derive(serde::Serialize, Debug, Clone, Copy)]
 #[serde(rename = "__elide__")]
@@ -206,7 +206,7 @@ pub(crate) enum AtomicLiteral<'a> {
     Integer(Anno, BigUInt<'a>),
     /// If L is a string literal consisting of the characters `C_1`, ..., `C_k`, then
     /// Rep(L) = `{string,ANNO,[C_1, ..., C_k]}`.
-    String(Anno, &'a [char]),
+    String(Anno, Charlist<'a>),
 }
 
 /// If L is an atom literal, then Rep(L) = `{atom,ANNO,L}`.

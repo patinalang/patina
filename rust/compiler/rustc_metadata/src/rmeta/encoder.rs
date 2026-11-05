@@ -766,6 +766,7 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
                 externally_implementable_items,
                 proc_macros,
                 beam_modules,
+                otp_application_name: tcx.otp_application_name(LOCAL_CRATE),
                 debugger_visualizers,
                 compiler_builtins: find_attr!(attrs, CompilerBuiltins),
                 needs_allocator: find_attr!(attrs, NeedsAllocator),

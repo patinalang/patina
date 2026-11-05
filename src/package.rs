@@ -6,9 +6,11 @@ use rustc_data_structures::fx::FxHashSet;
 use rustc_session::config::{ExternEntry, ExternLocation};
 use rustc_session::utils::CanonicalizedPath;
 
-pub(crate) const CORE_PACKAGE_NAME: &str = "Core";
-pub(crate) const STD_PACKAGE_NAME: &str = "Std";
-pub(crate) const PROC_MACRO_PACKAGE_NAME: &str = "ProcMacro";
+const CORE_PACKAGE_NAME: &str = "Core";
+const CORE_PACKAGE_OTP_APP: &str = "patina_core";
+const STD_PACKAGE_NAME: &str = "Std";
+const PROC_MACRO_PACKAGE_NAME: &str = "ProcMacro";
+const PROC_MACRO_PACKAGE_OTP_APP: &str = "patina_proc_macro";
 
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum DependencySpecError {
@@ -34,10 +36,63 @@ pub(crate) enum DependencyError {
     MissingMetadata { name: String, path: PathBuf },
 }
 
+pub(crate) struct PackageInfo {
+    pub name: String,
+    pub otp_application_name: String,
+    pub version: Option<String>,
+    pub description: String,
+}
+
+impl PackageInfo {
+    pub(crate) fn is_core(&self) -> bool {
+        self.name == CORE_PACKAGE_NAME
+    }
+
+    pub(crate) fn is_proc_macro(&self) -> bool {
+        self.name == PROC_MACRO_PACKAGE_NAME
+    }
+
+    pub(crate) fn core_package_info() -> PackageInfo {
+        Self {
+            name: CORE_PACKAGE_NAME.to_owned(),
+            otp_application_name: CORE_PACKAGE_OTP_APP.to_owned(),
+            version: None,
+            description: String::new(),
+        }
+    }
+
+    pub(crate) fn proc_macro_package_info() -> PackageInfo {
+        Self {
+            name: PROC_MACRO_PACKAGE_NAME.to_owned(),
+            otp_application_name: PROC_MACRO_PACKAGE_OTP_APP.to_owned(),
+            version: None,
+            description: String::new(),
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub(crate) struct PackageDependency {
     pub name: String,
     pub path: Option<PathBuf>,
+}
+
+impl PackageDependency {
+    pub(crate) fn is_core(&self) -> bool {
+        self.name == CORE_PACKAGE_NAME
+    }
+
+    pub(crate) fn is_proc_macro(&self) -> bool {
+        self.name == PROC_MACRO_PACKAGE_NAME
+    }
+
+    pub(crate) fn core_package_dependency(path: Option<PathBuf>) -> Self {
+        Self { name: CORE_PACKAGE_NAME.to_owned(), path }
+    }
+
+    pub(crate) fn proc_macro_package_dependency(path: Option<PathBuf>) -> Self {
+        Self { name: PROC_MACRO_PACKAGE_NAME.to_owned(), path }
+    }
 }
 
 impl FromStr for PackageDependency {

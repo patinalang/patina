@@ -1,3 +1,4 @@
+// snapshot: app
 #![allow(dead_code)]
 
 #[module = "Elixir.ModuleAttr.Person"]

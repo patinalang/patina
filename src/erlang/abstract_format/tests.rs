@@ -82,8 +82,8 @@ fn small_int(n: u8) -> Vec<u8> {
     vec![SMALL_INTEGER_EXT, n]
 }
 
-fn file_line_chars(chars: &[char], line: u32) -> FileLine<'_> {
-    FileLine(chars, line)
+fn file_line(filename: &str, line: u32) -> FileLine<'_> {
+    FileLine(Charlist(filename), line)
 }
 
 fn char_list(s: &str) -> Vec<u8> {
@@ -688,7 +688,7 @@ fn atom_or_var_var() {
 eaf_test! {
 fn atomic_literal_string() {
     // Rep(L) = {string, ANNO, [C_1, ..., C_k]}
-    let v = AtomicLiteral::String(anno(), &['a', 'b', 'c']);
+    let v = AtomicLiteral::String(anno(), Charlist("abc"));
     let expected = term(tuple(&[
         atom("string"),
         anno_bytes(),
@@ -701,7 +701,7 @@ fn atomic_literal_string() {
 eaf_test! {
 fn atomic_literal_empty_string_is_nil() {
     // An empty string encodes as the bare `[]`.
-    let v = AtomicLiteral::String(anno(), &[]);
+    let v = AtomicLiteral::String(anno(), Charlist(""));
     let expected = term(tuple(&[atom("string"), anno_bytes(), nil()]));
     assert_eq!(to_bytes(&v).unwrap(), expected);
 }
@@ -2283,8 +2283,7 @@ eaf_test! {
 fn module_form_file_attr() {
     // Rep(F) = {attribute, ANNO, file, {File, Line}}
     // The fourth element is an Erlang 2-tuple {File, Line}, NOT a list.
-    let file_chars: Vec<char> = "foo.erl".chars().collect();
-    let v = ModuleForm::FileAttr(anno(), file_line_chars(&file_chars, 42));
+    let v = ModuleForm::FileAttr(anno(), file_line("foo.erl", 42));
     let expected = term(attribute("file", &[tuple(&[char_list("foo.erl"), small_int(42)])]));
     assert_eq!(to_bytes(&v).unwrap(), expected);
 }
@@ -2548,8 +2547,7 @@ fn import_mod_funs_struct_is_2_tuple() {
 eaf_test! {
 fn file_line_struct_is_2_tuple() {
     // __elide__: {File, Line} — must be an Erlang tuple, not a list.
-    let file_chars: Vec<char> = "foo.erl".chars().collect();
-    let v = file_line_chars(&file_chars, 42);
+    let v = file_line("foo.erl", 42);
     let expected = term(tuple(&[char_list("foo.erl"), small_int(42)]));
     assert_eq!(to_bytes(&v).unwrap(), expected);
 }

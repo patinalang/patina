@@ -1,4 +1,4 @@
--file("tests/ui/src/module_attr.pt", 9).
+-file("tests/ui/src/module_attr.pt", 10).
 
 -module(module_attr_web_event).
 

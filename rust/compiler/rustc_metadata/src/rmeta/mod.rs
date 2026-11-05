@@ -275,6 +275,7 @@ pub(crate) struct CrateRoot {
     interpret_alloc_index: LazyArray<u64>,
     proc_macros: LazyArray<DefIndex>,
     beam_modules: LazyArray<Symbol>,
+    otp_application_name: Symbol,
 
     tables: LazyTables,
     debugger_visualizers: LazyArray<DebuggerVisualizerFile>,

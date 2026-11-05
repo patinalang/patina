@@ -6,13 +6,17 @@ mod manifest;
 mod num_utils;
 mod package;
 
+use std::io;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use clap::Parser;
-use rustc_errors::catch_fatal_errors;
+use clap::builder::ArgPredicate;
+use rustc_errors::{FatalError, catch_fatal_errors};
 
-use crate::manifest::Manifest;
+use crate::compile::compile_server::SpawnError;
+use crate::manifest::{Manifest, ManifestError};
+use crate::package::{DependencyError, PackageInfo, PackageNameError};
 
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]
 pub(crate) enum DumpStage {
@@ -31,6 +35,7 @@ pub(crate) enum EmitStage {
     Abstr,
     Beam,
     Meta,
+    App,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -46,6 +51,7 @@ pub(crate) enum Stage {
     Abstr,
     Beam,
     Meta,
+    App,
 }
 
 impl From<DumpStage> for Stage {
@@ -69,6 +75,7 @@ impl From<EmitStage> for Stage {
             EmitStage::Abstr => Stage::Abstr,
             EmitStage::Beam => Stage::Beam,
             EmitStage::Meta => Stage::Meta,
+            EmitStage::App => Stage::App,
         }
     }
 }
@@ -87,6 +94,15 @@ enum Command {
         /// Package directory.
         dir: PathBuf,
 
+        /// Emit compiled output.
+        #[arg(
+            long,
+            value_name = "STAGE",
+            default_values = ["meta", "beam", "app"],
+            default_value_if("dump", ArgPredicate::IsPresent, None)
+        )]
+        emit: Vec<EmitStage>,
+
         #[command(flatten)]
         common: CommonArgs,
     },
@@ -99,6 +115,24 @@ enum Command {
         /// Package name (defaults to PascalCase of the source filename).
         #[arg(long, value_name = "NAME")]
         pkg_name: Option<String>,
+
+        /// Package version. Required with `--emit app`.
+        #[arg(long, value_name = "VERSION", required_if_eq("emit", "app"))]
+        pkg_version: Option<String>,
+
+        /// OTP application name.
+        /// If not overridden, defaults to snake_case of the package name.
+        #[arg(long, value_name = "NAME")]
+        otp_application_name: Option<String>,
+
+        /// Emit compiled output.
+        #[arg(
+            long,
+            value_name = "STAGE",
+            default_values = ["meta", "beam"],
+            default_value_if("dump", ArgPredicate::IsPresent, None)
+        )]
+        emit: Vec<EmitStage>,
 
         #[command(flatten)]
         common: CommonArgs,
@@ -113,19 +147,20 @@ enum Command {
 /// Options for compiling a package.
 #[derive(clap::Args, Debug)]
 struct CommonArgs {
-    /// Emit compiled output.
-    #[arg(long, value_name = "STAGE")]
-    emit: Vec<EmitStage>,
-
     /// Dump intermediate compiler output.
     /// `--dump` differs from `--emit` in that its outputs are diagnostics
     /// only, and there's no guarantees about their stability.
+    /// Supplying `--dump` causes `--emit` to default to [] (nothing emitted by default).
     #[arg(long, value_name = "STAGE")]
     dump: Vec<DumpStage>,
 
     /// Output directory.
     #[arg(long, value_name = "DIR", default_value = ".")]
     out_dir: PathBuf,
+
+    /// Add `DIR` to library search directories. Can be repeated.
+    #[arg(short = 'L', long = "lib-dir", value_name = "DIR")]
+    lib_dirs: Vec<PathBuf>,
 
     /// Path to a running compile server's socket. If not given, patina starts a temporary one.
     #[arg(long, value_name = "SOCKET_PATH")]
@@ -138,36 +173,93 @@ struct CommonArgs {
     externs: Vec<package::PackageDependency>,
 }
 
+#[derive(Debug, thiserror::Error)]
+enum Error {
+    // Diagnostics are already reported.
+    #[error("compilation failed")]
+    Compile(#[from] FatalError),
+    #[error(transparent)]
+    Manifest(#[from] ManifestError),
+    #[error(transparent)]
+    PackageName(#[from] PackageNameError),
+    #[error(transparent)]
+    Dependency(#[from] DependencyError),
+    #[error("failed to read {}: {source}", path.display())]
+    ReadSource {
+        path: PathBuf,
+        #[source]
+        source: io::Error,
+    },
+    #[error("failed to run compile server: {0}")]
+    Serve(#[source] SpawnError),
+}
+
 fn main() -> ExitCode {
     let args = match Args::try_parse() {
         Ok(args) => args,
         Err(err) => err.exit(),
     };
 
-    match args.command {
-        Command::Build { dir, common } => {
-            let manifest = match Manifest::read(&dir) {
-                Ok(manifest) => manifest,
-                Err(err) => {
-                    eprintln!("error: {err}");
-                    return ExitCode::FAILURE;
-                }
-            };
-            let file = manifest.source_path(&dir);
-            run(common, &file, Some(&manifest.package.name))
+    match try_main(args) {
+        Ok(()) => ExitCode::SUCCESS,
+        // Error & diagnostics were already reported.
+        Err(Error::Compile(_)) => ExitCode::FAILURE,
+        Err(err) => {
+            eprintln!("error: {err}");
+            ExitCode::FAILURE
         }
-        Command::Compile { file, pkg_name, common } => run(common, &file, pkg_name.as_deref()),
-        Command::Serve => match compile::compile_server::serve() {
-            Ok(()) => ExitCode::SUCCESS,
-            Err(e) => {
-                eprintln!("error: failed to run compile server: {e}");
-                ExitCode::FAILURE
-            }
-        },
     }
 }
 
-fn run(args: CommonArgs, file: &Path, pkg_name: Option<&str>) -> ExitCode {
+fn try_main(args: Args) -> Result<(), Error> {
+    match args.command {
+        Command::Build { dir, emit, common } => {
+            let manifest = Manifest::read(&dir)?;
+            let file = manifest.source_path(&dir);
+            let manifest = manifest.package;
+            let name = package::resolve_package_name(Some(&manifest.name), &file)?;
+            let package = PackageInfo {
+                otp_application_name: manifest
+                    .otp_application_name
+                    .unwrap_or_else(|| package::snake_case(&name)),
+                name,
+                version: Some(manifest.version),
+                description: manifest.description.unwrap_or_default(),
+            };
+            run(common, emit, &file, package)
+        }
+        Command::Compile { file, pkg_name, pkg_version, otp_application_name, emit, common } => {
+            let name = package::resolve_package_name(pkg_name.as_deref(), &file)?;
+            let package = PackageInfo {
+                otp_application_name: otp_application_name
+                    .unwrap_or_else(|| package::snake_case(&name)),
+                name,
+                version: pkg_version,
+                description: String::new(),
+            };
+            run(common, emit, &file, package)
+        }
+        Command::Serve => compile::compile_server::serve().map_err(Error::Serve),
+    }
+}
+
+fn run(
+    args: CommonArgs,
+    emit: Vec<EmitStage>,
+    file: &Path,
+    package: PackageInfo,
+) -> Result<(), Error> {
+    let src = std::fs::read_to_string(file)
+        .map_err(|source| Error::ReadSource { path: file.to_owned(), source })?;
+    package::validate_dependencies(&args.externs)?;
+
+    let opts = compile::CompileOptions {
+        out_dir: args.out_dir,
+        lib_dirs: args.lib_dirs,
+        package,
+        externs: args.externs,
+    };
+
     let server =
         compile::compile_server::SyncServer::start(compile::compile_server::SyncServerOpts {
             sock_path: args.compile_server.clone(),
@@ -177,36 +269,9 @@ fn run(args: CommonArgs, file: &Path, pkg_name: Option<&str>) -> ExitCode {
         .dump
         .into_iter()
         .map(Stage::from)
-        .chain(args.emit.into_iter().map(Stage::from))
+        .chain(emit.into_iter().map(Stage::from))
         .collect::<Vec<_>>();
 
-    let stages = if stages.is_empty() { vec![Stage::Meta, Stage::Beam] } else { stages };
-
-    let src = match std::fs::read_to_string(file) {
-        Ok(src) => src,
-        Err(e) => {
-            eprintln!("error reading {}: {e}", file.display());
-            return ExitCode::FAILURE;
-        }
-    };
-
-    let pkg_name = match package::resolve_package_name(pkg_name, file) {
-        Ok(name) => name,
-        Err(err) => {
-            eprintln!("error: {err}");
-            return ExitCode::FAILURE;
-        }
-    };
-
-    if let Err(err) = package::validate_dependencies(&args.externs) {
-        eprintln!("error: {err}");
-        return ExitCode::FAILURE;
-    }
-
-    match catch_fatal_errors(|| {
-        compile::compile(&stages, file, &src, &args.out_dir, &pkg_name, &args.externs, &server)
-    }) {
-        Ok(()) => ExitCode::SUCCESS,
-        Err(_) => ExitCode::FAILURE,
-    }
+    catch_fatal_errors(|| compile::compile(&stages, file, &src, &opts, &server))?;
+    Ok(())
 }

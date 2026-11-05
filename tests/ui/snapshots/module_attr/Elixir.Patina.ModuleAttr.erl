@@ -1,4 +1,4 @@
--file("tests/ui/src/module_attr.pt", 1).
+-file("tests/ui/src/module_attr.pt", 2).
 
 -module('Elixir.Patina.ModuleAttr').
 

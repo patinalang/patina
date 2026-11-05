@@ -16,7 +16,7 @@ use rustc_expand::proc_macro::{BeamMacroRunner, MacroRunError};
 const SERVER_BEAM: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/patina_compile_server.beam"));
 
 const OP_COMPILE: &[u8] = b"compile";
-const OP_ABSTR: &[u8] = b"abstr";
+const OP_RENDER_TERM: &[u8] = b"render_term";
 const OP_ERL: &[u8] = b"erl";
 const OP_CORE0: &[u8] = b"core0";
 const OP_CORE: &[u8] = b"core";
@@ -159,8 +159,8 @@ impl CompileServer {
         }
     }
 
-    pub(super) fn render_abstr(&mut self, dcx: DiagCtxtHandle<'_>, eaf: &[u8]) -> String {
-        self.render(dcx, OP_ABSTR, eaf)
+    pub(super) fn render_term(&mut self, dcx: DiagCtxtHandle<'_>, term: &[u8]) -> String {
+        self.render(dcx, OP_RENDER_TERM, term)
     }
 
     pub(super) fn render_erl(&mut self, dcx: DiagCtxtHandle<'_>, eaf: &[u8]) -> String {

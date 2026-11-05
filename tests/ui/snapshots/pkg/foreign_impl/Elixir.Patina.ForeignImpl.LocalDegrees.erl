@@ -1,4 +1,4 @@
--file("tests/ui/src/pkg/foreign_impl.pt", 21).
+-file("tests/ui/src/pkg/foreign_impl.pt", 22).
 
 -module('Elixir.Patina.ForeignImpl.LocalDegrees').
 

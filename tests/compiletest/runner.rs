@@ -8,7 +8,9 @@ use libtest_mimic::Failed;
 use crate::snapshot;
 
 const TEXT_EXTENSIONS: &[&str] =
-    &["tokens", "ast", "expanded", "typed", "erl", "core0", "core", "abstr"];
+    &["tokens", "ast", "expanded", "typed", "erl", "core0", "core", "abstr", "app"];
+
+const DEPS_DIR: &str = "deps";
 
 /// The package directories under `pkg-src/`, in build order: each may use only the previous.
 const PACKAGES: &[&str] = &[
@@ -59,8 +61,10 @@ impl Runner {
 
     pub fn run_exs(&self, pt_path: &Path, exs_path: &Path) -> Result<(), Failed> {
         let out_dir = tempfile::tempdir().expect("create temp out dir");
-        let externs = self.package_deps(pt_path, out_dir.path());
-        let compiled = self.run_compile(&[], &["beam"], pt_path, out_dir.path(), &externs, false);
+        let lib_dir = out_dir.path().join(DEPS_DIR);
+        let externs = self.package_deps(pt_path, &lib_dir);
+        let compiled =
+            self.run_compile(&[], &["beam"], pt_path, out_dir.path(), &lib_dir, &externs, false);
 
         if !compiled.status.success() {
             return Err(Failed::from(format!(
@@ -73,6 +77,8 @@ impl Runner {
         }
 
         let output = Command::new("elixir")
+            .arg("-pa")
+            .arg(&lib_dir)
             .arg(
                 exs_path
                     .canonicalize()
@@ -97,30 +103,34 @@ impl Runner {
 
     fn compile(&self, pt_path: &Path) -> CompileOutput {
         let out_dir = tempfile::tempdir().expect("create temp out dir");
-        let externs = self.package_deps(pt_path, out_dir.path());
+        let lib_dir = out_dir.path().join(DEPS_DIR);
+        let externs = self.package_deps(pt_path, &lib_dir);
         let source = std::fs::read_to_string(pt_path).expect("read test source");
         let mut dumps = vec!["tokens", "ast", "expanded", "typed", "erl"];
+        let mut emits = vec!["abstr", "beam"];
 
         let mut header = source.lines().take_while(|line| line.starts_with("//"));
         if let Some(extra) = header.find_map(|line| line.strip_prefix("// snapshot:")) {
-            dumps.extend(extra.split(',').map(str::trim));
+            for stage in extra.split(',').map(str::trim) {
+                if stage == "app" { emits.push(stage) } else { dumps.push(stage) }
+            }
         }
 
         let output =
-            self.run_compile(&dumps, &["abstr", "beam"], pt_path, out_dir.path(), &externs, false);
+            self.run_compile(&dumps, &emits, pt_path, out_dir.path(), &lib_dir, &externs, false);
         let text_extensions: HashSet<&str> = TEXT_EXTENSIONS.iter().copied().collect();
         let artifacts = read_text_artifacts(out_dir.path(), &text_extensions);
 
         CompileOutput { artifacts, stderr: String::from_utf8_lossy(&output.stderr).into_owned() }
     }
 
-    fn package_deps(&self, pt_path: &Path, out_dir: &Path) -> Vec<String> {
+    fn package_deps(&self, pt_path: &Path, lib_dir: &Path) -> Vec<String> {
         let mut deps = Vec::new();
-        let is_pkg_test =
-            pt_path.strip_prefix(crate::UI_ROOT).is_ok_and(|rel| rel.starts_with("pkg"));
-        if !is_pkg_test {
+        if !is_pkg_test(pt_path) {
             return deps;
         }
+
+        std::fs::create_dir(lib_dir).expect("create dependency packages dir");
 
         for package in PACKAGES {
             let dir = Path::new(crate::PKG_SRC_ROOT).join(package);
@@ -128,7 +138,7 @@ impl Runner {
             let source = std::fs::read_to_string(&src)
                 .unwrap_or_else(|_| panic!("read dependency package {}", src.display()));
             let proc_macro = source.contains("ProcMacro");
-            let output = self.run_compile(&[], &["meta", "beam"], &dir, out_dir, &deps, proc_macro);
+            let output = self.run_compile(&[], &[], &dir, lib_dir, lib_dir, &deps, proc_macro);
             assert!(
                 output.status.success(),
                 "failed to build dependency package {}:\nstdout:\n{}stderr:\n{}",
@@ -147,18 +157,23 @@ impl Runner {
         emits: &[&str],
         pt_path: &Path,
         out_dir: &Path,
+        lib_dir: &Path,
         externs: &[String],
         proc_macro: bool,
     ) -> Output {
         let mut cmd = Command::new(env!("CARGO_BIN_EXE_patina"));
         // A package directory is built from its `Patina.toml`.
         cmd.arg(if pt_path.is_dir() { "build" } else { "compile" });
+        if !pt_path.is_dir() && emits.contains(&"app") {
+            cmd.arg("--pkg-version").arg("0.0.0");
+        }
         for dump in dumps {
             cmd.arg("--dump").arg(*dump);
         }
         for emit in emits {
             cmd.arg("--emit").arg(*emit);
         }
+        cmd.arg("-L").arg(lib_dir);
         for name in externs {
             cmd.arg("--extern").arg(name);
         }
@@ -169,6 +184,10 @@ impl Runner {
         cmd.arg("--out-dir").arg(out_dir).arg(pt_path);
         cmd.output().expect("run patina")
     }
+}
+
+fn is_pkg_test(pt_path: &Path) -> bool {
+    pt_path.strip_prefix(crate::UI_ROOT).is_ok_and(|rel| rel.starts_with("pkg"))
 }
 
 fn read_text_artifacts(out_dir: &Path, extensions: &HashSet<&str>) -> Vec<TextArtifact> {

@@ -1,4 +1,4 @@
--file("tests/ui/src/module_attr.pt", 15).
+-file("tests/ui/src/module_attr.pt", 16).
 
 -module(module_attr_helpers).
 

@@ -1,3 +1,4 @@
+mod app;
 pub(crate) mod compile_server;
 mod eaf_builder;
 mod translate;
@@ -29,7 +30,7 @@ use rustc_span::source_map::FilePathMapping;
 use rustc_span::{ErrorGuaranteed, FileName, RealFileName};
 
 use crate::compile::compile_server::SyncServer;
-use crate::package::{CORE_PACKAGE_NAME, PROC_MACRO_PACKAGE_NAME, PackageDependency};
+use crate::package::{PackageDependency, PackageInfo};
 use crate::{Stage, erlang};
 
 static INTERNAL_FEATURES: AtomicBool = AtomicBool::new(false);
@@ -67,9 +68,12 @@ fn ensure_core(out_dir: &Path, server: &Arc<SyncServer>) -> PathBuf {
         &[Stage::Meta, Stage::Beam],
         Path::new("core.pt"),
         CORE_SRC,
-        out_dir,
-        CORE_PACKAGE_NAME,
-        &[],
+        &CompileOptions {
+            out_dir: out_dir.to_owned(),
+            lib_dirs: Vec::new(),
+            package: PackageInfo::core_package_info(),
+            externs: Vec::new(),
+        },
         server,
     );
 
@@ -88,9 +92,12 @@ fn ensure_proc_macro(out_dir: &Path, server: &Arc<SyncServer>) -> PathBuf {
         &[Stage::Meta, Stage::Beam],
         Path::new("proc_macro.pt"),
         PROC_MACRO_SRC,
-        out_dir,
-        PROC_MACRO_PACKAGE_NAME,
-        &[],
+        &CompileOptions {
+            out_dir: out_dir.to_owned(),
+            lib_dirs: Vec::new(),
+            package: PackageInfo::proc_macro_package_info(),
+            externs: Vec::new(),
+        },
         server,
     );
 
@@ -152,15 +159,21 @@ macro_rules! consume_stage {
     };
 }
 
+pub(crate) struct CompileOptions {
+    pub out_dir: PathBuf,
+    pub lib_dirs: Vec<PathBuf>,
+    pub package: PackageInfo,
+    pub externs: Vec<PackageDependency>,
+}
+
 pub(crate) fn compile(
     stages: &[Stage],
     filename: &Path,
     src: &str,
-    out_dir: &Path,
-    pkg_name: &str,
-    externs: &[PackageDependency],
+    opts: &CompileOptions,
     server: &Arc<SyncServer>,
 ) {
+    let CompileOptions { out_dir, package: pkg, externs, .. } = opts;
     let filename_stem = filename
         .file_stem()
         .expect("filename to have a stem")
@@ -187,7 +200,7 @@ pub(crate) fn compile(
     });
 
     consume_stage!(stages_left, Stage::Ast, {
-        let config = make_config(filename.clone(), src, pkg_name, externs, out_dir, server);
+        let config = make_config(filename.clone(), src, opts, server);
         interface::run_compiler(config, |compiler| {
             let krate = parse_with_prelude(&compiler.sess, "");
 
@@ -208,8 +221,8 @@ pub(crate) fn compile(
         });
     });
 
-    let config = make_config(filename.clone(), src, pkg_name, externs, out_dir, server);
-    let prelude = if pkg_name == CORE_PACKAGE_NAME { "" } else { PRELUDE };
+    let config = make_config(filename.clone(), src, opts, server);
+    let prelude = if pkg.is_core() { "" } else { PRELUDE };
 
     interface::run_compiler(config, |compiler| {
         let krate = parse_with_prelude(&compiler.sess, prelude);
@@ -281,8 +294,23 @@ pub(crate) fn compile(
             }
 
             consume_stage!(stages_left, Stage::Meta, {
-                let metadata_path = out_dir.join(format!("lib{}.rmeta", pkg_name));
+                let metadata_path = out_dir.join(format!("lib{}.rmeta", pkg.name));
                 rustc_metadata::encode_metadata(tcx, &metadata_path, None);
+            });
+
+            consume_stage!(stages_left, Stage::App, {
+                let Some(version) = &pkg.version else {
+                    dcx.fatal(
+                        "emitting an `.app` requires a package version; set one with --pkg-version",
+                    );
+                };
+                let term = app::app_term(tcx, version, &pkg.description).unwrap_or_else(|e| {
+                    dcx.fatal(format!("failed to build the application specification: {e}"));
+                });
+                let mut rendered = server.with(dcx, |server| server.render_term(dcx, &term));
+                rendered.push_str(".\n");
+                write_file(out_dir, &pkg.otp_application_name, "app", rendered.as_bytes())
+                    .unwrap_or_else(|e| dcx.fatal(format!("failed to write app file: {e}")));
             });
 
             let arena = DroplessArena::default();
@@ -310,7 +338,7 @@ pub(crate) fn compile(
             consume_stage!(stages_left, Stage::Abstr, {
                 server.with(dcx, |server| {
                     for (mod_name, bytes) in &serialized_modules {
-                        let mut rendered = server.render_abstr(dcx, bytes);
+                        let mut rendered = server.render_term(dcx, bytes);
                         if !rendered.ends_with('\n') {
                             rendered.push('\n');
                         }
@@ -387,25 +415,21 @@ pub(crate) fn compile(
 fn make_config(
     filename: FileName,
     src: &str,
-    pkg_name: &str,
-    deps: &[PackageDependency],
-    out_dir: &Path,
+    opts: &CompileOptions,
     server: &Arc<SyncServer>,
 ) -> interface::Config {
-    let has_explicit_core = deps.iter().any(|dep| dep.name == CORE_PACKAGE_NAME);
-    let is_core = pkg_name == CORE_PACKAGE_NAME;
+    let CompileOptions { out_dir, lib_dirs, package: pkg, externs: deps } = opts;
+    let has_explicit_core = deps.iter().any(|dep| dep.is_core());
 
-    let core_dep = (!has_explicit_core && !is_core).then(|| {
+    let core_dep = (!has_explicit_core && !pkg.is_core()).then(|| {
         let core_rmeta = ensure_core(out_dir, server);
-        PackageDependency { name: CORE_PACKAGE_NAME.to_string(), path: Some(core_rmeta) }
+        PackageDependency::core_package_dependency(Some(core_rmeta))
     });
 
     let wants_proc_macro =
-        deps.iter().any(|dep| dep.name == PROC_MACRO_PACKAGE_NAME && dep.path.is_none())
-            && pkg_name != PROC_MACRO_PACKAGE_NAME;
-    let proc_macro_dep = wants_proc_macro.then(|| PackageDependency {
-        name: PROC_MACRO_PACKAGE_NAME.to_string(),
-        path: Some(ensure_proc_macro(out_dir, server)),
+        deps.iter().any(|dep| dep.is_proc_macro() && dep.path.is_none()) && !pkg.is_proc_macro();
+    let proc_macro_dep = wants_proc_macro.then(|| {
+        PackageDependency::proc_macro_package_dependency(Some(ensure_proc_macro(out_dir, server)))
     });
 
     let mut externs = BTreeMap::new();
@@ -442,9 +466,13 @@ fn make_config(
             },
             crate_types: vec![config::CrateType::Rlib],
             cg: config::CodegenOptions { panic: Some(PanicStrategy::Abort), ..Default::default() },
-            crate_name: Some(pkg_name.to_string()),
+            crate_name: Some(pkg.name.to_string()),
+            otp_application_name: Some(pkg.otp_application_name.clone()),
             externs: Externs::new(externs),
-            search_paths: vec![SearchPath::new(PathKind::All, out_dir.to_owned())],
+            search_paths: lib_dirs
+                .iter()
+                .map(|dir| SearchPath::new(PathKind::All, dir.to_owned()))
+                .collect(),
             ..Default::default()
         },
     }

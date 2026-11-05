@@ -1,4 +1,4 @@
--file("tests/ui/src/pkg/foreign_impl.pt", 23).
+-file("tests/ui/src/pkg/foreign_impl.pt", 24).
 
 -module('Elixir.Patina.ForeignImpl.$impl.Temperatures.Celsius').
 

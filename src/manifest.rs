@@ -35,6 +35,9 @@ pub(crate) struct Manifest {
 #[serde(deny_unknown_fields)]
 pub(crate) struct PackageManifest {
     pub name: String,
+    pub version: String,
+    pub otp_application_name: Option<String>,
+    pub description: Option<String>,
 }
 
 impl Manifest {

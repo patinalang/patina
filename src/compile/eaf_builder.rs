@@ -58,11 +58,14 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
     }
 
     pub(crate) fn pat_string(&self, span: impl IntoAnno, s: &str) -> eaf::Pattern<'arena> {
-        let chars = self.arena.alloc_from_iter(s.chars());
         eaf::Pattern::AtomicLiteral(eaf::AtomicLiteral::String(
             span.into_anno(self.source_map),
-            chars,
+            self.charlist(s),
         ))
+    }
+
+    fn charlist(&self, s: &str) -> eaf::Charlist<'arena> {
+        eaf::Charlist(if s.is_empty() { "" } else { self.arena.alloc_str(s) })
     }
 
     pub(crate) fn pat_float(&self, span: impl IntoAnno, value: f64) -> eaf::Pattern<'arena> {
@@ -165,7 +168,7 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
 
     /// List-based string literal.
     pub(crate) fn expr_string(&self, span: impl IntoAnno, s: Symbol) -> eaf::Expr<'arena> {
-        let chars = self.arena.alloc_from_iter(s.as_str().chars());
+        let chars = self.charlist(s.as_str());
         eaf::Expr::AtomicLiteral(eaf::AtomicLiteral::String(span.into_anno(self.source_map), chars))
     }
 
@@ -668,8 +671,8 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
 
     pub(crate) fn file_attr(&self, span: impl IntoAnno, filename: &str) -> eaf::ModuleForm<'arena> {
         let anno = span.into_anno(self.source_map);
-        let chars = self.arena.alloc_from_iter(filename.chars());
-        eaf::ModuleForm::FileAttr(anno, eaf::FileLine(chars, anno.line))
+        let filename = self.charlist(filename);
+        eaf::ModuleForm::FileAttr(anno, eaf::FileLine(filename, anno.line))
     }
 
     pub(crate) fn module_attr(&self, span: impl IntoAnno, name: Symbol) -> eaf::ModuleForm<'arena> {

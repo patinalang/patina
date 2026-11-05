@@ -670,6 +670,9 @@ impl CStore {
         match self.maybe_resolve_crate(tcx, name, dep_kind, origin) {
             Ok(cnum) => {
                 self.set_used_recursively(cnum);
+                if matches!(origin, CrateOrigin::Extern) {
+                    self.set_resolved_extern_crate_name(name, cnum);
+                }
                 Some(cnum)
             }
             Err(err) => {

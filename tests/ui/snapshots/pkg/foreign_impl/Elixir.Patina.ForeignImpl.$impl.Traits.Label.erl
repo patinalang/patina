@@ -1,4 +1,4 @@
--file("tests/ui/src/pkg/foreign_impl.pt", 10).
+-file("tests/ui/src/pkg/foreign_impl.pt", 11).
 
 -module('Elixir.Patina.ForeignImpl.$impl.Traits.Label').
 

@@ -338,6 +338,7 @@ top_level_options!(
         cg: CodegenOptions [SUBSTRUCT] { TARGET_MODIFIER: CodegenOptions(CodegenOptionsTargetModifiers) },
         externs: Externs [UNTRACKED],
         crate_name: Option<String> [TRACKED],
+        otp_application_name: Option<String> [TRACKED],
         /// Indicates how the compiler should treat unstable features.
         unstable_features: UnstableFeatures [TRACKED],
 

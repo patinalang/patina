@@ -1,3 +1,4 @@
+// snapshot: app
 use MoreTemperatures::{Kelvin, Rankine};
 use Temperatures::{Celsius, From};
 use Traits::{Label, Loud, Show};

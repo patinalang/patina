@@ -116,8 +116,8 @@ do_request(Sock, ~"compile", [Eaf]) ->
         {error, Errors, Warnings} ->
             write_msg(Sock, [~"error", Errors, Warnings])
     end;
-do_request(Sock, ~"abstr", [Eaf]) ->
-    Rendered = unicode:characters_to_binary(io_lib:format("~tp", [binary_to_term(Eaf)])),
+do_request(Sock, ~"render_term", [Term]) ->
+    Rendered = unicode:characters_to_binary(io_lib:format("~tp", [binary_to_term(Term)])),
     write_msg(Sock, [~"ok", Rendered]);
 do_request(Sock, ~"erl", [Eaf]) ->
     Forms = binary_to_term(Eaf),
