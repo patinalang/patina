@@ -3,7 +3,6 @@ name = "patina"
 version = "0.0.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
-build = "build.rs"
 
 [[test]]
 name = "compiletest"
@@ -34,7 +33,7 @@ rustc_metadata = { path = "rust/compiler/rustc_metadata" }
 
 etf = { path = "rust/compiler/etf" }
 
-clap = { version = "4.6.1", features = ["derive", "unicode"] }
+clap = { version = "4.6.1", features = ["derive", "env", "unicode"] }
 convert_case = "0.11.0"
 num-bigint = "0.4.6"
 serde = { version = "1.0.228", features = ["derive"] }

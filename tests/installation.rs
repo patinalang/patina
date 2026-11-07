@@ -25,6 +25,41 @@ fn assert_failure(output: &Output, message: &str) {
     assert!(stderr.contains(message), "got:\n{stderr}");
 }
 
+#[test]
+fn reserved_package_name_needs_bootstrap() {
+    let temp = tempfile::tempdir().expect("create temp dir");
+    let args = ["compile", "--pkg-name", "Std"];
+
+    let output = patina(temp.path(), &args, &[]);
+    assert_failure(&output, "package name `Std` is reserved");
+
+    let output = patina(temp.path(), &args, &[("PATINA_BOOTSTRAP", "1".as_ref())]);
+    assert_success(&output);
+}
+
+#[test]
+fn install_missing_any_required_file_is_reported() {
+    const INSTALL_FILES: [&str; 5] = [
+        "patina/ebin/patina.app",
+        "patina_core/ebin/libCore.rmeta",
+        "patina_core/ebin/patina_core.app",
+        "patina_proc_macro/ebin/libProcMacro.rmeta",
+        "patina_proc_macro/ebin/patina_proc_macro.app",
+    ];
+
+    for missing in INSTALL_FILES {
+        let root = tempfile::tempdir().expect("create temp dir");
+        for file in INSTALL_FILES.into_iter().filter(|file| *file != missing) {
+            let path = root.path().join("lib").join(file);
+            std::fs::create_dir_all(path.parent().expect("file's directory")).expect("create dir");
+            std::fs::write(path, b"").expect("write file");
+        }
+
+        let output = patina(root.path(), &["compile"], &[("PATINA_ROOT", root.path())]);
+        assert_failure(&output, &format!("Patina install corrupted: {missing} is missing"));
+    }
+}
+
 /// The VM logs this failure as a crash report too, which mustn't garble the reply.
 #[test]
 fn server_start_failure_is_reported() {

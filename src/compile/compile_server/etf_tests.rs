@@ -6,10 +6,14 @@ use rustc_errors::annotate_snippet_emitter_writer::AnnotateSnippetEmitter;
 use rustc_errors::emitter::{ColorConfig, stderr_destination};
 
 use super::{OP_CODE_PATH, SyncServer, SyncServerOpts};
+use crate::installation::Installation;
 
 fn server() -> &'static Arc<SyncServer> {
     static SERVER: OnceLock<Arc<SyncServer>> = OnceLock::new();
-    SERVER.get_or_init(|| SyncServer::start(SyncServerOpts::default()))
+    SERVER.get_or_init(|| {
+        let installation = Installation::locate(None).expect("locate the install");
+        SyncServer::start(SyncServerOpts { sock_path: None, installation })
+    })
 }
 
 /// Encodes `term`, echoes it through the VM, and returns what comes back.

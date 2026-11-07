@@ -34,7 +34,10 @@ note: an implementation of `Core::PartialOrd` might be missing for `Centimeters`
 LL | struct Centimeters(float);
    | ^^^^^^^^^^^^^^^^^^ must implement `Core::PartialOrd`
 note: the trait `Core::PartialOrd` must be implemented
-  --> core.pt:553:0
+  --> lib/core/src/core.pt:553:1
+   |
+LL | pub trait PartialOrd<Rhs = Self> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: aborting due to 4 previous errors
 

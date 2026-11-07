@@ -53,57 +53,6 @@ use Core::Prelude::*;
 extern mod patina_fmt;
 "#;
 
-const CORE_SRC: &str = include_str!("core.pt");
-const PROC_MACRO_SRC: &str = include_str!("proc_macro.pt");
-
-fn ensure_core(out_dir: &Path, server: &Arc<SyncServer>) -> PathBuf {
-    let rmeta_path = out_dir.join("libCore.rmeta");
-    let beam_path = out_dir.join("Elixir.Patina.Core.beam");
-
-    if rmeta_path.is_file() && beam_path.is_file() {
-        return rmeta_path;
-    }
-
-    compile(
-        &[Stage::Meta, Stage::Beam],
-        Path::new("core.pt"),
-        CORE_SRC,
-        &CompileOptions {
-            out_dir: out_dir.to_owned(),
-            lib_dirs: Vec::new(),
-            package: PackageInfo::core_package_info(),
-            externs: Vec::new(),
-        },
-        server,
-    );
-
-    rmeta_path
-}
-
-fn ensure_proc_macro(out_dir: &Path, server: &Arc<SyncServer>) -> PathBuf {
-    let rmeta_path = out_dir.join("libProcMacro.rmeta");
-    let beam_path = out_dir.join("Elixir.Patina.ProcMacro.beam");
-
-    if rmeta_path.is_file() && beam_path.is_file() {
-        return rmeta_path;
-    }
-
-    compile(
-        &[Stage::Meta, Stage::Beam],
-        Path::new("proc_macro.pt"),
-        PROC_MACRO_SRC,
-        &CompileOptions {
-            out_dir: out_dir.to_owned(),
-            lib_dirs: Vec::new(),
-            package: PackageInfo::proc_macro_package_info(),
-            externs: Vec::new(),
-        },
-        server,
-    );
-
-    rmeta_path
-}
-
 struct NoAnn;
 impl pprust::PpAnn for NoAnn {}
 
@@ -168,13 +117,8 @@ pub(crate) struct CompileOptions {
 
 impl CompileOptions {
     fn code_path(&self) -> FxIndexSet<PathBuf> {
-        // `ensure_core` and `ensure_proc_macro` currently write to `out_dir`.
         let rmeta_dirs = self.externs.iter().filter_map(|dep| dep.path.as_deref()?.parent());
-        std::iter::once(self.out_dir.as_path())
-            .chain(self.lib_dirs.iter().map(PathBuf::as_path))
-            .chain(rmeta_dirs)
-            .map(Path::to_owned)
-            .collect()
+        self.lib_dirs.iter().map(PathBuf::as_path).chain(rmeta_dirs).map(Path::to_owned).collect()
     }
 }
 
@@ -420,22 +364,10 @@ fn make_config(
     opts: &CompileOptions,
     server: &Arc<SyncServer>,
 ) -> interface::Config {
-    let CompileOptions { out_dir, lib_dirs, package: pkg, externs: deps } = opts;
-    let has_explicit_core = deps.iter().any(|dep| dep.is_core());
-
-    let core_dep = (!has_explicit_core && !pkg.is_core()).then(|| {
-        let core_rmeta = ensure_core(out_dir, server);
-        PackageDependency::core_package_dependency(Some(core_rmeta))
-    });
-
-    let wants_proc_macro =
-        deps.iter().any(|dep| dep.is_proc_macro() && dep.path.is_none()) && !pkg.is_proc_macro();
-    let proc_macro_dep = wants_proc_macro.then(|| {
-        PackageDependency::proc_macro_package_dependency(Some(ensure_proc_macro(out_dir, server)))
-    });
+    let CompileOptions { lib_dirs, package: pkg, externs: deps, .. } = opts;
 
     let mut externs = BTreeMap::new();
-    for dep in core_dep.iter().chain(deps.iter()).chain(proc_macro_dep.iter()) {
+    for dep in deps {
         externs.insert(dep.name.clone(), dep.into());
     }
 

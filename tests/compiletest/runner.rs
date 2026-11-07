@@ -76,7 +76,9 @@ impl Runner {
             )));
         }
 
+        let install_lib = Path::new(env!("CARGO_BIN_EXE_patina")).with_file_name("lib");
         let output = Command::new("elixir")
+            .env("ERL_LIBS", install_lib)
             .arg("-pa")
             .arg(&lib_dir)
             .arg(

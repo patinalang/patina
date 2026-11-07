@@ -15,7 +15,7 @@ use rustc_data_structures::marker::IntoDynSyncSend;
 use rustc_errors::DiagCtxtHandle;
 use rustc_expand::proc_macro::{BeamMacroRunner, MacroRunError};
 
-const SERVER_BEAM: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/patina_compile_server.beam"));
+use crate::installation::Installation;
 
 const OP_COMPILE: &[u8] = b"compile";
 const OP_RENDER_TERM: &[u8] = b"render_term";
@@ -38,8 +38,6 @@ const ERL_LOGGER: &str = "[{handler,default,logger_std_h,#{config=>#{type=>stand
 
 const ERL_INIT: &str = "\
 spawn(fun() -> io:get_line([]), erlang:halt(0) end), \
-[BeamPath] = init:get_plain_arguments(), \
-{module, patina_compile_server} = code:load_abs(BeamPath), \
 {Status, Part} = try \
     {ok, _} = patina_compile_server:ensure_started(), \
     {~\"ok\", unicode:characters_to_binary( \
@@ -99,8 +97,6 @@ impl Drop for TmpDir {
 pub(crate) enum SpawnError {
     #[error("failed to create temp dir: {0}")]
     TmpDir(#[source] io::Error),
-    #[error("failed to write compile server beam: {0}")]
-    WriteBeam(#[source] io::Error),
     #[error("failed to spawn erl compile server: {0}")]
     Erl(#[source] io::Error),
     #[error("failed to read the compile server's socket path: {0}")]
@@ -176,8 +172,8 @@ impl CompileServer {
         Ok(CompileServer { _vm: BeamVm::Shared, stream })
     }
 
-    fn spawn() -> Result<CompileServer, SpawnError> {
-        let (vm, sock_path) = BeamVm::start()?;
+    fn spawn(installation: &Installation) -> Result<CompileServer, SpawnError> {
+        let (vm, sock_path) = BeamVm::start(installation)?;
         let stream = UnixStream::connect(sock_path).map_err(SpawnError::Connect)?;
         Ok(CompileServer { _vm: vm, stream })
     }
@@ -383,25 +379,15 @@ impl CompileServer {
 }
 
 impl BeamVm {
-    fn start() -> Result<(BeamVm, PathBuf), SpawnError> {
+    fn start(installation: &Installation) -> Result<(BeamVm, PathBuf), SpawnError> {
         let tmpdir = TmpDir::new().map_err(SpawnError::TmpDir)?;
-
-        let beam_path = tmpdir.path().join("patina_compile_server.beam");
-        fs::write(&beam_path, SERVER_BEAM).map_err(SpawnError::WriteBeam)?;
 
         let mut child = Command::new("erl")
             .args([
-                "+pc",
-                "unicode",
-                "-noshell",
-                "-kernel",
-                "logger",
-                ERL_LOGGER,
-                "-eval",
-                ERL_INIT,
-                "-extra",
-                &beam_path.with_extension("").to_string_lossy(),
+                "+pc", "unicode", "-noshell", "-kernel", "logger", ERL_LOGGER, "-eval", ERL_INIT,
             ])
+            .arg("-pa")
+            .args(&installation.lib_dirs)
             .env("TMPDIR", tmpdir.path())
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
@@ -424,8 +410,8 @@ impl BeamVm {
 
 /// Runs a compile server for other patinas to connect to, until our stdin closes. Prints the
 /// server's socket path as the first line on stdout.
-pub(crate) fn serve() -> Result<(), SpawnError> {
-    let (vm, sock_path) = BeamVm::start()?;
+pub(crate) fn serve(installation: &Installation) -> Result<(), SpawnError> {
+    let (vm, sock_path) = BeamVm::start(installation)?;
     let mut line = sock_path.into_os_string().into_encoded_bytes();
     line.push(b'\n');
     io::stdout().write_all(&line).map_err(SpawnError::WriteSocketPath)?;
@@ -470,16 +456,17 @@ impl BeamMacroRunner for SyncServer {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub(crate) struct SyncServerOpts {
     pub(crate) sock_path: Option<PathBuf>,
+    pub(crate) installation: Installation,
 }
 
 impl SyncServer {
     pub(crate) fn start(opts: SyncServerOpts) -> Arc<SyncServer> {
         let startup = State::Starting(thread::spawn(move || match opts.sock_path {
             Some(sock_path) => CompileServer::connect(&sock_path),
-            None => CompileServer::spawn(),
+            None => CompileServer::spawn(&opts.installation),
         }));
         Arc::new(SyncServer { state: IntoDynSyncSend(Mutex::new(startup)) })
     }

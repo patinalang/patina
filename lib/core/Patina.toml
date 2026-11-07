@@ -1,0 +1,5 @@
+[package]
+name = "Core"
+version = "0.0.0"
+otp_application_name = "patina_core"
+description = "The Patina Core library"

@@ -8,10 +8,9 @@ use rustc_session::config::{ExternEntry, ExternLocation};
 use rustc_session::utils::CanonicalizedPath;
 
 const CORE_PACKAGE_NAME: &str = "Core";
-const CORE_PACKAGE_OTP_APP: &str = "patina_core";
 const STD_PACKAGE_NAME: &str = "Std";
 const PROC_MACRO_PACKAGE_NAME: &str = "ProcMacro";
-const PROC_MACRO_PACKAGE_OTP_APP: &str = "patina_proc_macro";
+const PATINA_BOOTSTRAP_ENV: &str = "PATINA_BOOTSTRAP";
 
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum DependencySpecError {
@@ -50,28 +49,6 @@ impl PackageInfo {
     pub(crate) fn is_core(&self) -> bool {
         self.name == CORE_PACKAGE_NAME
     }
-
-    pub(crate) fn is_proc_macro(&self) -> bool {
-        self.name == PROC_MACRO_PACKAGE_NAME
-    }
-
-    pub(crate) fn core_package_info() -> PackageInfo {
-        Self {
-            name: CORE_PACKAGE_NAME.to_owned(),
-            otp_application_name: CORE_PACKAGE_OTP_APP.to_owned(),
-            version: None,
-            description: String::new(),
-        }
-    }
-
-    pub(crate) fn proc_macro_package_info() -> PackageInfo {
-        Self {
-            name: PROC_MACRO_PACKAGE_NAME.to_owned(),
-            otp_application_name: PROC_MACRO_PACKAGE_OTP_APP.to_owned(),
-            version: None,
-            description: String::new(),
-        }
-    }
 }
 
 #[derive(Debug, Clone)]
@@ -85,16 +62,8 @@ impl PackageDependency {
         self.name == CORE_PACKAGE_NAME
     }
 
-    pub(crate) fn is_proc_macro(&self) -> bool {
-        self.name == PROC_MACRO_PACKAGE_NAME
-    }
-
-    pub(crate) fn core_package_dependency(path: Option<PathBuf>) -> Self {
-        Self { name: CORE_PACKAGE_NAME.to_owned(), path }
-    }
-
-    pub(crate) fn proc_macro_package_dependency(path: Option<PathBuf>) -> Self {
-        Self { name: PROC_MACRO_PACKAGE_NAME.to_owned(), path }
+    pub(crate) fn core_package_dependency() -> Self {
+        Self { name: CORE_PACKAGE_NAME.to_owned(), path: None }
     }
 }
 
@@ -139,6 +108,11 @@ impl From<&PackageDependency> for ExternEntry {
     }
 }
 
+/// Are we building patina itself (`true`), or building with patina (`false`).
+pub(crate) fn is_bootstrap() -> bool {
+    std::env::var_os(PATINA_BOOTSTRAP_ENV).is_some_and(|value| value == "1")
+}
+
 pub(crate) fn snake_case(name: &str) -> String {
     name.to_case(Case::Snake)
 }
@@ -156,7 +130,7 @@ pub(crate) fn resolve_package_name(
     };
 
     match name.as_str() {
-        CORE_PACKAGE_NAME | STD_PACKAGE_NAME | PROC_MACRO_PACKAGE_NAME => {
+        CORE_PACKAGE_NAME | STD_PACKAGE_NAME | PROC_MACRO_PACKAGE_NAME if !is_bootstrap() => {
             Err(PackageNameError::Reserved(name))
         }
         _ => Ok(name),

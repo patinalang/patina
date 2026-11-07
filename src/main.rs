@@ -2,6 +2,7 @@
 
 mod compile;
 mod erlang;
+mod installation;
 mod manifest;
 mod num_utils;
 mod package;
@@ -15,8 +16,9 @@ use clap::builder::{ArgPredicate, PathBufValueParser, TypedValueParser};
 use rustc_errors::{FatalError, catch_fatal_errors};
 
 use crate::compile::compile_server::SpawnError;
+use crate::installation::{Installation, LocateInstallationError};
 use crate::manifest::{Manifest, ManifestError};
-use crate::package::{DependencyError, PackageInfo, PackageNameError};
+use crate::package::{DependencyError, PackageDependency, PackageInfo, PackageNameError};
 
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]
 pub(crate) enum DumpStage {
@@ -83,6 +85,10 @@ impl From<EmitStage> for Stage {
 #[derive(Parser, Debug)]
 #[command(name = "patina", about = "Compile Patina packages.")]
 struct Args {
+    /// Root of the Patina install. If not given, it's found relative to this executable.
+    #[arg(long, env = "PATINA_ROOT", global = true, value_name = "DIR", value_parser = absolute_path())]
+    root: Option<PathBuf>,
+
     #[command(subcommand)]
     command: Command,
 }
@@ -170,7 +176,7 @@ struct CommonArgs {
     /// If `=RMETA` is omitted, the package is assumed to be in the library
     /// search directories.
     #[arg(long = "extern", value_name = "NAME[=RMETA]")]
-    externs: Vec<package::PackageDependency>,
+    externs: Vec<PackageDependency>,
 }
 
 fn absolute_path() -> impl TypedValueParser<Value = PathBuf> {
@@ -188,6 +194,8 @@ enum Error {
     PackageName(#[from] PackageNameError),
     #[error(transparent)]
     Dependency(#[from] DependencyError),
+    #[error(transparent)]
+    LocateInstallation(#[from] LocateInstallationError),
     #[error("failed to read {}: {source}", path.display())]
     ReadSource {
         path: PathBuf,
@@ -216,6 +224,7 @@ fn main() -> ExitCode {
 }
 
 fn try_main(args: Args) -> Result<(), Error> {
+    let installation = Installation::locate(args.root)?;
     match args.command {
         Command::Build { dir, emit, common } => {
             let manifest = Manifest::read(&dir)?;
@@ -230,7 +239,7 @@ fn try_main(args: Args) -> Result<(), Error> {
                 version: Some(manifest.version),
                 description: manifest.description.unwrap_or_default(),
             };
-            run(common, emit, &file, package)
+            run(common, emit, &file, package, installation)
         }
         Command::Compile { file, pkg_name, pkg_version, otp_application_name, emit, common } => {
             let name = package::resolve_package_name(pkg_name.as_deref(), &file)?;
@@ -241,9 +250,9 @@ fn try_main(args: Args) -> Result<(), Error> {
                 version: pkg_version,
                 description: String::new(),
             };
-            run(common, emit, &file, package)
+            run(common, emit, &file, package, installation)
         }
-        Command::Serve => compile::compile_server::serve().map_err(Error::Serve),
+        Command::Serve => compile::compile_server::serve(&installation).map_err(Error::Serve),
     }
 }
 
@@ -252,21 +261,26 @@ fn run(
     emit: Vec<EmitStage>,
     file: &Path,
     package: PackageInfo,
+    installation: Installation,
 ) -> Result<(), Error> {
     let src = std::fs::read_to_string(file)
         .map_err(|source| Error::ReadSource { path: file.to_owned(), source })?;
-    package::validate_dependencies(&args.externs)?;
 
-    let opts = compile::CompileOptions {
-        out_dir: args.out_dir,
-        lib_dirs: args.lib_dirs,
-        package,
-        externs: args.externs,
-    };
+    let mut lib_dirs = args.lib_dirs;
+    lib_dirs.extend_from_slice(&installation.lib_dirs);
+
+    let mut externs = args.externs;
+    if !package.is_core() && !externs.iter().any(PackageDependency::is_core) {
+        externs.push(PackageDependency::core_package_dependency());
+    }
+    package::validate_dependencies(&externs)?;
+
+    let opts = compile::CompileOptions { out_dir: args.out_dir, lib_dirs, package, externs };
 
     let server =
         compile::compile_server::SyncServer::start(compile::compile_server::SyncServerOpts {
             sock_path: args.compile_server.clone(),
+            installation,
         });
 
     let stages = args
