@@ -6,8 +6,8 @@ mod translate;
 use std::cell::Cell;
 use std::collections::BTreeMap;
 use std::fs::File;
-use std::io::{self, Write};
-use std::path::{self, Path, PathBuf};
+use std::io::Write;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
@@ -167,18 +167,14 @@ pub(crate) struct CompileOptions {
 }
 
 impl CompileOptions {
-    fn code_path(&self) -> io::Result<FxIndexSet<PathBuf>> {
+    fn code_path(&self) -> FxIndexSet<PathBuf> {
         // `ensure_core` and `ensure_proc_macro` currently write to `out_dir`.
-        let mut dirs = FxIndexSet::from_iter([path::absolute(&self.out_dir)?]);
-        for dir in &self.lib_dirs {
-            dirs.insert(path::absolute(dir)?);
-        }
-        for rmeta in self.externs.iter().filter_map(|dep| dep.path.as_ref()) {
-            if let Some(dir) = path::absolute(rmeta)?.parent() {
-                dirs.insert(dir.to_owned());
-            }
-        }
-        Ok(dirs)
+        let rmeta_dirs = self.externs.iter().filter_map(|dep| dep.path.as_deref()?.parent());
+        std::iter::once(self.out_dir.as_path())
+            .chain(self.lib_dirs.iter().map(PathBuf::as_path))
+            .chain(rmeta_dirs)
+            .map(Path::to_owned)
+            .collect()
     }
 }
 
@@ -249,9 +245,7 @@ pub(crate) fn compile(
             let dcx = tcx.sess.dcx();
 
             // Expansion runs proc macros, so this has to happen before it.
-            let code_path = opts.code_path().unwrap_or_else(|e| {
-                dcx.fatal(format!("failed to resolve the compile server's code path: {e}"));
-            });
+            let code_path = opts.code_path();
             server.with(dcx, |server| server.extend_code_path(dcx, code_path));
 
             consume_stage!(stages_left, Stage::Expanded, {

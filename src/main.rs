@@ -7,11 +7,11 @@ mod num_utils;
 mod package;
 
 use std::io;
-use std::path::{Path, PathBuf};
+use std::path::{self, Path, PathBuf};
 use std::process::ExitCode;
 
 use clap::Parser;
-use clap::builder::ArgPredicate;
+use clap::builder::{ArgPredicate, PathBufValueParser, TypedValueParser};
 use rustc_errors::{FatalError, catch_fatal_errors};
 
 use crate::compile::compile_server::SpawnError;
@@ -155,11 +155,11 @@ struct CommonArgs {
     dump: Vec<DumpStage>,
 
     /// Output directory.
-    #[arg(long, value_name = "DIR", default_value = ".")]
+    #[arg(long, value_name = "DIR", default_value = ".", value_parser = absolute_path())]
     out_dir: PathBuf,
 
     /// Add `DIR` to library search directories. Can be repeated.
-    #[arg(short = 'L', long = "lib-dir", value_name = "DIR")]
+    #[arg(short = 'L', long = "lib-dir", value_name = "DIR", value_parser = absolute_path())]
     lib_dirs: Vec<PathBuf>,
 
     /// Path to a running compile server's socket. If not given, patina starts a temporary one.
@@ -171,6 +171,10 @@ struct CommonArgs {
     /// search directories.
     #[arg(long = "extern", value_name = "NAME[=RMETA]")]
     externs: Vec<package::PackageDependency>,
+}
+
+fn absolute_path() -> impl TypedValueParser<Value = PathBuf> {
+    PathBufValueParser::new().try_map(path::absolute::<PathBuf>)
 }
 
 #[derive(Debug, thiserror::Error)]

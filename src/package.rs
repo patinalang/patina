@@ -1,4 +1,5 @@
-use std::path::{Path, PathBuf};
+use std::io;
+use std::path::{self, Path, PathBuf};
 use std::str::FromStr;
 
 use convert_case::{Case, Casing};
@@ -18,6 +19,8 @@ pub(crate) enum DependencySpecError {
     MissingName,
     #[error("missing metadata path")]
     MissingPath,
+    #[error("failed to resolve metadata path: {0}")]
+    ResolvePath(#[source] io::Error),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -105,9 +108,10 @@ impl FromStr for PackageDependency {
         match raw.split_once('=') {
             Some(("", _)) => Err(DependencySpecError::MissingName),
             Some((_, "")) => Err(DependencySpecError::MissingPath),
-            Some((name, path)) => {
-                Ok(Self { name: name.to_owned(), path: Some(PathBuf::from(path)) })
-            }
+            Some((name, path)) => match path::absolute(path) {
+                Ok(path) => Ok(Self { name: name.to_owned(), path: Some(path) }),
+                Err(err) => Err(DependencySpecError::ResolvePath(err)),
+            },
             None => Ok(Self { name: raw.to_owned(), path: None }),
         }
     }
