@@ -88,8 +88,28 @@ pub(crate) enum SpawnError {
     WriteBeam(#[source] io::Error),
     #[error("failed to spawn erl compile server: {0}")]
     Erl(#[source] io::Error),
+    #[error("failed to read the compile server's socket path: {0}")]
+    ReadSocketPath(#[source] TransportError),
+    #[error("compile server exited before reporting its socket")]
+    ExitedEarly,
+    #[error("compile server didn't report its socket in time")]
+    SocketTimeout,
+    #[error("compile server's stdout handler panicked")]
+    StdoutHandlerPanicked,
     #[error("failed to connect to compile server: {0}")]
     Connect(#[source] io::Error),
+}
+
+#[derive(Debug, thiserror::Error)]
+pub(crate) enum TransportError {
+    #[error(transparent)]
+    Io(#[from] io::Error),
+    #[error("message part too large: {0} bytes")]
+    PartTooLarge(usize),
+    #[error("too many message parts: {0}")]
+    TooManyParts(usize),
+    #[error("compile server didn't reply within {}s", .0.as_secs())]
+    Timeout(Duration),
 }
 
 /// Why there is no VM to talk to, kept for every caller that asks later.
@@ -292,7 +312,7 @@ impl CompileServer {
         &mut self,
         parts: &[&[u8]],
         timeout: Option<Duration>,
-    ) -> io::Result<Vec<Vec<u8>>> {
+    ) -> Result<Vec<Vec<u8>>, TransportError> {
         let result = self.exchange(parts, timeout);
         if result.is_err() {
             // Any failure leaves the stream positioned mid-frame
@@ -301,26 +321,29 @@ impl CompileServer {
         result
     }
 
-    fn exchange(&mut self, parts: &[&[u8]], timeout: Option<Duration>) -> io::Result<Vec<Vec<u8>>> {
+    fn exchange(
+        &mut self,
+        parts: &[&[u8]],
+        timeout: Option<Duration>,
+    ) -> Result<Vec<Vec<u8>>, TransportError> {
         write_msg(&mut self.stream, parts)?;
 
-        if timeout.is_none() {
+        let Some(timeout) = timeout else {
             return read_msg(&mut self.stream);
-        }
+        };
 
-        self.stream.set_read_timeout(timeout)?;
+        self.stream.set_read_timeout(Some(timeout))?;
         let result = read_msg(&mut self.stream);
         let restored = self.stream.set_read_timeout(None);
         match result {
-            Ok(parts) => restored.map(|()| parts),
-            Err(e) if matches!(e.kind(), io::ErrorKind::WouldBlock | io::ErrorKind::TimedOut) => {
-                Err(io::Error::new(
-                    io::ErrorKind::TimedOut,
-                    format!(
-                        "compile server stopped responding after {}s",
-                        timeout.expect("timeout is set in this branch").as_secs()
-                    ),
-                ))
+            Ok(parts) => {
+                restored?;
+                Ok(parts)
+            }
+            Err(TransportError::Io(e))
+                if matches!(e.kind(), io::ErrorKind::WouldBlock | io::ErrorKind::TimedOut) =>
+            {
+                Err(TransportError::Timeout(timeout))
             }
             Err(e) => Err(e),
         }
@@ -368,15 +391,9 @@ impl BeamVm {
 
         let sock_path = match sock_path.recv_timeout(CONNECT_TIMEOUT) {
             Ok(sock_path) => sock_path,
-            Err(RecvTimeoutError::Timeout) => Err(io::Error::new(
-                io::ErrorKind::TimedOut,
-                "compile server didn't report its socket in time",
-            )),
-            Err(RecvTimeoutError::Disconnected) => {
-                Err(io::Error::other("compile server's stdout handler panicked"))
-            }
-        };
-        let sock_path = sock_path.map_err(SpawnError::Connect)?;
+            Err(RecvTimeoutError::Timeout) => Err(SpawnError::SocketTimeout),
+            Err(RecvTimeoutError::Disconnected) => Err(SpawnError::StdoutHandlerPanicked),
+        }?;
         Ok((vm, sock_path))
     }
 }
@@ -494,13 +511,13 @@ impl Drop for SyncServer {
 
 /// Write a length-prefixed message: a big-endian `u32` part count, then each
 /// part as a big-endian `u32` length followed by its bytes.
-fn write_msg(stream: &mut UnixStream, parts: &[&[u8]]) -> io::Result<()> {
-    let count = u32::try_from(parts.len())
-        .map_err(|_| invalid(format!("too many message parts: {}", parts.len())))?;
+fn write_msg(stream: &mut UnixStream, parts: &[&[u8]]) -> Result<(), TransportError> {
+    let count =
+        u32::try_from(parts.len()).map_err(|_| TransportError::TooManyParts(parts.len()))?;
     stream.write_all(&count.to_be_bytes())?;
     for part in parts {
-        let len = u32::try_from(part.len())
-            .map_err(|_| invalid(format!("message part too large: {} bytes", part.len())))?;
+        let len =
+            u32::try_from(part.len()).map_err(|_| TransportError::PartTooLarge(part.len()))?;
         stream.write_all(&len.to_be_bytes())?;
         stream.write_all(part)?;
     }
@@ -508,7 +525,7 @@ fn write_msg(stream: &mut UnixStream, parts: &[&[u8]]) -> io::Result<()> {
 }
 
 /// Read a message framed as written by [`write_msg`].
-fn read_msg(stream: &mut impl Read) -> io::Result<Vec<Vec<u8>>> {
+fn read_msg(stream: &mut impl Read) -> Result<Vec<Vec<u8>>, TransportError> {
     let count = read_u32(stream)?;
     (0..count)
         .map(|_| {
@@ -526,22 +543,18 @@ fn read_u32(stream: &mut impl Read) -> io::Result<u32> {
     Ok(u32::from_be_bytes(bytes))
 }
 
-fn invalid(msg: String) -> io::Error {
-    io::Error::new(io::ErrorKind::InvalidInput, msg)
-}
-
 /// Starts a thread that reads our VM's stdout: first the socket path the VM prints as its first
 /// line, which it sends on the returned channel, then the rest, drained onto our stderr.
 /// The server listens on the socket before the VM prints it.
-fn start_stdout_handler(stdout: ChildStdout) -> mpsc::Receiver<io::Result<PathBuf>> {
+fn start_stdout_handler(stdout: ChildStdout) -> mpsc::Receiver<Result<PathBuf, SpawnError>> {
     let (tx, rx) = mpsc::channel();
     thread::spawn(move || {
         let mut reader = BufReader::new(stdout);
         let mut line = String::new();
         let sock_path = match reader.read_line(&mut line) {
-            Ok(0) => Err(io::Error::other("compile server exited before reporting its socket")),
+            Ok(0) => Err(SpawnError::ExitedEarly),
             Ok(_) => Ok(PathBuf::from(line.trim_end_matches('\n'))),
-            Err(e) => Err(e),
+            Err(e) => Err(SpawnError::ReadSocketPath(e.into())),
         };
         let _ = tx.send(sock_path);
         let _ = io::copy(&mut reader, &mut io::stderr());
