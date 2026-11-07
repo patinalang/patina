@@ -1,5 +1,7 @@
-use std::io::{self, BufRead, BufReader, Read, Write};
+use std::ffi::OsString;
+use std::io::{self, BufReader, Read, Write};
 use std::net::Shutdown;
+use std::os::unix::ffi::OsStringExt;
 use std::os::unix::net::UnixStream;
 use std::path::{Path, PathBuf};
 use std::process::{Child, ChildStdout, Command, Stdio};
@@ -31,12 +33,25 @@ const CONNECT_TIMEOUT: Duration = Duration::from_secs(60);
 /// There's a shorter timeout on the `patina_compile_server` side.
 const MACRO_REPLY_TIMEOUT: Duration = Duration::from_secs(120);
 
+/// The default logger goes to stdout, where it can interfere with our expected output.
+const ERL_LOGGER: &str = "[{handler,default,logger_std_h,#{config=>#{type=>standard_error}}}]";
+
 const ERL_INIT: &str = "\
 spawn(fun() -> io:get_line([]), erlang:halt(0) end), \
 [BeamPath] = init:get_plain_arguments(), \
 {module, patina_compile_server} = code:load_abs(BeamPath), \
-{ok, _} = patina_compile_server:ensure_started(), \
-io:format(\"~ts~n\", [patina_compile_server:socket_path()])";
+{Status, Part} = try \
+    {ok, _} = patina_compile_server:ensure_started(), \
+    {~\"ok\", unicode:characters_to_binary( \
+        patina_compile_server:socket_path(), unicode, file:native_name_encoding())} \
+catch Class:Reason:Stack -> \
+    {~\"error\", io_lib:bformat(\"~tp:~tp~n~tp\", [Class, Reason, Stack])} \
+end, \
+StdIoPort = open_port({fd, 0, 1}, [out, binary]), \
+true = port_command(StdIoPort, \
+                    <<2:32, (byte_size(Status)):32, Status/binary, \
+                      (byte_size(Part)):32, Part/binary>>), \
+Status =:= ~\"ok\" orelse erlang:halt(1)";
 
 pub(super) struct CompileOk {
     pub beam: Vec<u8>,
@@ -90,6 +105,12 @@ pub(crate) enum SpawnError {
     Erl(#[source] io::Error),
     #[error("failed to read the compile server's socket path: {0}")]
     ReadSocketPath(#[source] TransportError),
+    #[error("{0}")]
+    ServerStart(String),
+    #[error("compile server sent a malformed startup reply")]
+    MalformedStartupReply,
+    #[error("failed to write the compile server's socket path: {0}")]
+    WriteSocketPath(#[source] io::Error),
     #[error("compile server exited before reporting its socket")]
     ExitedEarly,
     #[error("compile server didn't report its socket in time")]
@@ -373,6 +394,9 @@ impl BeamVm {
                 "+pc",
                 "unicode",
                 "-noshell",
+                "-kernel",
+                "logger",
+                ERL_LOGGER,
                 "-eval",
                 ERL_INIT,
                 "-extra",
@@ -402,7 +426,9 @@ impl BeamVm {
 /// server's socket path as the first line on stdout.
 pub(crate) fn serve() -> Result<(), SpawnError> {
     let (vm, sock_path) = BeamVm::start()?;
-    println!("{}", sock_path.display());
+    let mut line = sock_path.into_os_string().into_encoded_bytes();
+    line.push(b'\n');
+    io::stdout().write_all(&line).map_err(SpawnError::WriteSocketPath)?;
     // Any error means there's no stdin to wait on anymore, so stop all the same.
     let _ = io::copy(&mut io::stdin().lock(), &mut io::sink());
     drop(vm);
@@ -543,23 +569,33 @@ fn read_u32(stream: &mut impl Read) -> io::Result<u32> {
     Ok(u32::from_be_bytes(bytes))
 }
 
-/// Starts a thread that reads our VM's stdout: first the socket path the VM prints as its first
-/// line, which it sends on the returned channel, then the rest, drained onto our stderr.
-/// The server listens on the socket before the VM prints it.
+/// Starts a thread that reads our VM's stdout: first the reply from [`ERL_INIT`],
+/// (the outcome is sent on the returned channel), then the rest, drained onto our stderr.
+/// The server listens on the socket before the VM replies.
 fn start_stdout_handler(stdout: ChildStdout) -> mpsc::Receiver<Result<PathBuf, SpawnError>> {
     let (tx, rx) = mpsc::channel();
     thread::spawn(move || {
         let mut reader = BufReader::new(stdout);
-        let mut line = String::new();
-        let sock_path = match reader.read_line(&mut line) {
-            Ok(0) => Err(SpawnError::ExitedEarly),
-            Ok(_) => Ok(PathBuf::from(line.trim_end_matches('\n'))),
-            Err(e) => Err(SpawnError::ReadSocketPath(e.into())),
-        };
-        let _ = tx.send(sock_path);
+        let _ = tx.send(read_startup_reply(&mut reader));
         let _ = io::copy(&mut reader, &mut io::stderr());
     });
     rx
+}
+
+fn read_startup_reply(stdout: &mut impl Read) -> Result<PathBuf, SpawnError> {
+    let parts = read_msg(stdout).map_err(|e| match e {
+        TransportError::Io(e) if e.kind() == io::ErrorKind::UnexpectedEof => {
+            SpawnError::ExitedEarly
+        }
+        e => SpawnError::ReadSocketPath(e),
+    })?;
+    match <[Vec<u8>; 2]>::try_from(parts) {
+        Ok([status, path]) if status == b"ok" => Ok(PathBuf::from(OsString::from_vec(path))),
+        Ok([status, reason]) if status == b"error" => {
+            Err(SpawnError::ServerStart(String::from_utf8_lossy(&reason).into_owned()))
+        }
+        _ => Err(SpawnError::MalformedStartupReply),
+    }
 }
 
 #[cfg(test)]
