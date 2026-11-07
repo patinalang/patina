@@ -1,4 +1,5 @@
-mod compile_server;
+#[path = "../common/mod.rs"]
+mod common;
 mod runner;
 mod snapshot;
 
@@ -32,7 +33,7 @@ struct Args {
 fn main() -> ExitCode {
     let args = Args::parse();
 
-    let server = match compile_server::CompileServer::start() {
+    let server = match common::CompileServer::start() {
         Ok(server) => server,
         Err(e) => {
             eprintln!("compiletest: failed to start the compile server: {e}");

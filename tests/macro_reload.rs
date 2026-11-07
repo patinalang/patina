@@ -1,7 +1,6 @@
-use std::io::{BufRead, BufReader};
-use std::process::{Child, Command, Stdio};
+mod common;
 
-use tempfile::TempDir;
+use common::Session;
 
 const CONSUMER: &str = "pub fn f() { let _x = Provider::num!(); }\n";
 
@@ -28,7 +27,7 @@ fn assert_rebuild_is_picked_up(first_out: &str, second_out: &str) {
         let args = ["--dump", "expanded", "-L", out, "--extern", "Provider"];
         session.build("consumer.pt", CONSUMER, &args);
 
-        let expanded = std::fs::read_to_string(session.dir.path().join("Consumer.expanded"))
+        let expanded = std::fs::read_to_string(session.path().join("Consumer.expanded"))
             .expect("read expanded");
         assert!(expanded.contains(&format!("let _x = {value};")), "got:\n{expanded}");
     }
@@ -44,44 +43,6 @@ fn proc_macro_rebuilt_elsewhere_is_reloaded_in_a_running_vm() {
     assert_rebuild_is_picked_up("first_out", "second_out");
 }
 
-/// A `patina serve`, and a directory to compile in that isn't the server's working directory.
-struct Session {
-    dir: TempDir,
-    socket: String,
-    /// Stops once this is dropped, as that closes its stdin.
-    _serve: Child,
-}
-
-impl Session {
-    fn new() -> Session {
-        let mut serve = Command::new(env!("CARGO_BIN_EXE_patina"))
-            .arg("serve")
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .spawn()
-            .expect("spawn compile server");
-        let mut socket = String::new();
-        BufReader::new(serve.stdout.take().expect("stdout is piped"))
-            .read_line(&mut socket)
-            .expect("read socket path");
-        socket.truncate(socket.trim_end().len());
-        let dir = tempfile::tempdir().expect("create temp dir");
-        Session { dir, socket, _serve: serve }
-    }
-
-    fn build(&self, file: &str, source: &str, args: &[&str]) {
-        std::fs::write(self.dir.path().join(file), source).expect("write source");
-        let output = Command::new(env!("CARGO_BIN_EXE_patina"))
-            .current_dir(self.dir.path())
-            .args(["compile", "--compile-server", &self.socket])
-            .args(args)
-            .arg(file)
-            .output()
-            .expect("run patina");
-        assert!(output.status.success(), "got:\n{}", String::from_utf8_lossy(&output.stderr));
-    }
-}
-
 /// A running server keeps the code path from earlier compiles, which mustn't shadow this one's.
 #[test]
 fn later_compile_code_path_wins_in_a_running_vm() {
@@ -95,8 +56,8 @@ fn later_compile_code_path_wins_in_a_running_vm() {
     let args = ["--dump", "expanded", "-L", "later", "--extern", "Provider"];
     session.build("consumer.pt", CONSUMER, &args);
 
-    let expanded = std::fs::read_to_string(session.dir.path().join("Consumer.expanded"))
-        .expect("read expanded");
+    let expanded =
+        std::fs::read_to_string(session.path().join("Consumer.expanded")).expect("read expanded");
     assert!(expanded.contains("let _x = 43;"), "got:\n{expanded}");
 }
 
