@@ -3,13 +3,23 @@
 //! Every test binary compiles this module separately and uses only a part of it.
 #![allow(dead_code)]
 
-use std::ffi::OsString;
 use std::io::{self, BufRead, BufReader};
-use std::os::unix::ffi::OsStringExt;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Output, Stdio};
 
 use tempfile::TempDir;
+
+#[cfg(unix)]
+fn path_from_bytes(bytes: Vec<u8>) -> PathBuf {
+    use std::ffi::OsString;
+    use std::os::unix::ffi::OsStringExt;
+    PathBuf::from(OsString::from_vec(bytes))
+}
+
+#[cfg(windows)]
+fn path_from_bytes(bytes: Vec<u8>) -> PathBuf {
+    PathBuf::from(String::from_utf8(bytes).expect("socket path is UTF-8"))
+}
 
 /// A running `patina serve`, which stops when this is dropped.
 pub(crate) struct CompileServer {
@@ -34,7 +44,7 @@ impl CompileServer {
             )));
         }
         line.pop_if(|byte| *byte == b'\n');
-        let sock_path = PathBuf::from(OsString::from_vec(line));
+        let sock_path = path_from_bytes(line);
 
         Ok(CompileServer { serve, sock_path })
     }

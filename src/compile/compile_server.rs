@@ -1,8 +1,9 @@
-use std::ffi::OsString;
 use std::io::{self, BufReader, Read, Write};
 use std::net::Shutdown;
-use std::os::unix::ffi::OsStringExt;
+#[cfg(unix)]
 use std::os::unix::net::UnixStream;
+#[cfg(windows)]
+use std::os::windows::net::UnixStream;
 use std::path::{Path, PathBuf};
 use std::process::{Child, ChildStdout, Command, Stdio};
 use std::sync::mpsc::{self, RecvTimeoutError};
@@ -587,12 +588,26 @@ fn read_startup_reply(stdout: &mut impl Read) -> Result<PathBuf, SpawnError> {
         e => SpawnError::ReadSocketPath(e),
     })?;
     match <[Vec<u8>; 2]>::try_from(parts) {
-        Ok([status, path]) if status == b"ok" => Ok(PathBuf::from(OsString::from_vec(path))),
+        Ok([status, path]) if status == b"ok" => {
+            path_from_bytes(path).ok_or(SpawnError::MalformedStartupReply)
+        }
         Ok([status, reason]) if status == b"error" => {
             Err(SpawnError::ServerStart(String::from_utf8_lossy(&reason).into_owned()))
         }
         _ => Err(SpawnError::MalformedStartupReply),
     }
+}
+
+#[cfg(unix)]
+fn path_from_bytes(bytes: Vec<u8>) -> Option<PathBuf> {
+    use std::ffi::OsString;
+    use std::os::unix::ffi::OsStringExt;
+    Some(PathBuf::from(OsString::from_vec(bytes)))
+}
+
+#[cfg(windows)]
+fn path_from_bytes(bytes: Vec<u8>) -> Option<PathBuf> {
+    String::from_utf8(bytes).ok().map(PathBuf::from)
 }
 
 #[cfg(test)]

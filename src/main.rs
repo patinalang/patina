@@ -1,4 +1,5 @@
 #![feature(rustc_private)]
+#![cfg_attr(windows, feature(windows_unix_domain_sockets))]
 
 mod compile;
 mod erlang;
