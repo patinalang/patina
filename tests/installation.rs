@@ -39,12 +39,10 @@ fn reserved_package_name_needs_bootstrap() {
 
 #[test]
 fn install_missing_any_required_file_is_reported() {
-    const INSTALL_FILES: [&str; 5] = [
+    const INSTALL_FILES: [&str; 3] = [
         "patina/ebin/patina.app",
         "patina_core/ebin/libCore.rmeta",
         "patina_core/ebin/patina_core.app",
-        "patina_proc_macro/ebin/libProcMacro.rmeta",
-        "patina_proc_macro/ebin/patina_proc_macro.app",
     ];
 
     for missing in INSTALL_FILES {

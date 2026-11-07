@@ -14,19 +14,18 @@ use Core::Prelude::*;
 #[allow(unused)]
 extern mod patina_fmt;
 
-#[rustc_diagnostic_item = "TokenStream"]
-type TokenStream = int;
+use Core::ProcMacro::TokenStream;
 
 #[proc_macro]
-pub fn wrong_argument_count() -> TokenStream { 0 }
+pub fn wrong_argument_count() -> TokenStream { TokenStream::new() }
 
 #[proc_macro]
-pub fn wrong_argument_type(_input: bool) -> TokenStream { 0 }
+pub fn wrong_argument_type(_input: bool) -> TokenStream { TokenStream::new() }
 
 #[proc_macro]
 pub fn wrong_result_type(_input: TokenStream) -> bool { true }
 
 #[proc_macro_attribute]
 pub fn wrong_attribute_argument_count(_input: TokenStream) -> TokenStream {
-    0
+    TokenStream::new()
 }

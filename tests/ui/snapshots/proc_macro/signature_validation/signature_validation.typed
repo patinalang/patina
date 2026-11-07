@@ -14,18 +14,34 @@ use Core::Prelude::*;
 #[allow(unused)]
 extern mod patina_fmt;
 
-#[attr = RustcDiagnosticItem("TokenStream")]
-type TokenStream = int;
+use Core::ProcMacro::TokenStream;
 
 #[attr = ProcMacro]
-fn wrong_argument_count() -> TokenStream ({ (0 as int) } as int)
+fn wrong_argument_count()
+    ->
+        TokenStream ({
+    ((TokenStream::new as
+            fn() -> Core::ProcMacro::TokenStream {Core::ProcMacro::TokenStream::new})()
+        as Core::ProcMacro::TokenStream)
+} as Core::ProcMacro::TokenStream)
 
 #[attr = ProcMacro]
-fn wrong_argument_type(_input: bool) -> TokenStream ({ (0 as int) } as int)
+fn wrong_argument_type(_input: bool)
+    ->
+        TokenStream ({
+    ((TokenStream::new as
+            fn() -> Core::ProcMacro::TokenStream {Core::ProcMacro::TokenStream::new})()
+        as Core::ProcMacro::TokenStream)
+} as Core::ProcMacro::TokenStream)
 
 #[attr = ProcMacro]
 fn wrong_result_type(_input: TokenStream) -> bool ({ (true as bool) } as bool)
 
 #[attr = ProcMacroAttribute]
 fn wrong_attribute_argument_count(_input: TokenStream)
-    -> TokenStream ({ (0 as int) } as int)
+    ->
+        TokenStream ({
+    ((TokenStream::new as
+            fn() -> Core::ProcMacro::TokenStream {Core::ProcMacro::TokenStream::new})()
+        as Core::ProcMacro::TokenStream)
+} as Core::ProcMacro::TokenStream)

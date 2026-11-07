@@ -9,7 +9,6 @@ use rustc_session::utils::CanonicalizedPath;
 
 const CORE_PACKAGE_NAME: &str = "Core";
 const STD_PACKAGE_NAME: &str = "Std";
-const PROC_MACRO_PACKAGE_NAME: &str = "ProcMacro";
 const PATINA_BOOTSTRAP_ENV: &str = "PATINA_BOOTSTRAP";
 
 #[derive(Debug, thiserror::Error)]
@@ -130,7 +129,7 @@ pub(crate) fn resolve_package_name(
     };
 
     match name.as_str() {
-        CORE_PACKAGE_NAME | STD_PACKAGE_NAME | PROC_MACRO_PACKAGE_NAME if !is_bootstrap() => {
+        CORE_PACKAGE_NAME | STD_PACKAGE_NAME if !is_bootstrap() => {
             Err(PackageNameError::Reserved(name))
         }
         _ => Ok(name),

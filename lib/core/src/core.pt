@@ -17,6 +17,8 @@
 #![no_core]
 #![rustc_coherence_is_core]
 
+pub mod ProcMacro;
+
 pub extern mod erlang;
 pub extern mod io;
 pub extern mod unicode;

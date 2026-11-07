@@ -64,7 +64,7 @@ impl Runner {
         let lib_dir = out_dir.path().join(DEPS_DIR);
         let externs = self.package_deps(pt_path, &lib_dir);
         let compiled =
-            self.run_compile(&[], &["beam"], pt_path, out_dir.path(), &lib_dir, &externs, false);
+            self.run_compile(&[], &["beam"], pt_path, out_dir.path(), &lib_dir, &externs);
 
         if !compiled.status.success() {
             return Err(Failed::from(format!(
@@ -118,8 +118,7 @@ impl Runner {
             }
         }
 
-        let output =
-            self.run_compile(&dumps, &emits, pt_path, out_dir.path(), &lib_dir, &externs, false);
+        let output = self.run_compile(&dumps, &emits, pt_path, out_dir.path(), &lib_dir, &externs);
         let text_extensions: HashSet<&str> = TEXT_EXTENSIONS.iter().copied().collect();
         let artifacts = read_text_artifacts(out_dir.path(), &text_extensions);
 
@@ -136,11 +135,7 @@ impl Runner {
 
         for package in PACKAGES {
             let dir = Path::new(crate::PKG_SRC_ROOT).join(package);
-            let src = dir.join("src").join(format!("{package}.pt"));
-            let source = std::fs::read_to_string(&src)
-                .unwrap_or_else(|_| panic!("read dependency package {}", src.display()));
-            let proc_macro = source.contains("ProcMacro");
-            let output = self.run_compile(&[], &[], &dir, lib_dir, lib_dir, &deps, proc_macro);
+            let output = self.run_compile(&[], &[], &dir, lib_dir, lib_dir, &deps);
             assert!(
                 output.status.success(),
                 "failed to build dependency package {}:\nstdout:\n{}stderr:\n{}",
@@ -161,7 +156,6 @@ impl Runner {
         out_dir: &Path,
         lib_dir: &Path,
         externs: &[String],
-        proc_macro: bool,
     ) -> Output {
         let mut cmd = Command::new(env!("CARGO_BIN_EXE_patina"));
         // A package directory is built from its `Patina.toml`.
@@ -178,9 +172,6 @@ impl Runner {
         cmd.arg("-L").arg(lib_dir);
         for name in externs {
             cmd.arg("--extern").arg(name);
-        }
-        if proc_macro {
-            cmd.arg("--extern").arg("ProcMacro");
         }
         cmd.arg("--compile-server").arg(&self.compile_server);
         cmd.arg("--out-dir").arg(out_dir).arg(pt_path);

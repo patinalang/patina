@@ -12,10 +12,9 @@ CARGO_FLAGS := $(if $(filter release,$(PROFILE)),--release)
 PATINA := target/$(PROFILE)/patina
 LIB := target/$(PROFILE)/lib
 
-APPS := patina patina_core patina_proc_macro
+APPS := patina patina_core
 PATINA_APP := $(LIB)/patina/ebin/patina.app
 CORE_APP := $(LIB)/patina_core/ebin/patina_core.app
-PROC_MACRO_APP := $(LIB)/patina_proc_macro/ebin/patina_proc_macro.app
 
 PATINA_ERL := $(wildcard lib/patina/src/*.erl)
 PATINA_VSN = $(shell cargo pkgid | cut -d'\#' -f2 | cut -d@ -f2)
@@ -37,7 +36,7 @@ help:
 
 .PHONY: build
 ## Build the compiler and its libraries.
-build: $(PATINA_APP) $(CORE_APP) $(PROC_MACRO_APP)
+build: $(PATINA_APP) $(CORE_APP)
 
 .PHONY: install
 ## Build and install into INSTALL_PREFIX.
@@ -88,7 +87,3 @@ $(PATINA_APP): $(PATINA_ERL) lib/patina/src/patina.app.src
 $(CORE_APP): $(PATINA) $(PATINA_APP) lib/core/Patina.toml $(wildcard lib/core/src/*.pt)
 	rm -rf $(dir $@)
 	PATINA_BOOTSTRAP=1 $(PATINA) build lib/core --out-dir $(dir $@)
-
-$(PROC_MACRO_APP): $(PATINA) $(PATINA_APP) $(CORE_APP) lib/proc_macro/Patina.toml $(wildcard lib/proc_macro/src/*.pt)
-	rm -rf $(dir $@)
-	PATINA_BOOTSTRAP=1 $(PATINA) build lib/proc_macro --out-dir $(dir $@)

@@ -1,5 +1,7 @@
 // See `rust/compiler/rustc_expand/src/proc_macro/tokens.rs`
 
+use crate::Prelude::*;
+
 extern mod erlang;
 extern mod unicode;
 

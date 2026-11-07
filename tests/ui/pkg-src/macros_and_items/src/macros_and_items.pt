@@ -1,4 +1,4 @@
-use ProcMacro::*;
+use Core::ProcMacro::*;
 
 pub trait Describe {
     fn describe(self) -> int;

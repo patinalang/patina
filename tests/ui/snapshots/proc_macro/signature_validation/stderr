@@ -1,38 +1,38 @@
 error: function-like proc macro has incorrect signature
-  --> tests/ui/src/proc_macro/signature_validation.pt:5:1
+  --> tests/ui/src/proc_macro/signature_validation.pt:4:1
    |
 LL | pub fn wrong_argument_count() -> TokenStream {
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ incorrect number of function parameters
    |
-   = note: expected signature `fn(int) -> _`
-              found signature `fn() -> _`
+   = note: expected signature `fn(Core::ProcMacro::TokenStream) -> Core::ProcMacro::TokenStream`
+              found signature `fn() -> Core::ProcMacro::TokenStream`
 
 error: function-like proc macro has incorrect signature
-  --> tests/ui/src/proc_macro/signature_validation.pt:10:36
+  --> tests/ui/src/proc_macro/signature_validation.pt:9:36
    |
 LL | pub fn wrong_argument_type(_input: bool) -> TokenStream {
-   |                                    ^^^^ expected `int`, found `bool`
+   |                                    ^^^^ expected `Core::ProcMacro::TokenStream`, found `bool`
    |
-   = note: expected signature `fn(int) -> _`
-              found signature `fn(bool) -> _`
+   = note: expected signature `fn(Core::ProcMacro::TokenStream) -> Core::ProcMacro::TokenStream`
+              found signature `fn(bool) -> Core::ProcMacro::TokenStream`
 
 error: function-like proc macro has incorrect signature
-  --> tests/ui/src/proc_macro/signature_validation.pt:15:50
+  --> tests/ui/src/proc_macro/signature_validation.pt:14:50
    |
 LL | pub fn wrong_result_type(_input: TokenStream) -> bool {
-   |                                                  ^^^^ expected `int`, found `bool`
+   |                                                  ^^^^ expected `Core::ProcMacro::TokenStream`, found `bool`
    |
-   = note: expected signature `fn(_) -> int`
-              found signature `fn(_) -> bool`
+   = note: expected signature `fn(Core::ProcMacro::TokenStream) -> Core::ProcMacro::TokenStream`
+              found signature `fn(Core::ProcMacro::TokenStream) -> bool`
 
 error: attribute proc macro has incorrect signature
-  --> tests/ui/src/proc_macro/signature_validation.pt:20:1
+  --> tests/ui/src/proc_macro/signature_validation.pt:19:1
    |
 LL | pub fn wrong_attribute_argument_count(_input: TokenStream) -> TokenStream {
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ incorrect number of function parameters
    |
-   = note: expected signature `fn(int, int) -> _`
-              found signature `fn(int) -> _`
+   = note: expected signature `fn(Core::ProcMacro::TokenStream, Core::ProcMacro::TokenStream) -> Core::ProcMacro::TokenStream`
+              found signature `fn(Core::ProcMacro::TokenStream) -> Core::ProcMacro::TokenStream`
 
 error: aborting due to 4 previous errors
 

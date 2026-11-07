@@ -1,0 +1,48 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+use Core::ProcMacro::*;
+
+fn main() ({
+    let _literal =
+        (((Literal::int as
+                    fn(int) -> Core::ProcMacro::Literal {Core::ProcMacro::Literal::int})((1
+                    as int)) as Core::ProcMacro::Literal).0 as {type error});
+    let _group =
+        (((Group::new as
+                    fn(Core::ProcMacro::Delimiter, Core::ProcMacro::TokenStream) -> Core::ProcMacro::Group {Core::ProcMacro::Group::new})((Delimiter::Brace
+                    as Core::ProcMacro::Delimiter),
+                ((TokenStream::new as
+                        fn() -> Core::ProcMacro::TokenStream {Core::ProcMacro::TokenStream::new})()
+                    as Core::ProcMacro::TokenStream)) as
+                Core::ProcMacro::Group).0 as {type error});
+    let _ident =
+        (((Ident::new as
+                    fn(str, Core::ProcMacro::Span) -> Core::ProcMacro::Ident {Core::ProcMacro::Ident::new})(("x"
+                    as str),
+                ((Span::call_site as
+                        fn() -> Core::ProcMacro::Span {Core::ProcMacro::Span::call_site})()
+                    as Core::ProcMacro::Span)) as Core::ProcMacro::Ident).0 as
+            {type error});
+    let _punct =
+        (((Punct::new as
+                    fn(char, Core::ProcMacro::Spacing) -> Core::ProcMacro::Punct {Core::ProcMacro::Punct::new})(('+'
+                    as char), (Spacing::Alone as Core::ProcMacro::Spacing)) as
+                Core::ProcMacro::Punct).0 as {type error});
+    let _kind =
+        (Core::ProcMacro::Bridge::LitKind::Integer as
+            Core::ProcMacro::Bridge::LitKind);
+} as ())

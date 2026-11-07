@@ -1,5 +1,0 @@
-[package]
-name = "ProcMacro"
-version = "0.0.0"
-otp_application_name = "patina_proc_macro"
-description = "The Patina ProcMacro library"

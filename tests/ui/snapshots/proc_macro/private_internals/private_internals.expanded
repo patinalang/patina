@@ -1,0 +1,25 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro, prelude_import)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate Core;
+
+#[allow(unused_imports)]
+#[prelude_import]
+use Core::Prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+use Core::ProcMacro::*;
+
+pub fn main() {
+    let _literal = Literal::int(1).0;
+    let _group = Group::new(Delimiter::Brace, TokenStream::new()).0;
+    let _ident = Ident::new("x", Span::call_site()).0;
+    let _punct = Punct::new('+', Spacing::Alone).0;
+    let _kind = Core::ProcMacro::Bridge::LitKind::Integer;
+}

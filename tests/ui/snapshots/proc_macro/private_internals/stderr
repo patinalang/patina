@@ -1,0 +1,42 @@
+error[E0603]: module `Bridge` is private
+  --> tests/ui/src/proc_macro/private_internals.pt:8:34
+   |
+LL |     let _kind = Core::ProcMacro::Bridge::LitKind::Integer;
+   |                                  ^^^^^^           ------- unit variant `Integer` is not publicly re-exported
+   |                                  |
+   |                                  private module
+   |
+note: the module `Bridge` is defined here
+  --> lib/core/src/proc_macro.pt:188:1
+   |
+LL | mod Bridge {
+   | ^^^^^^^^^^
+
+error[E0616]: field `0` of struct `Core::ProcMacro::Literal` is private
+  --> tests/ui/src/proc_macro/private_internals.pt:4:36
+   |
+LL |     let _literal = Literal::int(1).0;
+   |                                    ^ private field
+
+error[E0616]: field `0` of struct `Core::ProcMacro::Group` is private
+  --> tests/ui/src/proc_macro/private_internals.pt:5:67
+   |
+LL |     let _group = Group::new(Delimiter::Brace, TokenStream::new()).0;
+   |                                                                   ^ private field
+
+error[E0616]: field `0` of struct `Core::ProcMacro::Ident` is private
+  --> tests/ui/src/proc_macro/private_internals.pt:6:53
+   |
+LL |     let _ident = Ident::new("x", Span::call_site()).0;
+   |                                                     ^ private field
+
+error[E0616]: field `0` of struct `Core::ProcMacro::Punct` is private
+  --> tests/ui/src/proc_macro/private_internals.pt:7:50
+   |
+LL |     let _punct = Punct::new('+', Spacing::Alone).0;
+   |                                                  ^ private field
+
+error: aborting due to 5 previous errors
+
+Some errors have detailed explanations: E0603, E0616.
+For more information about an error, try `rustc --explain E0603`.

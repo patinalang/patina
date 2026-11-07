@@ -4,12 +4,8 @@ use std::{fs, io};
 use crate::package;
 
 const BOOTSTRAP_EXPECTED_LIB_FILES: [&str; 1] = ["patina/ebin/patina.app"];
-const EXPECTED_LIB_FILES: [&str; 4] = [
-    "patina_core/ebin/libCore.rmeta",
-    "patina_core/ebin/patina_core.app",
-    "patina_proc_macro/ebin/libProcMacro.rmeta",
-    "patina_proc_macro/ebin/patina_proc_macro.app",
-];
+const EXPECTED_LIB_FILES: [&str; 2] =
+    ["patina_core/ebin/libCore.rmeta", "patina_core/ebin/patina_core.app"];
 
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum LocateInstallationError {

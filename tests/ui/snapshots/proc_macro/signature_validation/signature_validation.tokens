@@ -1,18 +1,11 @@
-Pound
-OpenBracket
-Ident
-Whitespace
-Eq
-Whitespace
-Literal { kind: Str { terminated: true }, suffix_start: 13 }
-CloseBracket
-Whitespace
 Ident
 Whitespace
 Ident
-Whitespace
-Eq
-Whitespace
+Colon
+Colon
+Ident
+Colon
+Colon
 Ident
 Semi
 Whitespace
@@ -36,7 +29,12 @@ Ident
 Whitespace
 OpenBrace
 Whitespace
-Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Ident
+Colon
+Colon
+Ident
+OpenParen
+CloseParen
 Whitespace
 CloseBrace
 Whitespace
@@ -64,7 +62,12 @@ Ident
 Whitespace
 OpenBrace
 Whitespace
-Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Ident
+Colon
+Colon
+Ident
+OpenParen
+CloseParen
 Whitespace
 CloseBrace
 Whitespace
@@ -120,7 +123,12 @@ Ident
 Whitespace
 OpenBrace
 Whitespace
-Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Ident
+Colon
+Colon
+Ident
+OpenParen
+CloseParen
 Whitespace
 CloseBrace
 Whitespace
