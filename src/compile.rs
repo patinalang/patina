@@ -117,8 +117,9 @@ pub(crate) struct CompileOptions {
 
 impl CompileOptions {
     fn code_path(&self) -> FxIndexSet<PathBuf> {
+        // Explicitly named packages go first.
         let rmeta_dirs = self.externs.iter().filter_map(|dep| dep.path.as_deref()?.parent());
-        self.lib_dirs.iter().map(PathBuf::as_path).chain(rmeta_dirs).map(Path::to_owned).collect()
+        rmeta_dirs.chain(self.lib_dirs.iter().map(PathBuf::as_path)).map(Path::to_owned).collect()
     }
 }
 
@@ -189,8 +190,8 @@ pub(crate) fn compile(
             let dcx = tcx.sess.dcx();
 
             // Expansion runs proc macros, so this has to happen before it.
-            let code_path = opts.code_path();
-            server.with(dcx, |server| server.extend_code_path(dcx, code_path));
+            let code_path: Vec<_> = opts.code_path().into_iter().collect();
+            server.with(dcx, |server| server.extend_code_path(dcx, &code_path));
 
             consume_stage!(stages_left, Stage::Expanded, {
                 let expanded = pprust::print_crate(

@@ -3,7 +3,12 @@ use std::process::{Command, Output};
 
 /// Runs `patina <args> source.pt` in `dir`, with a trivial `source.pt`.
 fn patina(dir: &Path, args: &[&str], envs: &[(&str, &Path)]) -> Output {
-    std::fs::write(dir.join("source.pt"), "pub fn f() {}\n").expect("write source");
+    patina_with_source(dir, "pub fn f() {}\n", args, envs)
+}
+
+/// Runs `patina <args> source.pt` in `dir`, with `source` as `source.pt`.
+fn patina_with_source(dir: &Path, source: &str, args: &[&str], envs: &[(&str, &Path)]) -> Output {
+    std::fs::write(dir.join("source.pt"), source).expect("write source");
     Command::new(env!("CARGO_BIN_EXE_patina"))
         .current_dir(dir)
         .args(args)
@@ -78,4 +83,36 @@ fn non_ascii_socket_path_reaches_the_client() {
         let envs = [("TMPDIR", tmpdir.path()), ("LC_ALL", locale.as_ref())];
         assert_success(&patina(temp.path(), &["compile"], &envs));
     }
+}
+
+/// Macros run against the Core named by `--extern`, not the installed one, so a broken module in
+/// the named Core breaks them.
+#[test]
+fn core_override_replaces_installed_core_at_macro_time() {
+    let real_core = Path::new(env!("CARGO_BIN_EXE_patina")).with_file_name("lib/patina_core/ebin");
+    let temp = tempfile::tempdir().expect("create temp dir");
+
+    let core = temp.path().join("core");
+    std::fs::create_dir(&core).expect("create core dir");
+    std::fs::copy(real_core.join("libCore.rmeta"), core.join("libCore.rmeta"))
+        .expect("copy core metadata");
+    std::fs::write(core.join("Elixir.Patina.Core.ProcMacro.Literal.beam"), b"")
+        .expect("write broken module");
+
+    let provider = r#"
+use Core::ProcMacro::*;
+
+#[proc_macro]
+pub fn forty_two(_input: TokenStream) -> TokenStream {
+    TokenStream::from_trees([TokenTree::Literal(Literal::int(42))])
+}
+"#;
+    let args = ["compile", "--pkg-name", "Provider"];
+    assert_success(&patina_with_source(temp.path(), provider, &args, &[]));
+
+    let consumer = "pub fn f() { let _x = Provider::forty_two!(); }\n";
+    let core_extern = format!("Core={}", core.join("libCore.rmeta").display());
+    let args = ["compile", "--extern", &core_extern, "--extern", "Provider=libProvider.rmeta"];
+    let output = patina_with_source(temp.path(), consumer, &args, &[]);
+    assert_failure(&output, "message: error: undef");
 }

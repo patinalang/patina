@@ -137,7 +137,8 @@ do_request(Sock, <<"core", _/binary>> = Req, [Eaf]) ->
             write_msg(Sock, [~"error", Errors, Warnings])
     end;
 do_request(Sock, ~"code_path", Dirs) ->
-    lists:foreach(fun(Dir) -> code:add_pathz(binary_to_list(Dir)) end, Dirs),
+    Encoding = file:native_name_encoding(),
+    code:add_pathsa(lists:reverse([unicode:characters_to_list(Dir, Encoding) || Dir <- Dirs])),
     write_msg(Sock, [~"ok"]);
 do_request(Sock, ~"echo", [Bin]) ->
     write_msg(Sock, [~"ok", term_to_binary(binary_to_term(Bin), [{minor_version, 2}])]);
