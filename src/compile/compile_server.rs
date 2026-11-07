@@ -146,7 +146,7 @@ impl CompileServer {
         dcx: DiagCtxtHandle<'_>,
         eaf: &[u8],
     ) -> Result<CompileOk, CompileErr> {
-        let parts = self.call(dcx, OP_COMPILE, eaf);
+        let parts = self.call(dcx, &[OP_COMPILE, eaf]);
         match parts.as_slice() {
             [status, beam, warnings] if status == b"ok" => {
                 Ok(CompileOk { beam: beam.to_vec(), warnings: self.part_str(dcx, warnings) })
@@ -189,7 +189,7 @@ impl CompileServer {
         op: &[u8],
         eaf: &[u8],
     ) -> Result<String, CompileErr> {
-        let parts = self.call(dcx, op, eaf);
+        let parts = self.call(dcx, &[op, eaf]);
         match parts.as_slice() {
             [status, render] if status == b"ok" => Ok(self.part_str(dcx, render)),
             [status, errors, warnings] if status == b"error" => Err(CompileErr {
@@ -201,7 +201,7 @@ impl CompileServer {
     }
 
     fn render(&mut self, dcx: DiagCtxtHandle<'_>, op: &[u8], eaf: &[u8]) -> String {
-        let parts = self.call(dcx, op, eaf);
+        let parts = self.call(dcx, &[op, eaf]);
         match parts.as_slice() {
             [status, render] if status == b"ok" => self.part_str(dcx, render),
             parts => self.unexpected(dcx, parts),
@@ -213,19 +213,16 @@ impl CompileServer {
         dcx: DiagCtxtHandle<'_>,
         dirs: impl IntoIterator<Item = PathBuf>,
     ) {
-        let parts = dirs
+        let dirs = dirs
             .into_iter()
             .map(|dir| dir.to_string_lossy().into_owned().into_bytes())
             .collect::<Vec<_>>();
 
         let request: Box<[&[u8]]> =
-            std::iter::once(OP_CODE_PATH).chain(parts.iter().map(Vec::as_slice)).collect();
+            std::iter::once(OP_CODE_PATH).chain(dirs.iter().map(Vec::as_slice)).collect();
 
-        let response = match self.transact_within(&request, None) {
-            Ok(response) => response,
-            Err(e) => dcx.fatal(format!("compile server communication failed: {e}")),
-        };
-        match response.as_slice() {
+        let parts = self.call(dcx, &request);
+        match parts.as_slice() {
             [status] if status == b"ok" => {}
             parts => self.unexpected(dcx, parts),
         }
@@ -267,23 +264,17 @@ impl CompileServer {
     }
 
     #[cfg(test)]
-    pub(crate) fn echo(&mut self, bytes: &[u8]) -> Result<Vec<u8>, String> {
-        let parts = self
-            .transact_within(&[OP_ECHO, bytes], None)
-            .map_err(|e| format!("compile server I/O failed: {e}"))?;
-
+    pub(crate) fn echo(&mut self, dcx: DiagCtxtHandle<'_>, bytes: &[u8]) -> Vec<u8> {
+        let parts = self.call(dcx, &[OP_ECHO, bytes]);
         match parts.as_slice() {
-            [status, result] if status == b"ok" => Ok(result.clone()),
-            parts => Err(format!(
-                "unexpected compile server response: {}",
-                parts.iter().map(|p| String::from_utf8_lossy(p)).collect::<Vec<_>>().join(", ")
-            )),
+            [status, result] if status == b"ok" => result.clone(),
+            parts => self.unexpected(dcx, parts),
         }
     }
 
     /// Send a request and read the response, handling server-side exceptions.
-    fn call(&mut self, dcx: DiagCtxtHandle<'_>, op: &[u8], eaf: &[u8]) -> Vec<Vec<u8>> {
-        let parts = match self.transact_within(&[op, eaf], None) {
+    fn call(&mut self, dcx: DiagCtxtHandle<'_>, request: &[&[u8]]) -> Vec<Vec<u8>> {
+        let parts = match self.transact_within(request, None) {
             Ok(parts) => parts,
             Err(e) => dcx.fatal(format!("compile server communication failed: {e}")),
         };

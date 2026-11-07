@@ -1,6 +1,10 @@
 use std::sync::{Arc, OnceLock};
 use std::time::Duration;
 
+use rustc_errors::DiagCtxt;
+use rustc_errors::annotate_snippet_emitter_writer::AnnotateSnippetEmitter;
+use rustc_errors::emitter::{ColorConfig, stderr_destination};
+
 use super::{OP_CODE_PATH, SyncServer, SyncServerOpts};
 
 fn server() -> &'static Arc<SyncServer> {
@@ -10,9 +14,10 @@ fn server() -> &'static Arc<SyncServer> {
 
 /// Encodes `term`, echoes it through the VM, and returns what comes back.
 fn echo(term: &[u8]) -> Vec<u8> {
-    server()
-        .try_with(|server| server.echo(term).expect("echo through the VM"))
-        .expect("start the compile server")
+    let emitter = AnnotateSnippetEmitter::new(stderr_destination(ColorConfig::Never));
+    let dcx = DiagCtxt::new(Box::new(emitter));
+    let dcx = dcx.handle();
+    server().with(dcx, |server| server.echo(dcx, term))
 }
 
 /// A term the VM must hand back byte for byte.
