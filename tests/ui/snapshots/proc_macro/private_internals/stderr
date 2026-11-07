@@ -7,7 +7,7 @@ LL |     let _kind = Core::ProcMacro::Bridge::LitKind::Integer;
    |                                  private module
    |
 note: the module `Bridge` is defined here
-  --> lib/core/src/proc_macro.pt:188:1
+  --> $PATINA_ROOT/patina_core/src/proc_macro.pt:188:1
    |
 LL | mod Bridge {
    | ^^^^^^^^^^

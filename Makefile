@@ -85,5 +85,7 @@ $(PATINA_APP): $(PATINA_ERL) lib/patina/src/patina.app.src
 		lib/patina/src/patina.app.src > $@
 
 $(CORE_APP): $(PATINA) $(PATINA_APP) lib/core/Patina.toml $(wildcard lib/core/src/*.pt)
-	rm -rf $(dir $@)
-	PATINA_BOOTSTRAP=1 $(PATINA) build lib/core --out-dir $(dir $@)
+	rm -rf $(dir $@) $(LIB)/patina_core/src
+	mkdir -p $(LIB)/patina_core
+	cp -R lib/core/src $(LIB)/patina_core/src
+	cd lib/core && PATINA_BOOTSTRAP=1 $(abspath $(PATINA)) build --out-dir $(abspath $(dir $@))

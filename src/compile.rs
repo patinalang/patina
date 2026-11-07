@@ -26,8 +26,7 @@ use rustc_session::config::{Externs, PanicStrategy};
 use rustc_session::search_paths::{PathKind, SearchPath};
 use rustc_session::{Session, config};
 use rustc_span::edition::Edition;
-use rustc_span::source_map::FilePathMapping;
-use rustc_span::{ErrorGuaranteed, FileName, RealFileName};
+use rustc_span::{ErrorGuaranteed, FileName, RealFileName, RemapPathScopeComponents};
 
 use crate::compile::compile_server::SyncServer;
 use crate::package::{PackageDependency, PackageInfo};
@@ -137,9 +136,6 @@ pub(crate) fn compile(
         .to_str()
         .expect("filename to be valid UTF-8");
 
-    let filename =
-        FileName::Real(FilePathMapping::empty().to_real_filename(&RealFileName::empty(), filename));
-
     let mut stages_left = FxHashSet::from_iter(stages.iter());
     if stages_left.is_empty() {
         return;
@@ -157,14 +153,14 @@ pub(crate) fn compile(
     });
 
     consume_stage!(stages_left, Stage::Ast, {
-        let config = make_config(filename.clone(), src, opts, server);
+        let config = make_config(filename, opts, server);
         interface::run_compiler(config, |compiler| {
             let krate = parse_with_prelude(&compiler.sess, "");
 
             let ast = pprust::print_crate(
                 compiler.sess.source_map(),
                 &krate,
-                filename.clone(),
+                compiler.sess.io.input.file_name(&compiler.sess),
                 src.to_string(),
                 &NoAnn,
                 false,
@@ -178,7 +174,7 @@ pub(crate) fn compile(
         });
     });
 
-    let config = make_config(filename.clone(), src, opts, server);
+    let config = make_config(filename, opts, server);
     let prelude = if pkg.is_core() { "" } else { PRELUDE };
 
     interface::run_compiler(config, |compiler| {
@@ -197,7 +193,7 @@ pub(crate) fn compile(
                 let expanded = pprust::print_crate(
                     tcx.sess.source_map(),
                     &tcx.resolver_for_lowering().borrow().1,
-                    filename.clone(),
+                    tcx.sess.io.input.file_name(tcx.sess),
                     input_src.clone(),
                     &NoAnn,
                     true,
@@ -224,7 +220,7 @@ pub(crate) fn compile(
                 let typed = pprust_hir::print_crate(
                     tcx.sess.source_map(),
                     tcx.hir_root_module(),
-                    filename.clone(),
+                    tcx.sess.io.input.file_name(tcx.sess),
                     input_src,
                     &|id| tcx.hir_attrs(id),
                     &TypedAnn { tcx, maybe_typeck_results: Cell::new(None) },
@@ -368,8 +364,7 @@ pub(crate) fn compile(
 }
 
 fn make_config(
-    filename: FileName,
-    src: &str,
+    filename: &Path,
     opts: &CompileOptions,
     server: &Arc<SyncServer>,
 ) -> interface::Config {
@@ -380,10 +375,38 @@ fn make_config(
         externs.insert(dep.name.clone(), dep.into());
     }
 
+    let cwd = std::env::current_dir().unwrap_or_else(|e| {
+        panic!("failed to get the current directory: {e}");
+    });
+    let mut options = config::Options {
+        edition: Edition::EditionFuture,
+        unstable_features: UnstableFeatures::Allow,
+        unstable_opts: config::UnstableOptions {
+            ui_testing: true,
+            no_steal_thir: true,
+            ..Default::default()
+        },
+        crate_types: vec![config::CrateType::Rlib],
+        cg: config::CodegenOptions { panic: Some(PanicStrategy::Abort), ..Default::default() },
+        crate_name: Some(pkg.name.to_string()),
+        otp_application_name: Some(pkg.otp_application_name.clone()),
+        externs: Externs::new(externs),
+        search_paths: lib_dirs
+            .iter()
+            .map(|dir| SearchPath::new(PathKind::All, dir.to_owned()))
+            .collect(),
+        remap_path_prefix: vec![(cwd.clone(), PathBuf::new())],
+        remap_path_scope: RemapPathScopeComponents::all(),
+        ..Default::default()
+    };
+
+    options.working_dir =
+        options.file_path_mapping().to_real_filename(&RealFileName::empty(), &cwd);
+
     interface::Config {
         crate_cfg: vec![],
         crate_check_cfg: vec![],
-        input: config::Input::Str { name: filename, input: src.to_string() },
+        input: config::Input::File(filename.to_owned()),
         output_dir: None,
         output_file: None,
         ice_file: None,
@@ -399,25 +422,7 @@ fn make_config(
         })),
         beam_macro_runner: server.clone(),
         using_internal_features: &INTERNAL_FEATURES,
-        opts: config::Options {
-            edition: Edition::EditionFuture,
-            unstable_features: UnstableFeatures::Allow,
-            unstable_opts: config::UnstableOptions {
-                ui_testing: true,
-                no_steal_thir: true,
-                ..Default::default()
-            },
-            crate_types: vec![config::CrateType::Rlib],
-            cg: config::CodegenOptions { panic: Some(PanicStrategy::Abort), ..Default::default() },
-            crate_name: Some(pkg.name.to_string()),
-            otp_application_name: Some(pkg.otp_application_name.clone()),
-            externs: Externs::new(externs),
-            search_paths: lib_dirs
-                .iter()
-                .map(|dir| SearchPath::new(PathKind::All, dir.to_owned()))
-                .collect(),
-            ..Default::default()
-        },
+        opts: options,
     }
 }
 

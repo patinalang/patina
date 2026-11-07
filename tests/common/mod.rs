@@ -89,3 +89,7 @@ impl Session {
         assert!(output.status.success(), "got:\n{}", String::from_utf8_lossy(&output.stderr));
     }
 }
+
+pub(crate) fn install_root() -> PathBuf {
+    Path::new(env!("CARGO_BIN_EXE_patina")).with_file_name("lib")
+}

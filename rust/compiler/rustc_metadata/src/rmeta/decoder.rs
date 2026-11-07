@@ -1789,6 +1789,24 @@ impl CrateMetadata {
                     &mut name,
                 );
 
+                // Remap dependencies' paths, relative to the dependency root,
+                // to be relative to this application's root.
+                if let rustc_span::FileName::Real(old_name) = &name
+                    && let path = old_name.path(RemapPathScopeComponents::DIAGNOSTICS)
+                    && path.is_relative()
+                    && let Some(app_dir) =
+                        self.source.rmeta.as_deref().and_then(Path::parent).and_then(Path::parent)
+                    && let new_path = app_dir.join(path)
+                    && new_path.is_file()
+                {
+                    name = rustc_span::FileName::Real(
+                        tcx.sess
+                            .source_map()
+                            .path_mapping()
+                            .to_real_filename(&rustc_span::RealFileName::empty(), new_path),
+                    );
+                }
+
                 let local_version = tcx.sess.source_map().new_imported_source_file(
                     name,
                     src_hash,

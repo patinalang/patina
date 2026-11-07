@@ -55,7 +55,7 @@ LL |     let _f = bad_punct!();
    |
    = help: message: error: 'unsupported punctuation character'
            [{'Elixir.Patina.Core.ProcMacro.Punct',new,2,
-                [{file,"lib/core/src/proc_macro.pt"},{line,523}]},
+                [{file,"src/proc_macro.pt"},{line,523}]},
             {'Elixir.Patina.Macros',bad_punct,1,
                 [{file,"tests/ui/pkg-src/macros/src/macros.pt"},{line,113}]}]
 
@@ -67,9 +67,9 @@ LL |     let _g = bad_byte!();
    |
    = help: message: error: 'byte out of range'
            [{'Elixir.Patina.Core.ProcMacro',check_byte,1,
-                [{file,"lib/core/src/proc_macro.pt"},{line,151}]},
+                [{file,"src/proc_macro.pt"},{line,151}]},
             {'Elixir.Patina.Core.ProcMacro.Literal',byte_character,1,
-                [{file,"lib/core/src/proc_macro.pt"},{line,590}]},
+                [{file,"src/proc_macro.pt"},{line,590}]},
             {'Elixir.Patina.Macros',bad_byte,1,
                 [{file,"tests/ui/pkg-src/macros/src/macros.pt"},{line,232}]}]
 

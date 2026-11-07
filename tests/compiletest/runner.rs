@@ -5,7 +5,7 @@ use std::process::{Command, Output};
 use convert_case::{Case, Casing};
 use libtest_mimic::Failed;
 
-use crate::snapshot;
+use crate::{common, snapshot};
 
 const TEXT_EXTENSIONS: &[&str] =
     &["tokens", "ast", "expanded", "typed", "erl", "core0", "core", "abstr", "app"];
@@ -122,7 +122,11 @@ impl Runner {
         let text_extensions: HashSet<&str> = TEXT_EXTENSIONS.iter().copied().collect();
         let artifacts = read_text_artifacts(out_dir.path(), &text_extensions);
 
-        CompileOutput { artifacts, stderr: String::from_utf8_lossy(&output.stderr).into_owned() }
+        let root = common::install_root();
+        let cwd = std::env::current_dir().expect("read the current directory");
+        let root = root.strip_prefix(&cwd).unwrap_or(&root).display().to_string();
+        let stderr = String::from_utf8_lossy(&output.stderr).replace(&root, "$PATINA_ROOT");
+        CompileOutput { artifacts, stderr }
     }
 
     fn package_deps(&self, pt_path: &Path, lib_dir: &Path) -> Vec<String> {

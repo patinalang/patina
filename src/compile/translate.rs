@@ -16,7 +16,7 @@ use rustc_hir::{FieldDef, ItemKind, Mod};
 use rustc_middle::erl::{ErlImplFn, ErlModuleId, ErlReprKind, ErlVariantRepr};
 use rustc_middle::ty::{self, TyCtxt};
 use rustc_middle::{bug, span_bug};
-use rustc_span::{Span, Symbol, sym};
+use rustc_span::{FileName, RemapPathScopeComponents, Span, Symbol, sym};
 use scopes::Scopes;
 
 use crate::compile::eaf_builder::EafBuilder;
@@ -131,12 +131,10 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
     /// The file that contains the outermost macro call site of `span`.
     fn file_path(&self, span: Span) -> PathBuf {
         let span = span.source_callsite();
-        self.tcx
-            .sess
-            .source_map()
-            .span_to_filename(span)
-            .into_local_path()
-            .unwrap_or_else(|| span_fatal!(self.tcx, span, "no filename found"))
+        match self.tcx.sess.source_map().span_to_filename(span) {
+            FileName::Real(name) => name.path(RemapPathScopeComponents::DEBUGINFO).to_owned(),
+            _ => span_fatal!(self.tcx, span, "no filename found"),
+        }
     }
 
     fn push_function(&self, parts: &mut ModuleParts<'arena>, function: Function<'arena>) {

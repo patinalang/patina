@@ -98,6 +98,7 @@ enum Command {
     /// Compile the package in DIR, as described by its `Patina.toml`.
     Build {
         /// Package directory.
+        #[arg(default_value = ".", value_parser = absolute_path())]
         dir: PathBuf,
 
         /// Emit compiled output.
