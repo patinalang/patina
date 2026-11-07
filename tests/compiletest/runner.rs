@@ -76,9 +76,8 @@ impl Runner {
             )));
         }
 
-        let install_lib = Path::new(env!("CARGO_BIN_EXE_patina")).with_file_name("lib");
         let output = Command::new("elixir")
-            .env("ERL_LIBS", install_lib)
+            .env("ERL_LIBS", common::install_root())
             .arg("-pa")
             .arg(&lib_dir)
             .arg(
@@ -161,7 +160,7 @@ impl Runner {
         lib_dir: &Path,
         externs: &[String],
     ) -> Output {
-        let mut cmd = Command::new(env!("CARGO_BIN_EXE_patina"));
+        let mut cmd = common::patina_command();
         // A package directory is built from its `Patina.toml`.
         cmd.arg(if pt_path.is_dir() { "build" } else { "compile" });
         if !pt_path.is_dir() && emits.contains(&"app") {

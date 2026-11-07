@@ -11,7 +11,10 @@ use crate::installation::Installation;
 fn server() -> &'static Arc<SyncServer> {
     static SERVER: OnceLock<Arc<SyncServer>> = OnceLock::new();
     SERVER.get_or_init(|| {
-        let installation = Installation::locate(None).expect("locate the install");
+        let exe = std::env::current_exe().expect("find the test executable");
+        let profile_dir = exe.parent().and_then(|deps| deps.parent()).expect("target/<profile>");
+        let root = profile_dir.join("root");
+        let installation = Installation::locate(Some(root)).expect("locate the install");
         SyncServer::start(SyncServerOpts { sock_path: None, installation })
     })
 }

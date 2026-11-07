@@ -7,9 +7,12 @@ use common::Session;
 
 /// Runs `patina <args> source.pt` in `dir`, with a trivial `source.pt`.
 fn patina(dir: &Path, args: &[&str], envs: &[(&str, &Path)]) -> Output {
+    run(common::patina_command(), dir, args, envs)
+}
+
+fn run(mut cmd: Command, dir: &Path, args: &[&str], envs: &[(&str, &Path)]) -> Output {
     std::fs::write(dir.join("source.pt"), "pub fn f() {}\n").expect("write source");
-    Command::new(env!("CARGO_BIN_EXE_patina"))
-        .current_dir(dir)
+    cmd.current_dir(dir)
         .args(args)
         .arg("source.pt")
         .envs(envs.iter().copied())
@@ -52,7 +55,7 @@ fn install_missing_any_required_file_is_reported() {
     for missing in INSTALL_FILES {
         let root = tempfile::tempdir().expect("create temp dir");
         for file in INSTALL_FILES.into_iter().filter(|file| *file != missing) {
-            let path = root.path().join("lib").join(file);
+            let path = root.path().join(file);
             std::fs::create_dir_all(path.parent().expect("file's directory")).expect("create dir");
             std::fs::write(path, b"").expect("write file");
         }
@@ -88,7 +91,7 @@ fn non_ascii_socket_path_reaches_the_client() {
 /// the named Core breaks them.
 #[test]
 fn core_override_replaces_installed_core_at_macro_time() {
-    let real_core = Path::new(env!("CARGO_BIN_EXE_patina")).with_file_name("lib/patina_core/ebin");
+    let real_core = common::install_root().join("patina_core/ebin");
     let session = Session::new();
 
     let core = session.path().join("core");

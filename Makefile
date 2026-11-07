@@ -10,11 +10,11 @@ endif
 CARGO_FLAGS := $(if $(filter release,$(PROFILE)),--release)
 
 PATINA := target/$(PROFILE)/patina
-LIB := target/$(PROFILE)/lib
+ROOT := target/$(PROFILE)/root
 
 APPS := patina patina_core
-PATINA_APP := $(LIB)/patina/ebin/patina.app
-CORE_APP := $(LIB)/patina_core/ebin/patina_core.app
+PATINA_APP := $(ROOT)/patina/ebin/patina.app
+CORE_APP := $(ROOT)/patina_core/ebin/patina_core.app
 
 PATINA_ERL := $(wildcard lib/patina/src/*.erl)
 PATINA_VSN = $(shell cargo pkgid | cut -d'\#' -f2 | cut -d@ -f2)
@@ -41,10 +41,11 @@ build: $(PATINA_APP) $(CORE_APP)
 .PHONY: install
 ## Build and install into INSTALL_PREFIX.
 install: build
-	mkdir -p "$(INSTALL_PREFIX)/bin" "$(INSTALL_PREFIX)/lib"
-	cp $(PATINA) "$(INSTALL_PREFIX)/bin/patina"
-	cd "$(INSTALL_PREFIX)/lib" && rm -rf $(APPS)
-	cp -R $(addprefix $(LIB)/,$(APPS)) "$(INSTALL_PREFIX)/lib"
+	mkdir -p "$(INSTALL_PREFIX)"
+	cd "$(INSTALL_PREFIX)" && rm -rf $(APPS)
+	cp -R $(addprefix $(ROOT)/,$(APPS)) "$(INSTALL_PREFIX)"
+	mkdir -p "$(INSTALL_PREFIX)/patina/bin"
+	cp $(PATINA) "$(INSTALL_PREFIX)/patina/bin/patina"
 
 .PHONY: test
 ## Build and run all tests. Pass `cargo` arguments in ARGS.
@@ -66,10 +67,10 @@ compiletest-bless: build
 clean:
 	cargo clean
 
-.PHONY: clean-lib
-## Clean up Patina libraries.
-clean-lib:
-	rm -rf $(LIB)
+.PHONY: clean-install
+## Clean up the install tree.
+clean-install:
+	rm -rf $(ROOT)
 
 $(PATINA): FORCE
 	cargo build $(CARGO_FLAGS)
@@ -78,14 +79,16 @@ $(PATINA): FORCE
 FORCE:
 
 $(PATINA_APP): $(PATINA_ERL) lib/patina/src/patina.app.src
-	rm -rf $(dir $@)
-	mkdir -p $(dir $@)
+	rm -rf $(dir $@) $(ROOT)/patina/src
+	mkdir -p $(dir $@) $(ROOT)/patina/src
+	cp $(PATINA_ERL) lib/patina/src/patina.app.src $(ROOT)/patina/src
 	erlc -o $(dir $@) $(PATINA_ERL)
 	sed -e 's/vsn, "/vsn, "$(PATINA_VSN)/' -e 's/modules, \[/modules, [$(PATINA_MODULES)/' \
 		lib/patina/src/patina.app.src > $@
 
 $(CORE_APP): $(PATINA) $(PATINA_APP) lib/core/Patina.toml $(wildcard lib/core/src/*.pt)
-	rm -rf $(dir $@) $(LIB)/patina_core/src
-	mkdir -p $(LIB)/patina_core
-	cp -R lib/core/src $(LIB)/patina_core/src
-	cd lib/core && PATINA_BOOTSTRAP=1 $(abspath $(PATINA)) build --out-dir $(abspath $(dir $@))
+	rm -rf $(ROOT)/patina_core
+	mkdir -p $(ROOT)/patina_core
+	cp -R lib/core/Patina.toml lib/core/src $(ROOT)/patina_core
+	cd lib/core && PATINA_BOOTSTRAP=1  $(abspath $(PATINA)) --root=$(abspath $(ROOT)) \
+		build --out-dir $(abspath $(dir $@))

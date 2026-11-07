@@ -9,6 +9,12 @@ use std::process::{Child, Command, Output, Stdio};
 
 use tempfile::TempDir;
 
+pub(crate) fn patina_command() -> Command {
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_patina"));
+    cmd.env("PATINA_ROOT", install_root());
+    cmd
+}
+
 #[cfg(unix)]
 fn path_from_bytes(bytes: Vec<u8>) -> PathBuf {
     use std::ffi::OsString;
@@ -29,11 +35,8 @@ pub(crate) struct CompileServer {
 
 impl CompileServer {
     pub(crate) fn start() -> io::Result<CompileServer> {
-        let mut serve = Command::new(env!("CARGO_BIN_EXE_patina"))
-            .arg("serve")
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .spawn()?;
+        let mut serve =
+            patina_command().arg("serve").stdin(Stdio::piped()).stdout(Stdio::piped()).spawn()?;
 
         let mut line = Vec::new();
         let stdout = serve.stdout.take().expect("stdout is piped");
@@ -81,7 +84,7 @@ impl Session {
     /// Writes `source` to `file` in the session's directory, and compiles it.
     pub(crate) fn try_build(&self, file: &str, source: &str, args: &[&str]) -> Output {
         std::fs::write(self.path().join(file), source).expect("write source");
-        Command::new(env!("CARGO_BIN_EXE_patina"))
+        patina_command()
             .current_dir(self.path())
             .arg("compile")
             .arg("--compile-server")
@@ -101,5 +104,5 @@ impl Session {
 }
 
 pub(crate) fn install_root() -> PathBuf {
-    Path::new(env!("CARGO_BIN_EXE_patina")).with_file_name("lib")
+    Path::new(env!("CARGO_BIN_EXE_patina")).with_file_name("root")
 }
