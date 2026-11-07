@@ -339,20 +339,28 @@ pub(crate) fn compile(
 
             consume_stage!(stages_left, Stage::Beam, {
                 server.with(dcx, |server| {
-                    for (mod_name, bytes) in &serialized_modules {
-                        let compile = server.compile(dcx, bytes).unwrap_or_else(|e| {
-                            dcx.fatal(format!("erl backend failed: {}\n{}", e.errors, e.warnings));
-                        });
-
-                        if !compile.warnings.is_empty() && compile.warnings != "[]" {
-                            dcx.warn(compile.warnings);
-                        }
-
-                        write_file(out_dir, mod_name.as_str(), "beam", &compile.beam)
-                            .unwrap_or_else(|e| {
-                                dcx.fatal(format!("failed to write beam file: {e}"));
+                    let beam_filenames: Vec<_> = serialized_modules
+                        .iter()
+                        .map(|(mod_name, bytes)| {
+                            let compile = server.compile(dcx, bytes).unwrap_or_else(|e| {
+                                dcx.fatal(format!(
+                                    "erl backend failed: {}\n{}",
+                                    e.errors, e.warnings
+                                ));
                             });
-                    }
+
+                            if !compile.warnings.is_empty() && compile.warnings != "[]" {
+                                dcx.warn(compile.warnings);
+                            }
+
+                            write_file(out_dir, mod_name.as_str(), "beam", &compile.beam)
+                                .unwrap_or_else(|e| {
+                                    dcx.fatal(format!("failed to write beam file: {e}"));
+                                })
+                        })
+                        .collect();
+
+                    server.load_modules(dcx, &beam_filenames);
                 });
             });
         });
@@ -454,7 +462,7 @@ fn write_file(
     filename_stem: &str,
     extension: &str,
     content: &[u8],
-) -> Result<(), String> {
+) -> Result<PathBuf, String> {
     let filepath = out_dir.join(filename_stem).with_added_extension(extension);
 
     let mut file = File::create(&filepath)
@@ -463,5 +471,5 @@ fn write_file(
     file.write_all(content)
         .map_err(|e| format!("failed to write file {}: {e}", filepath.display()))?;
 
-    Ok(())
+    Ok(filepath)
 }

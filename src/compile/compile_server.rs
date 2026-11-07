@@ -23,6 +23,7 @@ const OP_ERL: &[u8] = b"erl";
 const OP_CORE0: &[u8] = b"core0";
 const OP_CORE: &[u8] = b"core";
 const OP_CODE_PATH: &[u8] = b"code_path";
+const OP_LOAD_MODULES: &[u8] = b"load_modules";
 const OP_MACRO: &[u8] = b"macro";
 #[cfg(test)]
 const OP_ECHO: &[u8] = b"echo";
@@ -253,6 +254,23 @@ impl CompileServer {
         let parts = self.call(dcx, &request);
         match parts.as_slice() {
             [status] if status == b"ok" => {}
+            parts => self.unexpected(dcx, parts),
+        }
+    }
+
+    pub(super) fn load_modules(&mut self, dcx: DiagCtxtHandle<'_>, files: &[PathBuf]) {
+        let request: Box<[&[u8]]> = std::iter::once(OP_LOAD_MODULES)
+            .chain(files.iter().map(|file| file.as_os_str().as_encoded_bytes()))
+            .collect();
+
+        let parts = self.call(dcx, &request);
+
+        match parts.as_slice() {
+            [status] if status == b"ok" => {}
+            [status, reason] if status == b"error" => {
+                let reason = self.part_str(dcx, reason);
+                dcx.fatal(format!("failed to load the rebuilt modules: {reason}"));
+            }
             parts => self.unexpected(dcx, parts),
         }
     }

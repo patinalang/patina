@@ -18,6 +18,32 @@ pub fn num(_input: TokenStream) -> TokenStream {{
     )
 }
 
+/// Builds a proc macro, uses it, rebuilds it in the same VM, and uses it again.
+fn assert_rebuild_is_picked_up(first_out: &str, second_out: &str) {
+    let session = Session::new();
+
+    for (out, value) in [(first_out, 42), (second_out, 43)] {
+        session.build("provider.pt", &provider(value), &["--out-dir", out]);
+
+        let args = ["--dump", "expanded", "-L", out, "--extern", "Provider"];
+        session.build("consumer.pt", CONSUMER, &args);
+
+        let expanded = std::fs::read_to_string(session.dir.path().join("Consumer.expanded"))
+            .expect("read expanded");
+        assert!(expanded.contains(&format!("let _x = {value};")), "got:\n{expanded}");
+    }
+}
+
+#[test]
+fn rebuilt_proc_macro_is_reloaded_in_a_running_vm() {
+    assert_rebuild_is_picked_up("out", "out");
+}
+
+#[test]
+fn proc_macro_rebuilt_elsewhere_is_reloaded_in_a_running_vm() {
+    assert_rebuild_is_picked_up("first_out", "second_out");
+}
+
 /// A `patina serve`, and a directory to compile in that isn't the server's working directory.
 struct Session {
     dir: TempDir,

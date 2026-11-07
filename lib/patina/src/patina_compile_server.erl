@@ -140,6 +140,11 @@ do_request(Sock, ~"code_path", Dirs) ->
     Encoding = file:native_name_encoding(),
     code:add_pathsa(lists:reverse([unicode:characters_to_list(Dir, Encoding) || Dir <- Dirs])),
     write_msg(Sock, [~"ok"]);
+do_request(Sock, ~"load_modules", Files) ->
+    case load_modules(Files) of
+        ok -> write_msg(Sock, [~"ok"]);
+        {error, Reason} -> write_msg(Sock, [~"error", Reason])
+    end;
 do_request(Sock, ~"echo", [Bin]) ->
     write_msg(Sock, [~"ok", term_to_binary(binary_to_term(Bin), [{minor_version, 2}])]);
 do_request(Sock, ~"macro", [Mod, Fun | ArgBins]) ->
@@ -147,6 +152,27 @@ do_request(Sock, ~"macro", [Mod, Fun | ArgBins]) ->
     Module = binary_to_atom(Mod, utf8),
     Function = binary_to_atom(Fun, utf8),
     run_macro(Sock, Module, Function, Args).
+
+load_modules(Files) ->
+    Stale = lists:filtermap(fun stale_module/1, Files),
+    case [Module || {Module, _File, _Beam} <- Stale, not code:soft_purge(Module)] of
+        [] -> code:atomic_load(Stale);
+        InUse -> {error, [{Module, old_code_in_use} || Module <- InUse]}
+    end.
+
+stale_module(FileBin) ->
+    File = unicode:characters_to_list(FileBin, file:native_name_encoding()),
+    Module = list_to_atom(filename:basename(File, ".beam")),
+    maybe
+        {file, _} ?= code:is_loaded(Module),
+        {ok, Beam} ?= file:read_file(File),
+        {ok, {Module, Md5}} ?= beam_lib:md5(Beam),
+        false ?= Md5 =:= Module:module_info(md5),
+
+        {true, {Module, File, Beam}}
+    else
+        _ -> false
+    end.
 
 run_macro(Sock, Module, Function, Args) ->
     {Pid, Ref} = spawn_opt(
