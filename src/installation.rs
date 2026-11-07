@@ -30,7 +30,9 @@ impl Installation {
         let root = match root {
             Some(root) => root,
             None => {
-                let exe = std::env::current_exe()?.canonicalize()?;
+                let exe = std::env::current_exe()?;
+                #[cfg(unix)]
+                let exe = exe.canonicalize()?;
                 match exe.ancestors().skip(1).take(2).find(|dir| dir.join("lib").is_dir()) {
                     Some(root) => root.to_owned(),
                     None => return Err(LocateInstallationError::NotFound),
