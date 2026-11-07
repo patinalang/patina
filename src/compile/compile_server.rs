@@ -420,10 +420,10 @@ impl BeamMacroRunner for SyncServer {
         function: &str,
         args: &[Vec<u8>],
     ) -> Result<Vec<u8>, MacroRunError> {
-        match self.try_with(|server| server.call_macro(module, function, args)) {
-            Ok(result) => result,
-            Err(error) => Err(MacroRunError::Transport(error)),
-        }
+        self.try_with(|server| match server {
+            Ok(server) => server.call_macro(module, function, args),
+            Err(error) => Err(MacroRunError::Transport(error.to_string())),
+        })
     }
 }
 
@@ -446,18 +446,21 @@ impl SyncServer {
         dcx: DiagCtxtHandle<'_>,
         f: impl FnOnce(&mut CompileServer) -> R,
     ) -> R {
-        self.try_with(f).unwrap_or_else(|err| dcx.fatal(err))
+        self.try_with(|server| match server {
+            Ok(server) => f(server),
+            Err(error) => dcx.fatal(error.to_string()),
+        })
     }
 
-    /// Like [`SyncServer::with`], but hands back the startup failure instead of
+    /// Like [`SyncServer::with`], but hands `f` the startup failure instead of
     /// raising it. Used by the proc-macro runner, which reports errors through
     /// rustc's macro machinery.
-    pub(crate) fn try_with<R>(&self, f: impl FnOnce(&mut CompileServer) -> R) -> Result<R, String> {
+    pub(crate) fn try_with<R>(
+        &self,
+        f: impl FnOnce(Result<&mut CompileServer, &StartupError>) -> R,
+    ) -> R {
         let mut state = self.state.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
-        match state.ready() {
-            Ok(server) => Ok(f(server)),
-            Err(err) => Err(err.to_string()),
-        }
+        f(state.ready())
     }
 }
 

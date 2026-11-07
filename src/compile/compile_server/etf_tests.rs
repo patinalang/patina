@@ -156,9 +156,10 @@ fn large_tuples_round_trip() {
 fn empty_message_part_gets_a_reply() {
     let reply = server()
         .try_with(|server| {
-            server.transact_within(&[OP_CODE_PATH, b""], Some(Duration::from_secs(10)))
+            server
+                .expect("start the compile server")
+                .transact_within(&[OP_CODE_PATH, b""], Some(Duration::from_secs(10)))
         })
-        .expect("start the compile server")
         .expect("get a reply");
     assert_eq!(reply, [b"ok"]);
 }
