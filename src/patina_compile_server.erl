@@ -237,9 +237,9 @@ compile_forms(Forms, Opts) ->
     end.
 
 read_msg(Sock) ->
-    case socket:recv(Sock, 1) of
-        {ok, <<Len:8/unsigned-integer>>} ->
-            {ok, lists:map(fun(_) -> read_bin(Sock) end, lists:seq(1, Len))};
+    case socket:recv(Sock, 4) of
+        {ok, <<Count:32/unsigned-integer>>} ->
+            {ok, lists:map(fun(_) -> read_bin(Sock) end, lists:seq(1, Count))};
         {error, _} ->
             closed
     end.
@@ -255,13 +255,11 @@ read_bin(Sock) ->
     end.
 
 write_msg(Sock, [_ | _] = Msg) ->
-    Len = length(Msg),
-    socket:send(Sock, <<Len:8/unsigned-integer>>),
+    socket:send(Sock, <<(length(Msg)):32/unsigned-integer>>),
     lists:foreach(fun(Data) -> write(Sock, Data) end, Msg).
 
 write(Sock, <<Data/binary>>) ->
-    Len = byte_size(Data),
-    socket:send(Sock, <<Len:32/unsigned-integer>>),
+    socket:send(Sock, <<(byte_size(Data)):32/unsigned-integer>>),
     socket:send(Sock, Data);
 write(Sock, Data) ->
     Bin = unicode:characters_to_binary(io_lib:format("~tp", [Data])),

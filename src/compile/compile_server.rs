@@ -492,12 +492,12 @@ impl Drop for SyncServer {
     }
 }
 
-/// Write a length-prefixed message: a one-byte part count, then each part as a
-/// big-endian `u32` length followed by its bytes.
+/// Write a length-prefixed message: a big-endian `u32` part count, then each
+/// part as a big-endian `u32` length followed by its bytes.
 fn write_msg(stream: &mut UnixStream, parts: &[&[u8]]) -> io::Result<()> {
-    let count = u8::try_from(parts.len())
+    let count = u32::try_from(parts.len())
         .map_err(|_| invalid(format!("too many message parts: {}", parts.len())))?;
-    stream.write_all(&[count])?;
+    stream.write_all(&count.to_be_bytes())?;
     for part in parts {
         let len = u32::try_from(part.len())
             .map_err(|_| invalid(format!("message part too large: {} bytes", part.len())))?;
@@ -508,19 +508,22 @@ fn write_msg(stream: &mut UnixStream, parts: &[&[u8]]) -> io::Result<()> {
 }
 
 /// Read a message framed as written by [`write_msg`].
-fn read_msg(stream: &mut UnixStream) -> io::Result<Vec<Vec<u8>>> {
-    let mut count = [0u8; 1];
-    stream.read_exact(&mut count)?;
+fn read_msg(stream: &mut impl Read) -> io::Result<Vec<Vec<u8>>> {
+    let count = read_u32(stream)?;
+    (0..count)
+        .map(|_| {
+            let len = read_u32(stream)?;
+            let mut data = vec![0u8; len as usize];
+            stream.read_exact(&mut data)?;
+            Ok(data)
+        })
+        .collect()
+}
 
-    let mut parts = Vec::with_capacity(count[0] as usize);
-    for _ in 0..count[0] {
-        let mut len = [0u8; 4];
-        stream.read_exact(&mut len)?;
-        let mut data = vec![0u8; u32::from_be_bytes(len) as usize];
-        stream.read_exact(&mut data)?;
-        parts.push(data);
-    }
-    Ok(parts)
+fn read_u32(stream: &mut impl Read) -> io::Result<u32> {
+    let mut bytes = [0u8; 4];
+    stream.read_exact(&mut bytes)?;
+    Ok(u32::from_be_bytes(bytes))
 }
 
 fn invalid(msg: String) -> io::Error {
