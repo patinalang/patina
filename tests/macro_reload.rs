@@ -1,36 +1,26 @@
 mod common;
 
-use common::Session;
+use common::{CONSUMER, Session, provider};
 
-const CONSUMER: &str = "pub fn f() { let _x = Provider::num!(); }\n";
+/// Expands `CONSUMER` with `args`, and checks that `num!()` gave `value`.
+#[track_caller]
+fn assert_num_expands_to(session: &Session, args: &[&str], value: u32) {
+    let args = [&["--dump", "expanded"], args].concat();
+    session.build("consumer.pt", CONSUMER, &args);
 
-fn provider(value: u32) -> String {
-    format!(
-        r#"
-use Core::ProcMacro::*;
-
-#[proc_macro]
-pub fn num(_input: TokenStream) -> TokenStream {{
-    TokenStream::from_trees([TokenTree::Literal(Literal::int({value}))])
-}}
-"#
-    )
+    let expanded =
+        std::fs::read_to_string(session.path().join("Consumer.expanded")).expect("read expanded");
+    assert!(expanded.contains(&format!("let _x = {value};")), "got:\n{expanded}");
 }
 
-/// Builds a proc macro, uses it, rebuilds it in the same VM, and uses it again.
 fn assert_rebuild_is_picked_up(first_out: &str, second_out: &str) {
     let session = Session::new();
 
-    for (out, value) in [(first_out, 42), (second_out, 43)] {
-        session.build("provider.pt", &provider(value), &["--out-dir", out]);
+    session.build("provider.pt", &provider(42), &["--out-dir", first_out]);
+    assert_num_expands_to(&session, &["-L", first_out, "--extern", "Provider"], 42);
 
-        let args = ["--dump", "expanded", "-L", out, "--extern", "Provider"];
-        session.build("consumer.pt", CONSUMER, &args);
-
-        let expanded = std::fs::read_to_string(session.path().join("Consumer.expanded"))
-            .expect("read expanded");
-        assert!(expanded.contains(&format!("let _x = {value};")), "got:\n{expanded}");
-    }
+    session.build("provider.pt", &provider(43), &["--out-dir", second_out]);
+    assert_num_expands_to(&session, &["-L", second_out, "--extern", "Provider"], 43);
 }
 
 #[test]
@@ -53,12 +43,7 @@ fn later_compile_code_path_wins_in_a_running_vm() {
     // Puts `earlier` on the code path, without running the macro and so loading its module.
     session.build("unused.pt", "pub fn f() {}\n", &["-L", "earlier", "--extern", "Provider"]);
 
-    let args = ["--dump", "expanded", "-L", "later", "--extern", "Provider"];
-    session.build("consumer.pt", CONSUMER, &args);
-
-    let expanded =
-        std::fs::read_to_string(session.path().join("Consumer.expanded")).expect("read expanded");
-    assert!(expanded.contains("let _x = 43;"), "got:\n{expanded}");
+    assert_num_expands_to(&session, &["-L", "later", "--extern", "Provider"], 43);
 }
 
 #[test]

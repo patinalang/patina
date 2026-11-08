@@ -268,14 +268,16 @@ fn run(
     let src = std::fs::read_to_string(file)
         .map_err(|source| Error::ReadSource { path: file.to_owned(), source })?;
 
-    let mut lib_dirs = args.lib_dirs;
-    lib_dirs.extend_from_slice(&installation.lib_dirs);
-
     let mut externs = args.externs;
     if !package.is_core() && !externs.iter().any(PackageDependency::is_core) {
         externs.push(PackageDependency::core_package_dependency());
     }
     package::validate_dependencies(&externs)?;
+
+    let mut lib_dirs = args.lib_dirs;
+    if !externs.iter().any(|dep| dep.is_core() && dep.path.is_some()) {
+        lib_dirs.push(installation.core_dir.clone());
+    }
 
     let opts = compile::CompileOptions { out_dir: args.out_dir, lib_dirs, package, externs };
 

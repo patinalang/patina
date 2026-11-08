@@ -106,3 +106,20 @@ impl Session {
 pub(crate) fn install_root() -> PathBuf {
     Path::new(env!("CARGO_BIN_EXE_patina")).with_file_name("root")
 }
+
+/// Source of a package with a proc macro, `num!()`, that expands to `value`.
+pub(crate) fn provider(value: u32) -> String {
+    format!(
+        r#"
+use Core::ProcMacro::*;
+
+#[proc_macro]
+pub fn num(_input: TokenStream) -> TokenStream {{
+    TokenStream::from_trees([TokenTree::Literal(Literal::int({value}))])
+}}
+"#
+    )
+}
+
+/// Source of a package that uses [`provider`]'s `num!()`.
+pub(crate) const CONSUMER: &str = "pub fn f() { let _x = Provider::num!(); }\n";

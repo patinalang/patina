@@ -1,12 +1,8 @@
 use std::env::consts::EXE_SUFFIX;
+use std::io;
 use std::path::{Path, PathBuf};
-use std::{fs, io};
 
-use crate::package;
-
-const BOOTSTRAP_EXPECTED_FILES: [&str; 1] = ["patina/ebin/patina.app"];
-const EXPECTED_FILES: [&str; 2] =
-    ["patina_core/ebin/libCore.rmeta", "patina_core/ebin/patina_core.app"];
+const EXPECTED_FILES: [&str; 1] = ["patina/ebin/patina.app"];
 
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum LocateInstallationError {
@@ -23,7 +19,10 @@ pub(crate) enum LocateInstallationError {
 
 #[derive(Debug, Clone)]
 pub(crate) struct Installation {
-    pub(crate) lib_dirs: Vec<PathBuf>,
+    /// `<root>/patina/ebin`
+    pub(crate) patina_dir: PathBuf,
+    /// `<root>/patina_core/ebin`
+    pub(crate) core_dir: PathBuf,
 }
 
 impl Installation {
@@ -43,30 +42,16 @@ impl Installation {
             }
         };
 
-        for path in BOOTSTRAP_EXPECTED_FILES {
+        for path in EXPECTED_FILES {
             if !root.join(path).is_file() {
                 return Err(LocateInstallationError::Corrupted(path));
             }
         }
 
-        if !package::is_bootstrap() {
-            for path in EXPECTED_FILES {
-                if !root.join(path).is_file() {
-                    return Err(LocateInstallationError::Corrupted(path));
-                }
-            }
-        }
-
-        let mut lib_dirs = Vec::new();
-        for entry in fs::read_dir(root)? {
-            let ebin = entry?.path().join("ebin");
-            if ebin.is_dir() {
-                lib_dirs.push(ebin);
-            }
-        }
-        lib_dirs.sort();
-
-        Ok(Installation { lib_dirs })
+        Ok(Installation {
+            patina_dir: root.join("patina/ebin"),
+            core_dir: root.join("patina_core/ebin"),
+        })
     }
 }
 
