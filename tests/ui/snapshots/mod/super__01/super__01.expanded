@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -32,46 +32,46 @@ fn function() {
 
     // The `super` keyword refers to the parent scope (outside the `My` module).
 
-    // This will bind to the `Cool::function` in the *pkg* scope.
+    // This will bind to the `cool::function` in the *pkg* scope.
     // In this case the pkg scope is the outermost scope.
 
-    { ::Core::io::put_chars([["called `function()`"]]); ::Core::io::nl(); };
+    { ::core::io::put_chars([["called `function()`"]]); ::core::io::nl(); };
 }
-mod Cool {
+mod cool {
     pub fn function() {
         {
-            ::Core::io::put_chars([["called `Cool::function()`"]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["called `cool::function()`"]]);
+            ::core::io::nl();
         };
     }
 }
-mod My {
+mod my {
     fn function() {
         {
-            ::Core::io::put_chars([["called `My::function()`"]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["called `my::function()`"]]);
+            ::core::io::nl();
         };
     }
-    mod Cool {
+    mod cool {
         pub fn function() {
             {
-                ::Core::io::put_chars([["called `My::Cool::function()`"]]);
-                ::Core::io::nl();
+                ::core::io::put_chars([["called `my::cool::function()`"]]);
+                ::core::io::nl();
             };
         }
     }
     pub fn indirect_call() {
         {
-            ::Core::io::put_chars(["called `My::indirect_call()`, that\n> "]);
+            ::core::io::put_chars(["called `my::indirect_call()`, that\n> "]);
         };
         self::function();
         function();
-        self::Cool::function();
+        self::cool::function();
         super::function();
         {
-            use pkg::Cool::function as root_function;
+            use pkg::cool::function as root_function;
             root_function();
         }
     }
 }
-pub fn main() { My::indirect_call(); }
+pub fn main() { my::indirect_call(); }

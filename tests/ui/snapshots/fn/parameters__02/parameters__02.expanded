@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -40,8 +40,8 @@ pub fn main() {
                 // won't print anything
 
                 {
-                    ::Core::io::put_chars([["fx evaluated!"]]);
-                    ::Core::io::nl();
+                    ::core::io::put_chars([["fx evaluated!"]]);
+                    ::core::io::nl();
                 };
                 3
             };
@@ -49,17 +49,17 @@ pub fn main() {
         ||
             {
                 {
-                    ::Core::io::put_chars([["fy evaluated!"]]);
-                    ::Core::io::nl();
+                    ::core::io::put_chars([["fy evaluated!"]]);
+                    ::core::io::nl();
                 };
                 5
             };
     let lazy_result = lazy_add(fx, fy);
     let op = choose_op(MathOp::Add);
     {
-        ::Core::io::put_chars([[patina_fmt::display(3), " op ",
+        ::core::io::put_chars([[patina_fmt::display(3), " op ",
                             patina_fmt::display(5), " = ",
                             patina_fmt::display(op(3, 5))]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     }
 }

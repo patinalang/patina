@@ -15,7 +15,7 @@ Whitespace
 Ident
 Bang
 OpenParen
-Literal { kind: Str { terminated: true }, suffix_start: 36 }
+Literal { kind: Str { terminated: true }, suffix_start: 37 }
 CloseParen
 Semi
 Whitespace
@@ -40,7 +40,7 @@ Whitespace
 Ident
 Bang
 OpenParen
-Literal { kind: Str { terminated: true }, suffix_start: 44 }
+Literal { kind: Str { terminated: true }, suffix_start: 45 }
 CloseParen
 Semi
 Whitespace

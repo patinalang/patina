@@ -9,18 +9,18 @@
 #![allow(dead_code)]
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 #[allow(unused)]
 extern mod patina_fmt;
 
 #[module = "duplicated_module"]
-mod First { }
+mod first { }
 
 #[module = "duplicated_module"]
 struct Second;
 
 #[module = "other_module"]
-mod Third { }
+mod third { }

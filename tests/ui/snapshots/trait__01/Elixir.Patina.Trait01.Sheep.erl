@@ -11,11 +11,11 @@
 -export(['__info__'/1,
          '$patina_constructor__Sheep'/2,
          shear/1,
-         'Trait01::Animal::new'/2,
-         'Trait01::Animal::name'/2,
-         'Trait01::Animal::noise'/2,
-         'Trait01::Animal::talk'/2,
-         'Trait01::Animal::$patina_witness'/0]).
+         'trait__01::Animal::new'/2,
+         'trait__01::Animal::name'/2,
+         'trait__01::Animal::noise'/2,
+         'trait__01::Animal::talk'/2,
+         'trait__01::Animal::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -39,14 +39,14 @@ is_naked(_self@0_0) -> _self@0_0#'Sheep'.naked.
 
 shear(_self@0_0) ->
     _witness_Animal@1_0 =
-        'Trait01::Animal::$patina_witness'(),
+        'trait__01::Animal::$patina_witness'(),
     case is_naked(_self@0_0) of
         true ->
             io:put_chars(begin
                              _element@3_0 = begin
                                                 _element@2_0 =
-                                                    'Trait01::Animal::name'(_witness_Animal@1_0,
-                                                                            _self@0_0),
+                                                    'trait__01::Animal::name'(_witness_Animal@1_0,
+                                                                              _self@0_0),
                                                 [_element@2_0,
                                                  <<" is already naked..."/utf8>>]
                                             end,
@@ -68,29 +68,29 @@ shear(_self@0_0) ->
             _self@0_0#'Sheep'{naked = true}
     end.
 
-'Trait01::Animal::new'(_witness_Animal@0_0,
-                       _name@1_0) ->
+'trait__01::Animal::new'(_witness_Animal@0_0,
+                         _name@1_0) ->
     #'Sheep'{naked = false, name = _name@1_0}.
 
-'Trait01::Animal::name'(_witness_Animal@0_0,
-                        _self@1_0) ->
+'trait__01::Animal::name'(_witness_Animal@0_0,
+                          _self@1_0) ->
     _self@1_0#'Sheep'.name.
 
-'Trait01::Animal::noise'(_witness_Animal@0_0,
-                         _self@1_0) ->
+'trait__01::Animal::noise'(_witness_Animal@0_0,
+                           _self@1_0) ->
     case is_naked(_self@1_0) of
         true -> <<"baaaaah?"/utf8>>;
         _ -> <<"baaaaah!"/utf8>>
     end.
 
-'Trait01::Animal::talk'(_witness_Animal@0_0,
-                        _self@1_0) ->
+'trait__01::Animal::talk'(_witness_Animal@0_0,
+                          _self@1_0) ->
     io:put_chars(begin
                      _element@4_0 = begin
                                         _element@2_0 = _self@1_0#'Sheep'.name,
                                         _element@3_0 =
-                                            'Trait01::Animal::noise'(_witness_Animal@0_0,
-                                                                     _self@1_0),
+                                            'trait__01::Animal::noise'(_witness_Animal@0_0,
+                                                                       _self@1_0),
                                         [_element@2_0,
                                          <<" pauses briefly... "/utf8>>,
                                          _element@3_0]
@@ -100,10 +100,10 @@ shear(_self@0_0) ->
     io:nl(),
     {}.
 
-'Trait01::Animal::$patina_witness'() ->
-    {{fun 'Elixir.Patina.Trait01.Sheep':'Trait01::Animal::new'/2,
-      fun 'Elixir.Patina.Trait01.Sheep':'Trait01::Animal::name'/2,
-      fun 'Elixir.Patina.Trait01.Sheep':'Trait01::Animal::noise'/2,
-      fun 'Elixir.Patina.Trait01.Sheep':'Trait01::Animal::talk'/2},
+'trait__01::Animal::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Trait01.Sheep':'trait__01::Animal::new'/2,
+      fun 'Elixir.Patina.Trait01.Sheep':'trait__01::Animal::name'/2,
+      fun 'Elixir.Patina.Trait01.Sheep':'trait__01::Animal::noise'/2,
+      fun 'Elixir.Patina.Trait01.Sheep':'trait__01::Animal::talk'/2},
      {},
      {}}.

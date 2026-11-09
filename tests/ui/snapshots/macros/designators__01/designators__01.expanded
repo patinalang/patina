@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -44,16 +44,16 @@ fn foo() {
     // Recall that blocks are expressions too!
 
     {
-        ::Core::io::put_chars([["You called ", patina_fmt::debug("foo"),
+        ::core::io::put_chars([["You called ", patina_fmt::debug("foo"),
                             "()"]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }
 fn bar() {
     {
-        ::Core::io::put_chars([["You called ", patina_fmt::debug("bar"),
+        ::core::io::put_chars([["You called ", patina_fmt::debug("bar"),
                             "()"]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }
 macro_rules! print_result {
@@ -64,16 +64,16 @@ pub fn main() {
     foo();
     bar();
     {
-        ::Core::io::put_chars([[patina_fmt::debug("1 + 1"), " = ",
+        ::core::io::put_chars([[patina_fmt::debug("1 + 1"), " = ",
                             patina_fmt::debug(1 + 1)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     ;
     {
-        ::Core::io::put_chars([[patina_fmt::debug("{ let x = 1; x * x + 2 * x - 1 }"),
+        ::core::io::put_chars([[patina_fmt::debug("{ let x = 1; x * x + 2 * x - 1 }"),
                             " = ",
                             patina_fmt::debug({ let x = 1; x * x + 2 * x - 1 })]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     ;
 }

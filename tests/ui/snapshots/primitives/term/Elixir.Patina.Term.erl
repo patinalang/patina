@@ -46,7 +46,7 @@ generic_equal(_witnesses_where_generic_equal@0_0,
 
 partial_eq_equal(_left@0_0, _right@1_0) ->
     _witness_PartialEq@2_0 =
-        'Elixir.Patina.Core.Term':'Core::PartialEq::$patina_witness'(),
+        'Elixir.Patina.Core.Term':'core::PartialEq::$patina_witness'(),
     _witnesses_where_generic_equal@3_0 =
         {_witness_PartialEq@2_0},
     generic_equal(_witnesses_where_generic_equal@3_0,

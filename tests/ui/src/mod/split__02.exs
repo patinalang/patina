@@ -6,22 +6,22 @@ defmodule Split02Test do
 
   test "root functions print" do
     assert """
-           called `MyMod::function()`
+           called `my_mod::function()`
            """ == capture_io(fn -> Patina.Split02.function() end)
 
     assert """
-           called `MyMod::indirect_access()`, that
-           > called `MyMod::private_function()`
+           called `my_mod::indirect_access()`, that
+           > called `my_mod::private_function()`
            """ == capture_io(fn -> Patina.Split02.indirect_access() end)
   end
 
   test "split submodule functions print" do
     assert """
-           called `MyMod::Nested::function()`
+           called `my_mod::nested::function()`
            """ == capture_io(fn -> Patina.Split02.Nested.function() end)
 
     assert """
-           called `MyMod::Inaccessible::public_function()`
+           called `my_mod::inaccessible::public_function()`
            """ == capture_io(fn -> Patina.Split02.Inaccessible.public_function() end)
   end
 end

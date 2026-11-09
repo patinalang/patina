@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -32,11 +32,11 @@ fn main()
                         {type error}) as !),
         } as {type error});
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)((number as {type error})) as term)] as
                         [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ((Ok as {type error})((() as ())) as {type error})
 } as {type error})

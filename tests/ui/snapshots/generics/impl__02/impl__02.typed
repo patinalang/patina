@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -40,13 +40,13 @@ fn main() ({
     let y = (GenVal { gen_val: (42 as int) } as GenVal<int>);
 
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)(((x as Val).value() as int)) as term),
                             (", " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((y as GenVal<int>).value() as int)) as
                                 term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

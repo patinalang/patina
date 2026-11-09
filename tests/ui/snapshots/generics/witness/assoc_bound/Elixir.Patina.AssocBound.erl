@@ -44,7 +44,7 @@ first(_witnesses_where_first@0_0, _i@1_0) ->
 
 counter_first(_n@0_0) ->
     _witness_Iter@1_0 =
-        'Elixir.Patina.AssocBound.Counter':'AssocBound::Iter::$patina_witness'(),
+        'Elixir.Patina.AssocBound.Counter':'assoc_bound::Iter::$patina_witness'(),
     _witnesses_where_first@2_0 = {_witness_Iter@1_0},
     first(_witnesses_where_first@2_0, _n@0_0).
 
@@ -78,7 +78,7 @@ show_member(_witnesses_where_show_member@0_0, _f@1_0) ->
     _type_Family_Member@5_0 = erlang:element(2,
                                              _vtable_Family@3_0),
     _witness_Show@6_0 =
-        'Elixir.Patina.AssocBound.$impl.Core.Int':'AssocBound::Show::$patina_witness'(),
+        'Elixir.Patina.AssocBound.$impl.Core.Int':'assoc_bound::Show::$patina_witness'(),
     _witnesses_where_Family_member@7_0 =
         {_witness_Show@6_0},
     _where_Family@8_0 =
@@ -98,14 +98,14 @@ show_member(_witnesses_where_show_member@0_0, _f@1_0) ->
 
 wrapper_plain() ->
     _witness_Family@0_0 =
-        'Elixir.Patina.AssocBound.Wrapper':'AssocBound::Family::$patina_witness'(),
+        'Elixir.Patina.AssocBound.Wrapper':'assoc_bound::Family::$patina_witness'(),
     _witnesses_where_show_plain@1_0 = {_witness_Family@0_0},
     show_plain(_witnesses_where_show_plain@1_0,
                'Elixir.Patina.AssocBound.Wrapper').
 
 wrapper_member() ->
     _witness_Family@0_0 =
-        'Elixir.Patina.AssocBound.Wrapper':'AssocBound::Family::$patina_witness'(),
+        'Elixir.Patina.AssocBound.Wrapper':'assoc_bound::Family::$patina_witness'(),
     _witnesses_where_show_member@1_0 =
         {_witness_Family@0_0},
     show_member(_witnesses_where_show_member@1_0,

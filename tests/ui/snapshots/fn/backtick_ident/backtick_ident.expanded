@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -24,7 +24,7 @@ pub fn `save!`() {
 
 
 
-    { ::Core::io::put_chars([["saved!"]]); ::Core::io::nl(); };
+    { ::core::io::put_chars([["saved!"]]); ::core::io::nl(); };
 }
 pub fn `a{b}`() -> int { 1 }
 pub fn `type`() -> int { 2 }
@@ -48,16 +48,16 @@ pub fn main() {
     `exists?`(1);
     `save!`();
     {
-        ::Core::io::put_chars([[patina_fmt::display("`a{b}`")]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::display("`a{b}`")]]);
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([[patina_fmt::display(`value?`)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::display(`value?`)]]);
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([[patina_fmt::display(`type`)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::display(`type`)]]);
+        ::core::io::nl();
     };
     let _ = `a{b}`();
 }

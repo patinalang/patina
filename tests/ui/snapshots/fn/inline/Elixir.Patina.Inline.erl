@@ -21,7 +21,7 @@
          recursion_inlines_once/0,
          fn_item_value_stays_reference/0,
          call_through_fn_item_inlines/0,
-         'Inline::Shape::double_area'/2,
+         'inline::Shape::double_area'/2,
          inlines_inherent_method/0,
          inlines_impl_method/0,
          inlines_default_method/0,
@@ -111,14 +111,14 @@ return_leaves_only_the_copy(_x@0_0) ->
 
 sum_to(_n@0_0) ->
     _witness_Iterator@1_0 =
-        'Elixir.Patina.Core.Range':'Core::Iterator::$patina_witness<int>'(),
+        'Elixir.Patina.Core.Range':'core::Iterator::$patina_witness<int>'(),
     _witnesses_where_IntoIterator@2_0 =
         {_witness_Iterator@1_0},
     _witness_IntoIterator@3_0 =
-        'Elixir.Patina.Core.$impl':'Core::IntoIterator::$patina_witness'(_witnesses_where_IntoIterator@2_0),
+        'Elixir.Patina.Core.$impl':'core::IntoIterator::$patina_witness'(_witnesses_where_IntoIterator@2_0),
     _total@4_0 = 0,
     case
-        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'(_witness_IntoIterator@3_0,
+        'Elixir.Patina.Core.$impl':'core::IntoIterator::into_iter'(_witness_IntoIterator@3_0,
                                                                    'Elixir.Patina.Core.Range':'$patina_constructor__Range'(0,
                                                                                                                            _n@0_0))
         of
@@ -132,7 +132,7 @@ sum_to(_n@0_0) ->
                                                       {_iter@5_2, _total@4_2};
                                                   _ ->
                                                       case
-                                                          'Elixir.Patina.Core.Range':'Core::Iterator::next<int>'(_witness_Iterator@1_0,
+                                                          'Elixir.Patina.Core.Range':'core::Iterator::next<int>'(_witness_Iterator@1_0,
                                                                                                                  _iter@5_0)
                                                           of
                                                           nil ->
@@ -172,15 +172,15 @@ sum_to(_n@0_0) ->
 
 inlines_loop() ->
     _witness_Iterator@0_0 =
-        'Elixir.Patina.Core.Range':'Core::Iterator::$patina_witness<int>'(),
+        'Elixir.Patina.Core.Range':'core::Iterator::$patina_witness<int>'(),
     _witnesses_where_IntoIterator@1_0 =
         {_witness_Iterator@0_0},
     _witness_IntoIterator@2_0 =
-        'Elixir.Patina.Core.$impl':'Core::IntoIterator::$patina_witness'(_witnesses_where_IntoIterator@1_0),
+        'Elixir.Patina.Core.$impl':'core::IntoIterator::$patina_witness'(_witnesses_where_IntoIterator@1_0),
     _n@3_0 = 4,
     _total@4_0 = 0,
     case
-        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'(_witness_IntoIterator@2_0,
+        'Elixir.Patina.Core.$impl':'core::IntoIterator::into_iter'(_witness_IntoIterator@2_0,
                                                                    'Elixir.Patina.Core.Range':'$patina_constructor__Range'(0,
                                                                                                                            _n@3_0))
         of
@@ -194,7 +194,7 @@ inlines_loop() ->
                                                       {_iter@5_2, _total@4_2};
                                                   _ ->
                                                       case
-                                                          'Elixir.Patina.Core.Range':'Core::Iterator::next<int>'(_witness_Iterator@0_0,
+                                                          'Elixir.Patina.Core.Range':'core::Iterator::next<int>'(_witness_Iterator@0_0,
                                                                                                                  _iter@5_0)
                                                           of
                                                           nil ->
@@ -260,7 +260,7 @@ call_through_fn_item_inlines() ->
     _b@2_0 = 6,
     _a@1_0 + _b@2_0.
 
-'Inline::Shape::double_area'(_witness_Shape@0_0,
+'inline::Shape::double_area'(_witness_Shape@0_0,
                              _self@1_0) ->
     _vtable_Shape@2_0 = erlang:element(1,
                                        _witness_Shape@0_0),
@@ -283,9 +283,9 @@ inlines_default_method() ->
 
 copy_calls_impl_method_statically() ->
     _witness_Shape@0_0 =
-        'Elixir.Patina.Inline.Circle':'Inline::Shape::$patina_witness'(),
+        'Elixir.Patina.Inline.Circle':'inline::Shape::$patina_witness'(),
     _self@1_0 = 1,
-    'Elixir.Patina.Inline.Circle':'Inline::Shape::area'(_witness_Shape@0_0,
+    'Elixir.Patina.Inline.Circle':'inline::Shape::area'(_witness_Shape@0_0,
                                                         _self@1_0)
         * 2.
 
@@ -316,7 +316,7 @@ generic_caller(_witnesses_where_generic_caller@0_0,
 
 generic_caller_dispatches_through_witness() ->
     _witness_Shape@0_0 =
-        'Elixir.Patina.Inline.Square':'Inline::Shape::$patina_witness'(),
+        'Elixir.Patina.Inline.Square':'inline::Shape::$patina_witness'(),
     _witnesses_where_generic_caller@1_0 =
         {_witness_Shape@0_0},
     generic_caller(_witnesses_where_generic_caller@1_0, 5).
@@ -343,7 +343,7 @@ twice_area_plus_one(_witnesses_where_twice_area_plus_one@0_0,
 
 copy_builds_witness_for_generic_call() ->
     _witness_Shape@0_0 =
-        'Elixir.Patina.Inline.Square':'Inline::Shape::$patina_witness'(),
+        'Elixir.Patina.Inline.Square':'inline::Shape::$patina_witness'(),
     _witnesses_where_area_plus_one@1_0 =
         {_witness_Shape@0_0},
     _shape@2_0 = 2,

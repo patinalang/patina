@@ -1,7 +1,7 @@
 // source: patina-by-example/src/custom_types/repr.md
 // block: 2/14
 
-mod MyMod {
+mod my_mod {
     #[repr(tagged)]
     struct MyStruct(int, int);
 

@@ -137,7 +137,7 @@
                        {atom,{24,5},'Elixir.Patina.OpaqueWitness.Name'},
                        {atom,
                            {24,5},
-                           'OpaqueWitness::Describe::$patina_witness'}},
+                           'opaque_witness::Describe::$patina_witness'}},
                    []}},
            {match,
                {24,5},

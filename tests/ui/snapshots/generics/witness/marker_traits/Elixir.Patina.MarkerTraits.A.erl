@@ -10,8 +10,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'MarkerTraits::Show::show'/2,
-         'MarkerTraits::Show::$patina_witness'/0]).
+         'marker_traits::Show::show'/2,
+         'marker_traits::Show::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -26,11 +26,11 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'MarkerTraits::Show::show'(_witness_Show@0_0,
-                           _self@1_0) ->
+'marker_traits::Show::show'(_witness_Show@0_0,
+                            _self@1_0) ->
     <<"a"/utf8>>.
 
-'MarkerTraits::Show::$patina_witness'() ->
-    {{fun 'Elixir.Patina.MarkerTraits.A':'MarkerTraits::Show::show'/2},
+'marker_traits::Show::$patina_witness'() ->
+    {{fun 'Elixir.Patina.MarkerTraits.A':'marker_traits::Show::show'/2},
      {},
      {}}.

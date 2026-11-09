@@ -9,9 +9,9 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'Defaults::Named::name'/2,
-         'Defaults::Named::$patina_witness'/0,
-         'Defaults::Greeter::$patina_witness'/0]).
+         'defaults::Named::name'/2,
+         'defaults::Named::$patina_witness'/0,
+         'defaults::Greeter::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -26,20 +26,20 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Named::name'(_witness_Named@0_0,
+'defaults::Named::name'(_witness_Named@0_0,
                         _self@1_0) ->
     _self@1_0.
 
-'Defaults::Named::$patina_witness'() ->
-    {{fun 'Elixir.Patina.Defaults.Person':'Defaults::Named::name'/2},
+'defaults::Named::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Defaults.Person':'defaults::Named::name'/2},
      {},
      {}}.
 
-'Defaults::Greeter::$patina_witness'() ->
+'defaults::Greeter::$patina_witness'() ->
     _witness_Named@0_0 =
-        {{fun 'Elixir.Patina.Defaults.Person':'Defaults::Named::name'/2},
+        {{fun 'Elixir.Patina.Defaults.Person':'defaults::Named::name'/2},
          {},
          {}},
-    {{fun 'Elixir.Patina.Defaults':'Defaults::Greeter::greet'/2},
+    {{fun 'Elixir.Patina.Defaults':'defaults::Greeter::greet'/2},
      {_witness_Named@0_0},
      {}}.

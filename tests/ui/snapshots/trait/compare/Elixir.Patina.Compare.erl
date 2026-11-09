@@ -36,7 +36,7 @@ compare(_witnesses_where_compare@0_0, _a@1_0, _b@2_0) ->
 
 main() ->
     _witness_PartialEq@0_0 =
-        'Elixir.Patina.Core.Int':'Core::PartialEq::$patina_witness'(),
+        'Elixir.Patina.Core.Int':'core::PartialEq::$patina_witness'(),
     _witnesses_where_compare@1_0 = {_witness_PartialEq@0_0},
     io:put_chars(begin
                      _element@3_0 = begin

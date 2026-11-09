@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -38,44 +38,44 @@ pub fn main() {
 
             // Lists can also be destructured using a similar syntax
             {
-            ::Core::io::put_chars([["elem 0: ", patina_fmt::display(xval)]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["elem 0: ", patina_fmt::display(xval)]]);
+            ::core::io::nl();
         }
         None => {
-            ::Core::io::put_chars([["the list is empty!"]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["the list is empty!"]]);
+            ::core::io::nl();
         }
     }
     {
-        ::Core::io::put_chars([["Number of elements in array: ",
+        ::core::io::put_chars([["Number of elements in array: ",
                             patina_fmt::display(xs.len())]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([["First element of the list: ",
+        ::core::io::put_chars([["First element of the list: ",
                             patina_fmt::display(xs.head())]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([["Rest of the list: ",
+        ::core::io::put_chars([["Rest of the list: ",
                             patina_fmt::debug(xs.tail())]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     let more_xs = [-1, 0, ..xs];
     {
-        ::Core::io::put_chars([["more_xs.tail().tail() is equal to xs: ",
+        ::core::io::put_chars([["more_xs.tail().tail() is equal to xs: ",
                             patina_fmt::display(more_xs.tail().tail() == xs)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     let [first, second, third, rest @ ..] = more_xs else { return };
     {
-        ::Core::io::put_chars([["Sum of first three elements is ",
+        ::core::io::put_chars([["Sum of first three elements is ",
                             patina_fmt::display(first + second + third)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([["...and the rest: ",
+        ::core::io::put_chars([["...and the rest: ",
                             patina_fmt::debug(rest)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }

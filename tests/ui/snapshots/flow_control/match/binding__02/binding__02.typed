@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -21,13 +21,13 @@ fn some_number()
     ->
         Option<int> ({
     ((Some as
-            fn(int) -> Core::Option<int> {Core::Option::<int>::Some})((42 as
-            int)) as Core::Option<int>)
-} as Core::Option<int>)
+            fn(int) -> core::Option<int> {core::Option::<int>::Some})((42 as
+            int)) as core::Option<int>)
+} as core::Option<int>)
 
 fn main() ({
-    (match ((some_number as fn() -> Core::Option<int> {some_number})() as
-            Core::Option<int>) {
+    (match ((some_number as fn() -> core::Option<int> {some_number})() as
+            core::Option<int>) {
 
             // Got `Some` variant, match if its value, bound to `n`,
             // is equal to 42.
@@ -42,18 +42,18 @@ fn main() ({
             // Match any other number.
             // Match anything else (`None` variant).
             {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("The Answer: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((n as int)) as
                                     term), ("!" as str)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         Some(n) => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("Not interesting... " as str),
                                 ((patina_fmt::display as fn(term) -> term)((n as int)) as
                                     term)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         _ => (() as ()),
     } as ())

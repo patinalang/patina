@@ -3,5 +3,5 @@
 
 #[allow(dead_code)]
 pub fn public_function() {
-    println!("called `MyMod::Inaccessible::public_function()`");
+    println!("called `my_mod::inaccessible::public_function()`");
 }

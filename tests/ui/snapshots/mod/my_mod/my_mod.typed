@@ -5,45 +5,45 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
 
-mod Inaccessible {
+mod inaccessible {
 
 
 
     #[allow(dead_code)]
     fn public_function() ({
         ({
-            ((::Core::io::put_chars as
-                    fn(term) -> term)(([([("called `MyMod::Inaccessible::public_function()`"
+            ((::core::io::put_chars as
+                    fn(term) -> term)(([([("called `my_mod::inaccessible::public_function()`"
                                     as str)] as [str])] as [[str]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         } as ());
     } as ())
 }
-mod Nested {
+mod nested {
     fn function() ({
         ({
-            ((::Core::io::put_chars as
-                    fn(term) -> term)(([([("called `MyMod::Nested::function()`"
+            ((::core::io::put_chars as
+                    fn(term) -> term)(([([("called `my_mod::nested::function()`"
                                     as str)] as [str])] as [[str]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         } as ());
     } as ())
     #[allow(dead_code)]
     fn private_function() ({
         ({
-            ((::Core::io::put_chars as
-                    fn(term) -> term)(([([("called `MyMod::Nested::private_function()`"
+            ((::core::io::put_chars as
+                    fn(term) -> term)(([([("called `my_mod::nested::private_function()`"
                                     as str)] as [str])] as [[str]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         } as ());
     } as ())
 }

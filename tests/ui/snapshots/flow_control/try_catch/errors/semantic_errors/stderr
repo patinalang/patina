@@ -93,7 +93,7 @@ error: unreachable pattern
 LL |         any(a"bogus", _) => {},
    |         ^^^^^^^^^^^^^^^^-------
    |         |
-   |         matches no values because `Core::ExceptionClass` is uninhabited
+   |         matches no values because `core::ExceptionClass` is uninhabited
    |         help: remove the match arm
    |
    = note: to learn more about uninhabited types, see https://doc.rust-lang.org/nomicon/exotic-sizes.html#empty-types

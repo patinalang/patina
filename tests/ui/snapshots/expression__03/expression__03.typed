@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -37,24 +37,24 @@ fn main() ({
         } as ());
 
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("x is " as str),
                             ((patina_fmt::debug as fn(term) -> term)((x as int)) as
                                 term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("y is " as str),
                             ((patina_fmt::debug as fn(term) -> term)((y as int)) as
                                 term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("z is " as str),
                             ((patina_fmt::debug as fn(term) -> term)((z as ())) as
                                 term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

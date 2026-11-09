@@ -4,9 +4,9 @@ error[E0308]: mismatched types
 LL |     receive { int(n) => n } after 10 { -1 }
    |                                   ^^ expected `Timeout`, found `int`
    |
-help: try wrapping the expression in `Core::Timeout::Millis`
+help: try wrapping the expression in `core::Timeout::Millis`
    |
-LL |     receive { int(n) => n } after Core::Timeout::Millis(10) { -1 }
+LL |     receive { int(n) => n } after core::Timeout::Millis(10) { -1 }
    |                                   ++++++++++++++++++++++  +
 
 error[E0133]: matching a `term` by runtime representation is unsafe and requires unsafe block

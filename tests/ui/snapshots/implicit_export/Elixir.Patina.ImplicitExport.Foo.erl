@@ -10,8 +10,8 @@
 
 -export(['__info__'/1,
          foo/0,
-         'ImplicitExport::FooTrait::bar'/1,
-         'ImplicitExport::FooTrait::$patina_witness'/0]).
+         'implicit_export::FooTrait::bar'/1,
+         'implicit_export::FooTrait::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -30,10 +30,10 @@ foo() -> priv_foo().
 
 priv_foo() -> {}.
 
-'ImplicitExport::FooTrait::bar'(_witness_FooTrait@0_0) ->
+'implicit_export::FooTrait::bar'(_witness_FooTrait@0_0) ->
     priv_foo().
 
-'ImplicitExport::FooTrait::$patina_witness'() ->
-    {{fun 'Elixir.Patina.ImplicitExport.Foo':'ImplicitExport::FooTrait::bar'/1},
+'implicit_export::FooTrait::$patina_witness'() ->
+    {{fun 'Elixir.Patina.ImplicitExport.Foo':'implicit_export::FooTrait::bar'/1},
      {},
      {}}.

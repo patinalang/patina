@@ -11,8 +11,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'TraitArgumentPatterns::Contains<int, _>::contains'/4,
-         'TraitArgumentPatterns::Contains<int, _>::$patina_witness'/0]).
+         'trait_argument_patterns::Contains<int, _>::contains'/4,
+         'trait_argument_patterns::Contains<int, _>::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -27,9 +27,9 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'TraitArgumentPatterns::Contains<int, _>::contains'(_witness_Contains@0_0,
-                                                    _self@1_0, _a@2_0,
-                                                    _b@3_0) ->
+'trait_argument_patterns::Contains<int, _>::contains'(_witness_Contains@0_0,
+                                                      _self@1_0, _a@2_0,
+                                                      _b@3_0) ->
     io:put_chars(begin
                      _element@7_0 = begin
                                         _element@4_0 = io_lib:format("~ktp",
@@ -51,7 +51,7 @@
     io:nl(),
     true.
 
-'TraitArgumentPatterns::Contains<int, _>::$patina_witness'() ->
-    {{fun 'Elixir.Patina.TraitArgumentPatterns.UnboundContainer':'TraitArgumentPatterns::Contains<int, _>::contains'/4},
+'trait_argument_patterns::Contains<int, _>::$patina_witness'() ->
+    {{fun 'Elixir.Patina.TraitArgumentPatterns.UnboundContainer':'trait_argument_patterns::Contains<int, _>::contains'/4},
      {},
      {}}.

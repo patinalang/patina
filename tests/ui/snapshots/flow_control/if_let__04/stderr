@@ -6,12 +6,12 @@ LL |     if Foo::Bar == a {
    |        |
    |        Foo
    |
-note: an implementation of `Core::PartialEq` might be missing for `Foo`
+note: an implementation of `core::PartialEq` might be missing for `Foo`
   --> tests/ui/src/flow_control/if_let__04.pt:6:1
    |
 LL | enum Foo {Bar}
-   | ^^^^^^^^ must implement `Core::PartialEq`
-note: the trait `Core::PartialEq` must be implemented
+   | ^^^^^^^^ must implement `core::PartialEq`
+note: the trait `core::PartialEq` must be implemented
   --> $PATINA_ROOT/patina_core/src/core.pt:441:1
    |
 LL | pub trait PartialEq<Rhs = Self> {

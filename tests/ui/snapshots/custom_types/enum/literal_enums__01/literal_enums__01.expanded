@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -31,16 +31,16 @@ pub fn main() {
 
     // "Peter"
     {
-        ::Core::io::put_chars([[patina_fmt::debug(AtomEnum::Foo as atom)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::debug(AtomEnum::Foo as atom)]]);
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([[patina_fmt::debug(IntEnum::NotFound as
+        ::core::io::put_chars([[patina_fmt::debug(IntEnum::NotFound as
                                     int)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([[patina_fmt::debug(StrEnum::Peter as str)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::debug(StrEnum::Peter as str)]]);
+        ::core::io::nl();
     };
 }

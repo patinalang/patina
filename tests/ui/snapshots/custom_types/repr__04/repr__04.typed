@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -28,19 +28,19 @@ fn main() ({
 
     // (a"Elixir.BarBar")
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)((((Pair as
                                             fn(int, float) -> Pair {Pair})((42 as int), (3.14 as float))
                                         as Pair) as term as term)) as term)] as [term])] as
                 [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)(((Bar as Bar) as term as term)) as term)]
                         as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

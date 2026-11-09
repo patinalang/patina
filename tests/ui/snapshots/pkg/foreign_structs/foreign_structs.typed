@@ -9,19 +9,19 @@
 #![attr = NoCore]
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 #[allow(unused)]
 extern mod patina_fmt;
 
-use Core::PhantomData;
+use core::PhantomData;
 use ::{};
-use Wrappers::Nested;
-use Wrappers::PhantomRecord;
-use Wrappers::PhantomTuple;
-use Wrappers::Wrapper;
+use wrappers::Nested;
+use wrappers::PhantomRecord;
+use wrappers::PhantomTuple;
+use wrappers::Wrapper;
 
 // `PhantomData` fields of structs from another package are left out too.
 
@@ -29,15 +29,15 @@ fn phantom_tuple(n: int)
     ->
         PhantomTuple<str> ({
     ((PhantomTuple as
-            fn(int, Core::PhantomData<str>) -> Wrappers::PhantomTuple<str> {Wrappers::PhantomTuple::<str>})((n
-            as int), (PhantomData as Core::PhantomData<str>)) as
-        Wrappers::PhantomTuple<str>)
-} as Wrappers::PhantomTuple<str>)
+            fn(int, core::PhantomData<str>) -> wrappers::PhantomTuple<str> {wrappers::PhantomTuple::<str>})((n
+            as int), (PhantomData as core::PhantomData<str>)) as
+        wrappers::PhantomTuple<str>)
+} as wrappers::PhantomTuple<str>)
 
 fn phantom_tuple_value(value: PhantomTuple<str>)
     ->
         int ({
-    let PhantomTuple(n, _) = (value as Wrappers::PhantomTuple<str>);
+    let PhantomTuple(n, _) = (value as wrappers::PhantomTuple<str>);
     (n as int)
 } as int)
 
@@ -46,28 +46,28 @@ fn phantom_record(id: int, name: str)
         PhantomRecord<int> ({
     (PhantomRecord {
         (id as int),
-        marker: (PhantomData as Core::PhantomData<int>),
-        (name as str) } as Wrappers::PhantomRecord<int>)
-} as Wrappers::PhantomRecord<int>)
+        marker: (PhantomData as core::PhantomData<int>),
+        (name as str) } as wrappers::PhantomRecord<int>)
+} as wrappers::PhantomRecord<int>)
 
 fn phantom_record_name(value: PhantomRecord<int>)
-    -> str ({ ((value as Wrappers::PhantomRecord<int>).name as str) } as str)
+    -> str ({ ((value as wrappers::PhantomRecord<int>).name as str) } as str)
 
 fn phantom_record_marker(value: PhantomRecord<int>)
     ->
         PhantomData<int> ({
     let PhantomRecord {  marker, .. } =
-        (value as Wrappers::PhantomRecord<int>);
-    (marker as Core::PhantomData<int>)
-} as Core::PhantomData<int>)
+        (value as wrappers::PhantomRecord<int>);
+    (marker as core::PhantomData<int>)
+} as core::PhantomData<int>)
 
 fn rename_phantom_record(value: PhantomRecord<int>)
     ->
         PhantomRecord<int> ({
     (PhantomRecord {
-        name: ("renamed" as str), ..(value as Wrappers::PhantomRecord<int>) }
-        as Wrappers::PhantomRecord<int>)
-} as Wrappers::PhantomRecord<int>)
+        name: ("renamed" as str), ..(value as wrappers::PhantomRecord<int>) }
+        as wrappers::PhantomRecord<int>)
+} as wrappers::PhantomRecord<int>)
 
 // A local type nested in generic wrappers from another package.
 
@@ -77,14 +77,14 @@ fn recursive()
     ->
         Recursive ({
     ((Recursive::Next as
-            fn(Wrappers::Nested<Recursive>) -> Recursive {Recursive::Next})(((Nested
+            fn(wrappers::Nested<Recursive>) -> Recursive {Recursive::Next})(((Nested
                 as
-                fn(Wrappers::Wrapper<Recursive>) -> Wrappers::Nested<Recursive> {Wrappers::Nested::<Recursive>})(((Wrapper
+                fn(wrappers::Wrapper<Recursive>) -> wrappers::Nested<Recursive> {wrappers::Nested::<Recursive>})(((Wrapper
                     as
-                    fn(Recursive) -> Wrappers::Wrapper<Recursive> {Wrappers::Wrapper::<Recursive>})(((Recursive::End
+                    fn(Recursive) -> wrappers::Wrapper<Recursive> {wrappers::Wrapper::<Recursive>})(((Recursive::End
                         as fn(int) -> Recursive {Recursive::End})((17 as int)) as
-                    Recursive)) as Wrappers::Wrapper<Recursive>)) as
-            Wrappers::Nested<Recursive>)) as Recursive)
+                    Recursive)) as wrappers::Wrapper<Recursive>)) as
+            wrappers::Nested<Recursive>)) as Recursive)
 } as Recursive)
 
 fn unwrap_recursive(value: Recursive)
@@ -95,7 +95,7 @@ fn unwrap_recursive(value: Recursive)
         Recursive::Next(wrapper) =>
             ((unwrap_recursive as
                     fn(Recursive) -> int {unwrap_recursive})((((wrapper as
-                            Wrappers::Nested<Recursive>).0 as
-                        Wrappers::Wrapper<Recursive>).0 as Recursive)) as int),
+                            wrappers::Nested<Recursive>).0 as
+                        wrappers::Wrapper<Recursive>).0 as Recursive)) as int),
     } as int)
 } as int)

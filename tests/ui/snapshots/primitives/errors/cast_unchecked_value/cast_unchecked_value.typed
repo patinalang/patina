@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -19,10 +19,10 @@ fn as_value(value: term)
         int ({
     let cast =
         (term::cast_unchecked::<int> as
-            unsafe fn(term) -> int {Core::<impl term>::cast_unchecked::<int>});
+            unsafe fn(term) -> int {core::<impl term>::cast_unchecked::<int>});
     (unsafe {
         ((cast as
-                unsafe fn(term) -> int {Core::<impl term>::cast_unchecked::<int>})((value
+                unsafe fn(term) -> int {core::<impl term>::cast_unchecked::<int>})((value
                 as term)) as int)
     } as int)
 } as int)

@@ -6,7 +6,7 @@ defmodule Split03Test do
 
   test "nested split file function runs" do
     assert """
-           called `MyMod::Nested::function()`
+           called `my_mod::nested::function()`
            """ == capture_io(fn -> Patina.Split03.function() end)
   end
 end

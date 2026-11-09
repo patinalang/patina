@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -20,14 +20,14 @@ extern mod patina_fmt;
 
 // A derive is exported under its trait name, so the function implementing it is
 // not nameable from another package -- by either name.
-use Macros::hello;
+use macros::hello;
 use ::{};
-use Macros::Hello;
-use Macros::def_site_by_set_span;
-use Macros::def_site_ident;
-use Macros::group_spans;
-use Macros::mixed_site_ident;
-use Macros::set_group_span;
+use macros::Hello;
+use macros::def_site_by_set_span;
+use macros::def_site_ident;
+use macros::group_spans;
+use macros::mixed_site_ident;
+use macros::set_group_span;
 
 fn spans() ({
     let local = (5 as int);
@@ -42,25 +42,25 @@ fn spans() ({
 
     // A path that does not resolve in another package is an ordinary error.
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)((local as {type error})) as term)] as
                         [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)((local as {type error})) as term)] as
                         [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)((local as {type error})) as term)] as
                         [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     let _a =
         (((missing_open as {type error}), (missing_close as {type error}),
@@ -72,4 +72,4 @@ fn spans() ({
             (inner as {type error})) as
             ({type error}, {type error}, {type error}, {type error}, {type error}));
 } as ())
-fn missing_item() ({ let _x = (Wrappers::Nope as {type error}); } as ())
+fn missing_item() ({ let _x = (wrappers::Nope as {type error}); } as ())

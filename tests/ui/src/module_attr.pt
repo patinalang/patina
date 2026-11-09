@@ -12,7 +12,7 @@ enum WebEvent {
 }
 
 #[module = "module_attr_helpers"]
-mod Helpers {
+mod helpers {
     pub fn answer() -> int {
         42
     }

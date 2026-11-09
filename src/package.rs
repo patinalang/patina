@@ -2,14 +2,13 @@ use std::path::{self, Path, PathBuf};
 use std::str::FromStr;
 use std::{fmt, io};
 
-use convert_case::{Case, Casing};
 use rustc_data_structures::fx::FxIndexMap;
 use rustc_session::config::{ExternEntry, ExternLocation, Externs};
 use rustc_session::utils::CanonicalizedPath;
 use serde::Deserialize;
 
-const CORE_PACKAGE_NAME: &str = "Core";
-const STD_PACKAGE_NAME: &str = "Std";
+const CORE_PACKAGE_NAME: &str = "core";
+const STD_PACKAGE_NAME: &str = "std";
 const PATINA_BOOTSTRAP_ENV: &str = "PATINA_BOOTSTRAP";
 
 #[derive(Debug, thiserror::Error)]
@@ -59,10 +58,6 @@ impl PackageName {
 
     fn is_reserved(&self) -> bool {
         matches!(self.0.as_str(), CORE_PACKAGE_NAME | STD_PACKAGE_NAME)
-    }
-
-    pub(crate) fn snake_case(&self) -> String {
-        self.0.to_case(Case::Snake)
     }
 }
 
@@ -195,7 +190,7 @@ pub(crate) fn resolve_package_name(
     let name = match explicit {
         Some(name) => name,
         None => match source.file_stem().and_then(|stem| stem.to_str()) {
-            Some(stem) => PackageName::try_from(stem.to_case(Case::Pascal))?,
+            Some(stem) => PackageName::try_from(stem.to_owned())?,
             None => return Err(PackageNameError::NoFileStem(source.to_owned())),
         },
     };
@@ -218,7 +213,7 @@ mod tests {
     fn package(package: &str) -> PackageInfo {
         PackageInfo {
             name: name(package),
-            otp_application_name: name(package).snake_case(),
+            otp_application_name: package.to_owned(),
             version: None,
             description: String::new(),
         }
@@ -239,14 +234,8 @@ mod tests {
     }
 
     #[test]
-    fn snake_case_keeps_acronyms_together() {
-        assert_eq!(name("MyJsonLib").snake_case(), "my_json_lib");
-        assert_eq!(name("MyJSONLib").snake_case(), "my_json_lib");
-    }
-
-    #[test]
     fn package_name_has_to_be_an_identifier() {
-        assert!("MyJSONLib".parse::<PackageName>().is_ok());
+        assert!("my_json_lib".parse::<PackageName>().is_ok());
         for invalid in ["", "hello-lib", "1st", "My Lib"] {
             assert!(
                 matches!(invalid.parse::<PackageName>(), Err(InvalidPackageName(name)) if name == invalid),
@@ -258,7 +247,7 @@ mod tests {
     #[test]
     fn package_name_comes_from_the_file_stem() {
         let resolved = resolve_package_name(None, Path::new("src/my_lib.pt")).unwrap();
-        assert_eq!(resolved, name("MyLib"));
+        assert_eq!(resolved, name("my_lib"));
     }
 
     #[test]
@@ -271,53 +260,53 @@ mod tests {
 
     #[test]
     fn dependencies_follow_core() {
-        let deps = [name("Zeta"), name("Alpha")].map(ExternArg::from);
-        let externs = package("Greeter").externs(deps).unwrap();
-        assert_eq!(entries(&externs), [("Core", None), ("Zeta", None), ("Alpha", None)]);
+        let deps = [name("zeta"), name("alpha")].map(ExternArg::from);
+        let externs = package("greeter").externs(deps).unwrap();
+        assert_eq!(entries(&externs), [("core", None), ("zeta", None), ("alpha", None)]);
         assert!(!names_core_file(&externs));
     }
 
     #[test]
     fn explicit_core_stays_first() {
-        let rmeta = Path::new("libCore.rmeta");
-        let deps = vec![explicit("Zeta", None), explicit("Core", Some(rmeta))];
+        let rmeta = Path::new("libcore.rmeta");
+        let deps = vec![explicit("zeta", None), explicit("core", Some(rmeta))];
 
-        let externs = package("Greeter").externs(deps).unwrap();
-        assert_eq!(entries(&externs), [("Core", Some(rmeta)), ("Zeta", None)]);
+        let externs = package("greeter").externs(deps).unwrap();
+        assert_eq!(entries(&externs), [("core", Some(rmeta)), ("zeta", None)]);
         assert!(names_core_file(&externs));
     }
 
     #[test]
     fn core_does_not_depend_on_itself() {
-        assert!(entries(&package("Core").externs([]).unwrap()).is_empty());
+        assert!(entries(&package("core").externs([]).unwrap()).is_empty());
     }
 
     #[test]
     fn duplicate_extern_is_rejected() {
-        let deps = vec![explicit("Alpha", None), explicit("Alpha", None)];
+        let deps = vec![explicit("alpha", None), explicit("alpha", None)];
         assert!(matches!(
-            package("Greeter").externs(deps),
-            Err(DuplicateExtern(dup)) if dup == name("Alpha")
+            package("greeter").externs(deps),
+            Err(DuplicateExtern(dup)) if dup == name("alpha")
         ));
     }
 
     #[test]
     fn duplicate_explicit_core_is_rejected() {
-        let rmeta = Path::new("libCore.rmeta");
-        let deps = vec![explicit("Core", Some(rmeta)), explicit("Core", Some(rmeta))];
+        let rmeta = Path::new("libcore.rmeta");
+        let deps = vec![explicit("core", Some(rmeta)), explicit("core", Some(rmeta))];
         assert!(matches!(
-            package("Greeter").externs(deps),
-            Err(DuplicateExtern(dup)) if dup == name("Core")
+            package("greeter").externs(deps),
+            Err(DuplicateExtern(dup)) if dup == name("core")
         ));
     }
 
     #[test]
     fn extern_metadata_file_has_to_exist() {
         let rmeta = std::env::current_exe().unwrap();
-        assert!(format!("Core={}", rmeta.display()).parse::<ExternArg>().is_ok());
-        let missing = rmeta.with_file_name("libMissing.rmeta");
+        assert!(format!("core={}", rmeta.display()).parse::<ExternArg>().is_ok());
+        let missing = rmeta.with_file_name("libmissing.rmeta");
         assert!(matches!(
-            format!("Missing={}", missing.display()).parse::<ExternArg>(),
+            format!("missing={}", missing.display()).parse::<ExternArg>(),
             Err(ExternArgError::MissingMetadata(path)) if path == missing
         ));
     }
@@ -326,12 +315,12 @@ mod tests {
     fn extern_needs_a_name_and_a_path_after_equals() {
         assert!(matches!("".parse::<ExternArg>(), Err(ExternArgError::MissingName)));
         assert!(matches!("=lib.rmeta".parse::<ExternArg>(), Err(ExternArgError::MissingName)));
-        assert!(matches!("Lib=".parse::<ExternArg>(), Err(ExternArgError::MissingPath)));
+        assert!(matches!("lib=".parse::<ExternArg>(), Err(ExternArgError::MissingPath)));
     }
 
     #[test]
     fn extern_name_has_to_be_an_identifier() {
-        assert!("HelloLib".parse::<ExternArg>().is_ok());
+        assert!("hello_lib".parse::<ExternArg>().is_ok());
         for raw in ["hello-lib", "hello-lib=lib/libhello.rmeta"] {
             assert!(
                 matches!(

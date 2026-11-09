@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -37,31 +37,31 @@ fn main() ({
     // but we have helpers for that.
     // a"ok"
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)((((Result::<int, str>::Ok as
                                             fn(int) -> Result<int, str> {Result::<int, str>::Ok})((42 as
                                             int)) as Result<int, str>) as term as term)) as term)] as
                         [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)((((Result::<int, str>::Err as
                                             fn(str) -> Result<int, str> {Result::<int, str>::Err})(("reason"
                                             as str)) as Result<int, str>) as term as term)) as term)] as
                         [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)(((((Result::<(), str>::Ok as
                                                 fn(()) -> Result<(), str> {Result::<(), str>::Ok})((() as
                                                 ())) as Result<(), str>).into::<Compat::BareOkResult>() as
                                         {type error}) as term as {type error})) as term)] as
                         [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

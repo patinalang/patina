@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -20,7 +20,7 @@ extern mod patina_fmt;
 // Similarly `mod inaccessible` and `mod nested` will locate the `nested.rs`
 // and `inaccessible.rs` files and insert them here under their respective
 // modules
-mod Inaccessible {
+mod inaccessible {
 
 
 
@@ -28,41 +28,41 @@ mod Inaccessible {
     #[allow(dead_code)]
     pub fn public_function() {
         {
-            ::Core::io::put_chars([["called `MyMod::Inaccessible::public_function()`"]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["called `my_mod::inaccessible::public_function()`"]]);
+            ::core::io::nl();
         };
     }
 }
-pub mod Nested {
+pub mod nested {
     pub fn function() {
         {
-            ::Core::io::put_chars([["called `MyMod::Nested::function()`"]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["called `my_mod::nested::function()`"]]);
+            ::core::io::nl();
         };
     }
     #[allow(dead_code)]
     fn private_function() {
         {
-            ::Core::io::put_chars([["called `MyMod::Nested::private_function()`"]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["called `my_mod::nested::private_function()`"]]);
+            ::core::io::nl();
         };
     }
 }
 pub fn function() {
     {
-        ::Core::io::put_chars([["called `MyMod::function()`"]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([["called `my_mod::function()`"]]);
+        ::core::io::nl();
     };
 }
 fn private_function() {
     {
-        ::Core::io::put_chars([["called `MyMod::private_function()`"]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([["called `my_mod::private_function()`"]]);
+        ::core::io::nl();
     };
 }
 pub fn indirect_access() {
     {
-        ::Core::io::put_chars(["called `MyMod::indirect_access()`, that\n> "]);
+        ::core::io::put_chars(["called `my_mod::indirect_access()`, that\n> "]);
     };
     private_function();
 }

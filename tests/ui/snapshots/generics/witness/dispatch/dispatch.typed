@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -31,11 +31,11 @@ impl Area for Point {
 
 
         ({
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("Area::area(" as str),
                                 ((patina_fmt::debug as fn(term) -> term)((self as Point)) as
                                     term), (")" as str)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         } as ());
         (((self as Point).x as int) * ((self as Point).y as int) as int)
     } as int)
@@ -45,11 +45,11 @@ fn total_area<T>(t: T) -> int where
 fn main() ({
     let p = (Point { x: (3 as int), y: (4 as int) } as Point);
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)(((total_area as
                                         fn(Point) -> int {total_area::<Point>})((p as Point)) as
                                     int)) as term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

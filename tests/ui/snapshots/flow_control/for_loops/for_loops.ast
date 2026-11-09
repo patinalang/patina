@@ -119,9 +119,9 @@ struct Bag {
 
 impl IntoIterator for Bag {
     type Item = str;
-    type IntoIter = Core::ListIter<str>;
+    type IntoIter = core::ListIter<str>;
 
-    fn into_iter(self) -> Core::ListIter<str> { self.items.iter() }
+    fn into_iter(self) -> core::ListIter<str> { self.items.iter() }
 }
 
 pub fn bag_count(items: [str]) -> int { count(Bag { items: items }) }

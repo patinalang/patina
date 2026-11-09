@@ -9,7 +9,7 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'ImplicitExport::FooTrait::bar'/1,
+         'implicit_export::FooTrait::bar'/1,
          main/0]).
 
 '__info__'(functions) ->
@@ -25,7 +25,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'ImplicitExport::FooTrait::bar'(_witness_FooTrait@0_0) ->
+'implicit_export::FooTrait::bar'(_witness_FooTrait@0_0) ->
     {}.
 
 main() -> 'Elixir.Patina.ImplicitExport.Bar':bar().

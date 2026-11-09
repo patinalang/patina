@@ -10,10 +10,10 @@
 #![attr = NoCore]
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 #[allow(unused)]
 extern mod patina_fmt;
 
@@ -31,7 +31,7 @@ enum WebEvent {
 }
 
 #[attr = ErlModule("module_attr_helpers")]
-mod Helpers {
+mod helpers {
     fn answer() -> int ({ (42 as int) } as int)
 }
 

@@ -4,11 +4,11 @@ error: cannot find derive macro `Debug` in this scope
 LL | #[derive(Debug)]
    |          ^^^^^
 
-error[E0599]: no method named `get_or_insert` found for enum `Core::Option<T>` in the current scope
+error[E0599]: no method named `get_or_insert` found for enum `core::Option<T>` in the current scope
   --> tests/ui/src/error/option_unwrap/defaults__03.pt:10:42
    |
 LL |     let first_available_fruit = my_fruit.get_or_insert(apple);
-   |                                          ^^^^^^^^^^^^^ method not found in `Core::Option<Fruit>`
+   |                                          ^^^^^^^^^^^^^ method not found in `core::Option<Fruit>`
 
 error: aborting due to 2 previous errors
 

@@ -9,8 +9,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'ForeignImpl::Size::size'/2,
-         'ForeignImpl::Size::$patina_witness'/0]).
+         'foreign_impl::Size::size'/2,
+         'foreign_impl::Size::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,11 +25,11 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'ForeignImpl::Size::size'(_witness_Size@0_0,
-                          _self@1_0) ->
+'foreign_impl::Size::size'(_witness_Size@0_0,
+                           _self@1_0) ->
     5.
 
-'ForeignImpl::Size::$patina_witness'() ->
-    {{fun 'Elixir.Patina.ForeignImpl.$impl.Traits.Label':'ForeignImpl::Size::size'/2},
+'foreign_impl::Size::$patina_witness'() ->
+    {{fun 'Elixir.Patina.ForeignImpl.$impl.Traits.Label':'foreign_impl::Size::size'/2},
      {},
      {}}.

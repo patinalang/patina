@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -40,12 +40,12 @@ fn print(result: Result<int, ParseIntError>) {
 
             // The following now provides a much more helpful error message.
             {
-            ::Core::io::put_chars([["n is ", patina_fmt::display(n)]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["n is ", patina_fmt::display(n)]]);
+            ::core::io::nl();
         }
         Err(e) => {
-            ::Core::io::put_chars([["Error: ", patina_fmt::display(e)]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["Error: ", patina_fmt::display(e)]]);
+            ::core::io::nl();
         }
     }
 }

@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -29,24 +29,24 @@ pub fn main() {
             // The `if condition` part ^ is a guard
 
             {
-            ::Core::io::put_chars([[patina_fmt::display(t),
+            ::core::io::put_chars([[patina_fmt::display(t),
                                 "C is above 30 Celsius"]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         }
         Temperature::Celsius(t) => {
-            ::Core::io::put_chars([[patina_fmt::display(t),
+            ::core::io::put_chars([[patina_fmt::display(t),
                                 "C is equal to or below 30 Celsius"]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         }
         Temperature::Fahrenheit(t) if t > 86 => {
-            ::Core::io::put_chars([[patina_fmt::display(t),
+            ::core::io::put_chars([[patina_fmt::display(t),
                                 "F is above 86 Fahrenheit"]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         }
         Temperature::Fahrenheit(t) => {
-            ::Core::io::put_chars([[patina_fmt::display(t),
+            ::core::io::put_chars([[patina_fmt::display(t),
                                 "F is equal to or below 86 Fahrenheit"]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         }
     }
 }

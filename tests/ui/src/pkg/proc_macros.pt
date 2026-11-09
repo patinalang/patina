@@ -1,9 +1,9 @@
-use Macros::{
+use macros::{
     braces, call_site_by_set_span, call_site_ident, delimiters, escapes, forty_two, identity,
     identity_alias, literal_factories, negative, passthrough, raw_ident, rebuild, render,
     replace_with_answer, respan, stream_ops, untyped_literals, wrapped, Hello, TypeName,
 };
-use Macros::Nested::nested_identity;
+use macros::nested::nested_identity;
 
 // Macro kinds.
 
@@ -59,7 +59,7 @@ pub fn documented() -> int {
 /// An inner doc comment is a `#`, a `!` and the group, one tree more than an
 /// outer one.
 #[passthrough]
-pub mod Documented {
+pub mod documented {
     //! Inner documentation.
     pub fn value() -> int {
         2
@@ -120,7 +120,7 @@ pub fn token_zoo() {
         "{} {} {} {} {} {} {} {} {} {}",
         shifted, nested, float, text, raw, atom, raw_atom, bits, ranged, neg
     );
-    println!("{} {}", documented(), Documented::value());
+    println!("{} {}", documented(), documented::value());
 }
 
 pub fn forwarded() {

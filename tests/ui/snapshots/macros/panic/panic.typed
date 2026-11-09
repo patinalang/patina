@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -25,10 +25,10 @@ fn explicit_panic()
 
 
     (unsafe {
-        (((::Core::erlang::error as
-                    fn(term, term, term) -> term)(((::Core::Panic::new as
-                        fn(str) -> Core::Panic {Core::Panic::new})(("explicit panic"
-                        as str)) as Core::Panic), (a"none" as atom),
+        (((::core::erlang::error as
+                    fn(term, term, term) -> term)(((::core::Panic::new as
+                        fn(str) -> core::Panic {core::Panic::new})(("explicit panic"
+                        as str)) as core::Panic), (a"none" as atom),
                 ([(((a"error_info" as atom),
                             (#{(a"module" as atom) =>
                                     (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
@@ -40,10 +40,10 @@ fn panic_with_message()
     ->
         int ({
     (unsafe {
-        (((::Core::erlang::error as
-                    fn(term, term, term) -> term)(((::Core::Panic::new as
-                        fn(str) -> Core::Panic {Core::Panic::new})(("unexpected value"
-                        as str)) as Core::Panic), (a"none" as atom),
+        (((::core::erlang::error as
+                    fn(term, term, term) -> term)(((::core::Panic::new as
+                        fn(str) -> core::Panic {core::Panic::new})(("unexpected value"
+                        as str)) as core::Panic), (a"none" as atom),
                 ([(((a"error_info" as atom),
                             (#{(a"module" as atom) =>
                                     (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
@@ -55,10 +55,10 @@ fn todo_without_message()
     ->
         int ({
     (unsafe {
-        (((::Core::erlang::error as
-                    fn(term, term, term) -> term)(((::Core::Panic::new as
-                        fn(str) -> Core::Panic {Core::Panic::new})(("not yet implemented"
-                        as str)) as Core::Panic), (a"none" as atom),
+        (((::core::erlang::error as
+                    fn(term, term, term) -> term)(((::core::Panic::new as
+                        fn(str) -> core::Panic {core::Panic::new})(("not yet implemented"
+                        as str)) as core::Panic), (a"none" as atom),
                 ([(((a"error_info" as atom),
                             (#{(a"module" as atom) =>
                                     (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
@@ -70,10 +70,10 @@ fn todo_with_message()
     ->
         int ({
     (unsafe {
-        (((::Core::erlang::error as
-                    fn(term, term, term) -> term)(((::Core::Panic::new as
-                        fn(str) -> Core::Panic {Core::Panic::new})(("not yet implemented: handle the value"
-                        as str)) as Core::Panic), (a"none" as atom),
+        (((::core::erlang::error as
+                    fn(term, term, term) -> term)(((::core::Panic::new as
+                        fn(str) -> core::Panic {core::Panic::new})(("not yet implemented: handle the value"
+                        as str)) as core::Panic), (a"none" as atom),
                 ([(((a"error_info" as atom),
                             (#{(a"module" as atom) =>
                                     (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
@@ -87,10 +87,10 @@ fn panic_in_let_else(map: #{int => int})
     let #{(1 as int) => value, ..} = (map as #{int => int}) else
         {
         (unsafe {
-            (((::Core::erlang::error as
-                        fn(term, term, term) -> term)(((::Core::Panic::new as
-                            fn(str) -> Core::Panic {Core::Panic::new})(("missing key" as
-                            str)) as Core::Panic), (a"none" as atom),
+            (((::core::erlang::error as
+                        fn(term, term, term) -> term)(((::core::Panic::new as
+                            fn(str) -> core::Panic {core::Panic::new})(("missing key" as
+                            str)) as core::Panic), (a"none" as atom),
                     ([(((a"error_info" as atom),
                                 (#{(a"module" as atom) =>
                                         (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
@@ -106,10 +106,10 @@ fn todo_in_let_else(map: #{int => int})
     let #{(1 as int) => value, ..} = (map as #{int => int}) else
         {
         (unsafe {
-            (((::Core::erlang::error as
-                        fn(term, term, term) -> term)(((::Core::Panic::new as
-                            fn(str) -> Core::Panic {Core::Panic::new})(("not yet implemented"
-                            as str)) as Core::Panic), (a"none" as atom),
+            (((::core::erlang::error as
+                        fn(term, term, term) -> term)(((::core::Panic::new as
+                            fn(str) -> core::Panic {core::Panic::new})(("not yet implemented"
+                            as str)) as core::Panic), (a"none" as atom),
                     ([(((a"error_info" as atom),
                                 (#{(a"module" as atom) =>
                                         (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
@@ -126,10 +126,10 @@ fn panic_in_loop(limit: int)
     (loop {
         (if ((i as int) == (limit as int) as bool) {
             (unsafe {
-                (((::Core::erlang::error as
-                            fn(term, term, term) -> term)(((::Core::Panic::new as
-                                fn(str) -> Core::Panic {Core::Panic::new})(("reached the limit"
-                                as str)) as Core::Panic), (a"none" as atom),
+                (((::core::erlang::error as
+                            fn(term, term, term) -> term)(((::core::Panic::new as
+                                fn(str) -> core::Panic {core::Panic::new})(("reached the limit"
+                                as str)) as core::Panic), (a"none" as atom),
                         ([(((a"error_info" as atom),
                                     (#{(a"module" as atom) =>
                                             (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
@@ -150,10 +150,10 @@ fn panic_in_nested_loop(limit: int)
             (if ((j as int) < (limit as int) as bool) {
                 (if ((i as int) == (limit as int) as bool) {
                     (unsafe {
-                        (((::Core::erlang::error as
-                                    fn(term, term, term) -> term)(((::Core::Panic::new as
-                                        fn(str) -> Core::Panic {Core::Panic::new})(("reached the limit"
-                                        as str)) as Core::Panic), (a"none" as atom),
+                        (((::core::erlang::error as
+                                    fn(term, term, term) -> term)(((::core::Panic::new as
+                                        fn(str) -> core::Panic {core::Panic::new})(("reached the limit"
+                                        as str)) as core::Panic), (a"none" as atom),
                                 ([(((a"error_info" as atom),
                                             (#{(a"module" as atom) =>
                                                     (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))

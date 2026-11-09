@@ -9,10 +9,10 @@
 #![attr = NoCore]
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 #[allow(unused)]
 extern mod patina_fmt;
 
@@ -44,8 +44,8 @@ fn incompatible_timeout()
         int ({
     (receive { int(n) => (n as int), }
         after ((Timeout::from_millis as
-                fn(int) -> Core::Timeout {Core::Timeout::from_millis})((0 as
-                int)) as Core::Timeout) ({ (a"bad" as atom) } as {type error})
+                fn(int) -> core::Timeout {core::Timeout::from_millis})((0 as
+                int)) as core::Timeout) ({ (a"bad" as atom) } as {type error})
         as {type error})
 } as {type error})
 

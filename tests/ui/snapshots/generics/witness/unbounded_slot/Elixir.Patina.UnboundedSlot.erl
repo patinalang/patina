@@ -26,9 +26,9 @@
 
 call(_h@0_0) ->
     _witness_Tr@1_0 =
-        'Elixir.Patina.UnboundedSlot.Holder':'UnboundedSlot::Tr::$patina_witness'(),
-    'Elixir.Patina.UnboundedSlot.Holder':'UnboundedSlot::Tr::method'(_witness_Tr@1_0,
-                                                                     _h@0_0).
+        'Elixir.Patina.UnboundedSlot.Holder':'unbounded_slot::Tr::$patina_witness'(),
+    'Elixir.Patina.UnboundedSlot.Holder':'unbounded_slot::Tr::method'(_witness_Tr@1_0,
+                                                                      _h@0_0).
 
 main() ->
     _h@0_0 = 1,

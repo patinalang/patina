@@ -1,4 +1,4 @@
-use MacrosAndItems::{Describe, Plain, doubled, echo, plain};
+use macros_and_items::{Describe, Plain, doubled, echo, plain};
 
 #[derive(Describe)]
 pub struct Marker;

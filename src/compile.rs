@@ -23,7 +23,7 @@ use rustc_parse::lexer::StripTokens;
 use rustc_parse::{new_parser_from_source_str, unwrap_or_emit_fatal};
 use rustc_session::config::{Externs, PanicStrategy};
 use rustc_session::search_paths::{PathKind, SearchPath};
-use rustc_session::{Session, config};
+use rustc_session::{Session, config, lint};
 use rustc_span::edition::Edition;
 use rustc_span::{ErrorGuaranteed, FileName, RealFileName, RemapPathScopeComponents};
 
@@ -41,11 +41,11 @@ const PRELUDE: &str = r#"
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -111,6 +111,7 @@ pub(crate) struct CompileOptions {
     pub lib_dirs: Vec<PathBuf>,
     pub package: PackageInfo,
     pub externs: Externs,
+    pub allowed_lints: Vec<String>,
 }
 
 impl CompileOptions {
@@ -367,7 +368,7 @@ fn make_config(
     opts: &CompileOptions,
     server: &Arc<SyncServer>,
 ) -> interface::Config {
-    let CompileOptions { lib_dirs, package: pkg, externs, .. } = opts;
+    let CompileOptions { lib_dirs, package: pkg, externs, allowed_lints, .. } = opts;
 
     let cwd = std::env::current_dir().unwrap_or_else(|e| {
         panic!("failed to get the current directory: {e}");
@@ -385,6 +386,7 @@ fn make_config(
         crate_name: Some(pkg.name.to_string()),
         otp_application_name: Some(pkg.otp_application_name.clone()),
         externs: externs.clone(),
+        lint_opts: allowed_lints.iter().map(|lint| (lint.clone(), lint::Level::Allow)).collect(),
         search_paths: lib_dirs
             .iter()
             .map(|dir| SearchPath::new(PathKind::All, dir.to_owned()))

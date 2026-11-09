@@ -37,13 +37,13 @@ call(_witnesses_where_call@0_0, _t@1_0) ->
 
 only_global_bound() ->
     _witness_Derived@0_0 =
-        'Elixir.Patina.GlobalBound.S':'GlobalBound::Derived::$patina_witness'(),
-    'Elixir.Patina.GlobalBound.S':'GlobalBound::Derived::derived'(_witness_Derived@0_0,
-                                                                  'Elixir.Patina.GlobalBound.S').
+        'Elixir.Patina.GlobalBound.S':'global_bound::Derived::$patina_witness'(),
+    'Elixir.Patina.GlobalBound.S':'global_bound::Derived::derived'(_witness_Derived@0_0,
+                                                                   'Elixir.Patina.GlobalBound.S').
 
 base() ->
     _witness_Derived@0_0 =
-        'Elixir.Patina.GlobalBound.S':'GlobalBound::Derived::$patina_witness'(),
+        'Elixir.Patina.GlobalBound.S':'global_bound::Derived::$patina_witness'(),
     _witnesses_where_call@1_0 = {_witness_Derived@0_0},
     call(_witnesses_where_call@1_0,
          'Elixir.Patina.GlobalBound.S').

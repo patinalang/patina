@@ -10,10 +10,10 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'GlobalBound::Derived::derived'/2,
-         'GlobalBound::Derived::$patina_witness'/0,
-         'GlobalBound::Base::base'/2,
-         'GlobalBound::Base::$patina_witness'/0]).
+         'global_bound::Derived::derived'/2,
+         'global_bound::Derived::$patina_witness'/0,
+         'global_bound::Base::base'/2,
+         'global_bound::Base::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -28,28 +28,28 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'GlobalBound::Derived::derived'(_witness_Derived@0_0,
-                                _self@1_0) ->
+'global_bound::Derived::derived'(_witness_Derived@0_0,
+                                 _self@1_0) ->
     1.
 
-'GlobalBound::Derived::$patina_witness'() ->
+'global_bound::Derived::$patina_witness'() ->
     _witness_Base@0_0 =
-        {{fun 'Elixir.Patina.GlobalBound.S':'GlobalBound::Base::base'/2},
+        {{fun 'Elixir.Patina.GlobalBound.S':'global_bound::Base::base'/2},
          {},
          {}},
-    {{fun 'Elixir.Patina.GlobalBound.S':'GlobalBound::Derived::derived'/2},
+    {{fun 'Elixir.Patina.GlobalBound.S':'global_bound::Derived::derived'/2},
      {_witness_Base@0_0},
      {}}.
 
-'GlobalBound::Base::base'(_witness_Base@0_0,
-                          _self@1_0) ->
+'global_bound::Base::base'(_witness_Base@0_0,
+                           _self@1_0) ->
     _witness_Derived@2_0 =
-        'GlobalBound::Derived::$patina_witness'(),
-    'GlobalBound::Derived::derived'(_witness_Derived@2_0,
-                                    _self@1_0)
+        'global_bound::Derived::$patina_witness'(),
+    'global_bound::Derived::derived'(_witness_Derived@2_0,
+                                     _self@1_0)
         + 1.
 
-'GlobalBound::Base::$patina_witness'() ->
-    {{fun 'Elixir.Patina.GlobalBound.S':'GlobalBound::Base::base'/2},
+'global_bound::Base::$patina_witness'() ->
+    {{fun 'Elixir.Patina.GlobalBound.S':'global_bound::Base::base'/2},
      {},
      {}}.

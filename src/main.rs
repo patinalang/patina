@@ -121,7 +121,7 @@ enum Command {
         /// Source file to compile.
         file: PathBuf,
 
-        /// Package name (defaults to PascalCase of the source filename).
+        /// Package name (defaults to the stem of the source filename).
         #[arg(long, value_name = "NAME")]
         pkg_name: Option<PackageName>,
 
@@ -130,7 +130,7 @@ enum Command {
         pkg_version: Option<String>,
 
         /// OTP application name.
-        /// If not overridden, defaults to snake_case of the package name.
+        /// If not overridden, defaults to the package name.
         #[arg(long, value_name = "NAME")]
         otp_application_name: Option<String>,
 
@@ -180,6 +180,10 @@ struct CommonArgs {
     /// Path to a running compile server's socket. If not given, patina starts a temporary one.
     #[arg(long, value_name = "SOCKET_PATH")]
     compile_server: Option<PathBuf>,
+
+    /// Allow the lint `LINT`. Can be repeated.
+    #[arg(short = 'A', long = "allow", value_name = "LINT")]
+    allowed_lints: Vec<String>,
 }
 
 fn absolute_path() -> impl TypedValueParser<Value = PathBuf> {
@@ -238,7 +242,7 @@ fn try_main(args: Args) -> Result<(), Error> {
             let package = PackageInfo {
                 otp_application_name: manifest
                     .otp_application_name
-                    .unwrap_or_else(|| name.snake_case()),
+                    .unwrap_or_else(|| name.to_string()),
                 name,
                 version: Some(manifest.version),
                 description: manifest.description.unwrap_or_default(),
@@ -257,7 +261,7 @@ fn try_main(args: Args) -> Result<(), Error> {
         } => {
             let name = package::resolve_package_name(pkg_name, &file)?;
             let package = PackageInfo {
-                otp_application_name: otp_application_name.unwrap_or_else(|| name.snake_case()),
+                otp_application_name: otp_application_name.unwrap_or_else(|| name.to_string()),
                 name,
                 version: pkg_version,
                 description: String::new(),
@@ -285,7 +289,13 @@ fn run(
         lib_dirs.push(installation.core_dir.clone());
     }
 
-    let opts = compile::CompileOptions { out_dir: args.out_dir, lib_dirs, package, externs };
+    let opts = compile::CompileOptions {
+        out_dir: args.out_dir,
+        lib_dirs,
+        package,
+        externs,
+        allowed_lints: args.allowed_lints,
+    };
 
     let server =
         compile::compile_server::SyncServer::start(compile::compile_server::SyncServerOpts {

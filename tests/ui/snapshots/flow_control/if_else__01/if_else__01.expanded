@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -29,29 +29,29 @@ pub fn main() {
         // TODO ^ Try suppressing this expression with a semicolon.
         //   ^ Don't forget to put a semicolon here! All `let` bindings need it.
 
-        { ::Core::io::put_chars([patina_fmt::display(n), " is negative"]); };
+        { ::core::io::put_chars([patina_fmt::display(n), " is negative"]); };
     } else if n > 0 {
-        { ::Core::io::put_chars([patina_fmt::display(n), " is positive"]); };
+        { ::core::io::put_chars([patina_fmt::display(n), " is positive"]); };
     } else {
-        { ::Core::io::put_chars([patina_fmt::display(n), " is zero"]); };
+        { ::core::io::put_chars([patina_fmt::display(n), " is zero"]); };
     }
     let big_n =
         if n < 10 && n > -10 {
             {
-                ::Core::io::put_chars([[", and is a small number, increase ten-fold"]]);
-                ::Core::io::nl();
+                ::core::io::put_chars([[", and is a small number, increase ten-fold"]]);
+                ::core::io::nl();
             };
             10 * n
         } else {
             {
-                ::Core::io::put_chars([[", and is a big number, halve the number"]]);
-                ::Core::io::nl();
+                ::core::io::put_chars([[", and is a big number, halve the number"]]);
+                ::core::io::nl();
             };
             n / 2
         };
     {
-        ::Core::io::put_chars([[patina_fmt::display(n), " -> ",
+        ::core::io::put_chars([[patina_fmt::display(n), " -> ",
                             patina_fmt::display(big_n)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }

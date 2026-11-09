@@ -38,6 +38,6 @@ a(_witnesses_where_a@0_0, _x@1_0) ->
 
 main() ->
     _witness_Tr@0_0 =
-        'Elixir.Patina.Forward.S':'Forward::Tr::$patina_witness'(),
+        'Elixir.Patina.Forward.S':'forward::Tr::$patina_witness'(),
     _witnesses_where_a@1_0 = {_witness_Tr@0_0},
     a(_witnesses_where_a@1_0, 'Elixir.Patina.Forward.S').

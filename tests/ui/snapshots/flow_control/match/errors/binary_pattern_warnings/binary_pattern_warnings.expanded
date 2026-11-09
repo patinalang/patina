@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -25,8 +25,8 @@ pub fn main() {
             <<256: int(size = 8), -1: int(size = 8)>> =>
             // These are truncated, or encoded as infinity.
             {
-            ::Core::io::put_chars([["never"]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["never"]]);
+            ::core::io::nl();
         }
         <<-1: int(size = 8, signed), 128: int(size = 8, signed), -129:
             int(size = 8, signed)>> => {}
@@ -35,9 +35,9 @@ pub fn main() {
         _ => {}
     }
     {
-        ::Core::io::put_chars([[patina_fmt::debug(<<300: int(size = 8), -1:
+        ::core::io::put_chars([[patina_fmt::debug(<<300: int(size = 8), -1:
                                         int(size = 8), 255: int(size = 8), 1.0e10: float(size = 16),
                                         b'\x80': int(size = 8, signed)>>)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }

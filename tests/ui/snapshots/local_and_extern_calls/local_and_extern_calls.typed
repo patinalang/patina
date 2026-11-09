@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -82,22 +82,22 @@ fn public_main()
     ((priv_main as fn() -> StructWithNew {priv_main})() as StructWithNew)
 } as StructWithNew)
 
-mod Nested {
+mod nested {
     fn main() ({
         // local call
-        let _ = ((public_function as fn() {Nested::public_function})() as ());
+        let _ = ((public_function as fn() {nested::public_function})() as ());
         // local call
         let _ =
-            ((self::public_function as fn() {Nested::public_function})() as
+            ((self::public_function as fn() {nested::public_function})() as
                 ());
         // local call
         let _ =
-            ((super::Nested::public_function as
-                    fn() {Nested::public_function})() as ());
+            ((super::nested::public_function as
+                    fn() {nested::public_function})() as ());
 
         // remote call
         #[attr = ExternCall]
-        ((public_function as fn() {Nested::public_function})() as ())
+        ((public_function as fn() {nested::public_function})() as ())
     } as ())
 
     fn public_function() ({ (() as ()) } as ())
@@ -113,7 +113,7 @@ fn main() ({
         ((self::public_main as fn() -> StructWithNew {public_main})() as
             StructWithNew);
     // remote call
-    let _ = ((Nested::main as fn() {Nested::main})() as ());
+    let _ = ((nested::main as fn() {nested::main})() as ());
     // local call
     let _ =
         ((self::priv_main as fn() -> StructWithNew {priv_main})() as
@@ -124,10 +124,10 @@ fn main() ({
                 fn(int) -> StructWithNew {StructWithNew::new})((42 as int)) as
             StructWithNew);
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)(((s as StructWithNew).value as int)) as
                                 term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

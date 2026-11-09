@@ -10,10 +10,10 @@
 #![allow(dead_code)]
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 #[allow(unused)]
 extern mod patina_fmt;
 
@@ -31,7 +31,7 @@ enum WebEvent {
 }
 
 #[module = "module_attr_helpers"]
-mod Helpers {
+mod helpers {
     pub fn answer() -> int { 42 }
 }
 

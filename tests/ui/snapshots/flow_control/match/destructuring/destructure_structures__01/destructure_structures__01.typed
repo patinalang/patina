@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -42,28 +42,28 @@ fn main() ({
             // Destructuring works with nested structs as well:
 
             {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("First of x is 1, b = " as str),
                                 ((patina_fmt::display as fn(term) -> term)((b as int)) as
                                     term), (",  y = " as str),
                                 ((patina_fmt::display as fn(term) -> term)((y as int)) as
                                     term), (" " as str)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         Foo {  y: 2,  x: i } => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("y is 2, i = " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((i as (int, int)))
                                     as term)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         Foo {  y, .. } => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("y = " as str),
                                 ((patina_fmt::display as fn(term) -> term)((y as int)) as
                                     term), (", we don\'t care about x" as str)] as [term])] as
                     [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
     } as ())
     let faa =
@@ -71,13 +71,13 @@ fn main() ({
             main::Foo);
     let Foo {  x: x0,  y: y0 } = (faa as main::Foo);
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("Outside: x0 = " as str),
                             ((patina_fmt::debug as fn(term) -> term)((x0 as (int, int)))
                                 as term), (", y0 = " as str),
                             ((patina_fmt::display as fn(term) -> term)((y0 as int)) as
                                 term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     struct Bar {
         foo: Foo,
@@ -85,13 +85,13 @@ fn main() ({
     let bar = (Bar { foo: (faa as main::Foo) } as main::Bar);
     let Bar {  foo: Foo {  x: nested_x,  y: nested_y } } = (bar as main::Bar);
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("Nested: nested_x = " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((nested_x as (int, int))) as term),
                             (", nested_y = " as str),
                             ((patina_fmt::debug as fn(term) -> term)((nested_y as int))
                                 as term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

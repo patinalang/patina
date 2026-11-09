@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -18,14 +18,14 @@ extern mod patina_fmt;
 // block: 2/2
 
 // Bind the `deeply::nested::function` path to `other_function`.
-use Deeply::Nested::function as other_function;
+use deeply::nested::function as other_function;
 
 fn function() ({
 
 
-    // Easier access to `Deeply::Nested::function`
+    // Easier access to `deeply::nested::function`
 
-    // This is equivalent to `use Deeply::Nested::function as function`.
+    // This is equivalent to `use deeply::nested::function as function`.
     // This `function()` will shadow the outer one.
 
     // `use` bindings have a local scope. In this case, the
@@ -33,40 +33,40 @@ fn function() ({
 
 
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("called `function()`" as str)] as
                         [str])] as [[str]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())
-mod Deeply {
-    mod Nested {
+mod deeply {
+    mod nested {
         fn function() ({
             ({
-                ((::Core::io::put_chars as
-                        fn(term) -> term)(([([("called `Deeply::Nested::function()`"
+                ((::core::io::put_chars as
+                        fn(term) -> term)(([([("called `deeply::nested::function()`"
                                         as str)] as [str])] as [[str]])) as term);
-                ((::Core::io::nl as fn() -> term)() as term);
+                ((::core::io::nl as fn() -> term)() as term);
             } as ());
         } as ())
     }
 }
 fn main() ({
-    ((other_function as fn() {Deeply::Nested::function})() as ());
+    ((other_function as fn() {deeply::nested::function})() as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("Entering block" as str)] as [str])] as
                 [[str]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        use pkg::Deeply::Nested::function;
+        use pkg::deeply::nested::function;
         ((function as {type error})() as {type error});
         ({
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("Leaving block" as str)] as [str])]
                     as [[str]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         } as ());
     } as ())
     ((function as fn() {function})() as ());

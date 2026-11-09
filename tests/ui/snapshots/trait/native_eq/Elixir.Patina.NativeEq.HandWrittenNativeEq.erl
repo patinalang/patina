@@ -10,8 +10,8 @@
 
 -export(['__info__'/1,
          '$patina_constructor__HandWrittenNativeEq'/2,
-         'Core::PartialEq::eq'/3,
-         'Core::PartialEq::$patina_witness'/0]).
+         'core::PartialEq::eq'/3,
+         'core::PartialEq::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -32,12 +32,12 @@
                                            _y@1_0) ->
     #'HandWrittenNativeEq'{x = _x@0_0, y = _y@1_0}.
 
-'Core::PartialEq::eq'(_witness_PartialEq@0_0, _self@1_0,
+'core::PartialEq::eq'(_witness_PartialEq@0_0, _self@1_0,
                       _other@2_0) ->
     _self@1_0 =:= _other@2_0.
 
-'Core::PartialEq::$patina_witness'() ->
-    {{fun 'Elixir.Patina.NativeEq.HandWrittenNativeEq':'Core::PartialEq::eq'/3,
-      fun 'Elixir.Patina.Core':'Core::PartialEq::ne'/3},
+'core::PartialEq::$patina_witness'() ->
+    {{fun 'Elixir.Patina.NativeEq.HandWrittenNativeEq':'core::PartialEq::eq'/3,
+      fun 'Elixir.Patina.Core':'core::PartialEq::ne'/3},
      {},
      {}}.

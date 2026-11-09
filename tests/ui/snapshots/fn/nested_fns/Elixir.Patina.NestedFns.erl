@@ -22,16 +22,16 @@
          from_impl/0,
          'from_impl::base'/0,
          nested_trait/0,
-         'NestedFns::nested_trait::Answer::answer'/2,
-         'NestedFns::{impl#1}::trait_in_method::Base::base'/2,
+         'nested_fns::nested_trait::Answer::answer'/2,
+         'nested_fns::{impl#1}::trait_in_method::Base::base'/2,
          trait_in_method/0,
          first_answer/0,
-         'NestedFns::first_answer::Answer::answer'/2,
+         'nested_fns::first_answer::Answer::answer'/2,
          second_answer/0,
-         'NestedFns::second_answer::Answer::answer'/2,
+         'nested_fns::second_answer::Answer::answer'/2,
          answers_in_blocks/0,
-         'NestedFns::answers_in_blocks::Answer::answer'/2,
-         'NestedFns::answers_in_blocks::Answer#1::answer'/2]).
+         'nested_fns::answers_in_blocks::Answer::answer'/2,
+         'nested_fns::answers_in_blocks::Answer#1::answer'/2]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -88,14 +88,14 @@ recursive_loop(_n@0_0) ->
 
 'recursive_loop::sum_to'(_n@0_0) ->
     _witness_Iterator@1_0 =
-        'Elixir.Patina.Core.Range':'Core::Iterator::$patina_witness<int>'(),
+        'Elixir.Patina.Core.Range':'core::Iterator::$patina_witness<int>'(),
     _witnesses_where_IntoIterator@2_0 =
         {_witness_Iterator@1_0},
     _witness_IntoIterator@3_0 =
-        'Elixir.Patina.Core.$impl':'Core::IntoIterator::$patina_witness'(_witnesses_where_IntoIterator@2_0),
+        'Elixir.Patina.Core.$impl':'core::IntoIterator::$patina_witness'(_witnesses_where_IntoIterator@2_0),
     _total@4_0 = 0,
     case
-        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'(_witness_IntoIterator@3_0,
+        'Elixir.Patina.Core.$impl':'core::IntoIterator::into_iter'(_witness_IntoIterator@3_0,
                                                                    'Elixir.Patina.Core.Range':'$patina_constructor__Range'(0,
                                                                                                                            _n@0_0))
         of
@@ -119,7 +119,7 @@ recursive_loop(_n@0_0) ->
                                                               _branch_value@11_0;
                                                           _ ->
                                                               case
-                                                                  'Elixir.Patina.Core.Range':'Core::Iterator::next<int>'(_witness_Iterator@1_0,
+                                                                  'Elixir.Patina.Core.Range':'core::Iterator::next<int>'(_witness_Iterator@1_0,
                                                                                                                          _iter@5_0)
                                                                   of
                                                                   nil ->
@@ -184,7 +184,7 @@ recursive_loop(_n@0_0) ->
 
 generic() ->
     _witness_Show@0_0 =
-        'Elixir.Patina.NestedFns.$impl.Core.Int':'NestedFns::Show::$patina_witness'(),
+        'Elixir.Patina.NestedFns.$impl.Core.Int':'nested_fns::Show::$patina_witness'(),
     _witnesses_where_describe@1_0 = {_witness_Show@0_0},
     'generic::describe'(_witnesses_where_describe@1_0, 5).
 
@@ -221,16 +221,16 @@ from_impl() ->
 
 nested_trait() ->
     _witness_Answer@0_0 =
-        'Elixir.Patina.NestedFns.Counter':'NestedFns::nested_trait::Answer::$patina_witness'(),
-    'NestedFns::nested_trait::Answer::answer'(_witness_Answer@0_0,
-                                              0).
+        'Elixir.Patina.NestedFns.Counter':'nested_fns::nested_trait::Answer::$patina_witness'(),
+    'nested_fns::nested_trait::Answer::answer'(_witness_Answer@0_0,
+                                               0).
 
-'NestedFns::nested_trait::Answer::answer'(_witness_Answer@0_0,
-                                          _self@1_0) ->
+'nested_fns::nested_trait::Answer::answer'(_witness_Answer@0_0,
+                                           _self@1_0) ->
     42.
 
-'NestedFns::{impl#1}::trait_in_method::Base::base'(_witness_Base@0_0,
-                                                   _self@1_0) ->
+'nested_fns::{impl#1}::trait_in_method::Base::base'(_witness_Base@0_0,
+                                                    _self@1_0) ->
     1000.
 
 trait_in_method() ->
@@ -238,41 +238,41 @@ trait_in_method() ->
 
 first_answer() ->
     _witness_Answer@0_0 =
-        'Elixir.Patina.NestedFns.Wrapper':'NestedFns::first_answer::Answer::$patina_witness'(),
-    'NestedFns::first_answer::Answer::answer'(_witness_Answer@0_0,
-                                              'Elixir.Patina.NestedFns.Wrapper').
+        'Elixir.Patina.NestedFns.Wrapper':'nested_fns::first_answer::Answer::$patina_witness'(),
+    'nested_fns::first_answer::Answer::answer'(_witness_Answer@0_0,
+                                               'Elixir.Patina.NestedFns.Wrapper').
 
-'NestedFns::first_answer::Answer::answer'(_witness_Answer@0_0,
-                                          _self@1_0) ->
+'nested_fns::first_answer::Answer::answer'(_witness_Answer@0_0,
+                                           _self@1_0) ->
     1.
 
 second_answer() ->
     _witness_Answer@0_0 =
-        'Elixir.Patina.NestedFns.Wrapper':'NestedFns::second_answer::Answer::$patina_witness'(),
-    'NestedFns::second_answer::Answer::answer'(_witness_Answer@0_0,
-                                               'Elixir.Patina.NestedFns.Wrapper').
+        'Elixir.Patina.NestedFns.Wrapper':'nested_fns::second_answer::Answer::$patina_witness'(),
+    'nested_fns::second_answer::Answer::answer'(_witness_Answer@0_0,
+                                                'Elixir.Patina.NestedFns.Wrapper').
 
-'NestedFns::second_answer::Answer::answer'(_witness_Answer@0_0,
-                                           _self@1_0) ->
+'nested_fns::second_answer::Answer::answer'(_witness_Answer@0_0,
+                                            _self@1_0) ->
     2.
 
 answers_in_blocks() ->
     _witness_Answer@0_0 =
-        'Elixir.Patina.NestedFns.Wrapper':'NestedFns::answers_in_blocks::Answer::$patina_witness'(),
+        'Elixir.Patina.NestedFns.Wrapper':'nested_fns::answers_in_blocks::Answer::$patina_witness'(),
     _witness_Answer@1_0 =
-        'Elixir.Patina.NestedFns.Wrapper':'NestedFns::answers_in_blocks::Answer#1::$patina_witness'(),
+        'Elixir.Patina.NestedFns.Wrapper':'nested_fns::answers_in_blocks::Answer#1::$patina_witness'(),
     _a@2_0 =
-        'NestedFns::answers_in_blocks::Answer::answer'(_witness_Answer@0_0,
-                                                       'Elixir.Patina.NestedFns.Wrapper'),
+        'nested_fns::answers_in_blocks::Answer::answer'(_witness_Answer@0_0,
+                                                        'Elixir.Patina.NestedFns.Wrapper'),
     _b@3_0 =
-        'NestedFns::answers_in_blocks::Answer#1::answer'(_witness_Answer@1_0,
-                                                         'Elixir.Patina.NestedFns.Wrapper'),
+        'nested_fns::answers_in_blocks::Answer#1::answer'(_witness_Answer@1_0,
+                                                          'Elixir.Patina.NestedFns.Wrapper'),
     _a@2_0 * 10 + _b@3_0.
 
-'NestedFns::answers_in_blocks::Answer::answer'(_witness_Answer@0_0,
-                                               _self@1_0) ->
+'nested_fns::answers_in_blocks::Answer::answer'(_witness_Answer@0_0,
+                                                _self@1_0) ->
     3.
 
-'NestedFns::answers_in_blocks::Answer#1::answer'(_witness_Answer@0_0,
-                                                 _self@1_0) ->
+'nested_fns::answers_in_blocks::Answer#1::answer'(_witness_Answer@0_0,
+                                                  _self@1_0) ->
     4.

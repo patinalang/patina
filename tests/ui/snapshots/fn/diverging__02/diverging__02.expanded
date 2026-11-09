@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -22,7 +22,7 @@ fn some_fn() { () }
 pub fn main() {
     let _a: () = some_fn();
     {
-        ::Core::io::put_chars([["This function returns and you can see this line."]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([["This function returns and you can see this line."]]);
+        ::core::io::nl();
     };
 }

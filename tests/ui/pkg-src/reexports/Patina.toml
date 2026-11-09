@@ -1,7 +1,7 @@
 [package]
-name = "Reexports"
+name = "reexports"
 version = "0.1.0"
 
 [dependencies]
-Macros = "~> 0.1"
-Wrappers = "~> 0.1"
+macros = "~> 0.1"
+wrappers = "~> 0.1"

@@ -11,11 +11,11 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'ImpliedAssocBound::HasItem::$patina_type::Item'/1,
-         'ImpliedAssocBound::HasItem::item'/2,
-         'ImpliedAssocBound::HasItem::$patina_witness'/0,
-         'ImpliedAssocBound::LabelledWithItems::other'/2,
-         'ImpliedAssocBound::LabelledWithItems::$patina_witness'/0]).
+         'implied_assoc_bound::HasItem::$patina_type::Item'/1,
+         'implied_assoc_bound::HasItem::item'/2,
+         'implied_assoc_bound::HasItem::$patina_witness'/0,
+         'implied_assoc_bound::LabelledWithItems::other'/2,
+         'implied_assoc_bound::LabelledWithItems::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -30,33 +30,33 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'ImpliedAssocBound::HasItem::$patina_type::Item'(_witness_HasItem@0_0) ->
+'implied_assoc_bound::HasItem::$patina_type::Item'(_witness_HasItem@0_0) ->
     {}.
 
-'ImpliedAssocBound::HasItem::item'(_witness_HasItem@0_0,
-                                   _self@1_0) ->
+'implied_assoc_bound::HasItem::item'(_witness_HasItem@0_0,
+                                     _self@1_0) ->
     'Elixir.Patina.ImpliedAssocBound.Tag'.
 
-'ImpliedAssocBound::HasItem::$patina_witness'() ->
-    {{fun 'Elixir.Patina.ImpliedAssocBound.Crate':'ImpliedAssocBound::HasItem::$patina_type::Item'/1,
-      fun 'Elixir.Patina.ImpliedAssocBound.Crate':'ImpliedAssocBound::HasItem::item'/2},
+'implied_assoc_bound::HasItem::$patina_witness'() ->
+    {{fun 'Elixir.Patina.ImpliedAssocBound.Crate':'implied_assoc_bound::HasItem::$patina_type::Item'/1,
+      fun 'Elixir.Patina.ImpliedAssocBound.Crate':'implied_assoc_bound::HasItem::item'/2},
      {},
      {}}.
 
-'ImpliedAssocBound::LabelledWithItems::other'(_witness_LabelledWithItems@0_0,
-                                              _self@1_0) ->
+'implied_assoc_bound::LabelledWithItems::other'(_witness_LabelledWithItems@0_0,
+                                                _self@1_0) ->
     1.
 
-'ImpliedAssocBound::LabelledWithItems::$patina_witness'() ->
+'implied_assoc_bound::LabelledWithItems::$patina_witness'() ->
     _witness_HasItem@0_0 =
-        {{fun 'Elixir.Patina.ImpliedAssocBound.Crate':'ImpliedAssocBound::HasItem::$patina_type::Item'/1,
-          fun 'Elixir.Patina.ImpliedAssocBound.Crate':'ImpliedAssocBound::HasItem::item'/2},
+        {{fun 'Elixir.Patina.ImpliedAssocBound.Crate':'implied_assoc_bound::HasItem::$patina_type::Item'/1,
+          fun 'Elixir.Patina.ImpliedAssocBound.Crate':'implied_assoc_bound::HasItem::item'/2},
          {},
          {}},
     _witness_Label@1_0 =
-        {{fun 'Elixir.Patina.ImpliedAssocBound.Tag':'ImpliedAssocBound::Label::label'/2},
+        {{fun 'Elixir.Patina.ImpliedAssocBound.Tag':'implied_assoc_bound::Label::label'/2},
          {},
          {}},
-    {{fun 'Elixir.Patina.ImpliedAssocBound.Crate':'ImpliedAssocBound::LabelledWithItems::other'/2},
+    {{fun 'Elixir.Patina.ImpliedAssocBound.Crate':'implied_assoc_bound::LabelledWithItems::other'/2},
      {_witness_HasItem@0_0, _witness_Label@1_0},
      {}}.

@@ -1,7 +1,7 @@
 // snapshot: app
-use MoreTemperatures::{Kelvin, Rankine};
-use Temperatures::{Celsius, From};
-use Traits::{Label, Loud, Show};
+use more_temperatures::{Kelvin, Rankine};
+use temperatures::{Celsius, From};
+use traits::{Label, Loud, Show};
 
 // A local trait on a foreign type.
 trait Size {
@@ -32,28 +32,28 @@ pub fn label_size() -> int {
 }
 
 pub fn local_to_celsius(n: int) -> int {
-    Temperatures::to_celsius(LocalDegrees(n))
+    temperatures::to_celsius(LocalDegrees(n))
 }
 
 pub fn fahrenheit_to_celsius(f: int) -> int {
-    Temperatures::to_celsius(Temperatures::Fahrenheit(f))
+    temperatures::to_celsius(temperatures::Fahrenheit(f))
 }
 
 pub fn kelvin_to_celsius(k: int) -> int {
-    Temperatures::to_celsius(Kelvin(k))
+    temperatures::to_celsius(Kelvin(k))
 }
 
 pub fn rankine_to_celsius(r: int) -> int {
-    Temperatures::to_celsius(Rankine(r))
+    temperatures::to_celsius(Rankine(r))
 }
 
-// Two independent packages implement different traits for `Traits::Label`.
+// Two independent packages implement different traits for `traits::Label`.
 pub fn label_shout() -> str {
-    LabelShout::shout(Label("x"))
+    label_shout::shout(Label("x"))
 }
 
 pub fn label_whisper() -> str {
-    LabelWhisper::whisper(Label("x"))
+    label_whisper::whisper(Label("x"))
 }
 
 pub fn label_show() -> str {

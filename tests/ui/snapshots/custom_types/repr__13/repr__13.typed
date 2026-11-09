@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -44,41 +44,41 @@ fn main() ({
     // (a"some", a"nil")
     // a"nil"
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)((((Option::<int>::Some as
                                             fn(int) -> Option<int> {Option::<int>::Some})((42 as int))
                                         as Option<int>) as term as term)) as term)] as [term])] as
                 [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)(((Option::<int>::None as Option<int>) as
                                     term as term)) as term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)((((Option::<atom>::Some as
                                             fn(atom) -> Option<atom> {Option::<atom>::Some})((a"hi" as
                                             atom)) as Option<atom>) as term as term)) as term)] as
                         [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)((((Option::<atom>::Some as
                                             fn(atom) -> Option<atom> {Option::<atom>::Some})((a"nil" as
                                             atom)) as Option<atom>) as term as term)) as term)] as
                         [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)((((Option::<Option<int>>::Some as
                                             fn(Option<int>) -> Option<Option<int>> {Option::<Option<int>>::Some})(((Option::Some
@@ -86,23 +86,23 @@ fn main() ({
                                                 fn(int) -> Option<int> {Option::<int>::Some})((42 as int))
                                             as Option<int>)) as Option<Option<int>>) as term as term))
                                 as term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)((((Option::<Option<int>>::Some as
                                             fn(Option<int>) -> Option<Option<int>> {Option::<Option<int>>::Some})((Option::None
                                             as Option<int>)) as Option<Option<int>>) as term as term))
                                 as term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)(((Option::<Option<int>>::None as
                                         Option<Option<int>>) as term as term)) as term)] as [term])]
                 as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

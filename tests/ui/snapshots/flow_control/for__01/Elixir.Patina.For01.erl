@@ -25,13 +25,13 @@
 
 main() ->
     _witness_Iterator@0_0 =
-        'Elixir.Patina.Core.Range':'Core::Iterator::$patina_witness<int>'(),
+        'Elixir.Patina.Core.Range':'core::Iterator::$patina_witness<int>'(),
     _witnesses_where_IntoIterator@1_0 =
         {_witness_Iterator@0_0},
     _witness_IntoIterator@2_0 =
-        'Elixir.Patina.Core.$impl':'Core::IntoIterator::$patina_witness'(_witnesses_where_IntoIterator@1_0),
+        'Elixir.Patina.Core.$impl':'core::IntoIterator::$patina_witness'(_witnesses_where_IntoIterator@1_0),
     case
-        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'(_witness_IntoIterator@2_0,
+        'Elixir.Patina.Core.$impl':'core::IntoIterator::into_iter'(_witness_IntoIterator@2_0,
                                                                    'Elixir.Patina.Core.Range':'$patina_constructor__Range'(1,
                                                                                                                            101))
         of
@@ -41,7 +41,7 @@ main() ->
                                     {'$patina_label_0', _iter@3_2} -> _iter@3_2;
                                     _ ->
                                         case
-                                            'Elixir.Patina.Core.Range':'Core::Iterator::next<int>'(_witness_Iterator@0_0,
+                                            'Elixir.Patina.Core.Range':'core::Iterator::next<int>'(_witness_Iterator@0_0,
                                                                                                    _iter@3_0)
                                             of
                                             nil ->

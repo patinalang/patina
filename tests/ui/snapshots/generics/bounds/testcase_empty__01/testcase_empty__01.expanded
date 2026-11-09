@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -42,13 +42,13 @@ pub fn main() {
     //println!("A turkey is {}", red(_turkey));
     // ^ TODO: Try uncommenting this line.
     {
-        ::Core::io::put_chars([["A cardinal is ",
+        ::core::io::put_chars([["A cardinal is ",
                             patina_fmt::display(red(cardinal))]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([["A blue jay is ",
+        ::core::io::put_chars([["A blue jay is ",
                             patina_fmt::display(blue(blue_jay))]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }

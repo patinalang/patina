@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -23,50 +23,50 @@ fn main() ({
     ({
         let _t =
             (match ((into_iter as
-                        fn(Core::Range<int>) -> <Core::Range<int> as Core::IntoIterator>::IntoIter {<Core::Range<int> as Core::IntoIterator>::into_iter})((Range {
-                        start: (1 as int), end: (101 as int) } as Core::Range<int>))
-                    as Core::Range<int>) {
+                        fn(core::Range<int>) -> <core::Range<int> as core::IntoIterator>::IntoIter {<core::Range<int> as core::IntoIterator>::into_iter})((Range {
+                        start: (1 as int), end: (101 as int) } as core::Range<int>))
+                    as core::Range<int>) {
                 mut iter =>
                     (loop {
                         (match ((next as
-                                    fn(Core::Range<int>) -> Core::Option<(<Core::Range<int> as Core::Iterator>::Item, Core::Range<int>)> {<Core::Range<int> as Core::Iterator>::next})((iter
-                                    as Core::Range<int>)) as
-                                Core::Option<(int, Core::Range<int>)>) {
+                                    fn(core::Range<int>) -> core::Option<(<core::Range<int> as core::Iterator>::Item, core::Range<int>)> {<core::Range<int> as core::Iterator>::next})((iter
+                                    as core::Range<int>)) as
+                                core::Option<(int, core::Range<int>)>) {
                             None {} => (break as !),
                             Some {  0: (n, next) } => {
-                                (iter = (next as Core::Range<int>) as Core::Range<int>);
+                                (iter = (next as core::Range<int>) as core::Range<int>);
                                 ({
                                     (if (((n as int) % (15 as int) as int) == (0 as int) as
                                             bool) {
                                         ({
-                                            ((::Core::io::put_chars as
+                                            ((::core::io::put_chars as
                                                     fn(term) -> term)(([([("fizzbuzz" as str)] as [str])] as
                                                     [[str]])) as term);
-                                            ((::Core::io::nl as fn() -> term)() as term);
+                                            ((::core::io::nl as fn() -> term)() as term);
                                         } as ());
                                     } else if (((n as int) % (3 as int) as int) == (0 as int) as
                                             bool) {
                                         ({
-                                            ((::Core::io::put_chars as
+                                            ((::core::io::put_chars as
                                                     fn(term) -> term)(([([("fizz" as str)] as [str])] as
                                                     [[str]])) as term);
-                                            ((::Core::io::nl as fn() -> term)() as term);
+                                            ((::core::io::nl as fn() -> term)() as term);
                                         } as ());
                                     } else if (((n as int) % (5 as int) as int) == (0 as int) as
                                             bool) {
                                         ({
-                                            ((::Core::io::put_chars as
+                                            ((::core::io::put_chars as
                                                     fn(term) -> term)(([([("buzz" as str)] as [str])] as
                                                     [[str]])) as term);
-                                            ((::Core::io::nl as fn() -> term)() as term);
+                                            ((::core::io::nl as fn() -> term)() as term);
                                         } as ());
                                     } else {
                                         ({
-                                            ((::Core::io::put_chars as
+                                            ((::core::io::put_chars as
                                                     fn(term) -> term)(([([((patina_fmt::display as
                                                                         fn(term) -> term)((n as int)) as term)] as [term])] as
                                                     [[term]])) as term);
-                                            ((::Core::io::nl as fn() -> term)() as term);
+                                            ((::core::io::nl as fn() -> term)() as term);
                                         } as ());
                                     } as ())
                                 } as ())

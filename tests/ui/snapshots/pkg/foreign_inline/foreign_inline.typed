@@ -5,20 +5,20 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
 
 use ::{};
-use Inlines::InlineImpl;
-use Inlines::Trait;
-use Inlines::calls_private_fn;
-use Inlines::generic_calls_method;
+use inlines::InlineImpl;
+use inlines::Trait;
+use inlines::calls_private_fn;
+use inlines::generic_calls_method;
 
 struct LocalImpl(int);
 
@@ -30,32 +30,32 @@ fn copy_calls_private_fn()
     ->
         int ({
     ((calls_private_fn as
-            fn(int) -> int {Inlines::calls_private_fn})((1 as int)) as int)
+            fn(int) -> int {inlines::calls_private_fn})((1 as int)) as int)
 } as int)
 
 fn inlines_foreign_impl_method()
     ->
         int ({
     (((InlineImpl as
-                fn(int) -> Inlines::InlineImpl {Inlines::InlineImpl})((2 as
-                int)) as Inlines::InlineImpl).method() as int)
+                fn(int) -> inlines::InlineImpl {inlines::InlineImpl})((2 as
+                int)) as inlines::InlineImpl).method() as int)
 } as int)
 
 fn inlines_foreign_generic_with_foreign_impl()
     ->
         int ({
     ((generic_calls_method as
-            fn(Inlines::InlineImpl) -> int {Inlines::generic_calls_method::<Inlines::InlineImpl>})(((InlineImpl
+            fn(inlines::InlineImpl) -> int {inlines::generic_calls_method::<inlines::InlineImpl>})(((InlineImpl
                 as
-                fn(int) -> Inlines::InlineImpl {Inlines::InlineImpl})((2 as
-                int)) as Inlines::InlineImpl)) as int)
+                fn(int) -> inlines::InlineImpl {inlines::InlineImpl})((2 as
+                int)) as inlines::InlineImpl)) as int)
 } as int)
 
 fn foreign_generic_calls_local_impl_statically()
     ->
         int ({
     ((generic_calls_method as
-            fn(LocalImpl) -> int {Inlines::generic_calls_method::<LocalImpl>})(((LocalImpl
+            fn(LocalImpl) -> int {inlines::generic_calls_method::<LocalImpl>})(((LocalImpl
                 as fn(int) -> LocalImpl {LocalImpl})((5 as int)) as
             LocalImpl)) as int)
 } as int)

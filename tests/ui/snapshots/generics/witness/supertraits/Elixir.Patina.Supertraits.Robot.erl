@@ -10,10 +10,10 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'Supertraits::Named::name'/2,
-         'Supertraits::Named::$patina_witness'/0,
-         'Supertraits::Greet::greeting'/2,
-         'Supertraits::Greet::$patina_witness'/0]).
+         'supertraits::Named::name'/2,
+         'supertraits::Named::$patina_witness'/0,
+         'supertraits::Greet::greeting'/2,
+         'supertraits::Greet::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -28,25 +28,25 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Supertraits::Named::name'(_witness_Named@0_0,
+'supertraits::Named::name'(_witness_Named@0_0,
                            _self@1_0) ->
     <<"Robot"/utf8>>.
 
-'Supertraits::Named::$patina_witness'() ->
-    {{fun 'Elixir.Patina.Supertraits.Robot':'Supertraits::Named::name'/2},
+'supertraits::Named::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Supertraits.Robot':'supertraits::Named::name'/2},
      {},
      {}}.
 
-'Supertraits::Greet::greeting'(_witness_Greet@0_0,
+'supertraits::Greet::greeting'(_witness_Greet@0_0,
                                _self@1_0) ->
     <<"Beep"/utf8>>.
 
-'Supertraits::Greet::$patina_witness'() ->
+'supertraits::Greet::$patina_witness'() ->
     _witness_Named@0_0 =
-        {{fun 'Elixir.Patina.Supertraits.Robot':'Supertraits::Named::name'/2},
+        {{fun 'Elixir.Patina.Supertraits.Robot':'supertraits::Named::name'/2},
          {},
          {}},
-    {{fun 'Elixir.Patina.Supertraits.Robot':'Supertraits::Greet::greeting'/2,
-      fun 'Elixir.Patina.Supertraits':'Supertraits::Greet::calls_supertrait'/2},
+    {{fun 'Elixir.Patina.Supertraits.Robot':'supertraits::Greet::greeting'/2,
+      fun 'Elixir.Patina.Supertraits':'supertraits::Greet::calls_supertrait'/2},
      {_witness_Named@0_0},
      {}}.

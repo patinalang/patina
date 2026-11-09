@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -37,13 +37,13 @@ pub fn main() {
     let age_days = age.to_days();
     // println!("Is an adult? {}", is_adult(age_days));
     {
-        ::Core::io::put_chars([["Is an adult? ",
+        ::core::io::put_chars([["Is an adult? ",
                             patina_fmt::display(is_adult(age))]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([["Is an adult? ",
+        ::core::io::put_chars([["Is an adult? ",
                             patina_fmt::display(is_adult(age_days.to_years()))]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }

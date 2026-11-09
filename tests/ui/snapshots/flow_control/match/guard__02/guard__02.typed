@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -25,16 +25,16 @@ fn main() ({
             // _ => unreachable!("Should never happen."),
             // TODO ^ uncomment to fix compilation
             {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("Zero" as str)] as [str])] as
                     [[str]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         i if ((i as int) > (0 as int) as bool) => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("Greater than zero" as str)] as
                             [str])] as [[str]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
     } as ())
 } as ())

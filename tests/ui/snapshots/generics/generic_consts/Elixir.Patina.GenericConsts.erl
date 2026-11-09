@@ -31,9 +31,9 @@
 
 quadrupled() ->
     _witness_Konst@0_0 =
-        'Elixir.Patina.GenericConsts.$impl.Core.Int':'GenericConsts::Konst::$patina_witness'(),
+        'Elixir.Patina.GenericConsts.$impl.Core.Int':'generic_consts::Konst::$patina_witness'(),
     _const_Konst_K@1_0 =
-        'Elixir.Patina.GenericConsts.$impl.Core.Int':'GenericConsts::Konst::$patina_const::K'(_witness_Konst@0_0),
+        'Elixir.Patina.GenericConsts.$impl.Core.Int':'generic_consts::Konst::$patina_const::K'(_witness_Konst@0_0),
     _const_DOUBLED@2_0 = _const_Konst_K@1_0 * 2,
     _const_QUADRUPLED@3_0 = _const_DOUBLED@2_0 * 2,
     _const_QUADRUPLED@3_0.
@@ -69,12 +69,12 @@ is_doubled(_witnesses_where_is_doubled@0_0, _n@1_0) ->
 
 doubled_int() ->
     _witness_Konst@0_0 =
-        'Elixir.Patina.GenericConsts.$impl.Core.Int':'GenericConsts::Konst::$patina_witness'(),
+        'Elixir.Patina.GenericConsts.$impl.Core.Int':'generic_consts::Konst::$patina_witness'(),
     _witnesses_where_doubled@1_0 = {_witness_Konst@0_0},
     doubled(_witnesses_where_doubled@1_0).
 
 is_doubled_int(_n@0_0) ->
     _witness_Konst@1_0 =
-        'Elixir.Patina.GenericConsts.$impl.Core.Int':'GenericConsts::Konst::$patina_witness'(),
+        'Elixir.Patina.GenericConsts.$impl.Core.Int':'generic_consts::Konst::$patina_witness'(),
     _witnesses_where_is_doubled@2_0 = {_witness_Konst@1_0},
     is_doubled(_witnesses_where_is_doubled@2_0, _n@0_0).

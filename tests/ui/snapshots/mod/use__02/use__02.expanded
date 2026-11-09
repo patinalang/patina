@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -18,39 +18,39 @@ extern mod patina_fmt;
 // block: 2/2
 
 // Bind the `deeply::nested::function` path to `other_function`.
-use Deeply::Nested::function as other_function;
+use deeply::nested::function as other_function;
 
 fn function() {
 
 
-    // Easier access to `Deeply::Nested::function`
+    // Easier access to `deeply::nested::function`
 
-    // This is equivalent to `use Deeply::Nested::function as function`.
+    // This is equivalent to `use deeply::nested::function as function`.
     // This `function()` will shadow the outer one.
 
     // `use` bindings have a local scope. In this case, the
     // shadowing of `function()` is only in this block.
 
 
-    { ::Core::io::put_chars([["called `function()`"]]); ::Core::io::nl(); };
+    { ::core::io::put_chars([["called `function()`"]]); ::core::io::nl(); };
 }
-mod Deeply {
-    pub mod Nested {
+mod deeply {
+    pub mod nested {
         pub fn function() {
             {
-                ::Core::io::put_chars([["called `Deeply::Nested::function()`"]]);
-                ::Core::io::nl();
+                ::core::io::put_chars([["called `deeply::nested::function()`"]]);
+                ::core::io::nl();
             };
         }
     }
 }
 pub fn main() {
     other_function();
-    { ::Core::io::put_chars([["Entering block"]]); ::Core::io::nl(); };
+    { ::core::io::put_chars([["Entering block"]]); ::core::io::nl(); };
     {
-        use pkg::Deeply::Nested::function;
+        use pkg::deeply::nested::function;
         function();
-        { ::Core::io::put_chars([["Leaving block"]]); ::Core::io::nl(); };
+        { ::core::io::put_chars([["Leaving block"]]); ::core::io::nl(); };
     }
     function();
 }

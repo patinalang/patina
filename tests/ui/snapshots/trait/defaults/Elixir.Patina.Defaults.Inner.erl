@@ -9,7 +9,7 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'Defaults::Inner::Doubler::doubled'/2]).
+         'defaults::inner::Doubler::doubled'/2]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -26,7 +26,7 @@
 
 helper(_x@0_0) -> _x@0_0 * 2.
 
-'Defaults::Inner::Doubler::doubled'(_witness_Doubler@0_0,
+'defaults::inner::Doubler::doubled'(_witness_Doubler@0_0,
                                     _self@1_0) ->
     _vtable_Doubler@2_0 = erlang:element(1,
                                          _witness_Doubler@0_0),

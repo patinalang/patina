@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -32,28 +32,28 @@ fn main() ({
         // FIXME ^ Comment out this line
 
         ({
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("inner short: " as str),
                                 ((patina_fmt::display as
                                         fn(term) -> term)((short_lived_binding as int)) as term)] as
                             [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         } as ());
     } as ())
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("outer short: " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)((short_lived_binding as {type error})) as
                                 term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("outer long: " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)((long_lived_binding as int)) as term)] as
                         [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

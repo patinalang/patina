@@ -1125,7 +1125,6 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "clap",
- "convert_case",
  "etf",
  "indexmap",
  "libtest-mimic",
@@ -1746,7 +1745,6 @@ dependencies = [
 name = "rustc_expand"
 version = "0.0.0"
 dependencies = [
- "convert_case",
  "etf",
  "rustc_ast",
  "rustc_ast_passes",
@@ -1956,7 +1954,6 @@ dependencies = [
 name = "rustc_interface"
 version = "0.0.0"
 dependencies = [
- "convert_case",
  "patina_etir_build",
  "rustc_ast",
  "rustc_ast_lowering",
@@ -2091,7 +2088,6 @@ name = "rustc_middle"
 version = "0.0.0"
 dependencies = [
  "bitflags",
- "convert_case",
  "either",
  "gsgdt",
  "parking_lot",
@@ -2334,6 +2330,7 @@ version = "0.0.0"
 dependencies = [
  "bitflags",
  "blake3",
+ "convert_case",
  "derive-where",
  "indexmap",
  "itoa",

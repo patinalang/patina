@@ -12,10 +12,10 @@
 #![attr = NoCore]
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 #[allow(unused)]
 extern mod patina_fmt;
 
@@ -30,37 +30,37 @@ struct Cooked(Food);
 fn peel(food: Option<Food>)
     ->
         Option<Peeled> ({
-    (match (food as Core::Option<Food>) {
+    (match (food as core::Option<Food>) {
         Some(food) =>
             ((Some as
-                    fn(Peeled) -> Core::Option<Peeled> {Core::Option::<Peeled>::Some})(((Peeled
+                    fn(Peeled) -> core::Option<Peeled> {core::Option::<Peeled>::Some})(((Peeled
                         as fn(Food) -> Peeled {Peeled})((food as Food)) as Peeled))
-                as Core::Option<Peeled>),
-        None => (None as Core::Option<Peeled>),
-    } as Core::Option<Peeled>)
-} as Core::Option<Peeled>)
+                as core::Option<Peeled>),
+        None => (None as core::Option<Peeled>),
+    } as core::Option<Peeled>)
+} as core::Option<Peeled>)
 
 // Chopping food. If there isn't any, then return `None`.
 // Otherwise, return the chopped food.
 fn chop(peeled: Option<Peeled>)
     ->
         Option<Chopped> ({
-    (match (peeled as Core::Option<Peeled>) {
+    (match (peeled as core::Option<Peeled>) {
         Some(Peeled(food)) =>
             ((Some as
-                    fn(Chopped) -> Core::Option<Chopped> {Core::Option::<Chopped>::Some})(((Chopped
+                    fn(Chopped) -> core::Option<Chopped> {core::Option::<Chopped>::Some})(((Chopped
                         as fn(Food) -> Chopped {Chopped})((food as Food)) as
-                    Chopped)) as Core::Option<Chopped>),
-        None => (None as Core::Option<Chopped>),
-    } as Core::Option<Chopped>)
-} as Core::Option<Chopped>)
+                    Chopped)) as core::Option<Chopped>),
+        None => (None as core::Option<Chopped>),
+    } as core::Option<Chopped>)
+} as core::Option<Chopped>)
 
 // Cooking food. Here, we showcase `map()` instead of `match` for case handling.
 fn cook(chopped: Option<Chopped>)
     ->
         Option<Cooked> ({
     ((chopped as
-            Core::Option<Chopped>).map((|Chopped(food)|
+            core::Option<Chopped>).map((|Chopped(food)|
             ((Cooked as fn(Food) -> Cooked {Cooked})((food as Food)) as
                 Cooked) as
             {closure@tests/ui/src/error/option_unwrap/map__01.pt:32:17: 32:32}))
@@ -73,7 +73,7 @@ fn process(food: Option<Food>)
     ->
         Option<Cooked> ({
     ((((food as
-                    Core::Option<Food>).map((|f|
+                    core::Option<Food>).map((|f|
                     ((Peeled as fn(Food) -> Peeled {Peeled})((f as Food)) as
                         Peeled) as
                     {closure@tests/ui/src/error/option_unwrap/map__01.pt:38:14: 38:17}))
@@ -93,65 +93,65 @@ fn process(food: Option<Food>)
 // Check whether there's food or not before trying to eat it!
 fn eat(food:
         Option<Cooked>) ({
-    (match (food as Core::Option<Cooked>) {
+    (match (food as core::Option<Cooked>) {
         Some(food) =>
 
             // Let's try the simpler looking `process()` now.
 
             {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("Mmm. I love " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((food as Cooked))
                                     as term)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         None => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("Oh no! It wasn\'t edible." as str)]
                             as [str])] as [[str]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
     } as ())
 } as ())
 fn main() ({
     let apple =
         ((Some as
-                fn(Food) -> Core::Option<Food> {Core::Option::<Food>::Some})((Food::Apple
-                as Food)) as Core::Option<Food>);
+                fn(Food) -> core::Option<Food> {core::Option::<Food>::Some})((Food::Apple
+                as Food)) as core::Option<Food>);
     let carrot =
         ((Some as
-                fn(Food) -> Core::Option<Food> {Core::Option::<Food>::Some})((Food::Carrot
-                as Food)) as Core::Option<Food>);
-    let potato = (None as Core::Option<Food>);
+                fn(Food) -> core::Option<Food> {core::Option::<Food>::Some})((Food::Carrot
+                as Food)) as core::Option<Food>);
+    let potato = (None as core::Option<Food>);
     let cooked_apple =
         ((cook as
-                fn(Core::Option<Chopped>) -> Core::Option<Cooked> {cook})(((chop
+                fn(core::Option<Chopped>) -> core::Option<Cooked> {cook})(((chop
                     as
-                    fn(Core::Option<Peeled>) -> Core::Option<Chopped> {chop})(((peel
+                    fn(core::Option<Peeled>) -> core::Option<Chopped> {chop})(((peel
                         as
-                        fn(Core::Option<Food>) -> Core::Option<Peeled> {peel})((apple
-                        as Core::Option<Food>)) as Core::Option<Peeled>)) as
-                Core::Option<Chopped>)) as Core::Option<Cooked>);
+                        fn(core::Option<Food>) -> core::Option<Peeled> {peel})((apple
+                        as core::Option<Food>)) as core::Option<Peeled>)) as
+                core::Option<Chopped>)) as core::Option<Cooked>);
     let cooked_carrot =
         ((cook as
-                fn(Core::Option<Chopped>) -> Core::Option<Cooked> {cook})(((chop
+                fn(core::Option<Chopped>) -> core::Option<Cooked> {cook})(((chop
                     as
-                    fn(Core::Option<Peeled>) -> Core::Option<Chopped> {chop})(((peel
+                    fn(core::Option<Peeled>) -> core::Option<Chopped> {chop})(((peel
                         as
-                        fn(Core::Option<Food>) -> Core::Option<Peeled> {peel})((carrot
-                        as Core::Option<Food>)) as Core::Option<Peeled>)) as
-                Core::Option<Chopped>)) as Core::Option<Cooked>);
+                        fn(core::Option<Food>) -> core::Option<Peeled> {peel})((carrot
+                        as core::Option<Food>)) as core::Option<Peeled>)) as
+                core::Option<Chopped>)) as core::Option<Cooked>);
     let cooked_potato =
         ((process as
-                fn(Core::Option<Food>) -> Core::Option<Cooked> {process})((potato
-                as Core::Option<Food>)) as Core::Option<Cooked>);
+                fn(core::Option<Food>) -> core::Option<Cooked> {process})((potato
+                as core::Option<Food>)) as core::Option<Cooked>);
     ((eat as
-            fn(Core::Option<Cooked>) {eat})((cooked_apple as
-            Core::Option<Cooked>)) as ());
+            fn(core::Option<Cooked>) {eat})((cooked_apple as
+            core::Option<Cooked>)) as ());
     ((eat as
-            fn(Core::Option<Cooked>) {eat})((cooked_carrot as
-            Core::Option<Cooked>)) as ());
+            fn(core::Option<Cooked>) {eat})((cooked_carrot as
+            core::Option<Cooked>)) as ());
     ((eat as
-            fn(Core::Option<Cooked>) {eat})((cooked_potato as
-            Core::Option<Cooked>)) as ());
+            fn(core::Option<Cooked>) {eat})((cooked_potato as
+            core::Option<Cooked>)) as ());
 } as ())

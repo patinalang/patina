@@ -7,7 +7,6 @@ use std::io::{self, BufRead, BufReader};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Output, Stdio};
 
-use convert_case::{Case, Casing};
 use tempfile::TempDir;
 
 pub(crate) fn patina_command() -> Command {
@@ -111,7 +110,7 @@ impl Session {
             "[package]\nname = \"{name}\"\nversion = \"0.1.0\"\n\n[dependencies]\n{dependencies}\n"
         );
         std::fs::write(dir.join("Patina.toml"), manifest).expect("write manifest");
-        let file = format!("{}.pt", name.to_case(Case::Snake));
+        let file = format!("{name}.pt");
         std::fs::write(dir.join("src").join(file), source).expect("write source");
     }
 
@@ -155,7 +154,7 @@ pub(crate) fn install_root() -> PathBuf {
 pub(crate) fn provider(value: u32) -> String {
     format!(
         r#"
-use Core::ProcMacro::*;
+use core::proc_macro::*;
 
 #[proc_macro]
 pub fn num(_input: TokenStream) -> TokenStream {{
@@ -166,4 +165,4 @@ pub fn num(_input: TokenStream) -> TokenStream {{
 }
 
 /// Source of a package that uses [`provider`]'s `num!()`.
-pub(crate) const CONSUMER: &str = "pub fn f() { let _x = Provider::num!(); }\n";
+pub(crate) const CONSUMER: &str = "pub fn f() { let _x = provider::num!(); }\n";

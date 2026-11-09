@@ -4,12 +4,12 @@ pub fn top(n: int) -> Option<int> {
     if n > 0 { Some(n) } else { None }
 }
 
-pub mod Outer {
+pub mod outer {
     pub fn outer(n: int) -> Option<int> {
         if n > 0 { Some(n) } else { None }
     }
 
-    pub mod Inner {
+    pub mod inner {
         pub fn inner(value: Option<int>) -> int {
             match value {
                 Some(n) => n,

@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -19,7 +19,7 @@ extern mod patina_fmt;
 
 fn foo() -> ! {
     unsafe {
-        ::Core::erlang::error(::Core::Panic::new("This call never returns."),
+        ::core::erlang::error(::core::Panic::new("This call never returns."),
                 a"none",
                 [(a"error_info",
                             #{a"module" =>

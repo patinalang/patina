@@ -1,7 +1,7 @@
 error[E0433]: cannot find module or crate `pkg` in this scope
   --> tests/ui/src/mod/use__01.pt:4:5
    |
-LL | use pkg::Deeply::Nested::{
+LL | use pkg::deeply::nested::{
    |     ^^^ use of unresolved module or unlinked crate `pkg`
    |
    = help: you might be missing a crate named `pkg`

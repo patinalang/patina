@@ -3,7 +3,7 @@ pub struct Wrapper<T>(pub T);
 
 pub struct Nested<T>(pub Wrapper<T>);
 
-use Core::PhantomData;
+use core::PhantomData;
 
 pub struct PhantomTuple<T>(pub int, pub PhantomData<T>);
 

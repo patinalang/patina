@@ -4,15 +4,15 @@
 // Similarly `mod inaccessible` and `mod nested` will locate the `nested.rs`
 // and `inaccessible.rs` files and insert them here under their respective
 // modules
-mod Inaccessible;
-pub mod Nested;
+mod inaccessible;
+pub mod nested;
 
-pub fn function() { println!("called `MyMod::function()`"); }
+pub fn function() { println!("called `my_mod::function()`"); }
 
-fn private_function() { println!("called `MyMod::private_function()`"); }
+fn private_function() { println!("called `my_mod::private_function()`"); }
 
 pub fn indirect_access() {
-    print!("called `MyMod::indirect_access()`, that\n> ");
+    print!("called `my_mod::indirect_access()`, that\n> ");
 
     private_function();
 }

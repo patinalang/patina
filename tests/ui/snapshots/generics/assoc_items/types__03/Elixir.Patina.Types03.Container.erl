@@ -11,12 +11,12 @@
 
 -export(['__info__'/1,
          '$patina_constructor__Container'/2,
-         'Types03::Contains::$patina_type::A'/1,
-         'Types03::Contains::$patina_type::B'/1,
-         'Types03::Contains::contains'/4,
-         'Types03::Contains::first'/2,
-         'Types03::Contains::last'/2,
-         'Types03::Contains::$patina_witness'/0]).
+         'types__03::Contains::$patina_type::A'/1,
+         'types__03::Contains::$patina_type::B'/1,
+         'types__03::Contains::contains'/4,
+         'types__03::Contains::first'/2,
+         'types__03::Contains::last'/2,
+         'types__03::Contains::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -36,30 +36,30 @@
 '$patina_constructor__Container'(_0@0_0, _1@1_0) ->
     #'Container'{'0' = _0@0_0, '1' = _1@1_0}.
 
-'Types03::Contains::$patina_type::A'(_witness_Contains@0_0) ->
+'types__03::Contains::$patina_type::A'(_witness_Contains@0_0) ->
     {}.
 
-'Types03::Contains::$patina_type::B'(_witness_Contains@0_0) ->
+'types__03::Contains::$patina_type::B'(_witness_Contains@0_0) ->
     {}.
 
-'Types03::Contains::contains'(_witness_Contains@0_0,
-                              _self@1_0, _number_1@2_0, _number_2@3_0) ->
+'types__03::Contains::contains'(_witness_Contains@0_0,
+                                _self@1_0, _number_1@2_0, _number_2@3_0) ->
     _self@1_0#'Container'.'0' =:= _number_1@2_0 andalso
         _self@1_0#'Container'.'1' =:= _number_2@3_0.
 
-'Types03::Contains::first'(_witness_Contains@0_0,
-                           _self@1_0) ->
+'types__03::Contains::first'(_witness_Contains@0_0,
+                             _self@1_0) ->
     _self@1_0#'Container'.'0'.
 
-'Types03::Contains::last'(_witness_Contains@0_0,
-                          _self@1_0) ->
+'types__03::Contains::last'(_witness_Contains@0_0,
+                            _self@1_0) ->
     _self@1_0#'Container'.'1'.
 
-'Types03::Contains::$patina_witness'() ->
-    {{fun 'Elixir.Patina.Types03.Container':'Types03::Contains::$patina_type::A'/1,
-      fun 'Elixir.Patina.Types03.Container':'Types03::Contains::$patina_type::B'/1,
-      fun 'Elixir.Patina.Types03.Container':'Types03::Contains::contains'/4,
-      fun 'Elixir.Patina.Types03.Container':'Types03::Contains::first'/2,
-      fun 'Elixir.Patina.Types03.Container':'Types03::Contains::last'/2},
+'types__03::Contains::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Types03.Container':'types__03::Contains::$patina_type::A'/1,
+      fun 'Elixir.Patina.Types03.Container':'types__03::Contains::$patina_type::B'/1,
+      fun 'Elixir.Patina.Types03.Container':'types__03::Contains::contains'/4,
+      fun 'Elixir.Patina.Types03.Container':'types__03::Contains::first'/2,
+      fun 'Elixir.Patina.Types03.Container':'types__03::Contains::last'/2},
      {},
      {}}.

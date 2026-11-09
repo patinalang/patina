@@ -5,6 +5,7 @@
 use std::hash::{Hash, Hasher};
 use std::{fmt, str};
 
+use convert_case::{Case, Casing};
 use rustc_arena::DroplessArena;
 use rustc_data_structures::fx::{FxHashSet, FxIndexSet};
 use rustc_data_structures::stable_hasher::{
@@ -2685,6 +2686,14 @@ impl Symbol {
         with_session_globals(|session_globals| unsafe {
             std::mem::transmute::<&str, &str>(session_globals.symbol_interner.get_str(*self))
         })
+    }
+
+    pub fn pascal_case(&self) -> String {
+        self.as_str().to_case(Case::Pascal)
+    }
+
+    pub fn snake_case(&self) -> String {
+        self.as_str().to_case(Case::Snake)
     }
 
     pub fn as_u32(self) -> u32 {

@@ -9,11 +9,11 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'Defaults::Animal::calls_required'/2,
-         'Defaults::Animal::calls_default'/2,
-         'Defaults::Animal::with_bounded_param'/4,
-         'Defaults::Animal::returns_self'/2,
-         'Defaults::Animal::whisper'/2,
+         'defaults::Animal::calls_required'/2,
+         'defaults::Animal::calls_default'/2,
+         'defaults::Animal::with_bounded_param'/4,
+         'defaults::Animal::returns_self'/2,
+         'defaults::Animal::whisper'/2,
          sheep_calls_required/1,
          dog_calls_required/1,
          sheep_with_bounded_param/1,
@@ -23,26 +23,26 @@
          dog_via/1,
          sheep_returns_self/1,
          dog_returns_self/1,
-         'Defaults::Combine::uses_rhs_witness'/4,
+         'defaults::Combine::uses_rhs_witness'/4,
          combine_coin_piles/2,
          combine_coin_with_note/2,
          combine_note_piles_via/2,
          combine_coin_with_note_via/2,
          double/1,
-         'Defaults::Greeter::greet'/2,
+         'defaults::Greeter::greet'/2,
          greet/1,
          greet_through_witness/1,
-         'Defaults::Container::needs_item_witness'/3,
+         'defaults::Container::needs_item_witness'/3,
          describe_boxed/1,
          describe_wrapped/1,
          describe_rewrapped/1,
          describe_loose/1,
          describe_first_loose/1,
          describe_nested/1,
-         'Defaults::Maker::make'/2,
+         'defaults::Maker::make'/2,
          make/0,
-         'Defaults::Numbered::$patina_const::D'/1,
-         'Defaults::Numbered::consts'/2,
+         'defaults::Numbered::$patina_const::D'/1,
+         'defaults::Numbered::consts'/2,
          one_consts/0,
          two_consts/0,
          plus_one_consts/0,
@@ -75,7 +75,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Animal::calls_required'(_witness_Animal@0_0,
+'defaults::Animal::calls_required'(_witness_Animal@0_0,
                                    _self@1_0) ->
     _vtable_Animal@2_0 = erlang:element(1,
                                         _witness_Animal@0_0),
@@ -89,7 +89,7 @@
                                         _self@1_0),
     {_element@5_0, _element@6_0}.
 
-'Defaults::Animal::calls_default'(_witness_Animal@0_0,
+'defaults::Animal::calls_default'(_witness_Animal@0_0,
                                   _self@1_0) ->
     _vtable_Animal@2_0 = erlang:element(1,
                                         _witness_Animal@0_0),
@@ -103,7 +103,7 @@
                                       _self@1_0),
     {_element@4_0, _element@5_0}.
 
-'Defaults::Animal::with_bounded_param'(_witness_Animal@0_0,
+'defaults::Animal::with_bounded_param'(_witness_Animal@0_0,
                                        _witnesses_where_Animal_with_bounded_param@1_0,
                                        _self@2_0, _tag@3_0) ->
     _vtable_Animal@4_0 = erlang:element(1,
@@ -124,12 +124,12 @@
                                     _tag@3_0),
     {_element@10_0, _element@11_0, _element@12_0}.
 
-'Defaults::Animal::returns_self'(_witness_Animal@0_0,
+'defaults::Animal::returns_self'(_witness_Animal@0_0,
                                  _self@1_0) ->
     _this@2_0 = _self@1_0,
     _this@2_0.
 
-'Defaults::Animal::whisper'(_witness_Animal@0_0,
+'defaults::Animal::whisper'(_witness_Animal@0_0,
                             _self@1_0) ->
     _vtable_Animal@2_0 = erlang:element(1,
                                         _witness_Animal@0_0),
@@ -156,36 +156,36 @@ via(_witnesses_where_via@0_0, _animal@1_0) ->
 
 sheep_calls_required(_name@0_0) ->
     _witness_Animal@1_0 =
-        'Elixir.Patina.Defaults.Sheep':'Defaults::Animal::$patina_witness'(),
-    'Defaults::Animal::calls_required'(_witness_Animal@1_0,
+        'Elixir.Patina.Defaults.Sheep':'defaults::Animal::$patina_witness'(),
+    'defaults::Animal::calls_required'(_witness_Animal@1_0,
                                        _name@0_0).
 
 dog_calls_required(_name@0_0) ->
     _witness_Animal@1_0 =
-        'Elixir.Patina.Defaults.Dog':'Defaults::Animal::$patina_witness'(),
-    'Elixir.Patina.Defaults.Dog':'Defaults::Animal::calls_required'(_witness_Animal@1_0,
+        'Elixir.Patina.Defaults.Dog':'defaults::Animal::$patina_witness'(),
+    'Elixir.Patina.Defaults.Dog':'defaults::Animal::calls_required'(_witness_Animal@1_0,
                                                                     _name@0_0).
 
 sheep_with_bounded_param(_name@0_0) ->
     _witness_Animal@1_0 =
-        'Elixir.Patina.Defaults.Sheep':'Defaults::Animal::$patina_witness'(),
+        'Elixir.Patina.Defaults.Sheep':'defaults::Animal::$patina_witness'(),
     _witness_Tag@2_0 =
-        'Elixir.Patina.Defaults.Bell':'Defaults::Tag::$patina_witness'(),
+        'Elixir.Patina.Defaults.Bell':'defaults::Tag::$patina_witness'(),
     _witnesses_where_Animal_with_bounded_param@3_0 =
         {_witness_Tag@2_0},
-    'Defaults::Animal::with_bounded_param'(_witness_Animal@1_0,
+    'defaults::Animal::with_bounded_param'(_witness_Animal@1_0,
                                            _witnesses_where_Animal_with_bounded_param@3_0,
                                            _name@0_0,
                                            'Elixir.Patina.Defaults.Bell').
 
 dog_with_bounded_param(_name@0_0) ->
     _witness_Animal@1_0 =
-        'Elixir.Patina.Defaults.Dog':'Defaults::Animal::$patina_witness'(),
+        'Elixir.Patina.Defaults.Dog':'defaults::Animal::$patina_witness'(),
     _witness_Tag@2_0 =
-        'Elixir.Patina.Defaults.Bell':'Defaults::Tag::$patina_witness'(),
+        'Elixir.Patina.Defaults.Bell':'defaults::Tag::$patina_witness'(),
     _witnesses_where_Animal_with_bounded_param@3_0 =
         {_witness_Tag@2_0},
-    'Defaults::Animal::with_bounded_param'(_witness_Animal@1_0,
+    'defaults::Animal::with_bounded_param'(_witness_Animal@1_0,
                                            _witnesses_where_Animal_with_bounded_param@3_0,
                                            _name@0_0,
                                            'Elixir.Patina.Defaults.Bell').
@@ -195,31 +195,31 @@ sheep_calls_stubs_locally(_name@0_0) ->
 
 sheep_via(_name@0_0) ->
     _witness_Animal@1_0 =
-        'Elixir.Patina.Defaults.Sheep':'Defaults::Animal::$patina_witness'(),
+        'Elixir.Patina.Defaults.Sheep':'defaults::Animal::$patina_witness'(),
     _witnesses_where_via@2_0 = {_witness_Animal@1_0},
     via(_witnesses_where_via@2_0, _name@0_0).
 
 dog_via(_name@0_0) ->
     _witness_Animal@1_0 =
-        'Elixir.Patina.Defaults.Dog':'Defaults::Animal::$patina_witness'(),
+        'Elixir.Patina.Defaults.Dog':'defaults::Animal::$patina_witness'(),
     _witnesses_where_via@2_0 = {_witness_Animal@1_0},
     via(_witnesses_where_via@2_0, _name@0_0).
 
 sheep_returns_self(_name@0_0) ->
     _witness_Animal@1_0 =
-        'Elixir.Patina.Defaults.Sheep':'Defaults::Animal::$patina_witness'(),
-    'Elixir.Patina.Defaults.Sheep':'Defaults::Animal::name'(_witness_Animal@1_0,
-                                                            'Defaults::Animal::returns_self'(_witness_Animal@1_0,
+        'Elixir.Patina.Defaults.Sheep':'defaults::Animal::$patina_witness'(),
+    'Elixir.Patina.Defaults.Sheep':'defaults::Animal::name'(_witness_Animal@1_0,
+                                                            'defaults::Animal::returns_self'(_witness_Animal@1_0,
                                                                                              _name@0_0)).
 
 dog_returns_self(_name@0_0) ->
     _witness_Animal@1_0 =
-        'Elixir.Patina.Defaults.Dog':'Defaults::Animal::$patina_witness'(),
-    'Elixir.Patina.Defaults.Dog':'Defaults::Animal::name'(_witness_Animal@1_0,
-                                                          'Defaults::Animal::returns_self'(_witness_Animal@1_0,
+        'Elixir.Patina.Defaults.Dog':'defaults::Animal::$patina_witness'(),
+    'Elixir.Patina.Defaults.Dog':'defaults::Animal::name'(_witness_Animal@1_0,
+                                                          'defaults::Animal::returns_self'(_witness_Animal@1_0,
                                                                                            _name@0_0)).
 
-'Defaults::Combine::uses_rhs_witness'(_witness_Combine@0_0,
+'defaults::Combine::uses_rhs_witness'(_witness_Combine@0_0,
                                       _witnesses_where_Combine_uses_rhs_witness@1_0,
                                       _self@2_0, _other@3_0) ->
     _supertraits_Combine@4_0 = erlang:element(2,
@@ -258,39 +258,39 @@ combine_via(_witnesses_where_combine_via@0_0, _a@1_0,
 
 combine_coin_piles(_a@0_0, _b@1_0) ->
     _witness_Value@2_0 =
-        'Elixir.Patina.Defaults.Coin':'Defaults::Value::$patina_witness'(),
+        'Elixir.Patina.Defaults.Coin':'defaults::Value::$patina_witness'(),
     _witnesses_where_Combine@3_0 = {_witness_Value@2_0},
     _witness_Combine@4_0 =
-        'Elixir.Patina.Defaults.Pile':'Defaults::Combine::$patina_witness'(_witnesses_where_Combine@3_0),
+        'Elixir.Patina.Defaults.Pile':'defaults::Combine::$patina_witness'(_witnesses_where_Combine@3_0),
     _supertraits_Combine@5_0 = erlang:element(2,
                                               _witness_Combine@4_0),
     _witness_Value@6_0 = erlang:element(1,
                                         _supertraits_Combine@5_0),
     _witnesses_where_Combine_uses_rhs_witness@7_0 =
         {_witness_Value@6_0},
-    'Defaults::Combine::uses_rhs_witness'(_witness_Combine@4_0,
+    'defaults::Combine::uses_rhs_witness'(_witness_Combine@4_0,
                                           _witnesses_where_Combine_uses_rhs_witness@7_0,
                                           begin _0@8_0 = _a@0_0, _0@8_0 end,
                                           begin _0@9_0 = _b@1_0, _0@9_0 end).
 
 combine_coin_with_note(_a@0_0, _b@1_0) ->
     _witness_Combine@2_0 =
-        'Elixir.Patina.Defaults.Coin':'Defaults::Combine<Defaults::Note>::$patina_witness'(),
+        'Elixir.Patina.Defaults.Coin':'defaults::Combine<defaults::Note>::$patina_witness'(),
     _witness_Value@3_0 =
-        'Elixir.Patina.Defaults.Note':'Defaults::Value::$patina_witness'(),
+        'Elixir.Patina.Defaults.Note':'defaults::Value::$patina_witness'(),
     _witnesses_where_Combine_uses_rhs_witness@4_0 =
         {_witness_Value@3_0},
-    'Defaults::Combine::uses_rhs_witness'(_witness_Combine@2_0,
+    'defaults::Combine::uses_rhs_witness'(_witness_Combine@2_0,
                                           _witnesses_where_Combine_uses_rhs_witness@4_0,
                                           _a@0_0,
                                           _b@1_0).
 
 combine_note_piles_via(_a@0_0, _b@1_0) ->
     _witness_Value@2_0 =
-        'Elixir.Patina.Defaults.Note':'Defaults::Value::$patina_witness'(),
+        'Elixir.Patina.Defaults.Note':'defaults::Value::$patina_witness'(),
     _witnesses_where_Combine@3_0 = {_witness_Value@2_0},
     _witness_Combine@4_0 =
-        'Elixir.Patina.Defaults.Pile':'Defaults::Combine::$patina_witness'(_witnesses_where_Combine@3_0),
+        'Elixir.Patina.Defaults.Pile':'defaults::Combine::$patina_witness'(_witnesses_where_Combine@3_0),
     _supertraits_Combine@5_0 = erlang:element(2,
                                               _witness_Combine@4_0),
     _witness_Value@6_0 = erlang:element(1,
@@ -303,9 +303,9 @@ combine_note_piles_via(_a@0_0, _b@1_0) ->
 
 combine_coin_with_note_via(_a@0_0, _b@1_0) ->
     _witness_Combine@2_0 =
-        'Elixir.Patina.Defaults.Coin':'Defaults::Combine<Defaults::Note>::$patina_witness'(),
+        'Elixir.Patina.Defaults.Coin':'defaults::Combine<defaults::Note>::$patina_witness'(),
     _witness_Value@3_0 =
-        'Elixir.Patina.Defaults.Note':'Defaults::Value::$patina_witness'(),
+        'Elixir.Patina.Defaults.Note':'defaults::Value::$patina_witness'(),
     _witnesses_where_combine_via@4_0 =
         {_witness_Combine@2_0, _witness_Value@3_0},
     combine_via(_witnesses_where_combine_via@4_0,
@@ -314,11 +314,11 @@ combine_coin_with_note_via(_a@0_0, _b@1_0) ->
 
 double(_x@0_0) ->
     _witness_Doubler@1_0 =
-        'Elixir.Patina.Defaults.N':'Defaults::Inner::Doubler::$patina_witness'(),
-    'Elixir.Patina.Defaults.Inner':'Defaults::Inner::Doubler::doubled'(_witness_Doubler@1_0,
+        'Elixir.Patina.Defaults.N':'defaults::inner::Doubler::$patina_witness'(),
+    'Elixir.Patina.Defaults.Inner':'defaults::inner::Doubler::doubled'(_witness_Doubler@1_0,
                                                                        _x@0_0).
 
-'Defaults::Greeter::greet'(_witness_Greeter@0_0,
+'defaults::Greeter::greet'(_witness_Greeter@0_0,
                            _self@1_0) ->
     _supertraits_Greeter@2_0 = erlang:element(2,
                                               _witness_Greeter@0_0),
@@ -345,17 +345,17 @@ greet_via(_witnesses_where_greet_via@0_0,
 
 greet(_name@0_0) ->
     _witness_Greeter@1_0 =
-        'Elixir.Patina.Defaults.Person':'Defaults::Greeter::$patina_witness'(),
-    'Defaults::Greeter::greet'(_witness_Greeter@1_0,
+        'Elixir.Patina.Defaults.Person':'defaults::Greeter::$patina_witness'(),
+    'defaults::Greeter::greet'(_witness_Greeter@1_0,
                                _name@0_0).
 
 greet_through_witness(_name@0_0) ->
     _witness_Greeter@1_0 =
-        'Elixir.Patina.Defaults.Person':'Defaults::Greeter::$patina_witness'(),
+        'Elixir.Patina.Defaults.Person':'defaults::Greeter::$patina_witness'(),
     _witnesses_where_greet_via@2_0 = {_witness_Greeter@1_0},
     greet_via(_witnesses_where_greet_via@2_0, _name@0_0).
 
-'Defaults::Container::needs_item_witness'(_witness_Container@0_0,
+'defaults::Container::needs_item_witness'(_witness_Container@0_0,
                                           _witnesses_where_Container_needs_item_witness@1_0,
                                           _self@2_0) ->
     _vtable_Container@3_0 = erlang:element(1,
@@ -415,12 +415,12 @@ nested(_witnesses_where_nested@0_0, _container@1_0) ->
 
 describe_boxed(_name@0_0) ->
     _witness_Container@1_0 =
-        'Elixir.Patina.Defaults.Boxed':'Defaults::Container::$patina_witness'(),
+        'Elixir.Patina.Defaults.Boxed':'defaults::Container::$patina_witness'(),
     _witness_Describe@2_0 =
-        'Elixir.Patina.Defaults.Name':'Defaults::Describe::$patina_witness'(),
+        'Elixir.Patina.Defaults.Name':'defaults::Describe::$patina_witness'(),
     _witnesses_where_Container_needs_item_witness@3_0 =
         {_witness_Describe@2_0},
-    'Defaults::Container::needs_item_witness'(_witness_Container@1_0,
+    'defaults::Container::needs_item_witness'(_witness_Container@1_0,
                                               _witnesses_where_Container_needs_item_witness@3_0,
                                               begin
                                                   _0@4_0 = _name@0_0, _0@4_0
@@ -428,12 +428,12 @@ describe_boxed(_name@0_0) ->
 
 describe_wrapped(_name@0_0) ->
     _witness_Describe@1_0 =
-        'Elixir.Patina.Defaults.Name':'Defaults::Describe::$patina_witness'(),
+        'Elixir.Patina.Defaults.Name':'defaults::Describe::$patina_witness'(),
     _witnesses_where_Container@2_0 =
         {_witness_Describe@1_0},
     _witness_Container@3_0 =
-        'Elixir.Patina.Defaults.Wrapped':'Defaults::Container::$patina_witness'(_witnesses_where_Container@2_0),
-    'Defaults::Container::needs_item_witness'(_witness_Container@3_0,
+        'Elixir.Patina.Defaults.Wrapped':'defaults::Container::$patina_witness'(_witnesses_where_Container@2_0),
+    'defaults::Container::needs_item_witness'(_witness_Container@3_0,
                                               _witnesses_where_Container@2_0,
                                               begin
                                                   _0@4_0 = _name@0_0, _0@4_0
@@ -441,12 +441,12 @@ describe_wrapped(_name@0_0) ->
 
 describe_rewrapped(_name@0_0) ->
     _witness_Container@1_0 =
-        'Elixir.Patina.Defaults.Rewrapped':'Defaults::Container::$patina_witness'(),
+        'Elixir.Patina.Defaults.Rewrapped':'defaults::Container::$patina_witness'(),
     _witness_Describe@2_0 =
-        'Elixir.Patina.Defaults.Name':'Defaults::Describe::$patina_witness'(),
+        'Elixir.Patina.Defaults.Name':'defaults::Describe::$patina_witness'(),
     _witnesses_where_Container_needs_item_witness@3_0 =
         {_witness_Describe@2_0},
-    'Defaults::Container::needs_item_witness'(_witness_Container@1_0,
+    'defaults::Container::needs_item_witness'(_witness_Container@1_0,
                                               _witnesses_where_Container_needs_item_witness@3_0,
                                               begin
                                                   _0@5_0 = begin
@@ -459,12 +459,12 @@ describe_rewrapped(_name@0_0) ->
 
 describe_loose(_name@0_0) ->
     _witness_Container@1_0 =
-        'Elixir.Patina.Defaults.Loose':'Defaults::Container::$patina_witness'(),
+        'Elixir.Patina.Defaults.Loose':'defaults::Container::$patina_witness'(),
     _witness_Describe@2_0 =
-        'Elixir.Patina.Defaults.Name':'Defaults::Describe::$patina_witness'(),
+        'Elixir.Patina.Defaults.Name':'defaults::Describe::$patina_witness'(),
     _witnesses_where_Container_needs_item_witness@3_0 =
         {_witness_Describe@2_0},
-    'Defaults::Container::needs_item_witness'(_witness_Container@1_0,
+    'defaults::Container::needs_item_witness'(_witness_Container@1_0,
                                               _witnesses_where_Container_needs_item_witness@3_0,
                                               begin
                                                   _0@4_0 = _name@0_0, _0@4_0
@@ -472,9 +472,9 @@ describe_loose(_name@0_0) ->
 
 describe_first_loose(_name@0_0) ->
     _witness_Container@1_0 =
-        'Elixir.Patina.Defaults.Loose':'Defaults::Container::$patina_witness'(),
+        'Elixir.Patina.Defaults.Loose':'defaults::Container::$patina_witness'(),
     _witness_Describe@2_0 =
-        'Elixir.Patina.Defaults.Name':'Defaults::Describe::$patina_witness'(),
+        'Elixir.Patina.Defaults.Name':'defaults::Describe::$patina_witness'(),
     _witnesses_where_first@3_0 = {_witness_Container@1_0,
                                   _witness_Describe@2_0},
     first(_witnesses_where_first@3_0,
@@ -482,15 +482,15 @@ describe_first_loose(_name@0_0) ->
 
 describe_nested(_name@0_0) ->
     _witness_Describe@1_0 =
-        'Elixir.Patina.Defaults.Boxed':'Defaults::Describe::$patina_witness'(),
+        'Elixir.Patina.Defaults.Boxed':'defaults::Describe::$patina_witness'(),
     _witnesses_where_Container@2_0 =
         {_witness_Describe@1_0},
     _witness_Container@3_0 =
-        'Elixir.Patina.Defaults.Wrapped':'Defaults::Container::$patina_witness'(_witnesses_where_Container@2_0),
+        'Elixir.Patina.Defaults.Wrapped':'defaults::Container::$patina_witness'(_witnesses_where_Container@2_0),
     _witness_Container@4_0 =
-        'Elixir.Patina.Defaults.Boxed':'Defaults::Container::$patina_witness'(),
+        'Elixir.Patina.Defaults.Boxed':'defaults::Container::$patina_witness'(),
     _witness_Describe@5_0 =
-        'Elixir.Patina.Defaults.Name':'Defaults::Describe::$patina_witness'(),
+        'Elixir.Patina.Defaults.Name':'defaults::Describe::$patina_witness'(),
     _witnesses_where_nested@6_0 = {_witness_Container@3_0,
                                    _witness_Container@4_0,
                                    _witness_Describe@5_0},
@@ -499,21 +499,21 @@ describe_nested(_name@0_0) ->
                _0@8_0 = begin _0@7_0 = _name@0_0, _0@7_0 end, _0@8_0
            end).
 
-'Defaults::Maker::make'(_witness_Maker@0_0,
+'defaults::Maker::make'(_witness_Maker@0_0,
                         _self@1_0) ->
     <<"made"/utf8>>.
 
 make() ->
     _witness_Maker@0_0 =
-        'Elixir.Patina.Defaults.Boxed':'Defaults::Maker::$patina_witness'(),
-    _ = 'Defaults::Maker::make'(_witness_Maker@0_0,
+        'Elixir.Patina.Defaults.Boxed':'defaults::Maker::$patina_witness'(),
+    _ = 'defaults::Maker::make'(_witness_Maker@0_0,
                                 begin _0@1_0 = <<"unused"/utf8>>, _0@1_0 end),
     {}.
 
-'Defaults::Numbered::$patina_const::D'(_witness_Numbered@0_0) ->
+'defaults::Numbered::$patina_const::D'(_witness_Numbered@0_0) ->
     100.
 
-'Defaults::Numbered::consts'(_witness_Numbered@0_0,
+'defaults::Numbered::consts'(_witness_Numbered@0_0,
                              _self@1_0) ->
     _vtable_Numbered@2_0 = erlang:element(1,
                                           _witness_Numbered@0_0),
@@ -546,54 +546,54 @@ sum(_witnesses_where_sum@0_0, __t@1_0) ->
 
 one_consts() ->
     _witness_Numbered@0_0 =
-        'Elixir.Patina.Defaults.One':'Defaults::Numbered::$patina_witness'(),
-    'Defaults::Numbered::consts'(_witness_Numbered@0_0,
+        'Elixir.Patina.Defaults.One':'defaults::Numbered::$patina_witness'(),
+    'defaults::Numbered::consts'(_witness_Numbered@0_0,
                                  'Elixir.Patina.Defaults.One').
 
 two_consts() ->
     _witness_Numbered@0_0 =
-        'Elixir.Patina.Defaults.Two':'Defaults::Numbered::$patina_witness'(),
-    'Defaults::Numbered::consts'(_witness_Numbered@0_0,
+        'Elixir.Patina.Defaults.Two':'defaults::Numbered::$patina_witness'(),
+    'defaults::Numbered::consts'(_witness_Numbered@0_0,
                                  'Elixir.Patina.Defaults.Two').
 
 plus_one_consts() ->
     _witness_Numbered@0_0 =
-        'Elixir.Patina.Defaults.One':'Defaults::Numbered::$patina_witness'(),
+        'Elixir.Patina.Defaults.One':'defaults::Numbered::$patina_witness'(),
     _witnesses_where_Numbered@1_0 = {_witness_Numbered@0_0},
     _witness_Numbered@2_0 =
-        'Elixir.Patina.Defaults.Plus':'Defaults::Numbered::$patina_witness'(_witnesses_where_Numbered@1_0),
-    'Defaults::Numbered::consts'(_witness_Numbered@2_0,
+        'Elixir.Patina.Defaults.Plus':'defaults::Numbered::$patina_witness'(_witnesses_where_Numbered@1_0),
+    'defaults::Numbered::consts'(_witness_Numbered@2_0,
                                  'Elixir.Patina.Defaults.One').
 
 sum_two() ->
     _witness_Numbered@0_0 =
-        'Elixir.Patina.Defaults.Two':'Defaults::Numbered::$patina_witness'(),
+        'Elixir.Patina.Defaults.Two':'defaults::Numbered::$patina_witness'(),
     _witnesses_where_sum@1_0 = {_witness_Numbered@0_0},
     sum(_witnesses_where_sum@1_0,
         'Elixir.Patina.Defaults.Two').
 
 one_c() ->
     _witness_Numbered@0_0 =
-        'Elixir.Patina.Defaults.One':'Defaults::Numbered::$patina_witness'(),
+        'Elixir.Patina.Defaults.One':'defaults::Numbered::$patina_witness'(),
     _const_Numbered_C@1_0 =
-        'Elixir.Patina.Defaults.One':'Defaults::Numbered::$patina_const::C'(_witness_Numbered@0_0),
+        'Elixir.Patina.Defaults.One':'defaults::Numbered::$patina_const::C'(_witness_Numbered@0_0),
     _const_Numbered_C@1_0.
 
 plus_two_d() ->
     _witness_Numbered@0_0 =
-        'Elixir.Patina.Defaults.Two':'Defaults::Numbered::$patina_witness'(),
+        'Elixir.Patina.Defaults.Two':'defaults::Numbered::$patina_witness'(),
     _witnesses_where_Numbered@1_0 = {_witness_Numbered@0_0},
     _witness_Numbered@2_0 =
-        'Elixir.Patina.Defaults.Plus':'Defaults::Numbered::$patina_witness'(_witnesses_where_Numbered@1_0),
+        'Elixir.Patina.Defaults.Plus':'defaults::Numbered::$patina_witness'(_witnesses_where_Numbered@1_0),
     _const_Numbered_D@3_0 =
-        'Defaults::Numbered::$patina_const::D'(_witness_Numbered@2_0),
+        'defaults::Numbered::$patina_const::D'(_witness_Numbered@2_0),
     _const_Numbered_D@3_0.
 
 doubled_k() ->
     _witness_Konst@0_0 =
-        'Elixir.Patina.Defaults.Holder':'Defaults::Konst::$patina_witness'(),
+        'Elixir.Patina.Defaults.Holder':'defaults::Konst::$patina_witness'(),
     _const_Konst_K@1_0 =
-        'Elixir.Patina.Defaults.Holder':'Defaults::Konst::$patina_const::K'(_witness_Konst@0_0),
+        'Elixir.Patina.Defaults.Holder':'defaults::Konst::$patina_const::K'(_witness_Konst@0_0),
     _const_DOUBLED@2_0 = _const_Konst_K@1_0 * 2,
     _const_DOUBLED@2_0.
 
@@ -630,23 +630,23 @@ str_ne(_a@0_0, _b@1_0) ->
 
 p_ne(_a@0_0, _b@1_0) ->
     _witness_PartialEq@2_0 =
-        'Elixir.Patina.Defaults.P':'Core::PartialEq::$patina_witness'(),
+        'Elixir.Patina.Defaults.P':'core::PartialEq::$patina_witness'(),
     _self@3_0 = _a@0_0,
     _other@4_0 = _b@1_0,
     not
-        'Elixir.Patina.Defaults.P':'Core::PartialEq::eq'(_witness_PartialEq@2_0,
+        'Elixir.Patina.Defaults.P':'core::PartialEq::eq'(_witness_PartialEq@2_0,
                                                          _self@3_0,
                                                          _other@4_0).
 
 p_differ(_a@0_0, _b@1_0) ->
     _witness_PartialEq@2_0 =
-        'Elixir.Patina.Defaults.P':'Core::PartialEq::$patina_witness'(),
+        'Elixir.Patina.Defaults.P':'core::PartialEq::$patina_witness'(),
     _witnesses_where_differ@3_0 = {_witness_PartialEq@2_0},
     differ(_witnesses_where_differ@3_0, _a@0_0, _b@1_0).
 
 int_differ(_a@0_0, _b@1_0) ->
     _witness_PartialEq@2_0 =
-        'Elixir.Patina.Core.Int':'Core::PartialEq::$patina_witness'(),
+        'Elixir.Patina.Core.Int':'core::PartialEq::$patina_witness'(),
     _witnesses_where_differ@3_0 = {_witness_PartialEq@2_0},
     differ(_witnesses_where_differ@3_0, _a@0_0, _b@1_0).
 
@@ -656,7 +656,7 @@ ring_via(_witnesses_where_ring_via@0_0, _ringer@1_0) ->
     _vtable_Ring@3_0 = erlang:element(1, _witness_Ring@2_0),
     _fn_Ring_ring@4_0 = erlang:element(1, _vtable_Ring@3_0),
     _witness_Tag@5_0 =
-        'Elixir.Patina.Defaults.Bell':'Defaults::Tag::$patina_witness'(),
+        'Elixir.Patina.Defaults.Bell':'defaults::Tag::$patina_witness'(),
     _witnesses_where_Ring_ring@6_0 = {_witness_Tag@5_0},
     _fn_Ring_ring@4_0(_witness_Ring@2_0,
                       _witnesses_where_Ring_ring@6_0,
@@ -665,25 +665,25 @@ ring_via(_witnesses_where_ring_via@0_0, _ringer@1_0) ->
 
 ring_loud() ->
     _witness_Ring@0_0 =
-        'Elixir.Patina.Defaults.Loud':'Defaults::Ring::$patina_witness'(),
+        'Elixir.Patina.Defaults.Loud':'defaults::Ring::$patina_witness'(),
     _witnesses_where_ring_via@1_0 = {_witness_Ring@0_0},
     ring_via(_witnesses_where_ring_via@1_0,
              'Elixir.Patina.Defaults.Loud').
 
 ring_quiet() ->
     _witness_Ring@0_0 =
-        'Elixir.Patina.Defaults.Quiet':'Defaults::Ring::$patina_witness'(),
+        'Elixir.Patina.Defaults.Quiet':'defaults::Ring::$patina_witness'(),
     _witnesses_where_ring_via@1_0 = {_witness_Ring@0_0},
     ring_via(_witnesses_where_ring_via@1_0,
              'Elixir.Patina.Defaults.Quiet').
 
 ring_quiet_directly() ->
     _witness_Ring@0_0 =
-        'Elixir.Patina.Defaults.Quiet':'Defaults::Ring::$patina_witness'(),
+        'Elixir.Patina.Defaults.Quiet':'defaults::Ring::$patina_witness'(),
     _witness_Tag@1_0 =
-        'Elixir.Patina.Defaults.Bell':'Defaults::Tag::$patina_witness'(),
+        'Elixir.Patina.Defaults.Bell':'defaults::Tag::$patina_witness'(),
     _witnesses_where_Ring_ring@2_0 = {_witness_Tag@1_0},
-    'Elixir.Patina.Defaults.Quiet':'Defaults::Ring::ring'(_witness_Ring@0_0,
+    'Elixir.Patina.Defaults.Quiet':'defaults::Ring::ring'(_witness_Ring@0_0,
                                                           _witnesses_where_Ring_ring@2_0,
                                                           'Elixir.Patina.Defaults.Quiet',
                                                           'Elixir.Patina.Defaults.Bell').
@@ -704,9 +704,9 @@ calls_required_through_pointer(_witnesses_where_calls_required_through_pointer@0
 
 describe_through_pointer(_name@0_0) ->
     _witness_Container@1_0 =
-        'Elixir.Patina.Defaults.Loose':'Defaults::Container::$patina_witness'(),
+        'Elixir.Patina.Defaults.Loose':'defaults::Container::$patina_witness'(),
     _witness_Describe@2_0 =
-        'Elixir.Patina.Defaults.Name':'Defaults::Describe::$patina_witness'(),
+        'Elixir.Patina.Defaults.Name':'defaults::Describe::$patina_witness'(),
     _witnesses_where_first@3_0 = {_witness_Container@1_0,
                                   _witness_Describe@2_0},
     _describe@5_0 = fun (_arg@4_0) ->
@@ -716,9 +716,9 @@ describe_through_pointer(_name@0_0) ->
 
 ne_through_pointer(_a@0_0, _b@1_0) ->
     _witness_PartialEq@2_0 =
-        'Elixir.Patina.Defaults.P':'Core::PartialEq::$patina_witness'(),
+        'Elixir.Patina.Defaults.P':'core::PartialEq::$patina_witness'(),
     _ne@5_0 = fun (_arg@3_0, _arg@4_0) ->
-                      'Elixir.Patina.Core':'Core::PartialEq::ne'(_witness_PartialEq@2_0,
+                      'Elixir.Patina.Core':'core::PartialEq::ne'(_witness_PartialEq@2_0,
                                                                  _arg@3_0,
                                                                  _arg@4_0)
               end,
@@ -726,7 +726,7 @@ ne_through_pointer(_a@0_0, _b@1_0) ->
 
 sheep_calls_required_through_pointer(_name@0_0) ->
     _witness_Animal@1_0 =
-        'Elixir.Patina.Defaults.Sheep':'Defaults::Animal::$patina_witness'(),
+        'Elixir.Patina.Defaults.Sheep':'defaults::Animal::$patina_witness'(),
     _witnesses_where_calls_required_through_pointer@2_0 =
         {_witness_Animal@1_0},
     calls_required_through_pointer(_witnesses_where_calls_required_through_pointer@2_0,

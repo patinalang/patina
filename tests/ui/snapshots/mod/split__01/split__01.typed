@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -18,19 +18,19 @@ extern mod patina_fmt;
 // block: 1/4
 
 // This declaration will look for a file named `my_mod.rs` and will
-// insert its contents inside a module named `MyMod` under this scope
-mod MyMod {
+// insert its contents inside a module named `my_mod` under this scope
+mod my_mod {
 
 
 
 
 
 
-    mod Inaccessible {
+    mod inaccessible {
         #[allow(dead_code)]
         fn public_function() -> int ({ (3 as int) } as int)
     }
-    mod Nested {
+    mod nested {
         fn function() -> int ({ (1 as int) } as int)
         #[allow(dead_code)]
         fn private_function() -> int ({ (2 as int) } as int)
@@ -40,22 +40,23 @@ mod MyMod {
     fn indirect_access()
         ->
             int ({
-        ((private_function as fn() -> int {MyMod::private_function})() as int)
+        ((private_function as fn() -> int {my_mod::private_function})() as
+            int)
     } as int)
 }
 fn function() ({
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("called `function()`" as str)] as
                         [str])] as [[str]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())
 fn main() ({
-    ((MyMod::function as fn() -> int {MyMod::function})() as int);
+    ((my_mod::function as fn() -> int {my_mod::function})() as int);
     ((function as fn() {function})() as ());
-    ((MyMod::indirect_access as fn() -> int {MyMod::indirect_access})() as
+    ((my_mod::indirect_access as fn() -> int {my_mod::indirect_access})() as
         int);
-    ((MyMod::Nested::function as fn() -> int {MyMod::Nested::function})() as
+    ((my_mod::nested::function as fn() -> int {my_mod::nested::function})() as
         int);
 } as ())

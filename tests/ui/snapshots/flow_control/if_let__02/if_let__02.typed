@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -21,14 +21,14 @@ fn main() ({
     // All have type `Option<int>`
     let number =
         ((Some as
-                fn(int) -> Core::Option<int> {Core::Option::<int>::Some})((7
-                as int)) as Core::Option<int>);
-    let letter: Option<int> = (None as Core::Option<int>);
-    let emoticon: Option<int> = (None as Core::Option<int>);
+                fn(int) -> core::Option<int> {core::Option::<int>::Some})((7
+                as int)) as core::Option<int>);
+    let letter: Option<int> = (None as core::Option<int>);
+    let emoticon: Option<int> = (None as core::Option<int>);
 
     // The `if let` construct reads: "if `let` destructures `number` into
     // `Some(i)`, evaluate the block (`{}`).
-    (if (let Some(i) = (number as Core::Option<int>) as bool) {
+    (if (let Some(i) = (number as core::Option<int>) as bool) {
 
         // If you need to specify a failure, use an else:
         // Destructure failed. Change to the failure case.
@@ -39,51 +39,51 @@ fn main() ({
         // alternate failure branch should be taken:
         // The condition evaluated false. This branch is the default:
         ({
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("Matched " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((i as int)) as
                                     term), ("!" as str)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         } as ());
     } as ())
-    (if (let Some(i) = (letter as Core::Option<int>) as bool) {
+    (if (let Some(i) = (letter as core::Option<int>) as bool) {
         ({
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("Matched " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((i as int)) as
                                     term), ("!" as str)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         } as ());
     } else {
         ({
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("Didn\'t match a number. Let\'s go with a letter!"
                                     as str)] as [str])] as [[str]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         } as ());
     } as ())
     let i_like_letters = (false as bool);
-    (if (let Some(i) = (emoticon as Core::Option<int>) as bool) {
+    (if (let Some(i) = (emoticon as core::Option<int>) as bool) {
         ({
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("Matched " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((i as int)) as
                                     term), ("!" as str)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         } as ());
     } else if (i_like_letters as bool) {
         ({
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("Didn\'t match a number. Let\'s go with a letter!"
                                     as str)] as [str])] as [[str]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         } as ());
     } else {
         ({
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("I don\'t like letters. Let\'s go with an emoticon :)!"
                                     as str)] as [str])] as [[str]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         } as ());
     } as ())
 } as ())

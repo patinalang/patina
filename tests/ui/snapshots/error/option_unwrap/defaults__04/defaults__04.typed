@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -20,7 +20,7 @@ extern mod patina_fmt;
 enum Fruit { Apple, Orange, Banana, Kiwi, Lemon, }
 
 fn main() ({
-    let mut my_fruit: Option<Fruit> = (None as Core::Option<Fruit>);
+    let mut my_fruit: Option<Fruit> = (None as core::Option<Fruit>);
     let get_lemon_as_fallback =
         (||
             ({
@@ -33,60 +33,60 @@ fn main() ({
                 // should_be_apple is: Apple
                 // my_apple is unchanged: Some(Apple)
                 ({
-                    ((::Core::io::put_chars as
+                    ((::core::io::put_chars as
                             fn(term) -> term)(([([("Providing lemon as fallback" as
                                             str)] as [str])] as [[str]])) as term);
-                    ((::Core::io::nl as fn() -> term)() as term);
+                    ((::core::io::nl as fn() -> term)() as term);
                 } as ());
                 (Fruit::Lemon as Fruit)
             } as Fruit) as
             {closure@tests/ui/src/error/option_unwrap/defaults__04.pt:9:33: 9:35});
     let first_available_fruit =
         ((my_fruit as
-                Core::Option<Fruit>).get_or_insert_with((get_lemon_as_fallback
+                core::Option<Fruit>).get_or_insert_with((get_lemon_as_fallback
                 as
                 {closure@tests/ui/src/error/option_unwrap/defaults__04.pt:9:33: 9:35}))
             as {type error});
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("first_available_fruit is: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((first_available_fruit as {type error}))
                                 as term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("my_fruit is: " as str),
                             ((patina_fmt::debug as
-                                    fn(term) -> term)((my_fruit as Core::Option<Fruit>)) as
+                                    fn(term) -> term)((my_fruit as core::Option<Fruit>)) as
                                 term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     let mut my_apple =
         ((Some as
-                fn(Fruit) -> Core::Option<Fruit> {Core::Option::<Fruit>::Some})((Fruit::Apple
-                as Fruit)) as Core::Option<Fruit>);
+                fn(Fruit) -> core::Option<Fruit> {core::Option::<Fruit>::Some})((Fruit::Apple
+                as Fruit)) as core::Option<Fruit>);
     let should_be_apple =
         ((my_apple as
-                Core::Option<Fruit>).get_or_insert_with((get_lemon_as_fallback
+                core::Option<Fruit>).get_or_insert_with((get_lemon_as_fallback
                 as
                 {closure@tests/ui/src/error/option_unwrap/defaults__04.pt:9:33: 9:35}))
             as {type error});
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("should_be_apple is: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((should_be_apple as {type error})) as
                                 term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("my_apple is unchanged: " as str),
                             ((patina_fmt::debug as
-                                    fn(term) -> term)((my_apple as Core::Option<Fruit>)) as
+                                    fn(term) -> term)((my_apple as core::Option<Fruit>)) as
                                 term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

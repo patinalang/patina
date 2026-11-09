@@ -234,7 +234,7 @@
                        {atom,{50,6},'Elixir.Patina.ImpliedAssocBound.Crate'},
                        {atom,
                            {50,6},
-                           'ImpliedAssocBound::LabelledWithItems::$patina_witness'}},
+                           'implied_assoc_bound::LabelledWithItems::$patina_witness'}},
                    []}},
            {match,
                {50,6},

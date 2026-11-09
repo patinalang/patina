@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -22,18 +22,18 @@ enum Fruit { Apple, Orange, Banana, Kiwi, Lemon, }
 fn main() ({
     let apple =
         ((Some as
-                fn(Fruit) -> Core::Option<Fruit> {Core::Option::<Fruit>::Some})((Fruit::Apple
-                as Fruit)) as Core::Option<Fruit>);
+                fn(Fruit) -> core::Option<Fruit> {core::Option::<Fruit>::Some})((Fruit::Apple
+                as Fruit)) as core::Option<Fruit>);
     let orange =
         ((Some as
-                fn(Fruit) -> Core::Option<Fruit> {Core::Option::<Fruit>::Some})((Fruit::Orange
-                as Fruit)) as Core::Option<Fruit>);
-    let no_fruit: Option<Fruit> = (None as Core::Option<Fruit>);
+                fn(Fruit) -> core::Option<Fruit> {core::Option::<Fruit>::Some})((Fruit::Orange
+                as Fruit)) as core::Option<Fruit>);
+    let no_fruit: Option<Fruit> = (None as core::Option<Fruit>);
 
     let first_available_fruit =
         (((no_fruit as
-                    Core::Option<Fruit>).or((orange as Core::Option<Fruit>)) as
-                {type error}).or((apple as Core::Option<Fruit>)) as
+                    core::Option<Fruit>).or((orange as core::Option<Fruit>)) as
+                {type error}).or((apple as core::Option<Fruit>)) as
             {type error});
     // first_available_fruit: Some(Orange)
 
@@ -43,11 +43,11 @@ fn main() ({
     // println!("Variable apple was moved, so this line won't compile: {:?}", apple);
     // TODO: uncomment the line above to see the compiler error
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("first_available_fruit: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((first_available_fruit as {type error}))
                                 as term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

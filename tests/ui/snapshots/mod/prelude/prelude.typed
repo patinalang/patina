@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -21,27 +21,27 @@ fn top(n: int)
         Option<int> ({
     (if ((n as int) > (0 as int) as bool) {
         ((Some as
-                fn(int) -> Core::Option<int> {Core::Option::<int>::Some})((n
-                as int)) as Core::Option<int>)
-    } else { (None as Core::Option<int>) } as Core::Option<int>)
-} as Core::Option<int>)
+                fn(int) -> core::Option<int> {core::Option::<int>::Some})((n
+                as int)) as core::Option<int>)
+    } else { (None as core::Option<int>) } as core::Option<int>)
+} as core::Option<int>)
 
-mod Outer {
+mod outer {
     fn outer(n: int)
         ->
             Option<int> ({
         (if ((n as int) > (0 as int) as bool) {
             ((Some as
-                    fn(int) -> Core::Option<int> {Core::Option::<int>::Some})((n
-                    as int)) as Core::Option<int>)
-        } else { (None as Core::Option<int>) } as Core::Option<int>)
-    } as Core::Option<int>)
+                    fn(int) -> core::Option<int> {core::Option::<int>::Some})((n
+                    as int)) as core::Option<int>)
+        } else { (None as core::Option<int>) } as core::Option<int>)
+    } as core::Option<int>)
 
-    mod Inner {
+    mod inner {
         fn inner(value: Option<int>)
             ->
                 int ({
-            (match (value as Core::Option<int>) {
+            (match (value as core::Option<int>) {
                 Some(n) => (n as int),
                 None => (0 as int),
             } as int)

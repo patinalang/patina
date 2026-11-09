@@ -5,22 +5,22 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
 
-use Macros::{
+use macros::{
     braces, call_site_by_set_span, call_site_ident, delimiters, escapes,
     forty_two, identity, identity_alias, literal_factories, negative,
     passthrough, raw_ident, rebuild, render, replace_with_answer, respan,
     stream_ops, untyped_literals, wrapped, Hello, TypeName,
 };
-use Macros::Nested::nested_identity;
+use macros::nested::nested_identity;
 
 // Macro kinds.
 
@@ -89,39 +89,39 @@ pub fn bang() {
     // Every variant keeps its payload when moved: an identifier, punctuation,
     // a literal and a group with its contents.
     {
-        ::Core::io::put_chars([[patina_fmt::display(1 + 2)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::display(1 + 2)]]);
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([[patina_fmt::display(4 + 1)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::display(4 + 1)]]);
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([[patina_fmt::display(5 + 2)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::display(5 + 2)]]);
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([[patina_fmt::display(identity()), " ",
+        ::core::io::put_chars([[patina_fmt::display(identity()), " ",
                             patina_fmt::display(identity_alias()), " ",
                             patina_fmt::display(nested_identity())]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
-    { ::Core::io::put_chars([[patina_fmt::display(42)]]); ::Core::io::nl(); };
+    { ::core::io::put_chars([[patina_fmt::display(42)]]); ::core::io::nl(); };
 }
 pub fn attribute() {
     {
-        ::Core::io::put_chars([[patina_fmt::display(answer()), " ",
+        ::core::io::put_chars([[patina_fmt::display(answer()), " ",
                             patina_fmt::display(from_attr())]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }
 pub fn derive() {
     let point = Point { x: 1, y: 2 };
     {
-        ::Core::io::put_chars([[patina_fmt::display(point.x + point.y), " ",
+        ::core::io::put_chars([[patina_fmt::display(point.x + point.y), " ",
                             patina_fmt::display(hello_from_derive()), " ",
                             patina_fmt::display(type_name())]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }
 #[doc =
@@ -131,7 +131,7 @@ pub fn documented() -> int { 1 }
 #[doc =
 " An inner doc comment is a `#`, a `!` and the group, one tree more than an"]
 #[doc = " outer one."]
-pub mod Documented {
+pub mod documented {
     #![doc = " Inner documentation."]
     pub fn value() -> int { 2 }
 }
@@ -141,9 +141,9 @@ pub fn round_trip() {
     let b = { let inner = 10; inner * 2 };
     let c = { 1 + 2 };
     {
-        ::Core::io::put_chars([[patina_fmt::display(a), " ",
+        ::core::io::put_chars([[patina_fmt::display(a), " ",
                             patina_fmt::display(b), " ", patina_fmt::display(c)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }
 pub fn token_zoo() {
@@ -163,7 +163,7 @@ pub fn token_zoo() {
     let ranged = match 3 { 1..=5 => true, _ => false, };
     let neg = -5;
     {
-        ::Core::io::put_chars([[patina_fmt::display(shifted), " ",
+        ::core::io::put_chars([[patina_fmt::display(shifted), " ",
                             patina_fmt::display(nested), " ",
                             patina_fmt::display(float), " ", patina_fmt::display(text),
                             " ", patina_fmt::display(raw), " ",
@@ -171,46 +171,46 @@ pub fn token_zoo() {
                             patina_fmt::display(raw_atom), " ",
                             patina_fmt::display(bits), " ", patina_fmt::display(ranged),
                             " ", patina_fmt::display(neg)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([[patina_fmt::display(documented()), " ",
-                            patina_fmt::display(Documented::value())]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::display(documented()), " ",
+                            patina_fmt::display(documented::value())]]);
+        ::core::io::nl();
     };
 }
 pub fn forwarded() {
     {
-        ::Core::io::put_chars([[patina_fmt::display(1 + 2)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::display(1 + 2)]]);
+        ::core::io::nl();
     };
 }
 pub fn rebuilt() {
     {
-        ::Core::io::put_chars([[patina_fmt::display((1 + 2) * 3)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::display((1 + 2) * 3)]]);
+        ::core::io::nl();
     };
 }
 pub fn built_streams() {
     {
-        ::Core::io::put_chars([[patina_fmt::display(1 + 2)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::display(1 + 2)]]);
+        ::core::io::nl();
     };
     let (list, product) = ([1, 2], 1 + 2 * 3);
     match list {
         [a, b] => {
-            ::Core::io::put_chars([[patina_fmt::display(a), " ",
+            ::core::io::put_chars([[patina_fmt::display(a), " ",
                                 patina_fmt::display(b), " ",
                                 patina_fmt::display(product)]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         }
-        _ => { ::Core::io::put_chars([["unexpected"]]); ::Core::io::nl(); }
+        _ => { ::core::io::put_chars([["unexpected"]]); ::core::io::nl(); }
     }
 }
 pub fn rendered() {
     {
-        ::Core::io::put_chars([[patina_fmt::display("`x` += f(1, \"q\\n\") r#\"raw\"# a\"at\" 'c' #[z] a.b if (y) m! (1) if ! w receive (v) `if`(u) fn(t)")]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::display("`x` += f(1, \"q\\n\") r#\"raw\"# a\"at\" 'c' #[z] a.b if (y) m! (1) if ! w receive (v) `if`(u) fn(t)")]]);
+        ::core::io::nl();
     };
 }
 macro_rules! discard { ($($t:tt)*) => {}; }
@@ -218,11 +218,11 @@ pub fn constructors() {
     let (c, i, big, f, s, a) =
         ('a', 1, 123456789012345678901234567890, 0.25, "s", a"a");
     {
-        ::Core::io::put_chars([[patina_fmt::display(c), " ",
+        ::core::io::put_chars([[patina_fmt::display(c), " ",
                             patina_fmt::display(i), " ", patina_fmt::display(big), " ",
                             patina_fmt::display(f), " ", patina_fmt::display(s), " ",
                             patina_fmt::display(a)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     ;
 }
@@ -230,35 +230,35 @@ pub fn escaped() {
     let (s, quote, backslash, double, non_ascii, a) =
         ("a\"b\\c\nd'e", '\'', '\\', '"', 'ż', a"x \"y\"");
     {
-        ::Core::io::put_chars([[patina_fmt::display(s), " ",
+        ::core::io::put_chars([[patina_fmt::display(s), " ",
                             patina_fmt::display(quote), " ",
                             patina_fmt::display(backslash), " ",
                             patina_fmt::display(double), " ",
                             patina_fmt::display(non_ascii), " ",
                             patina_fmt::display(a)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }
 pub fn call_site() {
     let local = 5;
     {
-        ::Core::io::put_chars([[patina_fmt::display(local)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::display(local)]]);
+        ::core::io::nl();
     };
 }
 pub fn raw_identifier() {
     let x = 7;
-    { ::Core::io::put_chars([[patina_fmt::display(x)]]); ::Core::io::nl(); };
+    { ::core::io::put_chars([[patina_fmt::display(x)]]); ::core::io::nl(); };
 }
 pub fn set_span() {
     let local = 5;
     {
-        ::Core::io::put_chars([[patina_fmt::display(local)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::display(local)]]);
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([[patina_fmt::display(local + 1 -
+        ::core::io::put_chars([[patina_fmt::display(local + 1 -
                                     (local * 2))]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }

@@ -9,10 +9,10 @@
 #![attr = NoCore]
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 #[allow(unused)]
 extern mod patina_fmt;
 
@@ -571,7 +571,7 @@ impl Dynamic {
     } as term)
 }
 
-mod Tuples {
+mod tuples {
     use super::effect;
 
     fn fields()
@@ -618,7 +618,7 @@ mod Tuples {
     } as (int, int, int))
 }
 
-mod Maps {
+mod maps {
     use super::effect;
 
     fn fields()
@@ -737,7 +737,7 @@ mod Maps {
     } as #{atom => int})
 }
 
-mod Lists {
+mod lists {
     use super::effect;
 
     fn fields()

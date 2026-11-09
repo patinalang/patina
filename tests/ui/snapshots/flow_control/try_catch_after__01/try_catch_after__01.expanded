@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -30,34 +30,34 @@ pub fn main() {
 
 
             {
-            ::Core::io::put_chars([["badarg!"]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["badarg!"]]);
+            ::core::io::nl();
         }
         error(#{a"__struct__" => a"Elixir.ArithmeticError", ..}) => {
-            ::Core::io::put_chars([["Elixir ArithmeticError"]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["Elixir ArithmeticError"]]);
+            ::core::io::nl();
         }
         error(reason @ #{a"__struct__" => a"Elixir.ArgumentError", ..}) => {
-            ::Core::io::put_chars([["Elixir ArgumentError ",
+            ::core::io::put_chars([["Elixir ArgumentError ",
                                 patina_fmt::debug(reason)]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         }
         error(reason), stacktrace => {
-            ::Core::io::put_chars([["other error: ",
+            ::core::io::put_chars([["other error: ",
                                 patina_fmt::debug(reason), " from ",
                                 patina_fmt::debug(stacktrace)]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         }
         throw(value) => {
-            ::Core::io::put_chars([["thrown: ", patina_fmt::debug(value)]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["thrown: ", patina_fmt::debug(value)]]);
+            ::core::io::nl();
         }
         exit(reason) => {
-            ::Core::io::put_chars([["exit: ", patina_fmt::debug(reason)]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["exit: ", patina_fmt::debug(reason)]]);
+            ::core::io::nl();
         }
     }
         after {
-        { ::Core::io::put_chars([["cleaning up"]]); ::Core::io::nl(); };
+        { ::core::io::put_chars([["cleaning up"]]); ::core::io::nl(); };
     };
 }

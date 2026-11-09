@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -50,40 +50,40 @@ fn inspect(event:
 
 
             {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("page loaded" as str)] as [str])] as
                     [[str]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         WebEvent::PageUnload => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("page unloaded" as str)] as [str])]
                     as [[str]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         WebEvent::KeyPress(c) => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("pressed \'" as str),
                                 ((patina_fmt::display as fn(term) -> term)((c as char)) as
                                     term), ("\'." as str)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         WebEvent::Paste(s) => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("pasted \"" as str),
                                 ((patina_fmt::display as fn(term) -> term)((s as str)) as
                                     term), ("\"." as str)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         WebEvent::Click {  x,  y } => {
             ({
-                ((::Core::io::put_chars as
+                ((::core::io::put_chars as
                         fn(term) -> term)(([([("clicked at x=" as str),
                                     ((patina_fmt::display as fn(term) -> term)((x as int)) as
                                         term), (", y=" as str),
                                     ((patina_fmt::display as fn(term) -> term)((y as int)) as
                                         term), ("." as str)] as [term])] as [[term]])) as term);
-                ((::Core::io::nl as fn() -> term)() as term);
+                ((::core::io::nl as fn() -> term)() as term);
             } as ());
         }
     } as ())

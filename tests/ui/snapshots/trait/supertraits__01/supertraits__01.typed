@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -52,7 +52,7 @@ fn comp_sci_student_greeting(student: dyn CompSciStudent)
 
 
     (unsafe {
-        (((::Core::unicode::characters_to_binary as
+        (((::core::unicode::characters_to_binary as
                     fn(term) -> term)(([("My name is " as str),
                         ((patina_fmt::display as
                                 fn(term) -> term)(((student as dyn CompSciStudent).name() as
@@ -104,10 +104,10 @@ fn main() ({
                 fn((dyn CompSciStudent + 'static)) -> str {comp_sci_student_greeting})((student
                 as CSStudent)) as str);
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)((greeting as str)) as term)] as [term])]
                 as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

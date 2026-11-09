@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -46,13 +46,13 @@ pub fn main() {
 
     // #{ a"__struct__" => a"Elixir.Patina.ByExample.Point", a"x" => 1, a"y" => 2 }
     {
-        ::Core::io::put_chars([[patina_fmt::debug(IntVariant(200) as term)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::debug(IntVariant(200) as term)]]);
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([[patina_fmt::debug(PointVariant {
+        ::core::io::put_chars([[patina_fmt::debug(PointVariant {
                                         point: Point { x: 1, y: 2 },
                                     } as term)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }

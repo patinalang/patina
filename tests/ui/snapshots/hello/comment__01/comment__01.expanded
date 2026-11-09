@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -52,8 +52,8 @@ pub fn main() {
     // Block comments can also be used within expressions:
     let x = 5 + /* 90 + */ 5;
     {
-        ::Core::io::put_chars([["Is `x` 10 or 100? x = ",
+        ::core::io::put_chars([["Is `x` 10 or 100? x = ",
                             patina_fmt::display(x)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }

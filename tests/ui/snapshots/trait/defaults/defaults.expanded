@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -170,7 +170,7 @@ pub fn combine_coin_with_note_via(a: int, b: int) -> int {
 
 // A default calling a helper that's private to the trait's module
 
-mod Inner {
+mod inner {
     fn helper(x: int) -> int { x * 2 }
 
     pub trait Doubler {
@@ -181,7 +181,7 @@ mod Inner {
     }
 }
 
-use Inner::Doubler;
+use inner::Doubler;
 
 struct N(int);
 

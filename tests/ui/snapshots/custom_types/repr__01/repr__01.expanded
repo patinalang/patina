@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -17,7 +17,7 @@ extern mod patina_fmt;
 // source: patina-by-example/src/custom_types/repr.md
 // block: 1/14
 
-mod MyMod {
+mod my_mod {
     // This struct's module name is `Elixir.Patina.ByExample.MyMod.MyStruct`.
     struct MyStruct;
 

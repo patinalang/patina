@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -18,19 +18,19 @@ extern mod patina_fmt;
 // block: 1/4
 
 // This declaration will look for a file named `my_mod.rs` and will
-// insert its contents inside a module named `MyMod` under this scope
-mod MyMod {
+// insert its contents inside a module named `my_mod` under this scope
+mod my_mod {
 
 
 
 
 
 
-    mod Inaccessible {
+    mod inaccessible {
         #[allow(dead_code)]
         pub fn public_function() -> int { 3 }
     }
-    pub mod Nested {
+    pub mod nested {
         pub fn function() -> int { 1 }
         #[allow(dead_code)]
         fn private_function() -> int { 2 }
@@ -40,11 +40,11 @@ mod MyMod {
     pub fn indirect_access() -> int { private_function() }
 }
 fn function() {
-    { ::Core::io::put_chars([["called `function()`"]]); ::Core::io::nl(); };
+    { ::core::io::put_chars([["called `function()`"]]); ::core::io::nl(); };
 }
 pub fn main() {
-    MyMod::function();
+    my_mod::function();
     function();
-    MyMod::indirect_access();
-    MyMod::Nested::function();
+    my_mod::indirect_access();
+    my_mod::nested::function();
 }

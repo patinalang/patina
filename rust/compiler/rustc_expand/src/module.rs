@@ -1,7 +1,6 @@
 use std::iter::once;
 use std::path::{self, Path, PathBuf};
 
-use convert_case::{Case, Casing};
 use rustc_ast::{AttrVec, Attribute, Inline, Item, ModSpans};
 use rustc_attr_parsing::validate_attr::emit_malformed_attribute;
 use rustc_errors::{Diag, ErrorGuaranteed};
@@ -119,10 +118,10 @@ pub(crate) fn mod_dir_path(
             if let DirOwnership::Owned { relative } = &mut dir_ownership {
                 if let Some(ident) = relative.take() {
                     // Remove the relative offset.
-                    dir_path.push(ident.as_str().to_case(Case::Snake));
+                    dir_path.push(ident.as_str());
                 }
             }
-            dir_path.push(ident.as_str().to_case(Case::Snake));
+            dir_path.push(ident.as_str());
 
             (dir_path, dir_ownership)
         }
@@ -234,14 +233,13 @@ pub fn default_submod_path<'a>(
     // `./<ident>.pt`.
     let relative_prefix_string;
     let relative_prefix = if let Some(ident) = relative {
-        relative_prefix_string =
-            format!("{}{}", ident.as_str().to_case(Case::Snake), path::MAIN_SEPARATOR);
+        relative_prefix_string = format!("{}{}", ident.name, path::MAIN_SEPARATOR);
         &relative_prefix_string
     } else {
         ""
     };
 
-    let default_path_str = format!("{}{}.pt", relative_prefix, ident.as_str().to_case(Case::Snake));
+    let default_path_str = format!("{}{}.pt", relative_prefix, ident.name);
     let default_path = dir_path.join(&default_path_str);
     if psess.source_map().file_exists(&default_path) {
         Ok(ModulePathSuccess {

@@ -13,10 +13,10 @@
 #![allow(dead_code)]
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 #[allow(unused)]
 extern mod patina_fmt;
 
@@ -41,22 +41,22 @@ pub fn main() {
             Beginner =>
             // Note again the lack of scoping.
             {
-            ::Core::io::put_chars([["Beginners are starting their learning journey!"]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["Beginners are starting their learning journey!"]]);
+            ::core::io::nl();
         }
         Advanced => {
-            ::Core::io::put_chars([["Advanced learners are mastering their subjects..."]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["Advanced learners are mastering their subjects..."]]);
+            ::core::io::nl();
         }
     }
     match role {
         Student => {
-            ::Core::io::put_chars([["Students are acquiring knowledge!"]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["Students are acquiring knowledge!"]]);
+            ::core::io::nl();
         }
         Teacher => {
-            ::Core::io::put_chars([["Teachers are spreading knowledge!"]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["Teachers are spreading knowledge!"]]);
+            ::core::io::nl();
         }
     }
 }

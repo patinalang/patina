@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -53,10 +53,10 @@ fn main() ({
                 // won't print anything
 
                 ({
-                    ((::Core::io::put_chars as
+                    ((::core::io::put_chars as
                             fn(term) -> term)(([([("fx evaluated!" as str)] as [str])]
                             as [[str]])) as term);
-                    ((::Core::io::nl as fn() -> term)() as term);
+                    ((::core::io::nl as fn() -> term)() as term);
                 } as ());
                 (3 as int)
             } as int) as
@@ -65,10 +65,10 @@ fn main() ({
         (||
             ({
                 ({
-                    ((::Core::io::put_chars as
+                    ((::core::io::put_chars as
                             fn(term) -> term)(([([("fy evaluated!" as str)] as [str])]
                             as [[str]])) as term);
-                    ((::Core::io::nl as fn() -> term)() as term);
+                    ((::core::io::nl as fn() -> term)() as term);
                 } as ());
                 (5 as int)
             } as int) as
@@ -84,7 +84,7 @@ fn main() ({
                 fn(MathOp) -> fnref(int, int) -> int {choose_op})((MathOp::Add
                 as MathOp)) as fnref(int, int) -> int);
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)((3 as int)) as term), (" op " as str),
                             ((patina_fmt::display as fn(term) -> term)((5 as int)) as
@@ -93,6 +93,6 @@ fn main() ({
                                     fn(term) -> term)(((op as
                                         fnref(int, int) -> int)((3 as int), (5 as int)) as int)) as
                                 term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ())
 } as ())

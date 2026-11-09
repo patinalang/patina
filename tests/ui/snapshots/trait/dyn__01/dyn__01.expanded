@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -45,8 +45,8 @@ pub fn main() {
     let random_number = 0.234;
     let animal = random_animal(random_number);
     {
-        ::Core::io::put_chars([["You\'ve randomly chosen an animal, and it says ",
+        ::core::io::put_chars([["You\'ve randomly chosen an animal, and it says ",
                             patina_fmt::display(animal.noise())]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }

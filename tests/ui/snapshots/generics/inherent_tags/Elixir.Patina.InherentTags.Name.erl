@@ -9,8 +9,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'InherentTags::Show::show'/2,
-         'InherentTags::Show::$patina_witness'/0]).
+         'inherent_tags::Show::show'/2,
+         'inherent_tags::Show::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,11 +25,11 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'InherentTags::Show::show'(_witness_Show@0_0,
-                           _self@1_0) ->
+'inherent_tags::Show::show'(_witness_Show@0_0,
+                            _self@1_0) ->
     <<"a name"/utf8>>.
 
-'InherentTags::Show::$patina_witness'() ->
-    {{fun 'Elixir.Patina.InherentTags.Name':'InherentTags::Show::show'/2},
+'inherent_tags::Show::$patina_witness'() ->
+    {{fun 'Elixir.Patina.InherentTags.Name':'inherent_tags::Show::show'/2},
      {},
      {}}.

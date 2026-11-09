@@ -1,11 +1,11 @@
-error[E0599]: no method named `map` found for struct `Core::ListIter<T>` in the current scope
+error[E0599]: no method named `map` found for struct `core::ListIter<T>` in the current scope
   --> tests/ui/src/error/iter_result__05.pt:8:10
    |
 LL |       let (numbers, errors): ([_], [_]) = strings
    |  _________________________________________-
 LL | |         .into_iter()
 LL | |         .map(|s| s.parse::<int>())
-   | |         -^^^ method not found in `Core::ListIter<str>`
+   | |         -^^^ method not found in `core::ListIter<str>`
    | |_________|
    |
 
@@ -15,11 +15,11 @@ error[E0433]: cannot find type `Result` in this scope
 LL |         .partition(Result::is_ok);
    |                    ^^^^^^ use of undeclared type `Result`
 
-error[E0599]: no method named `map` found for struct `Core::ListIter<T>` in the current scope
+error[E0599]: no method named `map` found for struct `core::ListIter<T>` in the current scope
   --> tests/ui/src/error/iter_result__05.pt:10:44
    |
 LL |     let numbers: [_] = numbers.into_iter().map(Result::unwrap).collect();
-   |                                            ^^^ method not found in `Core::ListIter<_>`
+   |                                            ^^^ method not found in `core::ListIter<_>`
 
 error[E0433]: cannot find type `Result` in this scope
   --> tests/ui/src/error/iter_result__05.pt:10:48
@@ -27,11 +27,11 @@ error[E0433]: cannot find type `Result` in this scope
 LL |     let numbers: [_] = numbers.into_iter().map(Result::unwrap).collect();
    |                                                ^^^^^^ use of undeclared type `Result`
 
-error[E0599]: no method named `map` found for struct `Core::ListIter<T>` in the current scope
+error[E0599]: no method named `map` found for struct `core::ListIter<T>` in the current scope
   --> tests/ui/src/error/iter_result__05.pt:11:42
    |
 LL |     let errors: [_] = errors.into_iter().map(Result::unwrap_err).collect();
-   |                                          ^^^ method not found in `Core::ListIter<_>`
+   |                                          ^^^ method not found in `core::ListIter<_>`
 
 error[E0433]: cannot find type `Result` in this scope
   --> tests/ui/src/error/iter_result__05.pt:11:46

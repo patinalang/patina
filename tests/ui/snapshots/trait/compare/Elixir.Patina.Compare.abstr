@@ -105,7 +105,7 @@
        {remote,
         {3,32},
         {atom,{3,32},'Elixir.Patina.Core.Int'},
-        {atom,{3,32},'Core::PartialEq::$patina_witness'}},
+        {atom,{3,32},'core::PartialEq::$patina_witness'}},
        []}},
      {match,
       {3,32},

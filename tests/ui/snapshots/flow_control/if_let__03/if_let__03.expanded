@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -36,18 +36,18 @@ pub fn main() {
         // Similar to Some() in the previous example
 
         // Binding also works with `if let`
-        { ::Core::io::put_chars([["a is foobar"]]); ::Core::io::nl(); };
+        { ::core::io::put_chars([["a is foobar"]]); ::core::io::nl(); };
     }
     if let Foo::Bar = b {
-        { ::Core::io::put_chars([["b is foobar"]]); ::Core::io::nl(); };
+        { ::core::io::put_chars([["b is foobar"]]); ::core::io::nl(); };
     }
     if let Foo::Qux(value) = c {
         {
-            ::Core::io::put_chars([["c is ", patina_fmt::display(value)]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["c is ", patina_fmt::display(value)]]);
+            ::core::io::nl();
         };
     }
     if let Foo::Qux(value @ 100) = c {
-        { ::Core::io::put_chars([["c is one hundred"]]); ::Core::io::nl(); };
+        { ::core::io::put_chars([["c is one hundred"]]); ::core::io::nl(); };
     }
 }

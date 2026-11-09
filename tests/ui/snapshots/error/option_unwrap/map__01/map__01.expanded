@@ -12,10 +12,10 @@
 #![allow(dead_code)]
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 #[allow(unused)]
 extern mod patina_fmt;
 
@@ -58,13 +58,13 @@ fn eat(food: Option<Cooked>) {
             // Let's try the simpler looking `process()` now.
 
             {
-            ::Core::io::put_chars([["Mmm. I love ",
+            ::core::io::put_chars([["Mmm. I love ",
                                 patina_fmt::debug(food)]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         }
         None => {
-            ::Core::io::put_chars([["Oh no! It wasn\'t edible."]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["Oh no! It wasn\'t edible."]]);
+            ::core::io::nl();
         }
     }
 }

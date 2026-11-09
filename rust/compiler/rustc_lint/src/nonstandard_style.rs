@@ -8,6 +8,7 @@ use rustc_hir::intravisit::{FnKind, Visitor};
 use rustc_hir::{GenericParamKind, PatExprKind, PatKind, find_attr};
 use rustc_middle::hir::nested_filter::All;
 use rustc_middle::ty::AssocContainer;
+use rustc_session::config::CrateType;
 use rustc_session::{declare_lint, declare_lint_pass};
 use rustc_span::def_id::LocalDefId;
 use rustc_span::{BytePos, Ident, Span};
@@ -16,7 +17,7 @@ use crate::lints::{
     NonCamelCaseType, NonCamelCaseTypeSub, NonSnakeCaseDiag, NonSnakeCaseDiagSub,
     NonUpperCaseGlobal, NonUpperCaseGlobalSub, NonUpperCaseGlobalSubTool,
 };
-use crate::{EarlyContext, EarlyLintPass, LateContext, LateLintPass, Lint, LintContext};
+use crate::{EarlyContext, EarlyLintPass, LateContext, LateLintPass, LintContext};
 
 declare_lint! {
     /// The `non_camel_case_types` lint detects types, variants, traits and
@@ -134,23 +135,23 @@ fn to_upper_camel_case(s: &str) -> String {
         .0
 }
 
-fn check_camel_case(cx: &impl LintContext, lint: &'static Lint, sort: &str, ident: &Ident) {
-    let name = ident.name.as_str();
-
-    if !is_upper_camel_case(name) {
-        let cc = to_upper_camel_case(name);
-        let sub = if *name != cc {
-            NonCamelCaseTypeSub::Suggestion { span: ident.span, replace: cc }
-        } else {
-            NonCamelCaseTypeSub::Label { span: ident.span }
-        };
-        cx.emit_span_lint(lint, ident.span, NonCamelCaseType { sort, name, sub });
-    }
-}
-
 impl NonCamelCaseTypes {
     fn check_case(&self, cx: &EarlyContext<'_>, sort: &str, ident: &Ident) {
-        check_camel_case(cx, NON_CAMEL_CASE_TYPES, sort, ident);
+        let name = ident.name.as_str();
+
+        if !is_upper_camel_case(name) {
+            let cc = to_upper_camel_case(name);
+            let sub = if *name != cc {
+                NonCamelCaseTypeSub::Suggestion { span: ident.span, replace: cc }
+            } else {
+                NonCamelCaseTypeSub::Label { span: ident.span }
+            };
+            cx.emit_span_lint(
+                NON_CAMEL_CASE_TYPES,
+                ident.span,
+                NonCamelCaseType { sort, name, sub },
+            );
+        }
     }
 }
 
@@ -200,79 +201,8 @@ impl EarlyLintPass for NonCamelCaseTypes {
 }
 
 declare_lint! {
-    /// The `non_camel_case_modules` lint detects modules and crates that
-    /// don't have camel case names.
-    ///
-    /// ### Example
-    ///
-    /// ```rust
-    /// mod my_mod;
-    /// ```
-    ///
-    /// {{produces}}
-    ///
-    /// ### Explanation
-    ///
-    /// The preferred style for these identifiers is to use "camel case", such
-    /// as `MyMod`, where the first letter should not be lowercase, and
-    /// should not use underscores between letters. Underscores are allowed at
-    /// the beginning and end of the identifier, as well as between
-    /// non-letters (such as `X86_64`).
-    pub NON_CAMEL_CASE_MODULES,
-    Warn,
-    "modules and crates should have camel case names"
-}
-
-declare_lint_pass!(NonCamelCaseModules => [NON_CAMEL_CASE_MODULES]);
-
-impl<'tcx> LateLintPass<'tcx> for NonCamelCaseModules {
-    fn check_mod(&mut self, cx: &LateContext<'_>, _: &'tcx hir::Mod<'tcx>, id: hir::HirId) {
-        if id != hir::CRATE_HIR_ID {
-            return;
-        }
-
-        let crate_ident = if let Some(name) = &cx.tcx.sess.opts.crate_name {
-            Some(Ident::from_str(name))
-        } else {
-            find_attr!(cx.tcx, crate, CrateName{name, name_span,..} => (name, name_span)).map(
-                |(&name, &span)| {
-                    // Discard the double quotes surrounding the literal.
-                    let sp = cx
-                        .sess()
-                        .source_map()
-                        .span_to_snippet(span)
-                        .ok()
-                        .and_then(|snippet| {
-                            let left = snippet.find('"')?;
-                            let right = snippet.rfind('"').map(|pos| snippet.len() - pos)?;
-
-                            Some(
-                                span.with_lo(span.lo() + BytePos(left as u32 + 1))
-                                    .with_hi(span.hi() - BytePos(right as u32)),
-                            )
-                        })
-                        .unwrap_or(span);
-
-                    Ident::new(name, sp)
-                },
-            )
-        };
-
-        if let Some(ident) = &crate_ident {
-            check_camel_case(cx, NON_CAMEL_CASE_MODULES, "package", ident);
-        }
-    }
-
-    fn check_item(&mut self, cx: &LateContext<'_>, it: &hir::Item<'_>) {
-        if let hir::ItemKind::Mod(ident, _) = it.kind {
-            check_camel_case(cx, NON_CAMEL_CASE_MODULES, "module", &ident);
-        }
-    }
-}
-
-declare_lint! {
     /// The `non_snake_case` lint detects variables, methods, functions,
-    /// and lifetime parameters that don't have snake case names.
+    /// lifetime parameters and modules that don't have snake case names.
     ///
     /// ### Example
     ///
@@ -289,7 +219,7 @@ declare_lint! {
     /// single underscore, such as `my_value`.
     pub NON_SNAKE_CASE,
     Warn,
-    "variables, methods, functions and lifetime parameters should have snake case names"
+    "variables, methods, functions, lifetime parameters and modules should have snake case names"
 }
 
 declare_lint_pass!(NonSnakeCase => [NON_SNAKE_CASE]);
@@ -389,6 +319,50 @@ impl NonSnakeCase {
 }
 
 impl<'tcx> LateLintPass<'tcx> for NonSnakeCase {
+    fn check_mod(&mut self, cx: &LateContext<'_>, _: &'tcx hir::Mod<'tcx>, id: hir::HirId) {
+        if id != hir::CRATE_HIR_ID {
+            return;
+        }
+
+        // Issue #45127: don't enforce `snake_case` for binary crates as binaries are not intended
+        // to be distributed and depended on like libraries. The lint is not suppressed for cdylib
+        // or staticlib because it's not clear what the desired lint behavior for those are.
+        if cx.tcx.crate_types().iter().all(|&crate_type| crate_type == CrateType::Executable) {
+            return;
+        }
+
+        let crate_ident = if let Some(name) = &cx.tcx.sess.opts.crate_name {
+            Some(Ident::from_str(name))
+        } else {
+            find_attr!(cx.tcx, crate, CrateName{name, name_span,..} => (name, name_span)).map(
+                |(&name, &span)| {
+                    // Discard the double quotes surrounding the literal.
+                    let sp = cx
+                        .sess()
+                        .source_map()
+                        .span_to_snippet(span)
+                        .ok()
+                        .and_then(|snippet| {
+                            let left = snippet.find('"')?;
+                            let right = snippet.rfind('"').map(|pos| snippet.len() - pos)?;
+
+                            Some(
+                                span.with_lo(span.lo() + BytePos(left as u32 + 1))
+                                    .with_hi(span.hi() - BytePos(right as u32)),
+                            )
+                        })
+                        .unwrap_or(span);
+
+                    Ident::new(name, sp)
+                },
+            )
+        };
+
+        if let Some(ident) = &crate_ident {
+            self.check_snake_case(cx, "package", ident);
+        }
+    }
+
     fn check_generic_param(&mut self, cx: &LateContext<'_>, param: &hir::GenericParam<'_>) {
         if let GenericParamKind::Lifetime { .. } = param.kind {
             self.check_snake_case(cx, "lifetime", &param.name.ident());
@@ -425,6 +399,12 @@ impl<'tcx> LateLintPass<'tcx> for NonSnakeCase {
                 self.check_snake_case(cx, "function", ident);
             }
             FnKind::Closure => (),
+        }
+    }
+
+    fn check_item(&mut self, cx: &LateContext<'_>, it: &hir::Item<'_>) {
+        if let hir::ItemKind::Mod(ident, _) = it.kind {
+            self.check_snake_case(cx, "module", &ident);
         }
     }
 

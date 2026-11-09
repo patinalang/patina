@@ -5,7 +5,6 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, LazyLock, OnceLock};
 use std::{env, fs, iter};
 
-use convert_case::{Case, Casing};
 use rustc_ast::{self as ast, CRATE_NODE_ID};
 use rustc_attr_parsing::{AttributeParser, ShouldEmit};
 use rustc_codegen_ssa::traits::CodegenBackend;
@@ -1312,10 +1311,7 @@ pub fn get_crate_name(sess: &Session, krate_attrs: &[ast::Attribute]) -> Symbol 
         if file_stem.starts_with('-') {
             sess.dcx().emit_err(errors::CrateNameInvalid { crate_name: file_stem });
         } else {
-            return validate(
-                Symbol::intern(&file_stem.replace('-', "_").to_case(Case::Pascal)),
-                None,
-            );
+            return validate(Symbol::intern(&file_stem.replace('-', "_")), None);
         }
     }
 

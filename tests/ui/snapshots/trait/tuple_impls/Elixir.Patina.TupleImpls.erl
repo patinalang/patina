@@ -36,48 +36,48 @@ show_generic(_witnesses_where_show_generic@0_0,
 
 show_unit() ->
     _witness_Show@0_0 =
-        'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::$patina_witness<()>'(),
-    'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::show<()>'(_witness_Show@0_0,
-                                                                             {}).
+        'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'tuple_impls::Show::$patina_witness<()>'(),
+    'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'tuple_impls::Show::show<()>'(_witness_Show@0_0,
+                                                                              {}).
 
 show_pair(_n@0_0, _s@1_0) ->
     _witness_Show@2_0 =
-        'Elixir.Patina.TupleImpls.$impl.Core.Int':'TupleImpls::Show::$patina_witness'(),
+        'Elixir.Patina.TupleImpls.$impl.Core.Int':'tuple_impls::Show::$patina_witness'(),
     _witness_Show@3_0 =
-        'Elixir.Patina.TupleImpls.$impl.Core.Str':'TupleImpls::Show::$patina_witness'(),
+        'Elixir.Patina.TupleImpls.$impl.Core.Str':'tuple_impls::Show::$patina_witness'(),
     _witnesses_where_Show@4_0 = {_witness_Show@2_0,
                                  _witness_Show@3_0},
     _witness_Show@5_0 =
-        'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::$patina_witness<(_, _)>'(_witnesses_where_Show@4_0),
-    'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::show<(_, _)>'(_witness_Show@5_0,
-                                                                                 {_n@0_0,
-                                                                                  _s@1_0}).
+        'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'tuple_impls::Show::$patina_witness<(_, _)>'(_witnesses_where_Show@4_0),
+    'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'tuple_impls::Show::show<(_, _)>'(_witness_Show@5_0,
+                                                                                  {_n@0_0,
+                                                                                   _s@1_0}).
 
 show_generic_all(_n@0_0, _s@1_0) ->
     _witness_Show@2_0 =
-        'Elixir.Patina.TupleImpls.$impl.Core.Int':'TupleImpls::Show::$patina_witness'(),
+        'Elixir.Patina.TupleImpls.$impl.Core.Int':'tuple_impls::Show::$patina_witness'(),
     _witnesses_where_Show@3_0 = {_witness_Show@2_0},
     _witness_Show@4_0 =
-        'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::$patina_witness<(_,)>'(_witnesses_where_Show@3_0),
+        'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'tuple_impls::Show::$patina_witness<(_,)>'(_witnesses_where_Show@3_0),
     _witnesses_where_show_generic@5_0 = {_witness_Show@4_0},
     _witness_Show@6_0 =
-        'Elixir.Patina.TupleImpls.$impl.Core.Str':'TupleImpls::Show::$patina_witness'(),
+        'Elixir.Patina.TupleImpls.$impl.Core.Str':'tuple_impls::Show::$patina_witness'(),
     _witnesses_where_Show@7_0 = {_witness_Show@2_0,
                                  _witness_Show@6_0},
     _witness_Show@8_0 =
-        'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::$patina_witness<(_, _)>'(_witnesses_where_Show@7_0),
+        'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'tuple_impls::Show::$patina_witness<(_, _)>'(_witnesses_where_Show@7_0),
     _witnesses_where_show_generic@9_0 = {_witness_Show@8_0},
     _witness_Show@10_0 =
-        'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::$patina_witness<()>'(),
+        'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'tuple_impls::Show::$patina_witness<()>'(),
     _witnesses_where_Show@11_0 = {_witness_Show@2_0,
                                   _witness_Show@10_0},
     _witness_Show@12_0 =
-        'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::$patina_witness<(_, _)>'(_witnesses_where_Show@11_0),
+        'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'tuple_impls::Show::$patina_witness<(_, _)>'(_witnesses_where_Show@11_0),
     _witnesses_where_Show@13_0 = {_witness_Show@2_0,
                                   _witness_Show@6_0,
                                   _witness_Show@12_0},
     _witness_Show@14_0 =
-        'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::$patina_witness<(_, _, _)>'(_witnesses_where_Show@13_0),
+        'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'tuple_impls::Show::$patina_witness<(_, _, _)>'(_witnesses_where_Show@13_0),
     _witnesses_where_show_generic@15_0 =
         {_witness_Show@14_0},
     <<<<(show_generic(_witnesses_where_show_generic@5_0,

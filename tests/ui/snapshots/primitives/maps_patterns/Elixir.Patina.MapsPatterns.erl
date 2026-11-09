@@ -83,9 +83,9 @@ lookup_pinned_key_in_closure(_map@0_0, _key@1_0) ->
 
 lookup_assoc_const_key(_map@0_0) ->
     _witness_Keyed@1_0 =
-        'Elixir.Patina.MapsPatterns.NameKey':'MapsPatterns::Keyed::$patina_witness'(),
+        'Elixir.Patina.MapsPatterns.NameKey':'maps_patterns::Keyed::$patina_witness'(),
     _const_Keyed_KEY@2_0 =
-        'Elixir.Patina.MapsPatterns.NameKey':'MapsPatterns::Keyed::$patina_const::KEY'(_witness_Keyed@1_0),
+        'Elixir.Patina.MapsPatterns.NameKey':'maps_patterns::Keyed::$patina_const::KEY'(_witness_Keyed@1_0),
     case _map@0_0 of
         #{_const_Keyed_KEY@2_0 := _value@3_0} -> _value@3_0;
         _ -> -1
@@ -108,7 +108,7 @@ lookup_generic_key(_witnesses_where_lookup_generic_key@0_0,
 
 lookup_generic_name_key(_map@0_0) ->
     _witness_Keyed@1_0 =
-        'Elixir.Patina.MapsPatterns.NameKey':'MapsPatterns::Keyed::$patina_witness'(),
+        'Elixir.Patina.MapsPatterns.NameKey':'maps_patterns::Keyed::$patina_witness'(),
     _witnesses_where_lookup_generic_key@2_0 =
         {_witness_Keyed@1_0},
     lookup_generic_key(_witnesses_where_lookup_generic_key@2_0,

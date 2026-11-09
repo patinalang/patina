@@ -5,52 +5,52 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
 
 use ::{};
-use MacrosAndItems::Describe;
-use MacrosAndItems::Plain;
-use MacrosAndItems::doubled;
-use MacrosAndItems::echo;
-use MacrosAndItems::plain;
+use macros_and_items::Describe;
+use macros_and_items::Plain;
+use macros_and_items::doubled;
+use macros_and_items::echo;
+use macros_and_items::plain;
 
 struct Marker;
 fn derived_value() -> int ({ (42 as int) } as int)
 
 fn items() ({
-    let n = (Plain { value: (5 as int) } as MacrosAndItems::Plain);
+    let n = (Plain { value: (5 as int) } as macros_and_items::Plain);
 
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
-                                    fn(term) -> term)(((n as MacrosAndItems::Plain).describe()
+                                    fn(term) -> term)(((n as macros_and_items::Plain).describe()
                                     as int)) as term), (" " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((plain as
-                                        fn() -> int {MacrosAndItems::plain})() as int)) as term),
+                                        fn() -> int {macros_and_items::plain})() as int)) as term),
                             (" " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((derived_value as
                                         fn() -> int {derived_value})() as int)) as term)] as
                         [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())
 fn macros() ({
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)(((5 as int) + (5 as int) as int)) as
                                 term), (" " as str),
                             ((patina_fmt::display as fn(term) -> term)((7 as int)) as
                                 term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

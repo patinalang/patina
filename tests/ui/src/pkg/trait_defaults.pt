@@ -1,4 +1,4 @@
-use Traits::{Greet, Label, Robot, greet_all};
+use traits::{Greet, Label, Robot, greet_all};
 
 struct Person(str);
 

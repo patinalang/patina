@@ -9,7 +9,6 @@ doctest = false
 
 [dependencies]
 # tidy-alphabetical-start
-convert_case = "0.11.0"
 etf = { path = "../etf" }
 rustc_ast = { path = "../rustc_ast" }
 rustc_ast_passes = { path = "../rustc_ast_passes" }

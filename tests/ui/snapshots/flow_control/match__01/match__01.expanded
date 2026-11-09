@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -35,39 +35,39 @@ pub fn main() {
 
     // You can use the pin operator (^) to match against bound variables
     {
-        ::Core::io::put_chars([["Tell me about ",
+        ::core::io::put_chars([["Tell me about ",
                             patina_fmt::display(number)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     match number {
-        1 => { ::Core::io::put_chars([["One!"]]); ::Core::io::nl(); }
+        1 => { ::core::io::put_chars([["One!"]]); ::core::io::nl(); }
         2 | 3 | 5 | 7 | 11 => {
-            ::Core::io::put_chars([["This is a prime"]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["This is a prime"]]);
+            ::core::io::nl();
         }
-        13..=19 => { ::Core::io::put_chars([["A teen"]]); ::Core::io::nl(); }
+        13..=19 => { ::core::io::put_chars([["A teen"]]); ::core::io::nl(); }
         _ => {
-            ::Core::io::put_chars([["Ain\'t special"]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["Ain\'t special"]]);
+            ::core::io::nl();
         }
     }
     let boolean = true;
     let binary = match boolean { false => 0, true => 1, };
     {
-        ::Core::io::put_chars([[patina_fmt::display(boolean), " -> ",
+        ::core::io::put_chars([[patina_fmt::display(boolean), " -> ",
                             patina_fmt::display(binary)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     let expected_value = 42;
     match 123 {
         ^expected_value => {
-            ::Core::io::put_chars([["found expected value"]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["found expected value"]]);
+            ::core::io::nl();
         }
         value => {
-            ::Core::io::put_chars([["found unexpected value ",
+            ::core::io::put_chars([["found unexpected value ",
                                 patina_fmt::display(value)]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         }
     }
 }

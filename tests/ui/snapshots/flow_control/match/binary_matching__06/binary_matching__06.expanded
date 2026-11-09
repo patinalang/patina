@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -34,8 +34,8 @@ pub fn main() {
         <<1: int(size = 1), 0: int(size = 1), (version + 1): int(size = 3)>>;
 
     {
-        ::Core::io::put_chars([[patina_fmt::debug(greeting), " ",
+        ::core::io::put_chars([[patina_fmt::debug(greeting), " ",
                             patina_fmt::debug(header), " ", patina_fmt::debug(flags)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }

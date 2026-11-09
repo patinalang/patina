@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -51,14 +51,14 @@ trait Animal {
         // TODO ^ Try removing the type annotations.
 
         ({
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([((patina_fmt::display as
                                         fn(term) -> term)(((self as Self).name() as str)) as term),
                                 (" says " as str),
                                 ((patina_fmt::display as
                                         fn(term) -> term)(((self as Self).noise() as str)) as term)]
                             as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         } as ());
     } as ())
 }
@@ -69,22 +69,22 @@ impl Sheep {
             Self ({
         (if ((self as Sheep).is_naked() as bool) {
             ({
-                ((::Core::io::put_chars as
+                ((::core::io::put_chars as
                         fn(term) -> term)(([([((patina_fmt::display as
                                             fn(term) -> term)(((self as Sheep).name() as str)) as term),
                                     (" is already naked..." as str)] as [term])] as [[term]]))
                     as term);
-                ((::Core::io::nl as fn() -> term)() as term);
+                ((::core::io::nl as fn() -> term)() as term);
             } as ());
             (self as Sheep)
         } else {
             ({
-                ((::Core::io::put_chars as
+                ((::core::io::put_chars as
                         fn(term) -> term)(([([((patina_fmt::display as
                                             fn(term) -> term)(((self as Sheep).name as str)) as term),
                                     (" gets a haircut!" as str)] as [term])] as [[term]])) as
                     term);
-                ((::Core::io::nl as fn() -> term)() as term);
+                ((::core::io::nl as fn() -> term)() as term);
             } as ());
             (Sheep { naked: (true as bool), ..(self as Sheep) } as Sheep)
         } as Sheep)
@@ -106,14 +106,14 @@ impl Animal for Sheep {
     } as str)
     fn talk(self) ({
         ({
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([((patina_fmt::display as
                                         fn(term) -> term)(((self as Sheep).name as str)) as term),
                                 (" pauses briefly... " as str),
                                 ((patina_fmt::display as
                                         fn(term) -> term)(((self as Sheep).noise() as str)) as
                                     term)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         } as ());
     } as ())
 }

@@ -11,8 +11,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'DuplicatePreconditions::Foo::foo<(_, _)>'/2,
-         'DuplicatePreconditions::Foo::$patina_witness<(_, _)>'/1]).
+         'duplicate_preconditions::Foo::foo<(_, _)>'/2,
+         'duplicate_preconditions::Foo::$patina_witness<(_, _)>'/1]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -27,8 +27,8 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'DuplicatePreconditions::Foo::foo<(_, _)>'(_witness_Foo@0_0,
-                                           _self@1_0) ->
+'duplicate_preconditions::Foo::foo<(_, _)>'(_witness_Foo@0_0,
+                                            _self@1_0) ->
     _where_Foo@2_0 = erlang:element(3, _witness_Foo@0_0),
     _witness_Bar@3_0 = erlang:element(2, _where_Foo@2_0),
     _witness_Bar@4_0 = erlang:element(1, _where_Foo@2_0),
@@ -40,7 +40,7 @@
     _fn_Bar_bar@8_0(_witness_Bar@4_0, _a@9_0) +
         _fn_Bar_bar@6_0(_witness_Bar@3_0, _b@10_0).
 
-'DuplicatePreconditions::Foo::$patina_witness<(_, _)>'(_witnesses_where_Foo@0_0) ->
-    {{fun 'Elixir.Patina.DuplicatePreconditions.$impl.Core.Tuple':'DuplicatePreconditions::Foo::foo<(_, _)>'/2},
+'duplicate_preconditions::Foo::$patina_witness<(_, _)>'(_witnesses_where_Foo@0_0) ->
+    {{fun 'Elixir.Patina.DuplicatePreconditions.$impl.Core.Tuple':'duplicate_preconditions::Foo::foo<(_, _)>'/2},
      {},
      _witnesses_where_Foo@0_0}.

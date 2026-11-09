@@ -9,14 +9,14 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'TupleImpls::Show::show<()>'/2,
-         'TupleImpls::Show::$patina_witness<()>'/0,
-         'TupleImpls::Show::show<(_,)>'/2,
-         'TupleImpls::Show::$patina_witness<(_,)>'/1,
-         'TupleImpls::Show::show<(_, _)>'/2,
-         'TupleImpls::Show::$patina_witness<(_, _)>'/1,
-         'TupleImpls::Show::show<(_, _, _)>'/2,
-         'TupleImpls::Show::$patina_witness<(_, _, _)>'/1]).
+         'tuple_impls::Show::show<()>'/2,
+         'tuple_impls::Show::$patina_witness<()>'/0,
+         'tuple_impls::Show::show<(_,)>'/2,
+         'tuple_impls::Show::$patina_witness<(_,)>'/1,
+         'tuple_impls::Show::show<(_, _)>'/2,
+         'tuple_impls::Show::$patina_witness<(_, _)>'/1,
+         'tuple_impls::Show::show<(_, _, _)>'/2,
+         'tuple_impls::Show::$patina_witness<(_, _, _)>'/1]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -31,17 +31,17 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'TupleImpls::Show::show<()>'(_witness_Show@0_0,
-                             _self@1_0) ->
+'tuple_impls::Show::show<()>'(_witness_Show@0_0,
+                              _self@1_0) ->
     <<"()"/utf8>>.
 
-'TupleImpls::Show::$patina_witness<()>'() ->
-    {{fun 'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::show<()>'/2},
+'tuple_impls::Show::$patina_witness<()>'() ->
+    {{fun 'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'tuple_impls::Show::show<()>'/2},
      {},
      {}}.
 
-'TupleImpls::Show::show<(_,)>'(_witness_Show@0_0,
-                               _self@1_0) ->
+'tuple_impls::Show::show<(_,)>'(_witness_Show@0_0,
+                                _self@1_0) ->
     _where_Show@2_0 = erlang:element(3, _witness_Show@0_0),
     _witness_Show@3_0 = erlang:element(1, _where_Show@2_0),
     _vtable_Show@4_0 = erlang:element(1, _witness_Show@3_0),
@@ -53,13 +53,13 @@
         ","/utf8>>/binary,
       ")"/utf8>>.
 
-'TupleImpls::Show::$patina_witness<(_,)>'(_witnesses_where_Show@0_0) ->
-    {{fun 'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::show<(_,)>'/2},
+'tuple_impls::Show::$patina_witness<(_,)>'(_witnesses_where_Show@0_0) ->
+    {{fun 'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'tuple_impls::Show::show<(_,)>'/2},
      {},
      _witnesses_where_Show@0_0}.
 
-'TupleImpls::Show::show<(_, _)>'(_witness_Show@0_0,
-                                 _self@1_0) ->
+'tuple_impls::Show::show<(_, _)>'(_witness_Show@0_0,
+                                  _self@1_0) ->
     _where_Show@2_0 = erlang:element(3, _witness_Show@0_0),
     _witness_Show@3_0 = erlang:element(2, _where_Show@2_0),
     _witness_Show@4_0 = erlang:element(1, _where_Show@2_0),
@@ -77,13 +77,13 @@
         ","/utf8>>/binary,
       ")"/utf8>>.
 
-'TupleImpls::Show::$patina_witness<(_, _)>'(_witnesses_where_Show@0_0) ->
-    {{fun 'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::show<(_, _)>'/2},
+'tuple_impls::Show::$patina_witness<(_, _)>'(_witnesses_where_Show@0_0) ->
+    {{fun 'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'tuple_impls::Show::show<(_, _)>'/2},
      {},
      _witnesses_where_Show@0_0}.
 
-'TupleImpls::Show::show<(_, _, _)>'(_witness_Show@0_0,
-                                    _self@1_0) ->
+'tuple_impls::Show::show<(_, _, _)>'(_witness_Show@0_0,
+                                     _self@1_0) ->
     _where_Show@2_0 = erlang:element(3, _witness_Show@0_0),
     _witness_Show@3_0 = erlang:element(3, _where_Show@2_0),
     _witness_Show@4_0 = erlang:element(2, _where_Show@2_0),
@@ -109,7 +109,7 @@
         ","/utf8>>/binary,
       ")"/utf8>>.
 
-'TupleImpls::Show::$patina_witness<(_, _, _)>'(_witnesses_where_Show@0_0) ->
-    {{fun 'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'TupleImpls::Show::show<(_, _, _)>'/2},
+'tuple_impls::Show::$patina_witness<(_, _, _)>'(_witnesses_where_Show@0_0) ->
+    {{fun 'Elixir.Patina.TupleImpls.$impl.Core.Tuple':'tuple_impls::Show::show<(_, _, _)>'/2},
      {},
      _witnesses_where_Show@0_0}.

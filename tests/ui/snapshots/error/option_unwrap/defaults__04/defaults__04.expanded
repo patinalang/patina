@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -33,33 +33,33 @@ pub fn main() {
                 // should_be_apple is: Apple
                 // my_apple is unchanged: Some(Apple)
                 {
-                    ::Core::io::put_chars([["Providing lemon as fallback"]]);
-                    ::Core::io::nl();
+                    ::core::io::put_chars([["Providing lemon as fallback"]]);
+                    ::core::io::nl();
                 };
                 Fruit::Lemon
             };
     let first_available_fruit =
         my_fruit.get_or_insert_with(get_lemon_as_fallback);
     {
-        ::Core::io::put_chars([["first_available_fruit is: ",
+        ::core::io::put_chars([["first_available_fruit is: ",
                             patina_fmt::debug(first_available_fruit)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([["my_fruit is: ",
+        ::core::io::put_chars([["my_fruit is: ",
                             patina_fmt::debug(my_fruit)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     let mut my_apple = Some(Fruit::Apple);
     let should_be_apple = my_apple.get_or_insert_with(get_lemon_as_fallback);
     {
-        ::Core::io::put_chars([["should_be_apple is: ",
+        ::core::io::put_chars([["should_be_apple is: ",
                             patina_fmt::debug(should_be_apple)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([["my_apple is unchanged: ",
+        ::core::io::put_chars([["my_apple is unchanged: ",
                             patina_fmt::debug(my_apple)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }

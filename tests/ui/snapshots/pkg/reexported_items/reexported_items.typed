@@ -5,19 +5,19 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
 
 use ::{};
-use Reexports::Hello;
-use Reexports::Wrapper;
-use Reexports::identity;
+use reexports::Hello;
+use reexports::Wrapper;
+use reexports::identity;
 
 struct Relayed {
     value: int,
@@ -28,7 +28,7 @@ fn proc_macros() ({
     let relayed = (Relayed { value: (3 as int) } as Relayed);
 
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)((((relayed as Relayed).value as int) +
                                     (1 as int) as int)) as term), (" " as str),
@@ -36,19 +36,19 @@ fn proc_macros() ({
                                     fn(term) -> term)(((hello_from_derive as
                                         fn() -> int {hello_from_derive})() as int)) as term)] as
                         [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())
 fn wrapper() ({
     let w =
         ((Wrapper as
-                fn(int) -> Reexports::Wrapper<int> {Reexports::Wrapper::<int>})((9
-                as int)) as Reexports::Wrapper<int>);
+                fn(int) -> reexports::Wrapper<int> {reexports::Wrapper::<int>})((9
+                as int)) as reexports::Wrapper<int>);
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
-                                    fn(term) -> term)(((w as Reexports::Wrapper<int>).0 as int))
+                                    fn(term) -> term)(((w as reexports::Wrapper<int>).0 as int))
                                 as term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

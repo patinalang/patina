@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -69,7 +69,7 @@ fn main() ({
 
 
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("Does container contain " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)((number_1 as int)) as term),
@@ -81,32 +81,32 @@ fn main() ({
                                     fn(term) -> term)(((container as
                                         Container).contains((number_1 as int), (number_2 as int)) as
                                     bool)) as term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("First number: " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((container as Container).first() as int))
                                 as term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("Last number: " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((container as Container).last() as int))
                                 as term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("The difference is: " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((difference as
                                         fn(Container) -> int {difference::<int, int, Container>})((container
                                         as Container)) as int)) as term)] as [term])] as [[term]]))
             as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

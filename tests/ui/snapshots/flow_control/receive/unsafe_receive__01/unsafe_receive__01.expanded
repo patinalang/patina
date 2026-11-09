@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -31,27 +31,27 @@ pub fn main() {
     unsafe {
         receive {
             int(n) => {
-                ::Core::io::put_chars([["got integer ",
+                ::core::io::put_chars([["got integer ",
                                     patina_fmt::debug(n)]]);
-                ::Core::io::nl();
+                ::core::io::nl();
             }
             atom(a) => {
-                ::Core::io::put_chars([["got atom ", patina_fmt::debug(a)]]);
-                ::Core::io::nl();
+                ::core::io::put_chars([["got atom ", patina_fmt::debug(a)]]);
+                ::core::io::nl();
             }
             Option::<str>::None => {
-                ::Core::io::put_chars([["got an empty string option"]]);
-                ::Core::io::nl();
+                ::core::io::put_chars([["got an empty string option"]]);
+                ::core::io::nl();
             }
             Option::<int>::None => {
-                ::Core::io::put_chars([["got an empty integer option"]]);
-                ::Core::io::nl();
+                ::core::io::put_chars([["got an empty integer option"]]);
+                ::core::io::nl();
             }
             _ => {
-                ::Core::io::put_chars([["got something else"]]);
-                ::Core::io::nl();
+                ::core::io::put_chars([["got something else"]]);
+                ::core::io::nl();
             }
         } after Timeout::from_seconds(5)
-            { { ::Core::io::put_chars([["timeout"]]); ::Core::io::nl(); } }
+            { { ::core::io::put_chars([["timeout"]]); ::core::io::nl(); } }
     }
 }

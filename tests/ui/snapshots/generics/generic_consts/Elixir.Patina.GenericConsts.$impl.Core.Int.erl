@@ -9,8 +9,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'GenericConsts::Konst::$patina_const::K'/1,
-         'GenericConsts::Konst::$patina_witness'/0]).
+         'generic_consts::Konst::$patina_const::K'/1,
+         'generic_consts::Konst::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,10 +25,10 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'GenericConsts::Konst::$patina_const::K'(_witness_Konst@0_0) ->
+'generic_consts::Konst::$patina_const::K'(_witness_Konst@0_0) ->
     7.
 
-'GenericConsts::Konst::$patina_witness'() ->
-    {{fun 'Elixir.Patina.GenericConsts.$impl.Core.Int':'GenericConsts::Konst::$patina_const::K'/1},
+'generic_consts::Konst::$patina_witness'() ->
+    {{fun 'Elixir.Patina.GenericConsts.$impl.Core.Int':'generic_consts::Konst::$patina_const::K'/1},
      {},
      {}}.

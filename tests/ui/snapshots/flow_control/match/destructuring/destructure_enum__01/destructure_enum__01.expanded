@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -41,50 +41,50 @@ pub fn main() {
 
     // An `enum` can be destructured using a `match`.
     // Don't need another arm because all variants have been examined
-    { ::Core::io::put_chars([["What color is it?"]]); ::Core::io::nl(); };
+    { ::core::io::put_chars([["What color is it?"]]); ::core::io::nl(); };
     match color {
         Color::Red => {
-            ::Core::io::put_chars([["The color is Red!"]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["The color is Red!"]]);
+            ::core::io::nl();
         }
         Color::Blue => {
-            ::Core::io::put_chars([["The color is Blue!"]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["The color is Blue!"]]);
+            ::core::io::nl();
         }
         Color::Green => {
-            ::Core::io::put_chars([["The color is Green!"]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["The color is Green!"]]);
+            ::core::io::nl();
         }
         Color::RGB(r, g, b) => {
-            ::Core::io::put_chars([["Red: ", patina_fmt::display(r),
+            ::core::io::put_chars([["Red: ", patina_fmt::display(r),
                                 ", green: ", patina_fmt::display(g), ", and blue: ",
                                 patina_fmt::display(b), "!"]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         }
         Color::HSV(h, s, v) => {
-            ::Core::io::put_chars([["Hue: ", patina_fmt::display(h),
+            ::core::io::put_chars([["Hue: ", patina_fmt::display(h),
                                 ", saturation: ", patina_fmt::display(s), ", value: ",
                                 patina_fmt::display(v), "!"]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         }
         Color::HSL(h, s, l) => {
-            ::Core::io::put_chars([["Hue: ", patina_fmt::display(h),
+            ::core::io::put_chars([["Hue: ", patina_fmt::display(h),
                                 ", saturation: ", patina_fmt::display(s), ", lightness: ",
                                 patina_fmt::display(l), "!"]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         }
         Color::CMY(c, m, y) => {
-            ::Core::io::put_chars([["Cyan: ", patina_fmt::display(c),
+            ::core::io::put_chars([["Cyan: ", patina_fmt::display(c),
                                 ", magenta: ", patina_fmt::display(m), ", yellow: ",
                                 patina_fmt::display(y), "!"]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         }
         Color::CMYK(c, m, y, k) => {
-            ::Core::io::put_chars([["Cyan: ", patina_fmt::display(c),
+            ::core::io::put_chars([["Cyan: ", patina_fmt::display(c),
                                 ", magenta: ", patina_fmt::display(m), ", yellow: ",
                                 patina_fmt::display(y), ", key (black): ",
                                 patina_fmt::display(k), "!"]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         }
     }
 }

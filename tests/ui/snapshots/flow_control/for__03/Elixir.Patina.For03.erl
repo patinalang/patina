@@ -25,16 +25,16 @@
 
 main() ->
     _witness_Iterator@0_0 =
-        'Elixir.Patina.Core.ListIter':'Core::Iterator::$patina_witness'(),
+        'Elixir.Patina.Core.ListIter':'core::Iterator::$patina_witness'(),
     _witnesses_where_IntoIterator@1_0 =
         {_witness_Iterator@0_0},
     _witness_IntoIterator@2_0 =
-        'Elixir.Patina.Core.$impl':'Core::IntoIterator::$patina_witness'(_witnesses_where_IntoIterator@1_0),
+        'Elixir.Patina.Core.$impl':'core::IntoIterator::$patina_witness'(_witnesses_where_IntoIterator@1_0),
     _names@3_0 = [<<"Bob"/utf8>>,
                   <<"Frank"/utf8>>,
                   <<"Ferris"/utf8>>],
     case
-        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'(_witness_IntoIterator@2_0,
+        'Elixir.Patina.Core.$impl':'core::IntoIterator::into_iter'(_witness_IntoIterator@2_0,
                                                                    'Elixir.Patina.Core.List':iter(_names@3_0))
         of
         _iter@4_0 ->
@@ -43,7 +43,7 @@ main() ->
                                     {'$patina_label_0', _iter@4_2} -> _iter@4_2;
                                     _ ->
                                         case
-                                            'Elixir.Patina.Core.ListIter':'Core::Iterator::next'(_witness_Iterator@0_0,
+                                            'Elixir.Patina.Core.ListIter':'core::Iterator::next'(_witness_Iterator@0_0,
                                                                                                  _iter@4_0)
                                             of
                                             nil ->

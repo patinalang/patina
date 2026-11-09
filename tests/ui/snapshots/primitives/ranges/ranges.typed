@@ -5,41 +5,41 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
 
 use ::{};
-use Core::Range;
-use Core::RangeInclusive;
+use core::Range;
+use core::RangeInclusive;
 
 fn half_open(start: int, end: int)
     ->
         Range<int> ({
-    (Range { start: (start as int), end: (end as int) } as Core::Range<int>)
-} as Core::Range<int>)
+    (Range { start: (start as int), end: (end as int) } as core::Range<int>)
+} as core::Range<int>)
 
 fn closed(start: int, end: int)
     ->
         RangeInclusive<int> ({
     ((range_inclusive_new as
-            fn(int, int) -> Core::RangeInclusive<int> {Core::RangeInclusive::<int>::new})((start
-            as int), (end as int)) as Core::RangeInclusive<int>)
-} as Core::RangeInclusive<int>)
+            fn(int, int) -> core::RangeInclusive<int> {core::RangeInclusive::<int>::new})((start
+            as int), (end as int)) as core::RangeInclusive<int>)
+} as core::RangeInclusive<int>)
 
 fn half_open_bounds()
     ->
         (int,
         int) ({
     let range =
-        (Range { start: (1 as int), end: (101 as int) } as Core::Range<int>);
-    ((((range as Core::Range<int>).start as int),
-        ((range as Core::Range<int>).end as int)) as (int, int))
+        (Range { start: (1 as int), end: (101 as int) } as core::Range<int>);
+    ((((range as core::Range<int>).start as int),
+        ((range as core::Range<int>).end as int)) as (int, int))
 } as (int, int))
 
 fn closed_bounds()
@@ -48,23 +48,23 @@ fn closed_bounds()
         int) ({
     let range =
         ((range_inclusive_new as
-                fn(int, int) -> Core::RangeInclusive<int> {Core::RangeInclusive::<int>::new})((1
-                as int), (100 as int)) as Core::RangeInclusive<int>);
-    ((((range as Core::RangeInclusive<int>).start as int),
-        ((range as Core::RangeInclusive<int>).end as int)) as (int, int))
+                fn(int, int) -> core::RangeInclusive<int> {core::RangeInclusive::<int>::new})((1
+                as int), (100 as int)) as core::RangeInclusive<int>);
+    ((((range as core::RangeInclusive<int>).start as int),
+        ((range as core::RangeInclusive<int>).end as int)) as (int, int))
 } as (int, int))
 
 fn char_range()
     ->
         RangeInclusive<char> ({
     ((range_inclusive_new as
-            fn(char, char) -> Core::RangeInclusive<char> {Core::RangeInclusive::<char>::new})(('a'
-            as char), ('z' as char)) as Core::RangeInclusive<char>)
-} as Core::RangeInclusive<char>)
+            fn(char, char) -> core::RangeInclusive<char> {core::RangeInclusive::<char>::new})(('a'
+            as char), ('z' as char)) as core::RangeInclusive<char>)
+} as core::RangeInclusive<char>)
 
 fn destructure(range: Range<int>)
     ->
         int ({
-    let Range {  start,  end } = (range as Core::Range<int>);
+    let Range {  start,  end } = (range as core::Range<int>);
     ((end as int) - (start as int) as int)
 } as int)

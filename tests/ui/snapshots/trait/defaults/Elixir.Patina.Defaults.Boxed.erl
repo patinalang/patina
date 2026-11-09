@@ -9,12 +9,12 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'Defaults::Container::$patina_type::Item'/1,
-         'Defaults::Container::get'/2,
-         'Defaults::Container::$patina_witness'/0,
-         'Defaults::Describe::describe'/2,
-         'Defaults::Describe::$patina_witness'/0,
-         'Defaults::Maker::$patina_witness'/0]).
+         'defaults::Container::$patina_type::Item'/1,
+         'defaults::Container::get'/2,
+         'defaults::Container::$patina_witness'/0,
+         'defaults::Describe::describe'/2,
+         'defaults::Describe::$patina_witness'/0,
+         'defaults::Maker::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -29,30 +29,30 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Container::$patina_type::Item'(_witness_Container@0_0) ->
+'defaults::Container::$patina_type::Item'(_witness_Container@0_0) ->
     {}.
 
-'Defaults::Container::get'(_witness_Container@0_0,
+'defaults::Container::get'(_witness_Container@0_0,
                            _self@1_0) ->
     _self@1_0.
 
-'Defaults::Container::$patina_witness'() ->
-    {{fun 'Elixir.Patina.Defaults.Boxed':'Defaults::Container::$patina_type::Item'/1,
-      fun 'Elixir.Patina.Defaults.Boxed':'Defaults::Container::get'/2,
-      fun 'Elixir.Patina.Defaults':'Defaults::Container::needs_item_witness'/3},
+'defaults::Container::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Defaults.Boxed':'defaults::Container::$patina_type::Item'/1,
+      fun 'Elixir.Patina.Defaults.Boxed':'defaults::Container::get'/2,
+      fun 'Elixir.Patina.Defaults':'defaults::Container::needs_item_witness'/3},
      {},
      {}}.
 
-'Defaults::Describe::describe'(_witness_Describe@0_0,
+'defaults::Describe::describe'(_witness_Describe@0_0,
                                _self@1_0) ->
     <<"boxed"/utf8>>.
 
-'Defaults::Describe::$patina_witness'() ->
-    {{fun 'Elixir.Patina.Defaults.Boxed':'Defaults::Describe::describe'/2},
+'defaults::Describe::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Defaults.Boxed':'defaults::Describe::describe'/2},
      {},
      {}}.
 
-'Defaults::Maker::$patina_witness'() ->
-    {{fun 'Elixir.Patina.Defaults':'Defaults::Maker::make'/2},
+'defaults::Maker::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Defaults':'defaults::Maker::make'/2},
      {},
      {}}.

@@ -5,18 +5,18 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
 
 // The other direction of each conversion is rejected, and so is a parameter with no use.
 
-use Core::PhantomData;
+use core::PhantomData;
 
 struct Source<T>(term, PhantomData<T>);
 

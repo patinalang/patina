@@ -10,8 +10,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'BoundGeneric::Tr::method'/2,
-         'BoundGeneric::Tr::$patina_witness'/1]).
+         'bound_generic::Tr::method'/2,
+         'bound_generic::Tr::$patina_witness'/1]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -26,8 +26,8 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'BoundGeneric::Tr::method'(_witness_Tr@0_0,
-                           _self@1_0) ->
+'bound_generic::Tr::method'(_witness_Tr@0_0,
+                            _self@1_0) ->
     _where_Tr@2_0 = erlang:element(3, _witness_Tr@0_0),
     _witness_Bound@3_0 = erlang:element(1, _where_Tr@2_0),
     _vtable_Bound@4_0 = erlang:element(1,
@@ -46,7 +46,7 @@
     io:nl(),
     _fn_Bound_b@5_0(_witness_Bound@3_0, _self@1_0).
 
-'BoundGeneric::Tr::$patina_witness'(_witnesses_where_Tr@0_0) ->
-    {{fun 'Elixir.Patina.BoundGeneric.Holder':'BoundGeneric::Tr::method'/2},
+'bound_generic::Tr::$patina_witness'(_witnesses_where_Tr@0_0) ->
+    {{fun 'Elixir.Patina.BoundGeneric.Holder':'bound_generic::Tr::method'/2},
      {},
      _witnesses_where_Tr@0_0}.

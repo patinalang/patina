@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -29,15 +29,15 @@ pub fn main() {
 
 
     {
-        ::Core::io::put_chars([["a binding: ",
+        ::core::io::put_chars([["a binding: ",
                             patina_fmt::display(a_binding)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     let another_binding;
     another_binding = 1;
     {
-        ::Core::io::put_chars([["another binding: ",
+        ::core::io::put_chars([["another binding: ",
                             patina_fmt::display(another_binding)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }

@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -36,15 +36,15 @@ macro_rules! test {
 
 pub fn main() {
     {
-        ::Core::io::put_chars([[patina_fmt::debug("1 + 1 == 2"), " and ",
+        ::core::io::put_chars([[patina_fmt::debug("1 + 1 == 2"), " and ",
                             patina_fmt::debug("2 * 2 == 4"), " is ",
                             patina_fmt::debug(1 + 1 == 2 && 2 * 2 == 4)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([[patina_fmt::debug("true"), " or ",
+        ::core::io::put_chars([[patina_fmt::debug("true"), " or ",
                             patina_fmt::debug("false"), " is ",
                             patina_fmt::debug(true || false)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }

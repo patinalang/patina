@@ -40,7 +40,7 @@ subtrait_of_marker(_witnesses_where_subtrait_of_marker@0_0,
 
 a_both() ->
     _witness_Show@0_0 =
-        'Elixir.Patina.MarkerTraits.A':'MarkerTraits::Show::$patina_witness'(),
+        'Elixir.Patina.MarkerTraits.A':'marker_traits::Show::$patina_witness'(),
     _witnesses_where_subtrait_of_marker@1_0 =
         {_witness_Show@0_0},
     subtrait_of_marker(_witnesses_where_subtrait_of_marker@1_0,
@@ -48,6 +48,6 @@ a_both() ->
 
 a_marked() ->
     _witness_Show@0_0 =
-        'Elixir.Patina.MarkerTraits.A':'MarkerTraits::Show::$patina_witness'(),
-    'Elixir.Patina.MarkerTraits.A':'MarkerTraits::Show::show'(_witness_Show@0_0,
-                                                              marker_bounds_only('Elixir.Patina.MarkerTraits.A')).
+        'Elixir.Patina.MarkerTraits.A':'marker_traits::Show::$patina_witness'(),
+    'Elixir.Patina.MarkerTraits.A':'marker_traits::Show::show'(_witness_Show@0_0,
+                                                               marker_bounds_only('Elixir.Patina.MarkerTraits.A')).

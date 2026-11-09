@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -45,32 +45,32 @@ fn main() ({
     // An `enum` can be destructured using a `match`.
     // Don't need another arm because all variants have been examined
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("What color is it?" as str)] as [str])]
                 as [[str]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     (match (color as Color) {
         Color::Red => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("The color is Red!" as str)] as
                             [str])] as [[str]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         Color::Blue => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("The color is Blue!" as str)] as
                             [str])] as [[str]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         Color::Green => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("The color is Green!" as str)] as
                             [str])] as [[str]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         Color::RGB(r, g, b) => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("Red: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((r as int)) as
                                     term), (", green: " as str),
@@ -78,10 +78,10 @@ fn main() ({
                                     term), (", and blue: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((b as int)) as
                                     term), ("!" as str)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         Color::HSV(h, s, v) => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("Hue: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((h as int)) as
                                     term), (", saturation: " as str),
@@ -89,10 +89,10 @@ fn main() ({
                                     term), (", value: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((v as int)) as
                                     term), ("!" as str)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         Color::HSL(h, s, l) => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("Hue: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((h as int)) as
                                     term), (", saturation: " as str),
@@ -100,10 +100,10 @@ fn main() ({
                                     term), (", lightness: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((l as int)) as
                                     term), ("!" as str)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         Color::CMY(c, m, y) => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("Cyan: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((c as int)) as
                                     term), (", magenta: " as str),
@@ -111,10 +111,10 @@ fn main() ({
                                     term), (", yellow: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((y as int)) as
                                     term), ("!" as str)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         Color::CMYK(c, m, y, k) => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("Cyan: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((c as int)) as
                                     term), (", magenta: " as str),
@@ -124,7 +124,7 @@ fn main() ({
                                     term), (", key (black): " as str),
                                 ((patina_fmt::display as fn(term) -> term)((k as int)) as
                                     term), ("!" as str)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
     } as ())
 } as ())

@@ -4,9 +4,9 @@ use common::{Session, assert_failure};
 
 const LIB: &str = "pub fn f() {}\n";
 
-/// Writes `Greeter`, which calls `HelloLib::f()`.
+/// Writes `greeter`, which calls `hello_lib::f()`.
 fn greeter(session: &Session, dependencies: &str) {
-    session.package("Greeter", dependencies, "pub fn g() { HelloLib::f() }\n");
+    session.package("greeter", dependencies, "pub fn g() { hello_lib::f() }\n");
 }
 
 /// Writes the package `name`, and builds it into `out_dir`.
@@ -18,44 +18,44 @@ fn build_lib(session: &Session, name: &str, out_dir: &str) {
 #[test]
 fn dependency_is_found_by_package_name() {
     let session = Session::new();
-    build_lib(&session, "HelloLib", "lib");
-    greeter(&session, r#"HelloLib = "~> 0.1""#);
-    session.build_package("Greeter", &["-L", "lib"]);
+    build_lib(&session, "hello_lib", "lib");
+    greeter(&session, r#"hello_lib = "~> 0.1""#);
+    session.build_package("greeter", &["-L", "lib"]);
 }
 
 #[test]
 fn missing_dependency_is_reported() {
     let session = Session::new();
-    greeter(&session, r#"HelloLib = "~> 0.1""#);
-    let output = session.try_build_package("Greeter", &[]);
-    assert_failure(&output, "can't find crate for `HelloLib`");
+    greeter(&session, r#"hello_lib = "~> 0.1""#);
+    let output = session.try_build_package("greeter", &[]);
+    assert_failure(&output, "can't find crate for `hello_lib`");
 }
 
 #[test]
 fn undeclared_package_is_not_a_dependency() {
     let session = Session::new();
-    build_lib(&session, "HelloLib", "lib");
+    build_lib(&session, "hello_lib", "lib");
     greeter(&session, "");
-    let output = session.try_build_package("Greeter", &["-L", "lib"]);
-    assert_failure(&output, "use of undeclared type `HelloLib`");
+    let output = session.try_build_package("greeter", &["-L", "lib"]);
+    assert_failure(&output, "use of unresolved module or unlinked crate `hello_lib`");
 }
 
 #[test]
 fn core_dependency_is_rejected() {
     let session = Session::new();
-    greeter(&session, r#"Core = "~> 0.1""#);
-    let output = session.try_build_package("Greeter", &[]);
-    assert_failure(&output, "Core cannot be named as an explicit dependency");
+    greeter(&session, r#"core = "~> 0.1""#);
+    let output = session.try_build_package("greeter", &[]);
+    assert_failure(&output, "core cannot be named as an explicit dependency");
 }
 
 #[test]
 fn applications_follow_the_manifest() {
     let session = Session::new();
-    for name in ["Zeta", "Alpha"] {
+    for name in ["zeta", "alpha"] {
         build_lib(&session, name, "lib");
     }
-    session.package("Greeter", "Zeta = \"~> 0.1\"\nAlpha = \"~> 0.1\"", LIB);
-    session.build_package("Greeter", &["-L", "lib"]);
+    session.package("greeter", "zeta = \"~> 0.1\"\nalpha = \"~> 0.1\"", LIB);
+    session.build_package("greeter", &["-L", "lib"]);
 
     let app = std::fs::read_to_string(session.path().join("greeter.app")).expect("read .app");
     // Ignore how the Erlang pretty printer breaks the list into lines.

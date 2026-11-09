@@ -10,12 +10,12 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'SourcePlanning::Value::value<int>'/2,
-         'SourcePlanning::Value::$patina_witness<int>'/0,
-         'SourcePlanning::Middle::$patina_witness<int>'/0,
-         'SourcePlanning::Deep::$patina_witness<int>'/0,
-         'SourcePlanning::Direct::direct'/2,
-         'SourcePlanning::Direct::$patina_witness'/1]).
+         'source_planning::Value::value<int>'/2,
+         'source_planning::Value::$patina_witness<int>'/0,
+         'source_planning::Middle::$patina_witness<int>'/0,
+         'source_planning::Deep::$patina_witness<int>'/0,
+         'source_planning::Direct::direct'/2,
+         'source_planning::Direct::$patina_witness'/1]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -30,39 +30,39 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'SourcePlanning::Value::value<int>'(_witness_Value@0_0,
-                                    _self@1_0) ->
+'source_planning::Value::value<int>'(_witness_Value@0_0,
+                                     _self@1_0) ->
     30.
 
-'SourcePlanning::Value::$patina_witness<int>'() ->
-    {{fun 'Elixir.Patina.SourcePlanning.Bounded':'SourcePlanning::Value::value<int>'/2},
+'source_planning::Value::$patina_witness<int>'() ->
+    {{fun 'Elixir.Patina.SourcePlanning.Bounded':'source_planning::Value::value<int>'/2},
      {},
      {}}.
 
-'SourcePlanning::Middle::$patina_witness<int>'() ->
+'source_planning::Middle::$patina_witness<int>'() ->
     _witness_Value@0_0 =
-        {{fun 'Elixir.Patina.SourcePlanning.Bounded':'SourcePlanning::Value::value<int>'/2},
+        {{fun 'Elixir.Patina.SourcePlanning.Bounded':'source_planning::Value::value<int>'/2},
          {},
          {}},
-    {{fun 'Elixir.Patina.SourcePlanning':'SourcePlanning::Middle::middle'/2},
+    {{fun 'Elixir.Patina.SourcePlanning':'source_planning::Middle::middle'/2},
      {_witness_Value@0_0},
      {}}.
 
-'SourcePlanning::Deep::$patina_witness<int>'() ->
+'source_planning::Deep::$patina_witness<int>'() ->
     _witness_Value@0_0 =
-        {{fun 'Elixir.Patina.SourcePlanning.Bounded':'SourcePlanning::Value::value<int>'/2},
+        {{fun 'Elixir.Patina.SourcePlanning.Bounded':'source_planning::Value::value<int>'/2},
          {},
          {}},
     _witness_Middle@1_0 =
-        {{fun 'Elixir.Patina.SourcePlanning':'SourcePlanning::Middle::middle'/2},
+        {{fun 'Elixir.Patina.SourcePlanning':'source_planning::Middle::middle'/2},
          {_witness_Value@0_0},
          {}},
-    {{fun 'Elixir.Patina.SourcePlanning':'SourcePlanning::Deep::deep'/2},
+    {{fun 'Elixir.Patina.SourcePlanning':'source_planning::Deep::deep'/2},
      {_witness_Middle@1_0},
      {}}.
 
-'SourcePlanning::Direct::direct'(_witness_Direct@0_0,
-                                 _self@1_0) ->
+'source_planning::Direct::direct'(_witness_Direct@0_0,
+                                  _self@1_0) ->
     _where_Direct@2_0 = erlang:element(3,
                                        _witness_Direct@0_0),
     _witness_Value@3_0 = erlang:element(1,
@@ -73,9 +73,9 @@
                                          _vtable_Value@4_0),
     _fn_Value_value@5_0(_witness_Value@3_0, _self@1_0).
 
-'SourcePlanning::Direct::$patina_witness'(_witnesses_where_Direct@0_0) ->
+'source_planning::Direct::$patina_witness'(_witnesses_where_Direct@0_0) ->
     _witness_Value@1_0 = erlang:element(1,
                                         _witnesses_where_Direct@0_0),
-    {{fun 'Elixir.Patina.SourcePlanning.Bounded':'SourcePlanning::Direct::direct'/2},
+    {{fun 'Elixir.Patina.SourcePlanning.Bounded':'source_planning::Direct::direct'/2},
      {_witness_Value@1_0},
      _witnesses_where_Direct@0_0}.

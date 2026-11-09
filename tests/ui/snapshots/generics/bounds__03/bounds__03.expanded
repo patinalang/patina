@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -52,7 +52,7 @@ fn print_debug<T: Debug>(t: T) {
     //println!("Area: {}", area(_triangle));
     // ^ TODO: Try uncommenting these.
     // | Error: Does not implement either `Debug` or `HasArea`.
-    { ::Core::io::put_chars([[patina_fmt::debug(t)]]); ::Core::io::nl(); };
+    { ::core::io::put_chars([[patina_fmt::debug(t)]]); ::core::io::nl(); };
 }
 fn area<T: HasArea>(t: T) -> float { t.area() }
 pub fn main() {
@@ -60,8 +60,8 @@ pub fn main() {
     let _triangle = Triangle { length: 3.0, height: 4.0 };
     print_debug(rectangle);
     {
-        ::Core::io::put_chars([["Area: ",
+        ::core::io::put_chars([["Area: ",
                             patina_fmt::display(area(rectangle))]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }

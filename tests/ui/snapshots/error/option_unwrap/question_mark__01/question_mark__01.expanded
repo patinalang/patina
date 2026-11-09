@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -23,7 +23,7 @@ fn next_birthday(current_age: Option<int>) -> Option<str> {
     // gets assigned to `next_age`
     let next_age: int = current_age? + 1;
     Some(unsafe {
-            ::Core::unicode::characters_to_binary(["Next year I will be ",
+            ::core::unicode::characters_to_binary(["Next year I will be ",
                             patina_fmt::display(next_age)]).cast_unchecked::<str>()
         })
 }

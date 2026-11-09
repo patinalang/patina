@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -20,7 +20,7 @@ extern mod patina_fmt;
 enum Fruit { Apple, Orange, Banana, Kiwi, Lemon, }
 
 fn main() ({
-    let no_fruit: Option<Fruit> = (None as Core::Option<Fruit>);
+    let no_fruit: Option<Fruit> = (None as core::Option<Fruit>);
     let get_kiwi_as_fallback =
         (||
             ({
@@ -28,44 +28,44 @@ fn main() ({
                 // Providing kiwi as fallback
                 // first_available_fruit: Some(Kiwi)
                 ({
-                    ((::Core::io::put_chars as
+                    ((::core::io::put_chars as
                             fn(term) -> term)(([([("Providing kiwi as fallback" as str)]
                                     as [str])] as [[str]])) as term);
-                    ((::Core::io::nl as fn() -> term)() as term);
+                    ((::core::io::nl as fn() -> term)() as term);
                 } as ());
                 ((Some as
-                        fn(Fruit) -> Core::Option<Fruit> {Core::Option::<Fruit>::Some})((Fruit::Kiwi
-                        as Fruit)) as Core::Option<Fruit>)
-            } as Core::Option<Fruit>) as
+                        fn(Fruit) -> core::Option<Fruit> {core::Option::<Fruit>::Some})((Fruit::Kiwi
+                        as Fruit)) as core::Option<Fruit>)
+            } as core::Option<Fruit>) as
             {closure@tests/ui/src/error/option_unwrap/defaults__02.pt:9:32: 9:34});
     let get_lemon_as_fallback =
         (||
             ({
                 ({
-                    ((::Core::io::put_chars as
+                    ((::core::io::put_chars as
                             fn(term) -> term)(([([("Providing lemon as fallback" as
                                             str)] as [str])] as [[str]])) as term);
-                    ((::Core::io::nl as fn() -> term)() as term);
+                    ((::core::io::nl as fn() -> term)() as term);
                 } as ());
                 ((Some as
-                        fn(Fruit) -> Core::Option<Fruit> {Core::Option::<Fruit>::Some})((Fruit::Lemon
-                        as Fruit)) as Core::Option<Fruit>)
-            } as Core::Option<Fruit>) as
+                        fn(Fruit) -> core::Option<Fruit> {core::Option::<Fruit>::Some})((Fruit::Lemon
+                        as Fruit)) as core::Option<Fruit>)
+            } as core::Option<Fruit>) as
             {closure@tests/ui/src/error/option_unwrap/defaults__02.pt:13:33: 13:35});
     let first_available_fruit =
         (((no_fruit as
-                    Core::Option<Fruit>).or_else((get_kiwi_as_fallback as
+                    core::Option<Fruit>).or_else((get_kiwi_as_fallback as
                     {closure@tests/ui/src/error/option_unwrap/defaults__02.pt:9:32: 9:34}))
                 as
                 {type error}).or_else((get_lemon_as_fallback as
                 {closure@tests/ui/src/error/option_unwrap/defaults__02.pt:13:33: 13:35}))
             as {type error});
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("first_available_fruit: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((first_available_fruit as {type error}))
                                 as term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

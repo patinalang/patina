@@ -1,13 +1,13 @@
-error[E0432]: unresolved import `Macros::hello`
+error[E0432]: unresolved import `macros::hello`
   --> tests/ui/src/pkg/errors/resolution.pt:7:5
    |
-LL | use Macros::hello;
+LL | use macros::hello;
    |     ^^^^^^^^^^^^^ no `hello` in the root
    |
 help: a similar name exists in the module
    |
-LL - use Macros::hello;
-LL + use Macros::Hello;
+LL - use macros::hello;
+LL + use macros::Hello;
    |
 
 error[E0425]: cannot find value `local` in this scope
@@ -124,11 +124,11 @@ error[E0425]: cannot find value `inner` in this scope
 LL |     let _b = set_group_span!(marker(inner));
    |                                     ^^^^^ not found in this scope
 
-error[E0425]: cannot find value `Nope` in crate `Wrappers`
+error[E0425]: cannot find value `Nope` in crate `wrappers`
   --> tests/ui/src/pkg/errors/resolution.pt:31:24
    |
-LL |     let _x = Wrappers::Nope;
-   |                        ^^^^ not found in `Wrappers`
+LL |     let _x = wrappers::Nope;
+   |                        ^^^^ not found in `wrappers`
 
 warning: unused import: `Hello`
   --> tests/ui/src/pkg/errors/resolution.pt:9:5

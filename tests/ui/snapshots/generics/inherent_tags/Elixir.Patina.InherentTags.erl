@@ -35,7 +35,7 @@ str_value(_s@0_0) ->
 
 name_f() ->
     _witness_Show@0_0 =
-        'Elixir.Patina.InherentTags.Name':'InherentTags::Show::$patina_witness'(),
+        'Elixir.Patina.InherentTags.Name':'inherent_tags::Show::$patina_witness'(),
     _witnesses_where_f@1_0 = {_witness_Show@0_0},
     'Elixir.Patina.InherentTags.GenVal':f(_witnesses_where_f@1_0,
                                           'Elixir.Patina.InherentTags.Name').

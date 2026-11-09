@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -271,7 +271,7 @@ fn combine_coin_with_note_via(a: int, b: int)
 
 // A default calling a helper that's private to the trait's module
 
-mod Inner {
+mod inner {
     fn helper(x: int) -> int ({ ((x as int) * (2 as int) as int) } as int)
 
     trait Doubler {
@@ -282,13 +282,13 @@ mod Inner {
             ->
                 int ({
             ((helper as
-                    fn(int) -> int {Inner::helper})(((self as Self).base() as
+                    fn(int) -> int {inner::helper})(((self as Self).base() as
                     int)) as int)
         } as int)
     }
 }
 
-use Inner::Doubler;
+use inner::Doubler;
 
 struct N(int);
 
@@ -737,7 +737,7 @@ fn ne_through_pointer(a: int, b: int)
         bool ({
     let ne: fn(P, P) -> bool =
         (<P as PartialEq>::ne as
-            fn(P, P) -> bool {<P as Core::PartialEq>::ne});
+            fn(P, P) -> bool {<P as core::PartialEq>::ne});
     ((ne as
             fn(P, P) -> bool)(((P as fn(int) -> P {P})((a as int)) as P),
         ((P as fn(int) -> P {P})((b as int)) as P)) as bool)

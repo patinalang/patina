@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -24,5 +24,5 @@ pub fn main() {
     if n > 4 { n = 4; }
 
     // 4
-    { ::Core::io::put_chars([[patina_fmt::debug(n)]]); ::Core::io::nl(); };
+    { ::core::io::put_chars([[patina_fmt::debug(n)]]); ::core::io::nl(); };
 }

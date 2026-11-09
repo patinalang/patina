@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -49,29 +49,29 @@ fn inspect(event: WebEvent) {
 
 
             {
-            ::Core::io::put_chars([["page loaded"]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["page loaded"]]);
+            ::core::io::nl();
         }
         WebEvent::PageUnload => {
-            ::Core::io::put_chars([["page unloaded"]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["page unloaded"]]);
+            ::core::io::nl();
         }
         WebEvent::KeyPress(c) => {
-            ::Core::io::put_chars([["pressed \'", patina_fmt::display(c),
+            ::core::io::put_chars([["pressed \'", patina_fmt::display(c),
                                 "\'."]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         }
         WebEvent::Paste(s) => {
-            ::Core::io::put_chars([["pasted \"", patina_fmt::display(s),
+            ::core::io::put_chars([["pasted \"", patina_fmt::display(s),
                                 "\"."]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         }
         WebEvent::Click { x, y } => {
             {
-                ::Core::io::put_chars([["clicked at x=",
+                ::core::io::put_chars([["clicked at x=",
                                     patina_fmt::display(x), ", y=", patina_fmt::display(y),
                                     "."]]);
-                ::Core::io::nl();
+                ::core::io::nl();
             };
         }
     }

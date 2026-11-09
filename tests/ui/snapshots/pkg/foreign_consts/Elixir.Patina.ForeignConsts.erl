@@ -56,9 +56,9 @@ computed_unit_x() ->
 
 foreign_doubled_of_local_impl() ->
     _witness_HasValue@0_0 =
-        'Elixir.Patina.ForeignConsts.Three':'Consts::HasValue::$patina_witness'(),
+        'Elixir.Patina.ForeignConsts.Three':'consts::HasValue::$patina_witness'(),
     _const_HasValue_VALUE@1_0 =
-        'Elixir.Patina.ForeignConsts.Three':'Consts::HasValue::$patina_const::VALUE'(_witness_HasValue@0_0),
+        'Elixir.Patina.ForeignConsts.Three':'consts::HasValue::$patina_const::VALUE'(_witness_HasValue@0_0),
     _const_DOUBLED@2_0 = _const_HasValue_VALUE@1_0 * 2,
     _const_DOUBLED@2_0.
 

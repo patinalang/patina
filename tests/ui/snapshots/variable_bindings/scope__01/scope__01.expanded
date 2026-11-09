@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -32,19 +32,19 @@ pub fn main() {
         // FIXME ^ Comment out this line
 
         {
-            ::Core::io::put_chars([["inner short: ",
+            ::core::io::put_chars([["inner short: ",
                                 patina_fmt::display(short_lived_binding)]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         };
     }
     {
-        ::Core::io::put_chars([["outer short: ",
+        ::core::io::put_chars([["outer short: ",
                             patina_fmt::display(short_lived_binding)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([["outer long: ",
+        ::core::io::put_chars([["outer long: ",
                             patina_fmt::display(long_lived_binding)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }

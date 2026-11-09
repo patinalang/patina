@@ -5,20 +5,20 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
 
 use ::{};
-use Traits::Greet;
-use Traits::Label;
-use Traits::Robot;
-use Traits::greet_all;
+use traits::Greet;
+use traits::Label;
+use traits::Robot;
+use traits::greet_all;
 
 struct Person(str);
 
@@ -38,9 +38,9 @@ impl Greet for Person {
         ->
             Label ({
         ((Label as
-                fn(str) -> Traits::Label {Traits::Label})(((self as Person).0
-                as str)) as Traits::Label)
-    } as Traits::Label)
+                fn(str) -> traits::Label {traits::Label})(((self as Person).0
+                as str)) as traits::Label)
+    } as traits::Label)
 }
 
 struct Cat;
@@ -54,9 +54,9 @@ impl Greet for Cat {
     fn name(self)
         ->
             Label ({
-        ((Label as fn(str) -> Traits::Label {Traits::Label})(("cat" as str))
-            as Traits::Label)
-    } as Traits::Label)
+        ((Label as fn(str) -> traits::Label {traits::Label})(("cat" as str))
+            as traits::Label)
+    } as traits::Label)
 }
 
 fn local_greet<T>(greeter: T) where
@@ -68,9 +68,9 @@ fn main() ({
     ((Cat as Cat).greet() as ());
     ((local_greet as fn(Cat) {local_greet::<Cat>})((Cat as Cat)) as ());
     ((greet_all as
-            fn(Person) {Traits::greet_all::<Person>})(((Person as
+            fn(Person) {traits::greet_all::<Person>})(((Person as
                 fn(str) -> Person {Person})(("Bob" as str)) as Person)) as
         ());
-    ((greet_all as fn(Cat) {Traits::greet_all::<Cat>})((Cat as Cat)) as ());
-    ((Robot as Traits::Robot).greet() as ());
+    ((greet_all as fn(Cat) {traits::greet_all::<Cat>})((Cat as Cat)) as ());
+    ((Robot as traits::Robot).greet() as ());
 } as ())

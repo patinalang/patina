@@ -7,7 +7,6 @@ pub mod witness;
 
 use std::hash::Hash as _;
 
-use convert_case::{Case, Casing};
 use rustc_abi::{FIRST_VARIANT, FieldIdx};
 use rustc_data_structures::fx::{FxHashMap, FxIndexMap, FxIndexSet};
 use rustc_data_structures::stable_hasher::StableHasher;
@@ -790,7 +789,7 @@ impl<'tcx> TyCtxt<'tcx> {
         match own_tag.or(inherited_tag) {
             Some(ErlTag::Explicit(tag)) => tag,
             Some(ErlTag::Style(ErlTagStyle::SnakeCase)) => {
-                Symbol::intern(&self.item_name(variant_def_id).as_str().to_case(Case::Snake))
+                Symbol::intern(&self.item_name(variant_def_id).snake_case())
             }
             None if repr == ErlReprKind::NativeRecord => self.item_name(variant_def_id),
             None => match self.def_kind(variant_def_id) {
@@ -894,7 +893,7 @@ fn erl_fn_name(tcx: TyCtxt<'_>, def_id: LocalDefId) -> Symbol {
 /// The prefix tag comes from the trait path.
 ///
 /// An impl that specializes another impl can share its self type, so its tag is the
-/// impl's disambiguated path instead (e.g. `Core::{impl#3}`).
+/// impl's disambiguated path instead (e.g. `core::{impl#3}`).
 fn erl_impl_self_tag(tcx: TyCtxt<'_>, impl_def_id: DefId) -> Option<String> {
     if let Some(trait_def_id) = tcx.impl_opt_trait_id(impl_def_id)
         && let Ok(mut ancestors) = tcx.trait_def(trait_def_id).ancestors(tcx, impl_def_id)
@@ -1010,18 +1009,28 @@ impl etir::Body<'_> {
 }
 
 /// The crate name followed by the definition path segments of `def_id`.
-fn erl_def_path_segments(tcx: TyCtxt<'_>, def_id: DefId) -> SmallVec<[String; 6]> {
-    let path = tcx.def_path(def_id);
+fn erl_def_path_segments(tcx: TyCtxt<'_>, mut def_id: DefId) -> SmallVec<[String; 6]> {
+    let mut segments = SmallVec::<[String; 6]>::new();
 
-    let mut segments =
-        SmallVec::<[String; 6]>::from_iter([tcx.crate_name(path.krate).as_str().to_owned()]);
-
-    for data in &path.data {
+    loop {
+        let data = tcx.def_key(def_id).disambiguated_data;
         if data.data != DefPathData::Ctor {
-            segments.push(data.as_sym(true).as_str().to_owned());
+            let name = if def_id.is_crate_root() {
+                tcx.crate_name(def_id.krate).pascal_case()
+            } else if matches!(tcx.def_kind(def_id), DefKind::Mod) {
+                data.as_sym(true).pascal_case()
+            } else {
+                data.as_sym(true).as_str().to_owned()
+            };
+            segments.push(name)
+        }
+        match tcx.opt_parent(def_id) {
+            Some(parent) => def_id = parent,
+            None => break,
         }
     }
 
+    segments.reverse();
     segments
 }
 
@@ -1049,7 +1058,7 @@ fn erl_module_name(tcx: TyCtxt<'_>, module: ErlModuleId) -> Symbol {
         }
         ErlModuleId::Prim(prim_ty) => {
             // The primitive modules are capitalized to be easy to call from Elixir.
-            let name = prim_ty.name_str().to_case(Case::Pascal);
+            let name = prim_ty.name().pascal_case();
             Symbol::intern(&format!("Elixir.Patina.Core.{name}"))
         }
         ErlModuleId::AdtImplHost(krate, adt) => {
@@ -1060,7 +1069,8 @@ fn erl_module_name(tcx: TyCtxt<'_>, module: ErlModuleId) -> Symbol {
         }
         // `Elixir.Patina.<Crate>.$impl`
         ErlModuleId::BlanketImplHost(krate) => {
-            Symbol::intern(&format!("Elixir.Patina.{}.$impl", tcx.crate_name(krate)))
+            let krate = tcx.crate_name(krate).pascal_case();
+            Symbol::intern(&format!("Elixir.Patina.{krate}.$impl"))
         }
     }
 }
@@ -1180,7 +1190,8 @@ fn check_erl_module_clashes(tcx: TyCtxt<'_>, (): ()) {
 fn erl_impl_host_name(tcx: TyCtxt<'_>, krate: CrateNum, self_module: Symbol) -> Symbol {
     let self_module = self_module.as_str();
     let self_path = self_module.strip_prefix("Elixir.Patina.").unwrap_or(self_module);
-    Symbol::intern(&format!("Elixir.Patina.{}.$impl.{self_path}", tcx.crate_name(krate)))
+    let krate = tcx.crate_name(krate).pascal_case();
+    Symbol::intern(&format!("Elixir.Patina.{krate}.$impl.{self_path}"))
 }
 
 fn erl_repr_attr(attribute: Option<(ReprAttr, Span)>) -> Option<ReprAttr> {

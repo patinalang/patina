@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -32,18 +32,18 @@ pub fn main() {
     let strings = ["tofu", "93", "18"];
 
     {
-        ::Core::io::put_chars([["The first doubled is ",
+        ::core::io::put_chars([["The first doubled is ",
                             patina_fmt::debug(double_first(numbers))]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([["The first doubled is ",
+        ::core::io::put_chars([["The first doubled is ",
                             patina_fmt::debug(double_first(empty))]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([["The first doubled is ",
+        ::core::io::put_chars([["The first doubled is ",
                             patina_fmt::debug(double_first(strings))]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }

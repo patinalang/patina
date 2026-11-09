@@ -1,6 +1,6 @@
 // The other direction of each conversion is rejected, and so is a parameter with no use.
 
-use Core::PhantomData;
+use core::PhantomData;
 
 pub struct Source<T>(term, PhantomData<T>);
 

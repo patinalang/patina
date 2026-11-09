@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -32,5 +32,5 @@ pub fn main() {
     // Statements here are executed when the compiled binary is called.
 
     // Print text to the console.
-    { ::Core::io::put_chars([["Hello World!"]]); ::Core::io::nl(); };
+    { ::core::io::put_chars([["Hello World!"]]); ::core::io::nl(); };
 }

@@ -9,10 +9,10 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'DisambiguatedNames::From<DisambiguatedNames::sibling_blocks::Foo>::from'/2,
-         'DisambiguatedNames::From<DisambiguatedNames::sibling_blocks::Foo>::$patina_witness'/0,
-         'DisambiguatedNames::From<DisambiguatedNames::sibling_blocks::Foo#1>::from'/2,
-         'DisambiguatedNames::From<DisambiguatedNames::sibling_blocks::Foo#1>::$patina_witness'/0]).
+         'disambiguated_names::From<disambiguated_names::sibling_blocks::Foo>::from'/2,
+         'disambiguated_names::From<disambiguated_names::sibling_blocks::Foo>::$patina_witness'/0,
+         'disambiguated_names::From<disambiguated_names::sibling_blocks::Foo#1>::from'/2,
+         'disambiguated_names::From<disambiguated_names::sibling_blocks::Foo#1>::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -27,20 +27,20 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'DisambiguatedNames::From<DisambiguatedNames::sibling_blocks::Foo>::from'(_witness_From@0_0,
-                                                                          __foo@1_0) ->
-    'Elixir.Patina.DisambiguatedNames.Celsius'.
-
-'DisambiguatedNames::From<DisambiguatedNames::sibling_blocks::Foo>::$patina_witness'() ->
-    {{fun 'Elixir.Patina.DisambiguatedNames.Celsius':'DisambiguatedNames::From<DisambiguatedNames::sibling_blocks::Foo>::from'/2},
-     {},
-     {}}.
-
-'DisambiguatedNames::From<DisambiguatedNames::sibling_blocks::Foo#1>::from'(_witness_From@0_0,
+'disambiguated_names::From<disambiguated_names::sibling_blocks::Foo>::from'(_witness_From@0_0,
                                                                             __foo@1_0) ->
     'Elixir.Patina.DisambiguatedNames.Celsius'.
 
-'DisambiguatedNames::From<DisambiguatedNames::sibling_blocks::Foo#1>::$patina_witness'() ->
-    {{fun 'Elixir.Patina.DisambiguatedNames.Celsius':'DisambiguatedNames::From<DisambiguatedNames::sibling_blocks::Foo#1>::from'/2},
+'disambiguated_names::From<disambiguated_names::sibling_blocks::Foo>::$patina_witness'() ->
+    {{fun 'Elixir.Patina.DisambiguatedNames.Celsius':'disambiguated_names::From<disambiguated_names::sibling_blocks::Foo>::from'/2},
+     {},
+     {}}.
+
+'disambiguated_names::From<disambiguated_names::sibling_blocks::Foo#1>::from'(_witness_From@0_0,
+                                                                              __foo@1_0) ->
+    'Elixir.Patina.DisambiguatedNames.Celsius'.
+
+'disambiguated_names::From<disambiguated_names::sibling_blocks::Foo#1>::$patina_witness'() ->
+    {{fun 'Elixir.Patina.DisambiguatedNames.Celsius':'disambiguated_names::From<disambiguated_names::sibling_blocks::Foo#1>::from'/2},
      {},
      {}}.

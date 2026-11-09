@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -34,15 +34,15 @@ fn main() ({
 
     // Error! Cannot modify a `const`.
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("The threshold is " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)((THRESHOLD as int)) as term)] as [term])]
                 as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::display as
                                     fn(term) -> term)((n as int)) as term), (" is " as str),
                             ((patina_fmt::display as
@@ -51,7 +51,7 @@ fn main() ({
                                     ("big" as str)
                                 } else { ("small" as str) } as term)) as term)] as [term])]
                 as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ((/*ERROR*/) = (5 as int) as int);
 } as ())

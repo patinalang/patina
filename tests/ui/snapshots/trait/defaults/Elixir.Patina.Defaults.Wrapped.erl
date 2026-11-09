@@ -9,9 +9,9 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'Defaults::Container::$patina_type::Item'/1,
-         'Defaults::Container::get'/2,
-         'Defaults::Container::$patina_witness'/1]).
+         'defaults::Container::$patina_type::Item'/1,
+         'defaults::Container::get'/2,
+         'defaults::Container::$patina_witness'/1]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -26,16 +26,16 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Container::$patina_type::Item'(_witness_Container@0_0) ->
+'defaults::Container::$patina_type::Item'(_witness_Container@0_0) ->
     {}.
 
-'Defaults::Container::get'(_witness_Container@0_0,
+'defaults::Container::get'(_witness_Container@0_0,
                            _self@1_0) ->
     _self@1_0.
 
-'Defaults::Container::$patina_witness'(_witnesses_where_Container@0_0) ->
-    {{fun 'Elixir.Patina.Defaults.Wrapped':'Defaults::Container::$patina_type::Item'/1,
-      fun 'Elixir.Patina.Defaults.Wrapped':'Defaults::Container::get'/2,
-      fun 'Elixir.Patina.Defaults':'Defaults::Container::needs_item_witness'/3},
+'defaults::Container::$patina_witness'(_witnesses_where_Container@0_0) ->
+    {{fun 'Elixir.Patina.Defaults.Wrapped':'defaults::Container::$patina_type::Item'/1,
+      fun 'Elixir.Patina.Defaults.Wrapped':'defaults::Container::get'/2,
+      fun 'Elixir.Patina.Defaults':'defaults::Container::needs_item_witness'/3},
      {},
      _witnesses_where_Container@0_0}.

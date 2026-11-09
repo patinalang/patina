@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -32,17 +32,17 @@ fn give_adult(drink: Option<str>) {
 
 
             {
-            ::Core::io::put_chars([["Yuck! Too sugary."]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["Yuck! Too sugary."]]);
+            ::core::io::nl();
         }
         Some(inner) => {
-            ::Core::io::put_chars([[patina_fmt::display(inner),
+            ::core::io::put_chars([[patina_fmt::display(inner),
                                 "? How nice."]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         }
         None => {
-            ::Core::io::put_chars([["No drink? Oh well."]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["No drink? Oh well."]]);
+            ::core::io::nl();
         }
     }
 }
@@ -50,16 +50,16 @@ fn drink(drink: Option<str>) {
     let inside = drink.unwrap();
     if inside == "lemonade" {
         unsafe {
-            ::Core::erlang::error(::Core::Panic::new("AAAaaaaa!!!!"), a"none",
+            ::core::erlang::error(::core::Panic::new("AAAaaaaa!!!!"), a"none",
                     [(a"error_info",
                                 #{a"module" =>
                                         a"Elixir.Patina.Core.Panic"})]).cast_unchecked::<!>()
         };
     }
     {
-        ::Core::io::put_chars([["I love ", patina_fmt::display(inside),
+        ::core::io::put_chars([["I love ", patina_fmt::display(inside),
                             "s!!!!!"]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }
 pub fn main() {

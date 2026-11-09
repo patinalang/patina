@@ -154,7 +154,7 @@ pub fn combine_coin_with_note_via(a: int, b: int) -> int {
 
 // A default calling a helper that's private to the trait's module
 
-mod Inner {
+mod inner {
     fn helper(x: int) -> int { x * 2 }
 
     pub trait Doubler {
@@ -165,7 +165,7 @@ mod Inner {
     }
 }
 
-use Inner::Doubler;
+use inner::Doubler;
 
 struct N(int);
 

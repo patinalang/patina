@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -46,34 +46,34 @@ pub fn main() {
 
             // `for` will iterate over the (key, value) pairs in arbitrary order.
             {
-            ::Core::io::put_chars([["Calling Daniel: ",
+            ::core::io::put_chars([["Calling Daniel: ",
                                 patina_fmt::display(call(number))]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         }
         _ => {
-            ::Core::io::put_chars([["Don\'t have Daniel\'s number."]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["Don\'t have Daniel\'s number."]]);
+            ::core::io::nl();
         }
     }
     contacts = contacts.insert("Daniel", "164-6743");
     match contacts.get("Ashley") {
         Some(number) => {
-            ::Core::io::put_chars([["Calling Ashley: ",
+            ::core::io::put_chars([["Calling Ashley: ",
                                 patina_fmt::display(call(number))]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         }
         _ => {
-            ::Core::io::put_chars([["Don\'t have Ashley\'s number."]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["Don\'t have Ashley\'s number."]]);
+            ::core::io::nl();
         }
     }
     contacts = contacts.remove("Ashley");
     contacts = #{"Laura" => "132-8372", ..contacts};
     for (contact, number) in contacts {
         {
-            ::Core::io::put_chars([["Calling ", patina_fmt::display(contact),
+            ::core::io::put_chars([["Calling ", patina_fmt::display(contact),
                                 ": ", patina_fmt::display(call(number))]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         };
     }
 }

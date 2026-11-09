@@ -24,6 +24,6 @@
 '__info__'(Key) -> module_info(Key).
 
 public_function() ->
-    io:put_chars([[<<"called `MyMod::Inaccessible::public_function()`"/utf8>>]]),
+    io:put_chars([[<<"called `my_mod::inaccessible::public_function()`"/utf8>>]]),
     io:nl(),
     {}.

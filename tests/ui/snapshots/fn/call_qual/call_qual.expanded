@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -51,14 +51,14 @@ pub fn public_main() -> StructWithNew {
     priv_main()
 }
 
-mod Nested {
+mod nested {
     pub fn main() {
         // local call
         let _ = public_function();
         // local call
         let _ = self::public_function();
         // local call
-        let _ = super::Nested::public_function();
+        let _ = super::nested::public_function();
         // remote call
         #[extern_call]
         public_function()
@@ -73,13 +73,13 @@ pub fn main() {
     // local call
     let _ = self::public_main();
     // remote call
-    let _ = Nested::main();
+    let _ = nested::main();
     // local call
     let _ = self::priv_main();
     // remote call (redundant `#[extern_call]` warning)
     let s = #[extern_call] StructWithNew::new(42);
     {
-        ::Core::io::put_chars([[patina_fmt::display(s.value)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::display(s.value)]]);
+        ::core::io::nl();
     };
 }

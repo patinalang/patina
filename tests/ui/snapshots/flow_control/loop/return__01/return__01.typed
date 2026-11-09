@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -34,10 +34,10 @@ fn main() ({
             (if (!(((left_val as int) == (right_val as int) as bool)) as bool)
                 {
                 (unsafe {
-                    (((::Core::erlang::error as
-                                fn(term, term, term) -> term)(((::Core::Panic::new as
-                                    fn(str) -> Core::Panic {Core::Panic::new})((unsafe {
-                                    (((::Core::unicode::characters_to_binary as
+                    (((::core::erlang::error as
+                                fn(term, term, term) -> term)(((::core::Panic::new as
+                                    fn(str) -> core::Panic {core::Panic::new})((unsafe {
+                                    (((::core::unicode::characters_to_binary as
                                                 fn(term) -> term)(([("assertion `left == right` failed" as
                                                         str),
                                                     ((patina_fmt::display as fn(term) -> term)(("" as str)) as
@@ -47,7 +47,7 @@ fn main() ({
                                                     ((patina_fmt::debug as fn(term) -> term)((right_val as int))
                                                         as term)] as [term])) as term).cast_unchecked::<str>() as
                                         str)
-                                } as str)) as Core::Panic), (a"none" as atom),
+                                } as str)) as core::Panic), (a"none" as atom),
                             ([(((a"error_info" as atom),
                                         (#{(a"module" as atom) =>
                                                 (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))

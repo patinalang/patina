@@ -11,12 +11,12 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'DuplicatePreconditions::Bar::bar'/2,
-         'DuplicatePreconditions::Bar::$patina_witness'/0,
-         'DuplicatePreconditions::Left::left'/2,
-         'DuplicatePreconditions::Left::$patina_witness'/0,
-         'DuplicatePreconditions::Right::right'/2,
-         'DuplicatePreconditions::Right::$patina_witness'/0]).
+         'duplicate_preconditions::Bar::bar'/2,
+         'duplicate_preconditions::Bar::$patina_witness'/0,
+         'duplicate_preconditions::Left::left'/2,
+         'duplicate_preconditions::Left::$patina_witness'/0,
+         'duplicate_preconditions::Right::right'/2,
+         'duplicate_preconditions::Right::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -31,37 +31,37 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'DuplicatePreconditions::Bar::bar'(_witness_Bar@0_0,
-                                   _self@1_0) ->
+'duplicate_preconditions::Bar::bar'(_witness_Bar@0_0,
+                                    _self@1_0) ->
     _self@1_0.
 
-'DuplicatePreconditions::Bar::$patina_witness'() ->
-    {{fun 'Elixir.Patina.DuplicatePreconditions.$impl.Core.Int':'DuplicatePreconditions::Bar::bar'/2},
+'duplicate_preconditions::Bar::$patina_witness'() ->
+    {{fun 'Elixir.Patina.DuplicatePreconditions.$impl.Core.Int':'duplicate_preconditions::Bar::bar'/2},
      {},
      {}}.
 
-'DuplicatePreconditions::Left::left'(_witness_Left@0_0,
-                                     _self@1_0) ->
+'duplicate_preconditions::Left::left'(_witness_Left@0_0,
+                                      _self@1_0) ->
     0.
 
-'DuplicatePreconditions::Left::$patina_witness'() ->
+'duplicate_preconditions::Left::$patina_witness'() ->
     _witness_Bar@0_0 =
-        {{fun 'Elixir.Patina.DuplicatePreconditions.$impl.Core.Int':'DuplicatePreconditions::Bar::bar'/2},
+        {{fun 'Elixir.Patina.DuplicatePreconditions.$impl.Core.Int':'duplicate_preconditions::Bar::bar'/2},
          {},
          {}},
-    {{fun 'Elixir.Patina.DuplicatePreconditions.$impl.Core.Int':'DuplicatePreconditions::Left::left'/2},
+    {{fun 'Elixir.Patina.DuplicatePreconditions.$impl.Core.Int':'duplicate_preconditions::Left::left'/2},
      {_witness_Bar@0_0},
      {}}.
 
-'DuplicatePreconditions::Right::right'(_witness_Right@0_0,
-                                       _self@1_0) ->
+'duplicate_preconditions::Right::right'(_witness_Right@0_0,
+                                        _self@1_0) ->
     0.
 
-'DuplicatePreconditions::Right::$patina_witness'() ->
+'duplicate_preconditions::Right::$patina_witness'() ->
     _witness_Bar@0_0 =
-        {{fun 'Elixir.Patina.DuplicatePreconditions.$impl.Core.Int':'DuplicatePreconditions::Bar::bar'/2},
+        {{fun 'Elixir.Patina.DuplicatePreconditions.$impl.Core.Int':'duplicate_preconditions::Bar::bar'/2},
          {},
          {}},
-    {{fun 'Elixir.Patina.DuplicatePreconditions.$impl.Core.Int':'DuplicatePreconditions::Right::right'/2},
+    {{fun 'Elixir.Patina.DuplicatePreconditions.$impl.Core.Int':'duplicate_preconditions::Right::right'/2},
      {_witness_Bar@0_0},
      {}}.

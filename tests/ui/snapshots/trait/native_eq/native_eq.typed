@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -79,11 +79,11 @@ fn int_options_eq(a: int, b: int)
     ->
         bool ({
     (((Some as
-                fn(int) -> Core::Option<int> {Core::Option::<int>::Some})((a
-                as int)) as Core::Option<int>) ==
+                fn(int) -> core::Option<int> {core::Option::<int>::Some})((a
+                as int)) as core::Option<int>) ==
         ((Some as
-                fn(int) -> Core::Option<int> {Core::Option::<int>::Some})((b
-                as int)) as Core::Option<int>) as bool)
+                fn(int) -> core::Option<int> {core::Option::<int>::Some})((b
+                as int)) as core::Option<int>) as bool)
 } as bool)
 
 fn hand_written_native_eq_lists_eq(a: int, b: int)
@@ -134,13 +134,13 @@ fn eq_by_parity_options_eq(a: int, b: int)
     ->
         bool ({
     (((Some as
-                fn(EqByParity) -> Core::Option<EqByParity> {Core::Option::<EqByParity>::Some})(((EqByParity
+                fn(EqByParity) -> core::Option<EqByParity> {core::Option::<EqByParity>::Some})(((EqByParity
                     as fn(int) -> EqByParity {EqByParity})((a as int)) as
-                EqByParity)) as Core::Option<EqByParity>) ==
+                EqByParity)) as core::Option<EqByParity>) ==
         ((Some as
-                fn(EqByParity) -> Core::Option<EqByParity> {Core::Option::<EqByParity>::Some})(((EqByParity
+                fn(EqByParity) -> core::Option<EqByParity> {core::Option::<EqByParity>::Some})(((EqByParity
                     as fn(int) -> EqByParity {EqByParity})((b as int)) as
-                EqByParity)) as Core::Option<EqByParity>) as bool)
+                EqByParity)) as core::Option<EqByParity>) as bool)
 } as bool)
 
 fn generic_eq<T>(a: T, b: T) -> bool where

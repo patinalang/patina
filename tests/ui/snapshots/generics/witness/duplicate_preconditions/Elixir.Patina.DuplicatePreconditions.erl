@@ -43,15 +43,15 @@ bar_from_left_or_right(_witnesses_where_bar_from_left_or_right@0_0,
     _witnesses_where_Foo@6_0 = {_witness_Bar@5_0,
                                 _witness_Bar@5_0},
     _witness_Foo@7_0 =
-        'Elixir.Patina.DuplicatePreconditions.$impl.Core.Tuple':'DuplicatePreconditions::Foo::$patina_witness<(_, _)>'(_witnesses_where_Foo@6_0),
+        'Elixir.Patina.DuplicatePreconditions.$impl.Core.Tuple':'duplicate_preconditions::Foo::$patina_witness<(_, _)>'(_witnesses_where_Foo@6_0),
     _witnesses_where_use_foo@8_0 = {_witness_Foo@7_0},
     use_foo(_witnesses_where_use_foo@8_0, {_a@1_0, _b@2_0}).
 
 duplicate_where_clauses() ->
     _witness_Left@0_0 =
-        'Elixir.Patina.DuplicatePreconditions.$impl.Core.Int':'DuplicatePreconditions::Left::$patina_witness'(),
+        'Elixir.Patina.DuplicatePreconditions.$impl.Core.Int':'duplicate_preconditions::Left::$patina_witness'(),
     _witness_Right@1_0 =
-        'Elixir.Patina.DuplicatePreconditions.$impl.Core.Int':'DuplicatePreconditions::Right::$patina_witness'(),
+        'Elixir.Patina.DuplicatePreconditions.$impl.Core.Int':'duplicate_preconditions::Right::$patina_witness'(),
     _witnesses_where_bar_from_left_or_right@2_0 =
         {_witness_Left@0_0, _witness_Right@1_0},
     bar_from_left_or_right(_witnesses_where_bar_from_left_or_right@2_0,

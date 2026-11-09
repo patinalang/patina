@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -37,12 +37,12 @@ pub fn main() {
 
     // <<131, 97, 42>>
     {
-        ::Core::io::put_chars([[patina_fmt::debug(opts as term)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::debug(opts as term)]]);
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([[patina_fmt::debug(erlang::term_to_binary(42,
+        ::core::io::put_chars([[patina_fmt::debug(erlang::term_to_binary(42,
                                     opts))]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }

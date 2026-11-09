@@ -9,8 +9,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'Forward::Tr::method'/2,
-         'Forward::Tr::$patina_witness'/0]).
+         'forward::Tr::method'/2,
+         'forward::Tr::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,7 +25,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Forward::Tr::method'(_witness_Tr@0_0, _self@1_0) ->
+'forward::Tr::method'(_witness_Tr@0_0, _self@1_0) ->
     io:put_chars(begin
                      _element@3_0 = begin
                                         _element@2_0 = io_lib:format("~ktp",
@@ -39,7 +39,7 @@
     io:nl(),
     {}.
 
-'Forward::Tr::$patina_witness'() ->
-    {{fun 'Elixir.Patina.Forward.S':'Forward::Tr::method'/2},
+'forward::Tr::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Forward.S':'forward::Tr::method'/2},
      {},
      {}}.

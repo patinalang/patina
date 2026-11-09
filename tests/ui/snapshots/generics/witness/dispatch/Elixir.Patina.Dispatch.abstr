@@ -101,7 +101,7 @@
        {remote,
         {18,20},
         {atom,{18,20},'Elixir.Patina.Dispatch.Point'},
-        {atom,{18,20},'Dispatch::Area::$patina_witness'}},
+        {atom,{18,20},'dispatch::Area::$patina_witness'}},
        []}},
      {match,
       {18,20},

@@ -15,7 +15,7 @@ impl Show for Label {
     }
 }
 
-pub mod Inner {
+pub mod inner {
     use super::{Show, say};
 
     pub trait Greet {
@@ -33,7 +33,7 @@ pub mod Inner {
 
 // Downstream packages reach the trait through this re-export, but its functions are named after
 // its canonical path.
-pub use Inner::Greet;
+pub use inner::Greet;
 
 pub struct Robot;
 

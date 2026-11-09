@@ -9,8 +9,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'TupleImpls::Show::show'/2,
-         'TupleImpls::Show::$patina_witness'/0]).
+         'tuple_impls::Show::show'/2,
+         'tuple_impls::Show::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,11 +25,11 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'TupleImpls::Show::show'(_witness_Show@0_0,
-                         _self@1_0) ->
+'tuple_impls::Show::show'(_witness_Show@0_0,
+                          _self@1_0) ->
     <<"i"/utf8>>.
 
-'TupleImpls::Show::$patina_witness'() ->
-    {{fun 'Elixir.Patina.TupleImpls.$impl.Core.Int':'TupleImpls::Show::show'/2},
+'tuple_impls::Show::$patina_witness'() ->
+    {{fun 'Elixir.Patina.TupleImpls.$impl.Core.Int':'tuple_impls::Show::show'/2},
      {},
      {}}.

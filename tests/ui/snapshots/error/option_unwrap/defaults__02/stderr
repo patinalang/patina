@@ -4,13 +4,13 @@ error: cannot find derive macro `Debug` in this scope
 LL | #[derive(Debug)]
    |          ^^^^^
 
-error[E0599]: no method named `or_else` found for enum `Core::Option<T>` in the current scope
+error[E0599]: no method named `or_else` found for enum `core::Option<T>` in the current scope
   --> tests/ui/src/error/option_unwrap/defaults__02.pt:19:10
    |
 LL |       let first_available_fruit = no_fruit
    |  _________________________________-
 LL | |         .or_else(get_kiwi_as_fallback)
-   | |         -^^^^^^^ method not found in `Core::Option<Fruit>`
+   | |         -^^^^^^^ method not found in `core::Option<Fruit>`
    | |_________|
    |
 

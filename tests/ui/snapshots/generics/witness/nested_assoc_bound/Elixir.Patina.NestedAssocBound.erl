@@ -56,7 +56,7 @@ nested_label(_witnesses_where_nested_label@0_0,
 
 root_label() ->
     _witness_Outer@0_0 =
-        'Elixir.Patina.NestedAssocBound.Root':'NestedAssocBound::Outer::$patina_witness'(),
+        'Elixir.Patina.NestedAssocBound.Root':'nested_assoc_bound::Outer::$patina_witness'(),
     _witnesses_where_nested_label@1_0 =
         {_witness_Outer@0_0},
     nested_label(_witnesses_where_nested_label@1_0,

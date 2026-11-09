@@ -9,8 +9,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'Traits::Show::show'/2,
-         'Traits::Show::$patina_witness'/0]).
+         'traits::Show::show'/2,
+         'traits::Show::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,10 +25,10 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Traits::Show::show'(_witness_Show@0_0, _self@1_0) ->
+'traits::Show::show'(_witness_Show@0_0, _self@1_0) ->
     <<"local"/utf8>>.
 
-'Traits::Show::$patina_witness'() ->
-    {{fun 'Elixir.Patina.ForeignImpl.Local':'Traits::Show::show'/2},
+'traits::Show::$patina_witness'() ->
+    {{fun 'Elixir.Patina.ForeignImpl.Local':'traits::Show::show'/2},
      {},
      {}}.

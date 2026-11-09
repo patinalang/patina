@@ -5,16 +5,16 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
 
-use Reexports::{Hello, Wrapper, identity};
+use reexports::{Hello, Wrapper, identity};
 
 pub struct Relayed {
     pub value: int,
@@ -25,15 +25,15 @@ pub fn proc_macros() {
     let relayed = Relayed { value: 3 };
 
     {
-        ::Core::io::put_chars([[patina_fmt::display(relayed.value + 1), " ",
+        ::core::io::put_chars([[patina_fmt::display(relayed.value + 1), " ",
                             patina_fmt::display(hello_from_derive())]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }
 pub fn wrapper() {
     let w = Wrapper(9);
     {
-        ::Core::io::put_chars([[patina_fmt::display(w.0)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::display(w.0)]]);
+        ::core::io::nl();
     };
 }

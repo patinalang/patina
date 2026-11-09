@@ -1,5 +1,5 @@
 #[module = "shared_module"]
-pub mod Shared {
+pub mod shared {
     pub fn answer() -> int {
         42
     }

@@ -5,16 +5,16 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
 
-use MacrosAndItems::{Describe, Plain, doubled, echo, plain};
+use macros_and_items::{Describe, Plain, doubled, echo, plain};
 
 pub struct Marker;
 fn derived_value() -> int { 42 }
@@ -23,16 +23,16 @@ pub fn items() {
     let n = Plain { value: 5 };
 
     {
-        ::Core::io::put_chars([[patina_fmt::display(n.describe()), " ",
+        ::core::io::put_chars([[patina_fmt::display(n.describe()), " ",
                             patina_fmt::display(plain()), " ",
                             patina_fmt::display(derived_value())]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }
 pub fn macros() {
     {
-        ::Core::io::put_chars([[patina_fmt::display(5 + 5), " ",
+        ::core::io::put_chars([[patina_fmt::display(5 + 5), " ",
                             patina_fmt::display(7)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }

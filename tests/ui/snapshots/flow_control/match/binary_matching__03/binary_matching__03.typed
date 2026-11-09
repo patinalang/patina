@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -34,7 +34,7 @@ fn main() ({
             // After an 8-bit header, the rest of a `bits` is a `bits`.
 
             {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("kind = " as str),
                                 ((patina_fmt::display as fn(term) -> term)((kind as int)) as
                                     term), (", payload = " as str),
@@ -42,11 +42,11 @@ fn main() ({
                                     as term), (", rest = " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((rest as bin)) as
                                     term)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         <<kind: int(size = (8 as int)), len: int(size = (8 as int)), payload:
             bin(size = ((len as int) / (2 as int) as int)), rest @ ..>> => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("kind = " as str),
                                 ((patina_fmt::display as fn(term) -> term)((kind as int)) as
                                     term), (", payload = " as str),
@@ -54,13 +54,13 @@ fn main() ({
                                     as term), (", rest = " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((rest as bin)) as
                                     term)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         _ => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("invalid packet" as str)] as [str])]
                     as [[str]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
     } as ())
     let packet: bits =
@@ -69,19 +69,19 @@ fn main() ({
             as bits);
     (match (packet as bits) {
         <<header: int(size = (8 as int)), tail @ ..>> => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("header = " as str),
                                 ((patina_fmt::display as fn(term) -> term)((header as int))
                                     as term), (", tail = " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((tail as bits)) as
                                     term)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         _ => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("did not match" as str)] as [str])]
                     as [[str]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
     } as ())
 } as ())

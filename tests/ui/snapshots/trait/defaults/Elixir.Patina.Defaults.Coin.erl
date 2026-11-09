@@ -9,9 +9,9 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'Defaults::Value::value'/2,
-         'Defaults::Value::$patina_witness'/0,
-         'Defaults::Combine<Defaults::Note>::$patina_witness'/0]).
+         'defaults::Value::value'/2,
+         'defaults::Value::$patina_witness'/0,
+         'defaults::Combine<defaults::Note>::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -26,20 +26,20 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Value::value'(_witness_Value@0_0,
+'defaults::Value::value'(_witness_Value@0_0,
                          _self@1_0) ->
     _self@1_0.
 
-'Defaults::Value::$patina_witness'() ->
-    {{fun 'Elixir.Patina.Defaults.Coin':'Defaults::Value::value'/2},
+'defaults::Value::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Defaults.Coin':'defaults::Value::value'/2},
      {},
      {}}.
 
-'Defaults::Combine<Defaults::Note>::$patina_witness'() ->
+'defaults::Combine<defaults::Note>::$patina_witness'() ->
     _witness_Value@0_0 =
-        {{fun 'Elixir.Patina.Defaults.Coin':'Defaults::Value::value'/2},
+        {{fun 'Elixir.Patina.Defaults.Coin':'defaults::Value::value'/2},
          {},
          {}},
-    {{fun 'Elixir.Patina.Defaults':'Defaults::Combine::uses_rhs_witness'/4},
+    {{fun 'Elixir.Patina.Defaults':'defaults::Combine::uses_rhs_witness'/4},
      {_witness_Value@0_0},
      {}}.

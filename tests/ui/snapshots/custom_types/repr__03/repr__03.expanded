@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -46,21 +46,21 @@ pub fn main() {
 
     // a"variantB"
     {
-        ::Core::io::put_chars([[patina_fmt::debug(Unit as term)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::debug(Unit as term)]]);
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([[patina_fmt::debug(CustomNameUnit as term)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::debug(CustomNameUnit as term)]]);
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([[patina_fmt::debug(NotJustUnits::VariantA as
+        ::core::io::put_chars([[patina_fmt::debug(NotJustUnits::VariantA as
                                     term)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([[patina_fmt::debug(NotJustUnits::VariantB as
+        ::core::io::put_chars([[patina_fmt::debug(NotJustUnits::VariantB as
                                     term)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }

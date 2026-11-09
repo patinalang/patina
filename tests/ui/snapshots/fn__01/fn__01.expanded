@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -38,15 +38,15 @@ fn fizzbuzz(n: int) -> () {
 
         // When a function returns `()`, the return type can be omitted from the
         // signature
-        { ::Core::io::put_chars([["fizzbuzz"]]); ::Core::io::nl(); };
+        { ::core::io::put_chars([["fizzbuzz"]]); ::core::io::nl(); };
     } else if is_divisible_by(n, 3) {
-        { ::Core::io::put_chars([["fizz"]]); ::Core::io::nl(); };
+        { ::core::io::put_chars([["fizz"]]); ::core::io::nl(); };
     } else if is_divisible_by(n, 5) {
-        { ::Core::io::put_chars([["buzz"]]); ::Core::io::nl(); };
+        { ::core::io::put_chars([["buzz"]]); ::core::io::nl(); };
     } else {
         {
-            ::Core::io::put_chars([[patina_fmt::display(n)]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([[patina_fmt::display(n)]]);
+            ::core::io::nl();
         };
     }
 }

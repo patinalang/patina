@@ -1,8 +1,8 @@
-use Core::ProcMacro::*;
+use core::proc_macro::*;
 pub fn main() {
     let _literal = Literal::int(1).0;
     let _group = Group::new(Delimiter::Brace, TokenStream::new()).0;
     let _ident = Ident::new("x", Span::call_site()).0;
     let _punct = Punct::new('+', Spacing::Alone).0;
-    let _kind = Core::ProcMacro::Bridge::LitKind::Integer;
+    let _kind = core::proc_macro::bridge::LitKind::Integer;
 }

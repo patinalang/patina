@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -32,8 +32,8 @@ impl<T> PrintInOption for T where Option<T>: Debug {
 
 
         {
-            ::Core::io::put_chars([[patina_fmt::debug(Some(self))]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([[patina_fmt::debug(Some(self))]]);
+            ::core::io::nl();
         };
     }
 }

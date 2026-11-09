@@ -12,17 +12,17 @@
 #![feature(never_type)]
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 #[allow(unused)]
 extern mod patina_fmt;
 
 fn some_fn() -> ! {
 
     unsafe {
-        ::Core::erlang::error(::Core::Panic::new("This call never returns."),
+        ::core::erlang::error(::core::Panic::new("This call never returns."),
                 a"none",
                 [(a"error_info",
                             #{a"module" =>
@@ -32,7 +32,7 @@ fn some_fn() -> ! {
 pub fn main() {
     let _a = some_fn();
     {
-        ::Core::io::put_chars([["You will never see this line!"]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([["You will never see this line!"]]);
+        ::core::io::nl();
     };
 }

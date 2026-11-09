@@ -10,8 +10,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'AssocBound::Show::show'/2,
-         'AssocBound::Show::$patina_witness'/0]).
+         'assoc_bound::Show::show'/2,
+         'assoc_bound::Show::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -26,11 +26,11 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'AssocBound::Show::show'(_witness_Show@0_0,
-                         _self@1_0) ->
+'assoc_bound::Show::show'(_witness_Show@0_0,
+                          _self@1_0) ->
     <<"an int"/utf8>>.
 
-'AssocBound::Show::$patina_witness'() ->
-    {{fun 'Elixir.Patina.AssocBound.$impl.Core.Int':'AssocBound::Show::show'/2},
+'assoc_bound::Show::$patina_witness'() ->
+    {{fun 'Elixir.Patina.AssocBound.$impl.Core.Int':'assoc_bound::Show::show'/2},
      {},
      {}}.

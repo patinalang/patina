@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -30,10 +30,10 @@ pub fn main() {
     // Note that type aliases *don't* provide any extra type safety, because
     // aliases are *not* new types
     {
-        ::Core::io::put_chars([[patina_fmt::display(nanoseconds),
+        ::core::io::put_chars([[patina_fmt::display(nanoseconds),
                             " nanoseconds + ", patina_fmt::display(inches),
                             " inches = ", patina_fmt::display(nanoseconds + inches),
                             " unit?"]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }

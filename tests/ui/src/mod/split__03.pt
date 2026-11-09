@@ -2,10 +2,10 @@
 // block: 3/4
 
 pub fn function() {
-    println!("called `MyMod::Nested::function()`");
+    println!("called `my_mod::nested::function()`");
 }
 
 #[allow(dead_code)]
 fn private_function() {
-    println!("called `MyMod::Nested::private_function()`");
+    println!("called `my_mod::nested::private_function()`");
 }

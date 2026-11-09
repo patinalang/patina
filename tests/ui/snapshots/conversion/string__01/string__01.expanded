@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -30,7 +30,7 @@ impl Fmt::Display for Circle {
 pub fn main() {
     let circle = Circle { radius: 6 };
     {
-        ::Core::io::put_chars([[patina_fmt::display(circle.to_str())]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::display(circle.to_str())]]);
+        ::core::io::nl();
     };
 }

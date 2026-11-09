@@ -9,7 +9,7 @@ fn assert_num_expands_to(session: &Session, args: &[&str], value: u32) {
     session.build("consumer.pt", CONSUMER, &args);
 
     let expanded =
-        std::fs::read_to_string(session.path().join("Consumer.expanded")).expect("read expanded");
+        std::fs::read_to_string(session.path().join("consumer.expanded")).expect("read expanded");
     assert!(expanded.contains(&format!("let _x = {value};")), "got:\n{expanded}");
 }
 
@@ -17,10 +17,10 @@ fn assert_rebuild_is_picked_up(first_out: &str, second_out: &str) {
     let session = Session::new();
 
     session.build("provider.pt", &provider(42), &["--out-dir", first_out]);
-    assert_num_expands_to(&session, &["-L", first_out, "--extern", "Provider"], 42);
+    assert_num_expands_to(&session, &["-L", first_out, "--extern", "provider"], 42);
 
     session.build("provider.pt", &provider(43), &["--out-dir", second_out]);
-    assert_num_expands_to(&session, &["-L", second_out, "--extern", "Provider"], 43);
+    assert_num_expands_to(&session, &["-L", second_out, "--extern", "provider"], 43);
 }
 
 #[test]
@@ -41,14 +41,14 @@ fn later_compile_code_path_wins_in_a_running_vm() {
     session.build("provider.pt", &provider(43), &["--out-dir", "later"]);
 
     // Puts `earlier` on the code path, without running the macro and so loading its module.
-    session.build("unused.pt", "pub fn f() {}\n", &["-L", "earlier", "--extern", "Provider"]);
+    session.build("unused.pt", "pub fn f() {}\n", &["-L", "earlier", "--extern", "provider"]);
 
-    assert_num_expands_to(&session, &["-L", "later", "--extern", "Provider"], 43);
+    assert_num_expands_to(&session, &["-L", "later", "--extern", "provider"], 43);
 }
 
 #[test]
 fn relative_extern_path_reaches_the_compile_server() {
     let session = Session::new();
     session.build("provider.pt", &provider(42), &["--out-dir", "out"]);
-    session.build("consumer.pt", CONSUMER, &["--extern", "Provider=out/libProvider.rmeta"]);
+    session.build("consumer.pt", CONSUMER, &["--extern", "provider=out/libprovider.rmeta"]);
 }

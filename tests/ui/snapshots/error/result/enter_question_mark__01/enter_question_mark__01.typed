@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -25,24 +25,24 @@ fn multiply(first_number_str: str, second_number_str: str)
         ParseIntError> ({
     let first_number =
         (match ((branch as
-                    fn({type error}) -> Core::ControlFlow<<{type error} as Core::Try>::Residual, <{type error} as Core::Try>::Output> {<{type error} as Core::Try>::branch})(((first_number_str
+                    fn({type error}) -> core::ControlFlow<<{type error} as core::Try>::Residual, <{type error} as core::Try>::Output> {<{type error} as core::Try>::branch})(((first_number_str
                         as str).parse::<int>() as {type error})) as
-                Core::ControlFlow<{type error}, {type error}>) {
+                core::ControlFlow<{type error}, {type error}>) {
             Break {  0: residual } => #[allow(unreachable_code)]
                 (return ((from_residual as
-                            fn({type error}) -> {type error} {<{type error} as Core::FromResidual<{type error}>>::from_residual})((residual
+                            fn({type error}) -> {type error} {<{type error} as core::FromResidual<{type error}>>::from_residual})((residual
                             as {type error})) as {type error}) as !),
             Continue {  0: val } => #[allow(unreachable_code)]
                 (val as {type error}),
         } as {type error});
     let second_number =
         (match ((branch as
-                    fn({type error}) -> Core::ControlFlow<<{type error} as Core::Try>::Residual, <{type error} as Core::Try>::Output> {<{type error} as Core::Try>::branch})(((second_number_str
+                    fn({type error}) -> core::ControlFlow<<{type error} as core::Try>::Residual, <{type error} as core::Try>::Output> {<{type error} as core::Try>::branch})(((second_number_str
                         as str).parse::<int>() as {type error})) as
-                Core::ControlFlow<{type error}, {type error}>) {
+                core::ControlFlow<{type error}, {type error}>) {
             Break {  0: residual } => #[allow(unreachable_code)]
                 (return ((from_residual as
-                            fn({type error}) -> {type error} {<{type error} as Core::FromResidual<{type error}>>::from_residual})((residual
+                            fn({type error}) -> {type error} {<{type error} as core::FromResidual<{type error}>>::from_residual})((residual
                             as {type error})) as {type error}) as !),
             Continue {  0: val } => #[allow(unreachable_code)]
                 (val as {type error}),
@@ -59,20 +59,20 @@ fn print(result:
     (match (result as {type error}) {
         Ok(n) =>
             {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("n is " as str),
                                 ((patina_fmt::display as
                                         fn(term) -> term)((n as {type error})) as term)] as [term])]
                     as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         Err(e) => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("Error: " as str),
                                 ((patina_fmt::display as
                                         fn(term) -> term)((e as {type error})) as term)] as [term])]
                     as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
     } as ())
 } as ())

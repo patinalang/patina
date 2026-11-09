@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -24,10 +24,10 @@ fn drink(beverage:
 
 
         (unsafe {
-            (((::Core::erlang::error as
-                        fn(term, term, term) -> term)(((::Core::Panic::new as
-                            fn(str) -> Core::Panic {Core::Panic::new})(("AAAaaaaa!!!!"
-                            as str)) as Core::Panic), (a"none" as atom),
+            (((::core::erlang::error as
+                        fn(term, term, term) -> term)(((::core::Panic::new as
+                            fn(str) -> core::Panic {core::Panic::new})(("AAAaaaaa!!!!"
+                            as str)) as core::Panic), (a"none" as atom),
                     ([(((a"error_info" as atom),
                                 (#{(a"module" as atom) =>
                                         (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
@@ -36,13 +36,13 @@ fn drink(beverage:
         } as !);
     } as ())
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("Some refreshing " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)((beverage as str)) as term),
                             (" is all I need." as str)] as [term])] as [[term]])) as
             term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())
 fn main() ({

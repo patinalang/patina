@@ -12,10 +12,10 @@
 #![attr = NoCore]
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 #[allow(unused)]
 extern mod patina_fmt;
 
@@ -27,26 +27,26 @@ fn have_ingredients(food: Food)
     ->
         Option<Food> ({
     (match (food as Food) {
-        Food::Sushi => (None as Core::Option<Food>),
+        Food::Sushi => (None as core::Option<Food>),
         _ =>
             ((Some as
-                    fn(Food) -> Core::Option<Food> {Core::Option::<Food>::Some})((food
-                    as Food)) as Core::Option<Food>),
-    } as Core::Option<Food>)
-} as Core::Option<Food>)
+                    fn(Food) -> core::Option<Food> {core::Option::<Food>::Some})((food
+                    as Food)) as core::Option<Food>),
+    } as core::Option<Food>)
+} as core::Option<Food>)
 
 // We have the recipe for everything except Cordon Bleu.
 fn have_recipe(food: Food)
     ->
         Option<Food> ({
     (match (food as Food) {
-        Food::CordonBleu => (None as Core::Option<Food>),
+        Food::CordonBleu => (None as core::Option<Food>),
         _ =>
             ((Some as
-                    fn(Food) -> Core::Option<Food> {Core::Option::<Food>::Some})((food
-                    as Food)) as Core::Option<Food>),
-    } as Core::Option<Food>)
-} as Core::Option<Food>)
+                    fn(Food) -> core::Option<Food> {core::Option::<Food>::Some})((food
+                    as Food)) as core::Option<Food>),
+    } as core::Option<Food>)
+} as core::Option<Food>)
 
 // To make a dish, we need both the recipe and the ingredients.
 // We can represent the logic with a chain of `match`es:
@@ -54,25 +54,25 @@ fn cookable_v1(food: Food)
     ->
         Option<Food> ({
     (match ((have_recipe as
-                fn(Food) -> Core::Option<Food> {have_recipe})((food as Food))
-            as Core::Option<Food>) {
-        None => (None as Core::Option<Food>),
+                fn(Food) -> core::Option<Food> {have_recipe})((food as Food))
+            as core::Option<Food>) {
+        None => (None as core::Option<Food>),
         Some(food) =>
             ((have_ingredients as
-                    fn(Food) -> Core::Option<Food> {have_ingredients})((food as
-                    Food)) as Core::Option<Food>),
-    } as Core::Option<Food>)
-} as Core::Option<Food>)
+                    fn(Food) -> core::Option<Food> {have_ingredients})((food as
+                    Food)) as core::Option<Food>),
+    } as core::Option<Food>)
+} as core::Option<Food>)
 
 // This can conveniently be rewritten more compactly with `and_then()`:
 fn cookable_v3(food: Food)
     ->
         Option<Food> ({
     (((have_recipe as
-                fn(Food) -> Core::Option<Food> {have_recipe})((food as Food))
+                fn(Food) -> core::Option<Food> {have_recipe})((food as Food))
             as
-            Core::Option<Food>).and_then((have_ingredients as
-            fn(Food) -> Core::Option<Food> {have_ingredients})) as
+            core::Option<Food>).and_then((have_ingredients as
+            fn(Food) -> core::Option<Food> {have_ingredients})) as
         {type error})
 } as {type error})
 
@@ -82,10 +82,10 @@ fn cookable_v2(food: Food)
     ->
         Option<Food> ({
     ((((have_recipe as
-                    fn(Food) -> Core::Option<Food> {have_recipe})((food as
+                    fn(Food) -> core::Option<Food> {have_recipe})((food as
                     Food)) as
-                Core::Option<Food>).map((have_ingredients as
-                fn(Food) -> Core::Option<Food> {have_ingredients})) as
+                core::Option<Food>).map((have_ingredients as
+                fn(Food) -> core::Option<Food> {have_ingredients})) as
             {type error}).flatten() as {type error})
 } as {type error})
 
@@ -93,26 +93,26 @@ fn eat(food: Food,
     day:
         Day) ({
     (match ((cookable_v3 as
-                fn(Food) -> Core::Option<Food> {cookable_v3})((food as Food))
-            as Core::Option<Food>) {
+                fn(Food) -> core::Option<Food> {cookable_v3})((food as Food))
+            as core::Option<Food>) {
         Some(food) =>
 
             {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("Yay! On " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((day as Day)) as
                                     term), (" we get to eat " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((food as Food)) as
                                     term), ("." as str)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         None => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("Oh no. We don\'t get to eat on " as
                                     str),
                                 ((patina_fmt::debug as fn(term) -> term)((day as Day)) as
                                     term), ("?" as str)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
     } as ())
 } as ())

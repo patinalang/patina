@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -62,7 +62,7 @@ impl Describe for (int, str) {
     } as str)
 }
 
-mod Nested {
+mod nested {
     trait Twice {
         fn twice(self)
         -> str;
@@ -78,7 +78,7 @@ mod Nested {
     }
 }
 
-use Nested::Twice;
+use nested::Twice;
 
 fn describe_generic<T>(t: T) -> str where
     T: Describe ({ ((t as T).describe() as str) } as str)

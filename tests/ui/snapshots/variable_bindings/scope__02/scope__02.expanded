@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -27,26 +27,26 @@ pub fn main() {
 
         // This binding *shadows* the previous binding
         {
-            ::Core::io::put_chars([["before being shadowed: ",
+            ::core::io::put_chars([["before being shadowed: ",
                                 patina_fmt::display(shadowed_binding)]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         };
         let shadowed_binding = "abc";
         {
-            ::Core::io::put_chars([["shadowed in inner block: ",
+            ::core::io::put_chars([["shadowed in inner block: ",
                                 patina_fmt::display(shadowed_binding)]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         };
     }
     {
-        ::Core::io::put_chars([["outside inner block: ",
+        ::core::io::put_chars([["outside inner block: ",
                             patina_fmt::display(shadowed_binding)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     let shadowed_binding = 2;
     {
-        ::Core::io::put_chars([["shadowed in outer block: ",
+        ::core::io::put_chars([["shadowed in outer block: ",
                             patina_fmt::display(shadowed_binding)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }

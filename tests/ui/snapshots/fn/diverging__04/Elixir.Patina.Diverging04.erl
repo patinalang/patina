@@ -38,14 +38,14 @@ main() ->
 
 'main::sum_odd_numbers'(_up_to@0_0) ->
     _witness_Iterator@1_0 =
-        'Elixir.Patina.Core.Range':'Core::Iterator::$patina_witness<int>'(),
+        'Elixir.Patina.Core.Range':'core::Iterator::$patina_witness<int>'(),
     _witnesses_where_IntoIterator@2_0 =
         {_witness_Iterator@1_0},
     _witness_IntoIterator@3_0 =
-        'Elixir.Patina.Core.$impl':'Core::IntoIterator::$patina_witness'(_witnesses_where_IntoIterator@2_0),
+        'Elixir.Patina.Core.$impl':'core::IntoIterator::$patina_witness'(_witnesses_where_IntoIterator@2_0),
     _acc@4_0 = 0,
     case
-        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'(_witness_IntoIterator@3_0,
+        'Elixir.Patina.Core.$impl':'core::IntoIterator::into_iter'(_witness_IntoIterator@3_0,
                                                                    'Elixir.Patina.Core.Range':'$patina_constructor__Range'(0,
                                                                                                                            _up_to@0_0))
         of
@@ -65,7 +65,7 @@ main() ->
                                                             {};
                                                         _ ->
                                                             case
-                                                                'Elixir.Patina.Core.Range':'Core::Iterator::next<int>'(_witness_Iterator@1_0,
+                                                                'Elixir.Patina.Core.Range':'core::Iterator::next<int>'(_witness_Iterator@1_0,
                                                                                                                        _iter@5_0)
                                                                 of
                                                                 nil ->

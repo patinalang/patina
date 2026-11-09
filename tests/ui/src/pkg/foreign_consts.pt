@@ -1,4 +1,4 @@
-use Consts::{Generic, HEADER, HasValue, PAIR, Point};
+use consts::{Generic, HEADER, HasValue, PAIR, Point};
 
 const LOCAL_PAIRS: [([int], #{str => int})] = [PAIR, PAIR];
 

@@ -39,8 +39,8 @@
 
 eq_by_parity_eq(_a@0_0, _b@1_0) ->
     _witness_PartialEq@2_0 =
-        'Elixir.Patina.NativeEq.EqByParity':'Core::PartialEq::$patina_witness'(),
-    'Elixir.Patina.NativeEq.EqByParity':'Core::PartialEq::eq'(_witness_PartialEq@2_0,
+        'Elixir.Patina.NativeEq.EqByParity':'core::PartialEq::$patina_witness'(),
+    'Elixir.Patina.NativeEq.EqByParity':'core::PartialEq::eq'(_witness_PartialEq@2_0,
                                                               _a@0_0,
                                                               _b@1_0).
 
@@ -84,12 +84,12 @@ hand_written_native_eq_lists_eq(_a@0_0, _b@1_0) ->
 
 eq_by_parity_lists_eq(_a@0_0, _b@1_0) ->
     _witness_PartialEq@2_0 =
-        'Elixir.Patina.NativeEq.EqByParity':'Core::PartialEq::$patina_witness'(),
+        'Elixir.Patina.NativeEq.EqByParity':'core::PartialEq::$patina_witness'(),
     _witnesses_where_PartialEq@3_0 =
         {_witness_PartialEq@2_0},
     _witness_PartialEq@4_0 =
-        'Elixir.Patina.Core.List':'Core::PartialEq::$patina_witness'(_witnesses_where_PartialEq@3_0),
-    'Elixir.Patina.Core.List':'Core::PartialEq::eq'(_witness_PartialEq@4_0,
+        'Elixir.Patina.Core.List':'core::PartialEq::$patina_witness'(_witnesses_where_PartialEq@3_0),
+    'Elixir.Patina.Core.List':'core::PartialEq::eq'(_witness_PartialEq@4_0,
                                                     begin
                                                         _element@5_0 = _a@0_0,
                                                         [_element@5_0]
@@ -101,14 +101,14 @@ eq_by_parity_lists_eq(_a@0_0, _b@1_0) ->
 
 eq_by_parity_tuples_eq(_a@0_0, _b@1_0) ->
     _witness_PartialEq@2_0 =
-        'Elixir.Patina.Core.Int':'Core::PartialEq::$patina_witness'(),
+        'Elixir.Patina.Core.Int':'core::PartialEq::$patina_witness'(),
     _witness_PartialEq@3_0 =
-        'Elixir.Patina.NativeEq.EqByParity':'Core::PartialEq::$patina_witness'(),
+        'Elixir.Patina.NativeEq.EqByParity':'core::PartialEq::$patina_witness'(),
     _witnesses_where_PartialEq@4_0 =
         {_witness_PartialEq@2_0, _witness_PartialEq@3_0},
     _witness_PartialEq@5_0 =
-        'Elixir.Patina.Core.Tuple':'Core::PartialEq::$patina_witness<(_, _)>'(_witnesses_where_PartialEq@4_0),
-    'Elixir.Patina.Core.Tuple':'Core::PartialEq::eq<(_, _)>'(_witness_PartialEq@5_0,
+        'Elixir.Patina.Core.Tuple':'core::PartialEq::$patina_witness<(_, _)>'(_witnesses_where_PartialEq@4_0),
+    'Elixir.Patina.Core.Tuple':'core::PartialEq::eq<(_, _)>'(_witness_PartialEq@5_0,
                                                              begin
                                                                  _element@6_0 =
                                                                      _a@0_0,
@@ -124,12 +124,12 @@ eq_by_parity_tuples_eq(_a@0_0, _b@1_0) ->
 
 eq_by_parity_maps_eq(_a@0_0, _b@1_0) ->
     _witness_PartialEq@2_0 =
-        'Elixir.Patina.NativeEq.EqByParity':'Core::PartialEq::$patina_witness'(),
+        'Elixir.Patina.NativeEq.EqByParity':'core::PartialEq::$patina_witness'(),
     _witnesses_where_PartialEq@3_0 =
         {_witness_PartialEq@2_0},
     _witness_PartialEq@4_0 =
-        'Elixir.Patina.Core.Map':'Core::PartialEq::$patina_witness'(_witnesses_where_PartialEq@3_0),
-    'Elixir.Patina.Core.Map':'Core::PartialEq::eq'(_witness_PartialEq@4_0,
+        'Elixir.Patina.Core.Map':'core::PartialEq::$patina_witness'(_witnesses_where_PartialEq@3_0),
+    'Elixir.Patina.Core.Map':'core::PartialEq::eq'(_witness_PartialEq@4_0,
                                                    begin
                                                        _value@5_0 = _a@0_0,
                                                        #{k => _value@5_0}
@@ -141,12 +141,12 @@ eq_by_parity_maps_eq(_a@0_0, _b@1_0) ->
 
 eq_by_parity_options_eq(_a@0_0, _b@1_0) ->
     _witness_PartialEq@2_0 =
-        'Elixir.Patina.NativeEq.EqByParity':'Core::PartialEq::$patina_witness'(),
+        'Elixir.Patina.NativeEq.EqByParity':'core::PartialEq::$patina_witness'(),
     _witnesses_where_PartialEq@3_0 =
         {_witness_PartialEq@2_0},
     _witness_PartialEq@4_0 =
-        'Elixir.Patina.Core.Option':'Core::PartialEq::$patina_witness'(_witnesses_where_PartialEq@3_0),
-    'Elixir.Patina.Core.Option':'Core::PartialEq::eq'(_witness_PartialEq@4_0,
+        'Elixir.Patina.Core.Option':'core::PartialEq::$patina_witness'(_witnesses_where_PartialEq@3_0),
+    'Elixir.Patina.Core.Option':'core::PartialEq::eq'(_witness_PartialEq@4_0,
                                                       begin
                                                           _0@5_0 = _a@0_0,
                                                           _0@5_0
@@ -170,11 +170,11 @@ generic_eq(_witnesses_where_generic_eq@0_0, _a@1_0,
 
 int_lists_eq_through_witness(_a@0_0, _b@1_0) ->
     _witness_PartialEq@2_0 =
-        'Elixir.Patina.Core.Int':'Core::PartialEq::$patina_witness'(),
+        'Elixir.Patina.Core.Int':'core::PartialEq::$patina_witness'(),
     _witnesses_where_PartialEq@3_0 =
         {_witness_PartialEq@2_0},
     _witness_PartialEq@4_0 =
-        'Elixir.Patina.Core.List':'Core::PartialEq::$patina_witness<Core::{impl#7}>'(_witnesses_where_PartialEq@3_0),
+        'Elixir.Patina.Core.List':'core::PartialEq::$patina_witness<core::{impl#7}>'(_witnesses_where_PartialEq@3_0),
     _witnesses_where_generic_eq@5_0 =
         {_witness_PartialEq@4_0},
     generic_eq(_witnesses_where_generic_eq@5_0,
@@ -183,11 +183,11 @@ int_lists_eq_through_witness(_a@0_0, _b@1_0) ->
 
 eq_by_parity_lists_eq_through_witness(_a@0_0, _b@1_0) ->
     _witness_PartialEq@2_0 =
-        'Elixir.Patina.NativeEq.EqByParity':'Core::PartialEq::$patina_witness'(),
+        'Elixir.Patina.NativeEq.EqByParity':'core::PartialEq::$patina_witness'(),
     _witnesses_where_PartialEq@3_0 =
         {_witness_PartialEq@2_0},
     _witness_PartialEq@4_0 =
-        'Elixir.Patina.Core.List':'Core::PartialEq::$patina_witness'(_witnesses_where_PartialEq@3_0),
+        'Elixir.Patina.Core.List':'core::PartialEq::$patina_witness'(_witnesses_where_PartialEq@3_0),
     _witnesses_where_generic_eq@5_0 =
         {_witness_PartialEq@4_0},
     generic_eq(_witnesses_where_generic_eq@5_0,
@@ -201,7 +201,7 @@ generic_lists_eq(_witnesses_where_generic_lists_eq@0_0,
     _witnesses_where_PartialEq@4_0 =
         {_witness_PartialEq@3_0},
     _witness_PartialEq@5_0 =
-        'Elixir.Patina.Core.List':'Core::PartialEq::$patina_witness'(_witnesses_where_PartialEq@4_0),
+        'Elixir.Patina.Core.List':'core::PartialEq::$patina_witness'(_witnesses_where_PartialEq@4_0),
     _vtable_PartialEq@6_0 = erlang:element(1,
                                            _witness_PartialEq@5_0),
     _fn_PartialEq_eq@7_0 = erlang:element(1,
@@ -212,7 +212,7 @@ generic_lists_eq(_witnesses_where_generic_lists_eq@0_0,
 
 eq_by_parity_lists_eq_in_generic_fn(_a@0_0, _b@1_0) ->
     _witness_PartialEq@2_0 =
-        'Elixir.Patina.NativeEq.EqByParity':'Core::PartialEq::$patina_witness'(),
+        'Elixir.Patina.NativeEq.EqByParity':'core::PartialEq::$patina_witness'(),
     _witnesses_where_generic_lists_eq@3_0 =
         {_witness_PartialEq@2_0},
     generic_lists_eq(_witnesses_where_generic_lists_eq@3_0,

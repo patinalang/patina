@@ -29,13 +29,13 @@ call(_witnesses_where_call@0_0, _h@1_0) ->
                                         _witnesses_where_call@0_0),
     _witnesses_where_Tr@3_0 = {_witness_Bound@2_0},
     _witness_Tr@4_0 =
-        'Elixir.Patina.BoundGeneric.Holder':'BoundGeneric::Tr::$patina_witness'(_witnesses_where_Tr@3_0),
-    'Elixir.Patina.BoundGeneric.Holder':'BoundGeneric::Tr::method'(_witness_Tr@4_0,
-                                                                   _h@1_0).
+        'Elixir.Patina.BoundGeneric.Holder':'bound_generic::Tr::$patina_witness'(_witnesses_where_Tr@3_0),
+    'Elixir.Patina.BoundGeneric.Holder':'bound_generic::Tr::method'(_witness_Tr@4_0,
+                                                                    _h@1_0).
 
 main() ->
     _witness_Bound@0_0 =
-        'Elixir.Patina.BoundGeneric.Number':'BoundGeneric::Bound::$patina_witness'(),
+        'Elixir.Patina.BoundGeneric.Number':'bound_generic::Bound::$patina_witness'(),
     _witnesses_where_call@1_0 = {_witness_Bound@0_0},
     _h@3_0 = begin _value@2_0 = 5, _value@2_0 end,
     io:put_chars(begin

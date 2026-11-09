@@ -9,8 +9,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'Inline::Shape::area'/2,
-         'Inline::Shape::$patina_witness'/0,
+         'inline::Shape::area'/2,
+         'inline::Shape::$patina_witness'/0,
          side/1]).
 
 '__info__'(functions) ->
@@ -26,12 +26,12 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Inline::Shape::area'(_witness_Shape@0_0, _self@1_0) ->
+'inline::Shape::area'(_witness_Shape@0_0, _self@1_0) ->
     _self@1_0 * _self@1_0.
 
-'Inline::Shape::$patina_witness'() ->
-    {{fun 'Elixir.Patina.Inline.Square':'Inline::Shape::area'/2,
-      fun 'Elixir.Patina.Inline':'Inline::Shape::double_area'/2},
+'inline::Shape::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Inline.Square':'inline::Shape::area'/2,
+      fun 'Elixir.Patina.Inline':'inline::Shape::double_area'/2},
      {},
      {}}.
 

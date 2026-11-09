@@ -1,4 +1,4 @@
-use Core::ProcMacro::TokenStream;
+use core::proc_macro::TokenStream;
 #[proc_macro]
 pub fn wrong_argument_count() -> TokenStream { TokenStream::new() }
 

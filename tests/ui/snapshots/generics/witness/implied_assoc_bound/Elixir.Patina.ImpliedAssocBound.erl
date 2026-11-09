@@ -67,7 +67,7 @@ labelled_with_items(_witnesses_where_labelled_with_items@0_0,
 
 crate_labels() ->
     _witness_LabelledWithItems@0_0 =
-        'Elixir.Patina.ImpliedAssocBound.Crate':'ImpliedAssocBound::LabelledWithItems::$patina_witness'(),
+        'Elixir.Patina.ImpliedAssocBound.Crate':'implied_assoc_bound::LabelledWithItems::$patina_witness'(),
     _supertraits_LabelledWithItems@1_0 = erlang:element(2,
                                                         _witness_LabelledWithItems@0_0),
     _witness_Label@2_0 = erlang:element(2,

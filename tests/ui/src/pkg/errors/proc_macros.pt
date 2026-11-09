@@ -1,7 +1,7 @@
 // Errors raised while expanding proc macros. Once expansion fails, name
 // resolution errors are no longer reported, so those are in `resolution.pt`.
 
-use Macros::{bad_byte, bad_punct, boom, identity, invalid_ident, lifetime_output, stray};
+use macros::{bad_byte, bad_punct, boom, identity, invalid_ident, lifetime_output, stray};
 
 pub fn expansion() {
     // Tokens that do not parse where the macro is used.

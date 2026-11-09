@@ -10,9 +10,9 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'SourcePlanning::Factory::$patina_type::Item'/1,
-         'SourcePlanning::Factory::item'/2,
-         'SourcePlanning::Factory::$patina_witness'/0]).
+         'source_planning::Factory::$patina_type::Item'/1,
+         'source_planning::Factory::item'/2,
+         'source_planning::Factory::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -27,27 +27,27 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'SourcePlanning::Factory::$patina_type::Item'(_witness_Factory@0_0) ->
+'source_planning::Factory::$patina_type::Item'(_witness_Factory@0_0) ->
     _witness_Value@1_0 =
-        {{fun 'Elixir.Patina.SourcePlanning.Wrapped':'SourcePlanning::Value::value'/2},
+        {{fun 'Elixir.Patina.SourcePlanning.Wrapped':'source_planning::Value::value'/2},
          {},
          {}},
     _witness_Middle@2_0 =
-        {{fun 'Elixir.Patina.SourcePlanning':'SourcePlanning::Middle::middle'/2},
+        {{fun 'Elixir.Patina.SourcePlanning':'source_planning::Middle::middle'/2},
          {_witness_Value@1_0},
          {}},
     _witness_Deep@3_0 =
-        {{fun 'Elixir.Patina.SourcePlanning':'SourcePlanning::Deep::deep'/2},
+        {{fun 'Elixir.Patina.SourcePlanning':'source_planning::Deep::deep'/2},
          {_witness_Middle@2_0},
          {}},
     {_witness_Deep@3_0, _witness_Value@1_0}.
 
-'SourcePlanning::Factory::item'(_witness_Factory@0_0,
-                                _self@1_0) ->
+'source_planning::Factory::item'(_witness_Factory@0_0,
+                                 _self@1_0) ->
     0.
 
-'SourcePlanning::Factory::$patina_witness'() ->
-    {{fun 'Elixir.Patina.SourcePlanning.Maker':'SourcePlanning::Factory::$patina_type::Item'/1,
-      fun 'Elixir.Patina.SourcePlanning.Maker':'SourcePlanning::Factory::item'/2},
+'source_planning::Factory::$patina_witness'() ->
+    {{fun 'Elixir.Patina.SourcePlanning.Maker':'source_planning::Factory::$patina_type::Item'/1,
+      fun 'Elixir.Patina.SourcePlanning.Maker':'source_planning::Factory::item'/2},
      {},
      {}}.

@@ -10,7 +10,7 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'LoopWitness::Score::loop_in_default'/3,
+         'loop_witness::Score::loop_in_default'/3,
          loop_in_default/2,
          pair/2,
          pair_repeated/3,
@@ -30,8 +30,8 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'LoopWitness::Score::loop_in_default'(_witness_Score@0_0,
-                                      _self@1_0, _times@2_0) ->
+'loop_witness::Score::loop_in_default'(_witness_Score@0_0,
+                                       _self@1_0, _times@2_0) ->
     _vtable_Score@3_0 = erlang:element(1,
                                        _witness_Score@0_0),
     _fn_Score_score@4_0 = erlang:element(1,
@@ -192,45 +192,45 @@ loop_in_closure(_witnesses_where_loop_in_closure@0_0,
 
 loop_in_default(_n@0_0, _times@1_0) ->
     _witness_Score@2_0 =
-        'Elixir.Patina.LoopWitness.Points':'LoopWitness::Score::$patina_witness'(),
-    'LoopWitness::Score::loop_in_default'(_witness_Score@2_0,
-                                          _n@0_0,
-                                          _times@1_0).
+        'Elixir.Patina.LoopWitness.Points':'loop_witness::Score::$patina_witness'(),
+    'loop_witness::Score::loop_in_default'(_witness_Score@2_0,
+                                           _n@0_0,
+                                           _times@1_0).
 
 pair(_a@0_0, _b@1_0) ->
     _witness_Score@2_0 =
-        'Elixir.Patina.LoopWitness.Points':'LoopWitness::Score::$patina_witness'(),
+        'Elixir.Patina.LoopWitness.Points':'loop_witness::Score::$patina_witness'(),
     _witnesses_where_Score@3_0 = {_witness_Score@2_0},
     _witness_Score@4_0 =
-        'Elixir.Patina.LoopWitness.Pair':'LoopWitness::Score::$patina_witness'(_witnesses_where_Score@3_0),
-    'Elixir.Patina.LoopWitness.Pair':'LoopWitness::Score::score'(_witness_Score@4_0,
-                                                                 begin
-                                                                     _a@5_0 =
-                                                                         _a@0_0,
-                                                                     _b@6_0 =
-                                                                         _b@1_0,
-                                                                     'Elixir.Patina.LoopWitness.Pair':'$patina_constructor__Pair'(_a@5_0,
-                                                                                                                                  _b@6_0)
-                                                                 end).
+        'Elixir.Patina.LoopWitness.Pair':'loop_witness::Score::$patina_witness'(_witnesses_where_Score@3_0),
+    'Elixir.Patina.LoopWitness.Pair':'loop_witness::Score::score'(_witness_Score@4_0,
+                                                                  begin
+                                                                      _a@5_0 =
+                                                                          _a@0_0,
+                                                                      _b@6_0 =
+                                                                          _b@1_0,
+                                                                      'Elixir.Patina.LoopWitness.Pair':'$patina_constructor__Pair'(_a@5_0,
+                                                                                                                                   _b@6_0)
+                                                                  end).
 
 pair_repeated(_a@0_0, _b@1_0, _times@2_0) ->
     _witness_Score@3_0 =
-        'Elixir.Patina.LoopWitness.Points':'LoopWitness::Score::$patina_witness'(),
+        'Elixir.Patina.LoopWitness.Points':'loop_witness::Score::$patina_witness'(),
     _witnesses_where_Score@4_0 = {_witness_Score@3_0},
     _witness_Score@5_0 =
-        'Elixir.Patina.LoopWitness.Pair':'LoopWitness::Score::$patina_witness'(_witnesses_where_Score@4_0),
-    'LoopWitness::Score::loop_in_default'(_witness_Score@5_0,
-                                          begin
-                                              _a@6_0 = _a@0_0,
-                                              _b@7_0 = _b@1_0,
-                                              'Elixir.Patina.LoopWitness.Pair':'$patina_constructor__Pair'(_a@6_0,
-                                                                                                           _b@7_0)
-                                          end,
-                                          _times@2_0).
+        'Elixir.Patina.LoopWitness.Pair':'loop_witness::Score::$patina_witness'(_witnesses_where_Score@4_0),
+    'loop_witness::Score::loop_in_default'(_witness_Score@5_0,
+                                           begin
+                                               _a@6_0 = _a@0_0,
+                                               _b@7_0 = _b@1_0,
+                                               'Elixir.Patina.LoopWitness.Pair':'$patina_constructor__Pair'(_a@6_0,
+                                                                                                            _b@7_0)
+                                           end,
+                                           _times@2_0).
 
 nested_rounds(_n@0_0, _rounds@1_0) ->
     _witness_Score@2_0 =
-        'Elixir.Patina.LoopWitness.Points':'LoopWitness::Score::$patina_witness'(),
+        'Elixir.Patina.LoopWitness.Points':'loop_witness::Score::$patina_witness'(),
     _witnesses_where_loop_continuing_outer@3_0 =
         {_witness_Score@2_0},
     loop_continuing_outer(_witnesses_where_loop_continuing_outer@3_0,
@@ -239,7 +239,7 @@ nested_rounds(_n@0_0, _rounds@1_0) ->
 
 closure_loop(_n@0_0, _times@1_0) ->
     _witness_Score@2_0 =
-        'Elixir.Patina.LoopWitness.Points':'LoopWitness::Score::$patina_witness'(),
+        'Elixir.Patina.LoopWitness.Points':'loop_witness::Score::$patina_witness'(),
     _witnesses_where_loop_in_closure@3_0 =
         {_witness_Score@2_0},
     loop_in_closure(_witnesses_where_loop_in_closure@3_0,

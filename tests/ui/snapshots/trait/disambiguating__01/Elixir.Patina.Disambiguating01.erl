@@ -25,15 +25,15 @@
 
 main() ->
     _witness_UsernameWidget@0_0 =
-        'Elixir.Patina.Disambiguating01.Form':'Disambiguating01::UsernameWidget::$patina_witness'(),
+        'Elixir.Patina.Disambiguating01.Form':'disambiguating__01::UsernameWidget::$patina_witness'(),
     _witness_AgeWidget@1_0 =
-        'Elixir.Patina.Disambiguating01.Form':'Disambiguating01::AgeWidget::$patina_witness'(),
+        'Elixir.Patina.Disambiguating01.Form':'disambiguating__01::AgeWidget::$patina_witness'(),
     _form@2_0 =
         'Elixir.Patina.Disambiguating01.Form':'$patina_constructor__Form'(<<"rustacean"/utf8>>,
                                                                           28),
     _username@3_0 =
-        'Elixir.Patina.Disambiguating01.Form':'Disambiguating01::UsernameWidget::get'(_witness_UsernameWidget@0_0,
-                                                                                      _form@2_0),
+        'Elixir.Patina.Disambiguating01.Form':'disambiguating__01::UsernameWidget::get'(_witness_UsernameWidget@0_0,
+                                                                                        _form@2_0),
     case {<<"rustacean"/utf8>>, _username@3_0} of
         {_left_val@4_0, _right_val@5_0} ->
             case not (_left_val@4_0 =:= _right_val@5_0) of
@@ -59,8 +59,8 @@ main() ->
             end
     end,
     _age@8_0 =
-        'Elixir.Patina.Disambiguating01.Form':'Disambiguating01::AgeWidget::get'(_witness_AgeWidget@1_0,
-                                                                                 _form@2_0),
+        'Elixir.Patina.Disambiguating01.Form':'disambiguating__01::AgeWidget::get'(_witness_AgeWidget@1_0,
+                                                                                   _form@2_0),
     case {28, _age@8_0} of
         {_left_val@9_0, _right_val@10_0} ->
             case not (_left_val@9_0 =:= _right_val@10_0) of

@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -25,23 +25,23 @@ fn next_birthday(current_age: Option<int>)
     // gets assigned to `next_age`
     let next_age: int =
         ((match ((branch as
-                        fn(Core::Option<int>) -> Core::ControlFlow<<Core::Option<int> as Core::Try>::Residual, <Core::Option<int> as Core::Try>::Output> {<Core::Option<int> as Core::Try>::branch})((current_age
-                        as Core::Option<int>)) as
-                    Core::ControlFlow<Core::Option<!>, int>) {
+                        fn(core::Option<int>) -> core::ControlFlow<<core::Option<int> as core::Try>::Residual, <core::Option<int> as core::Try>::Output> {<core::Option<int> as core::Try>::branch})((current_age
+                        as core::Option<int>)) as
+                    core::ControlFlow<core::Option<!>, int>) {
                 Break {  0: residual } => #[allow(unreachable_code)]
                     (return ((from_residual as
-                                fn(Core::Option<!>) -> Core::Option<str> {<Core::Option<str> as Core::FromResidual<Core::Option<!>>>::from_residual})((residual
-                                as Core::Option<!>)) as Core::Option<str>) as !),
+                                fn(core::Option<!>) -> core::Option<str> {<core::Option<str> as core::FromResidual<core::Option<!>>>::from_residual})((residual
+                                as core::Option<!>)) as core::Option<str>) as !),
                 Continue {  0: val } => #[allow(unreachable_code)]
                     (val as int),
             } as int) + (1 as int) as int);
     ((Some as
-            fn(str) -> Core::Option<str> {Core::Option::<str>::Some})((unsafe
+            fn(str) -> core::Option<str> {core::Option::<str>::Some})((unsafe
             {
-            (((::Core::unicode::characters_to_binary as
+            (((::core::unicode::characters_to_binary as
                         fn(term) -> term)(([("Next year I will be " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)((next_age as int)) as term)] as [term]))
                     as term).cast_unchecked::<str>() as str)
-        } as str)) as Core::Option<str>)
-} as Core::Option<str>)
+        } as str)) as core::Option<str>)
+} as core::Option<str>)

@@ -1,6 +1,6 @@
 [package]
-name = "MoreTemperatures"
+name = "more_temperatures"
 version = "0.1.0"
 
 [dependencies]
-Temperatures = "~> 0.1"
+temperatures = "~> 0.1"

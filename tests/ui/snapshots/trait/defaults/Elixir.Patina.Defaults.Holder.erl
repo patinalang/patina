@@ -9,8 +9,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'Defaults::Konst::$patina_const::K'/1,
-         'Defaults::Konst::$patina_witness'/0]).
+         'defaults::Konst::$patina_const::K'/1,
+         'defaults::Konst::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,10 +25,10 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Konst::$patina_const::K'(_witness_Konst@0_0) ->
+'defaults::Konst::$patina_const::K'(_witness_Konst@0_0) ->
     7.
 
-'Defaults::Konst::$patina_witness'() ->
-    {{fun 'Elixir.Patina.Defaults.Holder':'Defaults::Konst::$patina_const::K'/1},
+'defaults::Konst::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Defaults.Holder':'defaults::Konst::$patina_const::K'/1},
      {},
      {}}.

@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -23,7 +23,7 @@ fn give_adult(drink:
         Option<str>) ({
 
     // Specify a course of action for each case.
-    (match (drink as Core::Option<str>) {
+    (match (drink as core::Option<str>) {
         Some("lemonade") =>
             // Others will `panic` before drinking sugary drinks.
             // All drinks are handled implicitly using `unwrap`.
@@ -34,35 +34,35 @@ fn give_adult(drink:
 
 
             {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("Yuck! Too sugary." as str)] as
                             [str])] as [[str]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         Some(inner) => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([((patina_fmt::display as
                                         fn(term) -> term)((inner as str)) as term),
                                 ("? How nice." as str)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         None => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("No drink? Oh well." as str)] as
                             [str])] as [[str]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
     } as ())
 } as ())
 fn drink(drink:
         Option<str>) ({
-    let inside = ((drink as Core::Option<str>).unwrap() as {type error});
+    let inside = ((drink as core::Option<str>).unwrap() as {type error});
     (if ((inside as {type error}) == ("lemonade" as str) as bool) {
         (unsafe {
-            (((::Core::erlang::error as
-                        fn(term, term, term) -> term)(((::Core::Panic::new as
-                            fn(str) -> Core::Panic {Core::Panic::new})(("AAAaaaaa!!!!"
-                            as str)) as Core::Panic), (a"none" as atom),
+            (((::core::erlang::error as
+                        fn(term, term, term) -> term)(((::core::Panic::new as
+                            fn(str) -> core::Panic {core::Panic::new})(("AAAaaaaa!!!!"
+                            as str)) as core::Panic), (a"none" as atom),
                     ([(((a"error_info" as atom),
                                 (#{(a"module" as atom) =>
                                         (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
@@ -71,40 +71,40 @@ fn drink(drink:
         } as {type error});
     } as ())
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("I love " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)((inside as {type error})) as term),
                             ("s!!!!!" as str)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())
 fn main() ({
     let water =
         ((Some as
-                fn(str) -> Core::Option<str> {Core::Option::<str>::Some})(("water"
-                as str)) as Core::Option<str>);
+                fn(str) -> core::Option<str> {core::Option::<str>::Some})(("water"
+                as str)) as core::Option<str>);
     let lemonade =
         ((Some as
-                fn(str) -> Core::Option<str> {Core::Option::<str>::Some})(("lemonade"
-                as str)) as Core::Option<str>);
-    let void = (None as Core::Option<str>);
+                fn(str) -> core::Option<str> {core::Option::<str>::Some})(("lemonade"
+                as str)) as core::Option<str>);
+    let void = (None as core::Option<str>);
     ((give_adult as
-            fn(Core::Option<str>) {give_adult})((water as Core::Option<str>))
+            fn(core::Option<str>) {give_adult})((water as core::Option<str>))
         as ());
     ((give_adult as
-            fn(Core::Option<str>) {give_adult})((lemonade as
-            Core::Option<str>)) as ());
+            fn(core::Option<str>) {give_adult})((lemonade as
+            core::Option<str>)) as ());
     ((give_adult as
-            fn(Core::Option<str>) {give_adult})((void as Core::Option<str>))
+            fn(core::Option<str>) {give_adult})((void as core::Option<str>))
         as ());
     let coffee =
         ((Some as
-                fn(str) -> Core::Option<str> {Core::Option::<str>::Some})(("coffee"
-                as str)) as Core::Option<str>);
-    let nothing = (None as Core::Option<str>);
-    ((drink as fn(Core::Option<str>) {drink})((coffee as Core::Option<str>))
+                fn(str) -> core::Option<str> {core::Option::<str>::Some})(("coffee"
+                as str)) as core::Option<str>);
+    let nothing = (None as core::Option<str>);
+    ((drink as fn(core::Option<str>) {drink})((coffee as core::Option<str>))
         as ());
-    ((drink as fn(Core::Option<str>) {drink})((nothing as Core::Option<str>))
+    ((drink as fn(core::Option<str>) {drink})((nothing as core::Option<str>))
         as ());
 } as ())

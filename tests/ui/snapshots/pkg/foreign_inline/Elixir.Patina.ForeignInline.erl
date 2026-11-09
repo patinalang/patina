@@ -41,8 +41,8 @@ inlines_foreign_generic_with_foreign_impl() ->
 
 foreign_generic_calls_local_impl_statically() ->
     _witness_Trait@0_0 =
-        'Elixir.Patina.ForeignInline.LocalImpl':'Inlines::Trait::$patina_witness'(),
+        'Elixir.Patina.ForeignInline.LocalImpl':'inlines::Trait::$patina_witness'(),
     _x@1_0 = 5,
-    'Elixir.Patina.ForeignInline.LocalImpl':'Inlines::Trait::method'(_witness_Trait@0_0,
+    'Elixir.Patina.ForeignInline.LocalImpl':'inlines::Trait::method'(_witness_Trait@0_0,
                                                                      _x@1_0)
         * 2.

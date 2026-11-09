@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -38,30 +38,30 @@ fn main() ({
 
     // Error 2: the element doesn't parse to a number
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("The first doubled is " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((double_first as
                                         fn([str]) -> int {double_first})((numbers as [str])) as
                                     int)) as term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("The first doubled is " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((double_first as
                                         fn([str]) -> int {double_first})((empty as [str])) as int))
                                 as term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("The first doubled is " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((double_first as
                                         fn([str]) -> int {double_first})((strings as [str])) as
                                     int)) as term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

@@ -1,2 +1,2 @@
 #[module = "shared_module"]
-pub mod Mine { }
+pub mod mine { }

@@ -74,13 +74,13 @@ fizzbuzz(_n@0_0) ->
 
 fizzbuzz_to(_n@0_0) ->
     _witness_Iterator@1_0 =
-        'Elixir.Patina.Core.RangeInclusive':'Core::Iterator::$patina_witness<int>'(),
+        'Elixir.Patina.Core.RangeInclusive':'core::Iterator::$patina_witness<int>'(),
     _witnesses_where_IntoIterator@2_0 =
         {_witness_Iterator@1_0},
     _witness_IntoIterator@3_0 =
-        'Elixir.Patina.Core.$impl':'Core::IntoIterator::$patina_witness'(_witnesses_where_IntoIterator@2_0),
+        'Elixir.Patina.Core.$impl':'core::IntoIterator::$patina_witness'(_witnesses_where_IntoIterator@2_0),
     case
-        'Elixir.Patina.Core.$impl':'Core::IntoIterator::into_iter'(_witness_IntoIterator@3_0,
+        'Elixir.Patina.Core.$impl':'core::IntoIterator::into_iter'(_witness_IntoIterator@3_0,
                                                                    'Elixir.Patina.Core.RangeInclusive':new(1,
                                                                                                            _n@0_0))
         of
@@ -90,7 +90,7 @@ fizzbuzz_to(_n@0_0) ->
                                     {'$patina_label_0', _iter@4_2} -> _iter@4_2;
                                     _ ->
                                         case
-                                            'Elixir.Patina.Core.RangeInclusive':'Core::Iterator::next<int>'(_witness_Iterator@1_0,
+                                            'Elixir.Patina.Core.RangeInclusive':'core::Iterator::next<int>'(_witness_Iterator@1_0,
                                                                                                             _iter@4_0)
                                             of
                                             nil ->

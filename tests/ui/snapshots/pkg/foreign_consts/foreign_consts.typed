@@ -5,21 +5,21 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
 
 use ::{};
-use Consts::Generic;
-use Consts::HEADER;
-use Consts::HasValue;
-use Consts::PAIR;
-use Consts::Point;
+use consts::Generic;
+use consts::HEADER;
+use consts::HasValue;
+use consts::PAIR;
+use consts::Point;
 
 const LOCAL_PAIRS: [([int], #{str => int})] =
     ([(PAIR as ([int], #{str => int})), (PAIR as ([int], #{str => int}))] as
@@ -39,10 +39,10 @@ fn local_pairs()
 
 fn header() -> bin ({ (HEADER as bin) } as bin)
 
-fn origin_y() -> int ({ ((Point::ORIGIN as Consts::Point).y as int) } as int)
+fn origin_y() -> int ({ ((Point::ORIGIN as consts::Point).y as int) } as int)
 
 fn computed_unit_x()
-    -> int ({ ((Point::COMPUTED_UNIT as Consts::Point).x as int) } as int)
+    -> int ({ ((Point::COMPUTED_UNIT as consts::Point).x as int) } as int)
 
 struct Three;
 

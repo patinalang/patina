@@ -68,7 +68,7 @@ defmodule LoopsTest do
 
   test "loop helpers in trait impls are named after the impl's function" do
     assert MapSet.new(loop_helper_parents(Loops.Counter)) ==
-             MapSet.new(["Loops::Count::count<int>", "Loops::Count::count<str>"])
+             MapSet.new(["loops::Count::count<int>", "loops::Count::count<str>"])
   end
 
   test "continue and break in a try body run the after body" do

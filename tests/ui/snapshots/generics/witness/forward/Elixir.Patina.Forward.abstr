@@ -151,7 +151,7 @@
                    {remote,
                        {16,5},
                        {atom,{16,5},'Elixir.Patina.Forward.S'},
-                       {atom,{16,5},'Forward::Tr::$patina_witness'}},
+                       {atom,{16,5},'forward::Tr::$patina_witness'}},
                    []}},
            {match,
                {16,5},

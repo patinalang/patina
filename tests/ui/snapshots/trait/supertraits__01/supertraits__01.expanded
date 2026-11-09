@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -50,7 +50,7 @@ fn comp_sci_student_greeting(student: dyn CompSciStudent) -> str {
 
 
     unsafe {
-        ::Core::unicode::characters_to_binary(["My name is ",
+        ::core::unicode::characters_to_binary(["My name is ",
                         patina_fmt::display(student.name()), " and I attend ",
                         patina_fmt::display(student.university()),
                         ". My favorite language is ",
@@ -87,7 +87,7 @@ pub fn main() {
         };
     let greeting = comp_sci_student_greeting(student);
     {
-        ::Core::io::put_chars([[patina_fmt::display(greeting)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::display(greeting)]]);
+        ::core::io::nl();
     };
 }

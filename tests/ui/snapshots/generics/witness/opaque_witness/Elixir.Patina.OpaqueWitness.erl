@@ -38,6 +38,6 @@ show(_witnesses_where_show@0_0, _t@1_0) ->
 
 show_opaque_return() ->
     _witness_Describe@0_0 =
-        'Elixir.Patina.OpaqueWitness.Name':'OpaqueWitness::Describe::$patina_witness'(),
+        'Elixir.Patina.OpaqueWitness.Name':'opaque_witness::Describe::$patina_witness'(),
     _witnesses_where_show@1_0 = {_witness_Describe@0_0},
     show(_witnesses_where_show@1_0, make()).

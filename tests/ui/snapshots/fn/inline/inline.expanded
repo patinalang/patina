@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -122,11 +122,11 @@ pub fn binds_const_once_for_all_copies() -> int {
     plus_limit(1) + plus_limit(2) + LIMIT
 }
 
-mod Helpers {
+mod helpers {
     fn secret(x: int) -> int { x * 10 }
 
     #[inline]
     pub fn reveal(x: int) -> int { secret(x) }
 }
 
-pub fn exports_helpers_of_inline_fns() -> int { Helpers::reveal(4) }
+pub fn exports_helpers_of_inline_fns() -> int { helpers::reveal(4) }

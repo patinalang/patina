@@ -9,10 +9,10 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'Defaults::Animal::name'/2,
-         'Defaults::Animal::noise'/2,
-         'Defaults::Animal::calls_required'/2,
-         'Defaults::Animal::$patina_witness'/0]).
+         'defaults::Animal::name'/2,
+         'defaults::Animal::noise'/2,
+         'defaults::Animal::calls_required'/2,
+         'defaults::Animal::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -27,26 +27,26 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Animal::name'(_witness_Animal@0_0,
+'defaults::Animal::name'(_witness_Animal@0_0,
                          _self@1_0) ->
     _self@1_0.
 
-'Defaults::Animal::noise'(_witness_Animal@0_0,
+'defaults::Animal::noise'(_witness_Animal@0_0,
                           _self@1_0) ->
     <<"woof"/utf8>>.
 
-'Defaults::Animal::calls_required'(_witness_Animal@0_0,
+'defaults::Animal::calls_required'(_witness_Animal@0_0,
                                    _self@1_0) ->
     _element@2_0 = _self@1_0,
     {_element@2_0, <<"barks"/utf8>>}.
 
-'Defaults::Animal::$patina_witness'() ->
-    {{fun 'Elixir.Patina.Defaults.Dog':'Defaults::Animal::name'/2,
-      fun 'Elixir.Patina.Defaults.Dog':'Defaults::Animal::noise'/2,
-      fun 'Elixir.Patina.Defaults.Dog':'Defaults::Animal::calls_required'/2,
-      fun 'Elixir.Patina.Defaults':'Defaults::Animal::calls_default'/2,
-      fun 'Elixir.Patina.Defaults':'Defaults::Animal::with_bounded_param'/4,
-      fun 'Elixir.Patina.Defaults':'Defaults::Animal::returns_self'/2,
-      fun 'Elixir.Patina.Defaults':'Defaults::Animal::whisper'/2},
+'defaults::Animal::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Defaults.Dog':'defaults::Animal::name'/2,
+      fun 'Elixir.Patina.Defaults.Dog':'defaults::Animal::noise'/2,
+      fun 'Elixir.Patina.Defaults.Dog':'defaults::Animal::calls_required'/2,
+      fun 'Elixir.Patina.Defaults':'defaults::Animal::calls_default'/2,
+      fun 'Elixir.Patina.Defaults':'defaults::Animal::with_bounded_param'/4,
+      fun 'Elixir.Patina.Defaults':'defaults::Animal::returns_self'/2,
+      fun 'Elixir.Patina.Defaults':'defaults::Animal::whisper'/2},
      {},
      {}}.

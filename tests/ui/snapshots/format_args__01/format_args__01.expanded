@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -22,20 +22,20 @@ pub fn main() {
     let n: int = 42;
 
     {
-        ::Core::io::put_chars([["hello, ", patina_fmt::display(name), "!"]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([["hello, ", patina_fmt::display(name), "!"]]);
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([[patina_fmt::display(name), " = ",
+        ::core::io::put_chars([[patina_fmt::display(name), " = ",
                             patina_fmt::debug(n)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([[patina_fmt::display(name), " and ",
+        ::core::io::put_chars([[patina_fmt::display(name), " and ",
                             patina_fmt::debug(n)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
-    { ::Core::io::put_chars(["no "]); };
-    { ::Core::io::put_chars(["newline"]); };
-    { ::Core::io::nl(); };
+    { ::core::io::put_chars(["no "]); };
+    { ::core::io::put_chars(["newline"]); };
+    { ::core::io::nl(); };
 }

@@ -1,4 +1,4 @@
-use Core::PhantomData;
+use core::PhantomData;
 
 extern mod io;
 extern mod maps;

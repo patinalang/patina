@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -24,18 +24,18 @@ pub fn main() {
         match name {
             "Ferris" =>
                 {
-                ::Core::io::put_chars([["There is a rustacean among us!"]]);
-                ::Core::io::nl();
+                ::core::io::put_chars([["There is a rustacean among us!"]]);
+                ::core::io::nl();
             }
             _ => {
-                ::Core::io::put_chars([["Hello ",
+                ::core::io::put_chars([["Hello ",
                                     patina_fmt::display(name)]]);
-                ::Core::io::nl();
+                ::core::io::nl();
             }
         }
     }
     {
-        ::Core::io::put_chars([["names: ", patina_fmt::debug(names)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([["names: ", patina_fmt::debug(names)]]);
+        ::core::io::nl();
     };
 }

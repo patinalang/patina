@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -23,16 +23,16 @@ fn drink(beverage: str) {
 
 
         unsafe {
-            ::Core::erlang::error(::Core::Panic::new("AAAaaaaa!!!!"), a"none",
+            ::core::erlang::error(::core::Panic::new("AAAaaaaa!!!!"), a"none",
                     [(a"error_info",
                                 #{a"module" =>
                                         a"Elixir.Patina.Core.Panic"})]).cast_unchecked::<!>()
         };
     }
     {
-        ::Core::io::put_chars([["Some refreshing ",
+        ::core::io::put_chars([["Some refreshing ",
                             patina_fmt::display(beverage), " is all I need."]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }
 pub fn main() { drink("water"); drink("lemonade"); drink("still water"); }

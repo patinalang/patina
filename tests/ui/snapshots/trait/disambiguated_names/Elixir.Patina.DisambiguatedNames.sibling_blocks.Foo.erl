@@ -9,8 +9,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'DisambiguatedNames::Show::show'/2,
-         'DisambiguatedNames::Show::$patina_witness'/0]).
+         'disambiguated_names::Show::show'/2,
+         'disambiguated_names::Show::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,11 +25,11 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'DisambiguatedNames::Show::show'(_witness_Show@0_0,
-                                 _self@1_0) ->
+'disambiguated_names::Show::show'(_witness_Show@0_0,
+                                  _self@1_0) ->
     <<"a"/utf8>>.
 
-'DisambiguatedNames::Show::$patina_witness'() ->
-    {{fun 'Elixir.Patina.DisambiguatedNames.sibling_blocks.Foo':'DisambiguatedNames::Show::show'/2},
+'disambiguated_names::Show::$patina_witness'() ->
+    {{fun 'Elixir.Patina.DisambiguatedNames.sibling_blocks.Foo':'disambiguated_names::Show::show'/2},
      {},
      {}}.

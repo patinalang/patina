@@ -9,8 +9,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'BlanketImpl::Show::show'/2,
-         'BlanketImpl::Show::$patina_witness'/0]).
+         'blanket_impl::Show::show'/2,
+         'blanket_impl::Show::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,11 +25,11 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'BlanketImpl::Show::show'(_witness_Show@0_0,
-                          _self@1_0) ->
+'blanket_impl::Show::show'(_witness_Show@0_0,
+                           _self@1_0) ->
     _self@1_0.
 
-'BlanketImpl::Show::$patina_witness'() ->
-    {{fun 'Elixir.Patina.BlanketImpl.$impl.Core.Str':'BlanketImpl::Show::show'/2},
+'blanket_impl::Show::$patina_witness'() ->
+    {{fun 'Elixir.Patina.BlanketImpl.$impl.Core.Str':'blanket_impl::Show::show'/2},
      {},
      {}}.

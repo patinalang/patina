@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -29,5 +29,5 @@ macro_rules! say_hello {
 
 pub fn main() {
     // This call will expand into `println!("Hello!")`
-    { ::Core::io::put_chars([["Hello!"]]); ::Core::io::nl(); }
+    { ::core::io::put_chars([["Hello!"]]); ::core::io::nl(); }
 }

@@ -119,7 +119,7 @@
                    {remote,
                        {55,5},
                        {atom,{55,5},'Elixir.Patina.InherentTags.Name'},
-                       {atom,{55,5},'InherentTags::Show::$patina_witness'}},
+                       {atom,{55,5},'inherent_tags::Show::$patina_witness'}},
                    []}},
            {match,
                {55,5},

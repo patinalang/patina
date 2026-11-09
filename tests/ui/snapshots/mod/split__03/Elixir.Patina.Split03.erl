@@ -24,11 +24,11 @@
 '__info__'(Key) -> module_info(Key).
 
 function() ->
-    io:put_chars([[<<"called `MyMod::Nested::function()`"/utf8>>]]),
+    io:put_chars([[<<"called `my_mod::nested::function()`"/utf8>>]]),
     io:nl(),
     {}.
 
 private_function() ->
-    io:put_chars([[<<"called `MyMod::Nested::private_function()`"/utf8>>]]),
+    io:put_chars([[<<"called `my_mod::nested::private_function()`"/utf8>>]]),
     io:nl(),
     {}.

@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -26,8 +26,8 @@ mod inner {
 pub fn main() {
     used::ping();
     {
-        ::Core::io::put_chars([[patina_fmt::debug(used::foo::bar)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::debug(used::foo::bar)]]);
+        ::core::io::nl();
     };
     io::foo::bar(1, 2);
     io::a::b::c::d(1);

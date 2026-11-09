@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -23,11 +23,11 @@ pub fn main() {
         strings.into_iter().map(|s|
                     s.parse::<int>()).partition(Result::is_ok);
     {
-        ::Core::io::put_chars([["Numbers: ", patina_fmt::debug(numbers)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([["Numbers: ", patina_fmt::debug(numbers)]]);
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([["Errors: ", patina_fmt::debug(errors)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([["Errors: ", patina_fmt::debug(errors)]]);
+        ::core::io::nl();
     };
 }

@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -26,8 +26,8 @@ pub fn main() {
     let age = Years::new(25);
     let age_value = get_age(age);
     {
-        ::Core::io::put_chars([["Age ", patina_fmt::debug(age), " is ",
+        ::core::io::put_chars([["Age ", patina_fmt::debug(age), " is ",
                             patina_fmt::display(age_value)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }

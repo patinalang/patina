@@ -5,16 +5,16 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
 
-use Core::PhantomData;
+use core::PhantomData;
 
 extern mod io;
 extern mod maps;
@@ -28,8 +28,8 @@ fn typed(n: int)
     ->
         Typed<str> ({
     ((Typed as
-            fn(int, Core::PhantomData<str>) -> Typed<str> {Typed::<str>})((n
-            as int), (PhantomData as Core::PhantomData<str>)) as Typed<str>)
+            fn(int, core::PhantomData<str>) -> Typed<str> {Typed::<str>})((n
+            as int), (PhantomData as core::PhantomData<str>)) as Typed<str>)
 } as Typed<str>)
 
 fn typed_value(value: Typed<str>)
@@ -38,8 +38,8 @@ fn typed_value(value: Typed<str>)
 fn typed_marker(value: Typed<str>)
     ->
         PhantomData<str> ({
-    ((value as Typed<str>).1 as Core::PhantomData<str>)
-} as Core::PhantomData<str>)
+    ((value as Typed<str>).1 as core::PhantomData<str>)
+} as core::PhantomData<str>)
 
 fn typed_destructure(value: Typed<str>)
     -> int ({ let Typed(n, _) = (value as Typed<str>); (n as int) } as int)
@@ -49,9 +49,9 @@ fn typed_binding(value: Typed<str>)
         PhantomData<str> ({
     let Typed(_, marker) = (value as Typed<str>);
     ((id as
-            fn(Core::PhantomData<str>) -> Core::PhantomData<str> {id::<Core::PhantomData<str>>})((marker
-            as Core::PhantomData<str>)) as Core::PhantomData<str>)
-} as Core::PhantomData<str>)
+            fn(core::PhantomData<str>) -> core::PhantomData<str> {id::<core::PhantomData<str>>})((marker
+            as core::PhantomData<str>)) as core::PhantomData<str>)
+} as core::PhantomData<str>)
 
 fn typed_constant_pattern(value: Typed<str>)
     ->
@@ -79,43 +79,43 @@ fn marker_with_side_effect<T>()
     ->
         PhantomData<T> ({
     ((io::put_chars as fn(term) -> term)(("made a marker\n" as str)) as term);
-    (PhantomData as Core::PhantomData<T>)
-} as Core::PhantomData<T>)
+    (PhantomData as core::PhantomData<T>)
+} as core::PhantomData<T>)
 
 fn typed_effect(n: int)
     ->
         Typed<str> ({
     ((Typed as
-            fn(int, Core::PhantomData<str>) -> Typed<str> {Typed::<str>})((n
+            fn(int, core::PhantomData<str>) -> Typed<str> {Typed::<str>})((n
             as int),
         ((marker_with_side_effect as
-                fn() -> Core::PhantomData<str> {marker_with_side_effect::<str>})()
-            as Core::PhantomData<str>)) as Typed<str>)
+                fn() -> core::PhantomData<str> {marker_with_side_effect::<str>})()
+            as core::PhantomData<str>)) as Typed<str>)
 } as Typed<str>)
 
 fn marker_effect()
     ->
         PhantomData<str> ({
     (((typed_effect as fn(int) -> Typed<str> {typed_effect})((1 as int)) as
-            Typed<str>).1 as Core::PhantomData<str>)
-} as Core::PhantomData<str>)
+            Typed<str>).1 as core::PhantomData<str>)
+} as core::PhantomData<str>)
 
 fn phantom_in_loop_and_closure(n: int)
     ->
         int ({
-    let marker: PhantomData<int> = (PhantomData as Core::PhantomData<int>);
+    let marker: PhantomData<int> = (PhantomData as core::PhantomData<int>);
     let mut count = (0 as int);
     let mut last =
         ((Typed as
-                fn(int, Core::PhantomData<int>) -> Typed<int> {Typed::<int>})((0
-                as int), (PhantomData as Core::PhantomData<int>)) as
+                fn(int, core::PhantomData<int>) -> Typed<int> {Typed::<int>})((0
+                as int), (PhantomData as core::PhantomData<int>)) as
             Typed<int>);
     (loop {
         (if ((count as int) < (n as int) as bool) {
             (last =
                 ((Typed as
-                        fn(int, Core::PhantomData<int>) -> Typed<int> {Typed::<int>})((count
-                        as int), (marker as Core::PhantomData<int>)) as Typed<int>)
+                        fn(int, core::PhantomData<int>) -> Typed<int> {Typed::<int>})((count
+                        as int), (marker as core::PhantomData<int>)) as Typed<int>)
                 as Typed<int>);
             ((count as int) += (1 as int) as int);
         } else { (break as !); } as ())
@@ -123,8 +123,8 @@ fn phantom_in_loop_and_closure(n: int)
     let make =
         (|value|
             ((Typed as
-                    fn(int, Core::PhantomData<int>) -> Typed<int> {Typed::<int>})((value
-                    as int), (marker as Core::PhantomData<int>)) as Typed<int>)
+                    fn(int, core::PhantomData<int>) -> Typed<int> {Typed::<int>})((value
+                    as int), (marker as core::PhantomData<int>)) as Typed<int>)
             as
             {closure@tests/ui/src/custom_types/phantom_data.pt:73:16: 73:23});
     (((make as
@@ -141,9 +141,9 @@ impl <K, V> MapIter<K, V> {
             MapIter<K,
             V> ({
         ((MapIter as
-                fn(term, Core::PhantomData<(K, V)>) -> MapIter<K, V> {MapIter::<K, V>})(((maps::iterator
+                fn(term, core::PhantomData<(K, V)>) -> MapIter<K, V> {MapIter::<K, V>})(((maps::iterator
                     as fn(term) -> term)((map as #{K => V})) as term),
-            (PhantomData as Core::PhantomData<(K, V)>)) as MapIter<K, V>)
+            (PhantomData as core::PhantomData<(K, V)>)) as MapIter<K, V>)
     } as MapIter<K, V>)
 
     fn next(self)
@@ -161,17 +161,17 @@ impl <K, V> MapIter<K, V> {
                             ((value as term).cast_unchecked() as V)) as (K, V))
                     } as (K, V));
                 ((Some as
-                        fn(((K, V), MapIter<K, V>)) -> Core::Option<((K, V), MapIter<K, V>)> {Core::Option::<((K, V), MapIter<K, V>)>::Some})((((entry
+                        fn(((K, V), MapIter<K, V>)) -> core::Option<((K, V), MapIter<K, V>)> {core::Option::<((K, V), MapIter<K, V>)>::Some})((((entry
                             as (K, V)),
                         ((MapIter as
-                                fn(term, Core::PhantomData<(K, V)>) -> MapIter<K, V> {MapIter::<K, V>})((rest
-                                as term), (PhantomData as Core::PhantomData<(K, V)>)) as
+                                fn(term, core::PhantomData<(K, V)>) -> MapIter<K, V> {MapIter::<K, V>})((rest
+                                as term), (PhantomData as core::PhantomData<(K, V)>)) as
                             MapIter<K, V>)) as ((K, V), MapIter<K, V>))) as
-                    Core::Option<((K, V), MapIter<K, V>)>)
+                    core::Option<((K, V), MapIter<K, V>)>)
             }
-            _ => (None as Core::Option<((K, V), MapIter<K, V>)>),
-        } as Core::Option<((K, V), MapIter<K, V>)>)
-    } as Core::Option<((K, V), MapIter<K, V>)>)
+            _ => (None as core::Option<((K, V), MapIter<K, V>)>),
+        } as core::Option<((K, V), MapIter<K, V>)>)
+    } as core::Option<((K, V), MapIter<K, V>)>)
 }
 
 fn map_iter(map: #{str => int})
@@ -193,7 +193,7 @@ fn sum_values(map: #{str => int})
     let mut total = (0 as int);
     (loop {
         (match ((iter as MapIter<str, int>).next() as
-                Core::Option<((str, int), MapIter<str, int>)>) {
+                core::Option<((str, int), MapIter<str, int>)>) {
             None => (break as !),
             Some(((_, value), rest)) => {
                 (iter = (rest as MapIter<str, int>) as MapIter<str, int>);
@@ -209,14 +209,14 @@ fn first_entry(iter: MapIter<str, int>)
         Option<(str,
         int)> ({
     (match ((iter as MapIter<str, int>).next() as
-            Core::Option<((str, int), MapIter<str, int>)>) {
+            core::Option<((str, int), MapIter<str, int>)>) {
         Some((entry, _)) =>
             ((Some as
-                    fn((str, int)) -> Core::Option<(str, int)> {Core::Option::<(str, int)>::Some})((entry
-                    as (str, int))) as Core::Option<(str, int)>),
-        None => (None as Core::Option<(str, int)>),
-    } as Core::Option<(str, int)>)
-} as Core::Option<(str, int)>)
+                    fn((str, int)) -> core::Option<(str, int)> {core::Option::<(str, int)>::Some})((entry
+                    as (str, int))) as core::Option<(str, int)>),
+        None => (None as core::Option<(str, int)>),
+    } as core::Option<(str, int)>)
+} as core::Option<(str, int)>)
 
 // Several runtime fields: a native record without the phantom field.
 struct Record<T> {
@@ -230,7 +230,7 @@ fn record(a: int, b: str)
         Record<int> ({
     (Record {
         (a as int),
-        marker: (PhantomData as Core::PhantomData<int>),
+        marker: (PhantomData as core::PhantomData<int>),
         (b as str) } as Record<int>)
 } as Record<int>)
 
@@ -250,8 +250,8 @@ fn record_update_marker(value: Record<int>)
     (Record {
         marker:
             ((marker_with_side_effect as
-                    fn() -> Core::PhantomData<int> {marker_with_side_effect::<int>})()
-                as Core::PhantomData<int>), ..(value as Record<int>) } as
+                    fn() -> core::PhantomData<int> {marker_with_side_effect::<int>})()
+                as core::PhantomData<int>), ..(value as Record<int>) } as
         Record<int>)
 } as Record<int>)
 
@@ -261,8 +261,8 @@ fn record_destructure(value: Record<int>)
     let Record {  a,  marker, .. } = (value as Record<int>);
     let _marker =
         ((id as
-                fn(Core::PhantomData<int>) -> Core::PhantomData<int> {id::<Core::PhantomData<int>>})((marker
-                as Core::PhantomData<int>)) as Core::PhantomData<int>);
+                fn(core::PhantomData<int>) -> core::PhantomData<int> {id::<core::PhantomData<int>>})((marker
+                as core::PhantomData<int>)) as core::PhantomData<int>);
     (a as int)
 } as int)
 
@@ -274,8 +274,8 @@ fn pair(a: int, b: int)
     ->
         Shape<int> ({
     ((Shape::Pair as
-            fn(int, Core::PhantomData<int>, int) -> Shape<int> {Shape::<int>::Pair})((a
-            as int), (PhantomData as Core::PhantomData<int>), (b as int)) as
+            fn(int, core::PhantomData<int>, int) -> Shape<int> {Shape::<int>::Pair})((a
+            as int), (PhantomData as core::PhantomData<int>), (b as int)) as
         Shape<int>)
 } as Shape<int>)
 
@@ -298,7 +298,7 @@ fn tagged_pair(a: int, b: int)
         TaggedPair<int> ({
     (TaggedPair {
         (a as int),
-        marker: (PhantomData as Core::PhantomData<int>),
+        marker: (PhantomData as core::PhantomData<int>),
         (b as int) } as TaggedPair<int>)
 } as TaggedPair<int>)
 
@@ -325,7 +325,7 @@ fn elixir_point(x: int, y: int)
         ElixirPoint<float> ({
     (ElixirPoint {
         (x as int),
-        unit: (PhantomData as Core::PhantomData<float>),
+        unit: (PhantomData as core::PhantomData<float>),
         (y as int) } as ElixirPoint<float>)
 } as ElixirPoint<float>)
 
@@ -343,29 +343,29 @@ fn marker()
     ->
         Marker<int> ({
     ((Marker as
-            fn(Core::PhantomData<int>) -> Marker<int> {Marker::<int>})((PhantomData
-            as Core::PhantomData<int>)) as Marker<int>)
+            fn(core::PhantomData<int>) -> Marker<int> {Marker::<int>})((PhantomData
+            as core::PhantomData<int>)) as Marker<int>)
 } as Marker<int>)
 
 fn marker_inner(value: Marker<int>)
     ->
         PhantomData<int> ({
-    ((value as Marker<int>).0 as Core::PhantomData<int>)
-} as Core::PhantomData<int>)
+    ((value as Marker<int>).0 as core::PhantomData<int>)
+} as core::PhantomData<int>)
 
 fn materialized_marker()
     ->
         Option<PhantomData<int>> ({
     ((Some as
-            fn(Core::PhantomData<int>) -> Core::Option<Core::PhantomData<int>> {Core::Option::<Core::PhantomData<int>>::Some})((PhantomData
-            as Core::PhantomData<int>)) as
-        Core::Option<Core::PhantomData<int>>)
-} as Core::Option<Core::PhantomData<int>>)
+            fn(core::PhantomData<int>) -> core::Option<core::PhantomData<int>> {core::Option::<core::PhantomData<int>>::Some})((PhantomData
+            as core::PhantomData<int>)) as
+        core::Option<core::PhantomData<int>>)
+} as core::Option<core::PhantomData<int>>)
 
 fn is_some_marker(value: Option<PhantomData<int>>)
     ->
         bool ({
-    (match (value as Core::Option<Core::PhantomData<int>>) {
+    (match (value as core::Option<core::PhantomData<int>>) {
         Some(_) => (true as bool),
         None => (false as bool),
     } as bool)

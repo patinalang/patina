@@ -11,8 +11,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'AssocTypeTraitArg::Wraps<<_ as AssocTypeTraitArg::Container>::Item>::wrapped'/2,
-         'AssocTypeTraitArg::Wraps<<_ as AssocTypeTraitArg::Container>::Item>::$patina_witness'/1]).
+         'assoc_type_trait_arg::Wraps<<_ as assoc_type_trait_arg::Container>::Item>::wrapped'/2,
+         'assoc_type_trait_arg::Wraps<<_ as assoc_type_trait_arg::Container>::Item>::$patina_witness'/1]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -27,11 +27,11 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'AssocTypeTraitArg::Wraps<<_ as AssocTypeTraitArg::Container>::Item>::wrapped'(_witness_Wraps@0_0,
-                                                                               _self@1_0) ->
+'assoc_type_trait_arg::Wraps<<_ as assoc_type_trait_arg::Container>::Item>::wrapped'(_witness_Wraps@0_0,
+                                                                                     _self@1_0) ->
     0.
 
-'AssocTypeTraitArg::Wraps<<_ as AssocTypeTraitArg::Container>::Item>::$patina_witness'(_witnesses_where_Wraps@0_0) ->
-    {{fun 'Elixir.Patina.AssocTypeTraitArg.W':'AssocTypeTraitArg::Wraps<<_ as AssocTypeTraitArg::Container>::Item>::wrapped'/2},
+'assoc_type_trait_arg::Wraps<<_ as assoc_type_trait_arg::Container>::Item>::$patina_witness'(_witnesses_where_Wraps@0_0) ->
+    {{fun 'Elixir.Patina.AssocTypeTraitArg.W':'assoc_type_trait_arg::Wraps<<_ as assoc_type_trait_arg::Container>::Item>::wrapped'/2},
      {},
      _witnesses_where_Wraps@0_0}.

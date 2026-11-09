@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -30,15 +30,15 @@ pub fn main() {
             // ^ `if let` had additional optional `else`/`else if`
             // clauses. `while let` does not have these.
             {
-                ::Core::io::put_chars([["Greater than 9, quit!"]]);
-                ::Core::io::nl();
+                ::core::io::put_chars([["Greater than 9, quit!"]]);
+                ::core::io::nl();
             };
             optional = None;
         } else {
             {
-                ::Core::io::put_chars([["`i` is `", patina_fmt::debug(i),
+                ::core::io::put_chars([["`i` is `", patina_fmt::debug(i),
                                     "`. Try again."]]);
-                ::Core::io::nl();
+                ::core::io::nl();
             };
             optional = Some(i + 1);
         }

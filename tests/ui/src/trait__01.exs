@@ -6,9 +6,9 @@ defmodule Trait01Test do
 
   alias Patina.Trait01.Sheep
 
-  @sheep_witness Sheep."Trait01::Animal::$patina_witness"()
+  @sheep_witness Sheep."trait__01::Animal::$patina_witness"()
 
-  defp dolly, do: Sheep."Trait01::Animal::new"(@sheep_witness, "Dolly")
+  defp dolly, do: Sheep."trait__01::Animal::new"(@sheep_witness, "Dolly")
 
   defp sheared_dolly do
     {sheared, _output} = with_io(fn -> Sheep.shear(dolly()) end)
@@ -28,12 +28,12 @@ defmodule Trait01Test do
   end
 
   test "Animal::name returns the name" do
-    assert "Dolly" = Sheep."Trait01::Animal::name"(@sheep_witness, dolly())
+    assert "Dolly" = Sheep."trait__01::Animal::name"(@sheep_witness, dolly())
   end
 
   test "Animal::noise depends on whether the sheep is naked" do
-    assert "baaaaah!" = Sheep."Trait01::Animal::noise"(@sheep_witness, dolly())
-    assert "baaaaah?" = Sheep."Trait01::Animal::noise"(@sheep_witness, sheared_dolly())
+    assert "baaaaah!" = Sheep."trait__01::Animal::noise"(@sheep_witness, dolly())
+    assert "baaaaah?" = Sheep."trait__01::Animal::noise"(@sheep_witness, sheared_dolly())
   end
 
   test "shear gives a clothed sheep a haircut" do
@@ -54,7 +54,7 @@ defmodule Trait01Test do
     assert """
            Dolly pauses briefly... baaaaah?
            """ ==
-             capture_io(fn -> Sheep."Trait01::Animal::talk"(@sheep_witness, sheared_dolly()) end)
+             capture_io(fn -> Sheep."trait__01::Animal::talk"(@sheep_witness, sheared_dolly()) end)
   end
 
   test "is_naked/1 is private" do

@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -86,14 +86,14 @@ pub fn main() {
     // `mut` keyword lets us rebind the variable in the next statement.
 
     {
-        ::Core::io::put_chars([["Rectangle perimeter: ",
+        ::core::io::put_chars([["Rectangle perimeter: ",
                             patina_fmt::display(rectangle.perimeter())]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([["Rectangle area: ",
+        ::core::io::put_chars([["Rectangle area: ",
                             patina_fmt::display(rectangle.area())]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     let mut square =
         Rectangle { p1: Point::origin(), p2: Point::new(1.0, 1.0) };

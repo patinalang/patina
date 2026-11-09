@@ -9,8 +9,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'Defaults::Tag::tag'/2,
-         'Defaults::Tag::$patina_witness'/0]).
+         'defaults::Tag::tag'/2,
+         'defaults::Tag::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,10 +25,10 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Tag::tag'(_witness_Tag@0_0, _self@1_0) ->
+'defaults::Tag::tag'(_witness_Tag@0_0, _self@1_0) ->
     <<"a bell"/utf8>>.
 
-'Defaults::Tag::$patina_witness'() ->
-    {{fun 'Elixir.Patina.Defaults.Bell':'Defaults::Tag::tag'/2},
+'defaults::Tag::$patina_witness'() ->
+    {{fun 'Elixir.Patina.Defaults.Bell':'defaults::Tag::tag'/2},
      {},
      {}}.

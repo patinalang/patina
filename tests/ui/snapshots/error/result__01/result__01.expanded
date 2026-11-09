@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -28,12 +28,12 @@ pub fn main() {
     let twenty = multiply("10", "2");
 
     {
-        ::Core::io::put_chars([["double is ", patina_fmt::display(twenty)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([["double is ", patina_fmt::display(twenty)]]);
+        ::core::io::nl();
     };
     let tt = multiply("t", "2");
     {
-        ::Core::io::put_chars([["double is ", patina_fmt::display(tt)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([["double is ", patina_fmt::display(tt)]]);
+        ::core::io::nl();
     };
 }

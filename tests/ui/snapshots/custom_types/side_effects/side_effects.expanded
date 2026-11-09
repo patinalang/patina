@@ -9,10 +9,10 @@
 #![allow(dead_code)]
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 #[allow(unused)]
 extern mod patina_fmt;
 
@@ -305,7 +305,7 @@ impl Dynamic {
     }
 }
 
-pub mod Tuples {
+pub mod tuples {
     use super::effect;
 
     pub fn fields() -> (int, int, int) {
@@ -320,7 +320,7 @@ pub mod Tuples {
     }
 }
 
-pub mod Maps {
+pub mod maps {
     use super::effect;
 
     pub fn fields() -> #{atom => int} {
@@ -356,7 +356,7 @@ pub mod Maps {
     }
 }
 
-pub mod Lists {
+pub mod lists {
     use super::effect;
 
     pub fn fields() -> [int] {

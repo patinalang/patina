@@ -1,4 +1,4 @@
-use Core::{Range, RangeInclusive};
+use core::{Range, RangeInclusive};
 
 pub fn half_open(start: int, end: int) -> Range<int> { start..end }
 

@@ -5,7 +5,7 @@ struct Unit;
 struct Pair(int, int);
 
 // `PhantomData` fields don't count: one other field is fine, none is not.
-use Core::PhantomData;
+use core::PhantomData;
 
 #[repr(transparent)]
 struct PhantomNewtype<T>(int, PhantomData<T>);

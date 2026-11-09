@@ -10,9 +10,9 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'Supertraits::Greet::calls_supertrait'/2,
-         'Supertraits::Loud::shout'/2,
-         'Supertraits::Library::count'/4,
+         'supertraits::Greet::calls_supertrait'/2,
+         'supertraits::Loud::shout'/2,
+         'supertraits::Library::count'/4,
          bob_intro/0,
          robot_intro/0,
          bob_intro_loud/0,
@@ -31,7 +31,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Supertraits::Greet::calls_supertrait'(_witness_Greet@0_0,
+'supertraits::Greet::calls_supertrait'(_witness_Greet@0_0,
                                        _self@1_0) ->
     _supertraits_Greet@2_0 = erlang:element(2,
                                             _witness_Greet@0_0),
@@ -51,7 +51,7 @@
                                       _self@1_0),
     {_element@8_0, _element@9_0}.
 
-'Supertraits::Loud::shout'(_witness_Loud@0_0,
+'supertraits::Loud::shout'(_witness_Loud@0_0,
                            _self@1_0) ->
     _supertraits_Loud@2_0 = erlang:element(2,
                                            _witness_Loud@0_0),
@@ -124,7 +124,7 @@ via_indirect_supertrait(_witnesses_where_via_indirect_supertrait@0_0,
                                         _x@1_0),
     {_element@11_0, _element@12_0}.
 
-'Supertraits::Library::count'(_witness_Library@0_0,
+'supertraits::Library::count'(_witness_Library@0_0,
                               _witnesses_where_Library_count@1_0, _self@2_0,
                               _p@3_0) ->
     _supertraits_Library@4_0 = erlang:element(2,
@@ -156,7 +156,7 @@ count_in(_witnesses_where_count_in@0_0, _l@1_0) ->
     _fn_Library_count@4_0 = erlang:element(1,
                                            _vtable_Library@3_0),
     _witness_Pred@5_0 =
-        'Elixir.Patina.Supertraits.IsEven':'Supertraits::Pred::$patina_witness'(),
+        'Elixir.Patina.Supertraits.IsEven':'supertraits::Pred::$patina_witness'(),
     _witnesses_where_Library_count@6_0 =
         {_witness_Pred@5_0},
     _fn_Library_count@4_0(_witness_Library@2_0,
@@ -166,7 +166,7 @@ count_in(_witnesses_where_count_in@0_0, _l@1_0) ->
 
 bob_intro() ->
     _witness_Greet@0_0 =
-        'Elixir.Patina.Supertraits.Bob':'Supertraits::Greet::$patina_witness'(),
+        'Elixir.Patina.Supertraits.Bob':'supertraits::Greet::$patina_witness'(),
     _witnesses_where_via_subtrait_bound@1_0 =
         {_witness_Greet@0_0},
     via_subtrait_bound(_witnesses_where_via_subtrait_bound@1_0,
@@ -174,7 +174,7 @@ bob_intro() ->
 
 robot_intro() ->
     _witness_Greet@0_0 =
-        'Elixir.Patina.Supertraits.Robot':'Supertraits::Greet::$patina_witness'(),
+        'Elixir.Patina.Supertraits.Robot':'supertraits::Greet::$patina_witness'(),
     _witnesses_where_via_subtrait_bound@1_0 =
         {_witness_Greet@0_0},
     via_subtrait_bound(_witnesses_where_via_subtrait_bound@1_0,
@@ -182,7 +182,7 @@ robot_intro() ->
 
 bob_intro_loud() ->
     _witness_Loud@0_0 =
-        'Elixir.Patina.Supertraits.Bob':'Supertraits::Loud::$patina_witness'(),
+        'Elixir.Patina.Supertraits.Bob':'supertraits::Loud::$patina_witness'(),
     _witnesses_where_via_indirect_supertrait@1_0 =
         {_witness_Loud@0_0},
     via_indirect_supertrait(_witnesses_where_via_indirect_supertrait@1_0,
@@ -190,6 +190,6 @@ bob_intro_loud() ->
 
 books_count(_n@0_0) ->
     _witness_Library@1_0 =
-        'Elixir.Patina.Supertraits.Books':'Supertraits::Library::$patina_witness'(),
+        'Elixir.Patina.Supertraits.Books':'supertraits::Library::$patina_witness'(),
     _witnesses_where_count_in@2_0 = {_witness_Library@1_0},
     count_in(_witnesses_where_count_in@2_0, _n@0_0).

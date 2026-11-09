@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -47,52 +47,52 @@ pub fn main() {
 
 
     {
-        ::Core::io::put_chars([["Long tuple first value: ",
+        ::core::io::put_chars([["Long tuple first value: ",
                             patina_fmt::display(long_tuple.0)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([["Long tuple second value: ",
+        ::core::io::put_chars([["Long tuple second value: ",
                             patina_fmt::display(long_tuple.1)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     let tuple_of_tuples = ((1, 2, 3), (4.0, -1), -2);
     {
-        ::Core::io::put_chars([["tuple of tuples: ",
+        ::core::io::put_chars([["tuple of tuples: ",
                             patina_fmt::debug(tuple_of_tuples)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     let pair = (1, true);
     {
-        ::Core::io::put_chars([["Pair is ", patina_fmt::debug(pair)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([["Pair is ", patina_fmt::debug(pair)]]);
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([["The reversed pair is ",
+        ::core::io::put_chars([["The reversed pair is ",
                             patina_fmt::debug(reverse(pair))]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([["One element tuple: ",
+        ::core::io::put_chars([["One element tuple: ",
                             patina_fmt::debug((5,))]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([["Just an integer: ",
+        ::core::io::put_chars([["Just an integer: ",
                             patina_fmt::debug((5))]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     let tuple = (1, "hello", 4.5, true);
     let (a, b, c, d) = tuple;
     {
-        ::Core::io::put_chars([[patina_fmt::debug(a), ", ",
+        ::core::io::put_chars([[patina_fmt::debug(a), ", ",
                             patina_fmt::debug(b), ", ", patina_fmt::debug(c), ", ",
                             patina_fmt::debug(d)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     let matrix = Matrix(1.1, 1.2, 2.1, 2.2);
     {
-        ::Core::io::put_chars([[patina_fmt::debug(matrix)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::debug(matrix)]]);
+        ::core::io::nl();
     };
 }

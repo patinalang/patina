@@ -9,7 +9,7 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'Trait01::Animal::talk'/2,
+         'trait__01::Animal::talk'/2,
          main/0]).
 
 '__info__'(functions) ->
@@ -25,8 +25,8 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Trait01::Animal::talk'(_witness_Animal@0_0,
-                        _self@1_0) ->
+'trait__01::Animal::talk'(_witness_Animal@0_0,
+                          _self@1_0) ->
     _vtable_Animal@2_0 = erlang:element(1,
                                         _witness_Animal@0_0),
     _fn_Animal_noise@3_0 = erlang:element(3,
@@ -52,12 +52,12 @@
 
 main() ->
     _witness_Animal@0_0 =
-        'Elixir.Patina.Trait01.Sheep':'Trait01::Animal::$patina_witness'(),
+        'Elixir.Patina.Trait01.Sheep':'trait__01::Animal::$patina_witness'(),
     _dolly@1_0 =
-        'Elixir.Patina.Trait01.Sheep':'Trait01::Animal::new'(_witness_Animal@0_0,
-                                                             <<"Dolly"/utf8>>),
-    'Elixir.Patina.Trait01.Sheep':'Trait01::Animal::talk'(_witness_Animal@0_0,
-                                                          _dolly@1_0),
+        'Elixir.Patina.Trait01.Sheep':'trait__01::Animal::new'(_witness_Animal@0_0,
+                                                               <<"Dolly"/utf8>>),
+    'Elixir.Patina.Trait01.Sheep':'trait__01::Animal::talk'(_witness_Animal@0_0,
+                                                            _dolly@1_0),
     'Elixir.Patina.Trait01.Sheep':shear(_dolly@1_0),
-    'Elixir.Patina.Trait01.Sheep':'Trait01::Animal::talk'(_witness_Animal@0_0,
-                                                          _dolly@1_0).
+    'Elixir.Patina.Trait01.Sheep':'trait__01::Animal::talk'(_witness_Animal@0_0,
+                                                            _dolly@1_0).

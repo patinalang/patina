@@ -17,7 +17,7 @@
 #![no_core]
 #![rustc_coherence_is_core]
 
-pub mod ProcMacro;
+pub mod proc_macro;
 
 pub extern mod erlang;
 pub extern mod io;
@@ -997,7 +997,7 @@ impl Timeout {
 }
 
 /// Imported with `#[prelude_import]`.
-pub mod Prelude {
+pub mod prelude {
     pub use crate::Option::{None, Some};
     pub use crate::{
         Copy, Fn, FnOnce, IntoIterator, Iterator, NativeEq, Option, PartialEq, PartialOrd, Timeout,

@@ -10,8 +10,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'OpaqueWitness::Describe::describe'/2,
-         'OpaqueWitness::Describe::$patina_witness'/0]).
+         'opaque_witness::Describe::describe'/2,
+         'opaque_witness::Describe::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -26,11 +26,11 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'OpaqueWitness::Describe::describe'(_witness_Describe@0_0,
-                                    _self@1_0) ->
+'opaque_witness::Describe::describe'(_witness_Describe@0_0,
+                                     _self@1_0) ->
     _self@1_0.
 
-'OpaqueWitness::Describe::$patina_witness'() ->
-    {{fun 'Elixir.Patina.OpaqueWitness.Name':'OpaqueWitness::Describe::describe'/2},
+'opaque_witness::Describe::$patina_witness'() ->
+    {{fun 'Elixir.Patina.OpaqueWitness.Name':'opaque_witness::Describe::describe'/2},
      {},
      {}}.

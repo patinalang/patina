@@ -1,11 +1,11 @@
-error[E0599]: no method named `map` found for struct `Core::ListIter<T>` in the current scope
+error[E0599]: no method named `map` found for struct `core::ListIter<T>` in the current scope
   --> tests/ui/src/error/iter_result__04.pt:8:10
    |
 LL |       let (numbers, errors): ([_], [_]) = strings
    |  _________________________________________-
 LL | |         .into_iter()
 LL | |         .map(|s| s.parse::<int>())
-   | |         -^^^ method not found in `Core::ListIter<str>`
+   | |         -^^^ method not found in `core::ListIter<str>`
    | |_________|
    |
 

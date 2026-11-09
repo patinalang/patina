@@ -171,7 +171,7 @@ pub fn binds_const_once_for_all_copies() -> int {
     plus_limit(1) + plus_limit(2) + LIMIT
 }
 
-mod Helpers {
+mod helpers {
     fn secret(x: int) -> int {
         x * 10
     }
@@ -183,5 +183,5 @@ mod Helpers {
 }
 
 pub fn exports_helpers_of_inline_fns() -> int {
-    Helpers::reveal(4)
+    helpers::reveal(4)
 }

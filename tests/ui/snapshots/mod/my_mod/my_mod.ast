@@ -1,5 +1,5 @@
-mod Inaccessible;
-pub mod Nested;
+mod inaccessible;
+pub mod nested;
 
 pub fn function() -> int { 1 }
 

@@ -6,11 +6,11 @@ never_type#0])]
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -24,10 +24,10 @@ fn some_fn()
         ! ({
 
     (unsafe {
-        (((::Core::erlang::error as
-                    fn(term, term, term) -> term)(((::Core::Panic::new as
-                        fn(str) -> Core::Panic {Core::Panic::new})(("This call never returns."
-                        as str)) as Core::Panic), (a"none" as atom),
+        (((::core::erlang::error as
+                    fn(term, term, term) -> term)(((::core::Panic::new as
+                        fn(str) -> core::Panic {core::Panic::new})(("This call never returns."
+                        as str)) as core::Panic), (a"none" as atom),
                 ([(((a"error_info" as atom),
                             (#{(a"module" as atom) =>
                                     (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
@@ -38,9 +38,9 @@ fn some_fn()
 fn main() ({
     let _a = ((some_fn as fn() -> ! {some_fn})() as !);
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("You will never see this line!" as
                                 str)] as [str])] as [[str]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as !)

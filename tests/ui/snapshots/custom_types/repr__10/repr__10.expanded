@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -43,12 +43,12 @@ pub fn main() {
 
     // [a"foo"]
     {
-        ::Core::io::put_chars([[patina_fmt::debug(records::get_field_names(point))]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::debug(records::get_field_names(point))]]);
+        ::core::io::nl();
     };
     let rect = NativeRecordStruct { foo: "bar" };
     {
-        ::Core::io::put_chars([[patina_fmt::debug(records::get_field_names(rect))]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::debug(records::get_field_names(rect))]]);
+        ::core::io::nl();
     };
 }

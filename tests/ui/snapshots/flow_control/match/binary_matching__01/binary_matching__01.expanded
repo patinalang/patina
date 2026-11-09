@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -23,11 +23,11 @@ pub fn main() {
     match payload {
         <<prefix: int(size = 16), tag: int(size = 8), rest @ ..>> =>
             {
-            ::Core::io::put_chars([["prefix = ", patina_fmt::display(prefix),
+            ::core::io::put_chars([["prefix = ", patina_fmt::display(prefix),
                                 ", tag = ", patina_fmt::display(tag), ", rest = ",
                                 patina_fmt::debug(rest)]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         }
-        _ => { ::Core::io::put_chars([["did not match"]]); ::Core::io::nl(); }
+        _ => { ::core::io::put_chars([["did not match"]]); ::core::io::nl(); }
     }
 }

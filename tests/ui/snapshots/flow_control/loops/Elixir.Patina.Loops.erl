@@ -785,14 +785,14 @@ helper_names(_limit@0_0) ->
 
 trait_helper_names(_limit@0_0) ->
     _witness_Count@1_0 =
-        'Elixir.Patina.Loops.Counter':'Loops::Count::$patina_witness<int>'(),
+        'Elixir.Patina.Loops.Counter':'loops::Count::$patina_witness<int>'(),
     _witness_Count@2_0 =
-        'Elixir.Patina.Loops.Counter':'Loops::Count::$patina_witness<str>'(),
-    'Elixir.Patina.Loops.Counter':'Loops::Count::count<int>'(_witness_Count@1_0,
+        'Elixir.Patina.Loops.Counter':'loops::Count::$patina_witness<str>'(),
+    'Elixir.Patina.Loops.Counter':'loops::Count::count<int>'(_witness_Count@1_0,
                                                              0,
                                                              _limit@0_0)
         +
-        'Elixir.Patina.Loops.Counter':'Loops::Count::count<str>'(_witness_Count@2_0,
+        'Elixir.Patina.Loops.Counter':'loops::Count::count<str>'(_witness_Count@2_0,
                                                                  <<"a"/utf8>>,
                                                                  _limit@0_0).
 

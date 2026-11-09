@@ -11,7 +11,7 @@ enum AtomVariant {
 enum InheritedAtom { Unit, NonUnit(int), }
 
 // `PhantomData` fields don't count.
-use Core::PhantomData;
+use core::PhantomData;
 
 #[repr(atom)]
 struct PhantomAtom<T>(PhantomData<T>);

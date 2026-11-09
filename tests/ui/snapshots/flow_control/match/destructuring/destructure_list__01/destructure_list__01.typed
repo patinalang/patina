@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -36,44 +36,44 @@ fn main() ({
 
             // We have to include a catch-all for match exhaustiveness.
             {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("list[0] = 0, list[1] = " as str),
                                 ((patina_fmt::display as fn(term) -> term)((second as int))
                                     as term), (", list[2] = " as str),
                                 ((patina_fmt::display as fn(term) -> term)((third as int))
                                     as term)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         [1, _, third] => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("list[0] = 1, list[2] = " as str),
                                 ((patina_fmt::display as fn(term) -> term)((third as int))
                                     as term), (" and list[1] was ignored" as str)] as [term])]
                     as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         [-1, second, ..] => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("list[0] = -1, list[1] = " as str),
                                 ((patina_fmt::display as fn(term) -> term)((second as int))
                                     as term), (" and all the other ones were ignored" as str)]
                             as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         [3, second, tail@_..] => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("list[0] = 3, list[1] = " as str),
                                 ((patina_fmt::display as fn(term) -> term)((second as int))
                                     as term), (" and the other elements were " as str),
                                 ((patina_fmt::debug as fn(term) -> term)((tail as [int])) as
                                     term)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         _ => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("no list pattern matched" as str)] as
                             [str])] as [[str]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
     } as ())
 } as ())

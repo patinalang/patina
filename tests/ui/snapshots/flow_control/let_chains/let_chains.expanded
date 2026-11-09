@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -101,16 +101,16 @@ pub fn big_else(a: int) {
 
 
         {
-            ::Core::io::put_chars([["in range ", patina_fmt::display(v)]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["in range ", patina_fmt::display(v)]]);
+            ::core::io::nl();
         };
     } else {
-        { ::Core::io::put_chars([["out of range"]]); ::Core::io::nl(); };
+        { ::core::io::put_chars([["out of range"]]); ::core::io::nl(); };
         {
-            ::Core::io::put_chars([["not between 2 and 9"]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["not between 2 and 9"]]);
+            ::core::io::nl();
         };
-        { ::Core::io::put_chars([["or missing"]]); ::Core::io::nl(); };
+        { ::core::io::put_chars([["or missing"]]); ::core::io::nl(); };
     }
 }
 pub fn ladder(a: int, b: int) -> int {

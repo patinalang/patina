@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -18,8 +18,8 @@ extern mod patina_fmt;
 // block: 1/2
 
 use ::{};
-use pkg::Deeply::Nested::my_first_function;
-use pkg::Deeply::Nested::my_second_function;
-use pkg::Deeply::Nested::AndATraitType;
+use pkg::deeply::nested::my_first_function;
+use pkg::deeply::nested::my_second_function;
+use pkg::deeply::nested::AndATraitType;
 
 fn main() ({ ((my_first_function as {type error})() as {type error}); } as ())

@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -31,19 +31,19 @@ pub fn main() {
 
     // FIXME ^ Prefix with an underscore to suppress the warning
     {
-        ::Core::io::put_chars([["An integer: ",
+        ::core::io::put_chars([["An integer: ",
                             patina_fmt::debug(copied_integer)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([["A boolean: ",
+        ::core::io::put_chars([["A boolean: ",
                             patina_fmt::debug(a_boolean)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([["Meet the unit value: ",
+        ::core::io::put_chars([["Meet the unit value: ",
                             patina_fmt::debug(unit)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     let _unused_variable = 3;
     let noisy_unused_variable = 2;

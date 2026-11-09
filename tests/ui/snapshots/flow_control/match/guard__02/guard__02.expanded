@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -25,12 +25,12 @@ pub fn main() {
             // _ => unreachable!("Should never happen."),
             // TODO ^ uncomment to fix compilation
             {
-            ::Core::io::put_chars([["Zero"]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["Zero"]]);
+            ::core::io::nl();
         }
         i if i > 0 => {
-            ::Core::io::put_chars([["Greater than zero"]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["Greater than zero"]]);
+            ::core::io::nl();
         }
     }
 }

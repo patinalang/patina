@@ -20,7 +20,7 @@ defmodule InherentTagsTest do
     assert 7 == GenVal."f<int>"(5, 2)
 
     # The bounds tuple holds the witness of `Name: Show`.
-    show_name = Name."InherentTags::Show::$patina_witness"()
+    show_name = Name."inherent_tags::Show::$patina_witness"()
     assert "a name" == GenVal.f({show_name}, Name)
   end
 end

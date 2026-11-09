@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -20,14 +20,14 @@ extern mod patina_fmt;
 pub fn function() {
 
     {
-        ::Core::io::put_chars([["called `MyMod::Nested::function()`"]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([["called `my_mod::nested::function()`"]]);
+        ::core::io::nl();
     };
 }
 #[allow(dead_code)]
 fn private_function() {
     {
-        ::Core::io::put_chars([["called `MyMod::Nested::private_function()`"]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([["called `my_mod::nested::private_function()`"]]);
+        ::core::io::nl();
     };
 }

@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -35,14 +35,14 @@ pub fn main() {
             // Match any other number.
             // Match anything else (`None` variant).
             {
-            ::Core::io::put_chars([["The Answer: ", patina_fmt::display(n),
+            ::core::io::put_chars([["The Answer: ", patina_fmt::display(n),
                                 "!"]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         }
         Some(n) => {
-            ::Core::io::put_chars([["Not interesting... ",
+            ::core::io::put_chars([["Not interesting... ",
                                 patina_fmt::display(n)]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         }
         _ => (),
     }

@@ -5,44 +5,44 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
 
-use Core::ProcMacro::*;
+use core::proc_macro::*;
 
 fn main() ({
     let _literal =
         (((Literal::int as
-                    fn(int) -> Core::ProcMacro::Literal {Core::ProcMacro::Literal::int})((1
-                    as int)) as Core::ProcMacro::Literal).0 as {type error});
+                    fn(int) -> core::proc_macro::Literal {core::proc_macro::Literal::int})((1
+                    as int)) as core::proc_macro::Literal).0 as {type error});
     let _group =
         (((Group::new as
-                    fn(Core::ProcMacro::Delimiter, Core::ProcMacro::TokenStream) -> Core::ProcMacro::Group {Core::ProcMacro::Group::new})((Delimiter::Brace
-                    as Core::ProcMacro::Delimiter),
+                    fn(core::proc_macro::Delimiter, core::proc_macro::TokenStream) -> core::proc_macro::Group {core::proc_macro::Group::new})((Delimiter::Brace
+                    as core::proc_macro::Delimiter),
                 ((TokenStream::new as
-                        fn() -> Core::ProcMacro::TokenStream {Core::ProcMacro::TokenStream::new})()
-                    as Core::ProcMacro::TokenStream)) as
-                Core::ProcMacro::Group).0 as {type error});
+                        fn() -> core::proc_macro::TokenStream {core::proc_macro::TokenStream::new})()
+                    as core::proc_macro::TokenStream)) as
+                core::proc_macro::Group).0 as {type error});
     let _ident =
         (((Ident::new as
-                    fn(str, Core::ProcMacro::Span) -> Core::ProcMacro::Ident {Core::ProcMacro::Ident::new})(("x"
+                    fn(str, core::proc_macro::Span) -> core::proc_macro::Ident {core::proc_macro::Ident::new})(("x"
                     as str),
                 ((Span::call_site as
-                        fn() -> Core::ProcMacro::Span {Core::ProcMacro::Span::call_site})()
-                    as Core::ProcMacro::Span)) as Core::ProcMacro::Ident).0 as
+                        fn() -> core::proc_macro::Span {core::proc_macro::Span::call_site})()
+                    as core::proc_macro::Span)) as core::proc_macro::Ident).0 as
             {type error});
     let _punct =
         (((Punct::new as
-                    fn(char, Core::ProcMacro::Spacing) -> Core::ProcMacro::Punct {Core::ProcMacro::Punct::new})(('+'
-                    as char), (Spacing::Alone as Core::ProcMacro::Spacing)) as
-                Core::ProcMacro::Punct).0 as {type error});
+                    fn(char, core::proc_macro::Spacing) -> core::proc_macro::Punct {core::proc_macro::Punct::new})(('+'
+                    as char), (Spacing::Alone as core::proc_macro::Spacing)) as
+                core::proc_macro::Punct).0 as {type error});
     let _kind =
-        (Core::ProcMacro::Bridge::LitKind::Integer as
-            Core::ProcMacro::Bridge::LitKind);
+        (core::proc_macro::bridge::LitKind::Integer as
+            core::proc_macro::bridge::LitKind);
 } as ())

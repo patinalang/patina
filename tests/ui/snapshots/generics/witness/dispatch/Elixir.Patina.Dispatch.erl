@@ -32,7 +32,7 @@ total_area(_witnesses_where_total_area@0_0, _t@1_0) ->
 
 main() ->
     _witness_Area@0_0 =
-        'Elixir.Patina.Dispatch.Point':'Dispatch::Area::$patina_witness'(),
+        'Elixir.Patina.Dispatch.Point':'dispatch::Area::$patina_witness'(),
     _witnesses_where_total_area@1_0 = {_witness_Area@0_0},
     _p@2_0 =
         'Elixir.Patina.Dispatch.Point':'$patina_constructor__Point'(3,

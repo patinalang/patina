@@ -10,8 +10,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'UnboundedSlot::Tr::method'/2,
-         'UnboundedSlot::Tr::$patina_witness'/0]).
+         'unbounded_slot::Tr::method'/2,
+         'unbounded_slot::Tr::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -26,8 +26,8 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'UnboundedSlot::Tr::method'(_witness_Tr@0_0,
-                            _self@1_0) ->
+'unbounded_slot::Tr::method'(_witness_Tr@0_0,
+                             _self@1_0) ->
     io:put_chars(begin
                      _element@3_0 = begin
                                         _element@2_0 = io_lib:format("~ktp",
@@ -41,7 +41,7 @@
     io:nl(),
     {}.
 
-'UnboundedSlot::Tr::$patina_witness'() ->
-    {{fun 'Elixir.Patina.UnboundedSlot.Holder':'UnboundedSlot::Tr::method'/2},
+'unbounded_slot::Tr::$patina_witness'() ->
+    {{fun 'Elixir.Patina.UnboundedSlot.Holder':'unbounded_slot::Tr::method'/2},
      {},
      {}}.

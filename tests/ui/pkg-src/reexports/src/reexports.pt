@@ -2,7 +2,7 @@
 // from where they are defined. Neither reexport names an implementation
 // function: a bang macro is exported under the function's name, a derive under
 // its trait's.
-pub use Macros::{Hello, identity};
+pub use macros::{Hello, identity};
 
 // Reexports a type from another package.
-pub use Wrappers::Wrapper;
+pub use wrappers::Wrapper;

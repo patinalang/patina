@@ -152,7 +152,7 @@
                    {remote,
                        {16,5},
                        {atom,{16,5},'Elixir.Patina.Core.Term'},
-                       {atom,{16,5},'Core::PartialEq::$patina_witness'}},
+                       {atom,{16,5},'core::PartialEq::$patina_witness'}},
                    []}},
            {match,
                {16,5},

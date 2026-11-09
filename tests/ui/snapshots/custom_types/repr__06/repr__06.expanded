@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -33,15 +33,15 @@ pub fn main() {
 
     // (a"struct_http_style", 200, "hi")
     {
-        ::Core::io::put_chars([[patina_fmt::debug(SnakeCaseEnum::UnitVariant
+        ::core::io::put_chars([[patina_fmt::debug(SnakeCaseEnum::UnitVariant
                                     as term)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([[patina_fmt::debug(SnakeCaseEnum::StructHTTPStyle {
+        ::core::io::put_chars([[patina_fmt::debug(SnakeCaseEnum::StructHTTPStyle {
                                         code: 200,
                                         body: "hi",
                                     } as term)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }

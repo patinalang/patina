@@ -11,8 +11,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'TraitArgumentPatterns::Contains<int, _>::contains'/4,
-         'TraitArgumentPatterns::Contains<int, _>::$patina_witness'/1]).
+         'trait_argument_patterns::Contains<int, _>::contains'/4,
+         'trait_argument_patterns::Contains<int, _>::$patina_witness'/1]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -27,9 +27,9 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'TraitArgumentPatterns::Contains<int, _>::contains'(_witness_Contains@0_0,
-                                                    _self@1_0, _a@2_0,
-                                                    _value@3_0) ->
+'trait_argument_patterns::Contains<int, _>::contains'(_witness_Contains@0_0,
+                                                      _self@1_0, _a@2_0,
+                                                      _value@3_0) ->
     _where_Contains@4_0 = erlang:element(3,
                                          _witness_Contains@0_0),
     _witness_Marker@5_0 = erlang:element(1,
@@ -60,7 +60,7 @@
     _fn_Marker_value@7_0(_witness_Marker@5_0, _value@3_0) >
         0.
 
-'TraitArgumentPatterns::Contains<int, _>::$patina_witness'(_witnesses_where_Contains@0_0) ->
-    {{fun 'Elixir.Patina.TraitArgumentPatterns.BoundContainer':'TraitArgumentPatterns::Contains<int, _>::contains'/4},
+'trait_argument_patterns::Contains<int, _>::$patina_witness'(_witnesses_where_Contains@0_0) ->
+    {{fun 'Elixir.Patina.TraitArgumentPatterns.BoundContainer':'trait_argument_patterns::Contains<int, _>::contains'/4},
      {},
      _witnesses_where_Contains@0_0}.

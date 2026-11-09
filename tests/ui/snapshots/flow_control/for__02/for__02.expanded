@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -21,15 +21,15 @@ pub fn main() {
     // `n` will take the values: 1, 2, ..., 100 in each iteration
     for n in 1..=100 {
         if n % 15 == 0 {
-            { ::Core::io::put_chars([["fizzbuzz"]]); ::Core::io::nl(); };
+            { ::core::io::put_chars([["fizzbuzz"]]); ::core::io::nl(); };
         } else if n % 3 == 0 {
-            { ::Core::io::put_chars([["fizz"]]); ::Core::io::nl(); };
+            { ::core::io::put_chars([["fizz"]]); ::core::io::nl(); };
         } else if n % 5 == 0 {
-            { ::Core::io::put_chars([["buzz"]]); ::Core::io::nl(); };
+            { ::core::io::put_chars([["buzz"]]); ::core::io::nl(); };
         } else {
             {
-                ::Core::io::put_chars([[patina_fmt::display(n)]]);
-                ::Core::io::nl();
+                ::core::io::put_chars([[patina_fmt::display(n)]]);
+                ::core::io::nl();
             };
         }
     }

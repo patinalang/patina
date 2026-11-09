@@ -9,8 +9,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'Inlines::Trait::method'/2,
-         'Inlines::Trait::$patina_witness'/0]).
+         'inlines::Trait::method'/2,
+         'inlines::Trait::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,11 +25,11 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Inlines::Trait::method'(_witness_Trait@0_0,
+'inlines::Trait::method'(_witness_Trait@0_0,
                          _self@1_0) ->
     _self@1_0.
 
-'Inlines::Trait::$patina_witness'() ->
-    {{fun 'Elixir.Patina.ForeignInline.LocalImpl':'Inlines::Trait::method'/2},
+'inlines::Trait::$patina_witness'() ->
+    {{fun 'Elixir.Patina.ForeignInline.LocalImpl':'inlines::Trait::method'/2},
      {},
      {}}.

@@ -27,13 +27,13 @@ derived_value() -> 42.
 
 items() ->
     _witness_Describe@0_0 =
-        'Elixir.Patina.MacrosAndItems.Plain':'MacrosAndItems::Describe::$patina_witness'(),
+        'Elixir.Patina.MacrosAndItems.Plain':'macros_and_items::Describe::$patina_witness'(),
     _n@1_0 = 5,
     io:put_chars(begin
                      _element@5_0 = begin
                                         _element@2_0 = io_lib:format("~ktp",
-                                                                     ['Elixir.Patina.MacrosAndItems.Plain':'MacrosAndItems::Describe::describe'(_witness_Describe@0_0,
-                                                                                                                                                _n@1_0)]),
+                                                                     ['Elixir.Patina.MacrosAndItems.Plain':'macros_and_items::Describe::describe'(_witness_Describe@0_0,
+                                                                                                                                                  _n@1_0)]),
                                         _element@3_0 = io_lib:format("~ktp",
                                                                      ['Elixir.Patina.MacrosAndItems':plain()]),
                                         _element@4_0 = io_lib:format("~ktp",

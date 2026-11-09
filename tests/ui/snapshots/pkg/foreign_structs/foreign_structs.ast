@@ -1,7 +1,7 @@
 #![allow(private_interfaces)]
 
-use Core::PhantomData;
-use Wrappers::{Nested, PhantomRecord, PhantomTuple, Wrapper};
+use core::PhantomData;
+use wrappers::{Nested, PhantomRecord, PhantomTuple, Wrapper};
 
 // `PhantomData` fields of structs from another package are left out too.
 

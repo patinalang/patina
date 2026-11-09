@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -23,30 +23,30 @@ pub fn main() {
             // like in `match`, literals can also be used
 
             {
-            ::Core::io::put_chars([["received integer ",
+            ::core::io::put_chars([["received integer ",
                                 patina_fmt::debug(n)]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         }
         a"ping" => {
-            ::Core::io::put_chars([["received ping"]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["received ping"]]);
+            ::core::io::nl();
         }
         atom(a) => {
-            ::Core::io::put_chars([["received atom ", patina_fmt::debug(a)]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["received atom ", patina_fmt::debug(a)]]);
+            ::core::io::nl();
         }
     } after Timeout::from_seconds(5)
         {
         {
-            ::Core::io::put_chars([["timeout (5 seconds with no matching message)"]]);
-            ::Core::io::nl();
+            ::core::io::put_chars([["timeout (5 seconds with no matching message)"]]);
+            ::core::io::nl();
         }
     }
     receive {
         val => {
-            ::Core::io::put_chars([["received any message ",
+            ::core::io::put_chars([["received any message ",
                                 patina_fmt::debug(val)]]);
-            ::Core::io::nl();
+            ::core::io::nl();
         }
     }
 }

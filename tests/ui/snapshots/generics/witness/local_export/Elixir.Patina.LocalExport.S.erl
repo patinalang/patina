@@ -10,8 +10,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'LocalExport::Priv::p'/2,
-         'LocalExport::Priv::$patina_witness'/0,
+         'local_export::Priv::p'/2,
+         'local_export::Priv::$patina_witness'/0,
          q/1]).
 
 '__info__'(functions) ->
@@ -27,7 +27,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'LocalExport::Priv::p'(_witness_Priv@0_0, _self@1_0) ->
+'local_export::Priv::p'(_witness_Priv@0_0, _self@1_0) ->
     io:put_chars(begin
                      _element@3_0 = begin
                                         _element@2_0 = io_lib:format("~ktp",
@@ -41,12 +41,12 @@
     io:nl(),
     {}.
 
-'LocalExport::Priv::$patina_witness'() ->
-    {{fun 'Elixir.Patina.LocalExport.S':'LocalExport::Priv::p'/2},
+'local_export::Priv::$patina_witness'() ->
+    {{fun 'Elixir.Patina.LocalExport.S':'local_export::Priv::p'/2},
      {},
      {}}.
 
 q(_self@0_0) ->
     _witness_Priv@1_0 =
-        'LocalExport::Priv::$patina_witness'(),
-    'LocalExport::Priv::p'(_witness_Priv@1_0, _self@0_0).
+        'local_export::Priv::$patina_witness'(),
+    'local_export::Priv::p'(_witness_Priv@1_0, _self@0_0).

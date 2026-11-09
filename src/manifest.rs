@@ -77,7 +77,7 @@ impl TryFrom<String> for DependencyName {
     fn try_from(name: String) -> Result<Self, Self::Error> {
         let name = PackageName::try_from(name).map_err(|err| err.to_string())?;
         if name.is_core() {
-            return Err("Core cannot be named as an explicit dependency".into());
+            return Err("core cannot be named as an explicit dependency".into());
         }
         Ok(Self(name))
     }
@@ -159,7 +159,7 @@ impl Manifest {
     }
 
     pub(crate) fn source_path(&self) -> PathBuf {
-        self.dir.join("src").join(format!("{}.pt", self.package.name.snake_case()))
+        self.dir.join("src").join(format!("{}.pt", self.package.name))
     }
 
     pub(crate) fn dependency_names(&self) -> Vec<PackageName> {
@@ -173,13 +173,13 @@ mod tests {
 
     fn manifest(dependencies: &str) -> Result<Manifest, String> {
         let text = format!(
-            "[package]\nname = \"Greeter\"\nversion = \"0.1.0\"\n\n[dependencies]\n{dependencies}"
+            "[package]\nname = \"greeter\"\nversion = \"0.1.0\"\n\n[dependencies]\n{dependencies}"
         );
         Manifest::parse(&text, &package_dir()).map_err(|err| err.message().to_owned())
     }
 
     fn dependency(value: &str) -> Result<DependencyManifest, String> {
-        let manifest = manifest(&format!("MyJSONDep = {value}\n"))?;
+        let manifest = manifest(&format!("my_json_dep = {value}\n"))?;
         Ok(manifest.dependencies.into_values().next().expect("the dependency"))
     }
 
@@ -241,7 +241,7 @@ mod tests {
 
     #[test]
     fn unknown_manifest_key_is_rejected() {
-        let text = "[package]\nname = \"Greeter\"\nversion = \"0.1.0\"\n\n[dependency]\n";
+        let text = "[package]\nname = \"greeter\"\nversion = \"0.1.0\"\n\n[dependency]\n";
         let err = Manifest::parse(text, &package_dir()).unwrap_err();
         assert!(err.message().contains("unknown field `dependency`"), "got: {}", err.message());
     }
@@ -278,17 +278,17 @@ mod tests {
     #[test]
     fn dependencies_keep_their_order() {
         let manifest =
-            manifest("Zeta = \"~> 0.1\"\nAlpha = { path = \"../alpha\" }\nMid = \"~> 0.1\"\n");
+            manifest("zeta = \"~> 0.1\"\nalpha = { path = \"../alpha\" }\nmid = \"~> 0.1\"\n");
         let names = manifest.unwrap().dependency_names();
         let names: Vec<_> = names.iter().map(PackageName::to_string).collect();
-        assert_eq!(names, ["Zeta", "Alpha", "Mid"]);
+        assert_eq!(names, ["zeta", "alpha", "mid"]);
     }
 
     #[test]
     fn dependency_path_is_resolved_against_the_package_dir() {
         let absolute = std::env::temp_dir().join("elsewhere");
         let text = format!(
-            "Relative = {{ path = \"../lib\" }}\nAbsolute = {{ path = '{}' }}\n",
+            "relative = {{ path = \"../lib\" }}\nabsolute = {{ path = '{}' }}\n",
             absolute.display()
         );
         let sources: Vec<_> =
@@ -318,8 +318,8 @@ mod tests {
         );
         assert_eq!(name_error("\"\" = \"~> 0.1\"\n"), "`` isn't a valid package name");
         assert_eq!(
-            name_error("Core = \"~> 0.1\"\n"),
-            "Core cannot be named as an explicit dependency"
+            name_error("core = \"~> 0.1\"\n"),
+            "core cannot be named as an explicit dependency"
         );
     }
 }

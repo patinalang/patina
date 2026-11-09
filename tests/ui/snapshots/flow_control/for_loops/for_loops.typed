@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -21,18 +21,18 @@ fn sum_list(xs: [int])
     ({
         let _t =
             (match ((into_iter as
-                        fn([int]) -> <[int] as Core::IntoIterator>::IntoIter {<[int] as Core::IntoIterator>::into_iter})((xs
-                        as [int])) as Core::ListIter<int>) {
+                        fn([int]) -> <[int] as core::IntoIterator>::IntoIter {<[int] as core::IntoIterator>::into_iter})((xs
+                        as [int])) as core::ListIter<int>) {
                 mut iter =>
                     (loop {
                         (match ((next as
-                                    fn(Core::ListIter<int>) -> Core::Option<(<Core::ListIter<int> as Core::Iterator>::Item, Core::ListIter<int>)> {<Core::ListIter<int> as Core::Iterator>::next})((iter
-                                    as Core::ListIter<int>)) as
-                                Core::Option<(int, Core::ListIter<int>)>) {
+                                    fn(core::ListIter<int>) -> core::Option<(<core::ListIter<int> as core::Iterator>::Item, core::ListIter<int>)> {<core::ListIter<int> as core::Iterator>::next})((iter
+                                    as core::ListIter<int>)) as
+                                core::Option<(int, core::ListIter<int>)>) {
                             None {} => (break as !),
                             Some {  0: (x, next) } => {
-                                (iter = (next as Core::ListIter<int>) as
-                                    Core::ListIter<int>);
+                                (iter = (next as core::ListIter<int>) as
+                                    core::ListIter<int>);
                                 ({ ((total as int) += (x as int) as int); } as ())
                             }
                         } as ())
@@ -50,19 +50,19 @@ fn sum_twice(xs: [int])
     ({
         let _t =
             (match ((into_iter as
-                        fn(Core::ListIter<int>) -> <Core::ListIter<int> as Core::IntoIterator>::IntoIter {<Core::ListIter<int> as Core::IntoIterator>::into_iter})(((xs
-                            as [int]).iter() as Core::ListIter<int>)) as
-                    Core::ListIter<int>) {
+                        fn(core::ListIter<int>) -> <core::ListIter<int> as core::IntoIterator>::IntoIter {<core::ListIter<int> as core::IntoIterator>::into_iter})(((xs
+                            as [int]).iter() as core::ListIter<int>)) as
+                    core::ListIter<int>) {
                 mut iter =>
                     (loop {
                         (match ((next as
-                                    fn(Core::ListIter<int>) -> Core::Option<(<Core::ListIter<int> as Core::Iterator>::Item, Core::ListIter<int>)> {<Core::ListIter<int> as Core::Iterator>::next})((iter
-                                    as Core::ListIter<int>)) as
-                                Core::Option<(int, Core::ListIter<int>)>) {
+                                    fn(core::ListIter<int>) -> core::Option<(<core::ListIter<int> as core::Iterator>::Item, core::ListIter<int>)> {<core::ListIter<int> as core::Iterator>::next})((iter
+                                    as core::ListIter<int>)) as
+                                core::Option<(int, core::ListIter<int>)>) {
                             None {} => (break as !),
                             Some {  0: (x, next) } => {
-                                (iter = (next as Core::ListIter<int>) as
-                                    Core::ListIter<int>);
+                                (iter = (next as core::ListIter<int>) as
+                                    core::ListIter<int>);
                                 ({ ((total as int) += (x as int) as int); } as ())
                             }
                         } as ())
@@ -74,18 +74,18 @@ fn sum_twice(xs: [int])
     ({
         let _t =
             (match ((into_iter as
-                        fn([int]) -> <[int] as Core::IntoIterator>::IntoIter {<[int] as Core::IntoIterator>::into_iter})((xs
-                        as [int])) as Core::ListIter<int>) {
+                        fn([int]) -> <[int] as core::IntoIterator>::IntoIter {<[int] as core::IntoIterator>::into_iter})((xs
+                        as [int])) as core::ListIter<int>) {
                 mut iter =>
                     (loop {
                         (match ((next as
-                                    fn(Core::ListIter<int>) -> Core::Option<(<Core::ListIter<int> as Core::Iterator>::Item, Core::ListIter<int>)> {<Core::ListIter<int> as Core::Iterator>::next})((iter
-                                    as Core::ListIter<int>)) as
-                                Core::Option<(int, Core::ListIter<int>)>) {
+                                    fn(core::ListIter<int>) -> core::Option<(<core::ListIter<int> as core::Iterator>::Item, core::ListIter<int>)> {<core::ListIter<int> as core::Iterator>::next})((iter
+                                    as core::ListIter<int>)) as
+                                core::Option<(int, core::ListIter<int>)>) {
                             None {} => (break as !),
                             Some {  0: (x, next) } => {
-                                (iter = (next as Core::ListIter<int>) as
-                                    Core::ListIter<int>);
+                                (iter = (next as core::ListIter<int>) as
+                                    core::ListIter<int>);
                                 ({
                                     ((total as int) += ((x as int) * (100 as int) as int) as
                                         int);
@@ -106,18 +106,18 @@ fn sum_range(start: int, end: int)
     ({
         let _t =
             (match ((into_iter as
-                        fn(Core::Range<int>) -> <Core::Range<int> as Core::IntoIterator>::IntoIter {<Core::Range<int> as Core::IntoIterator>::into_iter})((Range {
+                        fn(core::Range<int>) -> <core::Range<int> as core::IntoIterator>::IntoIter {<core::Range<int> as core::IntoIterator>::into_iter})((Range {
                         start: (start as int), end: (end as int) } as
-                        Core::Range<int>)) as Core::Range<int>) {
+                        core::Range<int>)) as core::Range<int>) {
                 mut iter =>
                     (loop {
                         (match ((next as
-                                    fn(Core::Range<int>) -> Core::Option<(<Core::Range<int> as Core::Iterator>::Item, Core::Range<int>)> {<Core::Range<int> as Core::Iterator>::next})((iter
-                                    as Core::Range<int>)) as
-                                Core::Option<(int, Core::Range<int>)>) {
+                                    fn(core::Range<int>) -> core::Option<(<core::Range<int> as core::Iterator>::Item, core::Range<int>)> {<core::Range<int> as core::Iterator>::next})((iter
+                                    as core::Range<int>)) as
+                                core::Option<(int, core::Range<int>)>) {
                             None {} => (break as !),
                             Some {  0: (n, next) } => {
-                                (iter = (next as Core::Range<int>) as Core::Range<int>);
+                                (iter = (next as core::Range<int>) as core::Range<int>);
                                 ({ ((total as int) += (n as int) as int); } as ())
                             }
                         } as ())
@@ -135,21 +135,21 @@ fn sum_range_inclusive(start: int, end: int)
     ({
         let _t =
             (match ((into_iter as
-                        fn(Core::RangeInclusive<int>) -> <Core::RangeInclusive<int> as Core::IntoIterator>::IntoIter {<Core::RangeInclusive<int> as Core::IntoIterator>::into_iter})(((range_inclusive_new
+                        fn(core::RangeInclusive<int>) -> <core::RangeInclusive<int> as core::IntoIterator>::IntoIter {<core::RangeInclusive<int> as core::IntoIterator>::into_iter})(((range_inclusive_new
                             as
-                            fn(int, int) -> Core::RangeInclusive<int> {Core::RangeInclusive::<int>::new})((start
-                            as int), (end as int)) as Core::RangeInclusive<int>)) as
-                    Core::RangeInclusive<int>) {
+                            fn(int, int) -> core::RangeInclusive<int> {core::RangeInclusive::<int>::new})((start
+                            as int), (end as int)) as core::RangeInclusive<int>)) as
+                    core::RangeInclusive<int>) {
                 mut iter =>
                     (loop {
                         (match ((next as
-                                    fn(Core::RangeInclusive<int>) -> Core::Option<(<Core::RangeInclusive<int> as Core::Iterator>::Item, Core::RangeInclusive<int>)> {<Core::RangeInclusive<int> as Core::Iterator>::next})((iter
-                                    as Core::RangeInclusive<int>)) as
-                                Core::Option<(int, Core::RangeInclusive<int>)>) {
+                                    fn(core::RangeInclusive<int>) -> core::Option<(<core::RangeInclusive<int> as core::Iterator>::Item, core::RangeInclusive<int>)> {<core::RangeInclusive<int> as core::Iterator>::next})((iter
+                                    as core::RangeInclusive<int>)) as
+                                core::Option<(int, core::RangeInclusive<int>)>) {
                             None {} => (break as !),
                             Some {  0: (n, next) } => {
-                                (iter = (next as Core::RangeInclusive<int>) as
-                                    Core::RangeInclusive<int>);
+                                (iter = (next as core::RangeInclusive<int>) as
+                                    core::RangeInclusive<int>);
                                 ({ ((total as int) += (n as int) as int); } as ())
                             }
                         } as ())
@@ -167,18 +167,18 @@ fn weighted_map_sum(map: #{int => int})
     ({
         let _t =
             (match ((into_iter as
-                        fn(#{int => int}) -> <#{int => int} as Core::IntoIterator>::IntoIter {<#{int => int} as Core::IntoIterator>::into_iter})((map
-                        as #{int => int})) as Core::MapIter<int, int>) {
+                        fn(#{int => int}) -> <#{int => int} as core::IntoIterator>::IntoIter {<#{int => int} as core::IntoIterator>::into_iter})((map
+                        as #{int => int})) as core::MapIter<int, int>) {
                 mut iter =>
                     (loop {
                         (match ((next as
-                                    fn(Core::MapIter<int, int>) -> Core::Option<(<Core::MapIter<int, int> as Core::Iterator>::Item, Core::MapIter<int, int>)> {<Core::MapIter<int, int> as Core::Iterator>::next})((iter
-                                    as Core::MapIter<int, int>)) as
-                                Core::Option<((int, int), Core::MapIter<int, int>)>) {
+                                    fn(core::MapIter<int, int>) -> core::Option<(<core::MapIter<int, int> as core::Iterator>::Item, core::MapIter<int, int>)> {<core::MapIter<int, int> as core::Iterator>::next})((iter
+                                    as core::MapIter<int, int>)) as
+                                core::Option<((int, int), core::MapIter<int, int>)>) {
                             None {} => (break as !),
                             Some {  0: ((key, value), next) } => {
-                                (iter = (next as Core::MapIter<int, int>) as
-                                    Core::MapIter<int, int>);
+                                (iter = (next as core::MapIter<int, int>) as
+                                    core::MapIter<int, int>);
                                 ({
                                     ((total as int) += ((key as int) * (value as int) as int) as
                                         int);
@@ -199,19 +199,19 @@ fn map_entry_count(map: #{str => int})
     ({
         let _t =
             (match ((into_iter as
-                        fn(Core::MapIter<str, int>) -> <Core::MapIter<str, int> as Core::IntoIterator>::IntoIter {<Core::MapIter<str, int> as Core::IntoIterator>::into_iter})(((map
-                            as #{str => int}).iter() as Core::MapIter<str, int>)) as
-                    Core::MapIter<str, int>) {
+                        fn(core::MapIter<str, int>) -> <core::MapIter<str, int> as core::IntoIterator>::IntoIter {<core::MapIter<str, int> as core::IntoIterator>::into_iter})(((map
+                            as #{str => int}).iter() as core::MapIter<str, int>)) as
+                    core::MapIter<str, int>) {
                 mut iter =>
                     (loop {
                         (match ((next as
-                                    fn(Core::MapIter<str, int>) -> Core::Option<(<Core::MapIter<str, int> as Core::Iterator>::Item, Core::MapIter<str, int>)> {<Core::MapIter<str, int> as Core::Iterator>::next})((iter
-                                    as Core::MapIter<str, int>)) as
-                                Core::Option<((str, int), Core::MapIter<str, int>)>) {
+                                    fn(core::MapIter<str, int>) -> core::Option<(<core::MapIter<str, int> as core::Iterator>::Item, core::MapIter<str, int>)> {<core::MapIter<str, int> as core::Iterator>::next})((iter
+                                    as core::MapIter<str, int>)) as
+                                core::Option<((str, int), core::MapIter<str, int>)>) {
                             None {} => (break as !),
                             Some {  0: (_, next) } => {
-                                (iter = (next as Core::MapIter<str, int>) as
-                                    Core::MapIter<str, int>);
+                                (iter = (next as core::MapIter<str, int>) as
+                                    core::MapIter<str, int>);
                                 ({ ((count as int) += (1 as int) as int); } as ())
                             }
                         } as ())
@@ -228,19 +228,19 @@ fn count<I>(items: I) -> int where
     ({
         let _t =
             (match ((into_iter as
-                        fn(I) -> <I as Core::IntoIterator>::IntoIter {<I as Core::IntoIterator>::into_iter})((items
-                        as I)) as <I as Core::IntoIterator>::IntoIter) {
+                        fn(I) -> <I as core::IntoIterator>::IntoIter {<I as core::IntoIterator>::into_iter})((items
+                        as I)) as <I as core::IntoIterator>::IntoIter) {
                 mut iter =>
                     (loop {
                         (match ((next as
-                                    fn(<I as Core::IntoIterator>::IntoIter) -> Core::Option<(<<I as Core::IntoIterator>::IntoIter as Core::Iterator>::Item, <I as Core::IntoIterator>::IntoIter)> {<<I as Core::IntoIterator>::IntoIter as Core::Iterator>::next})((iter
-                                    as <I as Core::IntoIterator>::IntoIter)) as
-                                Core::Option<(<I as Core::IntoIterator>::Item, <I as Core::IntoIterator>::IntoIter)>)
+                                    fn(<I as core::IntoIterator>::IntoIter) -> core::Option<(<<I as core::IntoIterator>::IntoIter as core::Iterator>::Item, <I as core::IntoIterator>::IntoIter)> {<<I as core::IntoIterator>::IntoIter as core::Iterator>::next})((iter
+                                    as <I as core::IntoIterator>::IntoIter)) as
+                                core::Option<(<I as core::IntoIterator>::Item, <I as core::IntoIterator>::IntoIter)>)
                             {
                             None {} => (break as !),
                             Some {  0: (_, next) } => {
-                                (iter = (next as <I as Core::IntoIterator>::IntoIter) as
-                                    <I as Core::IntoIterator>::IntoIter);
+                                (iter = (next as <I as core::IntoIterator>::IntoIter) as
+                                    <I as core::IntoIterator>::IntoIter);
                                 ({ ((n as int) += (1 as int) as int); } as ())
                             }
                         } as ())
@@ -271,18 +271,18 @@ fn total<I>(items: I) -> int where I: IntoIterator<Item =
     ({
         let _t =
             (match ((into_iter as
-                        fn(I) -> <I as Core::IntoIterator>::IntoIter {<I as Core::IntoIterator>::into_iter})((items
-                        as I)) as <I as Core::IntoIterator>::IntoIter) {
+                        fn(I) -> <I as core::IntoIterator>::IntoIter {<I as core::IntoIterator>::into_iter})((items
+                        as I)) as <I as core::IntoIterator>::IntoIter) {
                 mut iter =>
                     (loop {
                         (match ((next as
-                                    fn(<I as Core::IntoIterator>::IntoIter) -> Core::Option<(<<I as Core::IntoIterator>::IntoIter as Core::Iterator>::Item, <I as Core::IntoIterator>::IntoIter)> {<<I as Core::IntoIterator>::IntoIter as Core::Iterator>::next})((iter
-                                    as <I as Core::IntoIterator>::IntoIter)) as
-                                Core::Option<(int, <I as Core::IntoIterator>::IntoIter)>) {
+                                    fn(<I as core::IntoIterator>::IntoIter) -> core::Option<(<<I as core::IntoIterator>::IntoIter as core::Iterator>::Item, <I as core::IntoIterator>::IntoIter)> {<<I as core::IntoIterator>::IntoIter as core::Iterator>::next})((iter
+                                    as <I as core::IntoIterator>::IntoIter)) as
+                                core::Option<(int, <I as core::IntoIterator>::IntoIter)>) {
                             None {} => (break as !),
                             Some {  0: (item, next) } => {
-                                (iter = (next as <I as Core::IntoIterator>::IntoIter) as
-                                    <I as Core::IntoIterator>::IntoIter);
+                                (iter = (next as <I as core::IntoIterator>::IntoIter) as
+                                    <I as core::IntoIterator>::IntoIter);
                                 ({ ((total as int) += (item as int) as int); } as ())
                             }
                         } as ())
@@ -297,8 +297,8 @@ fn total_range(end: int)
     ->
         int ({
     ((total as
-            fn(Core::Range<int>) -> int {total::<Core::Range<int>>})((Range {
-            start: (0 as int), end: (end as int) } as Core::Range<int>)) as
+            fn(core::Range<int>) -> int {total::<core::Range<int>>})((Range {
+            start: (0 as int), end: (end as int) } as core::Range<int>)) as
         int)
 } as int)
 
@@ -315,18 +315,18 @@ fn skip_odd_until(xs: [int], limit: int)
     ({
         let _t =
             (match ((into_iter as
-                        fn([int]) -> <[int] as Core::IntoIterator>::IntoIter {<[int] as Core::IntoIterator>::into_iter})((xs
-                        as [int])) as Core::ListIter<int>) {
+                        fn([int]) -> <[int] as core::IntoIterator>::IntoIter {<[int] as core::IntoIterator>::into_iter})((xs
+                        as [int])) as core::ListIter<int>) {
                 mut iter =>
                     (loop {
                         (match ((next as
-                                    fn(Core::ListIter<int>) -> Core::Option<(<Core::ListIter<int> as Core::Iterator>::Item, Core::ListIter<int>)> {<Core::ListIter<int> as Core::Iterator>::next})((iter
-                                    as Core::ListIter<int>)) as
-                                Core::Option<(int, Core::ListIter<int>)>) {
+                                    fn(core::ListIter<int>) -> core::Option<(<core::ListIter<int> as core::Iterator>::Item, core::ListIter<int>)> {<core::ListIter<int> as core::Iterator>::next})((iter
+                                    as core::ListIter<int>)) as
+                                core::Option<(int, core::ListIter<int>)>) {
                             None {} => (break as !),
                             Some {  0: (x, next) } => {
-                                (iter = (next as Core::ListIter<int>) as
-                                    Core::ListIter<int>);
+                                (iter = (next as core::ListIter<int>) as
+                                    core::ListIter<int>);
                                 ({
                                     (if (((x as int) % (2 as int) as int) == (1 as int) as bool)
                                         {
@@ -352,18 +352,18 @@ fn find_index(xs: [int], target: int)
     ({
         let _t =
             (match ((into_iter as
-                        fn([int]) -> <[int] as Core::IntoIterator>::IntoIter {<[int] as Core::IntoIterator>::into_iter})((xs
-                        as [int])) as Core::ListIter<int>) {
+                        fn([int]) -> <[int] as core::IntoIterator>::IntoIter {<[int] as core::IntoIterator>::into_iter})((xs
+                        as [int])) as core::ListIter<int>) {
                 mut iter =>
                     (loop {
                         (match ((next as
-                                    fn(Core::ListIter<int>) -> Core::Option<(<Core::ListIter<int> as Core::Iterator>::Item, Core::ListIter<int>)> {<Core::ListIter<int> as Core::Iterator>::next})((iter
-                                    as Core::ListIter<int>)) as
-                                Core::Option<(int, Core::ListIter<int>)>) {
+                                    fn(core::ListIter<int>) -> core::Option<(<core::ListIter<int> as core::Iterator>::Item, core::ListIter<int>)> {<core::ListIter<int> as core::Iterator>::next})((iter
+                                    as core::ListIter<int>)) as
+                                core::Option<(int, core::ListIter<int>)>) {
                             None {} => (break as !),
                             Some {  0: (x, next) } => {
-                                (iter = (next as Core::ListIter<int>) as
-                                    Core::ListIter<int>);
+                                (iter = (next as core::ListIter<int>) as
+                                    core::ListIter<int>);
                                 ({
                                     (if ((x as int) == (target as int) as bool) {
                                         (return (index as int) as !);
@@ -387,34 +387,34 @@ fn first_pair_with_sum(xs: [int], sum: int)
     ({
         let _t =
             (match ((into_iter as
-                        fn([int]) -> <[int] as Core::IntoIterator>::IntoIter {<[int] as Core::IntoIterator>::into_iter})((xs
-                        as [int])) as Core::ListIter<int>) {
+                        fn([int]) -> <[int] as core::IntoIterator>::IntoIter {<[int] as core::IntoIterator>::into_iter})((xs
+                        as [int])) as core::ListIter<int>) {
                 mut iter =>
                     ('outer: loop {
                         (match ((next as
-                                    fn(Core::ListIter<int>) -> Core::Option<(<Core::ListIter<int> as Core::Iterator>::Item, Core::ListIter<int>)> {<Core::ListIter<int> as Core::Iterator>::next})((iter
-                                    as Core::ListIter<int>)) as
-                                Core::Option<(int, Core::ListIter<int>)>) {
+                                    fn(core::ListIter<int>) -> core::Option<(<core::ListIter<int> as core::Iterator>::Item, core::ListIter<int>)> {<core::ListIter<int> as core::Iterator>::next})((iter
+                                    as core::ListIter<int>)) as
+                                core::Option<(int, core::ListIter<int>)>) {
                             None {} => (break as !),
                             Some {  0: (a, next) } => {
-                                (iter = (next as Core::ListIter<int>) as
-                                    Core::ListIter<int>);
+                                (iter = (next as core::ListIter<int>) as
+                                    core::ListIter<int>);
                                 ({
                                     ({
                                         let _t =
                                             (match ((into_iter as
-                                                        fn([int]) -> <[int] as Core::IntoIterator>::IntoIter {<[int] as Core::IntoIterator>::into_iter})((xs
-                                                        as [int])) as Core::ListIter<int>) {
+                                                        fn([int]) -> <[int] as core::IntoIterator>::IntoIter {<[int] as core::IntoIterator>::into_iter})((xs
+                                                        as [int])) as core::ListIter<int>) {
                                                 mut iter =>
                                                     (loop {
                                                         (match ((next as
-                                                                    fn(Core::ListIter<int>) -> Core::Option<(<Core::ListIter<int> as Core::Iterator>::Item, Core::ListIter<int>)> {<Core::ListIter<int> as Core::Iterator>::next})((iter
-                                                                    as Core::ListIter<int>)) as
-                                                                Core::Option<(int, Core::ListIter<int>)>) {
+                                                                    fn(core::ListIter<int>) -> core::Option<(<core::ListIter<int> as core::Iterator>::Item, core::ListIter<int>)> {<core::ListIter<int> as core::Iterator>::next})((iter
+                                                                    as core::ListIter<int>)) as
+                                                                core::Option<(int, core::ListIter<int>)>) {
                                                             None {} => (break as !),
                                                             Some {  0: (b, next) } => {
-                                                                (iter = (next as Core::ListIter<int>) as
-                                                                    Core::ListIter<int>);
+                                                                (iter = (next as core::ListIter<int>) as
+                                                                    core::ListIter<int>);
                                                                 ({
                                                                     (if ((b as int) <= (a as int) as bool) { (continue as !); }
                                                                         as ())
@@ -448,34 +448,34 @@ fn count_skipping_rows(rows: [[int]])
     ({
         let _t =
             (match ((into_iter as
-                        fn([[int]]) -> <[[int]] as Core::IntoIterator>::IntoIter {<[[int]] as Core::IntoIterator>::into_iter})((rows
-                        as [[int]])) as Core::ListIter<[int]>) {
+                        fn([[int]]) -> <[[int]] as core::IntoIterator>::IntoIter {<[[int]] as core::IntoIterator>::into_iter})((rows
+                        as [[int]])) as core::ListIter<[int]>) {
                 mut iter =>
                     ('rows: loop {
                         (match ((next as
-                                    fn(Core::ListIter<[int]>) -> Core::Option<(<Core::ListIter<[int]> as Core::Iterator>::Item, Core::ListIter<[int]>)> {<Core::ListIter<[int]> as Core::Iterator>::next})((iter
-                                    as Core::ListIter<[int]>)) as
-                                Core::Option<([int], Core::ListIter<[int]>)>) {
+                                    fn(core::ListIter<[int]>) -> core::Option<(<core::ListIter<[int]> as core::Iterator>::Item, core::ListIter<[int]>)> {<core::ListIter<[int]> as core::Iterator>::next})((iter
+                                    as core::ListIter<[int]>)) as
+                                core::Option<([int], core::ListIter<[int]>)>) {
                             None {} => (break as !),
                             Some {  0: (row, next) } => {
-                                (iter = (next as Core::ListIter<[int]>) as
-                                    Core::ListIter<[int]>);
+                                (iter = (next as core::ListIter<[int]>) as
+                                    core::ListIter<[int]>);
                                 ({
                                     ({
                                         let _t =
                                             (match ((into_iter as
-                                                        fn([int]) -> <[int] as Core::IntoIterator>::IntoIter {<[int] as Core::IntoIterator>::into_iter})((row
-                                                        as [int])) as Core::ListIter<int>) {
+                                                        fn([int]) -> <[int] as core::IntoIterator>::IntoIter {<[int] as core::IntoIterator>::into_iter})((row
+                                                        as [int])) as core::ListIter<int>) {
                                                 mut iter =>
                                                     (loop {
                                                         (match ((next as
-                                                                    fn(Core::ListIter<int>) -> Core::Option<(<Core::ListIter<int> as Core::Iterator>::Item, Core::ListIter<int>)> {<Core::ListIter<int> as Core::Iterator>::next})((iter
-                                                                    as Core::ListIter<int>)) as
-                                                                Core::Option<(int, Core::ListIter<int>)>) {
+                                                                    fn(core::ListIter<int>) -> core::Option<(<core::ListIter<int> as core::Iterator>::Item, core::ListIter<int>)> {<core::ListIter<int> as core::Iterator>::next})((iter
+                                                                    as core::ListIter<int>)) as
+                                                                core::Option<(int, core::ListIter<int>)>) {
                                                             None {} => (break as !),
                                                             Some {  0: (x, next) } => {
-                                                                (iter = (next as Core::ListIter<int>) as
-                                                                    Core::ListIter<int>);
+                                                                (iter = (next as core::ListIter<int>) as
+                                                                    core::ListIter<int>);
                                                                 ({
                                                                     (if ((x as int) < (0 as int) as bool) {
                                                                         (continue 'rows as !);
@@ -513,18 +513,18 @@ impl Iterator for Countdown {
             Option<(int,
             Countdown)> ({
         (if (((self as Countdown).from as int) == (0 as int) as bool) {
-            (None as Core::Option<(int, Countdown)>)
+            (None as core::Option<(int, Countdown)>)
         } else {
             ((Some as
-                    fn((int, Countdown)) -> Core::Option<(int, Countdown)> {Core::Option::<(int, Countdown)>::Some})(((((self
+                    fn((int, Countdown)) -> core::Option<(int, Countdown)> {core::Option::<(int, Countdown)>::Some})(((((self
                             as Countdown).from as int),
                     (Countdown {
                         from:
                             (((self as Countdown).from as int) - (1 as int) as int) } as
                         Countdown)) as (int, Countdown))) as
-                Core::Option<(int, Countdown)>)
-        } as Core::Option<(int, Countdown)>)
-    } as Core::Option<(int, Countdown)>)
+                core::Option<(int, Countdown)>)
+        } as core::Option<(int, Countdown)>)
+    } as core::Option<(int, Countdown)>)
 }
 
 fn countdown(from: int)
@@ -534,13 +534,13 @@ fn countdown(from: int)
     ({
         let _t =
             (match ((into_iter as
-                        fn(Countdown) -> <Countdown as Core::IntoIterator>::IntoIter {<Countdown as Core::IntoIterator>::into_iter})((Countdown {
+                        fn(Countdown) -> <Countdown as core::IntoIterator>::IntoIter {<Countdown as core::IntoIterator>::into_iter})((Countdown {
                         from: (from as int) } as Countdown)) as Countdown) {
                 mut iter =>
                     (loop {
                         (match ((next as
-                                    fn(Countdown) -> Core::Option<(<Countdown as Core::Iterator>::Item, Countdown)> {<Countdown as Core::Iterator>::next})((iter
-                                    as Countdown)) as Core::Option<(int, Countdown)>) {
+                                    fn(Countdown) -> core::Option<(<Countdown as core::Iterator>::Item, Countdown)> {<Countdown as core::Iterator>::next})((iter
+                                    as Countdown)) as core::Option<(int, Countdown)>) {
                             None {} => (break as !),
                             Some {  0: (n, next) } => {
                                 (iter = (next as Countdown) as Countdown);
@@ -569,13 +569,13 @@ impl IntoIterator for Bag {
     type
     IntoIter
     =
-    Core::ListIter<str>;
+    core::ListIter<str>;
 
     fn into_iter(self)
         ->
-            Core::ListIter<str> ({
-        (((self as Bag).items as [str]).iter() as Core::ListIter<str>)
-    } as Core::ListIter<str>)
+            core::ListIter<str> ({
+        (((self as Bag).items as [str]).iter() as core::ListIter<str>)
+    } as core::ListIter<str>)
 }
 
 fn bag_count(items: [str])

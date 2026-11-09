@@ -1,6 +1,6 @@
 [package]
-name = "Macros"
+name = "macros"
 version = "0.1.0"
 
 [dependencies]
-Wrappers = "~> 0.1"
+wrappers = "~> 0.1"

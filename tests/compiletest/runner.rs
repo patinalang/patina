@@ -2,7 +2,6 @@ use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
-use convert_case::{Case, Casing};
 use libtest_mimic::Failed;
 
 use crate::{common, snapshot};
@@ -146,7 +145,7 @@ impl Runner {
                 String::from_utf8_lossy(&output.stdout),
                 String::from_utf8_lossy(&output.stderr),
             );
-            deps.push(package.to_case(Case::Pascal));
+            deps.push(package.to_string());
         }
         deps
     }
@@ -172,6 +171,8 @@ impl Runner {
             .args(dumps.iter().flat_map(|dump| ["--dump", dump]))
             .args(emits.iter().flat_map(|emit| ["--emit", emit]))
             .args(externs.iter().flat_map(|name| ["--extern", name]))
+            // Package names come from test file names, like `expression__01`.
+            .args(["-A", "non_snake_case"])
             .arg("--out-dir")
             .arg(out_dir)
             .arg(pt_path)

@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -21,17 +21,17 @@ fn main() ({
     let strings = ([("tofu" as str), ("93" as str), ("18" as str)] as [str]);
     let numbers: [_] =
         ((((strings as [str]).into_iter() as
-                    Core::ListIter<str>).filter_map((|s|
+                    core::ListIter<str>).filter_map((|s|
                     (((s as {type error}).parse::<int>() as {type error}).ok()
                         as {type error}) as
                     {closure@tests/ui/src/error/iter_result__02.pt:8:21: 8:24}))
                 as {type error}).collect() as {type error});
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("Results: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)((numbers as {type error})) as term)] as
                         [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

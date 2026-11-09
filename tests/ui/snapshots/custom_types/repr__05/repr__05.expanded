@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -49,29 +49,29 @@ pub fn main() {
     // You can set a custom tag by specifying it with `#[repr(tag = "...")]`.
     // (a"custom_tag", 42)
     {
-        ::Core::io::put_chars([[patina_fmt::debug(Unit as term)]]);
-        ::Core::io::nl();
+        ::core::io::put_chars([[patina_fmt::debug(Unit as term)]]);
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([[patina_fmt::debug(UnitWithAtomOverride as
+        ::core::io::put_chars([[patina_fmt::debug(UnitWithAtomOverride as
                                     term)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([[patina_fmt::debug(TaggedEnum::TupleStyle("hello")
+        ::core::io::put_chars([[patina_fmt::debug(TaggedEnum::TupleStyle("hello")
                                     as term)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([[patina_fmt::debug(TaggedEnum::StructStyle {
+        ::core::io::put_chars([[patina_fmt::debug(TaggedEnum::StructStyle {
                                         x: 1,
                                         y: 2,
                                     } as term)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
     {
-        ::Core::io::put_chars([[patina_fmt::debug(TaggedEnum::WithCustomTag(42)
+        ::core::io::put_chars([[patina_fmt::debug(TaggedEnum::WithCustomTag(42)
                                     as term)]]);
-        ::Core::io::nl();
+        ::core::io::nl();
     };
 }

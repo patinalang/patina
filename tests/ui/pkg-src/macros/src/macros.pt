@@ -1,5 +1,5 @@
-use Core::ProcMacro::*;
-use Wrappers::Wrapper;
+use core::proc_macro::*;
+use wrappers::Wrapper;
 
 // A bang macro that returns its input unchanged.
 #[proc_macro]
@@ -11,7 +11,7 @@ pub fn identity(input: TokenStream) -> TokenStream {
 // and reexports from nested modules.
 pub use identity as identity_alias;
 
-pub mod Nested {
+pub mod nested {
     pub use super::identity as nested_identity;
 }
 

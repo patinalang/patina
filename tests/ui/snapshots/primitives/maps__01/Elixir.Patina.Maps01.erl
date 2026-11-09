@@ -38,9 +38,9 @@ call(_number@0_0) ->
 
 main() ->
     _witness_IntoIterator@0_0 =
-        'Elixir.Patina.Core.Map':'Core::IntoIterator::$patina_witness'(),
+        'Elixir.Patina.Core.Map':'core::IntoIterator::$patina_witness'(),
     _witness_Iterator@1_0 =
-        'Elixir.Patina.Core.MapIter':'Core::Iterator::$patina_witness'(),
+        'Elixir.Patina.Core.MapIter':'core::Iterator::$patina_witness'(),
     _contacts@2_0 = #{<<"Daniel"/utf8>> =>
                           <<"798-1364"/utf8>>,
                       <<"Ashley"/utf8>> => <<"645-7689"/utf8>>,
@@ -98,7 +98,7 @@ main() ->
     _contacts@2_3 = _contacts@2_2#{<<"Laura"/utf8>> =>
                                        <<"132-8372"/utf8>>},
     case
-        'Elixir.Patina.Core.Map':'Core::IntoIterator::into_iter'(_witness_IntoIterator@0_0,
+        'Elixir.Patina.Core.Map':'core::IntoIterator::into_iter'(_witness_IntoIterator@0_0,
                                                                  _contacts@2_3)
         of
         _iter@11_0 ->
@@ -108,7 +108,7 @@ main() ->
                                          _iter@11_2;
                                      _ ->
                                          case
-                                             'Elixir.Patina.Core.MapIter':'Core::Iterator::next'(_witness_Iterator@1_0,
+                                             'Elixir.Patina.Core.MapIter':'core::Iterator::next'(_witness_Iterator@1_0,
                                                                                                  _iter@11_0)
                                              of
                                              nil ->

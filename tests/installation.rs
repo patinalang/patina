@@ -21,11 +21,11 @@ fn run(cmd: &mut Command) -> Output {
 fn reserved_package_name_needs_bootstrap() {
     let temp = tempfile::tempdir().expect("create temp dir");
 
-    let output = run(compile_trivial(temp.path()).args(["--pkg-name", "Std"]));
-    assert_failure(&output, "package name `Std` is reserved");
+    let output = run(compile_trivial(temp.path()).args(["--pkg-name", "std"]));
+    assert_failure(&output, "package name `std` is reserved");
 
     let output =
-        run(compile_trivial(temp.path()).args(["--pkg-name", "Std"]).env("PATINA_BOOTSTRAP", "1"));
+        run(compile_trivial(temp.path()).args(["--pkg-name", "std"]).env("PATINA_BOOTSTRAP", "1"));
     assert_success(&output);
 }
 
@@ -42,7 +42,7 @@ fn install_without_core_needs_a_named_core() {
     let root = install_without_core(temp.path());
 
     let output = run(compile_trivial(temp.path()).env("PATINA_ROOT", &root));
-    assert_failure(&output, "can't find crate for `Core`");
+    assert_failure(&output, "can't find crate for `core`");
 
     let output = run(compile_trivial(temp.path())
         .env("PATINA_ROOT", &root)
@@ -57,9 +57,9 @@ fn named_core_hides_installed_core_from_dependencies() {
     session.build("provider.pt", "pub fn f() {}\n", &[]);
     let other_core = build_stand_in_core(session.path());
 
-    let args = ["--extern", &other_core, "--extern", "Provider=libProvider.rmeta"];
-    let output = session.try_build("consumer.pt", "pub fn g() { Provider::f() }\n", &args);
-    assert_failure(&output, "can't find crate for `Core` which `Provider` depends on");
+    let args = ["--extern", &other_core, "--extern", "provider=libprovider.rmeta"];
+    let output = session.try_build("consumer.pt", "pub fn g() { provider::f() }\n", &args);
+    assert_failure(&output, "can't find crate for `core` which `provider` depends on");
 }
 
 /// The VM logs this failure as a crash report too, which mustn't garble the reply.
@@ -86,7 +86,7 @@ fn non_ascii_socket_path_reaches_the_client() {
 
 /// `--extern` naming the install's Core.
 fn installed_core() -> String {
-    format!("Core={}", common::install_root().join("patina_core/ebin/libCore.rmeta").display())
+    format!("core={}", common::install_root().join("patina_core/ebin/libcore.rmeta").display())
 }
 
 /// Copies the install into `dir`, without Core, and returns its root.
@@ -102,12 +102,12 @@ fn install_without_core(dir: &Path) -> PathBuf {
 
 /// Builds a Core with nothing in it but an empty prelude, in `dir`, and returns its `--extern`.
 fn build_stand_in_core(dir: &Path) -> String {
-    let source = "#![feature(no_core)]\n#![no_std]\n#![no_core]\npub mod Prelude {}\n";
+    let source = "#![feature(no_core)]\n#![no_std]\n#![no_core]\npub mod prelude {}\n";
     std::fs::write(dir.join("core.pt"), source).expect("write source");
     let output = run(common::patina_command()
         .current_dir(dir)
-        .args(["compile", "--pkg-name", "Core", "--emit", "meta", "core.pt"])
+        .args(["compile", "--pkg-name", "core", "--emit", "meta", "core.pt"])
         .env("PATINA_BOOTSTRAP", "1"));
     assert_success(&output);
-    format!("Core={}", dir.join("libCore.rmeta").display())
+    format!("core={}", dir.join("libcore.rmeta").display())
 }

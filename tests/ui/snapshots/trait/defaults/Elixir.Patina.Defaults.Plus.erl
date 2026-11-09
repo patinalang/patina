@@ -9,8 +9,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'Defaults::Numbered::$patina_const::C'/1,
-         'Defaults::Numbered::$patina_witness'/1]).
+         'defaults::Numbered::$patina_const::C'/1,
+         'defaults::Numbered::$patina_witness'/1]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,7 +25,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Defaults::Numbered::$patina_const::C'(_witness_Numbered@0_0) ->
+'defaults::Numbered::$patina_const::C'(_witness_Numbered@0_0) ->
     _where_Numbered@1_0 = erlang:element(3,
                                          _witness_Numbered@0_0),
     _witness_Numbered@2_0 = erlang:element(1,
@@ -38,9 +38,9 @@
         _const_fn_Numbered_C@4_0(_witness_Numbered@2_0),
     _const_Numbered_C@5_0 + 10.
 
-'Defaults::Numbered::$patina_witness'(_witnesses_where_Numbered@0_0) ->
-    {{fun 'Elixir.Patina.Defaults.Plus':'Defaults::Numbered::$patina_const::C'/1,
-      fun 'Elixir.Patina.Defaults':'Defaults::Numbered::$patina_const::D'/1,
-      fun 'Elixir.Patina.Defaults':'Defaults::Numbered::consts'/2},
+'defaults::Numbered::$patina_witness'(_witnesses_where_Numbered@0_0) ->
+    {{fun 'Elixir.Patina.Defaults.Plus':'defaults::Numbered::$patina_const::C'/1,
+      fun 'Elixir.Patina.Defaults':'defaults::Numbered::$patina_const::D'/1,
+      fun 'Elixir.Patina.Defaults':'defaults::Numbered::consts'/2},
      {},
      _witnesses_where_Numbered@0_0}.

@@ -9,8 +9,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'MapsPatterns::Keyed::$patina_const::KEY'/1,
-         'MapsPatterns::Keyed::$patina_witness'/0]).
+         'maps_patterns::Keyed::$patina_const::KEY'/1,
+         'maps_patterns::Keyed::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,10 +25,10 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'MapsPatterns::Keyed::$patina_const::KEY'(_witness_Keyed@0_0) ->
+'maps_patterns::Keyed::$patina_const::KEY'(_witness_Keyed@0_0) ->
     <<"name"/utf8>>.
 
-'MapsPatterns::Keyed::$patina_witness'() ->
-    {{fun 'Elixir.Patina.MapsPatterns.NameKey':'MapsPatterns::Keyed::$patina_const::KEY'/1},
+'maps_patterns::Keyed::$patina_witness'() ->
+    {{fun 'Elixir.Patina.MapsPatterns.NameKey':'maps_patterns::Keyed::$patina_const::KEY'/1},
      {},
      {}}.

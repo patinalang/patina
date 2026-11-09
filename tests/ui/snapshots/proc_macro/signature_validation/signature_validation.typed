@@ -5,34 +5,34 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
 
-use Core::ProcMacro::TokenStream;
+use core::proc_macro::TokenStream;
 
 #[attr = ProcMacro]
 fn wrong_argument_count()
     ->
         TokenStream ({
     ((TokenStream::new as
-            fn() -> Core::ProcMacro::TokenStream {Core::ProcMacro::TokenStream::new})()
-        as Core::ProcMacro::TokenStream)
-} as Core::ProcMacro::TokenStream)
+            fn() -> core::proc_macro::TokenStream {core::proc_macro::TokenStream::new})()
+        as core::proc_macro::TokenStream)
+} as core::proc_macro::TokenStream)
 
 #[attr = ProcMacro]
 fn wrong_argument_type(_input: bool)
     ->
         TokenStream ({
     ((TokenStream::new as
-            fn() -> Core::ProcMacro::TokenStream {Core::ProcMacro::TokenStream::new})()
-        as Core::ProcMacro::TokenStream)
-} as Core::ProcMacro::TokenStream)
+            fn() -> core::proc_macro::TokenStream {core::proc_macro::TokenStream::new})()
+        as core::proc_macro::TokenStream)
+} as core::proc_macro::TokenStream)
 
 #[attr = ProcMacro]
 fn wrong_result_type(_input: TokenStream) -> bool ({ (true as bool) } as bool)
@@ -42,6 +42,6 @@ fn wrong_attribute_argument_count(_input: TokenStream)
     ->
         TokenStream ({
     ((TokenStream::new as
-            fn() -> Core::ProcMacro::TokenStream {Core::ProcMacro::TokenStream::new})()
-        as Core::ProcMacro::TokenStream)
-} as Core::ProcMacro::TokenStream)
+            fn() -> core::proc_macro::TokenStream {core::proc_macro::TokenStream::new})()
+        as core::proc_macro::TokenStream)
+} as core::proc_macro::TokenStream)

@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -28,16 +28,16 @@ fn get_count_item(s: str)
     let (it, second) = ((it as {type error}).next() as {type error});
 
     let (Some(count_str), Some(item)) =
-        (((first as Core::Option<{type error}>),
-            (second as Core::Option<str>)) as
-            (Core::Option<{type error}>, Core::Option<str>)) else
+        (((first as core::Option<{type error}>),
+            (second as core::Option<str>)) as
+            (core::Option<{type error}>, core::Option<str>)) else
         {
 
         (unsafe {
-            (((::Core::erlang::error as
-                        fn(term, term, term) -> term)(((::Core::Panic::new as
-                            fn(str) -> Core::Panic {Core::Panic::new})(("Can\'t segment count item pair: \'{s}\'"
-                            as str)) as Core::Panic), (a"none" as atom),
+            (((::core::erlang::error as
+                        fn(term, term, term) -> term)(((::core::Panic::new as
+                            fn(str) -> core::Panic {core::Panic::new})(("Can\'t segment count item pair: \'{s}\'"
+                            as str)) as core::Panic), (a"none" as atom),
                     ([(((a"error_info" as atom),
                                 (#{(a"module" as atom) =>
                                         (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
@@ -50,10 +50,10 @@ fn get_count_item(s: str)
             {type error}) else
         {
         (unsafe {
-            (((::Core::erlang::error as
-                        fn(term, term, term) -> term)(((::Core::Panic::new as
-                            fn(str) -> Core::Panic {Core::Panic::new})(("Can\'t parse integer: \'{count_str}\'"
-                            as str)) as Core::Panic), (a"none" as atom),
+            (((::core::erlang::error as
+                        fn(term, term, term) -> term)(((::core::Panic::new as
+                            fn(str) -> core::Panic {core::Panic::new})(("Can\'t parse integer: \'{count_str}\'"
+                            as str)) as core::Panic), (a"none" as atom),
                     ([(((a"error_info" as atom),
                                 (#{(a"module" as atom) =>
                                         (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
@@ -73,10 +73,10 @@ fn main() ({
             (if (!(((left_val as (int, str)) == (right_val as (int, str)) as
                         bool)) as bool) {
                 (unsafe {
-                    (((::Core::erlang::error as
-                                fn(term, term, term) -> term)(((::Core::Panic::new as
-                                    fn(str) -> Core::Panic {Core::Panic::new})((unsafe {
-                                    (((::Core::unicode::characters_to_binary as
+                    (((::core::erlang::error as
+                                fn(term, term, term) -> term)(((::core::Panic::new as
+                                    fn(str) -> core::Panic {core::Panic::new})((unsafe {
+                                    (((::core::unicode::characters_to_binary as
                                                 fn(term) -> term)(([("assertion `left == right` failed" as
                                                         str),
                                                     ((patina_fmt::display as fn(term) -> term)(("" as str)) as
@@ -87,7 +87,7 @@ fn main() ({
                                                     ((patina_fmt::debug as
                                                             fn(term) -> term)((right_val as (int, str))) as term)] as
                                                 [term])) as term).cast_unchecked::<str>() as str)
-                                } as str)) as Core::Panic), (a"none" as atom),
+                                } as str)) as core::Panic), (a"none" as atom),
                             ([(((a"error_info" as atom),
                                         (#{(a"module" as atom) =>
                                                 (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))

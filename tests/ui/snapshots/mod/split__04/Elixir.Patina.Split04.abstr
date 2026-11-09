@@ -93,7 +93,7 @@
                                  {6,5},
                                  {string,
                                      {6,5},
-                                     "called `MyMod::Inaccessible::public_function()`"},
+                                     "called `my_mod::inaccessible::public_function()`"},
                                  default,
                                  [utf8]}]},
                         {nil,{6,5}}},

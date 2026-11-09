@@ -9,9 +9,9 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'value<DisambiguatedNames::sibling_blocks::Foo>'/1,
-         'value<DisambiguatedNames::sibling_blocks::Foo#1>'/1,
-         'value<DisambiguatedNames::{impl#0}::local_type::Local>'/1]).
+         'value<disambiguated_names::sibling_blocks::Foo>'/1,
+         'value<disambiguated_names::sibling_blocks::Foo#1>'/1,
+         'value<disambiguated_names::{impl#0}::local_type::Local>'/1]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -26,11 +26,11 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'value<DisambiguatedNames::sibling_blocks::Foo>'(_self@0_0) ->
+'value<disambiguated_names::sibling_blocks::Foo>'(_self@0_0) ->
     1.
 
-'value<DisambiguatedNames::sibling_blocks::Foo#1>'(_self@0_0) ->
+'value<disambiguated_names::sibling_blocks::Foo#1>'(_self@0_0) ->
     2.
 
-'value<DisambiguatedNames::{impl#0}::local_type::Local>'(_self@0_0) ->
+'value<disambiguated_names::{impl#0}::local_type::Local>'(_self@0_0) ->
     3.

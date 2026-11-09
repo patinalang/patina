@@ -11,9 +11,9 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'NestedAssocBound::Outer::$patina_type::Inner'/1,
-         'NestedAssocBound::Outer::inner'/2,
-         'NestedAssocBound::Outer::$patina_witness'/0]).
+         'nested_assoc_bound::Outer::$patina_type::Inner'/1,
+         'nested_assoc_bound::Outer::inner'/2,
+         'nested_assoc_bound::Outer::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -28,24 +28,24 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'NestedAssocBound::Outer::$patina_type::Inner'(_witness_Outer@0_0) ->
+'nested_assoc_bound::Outer::$patina_type::Inner'(_witness_Outer@0_0) ->
     _witness_HasItem@1_0 =
-        {{fun 'Elixir.Patina.NestedAssocBound.Leaf':'NestedAssocBound::HasItem::$patina_type::Item'/1,
-          fun 'Elixir.Patina.NestedAssocBound.Leaf':'NestedAssocBound::HasItem::item'/2},
+        {{fun 'Elixir.Patina.NestedAssocBound.Leaf':'nested_assoc_bound::HasItem::$patina_type::Item'/1,
+          fun 'Elixir.Patina.NestedAssocBound.Leaf':'nested_assoc_bound::HasItem::item'/2},
          {},
          {}},
     _witness_Label@2_0 =
-        {{fun 'Elixir.Patina.NestedAssocBound.Tag':'NestedAssocBound::Label::label'/2},
+        {{fun 'Elixir.Patina.NestedAssocBound.Tag':'nested_assoc_bound::Label::label'/2},
          {},
          {}},
     {_witness_HasItem@1_0, _witness_Label@2_0}.
 
-'NestedAssocBound::Outer::inner'(_witness_Outer@0_0,
-                                 _self@1_0) ->
+'nested_assoc_bound::Outer::inner'(_witness_Outer@0_0,
+                                   _self@1_0) ->
     'Elixir.Patina.NestedAssocBound.Leaf'.
 
-'NestedAssocBound::Outer::$patina_witness'() ->
-    {{fun 'Elixir.Patina.NestedAssocBound.Root':'NestedAssocBound::Outer::$patina_type::Inner'/1,
-      fun 'Elixir.Patina.NestedAssocBound.Root':'NestedAssocBound::Outer::inner'/2},
+'nested_assoc_bound::Outer::$patina_witness'() ->
+    {{fun 'Elixir.Patina.NestedAssocBound.Root':'nested_assoc_bound::Outer::$patina_type::Inner'/1,
+      fun 'Elixir.Patina.NestedAssocBound.Root':'nested_assoc_bound::Outer::inner'/2},
      {},
      {}}.

@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -25,7 +25,7 @@ fn main() ({
     // Indexing starts at 0.
     // `.get(n)` can be used to traverse to and return the nth element of the list
     // as an `Option`.
-    (match ((xs as [int]).get((0 as int)) as Core::Option<int>) {
+    (match ((xs as [int]).get((0 as int)) as core::Option<int>) {
         Some(xval) =>
             // `len` returns the count of elements in the list.
             // Internally, it does that by traversing the list and counting all elements.
@@ -39,74 +39,74 @@ fn main() ({
 
             // Lists can also be destructured using a similar syntax
             {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("elem 0: " as str),
                                 ((patina_fmt::display as fn(term) -> term)((xval as int)) as
                                     term)] as [term])] as [[term]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
         None => {
-            ((::Core::io::put_chars as
+            ((::core::io::put_chars as
                     fn(term) -> term)(([([("the list is empty!" as str)] as
                             [str])] as [[str]])) as term);
-            ((::Core::io::nl as fn() -> term)() as term);
+            ((::core::io::nl as fn() -> term)() as term);
         }
     } as ())
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("Number of elements in array: " as
                                 str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((xs as [int]).len() as int)) as term)] as
                         [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("First element of the list: " as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((xs as [int]).head() as
-                                    Core::Option<int>)) as term)] as [term])] as [[term]])) as
+                                    core::Option<int>)) as term)] as [term])] as [[term]])) as
             term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("Rest of the list: " as str),
                             ((patina_fmt::debug as
                                     fn(term) -> term)(((xs as [int]).tail() as [int])) as term)]
                         as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     let more_xs =
         ([(-(1 as int) as int), (0 as int), ..(xs as [int])] as [int]);
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("more_xs.tail().tail() is equal to xs: "
                                 as str),
                             ((patina_fmt::display as
                                     fn(term) -> term)(((((more_xs as [int]).tail() as
                                             [int]).tail() as [int]) == (xs as [int]) as bool)) as term)]
                         as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     let [first, second, third, rest@_..] = (more_xs as [int]) else
         { (return as !) };
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("Sum of first three elements is " as
                                 str),
                             ((patina_fmt::display as
                                     fn(term) -> term)((((first as int) + (second as int) as int)
                                     + (third as int) as int)) as term)] as [term])] as
                 [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("...and the rest: " as str),
                             ((patina_fmt::debug as fn(term) -> term)((rest as [int])) as
                                 term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

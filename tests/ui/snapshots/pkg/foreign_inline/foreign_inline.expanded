@@ -5,16 +5,16 @@
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[prelude_import]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
 
-use Inlines::{InlineImpl, Trait, calls_private_fn, generic_calls_method};
+use inlines::{InlineImpl, Trait, calls_private_fn, generic_calls_method};
 
 pub struct LocalImpl(pub int);
 

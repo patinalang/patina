@@ -6,7 +6,7 @@ defmodule Split04Test do
 
   test "inaccessible split file function runs" do
     assert """
-           called `MyMod::Inaccessible::public_function()`
+           called `my_mod::inaccessible::public_function()`
            """ == capture_io(fn -> Patina.Split04.public_function() end)
   end
 end

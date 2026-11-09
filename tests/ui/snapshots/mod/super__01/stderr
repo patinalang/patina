@@ -1,7 +1,7 @@
 error[E0433]: cannot find module or crate `pkg` in this scope
   --> tests/ui/src/mod/super__01.pt:44:17
    |
-LL |             use pkg::Cool::function as root_function;
+LL |             use pkg::cool::function as root_function;
    |                 ^^^ use of unresolved module or unlinked crate `pkg`
    |
    = help: you might be missing a crate named `pkg`

@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -36,7 +36,7 @@ macro_rules! test {
 
 fn main() ({
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)(("1 + 1 == 2" as str)) as term),
                             (" and " as str),
@@ -48,10 +48,10 @@ fn main() ({
                                         (2 as int) as bool) &&
                                     (((2 as int) * (2 as int) as int) == (4 as int) as bool) as
                                     bool)) as term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([((patina_fmt::debug as
                                     fn(term) -> term)(("true" as str)) as term),
                             (" or " as str),
@@ -60,6 +60,6 @@ fn main() ({
                             ((patina_fmt::debug as
                                     fn(term) -> term)(((true as bool) || (false as bool) as
                                     bool)) as term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

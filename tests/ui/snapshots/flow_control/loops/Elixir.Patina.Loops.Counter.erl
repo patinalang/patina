@@ -9,10 +9,10 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'Loops::Count::count<int>'/3,
-         'Loops::Count::$patina_witness<int>'/0,
-         'Loops::Count::count<str>'/3,
-         'Loops::Count::$patina_witness<str>'/0]).
+         'loops::Count::count<int>'/3,
+         'loops::Count::$patina_witness<int>'/0,
+         'loops::Count::count<str>'/3,
+         'loops::Count::$patina_witness<str>'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -27,7 +27,7 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'Loops::Count::count<int>'(_witness_Count@0_0,
+'loops::Count::count<int>'(_witness_Count@0_0,
                            _self@1_0, _limit@2_0) ->
     _n@3_0 = 0,
     _n@3_1 = fun _$patina_loop(_n@3_0) ->
@@ -52,12 +52,12 @@
              end(_n@3_0),
     _n@3_1.
 
-'Loops::Count::$patina_witness<int>'() ->
-    {{fun 'Elixir.Patina.Loops.Counter':'Loops::Count::count<int>'/3},
+'loops::Count::$patina_witness<int>'() ->
+    {{fun 'Elixir.Patina.Loops.Counter':'loops::Count::count<int>'/3},
      {},
      {}}.
 
-'Loops::Count::count<str>'(_witness_Count@0_0,
+'loops::Count::count<str>'(_witness_Count@0_0,
                            _self@1_0, _limit@2_0) ->
     _n@3_0 = 0,
     _n@3_1 = fun _$patina_loop(_n@3_0) ->
@@ -82,7 +82,7 @@
              end(_n@3_0),
     _n@3_1.
 
-'Loops::Count::$patina_witness<str>'() ->
-    {{fun 'Elixir.Patina.Loops.Counter':'Loops::Count::count<str>'/3},
+'loops::Count::$patina_witness<str>'() ->
+    {{fun 'Elixir.Patina.Loops.Counter':'loops::Count::count<str>'/3},
      {},
      {}}.

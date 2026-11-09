@@ -11,8 +11,8 @@
 
 -export(['__info__'/1,
          '$patina_constructor__Pair'/2,
-         'LoopWitness::Score::score'/2,
-         'LoopWitness::Score::$patina_witness'/1]).
+         'loop_witness::Score::score'/2,
+         'loop_witness::Score::$patina_witness'/1]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -32,8 +32,8 @@
 '$patina_constructor__Pair'(_a@0_0, _b@1_0) ->
     #'Pair'{a = _a@0_0, b = _b@1_0}.
 
-'LoopWitness::Score::score'(_witness_Score@0_0,
-                            _self@1_0) ->
+'loop_witness::Score::score'(_witness_Score@0_0,
+                             _self@1_0) ->
     _where_Score@2_0 = erlang:element(3,
                                       _witness_Score@0_0),
     _witness_Score@3_0 = erlang:element(1,
@@ -61,8 +61,8 @@
                  end(_total@6_0),
     _total@6_1.
 
-'LoopWitness::Score::$patina_witness'(_witnesses_where_Score@0_0) ->
-    {{fun 'Elixir.Patina.LoopWitness.Pair':'LoopWitness::Score::score'/2,
-      fun 'Elixir.Patina.LoopWitness':'LoopWitness::Score::loop_in_default'/3},
+'loop_witness::Score::$patina_witness'(_witnesses_where_Score@0_0) ->
+    {{fun 'Elixir.Patina.LoopWitness.Pair':'loop_witness::Score::score'/2,
+      fun 'Elixir.Patina.LoopWitness':'loop_witness::Score::loop_in_default'/3},
      {},
      _witnesses_where_Score@0_0}.

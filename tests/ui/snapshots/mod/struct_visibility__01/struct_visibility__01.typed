@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -17,7 +17,7 @@ extern mod patina_fmt;
 // source: patina-by-example/src/mod/struct_visibility.md
 // block: 1/1
 
-mod My {
+mod my {
     // On BEAM side, struct `RenamedStruct` and its functions will live
     // in their own BEAM module `Elixir.Patina.MyPkg.My.RenamedStruct.beam` .
     // However, this is configurable so you can name your BEAM module anything.
@@ -39,21 +39,21 @@ mod My {
         fn new(contents: T)
             ->
                 ClosedBox<T> ({
-            (ClosedBox { contents: (contents as T) } as My::ClosedBox<T>)
-        } as My::ClosedBox<T>)
+            (ClosedBox { contents: (contents as T) } as my::ClosedBox<T>)
+        } as my::ClosedBox<T>)
     }
 }
 
 fn main() ({
     // Public structs with public fields can be constructed as usual
     let open_box =
-        (My::OpenBox { contents: ("public information" as str) } as
-            My::OpenBox<str>);
+        (my::OpenBox { contents: ("public information" as str) } as
+            my::OpenBox<str>);
     // and their fields can be normally accessed.
 
     // Public structs with private fields cannot be constructed using field names.
     // Error! `ClosedBox` has private fields
-    //let closed_box = My::ClosedBox { contents: "classified information" };
+    //let closed_box = my::ClosedBox { contents: "classified information" };
     // TODO ^ Try uncommenting this line
 
     // However, structs with private fields can be created using
@@ -64,15 +64,15 @@ fn main() ({
     //println!("The closed box contains: {}", _closed_box.contents);
     // TODO ^ Try uncommenting this line
     ({
-        ((::Core::io::put_chars as
+        ((::core::io::put_chars as
                 fn(term) -> term)(([([("The open box contains: " as str),
                             ((patina_fmt::display as
-                                    fn(term) -> term)(((open_box as My::OpenBox<str>).contents
+                                    fn(term) -> term)(((open_box as my::OpenBox<str>).contents
                                     as str)) as term)] as [term])] as [[term]])) as term);
-        ((::Core::io::nl as fn() -> term)() as term);
+        ((::core::io::nl as fn() -> term)() as term);
     } as ());
     let _closed_box =
-        ((My::ClosedBox::new as
-                fn(str) -> My::ClosedBox<str> {My::ClosedBox::<str>::new})(("classified information"
-                as str)) as My::ClosedBox<str>);
+        ((my::ClosedBox::new as
+                fn(str) -> my::ClosedBox<str> {my::ClosedBox::<str>::new})(("classified information"
+                as str)) as my::ClosedBox<str>);
 } as ())
