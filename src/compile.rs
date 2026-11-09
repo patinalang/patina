@@ -252,7 +252,7 @@ pub(crate) fn compile(
                 });
                 let mut rendered = server.with(dcx, |server| server.render_term(dcx, &term));
                 rendered.push_str(".\n");
-                write_file(out_dir, &pkg.otp_application_name, "app", rendered.as_bytes())
+                write_file(out_dir, &pkg.otp_app_name, "app", rendered.as_bytes())
                     .unwrap_or_else(|e| dcx.fatal(format!("failed to write app file: {e}")));
             });
 
@@ -384,7 +384,7 @@ fn make_config(
         crate_types: vec![config::CrateType::Rlib],
         cg: config::CodegenOptions { panic: Some(PanicStrategy::Abort), ..Default::default() },
         crate_name: Some(pkg.name.to_string()),
-        otp_application_name: Some(pkg.otp_application_name.clone()),
+        otp_app_name: Some(pkg.otp_app_name.clone()),
         externs: externs.clone(),
         lint_opts: allowed_lints.iter().map(|lint| (lint.clone(), lint::Level::Allow)).collect(),
         search_paths: lib_dirs

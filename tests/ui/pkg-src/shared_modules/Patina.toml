@@ -1,5 +1,5 @@
 [package]
 name = "shared_modules"
 version = "0.1.0"
-otp_application_name = "patina_shared_modules"
+otp_app_name = "patina_shared_modules"
 description = "Emits a module that a UI test emits too"

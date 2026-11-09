@@ -1,4 +1,4 @@
-//! The OTP application resource file, `<otp_application_name>.app`.
+//! The OTP application resource file, `<otp_app_name>.app`.
 
 use rustc_metadata::creader::CStore;
 use rustc_middle::bug;
@@ -43,7 +43,7 @@ pub(super) fn app_term(
         .collect();
 
     erlang::to_bytes(&Application {
-        name: eaf::Symbol(tcx.otp_application_name(LOCAL_CRATE)),
+        name: eaf::Symbol(tcx.otp_app_name(LOCAL_CRATE)),
         properties: [
             Property::Description { value: Charlist(description) },
             Property::Vsn { value: Charlist(version) },
@@ -63,6 +63,6 @@ fn dependency_applications(tcx: TyCtxt<'_>) -> impl Iterator<Item = rustc_span::
             .resolved_extern_crate(rustc_span::Symbol::intern(name))
             .unwrap_or_else(|| bug!("package dependency `{name}` was not resolved"));
 
-        tcx.otp_application_name(crate_num)
+        tcx.otp_app_name(crate_num)
     })
 }

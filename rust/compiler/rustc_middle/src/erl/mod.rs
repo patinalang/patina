@@ -1113,9 +1113,9 @@ fn beam_modules(tcx: TyCtxt<'_>, LocalCrate: LocalCrate) -> FxIndexSet<Symbol> {
     tcx.erl_local_modules(()).keys().map(|&module| tcx.erl_module_name(module)).collect()
 }
 
-/// Provider for [`TyCtxt::otp_application_name`] of the local crate.
-fn otp_application_name(tcx: TyCtxt<'_>, LocalCrate: LocalCrate) -> Symbol {
-    match &tcx.sess.opts.otp_application_name {
+/// Provider for [`TyCtxt::otp_app_name`] of the local crate.
+fn otp_app_name(tcx: TyCtxt<'_>, LocalCrate: LocalCrate) -> Symbol {
+    match &tcx.sess.opts.otp_app_name {
         Some(name) => Symbol::intern(name),
         None => bug!("the session has no Erlang application"),
     }
@@ -1220,7 +1220,7 @@ pub fn provide(providers: &mut Providers) {
         erl_module_name,
         erl_local_modules,
         beam_modules,
-        otp_application_name,
+        otp_app_name,
         check_erl_module_clashes,
         erl_shape_of_ty: shape::erl_shape_of_ty,
         erl_variant_wrap_guards: shape::erl_variant_wrap_guards,

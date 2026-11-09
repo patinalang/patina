@@ -1305,7 +1305,7 @@ rustc_queries! {
         separate_provide_extern
     }
 
-    query otp_application_name(_: CrateNum) -> Symbol {
+    query otp_app_name(_: CrateNum) -> Symbol {
         desc { "getting the OTP application name of a crate" }
         separate_provide_extern
     }

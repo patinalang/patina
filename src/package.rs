@@ -85,12 +85,23 @@ impl fmt::Display for PackageName {
 
 pub(crate) struct PackageInfo {
     pub name: PackageName,
-    pub otp_application_name: String,
+    pub otp_app_name: String,
     pub version: Option<String>,
     pub description: String,
 }
 
 impl PackageInfo {
+    pub(crate) fn new(
+        name: PackageName,
+        otp_app_name: Option<String>,
+        version: Option<String>,
+        description: Option<String>,
+    ) -> PackageInfo {
+        let otp_app_name = otp_app_name.unwrap_or_else(|| name.to_string());
+        let description = description.unwrap_or_else(|| "".to_owned());
+        PackageInfo { name, otp_app_name, version, description }
+    }
+
     pub(crate) fn is_core(&self) -> bool {
         self.name.is_core()
     }
@@ -211,12 +222,7 @@ mod tests {
     }
 
     fn package(package: &str) -> PackageInfo {
-        PackageInfo {
-            name: name(package),
-            otp_application_name: package.to_owned(),
-            version: None,
-            description: String::new(),
-        }
+        PackageInfo::new(name(package), None, None, None)
     }
 
     fn explicit(dependency: &str, path: Option<&Path>) -> ExternArg {

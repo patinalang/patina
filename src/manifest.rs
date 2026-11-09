@@ -44,7 +44,7 @@ pub(crate) struct Manifest {
 pub(crate) struct PackageManifest {
     pub name: PackageName,
     pub version: String,
-    pub otp_application_name: Option<String>,
+    pub otp_app_name: Option<String>,
     pub description: Option<String>,
 }
 
@@ -88,6 +88,8 @@ struct DependencyManifest {
     #[cfg_attr(not(test), expect(dead_code))]
     version: Option<String>,
     source: Option<DependencySource>,
+    #[cfg_attr(not(test), expect(dead_code))]
+    otp_app_name: Option<String>,
 }
 
 impl<'de> Deserialize<'de> for DependencyManifest {
@@ -97,7 +99,11 @@ impl<'de> Deserialize<'de> for DependencyManifest {
             .string(|version| {
                 let version =
                     NonEmptyString::try_from(version.to_owned()).map_err(de::Error::custom)?;
-                Ok(DependencyManifest { version: Some(version.0), source: None })
+                Ok(DependencyManifest {
+                    version: Some(version.0),
+                    source: None,
+                    otp_app_name: None,
+                })
             })
             .map(|map| {
                 let table: DependencyTable = map.deserialize()?;
@@ -117,13 +123,14 @@ struct DependencyTable {
     #[serde(rename = "ref")]
     git_ref: Option<NonEmptyString>,
     path: Option<NonEmptyString>,
+    otp_app_name: Option<NonEmptyString>,
 }
 
 impl TryFrom<DependencyTable> for DependencyManifest {
     type Error = &'static str;
 
     fn try_from(table: DependencyTable) -> Result<Self, Self::Error> {
-        let DependencyTable { version, hex, git, git_ref, path } = table;
+        let DependencyTable { version, hex, git, git_ref, path, otp_app_name } = table;
         if git_ref.is_some() && git.is_none() {
             return Err("`ref` needs `git`");
         }
@@ -135,7 +142,11 @@ impl TryFrom<DependencyTable> for DependencyManifest {
             (None, None, Some(path)) => Some(DependencySource::Path(path.0.into())),
             _ => return Err("only one of `hex`, `git` and `path` can be given"),
         };
-        Ok(DependencyManifest { version: version.map(|version| version.0), source })
+        Ok(DependencyManifest {
+            version: version.map(|version| version.0),
+            source,
+            otp_app_name: otp_app_name.map(|name| name.0),
+        })
     }
 }
 
@@ -194,6 +205,11 @@ mod tests {
     }
 
     #[track_caller]
+    fn otp_app_name(value: &str) -> Option<String> {
+        dependency(value).unwrap().otp_app_name
+    }
+
+    #[track_caller]
     fn error(value: &str) -> String {
         dependency(value).unwrap_err()
     }
@@ -235,6 +251,17 @@ mod tests {
     }
 
     #[test]
+    fn otp_app_name_goes_with_any_source() {
+        assert_eq!(otp_app_name(r#""~> 0.1""#), None);
+        assert_eq!(otp_app_name(r#"{ version = "~> 0.1" }"#), None);
+        assert_eq!(otp_app_name(r#"{ otp_app_name = "json" }"#).as_deref(), Some("json"));
+        for source in [r#"hex = "dep""#, r#"git = "../dep""#, r#"path = "../dep""#] {
+            let value = format!(r#"{{ {source}, otp_app_name = "json" }}"#);
+            assert_eq!(otp_app_name(&value).as_deref(), Some("json"), "for {value}");
+        }
+    }
+
+    #[test]
     fn dependency_of_the_wrong_type_is_rejected() {
         assert!(error("1").contains("expected a version requirement, or a table"));
     }
@@ -269,6 +296,7 @@ mod tests {
             r#"{ git = "" }"#,
             r#"{ git = "../dep", ref = "" }"#,
             r#"{ path = "" }"#,
+            r#"{ otp_app_name = "" }"#,
         ] {
             let error = error(value);
             assert!(error.starts_with("can't be empty"), "for {value}, got: {error}");

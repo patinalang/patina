@@ -132,7 +132,7 @@ enum Command {
         /// OTP application name.
         /// If not overridden, defaults to the package name.
         #[arg(long, value_name = "NAME")]
-        otp_application_name: Option<String>,
+        otp_app_name: Option<String>,
 
         /// Emit compiled output.
         #[arg(
@@ -239,14 +239,12 @@ fn try_main(args: Args) -> Result<(), Error> {
             let dependencies = manifest.dependency_names();
             let manifest = manifest.package;
             let name = package::resolve_package_name(Some(manifest.name), &file)?;
-            let package = PackageInfo {
-                otp_application_name: manifest
-                    .otp_application_name
-                    .unwrap_or_else(|| name.to_string()),
+            let package = PackageInfo::new(
                 name,
-                version: Some(manifest.version),
-                description: manifest.description.unwrap_or_default(),
-            };
+                manifest.otp_app_name,
+                Some(manifest.version),
+                manifest.description,
+            );
             let externs = package.externs(dependencies.into_iter().map(ExternArg::from))?;
             run(common, emit, &file, package, externs, installation)
         }
@@ -254,18 +252,13 @@ fn try_main(args: Args) -> Result<(), Error> {
             file,
             pkg_name,
             pkg_version,
-            otp_application_name,
+            otp_app_name,
             emit,
             extern_args,
             common,
         } => {
             let name = package::resolve_package_name(pkg_name, &file)?;
-            let package = PackageInfo {
-                otp_application_name: otp_application_name.unwrap_or_else(|| name.to_string()),
-                name,
-                version: pkg_version,
-                description: String::new(),
-            };
+            let package = PackageInfo::new(name, otp_app_name, pkg_version, None);
             let externs = package.externs(extern_args)?;
             run(common, emit, &file, package, externs, installation)
         }
