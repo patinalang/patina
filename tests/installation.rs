@@ -3,7 +3,7 @@ mod common;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
-use common::Session;
+use common::{Session, assert_failure, assert_success};
 
 /// `patina compile` of a trivial `source.pt`, in `dir`.
 fn compile_trivial(dir: &Path) -> Command {
@@ -15,18 +15,6 @@ fn compile_trivial(dir: &Path) -> Command {
 
 fn run(cmd: &mut Command) -> Output {
     cmd.output().expect("run patina")
-}
-
-#[track_caller]
-fn assert_success(output: &Output) {
-    assert!(output.status.success(), "got:\n{}", String::from_utf8_lossy(&output.stderr));
-}
-
-#[track_caller]
-fn assert_failure(output: &Output, message: &str) {
-    assert!(!output.status.success());
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(stderr.contains(message), "got:\n{stderr}");
 }
 
 #[test]

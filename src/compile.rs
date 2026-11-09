@@ -4,7 +4,6 @@ mod eaf_builder;
 mod translate;
 
 use std::cell::Cell;
-use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -29,7 +28,7 @@ use rustc_span::edition::Edition;
 use rustc_span::{ErrorGuaranteed, FileName, RealFileName, RemapPathScopeComponents};
 
 use crate::compile::compile_server::SyncServer;
-use crate::package::{PackageDependency, PackageInfo};
+use crate::package::PackageInfo;
 use crate::{Stage, erlang};
 
 static INTERNAL_FEATURES: AtomicBool = AtomicBool::new(false);
@@ -111,13 +110,13 @@ pub(crate) struct CompileOptions {
     pub out_dir: PathBuf,
     pub lib_dirs: Vec<PathBuf>,
     pub package: PackageInfo,
-    pub externs: Vec<PackageDependency>,
+    pub externs: Externs,
 }
 
 impl CompileOptions {
     fn code_path(&self) -> FxIndexSet<PathBuf> {
-        // Explicitly named packages go first.
-        let rmeta_dirs = self.externs.iter().filter_map(|dep| dep.path.as_deref()?.parent());
+        let rmeta_files = self.externs.iter().filter_map(|(_, entry)| entry.files()).flatten();
+        let rmeta_dirs = rmeta_files.filter_map(|file| file.original().parent());
         rmeta_dirs.chain(self.lib_dirs.iter().map(PathBuf::as_path)).map(Path::to_owned).collect()
     }
 }
@@ -368,12 +367,7 @@ fn make_config(
     opts: &CompileOptions,
     server: &Arc<SyncServer>,
 ) -> interface::Config {
-    let CompileOptions { lib_dirs, package: pkg, externs: deps, .. } = opts;
-
-    let mut externs = BTreeMap::new();
-    for dep in deps {
-        externs.insert(dep.name.clone(), dep.into());
-    }
+    let CompileOptions { lib_dirs, package: pkg, externs, .. } = opts;
 
     let cwd = std::env::current_dir().unwrap_or_else(|e| {
         panic!("failed to get the current directory: {e}");
@@ -390,7 +384,7 @@ fn make_config(
         cg: config::CodegenOptions { panic: Some(PanicStrategy::Abort), ..Default::default() },
         crate_name: Some(pkg.name.to_string()),
         otp_application_name: Some(pkg.otp_application_name.clone()),
-        externs: Externs::new(externs),
+        externs: externs.clone(),
         search_paths: lib_dirs
             .iter()
             .map(|dir| SearchPath::new(PathKind::All, dir.to_owned()))

@@ -15,11 +15,12 @@ use std::process::ExitCode;
 use clap::Parser;
 use clap::builder::{ArgPredicate, PathBufValueParser, TypedValueParser};
 use rustc_errors::{FatalError, catch_fatal_errors};
+use rustc_session::config::Externs;
 
 use crate::compile::compile_server::SpawnError;
 use crate::installation::{Installation, LocateInstallationError};
 use crate::manifest::{Manifest, ManifestError};
-use crate::package::{DependencyError, PackageDependency, PackageInfo, PackageNameError};
+use crate::package::{DuplicateExtern, ExternArg, PackageInfo, PackageName, PackageNameError};
 
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]
 pub(crate) enum DumpStage {
@@ -122,7 +123,7 @@ enum Command {
 
         /// Package name (defaults to PascalCase of the source filename).
         #[arg(long, value_name = "NAME")]
-        pkg_name: Option<String>,
+        pkg_name: Option<PackageName>,
 
         /// Package version. Required with `--emit app`.
         #[arg(long, value_name = "VERSION", required_if_eq("emit", "app"))]
@@ -141,6 +142,12 @@ enum Command {
             default_value_if("dump", ArgPredicate::IsPresent, None)
         )]
         emit: Vec<EmitStage>,
+
+        /// Package dependency as NAME=RMETA (may be repeated).
+        /// If `=RMETA` is omitted, the package is assumed to be in the library
+        /// search directories.
+        #[arg(long = "extern", value_name = "NAME[=RMETA]")]
+        extern_args: Vec<ExternArg>,
 
         #[command(flatten)]
         common: CommonArgs,
@@ -173,12 +180,6 @@ struct CommonArgs {
     /// Path to a running compile server's socket. If not given, patina starts a temporary one.
     #[arg(long, value_name = "SOCKET_PATH")]
     compile_server: Option<PathBuf>,
-
-    /// Package dependency as NAME=RMETA (may be repeated).
-    /// If `=RMETA` is omitted, the package is assumed to be in the library
-    /// search directories.
-    #[arg(long = "extern", value_name = "NAME[=RMETA]")]
-    externs: Vec<PackageDependency>,
 }
 
 fn absolute_path() -> impl TypedValueParser<Value = PathBuf> {
@@ -195,10 +196,10 @@ enum Error {
     #[error(transparent)]
     PackageName(#[from] PackageNameError),
     #[error(transparent)]
-    Dependency(#[from] DependencyError),
+    DuplicateExtern(#[from] DuplicateExtern),
     #[error(transparent)]
     LocateInstallation(#[from] LocateInstallationError),
-    #[error("failed to read {}: {source}", path.display())]
+    #[error("failed to read {path}: {source}")]
     ReadSource {
         path: PathBuf,
         #[source]
@@ -230,29 +231,39 @@ fn try_main(args: Args) -> Result<(), Error> {
     match args.command {
         Command::Build { dir, emit, common } => {
             let manifest = Manifest::read(&dir)?;
-            let file = manifest.source_path(&dir);
+            let file = manifest.source_path();
+            let dependencies = manifest.dependency_names();
             let manifest = manifest.package;
-            let name = package::resolve_package_name(Some(&manifest.name), &file)?;
+            let name = package::resolve_package_name(Some(manifest.name), &file)?;
             let package = PackageInfo {
                 otp_application_name: manifest
                     .otp_application_name
-                    .unwrap_or_else(|| package::snake_case(&name)),
+                    .unwrap_or_else(|| name.snake_case()),
                 name,
                 version: Some(manifest.version),
                 description: manifest.description.unwrap_or_default(),
             };
-            run(common, emit, &file, package, installation)
+            let externs = package.externs(dependencies.into_iter().map(ExternArg::from))?;
+            run(common, emit, &file, package, externs, installation)
         }
-        Command::Compile { file, pkg_name, pkg_version, otp_application_name, emit, common } => {
-            let name = package::resolve_package_name(pkg_name.as_deref(), &file)?;
+        Command::Compile {
+            file,
+            pkg_name,
+            pkg_version,
+            otp_application_name,
+            emit,
+            extern_args,
+            common,
+        } => {
+            let name = package::resolve_package_name(pkg_name, &file)?;
             let package = PackageInfo {
-                otp_application_name: otp_application_name
-                    .unwrap_or_else(|| package::snake_case(&name)),
+                otp_application_name: otp_application_name.unwrap_or_else(|| name.snake_case()),
                 name,
                 version: pkg_version,
                 description: String::new(),
             };
-            run(common, emit, &file, package, installation)
+            let externs = package.externs(extern_args)?;
+            run(common, emit, &file, package, externs, installation)
         }
         Command::Serve => compile::compile_server::serve(&installation).map_err(Error::Serve),
     }
@@ -263,19 +274,14 @@ fn run(
     emit: Vec<EmitStage>,
     file: &Path,
     package: PackageInfo,
+    externs: Externs,
     installation: Installation,
 ) -> Result<(), Error> {
     let src = std::fs::read_to_string(file)
         .map_err(|source| Error::ReadSource { path: file.to_owned(), source })?;
 
-    let mut externs = args.externs;
-    if !package.is_core() && !externs.iter().any(PackageDependency::is_core) {
-        externs.push(PackageDependency::core_package_dependency());
-    }
-    package::validate_dependencies(&externs)?;
-
     let mut lib_dirs = args.lib_dirs;
-    if !externs.iter().any(|dep| dep.is_core() && dep.path.is_some()) {
+    if !package::names_core_file(&externs) {
         lib_dirs.push(installation.core_dir.clone());
     }
 

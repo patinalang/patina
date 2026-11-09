@@ -7,6 +7,7 @@ use std::io::{self, BufRead, BufReader};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Output, Stdio};
 
+use convert_case::{Case, Casing};
 use tempfile::TempDir;
 
 pub(crate) fn patina_command() -> Command {
@@ -98,9 +99,52 @@ impl Session {
     /// Like [`Session::try_build`], but the compilation has to succeed.
     #[track_caller]
     pub(crate) fn build(&self, file: &str, source: &str, args: &[&str]) {
-        let output = self.try_build(file, source, args);
-        assert!(output.status.success(), "got:\n{}", String::from_utf8_lossy(&output.stderr));
+        assert_success(&self.try_build(file, source, args));
     }
+
+    /// Writes the package `name`, with `dependencies` as its `[dependencies]` table, to the
+    /// directory `name` in the session's directory.
+    pub(crate) fn package(&self, name: &str, dependencies: &str, source: &str) {
+        let dir = self.path().join(name);
+        std::fs::create_dir_all(dir.join("src")).expect("create package dir");
+        let manifest = format!(
+            "[package]\nname = \"{name}\"\nversion = \"0.1.0\"\n\n[dependencies]\n{dependencies}\n"
+        );
+        std::fs::write(dir.join("Patina.toml"), manifest).expect("write manifest");
+        let file = format!("{}.pt", name.to_case(Case::Snake));
+        std::fs::write(dir.join("src").join(file), source).expect("write source");
+    }
+
+    /// `patina build` of the package in `dir`, in the session's directory.
+    pub(crate) fn try_build_package(&self, dir: &str, args: &[&str]) -> Output {
+        patina_command()
+            .current_dir(self.path())
+            .arg("build")
+            .arg("--compile-server")
+            .arg(self.server.sock_path())
+            .args(args)
+            .arg(dir)
+            .output()
+            .expect("run patina")
+    }
+
+    /// Like [`Session::try_build_package`], but the build has to succeed.
+    #[track_caller]
+    pub(crate) fn build_package(&self, dir: &str, args: &[&str]) {
+        assert_success(&self.try_build_package(dir, args));
+    }
+}
+
+#[track_caller]
+pub(crate) fn assert_success(output: &Output) {
+    assert!(output.status.success(), "got:\n{}", String::from_utf8_lossy(&output.stderr));
+}
+
+#[track_caller]
+pub(crate) fn assert_failure(output: &Output, message: &str) {
+    assert!(!output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains(message), "got:\n{stderr}");
 }
 
 pub(crate) fn install_root() -> PathBuf {

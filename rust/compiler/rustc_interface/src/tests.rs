@@ -5,6 +5,7 @@ use std::path::PathBuf;
 use std::sync::atomic::AtomicBool;
 
 use rustc_abi::Align;
+use rustc_data_structures::fx::FxIndexMap;
 use rustc_data_structures::profiling::TimePassesFormat;
 use rustc_errors::ColorConfig;
 use rustc_errors::emitter::HumanReadableErrorType;
@@ -220,17 +221,17 @@ fn test_externs_tracking_hash_different_construction_order() {
     let mut v2 = Options::default();
     let mut v3 = Options::default();
 
-    v1.externs = Externs::new(mk_map(vec![
+    v1.externs = Externs::new(FxIndexMap::from_iter([
         (String::from("a"), new_public_extern_entry(vec!["b", "c"])),
         (String::from("d"), new_public_extern_entry(vec!["e", "f"])),
     ]));
 
-    v2.externs = Externs::new(mk_map(vec![
+    v2.externs = Externs::new(FxIndexMap::from_iter([
         (String::from("d"), new_public_extern_entry(vec!["e", "f"])),
         (String::from("a"), new_public_extern_entry(vec!["b", "c"])),
     ]));
 
-    v3.externs = Externs::new(mk_map(vec![
+    v3.externs = Externs::new(FxIndexMap::from_iter([
         (String::from("a"), new_public_extern_entry(vec!["b", "c"])),
         (String::from("d"), new_public_extern_entry(vec!["f", "e"])),
     ]));

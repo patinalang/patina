@@ -7,8 +7,8 @@
                         'Elixir.Patina.ForeignImpl.$impl.Traits.Label',
                         'Elixir.Patina.ForeignImpl.$impl.Temperatures.Celsius']},
               {registered,[]},
-              {applications,[kernel,stdlib,consts,patina_core,inlines,
-                             label_shout,label_whisper,macros,
-                             macros_and_items,more_temperatures,reexports,
-                             patina_shared_modules,temperatures,traits,
-                             wrappers]}]}.
+              {applications,[kernel,stdlib,patina_core,consts,temperatures,
+                             traits,wrappers,macros_and_items,
+                             more_temperatures,label_shout,label_whisper,
+                             macros,reexports,inlines,
+                             patina_shared_modules]}]}.

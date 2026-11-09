@@ -1,3 +1,6 @@
 [package]
 name = "LabelWhisper"
 version = "0.1.0"
+
+[dependencies]
+Traits = "~> 0.1"

@@ -138,7 +138,7 @@ impl Runner {
 
         for package in PACKAGES {
             let dir = Path::new(crate::PKG_SRC_ROOT).join(package);
-            let output = self.run_compile(&[], &[], &dir, lib_dir, lib_dir, &deps);
+            let output = self.run_build(&dir, lib_dir);
             assert!(
                 output.status.success(),
                 "failed to build dependency package {}:\nstdout:\n{}stderr:\n{}",
@@ -151,6 +151,7 @@ impl Runner {
         deps
     }
 
+    /// `patina compile` of the test source `pt_path`.
     fn run_compile(
         &self,
         dumps: &[&str],
@@ -160,25 +161,37 @@ impl Runner {
         lib_dir: &Path,
         externs: &[String],
     ) -> Output {
-        let mut cmd = common::patina_command();
-        // A package directory is built from its `Patina.toml`.
-        cmd.arg(if pt_path.is_dir() { "build" } else { "compile" });
-        if !pt_path.is_dir() && emits.contains(&"app") {
-            cmd.arg("--pkg-version").arg("0.0.0");
-        }
-        for dump in dumps {
-            cmd.arg("--dump").arg(*dump);
-        }
-        for emit in emits {
-            cmd.arg("--emit").arg(*emit);
-        }
-        cmd.arg("-L").arg(lib_dir);
-        for name in externs {
-            cmd.arg("--extern").arg(name);
-        }
-        cmd.arg("--compile-server").arg(&self.compile_server);
-        cmd.arg("--out-dir").arg(out_dir).arg(pt_path);
-        cmd.output().expect("run patina")
+        common::patina_command()
+            .arg("compile")
+            .arg("--compile-server")
+            .arg(&self.compile_server)
+            .arg("-L")
+            .arg(lib_dir)
+            .arg("--pkg-version")
+            .arg("0.0.0")
+            .args(dumps.iter().flat_map(|dump| ["--dump", dump]))
+            .args(emits.iter().flat_map(|emit| ["--emit", emit]))
+            .args(externs.iter().flat_map(|name| ["--extern", name]))
+            .arg("--out-dir")
+            .arg(out_dir)
+            .arg(pt_path)
+            .output()
+            .expect("run patina")
+    }
+
+    /// `patina build` of the package in `dir`, into `lib_dir`, where its dependencies are too.
+    fn run_build(&self, dir: &Path, lib_dir: &Path) -> Output {
+        common::patina_command()
+            .arg("build")
+            .arg("--compile-server")
+            .arg(&self.compile_server)
+            .arg("-L")
+            .arg(lib_dir)
+            .arg("--out-dir")
+            .arg(lib_dir)
+            .arg(dir)
+            .output()
+            .expect("run patina")
     }
 }
 

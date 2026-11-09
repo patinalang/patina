@@ -907,11 +907,8 @@ impl OutputTypes {
     }
 }
 
-/// Use tree-based collections to cheaply get a deterministic `Hash` implementation.
-/// *Do not* switch `BTreeMap` or `BTreeSet` out for an unsorted container type! That
-/// would break dependency tracking for command-line arguments.
 #[derive(Clone)]
-pub struct Externs(BTreeMap<String, ExternEntry>);
+pub struct Externs(FxIndexMap<String, ExternEntry>);
 
 #[derive(Clone, Debug)]
 pub struct ExternEntry {
@@ -957,7 +954,7 @@ pub enum ExternLocation {
 
 impl Externs {
     /// Used for testing.
-    pub fn new(data: BTreeMap<String, ExternEntry>) -> Externs {
+    pub fn new(data: FxIndexMap<String, ExternEntry>) -> Externs {
         Externs(data)
     }
 
@@ -965,7 +962,7 @@ impl Externs {
         self.0.get(key)
     }
 
-    pub fn iter(&self) -> BTreeMapIter<'_, String, ExternEntry> {
+    pub fn iter(&self) -> impl ExactSizeIterator<Item = (&String, &ExternEntry)> {
         self.0.iter()
     }
 }
@@ -1426,7 +1423,7 @@ impl Default for Options {
             cg: Default::default(),
             error_format: ErrorOutputType::default(),
             diagnostic_width: None,
-            externs: Externs(BTreeMap::new()),
+            externs: Externs(FxIndexMap::default()),
             crate_name: None,
             otp_application_name: None,
             libs: Vec::new(),
@@ -2306,14 +2303,14 @@ pub fn parse_externs(
     unstable_opts: &UnstableOptions,
 ) -> Externs {
     let is_unstable_enabled = unstable_opts.unstable_options;
-    let mut externs: BTreeMap<String, ExternEntry> = BTreeMap::new();
+    let mut externs: FxIndexMap<String, ExternEntry> = FxIndexMap::default();
     for arg in matches.opt_strs("extern") {
         let ExternOpt { crate_name: name, path, options } =
             split_extern_opt(early_dcx, unstable_opts, &arg).unwrap_or_else(|e| e.emit());
 
         let entry = externs.entry(name.to_owned());
 
-        use std::collections::btree_map::Entry;
+        use rustc_data_structures::fx::IndexEntry as Entry;
 
         let entry = if let Some(path) = path {
             // --extern prelude_name=some_file.rlib
