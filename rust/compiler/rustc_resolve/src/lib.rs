@@ -1989,13 +1989,14 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         }
 
         let node_id = self.next_node_id();
+        let span = ident.span.with_parent(None);
         let feed = self.create_def(
             parent_def,
             node_id,
             Some(ident.name),
             DefKind::ExternMod,
             LocalExpnId::ROOT.to_expn_id(),
-            ident.span,
+            span,
         );
         let child = feed.def_id();
         feed.visibility(ty::Visibility::Public);
@@ -2004,7 +2005,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             Some(parent),
             ModuleKind::Def(DefKind::ExternMod, child.to_def_id(), Some(ident.name)),
             LocalExpnId::ROOT.to_expn_id(),
-            ident.span,
+            span,
             parent.no_implicit_prelude,
         );
 
