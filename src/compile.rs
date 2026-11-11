@@ -10,7 +10,6 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
-use rustc_arena::DroplessArena;
 use rustc_ast::Crate;
 use rustc_ast_pretty::pprust;
 use rustc_data_structures::fx::{FxHashSet, FxIndexSet};
@@ -28,9 +27,9 @@ use rustc_span::def_id::LOCAL_CRATE;
 use rustc_span::edition::Edition;
 use rustc_span::{ErrorGuaranteed, FileName, RealFileName, RemapPathScopeComponents};
 
+use crate::Stage;
 use crate::compile::compile_server::SyncServer;
 use crate::package::PackageInfo;
-use crate::{Stage, erlang};
 
 static INTERNAL_FEATURES: AtomicBool = AtomicBool::new(false);
 
@@ -280,18 +279,10 @@ fn run_stages(
             .unwrap_or_else(|e| dcx.fatal(format!("failed to write app file: {e}")));
     });
 
-    let arena = DroplessArena::default();
-    let translator = translate::Translator::new(tcx, &arena);
-    let modules = translator.translate();
-
-    let serialized_modules = modules
-        .into_iter()
-        .map(|(mod_name, module)| {
-            let bytes = erlang::to_bytes(&module).unwrap_or_else(|e| {
-                dcx.fatal(format!("failed to serialize module: {e}"));
-            });
-            (mod_name, bytes)
-        })
+    let serialized_modules = tcx
+        .erl_local_modules(())
+        .keys()
+        .map(|&module| (tcx.erl_module_name(module), tcx.erl_module_eaf(module)))
         .collect::<Vec<_>>();
 
     consume_stage!(stages_left, Stage::Eaf, {
@@ -441,7 +432,9 @@ fn make_config(
         psess_created: None,
         track_state: None,
         register_lints: None,
-        override_queries: None,
+        override_queries: Some(|_, providers| {
+            providers.queries.erl_module_eaf = translate::erl_module_eaf;
+        }),
         extra_symbols: vec![],
         make_codegen_backend: Some(Box::new(|_| {
             Box::new(DummyCodegenBackend { target_config_override: None })

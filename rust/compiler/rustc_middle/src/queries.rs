@@ -611,14 +611,12 @@ rustc_queries! {
     /// This is a version of ETIR stored before resolving concrete types, preparing witnesses, etc.
     /// Suitable for inlining.
     query etir_template(key: DefId) -> &'tcx crate::erl::etir::Body<'tcx> {
-        no_hash
         desc { "building the Erlang translation IR of `{}`", tcx.def_path_str(key) }
         separate_provide_extern
     }
 
     /// The fully resolved ETIR body of an item.
     query etir_body(key: LocalDefId) -> &'tcx crate::erl::etir::Body<'tcx> {
-        no_hash
         desc { "lowering `{}` to the Erlang translation IR", tcx.def_path_str(key) }
     }
 
@@ -1289,6 +1287,13 @@ rustc_queries! {
     /// The Erlang module name for a generated, external, or primitive module.
     query erl_module_name(module: crate::erl::ErlModuleId) -> Symbol {
         desc { "computing the Erlang module name for `{module:?}`" }
+    }
+
+    /// The Erlang Abstract Format of a local Erlang module, serialized to External Term Format.
+    query erl_module_eaf(module: crate::erl::ErlModuleId) -> &'tcx Vec<u8> {
+        arena_cache
+        cache_on_disk
+        desc { "translating the Erlang module `{module:?}`" }
     }
 
     /// Every Erlang module emitted by the local crate, mapped to the impls hosted by that module.

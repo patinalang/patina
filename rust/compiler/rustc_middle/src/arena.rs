@@ -93,6 +93,7 @@ macro_rules! arena_types {
             [] ordered_name_set: rustc_data_structures::fx::FxIndexSet<rustc_span::Symbol>,
             [] erl_shape: rustc_middle::erl::shape::ErlShape,
             [] etir_body: rustc_middle::erl::etir::Body<'tcx>,
+            [] erl_module_eaf: Vec<u8>,
             [] stable_order_of_exportable_impls:
                 rustc_data_structures::fx::FxIndexMap<rustc_hir::def_id::DefId, usize>,
 

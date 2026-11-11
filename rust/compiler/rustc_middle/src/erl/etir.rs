@@ -4,7 +4,7 @@ use rustc_data_structures::packed::Pu128;
 use rustc_hir::def_id::DefId;
 use rustc_hir::{RangeEnd, TermClass};
 use rustc_index::{IndexVec, newtype_index};
-use rustc_macros::{TyDecodable, TyEncodable};
+use rustc_macros::{StableHash, TyDecodable, TyEncodable};
 use rustc_span::{ByteSymbol, Ident, Span, Symbol};
 
 use crate::erl::binary_pattern::BinarySegmentLayout;
@@ -15,6 +15,7 @@ pub mod visit;
 
 newtype_index! {
     #[encodable]
+    #[stable_hash]
     #[orderable]
     #[debug_format = "e{}"]
     pub struct ExprId {}
@@ -22,6 +23,7 @@ newtype_index! {
 
 newtype_index! {
     #[encodable]
+    #[stable_hash]
     #[orderable]
     #[debug_format = "p{}"]
     pub struct PatId {}
@@ -29,18 +31,21 @@ newtype_index! {
 
 newtype_index! {
     #[encodable]
+    #[stable_hash]
     #[debug_format = "v{}"]
     pub struct VarId {}
 }
 
 newtype_index! {
     #[encodable]
+    #[stable_hash]
     #[debug_format = "l{}"]
     pub struct LoopId {}
 }
 
 newtype_index! {
     #[encodable]
+    #[stable_hash]
     #[debug_format = "j{}"]
     pub struct JoinId {}
 }
@@ -48,12 +53,13 @@ newtype_index! {
 newtype_index! {
     /// A runtime field of a variant, in declaration order.
     #[encodable]
+    #[stable_hash]
     #[orderable]
     #[debug_format = "f{}"]
     pub struct FieldIdx {}
 }
 
-#[derive(Clone, Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable, StableHash)]
 pub struct Body<'tcx> {
     pub params: Box<[PatId]>,
     pub value: ExprId,
@@ -118,19 +124,19 @@ impl<'tcx> std::ops::Index<JoinId> for Body<'tcx> {
     }
 }
 
-#[derive(Clone, Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable, StableHash)]
 pub struct Var {
     pub ident: Ident,
 }
 
-#[derive(Clone, Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable, StableHash)]
 pub struct Expr<'tcx> {
     pub kind: ExprKind<'tcx>,
     pub ty: Ty<'tcx>,
     pub span: Span,
 }
 
-#[derive(Clone, Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable, StableHash)]
 pub enum ExprKind<'tcx> {
     Block(Box<[ExprId]>),
     Literal(Lit, Span),
@@ -163,7 +169,7 @@ pub enum ExprKind<'tcx> {
     Jump { target: JoinId, value: Option<ExprId> },
 }
 
-#[derive(Copy, Clone, Debug, TyEncodable, TyDecodable)]
+#[derive(Copy, Clone, Debug, TyEncodable, TyDecodable, StableHash)]
 pub enum Lit {
     Str(Symbol),
     Charlist(Symbol),
@@ -175,14 +181,14 @@ pub enum Lit {
     Bool(bool),
 }
 
-#[derive(Clone, Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable, StableHash)]
 pub struct BinarySegmentExpr {
     pub value: ExprId,
     pub layout: BinarySegmentLayout<ExprId>,
     pub span: Span,
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, TyEncodable, TyDecodable)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, TyEncodable, TyDecodable, StableHash)]
 pub enum BinaryOp {
     Concat,
     Subtract,
@@ -205,27 +211,27 @@ pub enum BinaryOp {
     Gt,
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, TyEncodable, TyDecodable)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, TyEncodable, TyDecodable, StableHash)]
 pub enum LogicalOp {
     And,
     Or,
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, TyEncodable, TyDecodable)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, TyEncodable, TyDecodable, StableHash)]
 pub enum UnaryOp {
     Not,
     Bnot,
     Neg,
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, TyEncodable, TyDecodable)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, TyEncodable, TyDecodable, StableHash)]
 pub enum CastKind {
     Identity,
     IntToFloat,
     FloatToInt,
 }
 
-#[derive(Clone, Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable, StableHash)]
 pub enum Callee<'tcx> {
     Value(ExprId),
     // Only a thing between lowering passes; it gets lowered to `Fun` or dispatch through witness.
@@ -235,14 +241,14 @@ pub enum Callee<'tcx> {
 }
 
 /// An Erlang function.
-#[derive(Clone, Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable, StableHash)]
 pub struct ErlFun {
     pub module: ErlModuleResolution,
     pub name: Symbol,
     pub arity: u32,
 }
 
-#[derive(Clone, Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable, StableHash)]
 pub struct AdtExpr {
     pub repr: AdtRepr,
     pub base: Option<ExprId>,
@@ -250,7 +256,7 @@ pub struct AdtExpr {
     pub fields: Box<[FieldExpr]>,
 }
 
-#[derive(Clone, Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable, StableHash)]
 pub struct FieldExpr {
     pub position: FieldIdx,
     pub name: Symbol,
@@ -258,7 +264,7 @@ pub struct FieldExpr {
 }
 
 /// The runtime representation of an ADT variant.
-#[derive(Copy, Clone, Debug, TyEncodable, TyDecodable)]
+#[derive(Copy, Clone, Debug, TyEncodable, TyDecodable, StableHash)]
 pub enum AdtRepr {
     Atom { tag: Symbol },
     Tagged { tag: Symbol },
@@ -267,7 +273,7 @@ pub enum AdtRepr {
     Transparent { tag: Symbol, variant: DefId, has_siblings: bool },
 }
 
-#[derive(Clone, Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable, StableHash)]
 pub struct Arm {
     pub pattern: PatId,
     pub guard: Option<ExprId>,
@@ -275,7 +281,7 @@ pub struct Arm {
     pub span: Span,
 }
 
-#[derive(Clone, Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable, StableHash)]
 pub struct CatchArm {
     pub class: PatId,
     pub reason: PatId,
@@ -285,19 +291,19 @@ pub struct CatchArm {
     pub span: Span,
 }
 
-#[derive(Clone, Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable, StableHash)]
 pub struct ReceiveAfter {
     pub timeout: ExprId,
     pub body: ExprId,
 }
 
-#[derive(Clone, Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable, StableHash)]
 pub struct Loop {
     /// Variables from the outer scope that are assigned to inside the loop.
     pub reassigned: Box<[VarId]>,
 }
 
-#[derive(Clone, Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable, StableHash)]
 pub struct Join {
     pub body: ExprId,
     pub value: Option<VarId>,
@@ -305,7 +311,7 @@ pub struct Join {
     pub params: Box<[VarId]>,
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, TyEncodable, TyDecodable)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, TyEncodable, TyDecodable, StableHash)]
 pub enum PatternInput {
     /// Static typing guarantees that the value has the pattern's type.
     Typed,
@@ -313,14 +319,14 @@ pub enum PatternInput {
     UntrustedRepresentation,
 }
 
-#[derive(Clone, Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable, StableHash)]
 pub struct Pat<'tcx> {
     pub kind: PatKind<'tcx>,
     pub ty: Ty<'tcx>,
     pub span: Span,
 }
 
-#[derive(Clone, Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable, StableHash)]
 pub enum PatKind<'tcx> {
     Wild { input: PatternInput },
     Binding { var: VarId, is_primary: bool, subpattern: Option<PatId>, input: PatternInput },
@@ -345,14 +351,14 @@ impl<'tcx> PatKind<'tcx> {
     }
 }
 
-#[derive(Clone, Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable, StableHash)]
 pub struct AdtPat<'tcx> {
     pub repr: AdtRepr,
     pub fields: IndexVec<FieldIdx, FieldPat<'tcx>>,
     pub input: PatternInput,
 }
 
-#[derive(Clone, Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable, StableHash)]
 pub struct FieldPat<'tcx> {
     pub name: Symbol,
     pub ty: Ty<'tcx>,
@@ -360,7 +366,7 @@ pub struct FieldPat<'tcx> {
     pub pattern: PatId,
 }
 
-#[derive(Clone, Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable, StableHash)]
 pub struct PatRange<'tcx> {
     pub lo: Option<ExprId>,
     pub hi: Option<ExprId>,
@@ -369,7 +375,7 @@ pub struct PatRange<'tcx> {
     pub input: PatternInput,
 }
 
-#[derive(Clone, Debug, TyEncodable, TyDecodable)]
+#[derive(Clone, Debug, TyEncodable, TyDecodable, StableHash)]
 pub struct BinarySegmentPat {
     pub pattern: PatId,
     pub layout: BinarySegmentLayout<ExprId>,

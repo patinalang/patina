@@ -69,30 +69,26 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         cx.translate_body_with_params(&etir.params, etir.value)
     }
 
-    pub fn translate(&self) -> Vec<(Symbol, eaf::Module<'arena>)> {
-        self.tcx
-            .erl_local_modules(())
-            .keys()
-            .map(|&module_id| match module_id {
-                ErlModuleId::Mod(def_id) => self.translate_module(def_id.expect_local()),
+    pub fn translate(&self, module_id: ErlModuleId) -> eaf::Module<'arena> {
+        match module_id {
+            ErlModuleId::Mod(def_id) => self.translate_module(def_id.expect_local()),
 
-                ErlModuleId::Adt(def_id) => match self.tcx.def_kind(def_id) {
-                    DefKind::Struct => self.translate_struct(def_id.expect_local()),
-                    DefKind::Enum => self.translate_enum(def_id.expect_local()),
-                    kind => bug!("Erlang module for a {kind:?}"),
-                },
+            ErlModuleId::Adt(def_id) => match self.tcx.def_kind(def_id) {
+                DefKind::Struct => self.translate_struct(def_id.expect_local()),
+                DefKind::Enum => self.translate_enum(def_id.expect_local()),
+                kind => bug!("Erlang module for a {kind:?}"),
+            },
 
-                ErlModuleId::Prim(_)
-                | ErlModuleId::AdtImplHost(..)
-                | ErlModuleId::PrimImplHost(..)
-                | ErlModuleId::BlanketImplHost(_) => self.translate_impl_only_module(module_id),
+            ErlModuleId::Prim(_)
+            | ErlModuleId::AdtImplHost(..)
+            | ErlModuleId::PrimImplHost(..)
+            | ErlModuleId::BlanketImplHost(_) => self.translate_impl_only_module(module_id),
 
-                ErlModuleId::Extern(_) => bug!("local Erlang module {module_id:?} is extern"),
-            })
-            .collect()
+            ErlModuleId::Extern(_) => bug!("local Erlang module {module_id:?} is extern"),
+        }
     }
 
-    fn translate_module(&self, def_id: LocalDefId) -> (Symbol, eaf::Module<'arena>) {
+    fn translate_module(&self, def_id: LocalDefId) -> eaf::Module<'arena> {
         let module_id = LocalModDefId::new_unchecked(def_id);
         let (module, _span, _hir_id) = self.tcx.hir_get_module(module_id);
         let parts = self.collect_module_fns(module_id, module);
@@ -106,7 +102,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         mod_name: Symbol,
         record_exports: impl IntoIterator<Item = Symbol>,
         parts: ModuleParts<'arena>,
-    ) -> (Symbol, eaf::Module<'arena>) {
+    ) -> eaf::Module<'arena> {
         let file = self.file_path(span);
         let file_attr = self.afb.file_attr(span, &file.to_string_lossy());
         let module_attr = self.afb.module_attr(span, mod_name);
@@ -121,7 +117,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         let attrs =
             [file_attr, module_attr, compile_attr, import_attr, record_export_attr, export_attr];
 
-        (mod_name, self.afb.module(attrs.into_iter().chain(parts.forms)))
+        self.afb.module(attrs.into_iter().chain(parts.forms))
     }
 
     fn module_parts(&self, span: Span) -> ModuleParts<'arena> {
@@ -241,7 +237,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         }
     }
 
-    fn translate_struct(&self, def_id: LocalDefId) -> (Symbol, eaf::Module<'arena>) {
+    fn translate_struct(&self, def_id: LocalDefId) -> eaf::Module<'arena> {
         let &rustc_hir::Item { span, kind: ItemKind::Struct(..), .. } =
             self.tcx.hir_expect_item(def_id)
         else {
@@ -259,7 +255,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         self.assemble_module(span, mod_name, record_exports, parts)
     }
 
-    fn translate_enum(&self, def_id: LocalDefId) -> (Symbol, eaf::Module<'arena>) {
+    fn translate_enum(&self, def_id: LocalDefId) -> eaf::Module<'arena> {
         let item = self.tcx.hir_expect_item(def_id);
 
         let ItemKind::Enum(_ident, _generics, enum_def) = item.kind else {
@@ -417,7 +413,7 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
         }
     }
 
-    fn translate_impl_only_module(&self, module_id: ErlModuleId) -> (Symbol, eaf::Module<'arena>) {
+    fn translate_impl_only_module(&self, module_id: ErlModuleId) -> eaf::Module<'arena> {
         let mod_name = self.tcx.erl_module_name(module_id);
 
         let span = match self.tcx.erl_local_modules(()).get(&module_id) {
@@ -440,4 +436,13 @@ impl<'tcx: 'arena, 'arena> Translator<'tcx, 'arena> {
 
 fn record_constructor_name(tag: Symbol) -> Symbol {
     Symbol::intern(&format!("$patina_constructor__{tag}"))
+}
+
+/// Provider for [`TyCtxt::erl_module_eaf`].
+pub(super) fn erl_module_eaf(tcx: TyCtxt<'_>, module_id: ErlModuleId) -> Vec<u8> {
+    let arena = DroplessArena::default();
+    let module = Translator::new(tcx, &arena).translate(module_id);
+    crate::erlang::to_bytes(&module).unwrap_or_else(|e| {
+        tcx.dcx().fatal(format!("failed to serialize module {module_id:?}: {e}"));
+    })
 }

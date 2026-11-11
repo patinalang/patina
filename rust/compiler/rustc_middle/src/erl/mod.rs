@@ -60,7 +60,7 @@ pub enum ErlImplFn<'tcx> {
 }
 
 /// The semantic target of an Erlang call.
-#[derive(Copy, Clone, Debug, TyEncodable, TyDecodable)]
+#[derive(Copy, Clone, Debug, TyEncodable, TyDecodable, StableHash)]
 pub enum ErlCallTarget<'tcx> {
     /// A free function, inherent method, trait method, or trait associated const.
     Item { def_id: DefId, args: GenericArgsRef<'tcx> },
@@ -73,7 +73,7 @@ pub enum ErlCallTarget<'tcx> {
 }
 
 /// The result of resolving which Erlang module contains a caller or callee.
-#[derive(Copy, Clone, Debug, PartialEq, Eq, TyEncodable, TyDecodable)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, TyEncodable, TyDecodable, StableHash)]
 pub enum ErlModuleResolution {
     Static(ErlModuleId),
     Dynamic,
