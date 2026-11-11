@@ -92,3 +92,4 @@ $(CORE_APP): $(PATINA) $(PATINA_APP) lib/core/Patina.toml $(wildcard lib/core/sr
 	cp -R lib/core/Patina.toml lib/core/src $(ROOT)/patina_core
 	cd lib/core && PATINA_BOOTSTRAP=1  $(abspath $(PATINA)) --root=$(abspath $(ROOT)) \
 		build --out-dir $(abspath $(dir $@))
+	rm -rf $(dir $@).patina_incremental

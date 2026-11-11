@@ -11,8 +11,7 @@ fn greeter(session: &Session, dependencies: &str) {
 
 /// Writes the package `name`, and builds it into `out_dir`.
 fn build_lib(session: &Session, name: &str, out_dir: &str) {
-    session.package(name, "", LIB);
-    session.build_package(name, &["--out-dir", out_dir]);
+    session.build_new_package(name, "", LIB, &["--out-dir", out_dir]);
 }
 
 #[test]
@@ -54,8 +53,8 @@ fn applications_follow_the_manifest() {
     for name in ["zeta", "alpha"] {
         build_lib(&session, name, "lib");
     }
-    session.package("greeter", "zeta = \"~> 0.1\"\nalpha = \"~> 0.1\"", LIB);
-    session.build_package("greeter", &["-L", "lib"]);
+    let dependencies = "zeta = \"~> 0.1\"\nalpha = \"~> 0.1\"";
+    session.build_new_package("greeter", dependencies, LIB, &["-L", "lib"]);
 
     let app = std::fs::read_to_string(session.path().join("greeter.app")).expect("read .app");
     // Ignore how the Erlang pretty printer breaks the list into lines.

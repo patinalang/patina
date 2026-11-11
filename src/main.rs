@@ -173,6 +173,10 @@ struct CommonArgs {
     #[arg(long, value_name = "DIR", default_value = ".", value_parser = absolute_path())]
     out_dir: PathBuf,
 
+    /// Directory for incremental compilation state (default: $out_dir/.patina_incremental).
+    #[arg(long, value_name = "DIR", value_parser = absolute_path())]
+    incremental_dir: Option<PathBuf>,
+
     /// Add `DIR` to library search directories. Can be repeated.
     #[arg(short = 'L', long = "lib-dir", value_name = "DIR", value_parser = absolute_path())]
     lib_dirs: Vec<PathBuf>,
@@ -294,10 +298,14 @@ fn run(
             installation,
         });
 
+    let incremental_dir =
+        args.incremental_dir.unwrap_or_else(|| args.out_dir.join(".patina_incremental"));
+
     let opts = compile::CompileOptions {
         base_dir,
         otp_version: server.otp_version()?,
         out_dir: args.out_dir,
+        incremental_dir,
         lib_dirs,
         package,
         externs,

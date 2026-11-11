@@ -132,6 +132,19 @@ impl Session {
     pub(crate) fn build_package(&self, dir: &str, args: &[&str]) {
         assert_success(&self.try_build_package(dir, args));
     }
+
+    /// Writes the package `name` (see [`Session::package`]) and builds it, which has to succeed.
+    #[track_caller]
+    pub(crate) fn build_new_package(
+        &self,
+        name: &str,
+        dependencies: &str,
+        source: &str,
+        args: &[&str],
+    ) {
+        self.package(name, dependencies, source);
+        self.build_package(name, args);
+    }
 }
 
 #[track_caller]

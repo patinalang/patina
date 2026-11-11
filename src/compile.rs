@@ -24,6 +24,7 @@ use rustc_parse::{new_parser_from_source_str, unwrap_or_emit_fatal};
 use rustc_session::config::{Externs, PanicStrategy};
 use rustc_session::search_paths::{PathKind, SearchPath};
 use rustc_session::{Session, config, lint};
+use rustc_span::def_id::LOCAL_CRATE;
 use rustc_span::edition::Edition;
 use rustc_span::{ErrorGuaranteed, FileName, RealFileName, RemapPathScopeComponents};
 
@@ -110,6 +111,7 @@ pub(crate) struct CompileOptions {
     pub base_dir: PathBuf,
     pub otp_version: String,
     pub out_dir: PathBuf,
+    pub incremental_dir: PathBuf,
     pub lib_dirs: Vec<PathBuf>,
     pub package: PackageInfo,
     pub externs: Externs,
@@ -184,183 +186,201 @@ pub(crate) fn compile(
         let input_src =
             if prelude.is_empty() { src.to_string() } else { format!("{prelude}\n{src}") };
 
-        passes::create_and_enter_global_ctxt(compiler, krate, |tcx| {
-            let dcx = tcx.sess.dcx();
+        let crate_hash = passes::create_and_enter_global_ctxt(compiler, krate, |tcx| {
+            run_stages(&mut stages_left, filename_stem, input_src, opts, server, tcx);
 
-            // Expansion runs proc macros, so this has to happen before it.
-            let code_path: Vec<_> = opts.code_path().into_iter().collect();
-            server.with(dcx, |server| server.extend_code_path(dcx, &code_path));
+            tcx.sess
+                .dcx()
+                .has_errors_or_delayed_bugs()
+                .is_none()
+                .then(|| tcx.crate_hash(LOCAL_CRATE))
+        });
 
-            consume_stage!(stages_left, Stage::Expanded, {
-                let expanded = pprust::print_crate(
-                    tcx.sess.source_map(),
-                    &tcx.resolver_for_lowering().borrow().1,
-                    tcx.sess.io.input.file_name(tcx.sess),
-                    input_src.clone(),
-                    &NoAnn,
-                    true,
-                    tcx.sess.edition(),
-                    &tcx.sess.psess.attr_id_generator,
-                );
+        if let Some(crate_hash) = crate_hash {
+            rustc_incremental::finalize_session_directory(&compiler.sess, Some(crate_hash));
+        }
+    });
+}
 
-                write_file(out_dir, filename_stem, "expanded", expanded.as_bytes()).unwrap_or_else(
+fn run_stages(
+    stages_left: &mut FxHashSet<&Stage>,
+    filename_stem: &str,
+    input_src: String,
+    opts: &CompileOptions,
+    server: &Arc<SyncServer>,
+    tcx: TyCtxt<'_>,
+) {
+    let dcx = tcx.sess.dcx();
+    let CompileOptions { out_dir, package: pkg, .. } = opts;
+
+    // Expansion runs proc macros, so this has to happen before it.
+    let code_path: Vec<_> = opts.code_path().into_iter().collect();
+    server.with(dcx, |server| server.extend_code_path(dcx, &code_path));
+
+    consume_stage!(stages_left, Stage::Expanded, {
+        let expanded = pprust::print_crate(
+            tcx.sess.source_map(),
+            &tcx.resolver_for_lowering().borrow().1,
+            tcx.sess.io.input.file_name(tcx.sess),
+            input_src.clone(),
+            &NoAnn,
+            true,
+            tcx.sess.edition(),
+            &tcx.sess.psess.attr_id_generator,
+        );
+
+        write_file(out_dir, filename_stem, "expanded", expanded.as_bytes()).unwrap_or_else(|e| {
+            dcx.fatal(format!("failed to write expanded file: {e}"));
+        });
+    });
+
+    consume_stage!(stages_left, Stage::Typed, {
+        tcx.hir_body_owners().for_each(|def_id| {
+            tcx.ensure_ok().typeck(def_id);
+            if !tcx.is_typeck_child(def_id.to_def_id()) {
+                tcx.ensure_ok().check_unsafety(def_id);
+                tcx.ensure_ok().check_transmutes(def_id);
+            }
+        });
+
+        let typed = pprust_hir::print_crate(
+            tcx.sess.source_map(),
+            tcx.hir_root_module(),
+            tcx.sess.io.input.file_name(tcx.sess),
+            input_src,
+            &|id| tcx.hir_attrs(id),
+            &TypedAnn { tcx, maybe_typeck_results: Cell::new(None) },
+        );
+
+        write_file(out_dir, filename_stem, "typed", typed.as_bytes()).unwrap_or_else(|e| {
+            dcx.fatal(format!("failed to write typed file: {e}"));
+        });
+    });
+
+    tcx.ensure_ok().analysis(());
+    if let Some(guar) = tcx.sess.dcx().has_errors_or_delayed_bugs() {
+        guar.raise_fatal();
+    }
+
+    consume_stage!(stages_left, Stage::Meta, {
+        let metadata_path = out_dir.join(format!("lib{}.rmeta", pkg.name));
+        rustc_metadata::encode_metadata(tcx, &metadata_path, None);
+    });
+
+    consume_stage!(stages_left, Stage::App, {
+        let Some(version) = &pkg.version else {
+            dcx.fatal("emitting an `.app` requires a package version; set one with --pkg-version");
+        };
+        let term = app::app_term(tcx, version, &pkg.description).unwrap_or_else(|e| {
+            dcx.fatal(format!("failed to build the application specification: {e}"));
+        });
+        let mut rendered = server.with(dcx, |server| server.render_term(dcx, &term));
+        rendered.push_str(".\n");
+        write_file(out_dir, &pkg.otp_app_name, "app", rendered.as_bytes())
+            .unwrap_or_else(|e| dcx.fatal(format!("failed to write app file: {e}")));
+    });
+
+    let arena = DroplessArena::default();
+    let translator = translate::Translator::new(tcx, &arena);
+    let modules = translator.translate();
+
+    let serialized_modules = modules
+        .into_iter()
+        .map(|(mod_name, module)| {
+            let bytes = erlang::to_bytes(&module).unwrap_or_else(|e| {
+                dcx.fatal(format!("failed to serialize module: {e}"));
+            });
+            (mod_name, bytes)
+        })
+        .collect::<Vec<_>>();
+
+    consume_stage!(stages_left, Stage::Eaf, {
+        for (mod_name, bytes) in &serialized_modules {
+            write_file(out_dir, mod_name.as_str(), "eaf", bytes).unwrap_or_else(|e| {
+                dcx.fatal(format!("failed to write eaf file: {e}"));
+            });
+        }
+    });
+
+    consume_stage!(stages_left, Stage::Abstr, {
+        server.with(dcx, |server| {
+            for (mod_name, bytes) in &serialized_modules {
+                let mut rendered = server.render_term(dcx, bytes);
+                if !rendered.ends_with('\n') {
+                    rendered.push('\n');
+                }
+                write_file(out_dir, mod_name.as_str(), "abstr", rendered.as_bytes())
+                    .unwrap_or_else(|e| {
+                        dcx.fatal(format!("failed to write abstr file: {e}"));
+                    });
+            }
+        });
+    });
+
+    consume_stage!(stages_left, Stage::Erl, {
+        server.with(dcx, |server| {
+            for (mod_name, bytes) in &serialized_modules {
+                let rendered = server.render_erl(dcx, bytes);
+                write_file(out_dir, mod_name.as_str(), "erl", rendered.as_bytes()).unwrap_or_else(
                     |e| {
-                        dcx.fatal(format!("failed to write expanded file: {e}"));
+                        dcx.fatal(format!("failed to write erl file: {e}"));
                     },
                 );
-            });
-
-            consume_stage!(stages_left, Stage::Typed, {
-                tcx.hir_body_owners().for_each(|def_id| {
-                    tcx.ensure_ok().typeck(def_id);
-                    if !tcx.is_typeck_child(def_id.to_def_id()) {
-                        tcx.ensure_ok().check_unsafety(def_id);
-                        tcx.ensure_ok().check_transmutes(def_id);
-                    }
-                });
-
-                let typed = pprust_hir::print_crate(
-                    tcx.sess.source_map(),
-                    tcx.hir_root_module(),
-                    tcx.sess.io.input.file_name(tcx.sess),
-                    input_src,
-                    &|id| tcx.hir_attrs(id),
-                    &TypedAnn { tcx, maybe_typeck_results: Cell::new(None) },
-                );
-
-                write_file(out_dir, filename_stem, "typed", typed.as_bytes()).unwrap_or_else(|e| {
-                    dcx.fatal(format!("failed to write typed file: {e}"));
-                });
-            });
-
-            tcx.ensure_ok().analysis(());
-            if let Some(guar) = tcx.sess.dcx().has_errors_or_delayed_bugs() {
-                guar.raise_fatal();
             }
+        });
+    });
 
-            consume_stage!(stages_left, Stage::Meta, {
-                let metadata_path = out_dir.join(format!("lib{}.rmeta", pkg.name));
-                rustc_metadata::encode_metadata(tcx, &metadata_path, None);
-            });
-
-            consume_stage!(stages_left, Stage::App, {
-                let Some(version) = &pkg.version else {
-                    dcx.fatal(
-                        "emitting an `.app` requires a package version; set one with --pkg-version",
-                    );
-                };
-                let term = app::app_term(tcx, version, &pkg.description).unwrap_or_else(|e| {
-                    dcx.fatal(format!("failed to build the application specification: {e}"));
+    consume_stage!(stages_left, Stage::Core0, {
+        server.with(dcx, |server| {
+            for (mod_name, bytes) in &serialized_modules {
+                let rendered = server.render_core0(dcx, bytes).unwrap_or_else(|e| {
+                    dcx.fatal(format!("erl backend failed: {}\n{}", e.errors, e.warnings));
                 });
-                let mut rendered = server.with(dcx, |server| server.render_term(dcx, &term));
-                rendered.push_str(".\n");
-                write_file(out_dir, &pkg.otp_app_name, "app", rendered.as_bytes())
-                    .unwrap_or_else(|e| dcx.fatal(format!("failed to write app file: {e}")));
-            });
-
-            let arena = DroplessArena::default();
-            let translator = translate::Translator::new(tcx, &arena);
-            let modules = translator.translate();
-
-            let serialized_modules = modules
-                .into_iter()
-                .map(|(mod_name, module)| {
-                    let bytes = erlang::to_bytes(&module).unwrap_or_else(|e| {
-                        dcx.fatal(format!("failed to serialize module: {e}"));
+                write_file(out_dir, mod_name.as_str(), "core0", rendered.as_bytes())
+                    .unwrap_or_else(|e| {
+                        dcx.fatal(format!("failed to write core0 file: {e}"));
                     });
-                    (mod_name, bytes)
+            }
+        });
+    });
+
+    consume_stage!(stages_left, Stage::Core, {
+        server.with(dcx, |server| {
+            for (mod_name, bytes) in &serialized_modules {
+                let rendered = server.render_core(dcx, bytes).unwrap_or_else(|e| {
+                    dcx.fatal(format!("erl backend failed: {}\n{}", e.errors, e.warnings));
+                });
+                write_file(out_dir, mod_name.as_str(), "core", rendered.as_bytes()).unwrap_or_else(
+                    |e| {
+                        dcx.fatal(format!("failed to write core file: {e}"));
+                    },
+                );
+            }
+        });
+    });
+
+    consume_stage!(stages_left, Stage::Beam, {
+        server.with(dcx, |server| {
+            let beam_filenames: Vec<_> = serialized_modules
+                .iter()
+                .map(|(mod_name, bytes)| {
+                    let compile = server.compile(dcx, bytes).unwrap_or_else(|e| {
+                        dcx.fatal(format!("erl backend failed: {}\n{}", e.errors, e.warnings));
+                    });
+
+                    if !compile.warnings.is_empty() && compile.warnings != "[]" {
+                        dcx.warn(compile.warnings);
+                    }
+
+                    write_file(out_dir, mod_name.as_str(), "beam", &compile.beam).unwrap_or_else(
+                        |e| {
+                            dcx.fatal(format!("failed to write beam file: {e}"));
+                        },
+                    )
                 })
-                .collect::<Vec<_>>();
+                .collect();
 
-            consume_stage!(stages_left, Stage::Eaf, {
-                for (mod_name, bytes) in &serialized_modules {
-                    write_file(out_dir, mod_name.as_str(), "eaf", bytes).unwrap_or_else(|e| {
-                        dcx.fatal(format!("failed to write eaf file: {e}"));
-                    });
-                }
-            });
-
-            consume_stage!(stages_left, Stage::Abstr, {
-                server.with(dcx, |server| {
-                    for (mod_name, bytes) in &serialized_modules {
-                        let mut rendered = server.render_term(dcx, bytes);
-                        if !rendered.ends_with('\n') {
-                            rendered.push('\n');
-                        }
-                        write_file(out_dir, mod_name.as_str(), "abstr", rendered.as_bytes())
-                            .unwrap_or_else(|e| {
-                                dcx.fatal(format!("failed to write abstr file: {e}"));
-                            });
-                    }
-                });
-            });
-
-            consume_stage!(stages_left, Stage::Erl, {
-                server.with(dcx, |server| {
-                    for (mod_name, bytes) in &serialized_modules {
-                        let rendered = server.render_erl(dcx, bytes);
-                        write_file(out_dir, mod_name.as_str(), "erl", rendered.as_bytes())
-                            .unwrap_or_else(|e| {
-                                dcx.fatal(format!("failed to write erl file: {e}"));
-                            });
-                    }
-                });
-            });
-
-            consume_stage!(stages_left, Stage::Core0, {
-                server.with(dcx, |server| {
-                    for (mod_name, bytes) in &serialized_modules {
-                        let rendered = server.render_core0(dcx, bytes).unwrap_or_else(|e| {
-                            dcx.fatal(format!("erl backend failed: {}\n{}", e.errors, e.warnings));
-                        });
-                        write_file(out_dir, mod_name.as_str(), "core0", rendered.as_bytes())
-                            .unwrap_or_else(|e| {
-                                dcx.fatal(format!("failed to write core0 file: {e}"));
-                            });
-                    }
-                });
-            });
-
-            consume_stage!(stages_left, Stage::Core, {
-                server.with(dcx, |server| {
-                    for (mod_name, bytes) in &serialized_modules {
-                        let rendered = server.render_core(dcx, bytes).unwrap_or_else(|e| {
-                            dcx.fatal(format!("erl backend failed: {}\n{}", e.errors, e.warnings));
-                        });
-                        write_file(out_dir, mod_name.as_str(), "core", rendered.as_bytes())
-                            .unwrap_or_else(|e| {
-                                dcx.fatal(format!("failed to write core file: {e}"));
-                            });
-                    }
-                });
-            });
-
-            consume_stage!(stages_left, Stage::Beam, {
-                server.with(dcx, |server| {
-                    let beam_filenames: Vec<_> = serialized_modules
-                        .iter()
-                        .map(|(mod_name, bytes)| {
-                            let compile = server.compile(dcx, bytes).unwrap_or_else(|e| {
-                                dcx.fatal(format!(
-                                    "erl backend failed: {}\n{}",
-                                    e.errors, e.warnings
-                                ));
-                            });
-
-                            if !compile.warnings.is_empty() && compile.warnings != "[]" {
-                                dcx.warn(compile.warnings);
-                            }
-
-                            write_file(out_dir, mod_name.as_str(), "beam", &compile.beam)
-                                .unwrap_or_else(|e| {
-                                    dcx.fatal(format!("failed to write beam file: {e}"));
-                                })
-                        })
-                        .collect();
-
-                    server.load_modules(dcx, &beam_filenames);
-                });
-            });
+            server.load_modules(dcx, &beam_filenames);
         });
     });
 }
@@ -370,7 +390,15 @@ fn make_config(
     opts: &CompileOptions,
     server: &Arc<SyncServer>,
 ) -> interface::Config {
-    let CompileOptions { base_dir, lib_dirs, package: pkg, externs, allowed_lints, .. } = opts;
+    let CompileOptions {
+        base_dir,
+        incremental_dir,
+        lib_dirs,
+        package: pkg,
+        externs,
+        allowed_lints,
+        ..
+    } = opts;
 
     let mut options = config::Options {
         edition: Edition::EditionFuture,
@@ -378,6 +406,7 @@ fn make_config(
         unstable_opts: config::UnstableOptions {
             ui_testing: true,
             no_steal_thir: true,
+            cache_proc_macros: true,
             ..Default::default()
         },
         crate_types: vec![config::CrateType::Rlib],
@@ -393,6 +422,7 @@ fn make_config(
             .collect(),
         remap_path_prefix: vec![(base_dir.clone(), PathBuf::new())],
         remap_path_scope: RemapPathScopeComponents::all(),
+        incremental: Some(incremental_dir.clone()),
         ..Default::default()
     };
 

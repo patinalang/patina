@@ -29,6 +29,7 @@ rustc_middle = { path = "rust/compiler/rustc_middle" }
 rustc_query_impl = { path = "rust/compiler/rustc_query_impl" }
 rustc_interface = { path = "rust/compiler/rustc_interface" }
 rustc_hir_pretty = { path = "rust/compiler/rustc_hir_pretty" }
+rustc_incremental = { path = "rust/compiler/rustc_incremental" }
 rustc_metadata = { path = "rust/compiler/rustc_metadata" }
 
 etf = { path = "rust/compiler/etf" }
