@@ -6,6 +6,7 @@ use std::os::unix::net::UnixStream;
 use std::os::windows::net::UnixStream;
 use std::path::{Path, PathBuf};
 use std::process::{Child, ChildStdout, Command, Stdio};
+use std::string::FromUtf8Error;
 use std::sync::mpsc::{self, RecvTimeoutError};
 use std::sync::{Arc, Mutex};
 use std::thread::JoinHandle;
@@ -26,6 +27,7 @@ const OP_CORE: &[u8] = b"core";
 const OP_CODE_PATH: &[u8] = b"code_path";
 const OP_LOAD_MODULES: &[u8] = b"load_modules";
 const OP_MACRO: &[u8] = b"macro";
+const OP_OTP_VERSION: &[u8] = b"otp_version";
 #[cfg(test)]
 const OP_ECHO: &[u8] = b"echo";
 
@@ -94,6 +96,20 @@ impl Drop for TmpDir {
     }
 }
 
+#[derive(Debug, thiserror::Error)]
+#[error("unexpected compile server response: {0}")]
+pub(crate) struct UnexpectedResponse(String);
+
+impl UnexpectedResponse {
+    fn from_parts(parts: &[Vec<u8>]) -> Self {
+        Self(parts.iter().map(|p| String::from_utf8_lossy(p)).collect::<Vec<_>>().join(", "))
+    }
+
+    fn fatal(&self, dcx: DiagCtxtHandle<'_>) -> ! {
+        dcx.fatal(self.to_string())
+    }
+}
+
 /// Why a compile server could not be started.
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum SpawnError {
@@ -132,14 +148,26 @@ pub(crate) enum TransportError {
 }
 
 /// Why there is no VM to talk to, kept for every caller that asks later.
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, Clone, thiserror::Error)]
 pub(crate) enum StartupError {
     #[error("failed to start compile server: {0}")]
-    Spawn(#[from] SpawnError),
+    Spawn(#[source] Arc<SpawnError>),
     #[error("the compile server's startup thread panicked")]
     Panicked,
     #[error("the compile server's startup was lost")]
     Lost,
+}
+
+#[derive(Debug, thiserror::Error)]
+pub(crate) enum OtpVersionError {
+    #[error(transparent)]
+    StartupError(#[from] StartupError),
+    #[error(transparent)]
+    Transport(#[from] TransportError),
+    #[error(transparent)]
+    UnexpectedResponse(UnexpectedResponse),
+    #[error("the version isn't UTF-8: {0}")]
+    UtfDecodeError(#[from] FromUtf8Error),
 }
 
 pub(crate) struct CompileServer {
@@ -247,6 +275,18 @@ impl CompileServer {
         }
     }
 
+    fn otp_version(&mut self) -> Result<String, OtpVersionError> {
+        let parts = self.transact_within(&[OP_OTP_VERSION], None)?;
+
+        match parts.as_slice() {
+            [status, version] if status == b"ok" => Ok(String::from_utf8(version.clone())?),
+
+            parts => {
+                Err(OtpVersionError::UnexpectedResponse(UnexpectedResponse::from_parts(parts)))
+            }
+        }
+    }
+
     pub(super) fn extend_code_path(&mut self, dcx: DiagCtxtHandle<'_>, dirs: &[PathBuf]) {
         let request: Box<[&[u8]]> = std::iter::once(OP_CODE_PATH)
             .chain(dirs.iter().map(|dir| dir.as_os_str().as_encoded_bytes()))
@@ -304,10 +344,9 @@ impl CompileServer {
                 String::from_utf8_lossy(reason)
             ))),
             [status] if status == b"timeout" => Err(MacroRunError::Timeout),
-            parts => Err(MacroRunError::Transport(format!(
-                "unexpected compile server response: {}",
-                parts.iter().map(|p| String::from_utf8_lossy(p)).collect::<Vec<_>>().join(", ")
-            ))),
+            parts => {
+                Err(MacroRunError::Transport(UnexpectedResponse::from_parts(parts).to_string()))
+            }
         }
     }
 
@@ -384,8 +423,7 @@ impl CompileServer {
     }
 
     fn unexpected(&self, dcx: DiagCtxtHandle<'_>, parts: &[Vec<u8>]) -> ! {
-        let parts = parts.iter().map(|p| String::from_utf8_lossy(p)).collect::<Vec<_>>().join(", ");
-        dcx.fatal(format!("unexpected compile server response: {parts}"));
+        UnexpectedResponse::from_parts(parts).fatal(dcx)
     }
 }
 
@@ -493,6 +531,13 @@ impl SyncServer {
         })
     }
 
+    pub(crate) fn otp_version(&self) -> Result<String, OtpVersionError> {
+        self.try_with(|server| match server {
+            Ok(server) => server.otp_version(),
+            Err(error) => Err(error.clone().into()),
+        })
+    }
+
     /// Like [`SyncServer::with`], but hands `f` the startup failure instead of
     /// raising it. Used by the proc-macro runner, which reports errors through
     /// rustc's macro machinery.
@@ -515,7 +560,7 @@ impl State {
                 };
                 *self = match startup.join() {
                     Ok(Ok(server)) => State::Ready(server),
-                    Ok(Err(err)) => State::Failed(err.into()),
+                    Ok(Err(err)) => State::Failed(StartupError::Spawn(Arc::new(err))),
                     Err(_) => State::Failed(StartupError::Panicked),
                 };
                 self.ready()

@@ -2033,6 +2033,10 @@ impl CrateMetadata {
         self.root.tables.adt_async_destructor.len > 0
     }
 
+    pub(crate) fn otp_version(&self) -> Symbol {
+        self.root.otp_version
+    }
+
     fn num_def_ids(&self) -> usize {
         self.root.tables.def_keys.size()
     }

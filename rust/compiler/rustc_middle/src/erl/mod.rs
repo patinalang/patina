@@ -1121,6 +1121,14 @@ fn otp_app_name(tcx: TyCtxt<'_>, LocalCrate: LocalCrate) -> Symbol {
     }
 }
 
+/// Provider for [`TyCtxt::otp_version`] of the local crate.
+fn otp_version(tcx: TyCtxt<'_>, LocalCrate: LocalCrate) -> Symbol {
+    match &tcx.sess.opts.otp_version {
+        Some(version) => Symbol::intern(version),
+        None => bug!("the session has no OTP version"),
+    }
+}
+
 /// Provider for [`TyCtxt::check_erl_module_clashes`].
 fn check_erl_module_clashes(tcx: TyCtxt<'_>, (): ()) {
     #[derive(Clone, Copy)]
@@ -1221,6 +1229,7 @@ pub fn provide(providers: &mut Providers) {
         erl_local_modules,
         beam_modules,
         otp_app_name,
+        otp_version,
         check_erl_module_clashes,
         erl_shape_of_ty: shape::erl_shape_of_ty,
         erl_variant_wrap_guards: shape::erl_variant_wrap_guards,

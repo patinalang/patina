@@ -339,6 +339,7 @@ top_level_options!(
         externs: Externs [UNTRACKED],
         crate_name: Option<String> [TRACKED],
         otp_app_name: Option<String> [TRACKED],
+        otp_version: Option<String> [TRACKED],
         /// Indicates how the compiler should treat unstable features.
         unstable_features: UnstableFeatures [TRACKED],
 

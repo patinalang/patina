@@ -456,6 +456,22 @@ impl CStore {
         self.report_incompatible_target_modifiers(tcx, krate);
         self.report_incompatible_partial_mitigations(tcx, krate);
         self.report_incompatible_async_drop_feature(tcx, krate);
+        self.report_incompatible_otp_versions(tcx, krate);
+    }
+
+    fn report_incompatible_otp_versions(&self, tcx: TyCtxt<'_>, krate: &Crate) {
+        let version = tcx.otp_version(LOCAL_CRATE);
+        for (_cnum, data) in self.iter_crate_data() {
+            let dependency_version = data.otp_version();
+            if dependency_version != version {
+                tcx.dcx().emit_err(errors::IncompatibleOtpVersion {
+                    span: krate.spans.inner_span.shrink_to_lo(),
+                    package: data.name(),
+                    dependency_version,
+                    version,
+                });
+            }
+        }
     }
 
     pub fn report_incompatible_target_modifiers(&self, tcx: TyCtxt<'_>, krate: &Crate) {

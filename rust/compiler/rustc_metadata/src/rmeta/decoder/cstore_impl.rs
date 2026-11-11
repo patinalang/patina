@@ -327,6 +327,7 @@ provide! { tcx, def_id, other, cdata,
     is_private_dep => { cdata.private_dep }
     is_panic_runtime => { cdata.root.panic_runtime }
     otp_app_name => { cdata.root.otp_app_name }
+    otp_version => { cdata.root.otp_version }
     beam_modules => { cdata.root.beam_modules.decode((cdata, tcx)).collect() }
     is_compiler_builtins => { cdata.root.compiler_builtins }
 

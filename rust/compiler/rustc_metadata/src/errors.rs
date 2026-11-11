@@ -673,6 +673,19 @@ pub(crate) struct AsyncDropTypesInDependency {
 }
 
 #[derive(Diagnostic)]
+#[diag(
+    "package `{$package}` was built with OTP {$dependency_version}, but this build uses OTP {$version}"
+)]
+#[help("rebuild `{$package}` with OTP {$version}")]
+pub(crate) struct IncompatibleOtpVersion {
+    #[primary_span]
+    pub span: Span,
+    pub package: Symbol,
+    pub dependency_version: Symbol,
+    pub version: Symbol,
+}
+
+#[derive(Diagnostic)]
 #[diag("link name must be well-formed if link kind is `raw-dylib`")]
 pub(crate) struct RawDylibMalformed {
     #[primary_span]

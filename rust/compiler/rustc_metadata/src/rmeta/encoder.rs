@@ -719,6 +719,7 @@ impl<'a, 'tcx> EncodeContext<'a, 'tcx> {
                 proc_macros,
                 beam_modules,
                 otp_app_name: tcx.otp_app_name(LOCAL_CRATE),
+                otp_version: tcx.otp_version(LOCAL_CRATE),
                 debugger_visualizers,
                 compiler_builtins: find_attr!(attrs, CompilerBuiltins),
                 needs_allocator: find_attr!(attrs, NeedsAllocator),

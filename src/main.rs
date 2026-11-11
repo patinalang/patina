@@ -17,7 +17,7 @@ use clap::builder::{ArgPredicate, PathBufValueParser, TypedValueParser};
 use rustc_errors::{FatalError, catch_fatal_errors};
 use rustc_session::config::Externs;
 
-use crate::compile::compile_server::SpawnError;
+use crate::compile::compile_server::{OtpVersionError, SpawnError};
 use crate::installation::{Installation, LocateInstallationError};
 use crate::manifest::{Manifest, ManifestError};
 use crate::package::{DuplicateExtern, ExternArg, PackageInfo, PackageName, PackageNameError};
@@ -213,6 +213,8 @@ enum Error {
     Serve(#[source] SpawnError),
     #[error("failed to get the current directory: {0}")]
     CurrentDir(#[source] io::Error),
+    #[error("failed to read OTP Version: {0}")]
+    OtpVersionError(#[from] OtpVersionError),
 }
 
 fn main() -> ExitCode {
@@ -286,20 +288,21 @@ fn run(
         lib_dirs.push(installation.core_dir.clone());
     }
 
+    let server =
+        compile::compile_server::SyncServer::start(compile::compile_server::SyncServerOpts {
+            sock_path: args.compile_server.clone(),
+            installation,
+        });
+
     let opts = compile::CompileOptions {
         base_dir,
+        otp_version: server.otp_version()?,
         out_dir: args.out_dir,
         lib_dirs,
         package,
         externs,
         allowed_lints: args.allowed_lints,
     };
-
-    let server =
-        compile::compile_server::SyncServer::start(compile::compile_server::SyncServerOpts {
-            sock_path: args.compile_server.clone(),
-            installation,
-        });
 
     let stages = args
         .dump

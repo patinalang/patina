@@ -145,6 +145,17 @@ do_request(Sock, ~"load_modules", Files) ->
         ok -> write_msg(Sock, [~"ok"]);
         {error, Reason} -> write_msg(Sock, [~"error", Reason])
     end;
+do_request(Sock, ~"otp_version", []) ->
+    OtpVersion =
+        case persistent_term:get({?MODULE, otp_version}, undefined) of
+            undefined ->
+                FetchedVersion = otp_version(),
+                persistent_term:put({?MODULE, otp_version}, FetchedVersion),
+                FetchedVersion;
+            CachedVersion ->
+                CachedVersion
+        end,
+    write_msg(Sock, [~"ok", OtpVersion]);
 do_request(Sock, ~"echo", [Bin]) ->
     write_msg(Sock, [~"ok", term_to_binary(binary_to_term(Bin), [{minor_version, 2}])]);
 do_request(Sock, ~"macro", [Mod, Fun | ArgBins]) ->
@@ -152,6 +163,21 @@ do_request(Sock, ~"macro", [Mod, Fun | ArgBins]) ->
     Module = binary_to_atom(Mod, utf8),
     Function = binary_to_atom(Fun, utf8),
     run_macro(Sock, Module, Function, Args).
+
+%% The full OTP version, such as `29.0.1`, or else just the major release.
+%% Inspired by https://github.com/fishcakez/dialyze/blob/6698ae582c77940ee10b4babe4adeff22f1b7779/lib/mix/tasks/dialyze.ex#L168
+otp_version() ->
+    Major = erlang:system_info(otp_release),
+    VsnFile = filename:join([code:root_dir(), "releases", Major, "OTP_VERSION"]),
+    OtpVersion =
+        maybe
+            {ok, Contents} ?= file:read_file(VsnFile),
+            [Full] ?= binary:split(Contents, ~"\n", [global, trim_all]),
+            Full
+        else
+            _ -> unicode:characters_to_binary(Major)
+        end,
+    OtpVersion.
 
 load_modules(Files) ->
     Stale = lists:filtermap(fun stale_module/1, Files),

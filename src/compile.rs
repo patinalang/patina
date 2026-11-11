@@ -108,6 +108,7 @@ macro_rules! consume_stage {
 
 pub(crate) struct CompileOptions {
     pub base_dir: PathBuf,
+    pub otp_version: String,
     pub out_dir: PathBuf,
     pub lib_dirs: Vec<PathBuf>,
     pub package: PackageInfo,
@@ -383,6 +384,7 @@ fn make_config(
         cg: config::CodegenOptions { panic: Some(PanicStrategy::Abort), ..Default::default() },
         crate_name: Some(pkg.name.to_string()),
         otp_app_name: Some(pkg.otp_app_name.clone()),
+        otp_version: Some(opts.otp_version.clone()),
         externs: externs.clone(),
         lint_opts: allowed_lints.iter().map(|lint| (lint.clone(), lint::Level::Allow)).collect(),
         search_paths: lib_dirs
