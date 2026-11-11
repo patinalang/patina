@@ -107,6 +107,7 @@ macro_rules! consume_stage {
 }
 
 pub(crate) struct CompileOptions {
+    pub base_dir: PathBuf,
     pub out_dir: PathBuf,
     pub lib_dirs: Vec<PathBuf>,
     pub package: PackageInfo,
@@ -368,11 +369,8 @@ fn make_config(
     opts: &CompileOptions,
     server: &Arc<SyncServer>,
 ) -> interface::Config {
-    let CompileOptions { lib_dirs, package: pkg, externs, allowed_lints, .. } = opts;
+    let CompileOptions { base_dir, lib_dirs, package: pkg, externs, allowed_lints, .. } = opts;
 
-    let cwd = std::env::current_dir().unwrap_or_else(|e| {
-        panic!("failed to get the current directory: {e}");
-    });
     let mut options = config::Options {
         edition: Edition::EditionFuture,
         unstable_features: UnstableFeatures::Allow,
@@ -391,13 +389,13 @@ fn make_config(
             .iter()
             .map(|dir| SearchPath::new(PathKind::All, dir.to_owned()))
             .collect(),
-        remap_path_prefix: vec![(cwd.clone(), PathBuf::new())],
+        remap_path_prefix: vec![(base_dir.clone(), PathBuf::new())],
         remap_path_scope: RemapPathScopeComponents::all(),
         ..Default::default()
     };
 
     options.working_dir =
-        options.file_path_mapping().to_real_filename(&RealFileName::empty(), &cwd);
+        options.file_path_mapping().to_real_filename(&RealFileName::empty(), base_dir);
 
     interface::Config {
         crate_cfg: vec![],

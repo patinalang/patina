@@ -29,9 +29,7 @@ LL |     let _c = boom!();
    |
    = help: message: error: badarith
            [{erlang,'div',[1,0],[{error_info,#{module => erl_erts_errors}}]},
-            {'Elixir.Patina.Macros',boom,1,
-                                    [{file,"tests/ui/pkg-src/macros/src/macros.pt"},
-                                     {line,105}]}]
+            {'Elixir.Patina.Macros',boom,1,[{file,"src/macros.pt"},{line,105}]}]
 
 error: lifetimes are not supported in Patina
   --> tests/ui/src/pkg/errors/proc_macros.pt:14:24
@@ -56,8 +54,7 @@ LL |     let _f = bad_punct!();
    = help: message: error: 'unsupported punctuation character'
            [{'Elixir.Patina.Core.ProcMacro.Punct',new,2,
                 [{file,"src/proc_macro.pt"},{line,523}]},
-            {'Elixir.Patina.Macros',bad_punct,1,
-                [{file,"tests/ui/pkg-src/macros/src/macros.pt"},{line,113}]}]
+            {'Elixir.Patina.Macros',bad_punct,1,[{file,"src/macros.pt"},{line,113}]}]
 
 error: proc macro panicked
   --> tests/ui/src/pkg/errors/proc_macros.pt:20:14
@@ -70,8 +67,7 @@ LL |     let _g = bad_byte!();
                 [{file,"src/proc_macro.pt"},{line,151}]},
             {'Elixir.Patina.Core.ProcMacro.Literal',byte_character,1,
                 [{file,"src/proc_macro.pt"},{line,590}]},
-            {'Elixir.Patina.Macros',bad_byte,1,
-                [{file,"tests/ui/pkg-src/macros/src/macros.pt"},{line,232}]}]
+            {'Elixir.Patina.Macros',bad_byte,1,[{file,"src/macros.pt"},{line,232}]}]
 
 error: aborting due to 8 previous errors
 

@@ -211,6 +211,8 @@ enum Error {
     },
     #[error("failed to run compile server: {0}")]
     Serve(#[source] SpawnError),
+    #[error("failed to get the current directory: {0}")]
+    CurrentDir(#[source] io::Error),
 }
 
 fn main() -> ExitCode {
@@ -246,7 +248,7 @@ fn try_main(args: Args) -> Result<(), Error> {
                 manifest.description,
             );
             let externs = package.externs(dependencies.into_iter().map(ExternArg::from))?;
-            run(common, emit, &file, package, externs, installation)
+            run(common, emit, dir, &file, package, externs, installation)
         }
         Command::Compile {
             file,
@@ -260,7 +262,8 @@ fn try_main(args: Args) -> Result<(), Error> {
             let name = package::resolve_package_name(pkg_name, &file)?;
             let package = PackageInfo::new(name, otp_app_name, pkg_version, None);
             let externs = package.externs(extern_args)?;
-            run(common, emit, &file, package, externs, installation)
+            let cwd = std::env::current_dir().map_err(Error::CurrentDir)?;
+            run(common, emit, cwd, &file, package, externs, installation)
         }
         Command::Serve => compile::compile_server::serve(&installation).map_err(Error::Serve),
     }
@@ -269,6 +272,7 @@ fn try_main(args: Args) -> Result<(), Error> {
 fn run(
     args: CommonArgs,
     emit: Vec<EmitStage>,
+    base_dir: PathBuf,
     file: &Path,
     package: PackageInfo,
     externs: Externs,
@@ -283,6 +287,7 @@ fn run(
     }
 
     let opts = compile::CompileOptions {
+        base_dir,
         out_dir: args.out_dir,
         lib_dirs,
         package,
