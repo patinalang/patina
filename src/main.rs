@@ -1,4 +1,4 @@
-#![feature(rustc_private)]
+#![feature(rustc_private, iter_intersperse)]
 #![cfg_attr(windows, feature(windows_unix_domain_sockets))]
 
 mod compile;

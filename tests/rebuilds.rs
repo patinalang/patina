@@ -191,3 +191,13 @@ fn changed_metadata_is_encoded_again() {
     session.build_new_package("greeter", "", &GREETER.replace("2", "3"), &[]);
     assert_ne!(metadata_inode(&session), rmeta);
 }
+
+#[test]
+fn removed_module_beam_is_deleted_even_if_the_cache_is_discarded() {
+    let session = Session::new();
+    session.build_new_package("greeter", "", GREETER, &[]);
+
+    // Changed options make incremental mechanism ignore the previous session.
+    session.build_new_package("greeter", "", "pub mod a {}\n", &["-A", "dead_code"]);
+    assert!(!session.path().join("Elixir.Patina.Greeter.B.beam").exists());
+}

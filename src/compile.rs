@@ -28,11 +28,11 @@ use rustc_session::search_paths::{PathKind, SearchPath};
 use rustc_session::{Session, config, lint};
 use rustc_span::def_id::LOCAL_CRATE;
 use rustc_span::edition::Edition;
-use rustc_span::{ErrorGuaranteed, FileName, RealFileName, RemapPathScopeComponents};
+use rustc_span::{ErrorGuaranteed, FileName, RealFileName, RemapPathScopeComponents, Symbol};
 
 use crate::Stage;
 use crate::compile::compile_server::SyncServer;
-use crate::package::PackageInfo;
+use crate::package::{PackageInfo, PackageName};
 
 static INTERNAL_FEATURES: AtomicBool = AtomicBool::new(false);
 
@@ -452,6 +452,15 @@ fn run_stages(
         }
 
         server.with(dcx, |server| server.load_modules(dcx, &beam_paths));
+
+        clean_up_beams_and_update_manifest(
+            &opts.incremental_dir,
+            &pkg.name,
+            out_dir,
+            tcx.beam_modules(LOCAL_CRATE),
+        )
+        .unwrap_or_else(|e| dcx.fatal(format!("failed to delete removed modules' beams: {e}")));
+
         work_products.extend(metadata_work_product);
         Some(work_products)
     });
@@ -488,6 +497,31 @@ fn try_use_cached_beam(
     }
 
     Some(cached)
+}
+
+fn clean_up_beams_and_update_manifest(
+    incremental_dir: &Path,
+    pkg_name: &PackageName,
+    out_dir: &Path,
+    modules: &FxIndexSet<Symbol>,
+) -> io::Result<()> {
+    let manifest_path = incremental_dir.join(format!("{pkg_name}.modules"));
+    let modules: FxIndexSet<&str> = modules.iter().map(|symbol| symbol.as_str()).collect();
+
+    let previous_modules = match std::fs::read_to_string(&manifest_path) {
+        Err(e) if e.kind() == io::ErrorKind::NotFound => Ok(String::new()),
+        other => other,
+    }?;
+
+    for module in previous_modules.lines().filter(|&module| !modules.contains(module)) {
+        match std::fs::remove_file(out_dir.join(module).with_added_extension("beam")) {
+            Err(e) if e.kind() == io::ErrorKind::NotFound => Ok(()),
+            other => other,
+        }?
+    }
+
+    let contents: String = modules.iter().copied().intersperse("\n").collect();
+    std::fs::write(&manifest_path, contents)
 }
 
 fn replace_file_via(
