@@ -23,6 +23,7 @@ rustc_abi = { path = "rust/compiler/rustc_abi" }
 rustc_errors = { path = "rust/compiler/rustc_errors" }
 rustc_data_structures = { path = "rust/compiler/rustc_data_structures" }
 rustc_feature = { path = "rust/compiler/rustc_feature" }
+rustc_fs_util = { path = "rust/compiler/rustc_fs_util" }
 rustc_hir = { path = "rust/compiler/rustc_hir" }
 rustc_index = { path = "rust/compiler/rustc_index" }
 rustc_middle = { path = "rust/compiler/rustc_middle" }
@@ -39,6 +40,7 @@ indexmap = { version = "2.14.0", features = ["serde"] }
 num-bigint = "0.4.6"
 serde = { version = "1.0.228", features = ["derive"] }
 serde-untagged = "0.1.9"
+tempfile = "3.27.0"
 thiserror = "2.0.18"
 toml = { version = "1.2.0", features = ["preserve_order"] }
 
@@ -46,7 +48,6 @@ toml = { version = "1.2.0", features = ["preserve_order"] }
 anyhow = "1.0.102"
 libtest-mimic = "0.8.2"
 similar = "3.1.1"
-tempfile = "3.27.0"
 walkdir = "2.5.0"
 
 [profile.dev.package.microlp]

@@ -5,18 +5,21 @@ mod translate;
 
 use std::cell::Cell;
 use std::fs::File;
-use std::io::Write;
+use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
 use rustc_ast::Crate;
 use rustc_ast_pretty::pprust;
-use rustc_data_structures::fx::{FxHashSet, FxIndexSet};
+use rustc_data_structures::fx::{FxHashSet, FxIndexMap, FxIndexSet};
+use rustc_errors::DiagCtxtHandle;
 use rustc_feature::UnstableFeatures;
 use rustc_hir_pretty as pprust_hir;
 use rustc_interface::util::DummyCodegenBackend;
 use rustc_interface::{interface, passes};
+use rustc_middle::bug;
+use rustc_middle::dep_graph::{DepKind, DepNode, WorkProduct, WorkProductId};
 use rustc_middle::ty::{TyCtxt, TypeckResults};
 use rustc_parse::lexer::StripTokens;
 use rustc_parse::{new_parser_from_source_str, unwrap_or_emit_fatal};
@@ -98,9 +101,9 @@ impl pprust_hir::PpAnn for TypedAnn<'_> {
 macro_rules! consume_stage {
     ($stages_left:expr, $stage:expr, $body:block) => {
         if $stages_left.remove(&$stage) {
-            $body
+            let result = $body;
             if $stages_left.is_empty() {
-                return;
+                return result;
             }
         }
     };
@@ -186,13 +189,15 @@ pub(crate) fn compile(
             if prelude.is_empty() { src.to_string() } else { format!("{prelude}\n{src}") };
 
         let crate_hash = passes::create_and_enter_global_ctxt(compiler, krate, |tcx| {
-            run_stages(&mut stages_left, filename_stem, input_src, opts, server, tcx);
+            // Only a build that emits beams keeps its session for the next build.
+            // Any other session is left unfinished and deleted.
+            let work_products =
+                run_stages(&mut stages_left, filename_stem, input_src, opts, server, tcx)?;
 
-            tcx.sess
-                .dcx()
-                .has_errors_or_delayed_bugs()
-                .is_none()
-                .then(|| tcx.crate_hash(LOCAL_CRATE))
+            tcx.sess.dcx().has_errors_or_delayed_bugs().is_none().then(|| {
+                rustc_incremental::save_work_product_index(tcx.sess, &tcx.dep_graph, work_products);
+                tcx.crate_hash(LOCAL_CRATE)
+            })
         });
 
         if let Some(crate_hash) = crate_hash {
@@ -208,9 +213,19 @@ fn run_stages(
     opts: &CompileOptions,
     server: &Arc<SyncServer>,
     tcx: TyCtxt<'_>,
-) {
+) -> Option<FxIndexMap<WorkProductId, WorkProduct>> {
     let dcx = tcx.sess.dcx();
     let CompileOptions { out_dir, package: pkg, .. } = opts;
+
+    // Outputs are written or linked here first, on the same filesystem  as `dir`,
+    // then renamed into place to get atomic changes in the output dir.
+    let staging_dir = tempfile::Builder::new()
+        .prefix(".patina-")
+        .suffix(".tmp")
+        .tempdir_in(out_dir)
+        .unwrap_or_else(|e| {
+            dcx.fatal(format!("failed to create a staging directory in {}: {e}", out_dir.display()))
+        });
 
     // Expansion runs proc macros, so this has to happen before it.
     let code_path: Vec<_> = opts.code_path().into_iter().collect();
@@ -231,6 +246,8 @@ fn run_stages(
         write_file(out_dir, filename_stem, "expanded", expanded.as_bytes()).unwrap_or_else(|e| {
             dcx.fatal(format!("failed to write expanded file: {e}"));
         });
+
+        None
     });
 
     consume_stage!(stages_left, Stage::Typed, {
@@ -254,6 +271,8 @@ fn run_stages(
         write_file(out_dir, filename_stem, "typed", typed.as_bytes()).unwrap_or_else(|e| {
             dcx.fatal(format!("failed to write typed file: {e}"));
         });
+
+        None
     });
 
     tcx.ensure_ok().analysis(());
@@ -261,9 +280,27 @@ fn run_stages(
         guar.raise_fatal();
     }
 
+    let mut metadata_work_product = None;
     consume_stage!(stages_left, Stage::Meta, {
         let metadata_path = out_dir.join(format!("lib{}.rmeta", pkg.name));
-        rustc_metadata::encode_metadata(tcx, &metadata_path, None);
+
+        replace_file_via(&staging_dir, &metadata_path, |temp| {
+            rustc_metadata::encode_metadata(tcx, temp, None);
+            Ok(())
+        })
+        .unwrap_or_else(|e| {
+            dcx.fatal(format!("failed to write metadata {}: {e}", metadata_path.display()));
+        });
+
+        metadata_work_product = rustc_incremental::copy_cgu_workproduct_to_incr_comp_cache_dir(
+            tcx.sess,
+            // "metadata" work-product name is hardcoded in `rustc_metadata::encode_metadata`
+            "metadata",
+            &[("rmeta", &metadata_path)],
+            &[],
+        );
+
+        None
     });
 
     consume_stage!(stages_left, Stage::App, {
@@ -277,25 +314,29 @@ fn run_stages(
         rendered.push_str(".\n");
         write_file(out_dir, &pkg.otp_app_name, "app", rendered.as_bytes())
             .unwrap_or_else(|e| dcx.fatal(format!("failed to write app file: {e}")));
+
+        None
     });
 
     let serialized_modules = tcx
         .erl_local_modules(())
         .keys()
-        .map(|&module| (tcx.erl_module_name(module), tcx.erl_module_eaf(module)))
+        .map(|&module| (module, tcx.erl_module_name(module), tcx.erl_module_eaf(module)))
         .collect::<Vec<_>>();
 
     consume_stage!(stages_left, Stage::Eaf, {
-        for (mod_name, bytes) in &serialized_modules {
+        for (_, mod_name, bytes) in &serialized_modules {
             write_file(out_dir, mod_name.as_str(), "eaf", bytes).unwrap_or_else(|e| {
                 dcx.fatal(format!("failed to write eaf file: {e}"));
             });
         }
+
+        None
     });
 
     consume_stage!(stages_left, Stage::Abstr, {
         server.with(dcx, |server| {
-            for (mod_name, bytes) in &serialized_modules {
+            for (_, mod_name, bytes) in &serialized_modules {
                 let mut rendered = server.render_term(dcx, bytes);
                 if !rendered.ends_with('\n') {
                     rendered.push('\n');
@@ -306,11 +347,13 @@ fn run_stages(
                     });
             }
         });
+
+        None
     });
 
     consume_stage!(stages_left, Stage::Erl, {
         server.with(dcx, |server| {
-            for (mod_name, bytes) in &serialized_modules {
+            for (_, mod_name, bytes) in &serialized_modules {
                 let rendered = server.render_erl(dcx, bytes);
                 write_file(out_dir, mod_name.as_str(), "erl", rendered.as_bytes()).unwrap_or_else(
                     |e| {
@@ -319,11 +362,13 @@ fn run_stages(
                 );
             }
         });
+
+        None
     });
 
     consume_stage!(stages_left, Stage::Core0, {
         server.with(dcx, |server| {
-            for (mod_name, bytes) in &serialized_modules {
+            for (_, mod_name, bytes) in &serialized_modules {
                 let rendered = server.render_core0(dcx, bytes).unwrap_or_else(|e| {
                     dcx.fatal(format!("erl backend failed: {}\n{}", e.errors, e.warnings));
                 });
@@ -333,11 +378,13 @@ fn run_stages(
                     });
             }
         });
+
+        None
     });
 
     consume_stage!(stages_left, Stage::Core, {
         server.with(dcx, |server| {
-            for (mod_name, bytes) in &serialized_modules {
+            for (_, mod_name, bytes) in &serialized_modules {
                 let rendered = server.render_core(dcx, bytes).unwrap_or_else(|e| {
                     dcx.fatal(format!("erl backend failed: {}\n{}", e.errors, e.warnings));
                 });
@@ -348,32 +395,109 @@ fn run_stages(
                 );
             }
         });
+
+        None
     });
 
     consume_stage!(stages_left, Stage::Beam, {
-        server.with(dcx, |server| {
-            let beam_filenames: Vec<_> = serialized_modules
-                .iter()
-                .map(|(mod_name, bytes)| {
-                    let compile = server.compile(dcx, bytes).unwrap_or_else(|e| {
-                        dcx.fatal(format!("erl backend failed: {}\n{}", e.errors, e.warnings));
-                    });
+        let mut work_products = FxIndexMap::default();
+        let mut beam_paths = Vec::new();
+        for &(module, mod_name, eaf) in &serialized_modules {
+            let mod_name = mod_name.as_str();
+            let beam_path = out_dir.join(mod_name).with_added_extension("beam");
+            let wp_name = format!("{mod_name}.beam");
+            let id = WorkProductId::from_cgu_name(&wp_name);
 
-                    if !compile.warnings.is_empty() && compile.warnings != "[]" {
-                        dcx.warn(compile.warnings);
+            let known_links =
+                match try_use_cached_beam(dcx, tcx, &staging_dir, &module, id, &beam_path) {
+                    Some(cached) => &[cached][..],
+                    None => {
+                        let compile = server
+                            .with(dcx, |server| server.compile(dcx, eaf))
+                            .unwrap_or_else(|e| {
+                                dcx.fatal(format!(
+                                    "erl backend failed: {}\n{}",
+                                    e.errors, e.warnings
+                                ));
+                            });
+
+                        if !compile.warnings.is_empty() && compile.warnings != "[]" {
+                            dcx.warn(compile.warnings);
+                        }
+
+                        replace_file_via(&staging_dir, &beam_path, |temp| {
+                            std::fs::write(temp, compile.beam)
+                        })
+                        .unwrap_or_else(|e| {
+                            dcx.fatal(format!(
+                                "failed to write beam file {}: {e}",
+                                beam_path.display()
+                            ));
+                        });
+
+                        &[]
                     }
+                };
 
-                    write_file(out_dir, mod_name.as_str(), "beam", &compile.beam).unwrap_or_else(
-                        |e| {
-                            dcx.fatal(format!("failed to write beam file: {e}"));
-                        },
-                    )
-                })
-                .collect();
+            let (_, wp) = rustc_incremental::copy_cgu_workproduct_to_incr_comp_cache_dir(
+                tcx.sess,
+                &wp_name,
+                &[("beam", &beam_path)],
+                known_links,
+            )
+            .unwrap_or_else(|| bug!("incremental compilation is not on"));
 
-            server.load_modules(dcx, &beam_filenames);
-        });
+            work_products.insert(id, wp);
+            beam_paths.push(beam_path);
+        }
+
+        server.with(dcx, |server| server.load_modules(dcx, &beam_paths));
+        work_products.extend(metadata_work_product);
+        Some(work_products)
     });
+
+    None
+}
+
+fn try_use_cached_beam(
+    dcx: DiagCtxtHandle,
+    tcx: TyCtxt<'_>,
+    staging_dir: &tempfile::TempDir,
+    module: &rustc_middle::erl::ErlModuleId,
+    id: WorkProductId,
+    out_path: &Path,
+) -> Option<PathBuf> {
+    let eaf_node = DepNode::construct(tcx, DepKind::erl_module_eaf, &module);
+    if !tcx.dep_graph.is_green(&eaf_node) {
+        return None;
+    };
+
+    let wp = tcx.dep_graph.previous_work_product(&id)?;
+    let file_name = wp.saved_files.get("beam")?;
+    let cached = rustc_incremental::in_incr_comp_dir_sess(tcx.sess, file_name);
+
+    if let Err(err) = replace_file_via(staging_dir, out_path, |temp| {
+        rustc_fs_util::link_or_copy(&cached, temp)?;
+        Ok(())
+    }) {
+        dcx.warn(format!(
+            "failed to restore {} from cache: {err}; recompiling",
+            out_path.display()
+        ));
+        return None;
+    }
+
+    Some(cached)
+}
+
+fn replace_file_via(
+    staging_dir: &tempfile::TempDir,
+    target: &Path,
+    write: impl FnOnce(&Path) -> io::Result<()>,
+) -> io::Result<()> {
+    let temp = staging_dir.path().join(target.file_name().expect("target path has a file name"));
+    write(&temp)?;
+    std::fs::rename(&temp, target)
 }
 
 fn make_config(
