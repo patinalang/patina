@@ -7,24 +7,18 @@ use rustc_data_structures::fx::FxIndexMap;
 use serde::{Deserialize, Deserializer, Serialize, de};
 use serde_untagged::UntaggedEnumVisitor;
 
-use crate::package::{PackageInfo, PackageName};
+use crate::package::{PackageInfo, PackageName, PackageNameError};
 
 pub(crate) const MANIFEST_FILE: &str = "Patina.toml";
 
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum ManifestError {
-    #[error("failed to read {path}: {source}")]
-    Read {
-        path: PathBuf,
-        #[source]
-        source: io::Error,
-    },
-    #[error("invalid {path}: {source}")]
-    Parse {
-        path: PathBuf,
-        #[source]
-        source: toml::de::Error,
-    },
+    #[error("error reading Patina.toml: {0}")]
+    Read(#[from] io::Error),
+    #[error("error parsing Patina.toml: {0}")]
+    Parse(#[from] toml::de::Error),
+    #[error(transparent)]
+    ReservedName(#[from] PackageNameError),
 }
 
 #[derive(Debug, Deserialize)]
@@ -164,9 +158,9 @@ impl TryFrom<DependencyTable> for DependencyManifest {
 impl<'a> Manifest {
     pub(crate) fn read(dir: &Path) -> Result<Manifest, ManifestError> {
         let path = dir.join(MANIFEST_FILE);
-        let read_err = |source| ManifestError::Read { path: path.clone(), source };
-        let text = std::fs::read_to_string(&path).map_err(read_err)?;
-        Self::parse(&text, dir).map_err(|source| ManifestError::Parse { path, source })
+        let text = std::fs::read_to_string(&path)?;
+        let manifest = Self::parse(&text, dir)?;
+        Ok(manifest)
     }
 
     fn parse(text: &str, dir: &Path) -> Result<Manifest, toml::de::Error> {

@@ -16,8 +16,9 @@ use std::process::ExitCode;
 
 use clap::Parser;
 use clap::builder::ArgPredicate;
-use rustc_errors::{FatalError, catch_fatal_errors};
-use rustc_session::config::Externs;
+use rustc_errors::emitter::HumanReadableErrorType;
+use rustc_errors::{ColorConfig, FatalError, catch_fatal_errors};
+use rustc_session::config::{ErrorOutputType, Externs};
 
 use crate::clean::CleanError;
 use crate::compile::compile_server::{OtpVersionError, SpawnError};
@@ -86,6 +87,27 @@ impl From<EmitStage> for Stage {
             EmitStage::Beam => Stage::Beam,
             EmitStage::Meta => Stage::Meta,
             EmitStage::App => Stage::App,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, clap::ValueEnum)]
+enum ErrorFormat {
+    /// Human-readable text.
+    Pretty,
+    /// One JSON object per line.
+    Json,
+}
+
+impl From<ErrorFormat> for ErrorOutputType {
+    fn from(format: ErrorFormat) -> Self {
+        match format {
+            ErrorFormat::Pretty => ErrorOutputType::default(),
+            ErrorFormat::Json => ErrorOutputType::Json {
+                pretty: false,
+                json_rendered: HumanReadableErrorType { short: false, unicode: false },
+                color_config: ColorConfig::Never,
+            },
         }
     }
 }
@@ -209,6 +231,10 @@ struct CommonArgs {
     /// Allow the lint `LINT`. Can be repeated.
     #[arg(short = 'A', long = "allow", value_name = "LINT")]
     allowed_lints: Vec<String>,
+
+    /// Format of the diagnostics written to stderr.
+    #[arg(long, value_enum, value_name = "FORMAT", default_value = "pretty")]
+    error_format: ErrorFormat,
 }
 
 #[derive(clap::Args, Debug)]
@@ -349,6 +375,10 @@ fn run(
     externs: Externs,
     installation: LazyInstallation,
 ) -> Result<(), Error> {
+    if package.name.is_reserved() && !package::is_bootstrap() {
+        return Err(PackageNameError::Reserved(package.name).into());
+    }
+
     let installation: Installation = installation.try_into()?;
     let src = std::fs::read_to_string(file)
         .map_err(|source| Error::ReadSource { path: file.to_owned(), source })?;
@@ -372,6 +402,7 @@ fn run(
         package,
         externs,
         allowed_lints: args.allowed_lints,
+        error_format: args.error_format.into(),
     };
 
     let stages = args

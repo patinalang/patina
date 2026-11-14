@@ -119,6 +119,7 @@ pub(crate) struct CompileOptions {
     pub package: PackageInfo,
     pub externs: Externs,
     pub allowed_lints: Vec<String>,
+    pub error_format: config::ErrorOutputType,
 }
 
 impl CompileOptions {
@@ -601,6 +602,7 @@ fn make_config(
         package: pkg,
         externs,
         allowed_lints,
+        error_format,
         ..
     } = opts;
 
@@ -613,6 +615,7 @@ fn make_config(
             cache_proc_macros: true,
             ..Default::default()
         },
+        error_format: *error_format,
         crate_types: vec![config::CrateType::Rlib],
         cg: config::CodegenOptions { panic: Some(PanicStrategy::Abort), ..Default::default() },
         crate_name: Some(pkg.name.to_string()),

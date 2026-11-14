@@ -54,7 +54,7 @@ impl PackageName {
         self.0 == CORE_PACKAGE_NAME
     }
 
-    fn is_reserved(&self) -> bool {
+    pub(crate) fn is_reserved(&self) -> bool {
         matches!(self.0.as_str(), CORE_PACKAGE_NAME | STD_PACKAGE_NAME)
     }
 }
@@ -207,11 +207,7 @@ pub(crate) fn resolve_package_name(
         },
     };
 
-    if name.is_reserved() && !is_bootstrap() {
-        Err(PackageNameError::Reserved(name))
-    } else {
-        Ok(name)
-    }
+    Ok(name)
 }
 
 #[cfg(test)]
