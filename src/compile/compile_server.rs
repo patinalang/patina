@@ -287,7 +287,8 @@ impl CompileServer {
         }
     }
 
-    pub(super) fn extend_code_path(&mut self, dcx: DiagCtxtHandle<'_>, dirs: &[PathBuf]) {
+    pub(super) fn extend_code_path(&mut self, dcx: DiagCtxtHandle<'_>, dirs: Vec<PathBuf>) {
+        let dirs = absolutize_paths(dcx, dirs);
         let request: Box<[&[u8]]> = std::iter::once(OP_CODE_PATH)
             .chain(dirs.iter().map(|dir| dir.as_os_str().as_encoded_bytes()))
             .collect();
@@ -299,7 +300,8 @@ impl CompileServer {
         }
     }
 
-    pub(super) fn load_modules(&mut self, dcx: DiagCtxtHandle<'_>, files: &[PathBuf]) {
+    pub(super) fn load_modules(&mut self, dcx: DiagCtxtHandle<'_>, files: Vec<PathBuf>) {
+        let files = absolutize_paths(dcx, files);
         let request: Box<[&[u8]]> = std::iter::once(OP_LOAD_MODULES)
             .chain(files.iter().map(|file| file.as_os_str().as_encoded_bytes()))
             .collect();
@@ -455,6 +457,16 @@ impl BeamVm {
         }?;
         Ok((vm, sock_path))
     }
+}
+
+fn absolutize_paths(dcx: DiagCtxtHandle<'_>, mut paths: Vec<PathBuf>) -> Vec<PathBuf> {
+    for path in &mut paths {
+        match std::path::absolute(&path) {
+            Ok(absolute_path) => *path = absolute_path,
+            Err(e) => dcx.fatal(format!("failed to resolve {}: {e}", path.display())),
+        }
+    }
+    paths
 }
 
 /// Runs a compile server for other patinas to connect to, until our stdin closes. Prints the

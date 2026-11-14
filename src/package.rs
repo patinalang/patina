@@ -1,6 +1,6 @@
-use std::path::{self, Path, PathBuf};
+use std::fmt;
+use std::path::{Path, PathBuf};
 use std::str::FromStr;
-use std::{fmt, io};
 
 use rustc_data_structures::fx::FxIndexMap;
 use rustc_session::config::{ExternEntry, ExternLocation, Externs};
@@ -19,8 +19,6 @@ pub(crate) enum ExternArgError {
     InvalidName(#[from] InvalidPackageName),
     #[error("missing metadata path")]
     MissingPath,
-    #[error("failed to resolve metadata path: {0}")]
-    ResolvePath(#[source] io::Error),
     #[error("metadata file {0} does not exist")]
     MissingMetadata(PathBuf),
 }
@@ -145,15 +143,17 @@ impl FromStr for ExternArg {
         match raw.split_once('=') {
             Some(("", _)) => Err(ExternArgError::MissingName),
             Some((_, "")) => Err(ExternArgError::MissingPath),
-            Some((name, path)) => {
-                let name = name.parse()?;
-                let path = path::absolute(path).map_err(ExternArgError::ResolvePath)?;
-                if !path.is_file() {
-                    return Err(ExternArgError::MissingMetadata(path));
-                }
-                Ok(Self { name, path: Some(path) })
-            }
+            Some((name, path)) => Ok(Self { name: name.parse()?, path: Some(path.into()) }),
             None => Ok(Self { name: raw.parse()?, path: None }),
+        }
+    }
+}
+
+impl ExternArg {
+    pub(crate) fn check_exists(&self) -> Result<(), ExternArgError> {
+        match &self.path {
+            Some(path) if !path.is_file() => Err(ExternArgError::MissingMetadata(path.clone())),
+            _ => Ok(()),
         }
     }
 }
@@ -309,10 +309,11 @@ mod tests {
     #[test]
     fn extern_metadata_file_has_to_exist() {
         let rmeta = std::env::current_exe().unwrap();
-        assert!(format!("core={}", rmeta.display()).parse::<ExternArg>().is_ok());
+        let check = |raw: String| raw.parse::<ExternArg>().unwrap().check_exists();
+        assert!(check(format!("core={}", rmeta.display())).is_ok());
         let missing = rmeta.with_file_name("libmissing.rmeta");
         assert!(matches!(
-            format!("missing={}", missing.display()).parse::<ExternArg>(),
+            check(format!("missing={}", missing.display())),
             Err(ExternArgError::MissingMetadata(path)) if path == missing
         ));
     }

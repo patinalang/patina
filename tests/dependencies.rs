@@ -17,9 +17,9 @@ fn build_lib(session: &Session, name: &str, out_dir: &str) {
 #[test]
 fn dependency_is_found_by_package_name() {
     let session = Session::new();
-    build_lib(&session, "hello_lib", "lib");
+    build_lib(&session, "hello_lib", "../lib");
     greeter(&session, r#"hello_lib = "~> 0.1""#);
-    session.build_package("greeter", &["-L", "lib"]);
+    session.build_package("greeter", &["-L", "../lib"]);
 }
 
 #[test]
@@ -33,9 +33,9 @@ fn missing_dependency_is_reported() {
 #[test]
 fn undeclared_package_is_not_a_dependency() {
     let session = Session::new();
-    build_lib(&session, "hello_lib", "lib");
+    build_lib(&session, "hello_lib", "../lib");
     greeter(&session, "");
-    let output = session.try_build_package("greeter", &["-L", "lib"]);
+    let output = session.try_build_package("greeter", &["-L", "../lib"]);
     assert_failure(&output, "use of unresolved module or unlinked crate `hello_lib`");
 }
 
@@ -51,12 +51,13 @@ fn core_dependency_is_rejected() {
 fn applications_follow_the_manifest() {
     let session = Session::new();
     for name in ["zeta", "alpha"] {
-        build_lib(&session, name, "lib");
+        build_lib(&session, name, "../lib");
     }
     let dependencies = "zeta = \"~> 0.1\"\nalpha = \"~> 0.1\"";
-    session.build_new_package("greeter", dependencies, LIB, &["-L", "lib"]);
+    session.build_new_package("greeter", dependencies, LIB, &["-L", "../lib"]);
 
-    let app = std::fs::read_to_string(session.path().join("greeter.app")).expect("read .app");
+    let app =
+        std::fs::read_to_string(session.path().join("greeter/greeter.app")).expect("read .app");
     // Ignore how the Erlang pretty printer breaks the list into lines.
     let app: String = app.split_whitespace().collect();
     let applications = "{applications,[kernel,stdlib,patina_core,zeta,alpha]}";

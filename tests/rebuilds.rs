@@ -5,13 +5,13 @@ use common::{Session, assert_failure, assert_success};
 #[test]
 fn dependency_change_is_seen() {
     let session = Session::new();
-    let lib = ["--out-dir", "lib"];
+    let lib = ["--out-dir", "../lib"];
     session.build_new_package("hello_lib", "", "pub fn f() -> int { 1 }\n", &lib);
     let greeter = "pub fn g() -> int { hello_lib::f() }\n";
-    session.build_new_package("greeter", r#"hello_lib = "~> 0.1""#, greeter, &["-L", "lib"]);
+    session.build_new_package("greeter", r#"hello_lib = "~> 0.1""#, greeter, &["-L", "../lib"]);
 
     session.build_new_package("hello_lib", "", "pub fn f() -> str { \"one\" }\n", &lib);
-    let output = session.try_build_package("greeter", &["-L", "lib"]);
+    let output = session.try_build_package("greeter", &["-L", "../lib"]);
     assert_failure(&output, "mismatched types");
 }
 
@@ -79,8 +79,8 @@ fn derive_reruns_only_when_its_package_changes() {
 fn incremental_dir_can_be_elsewhere() {
     let session = Session::new();
     session.build_new_package("greeter", "", "pub fn f() {}\n", &["--incremental-dir", "cache"]);
-    assert!(session.path().join("cache").is_dir());
-    assert!(!session.path().join(".patina_incremental").exists());
+    assert!(session.path().join("greeter/cache").is_dir());
+    assert!(!session.path().join("greeter/.patina_incremental").exists());
 }
 
 const GREETER: &str = "\
@@ -96,7 +96,7 @@ pub mod b {
 #[cfg(unix)]
 fn beam_inode(session: &Session, module: &str) -> u64 {
     use std::os::unix::fs::MetadataExt;
-    let beam = session.path().join(format!("Elixir.Patina.Greeter.{module}.beam"));
+    let beam = session.path().join(format!("greeter/Elixir.Patina.Greeter.{module}.beam"));
     std::fs::metadata(beam).expect("the beam exists").ino()
 }
 
@@ -140,7 +140,7 @@ fn build_without_beams_is_not_remembered() {
 fn deleted_beam_is_restored() {
     let session = Session::new();
     session.build_new_package("greeter", "", GREETER, &[]);
-    let beam = session.path().join("Elixir.Patina.Greeter.A.beam");
+    let beam = session.path().join("greeter/Elixir.Patina.Greeter.A.beam");
     let built = std::fs::read(&beam).expect("read the beam");
 
     std::fs::remove_file(&beam).expect("delete the beam");
@@ -152,10 +152,12 @@ fn deleted_beam_is_restored() {
 fn no_hidden_temporary_files_are_left() {
     let session = Session::new();
     session.build_new_package("greeter", "", GREETER, &[]);
-    std::fs::remove_file(session.path().join("Elixir.Patina.Greeter.A.beam")).expect("delete");
+    std::fs::remove_file(session.path().join("greeter/Elixir.Patina.Greeter.A.beam"))
+        .expect("delete");
     session.build_new_package("greeter", "", &GREETER.replace("2", "3"), &[]);
 
-    let entries = std::fs::read_dir(session.path()).expect("read the output directory");
+    let entries =
+        std::fs::read_dir(session.path().join("greeter")).expect("read the output directory");
     let hidden: Vec<_> = entries
         .map(|entry| entry.expect("read an entry").file_name())
         .filter(|name| name.to_string_lossy().starts_with('.') && name != ".patina_incremental")
@@ -166,7 +168,7 @@ fn no_hidden_temporary_files_are_left() {
 #[cfg(unix)]
 fn metadata_inode(session: &Session) -> u64 {
     use std::os::unix::fs::MetadataExt;
-    let rmeta = session.path().join("libgreeter.rmeta");
+    let rmeta = session.path().join("greeter/libgreeter.rmeta");
     std::fs::metadata(rmeta).expect("the .rmeta exists").ino()
 }
 
@@ -199,5 +201,5 @@ fn removed_module_beam_is_deleted_even_if_the_cache_is_discarded() {
 
     // Changed options make incremental mechanism ignore the previous session.
     session.build_new_package("greeter", "", "pub mod a {}\n", &["-A", "dead_code"]);
-    assert!(!session.path().join("Elixir.Patina.Greeter.B.beam").exists());
+    assert!(!session.path().join("greeter/Elixir.Patina.Greeter.B.beam").exists());
 }

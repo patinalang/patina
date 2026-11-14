@@ -190,6 +190,7 @@ impl Runner {
             .arg(lib_dir)
             .arg("--out-dir")
             .arg(lib_dir)
+            .arg("-C")
             .arg(dir)
             .output()
             .expect("run patina")

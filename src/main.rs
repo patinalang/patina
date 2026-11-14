@@ -9,18 +9,20 @@ mod num_utils;
 mod package;
 
 use std::io;
-use std::path::{self, Path, PathBuf};
+use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use clap::Parser;
-use clap::builder::{ArgPredicate, PathBufValueParser, TypedValueParser};
+use clap::builder::ArgPredicate;
 use rustc_errors::{FatalError, catch_fatal_errors};
 use rustc_session::config::Externs;
 
 use crate::compile::compile_server::{OtpVersionError, SpawnError};
 use crate::installation::{Installation, LocateInstallationError};
 use crate::manifest::{Manifest, ManifestError};
-use crate::package::{DuplicateExtern, ExternArg, PackageInfo, PackageName, PackageNameError};
+use crate::package::{
+    DuplicateExtern, ExternArg, ExternArgError, PackageInfo, PackageName, PackageNameError,
+};
 
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]
 pub(crate) enum DumpStage {
@@ -88,8 +90,12 @@ impl From<EmitStage> for Stage {
 #[command(name = "patina", about = "Compile Patina packages.")]
 struct Args {
     /// Root of the Patina install. If not given, it's found relative to this executable.
-    #[arg(long, env = "PATINA_ROOT", global = true, value_name = "DIR", value_parser = absolute_path())]
+    #[arg(long, env = "PATINA_ROOT", global = true, value_name = "DIR")]
     root: Option<PathBuf>,
+
+    /// Change to DIR before doing anything, including resolving any paths.
+    #[arg(short = 'C', global = true, value_name = "DIR")]
+    directory: Option<PathBuf>,
 
     #[command(subcommand)]
     command: Command,
@@ -97,12 +103,8 @@ struct Args {
 
 #[derive(clap::Subcommand, Debug)]
 enum Command {
-    /// Compile the package in DIR, as described by its `Patina.toml`.
+    /// Compile the package in the current directory, as described by its `Patina.toml`.
     Build {
-        /// Package directory.
-        #[arg(default_value = ".", value_parser = absolute_path())]
-        dir: PathBuf,
-
         /// Emit compiled output.
         #[arg(
             long,
@@ -170,15 +172,15 @@ struct CommonArgs {
     dump: Vec<DumpStage>,
 
     /// Output directory.
-    #[arg(long, value_name = "DIR", default_value = ".", value_parser = absolute_path())]
+    #[arg(long, value_name = "DIR", default_value = ".")]
     out_dir: PathBuf,
 
     /// Directory for incremental compilation state (default: $out_dir/.patina_incremental).
-    #[arg(long, value_name = "DIR", value_parser = absolute_path())]
+    #[arg(long, value_name = "DIR")]
     incremental_dir: Option<PathBuf>,
 
     /// Add `DIR` to library search directories. Can be repeated.
-    #[arg(short = 'L', long = "lib-dir", value_name = "DIR", value_parser = absolute_path())]
+    #[arg(short = 'L', long = "lib-dir", value_name = "DIR")]
     lib_dirs: Vec<PathBuf>,
 
     /// Path to a running compile server's socket. If not given, patina starts a temporary one.
@@ -188,10 +190,6 @@ struct CommonArgs {
     /// Allow the lint `LINT`. Can be repeated.
     #[arg(short = 'A', long = "allow", value_name = "LINT")]
     allowed_lints: Vec<String>,
-}
-
-fn absolute_path() -> impl TypedValueParser<Value = PathBuf> {
-    PathBufValueParser::new().try_map(path::absolute::<PathBuf>)
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -206,6 +204,8 @@ enum Error {
     #[error(transparent)]
     DuplicateExtern(#[from] DuplicateExtern),
     #[error(transparent)]
+    ExternArg(#[from] ExternArgError),
+    #[error(transparent)]
     LocateInstallation(#[from] LocateInstallationError),
     #[error("failed to read {path}: {source}")]
     ReadSource {
@@ -217,6 +217,12 @@ enum Error {
     Serve(#[source] SpawnError),
     #[error("failed to get the current directory: {0}")]
     CurrentDir(#[source] io::Error),
+    #[error("failed to change directories to {dir}: {source}")]
+    ChangeDir {
+        dir: PathBuf,
+        #[source]
+        source: io::Error,
+    },
     #[error("failed to read OTP Version: {0}")]
     OtpVersionError(#[from] OtpVersionError),
 }
@@ -239,10 +245,15 @@ fn main() -> ExitCode {
 }
 
 fn try_main(args: Args) -> Result<(), Error> {
+    if let Some(dir) = args.directory {
+        std::env::set_current_dir(&dir).map_err(|source| Error::ChangeDir { dir, source })?;
+    }
+    let cwd = std::env::current_dir().map_err(Error::CurrentDir)?;
+
     let installation = Installation::locate(args.root)?;
     match args.command {
-        Command::Build { dir, emit, common } => {
-            let manifest = Manifest::read(&dir)?;
+        Command::Build { emit, common } => {
+            let manifest = Manifest::read(&cwd)?;
             let file = manifest.source_path();
             let dependencies = manifest.dependency_names();
             let manifest = manifest.package;
@@ -254,7 +265,8 @@ fn try_main(args: Args) -> Result<(), Error> {
                 manifest.description,
             );
             let externs = package.externs(dependencies.into_iter().map(ExternArg::from))?;
-            run(common, emit, dir, &file, package, externs, installation)
+
+            run(common, emit, cwd, &file, package, externs, installation)
         }
         Command::Compile {
             file,
@@ -267,8 +279,10 @@ fn try_main(args: Args) -> Result<(), Error> {
         } => {
             let name = package::resolve_package_name(pkg_name, &file)?;
             let package = PackageInfo::new(name, otp_app_name, pkg_version, None);
+            for extern_arg in &extern_args {
+                extern_arg.check_exists()?;
+            }
             let externs = package.externs(extern_args)?;
-            let cwd = std::env::current_dir().map_err(Error::CurrentDir)?;
             run(common, emit, cwd, &file, package, externs, installation)
         }
         Command::Serve => compile::compile_server::serve(&installation).map_err(Error::Serve),

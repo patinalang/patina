@@ -122,6 +122,7 @@ impl Session {
             .arg("--compile-server")
             .arg(self.server.sock_path())
             .args(args)
+            .arg("-C")
             .arg(dir)
             .output()
             .expect("run patina")
