@@ -4,10 +4,10 @@ use std::io;
 use std::path::{Path, PathBuf};
 
 use rustc_data_structures::fx::FxIndexMap;
-use serde::{Deserialize, Deserializer, de};
+use serde::{Deserialize, Deserializer, Serialize, de};
 use serde_untagged::UntaggedEnumVisitor;
 
-use crate::package::PackageName;
+use crate::package::{PackageInfo, PackageName};
 
 pub(crate) const MANIFEST_FILE: &str = "Patina.toml";
 
@@ -30,7 +30,7 @@ pub(crate) enum ManifestError {
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct Manifest {
-    pub package: PackageManifest,
+    package: PackageManifest,
     /// In the manifest's order.
     #[serde(default)]
     dependencies: FxIndexMap<DependencyName, DependencyManifest>,
@@ -41,17 +41,22 @@ pub(crate) struct Manifest {
 
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub(crate) struct PackageManifest {
-    pub name: PackageName,
-    pub version: String,
-    pub otp_app_name: Option<String>,
-    pub description: Option<String>,
+struct PackageManifest {
+    name: PackageName,
+    version: String,
+    otp_app_name: Option<String>,
+    description: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
 pub(crate) enum DependencySource {
     Hex(String),
-    Git { url: String, git_ref: Option<String> },
+    Git {
+        url: String,
+        #[serde(rename = "ref")]
+        git_ref: Option<String>,
+    },
     Path(PathBuf),
 }
 
@@ -85,11 +90,17 @@ impl TryFrom<String> for DependencyName {
 
 #[derive(Debug)]
 struct DependencyManifest {
-    #[cfg_attr(not(test), expect(dead_code))]
     version: Option<String>,
     source: Option<DependencySource>,
-    #[cfg_attr(not(test), expect(dead_code))]
     otp_app_name: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub(crate) struct DependencyInfo {
+    pub(crate) name: PackageName,
+    pub(crate) version: Option<String>,
+    pub(crate) source: DependencySource,
+    pub(crate) otp_app_name: String,
 }
 
 impl<'de> Deserialize<'de> for DependencyManifest {
@@ -150,7 +161,7 @@ impl TryFrom<DependencyTable> for DependencyManifest {
     }
 }
 
-impl Manifest {
+impl<'a> Manifest {
     pub(crate) fn read(dir: &Path) -> Result<Manifest, ManifestError> {
         let path = dir.join(MANIFEST_FILE);
         let read_err = |source| ManifestError::Read { path: path.clone(), source };
@@ -169,12 +180,43 @@ impl Manifest {
         Ok(manifest)
     }
 
+    pub(crate) fn package(&self) -> PackageInfo {
+        PackageInfo::new(
+            self.package.name.clone(),
+            self.package.otp_app_name.clone(),
+            Some(self.package.version.clone()),
+            self.package.description.clone(),
+        )
+    }
+
     pub(crate) fn source_path(&self) -> PathBuf {
         self.dir.join("src").join(format!("{}.pt", self.package.name))
     }
 
     pub(crate) fn dependency_names(&self) -> Vec<PackageName> {
         self.dependencies.keys().map(|DependencyName(name)| name.clone()).collect()
+    }
+
+    pub(crate) fn dependencies(&'a self) -> Vec<DependencyInfo> {
+        self.dependencies
+            .iter()
+            .map(|(DependencyName(name), dependency)| {
+                let otp_app_name =
+                    dependency.otp_app_name.clone().unwrap_or_else(|| name.to_string());
+
+                let source = dependency
+                    .source
+                    .clone()
+                    .unwrap_or_else(|| DependencySource::Hex(otp_app_name.to_string()));
+
+                DependencyInfo {
+                    name: name.clone(),
+                    version: dependency.version.clone(),
+                    source,
+                    otp_app_name,
+                }
+            })
+            .collect()
     }
 }
 

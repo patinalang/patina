@@ -284,7 +284,7 @@ fn run_stages(
 
     let mut metadata_work_product = None;
     consume_stage!(stages_left, Stage::Meta, {
-        let metadata_path = out_dir.join(format!("lib{}.rmeta", pkg.name));
+        let metadata_path = metadata_path(out_dir, &pkg.name);
 
         replace_file_via(&staging_dir, &metadata_path, |temp| {
             rustc_metadata::encode_metadata(tcx, temp, None);
@@ -501,13 +501,21 @@ fn try_use_cached_beam(
     Some(cached)
 }
 
+pub(crate) fn metadata_path(out_dir: &Path, pkg_name: &PackageName) -> PathBuf {
+    out_dir.join(format!("lib{pkg_name}.rmeta"))
+}
+
+pub(crate) fn modules_list_path(incremental_dir: &Path, pkg_name: &PackageName) -> PathBuf {
+    incremental_dir.join(format!("{pkg_name}.modules"))
+}
+
 fn clean_up_beams_and_update_manifest(
     incremental_dir: &Path,
     pkg_name: &PackageName,
     out_dir: &Path,
     modules: &FxIndexSet<Symbol>,
 ) -> io::Result<()> {
-    let manifest_path = incremental_dir.join(format!("{pkg_name}.modules"));
+    let manifest_path = modules_list_path(incremental_dir, pkg_name);
     let modules: FxIndexSet<&str> = modules.iter().map(|symbol| symbol.as_str()).collect();
 
     let previous_modules = match std::fs::read_to_string(&manifest_path) {

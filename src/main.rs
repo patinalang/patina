@@ -7,6 +7,7 @@ mod installation;
 mod manifest;
 mod num_utils;
 mod package;
+mod print;
 
 use std::io;
 use std::path::{Path, PathBuf};
@@ -18,11 +19,12 @@ use rustc_errors::{FatalError, catch_fatal_errors};
 use rustc_session::config::Externs;
 
 use crate::compile::compile_server::{OtpVersionError, SpawnError};
-use crate::installation::{Installation, LocateInstallationError};
+use crate::installation::{Installation, LazyInstallation, LocateInstallationError};
 use crate::manifest::{Manifest, ManifestError};
 use crate::package::{
     DuplicateExtern, ExternArg, ExternArgError, PackageInfo, PackageName, PackageNameError,
 };
+use crate::print::PrintError;
 
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]
 pub(crate) enum DumpStage {
@@ -155,6 +157,16 @@ enum Command {
         common: CommonArgs,
     },
 
+    /// Print information about the package or Patina itself.
+    Print {
+        #[arg(value_enum, value_name = "INFO", required = true)]
+        prints: Vec<print::Print>,
+
+        /// Output format.
+        #[arg(long, value_enum)]
+        format: print::Format,
+    },
+
     /// Run a compile server to be used with Patina's `--compile-server` option.
     ///
     /// The server's socket path is printed as the first line on stdout.
@@ -225,6 +237,8 @@ enum Error {
     },
     #[error("failed to read OTP Version: {0}")]
     OtpVersionError(#[from] OtpVersionError),
+    #[error(transparent)]
+    Print(#[from] PrintError),
 }
 
 fn main() -> ExitCode {
@@ -250,20 +264,14 @@ fn try_main(args: Args) -> Result<(), Error> {
     }
     let cwd = std::env::current_dir().map_err(Error::CurrentDir)?;
 
-    let installation = Installation::locate(args.root)?;
+    let installation = LazyInstallation::new(args.root);
+
     match args.command {
         Command::Build { emit, common } => {
             let manifest = Manifest::read(&cwd)?;
             let file = manifest.source_path();
             let dependencies = manifest.dependency_names();
-            let manifest = manifest.package;
-            let name = package::resolve_package_name(Some(manifest.name), &file)?;
-            let package = PackageInfo::new(
-                name,
-                manifest.otp_app_name,
-                Some(manifest.version),
-                manifest.description,
-            );
+            let package = manifest.package();
             let externs = package.externs(dependencies.into_iter().map(ExternArg::from))?;
 
             run(common, emit, cwd, &file, package, externs, installation)
@@ -285,7 +293,11 @@ fn try_main(args: Args) -> Result<(), Error> {
             let externs = package.externs(extern_args)?;
             run(common, emit, cwd, &file, package, externs, installation)
         }
-        Command::Serve => compile::compile_server::serve(&installation).map_err(Error::Serve),
+        Command::Print { prints, format } => {
+            print::print(format, &prints, &cwd, installation)?;
+            Ok(())
+        }
+        Command::Serve => compile::compile_server::serve(installation.get()?).map_err(Error::Serve),
     }
 }
 
@@ -296,8 +308,9 @@ fn run(
     file: &Path,
     package: PackageInfo,
     externs: Externs,
-    installation: Installation,
+    installation: LazyInstallation,
 ) -> Result<(), Error> {
+    let installation: Installation = installation.try_into()?;
     let src = std::fs::read_to_string(file)
         .map_err(|source| Error::ReadSource { path: file.to_owned(), source })?;
 
@@ -307,10 +320,7 @@ fn run(
     }
 
     let server =
-        compile::compile_server::SyncServer::start(compile::compile_server::SyncServerOpts {
-            sock_path: args.compile_server.clone(),
-            installation,
-        });
+        compile::compile_server::SyncServer::start(args.compile_server.clone(), installation);
 
     let incremental_dir =
         args.incremental_dir.unwrap_or_else(|| args.out_dir.join(".patina_incremental"));

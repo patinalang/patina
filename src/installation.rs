@@ -1,3 +1,4 @@
+use std::cell::OnceCell;
 use std::env::consts::EXE_SUFFIX;
 use std::io;
 use std::path::{Path, PathBuf};
@@ -17,8 +18,40 @@ pub(crate) enum LocateInstallationError {
     Corrupted(&'static str),
 }
 
+pub(crate) struct LazyInstallation {
+    root: Option<PathBuf>,
+    installation: OnceCell<Installation>,
+}
+
+impl LazyInstallation {
+    pub(crate) fn new(root: Option<PathBuf>) -> Self {
+        Self { root, installation: OnceCell::new() }
+    }
+
+    pub(crate) fn get(&self) -> Result<&Installation, LocateInstallationError> {
+        match self.installation.get() {
+            Some(installation) => Ok(installation),
+            None => {
+                let installation = Installation::locate(self.root.clone())?;
+                Ok(self.installation.get_or_init(|| installation))
+            }
+        }
+    }
+}
+
+impl TryInto<Installation> for LazyInstallation {
+    type Error = LocateInstallationError;
+    fn try_into(mut self) -> Result<Installation, Self::Error> {
+        match self.installation.take() {
+            Some(installation) => Ok(installation),
+            None => Installation::locate(self.root),
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub(crate) struct Installation {
+    pub(crate) root: PathBuf,
     /// `<root>/patina/ebin`
     pub(crate) patina_dir: PathBuf,
     /// `<root>/patina_core/ebin`
@@ -48,10 +81,9 @@ impl Installation {
             }
         }
 
-        Ok(Installation {
-            patina_dir: root.join("patina/ebin"),
-            core_dir: root.join("patina_core/ebin"),
-        })
+        let patina_dir = root.join("patina/ebin");
+        let core_dir = root.join("patina_core/ebin");
+        Ok(Installation { root, patina_dir, core_dir })
     }
 }
 

@@ -5,7 +5,7 @@ use std::str::FromStr;
 use rustc_data_structures::fx::FxIndexMap;
 use rustc_session::config::{ExternEntry, ExternLocation, Externs};
 use rustc_session::utils::CanonicalizedPath;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 const CORE_PACKAGE_NAME: &str = "core";
 const STD_PACKAGE_NAME: &str = "std";
@@ -41,7 +41,7 @@ pub(crate) enum PackageNameError {
 #[error("`--extern {0}` is given more than once")]
 pub(crate) struct DuplicateExtern(PackageName);
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 #[serde(try_from = "String")]
 pub(crate) struct PackageName(String);
 
@@ -81,6 +81,7 @@ impl fmt::Display for PackageName {
     }
 }
 
+#[derive(Debug, Clone, Serialize)]
 pub(crate) struct PackageInfo {
     pub name: PackageName,
     pub otp_app_name: String,

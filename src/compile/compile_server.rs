@@ -517,17 +517,11 @@ impl BeamMacroRunner for SyncServer {
     }
 }
 
-#[derive(Debug)]
-pub(crate) struct SyncServerOpts {
-    pub(crate) sock_path: Option<PathBuf>,
-    pub(crate) installation: Installation,
-}
-
 impl SyncServer {
-    pub(crate) fn start(opts: SyncServerOpts) -> Arc<SyncServer> {
-        let startup = State::Starting(thread::spawn(move || match opts.sock_path {
+    pub(crate) fn start(sock_path: Option<PathBuf>, installation: Installation) -> Arc<SyncServer> {
+        let startup = State::Starting(thread::spawn(move || match sock_path {
             Some(sock_path) => CompileServer::connect(&sock_path),
-            None => CompileServer::spawn(&opts.installation),
+            None => CompileServer::spawn(&installation),
         }));
         Arc::new(SyncServer { state: IntoDynSyncSend(Mutex::new(startup)) })
     }

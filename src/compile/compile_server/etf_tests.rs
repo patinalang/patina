@@ -5,7 +5,7 @@ use rustc_errors::DiagCtxt;
 use rustc_errors::annotate_snippet_emitter_writer::AnnotateSnippetEmitter;
 use rustc_errors::emitter::{ColorConfig, stderr_destination};
 
-use super::{OP_CODE_PATH, SyncServer, SyncServerOpts};
+use super::{OP_CODE_PATH, SyncServer};
 use crate::installation::Installation;
 
 fn server() -> &'static Arc<SyncServer> {
@@ -15,7 +15,7 @@ fn server() -> &'static Arc<SyncServer> {
         let profile_dir = exe.parent().and_then(|deps| deps.parent()).expect("target/<profile>");
         let root = profile_dir.join("root");
         let installation = Installation::locate(Some(root)).expect("locate the install");
-        SyncServer::start(SyncServerOpts { sock_path: None, installation })
+        SyncServer::start(None, installation)
     })
 }
 
