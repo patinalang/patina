@@ -1,6 +1,7 @@
 #![feature(rustc_private, iter_intersperse)]
 #![cfg_attr(windows, feature(windows_unix_domain_sockets))]
 
+mod clean;
 mod compile;
 mod erlang;
 mod installation;
@@ -18,6 +19,7 @@ use clap::builder::ArgPredicate;
 use rustc_errors::{FatalError, catch_fatal_errors};
 use rustc_session::config::Externs;
 
+use crate::clean::CleanError;
 use crate::compile::compile_server::{OtpVersionError, SpawnError};
 use crate::installation::{Installation, LazyInstallation, LocateInstallationError};
 use crate::manifest::{Manifest, ManifestError};
@@ -167,6 +169,16 @@ enum Command {
         format: print::Format,
     },
 
+    /// Clean up the build artifacts & the incremental compilation files of `patina build`.
+    Clean {
+        /// Clean up the package `NAME` instead of the one described in `Patina.toml`.
+        #[arg(long, value_name = "NAME")]
+        pkg_name: Option<PackageName>,
+
+        #[command(flatten)]
+        output: OutputArgs,
+    },
+
     /// Run a compile server to be used with Patina's `--compile-server` option.
     ///
     /// The server's socket path is printed as the first line on stdout.
@@ -183,13 +195,8 @@ struct CommonArgs {
     #[arg(long, value_name = "STAGE")]
     dump: Vec<DumpStage>,
 
-    /// Output directory.
-    #[arg(long, value_name = "DIR", default_value = ".")]
-    out_dir: PathBuf,
-
-    /// Directory for incremental compilation state (default: $out_dir/.patina_incremental).
-    #[arg(long, value_name = "DIR")]
-    incremental_dir: Option<PathBuf>,
+    #[command(flatten)]
+    output: OutputArgs,
 
     /// Add `DIR` to library search directories. Can be repeated.
     #[arg(short = 'L', long = "lib-dir", value_name = "DIR")]
@@ -202,6 +209,28 @@ struct CommonArgs {
     /// Allow the lint `LINT`. Can be repeated.
     #[arg(short = 'A', long = "allow", value_name = "LINT")]
     allowed_lints: Vec<String>,
+}
+
+#[derive(clap::Args, Debug)]
+struct OutputArgs {
+    /// Output directory.
+    #[arg(long, value_name = "DIR", default_value = ".")]
+    out_dir: PathBuf,
+
+    /// Directory for incremental compilation state (default: $out_dir/.patina_incremental).
+    #[arg(long, value_name = "DIR")]
+    incremental_dir: Option<PathBuf>,
+}
+
+impl OutputArgs {
+    fn package_incremental_dir(&self, pkg_name: &PackageName) -> PathBuf {
+        let incremental_dir = self
+            .incremental_dir
+            .clone()
+            .unwrap_or_else(|| self.out_dir.join(".patina_incremental"));
+
+        incremental_dir.join(pkg_name.to_string())
+    }
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -239,6 +268,8 @@ enum Error {
     OtpVersionError(#[from] OtpVersionError),
     #[error(transparent)]
     Print(#[from] PrintError),
+    #[error(transparent)]
+    Clean(#[from] CleanError),
 }
 
 fn main() -> ExitCode {
@@ -297,6 +328,14 @@ fn try_main(args: Args) -> Result<(), Error> {
             print::print(format, &prints, &cwd, installation)?;
             Ok(())
         }
+        Command::Clean { pkg_name, output } => {
+            let pkg_name = match pkg_name {
+                Some(name) => name,
+                None => Manifest::read(&cwd)?.package().name,
+            };
+            clean::clean(&output.out_dir, &output.package_incremental_dir(&pkg_name))?;
+            Ok(())
+        }
         Command::Serve => compile::compile_server::serve(installation.get()?).map_err(Error::Serve),
     }
 }
@@ -322,13 +361,12 @@ fn run(
     let server =
         compile::compile_server::SyncServer::start(args.compile_server.clone(), installation);
 
-    let incremental_dir =
-        args.incremental_dir.unwrap_or_else(|| args.out_dir.join(".patina_incremental"));
+    let incremental_dir = args.output.package_incremental_dir(&package.name);
 
     let opts = compile::CompileOptions {
         base_dir,
         otp_version: server.otp_version()?,
-        out_dir: args.out_dir,
+        out_dir: args.output.out_dir,
         incremental_dir,
         lib_dirs,
         package,

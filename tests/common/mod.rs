@@ -134,6 +134,20 @@ impl Session {
         assert_success(&self.try_build_package(dir, args));
     }
 
+    /// `patina clean` of the package in `dir`, in the session's directory, which has to succeed.
+    #[track_caller]
+    pub(crate) fn clean_package(&self, dir: &str, args: &[&str]) {
+        let output = patina_command()
+            .current_dir(self.path())
+            .arg("clean")
+            .args(args)
+            .arg("-C")
+            .arg(dir)
+            .output()
+            .expect("run patina");
+        assert_success(&output);
+    }
+
     /// Writes the package `name` (see [`Session::package`]) and builds it, which has to succeed.
     #[track_caller]
     pub(crate) fn build_new_package(

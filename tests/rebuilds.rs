@@ -79,7 +79,7 @@ fn derive_reruns_only_when_its_package_changes() {
 fn incremental_dir_can_be_elsewhere() {
     let session = Session::new();
     session.build_new_package("greeter", "", "pub fn f() {}\n", &["--incremental-dir", "cache"]);
-    assert!(session.path().join("greeter/cache").is_dir());
+    assert!(session.path().join("greeter/cache/greeter").is_dir());
     assert!(!session.path().join("greeter/.patina_incremental").exists());
 }
 
@@ -202,4 +202,62 @@ fn removed_module_beam_is_deleted_even_if_the_cache_is_discarded() {
     // Changed options make incremental mechanism ignore the previous session.
     session.build_new_package("greeter", "", "pub mod a {}\n", &["-A", "dead_code"]);
     assert!(!session.path().join("greeter/Elixir.Patina.Greeter.B.beam").exists());
+}
+
+#[test]
+fn clean_removes_everything_build_wrote() {
+    let session = Session::new();
+    session.build_new_package("greeter", "", GREETER, &["--out-dir", "../out"]);
+
+    session.clean_package("greeter", &["--out-dir", "../out"]);
+    let out = session.path().join("out");
+    let left: Vec<_> = std::fs::read_dir(&out).expect("read out").collect();
+    assert_eq!(left.len(), 1, "left behind: {left:?}");
+    // The incremental dir is shared by the packages built into `out`, so it's kept.
+    let incremental: Vec<_> =
+        std::fs::read_dir(out.join(".patina_incremental")).expect("read incremental").collect();
+    assert!(incremental.is_empty(), "left behind: {incremental:?}");
+}
+
+#[test]
+fn clean_keeps_other_files_in_the_out_dir() {
+    let session = Session::new();
+    session.build_new_package("greeter", "", GREETER, &["--out-dir", "../out"]);
+    session.build_new_package("hello_lib", "", GREETER, &["--out-dir", "../out"]);
+    std::fs::write(session.path().join("out/foreign.beam"), "").expect("write a foreign beam");
+
+    session.clean_package("greeter", &["--out-dir", "../out"]);
+    let out = session.path().join("out");
+    assert!(out.join("foreign.beam").exists());
+    assert!(out.join("Elixir.Patina.HelloLib.A.beam").exists());
+    assert!(out.join("libhello_lib.rmeta").exists());
+    assert!(out.join(".patina_incremental/hello_lib").is_dir());
+}
+
+#[test]
+fn clean_by_name_needs_no_package() {
+    let session = Session::new();
+    session.build_new_package("greeter", "", GREETER, &["--out-dir", "../out"]);
+    std::fs::remove_dir_all(session.path().join("greeter")).expect("delete the package");
+
+    session.clean_package(".", &["--pkg-name", "greeter", "--out-dir", "out"]);
+    let out = session.path().join("out");
+    assert!(!out.join("Elixir.Patina.Greeter.A.beam").exists());
+    assert!(!out.join("libgreeter.rmeta").exists());
+    assert!(!out.join("greeter.app").exists());
+    assert!(!out.join(".patina_incremental/greeter").exists());
+}
+
+#[test]
+fn app_file_is_kept_by_a_build_that_does_not_emit_it() {
+    let session = Session::new();
+    session.build_new_package("greeter", "", GREETER, &[]);
+
+    session.build_package("greeter", &["--emit", "meta", "--emit", "beam"]);
+    let app = session.path().join("greeter/greeter.app");
+    assert!(app.exists());
+
+    // It's still the build's, so `clean` removes it.
+    session.clean_package("greeter", &[]);
+    assert!(!app.exists());
 }

@@ -4,6 +4,7 @@ mod eaf_builder;
 mod translate;
 
 use std::cell::Cell;
+use std::ffi::OsStr;
 use std::fs::File;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
@@ -28,11 +29,11 @@ use rustc_session::search_paths::{PathKind, SearchPath};
 use rustc_session::{Session, config, lint};
 use rustc_span::def_id::LOCAL_CRATE;
 use rustc_span::edition::Edition;
-use rustc_span::{ErrorGuaranteed, FileName, RealFileName, RemapPathScopeComponents, Symbol};
+use rustc_span::{ErrorGuaranteed, FileName, RealFileName, RemapPathScopeComponents};
 
 use crate::Stage;
 use crate::compile::compile_server::SyncServer;
-use crate::package::{PackageInfo, PackageName};
+use crate::package::PackageInfo;
 
 static INTERNAL_FEATURES: AtomicBool = AtomicBool::new(false);
 
@@ -208,6 +209,54 @@ pub(crate) fn compile(
     });
 }
 
+struct StagedOutDir<'a> {
+    dcx: DiagCtxtHandle<'a>,
+    out_dir: PathBuf,
+    staging_dir: tempfile::TempDir,
+    emitted_filenames: FxIndexSet<PathBuf>,
+}
+
+impl<'a> StagedOutDir<'a> {
+    fn new(dcx: DiagCtxtHandle<'a>, out_dir: PathBuf) -> io::Result<Self> {
+        let staging_dir =
+            tempfile::Builder::new().prefix(".patina-").suffix(".tmp").tempdir_in(&out_dir)?;
+
+        Ok(Self { dcx, out_dir, staging_dir, emitted_filenames: FxIndexSet::default() })
+    }
+
+    // Outputs are written or linked to `staging_dir` first, on the same filesystem  as `out_dir`,
+    // then renamed into place to get atomic changes in the output dir.
+    fn try_with_atomic_file(
+        &mut self,
+        file_name: &str,
+        write: impl FnOnce(&Path) -> io::Result<()>,
+    ) -> io::Result<PathBuf> {
+        let temp = self.staging_dir.path().join(file_name);
+        write(&temp)?;
+
+        let out = self.out_dir.join(file_name);
+        std::fs::rename(&temp, &out)?;
+
+        self.emitted_filenames.insert(file_name.into());
+        Ok(out)
+    }
+
+    fn with_atomic_file(
+        &mut self,
+        file_name: &str,
+        write: impl FnOnce(&Path) -> io::Result<()>,
+    ) -> PathBuf {
+        self.try_with_atomic_file(file_name, write).unwrap_or_else(|err| {
+            let out = self.out_dir.join(file_name);
+            self.dcx.fatal(format!("failed to write {}: {err}", out.display()))
+        })
+    }
+
+    fn emitted_filenames(&self) -> &FxIndexSet<PathBuf> {
+        &self.emitted_filenames
+    }
+}
+
 fn run_stages(
     stages_left: &mut FxHashSet<&Stage>,
     filename_stem: &str,
@@ -219,15 +268,9 @@ fn run_stages(
     let dcx = tcx.sess.dcx();
     let CompileOptions { out_dir, package: pkg, .. } = opts;
 
-    // Outputs are written or linked here first, on the same filesystem  as `dir`,
-    // then renamed into place to get atomic changes in the output dir.
-    let staging_dir = tempfile::Builder::new()
-        .prefix(".patina-")
-        .suffix(".tmp")
-        .tempdir_in(out_dir)
-        .unwrap_or_else(|e| {
-            dcx.fatal(format!("failed to create a staging directory in {}: {e}", out_dir.display()))
-        });
+    let mut staged_out_dir = StagedOutDir::new(dcx, out_dir.to_owned()).unwrap_or_else(|e| {
+        dcx.fatal(format!("failed to create a staging directory in {}: {e}", out_dir.display()))
+    });
 
     // Expansion runs proc macros, so this has to happen before it.
     let code_path: Vec<_> = opts.code_path().into_iter().collect();
@@ -284,22 +327,31 @@ fn run_stages(
 
     let mut metadata_work_product = None;
     consume_stage!(stages_left, Stage::Meta, {
-        let metadata_path = metadata_path(out_dir, &pkg.name);
-
-        replace_file_via(&staging_dir, &metadata_path, |temp| {
+        let metadata_file_name = format!("lib{}.rmeta", pkg.name);
+        let metadata_path = staged_out_dir.with_atomic_file(&metadata_file_name, |temp| {
             rustc_metadata::encode_metadata(tcx, temp, None);
             Ok(())
-        })
-        .unwrap_or_else(|e| {
-            dcx.fatal(format!("failed to write metadata {}: {e}", metadata_path.display()));
         });
+
+        // The work product's name is hardcoded in `rustc_metadata::encode_metadata`.
+        let wp_name = "metadata";
+
+        let known_links: Vec<_> = tcx
+            .dep_graph
+            .previous_work_product(&WorkProductId::from_cgu_name(wp_name))
+            .filter(|_| tcx.dep_graph.is_green(&tcx.metadata_dep_node()))
+            .and_then(|wp| {
+                let saved_file = wp.saved_files.get("rmeta")?;
+                Some(rustc_incremental::in_incr_comp_dir_sess(tcx.sess, saved_file))
+            })
+            .into_iter()
+            .collect();
 
         metadata_work_product = rustc_incremental::copy_cgu_workproduct_to_incr_comp_cache_dir(
             tcx.sess,
-            // "metadata" work-product name is hardcoded in `rustc_metadata::encode_metadata`
-            "metadata",
+            wp_name,
             &[("rmeta", &metadata_path)],
-            &[],
+            &known_links,
         );
 
         None
@@ -314,8 +366,8 @@ fn run_stages(
         });
         let mut rendered = server.with(dcx, |server| server.render_term(dcx, &term));
         rendered.push_str(".\n");
-        write_file(out_dir, &pkg.otp_app_name, "app", rendered.as_bytes())
-            .unwrap_or_else(|e| dcx.fatal(format!("failed to write app file: {e}")));
+        let app_file_name = format!("{}.app", pkg.otp_app_name);
+        staged_out_dir.with_atomic_file(&app_file_name, |temp| std::fs::write(temp, rendered));
 
         None
     });
@@ -406,13 +458,12 @@ fn run_stages(
         let mut beam_paths = Vec::new();
         for &(module, mod_name, eaf) in &serialized_modules {
             let mod_name = mod_name.as_str();
-            let beam_path = out_dir.join(mod_name).with_added_extension("beam");
-            let wp_name = format!("{mod_name}.beam");
-            let id = WorkProductId::from_cgu_name(&wp_name);
+            let beam_file_name = format!("{mod_name}.beam");
+            let id = WorkProductId::from_cgu_name(&beam_file_name);
 
-            let known_links =
-                match try_use_cached_beam(dcx, tcx, &staging_dir, &module, id, &beam_path) {
-                    Some(cached) => &[cached][..],
+            let (beam_path, known_links) =
+                match try_use_cached_beam(tcx, &mut staged_out_dir, &module, id, &beam_file_name) {
+                    Some((beam_path, cached)) => (beam_path, &[cached][..]),
                     None => {
                         let compile = server
                             .with(dcx, |server| server.compile(dcx, eaf))
@@ -427,23 +478,16 @@ fn run_stages(
                             dcx.warn(compile.warnings);
                         }
 
-                        replace_file_via(&staging_dir, &beam_path, |temp| {
+                        let beam_path = staged_out_dir.with_atomic_file(&beam_file_name, |temp| {
                             std::fs::write(temp, compile.beam)
-                        })
-                        .unwrap_or_else(|e| {
-                            dcx.fatal(format!(
-                                "failed to write beam file {}: {e}",
-                                beam_path.display()
-                            ));
                         });
-
-                        &[]
+                        (beam_path, &[][..])
                     }
                 };
 
             let (_, wp) = rustc_incremental::copy_cgu_workproduct_to_incr_comp_cache_dir(
                 tcx.sess,
-                &wp_name,
+                &beam_file_name,
                 &[("beam", &beam_path)],
                 known_links,
             )
@@ -455,13 +499,12 @@ fn run_stages(
 
         server.with(dcx, |server| server.load_modules(dcx, beam_paths));
 
-        clean_up_beams_and_update_manifest(
+        clean_up_and_update_files_list(
             &opts.incremental_dir,
-            &pkg.name,
             out_dir,
-            tcx.beam_modules(LOCAL_CRATE),
+            staged_out_dir.emitted_filenames(),
         )
-        .unwrap_or_else(|e| dcx.fatal(format!("failed to delete removed modules' beams: {e}")));
+        .unwrap_or_else(|e| dcx.fatal(format!("failed to delete outdated outputs: {e}")));
 
         work_products.extend(metadata_work_product);
         Some(work_products)
@@ -471,77 +514,79 @@ fn run_stages(
 }
 
 fn try_use_cached_beam(
-    dcx: DiagCtxtHandle,
     tcx: TyCtxt<'_>,
-    staging_dir: &tempfile::TempDir,
+    staged_out_dir: &mut StagedOutDir<'_>,
     module: &rustc_middle::erl::ErlModuleId,
     id: WorkProductId,
-    out_path: &Path,
-) -> Option<PathBuf> {
+    file_name: &str,
+) -> Option<(PathBuf, PathBuf)> {
     let eaf_node = DepNode::construct(tcx, DepKind::erl_module_eaf, &module);
     if !tcx.dep_graph.is_green(&eaf_node) {
         return None;
     };
 
     let wp = tcx.dep_graph.previous_work_product(&id)?;
-    let file_name = wp.saved_files.get("beam")?;
-    let cached = rustc_incremental::in_incr_comp_dir_sess(tcx.sess, file_name);
+    let saved_file = wp.saved_files.get("beam")?;
+    let cached = rustc_incremental::in_incr_comp_dir_sess(tcx.sess, saved_file);
 
-    if let Err(err) = replace_file_via(staging_dir, out_path, |temp| {
+    let beam_path = match staged_out_dir.try_with_atomic_file(file_name, |temp| {
         rustc_fs_util::link_or_copy(&cached, temp)?;
         Ok(())
     }) {
-        dcx.warn(format!(
-            "failed to restore {} from cache: {err}; recompiling",
-            out_path.display()
-        ));
-        return None;
-    }
+        Ok(beam_path) => beam_path,
 
-    Some(cached)
+        Err(err) => {
+            let out_path = staged_out_dir.out_dir.join(file_name);
+            tcx.sess.dcx().warn(format!(
+                "failed to restore {} from cache: {err}; recompiling",
+                out_path.display()
+            ));
+            return None;
+        }
+    };
+
+    Some((beam_path, cached))
 }
 
-pub(crate) fn metadata_path(out_dir: &Path, pkg_name: &PackageName) -> PathBuf {
-    out_dir.join(format!("lib{pkg_name}.rmeta"))
+pub(crate) fn files_list_path(incremental_dir: &Path) -> PathBuf {
+    incremental_dir.join("files")
 }
 
-pub(crate) fn modules_list_path(incremental_dir: &Path, pkg_name: &PackageName) -> PathBuf {
-    incremental_dir.join(format!("{pkg_name}.modules"))
-}
-
-fn clean_up_beams_and_update_manifest(
+/// Deletes build artifacts that were present in the previous build but are not present now.
+/// Only emitted "categories" are cleaned up, e.g. if the previous build remitted `.app`,
+/// but this build doesn't, the `.app` is grandfathered-in to the current build.
+/// Maintains a `files` file in the `incremental_dir`, containing the names
+/// of all tracked artifacts.
+fn clean_up_and_update_files_list(
     incremental_dir: &Path,
-    pkg_name: &PackageName,
     out_dir: &Path,
-    modules: &FxIndexSet<Symbol>,
+    files: &FxIndexSet<PathBuf>,
 ) -> io::Result<()> {
-    let manifest_path = modules_list_path(incremental_dir, pkg_name);
-    let modules: FxIndexSet<&str> = modules.iter().map(|symbol| symbol.as_str()).collect();
+    let emitted_kinds: FxHashSet<&OsStr> = files.iter().flat_map(|name| name.extension()).collect();
 
-    let previous_modules = match std::fs::read_to_string(&manifest_path) {
-        Err(e) if e.kind() == io::ErrorKind::NotFound => Ok(String::new()),
-        other => other,
-    }?;
+    let list_path = files_list_path(incremental_dir);
+    let previous_files = match std::fs::read_to_string(&list_path) {
+        Err(e) if e.kind() == io::ErrorKind::NotFound => String::new(),
+        other => other?,
+    };
 
-    for module in previous_modules.lines().filter(|&module| !modules.contains(module)) {
-        match std::fs::remove_file(out_dir.join(module).with_added_extension("beam")) {
-            Err(e) if e.kind() == io::ErrorKind::NotFound => Ok(()),
-            other => other,
-        }?
+    let mut kept = Vec::new();
+    for file in previous_files.lines().map(Path::new).filter(|&file| !files.contains(file)) {
+        let path = out_dir.join(file);
+        if file.extension().is_some_and(|kind| emitted_kinds.contains(kind)) {
+            match std::fs::remove_file(&path) {
+                Err(e) if e.kind() == io::ErrorKind::NotFound => {}
+                other => other?,
+            }
+        } else if path.exists() {
+            kept.push(file);
+        }
     }
 
-    let contents: String = modules.iter().copied().intersperse("\n").collect();
-    std::fs::write(&manifest_path, contents)
-}
-
-fn replace_file_via(
-    staging_dir: &tempfile::TempDir,
-    target: &Path,
-    write: impl FnOnce(&Path) -> io::Result<()>,
-) -> io::Result<()> {
-    let temp = staging_dir.path().join(target.file_name().expect("target path has a file name"));
-    write(&temp)?;
-    std::fs::rename(&temp, target)
+    let names = files.iter().map(PathBuf::as_path).chain(kept).map(Path::as_os_str);
+    let contents: Vec<u8> =
+        names.map(OsStr::as_encoded_bytes).intersperse(b"\n").flatten().copied().collect();
+    std::fs::write(&list_path, contents)
 }
 
 fn make_config(
