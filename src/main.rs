@@ -35,6 +35,8 @@ pub(crate) enum DumpStage {
     Ast,
     Expanded,
     Typed,
+    Eaf,
+    Abstr,
     Erl,
     Core0,
     Core,
@@ -42,8 +44,6 @@ pub(crate) enum DumpStage {
 
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]
 pub(crate) enum EmitStage {
-    Eaf,
-    Abstr,
     Beam,
     Meta,
     App,
@@ -55,11 +55,11 @@ pub(crate) enum Stage {
     Ast,
     Expanded,
     Typed,
+    Eaf,
+    Abstr,
     Erl,
     Core0,
     Core,
-    Eaf,
-    Abstr,
     Beam,
     Meta,
     App,
@@ -72,6 +72,8 @@ impl From<DumpStage> for Stage {
             DumpStage::Ast => Stage::Ast,
             DumpStage::Expanded => Stage::Expanded,
             DumpStage::Typed => Stage::Typed,
+            DumpStage::Eaf => Stage::Eaf,
+            DumpStage::Abstr => Stage::Abstr,
             DumpStage::Erl => Stage::Erl,
             DumpStage::Core0 => Stage::Core0,
             DumpStage::Core => Stage::Core,
@@ -82,8 +84,6 @@ impl From<DumpStage> for Stage {
 impl From<EmitStage> for Stage {
     fn from(stage: EmitStage) -> Self {
         match stage {
-            EmitStage::Eaf => Stage::Eaf,
-            EmitStage::Abstr => Stage::Abstr,
             EmitStage::Beam => Stage::Beam,
             EmitStage::Meta => Stage::Meta,
             EmitStage::App => Stage::App,

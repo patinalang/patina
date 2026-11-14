@@ -106,8 +106,8 @@ impl Runner {
         let lib_dir = out_dir.path().join(DEPS_DIR);
         let externs = self.package_deps(pt_path, &lib_dir);
         let source = std::fs::read_to_string(pt_path).expect("read test source");
-        let mut dumps = vec!["tokens", "ast", "expanded", "typed", "erl"];
-        let mut emits = vec!["abstr", "beam"];
+        let mut dumps = vec!["tokens", "ast", "expanded", "typed", "abstr", "erl"];
+        let mut emits = vec!["beam"];
 
         let mut header = source.lines().take_while(|line| line.starts_with("//"));
         if let Some(extra) = header.find_map(|line| line.strip_prefix("// snapshot:")) {
