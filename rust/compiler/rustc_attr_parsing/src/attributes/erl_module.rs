@@ -5,6 +5,7 @@ pub(crate) struct ErlModuleParser;
 impl SingleAttributeParser for ErlModuleParser {
     const PATH: &[Symbol] = &[sym::module];
     const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[
+        Allow(Target::Crate),
         Allow(Target::Struct),
         Allow(Target::Enum),
         Allow(Target::Mod),
