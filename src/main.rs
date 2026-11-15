@@ -11,7 +11,7 @@ mod package;
 mod print;
 
 use std::io;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::process::ExitCode;
 
 use clap::Parser;
@@ -123,6 +123,10 @@ struct Args {
     #[arg(short = 'C', global = true, value_name = "DIR")]
     directory: Option<PathBuf>,
 
+    /// Format of the diagnostics written to stderr.
+    #[arg(long, value_enum, global = true, value_name = "FORMAT", default_value = "pretty")]
+    error_format: ErrorFormat,
+
     #[command(subcommand)]
     command: Command,
 }
@@ -229,12 +233,8 @@ struct CommonArgs {
     compile_server: Option<PathBuf>,
 
     /// Allow the lint `LINT`. Can be repeated.
-    #[arg(short = 'A', long = "allow", value_name = "LINT")]
+    #[arg(short = 'A', long = "allow-lint", value_name = "LINT")]
     allowed_lints: Vec<String>,
-
-    /// Format of the diagnostics written to stderr.
-    #[arg(long, value_enum, value_name = "FORMAT", default_value = "pretty")]
-    error_format: ErrorFormat,
 }
 
 #[derive(clap::Args, Debug)]
@@ -319,19 +319,29 @@ fn try_main(args: Args) -> Result<(), Error> {
     if let Some(dir) = args.directory {
         std::env::set_current_dir(&dir).map_err(|source| Error::ChangeDir { dir, source })?;
     }
-    let cwd = std::env::current_dir().map_err(Error::CurrentDir)?;
+    let base_dir = std::env::current_dir().map_err(Error::CurrentDir)?;
 
     let installation = LazyInstallation::new(args.root);
+    let error_format = args.error_format;
 
     match args.command {
         Command::Build { emit, common } => {
-            let manifest = Manifest::read(&cwd)?;
+            let manifest = Manifest::read(&base_dir)?;
             let file = manifest.source_path();
             let dependencies = manifest.dependency_names();
             let package = manifest.package();
             let externs = package.externs(dependencies.into_iter().map(ExternArg::from))?;
 
-            run(common, emit, cwd, &file, package, externs, installation)
+            run(RunArgs {
+                common,
+                error_format,
+                emit,
+                base_dir,
+                file,
+                package,
+                externs,
+                installation,
+            })
         }
         Command::Compile {
             file,
@@ -348,16 +358,25 @@ fn try_main(args: Args) -> Result<(), Error> {
                 extern_arg.check_exists()?;
             }
             let externs = package.externs(extern_args)?;
-            run(common, emit, cwd, &file, package, externs, installation)
+            run(RunArgs {
+                common,
+                error_format,
+                emit,
+                base_dir,
+                file,
+                package,
+                externs,
+                installation,
+            })
         }
         Command::Print { prints, format } => {
-            print::print(format, &prints, &cwd, installation)?;
+            print::print(format, &prints, &base_dir, installation)?;
             Ok(())
         }
         Command::Clean { pkg_name, output } => {
             let pkg_name = match pkg_name {
                 Some(name) => name,
-                None => Manifest::read(&cwd)?.package().name,
+                None => Manifest::read(&base_dir)?.package().name,
             };
             clean::clean(&output.out_dir, &output.package_incremental_dir(&pkg_name))?;
             Ok(())
@@ -366,52 +385,58 @@ fn try_main(args: Args) -> Result<(), Error> {
     }
 }
 
-fn run(
-    args: CommonArgs,
+struct RunArgs {
+    common: CommonArgs,
+    error_format: ErrorFormat,
     emit: Vec<EmitStage>,
     base_dir: PathBuf,
-    file: &Path,
+    file: PathBuf,
     package: PackageInfo,
     externs: Externs,
     installation: LazyInstallation,
-) -> Result<(), Error> {
+}
+
+fn run(args: RunArgs) -> Result<(), Error> {
+    let RunArgs { common, error_format, emit, base_dir, file, package, externs, installation } =
+        args;
+
     if package.name.is_reserved() && !package::is_bootstrap() {
         return Err(PackageNameError::Reserved(package.name).into());
     }
 
     let installation: Installation = installation.try_into()?;
-    let src = std::fs::read_to_string(file)
-        .map_err(|source| Error::ReadSource { path: file.to_owned(), source })?;
+    let src = std::fs::read_to_string(&file)
+        .map_err(|source| Error::ReadSource { path: file.clone(), source })?;
 
-    let mut lib_dirs = args.lib_dirs;
+    let mut lib_dirs = common.lib_dirs;
     if !package::names_core_file(&externs) {
         lib_dirs.push(installation.core_dir.clone());
     }
 
     let server =
-        compile::compile_server::SyncServer::start(args.compile_server.clone(), installation);
+        compile::compile_server::SyncServer::start(common.compile_server.clone(), installation);
 
-    let incremental_dir = args.output.package_incremental_dir(&package.name);
+    let incremental_dir = common.output.package_incremental_dir(&package.name);
 
     let opts = compile::CompileOptions {
         base_dir,
         otp_version: server.otp_version()?,
-        out_dir: args.output.out_dir,
+        out_dir: common.output.out_dir,
         incremental_dir,
         lib_dirs,
         package,
         externs,
-        allowed_lints: args.allowed_lints,
-        error_format: args.error_format.into(),
+        allowed_lints: common.allowed_lints,
+        error_format: error_format.into(),
     };
 
-    let stages = args
+    let stages = common
         .dump
         .into_iter()
         .map(Stage::from)
         .chain(emit.into_iter().map(Stage::from))
         .collect::<Vec<_>>();
 
-    catch_fatal_errors(|| compile::compile(&stages, file, &src, &opts, &server))?;
+    catch_fatal_errors(|| compile::compile(&stages, &file, &src, &opts, &server))?;
     Ok(())
 }
