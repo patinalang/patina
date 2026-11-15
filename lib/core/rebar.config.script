@@ -1,0 +1,29 @@
+Exe =
+    case os:find_executable("patina") of
+        false -> error("the `patina` executable isn't in PATH");
+        Path -> Path
+    end,
+
+Port = open_port(
+    {spawn_executable, Exe},
+    [{args, ["print", "--format", "json", "install_root"]}, binary, exit_status, hide]
+),
+
+Collect = fun Collect(Output) ->
+    receive
+        {Port, {data, Data}} -> Collect([Output, Data]);
+        {Port, {exit_status, 0}} -> Output;
+        {Port, {exit_status, Status}} -> error({patina_print_failed, Status, Output})
+    end
+end,
+
+{#{"install_root" := Root}, ok, _Rest} = json:decode(
+    iolist_to_binary(Collect([])), ok, #{string => fun unicode:characters_to_list/1}
+),
+
+Dir = filename:join(Root, "patina_core"),
+[
+    {src_dirs, [filename:join(Dir, "src")]},
+    {patina_opts, [{additional_src_search_dirs, [Dir]}]},
+    {plugins, [rebar3_patina]}
+].

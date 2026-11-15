@@ -438,7 +438,7 @@ impl BeamVm {
                 "+pc", "unicode", "-noshell", "-kernel", "logger", ERL_LOGGER, "-eval", ERL_INIT,
             ])
             .arg("-pa")
-            .arg(&installation.patina_dir)
+            .arg(&installation.core_dir)
             .env("TMPDIR", tmpdir.path())
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())

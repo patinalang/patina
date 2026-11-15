@@ -30,10 +30,11 @@ fn reserved_package_name_needs_bootstrap() {
 }
 
 #[test]
-fn install_missing_compiler_app_is_reported() {
+fn install_missing_compile_server_is_reported() {
     let root = tempfile::tempdir().expect("create temp dir");
     let output = run(compile_trivial(root.path()).env("PATINA_ROOT", root.path()));
-    assert_failure(&output, "Patina install corrupted: patina/ebin/patina.app is missing");
+    let missing = "patina_core/ebin/patina_compile_server.beam is missing";
+    assert_failure(&output, &format!("Patina install corrupted: {missing}"));
 }
 
 #[test]
@@ -91,11 +92,12 @@ fn installed_core() -> String {
 
 /// Copies the install into `dir`, without Core, and returns its root.
 fn install_without_core(dir: &Path) -> PathBuf {
-    let ebin = dir.join("root/patina/ebin");
+    let ebin = dir.join("root/patina_core/ebin");
     std::fs::create_dir_all(&ebin).expect("create dir");
-    for entry in std::fs::read_dir(common::install_root().join("patina/ebin")).expect("read dir") {
-        let file = entry.expect("read dir entry").path();
-        std::fs::copy(&file, ebin.join(file.file_name().expect("file name"))).expect("copy file");
+    for module in ["patina", "patina_compile_server", "patina_error"] {
+        let file = format!("{module}.beam");
+        std::fs::copy(common::install_root().join("patina_core/ebin").join(&file), ebin.join(file))
+            .expect("copy file");
     }
     dir.join("root")
 }

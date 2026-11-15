@@ -12,13 +12,12 @@ CARGO_FLAGS := $(if $(filter release,$(PROFILE)),--release)
 PATINA := target/$(PROFILE)/patina
 ROOT := target/$(PROFILE)/root
 
-APPS := patina patina_core
-PATINA_APP := $(ROOT)/patina/ebin/patina.app
-CORE_APP := $(ROOT)/patina_core/ebin/patina_core.app
+APPS := patina_core
+CORE := $(ROOT)/patina_core
+CORE_APP := $(CORE)/ebin/patina_core.app
 
-PATINA_ERL := $(wildcard lib/patina/src/*.erl)
+CORE_ERL := $(wildcard lib/core/src/*.erl)
 PATINA_VSN = $(shell cargo pkgid | cut -d'\#' -f2 | cut -d@ -f2)
-PATINA_MODULES = $(shell echo $(basename $(notdir $(PATINA_ERL))) | tr ' ' ,)
 
 .DELETE_ON_ERROR:
 
@@ -36,7 +35,7 @@ help:
 
 .PHONY: build
 ## Build the compiler and its libraries.
-build: $(PATINA_APP) $(CORE_APP)
+build: $(CORE_APP)
 
 .PHONY: install
 ## Build and install into INSTALL_PREFIX.
@@ -78,18 +77,13 @@ $(PATINA): FORCE
 .PHONY: FORCE
 FORCE:
 
-$(PATINA_APP): $(PATINA_ERL) lib/patina/src/patina.app.src
-	rm -rf $(dir $@) $(ROOT)/patina/src
-	mkdir -p $(dir $@) $(ROOT)/patina/src
-	cp $(PATINA_ERL) lib/patina/src/patina.app.src $(ROOT)/patina/src
-	erlc -o $(dir $@) $(PATINA_ERL)
-	sed -e 's/vsn, "/vsn, "$(PATINA_VSN)/' -e 's/modules, \[/modules, [$(PATINA_MODULES)/' \
-		lib/patina/src/patina.app.src > $@
-
-$(CORE_APP): $(PATINA) $(PATINA_APP) lib/core/Patina.toml $(wildcard lib/core/src/*.pt)
-	rm -rf $(ROOT)/patina_core
-	mkdir -p $(ROOT)/patina_core
-	cp -R lib/core/Patina.toml lib/core/src $(ROOT)/patina_core
+$(CORE_APP): $(PATINA) lib/core/Patina.toml $(wildcard lib/core/src/*)
+	rm -rf $(CORE)
+	mkdir -p $(CORE)/ebin
+	cp -R lib/core/Patina.toml lib/core/src $(CORE)
+	sed -e 's/{vsn, "[^"]*"}/{vsn, "$(PATINA_VSN)"}/' lib/core/src/patina_core.app.src \
+		> $(CORE)/src/patina_core.app.src
+	erlc -o $(CORE)/ebin $(CORE_ERL)
 	cd lib/core && PATINA_BOOTSTRAP=1  $(abspath $(PATINA)) --root=$(abspath $(ROOT)) \
-		build --out-dir $(abspath $(dir $@))
-	rm -rf $(dir $@).patina_incremental
+		build --out-dir $(abspath $(CORE)/ebin)
+	rm -rf $(CORE)/ebin/.patina_incremental

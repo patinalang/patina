@@ -1,7 +1,0 @@
-{application, patina, [
-    {description, "The Patina compiler's Erlang library"},
-    {vsn, ""},
-    {modules, []},
-    {registered, [patina_compile_server]},
-    {applications, [kernel, stdlib, compiler, syntax_tools]}
-]}.

@@ -1,0 +1,7 @@
+{application, patina_core, [
+    {description, "The Patina Core library"},
+    {vsn, "0.0.0"},
+    {modules, []},
+    {registered, [patina_compile_server]},
+    {applications, [kernel, stdlib]}
+]}.

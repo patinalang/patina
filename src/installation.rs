@@ -3,7 +3,7 @@ use std::env::consts::EXE_SUFFIX;
 use std::io;
 use std::path::{Path, PathBuf};
 
-const EXPECTED_FILES: [&str; 1] = ["patina/ebin/patina.app"];
+const EXPECTED_FILES: [&str; 1] = ["patina_core/ebin/patina_compile_server.beam"];
 
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum LocateInstallationError {
@@ -52,8 +52,6 @@ impl TryInto<Installation> for LazyInstallation {
 #[derive(Debug, Clone)]
 pub(crate) struct Installation {
     pub(crate) root: PathBuf,
-    /// `<root>/patina/ebin`
-    pub(crate) patina_dir: PathBuf,
     /// `<root>/patina_core/ebin`
     pub(crate) core_dir: PathBuf,
 }
@@ -81,9 +79,8 @@ impl Installation {
             }
         }
 
-        let patina_dir = root.join("patina/ebin");
         let core_dir = root.join("patina_core/ebin");
-        Ok(Installation { root, patina_dir, core_dir })
+        Ok(Installation { root, core_dir })
     }
 }
 
