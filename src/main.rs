@@ -6,6 +6,7 @@ mod compile;
 mod erlang;
 mod installation;
 mod manifest;
+mod new;
 mod num_utils;
 mod package;
 mod print;
@@ -24,6 +25,7 @@ use crate::clean::CleanError;
 use crate::compile::compile_server::{OtpVersionError, SpawnError};
 use crate::installation::{Installation, LazyInstallation, LocateInstallationError};
 use crate::manifest::{Manifest, ManifestError};
+use crate::new::NewError;
 use crate::package::{
     DuplicateExtern, ExternArg, ExternArgError, PackageInfo, PackageName, PackageNameError,
 };
@@ -205,6 +207,16 @@ enum Command {
         output: OutputArgs,
     },
 
+    /// Create a new package.
+    New {
+        /// Directory to create the package in. It must not exist or be empty.
+        dir: PathBuf,
+
+        /// Package name. Can be omitted if `DIR` is already the package name.
+        #[arg(long, value_name = "NAME")]
+        pkg_name: Option<PackageName>,
+    },
+
     /// Run a compile server to be used with Patina's `--compile-server` option.
     ///
     /// The server's socket path is printed as the first line on stdout.
@@ -296,6 +308,8 @@ enum Error {
     Print(#[from] PrintError),
     #[error(transparent)]
     Clean(#[from] CleanError),
+    #[error(transparent)]
+    New(#[from] NewError),
 }
 
 fn main() -> ExitCode {
@@ -381,6 +395,7 @@ fn try_main(args: Args) -> Result<(), Error> {
             clean::clean(&output.out_dir, &output.package_incremental_dir(&pkg_name))?;
             Ok(())
         }
+        Command::New { dir, pkg_name } => Ok(new::new(&dir, pkg_name)?),
         Command::Serve => compile::compile_server::serve(installation.get()?).map_err(Error::Serve),
     }
 }

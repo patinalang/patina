@@ -1,0 +1,47 @@
+PkgDir = filename:dirname(filename:dirname(filename:absname(SCRIPT))),
+
+Exe =
+    case os:find_executable("patina") of
+        false -> error("the `patina` executable isn't in PATH");
+        Path -> Path
+    end,
+
+Port = open_port(
+    {spawn_executable, Exe},
+    [
+        {args, ["-C", PkgDir, "print", "--format", "json", "package", "dependencies"]},
+        binary,
+        exit_status,
+        hide
+    ]
+),
+
+Collect = fun Collect(Output) ->
+    receive
+        {Port, {data, Data}} -> Collect([Output, Data]);
+        {Port, {exit_status, 0}} -> Output;
+        {Port, {exit_status, Status}} -> error({patina_print_failed, Status})
+    end
+end,
+
+{Printed, ok, _Rest} = json:decode(
+    iolist_to_binary(Collect([])), ok, #{string => fun unicode:characters_to_list/1}
+),
+
+#{
+    "package" := #{"otp_app_name" := App, "version" := Version, "description" := Description},
+    "dependencies" := Deps
+} = Printed,
+
+{application, list_to_atom(App), [
+    {description, Description},
+    {vsn, Version},
+    {modules, []},
+    {registered, []},
+    {applications, [
+        kernel,
+        stdlib,
+        patina_core
+        | [list_to_atom(DepApp) || #{"otp_app_name" := DepApp} <- Deps]
+    ]}
+]}.

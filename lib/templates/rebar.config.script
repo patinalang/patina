@@ -1,0 +1,80 @@
+PkgDir = filename:dirname(filename:absname(SCRIPT)),
+
+Exe =
+    case os:find_executable("patina") of
+        false -> error("the `patina` executable isn't in PATH");
+        Found -> Found
+    end,
+
+Port = open_port(
+    {spawn_executable, Exe},
+    [
+        {args, ["-C", PkgDir, "print", "--format", "json", "dependencies"]},
+        binary,
+        exit_status,
+        hide
+    ]
+),
+
+CollectFun = fun Collect(Output) ->
+    receive
+        {Port, {data, Data}} -> Collect([Output, Data]);
+        {Port, {exit_status, 0}} -> Output;
+        {Port, {exit_status, Status}} -> error({patina_print_failed, Status})
+    end
+end,
+
+{#{"dependencies" := PatinaDeps0}, ok, _Rest} = json:decode(
+    iolist_to_binary(CollectFun([])), ok, #{string => fun unicode:characters_to_list/1}
+),
+
+PatinaDeps = lists:map(
+    fun(#{"otp_app_name" := App0, "version" := Requirement, "source" := Source}) ->
+        App = list_to_atom(App0),
+        case Source of
+            #{"hex" := Hex} ->
+                case {Requirement, Hex} of
+                    {null, App0} -> App;
+                    {null, _} -> {App, {pkg, list_to_atom(Hex)}};
+                    {_, App0} -> {App, Requirement};
+                    {_, _} -> {App, Requirement, {pkg, list_to_atom(Hex)}}
+                end;
+            #{"git" := #{"url" := Url, "ref" := null}} ->
+                {App, {git, Url}};
+            #{"git" := #{"url" := Url, "ref" := Ref}} ->
+                {App, {git, Url, {ref, Ref}}};
+            #{"path" := Path} ->
+                {App, {path, Path}}
+        end
+    end,
+    PatinaDeps0
+),
+
+DepNameFun = fun
+    (Dep) when is_tuple(Dep) -> element(1, Dep);
+    (Dep) when is_atom(Dep) -> Dep
+end,
+
+AddMissingFun = fun(New, Existing) ->
+    Names = lists:map(DepNameFun, Existing),
+    [Dep || Dep <- New, not lists:member(DepNameFun(Dep), Names)]
+end,
+
+ExistingDeps = proplists:get_value(deps, CONFIG, []),
+NewDeps = AddMissingFun([{patina_core, ">= 0.0.0"} | PatinaDeps], ExistingDeps),
+
+HasPathDeps = lists:any(
+    fun
+        ({_App, {path, _Path}}) -> true;
+        (_) -> false
+    end,
+    PatinaDeps
+),
+ExistingPlugins = proplists:get_value(plugins, CONFIG, []),
+NewPlugins = AddMissingFun([rebar3_patina | [rebar3_path_deps || HasPathDeps]], ExistingPlugins),
+
+Config = [
+    {plugins, NewPlugins ++ ExistingPlugins},
+    {deps, ExistingDeps ++ NewDeps}
+],
+lists:foldl(fun({Key, _} = Term, Acc) -> lists:keystore(Key, 1, Acc, Term) end, CONFIG, Config).

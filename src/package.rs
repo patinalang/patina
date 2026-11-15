@@ -57,6 +57,10 @@ impl PackageName {
     pub(crate) fn is_reserved(&self) -> bool {
         matches!(self.0.as_str(), CORE_PACKAGE_NAME | STD_PACKAGE_NAME)
     }
+
+    pub(crate) fn as_str(&self) -> &str {
+        &self.0
+    }
 }
 
 impl TryFrom<String> for PackageName {
