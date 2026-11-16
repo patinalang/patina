@@ -1,4 +1,4 @@
-PkgDir = filename:dirname(filename:absname(SCRIPT)),
+PkgDir = filename:dirname(SCRIPT),
 
 Exe =
     case os:find_executable("patina") of

@@ -16,7 +16,7 @@ APPS := patina_core
 CORE := $(ROOT)/patina_core
 CORE_APP := $(CORE)/ebin/patina_core.app
 
-CORE_ERL := $(wildcard lib/core/src/*.erl)
+CORE_ERL := $(wildcard lib/core/erl_src/*.erl)
 PATINA_VSN = $(shell cargo pkgid | cut -d'\#' -f2 | cut -d@ -f2)
 
 .DELETE_ON_ERROR:
@@ -77,12 +77,12 @@ $(PATINA): FORCE
 .PHONY: FORCE
 FORCE:
 
-$(CORE_APP): $(PATINA) lib/core/Patina.toml $(wildcard lib/core/src/*)
+$(CORE_APP): $(PATINA) lib/core/Patina.toml $(wildcard lib/core/src/*) $(wildcard lib/core/erl_src/*)
 	rm -rf $(CORE)
 	mkdir -p $(CORE)/ebin
-	cp -R lib/core/Patina.toml lib/core/src $(CORE)
-	sed -e 's/{vsn, "[^"]*"}/{vsn, "$(PATINA_VSN)"}/' lib/core/src/patina_core.app.src \
-		> $(CORE)/src/patina_core.app.src
+	cp -R lib/core/Patina.toml lib/core/src lib/core/erl_src $(CORE)
+	sed -e 's/{vsn, "[^"]*"}/{vsn, "$(PATINA_VSN)"}/' lib/core/erl_src/patina_core.app.src \
+		> $(CORE)/erl_src/patina_core.app.src
 	erlc -o $(CORE)/ebin $(CORE_ERL)
 	cd lib/core && PATINA_BOOTSTRAP=1  $(abspath $(PATINA)) --root=$(abspath $(ROOT)) \
 		build --out-dir $(abspath $(CORE)/ebin)

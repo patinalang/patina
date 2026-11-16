@@ -21,9 +21,44 @@ end,
     iolist_to_binary(Collect([])), ok, #{string => fun unicode:characters_to_list/1}
 ),
 
-Dir = filename:join(Root, "patina_core"),
+AppDir = filename:dirname(SCRIPT),
+PatinaCore = filename:join(Root, "patina_core"),
+ErlSrc = filename:join(PatinaCore, "erl_src"),
+LocalErlSrc = filename:join(AppDir, "erl_src"),
+
+LinkResult =
+    case file:read_link(LocalErlSrc) of
+        {ok, ErlSrc} ->
+            ok;
+        {ok, _OtherInstall} ->
+            file:delete(LocalErlSrc),
+            file:make_symlink(ErlSrc, LocalErlSrc);
+        {error, enoent} ->
+            file:make_symlink(ErlSrc, LocalErlSrc);
+        {error, enotsup} ->
+            {error, enotsup};
+        {error, einval} ->
+            ok
+    end,
+
+case LinkResult of
+    ok ->
+        ok;
+    {error, _} ->
+        ok = filelib:ensure_path(LocalErlSrc),
+        {ok, Files} = file:list_dir(ErlSrc),
+        lists:foreach(
+            fun(File) ->
+                Src = filename:join(ErlSrc, File),
+                Dst = filename:join(LocalErlSrc, File),
+                {ok, _} = file:copy(Src, Dst)
+            end,
+            Files
+        )
+end,
+
 [
-    {src_dirs, [filename:join(Dir, "src")]},
-    {patina_opts, [{additional_src_search_dirs, [Dir]}]},
+    {src_dirs, ["erl_src"]},
+    {patina_opts, [{additional_src_search_dirs, [PatinaCore]}]},
     {plugins, [rebar3_patina]}
 ].
