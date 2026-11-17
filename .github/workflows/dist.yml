@@ -1,0 +1,134 @@
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dist-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  OTP_VERSION: "29"
+
+jobs:
+  tarball:
+    name: ${{ matrix.target }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            runner: ubuntu-22.04
+          - target: aarch64-unknown-linux-gnu
+            runner: ubuntu-22.04-arm
+          - target: aarch64-apple-darwin
+            runner: macos-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
+        with:
+          otp-version: ${{ env.OTP_VERSION }}
+
+      - run: rustup toolchain install --profile minimal
+
+      - name: Verify target
+        run: |
+          rustc --version --verbose | grep -Fx 'host: ${{ matrix.target }}'
+
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: ${{ matrix.target }}
+
+      - name: Set DIST_NAME
+        run: |
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            version="${GITHUB_REF_NAME#v}"
+          elif [ "$GITHUB_EVENT_NAME" = push ]; then
+            version=nightly
+          else
+            version="$(git rev-parse --short HEAD)"
+          fi
+          echo "DIST_NAME=patina-$version-${{ matrix.target }}" >> "$GITHUB_ENV"
+
+      - name: Build and install
+        run: make install INSTALL_PREFIX="$PWD/dist/$DIST_NAME"
+
+      - name: Create the tarball
+        run: COPYFILE_DISABLE=1 tar -czf "$DIST_NAME.tar.gz" -C dist "$DIST_NAME"
+
+      - name: Smoke test the tarball
+        run: |
+          mkdir smoke
+          tar -xzf "$DIST_NAME.tar.gz" -C smoke
+          root="$PWD/smoke/$DIST_NAME"
+          export PATH="$root/patina/bin:$PATH"
+          patina print --format json install_root
+          cd smoke
+          patina new hello
+          cd hello
+          patina build
+          output="$(erl -noshell -pa . -pa "$root/patina_core/ebin" -eval "'Elixir.Patina.Hello':main(), halt().")"
+          echo "$output"
+          test "$output" = "Hello, world!"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ${{ env.DIST_NAME }}
+          path: ${{ env.DIST_NAME }}.tar.gz
+          if-no-files-found: error
+
+  release:
+    name: Publish release
+    if: github.ref_type == 'tag'
+    needs: tarball
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Upload the tarballs to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if ! gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes
+          fi
+          gh release upload "$GITHUB_REF_NAME" dist/*.tar.gz --clobber
+
+  nightly:
+    name: Publish nightly
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: tarball
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Move the nightly release to this commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          notes="Built from $GITHUB_SHA."
+          if gh release view nightly > /dev/null 2>&1; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/tags/nightly" -f sha="$GITHUB_SHA" -F force=true
+            gh release edit nightly --notes "$notes"
+          else
+            gh release create nightly --target "$GITHUB_SHA" --title nightly --notes "$notes" --prerelease --latest=false
+          fi
+          gh release upload nightly dist/*.tar.gz --clobber
