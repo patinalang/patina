@@ -1,0 +1,57 @@
+Short version for non-lawyers:
+
+The Patina Project is dual-licensed under Apache 2.0 and MIT
+terms.
+
+It is Copyright (c) The Patina Project Contributors.
+It contains, and is derived from, source code of the Rust project,
+which is Copyright (c) The Rust Project Contributors.
+
+Longer version:
+
+Copyrights in the Patina project are retained by their contributors. No
+copyright assignment is required to contribute to the Patina project.
+
+The Patina project is derived from the Rust project's source code:
+
+* A subset of files from the Rust project repository
+  <https://github.com/rust-lang/rust>, as found at commit
+  `cb40c25f6aebb637163d26bf76a680ed6e5d1eda`, is committed as a snapshot to this
+  repository's `main` branch under the `rust/` subdirectory.
+* The contents of the `rust/` subdirectory have since been modified by the
+  Patina project: files have been changed, added, and removed. The Patina
+  project may also incorporate later changes from the Rust project's repository.
+  Each change is recorded in the version control history.
+* The Rust project's version control history, at least up to and including the
+  commit above, is preserved on the `rust-history` branch of this repository.
+
+Copyrights in the Rust project are retained by their contributors.
+
+The Patina project is not affiliated with, or endorsed by, the Rust project
+or the Rust Foundation.
+
+The Patina project's repository is available at
+<https://github.com/patinalang/patina>.
+
+Some files include explicit copyright notices and/or license notices.
+For full authorship information, see the version control history, including
+the `rust-history` branch, or <https://thanks.rust-lang.org> for the Rust
+project.
+
+Except as otherwise noted, Patina is licensed under the Apache License, Version
+2.0 <LICENSE-APACHE> or <http://www.apache.org/licenses/LICENSE-2.0> or the MIT
+license <LICENSE-MIT> or <http://opensource.org/licenses/MIT>, at your option.
+
+We track licenses for third-party materials in two ways:
+
+* We use [REUSE](https://reuse.software) to track license information for
+  in-tree source files - both those authored by the Patina project and those
+  authored by third parties, including the Rust project. See `REUSE.toml`,
+  and our cached output of the `reuse` tool which is committed
+  to `license-metadata.json`.
+* We use `cargo` to track license information for out-of-tree dependencies.
+
+These two sources of information are collected by the tool `generate-copyright`
+into a file called `COPYRIGHT.html`, which is shipped with each compiled release
+of Patina. Please refer to that file for detailed information
+as to the components of any given Patina release.

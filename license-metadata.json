@@ -1,0 +1,1882 @@
+{
+  "files": {
+    "children": [
+      {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "license": {
+                      "copyright": [
+                        "The Patina Project Contributors"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "src",
+                    "type": "directory"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/patina_etir_build",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "license": {
+                              "copyright": [
+                                "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                              ],
+                              "spdx": "Apache-2.0 OR MIT"
+                            },
+                            "name": "ty.rs",
+                            "type": "file"
+                          }
+                        ],
+                        "license": {
+                          "copyright": [
+                            "The Patina Project Contributors",
+                            "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                          ],
+                          "spdx": "Apache-2.0 OR MIT"
+                        },
+                        "name": "deriving/generic",
+                        "type": "directory"
+                      },
+                      {
+                        "directories": [
+                          "assert"
+                        ],
+                        "files": [
+                          "autodiff.rs",
+                          "concat.rs",
+                          "concat_bytes.rs",
+                          "errors.rs",
+                          "format.rs",
+                          "lib.rs",
+                          "proc_macro_harness.rs"
+                        ],
+                        "license": {
+                          "copyright": [
+                            "The Patina Project Contributors",
+                            "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                          ],
+                          "spdx": "Apache-2.0 OR MIT"
+                        },
+                        "type": "group"
+                      }
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "src",
+                    "type": "directory"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_builtin_macros",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "license": {
+                          "copyright": [
+                            "The Patina Project Contributors",
+                            "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                          ],
+                          "spdx": "Apache-2.0 OR MIT"
+                        },
+                        "name": "metavar_expr.rs",
+                        "type": "file"
+                      }
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "src/mbe",
+                    "type": "directory"
+                  },
+                  {
+                    "children": [],
+                    "license": {
+                      "copyright": [
+                        "The Patina Project Contributors"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "src/proc_macro",
+                    "type": "directory"
+                  },
+                  {
+                    "directories": [],
+                    "files": [
+                      "src/expand.rs",
+                      "src/mbe.rs",
+                      "src/stats.rs"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "type": "group"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_expand",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "Cargo.toml",
+                    "type": "file"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_hir_pretty",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "directories": [],
+                    "files": [
+                      "src/callbacks.rs",
+                      "src/limits.rs",
+                      "src/queries.rs"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "type": "group"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_interface",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "Cargo.toml",
+                    "type": "file"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_lexer",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "src/lib.rs",
+                    "type": "file"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_lint_defs",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "directories": [],
+                    "files": [
+                      "src/dependency_format.rs",
+                      "src/eii.rs",
+                      "src/foreign_modules.rs",
+                      "src/fs.rs",
+                      "src/rmeta/def_path_hash_map.rs"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "type": "group"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_metadata",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "license": {
+                          "copyright": [
+                            "The Patina Project Contributors",
+                            "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                          ],
+                          "spdx": "Apache-2.0 OR MIT"
+                        },
+                        "name": "symbol.rs",
+                        "type": "file"
+                      }
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "src",
+                    "type": "directory"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_span",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "Cargo.toml",
+                    "type": "file"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_transmute",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "directories": [
+                      "extern_abi"
+                    ],
+                    "files": [
+                      "canon_abi.rs"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "type": "group"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_abi/src",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "visit.rs",
+                    "type": "file"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_ast_ir/src",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "directories": [
+                      "delegation"
+                    ],
+                    "files": [
+                      "asm.rs",
+                      "block.rs",
+                      "contract.rs",
+                      "index.rs",
+                      "path.rs",
+                      "stability.rs"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "type": "group"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_ast_lowering/src",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "lib.rs",
+                    "type": "file"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_ast_passes/src",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "fixup.rs",
+                    "type": "file"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_ast_pretty/src/pprust/state",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "lib.rs",
+                    "type": "file"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "1991-2024 Unicode, Inc"
+                  ],
+                  "spdx": "Unicode-3.0"
+                },
+                "name": "compiler/rustc_baked_icu_data/src",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "directories": [],
+                    "files": [
+                      "codegen_attrs.rs",
+                      "target_features.rs",
+                      "back/archive.rs"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "type": "group"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_codegen_ssa/src",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "directories": [],
+                    "files": [
+                      "diagnostic.rs",
+                      "mod.rs"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "type": "group"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_hir/src/attrs",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "directories": [
+                      "compare_impl_item"
+                    ],
+                    "files": [
+                      "always_applicable.rs",
+                      "compare_eii.rs",
+                      "compare_impl_item.rs",
+                      "entry.rs"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "type": "group"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_hir_analysis/src/check",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "directories": [],
+                    "files": [
+                      "inherent_impls_overlap.rs",
+                      "mod.rs",
+                      "unsafety.rs"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "type": "group"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_hir_analysis/src/coherence",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "directories": [],
+                    "files": [
+                      "bounds.rs",
+                      "errors.rs"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "type": "group"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_hir_analysis/src/hir_ty_lowering",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "license": {
+                      "copyright": [
+                        "The Patina Project Contributors"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "binary_pattern.rs",
+                    "type": "file"
+                  },
+                  {
+                    "directories": [],
+                    "files": [
+                      "autoderef.rs",
+                      "diverges.rs",
+                      "expectation.rs",
+                      "loops.rs",
+                      "opaque_types.rs",
+                      "typeck_root_ctxt.rs",
+                      "upvar.rs",
+                      "fn_ctxt/adjust_fulfillment_errors.rs",
+                      "fn_ctxt/arg_matrix.rs",
+                      "fn_ctxt/mod.rs",
+                      "method/prelude_edition_lints.rs"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "type": "group"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_hir_typeck/src",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "directories": [],
+                    "files": [
+                      "instantiate.rs",
+                      "query_response.rs"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "type": "group"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_infer/src/infer/canonical",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "directories": [],
+                    "files": [
+                      "higher_ranked.rs",
+                      "mod.rs"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "type": "group"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_infer/src/infer/relate",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "directories": [],
+                    "files": [
+                      "nested_filter.rs",
+                      "place.rs"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "type": "group"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_middle/src/hir",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "kind.rs",
+                    "type": "file"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_middle/src/ty/consts",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "tls.rs",
+                    "type": "file"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_middle/src/ty/context",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "inhabited_predicate.rs",
+                    "type": "file"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_middle/src/ty/inhabitedness",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "directories": [],
+                    "files": [
+                      "check_const_value.rs",
+                      "check_fnrefs.rs",
+                      "check_mutability.rs"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Patina Project Contributors"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "type": "group"
+                  },
+                  {
+                    "directories": [],
+                    "files": [
+                      "thir/mod.rs",
+                      "thir/util.rs",
+                      "thir/cx/block.rs",
+                      "thir/pattern/migration.rs"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "type": "group"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_mir_build/src",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "mod.rs",
+                    "type": "file"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_next_trait_solver/src/canonical",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "license": {
+                          "copyright": [
+                            "The Patina Project Contributors",
+                            "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                          ],
+                          "spdx": "Apache-2.0 OR MIT"
+                        },
+                        "name": "mod.rs",
+                        "type": "file"
+                      }
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "lexer",
+                    "type": "directory"
+                  },
+                  {
+                    "license": {
+                      "copyright": [
+                        "The Patina Project Contributors"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "parser/binary_pattern.rs",
+                    "type": "file"
+                  },
+                  {
+                    "directories": [
+                      "parser/tokenstream"
+                    ],
+                    "files": [
+                      "lib.rs",
+                      "parser/asm.rs",
+                      "parser/cfg_select.rs",
+                      "parser/generics.rs",
+                      "parser/nonterminal.rs",
+                      "parser/stmt.rs",
+                      "parser/tests.rs"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "type": "group"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_parse/src",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "license": {
+                      "copyright": [
+                        "The Patina Project Contributors"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "erl_export.rs",
+                    "type": "file"
+                  },
+                  {
+                    "directories": [],
+                    "files": [
+                      "debugger_visualizer.rs",
+                      "diagnostic_items.rs",
+                      "eii.rs",
+                      "entry.rs",
+                      "hir_id_validator.rs",
+                      "lib_features.rs",
+                      "stability.rs",
+                      "upvars.rs",
+                      "weak_lang_items.rs"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "type": "group"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_passes/src",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "errors.rs",
+                    "type": "file"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_privacy/src",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "directories": [
+                      "rustdoc"
+                    ],
+                    "files": [
+                      "errors.rs",
+                      "rustdoc.rs"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "type": "group"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_resolve/src",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "directories": [],
+                    "files": [
+                      "hashed.rs",
+                      "test.rs"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "type": "group"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_symbol_mangling/src",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "license": {
+                          "copyright": [
+                            "The Patina Project Contributors",
+                            "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                          ],
+                          "spdx": "Apache-2.0 OR MIT"
+                        },
+                        "name": "mod.rs",
+                        "type": "file"
+                      }
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "spec",
+                    "type": "directory"
+                  },
+                  {
+                    "directories": [],
+                    "files": [
+                      "json.rs",
+                      "tests.rs"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "type": "group"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_target/src",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "directories": [],
+                    "files": [
+                      "call_kind.rs",
+                      "on_unimplemented.rs",
+                      "overflow.rs"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "type": "group"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_trait_selection/src/error_reporting/traits",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "directories": [],
+                    "files": [
+                      "assoc.rs",
+                      "common_traits.rs",
+                      "instance.rs",
+                      "nested_bodies.rs",
+                      "structural_match.rs"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "type": "group"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "compiler/rustc_ty_utils/src",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "noscript.css",
+                    "type": "file"
+                  },
+                  {
+                    "license": {
+                      "copyright": [
+                        "Nicolas Gallagher and Jonathan Neal"
+                      ],
+                      "spdx": "MIT"
+                    },
+                    "name": "normalize.css",
+                    "type": "file"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "2016 Ike Ku, Jessica Stokes and Leon Guan",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "src/librustdoc/html/static/css",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "README.txt",
+                    "type": "file"
+                  },
+                  {
+                    "directories": [],
+                    "files": [
+                      "Fira-LICENSE.txt",
+                      "FiraMono-Medium.woff2",
+                      "FiraMono-Regular.woff2",
+                      "FiraSans-Italic.woff2",
+                      "FiraSans-Medium.woff2",
+                      "FiraSans-MediumItalic.woff2",
+                      "FiraSans-Regular.woff2"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "2014 Mozilla Foundation",
+                        "2014 Telefonica S.A"
+                      ],
+                      "spdx": "OFL-1.1"
+                    },
+                    "type": "group"
+                  },
+                  {
+                    "directories": [],
+                    "files": [
+                      "NanumBarunGothic-LICENSE.txt",
+                      "NanumBarunGothic.ttf.woff2"
+                    ],
+                    "license": {
+                      "copyright": [
+                        "2010 NAVER Corporation"
+                      ],
+                      "spdx": "OFL-1.1"
+                    },
+                    "type": "group"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "2010, 2012, 2014-2023 Adobe Systems Incorporated"
+                  ],
+                  "spdx": "OFL-1.1"
+                },
+                "name": "src/librustdoc/html/static/fonts",
+                "type": "directory"
+              },
+              {
+                "children": [
+                  {
+                    "license": {
+                      "copyright": [
+                        "The Patina Project Contributors"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "Cargo.lock",
+                    "type": "file"
+                  },
+                  {
+                    "license": {
+                      "copyright": [
+                        "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                      ],
+                      "spdx": "Apache-2.0 OR MIT"
+                    },
+                    "name": "templates/Node.html",
+                    "type": "file"
+                  }
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "src/tools/generate-copyright",
+                "type": "directory"
+              },
+              {
+                "directories": [
+                  "compiler/etf",
+                  "compiler/rustc_middle/src/erl"
+                ],
+                "files": [
+                  "compiler/rustc_attr_parsing/src/attributes/erl_module.rs",
+                  "compiler/rustc_attr_parsing/src/attributes/extern_call.rs",
+                  "src/tools/collect-license-metadata/Cargo.lock"
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "type": "group"
+              },
+              {
+                "directories": [
+                  "compiler/rustc_hir_analysis/src/impl_wf_check",
+                  "compiler/rustc_hir_analysis/src/collect/type_of",
+                  "compiler/rustc_infer/src/infer/snapshot",
+                  "compiler/rustc_lint/src/types",
+                  "compiler/rustc_middle/src/hooks",
+                  "compiler/rustc_middle/src/thir",
+                  "compiler/rustc_middle/src/ty/print",
+                  "compiler/rustc_next_trait_solver/src/solve/assembly",
+                  "compiler/rustc_trait_selection/src/traits/select",
+                  "compiler/rustc_type_ir/src/relate"
+                ],
+                "files": [
+                  "compiler/rustc_ast/src/ast.rs",
+                  "compiler/rustc_ast/src/token.rs",
+                  "compiler/rustc_ast/src/visit.rs",
+                  "compiler/rustc_ast/src/util/classify.rs",
+                  "compiler/rustc_ast/src/util/literal.rs",
+                  "compiler/rustc_ast_pretty/src/pprust/state.rs",
+                  "compiler/rustc_attr_parsing/src/context.rs",
+                  "compiler/rustc_attr_parsing/src/session_diagnostics.rs",
+                  "compiler/rustc_attr_parsing/src/validate_attr.rs",
+                  "compiler/rustc_attr_parsing/src/attributes/autodiff.rs",
+                  "compiler/rustc_attr_parsing/src/attributes/codegen_attrs.rs",
+                  "compiler/rustc_attr_parsing/src/attributes/inline.rs",
+                  "compiler/rustc_attr_parsing/src/attributes/macro_attrs.rs",
+                  "compiler/rustc_attr_parsing/src/attributes/mod.rs",
+                  "compiler/rustc_attr_parsing/src/attributes/prelude.rs",
+                  "compiler/rustc_attr_parsing/src/attributes/proc_macro_attrs.rs",
+                  "compiler/rustc_attr_parsing/src/attributes/repr.rs",
+                  "compiler/rustc_attr_parsing/src/attributes/rustc_internal.rs",
+                  "compiler/rustc_attr_parsing/src/attributes/util.rs",
+                  "compiler/rustc_errors/src/diagnostic.rs",
+                  "compiler/rustc_feature/src/builtin_attrs.rs",
+                  "compiler/rustc_feature/src/unstable.rs",
+                  "compiler/rustc_hir/src/def.rs",
+                  "compiler/rustc_hir/src/hir.rs",
+                  "compiler/rustc_hir/src/intravisit.rs",
+                  "compiler/rustc_hir/src/lang_items.rs",
+                  "compiler/rustc_hir/src/target.rs",
+                  "compiler/rustc_hir_analysis/src/collect.rs",
+                  "compiler/rustc_hir_analysis/src/delegation.rs",
+                  "compiler/rustc_hir_analysis/src/errors.rs",
+                  "compiler/rustc_hir_analysis/src/lib.rs",
+                  "compiler/rustc_hir_analysis/src/collect/resolve_bound_vars.rs",
+                  "compiler/rustc_hir_analysis/src/collect/type_of.rs",
+                  "compiler/rustc_hir_analysis/src/outlives/implicit_infer.rs",
+                  "compiler/rustc_hir_analysis/src/variance/constraints.rs",
+                  "compiler/rustc_infer/src/infer/context.rs",
+                  "compiler/rustc_infer/src/infer/freshen.rs",
+                  "compiler/rustc_infer/src/infer/mod.rs",
+                  "compiler/rustc_infer/src/infer/resolve.rs",
+                  "compiler/rustc_infer/src/infer/type_variable.rs",
+                  "compiler/rustc_lint/src/autorefs.rs",
+                  "compiler/rustc_lint/src/builtin.rs",
+                  "compiler/rustc_lint/src/context.rs",
+                  "compiler/rustc_lint/src/dangling.rs",
+                  "compiler/rustc_lint/src/foreign_modules.rs",
+                  "compiler/rustc_lint/src/internal.rs",
+                  "compiler/rustc_lint/src/invalid_from_utf8.rs",
+                  "compiler/rustc_lint/src/lib.rs",
+                  "compiler/rustc_lint/src/lints.rs",
+                  "compiler/rustc_lint/src/nonstandard_style.rs",
+                  "compiler/rustc_lint/src/precedence.rs",
+                  "compiler/rustc_lint/src/ptr_nulls.rs",
+                  "compiler/rustc_lint/src/types.rs",
+                  "compiler/rustc_lint/src/unused.rs",
+                  "compiler/rustc_macros/src/diagnostics/message.rs",
+                  "compiler/rustc_middle/src/arena.rs",
+                  "compiler/rustc_middle/src/error.rs",
+                  "compiler/rustc_middle/src/lib.rs",
+                  "compiler/rustc_middle/src/metadata.rs",
+                  "compiler/rustc_middle/src/queries.rs",
+                  "compiler/rustc_middle/src/thir.rs",
+                  "compiler/rustc_middle/src/mir/consts.rs",
+                  "compiler/rustc_middle/src/mir/pretty.rs",
+                  "compiler/rustc_middle/src/mir/statement.rs",
+                  "compiler/rustc_middle/src/mir/syntax.rs",
+                  "compiler/rustc_middle/src/mir/interpret/error.rs",
+                  "compiler/rustc_middle/src/mir/interpret/mod.rs",
+                  "compiler/rustc_middle/src/mir/interpret/queries.rs",
+                  "compiler/rustc_middle/src/query/erase.rs",
+                  "compiler/rustc_middle/src/query/keys.rs",
+                  "compiler/rustc_middle/src/traits/mod.rs",
+                  "compiler/rustc_middle/src/traits/select.rs",
+                  "compiler/rustc_middle/src/ty/adjustment.rs",
+                  "compiler/rustc_middle/src/ty/cast.rs",
+                  "compiler/rustc_middle/src/ty/consts.rs",
+                  "compiler/rustc_middle/src/ty/context.rs",
+                  "compiler/rustc_middle/src/ty/diagnostics.rs",
+                  "compiler/rustc_middle/src/ty/error.rs",
+                  "compiler/rustc_middle/src/ty/layout.rs",
+                  "compiler/rustc_middle/src/ty/mod.rs",
+                  "compiler/rustc_middle/src/ty/normalize_erasing_regions.rs",
+                  "compiler/rustc_middle/src/ty/offload_meta.rs",
+                  "compiler/rustc_middle/src/ty/pattern.rs",
+                  "compiler/rustc_middle/src/ty/significant_drop_order.rs",
+                  "compiler/rustc_middle/src/ty/structural_impls.rs",
+                  "compiler/rustc_middle/src/ty/sty.rs",
+                  "compiler/rustc_middle/src/ty/typeck_results.rs",
+                  "compiler/rustc_middle/src/ty/util.rs",
+                  "compiler/rustc_middle/src/ty/vtable.rs",
+                  "compiler/rustc_next_trait_solver/src/coherence.rs",
+                  "compiler/rustc_next_trait_solver/src/resolve.rs",
+                  "compiler/rustc_next_trait_solver/src/solve/trait_goals.rs",
+                  "compiler/rustc_next_trait_solver/src/solve/normalizes_to/mod.rs",
+                  "compiler/rustc_pattern_analysis/src/rustc.rs",
+                  "compiler/rustc_query_impl/src/handle_cycle_error.rs",
+                  "compiler/rustc_session/src/config.rs",
+                  "compiler/rustc_session/src/errors.rs",
+                  "compiler/rustc_session/src/options.rs",
+                  "compiler/rustc_session/src/session.rs",
+                  "compiler/rustc_trait_selection/src/error_reporting/infer/mod.rs",
+                  "compiler/rustc_trait_selection/src/error_reporting/infer/note_and_explain.rs",
+                  "compiler/rustc_trait_selection/src/error_reporting/infer/nice_region_error/util.rs",
+                  "compiler/rustc_trait_selection/src/traits/dyn_compatibility.rs",
+                  "compiler/rustc_trait_selection/src/traits/effects.rs",
+                  "compiler/rustc_trait_selection/src/traits/misc.rs",
+                  "compiler/rustc_trait_selection/src/traits/project.rs",
+                  "compiler/rustc_trait_selection/src/traits/wf.rs",
+                  "compiler/rustc_trait_selection/src/traits/query/dropck_outlives.rs",
+                  "compiler/rustc_trait_selection/src/traits/query/type_op/implied_outlives_bounds.rs",
+                  "compiler/rustc_type_ir/src/error.rs",
+                  "compiler/rustc_type_ir/src/fast_reject.rs",
+                  "compiler/rustc_type_ir/src/flags.rs",
+                  "compiler/rustc_type_ir/src/generic_visit.rs",
+                  "compiler/rustc_type_ir/src/infer_ctxt.rs",
+                  "compiler/rustc_type_ir/src/inherent.rs",
+                  "compiler/rustc_type_ir/src/interner.rs",
+                  "compiler/rustc_type_ir/src/lib.rs",
+                  "compiler/rustc_type_ir/src/outlives.rs",
+                  "compiler/rustc_type_ir/src/relate.rs",
+                  "compiler/rustc_type_ir/src/ty_kind.rs",
+                  "compiler/rustc_type_ir/src/walk.rs",
+                  "src/tools/collect-license-metadata/src/main.rs",
+                  "src/tools/collect-license-metadata/src/reuse.rs"
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors",
+                    "The Rust Project Developers (see https://thanks.rust-lang.org)"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "type": "group"
+              }
+            ],
+            "license": {
+              "copyright": [
+                "The Rust Project Developers (see https://thanks.rust-lang.org)"
+              ],
+              "spdx": "Apache-2.0 OR MIT"
+            },
+            "name": "rust",
+            "type": "directory"
+          },
+          {
+            "children": [
+              {
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "option_unwrap/question_mark__02.exs",
+                "type": "file"
+              }
+            ],
+            "license": {
+              "copyright": [
+                "2014 Jorge Aparicio",
+                "The Patina Project Contributors",
+                "The Rust Project Developers (see https://thanks.rust-lang.org)"
+              ],
+              "spdx": "Apache-2.0 OR MIT"
+            },
+            "name": "tests/ui/src/error",
+            "type": "directory"
+          },
+          {
+            "children": [
+              {
+                "directories": [
+                  "error",
+                  "witness"
+                ],
+                "files": [
+                  "generic_consts.exs",
+                  "generic_consts.pt",
+                  "impl__02.exs",
+                  "impl_arity.exs",
+                  "impl_arity.pt",
+                  "inherent_tags.exs",
+                  "inherent_tags.pt",
+                  "new_types__01.exs",
+                  "bounds/testcase_empty__01.exs"
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "type": "group"
+              }
+            ],
+            "license": {
+              "copyright": [
+                "2014 Jorge Aparicio",
+                "The Patina Project Contributors",
+                "The Rust Project Developers (see https://thanks.rust-lang.org)"
+              ],
+              "spdx": "Apache-2.0 OR MIT"
+            },
+            "name": "tests/ui/src/generics",
+            "type": "directory"
+          },
+          {
+            "children": [
+              {
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "comment__01.exs",
+                "type": "file"
+              }
+            ],
+            "license": {
+              "copyright": [
+                "2014 Jorge Aparicio",
+                "The Patina Project Contributors",
+                "The Rust Project Developers (see https://thanks.rust-lang.org)"
+              ],
+              "spdx": "Apache-2.0 OR MIT"
+            },
+            "name": "tests/ui/src/hello",
+            "type": "directory"
+          },
+          {
+            "children": [
+              {
+                "directories": [],
+                "files": [
+                  "alias__01.exs",
+                  "numeric_casts.exs",
+                  "numeric_casts.pt"
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "type": "group"
+              }
+            ],
+            "license": {
+              "copyright": [
+                "2014 Jorge Aparicio",
+                "The Patina Project Contributors",
+                "The Rust Project Developers (see https://thanks.rust-lang.org)"
+              ],
+              "spdx": "Apache-2.0 OR MIT"
+            },
+            "name": "tests/ui/src/types",
+            "type": "directory"
+          },
+          {
+            "children": [
+              {
+                "directories": [
+                  "errors"
+                ],
+                "files": [
+                  "declare__01_noerror.exs",
+                  "deferred_initialization.pt",
+                  "mut__01_noerror.exs"
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "type": "group"
+              }
+            ],
+            "license": {
+              "copyright": [
+                "2014 Jorge Aparicio",
+                "The Patina Project Contributors",
+                "The Rust Project Developers (see https://thanks.rust-lang.org)"
+              ],
+              "spdx": "Apache-2.0 OR MIT"
+            },
+            "name": "tests/ui/src/variable_bindings",
+            "type": "directory"
+          },
+          {
+            "children": [
+              {
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "enum_use__01.exs",
+                "type": "file"
+              }
+            ],
+            "license": {
+              "copyright": [
+                "2014 Jorge Aparicio",
+                "The Patina Project Contributors",
+                "The Rust Project Developers (see https://thanks.rust-lang.org)"
+              ],
+              "spdx": "Apache-2.0 OR MIT"
+            },
+            "name": "tests/ui/src/custom_types/enum",
+            "type": "directory"
+          },
+          {
+            "children": [
+              {
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "name": "return__01.exs",
+                "type": "file"
+              }
+            ],
+            "license": {
+              "copyright": [
+                "2014 Jorge Aparicio",
+                "The Patina Project Contributors",
+                "The Rust Project Developers (see https://thanks.rust-lang.org)"
+              ],
+              "spdx": "Apache-2.0 OR MIT"
+            },
+            "name": "tests/ui/src/flow_control/loop",
+            "type": "directory"
+          },
+          {
+            "children": [
+              {
+                "directories": [],
+                "files": [
+                  "destructure_enum__01.exs",
+                  "destructure_list__01.exs",
+                  "destructure_structures__01.exs",
+                  "destructure_tuple__01.exs"
+                ],
+                "license": {
+                  "copyright": [
+                    "The Patina Project Contributors"
+                  ],
+                  "spdx": "Apache-2.0 OR MIT"
+                },
+                "type": "group"
+              }
+            ],
+            "license": {
+              "copyright": [
+                "2014 Jorge Aparicio",
+                "The Patina Project Contributors",
+                "The Rust Project Developers (see https://thanks.rust-lang.org)"
+              ],
+              "spdx": "Apache-2.0 OR MIT"
+            },
+            "name": "tests/ui/src/flow_control/match/destructuring",
+            "type": "directory"
+          },
+          {
+            "license": {
+              "copyright": [
+                "The Rust Project Developers (see https://thanks.rust-lang.org)"
+              ],
+              "spdx": "Apache-2.0 OR MIT"
+            },
+            "name": ".gitattributes",
+            "type": "file"
+          },
+          {
+            "directories": [
+              "lib/core/src"
+            ],
+            "files": [
+              "rustfmt.toml"
+            ],
+            "license": {
+              "copyright": [
+                "The Patina Project Contributors",
+                "The Rust Project Developers (see https://thanks.rust-lang.org)"
+              ],
+              "spdx": "Apache-2.0 OR MIT"
+            },
+            "type": "group"
+          },
+          {
+            "directories": [
+              "tests/ui/src/conversion"
+            ],
+            "files": [
+              "tests/ui/src/attribute__01.pt",
+              "tests/ui/src/expression__01.pt",
+              "tests/ui/src/expression__02.pt",
+              "tests/ui/src/expression__03.pt",
+              "tests/ui/src/flow_control__01.pt",
+              "tests/ui/src/fn__01.pt",
+              "tests/ui/src/format_args__01.pt",
+              "tests/ui/src/generics__01.pt",
+              "tests/ui/src/generics__02.pt",
+              "tests/ui/src/hello__01.pt",
+              "tests/ui/src/macros__01.pt",
+              "tests/ui/src/primitives__01.pt",
+              "tests/ui/src/trait__01.pt",
+              "tests/ui/src/unsafe__01.pt",
+              "tests/ui/src/unsafe__02.pt",
+              "tests/ui/src/variable_bindings__01.pt",
+              "tests/ui/src/custom_types/constants__01.pt",
+              "tests/ui/src/custom_types/enum__01.pt",
+              "tests/ui/src/custom_types/enum__02.pt",
+              "tests/ui/src/custom_types/enum__03.pt",
+              "tests/ui/src/custom_types/repr__01.pt",
+              "tests/ui/src/custom_types/repr__02.pt",
+              "tests/ui/src/custom_types/repr__03.pt",
+              "tests/ui/src/custom_types/repr__04.pt",
+              "tests/ui/src/custom_types/repr__05.pt",
+              "tests/ui/src/custom_types/repr__06.pt",
+              "tests/ui/src/custom_types/repr__07.pt",
+              "tests/ui/src/custom_types/repr__08.pt",
+              "tests/ui/src/custom_types/repr__09.pt",
+              "tests/ui/src/custom_types/repr__10.pt",
+              "tests/ui/src/custom_types/repr__11.pt",
+              "tests/ui/src/custom_types/repr__12.pt",
+              "tests/ui/src/custom_types/repr__13.pt",
+              "tests/ui/src/custom_types/repr__14.pt",
+              "tests/ui/src/custom_types/structs__01.pt",
+              "tests/ui/src/flow_control/for__01.pt",
+              "tests/ui/src/flow_control/for__02.pt",
+              "tests/ui/src/flow_control/for__03.pt",
+              "tests/ui/src/flow_control/if_else__01.pt",
+              "tests/ui/src/flow_control/if_let__01.pt",
+              "tests/ui/src/flow_control/if_let__02.pt",
+              "tests/ui/src/flow_control/if_let__03.pt",
+              "tests/ui/src/flow_control/if_let__04.pt",
+              "tests/ui/src/flow_control/let_else__01.pt",
+              "tests/ui/src/flow_control/loop__01.pt",
+              "tests/ui/src/flow_control/match__01.pt",
+              "tests/ui/src/flow_control/receive__01.pt",
+              "tests/ui/src/flow_control/try_catch_after__01.pt",
+              "tests/ui/src/flow_control/while__01.pt",
+              "tests/ui/src/flow_control/while_let__01.pt",
+              "tests/ui/src/flow_control/while_let__02.pt",
+              "tests/ui/src/flow_control/match/binary_matching__01.pt",
+              "tests/ui/src/flow_control/match/binary_matching__02.pt",
+              "tests/ui/src/flow_control/match/binary_matching__03.pt",
+              "tests/ui/src/flow_control/match/binary_matching__04.pt",
+              "tests/ui/src/flow_control/match/binary_matching__05.pt",
+              "tests/ui/src/flow_control/match/binary_matching__06.pt",
+              "tests/ui/src/flow_control/match/binding__01.pt",
+              "tests/ui/src/flow_control/match/binding__02.pt",
+              "tests/ui/src/flow_control/match/guard__01.pt",
+              "tests/ui/src/flow_control/match/guard__02.pt",
+              "tests/ui/src/flow_control/match/unsafe_match__01.pt",
+              "tests/ui/src/flow_control/receive/unsafe_receive__01.pt",
+              "tests/ui/src/fn/closures__01.pt",
+              "tests/ui/src/fn/closures__02.pt",
+              "tests/ui/src/fn/diverging__01.pt",
+              "tests/ui/src/fn/diverging__02.pt",
+              "tests/ui/src/fn/diverging__03.pt",
+              "tests/ui/src/fn/diverging__04.pt",
+              "tests/ui/src/fn/extern_calls__01.pt",
+              "tests/ui/src/fn/methods__01.pt",
+              "tests/ui/src/fn/parameters__01.pt",
+              "tests/ui/src/fn/parameters__02.pt",
+              "tests/ui/src/macros/designators__01.pt",
+              "tests/ui/src/macros/dsl__01.pt",
+              "tests/ui/src/macros/overload__01.pt",
+              "tests/ui/src/macros/repeat__01.pt",
+              "tests/ui/src/macros/variadics__01.pt",
+              "tests/ui/src/mod/split__01.pt",
+              "tests/ui/src/mod/split__02.pt",
+              "tests/ui/src/mod/split__03.pt",
+              "tests/ui/src/mod/split__04.pt",
+              "tests/ui/src/mod/struct_visibility__01.pt",
+              "tests/ui/src/mod/super__01.pt",
+              "tests/ui/src/mod/use__01.pt",
+              "tests/ui/src/mod/use__02.pt",
+              "tests/ui/src/mod/visibility__01.pt",
+              "tests/ui/src/primitives/lists__01.pt",
+              "tests/ui/src/primitives/literals__01.pt",
+              "tests/ui/src/primitives/maps__01.pt",
+              "tests/ui/src/primitives/term__01.pt",
+              "tests/ui/src/primitives/term__02.pt",
+              "tests/ui/src/primitives/tuples__01.pt",
+              "tests/ui/src/trait/derive__01.pt",
+              "tests/ui/src/trait/disambiguating__01.pt",
+              "tests/ui/src/trait/dyn__01.pt",
+              "tests/ui/src/trait/impl_trait__01.pt",
+              "tests/ui/src/trait/impl_trait__02.pt",
+              "tests/ui/src/trait/impl_trait__03.pt",
+              "tests/ui/src/trait/iter__01.pt",
+              "tests/ui/src/trait/ops__01.pt",
+              "tests/ui/src/trait/supertraits__01.pt"
+            ],
+            "license": {
+              "copyright": [
+                "2014 Jorge Aparicio",
+                "The Patina Project Contributors",
+                "The Rust Project Developers (see https://thanks.rust-lang.org)"
+              ],
+              "spdx": "Apache-2.0 OR MIT"
+            },
+            "type": "group"
+          }
+        ],
+        "license": {
+          "copyright": [
+            "The Patina Project Contributors"
+          ],
+          "spdx": "Apache-2.0 OR MIT"
+        },
+        "name": ".",
+        "type": "directory"
+      }
+    ],
+    "type": "root"
+  }
+}

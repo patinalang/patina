@@ -1,0 +1,87 @@
+version = 1
+
+# Everything written for Patina.
+[[annotations]]
+path = "**"
+precedence = "override"
+SPDX-FileCopyrightText = "The Patina Project Contributors"
+SPDX-License-Identifier = "MIT OR Apache-2.0"
+
+# The Rust source tree, forked from https://github.com/rust-lang/rust at commit
+# cb40c25f6aebb637163d26bf76a680ed6e5d1eda, plus files outside `rust/`
+# that were taken or adapted from it.
+#
+# This names both Patina and Rust on every file. `collect-license-metadata`
+# is modified to check each file against the initial Rust snapshot commit.
+# Files that were not modified since are not attributed to Patina, and files
+# that weren't present then are not attributed to Rust.
+[[annotations]]
+path = [
+    "rust/**",
+    "lib/core/src/**",
+    ".gitattributes",
+    "rustfmt.toml",
+]
+precedence = "override"
+SPDX-FileCopyrightText = [
+    "The Rust Project Developers (see https://thanks.rust-lang.org)",
+    "The Patina Project Contributors",
+]
+SPDX-License-Identifier = "MIT OR Apache-2.0"
+
+[[annotations]]
+path = "rust/src/librustdoc/html/static/fonts/Fira**"
+precedence = "override"
+SPDX-FileCopyrightText = ["2014, Mozilla Foundation", "2014, Telefonica S.A."]
+SPDX-License-Identifier = "OFL-1.1"
+
+[[annotations]]
+path = "rust/src/librustdoc/html/static/fonts/NanumBarun**"
+precedence = "override"
+SPDX-FileCopyrightText = "2010 NAVER Corporation"
+SPDX-License-Identifier = "OFL-1.1"
+
+[[annotations]]
+path = [
+    "rust/src/librustdoc/html/static/fonts/SourceCodePro**",
+    "rust/src/librustdoc/html/static/fonts/SourceSerif4**",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "2010, 2012, 2014-2023, Adobe Systems Incorporated"
+SPDX-License-Identifier = "OFL-1.1"
+
+[[annotations]]
+path = "rust/src/librustdoc/html/static/css/normalize.css"
+precedence = "override"
+SPDX-FileCopyrightText = "Nicolas Gallagher and Jonathan Neal"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "rust/src/librustdoc/html/static/css/rustdoc.css"
+precedence = "override"
+SPDX-FileCopyrightText = [
+    "2016 Ike Ku, Jessica Stokes and Leon Guan",
+    "The Rust Project Developers (see https://thanks.rust-lang.org)",
+    "The Patina Project Contributors",
+]
+SPDX-License-Identifier = "MIT OR Apache-2.0"
+
+[[annotations]]
+path = "rust/compiler/rustc_baked_icu_data/src/data/**"
+precedence = "override"
+SPDX-FileCopyrightText = "1991-2024 Unicode, Inc."
+SPDX-License-Identifier = "Unicode-3.0"
+
+# The UI test sources extracted from Patina by Example
+# (https://github.com/kzemek/patina-by-example)
+# a modified version of Rust by  Example
+# (https://github.com/rust-lang/rust-by-example).
+[[annotations]]
+path = "tests/ui/src/**__*.pt"
+precedence = "override"
+SPDX-FileCopyrightText = [
+    "2014 Jorge Aparicio",
+    "The Rust Project Developers (see https://thanks.rust-lang.org)",
+    "The Patina Project Contributors",
+]
+SPDX-License-Identifier = "MIT OR Apache-2.0"

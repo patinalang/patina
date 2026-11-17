@@ -2,11 +2,11 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Copyright notices for The Rust Toolchain</title>
+    <title>Copyright notices for Patina</title>
 </head>
 <body>
 
-<h1>Copyright notices for The Rust Toolchain</h1>
+<h1>Copyright notices for Patina</h1>
 
 <h2>Table of Contents</h2>
 <ul>
@@ -18,17 +18,25 @@
 
 <h2 id="short-version">Short version for non-lawyers</h2>
 
-The Rust Project is dual-licensed under Apache 2.0 and MIT terms.
+<p>The Patina Project is dual-licensed under Apache 2.0 and MIT terms.</p>
+
+<p>It is Copyright (c) The Patina Project Contributors. It contains, and is derived from, source code of the Rust project, which is Copyright (c) The Rust Project Contributors.</p>
 
 <h2 id="longer-version">Longer version</h2>
 
-<p>Copyrights in the Rust project are retained by their contributors. No copyright assignment is required to contribute to the Rust project.</p>
+<p>Copyrights in the Patina project are retained by their contributors. No copyright assignment is required to contribute to the Patina project.</p>
 
-<p>Some files include explicit copyright notices and/or license notices. For full authorship information, see the version control history or <a href="https://thanks.rust-lang.org">https://thanks.rust-lang.org</a>.</p>
+<p>The Patina project is derived from the Rust project's source code. Copyrights in the Rust project are retained by their contributors.</p>
 
-<p>Except as otherwise noted (below and/or in individual files), Rust is licensed under the <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a> or the <a href="http://opensource.org/licenses/MIT">MIT</a> license, at your option.</p>
+<p>The Patina project is not affiliated with, or endorsed by, the Rust project or the Rust Foundation.</p>
 
-<p>This file describes the copyright and licensing information for the source code within The Rust Project git tree, and the third-party dependencies used when building the Rust toolchain (including the Rust Standard Library).</p>
+<p>The Patina project's repository is available at <a href="https://github.com/patinalang/patina">https://github.com/patinalang/patina</a>.</p>
+
+<p>Some files include explicit copyright notices and/or license notices. For full authorship information, see the version control history, including the <code>rust-history</code> branch, the <code>COPYRIGHT</code> file in the Patina git tree, or <a href="https://thanks.rust-lang.org">https://thanks.rust-lang.org</a> for the Rust project.</p>
+
+<p>Except as otherwise noted (below and/or in individual files), Patina is licensed under the Apache License, Version 2.0 (<code>LICENSE-APACHE</code> or <a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>) or the MIT license (<code>LICENSE-MIT</code> or <a href="http://opensource.org/licenses/MIT">http://opensource.org/licenses/MIT</a>), at your option. The texts of the other licenses named below are in the <code>LICENSES</code> directory distributed alongside this file.</p>
+
+<p>This file describes the copyright and licensing information for the source code within the Patina project git tree, and the third-party dependencies used when building Patina.</p>
 
 <h2 id="in-tree-files">In-tree files</h2>
 
@@ -43,7 +51,6 @@ The Rust Project is dual-licensed under Apache 2.0 and MIT terms.
 {% for (key, value) in dependencies %}
     <h3>📦 {{key.name}}-{{key.version}}</h3>
     <p><b>URL:</b> <a href="https://crates.io/crates/{{ key.name }}/{{ key.version }}">https://crates.io/crates/{{ key.name }}/{{ key.version }}</a></p>
-    <p><b>In libstd:</b> {% if value.is_in_libstd.unwrap() %} Yes {% else %} No {% endif %}</p>
     <p><b>Authors:</b> {{ value.authors|join(", ") }}</p>
     <p><b>License:</b> {{ value.license }}</p>
     {% let len = value.notices.len() %}

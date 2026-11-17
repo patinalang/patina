@@ -28,12 +28,12 @@ fn diff_text(expected: &str, actual: &str) {
 /// * Run `x.py run collect-license-metadata` to re-regenerate the file.
 /// * Run `x.py test collect-license-metadata` to check if the file you have is correct.
 fn main() -> Result<(), Error> {
-    let reuse_exe: PathBuf = std::env::var_os("REUSE_EXE").expect("Missing REUSE_EXE").into();
     let dest: PathBuf = std::env::var_os("DEST").expect("Missing DEST").into();
     let only_check = std::env::var_os("ONLY_CHECK").is_some();
+    let snap_commit = std::env::var("RUST_SNAPSHOT_COMMIT").expect("Missing RUST_SNAPSHOT_COMMIT");
 
     let mut interner = LicensesInterner::new();
-    let paths = crate::reuse::collect(&reuse_exe, &mut interner)?;
+    let paths = crate::reuse::collect(&snap_commit, &mut interner)?;
 
     let mut tree = crate::path_tree::build(paths);
     tree.simplify();
