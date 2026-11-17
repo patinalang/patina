@@ -110,8 +110,10 @@ macro_rules! consume_stage {
     };
 }
 
+#[derive(Clone)]
 pub(crate) struct CompileOptions {
     pub base_dir: PathBuf,
+    pub remap_path_prefix: Vec<(PathBuf, PathBuf)>,
     pub otp_version: String,
     pub out_dir: PathBuf,
     pub incremental_dir: PathBuf,
@@ -163,7 +165,7 @@ pub(crate) fn compile(
     });
 
     consume_stage!(stages_left, Stage::Ast, {
-        let config = make_config(filename, opts, server);
+        let config = make_config(filename, opts.clone(), server);
         interface::run_compiler(config, |compiler| {
             let krate = parse_with_prelude(&compiler.sess, "");
 
@@ -184,7 +186,7 @@ pub(crate) fn compile(
         });
     });
 
-    let config = make_config(filename, opts, server);
+    let config = make_config(filename, opts.clone(), server);
     let prelude = if pkg.is_core() { "" } else { PRELUDE };
 
     interface::run_compiler(config, |compiler| {
@@ -592,11 +594,12 @@ fn clean_up_and_update_files_list(
 
 fn make_config(
     filename: &Path,
-    opts: &CompileOptions,
+    opts: CompileOptions,
     server: &Arc<SyncServer>,
 ) -> interface::Config {
     let CompileOptions {
         base_dir,
+        remap_path_prefix,
         incremental_dir,
         lib_dirs,
         package: pkg,
@@ -615,21 +618,21 @@ fn make_config(
             cache_proc_macros: true,
             ..Default::default()
         },
-        error_format: *error_format,
+        error_format,
         crate_types: vec![config::CrateType::Rlib],
         cg: config::CodegenOptions { panic: Some(PanicStrategy::Abort), ..Default::default() },
         crate_name: Some(pkg.name.to_string()),
-        otp_app_name: Some(pkg.otp_app_name.clone()),
-        otp_version: Some(opts.otp_version.clone()),
-        externs: externs.clone(),
-        lint_opts: allowed_lints.iter().map(|lint| (lint.clone(), lint::Level::Allow)).collect(),
+        otp_app_name: Some(pkg.otp_app_name),
+        otp_version: Some(opts.otp_version),
+        externs,
+        lint_opts: allowed_lints.into_iter().map(|lint| (lint, lint::Level::Allow)).collect(),
         search_paths: lib_dirs
             .iter()
             .map(|dir| SearchPath::new(PathKind::All, dir.to_owned()))
             .collect(),
-        remap_path_prefix: vec![(base_dir.clone(), PathBuf::new())],
+        remap_path_prefix,
         remap_path_scope: RemapPathScopeComponents::all(),
-        incremental: Some(incremental_dir.clone()),
+        incremental: Some(incremental_dir),
         ..Default::default()
     };
 

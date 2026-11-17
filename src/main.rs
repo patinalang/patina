@@ -20,6 +20,7 @@ use clap::builder::ArgPredicate;
 use rustc_errors::emitter::HumanReadableErrorType;
 use rustc_errors::{ColorConfig, FatalError, catch_fatal_errors};
 use rustc_session::config::{ErrorOutputType, Externs};
+use rustc_session::utils::CanonicalizedPath;
 
 use crate::clean::CleanError;
 use crate::compile::compile_server::{OtpVersionError, SpawnError};
@@ -247,6 +248,16 @@ struct CommonArgs {
     /// Allow the lint `LINT`. Can be repeated.
     #[arg(short = 'A', long = "allow-lint", value_name = "LINT")]
     allowed_lints: Vec<String>,
+
+    /// Remap source paths starting with `FROM` to `TO` in diagnostics and outputs. Can be repeated.
+    /// If not given, remaps `CWD()=""`.
+    #[arg(long = "remap-path-prefix", value_name = "FROM=TO", value_parser = parse_remap_path_prefix)]
+    remap_path_prefix: Vec<(PathBuf, PathBuf)>,
+}
+
+fn parse_remap_path_prefix(remap: &str) -> Result<(PathBuf, PathBuf), String> {
+    let (from, to) = remap.rsplit_once('=').ok_or("must contain '=' between FROM and TO")?;
+    Ok((from.into(), to.into()))
 }
 
 #[derive(clap::Args, Debug)]
@@ -433,8 +444,22 @@ fn run(args: RunArgs) -> Result<(), Error> {
 
     let incremental_dir = common.output.package_incremental_dir(&package.name);
 
+    let remap_path_prefix = if common.remap_path_prefix.is_empty() {
+        vec![(base_dir.clone(), PathBuf::new())]
+    } else {
+        common
+            .remap_path_prefix
+            .into_iter()
+            .map(|(from, to)| {
+                let from = CanonicalizedPath::new(base_dir.join(from)).canonicalized().clone();
+                (from, to)
+            })
+            .collect()
+    };
+
     let opts = compile::CompileOptions {
         base_dir,
+        remap_path_prefix,
         otp_version: server.otp_version()?,
         out_dir: common.output.out_dir,
         incremental_dir,

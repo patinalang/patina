@@ -17,6 +17,7 @@
     emit/0,
     dump/0,
     extern/0,
+    remap/0,
     info/0,
     printed/0,
     package/0,
@@ -31,7 +32,7 @@
 - **`root`** - Root of the Patina install. If not given, it's found relative to its executable.
 - **`dir`** - Change to `dir` before doing anything, including resolving any paths.
 """.
--type global_option() :: {root, binary()} | {dir, binary()}.
+-type global_option() :: {root, file:filename_all()} | {dir, file:filename_all()}.
 
 -doc """
 Options for compiling a package.
@@ -42,19 +43,24 @@ Options for compiling a package.
   Supplying `dump` causes `emit` to default to [] (nothing emitted by default).
 - **`lib_dir`** - Add `DIR` to library search directories.
 - **`allow_lint`** - Allow the lint `LINT`.
+- **`remap_path_prefix`** - Remap source paths starting with `From` to `To`, in diagnostics and
+  outputs. 
 """.
 -type common_option() ::
     {dump, dump() | [dump()]}
-    | {lib_dir, DIR :: binary() | [DIR :: binary()]}
-    | {allow_lint, LINT :: binary() | [LINT :: binary()]}
+    | {lib_dir, DIR :: file:filename_all() | [DIR :: file:filename_all()]}
+    | {allow_lint, LINT :: file:filename_all() | [LINT :: file:filename_all()]}
+    | {remap_path_prefix, remap() | [remap()]}
     | output_option().
+
+-type remap() :: {From :: file:filename_all(), To :: file:filename_all()}.
 
 -doc """
 - **`out_dir`** - Output directory (default: `.`).
 - **`incremental_dir`** - Directory for incremental compilation state
   (default: $out_dir/.patina_incremental).
 """.
--type output_option() :: {out_dir, binary()} | {incremental_dir, binary()}.
+-type output_option() :: {out_dir, file:filename_all()} | {incremental_dir, file:filename_all()}.
 
 -doc """
 How to run `patina` executable.
@@ -75,9 +81,7 @@ How to run `patina` executable.
 -type result() :: {ok, [diagnostic()]} | {error, [diagnostic()]}.
 
 -doc """
-The file names in `spans` are relative to `dir`. The closing summaries ("aborting due to 1 previous
-error" and the like) are diagnostics without spans, as are the errors that aren't about the
-package's code.
+The file names in `spans` are relative to `dir`, unless `remap_path_prefix` says otherwise.
 """.
 -type diagnostic() :: #{
     message := binary(),
@@ -310,6 +314,9 @@ decode_diagnostic_level(~"failure-note") -> failure_note.
 encode_args(Options) ->
     lists:flatmap(fun encode_arg/1, Options).
 
+% Assume any list of integers is an Erlang string
+encode_arg({Key, [Int | _] = String}) when is_integer(Int) ->
+    encode_arg({Key, unicode:characters_to_binary(String)});
 encode_arg({executable, _Exe}) ->
     [];
 encode_arg({env, _Env}) ->
@@ -323,7 +330,7 @@ encode_arg({Key, Value}) ->
     [<<"--", Flag/binary, "=", (encode_arg_val(Value))/binary>>].
 
 encode_arg_val(Value) when is_atom(Value) -> atom_to_binary(Value);
-encode_arg_val({Key, Value}) -> <<Key/binary, "=", Value/binary>>;
+encode_arg_val({Key, Value}) -> unicode:characters_to_binary([Key, "=", Value]);
 encode_arg_val(Value) when is_binary(Value) -> Value.
 
 encode_env_var({Name0, Value0}) ->
