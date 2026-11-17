@@ -40,6 +40,7 @@ struct PackageManifest {
     version: String,
     otp_app_name: Option<String>,
     description: Option<String>,
+    path: Option<NonEmptyString>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -184,7 +185,10 @@ impl<'a> Manifest {
     }
 
     pub(crate) fn source_path(&self) -> PathBuf {
-        self.dir.join("src").join(format!("{}.pt", self.package.name))
+        match &self.package.path {
+            Some(path) => self.dir.join(&path.0),
+            None => self.dir.join("src").join(format!("{}.pt", self.package.name)),
+        }
     }
 
     pub(crate) fn dependency_names(&self) -> Vec<PackageName> {
@@ -364,6 +368,25 @@ mod tests {
                 Some(DependencySource::Path(absolute)),
             ]
         );
+    }
+
+    #[test]
+    fn source_path_defaults_to_src() {
+        let manifest = manifest("").unwrap();
+        assert_eq!(manifest.source_path(), package_dir().join("src/greeter.pt"));
+    }
+
+    #[test]
+    fn source_path_is_resolved_against_the_package_dir() {
+        let text = "[package]\nname = \"greeter\"\nversion = \"0.1.0\"\npath = \"greeter.pt\"\n";
+        let manifest = Manifest::parse(text, &package_dir()).unwrap();
+        assert_eq!(manifest.source_path(), package_dir().join("greeter.pt"));
+    }
+
+    #[test]
+    fn empty_source_path_is_rejected() {
+        let text = "[package]\nname = \"greeter\"\nversion = \"0.1.0\"\npath = \"\"\n";
+        assert!(Manifest::parse(text, &package_dir()).is_err());
     }
 
     #[test]
