@@ -66,7 +66,7 @@ Options for compiling a package.
 How to run `patina` executable.
 
 - **`executable`** - The patina executable, a path or a name to look up in `PATH`
-  (default: `"patina"`).
+  and .patina/patina/bin (default: `"patina"`).
 - **`env`** - See `t:env/0`.
 """.
 -type run_option() ::
@@ -340,11 +340,17 @@ encode_env_var({Name0, Value0}) ->
 
 executable_path(Opts) ->
     Exe = proplists:get_value(executable, Opts, "patina"),
+    {Sep, Home} =
+        case os:type() of
+            {win32, _} -> {";", os:getenv("USERPROFILE", "")};
+            _ -> {":", os:getenv("HOME", "")}
+        end,
+    SearchPath = os:getenv("PATH", "") ++ Sep ++ filename:join([Home, ".patina", "patina", "bin"]),
     maybe
         [_] ?= filename:split(Exe),
-        % `os:find_executable/1` does not work with binary paths.
+        % `os:find_executable/2` does not work with binary paths.
         Name = bin_as_list(Exe, file:native_name_encoding()),
-        Path = os:find_executable(Name),
+        Path = os:find_executable(Name, SearchPath),
         true ?= Path =/= false,
 
         Path

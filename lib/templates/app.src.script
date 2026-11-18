@@ -1,8 +1,14 @@
 PkgDir = filename:dirname(filename:dirname(filename:absname(SCRIPT))),
 
+{PathSep, Home} =
+    case os:type() of
+        {win32, _} -> {";", os:getenv("USERPROFILE", "")};
+        _ -> {":", os:getenv("HOME", "")}
+    end,
+SearchPath = os:getenv("PATH", "") ++ PathSep ++ filename:join([Home, ".patina", "patina", "bin"]),
 Exe =
-    case os:find_executable("patina") of
-        false -> error("the `patina` executable isn't in PATH");
+    case os:find_executable("patina", SearchPath) of
+        false -> error("the `patina` executable isn't in PATH or in ~/.patina/patina/bin");
         Path -> Path
     end,
 
