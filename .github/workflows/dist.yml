@@ -62,6 +62,9 @@ jobs:
       - name: Create the tarball
         run: COPYFILE_DISABLE=1 tar -czf "$DIST_NAME.tar.gz" -C dist "$DIST_NAME"
 
+      - name: Write the tarball's checksum
+        run: shasum -a 256 "$DIST_NAME.tar.gz" > "$DIST_NAME.tar.gz.sha256"
+
       - name: Smoke test the tarball
         run: |
           mkdir smoke
@@ -80,7 +83,9 @@ jobs:
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ${{ env.DIST_NAME }}
-          path: ${{ env.DIST_NAME }}.tar.gz
+          path: |
+            ${{ env.DIST_NAME }}.tar.gz
+            ${{ env.DIST_NAME }}.tar.gz.sha256
           if-no-files-found: error
 
   release:
@@ -104,7 +109,7 @@ jobs:
           if ! gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
             gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes
           fi
-          gh release upload "$GITHUB_REF_NAME" dist/*.tar.gz --clobber
+          gh release upload "$GITHUB_REF_NAME" dist/*.tar.gz dist/*.tar.gz.sha256 --clobber
 
   nightly:
     name: Publish nightly
@@ -131,4 +136,4 @@ jobs:
           else
             gh release create nightly --target "$GITHUB_SHA" --title nightly --notes "$notes" --prerelease --latest=false
           fi
-          gh release upload nightly dist/*.tar.gz --clobber
+          gh release upload nightly dist/*.tar.gz dist/*.tar.gz.sha256 --clobber
