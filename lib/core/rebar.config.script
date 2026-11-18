@@ -59,6 +59,6 @@ end,
 
 [
     {src_dirs, ["erl_src"]},
-    {patina_opts, [{additional_src_search_dirs, [PatinaCore]}]},
+    {patina_opts, [{packages, [PatinaCore]}]},
     {plugins, [rebar3_patina]}
 ].
