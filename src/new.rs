@@ -8,6 +8,8 @@ const MANIFEST: &str = include_str!("../lib/templates/Patina.toml");
 const ROOT_FILE: &str = include_str!("../lib/templates/root.pt");
 const REBAR_CONFIG_SCRIPT: &str = include_str!("../lib/templates/rebar.config.script");
 const APP_SRC_SCRIPT: &str = include_str!("../lib/templates/app.src.script");
+const GITATTRIBUTES: &str = include_str!("../lib/templates/gitattributes");
+const GITIGNORE: &str = include_str!("../lib/templates/gitignore");
 
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum NewError {
@@ -50,6 +52,8 @@ pub(crate) fn new(dir: &Path, name: Option<PackageName>) -> Result<(), NewError>
         ("rebar.config.script".to_owned(), REBAR_CONFIG_SCRIPT),
         (format!("src/{name}.pt"), ROOT_FILE),
         (format!("src/{name}.app.src.script"), APP_SRC_SCRIPT),
+        (".gitattributes".to_owned(), GITATTRIBUTES),
+        (".gitignore".to_owned(), GITIGNORE),
     ];
 
     for (file, contents) in files {
