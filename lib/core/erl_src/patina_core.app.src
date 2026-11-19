@@ -3,5 +3,9 @@
     {vsn, "0.0.0"},
     {modules, []},
     {registered, [patina_compile_server]},
-    {applications, [kernel, stdlib]}
+    {applications, [kernel, stdlib]},
+    {licenses, ["Apache-2.0", "MIT"]},
+    {links, [{"GitHub", "https://github.com/patinalang/patina"}]},
+    %% The package is a shim: `erl_src` and `src` come from the Patina install
+    {files, ["rebar.config.script", "README.md", "LICENSE-APACHE", "LICENSE-MIT"]}
 ]}.

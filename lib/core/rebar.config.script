@@ -66,5 +66,6 @@ end,
 [
     {src_dirs, ["erl_src"]},
     {patina_opts, [{packages, [PatinaCore]}]},
-    {plugins, [rebar3_patina]}
+    {plugins, [rebar3_patina]},
+    {project_plugins, [rebar3_hex]}
 ].
