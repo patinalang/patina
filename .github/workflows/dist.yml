@@ -76,7 +76,7 @@ jobs:
           patina new hello
           cd hello
           patina build
-          output="$(erl -noshell -pa . -pa "$root/patina_core/ebin" -eval "'Elixir.Patina.Hello':main(), halt().")"
+          output="$(erl -noshell -pa target/debug/hello/ebin -pa "$root/patina_core/ebin" -eval "'Elixir.Patina.Hello':main(), halt().")"
           echo "$output"
           test "$output" = "Hello, world!"
 
