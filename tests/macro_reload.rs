@@ -8,8 +8,8 @@ fn assert_num_expands_to(session: &Session, args: &[&str], value: u32) {
     let args = [&["--dump", "expanded"], args].concat();
     session.build("consumer.pt", CONSUMER, &args);
 
-    let expanded =
-        std::fs::read_to_string(session.path().join("consumer.expanded")).expect("read expanded");
+    let expanded = session.path().join("target/debug/consumer/ebin/consumer.expanded");
+    let expanded = std::fs::read_to_string(expanded).expect("read expanded");
     assert!(expanded.contains(&format!("let _x = {value};")), "got:\n{expanded}");
 }
 

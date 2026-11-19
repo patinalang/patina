@@ -56,8 +56,8 @@ fn applications_follow_the_manifest() {
     let dependencies = "zeta = \"~> 0.1\"\nalpha = \"~> 0.1\"";
     session.build_new_package("greeter", dependencies, LIB, &["-L", "../lib"]);
 
-    let app =
-        std::fs::read_to_string(session.path().join("greeter/greeter.app")).expect("read .app");
+    let app = session.path().join("greeter/target/debug/greeter/ebin/greeter.app");
+    let app = std::fs::read_to_string(app).expect("read .app");
     // Ignore how the Erlang pretty printer breaks the list into lines.
     let app: String = app.split_whitespace().collect();
     let applications = "{applications,[kernel,stdlib,patina_core,zeta,alpha]}";

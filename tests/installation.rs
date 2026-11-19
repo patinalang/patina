@@ -58,7 +58,8 @@ fn named_core_hides_installed_core_from_dependencies() {
     session.build("provider.pt", "pub fn f() {}\n", &[]);
     let other_core = build_stand_in_core(session.path());
 
-    let args = ["--extern", &other_core, "--extern", "provider=libprovider.rmeta"];
+    let provider = "provider=target/debug/provider/ebin/libprovider.rmeta";
+    let args = ["--extern", &other_core, "--extern", provider];
     let output = session.try_build("consumer.pt", "pub fn g() { provider::f() }\n", &args);
     assert_failure(&output, "can't find crate for `core` which `provider` depends on");
 }
@@ -111,5 +112,5 @@ fn build_stand_in_core(dir: &Path) -> String {
         .args(["compile", "--pkg-name", "core", "--emit", "meta", "core.pt"])
         .env("PATINA_BOOTSTRAP", "1"));
     assert_success(&output);
-    format!("core={}", dir.join("libcore.rmeta").display())
+    format!("core={}", dir.join("target/debug/core/ebin/libcore.rmeta").display())
 }

@@ -12,7 +12,7 @@ mod package;
 mod print;
 
 use std::io;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use clap::Parser;
@@ -200,10 +200,6 @@ enum Command {
 
     /// Clean up the build artifacts & the incremental compilation files of `patina build`.
     Clean {
-        /// Clean up the package `NAME` instead of the one described in `Patina.toml`.
-        #[arg(long, value_name = "NAME")]
-        pkg_name: Option<PackageName>,
-
         #[command(flatten)]
         output: OutputArgs,
     },
@@ -262,9 +258,8 @@ fn parse_remap_path_prefix(remap: &str) -> Result<(PathBuf, PathBuf), String> {
 
 #[derive(clap::Args, Debug)]
 struct OutputArgs {
-    /// Output directory.
-    #[arg(long, value_name = "DIR", default_value = ".")]
-    out_dir: PathBuf,
+    #[command(flatten)]
+    out_dir: OutputDir,
 
     /// Directory for incremental compilation state (default: $out_dir/.patina_incremental).
     #[arg(long, value_name = "DIR")]
@@ -272,13 +267,28 @@ struct OutputArgs {
 }
 
 impl OutputArgs {
-    fn package_incremental_dir(&self, pkg_name: &PackageName) -> PathBuf {
-        let incremental_dir = self
-            .incremental_dir
-            .clone()
-            .unwrap_or_else(|| self.out_dir.join(".patina_incremental"));
+    fn package_incremental_dir(&self, package: &PackageInfo) -> PathBuf {
+        let incremental_dir = self.incremental_dir.clone().unwrap_or_else(|| {
+            self.out_dir.resolve(&package.otp_app_name).join(".patina_incremental")
+        });
 
-        incremental_dir.join(pkg_name.to_string())
+        incremental_dir.join(package.name.to_string())
+    }
+}
+
+#[derive(clap::Args, Debug)]
+struct OutputDir {
+    /// Output directory (default: target/debug/$otp_app_name/ebin).
+    #[arg(long = "out-dir", value_name = "DIR")]
+    dir: Option<PathBuf>,
+}
+
+impl OutputDir {
+    fn resolve(&self, otp_app_name: &str) -> PathBuf {
+        match &self.dir {
+            Some(dir) => dir.clone(),
+            None => Path::new("target").join("debug").join(otp_app_name).join("ebin"),
+        }
     }
 }
 
@@ -398,12 +408,10 @@ fn try_main(args: Args) -> Result<(), Error> {
             print::print(format, &prints, &base_dir, installation)?;
             Ok(())
         }
-        Command::Clean { pkg_name, output } => {
-            let pkg_name = match pkg_name {
-                Some(name) => name,
-                None => Manifest::read(&base_dir)?.package().name,
-            };
-            clean::clean(&output.out_dir, &output.package_incremental_dir(&pkg_name))?;
+        Command::Clean { output } => {
+            let package = Manifest::read(&base_dir)?.package();
+            let out_dir = output.out_dir.resolve(&package.otp_app_name);
+            clean::clean(&out_dir, &output.package_incremental_dir(&package))?;
             Ok(())
         }
         Command::New { dir, pkg_name } => Ok(new::new(&dir, pkg_name)?),
@@ -442,7 +450,8 @@ fn run(args: RunArgs) -> Result<(), Error> {
     let server =
         compile::compile_server::SyncServer::start(common.compile_server.clone(), installation);
 
-    let incremental_dir = common.output.package_incremental_dir(&package.name);
+    let out_dir = common.output.out_dir.resolve(&package.otp_app_name);
+    let incremental_dir = common.output.package_incremental_dir(&package);
 
     let remap_path_prefix = if common.remap_path_prefix.is_empty() {
         vec![(base_dir.clone(), PathBuf::new())]
@@ -461,7 +470,7 @@ fn run(args: RunArgs) -> Result<(), Error> {
         base_dir,
         remap_path_prefix,
         otp_version: server.otp_version()?,
-        out_dir: common.output.out_dir,
+        out_dir,
         incremental_dir,
         lib_dirs,
         package,
