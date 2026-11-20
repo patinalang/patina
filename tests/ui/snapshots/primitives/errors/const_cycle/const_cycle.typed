@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // A constant can't be defined in terms of itself.
 
 const A: int = ((B as int) + (1 as int) as int);

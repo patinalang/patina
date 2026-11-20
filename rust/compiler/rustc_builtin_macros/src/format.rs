@@ -18,7 +18,7 @@ use rustc_lint_defs::LintId;
 use rustc_lint_defs::builtin::NAMED_ARGUMENTS_USED_POSITIONALLY;
 use rustc_parse::exp;
 use rustc_parse_format as parse;
-use rustc_span::{BytePos, ErrorGuaranteed, Ident, InnerSpan, Span, Symbol};
+use rustc_span::{BytePos, ErrorGuaranteed, Ident, InnerSpan, Span, Symbol, kw};
 use thin_vec::{ThinVec, thin_vec};
 
 use crate::errors;
@@ -1178,7 +1178,11 @@ fn lower_format_args_to_patina(ecx: &ExtCtxt<'_>, sp: Span, fmt: &FormatArgs) ->
 
                 let path = ecx.path(
                     sp,
-                    vec![Ident::new(patina_fmt_sym, fmt_sp), Ident::new(fn_name, fmt_sp)],
+                    vec![
+                        Ident::new(kw::DollarCrate, ecx.with_def_site_ctxt(sp)),
+                        Ident::new(patina_fmt_sym, fmt_sp),
+                        Ident::new(fn_name, fmt_sp),
+                    ],
                 );
                 let render = ecx.expr_call(sp, ecx.expr_path(path), thin_vec![arg]);
 

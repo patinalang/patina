@@ -1,0 +1,54 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use core::prelude::*;
+
+fn top(n:
+        int) ({
+
+
+    ({
+        ((::core::io::put_chars as
+                fn(term) -> term)(([([("top " as str),
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((n as int)) as term), (" " as str),
+                            ((::core::patina_fmt::debug as fn(term) -> term)((n as int))
+                                as term)] as [term])] as [[term]])) as term);
+        ((::core::io::nl as fn() -> term)() as term);
+    } as ());
+} as ())
+mod outer {
+    fn outer(n:
+            int) ({
+        ({
+            ((::core::io::put_chars as
+                    fn(term) -> term)(([([("outer " as str),
+                                ((::core::patina_fmt::display as
+                                        fn(term) -> term)((n as int)) as term), (" " as str),
+                                ((::core::patina_fmt::debug as fn(term) -> term)((n as int))
+                                    as term)] as [term])] as [[term]])) as term);
+            ((::core::io::nl as fn() -> term)() as term);
+        } as ());
+    } as ())
+    mod inner {
+        fn inner(n: int)
+            ->
+                str ({
+            (unsafe {
+                (((::core::unicode::characters_to_binary as
+                            fn(term) -> term)(([("inner " as str),
+                                ((::core::patina_fmt::display as
+                                        fn(term) -> term)((n as int)) as term)] as [term])) as
+                        term).cast_unchecked::<str>() as str)
+            } as str)
+        } as str)
+    }
+}

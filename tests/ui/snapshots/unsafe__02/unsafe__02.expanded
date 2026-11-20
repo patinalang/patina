@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/unsafe.md
 // block: 2/2
 
@@ -41,8 +38,8 @@ pub fn main() {
 
     // "the atom nil, an empty string option"
     {
-        ::core::io::put_chars([[patina_fmt::display(safe_description), ", ",
-                            patina_fmt::display(unsafe_description)]]);
+        ::core::io::put_chars([[::core::patina_fmt::display(safe_description),
+                            ", ", ::core::patina_fmt::display(unsafe_description)]]);
         ::core::io::nl();
     };
 }

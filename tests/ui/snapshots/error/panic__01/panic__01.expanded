@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/error/panic.md
 // block: 1/1
 
@@ -31,7 +28,7 @@ fn drink(beverage: str) {
     }
     {
         ::core::io::put_chars([["Some refreshing ",
-                            patina_fmt::display(beverage), " is all I need."]]);
+                            ::core::patina_fmt::display(beverage), " is all I need."]]);
         ::core::io::nl();
     };
 }

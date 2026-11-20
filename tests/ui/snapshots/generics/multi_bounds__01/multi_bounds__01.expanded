@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/generics/multi_bounds.md
 // block: 1/1
 
@@ -27,21 +24,23 @@ fn compare_prints<T: Debug + Display>(t: T) {
     // TODO ^ Try uncommenting this.
 
     {
-        ::core::io::put_chars([["Debug: `", patina_fmt::debug(t), "`"]]);
+        ::core::io::put_chars([["Debug: `", ::core::patina_fmt::debug(t),
+                            "`"]]);
         ::core::io::nl();
     };
     {
-        ::core::io::put_chars([["Display: `", patina_fmt::display(t), "`"]]);
+        ::core::io::put_chars([["Display: `", ::core::patina_fmt::display(t),
+                            "`"]]);
         ::core::io::nl();
     };
 }
 fn compare_types<T: Debug, U: Debug>(t: T, u: U) {
     {
-        ::core::io::put_chars([["t: `", patina_fmt::debug(t), "`"]]);
+        ::core::io::put_chars([["t: `", ::core::patina_fmt::debug(t), "`"]]);
         ::core::io::nl();
     };
     {
-        ::core::io::put_chars([["u: `", patina_fmt::debug(u), "`"]]);
+        ::core::io::put_chars([["u: `", ::core::patina_fmt::debug(u), "`"]]);
         ::core::io::nl();
     };
 }

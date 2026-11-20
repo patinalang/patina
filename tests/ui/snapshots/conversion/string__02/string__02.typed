@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/conversion/string.md
 // block: 2/3
 
@@ -29,7 +26,7 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("Sum: " as str),
-                            ((patina_fmt::debug as
+                            ((::core::patina_fmt::debug as
                                     fn(term) -> term)((sum as {type error})) as term)] as
                         [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);

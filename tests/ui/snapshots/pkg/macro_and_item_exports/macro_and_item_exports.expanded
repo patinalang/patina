@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 use macros_and_items::{Describe, Plain, doubled, echo, plain};
 
 pub struct Marker;
@@ -23,16 +20,16 @@ pub fn items() {
     let n = Plain { value: 5 };
 
     {
-        ::core::io::put_chars([[patina_fmt::display(n.describe()), " ",
-                            patina_fmt::display(plain()), " ",
-                            patina_fmt::display(derived_value())]]);
+        ::core::io::put_chars([[::core::patina_fmt::display(n.describe()),
+                            " ", ::core::patina_fmt::display(plain()), " ",
+                            ::core::patina_fmt::display(derived_value())]]);
         ::core::io::nl();
     };
 }
 pub fn macros() {
     {
-        ::core::io::put_chars([[patina_fmt::display(5 + 5), " ",
-                            patina_fmt::display(7)]]);
+        ::core::io::put_chars([[::core::patina_fmt::display(5 + 5), " ",
+                            ::core::patina_fmt::display(7)]]);
         ::core::io::nl();
     };
 }

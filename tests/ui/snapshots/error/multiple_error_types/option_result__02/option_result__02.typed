@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/error/multiple_error_types/option_result.md
 // block: 2/2
 
@@ -46,7 +43,7 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("The first doubled is " as str),
-                            ((patina_fmt::debug as
+                            ((::core::patina_fmt::debug as
                                     fn(term) -> term)(((double_first as
                                         fn([str]) -> {type error} {double_first})((numbers as
                                         [str])) as {type error})) as term)] as [term])] as
@@ -56,7 +53,7 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("The first doubled is " as str),
-                            ((patina_fmt::debug as
+                            ((::core::patina_fmt::debug as
                                     fn(term) -> term)(((double_first as
                                         fn([str]) -> {type error} {double_first})((empty as [str]))
                                     as {type error})) as term)] as [term])] as [[term]])) as
@@ -66,7 +63,7 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("The first doubled is " as str),
-                            ((patina_fmt::debug as
+                            ((::core::patina_fmt::debug as
                                     fn(term) -> term)(((double_first as
                                         fn([str]) -> {type error} {double_first})((strings as
                                         [str])) as {type error})) as term)] as [term])] as

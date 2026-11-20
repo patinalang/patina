@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/flow_control/for.md
 // block: 3/3
 
@@ -29,13 +26,14 @@ pub fn main() {
             }
             _ => {
                 ::core::io::put_chars([["Hello ",
-                                    patina_fmt::display(name)]]);
+                                    ::core::patina_fmt::display(name)]]);
                 ::core::io::nl();
             }
         }
     }
     {
-        ::core::io::put_chars([["names: ", patina_fmt::debug(names)]]);
+        ::core::io::put_chars([["names: ",
+                            ::core::patina_fmt::debug(names)]]);
         ::core::io::nl();
     };
 }

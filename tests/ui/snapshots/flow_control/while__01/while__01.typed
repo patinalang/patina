@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/flow_control/while.md
 // block: 1/1
 
@@ -52,7 +49,7 @@ fn main() ({
             } else {
                 ({
                     ((::core::io::put_chars as
-                            fn(term) -> term)(([([((patina_fmt::display as
+                            fn(term) -> term)(([([((::core::patina_fmt::display as
                                                 fn(term) -> term)((n as int)) as term)] as [term])] as
                             [[term]])) as term);
                     ((::core::io::nl as fn() -> term)() as term);

@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/variable_bindings/scope.md
 // block: 2/2
 
@@ -29,7 +26,7 @@ fn main() ({
         ({
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("before being shadowed: " as str),
-                                ((patina_fmt::display as
+                                ((::core::patina_fmt::display as
                                         fn(term) -> term)((shadowed_binding as int)) as term)] as
                             [term])] as [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
@@ -38,7 +35,7 @@ fn main() ({
         ({
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("shadowed in inner block: " as str),
-                                ((patina_fmt::display as
+                                ((::core::patina_fmt::display as
                                         fn(term) -> term)((shadowed_binding as str)) as term)] as
                             [term])] as [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
@@ -47,7 +44,7 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("outside inner block: " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)((shadowed_binding as int)) as term)] as
                         [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
@@ -56,7 +53,7 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("shadowed in outer block: " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)((shadowed_binding as int)) as term)] as
                         [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);

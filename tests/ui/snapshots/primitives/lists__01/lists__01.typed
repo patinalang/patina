@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/primitives/lists.md
 // block: 1/1
 
@@ -41,8 +38,9 @@ fn main() ({
             {
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("elem 0: " as str),
-                                ((patina_fmt::display as fn(term) -> term)((xval as int)) as
-                                    term)] as [term])] as [[term]])) as term);
+                                ((::core::patina_fmt::display as
+                                        fn(term) -> term)((xval as int)) as term)] as [term])] as
+                    [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
         }
         None => {
@@ -56,7 +54,7 @@ fn main() ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("Number of elements in array: " as
                                 str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)(((xs as [int]).len() as int)) as term)] as
                         [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
@@ -64,7 +62,7 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("First element of the list: " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)(((xs as [int]).head() as
                                     core::Option<int>)) as term)] as [term])] as [[term]])) as
             term);
@@ -73,7 +71,7 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("Rest of the list: " as str),
-                            ((patina_fmt::debug as
+                            ((::core::patina_fmt::debug as
                                     fn(term) -> term)(((xs as [int]).tail() as [int])) as term)]
                         as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
@@ -84,7 +82,7 @@ fn main() ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("more_xs.tail().tail() is equal to xs: "
                                 as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)(((((more_xs as [int]).tail() as
                                             [int]).tail() as [int]) == (xs as [int]) as bool)) as term)]
                         as [term])] as [[term]])) as term);
@@ -96,7 +94,7 @@ fn main() ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("Sum of first three elements is " as
                                 str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)((((first as int) + (second as int) as int)
                                     + (third as int) as int)) as term)] as [term])] as
                 [[term]])) as term);
@@ -105,8 +103,9 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("...and the rest: " as str),
-                            ((patina_fmt::debug as fn(term) -> term)((rest as [int])) as
-                                term)] as [term])] as [[term]])) as term);
+                            ((::core::patina_fmt::debug as
+                                    fn(term) -> term)((rest as [int])) as term)] as [term])] as
+                [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

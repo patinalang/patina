@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/fn/diverging.md
 // block: 4/4
 
@@ -40,7 +37,7 @@ pub fn main() {
     }
     {
         ::core::io::put_chars([["Sum of odd numbers up to 9 (excluding): ",
-                            patina_fmt::display(sum_odd_numbers(9))]]);
+                            ::core::patina_fmt::display(sum_odd_numbers(9))]]);
         ::core::io::nl();
     };
 }

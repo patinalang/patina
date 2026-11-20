@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/primitives/maps.md
 // block: 1/1
 
@@ -47,7 +44,7 @@ pub fn main() {
             // `for` will iterate over the (key, value) pairs in arbitrary order.
             {
             ::core::io::put_chars([["Calling Daniel: ",
-                                patina_fmt::display(call(number))]]);
+                                ::core::patina_fmt::display(call(number))]]);
             ::core::io::nl();
         }
         _ => {
@@ -59,7 +56,7 @@ pub fn main() {
     match contacts.get("Ashley") {
         Some(number) => {
             ::core::io::put_chars([["Calling Ashley: ",
-                                patina_fmt::display(call(number))]]);
+                                ::core::patina_fmt::display(call(number))]]);
             ::core::io::nl();
         }
         _ => {
@@ -71,8 +68,9 @@ pub fn main() {
     contacts = #{"Laura" => "132-8372", ..contacts};
     for (contact, number) in contacts {
         {
-            ::core::io::put_chars([["Calling ", patina_fmt::display(contact),
-                                ": ", patina_fmt::display(call(number))]]);
+            ::core::io::put_chars([["Calling ",
+                                ::core::patina_fmt::display(contact), ": ",
+                                ::core::patina_fmt::display(call(number))]]);
             ::core::io::nl();
         };
     }

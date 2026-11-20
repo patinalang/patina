@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // The witness function of an associated type gives the witnesses of its declared bounds.
 // `Show for int` is an impl for a primitive type outside Core.
 

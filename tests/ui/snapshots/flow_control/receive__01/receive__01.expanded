@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/flow_control/receive.md
 // block: 1/1
 
@@ -24,7 +21,7 @@ pub fn main() {
 
             {
             ::core::io::put_chars([["received integer ",
-                                patina_fmt::debug(n)]]);
+                                ::core::patina_fmt::debug(n)]]);
             ::core::io::nl();
         }
         a"ping" => {
@@ -32,7 +29,8 @@ pub fn main() {
             ::core::io::nl();
         }
         atom(a) => {
-            ::core::io::put_chars([["received atom ", patina_fmt::debug(a)]]);
+            ::core::io::put_chars([["received atom ",
+                                ::core::patina_fmt::debug(a)]]);
             ::core::io::nl();
         }
     } after Timeout::from_seconds(5)
@@ -45,7 +43,7 @@ pub fn main() {
     receive {
         val => {
             ::core::io::put_chars([["received any message ",
-                                patina_fmt::debug(val)]]);
+                                ::core::patina_fmt::debug(val)]]);
             ::core::io::nl();
         }
     }

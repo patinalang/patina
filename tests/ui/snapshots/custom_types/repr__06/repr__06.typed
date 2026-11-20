@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/custom_types/repr.md
 // block: 6/14
 
@@ -34,7 +31,7 @@ fn main() ({
     // (a"struct_http_style", 200, "hi")
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::debug as
+                fn(term) -> term)(([([((::core::patina_fmt::debug as
                                     fn(term) -> term)(((SnakeCaseEnum::UnitVariant as
                                         SnakeCaseEnum) as term as term)) as term)] as [term])] as
                 [[term]])) as term);
@@ -42,7 +39,7 @@ fn main() ({
     } as ());
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::debug as
+                fn(term) -> term)(([([((::core::patina_fmt::debug as
                                     fn(term) -> term)(((SnakeCaseEnum::StructHTTPStyle {
                                         code: (200 as int), body: ("hi" as str) } as SnakeCaseEnum)
                                     as term as term)) as term)] as [term])] as [[term]])) as

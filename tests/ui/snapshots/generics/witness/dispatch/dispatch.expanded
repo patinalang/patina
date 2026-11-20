@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 struct Point {
     x: int,
     y: int,
@@ -29,8 +26,8 @@ impl Area for Point {
 
 
         {
-            ::core::io::put_chars([["Area::area(", patina_fmt::debug(self),
-                                ")"]]);
+            ::core::io::put_chars([["Area::area(",
+                                ::core::patina_fmt::debug(self), ")"]]);
             ::core::io::nl();
         };
         self.x * self.y
@@ -40,7 +37,7 @@ fn total_area<T: Area>(t: T) -> int { t.area() }
 pub fn main() {
     let p = Point { x: 3, y: 4 };
     {
-        ::core::io::put_chars([[patina_fmt::display(total_area(p))]]);
+        ::core::io::put_chars([[::core::patina_fmt::display(total_area(p))]]);
         ::core::io::nl();
     };
 }

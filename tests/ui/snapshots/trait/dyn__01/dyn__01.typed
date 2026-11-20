@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/trait/dyn.md
 // block: 1/1
 
@@ -57,7 +54,7 @@ fn main() ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("You\'ve randomly chosen an animal, and it says "
                                 as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)(((animal as dyn Animal).noise() as str))
                                 as term)] as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);

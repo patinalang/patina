@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/flow_control/if_let.md
 // block: 2/4
 
@@ -41,8 +38,8 @@ fn main() ({
         ({
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("Matched " as str),
-                                ((patina_fmt::debug as fn(term) -> term)((i as int)) as
-                                    term), ("!" as str)] as [term])] as [[term]])) as term);
+                                ((::core::patina_fmt::debug as fn(term) -> term)((i as int))
+                                    as term), ("!" as str)] as [term])] as [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
         } as ());
     } as ())
@@ -50,8 +47,8 @@ fn main() ({
         ({
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("Matched " as str),
-                                ((patina_fmt::debug as fn(term) -> term)((i as int)) as
-                                    term), ("!" as str)] as [term])] as [[term]])) as term);
+                                ((::core::patina_fmt::debug as fn(term) -> term)((i as int))
+                                    as term), ("!" as str)] as [term])] as [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
         } as ());
     } else {
@@ -67,8 +64,8 @@ fn main() ({
         ({
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("Matched " as str),
-                                ((patina_fmt::debug as fn(term) -> term)((i as int)) as
-                                    term), ("!" as str)] as [term])] as [[term]])) as term);
+                                ((::core::patina_fmt::debug as fn(term) -> term)((i as int))
+                                    as term), ("!" as str)] as [term])] as [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
         } as ());
     } else if (i_like_letters as bool) {

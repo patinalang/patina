@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 enum BasicEnum {
     Unit,
     Tuple(int, str),
@@ -34,12 +31,13 @@ fn main() ({
             BasicEnum);
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::debug as
+                fn(term) -> term)(([([((::core::patina_fmt::debug as
                                     fn(term) -> term)((x as BasicEnum)) as term), ("\n" as str),
-                            ((patina_fmt::debug as fn(term) -> term)((y as BasicEnum))
-                                as term), ("\n" as str),
-                            ((patina_fmt::debug as fn(term) -> term)((z as BasicEnum))
-                                as term)] as [term])] as [[term]])) as term);
+                            ((::core::patina_fmt::debug as
+                                    fn(term) -> term)((y as BasicEnum)) as term), ("\n" as str),
+                            ((::core::patina_fmt::debug as
+                                    fn(term) -> term)((z as BasicEnum)) as term)] as [term])] as
+                [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

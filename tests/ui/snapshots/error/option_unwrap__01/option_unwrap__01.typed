@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/error/option_unwrap.md
 // block: 1/1
 
@@ -41,7 +38,7 @@ fn give_adult(drink:
         }
         Some(inner) => {
             ((::core::io::put_chars as
-                    fn(term) -> term)(([([((patina_fmt::display as
+                    fn(term) -> term)(([([((::core::patina_fmt::display as
                                         fn(term) -> term)((inner as str)) as term),
                                 ("? How nice." as str)] as [term])] as [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
@@ -73,7 +70,7 @@ fn drink(drink:
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("I love " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)((inside as {type error})) as term),
                             ("s!!!!!" as str)] as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);

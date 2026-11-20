@@ -2,7 +2,6 @@
 
 
 
-
 // source: patina-by-example/src/error/option_unwrap/map.md
 // block: 1/1
 
@@ -16,8 +15,6 @@ extern crate core;
 #[allow(unused_imports)]
 #[attr = PreludeImport]
 use core::prelude::*;
-#[allow(unused)]
-extern mod patina_fmt;
 
 enum Food { Apple, Carrot, Potato, }
 
@@ -101,8 +98,9 @@ fn eat(food:
             {
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("Mmm. I love " as str),
-                                ((patina_fmt::debug as fn(term) -> term)((food as Cooked))
-                                    as term)] as [term])] as [[term]])) as term);
+                                ((::core::patina_fmt::debug as
+                                        fn(term) -> term)((food as Cooked)) as term)] as [term])] as
+                    [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
         }
         None => {

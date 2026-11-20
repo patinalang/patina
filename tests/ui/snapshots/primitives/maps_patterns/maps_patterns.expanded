@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 pub fn lookup_name(map: #{str => int}) -> int {
     match map { #{"name" => name, ..} => name, _ => -1, }
 }

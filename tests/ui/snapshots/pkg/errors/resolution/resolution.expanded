@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // Name resolution errors involving other packages. They are not reported once
 // proc macro expansion has failed, so they cannot share a file with
 // `proc_macros.pt`.
@@ -39,15 +36,15 @@ pub fn spans() {
 
     // A path that does not resolve in another package is an ordinary error.
     {
-        ::core::io::put_chars([[patina_fmt::display(local)]]);
+        ::core::io::put_chars([[::core::patina_fmt::display(local)]]);
         ::core::io::nl();
     };
     {
-        ::core::io::put_chars([[patina_fmt::display(local)]]);
+        ::core::io::put_chars([[::core::patina_fmt::display(local)]]);
         ::core::io::nl();
     };
     {
-        ::core::io::put_chars([[patina_fmt::display(local)]]);
+        ::core::io::put_chars([[::core::patina_fmt::display(local)]]);
         ::core::io::nl();
     };
     let _a = (missing_open, missing_close, missing_entire);

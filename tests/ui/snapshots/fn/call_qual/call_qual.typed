@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 struct StructWithNew {
     value: int,
 }
@@ -125,7 +122,7 @@ fn main() ({
             StructWithNew);
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)(((s as StructWithNew).value as int)) as
                                 term)] as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);

@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/types/alias.md
 // block: 1/1
 
@@ -31,12 +28,13 @@ fn main() ({
     // aliases are *not* new types
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)((nanoseconds as int)) as term),
                             (" nanoseconds + " as str),
-                            ((patina_fmt::display as fn(term) -> term)((inches as int))
-                                as term), (" inches = " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((inches as int)) as term),
+                            (" inches = " as str),
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)(((nanoseconds as int) + (inches as int) as
                                     int)) as term), (" unit?" as str)] as [term])] as [[term]]))
             as term);

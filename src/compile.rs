@@ -50,9 +50,6 @@ extern crate core;
 #[allow(unused_imports)]
 #[prelude_import]
 use core::prelude::*;
-
-#[allow(unused)]
-extern mod patina_fmt;
 "#;
 
 struct NoAnn;

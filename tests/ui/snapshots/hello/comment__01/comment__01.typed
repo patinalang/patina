@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/hello/comment.md
 // block: 1/1
 
@@ -54,8 +51,9 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("Is `x` 10 or 100? x = " as str),
-                            ((patina_fmt::display as fn(term) -> term)((x as int)) as
-                                term)] as [term])] as [[term]])) as term);
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((x as int)) as term)] as [term])] as
+                [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

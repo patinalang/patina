@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 struct UnboundContainer;
 struct BoundContainer;
 struct NestedContainer;
@@ -41,8 +38,9 @@ impl Marker for Marked {
         ({
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("Marker::value(" as str),
-                                ((patina_fmt::debug as fn(term) -> term)((self as Marked))
-                                    as term), (")" as str)] as [term])] as [[term]])) as term);
+                                ((::core::patina_fmt::debug as
+                                        fn(term) -> term)((self as Marked)) as term), (")" as str)]
+                            as [term])] as [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
         } as ());
         ((self as Marked).value as int)
@@ -60,13 +58,13 @@ impl <T> Contains<int, T> for UnboundContainer {
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("UnboundContainer::contains(" as
                                     str),
-                                ((patina_fmt::debug as
+                                ((::core::patina_fmt::debug as
                                         fn(term) -> term)((self as UnboundContainer)) as term),
                                 (", " as str),
-                                ((patina_fmt::debug as fn(term) -> term)((a as int)) as
-                                    term), (", " as str),
-                                ((patina_fmt::debug as fn(term) -> term)((b as T)) as term),
-                                (")" as str)] as [term])] as [[term]])) as term);
+                                ((::core::patina_fmt::debug as fn(term) -> term)((a as int))
+                                    as term), (", " as str),
+                                ((::core::patina_fmt::debug as fn(term) -> term)((b as T))
+                                    as term), (")" as str)] as [term])] as [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
         } as ());
         (true as bool)
@@ -79,13 +77,14 @@ impl <T> Contains<int, T> for BoundContainer where T: Marker {
         ({
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("BoundContainer::contains(" as str),
-                                ((patina_fmt::debug as
+                                ((::core::patina_fmt::debug as
                                         fn(term) -> term)((self as BoundContainer)) as term),
                                 (", " as str),
-                                ((patina_fmt::debug as fn(term) -> term)((a as int)) as
-                                    term), (", " as str),
-                                ((patina_fmt::debug as fn(term) -> term)((value as T)) as
-                                    term), (")" as str)] as [term])] as [[term]])) as term);
+                                ((::core::patina_fmt::debug as fn(term) -> term)((a as int))
+                                    as term), (", " as str),
+                                ((::core::patina_fmt::debug as
+                                        fn(term) -> term)((value as T)) as term), (")" as str)] as
+                            [term])] as [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
         } as ());
         (((value as T).value() as int) > (0 as int) as bool)
@@ -98,12 +97,12 @@ impl <T> Contains<int, Wrapped<T>> for NestedContainer {
         ({
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("NestedContainer::contains(" as str),
-                                ((patina_fmt::debug as
+                                ((::core::patina_fmt::debug as
                                         fn(term) -> term)((self as NestedContainer)) as term),
                                 (", " as str),
-                                ((patina_fmt::debug as fn(term) -> term)((a as int)) as
-                                    term), (", " as str),
-                                ((patina_fmt::debug as
+                                ((::core::patina_fmt::debug as fn(term) -> term)((a as int))
+                                    as term), (", " as str),
+                                ((::core::patina_fmt::debug as
                                         fn(term) -> term)((wrapped as Wrapped<T>)) as term),
                                 (")" as str)] as [term])] as [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
@@ -114,7 +113,7 @@ impl <T> Contains<int, Wrapped<T>> for NestedContainer {
 fn main() ({
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)(((UnboundContainer as
                                         UnboundContainer).contains((1 as int), (false as bool)) as
                                     bool)) as term)] as [term])] as [[term]])) as term);
@@ -122,7 +121,7 @@ fn main() ({
     } as ());
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)(((BoundContainer as
                                         BoundContainer).contains((1 as int),
                                     (Marked { value: (2 as int) } as Marked)) as bool)) as
@@ -131,7 +130,7 @@ fn main() ({
     } as ());
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)(((NestedContainer as
                                         NestedContainer).contains((1 as int),
                                     (Wrapped { value: (false as bool) } as Wrapped<bool>)) as

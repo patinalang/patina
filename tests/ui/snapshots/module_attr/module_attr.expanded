@@ -5,7 +5,6 @@
 
 
 
-
 // snapshot: app
 #![allow(dead_code)]
 #[allow(unused_imports)]
@@ -14,8 +13,6 @@ extern crate core;
 #[allow(unused_imports)]
 #[prelude_import]
 use core::prelude::*;
-#[allow(unused)]
-extern mod patina_fmt;
 
 #[module = "Elixir.ModuleAttr.Person"]
 struct Person {

@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/flow_control/match/guard.md
 // block: 1/2
 
@@ -34,7 +31,7 @@ fn main() ({
 
             {
             ((::core::io::put_chars as
-                    fn(term) -> term)(([([((patina_fmt::display as
+                    fn(term) -> term)(([([((::core::patina_fmt::display as
                                         fn(term) -> term)((t as int)) as term),
                                 ("C is above 30 Celsius" as str)] as [term])] as [[term]]))
                 as term);
@@ -42,7 +39,7 @@ fn main() ({
         }
         Temperature::Celsius(t) => {
             ((::core::io::put_chars as
-                    fn(term) -> term)(([([((patina_fmt::display as
+                    fn(term) -> term)(([([((::core::patina_fmt::display as
                                         fn(term) -> term)((t as int)) as term),
                                 ("C is equal to or below 30 Celsius" as str)] as [term])] as
                     [[term]])) as term);
@@ -50,7 +47,7 @@ fn main() ({
         }
         Temperature::Fahrenheit(t) if ((t as int) > (86 as int) as bool) => {
             ((::core::io::put_chars as
-                    fn(term) -> term)(([([((patina_fmt::display as
+                    fn(term) -> term)(([([((::core::patina_fmt::display as
                                         fn(term) -> term)((t as int)) as term),
                                 ("F is above 86 Fahrenheit" as str)] as [term])] as
                     [[term]])) as term);
@@ -58,7 +55,7 @@ fn main() ({
         }
         Temperature::Fahrenheit(t) => {
             ((::core::io::put_chars as
-                    fn(term) -> term)(([([((patina_fmt::display as
+                    fn(term) -> term)(([([((::core::patina_fmt::display as
                                         fn(term) -> term)((t as int)) as term),
                                 ("F is equal to or below 86 Fahrenheit" as str)] as [term])]
                     as [[term]])) as term);

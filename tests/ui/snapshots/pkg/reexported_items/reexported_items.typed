@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 use ::{};
 use reexports::Hello;
 use reexports::Wrapper;
@@ -29,10 +26,10 @@ fn proc_macros() ({
 
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)((((relayed as Relayed).value as int) +
                                     (1 as int) as int)) as term), (" " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)(((hello_from_derive as
                                         fn() -> int {hello_from_derive})() as int)) as term)] as
                         [term])] as [[term]])) as term);
@@ -46,7 +43,7 @@ fn wrapper() ({
                 as int)) as reexports::Wrapper<int>);
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)(((w as reexports::Wrapper<int>).0 as int))
                                 as term)] as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);

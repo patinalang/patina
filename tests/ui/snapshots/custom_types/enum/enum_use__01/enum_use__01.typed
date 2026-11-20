@@ -2,7 +2,6 @@
 
 
 
-
 // source: patina-by-example/src/custom_types/enum/enum_use.md
 // block: 1/1
 
@@ -17,8 +16,6 @@ extern crate core;
 #[allow(unused_imports)]
 #[attr = PreludeImport]
 use core::prelude::*;
-#[allow(unused)]
-extern mod patina_fmt;
 
 enum Stage { Beginner, Advanced, }
 

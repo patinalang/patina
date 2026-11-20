@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/generics/bounds/testcase_empty.md
 // block: 1/1
 
@@ -44,7 +41,7 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("A cardinal is " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)(((red as
                                         fn(Cardinal) -> str {red::<Cardinal>})((cardinal as
                                         Cardinal)) as str)) as term)] as [term])] as [[term]])) as
@@ -54,7 +51,7 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("A blue jay is " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)(((blue as
                                         fn(BlueJay) -> str {blue::<BlueJay>})((blue_jay as BlueJay))
                                     as str)) as term)] as [term])] as [[term]])) as term);

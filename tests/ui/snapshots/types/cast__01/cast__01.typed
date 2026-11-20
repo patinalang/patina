@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/types/cast.md
 // block: 1/1
 
@@ -48,12 +45,13 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("Casting: " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)((decimal as float)) as term),
                             (" -> " as str),
-                            ((patina_fmt::display as fn(term) -> term)((integer as int))
-                                as term), (" -> " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((integer as int)) as term),
+                            (" -> " as str),
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)((character as char)) as term)] as [term])]
                 as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);

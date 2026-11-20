@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 extern mod used;
 extern mod unused;
 extern mod erlang;
@@ -26,7 +23,7 @@ mod inner {
 pub fn main() {
     used::ping();
     {
-        ::core::io::put_chars([[patina_fmt::debug(used::foo::bar)]]);
+        ::core::io::put_chars([[::core::patina_fmt::debug(used::foo::bar)]]);
         ::core::io::nl();
     };
     io::foo::bar(1, 2);

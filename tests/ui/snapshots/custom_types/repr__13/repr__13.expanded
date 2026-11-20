@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/custom_types/repr.md
 // block: 13/14
 
@@ -42,37 +39,37 @@ pub fn main() {
     // (a"some", a"nil")
     // a"nil"
     {
-        ::core::io::put_chars([[patina_fmt::debug(Option::<int>::Some(42) as
-                                    term)]]);
-        ::core::io::nl();
-    };
-    {
-        ::core::io::put_chars([[patina_fmt::debug(Option::<int>::None as
-                                    term)]]);
-        ::core::io::nl();
-    };
-    {
-        ::core::io::put_chars([[patina_fmt::debug(Option::<atom>::Some(a"hi")
+        ::core::io::put_chars([[::core::patina_fmt::debug(Option::<int>::Some(42)
                                     as term)]]);
         ::core::io::nl();
     };
     {
-        ::core::io::put_chars([[patina_fmt::debug(Option::<atom>::Some(a"nil")
+        ::core::io::put_chars([[::core::patina_fmt::debug(Option::<int>::None
                                     as term)]]);
         ::core::io::nl();
     };
     {
-        ::core::io::put_chars([[patina_fmt::debug(Option::<Option<int>>::Some(Option::Some(42))
+        ::core::io::put_chars([[::core::patina_fmt::debug(Option::<atom>::Some(a"hi")
                                     as term)]]);
         ::core::io::nl();
     };
     {
-        ::core::io::put_chars([[patina_fmt::debug(Option::<Option<int>>::Some(Option::None)
+        ::core::io::put_chars([[::core::patina_fmt::debug(Option::<atom>::Some(a"nil")
                                     as term)]]);
         ::core::io::nl();
     };
     {
-        ::core::io::put_chars([[patina_fmt::debug(Option::<Option<int>>::None
+        ::core::io::put_chars([[::core::patina_fmt::debug(Option::<Option<int>>::Some(Option::Some(42))
+                                    as term)]]);
+        ::core::io::nl();
+    };
+    {
+        ::core::io::put_chars([[::core::patina_fmt::debug(Option::<Option<int>>::Some(Option::None)
+                                    as term)]]);
+        ::core::io::nl();
+    };
+    {
+        ::core::io::put_chars([[::core::patina_fmt::debug(Option::<Option<int>>::None
                                     as term)]]);
         ::core::io::nl();
     };

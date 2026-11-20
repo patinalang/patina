@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 pub fn reject_or_pattern_function_parameter((0 | 1): int) {}
 
 pub fn reject_or_pattern_plain_let(value: int) { let (0 | 1) = value; }

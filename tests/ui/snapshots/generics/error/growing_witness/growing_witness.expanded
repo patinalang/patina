@@ -5,7 +5,6 @@
 
 
 
-
 #![allow(dead_code)]
 #[allow(unused_imports)]
 #[macro_use]
@@ -13,8 +12,6 @@ extern crate core;
 #[allow(unused_imports)]
 #[prelude_import]
 use core::prelude::*;
-#[allow(unused)]
-extern mod patina_fmt;
 
 // The witness of `S<int>: Base` needs the witness of `S<S<int>>: Derived`, which needs the witness
 // of `S<S<int>>: Base`, and so on. Each bound is larger than the one before.

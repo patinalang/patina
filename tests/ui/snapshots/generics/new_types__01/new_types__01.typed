@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/generics/new_types.md
 // block: 1/2
 
@@ -52,7 +49,7 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("Is an adult? " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)(((is_adult as
                                         fn(Years) -> bool {is_adult})((age as Years)) as bool)) as
                                 term)] as [term])] as [[term]])) as term);
@@ -61,7 +58,7 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("Is an adult? " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)(((is_adult as
                                         fn(Years) -> bool {is_adult})(((age_days as Days).to_years()
                                         as Years)) as bool)) as term)] as [term])] as [[term]])) as

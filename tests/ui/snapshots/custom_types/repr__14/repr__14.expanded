@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/custom_types/repr.md
 // block: 14/14
 
@@ -37,11 +34,11 @@ pub fn main() {
 
     // <<131, 97, 42>>
     {
-        ::core::io::put_chars([[patina_fmt::debug(opts as term)]]);
+        ::core::io::put_chars([[::core::patina_fmt::debug(opts as term)]]);
         ::core::io::nl();
     };
     {
-        ::core::io::put_chars([[patina_fmt::debug(erlang::term_to_binary(42,
+        ::core::io::put_chars([[::core::patina_fmt::debug(erlang::term_to_binary(42,
                                     opts))]]);
         ::core::io::nl();
     };

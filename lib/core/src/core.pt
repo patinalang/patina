@@ -21,6 +21,7 @@ pub mod proc_macro;
 
 pub extern mod erlang;
 pub extern mod io;
+pub extern mod patina_fmt;
 pub extern mod unicode;
 
 #[macro_export]

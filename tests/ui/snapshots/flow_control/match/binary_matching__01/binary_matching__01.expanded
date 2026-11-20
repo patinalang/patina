@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/flow_control/match/binary_matching.md
 // block: 1/6
 
@@ -23,9 +20,10 @@ pub fn main() {
     match payload {
         <<prefix: int(size = 16), tag: int(size = 8), rest @ ..>> =>
             {
-            ::core::io::put_chars([["prefix = ", patina_fmt::display(prefix),
-                                ", tag = ", patina_fmt::display(tag), ", rest = ",
-                                patina_fmt::debug(rest)]]);
+            ::core::io::put_chars([["prefix = ",
+                                ::core::patina_fmt::display(prefix), ", tag = ",
+                                ::core::patina_fmt::display(tag), ", rest = ",
+                                ::core::patina_fmt::debug(rest)]]);
             ::core::io::nl();
         }
         _ => { ::core::io::put_chars([["did not match"]]); ::core::io::nl(); }

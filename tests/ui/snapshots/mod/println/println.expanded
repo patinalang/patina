@@ -1,0 +1,39 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro, prelude_import)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern crate core;
+
+#[allow(unused_imports)]
+#[prelude_import]
+use core::prelude::*;
+
+pub fn top(n: int) {
+
+
+    {
+        ::core::io::put_chars([["top ", ::core::patina_fmt::display(n), " ",
+                            ::core::patina_fmt::debug(n)]]);
+        ::core::io::nl();
+    };
+}
+pub mod outer {
+    pub fn outer(n: int) {
+        {
+            ::core::io::put_chars([["outer ", ::core::patina_fmt::display(n),
+                                " ", ::core::patina_fmt::debug(n)]]);
+            ::core::io::nl();
+        };
+    }
+    pub mod inner {
+        pub fn inner(n: int) -> str {
+            unsafe {
+                ::core::unicode::characters_to_binary(["inner ",
+                                ::core::patina_fmt::display(n)]).cast_unchecked::<str>()
+            }
+        }
+    }
+}

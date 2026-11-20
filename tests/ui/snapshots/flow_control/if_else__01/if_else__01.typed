@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/flow_control/if_else.md
 // block: 1/1
 
@@ -31,21 +28,21 @@ fn main() ({
 
         ({
             ((::core::io::put_chars as
-                    fn(term) -> term)(([((patina_fmt::display as
+                    fn(term) -> term)(([((::core::patina_fmt::display as
                                 fn(term) -> term)((n as int)) as term),
                         (" is negative" as str)] as [term])) as term);
         } as ());
     } else if ((n as int) > (0 as int) as bool) {
         ({
             ((::core::io::put_chars as
-                    fn(term) -> term)(([((patina_fmt::display as
+                    fn(term) -> term)(([((::core::patina_fmt::display as
                                 fn(term) -> term)((n as int)) as term),
                         (" is positive" as str)] as [term])) as term);
         } as ());
     } else {
         ({
             ((::core::io::put_chars as
-                    fn(term) -> term)(([((patina_fmt::display as
+                    fn(term) -> term)(([((::core::patina_fmt::display as
                                 fn(term) -> term)((n as int)) as term), (" is zero" as str)]
                     as [term])) as term);
         } as ());
@@ -71,10 +68,11 @@ fn main() ({
         } as int);
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)((n as int)) as term), (" -> " as str),
-                            ((patina_fmt::display as fn(term) -> term)((big_n as int))
-                                as term)] as [term])] as [[term]])) as term);
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((big_n as int)) as term)] as [term])] as
+                [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

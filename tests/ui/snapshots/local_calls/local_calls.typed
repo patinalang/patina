@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 struct Years(int);
 
 impl Years {
@@ -34,9 +31,9 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("Age " as str),
-                            ((patina_fmt::debug as fn(term) -> term)((age as Years)) as
-                                term), (" is " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::debug as
+                                    fn(term) -> term)((age as Years)) as term), (" is " as str),
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)((age_value as int)) as term)] as [term])]
                 as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);

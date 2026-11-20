@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/flow_control/if_let.md
 // block: 2/4
 
@@ -36,13 +33,15 @@ pub fn main() {
         // alternate failure branch should be taken:
         // The condition evaluated false. This branch is the default:
         {
-            ::core::io::put_chars([["Matched ", patina_fmt::debug(i), "!"]]);
+            ::core::io::put_chars([["Matched ", ::core::patina_fmt::debug(i),
+                                "!"]]);
             ::core::io::nl();
         };
     }
     if let Some(i) = letter {
         {
-            ::core::io::put_chars([["Matched ", patina_fmt::debug(i), "!"]]);
+            ::core::io::put_chars([["Matched ", ::core::patina_fmt::debug(i),
+                                "!"]]);
             ::core::io::nl();
         };
     } else {
@@ -54,7 +53,8 @@ pub fn main() {
     let i_like_letters = false;
     if let Some(i) = emoticon {
         {
-            ::core::io::put_chars([["Matched ", patina_fmt::debug(i), "!"]]);
+            ::core::io::put_chars([["Matched ", ::core::patina_fmt::debug(i),
+                                "!"]]);
             ::core::io::nl();
         };
     } else if i_like_letters {

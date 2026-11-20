@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/generics/bounds/testcase_empty.md
 // block: 1/1
 
@@ -43,12 +40,12 @@ pub fn main() {
     // ^ TODO: Try uncommenting this line.
     {
         ::core::io::put_chars([["A cardinal is ",
-                            patina_fmt::display(red(cardinal))]]);
+                            ::core::patina_fmt::display(red(cardinal))]]);
         ::core::io::nl();
     };
     {
         ::core::io::put_chars([["A blue jay is ",
-                            patina_fmt::display(blue(blue_jay))]]);
+                            ::core::patina_fmt::display(blue(blue_jay))]]);
         ::core::io::nl();
     };
 }

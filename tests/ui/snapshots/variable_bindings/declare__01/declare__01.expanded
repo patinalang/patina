@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/variable_bindings/declare.md
 // block: 1/1
 
@@ -36,19 +33,19 @@ pub fn main() {
 
     {
         ::core::io::put_chars([["a binding: ",
-                            patina_fmt::display(a_binding)]]);
+                            ::core::patina_fmt::display(a_binding)]]);
         ::core::io::nl();
     };
     let another_binding;
     {
         ::core::io::put_chars([["another binding: ",
-                            patina_fmt::display(another_binding)]]);
+                            ::core::patina_fmt::display(another_binding)]]);
         ::core::io::nl();
     };
     another_binding = 1;
     {
         ::core::io::put_chars([["another binding: ",
-                            patina_fmt::display(another_binding)]]);
+                            ::core::patina_fmt::display(another_binding)]]);
         ::core::io::nl();
     };
 }

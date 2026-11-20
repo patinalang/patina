@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // Exercises the partial `format_args!` implementation: literal text, `{}` (Display)
 // and `{:?}` (Debug), positional and captured arguments.
 
@@ -22,17 +19,18 @@ pub fn main() {
     let n: int = 42;
 
     {
-        ::core::io::put_chars([["hello, ", patina_fmt::display(name), "!"]]);
+        ::core::io::put_chars([["hello, ", ::core::patina_fmt::display(name),
+                            "!"]]);
         ::core::io::nl();
     };
     {
-        ::core::io::put_chars([[patina_fmt::display(name), " = ",
-                            patina_fmt::debug(n)]]);
+        ::core::io::put_chars([[::core::patina_fmt::display(name), " = ",
+                            ::core::patina_fmt::debug(n)]]);
         ::core::io::nl();
     };
     {
-        ::core::io::put_chars([[patina_fmt::display(name), " and ",
-                            patina_fmt::debug(n)]]);
+        ::core::io::put_chars([[::core::patina_fmt::display(name), " and ",
+                            ::core::patina_fmt::debug(n)]]);
         ::core::io::nl();
     };
     { ::core::io::put_chars(["no "]); };

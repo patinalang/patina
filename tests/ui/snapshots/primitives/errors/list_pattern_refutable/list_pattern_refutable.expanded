@@ -11,7 +11,4 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 pub fn list_patterns_are_refutable(xs: [int]) { let [first, second] = xs; }

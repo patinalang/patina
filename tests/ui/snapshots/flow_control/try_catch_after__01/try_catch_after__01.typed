@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/flow_control/try_catch_after.md
 // block: 1/1
 
@@ -47,16 +44,18 @@ fn main() ({
             ..}) => {
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("Elixir ArgumentError " as str),
-                                ((patina_fmt::debug as fn(term) -> term)((reason as term))
-                                    as term)] as [term])] as [[term]])) as term);
+                                ((::core::patina_fmt::debug as
+                                        fn(term) -> term)((reason as term)) as term)] as [term])] as
+                    [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
         }
         error(reason), stacktrace => {
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("other error: " as str),
-                                ((patina_fmt::debug as fn(term) -> term)((reason as term))
-                                    as term), (" from " as str),
-                                ((patina_fmt::debug as
+                                ((::core::patina_fmt::debug as
+                                        fn(term) -> term)((reason as term)) as term),
+                                (" from " as str),
+                                ((::core::patina_fmt::debug as
                                         fn(term) -> term)((stacktrace as term)) as term)] as
                             [term])] as [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
@@ -64,15 +63,17 @@ fn main() ({
         throw(value) => {
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("thrown: " as str),
-                                ((patina_fmt::debug as fn(term) -> term)((value as term)) as
-                                    term)] as [term])] as [[term]])) as term);
+                                ((::core::patina_fmt::debug as
+                                        fn(term) -> term)((value as term)) as term)] as [term])] as
+                    [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
         }
         exit(reason) => {
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("exit: " as str),
-                                ((patina_fmt::debug as fn(term) -> term)((reason as term))
-                                    as term)] as [term])] as [[term]])) as term);
+                                ((::core::patina_fmt::debug as
+                                        fn(term) -> term)((reason as term)) as term)] as [term])] as
+                    [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
         }
     }

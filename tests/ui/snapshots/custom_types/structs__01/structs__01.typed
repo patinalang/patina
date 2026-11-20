@@ -2,7 +2,6 @@
 
 
 
-
 // source: patina-by-example/src/custom_types/structs.md
 // block: 1/1
 
@@ -17,8 +16,6 @@ extern crate core;
 #[allow(unused_imports)]
 #[attr = PreludeImport]
 use core::prelude::*;
-#[allow(unused)]
-extern mod patina_fmt;
 
 // TODO: Uncomment this once we have a way to derive Debug for structs
 // #[derive(Debug)]
@@ -79,7 +76,7 @@ fn main() ({
 
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::debug as
+                fn(term) -> term)(([([((::core::patina_fmt::debug as
                                     fn(term) -> term)((peter as Person)) as term)] as [term])]
                 as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
@@ -91,10 +88,10 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("point coordinates: (" as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)(((point as Point).x as float)) as term),
                             (", " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)(((point as Point).y as float)) as term),
                             (")" as str)] as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
@@ -104,10 +101,10 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("second point: (" as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)(((bottom_right as Point).x as float)) as
                                 term), (", " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)(((bottom_right as Point).y as float)) as
                                 term), (")" as str)] as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
@@ -126,10 +123,10 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("pair contains " as str),
-                            ((patina_fmt::debug as
+                            ((::core::patina_fmt::debug as
                                     fn(term) -> term)(((pair as Pair).0 as int)) as term),
                             (" and " as str),
-                            ((patina_fmt::debug as
+                            ((::core::patina_fmt::debug as
                                     fn(term) -> term)(((pair as Pair).1 as float)) as term)] as
                         [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
@@ -138,10 +135,12 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("pair contains " as str),
-                            ((patina_fmt::debug as fn(term) -> term)((integer as int))
-                                as term), (" and " as str),
-                            ((patina_fmt::debug as fn(term) -> term)((decimal as float))
-                                as term)] as [term])] as [[term]])) as term);
+                            ((::core::patina_fmt::debug as
+                                    fn(term) -> term)((integer as int)) as term),
+                            (" and " as str),
+                            ((::core::patina_fmt::debug as
+                                    fn(term) -> term)((decimal as float)) as term)] as [term])]
+                as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

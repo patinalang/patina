@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/error/iter_result.md
 // block: 1/5
 
@@ -22,7 +19,8 @@ pub fn main() {
     let numbers: [_] =
         strings.into_iter().map(|s| s.parse::<int>()).collect();
     {
-        ::core::io::put_chars([["Results: ", patina_fmt::debug(numbers)]]);
+        ::core::io::put_chars([["Results: ",
+                            ::core::patina_fmt::debug(numbers)]]);
         ::core::io::nl();
     };
 }

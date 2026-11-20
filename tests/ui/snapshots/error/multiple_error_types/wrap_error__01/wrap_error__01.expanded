@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/error/multiple_error_types/wrap_error.md
 // block: 1/1
 
@@ -79,18 +76,19 @@ fn print(result: Result<int>) {
 
             {
             ::core::io::put_chars([["The first doubled is ",
-                                patina_fmt::display(n)]]);
+                                ::core::patina_fmt::display(n)]]);
             ::core::io::nl();
         }
         Err(e) => {
             {
-                ::core::io::put_chars([["Error: ", patina_fmt::display(e)]]);
+                ::core::io::put_chars([["Error: ",
+                                    ::core::patina_fmt::display(e)]]);
                 ::core::io::nl();
             };
             if let Some(source) = e.source() {
                 {
                     ::core::io::put_chars([["  Caused by: ",
-                                        patina_fmt::display(source)]]);
+                                        ::core::patina_fmt::display(source)]]);
                     ::core::io::nl();
                 };
             }

@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 fn main() ({
     let _immutable_binding = (1 as int);
     let mut mutable_binding = (1 as int);
@@ -29,7 +26,7 @@ fn main() ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("Before mutating the binding: " as
                                 str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)((mutable_binding as int)) as term)] as
                         [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
@@ -38,7 +35,7 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("After mutating the binding: " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)((mutable_binding as int)) as term)] as
                         [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
@@ -50,10 +47,10 @@ fn main() ({
                 ((inner_mutable_binding as int) += (1 as int) as int);
                 ({
                     ((::core::io::put_chars as
-                            fn(term) -> term)(([([((patina_fmt::display as
+                            fn(term) -> term)(([([((::core::patina_fmt::display as
                                                 fn(term) -> term)((inner_mutable_binding as int)) as term),
                                         (" == " as str),
-                                        ((patina_fmt::display as
+                                        ((::core::patina_fmt::display as
                                                 fn(term) -> term)((mutable_binding as int)) as term),
                                         (" + 1" as str)] as [term])] as [[term]])) as term);
                     ((::core::io::nl as fn() -> term)() as term);

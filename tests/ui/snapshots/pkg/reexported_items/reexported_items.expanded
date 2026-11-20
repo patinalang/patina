@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 use reexports::{Hello, Wrapper, identity};
 
 pub struct Relayed {
@@ -25,15 +22,16 @@ pub fn proc_macros() {
     let relayed = Relayed { value: 3 };
 
     {
-        ::core::io::put_chars([[patina_fmt::display(relayed.value + 1), " ",
-                            patina_fmt::display(hello_from_derive())]]);
+        ::core::io::put_chars([[::core::patina_fmt::display(relayed.value +
+                                    1), " ",
+                            ::core::patina_fmt::display(hello_from_derive())]]);
         ::core::io::nl();
     };
 }
 pub fn wrapper() {
     let w = Wrapper(9);
     {
-        ::core::io::put_chars([[patina_fmt::display(w.0)]]);
+        ::core::io::put_chars([[::core::patina_fmt::display(w.0)]]);
         ::core::io::nl();
     };
 }

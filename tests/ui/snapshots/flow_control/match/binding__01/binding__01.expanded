@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/flow_control/match/binding.md
 // block: 1/2
 
@@ -43,22 +40,22 @@ pub fn main() {
         }
         n @ 1..=12 => {
             ::core::io::put_chars([["I\'m a child of age ",
-                                patina_fmt::debug(n)]]);
+                                ::core::patina_fmt::debug(n)]]);
             ::core::io::nl();
         }
         n @ 13..=19 => {
             ::core::io::put_chars([["I\'m a teen of age ",
-                                patina_fmt::debug(n)]]);
+                                ::core::patina_fmt::debug(n)]]);
             ::core::io::nl();
         }
         n @ (1 | 7 | 15 | 13) => {
             ::core::io::put_chars([["I\'m a teen of age ",
-                                patina_fmt::debug(n)]]);
+                                ::core::patina_fmt::debug(n)]]);
             ::core::io::nl();
         }
         n => {
             ::core::io::put_chars([["I\'m an old person of age ",
-                                patina_fmt::debug(n)]]);
+                                ::core::patina_fmt::debug(n)]]);
             ::core::io::nl();
         }
     }

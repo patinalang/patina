@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/macros/designators.md
 // block: 1/1
 
@@ -46,8 +43,9 @@ fn foo() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("You called " as str),
-                            ((patina_fmt::debug as fn(term) -> term)(("foo" as str)) as
-                                term), ("()" as str)] as [term])] as [[term]])) as term);
+                            ((::core::patina_fmt::debug as
+                                    fn(term) -> term)(("foo" as str)) as term), ("()" as str)]
+                        as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())
@@ -55,8 +53,9 @@ fn bar() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("You called " as str),
-                            ((patina_fmt::debug as fn(term) -> term)(("bar" as str)) as
-                                term), ("()" as str)] as [term])] as [[term]])) as term);
+                            ((::core::patina_fmt::debug as
+                                    fn(term) -> term)(("bar" as str)) as term), ("()" as str)]
+                        as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())
@@ -69,20 +68,20 @@ fn main() ({
     ((bar as fn() {bar})() as ());
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::debug as
+                fn(term) -> term)(([([((::core::patina_fmt::debug as
                                     fn(term) -> term)(("1 + 1" as str)) as term),
                             (" = " as str),
-                            ((patina_fmt::debug as
+                            ((::core::patina_fmt::debug as
                                     fn(term) -> term)(((1 as int) + (1 as int) as int)) as
                                 term)] as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::debug as
+                fn(term) -> term)(([([((::core::patina_fmt::debug as
                                     fn(term) -> term)(("{ let x = 1; x * x + 2 * x - 1 }" as
                                     str)) as term), (" = " as str),
-                            ((patina_fmt::debug as
+                            ((::core::patina_fmt::debug as
                                     fn(term) -> term)(({
                                     let x = (1 as int);
                                     ((((x as int) * (x as int) as int) +

@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/flow_control/match/binary_matching.md
 // block: 6/6
 
@@ -34,8 +31,9 @@ pub fn main() {
         <<1: int(size = 1), 0: int(size = 1), (version + 1): int(size = 3)>>;
 
     {
-        ::core::io::put_chars([[patina_fmt::debug(greeting), " ",
-                            patina_fmt::debug(header), " ", patina_fmt::debug(flags)]]);
+        ::core::io::put_chars([[::core::patina_fmt::debug(greeting), " ",
+                            ::core::patina_fmt::debug(header), " ",
+                            ::core::patina_fmt::debug(flags)]]);
         ::core::io::nl();
     };
 }

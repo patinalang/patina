@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/error/option_unwrap/question_mark.md
 // block: 1/2
 
@@ -24,6 +21,6 @@ fn next_birthday(current_age: Option<int>) -> Option<str> {
     let next_age: int = current_age? + 1;
     Some(unsafe {
             ::core::unicode::characters_to_binary(["Next year I will be ",
-                            patina_fmt::display(next_age)]).cast_unchecked::<str>()
+                            ::core::patina_fmt::display(next_age)]).cast_unchecked::<str>()
         })
 }

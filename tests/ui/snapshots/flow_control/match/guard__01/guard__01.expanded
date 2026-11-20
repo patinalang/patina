@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/flow_control/match/guard.md
 // block: 1/2
 
@@ -29,22 +26,22 @@ pub fn main() {
             // The `if condition` part ^ is a guard
 
             {
-            ::core::io::put_chars([[patina_fmt::display(t),
+            ::core::io::put_chars([[::core::patina_fmt::display(t),
                                 "C is above 30 Celsius"]]);
             ::core::io::nl();
         }
         Temperature::Celsius(t) => {
-            ::core::io::put_chars([[patina_fmt::display(t),
+            ::core::io::put_chars([[::core::patina_fmt::display(t),
                                 "C is equal to or below 30 Celsius"]]);
             ::core::io::nl();
         }
         Temperature::Fahrenheit(t) if t > 86 => {
-            ::core::io::put_chars([[patina_fmt::display(t),
+            ::core::io::put_chars([[::core::patina_fmt::display(t),
                                 "F is above 86 Fahrenheit"]]);
             ::core::io::nl();
         }
         Temperature::Fahrenheit(t) => {
-            ::core::io::put_chars([[patina_fmt::display(t),
+            ::core::io::put_chars([[::core::patina_fmt::display(t),
                                 "F is equal to or below 86 Fahrenheit"]]);
             ::core::io::nl();
         }

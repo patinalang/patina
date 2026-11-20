@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/flow_control/match/binary_matching.md
 // block: 4/6
 
@@ -31,14 +28,16 @@ pub fn main() {
 
             // The shorthand form can also be used with literals. 
             {
-            ::core::io::put_chars([["text rest ", patina_fmt::debug(rest)]]);
+            ::core::io::put_chars([["text rest ",
+                                ::core::patina_fmt::debug(rest)]]);
             ::core::io::nl();
         }
         _ => { ::core::io::put_chars([["unknown text"]]); ::core::io::nl(); }
     }
     match bytes {
         <<b"PNG", '!', rest @ ..>> => {
-            ::core::io::put_chars([["png data ", patina_fmt::debug(rest)]]);
+            ::core::io::put_chars([["png data ",
+                                ::core::patina_fmt::debug(rest)]]);
             ::core::io::nl();
         }
         _ => {
@@ -49,7 +48,7 @@ pub fn main() {
     match packet {
         <<b"PT", '!', "ok", 5: int(size = 3), rest @ ..>> => {
             ::core::io::put_chars([["packet tail ",
-                                patina_fmt::debug(rest)]]);
+                                ::core::patina_fmt::debug(rest)]]);
             ::core::io::nl();
         }
         _ => {

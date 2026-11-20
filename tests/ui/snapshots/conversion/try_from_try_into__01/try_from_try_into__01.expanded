@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/conversion/try_from_try_into.md
 // block: 1/1
 
@@ -42,9 +39,9 @@ pub fn main() {
                 unsafe {
                     ::core::erlang::error(::core::Panic::new(unsafe {
                                     ::core::unicode::characters_to_binary(["assertion `left == right` failed",
-                                                    patina_fmt::display(""), "\n  left: ",
-                                                    patina_fmt::debug(left_val), "\n right: ",
-                                                    patina_fmt::debug(right_val)]).cast_unchecked::<str>()
+                                                    ::core::patina_fmt::display(""), "\n  left: ",
+                                                    ::core::patina_fmt::debug(left_val), "\n right: ",
+                                                    ::core::patina_fmt::debug(right_val)]).cast_unchecked::<str>()
                                 }), a"none",
                             [(a"error_info",
                                         #{a"module" =>
@@ -59,9 +56,9 @@ pub fn main() {
                 unsafe {
                     ::core::erlang::error(::core::Panic::new(unsafe {
                                     ::core::unicode::characters_to_binary(["assertion `left == right` failed",
-                                                    patina_fmt::display(""), "\n  left: ",
-                                                    patina_fmt::debug(left_val), "\n right: ",
-                                                    patina_fmt::debug(right_val)]).cast_unchecked::<str>()
+                                                    ::core::patina_fmt::display(""), "\n  left: ",
+                                                    ::core::patina_fmt::debug(left_val), "\n right: ",
+                                                    ::core::patina_fmt::debug(right_val)]).cast_unchecked::<str>()
                                 }), a"none",
                             [(a"error_info",
                                         #{a"module" =>
@@ -77,9 +74,9 @@ pub fn main() {
                 unsafe {
                     ::core::erlang::error(::core::Panic::new(unsafe {
                                     ::core::unicode::characters_to_binary(["assertion `left == right` failed",
-                                                    patina_fmt::display(""), "\n  left: ",
-                                                    patina_fmt::debug(left_val), "\n right: ",
-                                                    patina_fmt::debug(right_val)]).cast_unchecked::<str>()
+                                                    ::core::patina_fmt::display(""), "\n  left: ",
+                                                    ::core::patina_fmt::debug(left_val), "\n right: ",
+                                                    ::core::patina_fmt::debug(right_val)]).cast_unchecked::<str>()
                                 }), a"none",
                             [(a"error_info",
                                         #{a"module" =>
@@ -95,9 +92,9 @@ pub fn main() {
                 unsafe {
                     ::core::erlang::error(::core::Panic::new(unsafe {
                                     ::core::unicode::characters_to_binary(["assertion `left == right` failed",
-                                                    patina_fmt::display(""), "\n  left: ",
-                                                    patina_fmt::debug(left_val), "\n right: ",
-                                                    patina_fmt::debug(right_val)]).cast_unchecked::<str>()
+                                                    ::core::patina_fmt::display(""), "\n  left: ",
+                                                    ::core::patina_fmt::debug(left_val), "\n right: ",
+                                                    ::core::patina_fmt::debug(right_val)]).cast_unchecked::<str>()
                                 }), a"none",
                             [(a"error_info",
                                         #{a"module" =>

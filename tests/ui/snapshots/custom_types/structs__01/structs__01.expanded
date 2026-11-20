@@ -5,7 +5,6 @@
 
 
 
-
 // source: patina-by-example/src/custom_types/structs.md
 // block: 1/1
 
@@ -17,8 +16,6 @@ extern crate core;
 #[allow(unused_imports)]
 #[prelude_import]
 use core::prelude::*;
-#[allow(unused)]
-extern mod patina_fmt;
 
 // TODO: Uncomment this once we have a way to derive Debug for structs
 // #[derive(Debug)]
@@ -78,22 +75,22 @@ pub fn main() {
     // Destructure a tuple struct
 
     {
-        ::core::io::put_chars([[patina_fmt::debug(peter)]]);
+        ::core::io::put_chars([[::core::patina_fmt::debug(peter)]]);
         ::core::io::nl();
     };
     let point: Point = Point { x: 5.2, y: 0.4 };
     let another_point: Point = Point { x: 10.3, y: 0.2 };
     {
         ::core::io::put_chars([["point coordinates: (",
-                            patina_fmt::display(point.x), ", ",
-                            patina_fmt::display(point.y), ")"]]);
+                            ::core::patina_fmt::display(point.x), ", ",
+                            ::core::patina_fmt::display(point.y), ")"]]);
         ::core::io::nl();
     };
     let bottom_right = Point { x: 10.3, ..another_point };
     {
         ::core::io::put_chars([["second point: (",
-                            patina_fmt::display(bottom_right.x), ", ",
-                            patina_fmt::display(bottom_right.y), ")"]]);
+                            ::core::patina_fmt::display(bottom_right.x), ", ",
+                            ::core::patina_fmt::display(bottom_right.y), ")"]]);
         ::core::io::nl();
     };
     let Point { x: left_edge, y: top_edge } = point;
@@ -105,14 +102,16 @@ pub fn main() {
     let _unit = Unit;
     let pair = Pair(1, 0.1);
     {
-        ::core::io::put_chars([["pair contains ", patina_fmt::debug(pair.0),
-                            " and ", patina_fmt::debug(pair.1)]]);
+        ::core::io::put_chars([["pair contains ",
+                            ::core::patina_fmt::debug(pair.0), " and ",
+                            ::core::patina_fmt::debug(pair.1)]]);
         ::core::io::nl();
     };
     let Pair(integer, decimal) = pair;
     {
-        ::core::io::put_chars([["pair contains ", patina_fmt::debug(integer),
-                            " and ", patina_fmt::debug(decimal)]]);
+        ::core::io::put_chars([["pair contains ",
+                            ::core::patina_fmt::debug(integer), " and ",
+                            ::core::patina_fmt::debug(decimal)]]);
         ::core::io::nl();
     };
 }

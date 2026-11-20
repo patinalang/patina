@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/primitives/literals.md
 // block: 1/1
 
@@ -30,59 +27,63 @@ pub fn main() {
 
     // Use underscores to improve readability!
     {
-        ::core::io::put_chars([["1 + 2 = ", patina_fmt::display(1 + 2)]]);
+        ::core::io::put_chars([["1 + 2 = ",
+                            ::core::patina_fmt::display(1 + 2)]]);
         ::core::io::nl();
     };
     {
-        ::core::io::put_chars([["1 - 2 = ", patina_fmt::display(1 - 2)]]);
+        ::core::io::put_chars([["1 - 2 = ",
+                            ::core::patina_fmt::display(1 - 2)]]);
         ::core::io::nl();
     };
     {
-        ::core::io::put_chars([["1e4 is ", patina_fmt::display(1e4),
-                            ", -2.5e-3 is ", patina_fmt::display(-2.5e-3)]]);
+        ::core::io::put_chars([["1e4 is ", ::core::patina_fmt::display(1e4),
+                            ", -2.5e-3 is ", ::core::patina_fmt::display(-2.5e-3)]]);
         ::core::io::nl();
     };
     {
         ::core::io::put_chars([["true AND false is ",
-                            patina_fmt::display(true && false)]]);
+                            ::core::patina_fmt::display(true && false)]]);
         ::core::io::nl();
     };
     {
         ::core::io::put_chars([["true OR false is ",
-                            patina_fmt::display(true || false)]]);
+                            ::core::patina_fmt::display(true || false)]]);
         ::core::io::nl();
     };
     {
-        ::core::io::put_chars([["NOT true is ", patina_fmt::display(!true)]]);
+        ::core::io::put_chars([["NOT true is ",
+                            ::core::patina_fmt::display(!true)]]);
         ::core::io::nl();
     };
     {
         ::core::io::put_chars([["0011 AND 0101 is ",
-                            patina_fmt::debug(0b0011 & 0b0101)]]);
+                            ::core::patina_fmt::debug(0b0011 & 0b0101)]]);
         ::core::io::nl();
     };
     {
         ::core::io::put_chars([["0011 OR 0101 is ",
-                            patina_fmt::debug(0b0011 | 0b0101)]]);
+                            ::core::patina_fmt::debug(0b0011 | 0b0101)]]);
         ::core::io::nl();
     };
     {
         ::core::io::put_chars([["0011 XOR 0101 is ",
-                            patina_fmt::debug(0b0011 ^ 0b0101)]]);
+                            ::core::patina_fmt::debug(0b0011 ^ 0b0101)]]);
         ::core::io::nl();
     };
     {
-        ::core::io::put_chars([["1 << 5 is ", patina_fmt::display(1 << 5)]]);
+        ::core::io::put_chars([["1 << 5 is ",
+                            ::core::patina_fmt::display(1 << 5)]]);
         ::core::io::nl();
     };
     {
         ::core::io::put_chars([["0x80 >> 2 is 0x",
-                            patina_fmt::debug(0x80 >> 2)]]);
+                            ::core::patina_fmt::debug(0x80 >> 2)]]);
         ::core::io::nl();
     };
     {
         ::core::io::put_chars([["One million is written as ",
-                            patina_fmt::display(1_000_000)]]);
+                            ::core::patina_fmt::display(1_000_000)]]);
         ::core::io::nl();
     };
 }

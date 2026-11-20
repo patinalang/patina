@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 use ::{};
 use macros_and_items::Describe;
 use macros_and_items::Plain;
@@ -29,14 +26,14 @@ fn items() ({
 
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)(((n as macros_and_items::Plain).describe()
                                     as int)) as term), (" " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)(((plain as
                                         fn() -> int {macros_and_items::plain})() as int)) as term),
                             (" " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)(((derived_value as
                                         fn() -> int {derived_value})() as int)) as term)] as
                         [term])] as [[term]])) as term);
@@ -46,11 +43,12 @@ fn items() ({
 fn macros() ({
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)(((5 as int) + (5 as int) as int)) as
                                 term), (" " as str),
-                            ((patina_fmt::display as fn(term) -> term)((7 as int)) as
-                                term)] as [term])] as [[term]])) as term);
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((7 as int)) as term)] as [term])] as
+                [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

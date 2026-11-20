@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/flow_control/match/binary_matching.md
 // block: 3/6
 
@@ -34,16 +31,18 @@ pub fn main() {
             // After an 8-bit header, the rest of a `bits` is a `bits`.
 
             {
-            ::core::io::put_chars([["kind = ", patina_fmt::display(kind),
-                                ", payload = ", patina_fmt::debug(payload), ", rest = ",
-                                patina_fmt::debug(rest)]]);
+            ::core::io::put_chars([["kind = ",
+                                ::core::patina_fmt::display(kind), ", payload = ",
+                                ::core::patina_fmt::debug(payload), ", rest = ",
+                                ::core::patina_fmt::debug(rest)]]);
             ::core::io::nl();
         }
         <<kind: int(size = 8), len: int(size = 8), payload:
             bin(size = len / 2), rest @ ..>> => {
-            ::core::io::put_chars([["kind = ", patina_fmt::display(kind),
-                                ", payload = ", patina_fmt::debug(payload), ", rest = ",
-                                patina_fmt::debug(rest)]]);
+            ::core::io::put_chars([["kind = ",
+                                ::core::patina_fmt::display(kind), ", payload = ",
+                                ::core::patina_fmt::debug(payload), ", rest = ",
+                                ::core::patina_fmt::debug(rest)]]);
             ::core::io::nl();
         }
         _ => {
@@ -55,8 +54,9 @@ pub fn main() {
         <<3: int(size = 4), 5: int(size = 4), 7: int(size = 3)>>;
     match packet {
         <<header: int(size = 8), tail @ ..>> => {
-            ::core::io::put_chars([["header = ", patina_fmt::display(header),
-                                ", tail = ", patina_fmt::debug(tail)]]);
+            ::core::io::put_chars([["header = ",
+                                ::core::patina_fmt::display(header), ", tail = ",
+                                ::core::patina_fmt::debug(tail)]]);
             ::core::io::nl();
         }
         _ => { ::core::io::put_chars([["did not match"]]); ::core::io::nl(); }

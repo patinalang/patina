@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/custom_types/repr.md
 // block: 3/14
 
@@ -47,21 +44,21 @@ fn main() ({
     // a"variantB"
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::debug as
+                fn(term) -> term)(([([((::core::patina_fmt::debug as
                                     fn(term) -> term)(((Unit as Unit) as term as term)) as
                                 term)] as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::debug as
+                fn(term) -> term)(([([((::core::patina_fmt::debug as
                                     fn(term) -> term)(((CustomNameUnit as CustomNameUnit) as
                                     term as term)) as term)] as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::debug as
+                fn(term) -> term)(([([((::core::patina_fmt::debug as
                                     fn(term) -> term)(((NotJustUnits::VariantA as NotJustUnits)
                                     as term as term)) as term)] as [term])] as [[term]])) as
             term);
@@ -69,7 +66,7 @@ fn main() ({
     } as ());
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::debug as
+                fn(term) -> term)(([([((::core::patina_fmt::debug as
                                     fn(term) -> term)(((NotJustUnits::VariantB as NotJustUnits)
                                     as term as term)) as term)] as [term])] as [[term]])) as
             term);

@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/flow_control/match/binary_matching.md
 // block: 1/6
 
@@ -27,12 +24,15 @@ fn main() ({
             {
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("prefix = " as str),
-                                ((patina_fmt::display as fn(term) -> term)((prefix as int))
-                                    as term), (", tag = " as str),
-                                ((patina_fmt::display as fn(term) -> term)((tag as int)) as
-                                    term), (", rest = " as str),
-                                ((patina_fmt::debug as fn(term) -> term)((rest as bin)) as
-                                    term)] as [term])] as [[term]])) as term);
+                                ((::core::patina_fmt::display as
+                                        fn(term) -> term)((prefix as int)) as term),
+                                (", tag = " as str),
+                                ((::core::patina_fmt::display as
+                                        fn(term) -> term)((tag as int)) as term),
+                                (", rest = " as str),
+                                ((::core::patina_fmt::debug as
+                                        fn(term) -> term)((rest as bin)) as term)] as [term])] as
+                    [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
         }
         _ => {

@@ -1,0 +1,15 @@
+pub fn top(n: int) {
+    println!("top {} {:?}", n, n);
+}
+
+pub mod outer {
+    pub fn outer(n: int) {
+        println!("outer {} {:?}", n, n);
+    }
+
+    pub mod inner {
+        pub fn inner(n: int) -> str {
+            format!("inner {}", n)
+        }
+    }
+}

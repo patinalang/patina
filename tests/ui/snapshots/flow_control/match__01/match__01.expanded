@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/flow_control/match.md
 // block: 1/1
 
@@ -36,7 +33,7 @@ pub fn main() {
     // You can use the pin operator (^) to match against bound variables
     {
         ::core::io::put_chars([["Tell me about ",
-                            patina_fmt::display(number)]]);
+                            ::core::patina_fmt::display(number)]]);
         ::core::io::nl();
     };
     match number {
@@ -54,8 +51,8 @@ pub fn main() {
     let boolean = true;
     let binary = match boolean { false => 0, true => 1, };
     {
-        ::core::io::put_chars([[patina_fmt::display(boolean), " -> ",
-                            patina_fmt::display(binary)]]);
+        ::core::io::put_chars([[::core::patina_fmt::display(boolean), " -> ",
+                            ::core::patina_fmt::display(binary)]]);
         ::core::io::nl();
     };
     let expected_value = 42;
@@ -66,7 +63,7 @@ pub fn main() {
         }
         value => {
             ::core::io::put_chars([["found unexpected value ",
-                                patina_fmt::display(value)]]);
+                                ::core::patina_fmt::display(value)]]);
             ::core::io::nl();
         }
     }

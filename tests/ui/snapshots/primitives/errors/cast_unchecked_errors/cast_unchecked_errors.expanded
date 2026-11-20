@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 pub fn without_unsafe(value: term) -> int { value.cast_unchecked() }
 
 pub fn uninferred(value: term) { let _ = unsafe { value.cast_unchecked() }; }

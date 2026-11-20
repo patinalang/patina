@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/variable_bindings.md
 // block: 1/1
 
@@ -32,17 +29,17 @@ pub fn main() {
     // FIXME ^ Prefix with an underscore to suppress the warning
     {
         ::core::io::put_chars([["An integer: ",
-                            patina_fmt::debug(copied_integer)]]);
+                            ::core::patina_fmt::debug(copied_integer)]]);
         ::core::io::nl();
     };
     {
         ::core::io::put_chars([["A boolean: ",
-                            patina_fmt::debug(a_boolean)]]);
+                            ::core::patina_fmt::debug(a_boolean)]]);
         ::core::io::nl();
     };
     {
         ::core::io::put_chars([["Meet the unit value: ",
-                            patina_fmt::debug(unit)]]);
+                            ::core::patina_fmt::debug(unit)]]);
         ::core::io::nl();
     };
     let _unused_variable = 3;

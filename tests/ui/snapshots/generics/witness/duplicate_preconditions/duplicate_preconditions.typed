@@ -2,7 +2,6 @@
 
 
 
-
 #![allow(dead_code)]
 #![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
 #![attr = NoStd]
@@ -13,8 +12,6 @@ extern crate core;
 #[allow(unused_imports)]
 #[attr = PreludeImport]
 use core::prelude::*;
-#[allow(unused)]
-extern mod patina_fmt;
 
 trait Bar {
     fn bar(self)

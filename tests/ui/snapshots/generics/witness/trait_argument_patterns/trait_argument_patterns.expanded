@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 struct UnboundContainer;
 struct BoundContainer;
 struct NestedContainer;
@@ -37,8 +34,8 @@ impl Marker for Marked {
 
 
         {
-            ::core::io::put_chars([["Marker::value(", patina_fmt::debug(self),
-                                ")"]]);
+            ::core::io::put_chars([["Marker::value(",
+                                ::core::patina_fmt::debug(self), ")"]]);
             ::core::io::nl();
         };
         self.value
@@ -52,8 +49,9 @@ impl<T> Contains<int, T> for UnboundContainer {
     fn contains(self, a: int, b: T) -> bool {
         {
             ::core::io::put_chars([["UnboundContainer::contains(",
-                                patina_fmt::debug(self), ", ", patina_fmt::debug(a), ", ",
-                                patina_fmt::debug(b), ")"]]);
+                                ::core::patina_fmt::debug(self), ", ",
+                                ::core::patina_fmt::debug(a), ", ",
+                                ::core::patina_fmt::debug(b), ")"]]);
             ::core::io::nl();
         };
         true
@@ -63,8 +61,9 @@ impl<T: Marker> Contains<int, T> for BoundContainer {
     fn contains(self, a: int, value: T) -> bool {
         {
             ::core::io::put_chars([["BoundContainer::contains(",
-                                patina_fmt::debug(self), ", ", patina_fmt::debug(a), ", ",
-                                patina_fmt::debug(value), ")"]]);
+                                ::core::patina_fmt::debug(self), ", ",
+                                ::core::patina_fmt::debug(a), ", ",
+                                ::core::patina_fmt::debug(value), ")"]]);
             ::core::io::nl();
         };
         value.value() > 0
@@ -74,8 +73,9 @@ impl<T> Contains<int, Wrapped<T>> for NestedContainer {
     fn contains(self, a: int, wrapped: Wrapped<T>) -> bool {
         {
             ::core::io::put_chars([["NestedContainer::contains(",
-                                patina_fmt::debug(self), ", ", patina_fmt::debug(a), ", ",
-                                patina_fmt::debug(wrapped), ")"]]);
+                                ::core::patina_fmt::debug(self), ", ",
+                                ::core::patina_fmt::debug(a), ", ",
+                                ::core::patina_fmt::debug(wrapped), ")"]]);
             ::core::io::nl();
         };
         true
@@ -83,17 +83,17 @@ impl<T> Contains<int, Wrapped<T>> for NestedContainer {
 }
 pub fn main() {
     {
-        ::core::io::put_chars([[patina_fmt::display(UnboundContainer.contains(1,
+        ::core::io::put_chars([[::core::patina_fmt::display(UnboundContainer.contains(1,
                                     false))]]);
         ::core::io::nl();
     };
     {
-        ::core::io::put_chars([[patina_fmt::display(BoundContainer.contains(1,
+        ::core::io::put_chars([[::core::patina_fmt::display(BoundContainer.contains(1,
                                     Marked { value: 2 }))]]);
         ::core::io::nl();
     };
     {
-        ::core::io::put_chars([[patina_fmt::display(NestedContainer.contains(1,
+        ::core::io::put_chars([[::core::patina_fmt::display(NestedContainer.contains(1,
                                     Wrapped { value: false }))]]);
         ::core::io::nl();
     };

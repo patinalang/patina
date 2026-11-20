@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/macros/variadics.md
 // block: 1/1
 
@@ -45,8 +42,8 @@ pub fn main() {
             let val: int =  // Look ma! Variadic `calculate!`!
                 1 + 2;
             {
-                ::core::io::put_chars([[patina_fmt::display("1 + 2"), " = ",
-                                    patina_fmt::display(val)]]);
+                ::core::io::put_chars([[::core::patina_fmt::display("1 + 2"),
+                                    " = ", ::core::patina_fmt::display(val)]]);
                 ::core::io::nl();
             };
         }
@@ -54,16 +51,16 @@ pub fn main() {
             {
                 let val: int = 3 + 4;
                 {
-                    ::core::io::put_chars([[patina_fmt::display("3 + 4"), " = ",
-                                        patina_fmt::display(val)]]);
+                    ::core::io::put_chars([[::core::patina_fmt::display("3 + 4"),
+                                        " = ", ::core::patina_fmt::display(val)]]);
                     ::core::io::nl();
                 };
             }
             {
                 let val: int = (2 * 3) + 1;
                 {
-                    ::core::io::put_chars([[patina_fmt::display("(2 * 3) + 1"),
-                                        " = ", patina_fmt::display(val)]]);
+                    ::core::io::put_chars([[::core::patina_fmt::display("(2 * 3) + 1"),
+                                        " = ", ::core::patina_fmt::display(val)]]);
                     ::core::io::nl();
                 };
             }

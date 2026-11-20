@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/mod/struct_visibility.md
 // block: 1/1
 
@@ -66,7 +63,7 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("The open box contains: " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)(((open_box as my::OpenBox<str>).contents
                                     as str)) as term)] as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);

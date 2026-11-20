@@ -5,7 +5,6 @@
 
 
 
-
 #![allow(dead_code)]
 #[allow(unused_imports)]
 #[macro_use]
@@ -13,8 +12,6 @@ extern crate core;
 #[allow(unused_imports)]
 #[prelude_import]
 use core::prelude::*;
-#[allow(unused)]
-extern mod patina_fmt;
 
 struct Pair<T> {
     a: T,
@@ -25,8 +22,8 @@ impl<T> Pair<T> {
     fn len(self) -> int {
 
         {
-            ::core::io::put_chars([["Pair::len(", patina_fmt::debug(self),
-                                ")"]]);
+            ::core::io::put_chars([["Pair::len(",
+                                ::core::patina_fmt::debug(self), ")"]]);
             ::core::io::nl();
         };
         2
@@ -35,7 +32,7 @@ impl<T> Pair<T> {
 pub fn main() {
     let p = Pair { a: 1, b: 2 };
     {
-        ::core::io::put_chars([[patina_fmt::display(p.len())]]);
+        ::core::io::put_chars([[::core::patina_fmt::display(p.len())]]);
         ::core::io::nl();
     };
 }

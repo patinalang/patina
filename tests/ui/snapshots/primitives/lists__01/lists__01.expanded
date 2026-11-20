@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/primitives/lists.md
 // block: 1/1
 
@@ -38,7 +35,8 @@ pub fn main() {
 
             // Lists can also be destructured using a similar syntax
             {
-            ::core::io::put_chars([["elem 0: ", patina_fmt::display(xval)]]);
+            ::core::io::put_chars([["elem 0: ",
+                                ::core::patina_fmt::display(xval)]]);
             ::core::io::nl();
         }
         None => {
@@ -48,34 +46,34 @@ pub fn main() {
     }
     {
         ::core::io::put_chars([["Number of elements in array: ",
-                            patina_fmt::display(xs.len())]]);
+                            ::core::patina_fmt::display(xs.len())]]);
         ::core::io::nl();
     };
     {
         ::core::io::put_chars([["First element of the list: ",
-                            patina_fmt::display(xs.head())]]);
+                            ::core::patina_fmt::display(xs.head())]]);
         ::core::io::nl();
     };
     {
         ::core::io::put_chars([["Rest of the list: ",
-                            patina_fmt::debug(xs.tail())]]);
+                            ::core::patina_fmt::debug(xs.tail())]]);
         ::core::io::nl();
     };
     let more_xs = [-1, 0, ..xs];
     {
         ::core::io::put_chars([["more_xs.tail().tail() is equal to xs: ",
-                            patina_fmt::display(more_xs.tail().tail() == xs)]]);
+                            ::core::patina_fmt::display(more_xs.tail().tail() == xs)]]);
         ::core::io::nl();
     };
     let [first, second, third, rest @ ..] = more_xs else { return };
     {
         ::core::io::put_chars([["Sum of first three elements is ",
-                            patina_fmt::display(first + second + third)]]);
+                            ::core::patina_fmt::display(first + second + third)]]);
         ::core::io::nl();
     };
     {
         ::core::io::put_chars([["...and the rest: ",
-                            patina_fmt::debug(rest)]]);
+                            ::core::patina_fmt::debug(rest)]]);
         ::core::io::nl();
     };
 }

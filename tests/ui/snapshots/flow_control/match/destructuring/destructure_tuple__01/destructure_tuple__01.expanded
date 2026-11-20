@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/flow_control/match/destructuring/destructure_tuple.md
 // block: 1/1
 
@@ -27,14 +24,14 @@ pub fn main() {
     // `_` means don't bind the value to a variable
     {
         ::core::io::put_chars([["Tell me about ",
-                            patina_fmt::debug(triple)]]);
+                            ::core::patina_fmt::debug(triple)]]);
         ::core::io::nl();
     };
     match triple {
         (0, y, z) => {
             ::core::io::put_chars([["First is `0`, `y` is ",
-                                patina_fmt::debug(y), ", and `z` is ",
-                                patina_fmt::debug(z)]]);
+                                ::core::patina_fmt::debug(y), ", and `z` is ",
+                                ::core::patina_fmt::debug(z)]]);
             ::core::io::nl();
         }
         (1, ..) => {

@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/error/result.md
 // block: 1/3
 
@@ -40,8 +37,9 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("double is " as str),
-                            ((patina_fmt::display as fn(term) -> term)((twenty as int))
-                                as term)] as [term])] as [[term]])) as term);
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((twenty as int)) as term)] as [term])] as
+                [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
     let tt =
@@ -51,8 +49,9 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("double is " as str),
-                            ((patina_fmt::display as fn(term) -> term)((tt as int)) as
-                                term)] as [term])] as [[term]])) as term);
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((tt as int)) as term)] as [term])] as
+                [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

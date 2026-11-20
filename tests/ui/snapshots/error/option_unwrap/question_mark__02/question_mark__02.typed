@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/error/option_unwrap/question_mark.md
 // block: 2/2
 
@@ -96,12 +93,13 @@ fn main() ({
                                     (((::core::unicode::characters_to_binary as
                                                 fn(term) -> term)(([("assertion `left == right` failed" as
                                                         str),
-                                                    ((patina_fmt::display as fn(term) -> term)(("" as str)) as
-                                                        term), ("\n  left: " as str),
-                                                    ((patina_fmt::debug as
+                                                    ((::core::patina_fmt::display as
+                                                            fn(term) -> term)(("" as str)) as term),
+                                                    ("\n  left: " as str),
+                                                    ((::core::patina_fmt::debug as
                                                             fn(term) -> term)((left_val as core::Option<int>)) as term),
                                                     ("\n right: " as str),
-                                                    ((patina_fmt::debug as
+                                                    ((::core::patina_fmt::debug as
                                                             fn(term) -> term)((right_val as core::Option<int>)) as
                                                         term)] as [term])) as term).cast_unchecked::<str>() as str)
                                 } as str)) as core::Panic), (a"none" as atom),

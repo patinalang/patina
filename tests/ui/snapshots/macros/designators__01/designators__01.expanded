@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/macros/designators.md
 // block: 1/1
 
@@ -44,15 +41,15 @@ fn foo() {
     // Recall that blocks are expressions too!
 
     {
-        ::core::io::put_chars([["You called ", patina_fmt::debug("foo"),
-                            "()"]]);
+        ::core::io::put_chars([["You called ",
+                            ::core::patina_fmt::debug("foo"), "()"]]);
         ::core::io::nl();
     };
 }
 fn bar() {
     {
-        ::core::io::put_chars([["You called ", patina_fmt::debug("bar"),
-                            "()"]]);
+        ::core::io::put_chars([["You called ",
+                            ::core::patina_fmt::debug("bar"), "()"]]);
         ::core::io::nl();
     };
 }
@@ -64,15 +61,18 @@ pub fn main() {
     foo();
     bar();
     {
-        ::core::io::put_chars([[patina_fmt::debug("1 + 1"), " = ",
-                            patina_fmt::debug(1 + 1)]]);
+        ::core::io::put_chars([[::core::patina_fmt::debug("1 + 1"), " = ",
+                            ::core::patina_fmt::debug(1 + 1)]]);
         ::core::io::nl();
     };
     ;
     {
-        ::core::io::put_chars([[patina_fmt::debug("{ let x = 1; x * x + 2 * x - 1 }"),
+        ::core::io::put_chars([[::core::patina_fmt::debug("{ let x = 1; x * x + 2 * x - 1 }"),
                             " = ",
-                            patina_fmt::debug({ let x = 1; x * x + 2 * x - 1 })]]);
+                            ::core::patina_fmt::debug({
+                                    let x = 1;
+                                    x * x + 2 * x - 1
+                                })]]);
         ::core::io::nl();
     };
     ;

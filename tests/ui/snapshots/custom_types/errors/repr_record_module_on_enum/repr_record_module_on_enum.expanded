@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 #[repr(native_record, record_module = "external_records")]
 enum EnumLevel { Value(int), }
 

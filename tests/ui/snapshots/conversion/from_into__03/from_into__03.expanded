@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/conversion/from_into.md
 // block: 3/4
 
@@ -32,7 +29,8 @@ pub fn main() {
     // Try removing the type annotation
     let num: Number = integer.into();
     {
-        ::core::io::put_chars([["My number is ", patina_fmt::debug(num)]]);
+        ::core::io::put_chars([["My number is ",
+                            ::core::patina_fmt::debug(num)]]);
         ::core::io::nl();
     };
 }

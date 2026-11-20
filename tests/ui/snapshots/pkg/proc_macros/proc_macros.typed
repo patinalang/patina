@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 use ::{};
 use macros::braces;
 use macros::call_site_by_set_span;
@@ -105,35 +102,35 @@ fn bang() ({
     // a literal and a group with its contents.
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)(((1 as int) + (2 as int) as int)) as
                                 term)] as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)(((4 as int) + (1 as int) as int)) as
                                 term)] as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)(((5 as int) + (2 as int) as int)) as
                                 term)] as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)(((identity as fn() -> int {identity})() as
                                     int)) as term), (" " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)(((identity_alias as
                                         fn() -> int {identity_alias})() as int)) as term),
                             (" " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)(((nested_identity as
                                         fn() -> int {nested_identity})() as int)) as term)] as
                         [term])] as [[term]])) as term);
@@ -141,7 +138,7 @@ fn bang() ({
     } as ());
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)((42 as int)) as term)] as [term])] as
                 [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
@@ -150,10 +147,10 @@ fn bang() ({
 fn attribute() ({
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)(((answer as fn() -> int {answer})() as
                                     int)) as term), (" " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)(((from_attr as fn() -> int {from_attr})()
                                     as int)) as term)] as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
@@ -163,14 +160,14 @@ fn derive() ({
     let point = (Point { x: (1 as int), y: (2 as int) } as Point);
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)((((point as Point).x as int) +
                                     ((point as Point).y as int) as int)) as term), (" " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)(((hello_from_derive as
                                         fn() -> int {hello_from_derive})() as int)) as term),
                             (" " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)(((type_name as fn() -> str {type_name})()
                                     as str)) as term)] as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
@@ -194,12 +191,13 @@ fn round_trip() ({
     let c = ({ ((1 as int) + (2 as int) as int) } as int);
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)((a as int)) as term), (" " as str),
-                            ((patina_fmt::display as fn(term) -> term)((b as int)) as
-                                term), (" " as str),
-                            ((patina_fmt::display as fn(term) -> term)((c as int)) as
-                                term)] as [term])] as [[term]])) as term);
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((b as int)) as term), (" " as str),
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((c as int)) as term)] as [term])] as
+                [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())
@@ -240,35 +238,36 @@ fn token_zoo() ({
     let neg = (-(5 as int) as int);
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)((shifted as int)) as term), (" " as str),
-                            ((patina_fmt::display as fn(term) -> term)((nested as int))
-                                as term), (" " as str),
-                            ((patina_fmt::display as fn(term) -> term)((float as float))
-                                as term), (" " as str),
-                            ((patina_fmt::display as fn(term) -> term)((text as str)) as
-                                term), (" " as str),
-                            ((patina_fmt::display as fn(term) -> term)((raw as str)) as
-                                term), (" " as str),
-                            ((patina_fmt::display as fn(term) -> term)((atom as atom))
-                                as term), (" " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((nested as int)) as term), (" " as str),
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((float as float)) as term), (" " as str),
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((text as str)) as term), (" " as str),
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((raw as str)) as term), (" " as str),
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((atom as atom)) as term), (" " as str),
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)((raw_atom as atom)) as term),
                             (" " as str),
-                            ((patina_fmt::display as fn(term) -> term)((bits as int)) as
-                                term), (" " as str),
-                            ((patina_fmt::display as fn(term) -> term)((ranged as bool))
-                                as term), (" " as str),
-                            ((patina_fmt::display as fn(term) -> term)((neg as int)) as
-                                term)] as [term])] as [[term]])) as term);
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((bits as int)) as term), (" " as str),
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((ranged as bool)) as term), (" " as str),
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((neg as int)) as term)] as [term])] as
+                [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)(((documented as
                                         fn() -> int {documented})() as int)) as term), (" " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)(((documented::value as
                                         fn() -> int {documented::value})() as int)) as term)] as
                         [term])] as [[term]])) as term);
@@ -278,7 +277,7 @@ fn token_zoo() ({
 fn forwarded() ({
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)(((1 as int) + (2 as int) as int)) as
                                 term)] as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
@@ -287,7 +286,7 @@ fn forwarded() ({
 fn rebuilt() ({
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)(((((1 as int) + (2 as int) as int)) *
                                     (3 as int) as int)) as term)] as [term])] as [[term]])) as
             term);
@@ -297,7 +296,7 @@ fn rebuilt() ({
 fn built_streams() ({
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)(((1 as int) + (2 as int) as int)) as
                                 term)] as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
@@ -309,12 +308,13 @@ fn built_streams() ({
     (match (list as [int]) {
         [a, b] => {
             ((::core::io::put_chars as
-                    fn(term) -> term)(([([((patina_fmt::display as
+                    fn(term) -> term)(([([((::core::patina_fmt::display as
                                         fn(term) -> term)((a as int)) as term), (" " as str),
-                                ((patina_fmt::display as fn(term) -> term)((b as int)) as
-                                    term), (" " as str),
-                                ((patina_fmt::display as fn(term) -> term)((product as int))
-                                    as term)] as [term])] as [[term]])) as term);
+                                ((::core::patina_fmt::display as
+                                        fn(term) -> term)((b as int)) as term), (" " as str),
+                                ((::core::patina_fmt::display as
+                                        fn(term) -> term)((product as int)) as term)] as [term])] as
+                    [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
         }
         _ => {
@@ -328,7 +328,7 @@ fn built_streams() ({
 fn rendered() ({
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)(("`x` += f(1, \"q\\n\") r#\"raw\"# a\"at\" \'c\' #[z] a.b if (y) m! (1) if ! w receive (v) `if`(u) fn(t)"
                                     as str)) as term)] as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
@@ -342,18 +342,19 @@ fn constructors() ({
             (char, int, int, float, str, atom));
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)((c as char)) as term), (" " as str),
-                            ((patina_fmt::display as fn(term) -> term)((i as int)) as
-                                term), (" " as str),
-                            ((patina_fmt::display as fn(term) -> term)((big as int)) as
-                                term), (" " as str),
-                            ((patina_fmt::display as fn(term) -> term)((f as float)) as
-                                term), (" " as str),
-                            ((patina_fmt::display as fn(term) -> term)((s as str)) as
-                                term), (" " as str),
-                            ((patina_fmt::display as fn(term) -> term)((a as atom)) as
-                                term)] as [term])] as [[term]])) as term);
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((i as int)) as term), (" " as str),
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((big as int)) as term), (" " as str),
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((f as float)) as term), (" " as str),
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((s as str)) as term), (" " as str),
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((a as atom)) as term)] as [term])] as
+                [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())
@@ -364,20 +365,21 @@ fn escaped() ({
             (str, char, char, char, char, atom));
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)((s as str)) as term), (" " as str),
-                            ((patina_fmt::display as fn(term) -> term)((quote as char))
-                                as term), (" " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((quote as char)) as term), (" " as str),
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)((backslash as char)) as term),
                             (" " as str),
-                            ((patina_fmt::display as fn(term) -> term)((double as char))
-                                as term), (" " as str),
-                            ((patina_fmt::display as
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((double as char)) as term), (" " as str),
+                            ((::core::patina_fmt::display as
                                     fn(term) -> term)((non_ascii as char)) as term),
                             (" " as str),
-                            ((patina_fmt::display as fn(term) -> term)((a as atom)) as
-                                term)] as [term])] as [[term]])) as term);
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((a as atom)) as term)] as [term])] as
+                [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())
@@ -385,7 +387,7 @@ fn call_site() ({
     let local = (5 as int);
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)((local as int)) as term)] as [term])] as
                 [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
@@ -395,7 +397,7 @@ fn raw_identifier() ({
     let x = (7 as int);
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)((x as int)) as term)] as [term])] as
                 [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
@@ -405,14 +407,14 @@ fn set_span() ({
     let local = (5 as int);
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)((local as int)) as term)] as [term])] as
                 [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)((((local as int) + (1 as int) as int) -
                                     ((local as int) * (2 as int) as int) as int)) as term)] as
                         [term])] as [[term]])) as term);

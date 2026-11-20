@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/hello/comment.md
 // block: 1/1
 
@@ -53,7 +50,7 @@ pub fn main() {
     let x = 5 + /* 90 + */ 5;
     {
         ::core::io::put_chars([["Is `x` 10 or 100? x = ",
-                            patina_fmt::display(x)]]);
+                            ::core::patina_fmt::display(x)]]);
         ::core::io::nl();
     };
 }

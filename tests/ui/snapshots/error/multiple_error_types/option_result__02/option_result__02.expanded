@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/error/multiple_error_types/option_result.md
 // block: 2/2
 
@@ -33,17 +30,17 @@ pub fn main() {
 
     {
         ::core::io::put_chars([["The first doubled is ",
-                            patina_fmt::debug(double_first(numbers))]]);
+                            ::core::patina_fmt::debug(double_first(numbers))]]);
         ::core::io::nl();
     };
     {
         ::core::io::put_chars([["The first doubled is ",
-                            patina_fmt::debug(double_first(empty))]]);
+                            ::core::patina_fmt::debug(double_first(empty))]]);
         ::core::io::nl();
     };
     {
         ::core::io::put_chars([["The first doubled is ",
-                            patina_fmt::debug(double_first(strings))]]);
+                            ::core::patina_fmt::debug(double_first(strings))]]);
         ::core::io::nl();
     };
 }

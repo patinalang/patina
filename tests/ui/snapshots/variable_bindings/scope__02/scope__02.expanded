@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/variable_bindings/scope.md
 // block: 2/2
 
@@ -28,25 +25,25 @@ pub fn main() {
         // This binding *shadows* the previous binding
         {
             ::core::io::put_chars([["before being shadowed: ",
-                                patina_fmt::display(shadowed_binding)]]);
+                                ::core::patina_fmt::display(shadowed_binding)]]);
             ::core::io::nl();
         };
         let shadowed_binding = "abc";
         {
             ::core::io::put_chars([["shadowed in inner block: ",
-                                patina_fmt::display(shadowed_binding)]]);
+                                ::core::patina_fmt::display(shadowed_binding)]]);
             ::core::io::nl();
         };
     }
     {
         ::core::io::put_chars([["outside inner block: ",
-                            patina_fmt::display(shadowed_binding)]]);
+                            ::core::patina_fmt::display(shadowed_binding)]]);
         ::core::io::nl();
     };
     let shadowed_binding = 2;
     {
         ::core::io::put_chars([["shadowed in outer block: ",
-                            patina_fmt::display(shadowed_binding)]]);
+                            ::core::patina_fmt::display(shadowed_binding)]]);
         ::core::io::nl();
     };
 }

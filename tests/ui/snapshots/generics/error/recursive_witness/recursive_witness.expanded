@@ -5,7 +5,6 @@
 
 
 
-
 #![allow(dead_code)]
 #[allow(unused_imports)]
 #[macro_use]
@@ -13,8 +12,6 @@ extern crate core;
 #[allow(unused_imports)]
 #[prelude_import]
 use core::prelude::*;
-#[allow(unused)]
-extern mod patina_fmt;
 
 // The witness of `Wrap<int>: Derived` holds the witness of `Wrap<int>: Base`, whose impl needs
 // the witness of `Wrap<int>: Derived` again.

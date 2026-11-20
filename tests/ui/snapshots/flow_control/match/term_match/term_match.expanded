@@ -5,7 +5,6 @@
 
 
 
-
 #![allow(non_camel_case_types)]
 #![deny(unused_unsafe)]
 #[allow(unused_imports)]
@@ -14,8 +13,6 @@ extern crate core;
 #[allow(unused_imports)]
 #[prelude_import]
 use core::prelude::*;
-#[allow(unused)]
-extern mod patina_fmt;
 
 const ANSWER: int = 42;
 

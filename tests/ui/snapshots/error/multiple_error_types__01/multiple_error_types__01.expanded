@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/error/multiple_error_types.md
 // block: 1/1
 
@@ -33,17 +30,17 @@ pub fn main() {
     // Error 2: the element doesn't parse to a number
     {
         ::core::io::put_chars([["The first doubled is ",
-                            patina_fmt::display(double_first(numbers))]]);
+                            ::core::patina_fmt::display(double_first(numbers))]]);
         ::core::io::nl();
     };
     {
         ::core::io::put_chars([["The first doubled is ",
-                            patina_fmt::display(double_first(empty))]]);
+                            ::core::patina_fmt::display(double_first(empty))]]);
         ::core::io::nl();
     };
     {
         ::core::io::put_chars([["The first doubled is ",
-                            patina_fmt::display(double_first(strings))]]);
+                            ::core::patina_fmt::display(double_first(strings))]]);
         ::core::io::nl();
     };
 }

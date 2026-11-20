@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/generics/where.md
 // block: 2/2
 
@@ -32,7 +29,7 @@ impl<T> PrintInOption for T where Option<T>: Debug {
 
 
         {
-            ::core::io::put_chars([[patina_fmt::debug(Some(self))]]);
+            ::core::io::put_chars([[::core::patina_fmt::debug(Some(self))]]);
             ::core::io::nl();
         };
     }

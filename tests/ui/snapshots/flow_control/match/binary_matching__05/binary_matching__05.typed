@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/flow_control/match/binary_matching.md
 // block: 5/6
 
@@ -29,15 +26,17 @@ fn main() ({
             {
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("png data " as str),
-                                ((patina_fmt::debug as fn(term) -> term)((rest as str)) as
-                                    term)] as [term])] as [[term]])) as term);
+                                ((::core::patina_fmt::debug as
+                                        fn(term) -> term)((rest as str)) as term)] as [term])] as
+                    [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
         }
         <<^jpg_prefix, rest @ ..>> => {
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("jpg data " as str),
-                                ((patina_fmt::debug as fn(term) -> term)((rest as str)) as
-                                    term)] as [term])] as [[term]])) as term);
+                                ((::core::patina_fmt::debug as
+                                        fn(term) -> term)((rest as str)) as term)] as [term])] as
+                    [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
         }
         _ => {
@@ -52,15 +51,17 @@ fn main() ({
         <<^bit_prefix: int(size = (16 as int), little), rest @ ..>> => {
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("expected " as str),
-                                ((patina_fmt::debug as fn(term) -> term)((rest as bin)) as
-                                    term)] as [term])] as [[term]])) as term);
+                                ((::core::patina_fmt::debug as
+                                        fn(term) -> term)((rest as bin)) as term)] as [term])] as
+                    [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
         }
         <<^bit_prefix: int(size = (4 as int)), rest @ ..>> => {
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("expected " as str),
-                                ((patina_fmt::debug as fn(term) -> term)((rest as bits)) as
-                                    term)] as [term])] as [[term]])) as term);
+                                ((::core::patina_fmt::debug as
+                                        fn(term) -> term)((rest as bits)) as term)] as [term])] as
+                    [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
         }
         _ => {

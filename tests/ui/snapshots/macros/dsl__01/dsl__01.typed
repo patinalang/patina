@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/macros/dsl.md
 // block: 1/1
 
@@ -37,11 +34,12 @@ fn main() ({
 
         ({
             ((::core::io::put_chars as
-                    fn(term) -> term)(([([((patina_fmt::display as
+                    fn(term) -> term)(([([((::core::patina_fmt::display as
                                         fn(term) -> term)(("1 + 2" as str)) as term),
                                 (" = " as str),
-                                ((patina_fmt::display as fn(term) -> term)((val as int)) as
-                                    term)] as [term])] as [[term]])) as term);
+                                ((::core::patina_fmt::display as
+                                        fn(term) -> term)((val as int)) as term)] as [term])] as
+                    [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
         } as ());
     } as ())
@@ -51,11 +49,12 @@ fn main() ({
                 (((3 as int) / (4 as int) as int)) as int);
         ({
             ((::core::io::put_chars as
-                    fn(term) -> term)(([([((patina_fmt::display as
+                    fn(term) -> term)(([([((::core::patina_fmt::display as
                                         fn(term) -> term)(("(1 + 2) * (3 / 4)" as str)) as term),
                                 (" = " as str),
-                                ((patina_fmt::display as fn(term) -> term)((val as int)) as
-                                    term)] as [term])] as [[term]])) as term);
+                                ((::core::patina_fmt::display as
+                                        fn(term) -> term)((val as int)) as term)] as [term])] as
+                    [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
         } as ());
     } as ())

@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/flow_control/try_catch_after.md
 // block: 1/1
 
@@ -39,21 +36,23 @@ pub fn main() {
         }
         error(reason @ #{a"__struct__" => a"Elixir.ArgumentError", ..}) => {
             ::core::io::put_chars([["Elixir ArgumentError ",
-                                patina_fmt::debug(reason)]]);
+                                ::core::patina_fmt::debug(reason)]]);
             ::core::io::nl();
         }
         error(reason), stacktrace => {
             ::core::io::put_chars([["other error: ",
-                                patina_fmt::debug(reason), " from ",
-                                patina_fmt::debug(stacktrace)]]);
+                                ::core::patina_fmt::debug(reason), " from ",
+                                ::core::patina_fmt::debug(stacktrace)]]);
             ::core::io::nl();
         }
         throw(value) => {
-            ::core::io::put_chars([["thrown: ", patina_fmt::debug(value)]]);
+            ::core::io::put_chars([["thrown: ",
+                                ::core::patina_fmt::debug(value)]]);
             ::core::io::nl();
         }
         exit(reason) => {
-            ::core::io::put_chars([["exit: ", patina_fmt::debug(reason)]]);
+            ::core::io::put_chars([["exit: ",
+                                ::core::patina_fmt::debug(reason)]]);
             ::core::io::nl();
         }
     }

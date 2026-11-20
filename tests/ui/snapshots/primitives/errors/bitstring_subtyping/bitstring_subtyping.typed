@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // `str <: bin <: bits`; none of these narrow.
 
 fn bin_to_str(value: bin) -> str ({ (value as bin) } as {type error})

@@ -2,7 +2,6 @@
 
 
 
-
 #![allow(dead_code)]
 #![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
 #![attr = NoStd]
@@ -13,8 +12,6 @@ extern crate core;
 #[allow(unused_imports)]
 #[attr = PreludeImport]
 use core::prelude::*;
-#[allow(unused)]
-extern mod patina_fmt;
 
 struct Holder<T> {
     value: T,
@@ -31,7 +28,7 @@ impl <T> Tr for Holder<T> {
         ({
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("Tr::method(" as str),
-                                ((patina_fmt::debug as
+                                ((::core::patina_fmt::debug as
                                         fn(term) -> term)((self as Holder<T>)) as term),
                                 (")" as str)] as [term])] as [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);

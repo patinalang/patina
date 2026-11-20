@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/trait/supertraits.md
 // block: 1/1
 
@@ -51,12 +48,13 @@ fn comp_sci_student_greeting(student: dyn CompSciStudent) -> str {
 
     unsafe {
         ::core::unicode::characters_to_binary(["My name is ",
-                        patina_fmt::display(student.name()), " and I attend ",
-                        patina_fmt::display(student.university()),
+                        ::core::patina_fmt::display(student.name()),
+                        " and I attend ",
+                        ::core::patina_fmt::display(student.university()),
                         ". My favorite language is ",
-                        patina_fmt::display(student.fav_language()),
+                        ::core::patina_fmt::display(student.fav_language()),
                         ". My Git username is ",
-                        patina_fmt::display(student.git_username())]).cast_unchecked::<str>()
+                        ::core::patina_fmt::display(student.git_username())]).cast_unchecked::<str>()
     }
 }
 struct CSStudent {
@@ -87,7 +85,7 @@ pub fn main() {
         };
     let greeting = comp_sci_student_greeting(student);
     {
-        ::core::io::put_chars([[patina_fmt::display(greeting)]]);
+        ::core::io::put_chars([[::core::patina_fmt::display(greeting)]]);
         ::core::io::nl();
     };
 }

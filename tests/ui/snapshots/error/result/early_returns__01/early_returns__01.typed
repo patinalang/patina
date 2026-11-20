@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/error/result/early_returns.md
 // block: 1/1
 
@@ -52,7 +49,7 @@ fn print(result:
             {
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("n is " as str),
-                                ((patina_fmt::display as
+                                ((::core::patina_fmt::display as
                                         fn(term) -> term)((n as {type error})) as term)] as [term])]
                     as [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
@@ -60,7 +57,7 @@ fn print(result:
         Err(e) => {
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("Error: " as str),
-                                ((patina_fmt::display as
+                                ((::core::patina_fmt::display as
                                         fn(term) -> term)((e as {type error})) as term)] as [term])]
                     as [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);

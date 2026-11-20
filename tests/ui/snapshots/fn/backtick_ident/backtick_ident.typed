@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 fn `exists?`(x: int) -> bool ({ ((x as int) > (0 as int) as bool) } as bool)
 
 fn `save!`() ({
@@ -70,21 +67,21 @@ fn main() ({
     ((`save!` as fn() {`save!`})() as ());
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)(("`a{b}`" as str)) as term)] as [term])]
                 as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)((`value?` as bool)) as term)] as [term])]
                 as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)((`type` as int)) as term)] as [term])] as
                 [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);

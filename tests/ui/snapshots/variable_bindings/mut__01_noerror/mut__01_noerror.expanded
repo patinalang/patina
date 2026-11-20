@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 pub fn main() {
     let _immutable_binding = 1;
     let mut mutable_binding = 1;
@@ -27,13 +24,13 @@ pub fn main() {
     // You must define a new variable to modify it inside your closure
     {
         ::core::io::put_chars([["Before mutating the binding: ",
-                            patina_fmt::display(mutable_binding)]]);
+                            ::core::patina_fmt::display(mutable_binding)]]);
         ::core::io::nl();
     };
     mutable_binding += 1;
     {
         ::core::io::put_chars([["After mutating the binding: ",
-                            patina_fmt::display(mutable_binding)]]);
+                            ::core::patina_fmt::display(mutable_binding)]]);
         ::core::io::nl();
     };
     let my_fun =
@@ -42,8 +39,9 @@ pub fn main() {
                 let mut inner_mutable_binding = mutable_binding;
                 inner_mutable_binding += 1;
                 {
-                    ::core::io::put_chars([[patina_fmt::display(inner_mutable_binding),
-                                        " == ", patina_fmt::display(mutable_binding), " + 1"]]);
+                    ::core::io::put_chars([[::core::patina_fmt::display(inner_mutable_binding),
+                                        " == ", ::core::patina_fmt::display(mutable_binding),
+                                        " + 1"]]);
                     ::core::io::nl();
                 };
             };

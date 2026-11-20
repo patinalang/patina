@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/expression.md
 // block: 3/3
 
@@ -36,15 +33,15 @@ pub fn main() {
         };
 
     {
-        ::core::io::put_chars([["x is ", patina_fmt::debug(x)]]);
+        ::core::io::put_chars([["x is ", ::core::patina_fmt::debug(x)]]);
         ::core::io::nl();
     };
     {
-        ::core::io::put_chars([["y is ", patina_fmt::debug(y)]]);
+        ::core::io::put_chars([["y is ", ::core::patina_fmt::debug(y)]]);
         ::core::io::nl();
     };
     {
-        ::core::io::put_chars([["z is ", patina_fmt::debug(z)]]);
+        ::core::io::put_chars([["z is ", ::core::patina_fmt::debug(z)]]);
         ::core::io::nl();
     };
 }

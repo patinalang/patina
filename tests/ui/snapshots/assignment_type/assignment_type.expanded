@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 pub fn assign() -> int { let mut value = 0; value = 42 }
 
 pub fn assign_op() -> int { let mut value = 40; value += 2 }

@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/flow_control/match.md
 // block: 1/1
 
@@ -37,8 +34,9 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("Tell me about " as str),
-                            ((patina_fmt::display as fn(term) -> term)((number as int))
-                                as term)] as [term])] as [[term]])) as term);
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((number as int)) as term)] as [term])] as
+                [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
     (match (number as int) {
@@ -73,11 +71,12 @@ fn main() ({
             as int);
     ({
         ((::core::io::put_chars as
-                fn(term) -> term)(([([((patina_fmt::display as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
                                     fn(term) -> term)((boolean as bool)) as term),
                             (" -> " as str),
-                            ((patina_fmt::display as fn(term) -> term)((binary as int))
-                                as term)] as [term])] as [[term]])) as term);
+                            ((::core::patina_fmt::display as
+                                    fn(term) -> term)((binary as int)) as term)] as [term])] as
+                [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
     let expected_value = (42 as int);
@@ -91,8 +90,9 @@ fn main() ({
         value => {
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("found unexpected value " as str),
-                                ((patina_fmt::display as fn(term) -> term)((value as int))
-                                    as term)] as [term])] as [[term]])) as term);
+                                ((::core::patina_fmt::display as
+                                        fn(term) -> term)((value as int)) as term)] as [term])] as
+                    [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
         }
     } as ())

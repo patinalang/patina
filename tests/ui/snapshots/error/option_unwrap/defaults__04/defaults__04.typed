@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/error/option_unwrap/defaults.md
 // block: 4/4
 
@@ -50,7 +47,7 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("first_available_fruit is: " as str),
-                            ((patina_fmt::debug as
+                            ((::core::patina_fmt::debug as
                                     fn(term) -> term)((first_available_fruit as {type error}))
                                 as term)] as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
@@ -58,7 +55,7 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("my_fruit is: " as str),
-                            ((patina_fmt::debug as
+                            ((::core::patina_fmt::debug as
                                     fn(term) -> term)((my_fruit as core::Option<Fruit>)) as
                                 term)] as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
@@ -76,7 +73,7 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("should_be_apple is: " as str),
-                            ((patina_fmt::debug as
+                            ((::core::patina_fmt::debug as
                                     fn(term) -> term)((should_be_apple as {type error})) as
                                 term)] as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
@@ -84,7 +81,7 @@ fn main() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("my_apple is unchanged: " as str),
-                            ((patina_fmt::debug as
+                            ((::core::patina_fmt::debug as
                                     fn(term) -> term)((my_apple as core::Option<Fruit>)) as
                                 term)] as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);

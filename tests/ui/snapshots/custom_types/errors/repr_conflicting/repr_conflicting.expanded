@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // A `#[repr(...)]` can only pick a single runtime representation.
 // The `tag` modifier is not at fault, so it is not part of the error span.
 #[repr(tagged, tag = "my_tag", transparent)]

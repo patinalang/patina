@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/custom_types/repr.md
 // block: 12/14
 
@@ -36,17 +33,17 @@ pub fn main() {
     // but we have helpers for that.
     // a"ok"
     {
-        ::core::io::put_chars([[patina_fmt::debug(Result::<int, str>::Ok(42)
-                                    as term)]]);
+        ::core::io::put_chars([[::core::patina_fmt::debug(Result::<int,
+                                            str>::Ok(42) as term)]]);
         ::core::io::nl();
     };
     {
-        ::core::io::put_chars([[patina_fmt::debug(Result::<int,
+        ::core::io::put_chars([[::core::patina_fmt::debug(Result::<int,
                                             str>::Err("reason") as term)]]);
         ::core::io::nl();
     };
     {
-        ::core::io::put_chars([[patina_fmt::debug(Result::<(),
+        ::core::io::put_chars([[::core::patina_fmt::debug(Result::<(),
                                                 str>::Ok(()).into::<Compat::BareOkResult>() as term)]]);
         ::core::io::nl();
     };

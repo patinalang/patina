@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/custom_types/repr.md
 // block: 8/14
 
@@ -46,11 +43,12 @@ pub fn main() {
 
     // #{ a"__struct__" => a"Elixir.Patina.ByExample.Point", a"x" => 1, a"y" => 2 }
     {
-        ::core::io::put_chars([[patina_fmt::debug(IntVariant(200) as term)]]);
+        ::core::io::put_chars([[::core::patina_fmt::debug(IntVariant(200) as
+                                    term)]]);
         ::core::io::nl();
     };
     {
-        ::core::io::put_chars([[patina_fmt::debug(PointVariant {
+        ::core::io::put_chars([[::core::patina_fmt::debug(PointVariant {
                                         point: Point { x: 1, y: 2 },
                                     } as term)]]);
         ::core::io::nl();

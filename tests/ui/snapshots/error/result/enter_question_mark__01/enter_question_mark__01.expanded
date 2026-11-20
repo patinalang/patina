@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/error/result/enter_question_mark.md
 // block: 1/1
 
@@ -31,11 +28,13 @@ fn print(result: Result<int, ParseIntError>) {
     match result {
         Ok(n) =>
             {
-            ::core::io::put_chars([["n is ", patina_fmt::display(n)]]);
+            ::core::io::put_chars([["n is ",
+                                ::core::patina_fmt::display(n)]]);
             ::core::io::nl();
         }
         Err(e) => {
-            ::core::io::put_chars([["Error: ", patina_fmt::display(e)]]);
+            ::core::io::put_chars([["Error: ",
+                                ::core::patina_fmt::display(e)]]);
             ::core::io::nl();
         }
     }

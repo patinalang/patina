@@ -11,9 +11,6 @@ extern crate core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 const EXPECTED: int = (7 as int);
 
 fn pin_not_found(value: int)

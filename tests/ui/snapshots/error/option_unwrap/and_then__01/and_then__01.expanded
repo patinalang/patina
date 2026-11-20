@@ -5,7 +5,6 @@
 
 
 
-
 // source: patina-by-example/src/error/option_unwrap/and_then.md
 // block: 1/1
 
@@ -16,8 +15,6 @@ extern crate core;
 #[allow(unused_imports)]
 #[prelude_import]
 use core::prelude::*;
-#[allow(unused)]
-extern mod patina_fmt;
 
 enum Food { CordonBleu, Steak, Sushi, }
 enum Day { Monday, Tuesday, Wednesday, }
@@ -57,13 +54,14 @@ fn eat(food: Food, day: Day) {
         Some(food) =>
 
             {
-            ::core::io::put_chars([["Yay! On ", patina_fmt::debug(day),
-                                " we get to eat ", patina_fmt::debug(food), "."]]);
+            ::core::io::put_chars([["Yay! On ",
+                                ::core::patina_fmt::debug(day), " we get to eat ",
+                                ::core::patina_fmt::debug(food), "."]]);
             ::core::io::nl();
         }
         None => {
             ::core::io::put_chars([["Oh no. We don\'t get to eat on ",
-                                patina_fmt::debug(day), "?"]]);
+                                ::core::patina_fmt::debug(day), "?"]]);
             ::core::io::nl();
         }
     }

@@ -11,9 +11,6 @@ extern crate core;
 #[prelude_import]
 use core::prelude::*;
 
-#[allow(unused)]
-extern mod patina_fmt;
-
 // source: patina-by-example/src/custom_types/repr.md
 // block: 9/14
 
@@ -46,22 +43,22 @@ pub fn main() {
     // ...but a term that looks like another variant is wrapped, too.
     // (a"othertag", (a"othertag", 1))
     {
-        ::core::io::put_chars([[patina_fmt::debug(MaybeUntagged("hello") as
-                                    term)]]);
-        ::core::io::nl();
-    };
-    {
-        ::core::io::put_chars([[patina_fmt::debug(MaybeUntagged(42) as
-                                    term)]]);
-        ::core::io::nl();
-    };
-    {
-        ::core::io::put_chars([[patina_fmt::debug(MaybeUntagged(a"hi" as term)
+        ::core::io::put_chars([[::core::patina_fmt::debug(MaybeUntagged("hello")
                                     as term)]]);
         ::core::io::nl();
     };
     {
-        ::core::io::put_chars([[patina_fmt::debug(MaybeUntagged((a"othertag",
+        ::core::io::put_chars([[::core::patina_fmt::debug(MaybeUntagged(42) as
+                                    term)]]);
+        ::core::io::nl();
+    };
+    {
+        ::core::io::put_chars([[::core::patina_fmt::debug(MaybeUntagged(a"hi"
+                                            as term) as term)]]);
+        ::core::io::nl();
+    };
+    {
+        ::core::io::put_chars([[::core::patina_fmt::debug(MaybeUntagged((a"othertag",
                                                 1) as term) as term)]]);
         ::core::io::nl();
     };
