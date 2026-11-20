@@ -24,74 +24,83 @@
 '__info__'(Key) -> module_info(Key).
 
 main() ->
-    _witness_Iterator@0_0 =
-        'Elixir.Patina.Core.ListIter':'core::Iterator::$patina_witness'(),
-    _witnesses_where_IntoIterator@1_0 =
-        {_witness_Iterator@0_0},
-    _witness_IntoIterator@2_0 =
-        'Elixir.Patina.Core.$impl':'core::IntoIterator::$patina_witness'(_witnesses_where_IntoIterator@1_0),
-    _names@3_0 = [<<"Bob"/utf8>>,
+    _names@0_0 = [<<"Bob"/utf8>>,
                   <<"Frank"/utf8>>,
                   <<"Ferris"/utf8>>],
-    case
-        'Elixir.Patina.Core.$impl':'core::IntoIterator::into_iter'(_witness_IntoIterator@2_0,
-                                                                   'Elixir.Patina.Core.List':iter(_names@3_0))
+    case begin
+             _self@2_0 = begin _self@1_0 = _names@0_0, _self@1_0 end,
+             _self@2_0
+         end
         of
-        _iter@4_0 ->
-            _iter@4_1 = fun _$patina_loop(_iter@4_0) ->
+        _iter@3_0 ->
+            _iter@3_1 = fun _$patina_loop(_iter@3_0) ->
                                 case [] of
-                                    {'$patina_label_0', _iter@4_2} -> _iter@4_2;
+                                    {'$patina_label_0', _iter@3_2} -> _iter@3_2;
                                     _ ->
-                                        case
-                                            'Elixir.Patina.Core.ListIter':'core::Iterator::next'(_witness_Iterator@0_0,
-                                                                                                 _iter@4_0)
+                                        case begin
+                                                 _self@4_0 = _iter@3_0,
+                                                 case _self@4_0 of
+                                                     [_head@6_0 | _tail@5_0 =
+                                                                      _] ->
+                                                         _0@8_0 = begin
+                                                                      _element@7_0 =
+                                                                          _tail@5_0,
+                                                                      {_head@6_0,
+                                                                       _element@7_0}
+                                                                  end,
+                                                         _0@8_0;
+                                                     [] -> nil
+                                                 end
+                                             end
                                             of
                                             nil ->
-                                                _branch_value@10_0 = begin
+                                                _branch_value@14_0 = begin
                                                                          '$patina_marker':jump('$patina_label_0',
-                                                                                               _iter@4_0),
+                                                                                               _iter@3_0),
                                                                          []
                                                                      end,
-                                                _iter@4_1 = _iter@4_0,
-                                                _branch_value@10_0;
-                                            _value@7_0 = {_name@5_0, _next@6_0}
-                                                when erlang:is_tuple(_value@7_0)
-                                                         andalso
-                                                         erlang:tuple_size(_value@7_0)
-                                                             =:= 2 ->
-                                                _iter@4_1 = _next@6_0,
-                                                case _name@5_0 of
+                                                _iter@3_1 = _iter@3_0,
+                                                _branch_value@14_0;
+                                            _value@11_0 = {_name@9_0,
+                                                           _next@10_0}
+                                                when
+                                                  erlang:is_tuple(_value@11_0)
+                                                      andalso
+                                                      erlang:tuple_size(_value@11_0)
+                                                          =:= 2 ->
+                                                _iter@3_1 = _next@10_0,
+                                                case _name@9_0 of
                                                     <<"Ferris"/utf8>> ->
                                                         io:put_chars([[<<"There is a rustacean among us!"/utf8>>]]),
                                                         io:nl(),
                                                         {};
                                                     _ ->
                                                         io:put_chars(begin
-                                                                         _element@9_0 =
+                                                                         _element@13_0 =
                                                                              begin
-                                                                                 _element@8_0 =
-                                                                                     _name@5_0,
+                                                                                 _element@12_0 =
+                                                                                     _name@9_0,
                                                                                  [<<"Hello "/utf8>>,
-                                                                                  _element@8_0]
+                                                                                  _element@12_0]
                                                                              end,
-                                                                         [_element@9_0]
+                                                                         [_element@13_0]
                                                                      end),
                                                         io:nl(),
                                                         {}
                                                 end
                                         end,
-                                        _$patina_loop(_iter@4_1)
+                                        _$patina_loop(_iter@3_1)
                                 end
-                        end(_iter@4_0),
+                        end(_iter@3_0),
             {}
     end,
     io:put_chars(begin
-                     _element@12_0 = begin
-                                         _element@11_0 = io_lib:format("~ktp",
-                                                                       [_names@3_0]),
-                                         [<<"names: "/utf8>>, _element@11_0]
+                     _element@16_0 = begin
+                                         _element@15_0 = io_lib:format("~ktp",
+                                                                       [_names@0_0]),
+                                         [<<"names: "/utf8>>, _element@15_0]
                                      end,
-                     [_element@12_0]
+                     [_element@16_0]
                  end),
     io:nl(),
     {}.

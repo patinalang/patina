@@ -24,54 +24,74 @@
 '__info__'(Key) -> module_info(Key).
 
 main() ->
-    _witness_Iterator@0_0 =
-        'Elixir.Patina.Core.RangeInclusive':'core::Iterator::$patina_witness<int>'(),
-    _witnesses_where_IntoIterator@1_0 =
-        {_witness_Iterator@0_0},
-    _witness_IntoIterator@2_0 =
-        'Elixir.Patina.Core.$impl':'core::IntoIterator::$patina_witness'(_witnesses_where_IntoIterator@1_0),
-    case
-        'Elixir.Patina.Core.$impl':'core::IntoIterator::into_iter'(_witness_IntoIterator@2_0,
-                                                                   'Elixir.Patina.Core.RangeInclusive':new(1,
-                                                                                                           100))
+    case begin
+             _self@0_0 = 'Elixir.Patina.Core.RangeInclusive':new(1,
+                                                                 100),
+             _self@0_0
+         end
         of
-        _iter@3_0 ->
-            _iter@3_1 = fun _$patina_loop(_iter@3_0) ->
+        _iter@1_0 ->
+            _iter@1_1 = fun _$patina_loop(_iter@1_0) ->
                                 case [] of
-                                    {'$patina_label_0', _iter@3_2} -> _iter@3_2;
+                                    {'$patina_label_0', _iter@1_2} -> _iter@1_2;
                                     _ ->
-                                        case
-                                            'Elixir.Patina.Core.RangeInclusive':'core::Iterator::next<int>'(_witness_Iterator@0_0,
-                                                                                                            _iter@3_0)
+                                        case begin
+                                                 _self@2_0 = _iter@1_0,
+                                                 case
+                                                     _self@2_0#'Elixir.Patina.Core.RangeInclusive':'RangeInclusive'.start
+                                                         =<
+                                                         _self@2_0#'Elixir.Patina.Core.RangeInclusive':'RangeInclusive'.'end'
+                                                     of
+                                                     true ->
+                                                         _0@6_0 = begin
+                                                                      _element@3_0 =
+                                                                          _self@2_0#'Elixir.Patina.Core.RangeInclusive':'RangeInclusive'.start,
+                                                                      _element@5_0 =
+                                                                          begin
+                                                                              _start@4_0 =
+                                                                                  _self@2_0#'Elixir.Patina.Core.RangeInclusive':'RangeInclusive'.start
+                                                                                      +
+                                                                                      1,
+                                                                              _self@2_0#'Elixir.Patina.Core.RangeInclusive':'RangeInclusive'{start
+                                                                                                                                                 =
+                                                                                                                                                 _start@4_0}
+                                                                          end,
+                                                                      {_element@3_0,
+                                                                       _element@5_0}
+                                                                  end,
+                                                         _0@6_0;
+                                                     _ -> nil
+                                                 end
+                                             end
                                             of
                                             nil ->
-                                                _branch_value@9_0 = begin
-                                                                        '$patina_marker':jump('$patina_label_0',
-                                                                                              _iter@3_0),
-                                                                        []
-                                                                    end,
-                                                _iter@3_1 = _iter@3_0,
-                                                _branch_value@9_0;
-                                            _value@6_0 = {_n@4_0, _next@5_0}
-                                                when erlang:is_tuple(_value@6_0)
+                                                _branch_value@12_0 = begin
+                                                                         '$patina_marker':jump('$patina_label_0',
+                                                                                               _iter@1_0),
+                                                                         []
+                                                                     end,
+                                                _iter@1_1 = _iter@1_0,
+                                                _branch_value@12_0;
+                                            _value@9_0 = {_n@7_0, _next@8_0}
+                                                when erlang:is_tuple(_value@9_0)
                                                          andalso
-                                                         erlang:tuple_size(_value@6_0)
+                                                         erlang:tuple_size(_value@9_0)
                                                              =:= 2 ->
-                                                _iter@3_1 = _next@5_0,
-                                                case _n@4_0 rem 15 =:= 0 of
+                                                _iter@1_1 = _next@8_0,
+                                                case _n@7_0 rem 15 =:= 0 of
                                                     true ->
                                                         io:put_chars([[<<"fizzbuzz"/utf8>>]]),
                                                         io:nl(),
                                                         {};
                                                     _ ->
-                                                        case _n@4_0 rem 3 =:= 0
+                                                        case _n@7_0 rem 3 =:= 0
                                                             of
                                                             true ->
                                                                 io:put_chars([[<<"fizz"/utf8>>]]),
                                                                 io:nl(),
                                                                 {};
                                                             _ ->
-                                                                case _n@4_0 rem
+                                                                case _n@7_0 rem
                                                                          5
                                                                          =:= 0
                                                                     of
@@ -81,14 +101,14 @@ main() ->
                                                                         {};
                                                                     _ ->
                                                                         io:put_chars(begin
-                                                                                         _element@8_0 =
+                                                                                         _element@11_0 =
                                                                                              begin
-                                                                                                 _element@7_0 =
+                                                                                                 _element@10_0 =
                                                                                                      io_lib:format("~ktp",
-                                                                                                                   [_n@4_0]),
-                                                                                                 [_element@7_0]
+                                                                                                                   [_n@7_0]),
+                                                                                                 [_element@10_0]
                                                                                              end,
-                                                                                         [_element@8_0]
+                                                                                         [_element@11_0]
                                                                                      end),
                                                                         io:nl(),
                                                                         {}
@@ -96,8 +116,8 @@ main() ->
                                                         end
                                                 end
                                         end,
-                                        _$patina_loop(_iter@3_1)
+                                        _$patina_loop(_iter@1_1)
                                 end
-                        end(_iter@3_0),
+                        end(_iter@1_0),
             {}
     end.

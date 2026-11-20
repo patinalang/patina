@@ -28,18 +28,29 @@ main() ->
         {'$patina_label_0'} -> {};
         _ ->
             _xs@0_0 = [1, 2, 3, 4, 5],
-            case 'Elixir.Patina.Core.List':get(_xs@0_0, 0) of
-                _value@2_0 = _xval@1_0
-                    when erlang:is_integer(_value@2_0) ->
+            case begin
+                     _self@1_0 = _xs@0_0,
+                     _index@2_0 = 0,
+                     case _self@1_0 of
+                         [_head@3_0 | _] when _index@2_0 =:= 0 -> _head@3_0;
+                         [_ | _tail@4_0 = _] when _index@2_0 > 0 ->
+                             'Elixir.Patina.Core.List':get(_tail@4_0,
+                                                           _index@2_0 - 1);
+                         _ -> nil
+                     end
+                 end
+                of
+                _value@6_0 = _xval@5_0
+                    when erlang:is_integer(_value@6_0) ->
                     io:put_chars(begin
-                                     _element@4_0 = begin
-                                                        _element@3_0 =
+                                     _element@8_0 = begin
+                                                        _element@7_0 =
                                                             io_lib:format("~ktp",
-                                                                          [_xval@1_0]),
+                                                                          [_xval@5_0]),
                                                         [<<"elem 0: "/utf8>>,
-                                                         _element@3_0]
+                                                         _element@7_0]
                                                     end,
-                                     [_element@4_0]
+                                     [_element@8_0]
                                  end),
                     io:nl(),
                     {};
@@ -49,101 +60,156 @@ main() ->
                     {}
             end,
             io:put_chars(begin
-                             _element@6_0 = begin
-                                                _element@5_0 =
-                                                    io_lib:format("~ktp",
-                                                                  ['Elixir.Patina.Core.List':len(_xs@0_0)]),
-                                                [<<"Number of elements in array: "/utf8>>,
-                                                 _element@5_0]
-                                            end,
-                             [_element@6_0]
-                         end),
-            io:nl(),
-            io:put_chars(begin
-                             _element@8_0 = begin
-                                                _element@7_0 =
-                                                    io_lib:format("~ktp",
-                                                                  ['Elixir.Patina.Core.List':head(_xs@0_0)]),
-                                                [<<"First element of the list: "/utf8>>,
-                                                 _element@7_0]
-                                            end,
-                             [_element@8_0]
-                         end),
-            io:nl(),
-            io:put_chars(begin
-                             _element@10_0 = begin
-                                                 _element@9_0 =
+                             _element@11_0 = begin
+                                                 _element@10_0 =
                                                      io_lib:format("~ktp",
-                                                                   ['Elixir.Patina.Core.List':tail(_xs@0_0)]),
-                                                 [<<"Rest of the list: "/utf8>>,
-                                                  _element@9_0]
+                                                                   [begin
+                                                                        _self@9_0 =
+                                                                            _xs@0_0,
+                                                                        erlang:length(_self@9_0)
+                                                                    end]),
+                                                 [<<"Number of elements in array: "/utf8>>,
+                                                  _element@10_0]
                                              end,
-                             [_element@10_0]
+                             [_element@11_0]
                          end),
             io:nl(),
-            _more_xs@11_0 = [-1, 0 | _xs@0_0],
             io:put_chars(begin
                              _element@15_0 = begin
                                                  _element@14_0 =
                                                      io_lib:format("~ktp",
                                                                    [begin
                                                                         _self@12_0 =
-                                                                            'Elixir.Patina.Core.List':tail('Elixir.Patina.Core.List':tail(_more_xs@11_0)),
-                                                                        _other@13_0 =
                                                                             _xs@0_0,
-                                                                        _self@12_0
-                                                                            =:=
-                                                                            _other@13_0
+                                                                        case
+                                                                            _self@12_0
+                                                                            of
+                                                                            [_head@13_0
+                                                                             | _] ->
+                                                                                _head@13_0;
+                                                                            [] ->
+                                                                                nil
+                                                                        end
                                                                     end]),
-                                                 [<<"more_xs.tail().tail() is equal to xs: "/utf8>>,
+                                                 [<<"First element of the list: "/utf8>>,
                                                   _element@14_0]
                                              end,
                              [_element@15_0]
                          end),
             io:nl(),
-            _rest@16_0 = {},
-            _first@17_0 = {},
-            _second@18_0 = {},
-            _third@19_0 = {},
-            case _more_xs@11_0 of
-                [_first@17_1, _second@18_1, _third@19_1 | _rest@16_1 =
+            io:put_chars(begin
+                             _element@19_0 = begin
+                                                 _element@18_0 =
+                                                     io_lib:format("~ktp",
+                                                                   [begin
+                                                                        _self@16_0 =
+                                                                            _xs@0_0,
+                                                                        case
+                                                                            _self@16_0
+                                                                            of
+                                                                            [_
+                                                                             | _tail@17_0 =
+                                                                                   _] ->
+                                                                                _tail@17_0;
+                                                                            [] ->
+                                                                                []
+                                                                        end
+                                                                    end]),
+                                                 [<<"Rest of the list: "/utf8>>,
+                                                  _element@18_0]
+                                             end,
+                             [_element@19_0]
+                         end),
+            io:nl(),
+            _more_xs@20_0 = [-1, 0 | _xs@0_0],
+            io:put_chars(begin
+                             _element@28_0 = begin
+                                                 _element@27_0 =
+                                                     io_lib:format("~ktp",
+                                                                   [begin
+                                                                        _self@25_0 =
+                                                                            begin
+                                                                                _self@23_0 =
+                                                                                    begin
+                                                                                        _self@21_0 =
+                                                                                            _more_xs@20_0,
+                                                                                        case
+                                                                                            _self@21_0
+                                                                                            of
+                                                                                            [_
+                                                                                             | _tail@22_0 =
+                                                                                                   _] ->
+                                                                                                _tail@22_0;
+                                                                                            [] ->
+                                                                                                []
+                                                                                        end
+                                                                                    end,
+                                                                                case
+                                                                                    _self@23_0
+                                                                                    of
+                                                                                    [_
+                                                                                     | _tail@24_0 =
+                                                                                           _] ->
+                                                                                        _tail@24_0;
+                                                                                    [] ->
+                                                                                        []
+                                                                                end
+                                                                            end,
+                                                                        _other@26_0 =
+                                                                            _xs@0_0,
+                                                                        _self@25_0
+                                                                            =:=
+                                                                            _other@26_0
+                                                                    end]),
+                                                 [<<"more_xs.tail().tail() is equal to xs: "/utf8>>,
+                                                  _element@27_0]
+                                             end,
+                             [_element@28_0]
+                         end),
+            io:nl(),
+            _rest@29_0 = {},
+            _first@30_0 = {},
+            _second@31_0 = {},
+            _third@32_0 = {},
+            case _more_xs@20_0 of
+                [_first@30_1, _second@31_1, _third@32_1 | _rest@29_1 =
                                                               _] ->
                     {};
                 _ ->
-                    _branch_value@20_0 = begin
+                    _branch_value@33_0 = begin
                                              '$patina_marker':jump('$patina_label_0'),
                                              []
                                          end,
-                    _rest@16_1 = _rest@16_0,
-                    _first@17_1 = _first@17_0,
-                    _second@18_1 = _second@18_0,
-                    _third@19_1 = _third@19_0,
-                    _branch_value@20_0
+                    _rest@29_1 = _rest@29_0,
+                    _first@30_1 = _first@30_0,
+                    _second@31_1 = _second@31_0,
+                    _third@32_1 = _third@32_0,
+                    _branch_value@33_0
             end,
             io:put_chars(begin
-                             _element@22_0 = begin
-                                                 _element@21_0 =
+                             _element@35_0 = begin
+                                                 _element@34_0 =
                                                      io_lib:format("~ktp",
-                                                                   [_first@17_1
+                                                                   [_first@30_1
                                                                         +
-                                                                        _second@18_1
+                                                                        _second@31_1
                                                                         +
-                                                                        _third@19_1]),
+                                                                        _third@32_1]),
                                                  [<<"Sum of first three elements is "/utf8>>,
-                                                  _element@21_0]
+                                                  _element@34_0]
                                              end,
-                             [_element@22_0]
+                             [_element@35_0]
                          end),
             io:nl(),
             io:put_chars(begin
-                             _element@24_0 = begin
-                                                 _element@23_0 =
+                             _element@37_0 = begin
+                                                 _element@36_0 =
                                                      io_lib:format("~ktp",
-                                                                   [_rest@16_1]),
+                                                                   [_rest@29_1]),
                                                  [<<"...and the rest: "/utf8>>,
-                                                  _element@23_0]
+                                                  _element@36_0]
                                              end,
-                             [_element@24_0]
+                             [_element@37_0]
                          end),
             io:nl(),
             {}

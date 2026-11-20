@@ -40,7 +40,8 @@
 
 'core::IntoIterator::into_iter'(_witness_IntoIterator@0_0,
                                 _self@1_0) ->
-    'Elixir.Patina.Core.List':iter(_self@1_0).
+    _self@2_0 = _self@1_0,
+    _self@2_0.
 
 'core::IntoIterator::$patina_witness'() ->
     {{fun 'Elixir.Patina.ForLoops.Bag':'core::IntoIterator::$patina_type::Item'/1,

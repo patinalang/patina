@@ -711,18 +711,21 @@ use crate::Option::{None, Some};
 
 impl<T> [T] {
     /// Returns a lazy iterator over the elements of the list.
+    #[inline]
     #[must_use]
     pub fn iter(self) -> ListIter<T> {
         ListIter(self)
     }
 
     /// Returns the number of elements in the list by walking the whole list.
+    #[inline]
     #[must_use]
     pub fn len(self) -> int {
         unsafe { erlang::length(self).cast_unchecked() }
     }
 
     /// Returns `true` if the list has no elements.
+    #[inline]
     #[must_use]
     pub fn is_empty(self) -> bool {
         match self {
@@ -732,6 +735,7 @@ impl<T> [T] {
     }
 
     /// Returns the first element, or `None` if the list is empty.
+    #[inline]
     #[must_use]
     pub fn head(self) -> Option<T> {
         match self {
@@ -743,6 +747,7 @@ impl<T> [T] {
     /// Returns the list without its first element.
     ///
     /// The tail of an empty list is an empty list.
+    #[inline]
     #[must_use]
     pub fn tail(self) -> [T] {
         match self {
@@ -752,6 +757,7 @@ impl<T> [T] {
     }
 
     /// Returns the last element, or `None` if the list is empty.
+    #[inline]
     #[must_use]
     pub fn last(self) -> Option<T> {
         match self {
@@ -761,6 +767,7 @@ impl<T> [T] {
     }
 
     /// Returns the element at the zero-based `index`, or `None` if it's out of bounds.
+    #[inline]
     #[must_use]
     pub fn get(self, index: int) -> Option<T> {
         match self {
@@ -771,12 +778,14 @@ impl<T> [T] {
     }
 
     /// Returns `true` if the list has an element that is exactly `value`.
+    #[inline]
     #[must_use]
     pub fn contains(self, value: T) -> bool {
         unsafe { lists::member(value, self).cast_unchecked() }
     }
 
     /// Returns the list in reverse order.
+    #[inline]
     #[must_use]
     pub fn reverse(self) -> [T] {
         unsafe { lists::reverse(self).cast_unchecked() }
@@ -793,24 +802,28 @@ impl<T> [T] {
 
 impl<K, V> #{K => V} {
     /// Returns a lazy iterator over the `(key, value)` entries of the map, in undefined order.
+    #[inline]
     #[must_use]
     pub fn iter(self) -> MapIter<K, V> {
         MapIter(unsafe { maps::iterator(self).cast_unchecked() }, PhantomData)
     }
 
     /// Returns the number of entries in the map.
+    #[inline]
     #[must_use]
     pub fn size(self) -> int {
         unsafe { erlang::map_size(self).cast_unchecked() }
     }
 
     /// Returns `true` if the map has no entries.
+    #[inline]
     #[must_use]
     pub fn is_empty(self) -> bool {
         self.size() == 0
     }
 
     /// Returns the value stored under `key`, or `None` if there is none.
+    #[inline]
     #[must_use]
     pub fn get(self, key: K) -> Option<V> {
         match self {
@@ -820,48 +833,56 @@ impl<K, V> #{K => V} {
     }
 
     /// Returns the value stored under `key`, or `default` if there is none.
+    #[inline]
     #[must_use]
     pub fn get_or(self, key: K, default: V) -> V {
         unsafe { maps::get(key, self, default).cast_unchecked() }
     }
 
     /// Returns `true` if the map has an entry for `key`.
+    #[inline]
     #[must_use]
     pub fn contains_key(self, key: K) -> bool {
         unsafe { maps::is_key(key, self).cast_unchecked() }
     }
 
     /// Returns a map with `key` set to `value`, replacing any previous value.
+    #[inline]
     #[must_use]
     pub fn insert(self, key: K, value: V) -> #{K => V} {
         unsafe { maps::put(key, value, self).cast_unchecked() }
     }
 
     /// Returns a map without the entry for `key`.
+    #[inline]
     #[must_use]
     pub fn remove(self, key: K) -> #{K => V} {
         unsafe { maps::remove(key, self).cast_unchecked() }
     }
 
     /// Returns a map with the entries of both maps. Where both have a key, `other`'s value wins.
+    #[inline]
     #[must_use]
     pub fn merge(self, other: #{K => V}) -> #{K => V} {
         unsafe { maps::merge(self, other).cast_unchecked() }
     }
 
     /// Returns the keys of the map, in arbitrary order.
+    #[inline]
     #[must_use]
     pub fn keys(self) -> [K] {
         unsafe { maps::keys(self).cast_unchecked() }
     }
 
     /// Returns the values of the map, in arbitrary order.
+    #[inline]
     #[must_use]
     pub fn values(self) -> [V] {
         unsafe { maps::values(self).cast_unchecked() }
     }
 
     /// Returns the `(key, value)` entries of the map, in arbitrary order.
+    #[inline]
     #[must_use]
     pub fn to_list(self) -> [(K, V)] {
         unsafe { maps::to_list(self).cast_unchecked() }
@@ -890,6 +911,7 @@ impl<I: Iterator> IntoIterator for I {
     type Item = I::Item;
     type IntoIter = I;
 
+    #[inline]
     fn into_iter(self) -> I {
         self
     }
@@ -901,6 +923,7 @@ pub struct ListIter<T>([T]);
 impl<T> Iterator for ListIter<T> {
     type Item = T;
 
+    #[inline]
     fn next(self) -> Option<(T, ListIter<T>)> {
         match self.0 {
             [head, tail @ ..] => Some((head, ListIter(tail))),
@@ -913,6 +936,7 @@ impl<T> IntoIterator for [T] {
     type Item = T;
     type IntoIter = ListIter<T>;
 
+    #[inline]
     fn into_iter(self) -> ListIter<T> {
         self.iter()
     }
@@ -924,6 +948,7 @@ pub struct MapIter<K, V>(term, PhantomData<(K, V)>);
 impl<K, V> Iterator for MapIter<K, V> {
     type Item = (K, V);
 
+    #[inline]
     fn next(self) -> Option<((K, V), MapIter<K, V>)> {
         match maps::next(self.0) {
             (key, value, rest) => {
@@ -939,6 +964,7 @@ impl<K, V> IntoIterator for #{K => V} {
     type Item = (K, V);
     type IntoIter = MapIter<K, V>;
 
+    #[inline]
     fn into_iter(self) -> MapIter<K, V> {
         self.iter()
     }
@@ -947,9 +973,10 @@ impl<K, V> IntoIterator for #{K => V} {
 impl Iterator for Range<int> {
     type Item = int;
 
+    #[inline]
     fn next(self) -> Option<(int, Range<int>)> {
         if self.start < self.end {
-            Some((self.start, Range { start: self.start + 1, end: self.end }))
+            Some((self.start, Range { start: self.start + 1, ..self }))
         } else {
             None
         }
@@ -959,9 +986,10 @@ impl Iterator for Range<int> {
 impl Iterator for RangeInclusive<int> {
     type Item = int;
 
+    #[inline]
     fn next(self) -> Option<(int, RangeInclusive<int>)> {
         if self.start <= self.end {
-            Some((self.start, RangeInclusive { start: self.start + 1, end: self.end }))
+            Some((self.start, RangeInclusive { start: self.start + 1, ..self }))
         } else {
             None
         }
@@ -985,12 +1013,15 @@ pub enum ExceptionClass {
 }
 
 impl Timeout {
+    #[inline]
     pub fn from_millis(ms: int) -> Timeout {
         Timeout::Millis(ms)
     }
+    #[inline]
     pub fn from_seconds(s: int) -> Timeout {
         Timeout::Millis(s * 1000)
     }
+    #[inline]
     pub fn from_minutes(m: int) -> Timeout {
         Timeout::Millis(m * 60000)
     }
