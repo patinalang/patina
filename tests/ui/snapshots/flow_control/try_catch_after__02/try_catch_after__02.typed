@@ -1,0 +1,43 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern crate core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use core::prelude::*;
+
+#[allow(unused)]
+extern mod patina_fmt;
+
+// source: patina-by-example/src/flow_control/try_catch_after.md
+// block: 2/2
+
+extern mod erlang;
+
+fn main() ({
+    let value =
+        (try ({
+                ((erlang::error as
+                        fn(term) -> term)((((a"badmatch" as atom), (42 as int)) as
+                        (atom, int))) as term);
+                (0 as int)
+            } as int)
+            catch {
+
+                // Match a `badmatch` tuple with an `int` value.
+                error((a"badmatch", int(n))) => (n as int),
+        } as int);
+
+    ({
+        ((::core::io::put_chars as
+                fn(term) -> term)(([([((patina_fmt::display as
+                                    fn(term) -> term)((value as int)) as term)] as [term])] as
+                [[term]])) as term);
+        ((::core::io::nl as fn() -> term)() as term);
+    } as ());
+} as ())

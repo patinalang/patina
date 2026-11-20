@@ -1,0 +1,89 @@
+LineComment { doc_style: None }
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+Semi
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+CloseParen
+Whitespace
+OpenBrace
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+Ident
+Colon
+Colon
+Ident
+OpenParen
+OpenParen
+Literal { kind: AtomStr { terminated: true }, suffix_start: 11 }
+Comma
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 2 }
+CloseParen
+CloseParen
+Semi
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Whitespace
+CloseBrace
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+OpenParen
+OpenParen
+Literal { kind: AtomStr { terminated: true }, suffix_start: 11 }
+Comma
+Whitespace
+Ident
+OpenParen
+Ident
+CloseParen
+CloseParen
+CloseParen
+Whitespace
+Eq
+Gt
+Whitespace
+Ident
+Comma
+Whitespace
+CloseBrace
+Semi
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 4 }
+Comma
+Whitespace
+Ident
+CloseParen
+Semi
+Whitespace
+CloseBrace
+Whitespace

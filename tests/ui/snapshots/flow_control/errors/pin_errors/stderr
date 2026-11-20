@@ -1,0 +1,58 @@
+error[E0425]: cannot find value `nosuch` in this scope
+  --> tests/ui/src/flow_control/errors/pin_errors.pt:5:10
+   |
+LL |         ^nosuch => true,
+   |          ^^^^^^ not found in this scope
+
+error[E0425]: cannot find value `a` in this scope
+  --> tests/ui/src/flow_control/errors/pin_errors.pt:12:14
+   |
+LL |         (a, ^a) => a,
+   |              ^ not found in this scope
+
+error: cannot pin `EXPECTED`: expected a local variable, found constant
+  --> tests/ui/src/flow_control/errors/pin_errors.pt:19:10
+   |
+LL |         ^EXPECTED => true,
+   |          ^^^^^^^^
+   |
+help: constants are matched by value without a pin
+   |
+LL -         ^EXPECTED => true,
+LL +         EXPECTED => true,
+   |
+
+error[E0308]: mismatched types
+  --> tests/ui/src/flow_control/errors/pin_errors.pt:26:9
+   |
+LL |     match value {
+   |           ----- this expression has type `int`
+LL |         ^expected => true,
+   |         ^^^^^^^^^ expected `int`, found `bool`
+
+error[E0005]: refutable pattern in closure argument
+  --> tests/ui/src/flow_control/errors/pin_errors.pt:32:20
+   |
+LL |     let closure = |^expected: int| 0;
+   |                    ^^^^^^^^^ pattern `_` not covered
+   |
+   = note: the matched value is of type `int`
+
+error[E0005]: refutable pattern in local binding
+  --> tests/ui/src/flow_control/errors/pin_errors.pt:37:9
+   |
+LL |     let ^expected = value;
+   |         ^^^^^^^^^ pattern `_` not covered
+   |
+   = note: `let` bindings require an "irrefutable pattern", like a `struct` or an `enum` with only one variant
+   = note: for more information, visit https://doc.rust-lang.org/book/ch19-02-refutability.html
+   = note: the matched value is of type `int`
+help: you might want to use `if let` to ignore the variant that isn't matched
+   |
+LL |     if let ^expected = value { todo!() };
+   |     ++                       +++++++++++
+
+error: aborting due to 6 previous errors
+
+Some errors have detailed explanations: E0005, E0308, E0425.
+For more information about an error, try `rustc --explain E0005`.

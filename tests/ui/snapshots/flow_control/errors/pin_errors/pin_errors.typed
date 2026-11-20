@@ -5,11 +5,11 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate Core;
+extern crate core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
-use Core::Prelude::*;
+use core::prelude::*;
 
 #[allow(unused)]
 extern mod patina_fmt;
@@ -55,9 +55,9 @@ fn closure_parameter(expected: int)
         int ({
     let closure =
         (|^expected: int| (0 as int) as
-            {closure@tests/ui/src/flow_control/errors/pin-errors.pt:32:19: 32:35});
+            {closure@tests/ui/src/flow_control/errors/pin_errors.pt:32:19: 32:35});
     ((closure as
-            {closure@tests/ui/src/flow_control/errors/pin-errors.pt:32:19: 32:35})((expected
+            {closure@tests/ui/src/flow_control/errors/pin_errors.pt:32:19: 32:35})((expected
             as int)) as int)
 } as int)
 

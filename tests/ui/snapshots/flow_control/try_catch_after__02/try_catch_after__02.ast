@@ -1,0 +1,16 @@
+// source: patina-by-example/src/flow_control/try_catch_after.md
+// block: 2/2
+
+extern mod erlang;
+
+pub fn main() {
+    let value =
+        try { erlang::error((a"badmatch", 42)); 0 }
+            catch {
+
+                // Match a `badmatch` tuple with an `int` value.
+                error((a"badmatch", int(n))) => n,
+        };
+
+    println!("{}", value);
+}
