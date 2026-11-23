@@ -5,8 +5,6 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, OnceLock};
 use std::{env, thread};
 
-use rustc_ast as ast;
-use rustc_attr_parsing::ShouldEmit;
 use rustc_codegen_ssa::back::archive::{ArArchiveBuilderBuilder, ArchiveBuilderBuilder};
 use rustc_codegen_ssa::back::link::link_binary;
 use rustc_codegen_ssa::target_features::cfg_target_feature;
@@ -30,7 +28,6 @@ use rustc_target::spec::Target;
 use tracing::info;
 
 use crate::errors;
-use crate::passes::parse_crate_name;
 
 /// Function pointer type that constructs a new CodegenBackend.
 type MakeBackendFn = fn() -> Box<dyn CodegenBackend>;
@@ -600,7 +597,7 @@ fn multiple_output_types_to_stdout(
     }
 }
 
-pub fn build_output_filenames(attrs: &[ast::Attribute], sess: &Session) -> OutputFilenames {
+pub fn build_output_filenames(sess: &Session) -> OutputFilenames {
     if multiple_output_types_to_stdout(
         &sess.opts.output_types,
         sess.io.output_file == Some(OutFileName::Stdout),
@@ -608,10 +605,7 @@ pub fn build_output_filenames(attrs: &[ast::Attribute], sess: &Session) -> Outpu
         sess.dcx().emit_fatal(errors::MultipleOutputTypesToStdout);
     }
 
-    let crate_name =
-        sess.opts.crate_name.clone().or_else(|| {
-            parse_crate_name(sess, attrs, ShouldEmit::Nothing).map(|i| i.0.to_string())
-        });
+    let crate_name = sess.opts.crate_name.clone();
 
     match sess.io.output_file {
         None => {

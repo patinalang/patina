@@ -668,36 +668,6 @@ pub enum CrateType {
 }
 
 impl CrateType {
-    /// Pairs of each `#[crate_type] = "..."` value and the crate type it resolves to
-    pub fn all() -> &'static [(Symbol, Self)] {
-        debug_assert_eq!(CrateType::default(), CrateType::Rlib);
-        &[
-            (rustc_span::sym::lib, CrateType::Rlib),
-            (rustc_span::sym::rlib, CrateType::Rlib),
-            (rustc_span::sym::dylib, CrateType::Dylib),
-            (rustc_span::sym::cdylib, CrateType::Cdylib),
-            (rustc_span::sym::staticlib, CrateType::StaticLib),
-            (rustc_span::sym::proc_dash_macro, CrateType::ProcMacro),
-            (rustc_span::sym::bin, CrateType::Executable),
-            (rustc_span::sym::sdylib, CrateType::Sdylib),
-        ]
-    }
-
-    /// Same as [`CrateType::all`], but does not include unstable options.
-    /// Used for diagnostics.
-    pub fn all_stable() -> &'static [(Symbol, Self)] {
-        debug_assert_eq!(CrateType::default(), CrateType::Rlib);
-        &[
-            (rustc_span::sym::lib, CrateType::Rlib),
-            (rustc_span::sym::rlib, CrateType::Rlib),
-            (rustc_span::sym::dylib, CrateType::Dylib),
-            (rustc_span::sym::cdylib, CrateType::Cdylib),
-            (rustc_span::sym::staticlib, CrateType::StaticLib),
-            (rustc_span::sym::proc_dash_macro, CrateType::ProcMacro),
-            (rustc_span::sym::bin, CrateType::Executable),
-        ]
-    }
-
     pub fn has_metadata(self) -> bool {
         match self {
             CrateType::Rlib | CrateType::Dylib | CrateType::ProcMacro => true,
@@ -706,24 +676,6 @@ impl CrateType {
             | CrateType::StaticLib
             | CrateType::Sdylib => false,
         }
-    }
-}
-
-impl TryFrom<Symbol> for CrateType {
-    type Error = ();
-
-    fn try_from(value: Symbol) -> Result<Self, Self::Error> {
-        Ok(match value {
-            rustc_span::sym::bin => CrateType::Executable,
-            rustc_span::sym::dylib => CrateType::Dylib,
-            rustc_span::sym::staticlib => CrateType::StaticLib,
-            rustc_span::sym::cdylib => CrateType::Cdylib,
-            rustc_span::sym::rlib => CrateType::Rlib,
-            rustc_span::sym::lib => CrateType::default(),
-            rustc_span::sym::proc_dash_macro => CrateType::ProcMacro,
-            rustc_span::sym::sdylib => CrateType::Sdylib,
-            _ => return Err(()),
-        })
     }
 }
 
@@ -982,16 +934,6 @@ pub enum AttributeKind {
 
     /// Represents `#[coverage(..)]`.
     Coverage(CoverageAttrKind),
-
-    /// Represents `#[crate_name = ...]`
-    CrateName {
-        name: Symbol,
-        name_span: Span,
-        attr_span: Span,
-    },
-
-    /// Represents `#![crate_type = ...]`
-    CrateType(ThinVec<CrateType>),
 
     /// Represents `#[custom_mir]`.
     CustomMir(Option<(MirDialect, Span)>, Option<(MirPhase, Span)>),

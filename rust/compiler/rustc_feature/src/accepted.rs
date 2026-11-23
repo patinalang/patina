@@ -164,8 +164,6 @@ declare_features! (
     (accepted, const_refs_to_static, "1.83.0", Some(119618)),
     /// Allows implementing `Copy` for closures where possible (RFC 2132).
     (accepted, copy_closures, "1.26.0", Some(44490)),
-    /// Allows `crate` in paths.
-    (accepted, crate_in_paths, "1.30.0", Some(45477)),
     /// Allows users to provide classes for fenced code block using `class:classname`.
     (accepted, custom_code_classes_in_docs, "1.80.0", Some(79483)),
     /// Allows using `#[debugger_visualizer]` attribute.
@@ -209,11 +207,6 @@ declare_features! (
     (accepted, extended_varargs_abi_support, "1.91.0", Some(100189)),
     /// Allows resolving absolute paths as paths from other crates.
     (accepted, extern_absolute_paths, "1.30.0", Some(44660)),
-    /// Allows `extern crate foo as bar;`. This puts `bar` into extern prelude.
-    (accepted, extern_crate_item_prelude, "1.31.0", Some(55599)),
-    /// Allows `extern crate self as foo;`.
-    /// This puts local crate root into extern prelude under name `foo`.
-    (accepted, extern_crate_self, "1.34.0", Some(56409)),
     /// Allows access to crate names passed via `--extern` through prelude.
     (accepted, extern_prelude, "1.30.0", Some(44660)),
     /// Allows using `system` as a calling convention with varargs.

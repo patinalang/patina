@@ -1708,25 +1708,6 @@ pub(crate) struct SingleUseLifetimeSugg {
 }
 
 #[derive(Diagnostic)]
-#[diag(
-    "absolute paths must start with `self`, `super`, `pkg`, or an external package name in the 2018 edition"
-)]
-pub(crate) struct AbsPathWithModule {
-    #[subdiagnostic]
-    pub sugg: AbsPathWithModuleSugg,
-}
-
-#[derive(Subdiagnostic)]
-#[suggestion("use `pkg`", code = "{replacement}")]
-pub(crate) struct AbsPathWithModuleSugg {
-    #[primary_span]
-    pub span: Span,
-    #[applicability]
-    pub applicability: Applicability,
-    pub replacement: String,
-}
-
-#[derive(Diagnostic)]
 #[diag("hidden lifetime parameters in types are deprecated")]
 pub(crate) struct ElidedLifetimesInPaths {
     #[subdiagnostic]

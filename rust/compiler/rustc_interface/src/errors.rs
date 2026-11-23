@@ -7,17 +7,6 @@ use rustc_span::{Span, Symbol};
 use rustc_target::spec::TargetTuple;
 
 #[derive(Diagnostic)]
-#[diag(
-    "`--crate-name` and `#[crate_name]` are required to match, but `{$crate_name}` != `{$attr_crate_name}`"
-)]
-pub(crate) struct CrateNameDoesNotMatch {
-    #[primary_span]
-    pub(crate) span: Span,
-    pub(crate) crate_name: Symbol,
-    pub(crate) attr_crate_name: Symbol,
-}
-
-#[derive(Diagnostic)]
 #[diag("package names cannot start with a `-`, but `{$crate_name}` has a leading hyphen")]
 pub(crate) struct CrateNameInvalid<'a> {
     pub(crate) crate_name: &'a str,

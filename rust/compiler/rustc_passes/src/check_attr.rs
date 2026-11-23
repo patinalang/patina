@@ -219,8 +219,6 @@ impl<'tcx> CheckAttrVisitor<'tcx> {
                     | AttributeKind::CompilerBuiltins
                     | AttributeKind::Coroutine
                     | AttributeKind::Coverage (..)
-                    | AttributeKind::CrateName { .. }
-                    | AttributeKind::CrateType(..)
                     | AttributeKind::CustomMir(..)
                     | AttributeKind::DebuggerVisualizer(..)
                     | AttributeKind::DefaultLibAllocator

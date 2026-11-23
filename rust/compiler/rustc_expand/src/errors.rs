@@ -481,20 +481,6 @@ pub(crate) struct GlobDelegationOutsideImpls {
 }
 
 #[derive(Diagnostic)]
-#[diag("`crate_name` within an `#![cfg_attr]` attribute is forbidden")]
-pub(crate) struct CrateNameInCfgAttr {
-    #[primary_span]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
-#[diag("`crate_type` within an `#![cfg_attr]` attribute is forbidden")]
-pub(crate) struct CrateTypeInCfgAttr {
-    #[primary_span]
-    pub span: Span,
-}
-
-#[derive(Diagnostic)]
 #[diag("qualified path without a trait in glob delegation")]
 pub(crate) struct GlobDelegationTraitlessQpath {
     #[primary_span]

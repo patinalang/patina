@@ -1770,7 +1770,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         let mut module_had_parse_errors = !self.mods_with_parse_errors.is_empty()
             && self.mods_with_parse_errors.contains(&parent_scope.module.nearest_parent_mod());
         let mut allow_super = true;
-        let mut second_binding = None;
 
         // We'll provide more context to the privacy errors later, up to `len`.
         let privacy_errors_len = self.privacy_errors.len();
@@ -1952,9 +1951,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
 
             match binding {
                 Ok(binding) => {
-                    if segment_idx == 1 {
-                        second_binding = Some(binding);
-                    }
                     let res = binding.res();
 
                     // Mark every privacy error in this path with the res to the last element. This allows us
@@ -1998,13 +1994,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     } else if res == Res::Err {
                         return PathResult::NonModule(PartialRes::new(Res::Err));
                     } else if opt_ns.is_some() && (is_last || maybe_assoc) {
-                        if let Some(finalize) = finalize {
-                            self.get_mut().lint_if_path_starts_with_module(
-                                finalize,
-                                path,
-                                second_binding,
-                            );
-                        }
                         record_segment_res(self.reborrow(), finalize, res, id);
                         return PathResult::NonModule(PartialRes::with_unresolved_segments(
                             res,
@@ -2104,10 +2093,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     );
                 }
             }
-        }
-
-        if let Some(finalize) = finalize {
-            self.get_mut().lint_if_path_starts_with_module(finalize, path, second_binding);
         }
 
         PathResult::Module(match module {

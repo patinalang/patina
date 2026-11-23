@@ -32,8 +32,7 @@ use rustc_span::{STDLIB_STABLE_CRATES, Span, Symbol, sym};
 use tracing::instrument;
 
 use crate::errors::{
-    CrateNameInCfgAttr, CrateTypeInCfgAttr, FeatureNotAllowed, FeatureRemoved,
-    FeatureRemovedReason, InvalidCfg, RemoveExprNotSupported,
+    FeatureNotAllowed, FeatureRemoved, FeatureRemovedReason, InvalidCfg, RemoveExprNotSupported,
 };
 
 /// A folder that strips out items that do not belong in the current configuration.
@@ -359,12 +358,6 @@ impl<'a> StripUnconfigured<'a> {
             cfg_attr.style,
             item_span,
         );
-        if attr.has_name(sym::crate_type) {
-            self.sess.dcx().emit_err(CrateTypeInCfgAttr { span: attr.span });
-        }
-        if attr.has_name(sym::crate_name) {
-            self.sess.dcx().emit_err(CrateNameInCfgAttr { span: attr.span });
-        }
         attr
     }
 

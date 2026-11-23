@@ -30,8 +30,6 @@ impl AttributeKind {
             ConstContinue(..) => No,
             Coroutine => No,
             Coverage(..) => No,
-            CrateName { .. } => No,
-            CrateType(_) => No,
             CustomMir(_, _) => Yes,
             DebuggerVisualizer(..) => No,
             DefaultLibAllocator => No,

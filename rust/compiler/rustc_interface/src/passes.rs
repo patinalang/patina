@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, LazyLock, OnceLock};
 use std::{env, fs, iter};
 
-use rustc_ast::{self as ast, CRATE_NODE_ID};
+use rustc_ast as ast;
 use rustc_attr_parsing::{AttributeParser, ShouldEmit};
 use rustc_codegen_ssa::traits::CodegenBackend;
 use rustc_codegen_ssa::{CompiledModules, CrateInfo};
@@ -20,11 +20,10 @@ use rustc_errors::{Diag, DiagCtxtHandle, Diagnostic, Level};
 use rustc_expand::base::{ExtCtxt, LintStoreExpand};
 use rustc_feature::Features;
 use rustc_fs_util::try_canonicalize;
-use rustc_hir::attrs::AttributeKind;
 use rustc_hir::def_id::{LOCAL_CRATE, StableCrateId, StableCrateIdMap};
 use rustc_hir::definitions::Definitions;
 use rustc_hir::limit::Limit;
-use rustc_hir::{Attribute, MaybeOwner, Target, find_attr};
+use rustc_hir::{MaybeOwner, Target, find_attr};
 use rustc_incremental::setup_dep_graph;
 use rustc_lint::{BufferedEarlyLint, EarlyCheckNode, LintStore, unerased_lint_store};
 use rustc_metadata::EncodedMetadata;
@@ -43,7 +42,7 @@ use rustc_session::errors::feature_err;
 use rustc_session::output::{filename_for_input, invalid_output_for_target};
 use rustc_session::search_paths::PathKind;
 use rustc_span::{
-    DUMMY_SP, ErrorGuaranteed, ExpnKind, SourceFileHash, SourceFileHashAlgorithm, Span, Symbol, sym,
+    DUMMY_SP, ErrorGuaranteed, ExpnKind, SourceFileHash, SourceFileHashAlgorithm, Symbol, sym,
 };
 use rustc_trait_selection::{solve, traits};
 use tracing::{info, instrument};
@@ -908,13 +907,11 @@ pub fn create_and_enter_global_ctxt<T, F: for<'tcx> FnOnce(TyCtxt<'tcx>) -> T>(
 
     let pre_configured_attrs = rustc_expand::config::pre_configure_attrs(sess, &krate.attrs);
 
-    let crate_name = get_crate_name(sess, &pre_configured_attrs);
+    let crate_name = get_crate_name(sess);
     let crate_types = collect_crate_types(
         sess,
         &compiler.codegen_backend.supported_crate_types(sess),
         compiler.codegen_backend.name(),
-        &pre_configured_attrs,
-        krate.spans.inner_span,
     );
     let stable_crate_id = StableCrateId::new(
         crate_name,
@@ -923,7 +920,7 @@ pub fn create_and_enter_global_ctxt<T, F: for<'tcx> FnOnce(TyCtxt<'tcx>) -> T>(
         sess.cfg_version,
     );
 
-    let outputs = util::build_output_filenames(&pre_configured_attrs, sess);
+    let outputs = util::build_output_filenames(sess);
 
     let dep_graph = setup_dep_graph(sess, crate_name, stable_crate_id);
 
@@ -1266,17 +1263,7 @@ pub(crate) fn start_codegen<'tcx>(
 }
 
 /// Compute and validate the crate name.
-pub fn get_crate_name(sess: &Session, krate_attrs: &[ast::Attribute]) -> Symbol {
-    // We validate *all* occurrences of `#![crate_name]`, pick the first find and
-    // if a crate name was passed on the command line via `--crate-name` we enforce
-    // that they match.
-    // We perform the validation step here instead of later to ensure it gets run
-    // in all code paths that require the crate name very early on, namely before
-    // macro expansion.
-
-    let attr_crate_name =
-        parse_crate_name(sess, krate_attrs, ShouldEmit::EarlyFatal { also_emit_lints: true });
-
+pub fn get_crate_name(sess: &Session) -> Symbol {
     let validate = |name, span| {
         rustc_session::output::validate_crate_name(sess, name, span);
         name
@@ -1284,20 +1271,7 @@ pub fn get_crate_name(sess: &Session, krate_attrs: &[ast::Attribute]) -> Symbol 
 
     if let Some(crate_name) = &sess.opts.crate_name {
         let crate_name = Symbol::intern(crate_name);
-        if let Some((attr_crate_name, span)) = attr_crate_name
-            && attr_crate_name != crate_name
-        {
-            sess.dcx().emit_err(errors::CrateNameDoesNotMatch {
-                span,
-                crate_name,
-                attr_crate_name,
-            });
-        }
         return validate(crate_name, None);
-    }
-
-    if let Some((crate_name, span)) = attr_crate_name {
-        return validate(crate_name, Some(span));
     }
 
     let path = match &sess.io.input {
@@ -1318,35 +1292,10 @@ pub fn get_crate_name(sess: &Session, krate_attrs: &[ast::Attribute]) -> Symbol 
     sym::rust_out
 }
 
-pub(crate) fn parse_crate_name(
-    sess: &Session,
-    attrs: &[ast::Attribute],
-    emit_errors: ShouldEmit,
-) -> Option<(Symbol, Span)> {
-    let rustc_hir::Attribute::Parsed(AttributeKind::CrateName { name, name_span, .. }) =
-        AttributeParser::parse_limited_should_emit(
-            sess,
-            attrs,
-            &[sym::crate_name],
-            DUMMY_SP,
-            rustc_ast::node_id::CRATE_NODE_ID,
-            Target::Crate,
-            None,
-            emit_errors,
-        )?
-    else {
-        unreachable!("crate_name is the only attr we could've parsed here");
-    };
-
-    Some((name, name_span))
-}
-
 pub fn collect_crate_types(
     session: &Session,
     backend_crate_types: &[CrateType],
     codegen_backend_name: &'static str,
-    attrs: &[ast::Attribute],
-    crate_span: Span,
 ) -> Vec<CrateType> {
     // If we're generating a test executable, then ignore all other output
     // styles at all other locations
@@ -1366,34 +1315,11 @@ pub fn collect_crate_types(
         return vec![CrateType::Rlib];
     }
 
-    // Only check command line flags if present. If no types are specified by
-    // command line, then reuse the empty `base` Vec to hold the types that
-    // will be found in crate attributes.
     // JUSTIFICATION: before wrapper fn is available
     #[allow(rustc::bad_opt_access)]
     let mut base = session.opts.crate_types.clone();
     if base.is_empty() {
-        if let Some(Attribute::Parsed(AttributeKind::CrateType(crate_type))) =
-            AttributeParser::parse_limited_should_emit(
-                session,
-                attrs,
-                &[sym::crate_type],
-                crate_span,
-                CRATE_NODE_ID,
-                Target::Crate,
-                None,
-                ShouldEmit::EarlyFatal { also_emit_lints: false },
-            )
-        {
-            base.extend(crate_type);
-        }
-
-        if base.is_empty() {
-            base.push(default_output_for_target(session));
-        } else {
-            base.sort();
-            base.dedup();
-        }
+        base.push(default_output_for_target(session));
     }
 
     base.retain(|crate_type| {
@@ -1419,8 +1345,7 @@ pub fn collect_crate_types(
 
 /// Returns default crate type for target
 ///
-/// Default crate type is used when crate type isn't provided neither
-/// through cmd line arguments nor through crate attributes
+/// Default crate type is used when no crate type is provided through command line arguments
 ///
 /// It is CrateType::Executable for all platforms but iOS as there is no
 /// way to run iOS binaries anyway without jailbreaking and

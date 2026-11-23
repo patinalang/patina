@@ -1240,14 +1240,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         let (ident, target, bindings, import_id) = match import.kind {
             ImportKind::Single { source, target, ref decls, id, .. } => (source, target, decls, id),
             ImportKind::Glob { ref max_vis, id } => {
-                if import.module_path.len() <= 1 {
-                    // HACK(eddyb) `lint_if_path_starts_with_module` needs at least
-                    // 2 segments, so the `resolve_path` above won't trigger it.
-                    let mut full_path = import.module_path.clone();
-                    full_path.push(Segment::from_ident(Ident::dummy()));
-                    self.lint_if_path_starts_with_module(finalize, &full_path, None);
-                }
-
                 if let ModuleOrUniformRoot::Module(module) = module
                     && module == import.parent_scope.module
                 {
@@ -1595,18 +1587,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     }
                 err.emit();
             }
-        }
-
-        if import.module_path.len() <= 1 {
-            // HACK(eddyb) `lint_if_path_starts_with_module` needs at least
-            // 2 segments, so the `resolve_path` above won't trigger it.
-            let mut full_path = import.module_path.clone();
-            full_path.push(Segment::from_ident(ident));
-            self.per_ns(|this, ns| {
-                if let Some(binding) = bindings[ns].get().decl().map(|b| b.import_source()) {
-                    this.lint_if_path_starts_with_module(finalize, &full_path, Some(binding));
-                }
-            });
         }
 
         // Record what this import resolves to for later uses in documentation,

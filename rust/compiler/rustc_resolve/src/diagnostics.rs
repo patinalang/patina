@@ -12,7 +12,7 @@ use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_data_structures::unord::{UnordMap, UnordSet};
 use rustc_errors::codes::*;
 use rustc_errors::{
-    Applicability, Diag, DiagCtxtHandle, Diagnostic, ErrorGuaranteed, MultiSpan, SuggestionStyle,
+    Applicability, Diag, DiagCtxtHandle, ErrorGuaranteed, MultiSpan, SuggestionStyle,
     struct_span_code_err,
 };
 use rustc_feature::BUILTIN_ATTRIBUTES;
@@ -25,8 +25,8 @@ use rustc_middle::bug;
 use rustc_middle::ty::{TyCtxt, Visibility};
 use rustc_session::Session;
 use rustc_session::lint::builtin::{
-    ABSOLUTE_PATHS_NOT_STARTING_WITH_CRATE, AMBIGUOUS_GLOB_IMPORTS, AMBIGUOUS_IMPORT_VISIBILITIES,
-    AMBIGUOUS_PANIC_IMPORTS, MACRO_EXPANDED_MACRO_EXPORTS_ACCESSED_BY_ABSOLUTE_PATHS,
+    AMBIGUOUS_GLOB_IMPORTS, AMBIGUOUS_IMPORT_VISIBILITIES, AMBIGUOUS_PANIC_IMPORTS,
+    MACRO_EXPANDED_MACRO_EXPORTS_ACCESSED_BY_ABSOLUTE_PATHS,
 };
 use rustc_session::utils::was_invoked_from_cargo;
 use rustc_span::edit_distance::find_best_match_for_name;
@@ -49,8 +49,8 @@ use crate::imports::{Import, ImportKind};
 use crate::late::{DiagMetadata, PatternSource, Rib};
 use crate::{
     AmbiguityError, AmbiguityKind, AmbiguityWarning, BindingError, BindingKey, Decl, DeclKind,
-    DelayedVisResolutionError, Finalize, ForwardGenericParamBanReason, HasGenericParams, IdentKey,
-    LateDecl, MacroRulesScope, Module, ModuleKind, ModuleOrUniformRoot, ParentScope, PathResult,
+    DelayedVisResolutionError, ForwardGenericParamBanReason, HasGenericParams, IdentKey, LateDecl,
+    MacroRulesScope, Module, ModuleKind, ModuleOrUniformRoot, ParentScope, PathResult,
     PrivacyError, Res, ResolutionError, Resolver, Scope, ScopeSet, Segment, UseError, Used,
     VisResolutionError, errors as errs, path_names_to_string,
 };
@@ -485,82 +485,6 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         }
 
         err.subdiagnostic(errors::RemoveUnnecessaryImport { span });
-    }
-
-    pub(crate) fn lint_if_path_starts_with_module(
-        &mut self,
-        finalize: Finalize,
-        path: &[Segment],
-        second_binding: Option<Decl<'_>>,
-    ) {
-        let Finalize { node_id, root_span, .. } = finalize;
-
-        let first_name = match path.get(0) {
-            // In the 2018 edition this lint is a hard error, so nothing to do
-            Some(seg) if seg.ident.span.is_rust_2015() && self.tcx.sess.is_rust_2015() => {
-                seg.ident.name
-            }
-            _ => return,
-        };
-
-        // We're only interested in `use` paths which should start with
-        // `{{root}}` currently.
-        if first_name != kw::PathRoot {
-            return;
-        }
-
-        match path.get(1) {
-            // If this import looks like `crate::...` it's already good
-            Some(Segment { ident, .. }) if ident.name == kw::Pkg => return,
-            // Otherwise go below to see if it's an extern crate
-            Some(_) => {}
-            // If the path has length one (and it's `PathRoot` most likely)
-            // then we don't know whether we're gonna be importing a crate or an
-            // item in our crate. Defer this lint to elsewhere
-            None => return,
-        }
-
-        // If the first element of our path was actually resolved to an
-        // `ExternCrate` (also used for `crate::...`) then no need to issue a
-        // warning, this looks all good!
-        if let Some(binding) = second_binding
-            && let DeclKind::Import { import, .. } = binding.kind
-            // Careful: we still want to rewrite paths from renamed extern crates.
-            && let ImportKind::ExternCrate { source: None, .. } = import.kind
-        {
-            return;
-        }
-
-        self.lint_buffer.dyn_buffer_lint_any(
-            ABSOLUTE_PATHS_NOT_STARTING_WITH_CRATE,
-            node_id,
-            root_span,
-            move |dcx, level, sess| {
-                let (replacement, applicability) = match sess
-                    .downcast_ref::<Session>()
-                    .expect("expected a `Session`")
-                    .source_map()
-                    .span_to_snippet(root_span)
-                {
-                    Ok(ref s) => {
-                        // FIXME(Manishearth) ideally the emitting code
-                        // can tell us whether or not this is global
-                        let opt_colon = if s.trim_start().starts_with("::") { "" } else { "::" };
-
-                        (format!("pkg{opt_colon}{s}"), Applicability::MachineApplicable)
-                    }
-                    Err(_) => ("pkg::<path>".to_string(), Applicability::HasPlaceholders),
-                };
-                errors::AbsPathWithModule {
-                    sugg: errors::AbsPathWithModuleSugg {
-                        span: root_span,
-                        applicability,
-                        replacement,
-                    },
-                }
-                .into_diag(dcx, level)
-            },
-        );
     }
 
     pub(crate) fn add_module_candidates(

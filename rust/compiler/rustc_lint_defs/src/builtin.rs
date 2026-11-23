@@ -15,7 +15,6 @@ declare_lint_pass! {
     HardwiredLints => [
         // tidy-alphabetical-start
         AARCH64_SOFTFLOAT_NEON,
-        ABSOLUTE_PATHS_NOT_STARTING_WITH_CRATE,
         AMBIGUOUS_ASSOCIATED_ITEMS,
         AMBIGUOUS_DERIVE_HELPERS,
         AMBIGUOUS_GLOB_IMPORTED_TRAITS,
@@ -123,7 +122,6 @@ declare_lint_pass! {
         UNEXPECTED_CFGS,
         UNFULFILLED_LINT_EXPECTATIONS,
         UNINHABITED_STATIC,
-        UNKNOWN_CRATE_TYPES,
         UNKNOWN_DIAGNOSTIC_ATTRIBUTES,
         UNKNOWN_LINTS,
         UNNAMEABLE_TEST_ITEMS,
@@ -1149,31 +1147,6 @@ declare_lint! {
 }
 
 declare_lint! {
-    /// The `unknown_crate_types` lint detects an unknown crate type found in
-    /// a [`crate_type` attribute].
-    ///
-    /// ### Example
-    ///
-    /// ```rust,compile_fail
-    /// #![crate_type="lol"]
-    /// fn main() {}
-    /// ```
-    ///
-    /// {{produces}}
-    ///
-    /// ### Explanation
-    ///
-    /// An unknown value give to the `crate_type` attribute is almost
-    /// certainly a mistake.
-    ///
-    /// [`crate_type` attribute]: https://doc.rust-lang.org/reference/linkage.html
-    pub UNKNOWN_CRATE_TYPES,
-    Deny,
-    "unknown crate type found in `#[crate_type]` directive",
-    crate_level_only
-}
-
-declare_lint! {
     /// The `trivial_casts` lint detects trivial casts which could be replaced
     /// with coercion, which may require a temporary variable.
     ///
@@ -1890,60 +1863,6 @@ declare_lint! {
 }
 
 declare_lint! {
-    /// The `absolute_paths_not_starting_with_crate` lint detects fully
-    /// qualified paths that start with a module name instead of `crate`,
-    /// `self`, or an extern crate name
-    ///
-    /// ### Example
-    ///
-    /// ```rust,edition2015,compile_fail
-    /// #![deny(absolute_paths_not_starting_with_crate)]
-    ///
-    /// mod foo {
-    ///     pub fn bar() {}
-    /// }
-    ///
-    /// fn main() {
-    ///     ::foo::bar();
-    /// }
-    /// ```
-    ///
-    /// {{produces}}
-    ///
-    /// ### Explanation
-    ///
-    /// Rust [editions] allow the language to evolve without breaking
-    /// backwards compatibility. This lint catches code that uses absolute
-    /// paths in the style of the 2015 edition. In the 2015 edition, absolute
-    /// paths (those starting with `::`) refer to either the crate root or an
-    /// external crate. In the 2018 edition it was changed so that they only
-    /// refer to external crates. The path prefix `crate::` should be used
-    /// instead to reference items from the crate root.
-    ///
-    /// If you switch the compiler from the 2015 to 2018 edition without
-    /// updating the code, then it will fail to compile if the old style paths
-    /// are used. You can manually change the paths to use the `crate::`
-    /// prefix to transition to the 2018 edition.
-    ///
-    /// This lint solves the problem automatically. It is "allow" by default
-    /// because the code is perfectly valid in the 2015 edition. The [`cargo
-    /// fix`] tool with the `--edition` flag will switch this lint to "warn"
-    /// and automatically apply the suggested fix from the compiler. This
-    /// provides a completely automated way to update old code to the 2018
-    /// edition.
-    ///
-    /// [editions]: https://doc.rust-lang.org/edition-guide/
-    /// [`cargo fix`]: https://doc.rust-lang.org/cargo/commands/cargo-fix.html
-    pub ABSOLUTE_PATHS_NOT_STARTING_WITH_CRATE,
-    Allow,
-    "fully qualified paths that start with a module name \
-     instead of `pkg`, `self`, or an extern crate name",
-     @future_incompatible = FutureIncompatibleInfo {
-         reason: fcw!(EditionError 2018 "path-changes"),
-     };
-}
-
-declare_lint! {
     /// The `unstable_name_collisions` lint detects that you have used a name
     /// that the standard library plans to add in the future.
     ///
@@ -2065,7 +1984,6 @@ declare_lint! {
     ///
     /// ```rust,ignore (proc-macro)
     /// // foo.rs
-    /// #![crate_type = "proc-macro"]
     ///
     /// extern crate proc_macro;
     ///
@@ -4251,7 +4169,6 @@ declare_lint! {
     /// ### Example
     ///
     /// ```rust,ignore (proc-macro)
-    /// #![crate_type = "proc-macro"]
     /// #![deny(ambiguous_derive_helpers)]
     ///
     /// use proc_macro::TokenStream;
@@ -4905,7 +4822,6 @@ declare_lint! {
     ///
     /// ```rust,ignore (dependent)
     /// // dependency.rs
-    /// #![crate_type = "lib"]
     ///
     /// pub trait Trait<T, U> {}
     /// ```

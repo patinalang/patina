@@ -291,10 +291,6 @@ pub static BUILTIN_ATTRIBUTES: &[BuiltinAttribute] = &[
     gated!(must_not_suspend, experimental!(must_not_suspend)),
     ungated!(deprecated),
 
-    // Crate properties:
-    ungated!(crate_name),
-    ungated!(crate_type),
-
     // ABI, linking, symbols, and FFI
     ungated!(link),
     ungated!(link_name),

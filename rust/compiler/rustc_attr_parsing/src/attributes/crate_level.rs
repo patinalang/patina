@@ -1,77 +1,7 @@
-use rustc_hir::attrs::{CrateType, WindowsSubsystemKind};
-use rustc_session::lint::builtin::UNKNOWN_CRATE_TYPES;
+use rustc_hir::attrs::WindowsSubsystemKind;
 use rustc_span::Symbol;
-use rustc_span::edit_distance::find_best_match_for_name;
 
 use super::prelude::*;
-use crate::errors::{UnknownCrateTypes, UnknownCrateTypesSuggestion};
-
-pub(crate) struct CrateNameParser;
-
-impl SingleAttributeParser for CrateNameParser {
-    const PATH: &[Symbol] = &[sym::crate_name];
-    const ON_DUPLICATE: OnDuplicate = OnDuplicate::WarnButFutureError;
-    const TEMPLATE: AttributeTemplate = template!(NameValueStr: "name");
-    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[Allow(Target::Crate)]);
-
-    fn convert(cx: &mut AcceptContext<'_, '_>, args: &ArgParser) -> Option<AttributeKind> {
-        let n = cx.expect_name_value(args, cx.attr_span, None)?;
-
-        let Some(name) = n.value_as_str() else {
-            cx.adcx().expected_string_literal(n.value_span, Some(n.value_as_lit()));
-            return None;
-        };
-
-        Some(AttributeKind::CrateName { name, name_span: n.value_span, attr_span: cx.attr_span })
-    }
-}
-
-pub(crate) struct CrateTypeParser;
-
-impl CombineAttributeParser for CrateTypeParser {
-    const PATH: &[Symbol] = &[sym::crate_type];
-    type Item = CrateType;
-    const CONVERT: ConvertFn<Self::Item> = |items, _| AttributeKind::CrateType(items);
-
-    const ALLOWED_TARGETS: AllowedTargets = AllowedTargets::AllowList(&[Allow(Target::Crate)]);
-
-    const TEMPLATE: AttributeTemplate =
-        template!(NameValueStr: "crate type", "https://doc.rust-lang.org/reference/linkage.html");
-
-    fn extend(
-        cx: &mut AcceptContext<'_, '_>,
-        args: &ArgParser,
-    ) -> impl IntoIterator<Item = Self::Item> {
-        let n = cx.expect_name_value(args, cx.attr_span, None)?;
-
-        let Some(crate_type) = n.value_as_str() else {
-            cx.adcx().expected_string_literal(n.value_span, Some(n.value_as_lit()));
-            return None;
-        };
-
-        let Ok(crate_type) = crate_type.try_into() else {
-            // We don't error on invalid `#![crate_type]` when not applied to a crate
-            if cx.shared.target == Target::Crate {
-                let candidate = find_best_match_for_name(
-                    &CrateType::all_stable().iter().map(|(name, _)| *name).collect::<Vec<_>>(),
-                    crate_type,
-                    None,
-                );
-                let span = n.value_span;
-                cx.emit_lint(
-                    UNKNOWN_CRATE_TYPES,
-                    UnknownCrateTypes {
-                        sugg: candidate.map(|s| UnknownCrateTypesSuggestion { span, snippet: s }),
-                    },
-                    span,
-                );
-            }
-            return None;
-        };
-
-        Some(crate_type)
-    }
-}
 
 pub(crate) struct RecursionLimitParser;
 

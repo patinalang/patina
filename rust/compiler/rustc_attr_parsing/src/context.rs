@@ -151,7 +151,6 @@ attribute_parsers!(
 
         // tidy-alphabetical-start
         Combine<AllowInternalUnstableParser>,
-        Combine<CrateTypeParser>,
         Combine<DebuggerViualizerParser>,
         Combine<FeatureParser>,
         Combine<ForceTargetFeatureParser>,
@@ -172,7 +171,6 @@ attribute_parsers!(
         Single<CfiEncodingParser>,
         Single<CollapseDebugInfoParser>,
         Single<CoverageParser>,
-        Single<CrateNameParser>,
         Single<CustomMirParser>,
         Single<DeprecatedParser>,
         Single<DoNotRecommendParser>,
