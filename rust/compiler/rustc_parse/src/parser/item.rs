@@ -294,7 +294,11 @@ impl<'a> Parser<'a> {
                 eii_impls: ThinVec::new(),
             }))
         } else if self.eat_keyword_case(exp!(Extern), case) {
-            if self.eat_keyword_case(exp!(Pkg), case) {
+            if self.token.is_keyword(kw::Crate) {
+                self.dcx().emit_err(errors::ExternCrateSpelledPkg { span: self.token.span });
+                self.bump();
+                self.parse_item_extern_crate()?
+            } else if self.eat_keyword_case(exp!(Pkg), case) {
                 // EXTERN CRATE
                 self.parse_item_extern_crate()?
             } else if self.check_keyword_case(exp!(Mod), case) {

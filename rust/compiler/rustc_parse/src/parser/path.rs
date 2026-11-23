@@ -462,6 +462,11 @@ impl<'a> Parser<'a> {
 
     pub(super) fn parse_path_segment_ident(&mut self) -> PResult<'a, Ident> {
         match self.token.ident() {
+            Some((ident, IdentIsRaw::No)) if ident.name == kw::Crate => {
+                self.dcx().emit_err(errors::CrateSpelledPkg { span: ident.span });
+                self.bump();
+                Ok(Ident::new(kw::Pkg, ident.span))
+            }
             Some((ident, IdentIsRaw::No)) if ident.is_path_segment_keyword() => {
                 self.bump();
                 Ok(ident)

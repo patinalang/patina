@@ -1536,7 +1536,7 @@ impl<'a> Parser<'a> {
     fn can_be_ident_pat(&mut self) -> bool {
         self.check_ident()
         && !self.token.is_bool_lit() // Avoid `true` or `false` as a binding as it is a literal.
-        && !self.token.is_path_segment_keyword() // Avoid e.g. `Self` as it is a path.
+        && (!self.token.is_path_segment_keyword() || self.token.is_keyword(kw::Crate)) // Avoid e.g. `Self` as it is a path.
         // Avoid `in`. Due to recovery in the list parser this messes with `for ( $pat in $expr )`.
         && !self.token.is_keyword(kw::In)
         // Try to do something more complex?

@@ -16,6 +16,30 @@ use rustc_span::edition::{Edition, LATEST_STABLE_EDITION};
 use rustc_span::{Ident, Span, Symbol};
 
 #[derive(Diagnostic)]
+#[diag("Patina has no `crate` keyword")]
+pub(crate) struct CrateSpelledPkg {
+    #[primary_span]
+    #[suggestion(
+        "use `pkg` to refer to the current package",
+        code = "pkg",
+        applicability = "machine-applicable"
+    )]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
+#[diag("Patina has no `crate` keyword")]
+pub(crate) struct ExternCrateSpelledPkg {
+    #[primary_span]
+    #[suggestion(
+        "use `extern pkg` to declare an external package",
+        code = "pkg",
+        applicability = "machine-applicable"
+    )]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag("ambiguous `+` in a type")]
 pub(crate) struct AmbiguousPlus {
     #[primary_span]

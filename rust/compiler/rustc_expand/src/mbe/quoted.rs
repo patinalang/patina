@@ -327,7 +327,10 @@ fn parse_tree<'a>(
                 Some(tokenstream::TokenTree::Token(token, _)) if token.is_ident() => {
                     let (ident, is_raw) = token.ident().unwrap();
                     let span = ident.span.with_lo(dollar_span.lo());
-                    if ident.name == kw::Pkg && matches!(is_raw, IdentIsRaw::No) {
+                    if ident.name == kw::Crate && matches!(is_raw, IdentIsRaw::No) {
+                        sess.dcx().emit_err(errors::CrateSpelledPkg { span: ident.span });
+                        TokenTree::token(token::Ident(kw::DollarPkg, is_raw), span)
+                    } else if ident.name == kw::Pkg && matches!(is_raw, IdentIsRaw::No) {
                         TokenTree::token(token::Ident(kw::DollarPkg, is_raw), span)
                     } else {
                         TokenTree::MetaVar(span, ident)

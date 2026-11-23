@@ -1,0 +1,44 @@
+error: Patina has no `crate` keyword
+  --> tests/ui/src/mod/errors/pkg_keyword_crate.pt:1:8
+   |
+LL | extern crate core as core2;
+   |        ^^^^^ help: use `extern pkg` to declare an external package: `pkg`
+
+error: expected identifier, found reserved keyword `crate`
+  --> tests/ui/src/mod/errors/pkg_keyword_crate.pt:3:4
+   |
+LL | fn crate() {}
+   |    ^^^^^ expected identifier, found reserved keyword
+   |
+help: escape `crate` to use it as an identifier
+   |
+LL - fn crate() {}
+LL + fn `crate`() {}
+   |
+
+error: Patina has no `crate` keyword
+  --> tests/ui/src/mod/errors/pkg_keyword_crate.pt:5:5
+   |
+LL | pub(crate) fn visible() -> int { 1 }
+   |     ^^^^^ help: use `pkg` to refer to the current package: `pkg`
+
+error: Patina has no `crate` keyword
+  --> tests/ui/src/mod/errors/pkg_keyword_crate.pt:8:53
+   |
+LL |     let _: core2::Option<int> = core2::Option::Some(crate::visible());
+   |                                                     ^^^^^ help: use `pkg` to refer to the current package: `pkg`
+
+error: expected identifier, found reserved keyword `crate`
+  --> tests/ui/src/mod/errors/pkg_keyword_crate.pt:9:9
+   |
+LL |     let crate = 1;
+   |         ^^^^^ expected identifier, found reserved keyword
+   |
+help: escape `crate` to use it as an identifier
+   |
+LL -     let crate = 1;
+LL +     let `crate` = 1;
+   |
+
+error: aborting due to 5 previous errors
+

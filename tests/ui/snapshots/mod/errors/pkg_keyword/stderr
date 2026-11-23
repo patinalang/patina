@@ -1,5 +1,11 @@
+error: Patina has no `crate` keyword
+  --> tests/ui/src/mod/errors/pkg_keyword.pt:8:14
+   |
+LL |     () => { $crate::first::visible() };
+   |              ^^^^^ help: use `pkg` to refer to the current package: `pkg`
+
 error[E0425]: cannot find function `visible` in this scope
-  --> tests/ui/src/mod/pkg_keyword.pt:13:31
+  --> tests/ui/src/mod/errors/pkg_keyword.pt:17:31
    |
 LL |     fn unqualified() -> int { visible() }
    |                               ^^^^^^^ not found in this scope
@@ -10,11 +16,11 @@ LL +     use pkg::first::visible;
    |
 
 error[E0425]: cannot find function `missing` in module `pkg::first`
-  --> tests/ui/src/mod/pkg_keyword.pt:19:17
+  --> tests/ui/src/mod/errors/pkg_keyword.pt:24:17
    |
 LL |     pkg::first::missing();
    |                 ^^^^^^^ not found in `pkg::first`
 
-error: aborting due to 2 previous errors
+error: aborting due to 3 previous errors
 
 For more information about this error, try `rustc --explain E0425`.

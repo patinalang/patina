@@ -947,7 +947,10 @@ impl Token {
     }
 
     pub fn is_path_segment_keyword(&self) -> bool {
-        self.is_non_raw_ident_where(Ident::is_path_segment_keyword)
+        self.is_non_raw_ident_where(|ident| {
+            // Pass `crate` so we can write a better diagnostic later.
+            ident.name == kw::Crate || ident.is_path_segment_keyword()
+        })
     }
 
     /// Returns true for reserved identifiers used internally for elided lifetimes,

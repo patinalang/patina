@@ -88,6 +88,7 @@ symbols! {
         Abstract:           "abstract",
         Become:             "become",
         Box:                "box",
+        Crate:              "crate",
         Do:                 "do",
         Final:              "final",
         FnRef:              "fnref",

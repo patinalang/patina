@@ -1,0 +1,10 @@
+extern pkg core as core2;
+
+fn `crate`() {}
+
+pub(pkg) fn visible() -> int { 1 }
+
+pub fn main() {
+    let _: core2::Option<int> = core2::Option::Some(pkg::visible());
+    let _ = 1;
+}

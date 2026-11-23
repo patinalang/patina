@@ -4,6 +4,10 @@ macro_rules! call_visible {
     () => { $pkg::first::visible() };
 }
 
+macro_rules! call_visible_legacy {
+    () => { $crate::first::visible() };
+}
+
 mod first {
     pub(pkg) fn visible() -> int { 1 }
 }
@@ -15,6 +19,7 @@ mod second {
 
 pub fn main() {
     let _: core2::Option<int> = core2::Option::Some(call_visible!());
+    call_visible_legacy!();
     second::call();
     pkg::first::missing();
 }

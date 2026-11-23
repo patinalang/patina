@@ -1,0 +1,10 @@
+extern crate core as core2;
+
+fn crate() {}
+
+pub(crate) fn visible() -> int { 1 }
+
+pub fn main() {
+    let _: core2::Option<int> = core2::Option::Some(crate::visible());
+    let crate = 1;
+}

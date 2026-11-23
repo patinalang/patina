@@ -6,6 +6,18 @@ use rustc_macros::{Diagnostic, Subdiagnostic};
 use rustc_span::{Ident, MacroRulesNormalizedIdent, Span, Symbol};
 
 #[derive(Diagnostic)]
+#[diag("Patina has no `crate` keyword")]
+pub(crate) struct CrateSpelledPkg {
+    #[primary_span]
+    #[suggestion(
+        "use `pkg` to refer to the current package",
+        code = "pkg",
+        applicability = "machine-applicable"
+    )]
+    pub span: Span,
+}
+
+#[derive(Diagnostic)]
 #[diag("`#[cfg_attr]` does not expand to any attributes")]
 pub(crate) struct CfgAttrNoAttributes;
 
