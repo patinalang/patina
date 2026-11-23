@@ -147,8 +147,9 @@ fn closure_receive(value: int)
         (||
             (receive { int(n) => ((n as int) + (value as int) as int), } as
                 int) as
-            {closure@tests/ui/src/flow_control/receive.pt:81:16: 81:18});
-    ((take as {closure@tests/ui/src/flow_control/receive.pt:81:16: 81:18})()
+            {closure@tests/ui/src/flow_control/receive_test.pt:81:16: 81:18});
+    ((take as
+            {closure@tests/ui/src/flow_control/receive_test.pt:81:16: 81:18})()
         as int)
 } as int)
 

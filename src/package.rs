@@ -67,7 +67,13 @@ impl TryFrom<String> for PackageName {
     type Error = InvalidPackageName;
 
     fn try_from(name: String) -> Result<Self, Self::Error> {
-        if rustc_lexer::is_ident(&name) { Ok(Self(name)) } else { Err(InvalidPackageName(name)) }
+        if rustc_span::symbol::is_reserved_ident(&name, crate::EDITION)
+            || !rustc_lexer::is_ident(&name)
+        {
+            Err(InvalidPackageName(name))
+        } else {
+            Ok(Self(name))
+        }
     }
 }
 
@@ -248,6 +254,17 @@ mod tests {
                 matches!(invalid.parse::<PackageName>(), Err(InvalidPackageName(name)) if name == invalid),
                 "for {invalid:?}"
             );
+        }
+    }
+
+    #[test]
+    fn keywords_cannot_be_package_names() {
+        for keyword in ["mod", "crate", "pkg", "Self", "_", "receive", "gen", "try", "async"] {
+            let error = keyword.parse::<PackageName>().unwrap_err();
+            assert!(matches!(&error, InvalidPackageName(name) if name == keyword));
+        }
+        for allowed in ["union", "auto", "raw", "pkg_utils", "my_pkg"] {
+            assert!(allowed.parse::<PackageName>().is_ok(), "for {allowed}");
         }
     }
 

@@ -1,5 +1,5 @@
-[{attribute,{9,1},file,{"tests/ui/src/flow_control/receive.pt",9}},
- {attribute,{9,1},module,'Elixir.Patina.Receive.Value'},
+[{attribute,{9,1},file,{"tests/ui/src/flow_control/receive_test.pt",9}},
+ {attribute,{9,1},module,'Elixir.Patina.ReceiveTest.Value'},
  {attribute,{9,1},compile,[no_auto_import]},
  {attribute,{9,1},import,{erlang,[{is_record,3}]}},
  {attribute,{9,1},export_record,[]},

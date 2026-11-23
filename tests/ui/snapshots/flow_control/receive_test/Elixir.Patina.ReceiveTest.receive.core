@@ -1,20 +1,20 @@
-module 'Elixir.Patina.Receive.Value' ['__info__'/1,
-				      'module_info'/0,
-				      'module_info'/1]
-    attributes [%% Line 9
+module 'Elixir.Patina.ReceiveTest.receive' ['__info__'/1,
+					    'module_info'/0,
+					    'module_info'/1]
+    attributes [%% Line 73
 		'file' =
-		    %% Line 9
-		    [{[116|[101|[115|[116|[115|[47|[117|[105|[47|[115|[114|[99|[47|[102|[108|[111|[119|[95|[99|[111|[110|[116|[114|[111|[108|[47|[114|[101|[99|[101|[105|[118|[101|[46|[112|[116]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]],9}],
-		%% Line 9
+		    %% Line 73
+		    [{[116|[101|[115|[116|[115|[47|[117|[105|[47|[115|[114|[99|[47|[102|[108|[111|[119|[95|[99|[111|[110|[116|[114|[111|[108|[47|[114|[101|[99|[101|[105|[118|[101|[95|[116|[101|[115|[116|[46|[112|[116]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]],73}],
+		%% Line 73
 		'compile' =
-		    %% Line 9
+		    %% Line 73
 		    ['no_auto_import'],
-		%% Line 9
+		%% Line 73
 		'export_record' =
-		    %% Line 9
+		    %% Line 73
 		    []]
 '__info__'/1 =
-    %% Line 9
+    %% Line 73
     ( fun (_0) ->
 	  ( case ( _0
 		   -| [{'function',{'__info__',1}}] ) of
@@ -57,12 +57,12 @@ module 'Elixir.Patina.Receive.Value' ['__info__'/1,
 'module_info'/0 =
     ( fun () ->
 	  call 'erlang':'get_module_info'
-	      ('Elixir.Patina.Receive.Value')
+	      ('Elixir.Patina.ReceiveTest.receive')
       -| [{'function',{'module_info',0}}] )
 'module_info'/1 =
     ( fun (_0) ->
 	  call 'erlang':'get_module_info'
-	      ('Elixir.Patina.Receive.Value', ( _0
-						-| [{'function',{'module_info',1}}] ))
+	      ('Elixir.Patina.ReceiveTest.receive', ( _0
+						      -| [{'function',{'module_info',1}}] ))
       -| [{'function',{'module_info',1}}] )
 end

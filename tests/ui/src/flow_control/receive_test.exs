@@ -2,7 +2,7 @@ ExUnit.start()
 
 defmodule ReceiveTest do
   use ExUnit.Case
-  alias Patina.Receive
+  alias Patina.ReceiveTest, as: Receive
 
   test "selective receive leaves unmatched messages in the mailbox" do
     send(self(), :a)

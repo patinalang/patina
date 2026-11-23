@@ -28,7 +28,6 @@ use rustc_session::config::{Externs, PanicStrategy};
 use rustc_session::search_paths::{PathKind, SearchPath};
 use rustc_session::{Session, config, lint};
 use rustc_span::def_id::LOCAL_CRATE;
-use rustc_span::edition::Edition;
 use rustc_span::{ErrorGuaranteed, FileName, RealFileName, RemapPathScopeComponents};
 
 use crate::Stage;
@@ -607,7 +606,7 @@ fn make_config(
     } = opts;
 
     let mut options = config::Options {
-        edition: Edition::EditionFuture,
+        edition: crate::EDITION,
         unstable_features: UnstableFeatures::Allow,
         unstable_opts: config::UnstableOptions {
             ui_testing: true,

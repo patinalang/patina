@@ -259,6 +259,12 @@ mod tests {
     }
 
     #[test]
+    fn keyword_dependency_name_is_rejected() {
+        let error = manifest("fn = \"~> 0.1\"\n").unwrap_err();
+        assert!(error.contains("`fn` isn't a valid package name"), "got: {error}");
+    }
+
+    #[test]
     fn dependency_sources() {
         assert_eq!(source(r#""~> 0.1""#), None);
         assert_eq!(source(r#"{ version = "~> 0.1" }"#), None);

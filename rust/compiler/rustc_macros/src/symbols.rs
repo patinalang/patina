@@ -304,6 +304,9 @@ fn symbols_with_errors(input: TokenStream) -> (TokenStream, Vec<syn::Error>) {
         /// [`Interner::with_extra_symbols`].
         pub const PREDEFINED_SYMBOLS_COUNT: u32 = #predefined_symbols_count;
 
+        /// The predefined symbols, in index order. Keywords come first.
+        const PREDEFINED_SYMBOLS: &[&str] = &[#prefill_stream];
+
         #[doc(hidden)]
         #[allow(non_upper_case_globals)]
         mod kw_generated {
@@ -323,7 +326,7 @@ fn symbols_with_errors(input: TokenStream) -> (TokenStream, Vec<syn::Error>) {
             /// any extra symbols provided by external drivers such as Clippy
             pub(crate) fn with_extra_symbols(extra_symbols: &[&'static str]) -> Self {
                 Interner::prefill(
-                    &[#prefill_stream],
+                    PREDEFINED_SYMBOLS,
                     extra_symbols,
                 )
             }

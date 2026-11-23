@@ -1,6 +1,6 @@
--file("tests/ui/src/flow_control/receive.pt", 73).
+-file("tests/ui/src/flow_control/receive_test.pt", 9).
 
--module('Elixir.Patina.Receive.receive').
+-module('Elixir.Patina.ReceiveTest.Value').
 
 -compile([no_auto_import]).
 

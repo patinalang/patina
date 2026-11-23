@@ -1,25 +1,25 @@
-module 'Elixir.Patina.Receive' ['__info__'/1,
-				'closure_receive'/1,
-				'contextual_after'/0,
-				'diverging_timeout'/0,
-				'durations'/0,
-				'echo'/0,
-				'guarded_or'/0,
-				'merge_timeout'/0,
-				'module_info'/0,
-				'module_info'/1,
-				'only_timeout'/0,
-				'raw_identifiers'/0,
-				'sum_until_stop'/0,
-				'take_atom'/0,
-				'take_int'/0,
-				'take_int_or_timeout'/0,
-				'unchanged_timeout'/0,
-				'unsafe_value'/0]
+module 'Elixir.Patina.ReceiveTest' ['__info__'/1,
+				    'closure_receive'/1,
+				    'contextual_after'/0,
+				    'diverging_timeout'/0,
+				    'durations'/0,
+				    'echo'/0,
+				    'guarded_or'/0,
+				    'merge_timeout'/0,
+				    'module_info'/0,
+				    'module_info'/1,
+				    'only_timeout'/0,
+				    'raw_identifiers'/0,
+				    'sum_until_stop'/0,
+				    'take_atom'/0,
+				    'take_int'/0,
+				    'take_int_or_timeout'/0,
+				    'unchanged_timeout'/0,
+				    'unsafe_value'/0]
     attributes [%% Line 3
 		'file' =
 		    %% Line 3
-		    [{[116|[101|[115|[116|[115|[47|[117|[105|[47|[115|[114|[99|[47|[102|[108|[111|[119|[95|[99|[111|[110|[116|[114|[111|[108|[47|[114|[101|[99|[101|[105|[118|[101|[46|[112|[116]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]],3}],
+		    [{[116|[101|[115|[116|[115|[47|[117|[105|[47|[115|[114|[99|[47|[102|[108|[111|[119|[95|[99|[111|[110|[116|[114|[111|[108|[47|[114|[101|[99|[101|[105|[118|[101|[95|[116|[101|[115|[116|[46|[112|[116]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]],3}],
 		%% Line 3
 		'compile' =
 		    %% Line 3
@@ -732,12 +732,12 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 'module_info'/0 =
     ( fun () ->
 	  call 'erlang':'get_module_info'
-	      ('Elixir.Patina.Receive')
+	      ('Elixir.Patina.ReceiveTest')
       -| [{'function',{'module_info',0}}] )
 'module_info'/1 =
     ( fun (_0) ->
 	  call 'erlang':'get_module_info'
-	      ('Elixir.Patina.Receive', ( _0
-					  -| [{'function',{'module_info',1}}] ))
+	      ('Elixir.Patina.ReceiveTest', ( _0
+					      -| [{'function',{'module_info',1}}] ))
       -| [{'function',{'module_info',1}}] )
 end

@@ -2964,6 +2964,14 @@ pub mod sym {
     }
 }
 
+/// Returns `true` if `name` is a reserved identifier in `edition`.
+pub fn is_reserved_ident(name: &str, edition: Edition) -> bool {
+    PREDEFINED_SYMBOLS
+        .iter()
+        .position(|&predefined| predefined == name)
+        .is_some_and(|idx| Symbol::new(idx as u32).is_reserved(|| edition))
+}
+
 impl Symbol {
     fn is_special(self) -> bool {
         self <= kw::Underscore

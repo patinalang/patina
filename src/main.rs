@@ -21,6 +21,7 @@ use rustc_errors::emitter::HumanReadableErrorType;
 use rustc_errors::{ColorConfig, FatalError, catch_fatal_errors};
 use rustc_session::config::{ErrorOutputType, Externs};
 use rustc_session::utils::CanonicalizedPath;
+use rustc_span::edition::Edition;
 
 use crate::clean::CleanError;
 use crate::compile::compile_server::{OtpVersionError, SpawnError};
@@ -31,6 +32,8 @@ use crate::package::{
     DuplicateExtern, ExternArg, ExternArgError, PackageInfo, PackageName, PackageNameError,
 };
 use crate::print::PrintError;
+
+pub(crate) const EDITION: Edition = Edition::EditionFuture;
 
 #[derive(Debug, Clone, Copy, clap::ValueEnum)]
 pub(crate) enum DumpStage {
