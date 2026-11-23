@@ -779,11 +779,11 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 err.note(format!("cannot satisfy `{predicate}`"));
             }
             (0, _, 1) => {
-                err.note(format!("{msg} in the `{}` crate{post}", crates[0]));
+                err.note(format!("{msg} in the `{}` package{post}", crates[0]));
             }
             (0, _, _) => {
                 err.note(format!(
-                    "{} in the following crates: {}{}",
+                    "{} in the following packages: {}{}",
                     msg,
                     crate_names.join(", "),
                     post,
@@ -796,13 +796,13 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
             (_, 1, 1) => {
                 let span: MultiSpan = spans.into();
                 err.span_note(span, msg);
-                err.note(format!("and another `impl` found in the `{}` crate{post}", crates[0]));
+                err.note(format!("and another `impl` found in the `{}` package{post}", crates[0]));
             }
             _ => {
                 let span: MultiSpan = spans.into();
                 err.span_note(span, msg);
                 err.note(format!(
-                    "and more `impl`s found in the following crates: {}{}",
+                    "and more `impl`s found in the following packages: {}{}",
                     crate_names.join(", "),
                     post,
                 ));

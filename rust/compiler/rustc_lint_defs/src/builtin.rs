@@ -70,7 +70,7 @@ declare_lint_pass! {
         LONG_RUNNING_CONST_EVAL,
         LOSSY_PROVENANCE_CASTS,
         MACRO_EXPANDED_MACRO_EXPORTS_ACCESSED_BY_ABSOLUTE_PATHS,
-        MACRO_USE_EXTERN_CRATE,
+        MACRO_USE_EXTERN_PKG,
         MALFORMED_DIAGNOSTIC_ATTRIBUTES,
         MALFORMED_DIAGNOSTIC_FORMAT_LITERALS,
         META_VARIABLE_MISUSE,
@@ -88,7 +88,7 @@ declare_lint_pass! {
         PRIVATE_BOUNDS,
         PRIVATE_INTERFACES,
         PROC_MACRO_DERIVE_RESOLUTION_FALLBACK,
-        PUB_USE_OF_PRIVATE_EXTERN_CRATE,
+        PUB_USE_OF_PRIVATE_EXTERN_PKG,
         REDUNDANT_IMPORTS,
         REDUNDANT_LIFETIMES,
         REFINING_IMPL_TRAIT_INTERNAL,
@@ -139,8 +139,8 @@ declare_lint_pass! {
         UNUSED_ASSIGNMENTS,
         UNUSED_ASSOCIATED_TYPE_BOUNDS,
         UNUSED_ATTRIBUTES,
-        UNUSED_CRATE_DEPENDENCIES,
-        UNUSED_EXTERN_CRATES,
+        UNUSED_PKG_DEPENDENCIES,
+        UNUSED_EXTERN_PKGS,
         UNUSED_FEATURES,
         UNUSED_IMPORTS,
         UNUSED_LABELS,
@@ -513,28 +513,28 @@ declare_lint! {
 }
 
 declare_lint! {
-    /// The `unused_extern_crates` lint guards against `extern crate` items
+    /// The `unused_extern_pkgs` lint guards against `extern pkg` items
     /// that are never used.
     ///
     /// ### Example
     ///
     /// ```rust,compile_fail
-    /// #![deny(unused_extern_crates)]
+    /// #![deny(unused_extern_pkgs)]
     /// #![deny(warnings)]
-    /// extern crate proc_macro;
+    /// extern pkg proc_macro;
     /// ```
     ///
     /// {{produces}}
     ///
     /// ### Explanation
     ///
-    /// `extern crate` items that are unused have no effect and should be
+    /// `extern pkg` items that are unused have no effect and should be
     /// removed. Note that there are some cases where specifying an `extern
-    /// crate` is desired for the side effect of ensuring the given crate is
+    /// pkg` is desired for the side effect of ensuring the given package is
     /// linked, even though it is not otherwise directly referenced. The lint
-    /// can be silenced by aliasing the crate to an underscore, such as
-    /// `extern crate foo as _`. Also note that it is no longer idiomatic to
-    /// use `extern crate` in the [2018 edition], as extern crates are now
+    /// can be silenced by aliasing the package to an underscore, such as
+    /// `extern pkg foo as _`. Also note that it is no longer idiomatic to
+    /// use `extern pkg` in the [2018 edition], as extern packages are now
     /// automatically added in scope.
     ///
     /// This lint is "allow" by default because it can be noisy, and produce
@@ -543,32 +543,32 @@ declare_lint! {
     /// `Cargo.toml`) to ensure stale build entries aren't left behind.
     ///
     /// [2018 edition]: https://doc.rust-lang.org/edition-guide/rust-2018/module-system/path-clarity.html#no-more-extern-crate
-    pub UNUSED_EXTERN_CRATES,
+    pub UNUSED_EXTERN_PKGS,
     Allow,
-    "extern crates that are never used"
+    "extern packages that are never used"
 }
 
 declare_lint! {
-    /// The `unused_crate_dependencies` lint detects crate dependencies that
+    /// The `unused_pkg_dependencies` lint detects package dependencies that
     /// are never used.
     ///
     /// ### Example
     ///
-    /// ```rust,ignore (needs extern crate)
-    /// #![deny(unused_crate_dependencies)]
+    /// ```rust,ignore (needs extern pkg)
+    /// #![deny(unused_pkg_dependencies)]
     /// ```
     ///
     /// This will produce:
     ///
     /// ```text
-    /// error: extern crate `regex` is unused in crate `lint_example`
+    /// error: extern package `regex` is unused in package `lint_example`
     ///   |
-    ///   = help: remove the dependency or add `use regex as _;` to the crate root
+    ///   = help: remove the dependency or add `use regex as _;` to the package root
     /// note: the lint level is defined here
     ///  --> src/lib.rs:1:9
     ///   |
-    /// 1 | #![deny(unused_crate_dependencies)]
-    ///   |         ^^^^^^^^^^^^^^^^^^^^^^^^^
+    /// 1 | #![deny(unused_pkg_dependencies)]
+    ///   |         ^^^^^^^^^^^^^^^^^^^^^^^
     /// ```
     ///
     /// ### Explanation
@@ -579,22 +579,17 @@ declare_lint! {
     /// building dependencies that are no longer used. This lint can be
     /// enabled to detect dependencies that are never used (more specifically,
     /// any dependency passed with the `--extern` command-line flag that is
-    /// never referenced via [`use`], [`extern crate`], or in any [path]).
+    /// never referenced via [`use`], [`extern pkg`], or in any [path]).
     ///
     /// This lint is "allow" by default because it can provide false positives
-    /// depending on how the build system is configured. For example, when
-    /// using Cargo, a "package" consists of multiple crates (such as a
-    /// library and a binary), but the dependencies are defined for the
-    /// package as a whole. If there is a dependency that is only used in the
-    /// binary, but not the library, then the lint will be incorrectly issued
-    /// in the library.
+    /// depending on how the build system is configured.
     ///
     /// [path]: https://doc.rust-lang.org/reference/paths.html
     /// [`use`]: https://doc.rust-lang.org/reference/items/use-declarations.html
-    /// [`extern crate`]: https://doc.rust-lang.org/reference/items/extern-crates.html
-    pub UNUSED_CRATE_DEPENDENCIES,
+    /// [`extern pkg`]: https://doc.rust-lang.org/reference/items/extern-crates.html
+    pub UNUSED_PKG_DEPENDENCIES,
     Allow,
-    "crate dependencies that are never used",
+    "package dependencies that are never used",
     crate_level_only
 }
 
@@ -1297,13 +1292,13 @@ declare_lint! {
 }
 
 declare_lint! {
-    /// The `pub_use_of_private_extern_crate` lint detects a specific
-    /// situation of re-exporting a private `extern crate`.
+    /// The `pub_use_of_private_extern_pkg` lint detects a specific
+    /// situation of re-exporting a private `extern pkg`.
     ///
     /// ### Example
     ///
     /// ```rust,compile_fail
-    /// extern crate core;
+    /// extern pkg core;
     /// pub use core as reexported_core;
     /// ```
     ///
@@ -1312,7 +1307,7 @@ declare_lint! {
     /// ### Explanation
     ///
     /// A public `use` declaration should not be used to publically re-export a
-    /// private `extern crate`. `pub extern crate` should be used instead.
+    /// private `extern pkg`. `pub extern pkg` should be used instead.
     ///
     /// This was historically allowed, but is not the intended behavior
     /// according to the visibility rules. This is a [future-incompatible]
@@ -1321,9 +1316,9 @@ declare_lint! {
     ///
     /// [issue #127909]: https://github.com/rust-lang/rust/issues/127909
     /// [future-incompatible]: ../index.md#future-incompatible-lints
-    pub PUB_USE_OF_PRIVATE_EXTERN_CRATE,
+    pub PUB_USE_OF_PRIVATE_EXTERN_PKG,
     Deny,
-    "detect public re-exports of private extern crates",
+    "detect public re-exports of private extern packages",
     @future_incompatible = FutureIncompatibleInfo {
         reason: fcw!(FutureReleaseError #127909),
         report_in_deps: true,
@@ -2130,15 +2125,15 @@ declare_lint! {
 }
 
 declare_lint! {
-    /// The `macro_use_extern_crate` lint detects the use of the [`macro_use` attribute].
+    /// The `macro_use_extern_pkg` lint detects the use of the [`macro_use` attribute].
     ///
     /// ### Example
     ///
-    /// ```rust,ignore (needs extern crate)
-    /// #![deny(macro_use_extern_crate)]
+    /// ```rust,ignore (needs extern pkg)
+    /// #![deny(macro_use_extern_pkg)]
     ///
     /// #[macro_use]
-    /// extern crate serde_json;
+    /// extern pkg serde_json;
     ///
     /// fn main() {
     ///     let _ = json!{{}};
@@ -2148,7 +2143,7 @@ declare_lint! {
     /// This will produce:
     ///
     /// ```text
-    /// error: applying the `#[macro_use]` attribute to an `extern crate` item is deprecated
+    /// error: applying the `#[macro_use]` attribute to an `extern pkg` item is deprecated
     ///  --> src/main.rs:3:1
     ///   |
     /// 3 | #[macro_use]
@@ -2158,17 +2153,17 @@ declare_lint! {
     /// note: the lint level is defined here
     ///  --> src/main.rs:1:9
     ///   |
-    /// 1 | #![deny(macro_use_extern_crate)]
-    ///   |         ^^^^^^^^^^^^^^^^^^^^^^
+    /// 1 | #![deny(macro_use_extern_pkg)]
+    ///   |         ^^^^^^^^^^^^^^^^^^^^
     /// ```
     ///
     /// ### Explanation
     ///
-    /// The [`macro_use` attribute] on an [`extern crate`] item causes
-    /// macros in that external crate to be brought into the prelude of the
-    /// crate, making the macros in scope everywhere. As part of the efforts
+    /// The [`macro_use` attribute] on an [`extern pkg`] item causes
+    /// macros in that external package to be brought into the prelude of the
+    /// package, making the macros in scope everywhere. As part of the efforts
     /// to simplify handling of dependencies in the [2018 edition], the use of
-    /// `extern crate` is being phased out. To bring macros from extern crates
+    /// `extern pkg` is being phased out. To bring macros from extern packages
     /// into scope, it is recommended to use a [`use` import].
     ///
     /// This lint is "allow" by default because this is a stylistic choice
@@ -2177,7 +2172,7 @@ declare_lint! {
     /// [`macro_use` attribute]: https://doc.rust-lang.org/reference/macros-by-example.html#the-macro_use-attribute
     /// [`use` import]: https://doc.rust-lang.org/reference/items/use-declarations.html
     /// [issue #52043]: https://github.com/rust-lang/rust/issues/52043
-    pub MACRO_USE_EXTERN_CRATE,
+    pub MACRO_USE_EXTERN_PKG,
     Allow,
     "the `#[macro_use]` attribute is now deprecated in favor of using macros \
      via the module system"

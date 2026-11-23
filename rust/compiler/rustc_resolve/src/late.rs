@@ -517,7 +517,7 @@ impl PathSource<'_, '_, '_> {
                         if let [segment, _] = path.segments.as_slice()
                             && segment.ident.name == kw::PathRoot =>
                     {
-                        "external crate"
+                        "external package"
                     }
                     ExprKind::Path(_, path)
                         if let Some(segment) = path.segments.last()

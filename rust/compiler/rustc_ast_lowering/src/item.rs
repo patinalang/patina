@@ -1971,7 +1971,7 @@ impl<'hir> LoweringContext<'_, 'hir> {
             let Some(did) = did.as_local() else {
                 self.dcx().span_err(
                     path.span,
-                    "only opaque types defined in the local crate can be defined",
+                    "only opaque types defined in the local package can be defined",
                 );
                 return None;
             };

@@ -256,7 +256,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         let old_kind = match (ns, old_binding.res()) {
             (ValueNS, _) => "value",
             (MacroNS, _) => "macro",
-            (TypeNS, _) if old_binding.is_extern_crate() => "extern crate",
+            (TypeNS, _) if old_binding.is_extern_crate() => "extern package",
             (TypeNS, Res::Def(DefKind::Mod, _)) => "module",
             (TypeNS, Res::Def(DefKind::Trait, _)) => "trait",
             (TypeNS, _) => "type",
@@ -2136,7 +2136,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         {
             Some(&[
                 "consider updating this dependency to resolve this error",
-                "if updating the dependency does not resolve the problem report the problem to the author of the relevant crate",
+                "if updating the dependency does not resolve the problem report the problem to the author of the relevant package",
             ] as &[_])
         } else {
             None
@@ -2632,7 +2632,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         let scope = match &path[..failed_segment_idx] {
             [.., prev] => {
                 if prev.ident.name == kw::PathRoot {
-                    format!("the crate root")
+                    format!("the package root")
                 } else {
                     format!("`{}`", prev.ident)
                 }
@@ -2669,7 +2669,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             } else if ident.name == sym::core {
                 (
                     message,
-                    format!("you might be missing crate `{ident}`"),
+                    format!("you might be missing package `{ident}`"),
                     Some((
                         vec![(ident.span, "std".to_string())],
                         "try using `std` instead of `core`".to_string(),
@@ -2678,14 +2678,14 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 )
             } else if ident.name == kw::Underscore {
                 (
-                    "invalid crate or module name `_`".to_string(),
-                    "`_` is not a valid crate or module name".to_string(),
+                    "invalid package or module name `_`".to_string(),
+                    "`_` is not a valid package or module name".to_string(),
                     None,
                 )
             } else if self.tcx.sess.is_rust_2015() {
                 (
-                    format!("cannot find module or crate `{ident}` in {scope}"),
-                    format!("use of unresolved module or unlinked crate `{ident}`"),
+                    format!("cannot find module or package `{ident}` in {scope}"),
+                    format!("use of unresolved module or unlinked package `{ident}`"),
                     Some((
                         vec![(
                             self.current_crate_outer_attr_insert_span,
@@ -2693,13 +2693,13 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                         )],
                         if was_invoked_from_cargo() {
                             format!(
-                                "if you wanted to use a crate named `{ident}`, use `cargo add \
+                                "if you wanted to use a package named `{ident}`, use `cargo add \
                                  {ident}` to add it to your `Cargo.toml` and import it in your \
                                  code",
                             )
                         } else {
                             format!(
-                                "you might be missing a crate named `{ident}`, add it to your \
+                                "you might be missing a package named `{ident}`, add it to your \
                                  project and import it in your code",
                             )
                         },
@@ -2707,7 +2707,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     )),
                 )
             } else {
-                (message, format!("could not find `{ident}` in the crate root"), None)
+                (message, format!("could not find `{ident}` in the package root"), None)
             }
         } else if failed_segment_idx > 0 {
             let parent = path[failed_segment_idx - 1].ident.name;
@@ -2715,9 +2715,9 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 // ::foo is mounted at the crate root for 2015, and is the extern
                 // prelude for 2018+
                 kw::PathRoot if self.tcx.sess.edition() > Edition::Edition2015 => {
-                    "the list of imported crates".to_owned()
+                    "the list of imported packages".to_owned()
                 }
-                kw::PathRoot | kw::Pkg => "the crate root".to_owned(),
+                kw::PathRoot | kw::Pkg => "the package root".to_owned(),
                 _ => format!("`{parent}`"),
             };
 
@@ -2852,7 +2852,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             if ident.name == sym::alloc {
                 suggestion = Some((
                     vec![],
-                    String::from("add `extern pkg alloc` to use the `alloc` crate"),
+                    String::from("add `extern pkg alloc` to use the `alloc` package"),
                     Applicability::MaybeIncorrect,
                 ))
             }
@@ -2862,7 +2862,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     |sugg| {
                         (
                             vec![(ident.span, sugg.to_string())],
-                            String::from("there is a crate or module with a similar name"),
+                            String::from("there is a package or module with a similar name"),
                             Applicability::MaybeIncorrect,
                         )
                     },
@@ -2877,8 +2877,8 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 ignore_import,
             ) {
                 let descr = binding.res().descr();
-                let message = format!("cannot find module or crate `{ident}` in {scope}");
-                (message, format!("{descr} `{ident}` is not a crate or module"), suggestion)
+                let message = format!("cannot find module or package `{ident}` in {scope}");
+                (message, format!("{descr} `{ident}` is not a package or module"), suggestion)
             } else {
                 let suggestion = if suggestion.is_some() {
                     suggestion
@@ -2888,7 +2888,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     Some((
                         vec![],
                         format!(
-                            "if you wanted to use a crate named `{ident}`, use `cargo add {ident}` \
+                            "if you wanted to use a package named `{ident}`, use `cargo add {ident}` \
                              to add it to your `Cargo.toml`",
                         ),
                         Applicability::MaybeIncorrect,
@@ -2896,14 +2896,14 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 } else {
                     Some((
                         vec![],
-                        format!("you might be missing a crate named `{ident}`",),
+                        format!("you might be missing a package named `{ident}`",),
                         Applicability::MaybeIncorrect,
                     ))
                 };
-                let message = format!("cannot find module or crate `{ident}` in {scope}");
+                let message = format!("cannot find module or package `{ident}` in {scope}");
                 (
                     message,
-                    format!("use of unresolved module or unlinked crate `{ident}`"),
+                    format!("use of unresolved module or unlinked package `{ident}`"),
                     suggestion,
                 )
             }
@@ -3234,7 +3234,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
 
         let suggestion = Some((
             corrections,
-            String::from("a macro with this name exists at the root of the crate"),
+            String::from("a macro with this name exists at the root of the package"),
             Applicability::MaybeIncorrect,
         ));
         Some((

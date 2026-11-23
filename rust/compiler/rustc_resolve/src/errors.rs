@@ -592,7 +592,7 @@ pub(crate) struct AddAsNonDerive<'a> {
 }
 
 #[derive(Diagnostic)]
-#[diag("can't use a procedural macro from the same crate that defines it")]
+#[diag("can't use a procedural macro from the same package that defines it")]
 pub(crate) struct ProcMacroSameCrate {
     #[primary_span]
     pub(crate) span: Span,
@@ -611,7 +611,7 @@ pub(crate) struct ProcMacroDeriveResolutionFallback {
 
 #[derive(Diagnostic)]
 #[diag(
-    "macro-expanded `macro_export` macros from the current crate cannot be referred to by absolute paths"
+    "macro-expanded `macro_export` macros from the current package cannot be referred to by absolute paths"
 )]
 pub(crate) struct MacroExpandedMacroExportsAccessedByAbsolutePaths {
     #[note("the macro is defined here")]
@@ -782,7 +782,7 @@ pub(crate) struct CannotBeReexportedPrivate {
 }
 
 #[derive(Diagnostic)]
-#[diag("`{$ident}` is only public within the crate, and cannot be re-exported outside", code = E0364)]
+#[diag("`{$ident}` is only public within the package, and cannot be re-exported outside", code = E0364)]
 pub(crate) struct CannotBeReexportedCratePublic {
     #[primary_span]
     pub(crate) span: Span,
@@ -800,17 +800,17 @@ pub(crate) struct CannotBeReexportedPrivateNS {
 }
 
 #[derive(Diagnostic)]
-#[diag("`{$ident}` is only public within the crate, and cannot be re-exported outside", code = E0365)]
+#[diag("`{$ident}` is only public within the package, and cannot be re-exported outside", code = E0365)]
 #[note("consider declaring type or module `{$ident}` with `pub`")]
 pub(crate) struct CannotBeReexportedCratePublicNS {
     #[primary_span]
-    #[label("re-export of crate public `{$ident}`")]
+    #[label("re-export of package public `{$ident}`")]
     pub(crate) span: Span,
     pub(crate) ident: Ident,
 }
 
 #[derive(Diagnostic)]
-#[diag("extern crate `{$ident}` is private and cannot be re-exported", code = E0365)]
+#[diag("extern package `{$ident}` is private and cannot be re-exported", code = E0365)]
 pub(crate) struct PrivateExternCrateReexport {
     pub ident: Ident,
     #[suggestion(
@@ -831,7 +831,7 @@ pub(crate) struct ConsiderAddingMacroExport {
 
 #[derive(Subdiagnostic)]
 #[suggestion(
-    "in case you want to use the macro within this crate only, reduce the visibility to `pub(pkg)`",
+    "in case you want to use the macro within this package only, reduce the visibility to `pub(pkg)`",
     code = "pub(pkg)",
     applicability = "maybe-incorrect"
 )]
@@ -849,7 +849,7 @@ pub(crate) struct ConsiderMarkingAsPub {
 }
 
 #[derive(Diagnostic)]
-#[diag("cannot glob-import all possible crates")]
+#[diag("cannot glob-import all possible packages")]
 pub(crate) struct CannotGlobImportAllCrates {
     #[primary_span]
     pub(crate) span: Span,
@@ -911,7 +911,7 @@ pub(crate) struct UnexpectedResUseAtOpInSlicePatWithRangeSugg {
 }
 
 #[derive(Diagnostic)]
-#[diag("an `extern pkg` loading macros must be at the crate root", code = E0468)]
+#[diag("an `extern pkg` loading macros must be at the package root", code = E0468)]
 pub(crate) struct ExternCrateLoadingMacroNotAtCrateRoot {
     #[primary_span]
     pub(crate) span: Span,
@@ -922,7 +922,7 @@ pub(crate) struct ExternCrateLoadingMacroNotAtCrateRoot {
 pub(crate) struct ExternCrateSelfRequiresRenaming {
     #[primary_span]
     #[suggestion(
-        "rename the `self` crate to be able to import it",
+        "rename the `self` package to be able to import it",
         code = "extern pkg self as name;",
         applicability = "has-placeholders"
     )]
@@ -1409,7 +1409,7 @@ pub(crate) struct LegacyDeriveHelpers {
 }
 
 #[derive(Diagnostic)]
-#[diag("unused extern crate")]
+#[diag("unused extern package")]
 pub(crate) struct UnusedExternCrate {
     #[label("unused")]
     pub span: Span,
@@ -1518,7 +1518,7 @@ pub(crate) enum UnknownDiagnosticAttributeHelp {
         span: Span,
         typo_name: Symbol,
     },
-    #[help("add `#![feature({$feature})]` to the crate attributes to enable")]
+    #[help("add `#![feature({$feature})]` to the package attributes to enable")]
     UseFeature { feature: Symbol },
 }
 
@@ -1709,7 +1709,7 @@ pub(crate) struct SingleUseLifetimeSugg {
 
 #[derive(Diagnostic)]
 #[diag(
-    "absolute paths must start with `self`, `super`, `pkg`, or an external crate name in the 2018 edition"
+    "absolute paths must start with `self`, `super`, `pkg`, or an external package name in the 2018 edition"
 )]
 pub(crate) struct AbsPathWithModule {
     #[subdiagnostic]

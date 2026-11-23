@@ -1484,7 +1484,7 @@ impl SearchInterfaceForPrivateItemsVisitor<'_> {
                     {
                         "private"
                     } else if vis_def_id.is_top_level_module() {
-                        "crate-private"
+                        "package-private"
                     } else {
                         "restricted"
                     }

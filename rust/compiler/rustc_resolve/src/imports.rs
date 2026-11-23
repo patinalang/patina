@@ -21,7 +21,7 @@ use rustc_middle::ty::{TyCtxt, Visibility};
 use rustc_session::errors::feature_err;
 use rustc_session::lint::builtin::{
     AMBIGUOUS_GLOB_REEXPORTS, EXPORTED_PRIVATE_DEPENDENCIES, HIDDEN_GLOB_REEXPORTS,
-    PUB_USE_OF_PRIVATE_EXTERN_CRATE, REDUNDANT_IMPORTS, UNUSED_IMPORTS,
+    PUB_USE_OF_PRIVATE_EXTERN_PKG, REDUNDANT_IMPORTS, UNUSED_IMPORTS,
 };
 use rustc_span::edit_distance::find_best_match_for_name;
 use rustc_span::hygiene::LocalExpnId;
@@ -1484,7 +1484,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     }
                     _ => {
                         if !ident.is_path_segment_keyword() {
-                            format!("no external crate `{ident}`")
+                            format!("no external package `{ident}`")
                         } else {
                             // HACK(eddyb) this shows up for `self` & `super`, which
                             // should work instead - for now keep the same error message.
@@ -1550,7 +1550,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             {
                 let extern_crate_sp = self.tcx.source_span(self.local_def_id(extern_crate_id));
                 self.lint_buffer.buffer_lint(
-                    PUB_USE_OF_PRIVATE_EXTERN_CRATE,
+                    PUB_USE_OF_PRIVATE_EXTERN_PKG,
                     import_id,
                     import.span,
                     crate::errors::PrivateExternCrateReexport {
@@ -1851,7 +1851,7 @@ fn import_kind_to_string(import_kind: &ImportKind<'_>) -> String {
     match import_kind {
         ImportKind::Single { source, .. } => source.to_string(),
         ImportKind::Glob { .. } => "*".to_string(),
-        ImportKind::ExternCrate { .. } => "<extern crate>".to_string(),
+        ImportKind::ExternCrate { .. } => "<extern package>".to_string(),
         ImportKind::ExternMod { .. } => "<extern mod>".to_string(),
         ImportKind::MacroUse { .. } => "#[macro_use]".to_string(),
         ImportKind::MacroExport => "#[macro_export]".to_string(),

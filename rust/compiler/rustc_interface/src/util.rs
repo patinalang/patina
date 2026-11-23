@@ -432,7 +432,7 @@ impl CodegenBackend for DummyCodegenBackend {
             && outputs.outputs.should_link()
         {
             sess.dcx().fatal(format!(
-                "crate type {crate_type} not supported by the dummy codegen backend"
+                "package type {crate_type} not supported by the dummy codegen backend"
             ));
         }
 

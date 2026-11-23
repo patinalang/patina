@@ -57,7 +57,7 @@ pub(crate) struct CguFieldsMissing<'a> {
 }
 
 #[derive(Diagnostic)]
-#[diag("`#![doc({$attr_name} = \"...\")]` isn't allowed as a crate-level attribute")]
+#[diag("`#![doc({$attr_name} = \"...\")]` isn't allowed as a package-level attribute")]
 pub(crate) struct DocAttrNotCrateLevel {
     #[primary_span]
     pub span: Span,
@@ -220,7 +220,7 @@ pub(crate) struct DeprecatedItemSuggestion {
     #[primary_span]
     pub span: Span,
 
-    #[help("add `#![feature(deprecated_suggestion)]` to the crate root")]
+    #[help("add `#![feature(deprecated_suggestion)]` to the package root")]
     pub is_nightly: bool,
 
     #[note("see #94785 for more details")]

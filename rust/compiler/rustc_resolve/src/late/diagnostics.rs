@@ -518,17 +518,22 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                     // In edition 2018 onwards, the `::foo` syntax may only pull from the extern prelude
                     // which overrides all other expectations of item type
                     expected = "pkg";
-                    (String::new(), "the list of imported crates".to_string(), None, None)
+                    (String::new(), "the list of imported packages".to_string(), None, None)
                 } else {
                     (
                         String::new(),
-                        "the crate root".to_string(),
+                        "the package root".to_string(),
                         Some(CRATE_DEF_ID.to_def_id()),
                         None,
                     )
                 }
             } else if path.len() == 2 && path[0].ident.name == kw::Pkg {
-                (String::new(), "the crate root".to_string(), Some(CRATE_DEF_ID.to_def_id()), None)
+                (
+                    String::new(),
+                    "the package root".to_string(),
+                    Some(CRATE_DEF_ID.to_def_id()),
+                    None,
+                )
             } else {
                 let mod_path = &path[..path.len() - 1];
                 let mod_res = self.resolve_path(mod_path, Some(TypeNS), None, source);
@@ -2401,7 +2406,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                             // We don't need to handle foreign crate types because in that case you
                             // can't access the ctor either way.
                             format!(
-                                "crate{}", // The method already has leading `::`.
+                                "pkg{}", // The method already has leading `::`.
                                 self.r.tcx.def_path(def_id).to_string_no_crate_verbose(),
                             ),
                             Applicability::MachineApplicable,

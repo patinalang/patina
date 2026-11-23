@@ -107,7 +107,7 @@ pub(crate) struct ErroneousConstant {
 
 #[derive(Diagnostic)]
 #[diag("reached the type-length limit while instantiating `{$instance}`")]
-#[help("consider adding a `#![type_length_limit=\"{$type_length}\"]` attribute to your crate")]
+#[help("consider adding a `#![type_length_limit=\"{$type_length}\"]` attribute to your package")]
 pub(crate) struct TypeLengthLimit<'tcx> {
     #[primary_span]
     pub span: Span,

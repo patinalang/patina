@@ -184,7 +184,7 @@ pub(crate) struct FeatureNotAllowed {
 #[derive(Diagnostic)]
 #[diag("recursion limit reached while expanding `{$descr}`")]
 #[help(
-    "consider increasing the recursion limit by adding a `#![recursion_limit = \"{$suggested_limit}\"]` attribute to your crate (`{$crate_name}`)"
+    "consider increasing the recursion limit by adding a `#![recursion_limit = \"{$suggested_limit}\"]` attribute to your package (`{$crate_name}`)"
 )]
 pub(crate) struct RecursionLimitReached {
     #[primary_span]
@@ -312,7 +312,7 @@ pub(crate) struct ModuleInBlockName {
 #[diag("file not found for module `{$name}`", code = E0583)]
 #[help("to create the module `{$name}`, create file \"{$path}\"")]
 #[note(
-    "if there is a `mod {$name}` elsewhere in the crate already, import it with `use pkg::...` instead"
+    "if there is a `mod {$name}` elsewhere in the package already, import it with `use pkg::...` instead"
 )]
 pub(crate) struct ModuleFileNotFound {
     #[primary_span]

@@ -3394,7 +3394,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 continue;
             }
             let mut mspan: MultiSpan = span.into();
-            mspan.push_span_label(span, format!("`{ty}` is defined in another crate"));
+            mspan.push_span_label(span, format!("`{ty}` is defined in another package"));
             err.span_note(
                 mspan,
                 format!("`{ty}` does not implement `{}`", pred.trait_ref.print_trait_sugared()),

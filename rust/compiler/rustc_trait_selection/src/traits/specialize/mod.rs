@@ -527,9 +527,9 @@ fn report_conflicting_impls<'tcx>(
             Err(cname) => {
                 let msg = match to_pretty_impl_header(tcx, overlap.with_impl) {
                     Some(s) => {
-                        format!("conflicting implementation in crate `{cname}`:\n- {s}")
+                        format!("conflicting implementation in package `{cname}`:\n- {s}")
                     }
-                    None => format!("conflicting implementation in crate `{cname}`"),
+                    None => format!("conflicting implementation in package `{cname}`"),
                 };
                 err.note(msg);
             }

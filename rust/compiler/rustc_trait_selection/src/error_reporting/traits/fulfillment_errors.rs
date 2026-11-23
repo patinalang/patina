@@ -2520,7 +2520,7 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
     ) {
         let crate_name = self.tcx.crate_name(krate);
         let crate_msg = format!(
-            "there are multiple different versions of crate `{crate_name}` in the dependency graph"
+            "there are multiple different versions of package `{crate_name}` in the dependency graph"
         );
         err.span_note(sp, crate_msg);
     }

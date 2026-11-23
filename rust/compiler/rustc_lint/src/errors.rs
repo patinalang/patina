@@ -70,7 +70,7 @@ pub(crate) struct UnknownToolInScopedLint {
     pub span: Option<Span>,
     pub tool_name: Symbol,
     pub lint_name: String,
-    #[help("add `#![register_tool({$tool_name})]` to the crate root")]
+    #[help("add `#![register_tool({$tool_name})]` to the package root")]
     pub is_nightly_build: bool,
 }
 

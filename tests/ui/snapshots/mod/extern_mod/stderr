@@ -12,13 +12,13 @@ warning: unused import: `erlang`
 LL | extern mod erlang;
    |            ^^^^^^
 
-error[E0433]: cannot find module or crate `erlang` in this scope
+error[E0433]: cannot find module or package `erlang` in this scope
   --> tests/ui/src/mod/extern_mod.pt:8:21
    |
 LL |         let _hash = erlang::phash2(());
-   |                     ^^^^^^ use of unresolved module or unlinked crate `erlang`
+   |                     ^^^^^^ use of unresolved module or unlinked package `erlang`
    |
-   = help: you might be missing a crate named `erlang`
+   = help: you might be missing a package named `erlang`
 
 error: aborting due to 1 previous error; 2 warnings emitted
 

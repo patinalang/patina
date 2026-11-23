@@ -92,7 +92,7 @@ pub(super) fn find_opaque_ty_constraints_for_tait(
         let guar = tcx.dcx().emit_err(UnconstrainedOpaqueType {
             span: tcx.def_span(def_id),
             name: tcx.item_ident(parent_def_id.to_def_id()),
-            what: "crate",
+            what: "package",
         });
         EarlyBinder::bind(Ty::new_error(tcx, guar))
     }

@@ -4512,7 +4512,7 @@ impl ItemKind {
 
     pub fn descr(&self) -> &'static str {
         match self {
-            ItemKind::ExternCrate(..) => "extern crate",
+            ItemKind::ExternCrate(..) => "extern package",
             ItemKind::Use(..) => "`use` import",
             ItemKind::Static(..) => "static item",
             ItemKind::Const(..) => "constant item",

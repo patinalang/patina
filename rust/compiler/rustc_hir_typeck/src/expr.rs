@@ -2450,7 +2450,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 you_can = if self.tcx.features().default_field_values() {
                     "you can"
                 } else {
-                    "if you added `#![feature(default_field_values)]` to your crate you could"
+                    "if you added `#![feature(default_field_values)]` to your package you could"
                 },
             );
             if let Some(hir_field) = hir_fields.last() {

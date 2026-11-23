@@ -119,7 +119,7 @@ pub fn is_const_evaluatable<'tcx>(
                         if span == DUMMY_SP { tcx.def_span(uv.def) } else { span },
                         "failed to evaluate generic const expression",
                     )
-                    .with_note("the crate this constant originates from uses `#![feature(generic_const_exprs)]`")
+                    .with_note("the package this constant originates from uses `#![feature(generic_const_exprs)]`")
                     .with_span_suggestion_verbose(
                         DUMMY_SP,
                         "consider enabling this feature",

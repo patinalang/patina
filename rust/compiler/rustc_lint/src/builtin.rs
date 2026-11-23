@@ -431,7 +431,7 @@ impl MissingDoc {
 
 impl<'tcx> LateLintPass<'tcx> for MissingDoc {
     fn check_crate(&mut self, cx: &LateContext<'_>) {
-        self.check_missing_docs_attrs(cx, CRATE_DEF_ID, "the", "crate");
+        self.check_missing_docs_attrs(cx, CRATE_DEF_ID, "the", "package");
     }
 
     fn check_item(&mut self, cx: &LateContext<'_>, it: &hir::Item<'_>) {

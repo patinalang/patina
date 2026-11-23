@@ -58,7 +58,7 @@ impl<G: EmissionGuarantee> Diagnostic<'_, G> for NegativePositiveConflict<'_> {
                 diag.span_label(span, msg!("negative implementation here"));
             }
             Err(cname) => {
-                diag.note(msg!("negative implementation in crate `{$negative_impl_cname}`"));
+                diag.note(msg!("negative implementation in package `{$negative_impl_cname}`"));
                 diag.arg("negative_impl_cname", cname.to_string());
             }
         }
@@ -67,7 +67,7 @@ impl<G: EmissionGuarantee> Diagnostic<'_, G> for NegativePositiveConflict<'_> {
                 diag.span_label(span, msg!("positive implementation here"));
             }
             Err(cname) => {
-                diag.note(msg!("positive implementation in crate `{$positive_impl_cname}`"));
+                diag.note(msg!("positive implementation in package `{$positive_impl_cname}`"));
                 diag.arg("positive_impl_cname", cname.to_string());
             }
         }
@@ -1897,7 +1897,7 @@ impl Subdiagnostic for AddPreciseCapturingAndParams {
     fn add_to_diag<G: EmissionGuarantee>(self, diag: &mut Diag<'_, G>) {
         diag.arg("new_lifetime", self.new_lifetime);
         diag.multipart_suggestion(
-            msg!("add a `use<...>` bound to explicitly capture `{$new_lifetime}` after turning all argument-position `impl Trait` into type parameters, noting that this possibly affects the API of this crate"),
+            msg!("add a `use<...>` bound to explicitly capture `{$new_lifetime}` after turning all argument-position `impl Trait` into type parameters, noting that this possibly affects the API of this package"),
             self.suggs,
             Applicability::MaybeIncorrect,
         );

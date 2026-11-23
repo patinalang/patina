@@ -314,7 +314,7 @@ pub(crate) struct LifetimesOrBoundsMismatchOnTrait {
 #[diag("the `{$trait_}` trait may only be implemented for local structs, enums, and unions", code = E0120)]
 pub(crate) struct DropImplOnWrongItem {
     #[primary_span]
-    #[label("must be a struct, enum, or union in the current crate")]
+    #[label("must be a struct, enum, or union in the current package")]
     pub span: Span,
     pub trait_: Symbol,
 }
@@ -677,7 +677,7 @@ impl<'a, G: EmissionGuarantee> Diagnostic<'a, G> for MissingGenericParams {
 
 #[derive(Diagnostic)]
 #[diag("manual implementations of `{$trait_name}` are experimental", code = E0183)]
-#[help("add `#![feature(unboxed_closures)]` to the crate attributes to enable")]
+#[help("add `#![feature(unboxed_closures)]` to the package attributes to enable")]
 pub(crate) struct ManualImplementation {
     #[primary_span]
     #[label("manual implementations of `{$trait_name}` are experimental")]
@@ -744,7 +744,7 @@ pub(crate) struct LinkageType {
 
 #[derive(Diagnostic)]
 #[help(
-    "consider increasing the recursion limit by adding a `#![recursion_limit = \"{$suggested_limit}\"]` attribute to your crate (`{$crate_name}`)"
+    "consider increasing the recursion limit by adding a `#![recursion_limit = \"{$suggested_limit}\"]` attribute to your package (`{$crate_name}`)"
 )]
 #[diag("reached the recursion limit while auto-dereferencing `{$ty}`", code = E0055)]
 pub(crate) struct AutoDerefReachedRecursionLimit<'a> {
@@ -947,7 +947,7 @@ pub(crate) struct EnumDiscriminantOverflowed {
 #[diag(
     "the `#[rustc_paren_sugar]` attribute is a temporary means of controlling which traits can use parenthetical notation"
 )]
-#[help("add `#![feature(unboxed_closures)]` to the crate attributes to use it")]
+#[help("add `#![feature(unboxed_closures)]` to the package attributes to use it")]
 pub(crate) struct ParenSugarAttribute {
     #[primary_span]
     pub span: Span,
@@ -955,7 +955,7 @@ pub(crate) struct ParenSugarAttribute {
 
 #[derive(Diagnostic)]
 #[diag("use of SIMD type{$snip} in FFI is highly experimental and may result in invalid code")]
-#[help("add `#![feature(simd_ffi)]` to the crate attributes to enable")]
+#[help("add `#![feature(simd_ffi)]` to the package attributes to enable")]
 pub(crate) struct SIMDFFIHighlyExperimental {
     #[primary_span]
     pub span: Span,
@@ -975,7 +975,7 @@ pub(crate) enum ImplNotMarkedDefault {
         ident: Ident,
     },
     #[diag("`{$ident}` specializes an item from a parent `impl`, but that item is not marked `default`", code = E0520)]
-    #[note("parent implementation is in crate `{$cname}`")]
+    #[note("parent implementation is in package `{$cname}`")]
     Err {
         #[primary_span]
         span: Span,
@@ -1073,7 +1073,7 @@ pub(crate) struct MissingTraitItemUnstable {
 
 #[derive(Diagnostic)]
 #[diag("implementing `rustc_specialization_trait` traits is unstable")]
-#[help("add `#![feature(min_specialization)]` to the crate attributes to enable")]
+#[help("add `#![feature(min_specialization)]` to the package attributes to enable")]
 pub(crate) struct SpecializationTrait {
     #[primary_span]
     pub span: Span,
@@ -1167,7 +1167,7 @@ pub(crate) enum LateBoundInApit {
 #[derive(Diagnostic)]
 #[diag("impl trait in impl method signature does not match trait method signature")]
 #[note(
-    "add `#[allow(refining_impl_trait)]` if it is intended for this to be part of the public API of this crate"
+    "add `#[allow(refining_impl_trait)]` if it is intended for this to be part of the public API of this package"
 )]
 #[note(
     "we are soliciting feedback, see issue #121718 <https://github.com/rust-lang/rust/issues/121718> for more information"
@@ -1192,7 +1192,7 @@ pub(crate) struct ReturnPositionImplTraitInTraitRefined {
 #[derive(Diagnostic)]
 #[diag("impl trait in impl method captures fewer lifetimes than in trait")]
 #[note(
-    "add `#[allow(refining_impl_trait)]` if it is intended for this to be part of the public API of this crate"
+    "add `#[allow(refining_impl_trait)]` if it is intended for this to be part of the public API of this package"
 )]
 #[note(
     "we are soliciting feedback, see issue #121718 <https://github.com/rust-lang/rust/issues/121718> for more information"
@@ -1208,8 +1208,8 @@ pub(crate) struct ReturnPositionImplTraitInTraitRefinedLifetimes {
 }
 
 #[derive(Diagnostic)]
-#[diag("cannot define inherent `impl` for a type outside of the crate where the type is defined", code = E0390)]
-#[help("consider moving this inherent impl into the crate defining the type if possible")]
+#[diag("cannot define inherent `impl` for a type outside of the package where the type is defined", code = E0390)]
+#[help("consider moving this inherent impl into the package defining the type if possible")]
 pub(crate) struct InherentTyOutside {
     #[primary_span]
     #[help(
@@ -1262,8 +1262,8 @@ pub(crate) struct CoercePointeeNoField {
 }
 
 #[derive(Diagnostic)]
-#[diag("cannot define inherent `impl` for a type outside of the crate where the type is defined", code = E0390)]
-#[help("consider moving this inherent impl into the crate defining the type if possible")]
+#[diag("cannot define inherent `impl` for a type outside of the package where the type is defined", code = E0390)]
+#[help("consider moving this inherent impl into the package defining the type if possible")]
 pub(crate) struct InherentTyOutsideRelevant {
     #[primary_span]
     pub span: Span,
@@ -1272,7 +1272,7 @@ pub(crate) struct InherentTyOutsideRelevant {
 }
 
 #[derive(Diagnostic)]
-#[diag("cannot define inherent `impl` for a type outside of the crate where the type is defined", code = E0116)]
+#[diag("cannot define inherent `impl` for a type outside of the package where the type is defined", code = E0116)]
 #[help(
     "consider defining a trait and implementing it for the type or using a newtype wrapper like `struct MyType(ExternalType);` and implement it"
 )]
@@ -1281,7 +1281,7 @@ pub(crate) struct InherentTyOutsideRelevant {
 )]
 pub(crate) struct InherentTyOutsideNew {
     #[primary_span]
-    #[label("impl for type defined outside of crate")]
+    #[label("impl for type defined outside of package")]
     pub span: Span,
     #[subdiagnostic]
     pub note: Option<InherentTyOutsideNewAliasNote>,
@@ -1459,20 +1459,20 @@ pub(crate) struct TraitsWithDefaultImpl<'a> {
 }
 
 #[derive(Diagnostic)]
-#[diag("cross-crate traits with a default impl, like `{$traits}`, can only be implemented for a struct/enum type, not `{$self_ty}`", code = E0321)]
+#[diag("cross-package traits with a default impl, like `{$traits}`, can only be implemented for a struct/enum type, not `{$self_ty}`", code = E0321)]
 pub(crate) struct CrossCrateTraits<'a> {
     #[primary_span]
-    #[label("can't implement cross-crate trait with a default impl for non-struct/enum type")]
+    #[label("can't implement cross-package trait with a default impl for non-struct/enum type")]
     pub span: Span,
     pub traits: String,
     pub self_ty: Ty<'a>,
 }
 
 #[derive(Diagnostic)]
-#[diag("cross-crate traits with a default impl, like `{$traits}`, can only be implemented for a struct/enum type defined in the current crate", code = E0321)]
+#[diag("cross-package traits with a default impl, like `{$traits}`, can only be implemented for a struct/enum type defined in the current package", code = E0321)]
 pub(crate) struct CrossCrateTraitsDefined {
     #[primary_span]
-    #[label("can't implement cross-crate trait for type in another crate")]
+    #[label("can't implement cross-package trait for type in another package")]
     pub span: Span,
     pub traits: String,
 }
@@ -1543,7 +1543,7 @@ pub(crate) struct TyParamSome {
     #[primary_span]
     #[label("type parameter `{$param}` must be used as the type parameter for some local type")]
     pub span: Span,
-    #[note("only traits defined in the current crate can be implemented for a type parameter")]
+    #[note("only traits defined in the current package can be implemented for a type parameter")]
     pub note: (),
     pub param: Ident,
 }
@@ -1556,14 +1556,14 @@ pub(crate) struct TyParamSome {
 pub(crate) struct TyParamSomeLint {
     #[label("type parameter `{$param}` must be used as the type parameter for some local type")]
     pub span: Span,
-    #[note("only traits defined in the current crate can be implemented for a type parameter")]
+    #[note("only traits defined in the current package can be implemented for a type parameter")]
     pub note: (),
     pub param: Ident,
 }
 
 #[derive(Diagnostic)]
 pub(crate) enum OnlyCurrentTraits {
-    #[diag("only traits defined in the current crate can be implemented for types defined outside of the crate", code = E0117)]
+    #[diag("only traits defined in the current package can be implemented for types defined outside of the package", code = E0117)]
     Outside {
         #[primary_span]
         span: Span,
@@ -1574,7 +1574,7 @@ pub(crate) enum OnlyCurrentTraits {
         #[note("define and implement a trait or new type instead")]
         note: (),
     },
-    #[diag("only traits defined in the current crate can be implemented for primitive types", code = E0117)]
+    #[diag("only traits defined in the current package can be implemented for primitive types", code = E0117)]
     Primitive {
         #[primary_span]
         span: Span,
@@ -1585,7 +1585,7 @@ pub(crate) enum OnlyCurrentTraits {
         #[note("define and implement a trait or new type instead")]
         note: (),
     },
-    #[diag("only traits defined in the current crate can be implemented for arbitrary types", code = E0117)]
+    #[diag("only traits defined in the current package can be implemented for arbitrary types", code = E0117)]
     Arbitrary {
         #[primary_span]
         span: Span,
@@ -1600,21 +1600,21 @@ pub(crate) enum OnlyCurrentTraits {
 
 #[derive(Subdiagnostic)]
 #[label(
-    "type alias impl trait is treated as if it were foreign, because its hidden type could be from a foreign crate"
+    "type alias impl trait is treated as if it were foreign, because its hidden type could be from a foreign package"
 )]
 pub(crate) struct OnlyCurrentTraitsOpaque {
     #[primary_span]
     pub span: Span,
 }
 #[derive(Subdiagnostic)]
-#[label("this is not defined in the current crate because this is a foreign trait")]
+#[label("this is not defined in the current package because this is a foreign trait")]
 pub(crate) struct OnlyCurrentTraitsForeign {
     #[primary_span]
     pub span: Span,
 }
 
 #[derive(Subdiagnostic)]
-#[label("this is not defined in the current crate because {$name} are always foreign")]
+#[label("this is not defined in the current package because {$name} are always foreign")]
 pub(crate) struct OnlyCurrentTraitsName<'a> {
     #[primary_span]
     pub span: Span,
@@ -1622,7 +1622,9 @@ pub(crate) struct OnlyCurrentTraitsName<'a> {
 }
 
 #[derive(Subdiagnostic)]
-#[label("`{$pointer}` is not defined in the current crate because raw pointers are always foreign")]
+#[label(
+    "`{$pointer}` is not defined in the current package because raw pointers are always foreign"
+)]
 pub(crate) struct OnlyCurrentTraitsPointer<'a> {
     #[primary_span]
     pub span: Span,
@@ -1630,7 +1632,7 @@ pub(crate) struct OnlyCurrentTraitsPointer<'a> {
 }
 
 #[derive(Subdiagnostic)]
-#[label("`{$ty}` is not defined in the current crate")]
+#[label("`{$ty}` is not defined in the current package")]
 pub(crate) struct OnlyCurrentTraitsTy<'a> {
     #[primary_span]
     pub span: Span,
@@ -1638,7 +1640,7 @@ pub(crate) struct OnlyCurrentTraitsTy<'a> {
 }
 
 #[derive(Subdiagnostic)]
-#[label("`{$name}` is not defined in the current crate")]
+#[label("`{$name}` is not defined in the current package")]
 pub(crate) struct OnlyCurrentTraitsAdt {
     #[primary_span]
     pub span: Span,

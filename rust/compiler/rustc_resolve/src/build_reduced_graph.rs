@@ -644,7 +644,7 @@ impl<'a, 'ra, 'tcx> DefCollector<'a, 'ra, 'tcx> {
                         if !module_path.is_empty() {
                             self.r.dcx().span_err(
                                 source.ident.span,
-                                "`$crate` in paths can only be used in start position",
+                                "`$pkg` in paths can only be used in start position",
                             );
                             return;
                         }
@@ -1097,7 +1097,8 @@ impl<'a, 'ra, 'tcx> DefCollector<'a, 'ra, 'tcx> {
                 Entry::Occupied(mut occupied) => {
                     let entry = occupied.get_mut();
                     if entry.item_decl.is_some() {
-                        let msg = format!("extern crate `{orig_ident}` already in extern prelude");
+                        let msg =
+                            format!("extern package `{orig_ident}` already in extern prelude");
                         self.r.tcx.dcx().span_delayed_bug(item.span, msg);
                     } else {
                         entry.item_decl = Some((import_decl, orig_ident.span, orig_name.is_some()));

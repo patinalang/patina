@@ -124,7 +124,7 @@ error[E0425]: cannot find value `inner` in this scope
 LL |     let _b = set_group_span!(marker(inner));
    |                                     ^^^^^ not found in this scope
 
-error[E0425]: cannot find value `Nope` in crate `wrappers`
+error[E0425]: cannot find value `Nope` in package `wrappers`
   --> tests/ui/src/pkg/errors/resolution.pt:31:24
    |
 LL |     let _x = wrappers::Nope;

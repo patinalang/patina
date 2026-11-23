@@ -1874,7 +1874,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     module,
                     || {
                         let name_str = if name == kw::PathRoot {
-                            "the crate root".to_string()
+                            "the package root".to_string()
                         } else {
                             format!("`{name}`")
                         };
@@ -2044,7 +2044,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                                 let scope = match &path[..segment_idx] {
                                     [.., prev] => {
                                         if prev.ident.name == kw::PathRoot {
-                                            format!("the crate root")
+                                            format!("the package root")
                                         } else {
                                             format!("`{}`", prev.ident)
                                         }

@@ -32,7 +32,7 @@ use rustc_data_structures::unord::UnordSet;
 use rustc_errors::{DiagArgValue, Diagnostic, MultiSpan};
 use rustc_hir::def::{DefKind, Res};
 use rustc_session::lint::builtin::{
-    MACRO_USE_EXTERN_CRATE, UNUSED_EXTERN_CRATES, UNUSED_IMPORTS, UNUSED_QUALIFICATIONS,
+    MACRO_USE_EXTERN_PKG, UNUSED_EXTERN_PKGS, UNUSED_IMPORTS, UNUSED_QUALIFICATIONS,
 };
 use rustc_span::{DUMMY_SP, Ident, Span, kw};
 
@@ -186,7 +186,7 @@ impl<'a, 'ra, 'tcx> UnusedImportCheckVisitor<'a, 'ra, 'tcx> {
             if warn_if_unused {
                 if let Some(&span) = maybe_unused_extern_crates.get(&extern_crate.id) {
                     self.r.lint_buffer.buffer_lint(
-                        UNUSED_EXTERN_CRATES,
+                        UNUSED_EXTERN_PKGS,
                         extern_crate.id,
                         span,
                         crate::errors::UnusedExternCrate {
@@ -250,7 +250,7 @@ impl<'a, 'ra, 'tcx> UnusedImportCheckVisitor<'a, 'ra, 'tcx> {
                 .unwrap_or(extern_crate.ident.span);
 
             self.r.lint_buffer.buffer_lint(
-                UNUSED_EXTERN_CRATES,
+                UNUSED_EXTERN_PKGS,
                 extern_crate.id,
                 extern_crate.span,
                 crate::errors::ExternCrateNotIdiomatic {
@@ -445,7 +445,7 @@ impl Resolver<'_, '_> {
                     if let ImportKind::MacroUse { .. } = import.kind {
                         if !import.span.is_dummy() {
                             self.lint_buffer.buffer_lint(
-                                MACRO_USE_EXTERN_CRATE,
+                                MACRO_USE_EXTERN_PKG,
                                 import.root_id,
                                 import.span,
                                 crate::errors::MacroUseDeprecated,

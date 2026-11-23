@@ -24,7 +24,7 @@ pub(crate) struct BaseExpressionDoubleDot {
     #[primary_span]
     pub span: Span,
     #[suggestion(
-        "add `#![feature(default_field_values)]` to the crate attributes to enable default values on `struct` fields",
+        "add `#![feature(default_field_values)]` to the package attributes to enable default values on `struct` fields",
         code = "#![feature(default_field_values)]\n",
         applicability = "machine-applicable",
         style = "verbose"

@@ -334,7 +334,7 @@ impl CStore {
             return;
         }
         let level = tcx
-            .lint_level_at_node(lint::builtin::UNUSED_CRATE_DEPENDENCIES, rustc_hir::CRATE_HIR_ID)
+            .lint_level_at_node(lint::builtin::UNUSED_PKG_DEPENDENCIES, rustc_hir::CRATE_HIR_ID)
             .level;
         if level != lint::Level::Allow {
             let unused_externs =
@@ -1141,7 +1141,7 @@ impl CStore {
             }
 
             tcx.sess.psess.buffer_lint(
-                lint::builtin::UNUSED_CRATE_DEPENDENCIES,
+                lint::builtin::UNUSED_PKG_DEPENDENCIES,
                 span,
                 ast::CRATE_NODE_ID,
                 errors::UnusedCrateDependency {

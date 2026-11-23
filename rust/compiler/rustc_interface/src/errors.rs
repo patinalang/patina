@@ -18,7 +18,7 @@ pub(crate) struct CrateNameDoesNotMatch {
 }
 
 #[derive(Diagnostic)]
-#[diag("crate names cannot start with a `-`, but `{$crate_name}` has a leading hyphen")]
+#[diag("package names cannot start with a `-`, but `{$crate_name}` has a leading hyphen")]
 pub(crate) struct CrateNameInvalid<'a> {
     pub(crate) crate_name: &'a str,
 }
@@ -46,7 +46,7 @@ pub(crate) struct EmojiIdentifier {
 }
 
 #[derive(Diagnostic)]
-#[diag("cannot mix `bin` crate type with others")]
+#[diag("cannot mix `bin` package type with others")]
 pub(crate) struct MixedBinCrate;
 
 #[derive(Diagnostic)]
@@ -118,14 +118,16 @@ pub(crate) struct AbiRequiredTargetFeature<'a> {
 }
 
 #[derive(Diagnostic)]
-#[diag("dropping unsupported crate type `{$crate_type}` for codegen backend `{$codegen_backend}`")]
+#[diag(
+    "dropping unsupported package type `{$crate_type}` for codegen backend `{$codegen_backend}`"
+)]
 pub(crate) struct UnsupportedCrateTypeForCodegenBackend {
     pub(crate) crate_type: CrateType,
     pub(crate) codegen_backend: &'static str,
 }
 
 #[derive(Diagnostic)]
-#[diag("dropping unsupported crate type `{$crate_type}` for target `{$target_triple}`")]
+#[diag("dropping unsupported package type `{$crate_type}` for target `{$target_triple}`")]
 pub(crate) struct UnsupportedCrateTypeForTarget<'a> {
     pub(crate) crate_type: CrateType,
     pub(crate) target_triple: &'a TargetTuple,

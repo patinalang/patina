@@ -289,7 +289,7 @@ fn register_builtins(store: &mut LintStore) {
         UNUSED_MACRO_RULES,
         UNUSED_ALLOCATION,
         UNUSED_DOC_COMMENTS,
-        UNUSED_EXTERN_CRATES,
+        UNUSED_EXTERN_PKGS,
         UNUSED_FEATURES,
         UNUSED_LABELS,
         UNUSED_PARENS,
@@ -303,7 +303,7 @@ fn register_builtins(store: &mut LintStore) {
     add_lint_group!(
         "rust_2018_idioms",
         BARE_TRAIT_OBJECTS,
-        UNUSED_EXTERN_CRATES,
+        UNUSED_EXTERN_PKGS,
         ELLIPSIS_INCLUSIVE_RANGE_PATTERNS,
         ELIDED_LIFETIMES_IN_PATHS,
         EXPLICIT_OUTLIVES_REQUIREMENTS // FIXME(#52665, #47816) not always applicable and not all
@@ -392,11 +392,6 @@ fn register_builtins(store: &mut LintStore) {
         "hr_lifetime_in_assoc_type",
         "converted into hard error, see issue #33685 \
          <https://github.com/rust-lang/rust/issues/33685> for more information",
-    );
-    store.register_removed(
-        "inaccessible_extern_crate",
-        "converted into hard error, see issue #36886 \
-         <https://github.com/rust-lang/rust/issues/36886> for more information",
     );
     store.register_removed(
         "super_or_self_in_global_path",
@@ -561,11 +556,6 @@ fn register_builtins(store: &mut LintStore) {
         "indirect_structural_match",
         "converted into hard error, see RFC #3535 \
          <https://rust-lang.github.io/rfcs/3535-constants-in-patterns.html> for more information",
-    );
-    store.register_removed(
-        "deprecated_cfg_attr_crate_type_name",
-        "converted into hard error, see issue #91632 \
-         <https://github.com/rust-lang/rust/issues/91632> for more information",
     );
     store.register_removed(
         "pointer_structural_match",

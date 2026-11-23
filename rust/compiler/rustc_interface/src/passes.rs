@@ -272,7 +272,7 @@ fn configure_and_expand(
         sess.dcx().emit_err(errors::MixedBinCrate);
     }
     if crate_types.contains(&CrateType::Sdylib) && !tcx.features().export_stable() {
-        feature_err(sess, sym::export_stable, DUMMY_SP, "`sdylib` crate type is unstable").emit();
+        feature_err(sess, sym::export_stable, DUMMY_SP, "`sdylib` package type is unstable").emit();
     }
 
     sess.time("register_proc_macros", || {

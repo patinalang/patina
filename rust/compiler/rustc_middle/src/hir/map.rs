@@ -682,7 +682,7 @@ impl<'tcx> TyCtxt<'tcx> {
         match self.hir_node(id) {
             Node::Item(item) => {
                 let item_str = match item.kind {
-                    ItemKind::ExternCrate(..) => "extern crate",
+                    ItemKind::ExternCrate(..) => "extern pkg",
                     ItemKind::Use(..) => "use",
                     ItemKind::Static(..) => "static",
                     ItemKind::Const(..) => "const",

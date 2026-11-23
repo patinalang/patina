@@ -5,7 +5,7 @@ use rustc_span::{Span, Symbol};
 
 #[derive(Diagnostic)]
 #[help(
-    "consider increasing the recursion limit by adding a `#![recursion_limit = \"{$suggested_limit}\"]` attribute to your crate (`{$crate_name}`)"
+    "consider increasing the recursion limit by adding a `#![recursion_limit = \"{$suggested_limit}\"]` attribute to your package (`{$crate_name}`)"
 )]
 #[diag("queries overflow the depth limit!")]
 pub(crate) struct QueryOverflow {

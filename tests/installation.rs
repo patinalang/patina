@@ -43,7 +43,7 @@ fn install_without_core_needs_a_named_core() {
     let root = install_without_core(temp.path());
 
     let output = run(compile_trivial(temp.path()).env("PATINA_ROOT", &root));
-    assert_failure(&output, "can't find crate for `core`");
+    assert_failure(&output, "can't find package for `core`");
 
     let output = run(compile_trivial(temp.path())
         .env("PATINA_ROOT", &root)
@@ -61,7 +61,7 @@ fn named_core_hides_installed_core_from_dependencies() {
     let provider = "provider=target/debug/provider/ebin/libprovider.rmeta";
     let args = ["--extern", &other_core, "--extern", provider];
     let output = session.try_build("consumer.pt", "pub fn g() { provider::f() }\n", &args);
-    assert_failure(&output, "can't find crate for `core` which `provider` depends on");
+    assert_failure(&output, "can't find package for `core` which `provider` depends on");
 }
 
 /// The VM logs this failure as a crash report too, which mustn't garble the reply.

@@ -225,14 +225,14 @@ impl SuggestUpgradeCompiler {
 }
 
 #[derive(Subdiagnostic)]
-#[help("add `#![feature({$feature})]` to the crate attributes to enable")]
+#[help("add `#![feature({$feature})]` to the package attributes to enable")]
 pub(crate) struct FeatureDiagnosticHelp {
     pub(crate) feature: Symbol,
 }
 
 #[derive(Subdiagnostic)]
 #[suggestion(
-    "add `#![feature({$feature})]` to the crate attributes to enable",
+    "add `#![feature({$feature})]` to the package attributes to enable",
     applicability = "maybe-incorrect",
     code = "#![feature({feature})]\n"
 )]
@@ -403,14 +403,14 @@ pub(crate) struct FileWriteFail<'a> {
 }
 
 #[derive(Diagnostic)]
-#[diag("crate name must not be empty")]
+#[diag("package name must not be empty")]
 pub(crate) struct CrateNameEmpty {
     #[primary_span]
     pub(crate) span: Option<Span>,
 }
 
 #[derive(Diagnostic)]
-#[diag("invalid character {$character} in crate name: `{$crate_name}`")]
+#[diag("invalid character {$character} in package name: `{$crate_name}`")]
 pub(crate) struct InvalidCharacterInCrateName {
     #[primary_span]
     pub(crate) span: Option<Span>,

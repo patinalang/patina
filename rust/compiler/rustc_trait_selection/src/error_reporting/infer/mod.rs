@@ -1592,10 +1592,10 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                             ));
                             let def_span = self.tcx.def_span(defid);
                             let msg = if defid.is_local() {
-                                format!("the other {name} is defined in the current crate")
+                                format!("the other {name} is defined in the current package")
                             } else {
                                 let crate_name = self.tcx.crate_name(defid.krate);
-                                format!("the other {name} is defined in crate `{crate_name}`")
+                                format!("the other {name} is defined in package `{crate_name}`")
                             };
                             diag.span_note(def_span, msg);
                         };
@@ -1624,13 +1624,13 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                                     let module_name =
                                         self.tcx.def_path(module).to_string_no_crate_verbose();
                                     format!(
-                                        "{name} is defined in module `crate{module_name}` of the current crate"
+                                        "{name} is defined in module `pkg{module_name}` of the current package"
                                     )
                                 } else if defid.is_local() {
-                                    format!("{name} is defined in the current crate")
+                                    format!("{name} is defined in the current package")
                                 } else {
                                     let crate_name = self.tcx.crate_name(defid.krate);
-                                    format!("{name} is defined in crate `{crate_name}`")
+                                    format!("{name} is defined in package `{crate_name}`")
                                 };
                                 diag.span_note(def_span, msg);
                             }

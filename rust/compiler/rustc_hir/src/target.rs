@@ -267,7 +267,7 @@ impl Target {
 
     pub fn name(self) -> &'static str {
         match self {
-            Target::ExternCrate => "extern crate",
+            Target::ExternCrate => "extern package",
             Target::Use => "use",
             Target::Static => "static",
             Target::Const => "constant",
@@ -311,14 +311,14 @@ impl Target {
             Target::ExprField => "struct field",
             Target::WherePredicate => "where predicate",
             Target::MacroCall => "macro call",
-            Target::Crate => "crate",
+            Target::Crate => "package",
             Target::Delegation { .. } => "delegation",
         }
     }
 
     pub fn plural_name(self) -> &'static str {
         match self {
-            Target::ExternCrate => "extern crates",
+            Target::ExternCrate => "extern packages",
             Target::Use => "use statements",
             Target::Static => "statics",
             Target::Const => "constants",
@@ -363,7 +363,7 @@ impl Target {
             Target::ExprField => "struct fields",
             Target::WherePredicate => "where predicates",
             Target::MacroCall => "macro calls",
-            Target::Crate => "crates",
+            Target::Crate => "packages",
             Target::Delegation { .. } => "delegations",
         }
     }

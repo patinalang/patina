@@ -322,7 +322,7 @@ pub(crate) struct BuiltinUnreachablePub<'a> {
     pub new_vis: &'a str,
     #[suggestion("consider restricting its visibility", code = "{new_vis}")]
     pub suggestion: (Span, Applicability),
-    #[help("or consider exporting it for use by other crates")]
+    #[help("or consider exporting it for use by other packages")]
     pub help: bool,
 }
 
@@ -359,7 +359,7 @@ impl<'a> Diagnostic<'a, ()> for BuiltinTypeAliasBounds<'_> {
                 see issue #112792 <https://github.com/rust-lang/rust/issues/112792> for more information"
             ));
         if self.enable_feat_help {
-            diag.help(msg!("add `#![feature(lazy_type_alias)]` to the crate attributes to enable the desired semantics"));
+            diag.help(msg!("add `#![feature(lazy_type_alias)]` to the package attributes to enable the desired semantics"));
         }
 
         // We perform the walk in here instead of in `<TypeAliasBounds as LateLintPass>` to
@@ -665,11 +665,11 @@ pub(crate) struct BuiltinDerefNullptr {
 #[derive(Diagnostic)]
 pub(crate) enum BuiltinSpecialModuleNameUsed {
     #[diag("found module declaration for lib.rs")]
-    #[note("lib.rs is the root of this crate's library target")]
+    #[note("lib.rs is the root of this package's library target")]
     #[help("to refer to it from other targets, use the library's name as the path")]
     Lib,
     #[diag("found module declaration for main.rs")]
-    #[note("a binary crate cannot be used as library")]
+    #[note("a binary package cannot be used as library")]
     Main,
 }
 
@@ -1088,7 +1088,7 @@ pub(crate) struct BadOptAccessDiag<'a> {
     "dangerous use of `extern pkg {$name}` which is not guaranteed to exist exactly once in the sysroot"
 )]
 #[help(
-    "try using a cargo dependency or using a re-export of the dependency provided by a rustc_* crate"
+    "try using a cargo dependency or using a re-export of the dependency provided by a rustc_* package"
 )]
 pub(crate) struct ImplicitSysrootCrateImportDiag<'a> {
     pub name: &'a str,
@@ -1297,7 +1297,7 @@ pub(crate) struct UnknownLintFromCommandLine<'a> {
 }
 
 #[derive(Diagnostic)]
-#[diag("{$level}({$name}) is ignored unless specified at crate level")]
+#[diag("{$level}({$name}) is ignored unless specified at package level")]
 pub(crate) struct IgnoredUnlessCrateSpecified<'a> {
     pub level: &'a str,
     pub name: Symbol,
@@ -1396,7 +1396,7 @@ pub(crate) struct ConfusableIdentifierPair {
 
 #[derive(Diagnostic)]
 #[diag(
-    "the usage of Script Group `{$set}` in this crate consists solely of mixed script confusables"
+    "the usage of Script Group `{$set}` in this package consists solely of mixed script confusables"
 )]
 #[note("the usage includes {$includes}")]
 #[note("please recheck to make sure their usages are indeed what you want")]
@@ -1729,7 +1729,7 @@ impl<'a> Diagnostic<'a, ()> for NonLocalDefinitionsDiag {
 
 #[derive(Subdiagnostic)]
 #[note(
-    "the {$macro_kind} `{$macro_name}` may come from an old version of the `{$crate_name}` crate, try updating your dependency with `cargo update -p {$crate_name}`"
+    "the {$macro_kind} `{$macro_name}` may come from an old version of the `{$crate_name}` package, try updating your dependency with `cargo update -p {$crate_name}`"
 )]
 pub(crate) struct NonLocalDefinitionsCargoUpdateNote {
     pub macro_kind: &'static str,

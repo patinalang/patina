@@ -298,7 +298,7 @@ impl Visibility {
                     "pub(self)".to_string()
                 } else {
                     format!(
-                        "pub(in crate{})",
+                        "pub(in pkg{})",
                         tcx.def_path(restricted_id.to_def_id()).to_string_no_crate_verbose()
                     )
                 }

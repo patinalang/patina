@@ -1540,7 +1540,7 @@ pub(crate) struct MismatchedClosingDelimiter {
 #[diag("incorrect visibility restriction", code = E0704)]
 #[help(
     "some possible visibility restrictions are:
-    `pub(pkg)`: visible only on the current crate
+    `pub(pkg)`: visible only on the current package
     `pub(super)`: visible only in the current module's parent
     `pub(in path::to::module)`: visible only on the specified path"
 )]
@@ -1560,7 +1560,7 @@ pub(crate) struct IncorrectVisibilityRestriction {
 #[diag("incorrect `impl` restriction")]
 #[help(
     "some possible `impl` restrictions are:
-    `impl(crate)`: can only be implemented in the current crate
+    `impl(pkg)`: can only be implemented in the current package
     `impl(super)`: can only be implemented in the parent module
     `impl(self)`: can only be implemented in current module
     `impl(in path::to::module)`: can only be implemented in the specified path"
@@ -2716,7 +2716,7 @@ pub(crate) struct AssociatedStaticItemNotAllowed {
 }
 
 #[derive(Diagnostic)]
-#[diag("crate name using dashes are not valid in `extern pkg` statements")]
+#[diag("package name using dashes are not valid in `extern pkg` statements")]
 pub(crate) struct ExternCrateNameWithDashes {
     #[primary_span]
     #[label("dash-separated idents are not valid")]
@@ -2727,7 +2727,7 @@ pub(crate) struct ExternCrateNameWithDashes {
 
 #[derive(Subdiagnostic)]
 #[multipart_suggestion(
-    "if the original crate name uses dashes you need to use underscores in the code",
+    "if the original package name uses dashes you need to use underscores in the code",
     applicability = "machine-applicable"
 )]
 pub(crate) struct ExternCrateNameWithDashesSugg {

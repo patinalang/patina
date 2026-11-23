@@ -27,7 +27,7 @@ pub fn suggest_new_overflow_limit<'tcx, G: EmissionGuarantee>(
     };
     err.help(format!(
         "consider increasing the recursion limit by adding a \
-         `#![recursion_limit = \"{}\"]` attribute to your crate (`{}`)",
+         `#![recursion_limit = \"{}\"]` attribute to your package (`{}`)",
         suggested_limit,
         tcx.crate_name(LOCAL_CRATE),
     ));

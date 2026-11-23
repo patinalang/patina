@@ -3,7 +3,7 @@ use rustc_macros::{Diagnostic, Subdiagnostic};
 use rustc_span::{Span, Symbol};
 
 #[derive(Diagnostic)]
-#[diag("`{$name}` attribute cannot be used at crate level")]
+#[diag("`{$name}` attribute cannot be used at package level")]
 pub(crate) struct InvalidAttrAtCrateLevel {
     #[primary_span]
     pub span: Span,
@@ -155,8 +155,8 @@ pub(crate) struct InvalidTargetLint {
 #[derive(Diagnostic)]
 #[diag(
     "{$is_used_as_inner ->
-        [false] crate-level attribute should be an inner attribute: add an exclamation mark: `#![{$name}]`
-        *[other] the `#![{$name}]` attribute can only be used at the crate root
+        [false] package-level attribute should be an inner attribute: add an exclamation mark: `#![{$name}]`
+        *[other] the `#![{$name}]` attribute can only be used at the package root
     }"
 )]
 pub(crate) struct InvalidAttrStyle {
@@ -268,7 +268,7 @@ pub(crate) struct DocTestUnknown {
 pub(crate) struct DocTestLiteral;
 
 #[derive(Diagnostic)]
-#[diag("this attribute can only be applied at the crate level")]
+#[diag("this attribute can only be applied at the package level")]
 #[note(
     "read <https://doc.rust-lang.org/nightly/rustdoc/the-doc-attribute.html#at-the-crate-level> for more information"
 )]
@@ -472,9 +472,9 @@ impl UnexpectedCfgRustcHelp {
 
 #[derive(Subdiagnostic)]
 #[note(
-    "using a cfg inside a {$macro_kind} will use the cfgs from the destination crate and not the ones from the defining crate"
+    "using a cfg inside a {$macro_kind} will use the cfgs from the destination package and not the ones from the defining package"
 )]
-#[help("try referring to `{$macro_name}` crate for guidance on how handle this unexpected cfg")]
+#[help("try referring to `{$macro_name}` package for guidance on how handle this unexpected cfg")]
 pub(crate) struct UnexpectedCfgRustcMacroHelp {
     pub macro_kind: &'static str,
     pub macro_name: Symbol,
@@ -482,9 +482,9 @@ pub(crate) struct UnexpectedCfgRustcMacroHelp {
 
 #[derive(Subdiagnostic)]
 #[note(
-    "using a cfg inside a {$macro_kind} will use the cfgs from the destination crate and not the ones from the defining crate"
+    "using a cfg inside a {$macro_kind} will use the cfgs from the destination package and not the ones from the defining package"
 )]
-#[help("try referring to `{$macro_name}` crate for guidance on how handle this unexpected cfg")]
+#[help("try referring to `{$macro_name}` package for guidance on how handle this unexpected cfg")]
 pub(crate) struct UnexpectedCfgCargoMacroHelp {
     pub macro_kind: &'static str,
     pub macro_name: Symbol,

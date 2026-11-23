@@ -702,7 +702,7 @@ fn attempt_dyn_to_enum_suggestion(
     };
 
     if let [only_impl] = &concrete_impls[..] {
-        let within = if externally_visible { " within this crate" } else { "" };
+        let within = if externally_visible { " within this package" } else { "" };
         err.help(with_no_trimmed_paths!(format!(
             "only type `{only_impl}` implements `{trait_str}`{within}; \
             consider using it directly instead."
@@ -724,7 +724,7 @@ fn attempt_dyn_to_enum_suggestion(
 
     if externally_visible {
         err.note(format!(
-            "`{trait_str}` may be implemented in other crates; if you want to support your users \
+            "`{trait_str}` may be implemented in other packages; if you want to support your users \
              passing their own types here, you can't refer to a specific type",
         ));
     }

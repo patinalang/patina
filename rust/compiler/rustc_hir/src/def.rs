@@ -210,7 +210,7 @@ impl DefKind {
     pub fn descr(self, def_id: DefId) -> &'static str {
         match self {
             DefKind::Fn => "function",
-            DefKind::Mod if def_id.is_crate_root() && !def_id.is_local() => "crate",
+            DefKind::Mod if def_id.is_crate_root() && !def_id.is_local() => "package",
             DefKind::Mod => "module",
             DefKind::Static { .. } => "static",
             DefKind::Enum => "enum",
@@ -242,7 +242,7 @@ impl DefKind {
             DefKind::Field => "field",
             DefKind::Impl { .. } => "implementation",
             DefKind::Closure => "closure",
-            DefKind::ExternCrate => "extern crate",
+            DefKind::ExternCrate => "extern package",
             DefKind::GlobalAsm => "global assembly block",
             DefKind::SyntheticCoroutineBody => "synthetic mir body",
         }
@@ -886,7 +886,7 @@ impl<Id> Res<Id> {
             Res::Local(..) => "local variable",
             Res::SelfTyParam { .. } | Res::SelfTyAlias { .. } => "self type",
             Res::ToolMod => "tool module",
-            Res::OpenMod(..) => "namespaced crate",
+            Res::OpenMod(..) => "namespaced package",
             Res::NonMacroAttr(attr_kind) => attr_kind.descr(),
             Res::Err => "unresolved item",
         }

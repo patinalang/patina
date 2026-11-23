@@ -668,7 +668,7 @@ pub(crate) fn default_query(name: &str, key: &dyn std::fmt::Debug) -> ! {
 #[cold]
 pub(crate) fn default_extern_query(name: &str, key: &dyn std::fmt::Debug) -> ! {
     bug!(
-        "`tcx.{name}({key:?})` unsupported by its crate; \
+        "`tcx.{name}({key:?})` unsupported by its package; \
          perhaps the `{name}` query was never assigned a provider function",
     )
 }

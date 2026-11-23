@@ -78,7 +78,7 @@ pub(crate) struct MixedExportNameAndNoMangle {
 }
 
 #[derive(Diagnostic)]
-#[diag("crate-level attribute should be an inner attribute")]
+#[diag("package-level attribute should be an inner attribute")]
 pub(crate) struct OuterCrateLevelAttr {
     #[subdiagnostic]
     pub suggestion: OuterCrateLevelAttrSuggestion,
@@ -92,7 +92,7 @@ pub(crate) struct OuterCrateLevelAttrSuggestion {
 }
 
 #[derive(Diagnostic)]
-#[diag("crate-level attribute should be in the root module")]
+#[diag("package-level attribute should be in the root module")]
 pub(crate) struct InnerCrateLevelAttr;
 
 #[derive(Diagnostic)]
@@ -315,7 +315,7 @@ pub(crate) enum UnusedNote {
     #[note("`default_method_body_is_const` has been replaced with `const` on traits")]
     DefaultMethodBodyConst,
     #[note(
-        "the `linker_messages` and `linker_info` lints can only be controlled at the root of a crate that needs to be linked"
+        "the `linker_messages` and `linker_info` lints can only be controlled at the root of a package that needs to be linked"
     )]
     LinkerMessagesBinaryCrateOnly,
 }
@@ -371,14 +371,14 @@ pub(crate) struct MissingPanicHandler;
 #[diag("unwinding panics are not supported without std")]
 #[help("using nightly cargo, use -Zbuild-std with panic=\"abort\" to avoid unwinding")]
 #[note(
-    "since the core library is usually precompiled with panic=\"unwind\", rebuilding your crate with panic=\"abort\" may not be enough to fix the problem"
+    "since the core library is usually precompiled with panic=\"unwind\", rebuilding your package with panic=\"abort\" may not be enough to fix the problem"
 )]
 pub(crate) struct PanicUnwindWithoutStd;
 
 #[derive(Diagnostic)]
 #[diag("lang item required, but not found: `{$name}`")]
 #[note(
-    "this can occur when a binary crate with `#![no_std]` is compiled for a target where `{$name}` is defined in the standard library"
+    "this can occur when a binary package with `#![no_std]` is compiled for a target where `{$name}` is defined in the standard library"
 )]
 #[help(
     "you may be able to compile for a target that doesn't need `{$name}`, specify a target with `--target` or in `.cargo/config`"
@@ -439,13 +439,13 @@ pub(crate) struct LangItemOnIncorrectTarget {
 }
 
 #[derive(Diagnostic)]
-#[diag("duplicate diagnostic item in crate `{$crate_name}`: `{$name}`")]
+#[diag("duplicate diagnostic item in package `{$crate_name}`: `{$name}`")]
 pub(crate) struct DuplicateDiagnosticItemInCrate {
     #[primary_span]
     pub duplicate_span: Option<Span>,
     #[note("the diagnostic item is first defined here")]
     pub orig_span: Option<Span>,
-    #[note("the diagnostic item is first defined in crate `{$orig_crate_name}`")]
+    #[note("the diagnostic item is first defined in package `{$orig_crate_name}`")]
     pub different_crates: bool,
     pub crate_name: Symbol,
     pub orig_crate_name: Symbol,
@@ -505,7 +505,7 @@ impl<'a, G: EmissionGuarantee> Diagnostic<'a, G> for NoMainErr {
     #[track_caller]
     fn into_diag(self, dcx: DiagCtxtHandle<'a>, level: Level) -> Diag<'a, G> {
         let mut diag =
-            Diag::new(dcx, level, msg!("`main` function not found in crate `{$crate_name}`"));
+            Diag::new(dcx, level, msg!("`main` function not found in package `{$crate_name}`"));
         diag.span(DUMMY_SP);
         diag.code(E0601);
         diag.arg("crate_name", self.crate_name);
@@ -516,12 +516,12 @@ impl<'a, G: EmissionGuarantee> Diagnostic<'a, G> for NoMainErr {
                 diag.span_note(span, msg!("here is a function named `main`"));
             }
             diag.note(msg!(
-                "you have one or more functions named `main` not defined at the crate level"
+                "you have one or more functions named `main` not defined at the package level"
             ));
             diag.help(msg!("consider moving the `main` function definitions"));
             // There were some functions named `main` though. Try to give the user a hint.
             msg!(
-                "the main function must be defined at the crate level{$has_filename ->
+                "the main function must be defined at the package level{$has_filename ->
                     [true] {\" \"}(in `{$filename}`)
                     *[false] {\"\"}
                 }"
@@ -529,7 +529,7 @@ impl<'a, G: EmissionGuarantee> Diagnostic<'a, G> for NoMainErr {
         } else if self.has_filename {
             msg!("consider adding a `main` function to `{$filename}`")
         } else {
-            msg!("consider adding a `main` function at the crate level")
+            msg!("consider adding a `main` function at the package level")
         };
         if self.file_empty {
             diag.note(note);
@@ -576,10 +576,10 @@ impl<G: EmissionGuarantee> Diagnostic<'_, G> for DuplicateLangItem {
             match self.duplicate {
                 Duplicate::Plain => msg!("found duplicate lang item `{$lang_item_name}`"),
                 Duplicate::Crate => {
-                    msg!("duplicate lang item in crate `{$crate_name}`: `{$lang_item_name}`")
+                    msg!("duplicate lang item in package `{$crate_name}`: `{$lang_item_name}`")
                 }
                 Duplicate::CrateDepends => msg!(
-                    "duplicate lang item in crate `{$crate_name}` (which `{$dependency_of}` depends on): `{$lang_item_name}`"
+                    "duplicate lang item in package `{$crate_name}` (which `{$dependency_of}` depends on): `{$lang_item_name}`"
                 ),
             },
         );
@@ -604,13 +604,13 @@ impl<G: EmissionGuarantee> Diagnostic<'_, G> for DuplicateLangItem {
             diag.span_note(span, msg!("the lang item is first defined here"));
         } else {
             if self.orig_dependency_of.is_none() {
-                diag.note(msg!("the lang item is first defined in crate `{$orig_crate_name}`"));
+                diag.note(msg!("the lang item is first defined in package `{$orig_crate_name}`"));
             } else {
-                diag.note(msg!("the lang item is first defined in crate `{$orig_crate_name}` (which `{$orig_dependency_of}` depends on)"));
+                diag.note(msg!("the lang item is first defined in package `{$orig_crate_name}` (which `{$orig_dependency_of}` depends on)"));
             }
 
             if self.orig_is_local {
-                diag.note(msg!("first definition in the local crate (`{$orig_crate_name}`)"));
+                diag.note(msg!("first definition in the local package (`{$orig_crate_name}`)"));
             } else {
                 diag.note(msg!(
                     "first definition in `{$orig_crate_name}` loaded from {$orig_path}"
@@ -618,7 +618,7 @@ impl<G: EmissionGuarantee> Diagnostic<'_, G> for DuplicateLangItem {
             }
 
             if self.is_local {
-                diag.note(msg!("second definition in the local crate (`{$crate_name}`)"));
+                diag.note(msg!("second definition in the local package (`{$crate_name}`)"));
             } else {
                 diag.note(msg!("second definition in `{$crate_name}` loaded from {$path}"));
             }
@@ -1188,14 +1188,14 @@ pub(crate) struct EiiWithTrackCaller {
 #[diag("`#[{$name}]` required, but not found")]
 pub(crate) struct EiiWithoutImpl {
     #[primary_span]
-    #[label("expected because `#[{$name}]` was declared here in crate `{$decl_crate_name}`")]
+    #[label("expected because `#[{$name}]` was declared here in package `{$decl_crate_name}`")]
     pub span: Span,
     pub name: Symbol,
 
     pub current_crate_name: Symbol,
     pub decl_crate_name: Symbol,
     #[help(
-        "expected at least one implementation in crate `{$current_crate_name}` or any of its dependencies"
+        "expected at least one implementation in package `{$current_crate_name}` or any of its dependencies"
     )]
     pub help: (),
 }
@@ -1206,17 +1206,17 @@ pub(crate) struct DuplicateEiiImpls {
     pub name: Symbol,
 
     #[primary_span]
-    #[label("first implemented here in crate `{$first_crate}`")]
+    #[label("first implemented here in package `{$first_crate}`")]
     pub first_span: Span,
     pub first_crate: Symbol,
 
-    #[label("also implemented here in crate `{$second_crate}`")]
+    #[label("also implemented here in package `{$second_crate}`")]
     pub second_span: Span,
     pub second_crate: Symbol,
 
     #[note("in addition to these two, { $num_additional_crates ->
-        [one] another implementation was found in crate {$additional_crate_names}
-        *[other] more implementations were also found in the following crates: {$additional_crate_names}
+        [one] another implementation was found in package {$additional_crate_names}
+        *[other] more implementations were also found in the following packages: {$additional_crate_names}
     }")]
     pub additional_crates: Option<()>,
 
@@ -1224,7 +1224,7 @@ pub(crate) struct DuplicateEiiImpls {
     pub additional_crate_names: String,
 
     #[help(
-        "an \"externally implementable item\" can only have a single implementation in the final artifact. When multiple implementations are found, also in different crates, they conflict"
+        "an \"externally implementable item\" can only have a single implementation in the final artifact. When multiple implementations are found, also in different packages, they conflict"
     )]
     pub help: (),
 }

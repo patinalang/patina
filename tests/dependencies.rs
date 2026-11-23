@@ -27,7 +27,7 @@ fn missing_dependency_is_reported() {
     let session = Session::new();
     greeter(&session, r#"hello_lib = "~> 0.1""#);
     let output = session.try_build_package("greeter", &[]);
-    assert_failure(&output, "can't find crate for `hello_lib`");
+    assert_failure(&output, "can't find package for `hello_lib`");
 }
 
 #[test]
@@ -36,7 +36,7 @@ fn undeclared_package_is_not_a_dependency() {
     build_lib(&session, "hello_lib", "../lib");
     greeter(&session, "");
     let output = session.try_build_package("greeter", &["-L", "../lib"]);
-    assert_failure(&output, "use of unresolved module or unlinked crate `hello_lib`");
+    assert_failure(&output, "use of unresolved module or unlinked package `hello_lib`");
 }
 
 #[test]

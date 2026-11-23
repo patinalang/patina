@@ -1416,7 +1416,7 @@ fn check_impl_constness(
                 if tcx.features().const_trait_impl() {
                     ""
                 } else {
-                    "enable `#![feature(const_trait_impl)]` in your crate and "
+                    "enable `#![feature(const_trait_impl)]` in your package and "
                 },
             )
         }

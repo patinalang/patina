@@ -1076,7 +1076,7 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                             if self.tcx().features().const_trait_impl() {
                                 ""
                             } else {
-                                "enable `#![feature(const_trait_impl)]` in your crate and "
+                                "enable `#![feature(const_trait_impl)]` in your package and "
                             },
                         )
                     }

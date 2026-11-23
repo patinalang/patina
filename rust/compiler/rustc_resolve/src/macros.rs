@@ -1185,7 +1185,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                         if let Some(name) = name {
                             format!("{} `{name}`", kind.descr(def_id))
                         } else {
-                            "the crate root".to_string()
+                            "the package root".to_string()
                         }
                     }
                     ModuleKind::Block => "this scope".to_string(),

@@ -2466,7 +2466,7 @@ impl<'tcx> TyCtxt<'tcx> {
         for (desc, feature) in features {
             // FIXME: make this string translatable
             let msg =
-                format!("add `#![feature({feature})]` to the crate attributes to enable{desc}");
+                format!("add `#![feature({feature})]` to the package attributes to enable{desc}");
             diag.span_suggestion_verbose(
                 span,
                 msg,

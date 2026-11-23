@@ -154,7 +154,7 @@ rustc_queries! {
     /// Collects the list of all tools registered using `#![register_tool]`.
     query registered_tools(_: ()) -> &'tcx ty::RegisteredTools {
         arena_cache
-        desc { "compute registered tools for crate" }
+        desc { "compute registered tools for package" }
     }
 
     query early_lint_checks(_: ()) {
@@ -207,7 +207,7 @@ rustc_queries! {
     query hir_crate(key: ()) -> &'tcx Crate<'tcx> {
         arena_cache
         eval_always
-        desc { "getting the crate HIR" }
+        desc { "getting the package HIR" }
     }
 
     query lower_delayed_owner(def_id: LocalDefId) {
@@ -224,7 +224,7 @@ rustc_queries! {
     query hir_crate_items(_: ()) -> &'tcx rustc_middle::hir::ModuleItems {
         arena_cache
         eval_always
-        desc { "getting HIR crate items" }
+        desc { "getting HIR package items" }
     }
 
     /// The items in a module.
@@ -402,7 +402,7 @@ rustc_queries! {
     query analysis(key: ()) {
         eval_always
         desc {
-            "running analysis passes on crate `{}`",
+            "running analysis passes on package `{}`",
             tcx.crate_name(LOCAL_CRATE),
         }
     }
@@ -549,7 +549,7 @@ rustc_queries! {
     /// - the `libs` (`-l`) option
     query native_libraries(_: CrateNum) -> &'tcx Vec<NativeLib> {
         arena_cache
-        desc { "looking up the native libraries of a linked crate" }
+        desc { "looking up the native libraries of a linked package" }
         separate_provide_extern
     }
 
@@ -560,7 +560,7 @@ rustc_queries! {
 
     query lint_expectations(_: ()) -> &'tcx Vec<(LintExpectationId, LintExpectation)> {
         arena_cache
-        desc { "computing `#[expect]`ed lints in this crate" }
+        desc { "computing `#[expect]`ed lints in this package" }
     }
 
     query lints_that_dont_need_to_run(_: ()) -> &'tcx UnordSet<LintId> {
@@ -574,7 +574,7 @@ rustc_queries! {
     }
 
     query is_panic_runtime(_: CrateNum) -> bool {
-        desc { "checking if the crate is_panic_runtime" }
+        desc { "checking if the package is_panic_runtime" }
         separate_provide_extern
     }
 
@@ -588,7 +588,7 @@ rustc_queries! {
     query crate_params_in_repr(_: ()) -> &'tcx rustc_span::def_id::LocalDefIdMap<rustc_index::bit_set::DenseBitSet<u32>> {
         arena_cache
         no_hash
-        desc { "finding type parameters in the representation of the crate's ADTs" }
+        desc { "finding type parameters in the representation of the package's ADTs" }
     }
 
     /// Parameters that can supply a potentially transparent ADT's outer representation.
@@ -1027,7 +1027,7 @@ rustc_queries! {
     /// </div>
     query crate_variances(_: ()) -> &'tcx ty::CrateVariancesMap<'tcx> {
         arena_cache
-        desc { "computing the variances for items in this crate" }
+        desc { "computing the variances for items in this package" }
     }
 
     /// Returns the (inferred) variances of the item given by `DefId`.
@@ -1053,7 +1053,7 @@ rustc_queries! {
     /// </div>
     query inferred_outlives_crate(_: ()) -> &'tcx ty::CratePredicatesMap<'tcx> {
         arena_cache
-        desc { "computing the inferred outlives-predicates for items in this crate" }
+        desc { "computing the inferred outlives-predicates for items in this package" }
     }
 
     /// Maps from an impl/trait or struct/variant `DefId`
@@ -1191,7 +1191,7 @@ rustc_queries! {
     }
 
     query check_unused_traits(_: ()) {
-        desc { "checking unused trait imports in crate" }
+        desc { "checking unused trait imports in package" }
     }
 
     /// Checks the attributes in the module.
@@ -1300,23 +1300,23 @@ rustc_queries! {
     /// Impls that produce no Erlang functions are left out.
     query erl_local_modules(_: ()) -> &'tcx FxIndexMap<crate::erl::ErlModuleId, &'tcx [LocalDefId]> {
         arena_cache
-        desc { "collecting the Erlang modules of the local crate" }
+        desc { "collecting the Erlang modules of the local package" }
     }
 
     /// The names of every BEAM module emitted by a crate.
     query beam_modules(_: CrateNum) -> &'tcx FxIndexSet<Symbol> {
         arena_cache
-        desc { "listing the BEAM modules of a crate" }
+        desc { "listing the BEAM modules of a package" }
         separate_provide_extern
     }
 
     query otp_app_name(_: CrateNum) -> Symbol {
-        desc { "getting the OTP application name of a crate" }
+        desc { "getting the OTP application name of a package" }
         separate_provide_extern
     }
 
     query otp_version(_: CrateNum) -> Symbol {
-        desc { "getting the OTP version that built a crate" }
+        desc { "getting the OTP version that built a package" }
         separate_provide_extern
     }
 
@@ -1373,7 +1373,7 @@ rustc_queries! {
         LocalDefIdMap<FxIndexSet<DefId>>,
     ), ErrorGuaranteed> {
         arena_cache
-        desc { "finding live symbols in crate" }
+        desc { "finding live symbols in package" }
     }
 
     query check_mod_deathness(key: LocalModDefId) {
@@ -1422,7 +1422,7 @@ rustc_queries! {
     ///
     /// </div>
     query crate_inherent_impls(k: ()) -> (&'tcx CrateInherentImpls, Result<(), ErrorGuaranteed>) {
-        desc { "finding all inherent impls defined in crate" }
+        desc { "finding all inherent impls defined in package" }
     }
 
     /// Checks all types in the crate for overlap in their inherent impls. Reports errors.
@@ -1433,7 +1433,7 @@ rustc_queries! {
     ///
     /// </div>
     query crate_inherent_impls_validity_check(_: ()) -> Result<(), ErrorGuaranteed> {
-        desc { "check for inherent impls that should not be defined in crate" }
+        desc { "check for inherent impls that should not be defined in package" }
     }
 
     /// Checks all types in the crate for overlap in their inherent impls. Reports errors.
@@ -1444,7 +1444,7 @@ rustc_queries! {
     ///
     /// </div>
     query crate_inherent_impls_overlap_check(_: ()) -> Result<(), ErrorGuaranteed> {
-        desc { "check for overlap between inherent impls defined in this crate" }
+        desc { "check for overlap between inherent impls defined in this package" }
     }
 
     /// Checks whether all impls in the crate pass the overlap check, returning
@@ -1921,7 +1921,7 @@ rustc_queries! {
 
     query dylib_dependency_formats(_: CrateNum)
                                     -> &'tcx [(CrateNum, LinkagePreference)] {
-        desc { "getting dylib dependency formats of crate" }
+        desc { "getting dylib dependency formats of package" }
         separate_provide_extern
     }
 
@@ -1931,27 +1931,27 @@ rustc_queries! {
     }
 
     query is_compiler_builtins(_: CrateNum) -> bool {
-        desc { "checking if the crate is_compiler_builtins" }
+        desc { "checking if the package is_compiler_builtins" }
         separate_provide_extern
     }
     query has_global_allocator(_: CrateNum) -> bool {
         // This query depends on untracked global state in CStore
         eval_always
-        desc { "checking if the crate has_global_allocator" }
+        desc { "checking if the package has_global_allocator" }
         separate_provide_extern
     }
     query has_alloc_error_handler(_: CrateNum) -> bool {
         // This query depends on untracked global state in CStore
         eval_always
-        desc { "checking if the crate has_alloc_error_handler" }
+        desc { "checking if the package has_alloc_error_handler" }
         separate_provide_extern
     }
     query has_panic_handler(_: CrateNum) -> bool {
-        desc { "checking if the crate has_panic_handler" }
+        desc { "checking if the package has_panic_handler" }
         separate_provide_extern
     }
     query is_profiler_runtime(_: CrateNum) -> bool {
-        desc { "checking if a crate is `#![profiler_runtime]`" }
+        desc { "checking if a package is `#![profiler_runtime]`" }
         separate_provide_extern
     }
     query has_ffi_unwind_calls(key: LocalDefId) -> bool {
@@ -1959,30 +1959,30 @@ rustc_queries! {
         cache_on_disk
     }
     query required_panic_strategy(_: CrateNum) -> Option<PanicStrategy> {
-        desc { "getting a crate's required panic strategy" }
+        desc { "getting a package's required panic strategy" }
         separate_provide_extern
     }
     query panic_in_drop_strategy(_: CrateNum) -> PanicStrategy {
-        desc { "getting a crate's configured panic-in-drop strategy" }
+        desc { "getting a package's configured panic-in-drop strategy" }
         separate_provide_extern
     }
     query is_no_builtins(_: CrateNum) -> bool {
-        desc { "getting whether a crate has `#![no_builtins]`" }
+        desc { "getting whether a package has `#![no_builtins]`" }
         separate_provide_extern
     }
     query symbol_mangling_version(_: CrateNum) -> SymbolManglingVersion {
-        desc { "getting a crate's symbol mangling version" }
+        desc { "getting a package's symbol mangling version" }
         separate_provide_extern
     }
 
     query extern_crate(def_id: CrateNum) -> Option<&'tcx ExternCrate> {
         eval_always
-        desc { "getting crate's ExternCrateData" }
+        desc { "getting package's ExternCrateData" }
         separate_provide_extern
     }
 
     query specialization_enabled_in(cnum: CrateNum) -> bool {
-        desc { "checking whether the crate enabled `specialization`/`min_specialization`" }
+        desc { "checking whether the package enabled `specialization`/`min_specialization`" }
         separate_provide_extern
     }
 
@@ -2031,7 +2031,7 @@ rustc_queries! {
     query reachable_non_generics(_: CrateNum)
         -> &'tcx DefIdMap<SymbolExportInfo> {
         arena_cache
-        desc { "looking up the exported symbols of a crate" }
+        desc { "looking up the exported symbols of a package" }
         separate_provide_extern
     }
     query is_reachable_non_generic(def_id: DefId) -> bool {
@@ -2041,7 +2041,7 @@ rustc_queries! {
     }
     query is_unreachable_local_definition(def_id: LocalDefId) -> bool {
         desc {
-            "checking whether `{}` is reachable from outside the crate",
+            "checking whether `{}` is reachable from outside the package",
             tcx.def_path_str(def_id),
         }
     }
@@ -2117,7 +2117,7 @@ rustc_queries! {
     /// Returns a list of all `extern` blocks of a crate.
     query foreign_modules(_: CrateNum) -> &'tcx FxIndexMap<DefId, ForeignModule> {
         arena_cache
-        desc { "looking up the foreign modules of a linked crate" }
+        desc { "looking up the foreign modules of a linked package" }
         separate_provide_extern
     }
 
@@ -2129,7 +2129,7 @@ rustc_queries! {
     /// Identifies the entry-point (e.g., the `main` function) for a given
     /// crate, returning `None` if there is no entry point (such as for library crates).
     query entry_fn(_: ()) -> Option<(DefId, EntryFnType)> {
-        desc { "looking up the entry function of a crate" }
+        desc { "looking up the entry function of a package" }
     }
 
     // The macro which defines `rustc_metadata::provide_extern` depends on this query's name.
@@ -2141,14 +2141,14 @@ rustc_queries! {
     // compilation and cause subsequent crashes when attempting to write to `definitions`
     query crate_hash(_: CrateNum) -> Svh {
         eval_always
-        desc { "looking up the hash a crate" }
+        desc { "looking up the hash a package" }
         separate_provide_extern
     }
 
     /// Gets the hash for the host proc macro. Used to support -Z dual-proc-macro.
     query crate_host_hash(_: CrateNum) -> Option<Svh> {
         eval_always
-        desc { "looking up the hash of a host version of a crate" }
+        desc { "looking up the hash of a host version of a package" }
         separate_provide_extern
     }
 
@@ -2157,7 +2157,7 @@ rustc_queries! {
     query extra_filename(_: CrateNum) -> &'tcx String {
         arena_cache
         eval_always
-        desc { "looking up the extra filename for a crate" }
+        desc { "looking up the extra filename for a package" }
         separate_provide_extern
     }
 
@@ -2165,14 +2165,14 @@ rustc_queries! {
     query crate_extern_paths(_: CrateNum) -> &'tcx Vec<PathBuf> {
         arena_cache
         eval_always
-        desc { "looking up the paths for extern crates" }
+        desc { "looking up the paths for extern packages" }
         separate_provide_extern
     }
 
     /// Given a crate and a trait, look up all impls of that trait in the crate.
     /// Return `(impl_id, self_ty)`.
     query implementations_of_trait(_: (CrateNum, DefId)) -> &'tcx [(DefId, Option<SimplifiedType>)] {
-        desc { "looking up implementations of a trait in a crate" }
+        desc { "looking up implementations of a trait in a package" }
         separate_provide_extern
     }
 
@@ -2181,7 +2181,7 @@ rustc_queries! {
     /// Do not call this directly, but instead use the `incoherent_impls` query.
     /// This query is only used to get the data necessary for that query.
     query crate_incoherent_impls(key: (CrateNum, SimplifiedType)) -> &'tcx [DefId] {
-        desc { "collecting all impls for a type in a crate" }
+        desc { "collecting all impls for a type in a package" }
         separate_provide_extern
     }
 
@@ -2283,7 +2283,7 @@ rustc_queries! {
     /// Gets the name of the crate.
     query crate_name(_: CrateNum) -> Symbol {
         feedable
-        desc { "fetching what a crate is named" }
+        desc { "fetching what a package is named" }
         separate_provide_extern
     }
     query module_children(def_id: DefId) -> &'tcx [ModChild] {
@@ -2297,12 +2297,12 @@ rustc_queries! {
     ///
     /// This should never be used for the local crate, instead use `iter_local_def_id`.
     query num_extern_def_ids(_: CrateNum) -> usize {
-        desc { "fetching the number of definitions in a crate" }
+        desc { "fetching the number of definitions in a package" }
         separate_provide_extern
     }
 
     query lib_features(_: CrateNum) -> &'tcx LibFeatures {
-        desc { "calculating the lib features defined in a crate" }
+        desc { "calculating the lib features defined in a package" }
         separate_provide_extern
         arena_cache
     }
@@ -2320,7 +2320,7 @@ rustc_queries! {
     /// unstable feature" error for a feature that was implied.
     query stability_implications(_: CrateNum) -> &'tcx UnordMap<Symbol, Symbol> {
         arena_cache
-        desc { "calculating the implications between `#[unstable]` features defined in a crate" }
+        desc { "calculating the implications between `#[unstable]` features defined in a package" }
         separate_provide_extern
     }
     /// Whether the function is an intrinsic
@@ -2344,19 +2344,19 @@ rustc_queries! {
 
     /// Returns the lang items defined in another crate by loading it from metadata.
     query defined_lang_items(_: CrateNum) -> &'tcx [(DefId, LangItem)] {
-        desc { "calculating the lang items defined in a crate" }
+        desc { "calculating the lang items defined in a package" }
         separate_provide_extern
     }
 
     /// Returns the diagnostic items defined in a crate.
     query diagnostic_items(_: CrateNum) -> &'tcx rustc_hir::diagnostic_items::DiagnosticItems {
         arena_cache
-        desc { "calculating the diagnostic items map in a crate" }
+        desc { "calculating the diagnostic items map in a package" }
         separate_provide_extern
     }
 
     query missing_lang_items(_: CrateNum) -> &'tcx [LangItem] {
-        desc { "calculating the missing lang items in a crate" }
+        desc { "calculating the missing lang items in a package" }
         separate_provide_extern
     }
 
@@ -2376,13 +2376,13 @@ rustc_queries! {
     }
     query missing_extern_crate_item(_: CrateNum) -> bool {
         eval_always
-        desc { "seeing if we're missing an `extern pkg` item for this crate" }
+        desc { "seeing if we're missing an `extern pkg` item for this package" }
         separate_provide_extern
     }
     query used_crate_source(_: CrateNum) -> &'tcx Arc<CrateSource> {
         arena_cache
         eval_always
-        desc { "looking at the source for a crate" }
+        desc { "looking at the source for a package" }
         separate_provide_extern
     }
 
@@ -2392,7 +2392,7 @@ rustc_queries! {
     ///       represents a genuine input to the query system.
     query debugger_visualizers(_: CrateNum) -> &'tcx Vec<DebuggerVisualizerFile> {
         arena_cache
-        desc { "looking up the debugger visualizers for this crate" }
+        desc { "looking up the debugger visualizers for this package" }
         separate_provide_extern
         eval_always
     }
@@ -2405,16 +2405,16 @@ rustc_queries! {
     /// is marked as a private dependency
     query is_private_dep(c: CrateNum) -> bool {
         eval_always
-        desc { "checking whether crate `{}` is a private dependency", c }
+        desc { "checking whether package `{}` is a private dependency", c }
         separate_provide_extern
     }
     query allocator_kind(_: ()) -> Option<AllocatorKind> {
         eval_always
-        desc { "getting the allocator kind for the current crate" }
+        desc { "getting the allocator kind for the current package" }
     }
     query alloc_error_handler_kind(_: ()) -> Option<AllocatorKind> {
         eval_always
-        desc { "alloc error handler kind for the current crate" }
+        desc { "alloc error handler kind for the current package" }
     }
 
     query upvars_mentioned(def_id: DefId) -> Option<&'tcx FxIndexMap<hir::HirId, hir::Upvar>> {
@@ -2433,7 +2433,7 @@ rustc_queries! {
     // `crates` in most other cases too.
     query used_crates(_: ()) -> &'tcx [CrateNum] {
         eval_always
-        desc { "fetching `CrateNum`s for all crates loaded non-speculatively" }
+        desc { "fetching `CrateNum`s for all packages loaded non-speculatively" }
     }
 
     /// All crates that share the same name as crate `c`.
@@ -2446,12 +2446,12 @@ rustc_queries! {
 
     /// A list of all traits in a crate, used by rustdoc and error reporting.
     query traits(_: CrateNum) -> &'tcx [DefId] {
-        desc { "fetching all traits in a crate" }
+        desc { "fetching all traits in a package" }
         separate_provide_extern
     }
 
     query trait_impls_in_crate(_: CrateNum) -> &'tcx [DefId] {
-        desc { "fetching all trait impls in a crate" }
+        desc { "fetching all trait impls in a package" }
         separate_provide_extern
     }
 
@@ -2461,7 +2461,7 @@ rustc_queries! {
     }
 
     query exportable_items(_: CrateNum) -> &'tcx [DefId] {
-        desc { "fetching all exportable items in a crate" }
+        desc { "fetching all exportable items in a package" }
         separate_provide_extern
     }
 
@@ -2477,7 +2477,7 @@ rustc_queries! {
     /// - The `exported_non_generic_symbols` and `exported_generic_symbols`
     ///   sets of different crates do not intersect.
     query exported_non_generic_symbols(cnum: CrateNum) -> &'tcx [(ExportedSymbol<'tcx>, SymbolExportInfo)] {
-        desc { "collecting exported non-generic symbols for crate `{}`", cnum}
+        desc { "collecting exported non-generic symbols for package `{}`", cnum}
         cache_on_disk
         separate_provide_extern
     }
@@ -2490,7 +2490,7 @@ rustc_queries! {
     /// - The `exported_non_generic_symbols` and `exported_generic_symbols`
     ///   sets of different crates do not intersect.
     query exported_generic_symbols(cnum: CrateNum) -> &'tcx [(ExportedSymbol<'tcx>, SymbolExportInfo)] {
-        desc { "collecting exported generic symbols for crate `{}`", cnum}
+        desc { "collecting exported generic symbols for package `{}`", cnum}
         cache_on_disk
         separate_provide_extern
     }
@@ -2794,7 +2794,7 @@ rustc_queries! {
     }
 
     query cross_crate_inlinable(def_id: DefId) -> bool {
-        desc { "whether the item should be made inlinable across crates" }
+        desc { "whether the item should be made inlinable across packages" }
         separate_provide_extern
     }
 
@@ -2849,7 +2849,7 @@ rustc_queries! {
     /// Returns a list of all `externally implementable items` crate.
     query externally_implementable_items(cnum: CrateNum) -> &'tcx FxIndexMap<DefId, (EiiDecl, FxIndexMap<DefId, EiiImpl>)> {
         arena_cache
-        desc { "looking up the externally implementable items of a crate" }
+        desc { "looking up the externally implementable items of a package" }
         cache_on_disk
         separate_provide_extern
     }

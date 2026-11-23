@@ -604,7 +604,7 @@ impl<'a, 'tcx> CastCheck<'tcx> {
                     self.cast_ty,
                     fcx,
                 )
-                .with_note("cannot cast an enum with a non-exhaustive variant when it's defined in another crate")
+                .with_note("cannot cast an enum with a non-exhaustive variant when it's defined in another package")
                 .emit();
             }
             CastError::PtrPtrAddingAutoTrait(added) => {
