@@ -5,7 +5,7 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate core;
+extern pkg core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]

@@ -45,7 +45,7 @@ const PRELUDE: &str = r#"
 
 #[allow(unused_imports)]
 #[macro_use]
-extern crate core;
+extern pkg core;
 
 #[allow(unused_imports)]
 #[prelude_import]

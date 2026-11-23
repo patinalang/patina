@@ -518,7 +518,7 @@ pub(crate) struct TraitImplDuplicate {
 pub(crate) struct Relative2018 {
     #[primary_span]
     pub(crate) span: Span,
-    #[suggestion("try", code = "crate::{path_str}", applicability = "maybe-incorrect")]
+    #[suggestion("try", code = "pkg::{path_str}", applicability = "maybe-incorrect")]
     pub(crate) path_span: Span,
     pub(crate) path_str: String,
 }
@@ -619,7 +619,7 @@ pub(crate) struct MacroExpandedMacroExportsAccessedByAbsolutePaths {
 }
 
 #[derive(Diagnostic)]
-#[diag("`#[macro_use]` is not supported on `extern crate self`")]
+#[diag("`#[macro_use]` is not supported on `extern pkg self`")]
 pub(crate) struct MacroUseExternCrateSelf {
     #[primary_span]
     pub(crate) span: Span,
@@ -814,7 +814,7 @@ pub(crate) struct CannotBeReexportedCratePublicNS {
 pub(crate) struct PrivateExternCrateReexport {
     pub ident: Ident,
     #[suggestion(
-        "consider making the `extern crate` item publicly accessible",
+        "consider making the `extern pkg` item publicly accessible",
         code = "pub ",
         style = "verbose",
         applicability = "maybe-incorrect"
@@ -831,8 +831,8 @@ pub(crate) struct ConsiderAddingMacroExport {
 
 #[derive(Subdiagnostic)]
 #[suggestion(
-    "in case you want to use the macro within this crate only, reduce the visibility to `pub(crate)`",
-    code = "pub(crate)",
+    "in case you want to use the macro within this crate only, reduce the visibility to `pub(pkg)`",
+    code = "pub(pkg)",
     applicability = "maybe-incorrect"
 )]
 pub(crate) struct ConsiderMarkingAsPubCrate {
@@ -911,19 +911,19 @@ pub(crate) struct UnexpectedResUseAtOpInSlicePatWithRangeSugg {
 }
 
 #[derive(Diagnostic)]
-#[diag("an `extern crate` loading macros must be at the crate root", code = E0468)]
+#[diag("an `extern pkg` loading macros must be at the crate root", code = E0468)]
 pub(crate) struct ExternCrateLoadingMacroNotAtCrateRoot {
     #[primary_span]
     pub(crate) span: Span,
 }
 
 #[derive(Diagnostic)]
-#[diag("`extern crate self;` requires renaming")]
+#[diag("`extern pkg self;` requires renaming")]
 pub(crate) struct ExternCrateSelfRequiresRenaming {
     #[primary_span]
     #[suggestion(
         "rename the `self` crate to be able to import it",
-        code = "extern crate self as name;",
+        code = "extern pkg self as name;",
         applicability = "has-placeholders"
     )]
     pub(crate) span: Span,
@@ -983,7 +983,7 @@ pub(crate) struct UnnamedImport {
 }
 
 #[derive(Diagnostic)]
-#[diag("macro-expanded `extern crate` items cannot shadow names passed with `--extern`")]
+#[diag("macro-expanded `extern pkg` items cannot shadow names passed with `--extern`")]
 pub(crate) struct MacroExpandedExternCrateCannotShadowExternArguments {
     #[primary_span]
     pub(crate) span: Span,
@@ -1414,7 +1414,7 @@ pub(crate) struct UnusedExternCrate {
     #[label("unused")]
     pub span: Span,
     #[suggestion(
-        "remove the unused `extern crate`",
+        "remove the unused `extern pkg`",
         code = "",
         applicability = "machine-applicable",
         style = "verbose"
@@ -1439,7 +1439,7 @@ pub(crate) struct UnusedLabel;
 pub(crate) struct UnusedMacroUse;
 
 #[derive(Diagnostic)]
-#[diag("applying the `#[macro_use]` attribute to an `extern crate` item is deprecated")]
+#[diag("applying the `#[macro_use]` attribute to an `extern pkg` item is deprecated")]
 #[help("remove it and import macros at use sites with a `use` item instead")]
 pub(crate) struct MacroUseDeprecated;
 
@@ -1463,7 +1463,7 @@ pub(crate) struct MacroRuleNeverUsed {
 }
 
 #[derive(Diagnostic)]
-#[diag("`extern crate` is not idiomatic in the new edition")]
+#[diag("`extern pkg` is not idiomatic in the new edition")]
 pub(crate) struct ExternCrateNotIdiomatic {
     #[suggestion(
         "convert it to a `use`",
@@ -1709,7 +1709,7 @@ pub(crate) struct SingleUseLifetimeSugg {
 
 #[derive(Diagnostic)]
 #[diag(
-    "absolute paths must start with `self`, `super`, `crate`, or an external crate name in the 2018 edition"
+    "absolute paths must start with `self`, `super`, `pkg`, or an external crate name in the 2018 edition"
 )]
 pub(crate) struct AbsPathWithModule {
     #[subdiagnostic]
@@ -1717,7 +1717,7 @@ pub(crate) struct AbsPathWithModule {
 }
 
 #[derive(Subdiagnostic)]
-#[suggestion("use `crate`", code = "{replacement}")]
+#[suggestion("use `pkg`", code = "{replacement}")]
 pub(crate) struct AbsPathWithModuleSugg {
     #[primary_span]
     pub span: Span,

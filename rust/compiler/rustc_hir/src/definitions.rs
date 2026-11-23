@@ -509,7 +509,7 @@ impl DefPathData {
             TypeNs(name) | ValueNs(name) | MacroNs(name) | LifetimeNs(name)
             | OpaqueLifetime(name) => DefPathDataName::Named(name),
             // Note that this does not show up in user print-outs.
-            CrateRoot => DefPathDataName::Anon { namespace: kw::Crate },
+            CrateRoot => DefPathDataName::Anon { namespace: kw::Pkg },
             Impl => DefPathDataName::Anon { namespace: kw::Impl },
             ForeignMod => DefPathDataName::Anon { namespace: kw::Extern },
             Use => DefPathDataName::Anon { namespace: kw::Use },

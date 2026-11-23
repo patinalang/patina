@@ -47,20 +47,20 @@ pub macro derive($item:item) {}
 
 #[macro_export]
 macro_rules! print {
-    ($($arg:tt)*) => {{ $crate::io::put_chars($crate::format_args!($($arg)*)); }};
+    ($($arg:tt)*) => {{ $pkg::io::put_chars($pkg::format_args!($($arg)*)); }};
 }
 
 #[macro_export]
 macro_rules! println {
-    () => {{ $crate::io::nl(); }};
-    ($($arg:tt)*) => {{ $crate::io::put_chars([$crate::format_args!($($arg)*)]); $crate::io::nl(); }};
+    () => {{ $pkg::io::nl(); }};
+    ($($arg:tt)*) => {{ $pkg::io::put_chars([$pkg::format_args!($($arg)*)]); $pkg::io::nl(); }};
 }
 
 #[macro_export]
 macro_rules! format {
     ($($arg:tt)*) => {
         unsafe {
-            $crate::unicode::characters_to_binary($crate::format_args!($($arg)*))
+            $pkg::unicode::characters_to_binary($pkg::format_args!($($arg)*))
                 .cast_unchecked::<str>()
         }
     };
@@ -72,7 +72,7 @@ macro_rules! assert_eq {
         match ($left, $right) {
             (left_val, right_val) => {
                 if !(left_val == right_val) {
-                    $crate::panic!(@raise $crate::format!(
+                    $pkg::panic!(@raise $pkg::format!(
                         "assertion `left == right` failed{}\n  left: {:?}\n right: {:?}",
                         $message,
                         left_val,
@@ -83,10 +83,10 @@ macro_rules! assert_eq {
         }
     };
     ($left:expr, $right:expr $(,)?) => {
-        $crate::assert_eq!(@impl $left, $right, "")
+        $pkg::assert_eq!(@impl $left, $right, "")
     };
     ($left:expr, $right:expr, $($arg:tt)+) => {
-        $crate::assert_eq!(@impl $left, $right, $crate::format!(": {}", $crate::format!($($arg)+)))
+        $pkg::assert_eq!(@impl $left, $right, $pkg::format!(": {}", $pkg::format!($($arg)+)))
     };
 }
 
@@ -113,12 +113,12 @@ impl Panic {
 #[macro_export]
 #[allow_internal_unstable(never_type)]
 macro_rules! panic {
-    () => { $crate::panic!(@raise "explicit panic") };
-    ($msg:literal) => { $crate::panic!(@raise $msg) };
+    () => { $pkg::panic!(@raise "explicit panic") };
+    ($msg:literal) => { $pkg::panic!(@raise $msg) };
     (@raise $msg:expr) => {
         unsafe {
-            $crate::erlang::error(
-                $crate::Panic::new($msg),
+            $pkg::erlang::error(
+                $pkg::Panic::new($msg),
                 a"none",
                 [(a"error_info", #{a"module" => a"Elixir.Patina.Core.Panic"})],
             )
@@ -129,8 +129,8 @@ macro_rules! panic {
 
 #[macro_export]
 macro_rules! todo {
-    () => { $crate::panic!(@raise "not yet implemented") };
-    ($msg:literal) => { $crate::panic!(@raise $crate::concat!("not yet implemented: ", $msg)) };
+    () => { $pkg::panic!(@raise "not yet implemented") };
+    ($msg:literal) => { $pkg::panic!(@raise $pkg::concat!("not yet implemented: ", $msg)) };
 }
 
 #[lang = "pointee_sized"]
@@ -708,7 +708,7 @@ impl term {
 extern mod lists;
 extern mod maps;
 
-use crate::Option::{None, Some};
+use pkg::Option::{None, Some};
 
 impl<T> [T] {
     /// Returns a lazy iterator over the elements of the list.
@@ -1030,8 +1030,8 @@ impl Timeout {
 
 /// Imported with `#[prelude_import]`.
 pub mod prelude {
-    pub use crate::Option::{None, Some};
-    pub use crate::{
+    pub use pkg::Option::{None, Some};
+    pub use pkg::{
         Copy, Fn, FnOnce, IntoIterator, Iterator, NativeEq, Option, PartialEq, PartialOrd, Timeout,
         derive,
     };

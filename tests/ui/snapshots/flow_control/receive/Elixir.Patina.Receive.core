@@ -119,55 +119,51 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 'take_int_or_timeout'/0 =
     %% Line 15
     ( fun () ->
-	  let <_0> =
-	      call %% Line 16
-		   'Elixir.Patina.Core.Timeout':%% Line 16
-						'from_millis'
-		  (%% Line 16
-		   10)
-	  in  ( letrec
-		    'recv$^0'/0 =
-			fun () ->
-			    let <_3,_1> =
-				primop 'recv_peek_message'
-				    ()
-			    in  case _3 of
-				  <'true'> when 'true' ->
-				      %% Line 16
-				      case _1 of
-					<_X_n@0_0>
-					    when call 'erlang':'is_integer'
-						  (_1) ->
-					    do  primop 'remove_message'
+	  ( letrec
+		'recv$^0'/0 =
+		    fun () ->
+			let <_3,_1> =
+			    primop 'recv_peek_message'
+				()
+			in  case _3 of
+			      <'true'> when 'true' ->
+				  %% Line 16
+				  case _1 of
+				    <_X_n@1_0>
+					when call 'erlang':'is_integer'
+					      (_1) ->
+					do  primop 'remove_message'
+						()
+					    _X_n@1_0
+				    ( <Other> when 'true' ->
+					  do  primop 'recv_next'
+						  ()
+					      ( apply 'recv$^0'/0
 						    ()
-						_X_n@0_0
-					( <Other> when 'true' ->
-					      do  primop 'recv_next'
-						      ()
-						  ( apply 'recv$^0'/0
-							()
-						    -| ['dialyzer_ignore'] )
-					  -| ['compiler_generated','dialyzer_ignore'] )
+						-| ['dialyzer_ignore'] )
+				      -| ['compiler_generated','dialyzer_ignore'] )
+				  end
+			      <'false'> when 'true' ->
+				  let <_2> =
+				      primop 'recv_wait_timeout'
+					  (%% Line 16
+					   ( 10
+					     -| ['result_not_wanted'] ))
+				  in  case _2 of
+					<'true'> when 'true' ->
+					    %% Line 16
+					    -1
+					( <'false'> when 'true' ->
+					      ( apply 'recv$^0'/0
+						    ()
+						-| ['dialyzer_ignore'] )
+					  -| ['dialyzer_ignore'] )
 				      end
-				  <'false'> when 'true' ->
-				      let <_2> =
-					  primop 'recv_wait_timeout'
-					      (_0)
-				      in  case _2 of
-					    <'true'> when 'true' ->
-						%% Line 16
-						-1
-					    ( <'false'> when 'true' ->
-						  ( apply 'recv$^0'/0
-							()
-						    -| ['dialyzer_ignore'] )
-					      -| ['dialyzer_ignore'] )
-					  end
-				end
-		in  ( apply 'recv$^0'/0
-			  ()
-		      -| ['dialyzer_ignore'] )
-		-| ['letrec_goto','no_inline'] )
+			    end
+	    in  ( apply 'recv$^0'/0
+		      ()
+		  -| ['dialyzer_ignore'] )
+	    -| ['letrec_goto','no_inline'] )
       -| [{'function',{'take_int_or_timeout',0}}] )
 'take_atom'/0 =
     %% Line 19
@@ -355,86 +351,78 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 'unsafe_value'/0 =
     %% Line 38
     ( fun () ->
-	  let <_0> =
-	      call %% Line 40
-		   'Elixir.Patina.Core.Timeout':%% Line 40
-						'from_millis'
-		  (%% Line 40
-		   0)
-	  in  ( letrec
-		    'recv$^0'/0 =
-			fun () ->
-			    let <_3,_1> =
-				primop 'recv_peek_message'
-				    ()
-			    in  case _3 of
-				  <'true'> when 'true' ->
-				      %% Line 40
-				      case _1 of
-					<{'value',_X_number@0_0}>
-					    when call 'erlang':'is_integer'
-						  (_X_number@0_0) ->
-					    do  primop 'remove_message'
+	  ( letrec
+		'recv$^0'/0 =
+		    fun () ->
+			let <_3,_1> =
+			    primop 'recv_peek_message'
+				()
+			in  case _3 of
+			      <'true'> when 'true' ->
+				  %% Line 40
+				  case _1 of
+				    <{'value',_X_number@1_0}>
+					when call 'erlang':'is_integer'
+					      (_X_number@1_0) ->
+					do  primop 'remove_message'
+						()
+					    _X_number@1_0
+				    ( <Other> when 'true' ->
+					  do  primop 'recv_next'
+						  ()
+					      ( apply 'recv$^0'/0
 						    ()
-						_X_number@0_0
-					( <Other> when 'true' ->
-					      do  primop 'recv_next'
-						      ()
-						  ( apply 'recv$^0'/0
-							()
-						    -| ['dialyzer_ignore'] )
-					  -| ['compiler_generated','dialyzer_ignore'] )
+						-| ['dialyzer_ignore'] )
+				      -| ['compiler_generated','dialyzer_ignore'] )
+				  end
+			      <'false'> when 'true' ->
+				  let <_2> =
+				      primop 'recv_wait_timeout'
+					  (%% Line 40
+					   ( 0
+					     -| ['result_not_wanted'] ))
+				  in  case _2 of
+					<'true'> when 'true' ->
+					    %% Line 40
+					    -1
+					( <'false'> when 'true' ->
+					      ( apply 'recv$^0'/0
+						    ()
+						-| ['dialyzer_ignore'] )
+					  -| ['dialyzer_ignore'] )
 				      end
-				  <'false'> when 'true' ->
-				      let <_2> =
-					  primop 'recv_wait_timeout'
-					      (_0)
-				      in  case _2 of
-					    <'true'> when 'true' ->
-						%% Line 40
-						-1
-					    ( <'false'> when 'true' ->
-						  ( apply 'recv$^0'/0
-							()
-						    -| ['dialyzer_ignore'] )
-					      -| ['dialyzer_ignore'] )
-					  end
-				end
-		in  ( apply 'recv$^0'/0
-			  ()
-		      -| ['dialyzer_ignore'] )
-		-| ['letrec_goto','no_inline'] )
+			    end
+	    in  ( apply 'recv$^0'/0
+		      ()
+		  -| ['dialyzer_ignore'] )
+	    -| ['letrec_goto','no_inline'] )
       -| [{'function',{'unsafe_value',0}}] )
 'only_timeout'/0 =
     %% Line 44
     ( fun () ->
-	  let <_0> =
-	      call %% Line 45
-		   'Elixir.Patina.Core.Timeout':%% Line 45
-						'from_millis'
-		  (%% Line 45
-		   0)
-	  in  ( letrec
-		    'recv$^0'/0 =
-			fun () ->
-			    let <_1> =
-				primop 'recv_wait_timeout'
-				    (_0)
-			    in  ( case _1 of
-				    <'true'> when 'true' ->
-					%% Line 45
-					7
-				    ( <'false'> when 'true' ->
-					  ( apply 'recv$^0'/0
-						()
-					    -| ['dialyzer_ignore'] )
-				      -| ['compiler_generated','dialyzer_ignore'] )
-				  end
-				  -| ['receive_timeout'] )
-		in  ( apply 'recv$^0'/0
-			  ()
-		      -| ['dialyzer_ignore'] )
-		-| ['letrec_goto','no_inline'] )
+	  ( letrec
+		'recv$^0'/0 =
+		    fun () ->
+			let <_1> =
+			    primop 'recv_wait_timeout'
+				(%% Line 45
+				 ( 0
+				   -| ['result_not_wanted'] ))
+			in  ( case _1 of
+				<'true'> when 'true' ->
+				    %% Line 45
+				    7
+				( <'false'> when 'true' ->
+				      ( apply 'recv$^0'/0
+					    ()
+					-| ['dialyzer_ignore'] )
+				  -| ['compiler_generated','dialyzer_ignore'] )
+			      end
+			      -| ['receive_timeout'] )
+	    in  ( apply 'recv$^0'/0
+		      ()
+		  -| ['dialyzer_ignore'] )
+	    -| ['letrec_goto','no_inline'] )
       -| [{'function',{'only_timeout',0}}] )
 'guarded_or'/0 =
     %% Line 48
@@ -504,141 +492,115 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 'merge_timeout'/0 =
     %% Line 52
     ( fun () ->
-	  let <_3,_X_value@0_1> =
-	      let <_4> =
-		  call %% Line 54
-		       'Elixir.Patina.Core.Timeout':%% Line 54
-						    'from_millis'
-		      (%% Line 54
-		       0)
-	      in  ( letrec
-			'recv$^0'/0 =
-			    fun () ->
-				let <_7,_5> =
-				    primop 'recv_peek_message'
-					()
-				in  case _7 of
-				      <'true'> when 'true' ->
-					  %% Line 54
-					  case _5 of
-					    <_X_n@1_0>
-						when call 'erlang':'is_integer'
-						      (_5) ->
-						do  primop 'remove_message'
+	  let <_4,_X_value@0_1> =
+	      ( letrec
+		    'recv$^0'/0 =
+			fun () ->
+			    let <_7,_5> =
+				primop 'recv_peek_message'
+				    ()
+			    in  case _7 of
+				  <'true'> when 'true' ->
+				      %% Line 54
+				      case _5 of
+					<_X_n@2_0>
+					    when call 'erlang':'is_integer'
+						  (_5) ->
+					    do  primop 'remove_message'
+						    ()
+						<{},_X_n@2_0>
+					( <Other> when 'true' ->
+					      do  primop 'recv_next'
+						      ()
+						  ( apply 'recv$^0'/0
 							()
-						    <{},_X_n@1_0>
-					    ( <Other> when 'true' ->
-						  do  primop 'recv_next'
-							  ()
-						      ( apply 'recv$^0'/0
-							    ()
-							-| ['dialyzer_ignore'] )
-					      -| ['compiler_generated','dialyzer_ignore'] )
+						    -| ['dialyzer_ignore'] )
+					  -| ['compiler_generated','dialyzer_ignore'] )
+				      end
+				  <'false'> when 'true' ->
+				      let <_6> =
+					  primop 'recv_wait_timeout'
+					      (%% Line 54
+					       ( 0
+						 -| ['result_not_wanted'] ))
+				      in  case _6 of
+					    <'true'> when 'true' ->
+						%% Line 54
+						<{},( 2
+						      -| ['result_not_wanted'] )>
+					    ( <'false'> when 'true' ->
+						  ( apply 'recv$^0'/0
+							()
+						    -| ['dialyzer_ignore'] )
+					      -| ['dialyzer_ignore'] )
 					  end
-				      <'false'> when 'true' ->
-					  let <_6> =
-					      primop 'recv_wait_timeout'
-						  (_4)
-					  in  case _6 of
-						<'true'> when 'true' ->
-						    %% Line 54
-						    <{},( 2
-							  -| ['result_not_wanted'] )>
-						( <'false'> when 'true' ->
-						      ( apply 'recv$^0'/0
-							    ()
-							-| ['dialyzer_ignore'] )
-						  -| ['dialyzer_ignore'] )
-					      end
-				    end
-		    in  ( apply 'recv$^0'/0
-			      ()
-			  -| ['dialyzer_ignore'] )
-		    -| ['letrec_goto','no_inline'] )
+				end
+		in  ( apply 'recv$^0'/0
+			  ()
+		      -| ['dialyzer_ignore'] )
+		-| ['letrec_goto'] )
 	  in  %% Line 55
 	      _X_value@0_1
       -| [{'function',{'merge_timeout',0}}] )
 'unchanged_timeout'/0 =
     %% Line 58
     ( fun () ->
-	  let <_4,_X_value@0_1> =
-	      let <_5> =
-		  call %% Line 60
-		       'Elixir.Patina.Core.Timeout':%% Line 60
-						    'from_millis'
-		      (%% Line 60
-		       0)
-	      in  ( letrec
-			'recv$^0'/0 =
-			    fun () ->
-				let <_8,_6> =
-				    primop 'recv_peek_message'
-					()
-				in  case _8 of
-				      <'true'> when 'true' ->
-					  %% Line 60
-					  case _6 of
-					    <_X_n@1_0>
-						when call 'erlang':'is_integer'
-						      (_6) ->
-						do  primop 'remove_message'
+	  let <_5,_X_value@0_1> =
+	      ( letrec
+		    'recv$^0'/0 =
+			fun () ->
+			    let <_8,_6> =
+				primop 'recv_peek_message'
+				    ()
+			    in  case _8 of
+				  <'true'> when 'true' ->
+				      %% Line 60
+				      case _6 of
+					<_X_n@2_0>
+					    when call 'erlang':'is_integer'
+						  (_6) ->
+					    do  primop 'remove_message'
+						    ()
+						<{},_X_n@2_0>
+					( <Other> when 'true' ->
+					      do  primop 'recv_next'
+						      ()
+						  ( apply 'recv$^0'/0
 							()
-						    <{},_X_n@1_0>
-					    ( <Other> when 'true' ->
-						  do  primop 'recv_next'
-							  ()
-						      ( apply 'recv$^0'/0
-							    ()
-							-| ['dialyzer_ignore'] )
-					      -| ['compiler_generated','dialyzer_ignore'] )
+						    -| ['dialyzer_ignore'] )
+					  -| ['compiler_generated','dialyzer_ignore'] )
+				      end
+				  <'false'> when 'true' ->
+				      let <_7> =
+					  primop 'recv_wait_timeout'
+					      (%% Line 60
+					       ( 0
+						 -| ['result_not_wanted'] ))
+				      in  case _7 of
+					    <'true'> when 'true' ->
+						%% Line 60
+						<( {}
+						   -| ['result_not_wanted'] ),( 1
+										-| ['result_not_wanted'] )>
+					    ( <'false'> when 'true' ->
+						  ( apply 'recv$^0'/0
+							()
+						    -| ['dialyzer_ignore'] )
+					      -| ['dialyzer_ignore'] )
 					  end
-				      <'false'> when 'true' ->
-					  let <_7> =
-					      primop 'recv_wait_timeout'
-						  (_5)
-					  in  case _7 of
-						<'true'> when 'true' ->
-						    %% Line 60
-						    <( {}
-						       -| ['result_not_wanted'] ),( 1
-										    -| ['result_not_wanted'] )>
-						( <'false'> when 'true' ->
-						      ( apply 'recv$^0'/0
-							    ()
-							-| ['dialyzer_ignore'] )
-						  -| ['dialyzer_ignore'] )
-					      end
-				    end
-		    in  ( apply 'recv$^0'/0
-			      ()
-			  -| ['dialyzer_ignore'] )
-		    -| ['letrec_goto','no_inline'] )
+				end
+		in  ( apply 'recv$^0'/0
+			  ()
+		      -| ['dialyzer_ignore'] )
+		-| ['letrec_goto'] )
 	  in  %% Line 61
 	      _X_value@0_1
       -| [{'function',{'unchanged_timeout',0}}] )
 'durations'/0 =
     %% Line 64
     ( fun () ->
-	  let <_X_element@0_0> =
-	      call %% Line 65
-		   ( 'Elixir.Patina.Core.Timeout'
-		     -| ['result_not_wanted'] ):%% Line 65
-						( 'from_seconds'
-						  -| ['result_not_wanted'] )
-		  (%% Line 65
-		   ( 2
-		     -| ['result_not_wanted'] ))
-	  in  let <_X_element@1_0> =
-		  call %% Line 65
-		       ( 'Elixir.Patina.Core.Timeout'
-			 -| ['result_not_wanted'] ):%% Line 65
-						    ( 'from_minutes'
-						      -| ['result_not_wanted'] )
-		      (%% Line 65
-		       ( 3
-			 -| ['result_not_wanted'] ))
-	      in  %% Line 65
-		  {_X_element@0_0,_X_element@1_0}
+	  %% Line 65
+	  {2000,180000}
       -| [{'function',{'durations',0}}] )
 'contextual_after'/0 =
     %% Line 68
@@ -715,60 +677,56 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 	  ( letrec
 		'$patina_label_0'/1 =
 		    fun (%% Line 86
-			 _X_jump_value@1_0) ->
+			 _X_jump_value@2_0) ->
 			%% Line 86
-			_X_jump_value@1_0
-	    in  let <_3> =
-		    call %% Line 86
-			 'Elixir.Patina.Core.Timeout':%% Line 86
-						      'from_millis'
-			(%% Line 86
-			 0)
-		in  ( letrec
-			  'recv$^0'/0 =
-			      fun () ->
-				  let <_6,_4> =
-				      primop 'recv_peek_message'
-					  ()
-				  in  case _6 of
-					<'true'> when 'true' ->
-					    %% Line 86
-					    case _4 of
-					      <_X_n@0_0>
-						  when call 'erlang':'is_integer'
-							(_4) ->
-						  do  primop 'remove_message'
+			_X_jump_value@2_0
+	    in  ( letrec
+		      'recv$^0'/0 =
+			  fun () ->
+			      let <_6,_4> =
+				  primop 'recv_peek_message'
+				      ()
+			      in  case _6 of
+				    <'true'> when 'true' ->
+					%% Line 86
+					case _4 of
+					  <_X_n@1_0>
+					      when call 'erlang':'is_integer'
+						    (_4) ->
+					      do  primop 'remove_message'
+						      ()
+						  apply '$patina_label_0'/1
+						      (_X_n@1_0)
+					  ( <Other> when 'true' ->
+						do  primop 'recv_next'
+							()
+						    ( apply 'recv$^0'/0
 							  ()
-						      apply '$patina_label_0'/1
-							  (_X_n@0_0)
-					      ( <Other> when 'true' ->
-						    do  primop 'recv_next'
-							    ()
-							( apply 'recv$^0'/0
-							      ()
-							  -| ['dialyzer_ignore'] )
-						-| ['compiler_generated','dialyzer_ignore'] )
+						      -| ['dialyzer_ignore'] )
+					    -| ['compiler_generated','dialyzer_ignore'] )
+					end
+				    <'false'> when 'true' ->
+					let <_5> =
+					    primop 'recv_wait_timeout'
+						(%% Line 86
+						 ( 0
+						   -| ['result_not_wanted'] ))
+					in  case _5 of
+					      <'true'> when 'true' ->
+						  apply '$patina_label_0'/1
+						      (%% Line 86
+						       -1)
+					      ( <'false'> when 'true' ->
+						    ( apply 'recv$^0'/0
+							  ()
+						      -| ['dialyzer_ignore'] )
+						-| ['dialyzer_ignore'] )
 					    end
-					<'false'> when 'true' ->
-					    let <_5> =
-						primop 'recv_wait_timeout'
-						    (_3)
-					    in  case _5 of
-						  <'true'> when 'true' ->
-						      apply '$patina_label_0'/1
-							  (%% Line 86
-							   -1)
-						  ( <'false'> when 'true' ->
-							( apply 'recv$^0'/0
-							      ()
-							  -| ['dialyzer_ignore'] )
-						    -| ['dialyzer_ignore'] )
-						end
-				      end
-		      in  ( apply 'recv$^0'/0
-				()
-			    -| ['dialyzer_ignore'] )
-		      -| ['letrec_goto','no_inline'] )
+				  end
+		  in  ( apply 'recv$^0'/0
+			    ()
+			-| ['dialyzer_ignore'] )
+		  -| ['letrec_goto','no_inline'] )
 	    -| ['letrec_goto','no_inline'] )
       -| [{'function',{'diverging_timeout',0}}] )
 'module_info'/0 =

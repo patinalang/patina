@@ -36,7 +36,7 @@ symbols! {
         // Matching predicates: `is_special`/`is_reserved`
         //
         // tidy-alphabetical-start
-        DollarCrate:        "$crate",
+        DollarPkg:          "$pkg",
         PathRoot:           "{{root}}",
         Underscore:         "_",
         // tidy-alphabetical-end
@@ -48,7 +48,6 @@ symbols! {
         Break:              "break",
         Const:              "const",
         Continue:           "continue",
-        Crate:              "crate",
         Else:               "else",
         Enum:               "enum",
         Extern:             "extern",
@@ -64,6 +63,7 @@ symbols! {
         Mod:                "mod",
         Move:               "move",
         Mut:                "mut",
+        Pkg:                "pkg",
         Pub:                "pub",
         Receive:            "receive",
         Ref:                "ref",
@@ -2578,7 +2578,7 @@ impl fmt::Display for IdentPrinter {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self.mode {
             IdentPrintMode::Normal
-                if self.symbol == kw::DollarCrate
+                if self.symbol == kw::DollarPkg
                     && let Some(span) = self.convert_dollar_crate =>
             {
                 let converted = span.ctxt().dollar_crate_name();
@@ -3008,9 +3008,9 @@ impl Symbol {
         self == kw::Super
             || self == kw::SelfLower
             || self == kw::SelfUpper
-            || self == kw::Crate
+            || self == kw::Pkg
             || self == kw::PathRoot
-            || self == kw::DollarCrate
+            || self == kw::DollarPkg
     }
 
     /// Returns `true` if the symbol is `true` or `false`.
@@ -3115,7 +3115,7 @@ impl Ident {
 /// *Note:* Please update this if a new keyword is added beyond the current
 /// range.
 pub fn used_keywords(edition: impl Copy + FnOnce() -> Edition) -> Vec<Symbol> {
-    (kw::DollarCrate.as_u32()..kw::Yeet.as_u32())
+    (kw::DollarPkg.as_u32()..kw::Yeet.as_u32())
         .filter_map(|kw| {
             let kw = Symbol::new(kw);
             if kw.is_used_keyword_always() || kw.is_used_keyword_conditional(edition) {

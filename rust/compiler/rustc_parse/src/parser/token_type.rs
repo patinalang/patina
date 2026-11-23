@@ -87,7 +87,7 @@ pub enum TokenType {
     KwContinue,
     KwContractEnsures,
     KwContractRequires,
-    KwCrate,
+    KwPkg,
     KwDefault,
     KwDyn,
     KwElse,
@@ -232,7 +232,7 @@ impl TokenType {
             KwContinue,
             KwContractEnsures,
             KwContractRequires,
-            KwCrate,
+            KwPkg,
             KwDefault,
             KwDyn,
             KwElse,
@@ -312,7 +312,7 @@ impl TokenType {
             TokenType::KwContinue => Some(kw::Continue),
             TokenType::KwContractEnsures => Some(kw::ContractEnsures),
             TokenType::KwContractRequires => Some(kw::ContractRequires),
-            TokenType::KwCrate => Some(kw::Crate),
+            TokenType::KwPkg => Some(kw::Pkg),
             TokenType::KwDefault => Some(kw::Default),
             TokenType::KwDyn => Some(kw::Dyn),
             TokenType::KwElse => Some(kw::Else),
@@ -533,7 +533,7 @@ macro_rules! exp {
     (Continue)       => { exp!(@kw, Continue,   KwContinue) };
     (ContractEnsures)  => { exp!(@kw, ContractEnsures, KwContractEnsures) };
     (ContractRequires) => { exp!(@kw, ContractRequires, KwContractRequires) };
-    (Crate)          => { exp!(@kw, Crate,      KwCrate) };
+    (Pkg)            => { exp!(@kw, Pkg,        KwPkg) };
     (Default)        => { exp!(@kw, Default,    KwDefault) };
     (Dyn)            => { exp!(@kw, Dyn,        KwDyn) };
     (Else)           => { exp!(@kw, Else,       KwElse) };

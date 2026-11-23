@@ -293,7 +293,7 @@ impl Visibility {
         match self {
             ty::Visibility::Restricted(restricted_id) => {
                 if restricted_id.is_top_level_module() {
-                    "pub(crate)".to_string()
+                    "pub(pkg)".to_string()
                 } else if restricted_id == tcx.parent_module_from_def_id(def_id).to_local_def_id() {
                     "pub(self)".to_string()
                 } else {

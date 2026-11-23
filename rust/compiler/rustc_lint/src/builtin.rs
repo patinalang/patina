@@ -1253,7 +1253,7 @@ impl UnreachablePub {
             {
                 "pub(super)"
             } else {
-                "pub(crate)"
+                "pub(pkg)"
             };
 
             if vis_span.from_expansion() {

@@ -1,0 +1,20 @@
+error[E0425]: cannot find function `visible` in this scope
+  --> tests/ui/src/mod/pkg_keyword.pt:13:31
+   |
+LL |     fn unqualified() -> int { visible() }
+   |                               ^^^^^^^ not found in this scope
+   |
+help: consider importing this function
+   |
+LL +     use pkg::first::visible;
+   |
+
+error[E0425]: cannot find function `missing` in module `pkg::first`
+  --> tests/ui/src/mod/pkg_keyword.pt:19:17
+   |
+LL |     pkg::first::missing();
+   |                 ^^^^^^^ not found in `pkg::first`
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

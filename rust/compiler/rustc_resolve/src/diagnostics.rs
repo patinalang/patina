@@ -412,7 +412,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             }
             ImportKind::ExternCrate { source, target, .. } => {
                 suggestion = Some(format!(
-                    "extern crate {} as {};",
+                    "extern pkg {} as {};",
                     source.unwrap_or(target.name),
                     suggested_name,
                 ))
@@ -511,7 +511,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
 
         match path.get(1) {
             // If this import looks like `crate::...` it's already good
-            Some(Segment { ident, .. }) if ident.name == kw::Crate => return,
+            Some(Segment { ident, .. }) if ident.name == kw::Pkg => return,
             // Otherwise go below to see if it's an extern crate
             Some(_) => {}
             // If the path has length one (and it's `PathRoot` most likely)
@@ -547,9 +547,9 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                         // can tell us whether or not this is global
                         let opt_colon = if s.trim_start().starts_with("::") { "" } else { "::" };
 
-                        (format!("crate{opt_colon}{s}"), Applicability::MachineApplicable)
+                        (format!("pkg{opt_colon}{s}"), Applicability::MachineApplicable)
                     }
-                    Err(_) => ("crate::<path>".to_string(), Applicability::HasPlaceholders),
+                    Err(_) => ("pkg::<path>".to_string(), Applicability::HasPlaceholders),
                 };
                 errors::AbsPathWithModule {
                     sugg: errors::AbsPathWithModuleSugg {
@@ -1211,7 +1211,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                             self.tcx.sess.edition(),
                         ) {
                             (true, true, Edition::Edition2015) => String::new(),
-                            (true, true, _) => kw::Crate.to_string(),
+                            (true, true, _) => kw::Pkg.to_string(),
                             (true, false, _) | (false, _, _) => name.to_string(),
                         }
                     })
@@ -1607,7 +1607,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
     where
         FilterFn: Fn(Res) -> bool,
     {
-        let crate_path = thin_vec![ast::PathSegment::from_ident(Ident::with_dummy_span(kw::Crate))];
+        let crate_path = thin_vec![ast::PathSegment::from_ident(Ident::with_dummy_span(kw::Pkg))];
         let mut suggestions = self.lookup_import_candidates_from_module(
             lookup_ident,
             namespace,
@@ -2103,7 +2103,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 if let Scope::ModuleNonGlobs(module, _) | Scope::ModuleGlobs(module, _) = scope {
                     if module == self.graph_root.to_module() {
                         help_msgs.push(format!(
-                            "use `crate::{ident}` to refer to this {thing} unambiguously"
+                            "use `pkg::{ident}` to refer to this {thing} unambiguously"
                         ));
                     } else if module.is_normal() {
                         help_msgs.push(format!(
@@ -2176,7 +2176,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         self.field_idents(def_id)?.iter().map(|&f| f.span).reduce(Span::to) // None for `struct Foo()`
     }
 
-    /// Returns the path segments (as symbols) of a module, including `kw::Crate` at the start.
+    /// Returns the path segments (as symbols) of a module, including `kw::Pkg` at the start.
     /// For example, for `crate::foo::bar`, returns `[Crate, foo, bar]`.
     /// Returns `None` for block modules that don't have a `DefId`.
     fn module_path_names(&self, module: Module<'ra>) -> Option<Vec<Symbol>> {
@@ -2192,7 +2192,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             def_id = parent;
         }
         path.reverse();
-        path.insert(0, kw::Crate);
+        path.insert(0, kw::Pkg);
         Some(path)
     }
 
@@ -2229,8 +2229,8 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
 
             let mut candidate_names: Vec<Symbol> =
                 filtered_segments.iter().map(|segment| segment.ident.name).collect();
-            if candidate_names.first() != Some(&kw::Crate) {
-                candidate_names.insert(0, kw::Crate);
+            if candidate_names.first() != Some(&kw::Pkg) {
+                candidate_names.insert(0, kw::Pkg);
             }
             if candidate_names.len() < 2 {
                 return;
@@ -2383,7 +2383,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 .map(|def_id| {
                     self.tcx.opt_item_name(*def_id).map(|name| {
                         Ident::with_dummy_span(if def_id.is_top_level_module() {
-                            kw::Crate
+                            kw::Pkg
                         } else {
                             name
                         })
@@ -2689,7 +2689,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     Some((
                         vec![(
                             self.current_crate_outer_attr_insert_span,
-                            format!("extern crate {ident};\n"),
+                            format!("extern pkg {ident};\n"),
                         )],
                         if was_invoked_from_cargo() {
                             format!(
@@ -2717,7 +2717,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                 kw::PathRoot if self.tcx.sess.edition() > Edition::Edition2015 => {
                     "the list of imported crates".to_owned()
                 }
-                kw::PathRoot | kw::Crate => "the crate root".to_owned(),
+                kw::PathRoot | kw::Pkg => "the crate root".to_owned(),
                 _ => format!("`{parent}`"),
             };
 
@@ -2852,7 +2852,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             if ident.name == sym::alloc {
                 suggestion = Some((
                     vec![],
-                    String::from("add `extern crate alloc` to use the `alloc` crate"),
+                    String::from("add `extern pkg alloc` to use the `alloc` crate"),
                     Applicability::MaybeIncorrect,
                 ))
             }
@@ -3022,7 +3022,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         parent_scope: &ParentScope<'ra>,
     ) -> Option<(Vec<Segment>, Option<String>)> {
         // Replace first ident with `crate` and check if that is valid.
-        path[0].ident.name = kw::Crate;
+        path[0].ident.name = kw::Pkg;
         let result = self.cm().maybe_resolve_path(&path, None, parent_scope, None);
         debug!(?path, ?result);
         if let PathResult::Module(..) = result {
@@ -3139,7 +3139,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
         if !kinds.contains(MacroKinds::BANG) {
             return None;
         }
-        let module_name = crate_module.kind.name().unwrap_or(kw::Crate);
+        let module_name = crate_module.kind.name().unwrap_or(kw::Pkg);
         let import_snippet = match import.kind {
             ImportKind::Single { source, target, .. } if source != target => {
                 format!("{source} as {target}")
@@ -3597,7 +3597,7 @@ fn show_candidates(
         let std_path_strings =
             path_strings.extract_if(.., |p| p.0.starts_with("std::")).collect::<Vec<_>>();
         let foreign_crate_path_strings =
-            path_strings.extract_if(.., |p| !p.0.starts_with("crate::")).collect::<Vec<_>>();
+            path_strings.extract_if(.., |p| !p.0.starts_with("pkg::")).collect::<Vec<_>>();
 
         // We list the `crate` local paths first.
         // Then we list the `std`/`core` paths.

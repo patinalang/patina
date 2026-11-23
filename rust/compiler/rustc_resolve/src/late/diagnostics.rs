@@ -517,7 +517,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                 if self.r.tcx.sess.edition() > Edition::Edition2015 {
                     // In edition 2018 onwards, the `::foo` syntax may only pull from the extern prelude
                     // which overrides all other expectations of item type
-                    expected = "crate";
+                    expected = "pkg";
                     (String::new(), "the list of imported crates".to_string(), None, None)
                 } else {
                     (
@@ -527,7 +527,7 @@ impl<'ast, 'ra, 'tcx> LateResolutionVisitor<'_, 'ast, 'ra, 'tcx> {
                         None,
                     )
                 }
-            } else if path.len() == 2 && path[0].ident.name == kw::Crate {
+            } else if path.len() == 2 && path[0].ident.name == kw::Pkg {
                 (String::new(), "the crate root".to_string(), Some(CRATE_DEF_ID.to_def_id()), None)
             } else {
                 let mod_path = &path[..path.len() - 1];

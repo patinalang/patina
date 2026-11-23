@@ -588,7 +588,7 @@ impl<'a> State<'a> {
         self.ann.pre(self, AnnNode::Item(item));
         match item.kind {
             hir::ItemKind::ExternCrate(orig_name, ident) => {
-                let (cb, ib) = self.head("extern crate");
+                let (cb, ib) = self.head("extern pkg");
                 if let Some(orig_name) = orig_name {
                     self.print_name(orig_name);
                     self.space();

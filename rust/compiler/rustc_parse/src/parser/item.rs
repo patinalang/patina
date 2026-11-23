@@ -294,7 +294,7 @@ impl<'a> Parser<'a> {
                 eii_impls: ThinVec::new(),
             }))
         } else if self.eat_keyword_case(exp!(Extern), case) {
-            if self.eat_keyword_case(exp!(Crate), case) {
+            if self.eat_keyword_case(exp!(Pkg), case) {
                 // EXTERN CRATE
                 self.parse_item_extern_crate()?
             } else if self.check_keyword_case(exp!(Mod), case) {
@@ -1084,7 +1084,7 @@ impl<'a> Parser<'a> {
                 return true;
             }
             // `impl(crate | self | super)` + SUFFIX
-            if self.is_keyword_ahead(2, &[kw::Crate, kw::SelfLower, kw::Super])
+            if self.is_keyword_ahead(2, &[kw::Pkg, kw::SelfLower, kw::Super])
                 && self.look_ahead(3, |t| t == &token::CloseParen)
                 && SUFFIXES.iter().any(|suffix| {
                     suffix.iter().enumerate().all(|(i, kw)| self.is_keyword_ahead(i + 4, &[*kw]))

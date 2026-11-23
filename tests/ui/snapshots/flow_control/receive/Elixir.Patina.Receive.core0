@@ -139,12 +139,7 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 	  ( case ( <>
 		   -| [{'function',{'take_int_or_timeout',0}}] ) of
 	      <> when 'true' ->
-		  let <_0> =
-		      call %% Line 16
-			   'Elixir.Patina.Core.Timeout':%% Line 16
-							'from_millis'
-			  (%% Line 16
-			   10)
+		  let <_X_ms@0_0> = 10
 		  in  ( letrec
 			    'recv$^0'/0 =
 				fun () ->
@@ -155,12 +150,12 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 					  <'true'> when 'true' ->
 					      %% Line 16
 					      case _1 of
-						<_X_n@0_0>
+						<_X_n@1_0>
 						    when call 'erlang':'is_integer'
-							  (_X_n@0_0) ->
+							  (_X_n@1_0) ->
 						    do  primop 'remove_message'
 							    ()
-							_X_n@0_0
+							_X_n@1_0
 						( <Other> when 'true' ->
 						      do  primop 'recv_next'
 							      ()
@@ -172,7 +167,8 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 					  <'false'> when 'true' ->
 					      let <_2> =
 						  primop 'recv_wait_timeout'
-						      (_0)
+						      (%% Line 1019
+						       _X_ms@0_0)
 					      in  case _2 of
 						    <'true'> when 'true' ->
 							%% Line 16
@@ -434,12 +430,7 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 	  ( case ( <>
 		   -| [{'function',{'unsafe_value',0}}] ) of
 	      <> when 'true' ->
-		  let <_0> =
-		      call %% Line 40
-			   'Elixir.Patina.Core.Timeout':%% Line 40
-							'from_millis'
-			  (%% Line 40
-			   0)
+		  let <_X_ms@0_0> = 0
 		  in  ( letrec
 			    'recv$^0'/0 =
 				fun () ->
@@ -450,12 +441,12 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 					  <'true'> when 'true' ->
 					      %% Line 40
 					      case _1 of
-						<{'value',_X_number@0_0}>
+						<{'value',_X_number@1_0}>
 						    when call 'erlang':'is_integer'
-							  (_X_number@0_0) ->
+							  (_X_number@1_0) ->
 						    do  primop 'remove_message'
 							    ()
-							_X_number@0_0
+							_X_number@1_0
 						( <Other> when 'true' ->
 						      do  primop 'recv_next'
 							      ()
@@ -467,7 +458,8 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 					  <'false'> when 'true' ->
 					      let <_2> =
 						  primop 'recv_wait_timeout'
-						      (_0)
+						      (%% Line 1019
+						       _X_ms@0_0)
 					      in  case _2 of
 						    <'true'> when 'true' ->
 							%% Line 40
@@ -499,18 +491,14 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 	  ( case ( <>
 		   -| [{'function',{'only_timeout',0}}] ) of
 	      <> when 'true' ->
-		  let <_0> =
-		      call %% Line 45
-			   'Elixir.Patina.Core.Timeout':%% Line 45
-							'from_millis'
-			  (%% Line 45
-			   0)
+		  let <_X_ms@0_0> = 0
 		  in  ( letrec
 			    'recv$^0'/0 =
 				fun () ->
 				    let <_1> =
 					primop 'recv_wait_timeout'
-					    (_0)
+					    (%% Line 1019
+					     _X_ms@0_0)
 				    in  ( case _1 of
 					    <'true'> when 'true' ->
 						%% Line 45
@@ -628,14 +616,9 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 		   -| [{'function',{'merge_timeout',0}}] ) of
 	      <> when 'true' ->
 		  let <_X_value@0_0> = 1
-		  in  let <_3,_X_value@0_1> =
-			  let <_4> =
-			      call %% Line 54
-				   'Elixir.Patina.Core.Timeout':%% Line 54
-								'from_millis'
-				  (%% Line 54
-				   0)
-			  in  ( letrec
+		  in  let <_X_ms@1_0> = 0
+		      in  let <_4,_X_value@0_1> =
+			      ( letrec
 				    'recv$^0'/0 =
 					fun () ->
 					    let <_7,_5> =
@@ -645,12 +628,12 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 						  <'true'> when 'true' ->
 						      %% Line 54
 						      case _5 of
-							<_X_n@1_0>
+							<_X_n@2_0>
 							    when call 'erlang':'is_integer'
-								  (_X_n@1_0) ->
+								  (_X_n@2_0) ->
 							    do  primop 'remove_message'
 								    ()
-								let <_X_value@0_1> = _X_n@1_0
+								let <_X_value@0_1> = _X_n@2_0
 								in  <{},_X_value@0_1>
 							( <Other> when 'true' ->
 							      do  primop 'recv_next'
@@ -663,7 +646,8 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 						  <'false'> when 'true' ->
 						      let <_6> =
 							  primop 'recv_wait_timeout'
-							      (_4)
+							      (%% Line 1019
+							       _X_ms@1_0)
 						      in  case _6 of
 							    <'true'> when 'true' ->
 								let <_X_value@0_1> = 2
@@ -679,9 +663,9 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 				in  ( apply 'recv$^0'/0
 					  ()
 				      -| ['dialyzer_ignore'] )
-				-| ['letrec_goto','no_inline'] )
-		      in  %% Line 55
-			  _X_value@0_1
+				-| ['letrec_goto'] )
+			  in  %% Line 55
+			      _X_value@0_1
 	      ( <> when 'true' ->
 		    ( primop 'match_fail'
 			  (( {'function_clause'}
@@ -698,14 +682,9 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 		   -| [{'function',{'unchanged_timeout',0}}] ) of
 	      <> when 'true' ->
 		  let <_X_value@0_0> = 1
-		  in  let <_4,_X_value@0_1> =
-			  let <_5> =
-			      call %% Line 60
-				   'Elixir.Patina.Core.Timeout':%% Line 60
-								'from_millis'
-				  (%% Line 60
-				   0)
-			  in  ( letrec
+		  in  let <_X_ms@1_0> = 0
+		      in  let <_5,_X_value@0_1> =
+			      ( letrec
 				    'recv$^0'/0 =
 					fun () ->
 					    let <_8,_6> =
@@ -715,12 +694,12 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 						  <'true'> when 'true' ->
 						      %% Line 60
 						      case _6 of
-							<_X_n@1_0>
+							<_X_n@2_0>
 							    when call 'erlang':'is_integer'
-								  (_X_n@1_0) ->
+								  (_X_n@2_0) ->
 							    do  primop 'remove_message'
 								    ()
-								let <_X_value@0_1> = _X_n@1_0
+								let <_X_value@0_1> = _X_n@2_0
 								in  <{},_X_value@0_1>
 							( <Other> when 'true' ->
 							      do  primop 'recv_next'
@@ -733,14 +712,15 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 						  <'false'> when 'true' ->
 						      let <_7> =
 							  primop 'recv_wait_timeout'
-							      (_5)
+							      (%% Line 1019
+							       _X_ms@1_0)
 						      in  case _7 of
 							    <'true'> when 'true' ->
-								let <_X_branch_value@2_0> =
+								let <_X_branch_value@3_0> =
 								    {}
 								in  let <_X_value@0_1> = _X_value@0_0
 								    in  %% Line 60
-									<_X_branch_value@2_0,_X_value@0_1>
+									<_X_branch_value@3_0,_X_value@0_1>
 							    ( <'false'> when 'true' ->
 								  ( apply 'recv$^0'/0
 									()
@@ -751,9 +731,9 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 				in  ( apply 'recv$^0'/0
 					  ()
 				      -| ['dialyzer_ignore'] )
-				-| ['letrec_goto','no_inline'] )
-		      in  %% Line 61
-			  _X_value@0_1
+				-| ['letrec_goto'] )
+			  in  %% Line 61
+			      _X_value@0_1
 	      ( <> when 'true' ->
 		    ( primop 'match_fail'
 			  (( {'function_clause'}
@@ -769,26 +749,32 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 	  ( case ( <>
 		   -| [{'function',{'durations',0}}] ) of
 	      <> when 'true' ->
-		  let <_X_element@0_0> =
-		      call %% Line 65
-			   ( 'Elixir.Patina.Core.Timeout'
-			     -| ['result_not_wanted'] ):%% Line 65
-							( 'from_seconds'
-							  -| ['result_not_wanted'] )
-			  (%% Line 65
-			   ( 2
-			     -| ['result_not_wanted'] ))
-		  in  let <_X_element@1_0> =
-			  call %% Line 65
-			       ( 'Elixir.Patina.Core.Timeout'
-				 -| ['result_not_wanted'] ):%% Line 65
-							    ( 'from_minutes'
+		  let <_X_s@0_0> = 2
+		  in  let <_X_0@1_0> =
+			  call %% Line 1023
+			       ( 'erlang'
+				 -| ['result_not_wanted'] ):%% Line 1023
+							    ( '*'
 							      -| ['result_not_wanted'] )
-			      (%% Line 65
-			       ( 3
-				 -| ['result_not_wanted'] ))
-		      in  %% Line 65
-			  {_X_element@0_0,_X_element@1_0}
+			      (%% Line 1023
+			       _X_s@0_0, %% Line 1023
+					 ( 1000
+					   -| ['result_not_wanted'] ))
+		      in  let <_X_element@2_0> = _X_0@1_0
+			  in  let <_X_m@3_0> = 3
+			      in  let <_X_0@4_0> =
+				      call %% Line 1027
+					   ( 'erlang'
+					     -| ['result_not_wanted'] ):%% Line 1027
+									( '*'
+									  -| ['result_not_wanted'] )
+					  (%% Line 1027
+					   _X_m@3_0, %% Line 1027
+						     ( 60000
+						       -| ['result_not_wanted'] ))
+				  in  let <_X_element@5_0> = _X_0@4_0
+				      in  %% Line 65
+					  {_X_element@2_0,_X_element@5_0}
 	      ( <> when 'true' ->
 		    ( primop 'match_fail'
 			  (( {'function_clause'}
@@ -924,15 +910,10 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 		  ( letrec
 			'$patina_label_0'/1 =
 			    fun (%% Line 86
-				 _X_jump_value@1_0) ->
+				 _X_jump_value@2_0) ->
 				%% Line 86
-				_X_jump_value@1_0
-		    in  let <_3> =
-			    call %% Line 86
-				 'Elixir.Patina.Core.Timeout':%% Line 86
-							      'from_millis'
-				(%% Line 86
-				 0)
+				_X_jump_value@2_0
+		    in  let <_X_ms@0_0> = 0
 			in  ( letrec
 				  'recv$^0'/0 =
 				      fun () ->
@@ -943,13 +924,13 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 						<'true'> when 'true' ->
 						    %% Line 86
 						    case _4 of
-						      <_X_n@0_0>
+						      <_X_n@1_0>
 							  when call 'erlang':'is_integer'
-								(_X_n@0_0) ->
+								(_X_n@1_0) ->
 							  do  primop 'remove_message'
 								  ()
 							      apply '$patina_label_0'/1
-								  (_X_n@0_0)
+								  (_X_n@1_0)
 						      ( <Other> when 'true' ->
 							    do  primop 'recv_next'
 								    ()
@@ -961,10 +942,11 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 						<'false'> when 'true' ->
 						    let <_5> =
 							primop 'recv_wait_timeout'
-							    (_3)
+							    (%% Line 1019
+							     _X_ms@0_0)
 						    in  case _5 of
 							  <'true'> when 'true' ->
-							      let <_0> =
+							      let <_1> =
 								  call %% Line 86
 								       'erlang':%% Line 86
 										'-'
@@ -972,7 +954,7 @@ module 'Elixir.Patina.Receive' ['__info__'/1,
 								       1)
 							      in  apply '$patina_label_0'/1
 								      (%% Line 86
-								       _0)
+								       _1)
 							  ( <'false'> when 'true' ->
 								( apply 'recv$^0'/0
 								      ()

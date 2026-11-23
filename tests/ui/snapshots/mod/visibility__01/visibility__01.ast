@@ -64,7 +64,7 @@ mod my_mod {
     }
 
     // pub(pkg) makes functions visible only within the current package.
-    pub fn public_function_in_pkg() {
+    pub(pkg) fn public_function_in_pkg() {
         println!("called `my_mod::public_function_in_pkg()`");
     }
 
@@ -78,7 +78,7 @@ mod my_mod {
         // Private parent items will still restrict the visibility of a child item,
         // even if it is declared as visible within a bigger scope.
         #[allow(dead_code)]
-        pub fn restricted_function() {
+        pub(pkg) fn restricted_function() {
             println!("called `my_mod::private_nested::restricted_function()`");
         }
     }

@@ -172,7 +172,7 @@ impl<'a> State<'a> {
         self.ann.pre(self, AnnNode::Item(item));
         match &item.kind {
             ast::ItemKind::ExternCrate(orig_name, ident) => {
-                let (cb, ib) = self.head(visibility_qualified(&item.vis, "extern crate"));
+                let (cb, ib) = self.head(visibility_qualified(&item.vis, "extern pkg"));
                 if let &Some(orig_name) = orig_name {
                     self.print_name(orig_name);
                     self.space();
@@ -493,7 +493,7 @@ impl<'a> State<'a> {
             ast::VisibilityKind::Public => self.word_nbsp("pub"),
             ast::VisibilityKind::Restricted { path, shorthand, .. } => {
                 let path = Self::to_string(|s| s.print_path(path, false, 0));
-                if *shorthand && (path == "crate" || path == "self" || path == "super") {
+                if *shorthand && (path == "pkg" || path == "self" || path == "super") {
                     self.word_nbsp(format!("pub({path})"))
                 } else {
                     self.word_nbsp(format!("pub(in {path})"))

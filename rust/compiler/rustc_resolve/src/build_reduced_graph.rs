@@ -640,7 +640,7 @@ impl<'a, 'ra, 'tcx> DefCollector<'a, 'ra, 'tcx> {
                 };
 
                 match source.ident.name {
-                    kw::DollarCrate => {
+                    kw::DollarPkg => {
                         if !module_path.is_empty() {
                             self.r.dcx().span_err(
                                 source.ident.span,
@@ -649,11 +649,11 @@ impl<'a, 'ra, 'tcx> DefCollector<'a, 'ra, 'tcx> {
                             return;
                         }
                     }
-                    kw::Crate => {
+                    kw::Pkg => {
                         if !module_path.is_empty() {
                             self.r.dcx().span_err(
                                 source.ident.span,
-                                "`crate` in paths can only be used in start position",
+                                "`pkg` in paths can only be used in start position",
                             );
                             return;
                         }

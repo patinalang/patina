@@ -25,16 +25,16 @@
 
 main() ->
     receive
-        _n@0_0 when erlang:is_integer(_n@0_0) ->
+        _n@2_0 when erlang:is_integer(_n@2_0) ->
             io:put_chars(begin
-                             _element@2_0 = begin
-                                                _element@1_0 =
+                             _element@4_0 = begin
+                                                _element@3_0 =
                                                     io_lib:format("~ktp",
-                                                                  [_n@0_0]),
+                                                                  [_n@2_0]),
                                                 [<<"received integer "/utf8>>,
-                                                 _element@1_0]
+                                                 _element@3_0]
                                             end,
-                             [_element@2_0]
+                             [_element@4_0]
                          end),
             io:nl(),
             {};
@@ -42,36 +42,38 @@ main() ->
             io:put_chars([[<<"received ping"/utf8>>]]),
             io:nl(),
             {};
-        _a@3_0 when erlang:is_atom(_a@3_0) ->
+        _a@5_0 when erlang:is_atom(_a@5_0) ->
             io:put_chars(begin
-                             _element@5_0 = begin
-                                                _element@4_0 =
+                             _element@7_0 = begin
+                                                _element@6_0 =
                                                     io_lib:format("~ktp",
-                                                                  [_a@3_0]),
+                                                                  [_a@5_0]),
                                                 [<<"received atom "/utf8>>,
-                                                 _element@4_0]
+                                                 _element@6_0]
                                             end,
-                             [_element@5_0]
+                             [_element@7_0]
                          end),
             io:nl(),
             {}
-        after 'Elixir.Patina.Core.Timeout':from_seconds(5) ->
+        after begin
+                  _s@0_0 = 5, _0@1_0 = _s@0_0 * 1000, _0@1_0
+              end ->
                   io:put_chars([[<<"timeout (5 seconds with no matching "
                                    "message)"/utf8>>]]),
                   io:nl(),
                   {}
     end,
     receive
-        _val@6_0 ->
+        _val@8_0 ->
             io:put_chars(begin
-                             _element@8_0 = begin
-                                                _element@7_0 =
-                                                    io_lib:format("~ktp",
-                                                                  [_val@6_0]),
-                                                [<<"received any message "/utf8>>,
-                                                 _element@7_0]
-                                            end,
-                             [_element@8_0]
+                             _element@10_0 = begin
+                                                 _element@9_0 =
+                                                     io_lib:format("~ktp",
+                                                                   [_val@8_0]),
+                                                 [<<"received any message "/utf8>>,
+                                                  _element@9_0]
+                                             end,
+                             [_element@10_0]
                          end),
             io:nl(),
             {}

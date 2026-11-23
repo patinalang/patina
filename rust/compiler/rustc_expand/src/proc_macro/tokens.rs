@@ -867,8 +867,8 @@ fn read_lit_kind(
 }
 
 fn intern_identifier(name: &str, is_raw: bool) -> Result<Symbol, TokenDecodeError> {
-    if name == "$crate" && !is_raw {
-        return Ok(kw::DollarCrate);
+    if name == "$pkg" && !is_raw {
+        return Ok(kw::DollarPkg);
     }
     let normalized = nfc_normalize(name);
     let valid =

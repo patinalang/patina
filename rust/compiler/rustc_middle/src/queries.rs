@@ -2376,7 +2376,7 @@ rustc_queries! {
     }
     query missing_extern_crate_item(_: CrateNum) -> bool {
         eval_always
-        desc { "seeing if we're missing an `extern crate` item for this crate" }
+        desc { "seeing if we're missing an `extern pkg` item for this crate" }
         separate_provide_extern
     }
     query used_crate_source(_: CrateNum) -> &'tcx Arc<CrateSource> {

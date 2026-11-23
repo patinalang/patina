@@ -1179,7 +1179,7 @@ fn lower_format_args_to_patina(ecx: &ExtCtxt<'_>, sp: Span, fmt: &FormatArgs) ->
                 let path = ecx.path(
                     sp,
                     vec![
-                        Ident::new(kw::DollarCrate, ecx.with_def_site_ctxt(sp)),
+                        Ident::new(kw::DollarPkg, ecx.with_def_site_ctxt(sp)),
                         Ident::new(patina_fmt_sym, fmt_sp),
                         Ident::new(fn_name, fmt_sp),
                     ],

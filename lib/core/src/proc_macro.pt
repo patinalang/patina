@@ -1,6 +1,6 @@
 // See `rust/compiler/rustc_expand/src/proc_macro/tokens.rs`
 
-use crate::prelude::*;
+use pkg::prelude::*;
 
 extern mod erlang;
 extern mod unicode;
@@ -359,7 +359,7 @@ fn space_between(first: TokenTree, second: TokenTree) -> bool {
         (TokenTree::Ident(ident), TokenTree::Punct(_)) if second_char == '!' => {
             is_reserved(ident.0.sym) && !ident.0.is_raw
         }
-        // IDENT|`fn`|`Self`|`pub` + `(`: `f(3)`, `fn(x: int)`, `Self()`, `pub(crate)`,
+        // IDENT|`fn`|`Self`|`pub` + `(`: `f(3)`, `fn(x: int)`, `Self()`, `pub(pkg)`,
         //      but `let (a, b) = (1, 2)` needs a space after the `let`
         (TokenTree::Ident(ident), TokenTree::Group(group)) => match group.delimiter() {
             Delimiter::Parenthesis => {
@@ -381,8 +381,8 @@ fn space_between(first: TokenTree, second: TokenTree) -> bool {
 
 fn is_reserved(sym: str) -> bool {
     match sym {
-        "$crate" | "{{root}}" | "_"
-        | "as" | "break" | "const" | "continue" | "crate" | "else" | "enum" | "extern"
+        "$pkg" | "{{root}}" | "_"
+        | "as" | "break" | "const" | "continue" | "pkg" | "else" | "enum" | "extern"
         | "false" | "fn" | "for" | "if" | "impl" | "in" | "let" | "loop" | "match" | "mod"
         | "move" | "mut" | "pub" | "receive" | "ref" | "return" | "self" | "Self" | "static"
         | "struct" | "super" | "trait" | "true" | "type" | "unsafe" | "use" | "where"

@@ -1516,7 +1516,7 @@ pub(crate) struct MismatchedClosingDelimiter {
 #[diag("incorrect visibility restriction", code = E0704)]
 #[help(
     "some possible visibility restrictions are:
-    `pub(crate)`: visible only on the current crate
+    `pub(pkg)`: visible only on the current crate
     `pub(super)`: visible only in the current module's parent
     `pub(in path::to::module)`: visible only on the specified path"
 )]
@@ -2692,7 +2692,7 @@ pub(crate) struct AssociatedStaticItemNotAllowed {
 }
 
 #[derive(Diagnostic)]
-#[diag("crate name using dashes are not valid in `extern crate` statements")]
+#[diag("crate name using dashes are not valid in `extern pkg` statements")]
 pub(crate) struct ExternCrateNameWithDashes {
     #[primary_span]
     #[label("dash-separated idents are not valid")]

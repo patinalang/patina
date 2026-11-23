@@ -174,10 +174,10 @@ impl<'ra, 'tcx> ResolverExpand for Resolver<'ra, 'tcx> {
 
     fn resolve_dollar_crates(&self) {
         hygiene::update_dollar_crate_names(|ctxt| {
-            let ident = Ident::new(kw::DollarCrate, DUMMY_SP.with_ctxt(ctxt));
+            let ident = Ident::new(kw::DollarPkg, DUMMY_SP.with_ctxt(ctxt));
             match self.resolve_crate_root(ident).kind {
                 ModuleKind::Def(.., name) if let Some(name) = name => name,
-                _ => kw::Crate,
+                _ => kw::Pkg,
             }
         });
     }
@@ -795,7 +795,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
             && let [segment] = path.as_slice()
             && segment.ident.span.ctxt().outer_expn_data().local_inner_macros
         {
-            let root = Ident::new(kw::DollarCrate, segment.ident.span);
+            let root = Ident::new(kw::DollarPkg, segment.ident.span);
             path.insert(0, Segment::from_ident(root));
         }
 

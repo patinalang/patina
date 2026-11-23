@@ -1,0 +1,216 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern pkg core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use core::prelude::*;
+
+// source: patina-by-example/src/mod/visibility.md
+// block: 1/1
+
+// A module named `my_mod`.
+// On the BEAM side, module names are converted to PascalCase.
+// This makes calling Patina code from Elixir significantly more ergonomic.
+mod my_mod {
+    // On BEAM side, module `my_mod` will be saved as `Elixir.Patina.MyPkg.MyMod.beam` .
+    // However, this is configurable so you can name your BEAM module anything.
+    // For example, to replace an Elixir `MyMod` module:
+    // Note that this only changes the BEAM module name for the current
+    // Patina module, and doesn't affect the names of its submodules!
+
+    // Items in modules default to private visibility.
+    fn private_function() ({
+
+        // Use the `pub` modifier to override default visibility.
+
+        // Items can access other items in the same module,
+        // even when private.
+
+        // Modules can also be nested
+
+
+        // Functions declared using `pub(in path)` syntax are only visible
+        // within the given path. `path` must be a parent or ancestor module.
+
+        // Functions declared using `pub(self)` syntax are only visible within
+        // the current module, which is the same as leaving them private - except
+        // they *will* be exported by the generated BEAM module.
+
+        // Functions declared using `pub(super)` syntax are only visible within
+        // the parent module. The same caveats apply - these functions are still
+        // exported in the BEAM module.
+
+
+        // pub(pkg) makes functions visible only within the current package.
+
+        // Nested modules follow the same rules for visibility
+
+        // Private parent items will still restrict the visibility of a child item,
+        // even if it is declared as visible within a bigger scope.
+
+
+        // Modules allow disambiguation between items that have the same name.
+
+        // Public items, including those inside nested modules, can be
+        // accessed from outside the parent module.
+
+        // pub(pkg) items can be called from anywhere in the same pkg
+
+        // pub(in path) items can only be called from within the module specified
+        // Error! function `public_function_in_my_mod` is private
+        //my_mod::nested::public_function_in_my_mod();
+        // TODO ^ Try uncommenting this line
+
+        // Private items of a module cannot be directly accessed, even if
+        // nested in a public module:
+
+        // Error! `private_function` is private
+        //my_mod::private_function();
+        // TODO ^ Try uncommenting this line
+
+        // Error! `private_function` is private
+        //my_mod::nested::private_function();
+        // TODO ^ Try uncommenting this line
+
+        // Error! `private_nested` is a private module
+        //my_mod::private_nested::function();
+        // TODO ^ Try uncommenting this line
+
+        // Error! `private_nested` is a private module
+        //my_mod::private_nested::restricted_function();
+        // TODO ^ Try uncommenting this line
+        ({
+            ((::core::io::put_chars as
+                    fn(term) -> term)(([([("called `my_mod::private_function()`"
+                                    as str)] as [str])] as [[str]])) as term);
+            ((::core::io::nl as fn() -> term)() as term);
+        } as ());
+    } as ())
+    fn function() ({
+        ({
+            ((::core::io::put_chars as
+                    fn(term) -> term)(([([("called `my_mod::function()`" as
+                                    str)] as [str])] as [[str]])) as term);
+            ((::core::io::nl as fn() -> term)() as term);
+        } as ());
+    } as ())
+    fn indirect_access() ({
+        ({
+            ((::core::io::put_chars as
+                    fn(term) -> term)(([("called `my_mod::indirect_access()`, that\n> "
+                            as str)] as [str])) as term);
+        } as ());
+        ((private_function as fn() {my_mod::private_function})() as ());
+    } as ())
+    mod nested {
+        fn function() ({
+            ({
+                ((::core::io::put_chars as
+                        fn(term) -> term)(([([("called `my_mod::nested::function()`"
+                                        as str)] as [str])] as [[str]])) as term);
+                ((::core::io::nl as fn() -> term)() as term);
+            } as ());
+        } as ())
+        #[allow(dead_code)]
+        fn private_function() ({
+            ({
+                ((::core::io::put_chars as
+                        fn(term) -> term)(([([("called `my_mod::nested::private_function()`"
+                                        as str)] as [str])] as [[str]])) as term);
+                ((::core::io::nl as fn() -> term)() as term);
+            } as ());
+        } as ())
+        fn public_function_in_my_mod() ({
+            ({
+                ((::core::io::put_chars as
+                        fn(term) -> term)(([("called `my_mod::nested::public_function_in_my_mod()`, that\n> "
+                                as str)] as [str])) as term);
+            } as ());
+            ((public_function_in_nested as
+                    fn() {my_mod::nested::public_function_in_nested})() as ());
+        } as ())
+        fn public_function_in_nested() ({
+            ({
+                ((::core::io::put_chars as
+                        fn(term) -> term)(([([("called `my_mod::nested::public_function_in_nested()`"
+                                        as str)] as [str])] as [[str]])) as term);
+                ((::core::io::nl as fn() -> term)() as term);
+            } as ());
+        } as ())
+        fn public_function_in_super_mod() ({
+            ({
+                ((::core::io::put_chars as
+                        fn(term) -> term)(([([("called `my_mod::nested::public_function_in_super_mod()`"
+                                        as str)] as [str])] as [[str]])) as term);
+                ((::core::io::nl as fn() -> term)() as term);
+            } as ());
+        } as ())
+    }
+    fn call_public_function_in_my_mod() ({
+        ({
+            ((::core::io::put_chars as
+                    fn(term) -> term)(([("called `my_mod::call_public_function_in_my_mod()`, that\n> "
+                            as str)] as [str])) as term);
+        } as ());
+        ((nested::public_function_in_my_mod as
+                fn() {my_mod::nested::public_function_in_my_mod})() as ());
+        ({
+            ((::core::io::put_chars as
+                    fn(term) -> term)(([("> " as str)] as [str])) as term);
+        } as ());
+        ((nested::public_function_in_super_mod as
+                fn() {my_mod::nested::public_function_in_super_mod})() as ());
+    } as ())
+    fn public_function_in_pkg() ({
+        ({
+            ((::core::io::put_chars as
+                    fn(term) -> term)(([([("called `my_mod::public_function_in_pkg()`"
+                                    as str)] as [str])] as [[str]])) as term);
+            ((::core::io::nl as fn() -> term)() as term);
+        } as ());
+    } as ())
+    mod private_nested {
+        #[allow(dead_code)]
+        fn function() ({
+            ({
+                ((::core::io::put_chars as
+                        fn(term) -> term)(([([("called `my_mod::private_nested::function()`"
+                                        as str)] as [str])] as [[str]])) as term);
+                ((::core::io::nl as fn() -> term)() as term);
+            } as ());
+        } as ())
+        #[allow(dead_code)]
+        fn restricted_function() ({
+            ({
+                ((::core::io::put_chars as
+                        fn(term) -> term)(([([("called `my_mod::private_nested::restricted_function()`"
+                                        as str)] as [str])] as [[str]])) as term);
+                ((::core::io::nl as fn() -> term)() as term);
+            } as ());
+        } as ())
+    }
+}
+fn function() ({
+    ({
+        ((::core::io::put_chars as
+                fn(term) -> term)(([([("called `function()`" as str)] as
+                        [str])] as [[str]])) as term);
+        ((::core::io::nl as fn() -> term)() as term);
+    } as ());
+} as ())
+fn main() ({
+    ((function as fn() {function})() as ());
+    ((my_mod::function as fn() {my_mod::function})() as ());
+    ((my_mod::indirect_access as fn() {my_mod::indirect_access})() as ());
+    ((my_mod::nested::function as fn() {my_mod::nested::function})() as ());
+    ((my_mod::call_public_function_in_my_mod as
+            fn() {my_mod::call_public_function_in_my_mod})() as ());
+    ((my_mod::public_function_in_pkg as
+            fn() {my_mod::public_function_in_pkg})() as ());
+} as ())

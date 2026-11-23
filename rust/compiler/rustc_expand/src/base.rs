@@ -1366,7 +1366,7 @@ impl<'a> ExtCtxt<'a> {
     }
     pub fn std_path(&self, components: &[Symbol]) -> Vec<Ident> {
         let def_site = self.with_def_site_ctxt(DUMMY_SP);
-        iter::once(Ident::new(kw::DollarCrate, def_site))
+        iter::once(Ident::new(kw::DollarPkg, def_site))
             .chain(components.iter().map(|&s| Ident::with_dummy_span(s)))
             .collect()
     }

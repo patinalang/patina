@@ -87,7 +87,7 @@ impl SyntaxContextData {
             parent: SyntaxContext::root(),
             opaque: SyntaxContext::root(),
             opaque_and_semiopaque: SyntaxContext::root(),
-            dollar_crate_name: kw::DollarCrate,
+            dollar_crate_name: kw::DollarPkg,
         }
     }
 
@@ -606,7 +606,7 @@ impl HygieneData {
             parent,
             opaque,
             opaque_and_semiopaque,
-            dollar_crate_name: kw::DollarCrate,
+            dollar_crate_name: kw::DollarPkg,
         };
         ctxt
     }
@@ -630,8 +630,8 @@ pub fn update_dollar_crate_names(mut get_name: impl FnMut(SyntaxContext) -> Symb
     let mut to_update = vec![];
     HygieneData::with(|data| {
         for (idx, scdata) in data.syntax_context_data.iter().enumerate().rev() {
-            if scdata.dollar_crate_name == kw::DollarCrate {
-                to_update.push((idx, kw::DollarCrate));
+            if scdata.dollar_crate_name == kw::DollarPkg {
+                to_update.push((idx, kw::DollarPkg));
             } else {
                 break;
             }

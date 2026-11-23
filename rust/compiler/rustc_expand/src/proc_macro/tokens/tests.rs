@@ -809,10 +809,10 @@ fn rejects_lifetime_in_output_with_the_offending_span() {
 fn dollar_crate_decodes_to_the_keyword() {
     create_default_session_globals_then(|| {
         let wire =
-            Wire::one(|w| w.tuple(4).atom("ident").bin("$crate").boolean(false).int(CALL_SITE_ID));
+            Wire::one(|w| w.tuple(4).atom("ident").bin("$pkg").boolean(false).int(CALL_SITE_ID));
         let decoded = decode_ok(&wire);
         let expected = TokenStream::new(vec![TokenTree::token_alone(
-            token::Ident(rustc_span::kw::DollarCrate, token::IdentIsRaw::No),
+            token::Ident(rustc_span::kw::DollarPkg, token::IdentIsRaw::No),
             span(0, 1),
         )]);
         assert_eq_unspanned(&decoded, &expected);
@@ -824,10 +824,10 @@ fn dollar_crate_decodes_to_the_keyword() {
 fn raw_dollar_crate_is_not_the_keyword() {
     create_default_session_globals_then(|| {
         let wire =
-            Wire::one(|w| w.tuple(4).atom("ident").bin("$crate").boolean(true).int(CALL_SITE_ID));
+            Wire::one(|w| w.tuple(4).atom("ident").bin("$pkg").boolean(true).int(CALL_SITE_ID));
         assert_eq!(
             decode_err(&wire),
-            TokenDecodeError::InvalidIdentifier { name: "$crate".to_string(), is_raw: true }
+            TokenDecodeError::InvalidIdentifier { name: "$pkg".to_string(), is_raw: true }
         );
     });
 }

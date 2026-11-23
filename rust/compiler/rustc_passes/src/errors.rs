@@ -180,23 +180,23 @@ pub(crate) struct DocInlineOnlyUse {
 }
 
 #[derive(Diagnostic)]
-#[diag("this attribute can only be applied to an `extern crate` item")]
+#[diag("this attribute can only be applied to an `extern pkg` item")]
 #[note(
     "read <https://doc.rust-lang.org/unstable-book/language-features/doc-masked.html> for more information"
 )]
 pub(crate) struct DocMaskedOnlyExternCrate {
-    #[label("only applicable on `extern crate` items")]
+    #[label("only applicable on `extern pkg` items")]
     pub attr_span: Span,
-    #[label("not an `extern crate` item")]
+    #[label("not an `extern pkg` item")]
     pub item_span: Span,
 }
 
 #[derive(Diagnostic)]
-#[diag("this attribute cannot be applied to an `extern crate self` item")]
+#[diag("this attribute cannot be applied to an `extern pkg self` item")]
 pub(crate) struct DocMaskedNotExternCrateSelf {
-    #[label("not applicable on `extern crate self` items")]
+    #[label("not applicable on `extern pkg self` items")]
     pub attr_span: Span,
-    #[label("`extern crate self` defined here")]
+    #[label("`extern pkg self` defined here")]
     pub item_span: Span,
 }
 
@@ -542,7 +542,7 @@ impl<'a, G: EmissionGuarantee> Diagnostic<'a, G> for NoMainErr {
             && main_def.opt_fn_def_id().is_none()
         {
             // There is something at `crate::main`, but it is not a function definition.
-            diag.span_label(main_def.span, msg!("non-function item at `crate::main` is found"));
+            diag.span_label(main_def.span, msg!("non-function item at `pkg::main` is found"));
         }
 
         if self.add_teach_note {

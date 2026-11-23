@@ -857,7 +857,7 @@ impl MetadataBlob {
                         let def_key = root.tables.def_keys.get(blob, item).unwrap().decode(blob);
                         #[allow(rustc::symbol_intern_string_literal)]
                         let def_name = if item == CRATE_DEF_INDEX {
-                            kw::Crate
+                            kw::Pkg
                         } else {
                             def_key
                                 .disambiguated_data

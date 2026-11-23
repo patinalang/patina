@@ -5,7 +5,7 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate core;
+extern pkg core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
@@ -80,7 +80,7 @@ mod my {
         ((super::function as fn() {function})() as ());
         ({
             use pkg::cool::function as root_function;
-            ((root_function as {type error})() as {type error});
+            ((root_function as fn() {cool::function})() as ());
         } as ())
     } as ())
 }

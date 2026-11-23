@@ -37,7 +37,7 @@ declare_lint! {
     /// start with `self::`, `super::`, or `crate::`. This lint can be used to enforce that style.
     pub UNQUALIFIED_LOCAL_IMPORTS,
     Allow,
-    "`use` of a local item without leading `self::`, `super::`, or `crate::`",
+    "`use` of a local item without leading `self::`, `super::`, or `pkg::`",
     @feature_gate = unqualified_local_imports;
 }
 
@@ -61,7 +61,7 @@ impl<'tcx> LateLintPass<'tcx> for UnqualifiedLocalImports {
         // `super`, or `crate`. If the path is empty, that means we have a `use *`, which is
         // equivalent to `use crate::*` so we don't fire the lint in that case.
         let Some(first_seg) = path.segments.first() else { return };
-        if matches!(first_seg.ident.name, kw::SelfLower | kw::Super | kw::Crate) {
+        if matches!(first_seg.ident.name, kw::SelfLower | kw::Super | kw::Pkg) {
             return;
         }
 

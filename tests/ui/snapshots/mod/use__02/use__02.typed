@@ -5,7 +5,7 @@
 
 #[allow(unused_imports)]
 #[attr = MacroUse {arguments: UseAll}]
-extern crate core;
+extern pkg core;
 
 #[allow(unused_imports)]
 #[attr = PreludeImport]
@@ -58,7 +58,7 @@ fn main() ({
     } as ());
     ({
         use pkg::deeply::nested::function;
-        ((function as {type error})() as {type error});
+        ((function as fn() {deeply::nested::function})() as ());
         ({
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("Leaving block" as str)] as [str])]

@@ -589,12 +589,12 @@ impl<'tcx> LateLintPass<'tcx> for SymbolInternStringLiteral {
 }
 
 declare_tool_lint! {
-    /// The `implicit_sysroot_crate_import` detects use of `extern crate` to import non-sysroot crates
+    /// The `implicit_sysroot_crate_import` detects use of `extern pkg` to import non-sysroot crates
     /// (e.g. crates.io deps) from the sysroot, which is dangerous because these crates are not guaranteed
     /// to exist exactly once, and so may be missing entirely or appear multiple times resulting in ambiguity.
     pub rustc::IMPLICIT_SYSROOT_CRATE_IMPORT,
     Allow,
-    "Forbid uses of non-sysroot crates in `extern crate`",
+    "Forbid uses of non-sysroot crates in `extern pkg`",
     report_in_external_macro: true
 }
 

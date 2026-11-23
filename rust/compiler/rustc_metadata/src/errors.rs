@@ -30,7 +30,7 @@ pub(crate) struct LibRequired<'a> {
 #[diag(
     "crate `{$crate_name}` required to be available in {$kind} format, but was not found in this form"
 )]
-#[help("try adding `extern crate rustc_driver;` at the top level of this crate")]
+#[help("try adding `extern pkg rustc_driver;` at the top level of this crate")]
 pub(crate) struct RustcLibRequired<'a> {
     pub crate_name: Symbol,
     pub kind: &'a str,

@@ -2393,7 +2393,7 @@ impl<'tcx> Printer<'tcx> for FmtPrinter<'_, 'tcx> {
             if self.tcx.sess.at_least_rust_2018() {
                 // We add the `crate::` keyword on Rust 2018, only when desired.
                 if with_crate_prefix() {
-                    write!(self, "{}", kw::Crate)?;
+                    write!(self, "{}", kw::Pkg)?;
                     self.empty_path = false;
                 }
             }

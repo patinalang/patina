@@ -1085,7 +1085,7 @@ pub(crate) struct BadOptAccessDiag<'a> {
 
 #[derive(Diagnostic)]
 #[diag(
-    "dangerous use of `extern crate {$name}` which is not guaranteed to exist exactly once in the sysroot"
+    "dangerous use of `extern pkg {$name}` which is not guaranteed to exist exactly once in the sysroot"
 )]
 #[help(
     "try using a cargo dependency or using a re-export of the dependency provided by a rustc_* crate"
@@ -2355,7 +2355,7 @@ pub(crate) enum InvalidAsmLabel {
 }
 
 #[derive(Diagnostic)]
-#[diag("`use` of a local item without leading `self::`, `super::`, or `crate::`")]
+#[diag("`use` of a local item without leading `self::`, `super::`, or `pkg::`")]
 pub(crate) struct UnqualifiedLocalImportsDiag;
 
 #[derive(Diagnostic)]

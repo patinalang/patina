@@ -2385,7 +2385,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
     fn resolve_crate_root(&self, ident: Ident) -> Module<'ra> {
         debug!("resolve_crate_root({:?})", ident);
         let mut ctxt = ident.span.ctxt();
-        let mark = if ident.name == kw::DollarCrate {
+        let mark = if ident.name == kw::DollarPkg {
             // When resolving `$crate` from a `macro_rules!` invoked in a `macro`,
             // we don't want to pretend that the `macro_rules!` definition is in the `macro`
             // as described in `SyntaxContext::apply_mark`, so we ignore prepended opaque marks.

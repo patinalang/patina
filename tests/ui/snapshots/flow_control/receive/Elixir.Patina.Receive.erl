@@ -45,8 +45,8 @@ take_int() ->
 
 take_int_or_timeout() ->
     receive
-        _n@0_0 when erlang:is_integer(_n@0_0) -> _n@0_0
-        after 'Elixir.Patina.Core.Timeout':from_millis(10) -> -1
+        _n@1_0 when erlang:is_integer(_n@1_0) -> _n@1_0
+        after begin _ms@0_0 = 10, _ms@0_0 end -> -1
     end.
 
 take_atom() ->
@@ -87,16 +87,14 @@ sum_until_stop() ->
 
 unsafe_value() ->
     receive
-        {value, _number@0_0}
-            when erlang:is_integer(_number@0_0) ->
-            _number@0_0
-        after 'Elixir.Patina.Core.Timeout':from_millis(0) -> -1
+        {value, _number@1_0}
+            when erlang:is_integer(_number@1_0) ->
+            _number@1_0
+        after begin _ms@0_0 = 0, _ms@0_0 end -> -1
     end.
 
 only_timeout() ->
-    receive
-         after 'Elixir.Patina.Core.Timeout':from_millis(0) -> 7
-    end.
+    receive  after begin _ms@0_0 = 0, _ms@0_0 end -> 7 end.
 
 guarded_or() ->
     receive
@@ -111,10 +109,10 @@ guarded_or() ->
 merge_timeout() ->
     _value@0_0 = 1,
     receive
-        _n@1_0 when erlang:is_integer(_n@1_0) ->
-            _value@0_1 = _n@1_0,
+        _n@2_0 when erlang:is_integer(_n@2_0) ->
+            _value@0_1 = _n@2_0,
             {}
-        after 'Elixir.Patina.Core.Timeout':from_millis(0) ->
+        after begin _ms@1_0 = 0, _ms@1_0 end ->
                   _value@0_1 = 2, {}
     end,
     _value@0_1.
@@ -122,22 +120,24 @@ merge_timeout() ->
 unchanged_timeout() ->
     _value@0_0 = 1,
     receive
-        _n@1_0 when erlang:is_integer(_n@1_0) ->
-            _value@0_1 = _n@1_0,
+        _n@2_0 when erlang:is_integer(_n@2_0) ->
+            _value@0_1 = _n@2_0,
             {}
-        after 'Elixir.Patina.Core.Timeout':from_millis(0) ->
-                  _branch_value@2_0 = {},
+        after begin _ms@1_0 = 0, _ms@1_0 end ->
+                  _branch_value@3_0 = {},
                   _value@0_1 = _value@0_0,
-                  _branch_value@2_0
+                  _branch_value@3_0
     end,
     _value@0_1.
 
 durations() ->
-    _element@0_0 =
-        'Elixir.Patina.Core.Timeout':from_seconds(2),
-    _element@1_0 =
-        'Elixir.Patina.Core.Timeout':from_minutes(3),
-    {_element@0_0, _element@1_0}.
+    _element@2_0 = begin
+                       _s@0_0 = 2, _0@1_0 = _s@0_0 * 1000, _0@1_0
+                   end,
+    _element@5_0 = begin
+                       _m@3_0 = 3, _0@4_0 = _m@3_0 * 60000, _0@4_0
+                   end,
+    {_element@2_0, _element@5_0}.
 
 contextual_after() ->
     _after@0_0 = 4,
@@ -158,13 +158,13 @@ closure_receive(_value@0_0) ->
 
 diverging_timeout() ->
     case [] of
-        {'$patina_label_0', _jump_value@1_0} -> _jump_value@1_0;
+        {'$patina_label_0', _jump_value@2_0} -> _jump_value@2_0;
         _ ->
             receive
-                _n@0_0 when erlang:is_integer(_n@0_0) ->
-                    '$patina_marker':jump('$patina_label_0', _n@0_0),
+                _n@1_0 when erlang:is_integer(_n@1_0) ->
+                    '$patina_marker':jump('$patina_label_0', _n@1_0),
                     []
-                after 'Elixir.Patina.Core.Timeout':from_millis(0) ->
+                after begin _ms@0_0 = 0, _ms@0_0 end ->
                           '$patina_marker':jump('$patina_label_0', -1), []
             end
     end.

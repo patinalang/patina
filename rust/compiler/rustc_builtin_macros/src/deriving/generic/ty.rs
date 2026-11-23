@@ -57,7 +57,7 @@ impl Path {
             PathKind::Local => cx.path_all(span, false, idents, params),
             PathKind::Std => {
                 let def_site = cx.with_def_site_ctxt(DUMMY_SP);
-                idents.insert(0, Ident::new(kw::DollarCrate, def_site));
+                idents.insert(0, Ident::new(kw::DollarPkg, def_site));
                 cx.path_all(span, false, idents, params)
             }
         }

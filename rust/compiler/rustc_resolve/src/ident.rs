@@ -1053,8 +1053,8 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                     {
                         return Ok(module.self_decl.unwrap());
                     }
-                    if ident.name == kw::Crate
-                        || ident.name == kw::DollarCrate
+                    if ident.name == kw::Pkg
+                        || ident.name == kw::DollarPkg
                         || self.path_root_is_crate_root(ident)
                     {
                         let module = self.resolve_crate_root(ident);
@@ -1850,7 +1850,7 @@ impl<'ra, 'tcx> Resolver<'ra, 'tcx> {
                         module = Some(ModuleOrUniformRoot::ModuleAndExternPrelude(crate_root));
                         continue;
                     }
-                    if name == kw::PathRoot || name == kw::Crate || name == kw::DollarCrate {
+                    if name == kw::PathRoot || name == kw::Pkg || name == kw::DollarPkg {
                         // `::a::b`, `crate::a::b` or `$crate::a::b`
                         let crate_root = self.resolve_crate_root(ident);
                         if let Some(res) = crate_root.res() {

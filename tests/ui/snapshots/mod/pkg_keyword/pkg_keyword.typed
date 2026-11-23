@@ -1,0 +1,42 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern pkg core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use core::prelude::*;
+
+extern pkg core as core2;
+
+macro_rules! call_visible { () => { $pkg::first::visible() }; }
+
+mod first {
+    fn visible() -> int ({ (1 as int) } as int)
+}
+
+mod second {
+    fn call()
+        ->
+            int ({
+        ((pkg::first::visible as fn() -> int {first::visible})() as int)
+    } as int)
+    fn unqualified()
+        ->
+            int ({ ((visible as {type error})() as {type error}) } as
+        {type error})
+}
+
+fn main() ({
+    let _: core2::Option<int> =
+        ((core2::Option::Some as
+                fn(int) -> core::Option<int> {core::Option::<int>::Some})(((pkg::first::visible
+                    as fn() -> int {first::visible})() as int)) as
+            core::Option<int>);
+    ((second::call as fn() -> int {second::call})() as int);
+    ((pkg::first::missing as {type error})() as {type error});
+} as ())

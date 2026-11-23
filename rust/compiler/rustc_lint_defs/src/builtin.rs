@@ -1942,7 +1942,7 @@ declare_lint! {
     pub ABSOLUTE_PATHS_NOT_STARTING_WITH_CRATE,
     Allow,
     "fully qualified paths that start with a module name \
-     instead of `crate`, `self`, or an extern crate name",
+     instead of `pkg`, `self`, or an extern crate name",
      @future_incompatible = FutureIncompatibleInfo {
          reason: fcw!(EditionError 2018 "path-changes"),
      };

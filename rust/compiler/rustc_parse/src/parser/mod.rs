@@ -1517,7 +1517,7 @@ impl<'a> Parser<'a> {
                     tokens: None,
                 });
             } else if self.look_ahead(2, |t| t == &token::CloseParen)
-                && self.is_keyword_ahead(1, &[kw::Crate, kw::Super, kw::SelfLower])
+                && self.is_keyword_ahead(1, &[kw::Pkg, kw::Super, kw::SelfLower])
             {
                 // Parse `pub(crate)`, `pub(self)`, or `pub(super)`.
                 self.bump(); // `(`
@@ -1576,7 +1576,7 @@ impl<'a> Parser<'a> {
                 self.psess.gated_spans.gate(sym::impl_restriction, span);
                 return Ok(ImplRestriction { kind: restriction, span, tokens: None });
             } else if self.look_ahead(1, |t| t == &token::CloseParen)
-                && self.is_keyword_ahead(0, &[kw::Crate, kw::Super, kw::SelfLower])
+                && self.is_keyword_ahead(0, &[kw::Pkg, kw::Super, kw::SelfLower])
             {
                 let path = self.parse_path(PathStyle::Mod)?; // `crate`/`super`/`self`
                 self.expect(exp!(CloseParen))?; // `)`

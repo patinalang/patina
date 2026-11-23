@@ -7,7 +7,7 @@ LL |     let opts: [TermToBinaryOpts] = [Deterministic, MinorVersion(2)];
 help: consider importing this unit variant
   --> <patina-prelude>:11:1
    |
-LL + use crate::TermToBinaryOpts::Deterministic;
+LL + use pkg::TermToBinaryOpts::Deterministic;
    |
 
 error[E0425]: cannot find function, tuple struct or tuple variant `MinorVersion` in this scope
@@ -19,7 +19,7 @@ LL |     let opts: [TermToBinaryOpts] = [Deterministic, MinorVersion(2)];
 help: consider importing this tuple variant
   --> <patina-prelude>:11:1
    |
-LL + use crate::TermToBinaryOpts::MinorVersion;
+LL + use pkg::TermToBinaryOpts::MinorVersion;
    |
 
 error: aborting due to 2 previous errors

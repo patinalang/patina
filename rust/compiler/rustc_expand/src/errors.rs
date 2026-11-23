@@ -300,7 +300,7 @@ pub(crate) struct ModuleInBlockName {
 #[diag("file not found for module `{$name}`", code = E0583)]
 #[help("to create the module `{$name}`, create file \"{$path}\"")]
 #[note(
-    "if there is a `mod {$name}` elsewhere in the crate already, import it with `use crate::...` instead"
+    "if there is a `mod {$name}` elsewhere in the crate already, import it with `use pkg::...` instead"
 )]
 pub(crate) struct ModuleFileNotFound {
     #[primary_span]
