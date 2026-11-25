@@ -7,6 +7,11 @@ else
     PROFILE ?= debug
 endif
 
+ifneq ($(wildcard .git),)
+    GIT_COMMIT = $(eval GIT_COMMIT := $(shell git --git-dir=.git rev-parse --verify HEAD))$(GIT_COMMIT)
+    export CFG_VERSION ?= nightly ($(or $(GIT_COMMIT),$(error Could not resolve Git commit SHA, set CFG_VERSION manually)))
+endif
+
 CARGO_FLAGS := $(if $(filter release,$(PROFILE)),--release)
 
 PATINA := target/$(PROFILE)/patina
