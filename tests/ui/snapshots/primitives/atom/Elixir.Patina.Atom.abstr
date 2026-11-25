@@ -93,7 +93,7 @@
           [],[],
           [{match,{4,5},{var,{4,9},'_value@0_0'},{atom,{4,23},hello}},
            {var,{5,5},'_value@0_0'}]}]},
- {function,{8,1},named,0,[{clause,{8,1},[],[],[{atom,{1,21},named}]}]},
+ {function,{8,1},named,0,[{clause,{8,1},[],[],[{atom,{9,5},named}]}]},
  {function,
      {12,1},
      escaped,0,

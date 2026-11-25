@@ -1,3 +1,5 @@
+use rustc_span::Span;
+
 use super::{
     AdtExpr, AdtPat, Arm, BinarySegmentExpr, BinarySegmentPat, Body, Callee, CatchArm, Expr,
     ExprId, ExprKind, FieldExpr, FieldPat, Join, JoinId, Loop, LoopId, Pat, PatId, PatKind,
@@ -53,6 +55,8 @@ pub trait Visitor<'etir, 'tcx: 'etir>: Sized {
 
     fn visit_args(&mut self, _args: &GenericArgsRef<'tcx>) {}
 
+    fn visit_span(&mut self, _span: &Span) {}
+
     /// Visits the join defined by a `Join` expr, followed by its body.
     fn visit_join_def(&mut self, id: &JoinId) {
         self.visit_join_id(id);
@@ -101,6 +105,8 @@ pub trait MutVisitor<'etir, 'tcx: 'etir>: Sized {
 
     fn visit_args(&mut self, _args: &mut GenericArgsRef<'tcx>) {}
 
+    fn visit_span(&mut self, _span: &mut Span) {}
+
     fn visit_join_def(&mut self, id: &mut JoinId) {
         self.visit_join_id(id);
     }
@@ -123,11 +129,14 @@ pub fn walk_body_mut<'etir, 'tcx: 'etir, V: MutVisitor<'etir, 'tcx>>(
     visitor: &mut V,
     body: &'etir mut Body<'tcx>,
 ) {
-    let Body { params, value, exprs, pats, vars: _, loops, joins } = body;
+    let Body { params, value, exprs, pats, vars, loops, joins } = body;
     for param in params {
         visitor.visit_pat_id(param);
     }
     visitor.visit_expr_id(value);
+    for var in vars {
+        visitor.visit_span(&mut var.ident.span);
+    }
     for expr in exprs {
         visitor.visit_expr(expr);
     }
@@ -152,15 +161,16 @@ macro_rules! make_walkers {
             expr: &'etir $($mutability)? Expr<'tcx>,
         ) {
             use ExprKind::*;
-            let Expr { kind, ty, span: _ } = expr;
+            let Expr { kind, ty, span } = expr;
             visitor.visit_ty(ty);
+            visitor.visit_span(span);
             match kind {
                 Block(exprs) => {
                     for expr in exprs {
                         visitor.visit_expr_id(expr);
                     }
                 }
-                Literal(_, _) => {}
+                Literal(_, span) => visitor.visit_span(span),
                 Var(var) => visitor.visit_var_id(var),
                 Const { def_id: _, args } => visitor.visit_args(args),
                 List { items, tail } => {
@@ -186,7 +196,8 @@ macro_rules! make_walkers {
                     }
                 }
                 BinaryPattern { segments } => {
-                    for BinarySegmentExpr { value, layout, span: _ } in segments {
+                    for BinarySegmentExpr { value, layout, span } in segments {
+                        visitor.visit_span(span);
                         visitor.visit_expr_id(value);
                         ${concat(walk_segment_layout, $suffix)}(visitor, layout);
                     }
@@ -283,7 +294,8 @@ macro_rules! make_walkers {
             visitor: &mut V,
             arm: &'etir $($mutability)? Arm,
         ) {
-            let Arm { pattern, guard, body, span: _ } = arm;
+            let Arm { pattern, guard, body, span } = arm;
+            visitor.visit_span(span);
             visitor.visit_pat_id(pattern);
             if let Some(guard) = guard {
                 visitor.visit_expr_id(guard);
@@ -295,7 +307,8 @@ macro_rules! make_walkers {
             visitor: &mut V,
             arm: &'etir $($mutability)? CatchArm,
         ) {
-            let CatchArm { class, reason, stacktrace, guard, body, span: _ } = arm;
+            let CatchArm { class, reason, stacktrace, guard, body, span } = arm;
+            visitor.visit_span(span);
             visitor.visit_pat_id(class);
             visitor.visit_pat_id(reason);
             if let Some(stacktrace) = stacktrace {
@@ -312,8 +325,9 @@ macro_rules! make_walkers {
             pat: &'etir $($mutability)? Pat<'tcx>,
         ) {
             use PatKind::*;
-            let Pat { kind, ty, span: _ } = pat;
+            let Pat { kind, ty, span } = pat;
             visitor.visit_ty(ty);
+            visitor.visit_span(span);
             match kind {
                 Wild { input: _ } => {}
                 Binding { var, is_primary: _, subpattern, input: _ } => {
@@ -357,7 +371,8 @@ macro_rules! make_walkers {
                 BinaryPattern { segments } => {
                     // A size can only refer to bindings of earlier segments,
                     // so it comes before its pattern.
-                    for BinarySegmentPat { pattern, layout, span: _ } in segments {
+                    for BinarySegmentPat { pattern, layout, span } in segments {
+                        visitor.visit_span(span);
                         ${concat(walk_segment_layout, $suffix)}(visitor, layout);
                         visitor.visit_pat_id(pattern);
                     }

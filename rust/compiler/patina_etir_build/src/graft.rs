@@ -4,6 +4,7 @@ use rustc_middle::bug;
 use rustc_middle::erl::etir::visit::{MutVisitor, walk_body_mut};
 use rustc_middle::erl::etir::{Body, ExprId, JoinId, LoopId, PatId, VarId};
 use rustc_middle::ty::{self, GenericArgsRef, Ty, TyCtxt};
+use rustc_span::Span;
 
 use crate::BodyBuildCx;
 
@@ -18,14 +19,15 @@ pub(crate) struct Graft {
 impl<'tcx> BodyBuildCx<'tcx> {
     /// Appends a copy of `source` applied to `call_args` (with `param = call_arg` exprs).
     /// Instantiates source's generic parameters with `args`, and normalizes the resulting types
-    /// in the owner's environment.
+    /// in the owner's environment. Replaces all spans of the copy with `caller_span`.
     pub(crate) fn graft(
         &mut self,
         mut source: Body<'tcx>,
         args: GenericArgsRef<'tcx>,
         call_args: &[ExprId],
+        caller_span: Span,
     ) -> Graft {
-        Rebaser::rebase(&mut source, self, args);
+        Rebaser::rebase(&mut source, self, args, caller_span);
 
         let Body { params, value, exprs, pats, vars, loops, joins } = source;
         if params.len() != call_args.len() {
@@ -58,18 +60,25 @@ impl<'tcx> BodyBuildCx<'tcx> {
 
 /// Offsets the ids of copied nodes, past the max offset already in the target body.
 /// Instantiates source's generic parameters in the target's environment.
+/// Replaces all spans with `span`.
 struct Rebaser<'a, 'tcx> {
     tcx: TyCtxt<'tcx>,
     typing_env: ty::TypingEnv<'tcx>,
     target: &'a Body<'tcx>,
     args: GenericArgsRef<'tcx>,
+    span: Span,
 }
 
 impl<'a, 'tcx> Rebaser<'a, 'tcx> {
-    fn rebase(source: &mut Body<'tcx>, cx: &'a BodyBuildCx<'tcx>, args: GenericArgsRef<'tcx>) {
+    fn rebase(
+        source: &mut Body<'tcx>,
+        cx: &'a BodyBuildCx<'tcx>,
+        args: GenericArgsRef<'tcx>,
+        span: Span,
+    ) {
         let tcx = cx.tcx;
         let typing_env = ty::TypingEnv::post_analysis(tcx, tcx.typeck_root_def_id(cx.owner));
-        walk_body_mut(&mut Self { tcx, typing_env, target: &cx.body, args }, source);
+        walk_body_mut(&mut Self { tcx, typing_env, target: &cx.body, args, span }, source);
     }
 }
 
@@ -110,5 +119,9 @@ impl<'a, 'etir, 'tcx: 'etir> MutVisitor<'etir, 'tcx> for Rebaser<'a, 'tcx> {
 
     fn visit_args(&mut self, args: &mut GenericArgsRef<'tcx>) {
         *args = self.instantiate(*args);
+    }
+
+    fn visit_span(&mut self, span: &mut Span) {
+        *span = self.span;
     }
 }

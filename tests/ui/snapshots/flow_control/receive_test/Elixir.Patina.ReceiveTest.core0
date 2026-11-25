@@ -167,7 +167,7 @@ module 'Elixir.Patina.ReceiveTest' ['__info__'/1,
 					  <'false'> when 'true' ->
 					      let <_2> =
 						  primop 'recv_wait_timeout'
-						      (%% Line 1019
+						      (%% Line 16
 						       _X_ms@0_0)
 					      in  case _2 of
 						    <'true'> when 'true' ->
@@ -458,7 +458,7 @@ module 'Elixir.Patina.ReceiveTest' ['__info__'/1,
 					  <'false'> when 'true' ->
 					      let <_2> =
 						  primop 'recv_wait_timeout'
-						      (%% Line 1019
+						      (%% Line 40
 						       _X_ms@0_0)
 					      in  case _2 of
 						    <'true'> when 'true' ->
@@ -497,7 +497,7 @@ module 'Elixir.Patina.ReceiveTest' ['__info__'/1,
 				fun () ->
 				    let <_1> =
 					primop 'recv_wait_timeout'
-					    (%% Line 1019
+					    (%% Line 45
 					     _X_ms@0_0)
 				    in  ( case _1 of
 					    <'true'> when 'true' ->
@@ -646,7 +646,7 @@ module 'Elixir.Patina.ReceiveTest' ['__info__'/1,
 						  <'false'> when 'true' ->
 						      let <_6> =
 							  primop 'recv_wait_timeout'
-							      (%% Line 1019
+							      (%% Line 54
 							       _X_ms@1_0)
 						      in  case _6 of
 							    <'true'> when 'true' ->
@@ -712,7 +712,7 @@ module 'Elixir.Patina.ReceiveTest' ['__info__'/1,
 						  <'false'> when 'true' ->
 						      let <_7> =
 							  primop 'recv_wait_timeout'
-							      (%% Line 1019
+							      (%% Line 60
 							       _X_ms@1_0)
 						      in  case _7 of
 							    <'true'> when 'true' ->
@@ -751,25 +751,25 @@ module 'Elixir.Patina.ReceiveTest' ['__info__'/1,
 	      <> when 'true' ->
 		  let <_X_s@0_0> = 2
 		  in  let <_X_0@1_0> =
-			  call %% Line 1023
+			  call %% Line 65
 			       ( 'erlang'
-				 -| ['result_not_wanted'] ):%% Line 1023
+				 -| ['result_not_wanted'] ):%% Line 65
 							    ( '*'
 							      -| ['result_not_wanted'] )
-			      (%% Line 1023
-			       _X_s@0_0, %% Line 1023
+			      (%% Line 65
+			       _X_s@0_0, %% Line 65
 					 ( 1000
 					   -| ['result_not_wanted'] ))
 		      in  let <_X_element@2_0> = _X_0@1_0
 			  in  let <_X_m@3_0> = 3
 			      in  let <_X_0@4_0> =
-				      call %% Line 1027
+				      call %% Line 65
 					   ( 'erlang'
-					     -| ['result_not_wanted'] ):%% Line 1027
+					     -| ['result_not_wanted'] ):%% Line 65
 									( '*'
 									  -| ['result_not_wanted'] )
-					  (%% Line 1027
-					   _X_m@3_0, %% Line 1027
+					  (%% Line 65
+					   _X_m@3_0, %% Line 65
 						     ( 60000
 						       -| ['result_not_wanted'] ))
 				  in  let <_X_element@5_0> = _X_0@4_0
@@ -942,7 +942,7 @@ module 'Elixir.Patina.ReceiveTest' ['__info__'/1,
 						<'false'> when 'true' ->
 						    let <_5> =
 							primop 'recv_wait_timeout'
-							    (%% Line 1019
+							    (%% Line 86
 							     _X_ms@0_0)
 						    in  case _5 of
 							  <'true'> when 'true' ->

@@ -55,7 +55,7 @@ impl<'a, 'tcx> Inliner<'a, 'tcx> {
                     ref args,
                 } => {
                     let call_args = args.clone();
-                    self.inline_call(def_id, inline_args, &call_args)
+                    self.inline_call(def_id, inline_args, &call_args, span)
                 }
                 _ => None,
             };
@@ -87,6 +87,7 @@ impl<'a, 'tcx> Inliner<'a, 'tcx> {
         def_id: DefId,
         inline_args: GenericArgsRef<'tcx>,
         call_args: &[ExprId],
+        span: Span,
     ) -> Option<ExprKind<'tcx>> {
         let tcx = self.cx.tcx;
         let Some((def_id, inline_args)) =
@@ -103,7 +104,7 @@ impl<'a, 'tcx> Inliner<'a, 'tcx> {
             return None;
         }
 
-        let value = self.graft_and_recursively_inline(def_id, inline_args, call_args);
+        let value = self.graft_and_recursively_inline(def_id, inline_args, call_args, span);
         Some(ExprKind::Block(Box::new([value])))
     }
 
@@ -116,7 +117,7 @@ impl<'a, 'tcx> Inliner<'a, 'tcx> {
             span_bug!(span, "cycle between constants should've been reported as a query cycle");
         }
 
-        let value = self.graft_and_recursively_inline(def_id, args, &[]);
+        let value = self.graft_and_recursively_inline(def_id, args, &[], span);
 
         let name = VarPrefix::Const.to_name(self.cx.tcx, def_id);
         let var = self.cx.push_var(Ident::new(name, span));
@@ -131,10 +132,11 @@ impl<'a, 'tcx> Inliner<'a, 'tcx> {
         def_id: DefId,
         args: GenericArgsRef<'tcx>,
         call_args: &[ExprId],
+        span: Span,
     ) -> ExprId {
         let template = self.cx.tcx.etir_template(def_id).clone();
 
-        let Graft { value, exprs, pats } = self.cx.graft(template, args, call_args);
+        let Graft { value, exprs, pats } = self.cx.graft(template, args, call_args, span);
 
         self.stack.push(def_id);
         self.inline(exprs, pats);

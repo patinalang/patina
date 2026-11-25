@@ -688,7 +688,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
 
         let const_body = self.cx.tcx.etir_template(def_id);
         if const_body.is_erl_literal() {
-            let Graft { value, .. } = self.cx.graft(const_body.clone(), args, &[]);
+            let Graft { value, .. } = self.cx.graft(const_body.clone(), args, &[], span);
             value
         } else {
             self.cx.push_expr(etir::ExprKind::Const { def_id, args }, expr.ty, span)
