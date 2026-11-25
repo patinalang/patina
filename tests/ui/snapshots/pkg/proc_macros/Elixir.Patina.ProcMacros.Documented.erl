@@ -1,4 +1,4 @@
--file("tests/ui/src/pkg/proc_macros.pt", 63).
+-file("tests/ui/src/pkg/proc_macros.pt", 69).
 
 -module('Elixir.Patina.ProcMacros.Documented').
 

@@ -644,9 +644,11 @@ impl Token {
         Token::new(TokenKind::Question, DUMMY_SP)
     }
 
-    /// Recovers a `Token` from an `Ident`. This creates a raw identifier if necessary.
+    /// Recovers a `Token` from an `Ident`, escaping its name if needed.
     pub fn from_ast_ident(ident: Ident) -> Self {
-        Token::new(Ident(ident.name, ident.is_raw_guess().into()), ident.span)
+        let is_raw = ident.is_raw_guess();
+        let name = if is_raw { ident.name.escaped(|| ident.span.edition()) } else { ident.name };
+        Token::new(Ident(name, (is_raw && !name.is_escaped_keyword()).into()), ident.span)
     }
 
     pub fn is_range_separator(&self) -> bool {

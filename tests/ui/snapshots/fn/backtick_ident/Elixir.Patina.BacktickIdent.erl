@@ -9,11 +9,22 @@
 -export_record([]).
 
 -export(['__info__'/1,
+         out_of_line_keyword_module/0,
+         keyword_module/0,
+         keyword_extern/0,
          'exists?'/1,
          'save!'/0,
          'a{b}'/0,
          type/0,
-         main/0]).
+         keyword_trait/0,
+         main/0,
+         keyword_nested_fns/0,
+         keyword_local/0,
+         keyword_literals/0,
+         keyword_nested_traits/0,
+         keyword_nested_mods/0,
+         unit_pattern/0,
+         'Self'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -28,6 +39,14 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
+out_of_line_keyword_module() ->
+    'Elixir.Patina.BacktickIdent.BacktickIdent.Pkg':value().
+
+keyword_module() ->
+    'Elixir.Patina.BacktickIdent.Pkg':value().
+
+keyword_extern() -> erlang:self() =:= erlang:self().
+
 'exists?'(_x@0_0) -> _x@0_0 > 0.
 
 'save!'() ->
@@ -38,6 +57,12 @@
 'a{b}'() -> 1.
 
 type() -> 2.
+
+keyword_trait() ->
+    _witness_Shape@0_0 =
+        'Elixir.Patina.BacktickIdent.S':'backtick_ident::type::Shape::$patina_witness'(),
+    'Elixir.Patina.BacktickIdent.S':'backtick_ident::type::Shape::fn'(_witness_Shape@0_0,
+                                                                      43).
 
 main() ->
     case [] of
@@ -104,3 +129,43 @@ main() ->
             _ = 'a{b}'(),
             {}
     end.
+
+keyword_nested_fns() ->
+    _first@0_0 = 'keyword_nested_fns::type'(),
+    _second@1_0 = 'keyword_nested_fns::type#1'(),
+    _first@0_0 + _second@1_0.
+
+'keyword_nested_fns::type'() -> 1.
+
+'keyword_nested_fns::type#1'() -> 2.
+
+keyword_local() ->
+    _type@0_0 = 4,
+    _type@0_0 + 1.
+
+keyword_literals() -> {<<"`fn`"/utf8>>, '`fn`'}.
+
+keyword_nested_traits() ->
+    _witness_type@0_0 =
+        'Elixir.Patina.BacktickIdent.S':'backtick_ident::keyword_nested_traits::type::$patina_witness'(),
+    _witness_type@1_0 =
+        'Elixir.Patina.BacktickIdent.S':'backtick_ident::keyword_nested_traits::type#1::$patina_witness'(),
+    _first@2_0 =
+        'Elixir.Patina.BacktickIdent.S':'backtick_ident::keyword_nested_traits::type::get'(_witness_type@0_0,
+                                                                                           1),
+    _second@3_0 =
+        'Elixir.Patina.BacktickIdent.S':'backtick_ident::keyword_nested_traits::type#1::get'(_witness_type@1_0,
+                                                                                             1),
+    _first@2_0 + _second@3_0.
+
+keyword_nested_mods() ->
+    _first@0_0 =
+        'Elixir.Patina.BacktickIdent.keyword_nested_mods.Type':value(),
+    _second@1_0 =
+        'Elixir.Patina.BacktickIdent.keyword_nested_mods.Type#1':value(),
+    _first@0_0 + _second@1_0.
+
+unit_pattern() ->
+    'Elixir.Patina.BacktickIdent.Unit':same('Elixir.Patina.BacktickIdent.Unit').
+
+'Self'() -> {}.

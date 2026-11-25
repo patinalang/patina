@@ -577,7 +577,7 @@ impl<'a, 'tcx> Lower<'a, 'tcx> {
         let module = tcx.erl_module_for_target(self.cx.owner, target);
         let name = match target {
             ErlCallTarget::Item { def_id, .. } => tcx.erl_fn_name(def_id),
-            ErlCallTarget::Extern { function, .. } => tcx.item_name(function),
+            ErlCallTarget::Extern { function, .. } => tcx.item_name(function).unescaped(),
             ErlCallTarget::Constructor { .. } | ErlCallTarget::Dynamic => {
                 span_bug!(span, "item reference to {target:?}")
             }

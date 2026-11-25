@@ -89,7 +89,7 @@ fn info_struct_clause<'tcx, 'arena>(
     let list_elems = fields.iter().map(|field| {
         // field => $field_name
         let field_key = afb.expr_atom(field.ident.span, sym::field);
-        let field_val = afb.expr_atom(field.ident.span, field.ident.name);
+        let field_val = afb.expr_atom(field.ident.span, field.ident.name.unescaped());
 
         // default => nil
         let default_key = afb.expr_atom(field.span, kw::Default);
@@ -229,7 +229,7 @@ fn base_struct_map<'tcx, 'arena>(
     let struct_val = afb.expr_atom(span, mod_name);
 
     let field_assocs = fields.iter().map(|field| {
-        let key = afb.expr_atom(field.ident.span, field.ident.name);
+        let key = afb.expr_atom(field.ident.span, field.ident.name.unescaped());
         let val = afb.expr_atom(field.span, sym::nil);
         (key, val)
     });

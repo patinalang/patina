@@ -389,6 +389,12 @@ fn type_name(trees: [TokenTree]) -> str {
     }
 }
 
+// A derive and a helper attribute named after keywords.
+#[proc_macro_derive(`type`, attributes(`fn`))]
+pub fn derive_keyword(_input: TokenStream) -> TokenStream {
+    TokenStream::new()
+}
+
 // A derive that reads the name of the type it is applied to and generates
 // `pub fn type_name() -> str { "<name>" }`.
 #[proc_macro_derive(TypeName)]

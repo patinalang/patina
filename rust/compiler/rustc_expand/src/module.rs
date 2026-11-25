@@ -118,10 +118,10 @@ pub(crate) fn mod_dir_path(
             if let DirOwnership::Owned { relative } = &mut dir_ownership {
                 if let Some(ident) = relative.take() {
                     // Remove the relative offset.
-                    dir_path.push(ident.as_str());
+                    dir_path.push(ident.name.as_unescaped_str());
                 }
             }
-            dir_path.push(ident.as_str());
+            dir_path.push(ident.name.as_unescaped_str());
 
             (dir_path, dir_ownership)
         }
@@ -233,13 +233,13 @@ pub fn default_submod_path<'a>(
     // `./<ident>.pt`.
     let relative_prefix_string;
     let relative_prefix = if let Some(ident) = relative {
-        relative_prefix_string = format!("{}{}", ident.name, path::MAIN_SEPARATOR);
+        relative_prefix_string = format!("{}{}", ident.name.unescaped(), path::MAIN_SEPARATOR);
         &relative_prefix_string
     } else {
         ""
     };
 
-    let default_path_str = format!("{}{}.pt", relative_prefix, ident.name);
+    let default_path_str = format!("{}{}.pt", relative_prefix, ident.name.unescaped());
     let default_path = dir_path.join(&default_path_str);
     if psess.source_map().file_exists(&default_path) {
         Ok(ModulePathSuccess {

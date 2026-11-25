@@ -190,6 +190,16 @@ pub struct DisambiguatedDefPathData {
 }
 
 impl DisambiguatedDefPathData {
+    pub fn as_unescaped_sym(&self, verbose: bool) -> Symbol {
+        match self.data.name() {
+            DefPathDataName::Named(name) if verbose && self.disambiguator != 0 => {
+                Symbol::intern(&format!("{}#{}", name.unescaped(), self.disambiguator))
+            }
+            DefPathDataName::Named(name) => name.unescaped(),
+            DefPathDataName::Anon { .. } => self.as_sym(verbose),
+        }
+    }
+
     pub fn as_sym(&self, verbose: bool) -> Symbol {
         match self.data.name() {
             DefPathDataName::Named(name) => {

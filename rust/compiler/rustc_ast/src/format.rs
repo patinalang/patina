@@ -93,7 +93,7 @@ impl FormatArguments {
     pub fn add(&mut self, arg: FormatArgument) -> usize {
         let index = self.arguments.len();
         if let Some(name) = arg.kind.ident() {
-            self.names.insert(name.name, index);
+            self.names.insert(name.name.unescaped(), index);
         } else if self.names.is_empty() {
             // Only count the unnamed args before the first named arg.
             // (Any later ones are errors.)
@@ -114,7 +114,7 @@ impl FormatArguments {
     }
 
     pub fn by_name(&self, name: Symbol) -> Option<(usize, &FormatArgument)> {
-        let i = *self.names.get(&name)?;
+        let i = *self.names.get(&name.unescaped())?;
         Some((i, &self.arguments[i]))
     }
 

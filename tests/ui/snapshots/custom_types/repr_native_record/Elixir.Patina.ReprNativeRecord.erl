@@ -16,7 +16,11 @@
          record_struct/0,
          struct_x/1,
          record_pair/0,
-         pair_second/1]).
+         pair_second/1,
+         keyword_field/0,
+         keyword_field_value/1,
+         keyword_field_updated/1,
+         keyword_field_pattern/1]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -53,3 +57,23 @@ record_pair() ->
 
 pair_second(_value@0_0) ->
     _value@0_0#'Elixir.Patina.ReprNativeRecord.NativeRecordPair':'NativeRecordPair'.'1'.
+
+keyword_field() ->
+    'Elixir.Patina.ReprNativeRecord.KeywordField':'$patina_constructor__KeywordField'(7,
+                                                                                      1).
+
+keyword_field_value(_value@0_0) ->
+    _value@0_0#'Elixir.Patina.ReprNativeRecord.KeywordField':'KeywordField'.type.
+
+keyword_field_updated(_value@0_0) ->
+    _value@0_0#'Elixir.Patina.ReprNativeRecord.KeywordField':'KeywordField'{type
+                                                                                =
+                                                                                8}.
+
+keyword_field_pattern(_value@0_0) ->
+    #'Elixir.Patina.ReprNativeRecord.KeywordField':'KeywordField'{type
+                                                                      =
+                                                                      _type@1_0,
+                                                                  other = _} =
+        _value@0_0,
+    _type@1_0.

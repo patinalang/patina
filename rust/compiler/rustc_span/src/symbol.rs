@@ -2683,6 +2683,39 @@ impl Symbol {
         })
     }
 
+    /// Map a keyword to its predefined escaped spelling.
+    pub fn escaped(self, edition: impl Copy + FnOnce() -> Edition) -> Symbol {
+        if self.is_escapable_keyword(edition) {
+            debug_assert!(self.as_u32() < KEYWORDS_COUNT);
+            Symbol::new(ESCAPED_KEYWORDS_BASE + self.as_u32())
+        } else {
+            self
+        }
+    }
+
+    /// Roughly equivalent to `escaped().as_str()`, but without the need to store the temporary.
+    pub fn as_unescaped_str(&self) -> &str {
+        with_session_globals(|session_globals| unsafe {
+            std::mem::transmute::<&str, &str>(
+                session_globals.symbol_interner.get_str(self.unescaped()),
+            )
+        })
+    }
+
+    /// Whether this is an escaped keyword, such as `` `type` ``.
+    pub fn is_escaped_keyword(self) -> bool {
+        (ESCAPED_KEYWORDS_BASE..ESCAPED_KEYWORDS_BASE + KEYWORDS_COUNT).contains(&self.as_u32())
+    }
+
+    /// Map a predefined escaped keyword back to its keywor.
+    pub fn unescaped(self) -> Symbol {
+        if self.is_escaped_keyword() {
+            Symbol::new(self.as_u32() - ESCAPED_KEYWORDS_BASE)
+        } else {
+            self
+        }
+    }
+
     pub fn pascal_case(&self) -> String {
         self.as_str().to_case(Case::Pascal)
     }
@@ -3030,6 +3063,16 @@ impl Symbol {
             && !string.contains(['`', '\n', '\r'])
             && !string.starts_with('\'')
             && !string.bytes().all(|b| b.is_ascii_digit())
+    }
+
+    /// Returns `true` if this symbol can be an escaped identifier.
+    pub fn can_be_escaped(self, edition: impl Copy + FnOnce() -> Edition) -> bool {
+        self.is_escapable_keyword(edition) || self.can_be_raw()
+    }
+
+    /// A keyword that can be turned into an identifier by escaping with backticks.
+    fn is_escapable_keyword(self, edition: impl Copy + FnOnce() -> Edition) -> bool {
+        self.is_reserved(edition) && !self.is_special()
     }
 
     /// Was this symbol index predefined in the compiler's `symbols!` macro?

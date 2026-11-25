@@ -2,9 +2,22 @@ extern crate core as core2;
 
 fn crate() {}
 
+// `pkg` is a keyword too, so a bare `pkg` can't name an item, a field or a local.
+fn pkg() {}
+struct Field { pkg: int }
+
 pub(crate) fn visible() -> int { 1 }
 
 pub fn main() {
     let _: core2::Option<int> = core2::Option::Some(crate::visible());
     let crate = 1;
+    let pkg = 2;
+    let self = 2;
+    let super = 2;
+    let _ = Field { `pkg`: 3 }.pkg;
+    let _ = Field { `pkg`: 3 }.self;
+    let _ = Field { `pkg`: 3 }.super;
+    let _ = Field { `pkg`: 3 }.Self;
+    let _ = Field { `pkg`: 3 }.crate;
+    let _ = Field { `pkg`: 3 }.pkg::<int>();
 }

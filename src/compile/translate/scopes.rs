@@ -41,7 +41,7 @@ impl PatinaVar {
     }
 
     fn make_erl_name(name: Symbol, var_num: u32, vsn: u32) -> Symbol {
-        Symbol::intern(&format!("_{}@{}_{}", name, var_num, vsn))
+        Symbol::intern(&format!("_{}@{}_{}", name.unescaped(), var_num, vsn))
     }
 }
 

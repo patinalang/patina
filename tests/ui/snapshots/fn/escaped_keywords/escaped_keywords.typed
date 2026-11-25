@@ -1,0 +1,43 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0,
+macro_metavar_expr_concat#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern pkg core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use core::prelude::*;
+
+
+macro_rules! declare { () => { fn ${concat(ty, pe)}() -> int { 1 } }; }
+fn `type`() -> int ({ (1 as int) } as int)
+
+
+fn print() ({
+    let `type` = ((`type` as fn() -> int {`type`})() as int);
+    ({
+        ((::core::io::put_chars as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
+                                    fn(term) -> term)((`type` as int)) as term)] as [term])] as
+                [[term]])) as term);
+        ((::core::io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((::core::io::put_chars as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
+                                    fn(term) -> term)((2 as int)) as term)] as [term])] as
+                [[term]])) as term);
+        ((::core::io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((::core::io::put_chars as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
+                                    fn(term) -> term)((3 as int)) as term)] as [term])] as
+                [[term]])) as term);
+        ((::core::io::nl as fn() -> term)() as term);
+    } as ());
+} as ())

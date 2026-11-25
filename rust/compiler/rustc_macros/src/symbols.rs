@@ -192,7 +192,7 @@ fn symbols_with_errors(input: TokenStream) -> (TokenStream, Vec<syn::Error>) {
     let prefill_ints = 0..=9;
     let prefill_letters = ('A'..='Z').chain('a'..='z');
     let mut entries = Entries::with_capacity(
-        input.keywords.len()
+        input.keywords.len() * 2
             + input.symbols.len()
             + prefill_ints.clone().count()
             + prefill_letters.clone().count(),
@@ -249,6 +249,15 @@ fn symbols_with_errors(input: TokenStream) -> (TokenStream, Vec<syn::Error>) {
         });
     }
 
+    let escaped_keywords_base = entries.len();
+    let keywords_count = input.keywords.len() as u32;
+    for keyword in &input.keywords {
+        let name = keyword.value.value();
+        let value = format!("`{name}`");
+        entries.insert(keyword.name.span(), &value, &mut errors);
+        prefill_stream.extend(quote! { #value, });
+    }
+
     // Symbols whose value comes from an environment variable. It's allowed for
     // these to have the same value as another symbol.
     for symbol in &input.symbols {
@@ -295,6 +304,8 @@ fn symbols_with_errors(input: TokenStream) -> (TokenStream, Vec<syn::Error>) {
     let symbol_lowercase_letters_base = entries.map["a"].idx;
     let predefined_symbols_count = entries.len();
     let output = quote! {
+        const ESCAPED_KEYWORDS_BASE: u32 = #escaped_keywords_base;
+        const KEYWORDS_COUNT: u32 = #keywords_count;
         const SYMBOL_DIGITS_BASE: u32 = #symbol_digits_base;
         const SYMBOL_UPPERCASE_LETTERS_BASE: u32 = #symbol_uppercase_letters_base;
         const SYMBOL_LOWERCASE_LETTERS_BASE: u32 = #symbol_lowercase_letters_base;

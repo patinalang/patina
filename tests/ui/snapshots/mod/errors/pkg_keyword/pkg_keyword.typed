@@ -33,7 +33,99 @@ mod second {
         {type error})
 }
 
+mod `pkg` {
+    fn visible() -> int ({ (2 as int) } as int)
+}
+
+use ::{};
+use ::{};
+use self::`pkg`::visible as escaped_visible;
+use pkg as package_root;
+
+fn `pkg`<T>(value: T) -> T ({ (value as T) } as T)
+
+macro_rules! call_named { ($name:ident) => { $name::visible() }; }
+
+// An escaped `pkg` works as a field and a method name.
+struct Holder {
+    `pkg`: int,
+}
+
+impl Holder {
+    fn `pkg`(self) -> int ({ ((self as Holder).`pkg` as int) } as int)
+}
+
+trait Shape { }
+struct Circle {
+    radius: int,
+}
+struct Square {
+    side: int,
+}
+impl Shape for Circle { }
+impl Shape for Square { }
+
+// The mismatch note names the trait as `impl pkg::Shape`.
+fn shape(round: bool)
+    ->
+        /*impl Trait*/ ({
+    (if (round as bool) {
+        (return (Circle { radius: (1 as int) } as Circle) as !);
+    } as ())
+    (Square { side: (1 as int) } as Square)
+} as {type error})
+
+mod `type` {
+    trait Shape { }
+}
+impl `type`::Shape for Circle { }
+impl `type`::Shape for Square { }
+
+fn keyword_shape(round: bool)
+    ->
+        /*impl Trait*/ ({
+    (if (round as bool) {
+        (return (Circle { radius: (1 as int) } as Circle) as !);
+    } as ())
+    (Square { side: (1 as int) } as Square)
+} as {type error})
+
+// The lint names the unknown key as `pkg::alias`.
+#[attr = Doc(DocAttribute {aliases: [], inline: [], cfg: [], auto_cfg: [],
+auto_cfg_change: [], test_attrs: []})]
+fn documented() ({ } as ())
+
+// The package root can only be imported under a name.
+use pkg;
+
+// `pkg` is a keyword, so it isn't a cfg name.
+fn configured() ({ } as ())
+
+// An escaped `pkg` works as a local.
+fn escaped_local(holder: Holder)
+    ->
+        int ({
+    let `pkg` =
+        (((holder as Holder).`pkg`() as int) +
+            ((holder as Holder).`pkg` as int) as int);
+    ((`pkg` as int) + (1 as int) as int)
+} as int)
+
 fn main() ({
+    let _ =
+        ((escaped_local as
+                fn(Holder) -> int {escaped_local})((Holder { `pkg`: (4 as int)
+                } as Holder)) as int);
+    // Only the first segment of a path can be `pkg`.
+    let _ = ((first::pkg::visible as {type error})() as {type error});
+    let _ =
+        ((`pkg`::<int> as fn(int) -> int {`pkg`::<int>})((3 as int)) as int);
+    let _ = ((`pkg`::visible as fn() -> int {`pkg`::visible})() as int);
+    let _ = ((escaped_visible as fn() -> int {`pkg`::visible})() as int);
+    let _ =
+        ((package_root::first::visible as fn() -> int {first::visible})() as
+            int);
+    let _ = ((`pkg`::visible as fn() -> int {`pkg`::visible})() as int);
     let _: core2::Option<int> =
         ((core2::Option::Some as
                 fn(int) -> core::Option<int> {core::Option::<int>::Some})(((pkg::first::visible

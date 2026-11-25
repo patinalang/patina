@@ -2,7 +2,7 @@ use macros::{
     braces, call_site_by_set_span, call_site_ident, delimiters, escapes,
     forty_two, identity, identity_alias, literal_factories, negative,
     passthrough, raw_ident, rebuild, render, replace_with_answer, respan,
-    stream_ops, untyped_literals, wrapped, Hello, TypeName,
+    stream_ops, untyped_literals, wrapped, Hello, TypeName, `type`,
 };
 use macros::nested::nested_identity;
 
@@ -38,6 +38,12 @@ pub fn bang() {
 }
 
 pub fn attribute() { println!("{} {}", answer(), from_attr()); }
+
+#[derive(`type`)]
+pub struct KeywordDerived {
+    #[`fn`]
+    pub x: int,
+}
 
 pub fn derive() {
     let point = Point { x: 1, y: 2 };
@@ -120,7 +126,7 @@ pub fn built_streams() {
 pub fn rendered() {
     println!("{}",
     render!(`x` += f(1, "q\n") r#"raw"# a"at" 'c' #[z] a.b if (y) m!(1) if !w
-    receive (v) `if`(u) fn(t)));
+    receive (v) `if`(u) fn(t) pkg::s `pkg`::r));
 }
 
 // Literals.

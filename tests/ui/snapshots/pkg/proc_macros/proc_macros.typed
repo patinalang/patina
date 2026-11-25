@@ -33,6 +33,7 @@ use macros::untyped_literals;
 use macros::wrapped;
 use macros::Hello;
 use macros::TypeName;
+use macros::`type`;
 use macros::nested::nested_identity;
 
 // Macro kinds.
@@ -57,6 +58,7 @@ fn hello_from_derive() -> int ({ (7 as int) } as int)
 fn type_name() -> str ({ ("Point" as str) } as str)
 
 fn bang() ({
+
 
 
 
@@ -156,6 +158,9 @@ fn attribute() ({
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())
+struct KeywordDerived {
+    x: int,
+}
 fn derive() ({
     let point = (Point { x: (1 as int), y: (2 as int) } as Point);
     ({
@@ -329,7 +334,7 @@ fn rendered() ({
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([((::core::patina_fmt::display as
-                                    fn(term) -> term)(("`x` += f(1, \"q\\n\") r#\"raw\"# a\"at\" \'c\' #[z] a.b if (y) m! (1) if ! w receive (v) `if`(u) fn(t)"
+                                    fn(term) -> term)(("`x` += f(1, \"q\\n\") r#\"raw\"# a\"at\" \'c\' #[z] a.b if (y) m! (1) if ! w receive (v) `if`(u) fn(t) pkg :: s `pkg` :: r"
                                     as str)) as term)] as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());

@@ -789,15 +789,18 @@ impl<'tcx> TyCtxt<'tcx> {
         match own_tag.or(inherited_tag) {
             Some(ErlTag::Explicit(tag)) => tag,
             Some(ErlTag::Style(ErlTagStyle::SnakeCase)) => {
-                Symbol::intern(&self.item_name(variant_def_id).snake_case())
+                Symbol::intern(&self.item_name(variant_def_id).unescaped().snake_case())
             }
-            None if repr == ErlReprKind::NativeRecord => self.item_name(variant_def_id),
+            None if repr == ErlReprKind::NativeRecord => self.item_name(variant_def_id).unescaped(),
             None => match self.def_kind(variant_def_id) {
                 DefKind::Struct => self.erl_module_name(ErlModuleId::Adt(variant_def_id)),
                 DefKind::Variant => {
                     let enum_module =
                         self.erl_module_name(ErlModuleId::Adt(self.parent(variant_def_id)));
-                    Symbol::intern(&format!("{enum_module}.{}", self.item_name(variant_def_id)))
+                    Symbol::intern(&format!(
+                        "{enum_module}.{}",
+                        self.item_name(variant_def_id).unescaped()
+                    ))
                 }
                 _ => unreachable!(),
             },
@@ -849,14 +852,15 @@ fn erl_fn_name(tcx: TyCtxt<'_>, def_id: LocalDefId) -> Symbol {
     if !tcx.erl_has_fn_name(def_id) {
         bug!("`{}` has no Erlang function name", tcx.def_path_str(def_id));
     }
-    let item_name = tcx.item_name(def_id);
+    let item_name_sym = tcx.item_name(def_id);
+    let item_name = item_name_sym.as_unescaped_str();
 
     if tcx.is_erl_nested_item(def_id) {
         let module_depth = tcx.def_path(tcx.lexical_erl_module(def_id)).data.len();
         let path = tcx.def_path(def_id);
         let name = path.data[module_depth..]
             .iter()
-            .map(|segment| segment.as_sym(true).to_string())
+            .map(|segment| segment.as_unescaped_sym(true).to_string())
             .intersperse("::".to_owned())
             .collect();
 
@@ -936,8 +940,10 @@ fn erl_impl_self_tag(tcx: TyCtxt<'_>, impl_def_id: DefId) -> Option<String> {
 
 /// Prints paths from the crate name, so that every crate prints the same text.
 fn with_erl_paths<R>(print: impl FnOnce() -> R) -> R {
-    ty::print::with_resolve_crate_name!(ty::print::with_no_visible_paths!(
-        ty::print::with_no_trimmed_paths!(ty::print::with_disambiguated_paths!(print()))
+    ty::print::with_erl_path_names!(ty::print::with_resolve_crate_name!(
+        ty::print::with_no_visible_paths!(ty::print::with_no_trimmed_paths!(
+            ty::print::with_disambiguated_paths!(print())
+        ))
     ))
 }
 
@@ -1018,9 +1024,9 @@ fn erl_def_path_segments(tcx: TyCtxt<'_>, mut def_id: DefId) -> SmallVec<[String
             let name = if def_id.is_crate_root() {
                 tcx.crate_name(def_id.krate).pascal_case()
             } else if matches!(tcx.def_kind(def_id), DefKind::Mod) {
-                data.as_sym(true).pascal_case()
+                data.as_unescaped_sym(true).pascal_case()
             } else {
-                data.as_sym(true).as_str().to_owned()
+                data.as_unescaped_sym(true).to_string()
             };
             segments.push(name)
         }
@@ -1049,7 +1055,7 @@ fn erl_module_name(tcx: TyCtxt<'_>, module: ErlModuleId) -> Symbol {
             let mut segments = SmallVec::<[String; 6]>::new();
 
             while tcx.def_kind(def_id) == DefKind::ExternMod {
-                segments.push(tcx.item_name(def_id).as_str().to_owned());
+                segments.push(tcx.item_name(def_id).as_unescaped_str().to_owned());
                 def_id = tcx.parent(def_id);
             }
 

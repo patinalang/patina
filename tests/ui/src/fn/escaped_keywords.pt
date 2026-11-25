@@ -1,0 +1,14 @@
+#![feature(macro_metavar_expr_concat)]
+
+macro_rules! declare {
+    () => { fn ${concat(ty, pe)}() -> int { 1 } };
+}
+
+declare!();
+
+pub fn print() {
+    let `type` = `type`();
+    println!("{type}");
+    println!("{type}", `type` = 2);
+    println!("{type}", type = 3);
+}

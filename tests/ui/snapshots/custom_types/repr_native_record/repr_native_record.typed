@@ -73,3 +73,32 @@ fn record_pair()
 
 fn pair_second(value: NativeRecordPair)
     -> int ({ ((value as NativeRecordPair).1 as int) } as int)
+
+#[attr = Repr {reprs: [NativeRecord], modifiers: []}]
+struct KeywordField {
+    `type`: int,
+    other: int,
+}
+
+fn keyword_field()
+    ->
+        KeywordField ({
+    (KeywordField { `type`: (7 as int), other: (1 as int) } as KeywordField)
+} as KeywordField)
+
+fn keyword_field_value(value: KeywordField)
+    -> int ({ ((value as KeywordField).`type` as int) } as int)
+
+fn keyword_field_updated(value: KeywordField)
+    ->
+        KeywordField ({
+    (KeywordField { `type`: (8 as int), ..(value as KeywordField) } as
+        KeywordField)
+} as KeywordField)
+
+fn keyword_field_pattern(value: KeywordField)
+    ->
+        int ({
+    let KeywordField {  `type`, .. } = (value as KeywordField);
+    (`type` as int)
+} as int)

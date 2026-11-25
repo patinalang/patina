@@ -39,6 +39,7 @@ thread_local! {
     static NO_VISIBLE_PATH: Cell<bool> = const { Cell::new(false) };
     static NO_VISIBLE_PATH_IF_DOC_HIDDEN: Cell<bool> = const { Cell::new(false) };
     static DISAMBIGUATED_PATH: Cell<bool> = const { Cell::new(false) };
+    static ERL_PATH_NAMES: Cell<bool> = const { Cell::new(false) };
     static RTN_MODE: Cell<RtnMode> = const { Cell::new(RtnMode::ForDiagnostic) };
 }
 
@@ -126,6 +127,8 @@ define_helper!(
     /// Print paths as their definition paths: with the disambiguators of same-named siblings,
     /// like `Foo#1`, and with impls as `{impl#N}` rather than their types.
     fn with_disambiguated_paths(DisambiguatedPathGuard, DISAMBIGUATED_PATH);
+    /// Print plain identifier names for Erlang atoms, e.g. `` self `` rather than `` `self` ``.
+    fn with_erl_path_names(ErlPathNamesGuard, ERL_PATH_NAMES);
 );
 
 #[must_use]
@@ -2459,7 +2462,12 @@ impl<'tcx> Printer<'tcx> for FmtPrinter<'_, 'tcx> {
         }
 
         let verbose = self.should_print_verbose() || with_disambiguated_paths();
-        write!(self, "{}", disambiguated_data.as_sym(verbose))?;
+        let sym = if with_erl_path_names() {
+            disambiguated_data.as_unescaped_sym(verbose)
+        } else {
+            disambiguated_data.as_sym(verbose)
+        };
+        write!(self, "{}", sym)?;
 
         if is_raw {
             write!(self, "`")?;

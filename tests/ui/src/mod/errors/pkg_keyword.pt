@@ -9,7 +9,7 @@ macro_rules! call_visible_legacy {
 }
 
 mod first {
-    pub(pkg) fn visible() -> int { 1 }
+    pub(in pkg) fn visible() -> int { 1 }
 }
 
 mod second {
@@ -17,7 +17,75 @@ mod second {
     fn unqualified() -> int { visible() }
 }
 
+mod `pkg` {
+    pub fn visible() -> int { 2 }
+}
+
+use self::{`pkg`::{visible as escaped_visible}};
+use pkg as package_root;
+
+fn `pkg`<T>(value: T) -> T { value }
+
+macro_rules! call_named {
+    ($name:ident) => { $name::visible() };
+}
+
+// An escaped `pkg` works as a field and a method name.
+struct Holder { `pkg`: int }
+
+impl Holder {
+    fn `pkg`(self) -> int { self.`pkg` }
+}
+
+trait Shape {}
+struct Circle { radius: int }
+struct Square { side: int }
+impl Shape for Circle {}
+impl Shape for Square {}
+
+// The mismatch note names the trait as `impl pkg::Shape`.
+fn shape(round: bool) -> impl pkg::Shape {
+    if round {
+        return Circle { radius: 1 };
+    }
+    Square { side: 1 }
+}
+
+mod `type` { pub trait Shape {} }
+impl `type`::Shape for Circle {}
+impl `type`::Shape for Square {}
+
+fn keyword_shape(round: bool) -> impl `type`::Shape {
+    if round { return Circle { radius: 1 }; }
+    Square { side: 1 }
+}
+
+// The lint names the unknown key as `pkg::alias`.
+#[doc(pkg::alias)]
+fn documented() {}
+
+// The package root can only be imported under a name.
+use pkg;
+
+// `pkg` is a keyword, so it isn't a cfg name.
+#[cfg(pkg)]
+fn configured() {}
+
+// An escaped `pkg` works as a local.
+fn escaped_local(holder: Holder) -> int {
+    let `pkg` = holder.`pkg`() + holder.`pkg`;
+    `pkg` + 1
+}
+
 pub fn main() {
+    let _ = escaped_local(Holder { `pkg`: 4 });
+    // Only the first segment of a path can be `pkg`.
+    let _ = first::pkg::visible();
+    let _ = `pkg`::<int>(3);
+    let _ = r#pkg::visible();
+    let _ = escaped_visible();
+    let _ = package_root::first::visible();
+    let _ = call_named!(`pkg`);
     let _: core2::Option<int> = core2::Option::Some(call_visible!());
     call_visible_legacy!();
     second::call();

@@ -16,20 +16,46 @@ LL - fn crate() {}
 LL + fn `crate`() {}
    |
 
+error: expected identifier, found keyword `pkg`
+  --> tests/ui/src/mod/errors/pkg_keyword_crate.pt:6:4
+   |
+LL | fn pkg() {}
+   |    ^^^ expected identifier, found keyword
+   |
+help: escape `pkg` to use it as an identifier
+   |
+LL - fn pkg() {}
+LL + fn `pkg`() {}
+   |
+
+error: expected identifier, found keyword `pkg`
+  --> tests/ui/src/mod/errors/pkg_keyword_crate.pt:7:16
+   |
+LL | struct Field { pkg: int }
+   |        -----   ^^^ expected identifier, found keyword
+   |        |
+   |        while parsing this struct
+   |
+help: escape `pkg` to use it as an identifier
+   |
+LL - struct Field { pkg: int }
+LL + struct Field { `pkg`: int }
+   |
+
 error: Patina has no `crate` keyword
-  --> tests/ui/src/mod/errors/pkg_keyword_crate.pt:5:5
+  --> tests/ui/src/mod/errors/pkg_keyword_crate.pt:9:5
    |
 LL | pub(crate) fn visible() -> int { 1 }
    |     ^^^^^ help: use `pkg` to refer to the current package: `pkg`
 
 error: Patina has no `crate` keyword
-  --> tests/ui/src/mod/errors/pkg_keyword_crate.pt:8:53
+  --> tests/ui/src/mod/errors/pkg_keyword_crate.pt:12:53
    |
 LL |     let _: core2::Option<int> = core2::Option::Some(crate::visible());
    |                                                     ^^^^^ help: use `pkg` to refer to the current package: `pkg`
 
 error: expected identifier, found reserved keyword `crate`
-  --> tests/ui/src/mod/errors/pkg_keyword_crate.pt:9:9
+  --> tests/ui/src/mod/errors/pkg_keyword_crate.pt:13:9
    |
 LL |     let crate = 1;
    |         ^^^^^ expected identifier, found reserved keyword
@@ -40,5 +66,119 @@ LL -     let crate = 1;
 LL +     let `crate` = 1;
    |
 
-error: aborting due to 5 previous errors
+error: expected identifier, found keyword `pkg`
+  --> tests/ui/src/mod/errors/pkg_keyword_crate.pt:14:9
+   |
+LL |     let pkg = 2;
+   |         ^^^ expected identifier, found keyword
+   |
+help: escape `pkg` to use it as an identifier
+   |
+LL -     let pkg = 2;
+LL +     let `pkg` = 2;
+   |
+
+error: expected identifier, found keyword `self`
+  --> tests/ui/src/mod/errors/pkg_keyword_crate.pt:15:9
+   |
+LL |     let self = 2;
+   |         ^^^^ expected identifier, found keyword
+   |
+help: escape `self` to use it as an identifier
+   |
+LL -     let self = 2;
+LL +     let `self` = 2;
+   |
+
+error: expected identifier, found keyword `super`
+  --> tests/ui/src/mod/errors/pkg_keyword_crate.pt:16:9
+   |
+LL |     let super = 2;
+   |         ^^^^^ expected identifier, found keyword
+   |
+help: escape `super` to use it as an identifier
+   |
+LL -     let super = 2;
+LL +     let `super` = 2;
+   |
+
+error: expected identifier, found keyword `pkg`
+  --> tests/ui/src/mod/errors/pkg_keyword_crate.pt:17:32
+   |
+LL |     let _ = Field { `pkg`: 3 }.pkg;
+   |                                ^^^ expected identifier, found keyword
+   |
+help: escape `pkg` to use it as an identifier
+   |
+LL -     let _ = Field { `pkg`: 3 }.pkg;
+LL +     let _ = Field { `pkg`: 3 }.`pkg`;
+   |
+
+error: expected identifier, found keyword `self`
+  --> tests/ui/src/mod/errors/pkg_keyword_crate.pt:18:32
+   |
+LL |     let _ = Field { `pkg`: 3 }.self;
+   |                                ^^^^ expected identifier, found keyword
+   |
+help: escape `self` to use it as an identifier
+   |
+LL -     let _ = Field { `pkg`: 3 }.self;
+LL +     let _ = Field { `pkg`: 3 }.`self`;
+   |
+
+error: expected identifier, found keyword `super`
+  --> tests/ui/src/mod/errors/pkg_keyword_crate.pt:19:32
+   |
+LL |     let _ = Field { `pkg`: 3 }.super;
+   |                                ^^^^^ expected identifier, found keyword
+   |
+help: escape `super` to use it as an identifier
+   |
+LL -     let _ = Field { `pkg`: 3 }.super;
+LL +     let _ = Field { `pkg`: 3 }.`super`;
+   |
+
+error: expected identifier, found keyword `Self`
+  --> tests/ui/src/mod/errors/pkg_keyword_crate.pt:20:32
+   |
+LL |     let _ = Field { `pkg`: 3 }.Self;
+   |                                ^^^^ expected identifier, found keyword
+   |
+help: escape `Self` to use it as an identifier
+   |
+LL -     let _ = Field { `pkg`: 3 }.Self;
+LL +     let _ = Field { `pkg`: 3 }.`Self`;
+   |
+
+error: expected identifier, found reserved keyword `crate`
+  --> tests/ui/src/mod/errors/pkg_keyword_crate.pt:21:32
+   |
+LL |     let _ = Field { `pkg`: 3 }.crate;
+   |                                ^^^^^ expected identifier, found reserved keyword
+   |
+help: escape `crate` to use it as an identifier
+   |
+LL -     let _ = Field { `pkg`: 3 }.crate;
+LL +     let _ = Field { `pkg`: 3 }.`crate`;
+   |
+
+error: expected identifier, found keyword `pkg`
+  --> tests/ui/src/mod/errors/pkg_keyword_crate.pt:22:32
+   |
+LL |     let _ = Field { `pkg`: 3 }.pkg::<int>();
+   |                                ^^^ expected identifier, found keyword
+   |
+help: escape `pkg` to use it as an identifier
+   |
+LL -     let _ = Field { `pkg`: 3 }.pkg::<int>();
+LL +     let _ = Field { `pkg`: 3 }.`pkg`::<int>();
+   |
+
+error: expected one of `(`, `.`, `;`, `?`, `else`, or an operator, found `::`
+  --> tests/ui/src/mod/errors/pkg_keyword_crate.pt:22:35
+   |
+LL |     let _ = Field { `pkg`: 3 }.pkg::<int>();
+   |                                   ^^ expected one of `(`, `.`, `;`, `?`, `else`, or an operator
+
+error: aborting due to 17 previous errors
 

@@ -819,9 +819,27 @@ fn dollar_crate_decodes_to_the_keyword() {
     });
 }
 
-/// A raw `$crate` is an ordinary identifier, not the keyword.
 #[test]
-fn raw_dollar_crate_is_not_the_keyword() {
+fn round_trips_bare_and_escaped_pkg() {
+    create_default_session_globals_then(|| {
+        let stream = TokenStream::new(vec![
+            TokenTree::token_alone(token::Ident(rustc_span::kw::Pkg, IdentIsRaw::No), span(4, 5)),
+            TokenTree::token_alone(
+                token::Ident(Symbol::intern("`pkg`"), IdentIsRaw::No),
+                span(6, 7),
+            ),
+            TokenTree::token_alone(
+                token::Ident(Symbol::intern("`self`"), IdentIsRaw::No),
+                span(8, 9),
+            ),
+        ]);
+        assert_eq_unspanned(&encode_decode(&stream), &stream);
+    });
+}
+
+/// A raw `$pkg` is an ordinary identifier, not the keyword.
+#[test]
+fn rejects_raw_dollar_pkg() {
     create_default_session_globals_then(|| {
         let wire =
             Wire::one(|w| w.tuple(4).atom("ident").bin("$pkg").boolean(true).int(CALL_SITE_ID));

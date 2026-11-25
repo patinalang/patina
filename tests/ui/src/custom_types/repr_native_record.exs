@@ -45,4 +45,16 @@ defmodule ReprNativeRecordTest do
     assert [:"0", :"1"] = :records.get_field_names(value)
     assert 40 = ReprNativeRecord.pair_second(value)
   end
+
+  test "a native record field named after a keyword uses the plain name" do
+    value = ReprNativeRecord.keyword_field()
+
+    assert [:type, :other] = :records.get_field_names(value)
+    assert 7 = ReprNativeRecord.keyword_field_value(value)
+    assert 7 = ReprNativeRecord.keyword_field_pattern(value)
+
+    updated = ReprNativeRecord.keyword_field_updated(value)
+    assert 8 = ReprNativeRecord.keyword_field_value(updated)
+    assert [:type, :other] = :records.get_field_names(updated)
+  end
 end

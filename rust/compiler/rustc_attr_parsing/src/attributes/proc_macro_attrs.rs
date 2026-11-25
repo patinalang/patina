@@ -78,14 +78,7 @@ fn parse_derive_like(
         cx.adcx().expected_not_literal(trait_attr.span());
         return None;
     };
-    let Some(trait_ident) = trait_attr.path().word() else {
-        cx.adcx().expected_identifier(trait_attr.path().span());
-        return None;
-    };
-    if !trait_ident.name.can_be_raw() {
-        cx.adcx().expected_identifier(trait_ident.span);
-        return None;
-    }
+    let trait_ident = expect_derive_ident(cx, trait_attr.path())?;
     cx.expect_no_args(trait_attr.args())?;
 
     // Parse optional attributes
@@ -108,14 +101,7 @@ fn parse_derive_like(
                 return None;
             };
             cx.expect_no_args(attr.args())?;
-            let Some(ident) = attr.path().word() else {
-                cx.adcx().expected_identifier(attr.path().span());
-                return None;
-            };
-            if !ident.name.can_be_raw() {
-                cx.adcx().expected_identifier(ident.span);
-                return None;
-            }
+            let ident = expect_derive_ident(cx, attr.path())?;
             if rustc_feature::is_builtin_attr_name(ident.name) {
                 cx.emit_lint(
                     AMBIGUOUS_DERIVE_HELPERS,
@@ -133,4 +119,17 @@ fn parse_derive_like(
     }
 
     Some((Some(trait_ident), attributes))
+}
+
+fn expect_derive_ident(cx: &mut AcceptContext<'_, '_>, path: &OwnedPathParser) -> Option<Ident> {
+    let Some(ident) = path.word() else {
+        cx.adcx().expected_identifier(path.span());
+        return None;
+    };
+    if ident.name.is_escaped_keyword() || ident.name.can_be_raw() {
+        Some(ident)
+    } else {
+        cx.adcx().expected_identifier(ident.span);
+        None
+    }
 }

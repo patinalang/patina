@@ -1,0 +1,33 @@
+warning: trait `type` should have an upper camel case name
+  --> tests/ui/src/fn/backtick_ident.pt:115:15
+   |
+LL |         trait `type` {
+   |               ^^^^^^ help: convert the identifier to upper camel case: `Type`
+   |
+   = note: `#[warn(non_camel_case_types)]` (part of `#[warn(nonstandard_style)]`) on by default
+
+warning: trait `type` should have an upper camel case name
+  --> tests/ui/src/fn/backtick_ident.pt:124:15
+   |
+LL |         trait `type` {
+   |               ^^^^^^ help: convert the identifier to upper camel case: `Type`
+
+warning: function `Self` should have a snake case name
+  --> tests/ui/src/fn/backtick_ident.pt:165:8
+   |
+LL | pub fn `Self`() {}
+   |        ^^^^^^
+   |
+note: the lint level is defined here
+  --> tests/ui/src/fn/backtick_ident.pt:164:8
+   |
+LL | #[warn(non_snake_case)]
+   |        ^^^^^^^^^^^^^^
+help: rename the identifier or convert it to a snake case raw identifier (notice the capitalization)
+   |
+LL - pub fn `Self`() {}
+LL + pub fn `self`() {}
+   |
+
+warning: 3 warnings emitted
+

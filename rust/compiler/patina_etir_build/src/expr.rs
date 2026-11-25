@@ -373,7 +373,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
             lhs,
             repr: self.lower_adt_repr(span, adt_def, variant),
             position: etir::FieldIdx::from_usize(position),
-            name: variant.fields[name].name,
+            name: variant.fields[name].name.unescaped(),
         };
         self.cx.push_expr(kind, expr.ty, span)
     }
@@ -732,7 +732,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
                     };
                     Some(etir::FieldExpr {
                         position: etir::FieldIdx::from_usize(position),
-                        name: field_def.name,
+                        name: field_def.name.unescaped(),
                         value,
                     })
                 })

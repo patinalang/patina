@@ -57,7 +57,15 @@ fn check_dup_keywords() {
         }
         Symbols {}
     };
-    test_symbols_macro(input, &["Symbol `crate` is duplicated", "location of previous definition"]);
+    test_symbols_macro(
+        input,
+        &[
+            "Symbol `crate` is duplicated",
+            "location of previous definition",
+            "Symbol ``crate`` is duplicated",
+            "location of previous definition",
+        ],
+    );
 }
 
 #[test]

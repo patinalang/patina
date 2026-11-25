@@ -2385,12 +2385,12 @@ fn parse_use() {
 #[test]
 fn parse_extern_crate() {
     create_default_session_globals_then(|| {
-        let ex_s = "extern crate foo;";
+        let ex_s = "extern pkg foo;";
         let vitem = string_to_item(ex_s.to_string()).unwrap();
         let vitem_s = item_to_string(&vitem);
         assert_eq!(&vitem_s[..], ex_s);
 
-        let ex_s = "extern crate foo as bar;";
+        let ex_s = "extern pkg foo as bar;";
         let vitem = string_to_item(ex_s.to_string()).unwrap();
         let vitem_s = item_to_string(&vitem);
         assert_eq!(&vitem_s[..], ex_s);

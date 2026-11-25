@@ -3,6 +3,8 @@ pub fn main() {
     let x = ``;
     let `self` = 1;
     let `_` = 1;
+    let `$pkg` = 1;
+    let `{{root}}` = 1;
     let `'a` = 1;
     let `0` = 1;
 }

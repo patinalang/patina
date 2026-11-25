@@ -137,7 +137,7 @@ fn to_upper_camel_case(s: &str) -> String {
 
 impl NonCamelCaseTypes {
     fn check_case(&self, cx: &EarlyContext<'_>, sort: &str, ident: &Ident) {
-        let name = ident.name.as_str();
+        let name = ident.name.as_unescaped_str();
 
         if !is_upper_camel_case(name) {
             let cc = to_upper_camel_case(name);
@@ -280,7 +280,7 @@ impl NonSnakeCase {
             ident.chars().all(|c| c.to_lowercase().eq([c]))
         }
 
-        let name = ident.name.as_str();
+        let name = ident.name.as_unescaped_str();
 
         if !is_snake_case(name) {
             let span = ident.span;
@@ -296,10 +296,13 @@ impl NonSnakeCase {
                         // We shouldn't suggest a reserved identifier to fix non-snake-case
                         // identifiers. Instead, recommend renaming the identifier entirely or, if
                         // permitted, escaping it to create a raw identifier.
-                        if sc_ident.name.can_be_raw() {
+                        if sc_ident.name.can_be_escaped(|| span.edition()) {
                             NonSnakeCaseDiagSub::RenameOrConvertSuggestion {
                                 span,
-                                suggestion: sc_ident,
+                                suggestion: Ident::new(
+                                    sc_ident.name.escaped(|| span.edition()),
+                                    span,
+                                ),
                             }
                         } else {
                             NonSnakeCaseDiagSub::SuggestionAndNote { span }
@@ -461,7 +464,7 @@ impl<'a, 'b, F: FnOnce() -> NonUpperCaseGlobal<'b>> Diagnostic<'a, ()>
 
 impl NonUpperCaseGlobals {
     fn check_upper_case(cx: &LateContext<'_>, sort: &str, did: Option<LocalDefId>, ident: &Ident) {
-        let name = ident.name.as_str();
+        let name = ident.name.as_unescaped_str();
         // FIXME: we should add a more efficient version
         // in the stdlib for `c.to_uppercase().eq([c])`
         if !name.chars().all(|c| c.to_uppercase().eq([c])) {

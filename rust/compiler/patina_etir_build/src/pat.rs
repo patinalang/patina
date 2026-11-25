@@ -234,7 +234,7 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
                     Some(field) => self.lower_pat(&field.pattern, input),
                     None => self.cx.push_pat(etir::PatKind::Wild { input }, ty, span),
                 };
-                etir::FieldPat { name: field_def.name, ty, pattern }
+                etir::FieldPat { name: field_def.name.unescaped(), ty, pattern }
             })
             .collect();
 

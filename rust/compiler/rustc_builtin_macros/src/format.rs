@@ -431,7 +431,13 @@ fn make_format_args(
                 } else {
                     // Name not found in `args`, so we add it as an implicitly captured argument.
                     let span = span.unwrap_or(fmt_span);
-                    let ident = Ident::new(name, span);
+                    // Path keywords such as `self` retain their meaning in implicit captures.
+                    let capture_name = if name.is_path_segment_keyword() {
+                        name
+                    } else {
+                        name.escaped(|| span.edition())
+                    };
+                    let ident = Ident::new(capture_name, span);
                     let expr = if is_direct_literal {
                         ecx.expr_ident(span, ident)
                     } else {

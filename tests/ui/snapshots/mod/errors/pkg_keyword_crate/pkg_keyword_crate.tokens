@@ -18,6 +18,30 @@ Whitespace
 OpenBrace
 CloseBrace
 Whitespace
+LineComment { doc_style: None }
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+CloseParen
+Whitespace
+OpenBrace
+CloseBrace
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+Ident
+Colon
+Whitespace
+Ident
+Whitespace
+CloseBrace
+Whitespace
 Ident
 OpenParen
 Ident
@@ -89,6 +113,160 @@ Whitespace
 Eq
 Whitespace
 Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Semi
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Semi
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Semi
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Semi
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+BacktickIdent { terminated: true }
+Colon
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Whitespace
+CloseBrace
+Dot
+Ident
+Semi
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+BacktickIdent { terminated: true }
+Colon
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Whitespace
+CloseBrace
+Dot
+Ident
+Semi
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+BacktickIdent { terminated: true }
+Colon
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Whitespace
+CloseBrace
+Dot
+Ident
+Semi
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+BacktickIdent { terminated: true }
+Colon
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Whitespace
+CloseBrace
+Dot
+Ident
+Semi
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+BacktickIdent { terminated: true }
+Colon
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Whitespace
+CloseBrace
+Dot
+Ident
+Semi
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Eq
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+BacktickIdent { terminated: true }
+Colon
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Whitespace
+CloseBrace
+Dot
+Ident
+Colon
+Colon
+Lt
+Ident
+Gt
+OpenParen
+CloseParen
 Semi
 Whitespace
 CloseBrace

@@ -11,16 +11,65 @@ extern pkg core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
+extern mod erlang;
+
+mod backtick_ident {
+    mod `pkg` {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // Two block-local functions with the same keyword name get disambiguated Erlang names.
+
+        // A local named after a keyword becomes an Erlang variable with the plain name.
+
+        // Literals share symbols with escaped keywords, but they are never unescaped.
+
+        // Block-local traits and modules with the same keyword name get disambiguated Erlang names.
+
+
+        // `Self` is still a pattern: a path to the unit struct.
+
+
+
+        // The snake case lint suggests escaping `self`. UI tests allow the lint, so warn here.
+        fn value() -> int ({ (37 as int) } as int)
+    }
+}
+fn out_of_line_keyword_module()
+    ->
+        int ({
+    ((backtick_ident::`pkg`::value as
+            fn() -> int {backtick_ident::`pkg`::value})() as int)
+} as int)
+mod `pkg` {
+    fn value() -> int ({ (42 as int) } as int)
+}
+fn keyword_module()
+    ->
+        int ({ ((`pkg`::value as fn() -> int {`pkg`::value})() as int) } as
+    int)
+fn keyword_extern()
+    ->
+        bool ({
+    (((erlang::`self` as fn() -> term)() as term) ==
+        ((erlang::self as fn() -> term)() as term) as bool)
+} as bool)
 fn `exists?`(x: int) -> bool ({ ((x as int) > (0 as int) as bool) } as bool)
-
 fn `save!`() ({
-
-
-
-
-
-
-
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("saved!" as str)] as [str])] as
@@ -30,6 +79,22 @@ fn `save!`() ({
 } as ())
 fn `a{b}`() -> int ({ (1 as int) } as int)
 fn `type`() -> int ({ (2 as int) } as int)
+mod `type` {
+    trait Shape {
+        fn `fn`(self)
+        -> int;
+    }
+}
+impl `type`::Shape for S {
+    fn `fn`(self) -> int ({ ((self as S).value as int) } as int)
+}
+fn keyword_trait()
+    ->
+        int ({
+    ((<S as `type`::Shape>::`fn` as
+            fn(S) -> int {<S as `type`::Shape>::`fn`})((S { value: (43 as int)
+            } as S)) as int)
+} as int)
 struct S {
     value: int,
 }
@@ -88,3 +153,88 @@ fn main() ({
     } as ());
     let _ = ((`a{b}` as fn() -> int {`a{b}`})() as int);
 } as ())
+fn keyword_nested_fns()
+    ->
+        int ({
+    let first =
+        ({
+            fn `type`() -> int ({ (1 as int) } as int)
+            ((`type` as fn() -> int {keyword_nested_fns::`type`})() as int)
+        } as int);
+    let second =
+        ({
+            fn `type`() -> int ({ (2 as int) } as int)
+            ((`type` as fn() -> int {keyword_nested_fns::`type`})() as int)
+        } as int);
+    ((first as int) + (second as int) as int)
+} as int)
+fn keyword_local()
+    ->
+        int ({
+    let `type` = (4 as int);
+    ((`type` as int) + (1 as int) as int)
+} as int)
+fn keyword_literals()
+    ->
+        (str,
+        atom) ({ ((("`fn`" as str), (a"`fn`" as atom)) as (str, atom)) } as
+    (str, atom))
+fn keyword_nested_traits()
+    ->
+        int ({
+    let first =
+        ({
+            trait `type` {
+                fn get(self)
+                -> int;
+            }
+            impl `type` for S {
+                fn get(self) -> int ({ ((self as S).value as int) } as int)
+            }
+            ((S { value: (1 as int) } as S).get() as int)
+        } as int);
+    let second =
+        ({
+            trait `type` {
+                fn get(self)
+                -> int;
+            }
+            impl `type` for S {
+                fn get(self)
+                    ->
+                        int ({ (((self as S).value as int) + (1 as int) as int) } as
+                    int)
+            }
+            ((S { value: (1 as int) } as S).get() as int)
+        } as int);
+    ((first as int) + (second as int) as int)
+} as int)
+fn keyword_nested_mods()
+    ->
+        int ({
+    let first =
+        ({
+            mod `type` {
+                fn value() -> int ({ (1 as int) } as int)
+            }
+            ((`type`::value as
+                    fn() -> int {keyword_nested_mods::`type`::value})() as int)
+        } as int);
+    let second =
+        ({
+            mod `type` {
+                fn value() -> int ({ (2 as int) } as int)
+            }
+            ((`type`::value as
+                    fn() -> int {keyword_nested_mods::`type`::value})() as int)
+        } as int);
+    ((first as int) + (second as int) as int)
+} as int)
+struct Unit;
+impl Unit {
+    fn same(self)
+        -> bool ({ let Self = (self as Unit); (true as bool) } as bool)
+}
+fn unit_pattern() -> bool ({ ((Unit as Unit).same() as bool) } as bool)
+#[warn(non_snake_case)]
+fn `Self`() ({ } as ())

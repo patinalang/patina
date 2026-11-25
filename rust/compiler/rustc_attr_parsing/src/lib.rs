@@ -85,7 +85,6 @@
 
 // tidy-alphabetical-start
 #![feature(decl_macro)]
-#![feature(iter_intersperse)]
 #![feature(try_blocks)]
 #![recursion_limit = "256"]
 // tidy-alphabetical-end

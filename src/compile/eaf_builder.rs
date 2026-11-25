@@ -734,8 +734,10 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
         field_name: Ident,
         default: Option<eaf::Expr<'arena>>,
     ) -> eaf::RecordFieldDecl<'arena> {
-        let name_atom =
-            eaf::Atom(field_name.span.into_anno(self.source_map), field_name.name.into());
+        let name_atom = eaf::Atom(
+            field_name.span.into_anno(self.source_map),
+            field_name.name.unescaped().into(),
+        );
 
         eaf::RecordFieldDecl::Untyped(eaf::RecordField(
             span.into_anno(self.source_map),
@@ -764,7 +766,7 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
 
         let iter = fields.into_iter().map(|(field, value)| {
             let anno = field.span.into_anno(self.source_map);
-            let key = eaf::AtomOrVar::Atom(anno, field.name.into());
+            let key = eaf::AtomOrVar::Atom(anno, field.name.unescaped().into());
             eaf::RecordField(anno, key, Some(self.arena.alloc(value)))
         });
         let fields = self.arena.alloc_from_iter(iter);
@@ -813,7 +815,7 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
 
         let iter = fields.into_iter().map(|(field, value)| {
             let anno = field.span.into_anno(self.source_map);
-            let key = eaf::Atom(anno, field.name.into());
+            let key = eaf::Atom(anno, field.name.unescaped().into());
             eaf::RecordField(anno, key, Some(self.arena.alloc(value)))
         });
         let fields = self.arena.alloc_from_iter(iter);
@@ -836,7 +838,7 @@ impl<'sm, 'arena> EafBuilder<'sm, 'arena> {
 
         let iter = fields.into_iter().map(|(field, value)| {
             let anno = field.span.into_anno(self.source_map);
-            let key = eaf::AtomOrVar::Atom(anno, field.name.into());
+            let key = eaf::AtomOrVar::Atom(anno, field.name.unescaped().into());
             eaf::RecordField(anno, key, Some(self.arena.alloc(value)))
         });
         let fields = self.arena.alloc_from_iter(iter);

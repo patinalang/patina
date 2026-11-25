@@ -315,7 +315,8 @@ impl<'a> Parser<'a> {
 
         // suggest wrapping a keyword in identifier position with backticks
         let suggest_raw = if let Some((ident, IdentIsRaw::No)) = self.token.ident()
-            && ident.is_raw_guess()
+            && (ident.is_raw_guess()
+                || ident.is_reserved() && ident.name.can_be_escaped(|| ident.span.edition()))
             && self.look_ahead(1, |t| valid_follow.contains(&t.kind))
         {
             recovered_ident = Some((ident, IdentIsRaw::Yes));

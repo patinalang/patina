@@ -68,6 +68,9 @@ Whitespace
 Ident
 Comma
 Whitespace
+BacktickIdent { terminated: true }
+Comma
+Whitespace
 CloseBrace
 Semi
 Whitespace
@@ -365,6 +368,37 @@ OpenParen
 CloseParen
 CloseParen
 Semi
+Whitespace
+CloseBrace
+Whitespace
+Pound
+OpenBracket
+Ident
+OpenParen
+BacktickIdent { terminated: true }
+CloseParen
+CloseBracket
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+Whitespace
+OpenBrace
+Whitespace
+Pound
+OpenBracket
+BacktickIdent { terminated: true }
+CloseBracket
+Whitespace
+Ident
+Whitespace
+Ident
+Colon
+Whitespace
+Ident
+Comma
 Whitespace
 CloseBrace
 Whitespace
@@ -1256,6 +1290,16 @@ Ident
 OpenParen
 Ident
 CloseParen
+Whitespace
+Ident
+Colon
+Colon
+Ident
+Whitespace
+BacktickIdent { terminated: true }
+Colon
+Colon
+Ident
 Whitespace
 CloseParen
 CloseParen

@@ -52,3 +52,24 @@ pub fn struct_x(value: NativeRecordStruct) -> int { value.x }
 pub fn record_pair() -> NativeRecordPair { NativeRecordPair(30, 40) }
 
 pub fn pair_second(value: NativeRecordPair) -> int { value.1 }
+
+#[repr(native_record)]
+pub struct KeywordField {
+    `type`: int,
+    other: int,
+}
+
+pub fn keyword_field() -> KeywordField {
+    KeywordField { `type`: 7, other: 1 }
+}
+
+pub fn keyword_field_value(value: KeywordField) -> int { value.`type` }
+
+pub fn keyword_field_updated(value: KeywordField) -> KeywordField {
+    KeywordField { `type`: 8, ..value }
+}
+
+pub fn keyword_field_pattern(value: KeywordField) -> int {
+    let KeywordField { `type`, .. } = value;
+    `type`
+}

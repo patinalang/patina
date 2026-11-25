@@ -64,7 +64,7 @@ defmodule ProcMacrosTest do
 
   test "token streams render as source text" do
     assert ~S"""
-           `x` += f(1, "q\n") r#"raw"# a"at" 'c' #[z] a.b if (y) m! (1) if ! w receive (v) `if`(u) fn(t)
+           `x` += f(1, "q\n") r#"raw"# a"at" 'c' #[z] a.b if (y) m! (1) if ! w receive (v) `if`(u) fn(t) pkg :: s `pkg` :: r
            """ == capture_io(&ProcMacros.rendered/0)
   end
 

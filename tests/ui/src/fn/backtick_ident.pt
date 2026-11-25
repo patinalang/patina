@@ -1,3 +1,19 @@
+extern mod erlang;
+
+mod backtick_ident {
+    pub mod `pkg`;
+}
+
+pub fn out_of_line_keyword_module() -> int { backtick_ident::`pkg`::value() }
+
+mod `pkg` {
+    pub fn value() -> int { 42 }
+}
+
+pub fn keyword_module() -> int { `pkg`::value() }
+
+pub fn keyword_extern() -> bool { erlang::`self`() == erlang::self() }
+
 pub fn `exists?`(x: int) -> bool {
     x > 0
 }
@@ -13,6 +29,16 @@ pub fn `a{b}`() -> int {
 pub fn `type`() -> int {
     2
 }
+
+mod `type` {
+    pub trait Shape { fn `fn`(self) -> int; }
+}
+
+impl `type`::Shape for S {
+    fn `fn`(self) -> int { self.value }
+}
+
+pub fn keyword_trait() -> int { <S as `type`::Shape>::`fn`(S { value: 43 }) }
 
 struct S {
     value: int,
@@ -58,3 +84,82 @@ pub fn main() {
     println!("{}", r#type);
     let _ = `a{b}`();
 }
+
+// Two block-local functions with the same keyword name get disambiguated Erlang names.
+pub fn keyword_nested_fns() -> int {
+    let first = {
+        fn `type`() -> int { 1 }
+        `type`()
+    };
+    let second = {
+        fn `type`() -> int { 2 }
+        `type`()
+    };
+    first + second
+}
+
+// A local named after a keyword becomes an Erlang variable with the plain name.
+pub fn keyword_local() -> int {
+    let `type` = 4;
+    `type` + 1
+}
+
+// Literals share symbols with escaped keywords, but they are never unescaped.
+pub fn keyword_literals() -> (str, atom) {
+    ("`fn`", a"`fn`")
+}
+
+// Block-local traits and modules with the same keyword name get disambiguated Erlang names.
+pub fn keyword_nested_traits() -> int {
+    let first = {
+        trait `type` {
+            fn get(self) -> int;
+        }
+        impl `type` for S {
+            fn get(self) -> int { self.value }
+        }
+        S { value: 1 }.get()
+    };
+    let second = {
+        trait `type` {
+            fn get(self) -> int;
+        }
+        impl `type` for S {
+            fn get(self) -> int { self.value + 1 }
+        }
+        S { value: 1 }.get()
+    };
+    first + second
+}
+
+pub fn keyword_nested_mods() -> int {
+    let first = {
+        mod `type` {
+            pub fn value() -> int { 1 }
+        }
+        `type`::value()
+    };
+    let second = {
+        mod `type` {
+            pub fn value() -> int { 2 }
+        }
+        `type`::value()
+    };
+    first + second
+}
+
+// `Self` is still a pattern: a path to the unit struct.
+pub struct Unit;
+
+impl Unit {
+    fn same(self) -> bool {
+        let Self = self;
+        true
+    }
+}
+
+pub fn unit_pattern() -> bool { Unit.same() }
+
+// The snake case lint suggests escaping `self`. UI tests allow the lint, so warn here.
+#[warn(non_snake_case)]
+pub fn `Self`() {}

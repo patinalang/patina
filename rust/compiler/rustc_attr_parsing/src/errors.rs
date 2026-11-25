@@ -246,7 +246,7 @@ pub(crate) struct DocUnknownPlugins {
 #[derive(Diagnostic)]
 #[diag("unknown `doc` attribute `{$name}`")]
 pub(crate) struct DocUnknownAny {
-    pub name: Symbol,
+    pub name: String,
 }
 
 #[derive(Diagnostic)]

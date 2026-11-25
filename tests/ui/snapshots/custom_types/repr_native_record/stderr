@@ -8,5 +8,14 @@ LL |     AtomUnit,
    |
    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
 
-warning: 1 warning emitted
+warning: field `other` is never read
+  --> tests/ui/src/custom_types/repr_native_record.pt:61:5
+   |
+LL | pub struct KeywordField {
+   |            ------------ field in this struct
+LL |     `type`: int,
+LL |     other: int,
+   |     ^^^^^
+
+warning: 2 warnings emitted
 

@@ -333,7 +333,8 @@ built_streams() ->
 rendered() ->
     io:put_chars([[<<"`x` += f(1, \"q\\n\") r#\"raw\"# a\"at\" "
                      "'c' #[z] a.b if (y) m! (1) if ! w receive "
-                     "(v) `if`(u) fn(t)"/utf8>>]]),
+                     "(v) `if`(u) fn(t) pkg :: s `pkg` :: "
+                     "r"/utf8>>]]),
     io:nl(),
     {}.
 

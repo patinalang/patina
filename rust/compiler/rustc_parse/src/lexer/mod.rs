@@ -233,12 +233,7 @@ impl<'psess, 'src> Lexer<'psess, 'src> {
                 rustc_lexer::TokenKind::RawIdent => {
                     let sym = nfc_normalize(self.str_from(start + BytePos(2)));
                     let span = self.mk_sp(start, self.pos);
-                    self.psess.symbol_gallery.insert(sym, span);
-                    if !sym.can_be_raw() {
-                        self.dcx().emit_err(errors::CannotBeRawIdent { span, ident: sym });
-                    }
-                    self.psess.raw_identifier_spans.push(span);
-                    token::Ident(sym, IdentIsRaw::Yes)
+                    self.escaped_ident(sym, span, errors::CannotBeRawIdent { span, ident: sym })
                 }
                 rustc_lexer::TokenKind::BacktickIdent { terminated } => {
                     let span = self.mk_sp(start, self.pos);
@@ -247,22 +242,17 @@ impl<'psess, 'src> Lexer<'psess, 'src> {
                     if !terminated {
                         self.dcx().emit_err(errors::UnterminatedBacktickIdent { span });
                     }
-                    let (sym, has_content) = if content.is_empty() {
+                    if content.is_empty() {
                         if terminated {
                             self.dcx().emit_err(errors::EmptyBacktickIdent { span });
                         }
-                        (sym::dummy, false)
+                        self.psess.raw_identifier_spans.push(span);
+                        token::Ident(sym::dummy, IdentIsRaw::Yes)
                     } else {
-                        (nfc_normalize(content), true)
-                    };
-                    if has_content {
-                        self.psess.symbol_gallery.insert(sym, span);
-                        if !sym.can_be_raw() {
-                            self.dcx().emit_err(errors::CannotBeBacktickIdent { span, ident: sym });
-                        }
+                        let sym = nfc_normalize(content);
+                        let error = errors::CannotBeBacktickIdent { span, ident: sym };
+                        self.escaped_ident(sym, span, error)
                     }
-                    self.psess.raw_identifier_spans.push(span);
-                    token::Ident(sym, IdentIsRaw::Yes)
                 }
                 rustc_lexer::TokenKind::UnknownPrefix => {
                     self.report_unknown_prefix(start);
@@ -507,6 +497,21 @@ impl<'psess, 'src> Lexer<'psess, 'src> {
             let span = self.mk_sp(start, self.pos);
             return (Token::new(kind, span), preceded_by_whitespace);
         }
+    }
+
+    fn escaped_ident(
+        &mut self,
+        sym: Symbol,
+        span: Span,
+        error: impl Diagnostic<'psess>,
+    ) -> TokenKind {
+        self.psess.symbol_gallery.insert(sym, span);
+        if !sym.can_be_escaped(|| span.edition()) {
+            self.dcx().emit_err(error);
+        }
+        self.psess.raw_identifier_spans.push(span);
+        let escaped = sym.escaped(|| span.edition());
+        token::Ident(escaped, IdentIsRaw::from(!escaped.is_escaped_keyword()))
     }
 
     fn ident(&self, start: BytePos) -> TokenKind {

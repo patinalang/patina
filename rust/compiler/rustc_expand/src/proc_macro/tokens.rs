@@ -24,6 +24,7 @@ use rustc_ast::tokenstream::{
     self, DelimSpacing, DelimSpan, Spacing, TokenStream, TokenTreeCursor,
 };
 use rustc_data_structures::fx::FxIndexSet;
+use rustc_lint_defs::Edition;
 use rustc_parse::lexer::nfc_normalize;
 use rustc_session::parse::ParseSess;
 use rustc_span::{BytePos, ErrorGuaranteed, Pos, Span, Symbol, kw};
@@ -408,7 +409,11 @@ impl Encoder<'_> {
         let joint = matches!(spacing, Spacing::Joint);
         match Wire::try_from(token)? {
             Wire::Op { op, span } => self.write_op(op, joint, span),
-            Wire::Ident { name, is_raw, span } => self.write_ident(name.as_str(), is_raw, span),
+            Wire::Ident { name, is_raw, span } => self.write_ident(
+                name.as_unescaped_str(),
+                if name.is_escaped_keyword() { IdentIsRaw::Yes } else { is_raw },
+                span,
+            ),
             Wire::Literal { lit: token::Lit { kind, symbol, suffix }, span } => {
                 let kind = lit_kind_value(kind);
                 self.write_literal(kind, symbol.as_str(), suffix.as_ref().map(Symbol::as_str), span)
@@ -718,10 +723,10 @@ impl Decoder<'_> {
                 let name = self.reader.read_string()?;
                 let is_raw = self.reader.read_bool()?;
                 let span = self.read_id_and_resolve_span()?;
-                let symbol = intern_identifier(name, is_raw)?;
+                let symbol = intern_identifier(name, is_raw, || span.edition())?;
                 self.psess.symbol_gallery.insert(symbol, span);
                 Ok(Decoded::Trees(smallvec![tokenstream::TokenTree::token_alone(
-                    token::Ident(symbol, IdentIsRaw::from(is_raw)),
+                    token::Ident(symbol, IdentIsRaw::from(is_raw && !symbol.is_escaped_keyword())),
                     span,
                 )]))
             }
@@ -866,17 +871,24 @@ fn read_lit_kind(
     }
 }
 
-fn intern_identifier(name: &str, is_raw: bool) -> Result<Symbol, TokenDecodeError> {
+fn intern_identifier(
+    name: &str,
+    is_raw: bool,
+    edition: impl Copy + FnOnce() -> Edition,
+) -> Result<Symbol, TokenDecodeError> {
     if name == "$pkg" && !is_raw {
         return Ok(kw::DollarPkg);
     }
     let normalized = nfc_normalize(name);
-    let valid =
-        if is_raw { normalized.can_be_raw() } else { rustc_lexer::is_ident(normalized.as_str()) };
+    let valid = if is_raw {
+        normalized.can_be_escaped(edition)
+    } else {
+        rustc_lexer::is_ident(normalized.as_str())
+    };
     if !valid {
         return Err(TokenDecodeError::InvalidIdentifier { name: name.to_string(), is_raw });
     }
-    Ok(normalized)
+    Ok(if is_raw { normalized.escaped(edition) } else { normalized })
 }
 
 #[cfg(test)]

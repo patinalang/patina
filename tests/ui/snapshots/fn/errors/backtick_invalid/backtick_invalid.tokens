@@ -62,5 +62,23 @@ Whitespace
 Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
 Semi
 Whitespace
+Ident
+Whitespace
+BacktickIdent { terminated: true }
+Whitespace
+Eq
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Semi
+Whitespace
+Ident
+Whitespace
+BacktickIdent { terminated: true }
+Whitespace
+Eq
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Semi
+Whitespace
 CloseBrace
 Whitespace

@@ -614,14 +614,12 @@ impl DocParser {
             Some(name) => {
                 cx.emit_lint(
                     rustc_session::lint::builtin::INVALID_DOC_ATTRIBUTES,
-                    DocUnknownAny { name },
+                    DocUnknownAny { name: name.to_ident_string() },
                     path.span(),
                 );
             }
             None => {
-                let full_name =
-                    path.segments().map(|s| s.as_str()).intersperse("::").collect::<String>();
-                let name = Symbol::intern(&full_name);
+                let name = rustc_ast::join_path_idents(path.segments());
                 cx.emit_lint(
                     rustc_session::lint::builtin::INVALID_DOC_ATTRIBUTES,
                     DocUnknownAny { name },

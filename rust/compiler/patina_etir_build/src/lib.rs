@@ -298,11 +298,15 @@ impl VarPrefix {
         let def_id = tcx.trait_item_of(def_id).unwrap_or(def_id);
 
         let name = if let DefKind::Impl { of_trait: true } = tcx.def_kind(def_id) {
-            tcx.item_name(tcx.impl_trait_id(def_id)).to_string()
+            tcx.item_name(tcx.impl_trait_id(def_id)).as_unescaped_str().to_owned()
         } else if let Some(trait_def_id) = tcx.trait_of_assoc(def_id) {
-            format!("{}_{}", tcx.item_name(trait_def_id), tcx.item_name(def_id))
+            format!(
+                "{}_{}",
+                tcx.item_name(trait_def_id).as_unescaped_str(),
+                tcx.item_name(def_id).as_unescaped_str()
+            )
         } else {
-            tcx.item_name(def_id).to_string()
+            tcx.item_name(def_id).as_unescaped_str().to_owned()
         };
 
         Symbol::intern(&format!("{}_{name}", self.as_str()))

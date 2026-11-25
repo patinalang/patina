@@ -1400,7 +1400,11 @@ impl<'a> Parser<'a> {
         }
 
         let fn_span_lo = self.token.span;
-        let mut seg = self.parse_path_segment(PathStyle::Expr, None)?;
+        let mut seg = if self.token.is_path_segment_keyword() {
+            PathSegment::from_ident(self.parse_ident_common(true)?)
+        } else {
+            self.parse_path_segment(PathStyle::Expr, None)?
+        };
         self.check_trailing_angle_brackets(&seg, &[exp!(OpenParen)]);
         self.check_turbofish_missing_angle_brackets(&mut seg);
 
