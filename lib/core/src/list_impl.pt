@@ -1,0 +1,138 @@
+use pkg::{IntoIterator, Iterator, ListIter, NativeEq, Option, PartialEq, erlang};
+use pkg::Option::{None, Some};
+
+extern mod lists;
+
+impl<T> [T] {
+    /// Returns a lazy iterator over the elements of the list.
+    #[inline]
+    #[must_use]
+    pub fn iter(self) -> ListIter<T> {
+        ListIter(self)
+    }
+
+    /// Returns the number of elements in the list by walking the whole list.
+    #[inline]
+    #[must_use]
+    pub fn len(self) -> int {
+        unsafe { erlang::length(self).cast_unchecked() }
+    }
+
+    /// Returns `true` if the list has no elements.
+    #[inline]
+    #[must_use]
+    pub fn is_empty(self) -> bool {
+        match self {
+            [] => true,
+            _ => false,
+        }
+    }
+
+    /// Returns the first element, or `None` if the list is empty.
+    #[inline]
+    #[must_use]
+    pub fn head(self) -> Option<T> {
+        match self {
+            [head, ..] => Some(head),
+            [] => None,
+        }
+    }
+
+    /// Returns the list without its first element.
+    ///
+    /// The tail of an empty list is an empty list.
+    #[inline]
+    #[must_use]
+    pub fn tail(self) -> [T] {
+        match self {
+            [_, tail @ ..] => tail,
+            [] => [],
+        }
+    }
+
+    /// Returns the last element, or `None` if the list is empty.
+    #[inline]
+    #[must_use]
+    pub fn last(self) -> Option<T> {
+        match self {
+            [] => None,
+            _ => Some(unsafe { lists::last(self).cast_unchecked() }),
+        }
+    }
+
+    /// Returns the element at the zero-based `index`, or `None` if it's out of bounds.
+    #[inline]
+    #[must_use]
+    pub fn get(self, index: int) -> Option<T> {
+        match self {
+            [head, ..] if index == 0 => Some(head),
+            [_, tail @ ..] if index > 0 => tail.get(index - 1),
+            _ => None,
+        }
+    }
+
+    /// Returns `true` if the list has an element that is exactly `value`.
+    #[inline]
+    #[must_use]
+    pub fn contains(self, value: T) -> bool {
+        unsafe { lists::member(value, self).cast_unchecked() }
+    }
+
+    /// Returns the list in reverse order.
+    #[inline]
+    #[must_use]
+    pub fn reverse(self) -> [T] {
+        unsafe { lists::reverse(self).cast_unchecked() }
+    }
+
+    /// Returns the elements of `self` followed by the elements of `other`.
+    ///
+    /// This copies `self`, but shares `other`.
+    #[must_use]
+    pub fn concat(self, other: [T]) -> [T] {
+        unsafe { lists::append(self, other).cast_unchecked() }
+    }
+}
+
+impl<T> Iterator for ListIter<T> {
+    type Item = T;
+
+    #[inline]
+    fn next(self) -> Option<(T, ListIter<T>)> {
+        match self.0 {
+            [head, tail @ ..] => Some((head, ListIter(tail))),
+            [] => None,
+        }
+    }
+}
+
+impl<T> IntoIterator for [T] {
+    type Item = T;
+    type IntoIter = ListIter<T>;
+
+    #[inline]
+    fn into_iter(self) -> ListIter<T> {
+        self.iter()
+    }
+}
+
+impl<T: PartialEq> PartialEq for [T] {
+    default fn eq(self, other: [T]) -> bool {
+        match (self, other) {
+            ([left, left_tail @ ..], [right, right_tail @ ..]) => {
+                left == right && left_tail == right_tail
+            }
+            ([], []) => true,
+            _ => false,
+        }
+    }
+}
+
+impl<T: NativeEq> NativeEq for [T] {}
+
+impl<T: NativeEq> PartialEq for [T] {
+    #[inline]
+    fn eq(self, other: [T]) -> bool {
+        self as term == other as term
+    }
+}

@@ -541,7 +541,7 @@
                        {atom,{79,5},'Elixir.Patina.Core.List'},
                        {atom,
                            {79,5},
-                           'core::PartialEq::$patina_witness<core::{impl#7}>'}},
+                           'core::PartialEq::$patina_witness<core::list_impl::{impl#5}>'}},
                    [{var,{79,5},'_witnesses_where_PartialEq@3_0'}]}},
            {match,
                {79,5},

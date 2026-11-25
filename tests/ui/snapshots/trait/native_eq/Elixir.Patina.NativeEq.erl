@@ -174,7 +174,7 @@ int_lists_eq_through_witness(_a@0_0, _b@1_0) ->
     _witnesses_where_PartialEq@3_0 =
         {_witness_PartialEq@2_0},
     _witness_PartialEq@4_0 =
-        'Elixir.Patina.Core.List':'core::PartialEq::$patina_witness<core::{impl#7}>'(_witnesses_where_PartialEq@3_0),
+        'Elixir.Patina.Core.List':'core::PartialEq::$patina_witness<core::list_impl::{impl#5}>'(_witnesses_where_PartialEq@3_0),
     _witnesses_where_generic_eq@5_0 =
         {_witness_PartialEq@4_0},
     generic_eq(_witnesses_where_generic_eq@5_0,
