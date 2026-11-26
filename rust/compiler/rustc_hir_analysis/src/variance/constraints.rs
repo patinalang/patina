@@ -231,6 +231,9 @@ impl<'a, 'tcx> ConstraintContext<'a, 'tcx> {
             | ty::Float
             | ty::Str
             | ty::Term
+            | ty::Pid
+            | ty::Port
+            | ty::ErlRef
             | ty::Atom
             | ty::Bin
             | ty::Bits

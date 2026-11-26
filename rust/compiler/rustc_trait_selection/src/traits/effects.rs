@@ -361,6 +361,9 @@ fn evaluate_host_effect_for_copy_clone_goal<'tcx>(
         | ty::Float
         | ty::Char
         | ty::Term
+        | ty::Pid
+        | ty::Port
+        | ty::ErlRef
         | ty::Atom
         | ty::Bin
         | ty::Bits
@@ -492,6 +495,9 @@ fn evaluate_host_effect_for_destruct_goal<'tcx>(
         | ty::Float
         | ty::Str
         | ty::Term
+        | ty::Pid
+        | ty::Port
+        | ty::ErlRef
         | ty::Atom
         | ty::Bin
         | ty::Bits

@@ -1279,6 +1279,9 @@ impl<'cx, 'tcx> SelectionContext<'cx, 'tcx> {
             | ty::Dynamic(..)
             | ty::Str
             | ty::Term
+            | ty::Pid
+            | ty::Port
+            | ty::ErlRef
             | ty::Atom
             | ty::Bin
             | ty::Bits

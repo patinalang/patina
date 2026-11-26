@@ -252,8 +252,6 @@ Colon
 Ident
 OpenParen
 Ident
-Whitespace
-Ident
 CloseParen
 Whitespace
 Eq

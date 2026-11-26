@@ -15,7 +15,7 @@ fn stack_in_args() { try {} catch { (/*ERROR*/) => {} } }
 fn stack_pattern() { try {} catch { error(_), (/*ERROR*/) => {} } }
 fn stack_alias() { try {} catch { error(_), (/*ERROR*/) => {} } }
 fn stack_mut() { try {} catch { error(_), (/*ERROR*/) => {} } }
-fn stack_ref() { try {} catch { error(_), (/*ERROR*/) => {} } }
+fn stack_ref() { try {} catch { error(_), stacktrace => {} } }
 fn misplaced_stacktrace() {
     try {} catch { exit(_) if true, stacktrace => {} }
 }

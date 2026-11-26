@@ -373,6 +373,9 @@ impl<'tcx> TypeSuperFoldable<TyCtxt<'tcx>> for Ty<'tcx> {
             | ty::Int
             | ty::Str
             | ty::Term
+            | ty::Pid
+            | ty::Port
+            | ty::ErlRef
             | ty::Atom
             | ty::Bin
             | ty::Bits
@@ -416,6 +419,9 @@ impl<'tcx> TypeSuperFoldable<TyCtxt<'tcx>> for Ty<'tcx> {
             | ty::Int
             | ty::Str
             | ty::Term
+            | ty::Pid
+            | ty::Port
+            | ty::ErlRef
             | ty::Atom
             | ty::Bin
             | ty::Bits
@@ -477,6 +483,9 @@ impl<'tcx> TypeSuperVisitable<TyCtxt<'tcx>> for Ty<'tcx> {
             | ty::Int
             | ty::Str
             | ty::Term
+            | ty::Pid
+            | ty::Port
+            | ty::ErlRef
             | ty::Atom
             | ty::Bin
             | ty::Bits

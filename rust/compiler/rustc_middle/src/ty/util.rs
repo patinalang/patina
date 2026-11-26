@@ -1171,6 +1171,9 @@ impl<'tcx> Ty<'tcx> {
             | ty::Char
             | ty::Str
             | ty::Term
+            | ty::Pid
+            | ty::Port
+            | ty::ErlRef
             | ty::Atom
             | ty::Bin
             | ty::Bits
@@ -1225,6 +1228,9 @@ impl<'tcx> Ty<'tcx> {
             | ty::Char
             | ty::Str
             | ty::Term
+            | ty::Pid
+            | ty::Port
+            | ty::ErlRef
             | ty::Atom
             | ty::Bin
             | ty::Bits
@@ -1280,6 +1286,9 @@ impl<'tcx> Ty<'tcx> {
             | ty::Char
             | ty::Str
             | ty::Term
+            | ty::Pid
+            | ty::Port
+            | ty::ErlRef
             | ty::Atom
             | ty::Bin
             | ty::Bits
@@ -1452,6 +1461,9 @@ impl<'tcx> Ty<'tcx> {
             | ty::Int
             | ty::Str
             | ty::Term
+            | ty::Pid
+            | ty::Port
+            | ty::ErlRef
             | ty::Atom
             | ty::Bin
             | ty::Bits
@@ -1547,6 +1559,9 @@ pub fn needs_drop_components_with_async<'tcx>(
         | ty::RawPtr(_, _)
         | ty::Ref(..)
         | ty::Term
+        | ty::Pid
+        | ty::Port
+        | ty::ErlRef
         | ty::Atom
         | ty::Bin
         | ty::Bits

@@ -3782,6 +3782,9 @@ pub enum PrimTy {
     Bool,
     Char,
     Term,
+    Pid,
+    Port,
+    Ref,
     Atom,
     Bin,
     Bits,
@@ -3793,13 +3796,16 @@ pub enum PrimTy {
 
 impl PrimTy {
     /// All of the primitive types
-    pub const ALL: [Self; 12] = [
+    pub const ALL: [Self; 15] = [
         // any changes here should also be reflected in `PrimTy::from_name`
         Self::Float,
         Self::Bool,
         Self::Char,
         Self::Str,
         Self::Term,
+        Self::Pid,
+        Self::Port,
+        Self::Ref,
         Self::Atom,
         Self::Bin,
         Self::Bits,
@@ -3819,6 +3825,9 @@ impl PrimTy {
             PrimTy::Bool => "bool",
             PrimTy::Char => "char",
             PrimTy::Term => "term",
+            PrimTy::Pid => "pid",
+            PrimTy::Port => "port",
+            PrimTy::Ref => "ref",
             PrimTy::Atom => "atom",
             PrimTy::Bin => "bin",
             PrimTy::Bits => "bits",
@@ -3836,6 +3845,9 @@ impl PrimTy {
             PrimTy::Bool => sym::bool,
             PrimTy::Char => sym::char,
             PrimTy::Term => sym::term,
+            PrimTy::Pid => sym::pid,
+            PrimTy::Port => sym::port,
+            PrimTy::Ref => sym::ref_,
             PrimTy::Atom => sym::atom,
             PrimTy::Bin => sym::bin,
             PrimTy::Bits => sym::bits,
@@ -3861,6 +3873,9 @@ impl PrimTy {
             sym::char => Self::Char,
             sym::str => Self::Str,
             sym::term => Self::Term,
+            sym::pid => Self::Pid,
+            sym::port => Self::Port,
+            sym::ref_ => Self::Ref,
             sym::atom => Self::Atom,
             sym::bin => Self::Bin,
             sym::bits => Self::Bits,

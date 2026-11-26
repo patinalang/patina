@@ -112,7 +112,6 @@ pub enum TokenType {
     KwPub,
     KwRaw,
     KwReceive,
-    KwRef,
     KwReturn,
     KwReuse,
     KwSafe,
@@ -257,7 +256,6 @@ impl TokenType {
             KwPub,
             KwRaw,
             KwReceive,
-            KwRef,
             KwReturn,
             KwReuse,
             KwSafe,
@@ -337,7 +335,6 @@ impl TokenType {
             TokenType::KwPub => Some(kw::Pub),
             TokenType::KwRaw => Some(kw::Raw),
             TokenType::KwReceive => Some(kw::Receive),
-            TokenType::KwRef => Some(kw::Ref),
             TokenType::KwReturn => Some(kw::Return),
             TokenType::KwReuse => Some(kw::Reuse),
             TokenType::KwSafe => Some(kw::Safe),
@@ -558,7 +555,6 @@ macro_rules! exp {
     (Pub)            => { exp!(@kw, Pub,        KwPub) };
     (Raw)            => { exp!(@kw, Raw,        KwRaw) };
     (Receive)        => { exp!(@kw, Receive,    KwReceive) };
-    (Ref)            => { exp!(@kw, Ref,        KwRef) };
     (Return)         => { exp!(@kw, Return,     KwReturn) };
     (Reuse)          => { exp!(@kw, Reuse,      KwReuse) };
     (Safe)           => { exp!(@kw, Safe,       KwSafe) };

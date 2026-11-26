@@ -143,6 +143,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             | ty::Adt(..)
             | ty::Str
             | ty::Term
+            | ty::Pid
+            | ty::Port
+            | ty::ErlRef
             | ty::Atom
             | ty::Bin
             | ty::Bits

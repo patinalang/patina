@@ -476,7 +476,7 @@ macro_rules! partial_eq_impl {
         }
     )*)
 }
-partial_eq_impl! { bool int float str atom bin bits char term }
+partial_eq_impl! { bool int float str atom bin bits char term pid port ref }
 
 /// `T: NativeEq` means that `==` on `T` is exact term matching (`=:=`).
 ///
@@ -489,7 +489,7 @@ macro_rules! native_eq_impl {
         impl NativeEq for $t {}
     )*)
 }
-native_eq_impl! { bool int float str atom bin bits char term }
+native_eq_impl! { bool int float str atom bin bits char term pid port ref }
 impl NativeEq for () {}
 
 impl PartialEq for () {
@@ -549,7 +549,7 @@ macro_rules! partial_ord_impl {
     )*)
 }
 
-partial_ord_impl! { bool int float str atom bin bits }
+partial_ord_impl! { bool int float str atom bin bits term pid port ref }
 
 #[lang = "structural_peq"]
 pub trait StructuralPartialEq {}

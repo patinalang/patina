@@ -1026,6 +1026,9 @@ fn assemble_candidates_from_impls<'cx, 'tcx>(
                         | ty::Foreign(_)
                         | ty::Str
                         | ty::Term
+                        | ty::Pid
+                        | ty::Port
+                        | ty::ErlRef
                         | ty::Atom
                         | ty::Bin
                         | ty::Bits
@@ -1083,6 +1086,9 @@ fn assemble_candidates_from_impls<'cx, 'tcx>(
                             | ty::Float
                             | ty::Str
                             | ty::Term
+                            | ty::Pid
+                            | ty::Port
+                            | ty::ErlRef
                             | ty::Atom
                             | ty::Bin
                             | ty::Bits

@@ -921,7 +921,7 @@ impl TermClass {
             sym::map => Self::Map,
             sym::pid => Self::Pid,
             sym::port => Self::Port,
-            kw::Ref => Self::Ref,
+            sym::ref_ => Self::Ref,
             sym::tuple => Self::Tuple,
             _ => return None,
         })
@@ -940,7 +940,7 @@ impl TermClass {
             Self::Map => sym::map,
             Self::Pid => sym::pid,
             Self::Port => sym::port,
-            Self::Ref => kw::Ref,
+            Self::Ref => sym::ref_,
             Self::Tuple => sym::tuple,
         }
     }

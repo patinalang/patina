@@ -514,6 +514,9 @@ impl<'tcx> Interner for TyCtxt<'tcx> {
             | ty::Foreign(_)
             | ty::Str
             | ty::Term
+            | ty::Pid
+            | ty::Port
+            | ty::ErlRef
             | ty::Atom
             | ty::Bin
             | ty::Bits

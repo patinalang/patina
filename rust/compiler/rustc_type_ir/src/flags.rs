@@ -243,6 +243,9 @@ impl<I: Interner> FlagComputation<I> {
             | ty::Never
             | ty::Str
             | ty::Term
+            | ty::Pid
+            | ty::Port
+            | ty::ErlRef
             | ty::Atom
             | ty::Bin
             | ty::Bits

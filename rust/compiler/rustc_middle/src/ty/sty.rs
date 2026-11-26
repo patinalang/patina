@@ -1361,10 +1361,28 @@ impl<'tcx> Ty<'tcx> {
 
     /// A scalar type is one that denotes an atomic datum, with no sub-components.
     /// (A RawPtr is scalar because it represents a non-managed pointer, so its
-    /// contents are abstract to rustc.)
+    /// contents are abstract to rustc. Likewise `str`, `bin`, `bits`, `atom`,
+    /// `pid`, `port`, `ref` and `term` are BEAM terms that the runtime compares
+    /// natively.)
     #[inline]
     pub fn is_scalar(self) -> bool {
-        matches!(self.kind(), Bool | Char | Int | Float | FnDef(..) | FnPtr(..) | RawPtr(_, _))
+        matches!(
+            self.kind(),
+            Bool | Char
+                | Int
+                | Float
+                | Str
+                | Bin
+                | Bits
+                | Atom
+                | Term
+                | Pid
+                | Port
+                | ErlRef
+                | FnDef(..)
+                | FnPtr(..)
+                | RawPtr(_, _)
+        )
     }
 
     /// Returns `true` if this type is a floating point type.
@@ -1647,6 +1665,9 @@ impl<'tcx> Ty<'tcx> {
             | ty::Foreign(_)
             | ty::Str
             | ty::Term
+            | ty::Pid
+            | ty::Port
+            | ty::ErlRef
             | ty::Atom
             | ty::Bin
             | ty::Bits
@@ -1699,6 +1720,9 @@ impl<'tcx> Ty<'tcx> {
             | ty::Never
             | ty::Error(_)
             | ty::Term
+            | ty::Pid
+            | ty::Port
+            | ty::ErlRef
             | ty::Atom
             | ty::Bin
             | ty::Bits
@@ -1885,6 +1909,9 @@ impl<'tcx> Ty<'tcx> {
             | ty::CoroutineClosure(..)
             | ty::Str
             | ty::Term
+            | ty::Pid
+            | ty::Port
+            | ty::ErlRef
             | ty::Atom
             | ty::Bin
             | ty::Bits
@@ -1929,6 +1956,9 @@ impl<'tcx> Ty<'tcx> {
             | ty::Never
             | ty::Str
             | ty::Term
+            | ty::Pid
+            | ty::Port
+            | ty::ErlRef
             | ty::Atom
             | ty::Bin
             | ty::Bits
@@ -1987,6 +2017,9 @@ impl<'tcx> Ty<'tcx> {
             | ty::Float
             | ty::Str
             | ty::Term
+            | ty::Pid
+            | ty::Port
+            | ty::ErlRef
             | ty::Atom
             | ty::Bin
             | ty::Bits
@@ -2039,6 +2072,9 @@ impl<'tcx> Ty<'tcx> {
             ty::Float => Some(sym::float),
             ty::Str => Some(sym::str),
             ty::Term => Some(sym::term),
+            ty::Pid => Some(sym::pid),
+            ty::Port => Some(sym::port),
+            ty::ErlRef => Some(sym::ref_),
             ty::Atom => Some(sym::atom),
             ty::Bin => Some(sym::bin),
             ty::Bits => Some(sym::bits),

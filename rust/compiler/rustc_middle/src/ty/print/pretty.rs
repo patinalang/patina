@@ -678,6 +678,9 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
                 | ty::Int
                 | ty::Str
                 | ty::Term
+                | ty::Pid
+                | ty::Port
+                | ty::ErlRef
                 | ty::Atom
                 | ty::Bin
                 | ty::Bits
@@ -885,6 +888,9 @@ pub trait PrettyPrinter<'tcx>: Printer<'tcx> + fmt::Write {
             }
             ty::Str => write!(self, "str")?,
             ty::Term => write!(self, "term")?,
+            ty::Pid => write!(self, "pid")?,
+            ty::Port => write!(self, "port")?,
+            ty::ErlRef => write!(self, "ref")?,
             ty::Atom => write!(self, "atom")?,
             ty::Bin => write!(self, "bin")?,
             ty::Bits => write!(self, "bits")?,

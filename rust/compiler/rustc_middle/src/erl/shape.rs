@@ -17,6 +17,9 @@ pub enum ErlShape {
     Bitstring,
     List,
     Fun,
+    Pid,
+    Port,
+    Ref,
     Tuple { arity: usize, first: Box<ErlShape> },
     AnyTuple,
     Map,
@@ -45,7 +48,13 @@ impl ErlShape {
                 (m, n) == (p, q)
             }
             (Binary | Bitstring, Binary | Bitstring) => true,
-            (Int, Int) | (Float, Float) | (List, List) | (Fun, Fun) => true,
+            (Int, Int)
+            | (Float, Float)
+            | (List, List)
+            | (Fun, Fun)
+            | (Pid, Pid)
+            | (Port, Port)
+            | (Ref, Ref) => true,
             _ => false,
         }
     }
@@ -152,6 +161,9 @@ impl<'tcx> TyCtxt<'tcx> {
                 ErlShape::Tuple { arity: tys.len(), first: Box::new(first) }
             }
             ty::FnDef(..) | ty::FnPtr(..) => ErlShape::Fun,
+            ty::Pid => ErlShape::Pid,
+            ty::Port => ErlShape::Port,
+            ty::ErlRef => ErlShape::Ref,
             ty::Adt(def, args) => self.erl_shape_of_adt(*def, args, visiting),
             ty::Term | ty::Param(_) | ty::Alias(..) | ty::Error(_) => ErlShape::Any,
             ty::Never => ErlShape::Union(Box::new([])),

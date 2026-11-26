@@ -1,0 +1,18 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern pkg core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use core::prelude::*;
+
+fn pid_as_ref(value: pid) -> ref ({ (value as pid) } as {type error})
+
+fn int_as_port() -> port ({ (1 as int) } as {type error})
+
+fn term_as_pid(value: term) -> pid ({ (value as term) } as {type error})

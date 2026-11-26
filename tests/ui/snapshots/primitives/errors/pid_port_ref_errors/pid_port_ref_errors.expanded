@@ -1,0 +1,18 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro, prelude_import)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern pkg core;
+
+#[allow(unused_imports)]
+#[prelude_import]
+use core::prelude::*;
+
+pub fn pid_as_ref(value: pid) -> ref { value }
+
+pub fn int_as_port() -> port { 1 }
+
+pub fn term_as_pid(value: term) -> pid { value }

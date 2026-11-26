@@ -94,6 +94,9 @@ impl MappingFlags {
             | ty::Int
             | ty::Float
             | ty::Term
+            | ty::Pid
+            | ty::Port
+            | ty::ErlRef
             | ty::Atom
             | ty::Bin
             | ty::Bits => MappingFlags::LITERAL | MappingFlags::IMPLICIT,

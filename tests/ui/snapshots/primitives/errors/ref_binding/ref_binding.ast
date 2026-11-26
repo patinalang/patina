@@ -1,0 +1,25 @@
+pub struct Wrapper {
+    value: int,
+}
+
+pub fn ref_binding(value: Option<int>) -> int {
+    match value { Some(found) => found, None => 0, }
+}
+
+pub fn ref_mut_binding(value: Option<int>) -> int {
+    match value { Some(mut found) => found, None => 0, }
+}
+
+pub fn mut_ref_binding(value: Option<int>) -> int {
+    match value { Some(mut found) => found, None => 0, }
+}
+
+pub fn ref_field_shorthand(wrapper: Wrapper) -> int {
+    let Wrapper { value } = wrapper;
+    value
+}
+
+pub fn ref_mut_field_shorthand(wrapper: Wrapper) -> int {
+    let Wrapper { mut value } = wrapper;
+    value
+}

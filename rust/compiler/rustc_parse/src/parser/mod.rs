@@ -35,10 +35,9 @@ use rustc_ast::tokenstream::{
 use rustc_ast::util::case::Case;
 use rustc_ast::util::classify;
 use rustc_ast::{
-    self as ast, AnonConst, AttrArgs, AttrId, BinOpKind, ByRef, Const, CoroutineKind,
-    DUMMY_NODE_ID, DelimArgs, Expr, ExprKind, Extern, HasAttrs, HasTokens, ImplRestriction,
-    MgcaDisambiguation, Mutability, Recovered, RestrictionKind, Safety, StrLit, Visibility,
-    VisibilityKind,
+    self as ast, AnonConst, AttrArgs, AttrId, BinOpKind, Const, CoroutineKind, DUMMY_NODE_ID,
+    DelimArgs, Expr, ExprKind, Extern, HasAttrs, HasTokens, ImplRestriction, MgcaDisambiguation,
+    Mutability, Recovered, RestrictionKind, Safety, StrLit, Visibility, VisibilityKind,
 };
 use rustc_ast_pretty::pprust;
 use rustc_data_structures::fx::FxHashMap;
@@ -1319,18 +1318,34 @@ impl<'a> Parser<'a> {
         if self.eat_keyword(exp!(Mut)) { Mutability::Mut } else { Mutability::Not }
     }
 
-    /// Parse nothing or a by-reference mode.
-    ///
-    /// ```ebnf
-    /// ByRef = "ref" PinAndMut?
-    /// ```
-    fn parse_byref(&mut self) -> ByRef {
-        if self.eat_keyword(exp!(Ref)) {
-            let (pinnedness, mutability) = self.parse_pin_and_mut();
-            ByRef::Yes(pinnedness, mutability)
-        } else {
-            ByRef::No
+    /// Recover from a Rust-style `ref` binding mode, as in `ref x` or `ref mut x`.
+    fn recover_ref_binding_mode(&mut self) -> bool {
+        let Some((ident, IdentIsRaw::No)) = self.token.ident() else { return false };
+        if ident.name != sym::ref_ {
+            return false;
         }
+        let Some(applicability) = self.look_ahead(1, |t| {
+            if t.is_keyword(kw::Mut) {
+                // Writing `ref mut x`, the author probably expected to mutate the original.
+                Some(Applicability::MaybeIncorrect)
+            } else if t.is_non_reserved_ident() {
+                Some(Applicability::MachineApplicable)
+            } else {
+                None
+            }
+        }) else {
+            return false;
+        };
+
+        self.bump();
+        self.dcx().emit_err(errors::RefBindingMode {
+            span: ident.span,
+            suggestion: errors::RefBindingModeSugg {
+                span: ident.span.until(self.token.span),
+                applicability,
+            },
+        });
+        true
     }
 
     /// Parse nothing or "explicit" mutability.

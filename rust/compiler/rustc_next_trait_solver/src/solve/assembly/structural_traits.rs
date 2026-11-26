@@ -36,6 +36,9 @@ where
         | ty::Error(_)
         | ty::Str
         | ty::Term
+        | ty::Pid
+        | ty::Port
+        | ty::ErlRef
         | ty::Atom
         | ty::Bin
         | ty::Bits
@@ -144,6 +147,9 @@ where
         | ty::CoroutineClosure(..)
         | ty::Str
         | ty::Term
+        | ty::Pid
+        | ty::Port
+        | ty::ErlRef
         | ty::Atom
         | ty::Bin
         | ty::Bits
@@ -211,6 +217,9 @@ where
         | ty::Char
         | ty::RawPtr(..)
         | ty::Term
+        | ty::Pid
+        | ty::Port
+        | ty::ErlRef
         | ty::Map(..)
         | ty::Never
         | ty::Ref(_, _, Mutability::Not)
@@ -391,6 +400,9 @@ pub(in crate::solve) fn extract_tupled_inputs_and_output_from_callable<I: Intern
         | ty::Foreign(_)
         | ty::Str
         | ty::Term
+        | ty::Pid
+        | ty::Port
+        | ty::ErlRef
         | ty::Atom
         | ty::Bin
         | ty::Bits
@@ -566,6 +578,9 @@ pub(in crate::solve) fn extract_tupled_inputs_and_output_from_async_callable<I: 
         | ty::Foreign(_)
         | ty::Str
         | ty::Term
+        | ty::Pid
+        | ty::Port
+        | ty::ErlRef
         | ty::Atom
         | ty::Bin
         | ty::Bits
@@ -731,6 +746,9 @@ pub(in crate::solve) fn extract_fn_def_from_const_callable<I: Interner>(
         | ty::Foreign(_)
         | ty::Str
         | ty::Term
+        | ty::Pid
+        | ty::Port
+        | ty::ErlRef
         | ty::Atom
         | ty::Bin
         | ty::Bits
@@ -814,6 +832,9 @@ pub(in crate::solve) fn const_conditions_for_destruct<I: Interner>(
         | ty::Float
         | ty::Str
         | ty::Term
+        | ty::Pid
+        | ty::Port
+        | ty::ErlRef
         | ty::Atom
         | ty::Bin
         | ty::Bits

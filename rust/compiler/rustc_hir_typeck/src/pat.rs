@@ -1180,11 +1180,10 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             hir::TermClass::Map => Ty::new_map(self.tcx, self.tcx.types.term, self.tcx.types.term),
             hir::TermClass::Bin => self.tcx.types.bin,
             hir::TermClass::Bits => self.tcx.types.bits,
-            hir::TermClass::Tuple
-            | hir::TermClass::Fn
-            | hir::TermClass::Pid
-            | hir::TermClass::Port
-            | hir::TermClass::Ref => self.tcx.types.term,
+            hir::TermClass::Pid => self.tcx.types.pid,
+            hir::TermClass::Port => self.tcx.types.port,
+            hir::TermClass::Ref => self.tcx.types.erl_ref,
+            hir::TermClass::Tuple | hir::TermClass::Fn => self.tcx.types.term,
         };
 
         if let Err(guar) =

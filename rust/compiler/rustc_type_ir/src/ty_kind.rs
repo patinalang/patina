@@ -130,6 +130,17 @@ pub enum TyKind<I: Interner> {
     /// An opaque Erlang term. Written as `term`. Has no literal form.
     Term,
 
+    /// An Erlang process identifier. Written as `pid`. Has no literal form.
+    Pid,
+
+    /// An Erlang port identifier. Written as `port`. Has no literal form.
+    Port,
+
+    /// An Erlang reference. Written as `ref`. Has no literal form.
+    ///
+    /// Temporarily named `ErlRef` to avoid clashing with [`TyKind::Ref`].
+    ErlRef,
+
     /// An Erlang atom. Written as `atom`, with literals `a"…"`.
     Atom,
 
@@ -359,6 +370,9 @@ impl<I: Interner> TyKind<I> {
             | ty::Foreign(_)
             | ty::Str
             | ty::Term
+            | ty::Pid
+            | ty::Port
+            | ty::ErlRef
             | ty::Atom
             | ty::Bin
             | ty::Bits
@@ -415,6 +429,9 @@ impl<I: Interner> fmt::Debug for TyKind<I> {
             Foreign(d) => f.debug_tuple("Foreign").field(d).finish(),
             Str => write!(f, "str"),
             Term => write!(f, "term"),
+            Pid => write!(f, "pid"),
+            Port => write!(f, "port"),
+            ErlRef => write!(f, "ref"),
             Atom => write!(f, "atom"),
             Bin => write!(f, "bin"),
             Bits => write!(f, "bits"),

@@ -448,6 +448,9 @@ impl<'tcx> Printer<'tcx> for V0SymbolMangler<'tcx> {
             ty::Char => "c",
             ty::Str => "e",
             ty::Term => "t",
+            ty::Pid => "i",
+            ty::Port => "o",
+            ty::ErlRef => "r",
             ty::Atom => "a",
             ty::Bin => "h",
             ty::Bits => "j",
@@ -480,6 +483,9 @@ impl<'tcx> Printer<'tcx> for V0SymbolMangler<'tcx> {
             | ty::Int
             | ty::Str
             | ty::Term
+            | ty::Pid
+            | ty::Port
+            | ty::ErlRef
             | ty::Atom
             | ty::Bin
             | ty::Bits

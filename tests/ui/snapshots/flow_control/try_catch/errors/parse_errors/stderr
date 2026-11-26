@@ -143,11 +143,18 @@ error: a stacktrace pattern must be a plain identifier or `_`
 LL | fn stack_mut() { try {} catch { error(_), mut stacktrace => {} } }
    |                                           ^^^^^^^^^^^^^^
 
-error: a stacktrace pattern must be a plain identifier or `_`
+error: `ref` is a type, not a binding mode
   --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:16:43
    |
 LL | fn stack_ref() { try {} catch { error(_), ref stacktrace => {} } }
-   |                                           ^^^^^^^^^^^^^^
+   |                                           ^^^ `ref` names the BEAM reference type
+   |
+   = note: Patina has no Rust-style `ref` bindings; every binding already refers to its value
+help: remove `ref`
+   |
+LL - fn stack_ref() { try {} catch { error(_), ref stacktrace => {} } }
+LL + fn stack_ref() { try {} catch { error(_), stacktrace => {} } }
+   |
 
 error: the stacktrace pattern must appear after the guard
   --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:17:51
@@ -183,11 +190,24 @@ LL - fn mutable_class() { try {} catch { mut error(reason) => {} } }
 LL + fn mutable_class() { try {} catch { error(reason) => {} } }
    |
 
-error: expected identifier, found enum pattern
+error: unknown exception class `ref`
+  --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:19:40
+   |
+LL | fn referenced_class() { try {} catch { ref exit(reason) => {} } }
+   |                                        ^^^
+   |
+   = note: exception classes are `error`, `throw`, `exit`, and `any`
+help: use an exception class pattern, e.g. `error(reason)`
+   |
+LL - fn referenced_class() { try {} catch { ref exit(reason) => {} } }
+LL + fn referenced_class() { try {} catch { error(reason) exit(reason) => {} } }
+   |
+
+error: expected one of `(`, `,`, `=>`, or `if`, found `exit`
   --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:19:44
    |
 LL | fn referenced_class() { try {} catch { ref exit(reason) => {} } }
-   |                                            ^^^^
+   |                                            ^^^^ expected one of `(`, `,`, `=>`, or `if`
 
 error: a `catch` arm must start with an exception class pattern
   --> tests/ui/src/flow_control/try_catch/errors/parse_errors.pt:20:37
@@ -253,5 +273,5 @@ error: `catch` requires at least one arm
 LL | fn empty_catch() { try {} catch {} }
    |                           ^^^^^^^^
 
-error: aborting due to 27 previous errors
+error: aborting due to 28 previous errors
 

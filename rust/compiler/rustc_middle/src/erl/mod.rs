@@ -547,6 +547,9 @@ impl<'tcx> TyCtxt<'tcx> {
             ty::Float => Some(Static(ErlModuleId::Prim(PrimTy::Float))),
             ty::Str => Some(Static(ErlModuleId::Prim(PrimTy::Str))),
             ty::Term => Some(Static(ErlModuleId::Prim(PrimTy::Term))),
+            ty::Pid => Some(Static(ErlModuleId::Prim(PrimTy::Pid))),
+            ty::Port => Some(Static(ErlModuleId::Prim(PrimTy::Port))),
+            ty::ErlRef => Some(Static(ErlModuleId::Prim(PrimTy::Ref))),
             ty::Atom => Some(Static(ErlModuleId::Prim(PrimTy::Atom))),
             ty::Bin => Some(Static(ErlModuleId::Prim(PrimTy::Bin))),
             ty::Bits => Some(Static(ErlModuleId::Prim(PrimTy::Bits))),
@@ -922,6 +925,9 @@ fn erl_impl_self_tag(tcx: TyCtxt<'_>, impl_def_id: DefId) -> Option<String> {
         | ty::Float
         | ty::Str
         | ty::Term
+        | ty::Pid
+        | ty::Port
+        | ty::ErlRef
         | ty::Atom
         | ty::Bin
         | ty::Bits

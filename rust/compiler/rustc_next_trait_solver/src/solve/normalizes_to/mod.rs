@@ -612,6 +612,9 @@ where
             | ty::Coroutine(..)
             | ty::CoroutineWitness(..)
             | ty::Term
+            | ty::Pid
+            | ty::Port
+            | ty::ErlRef
             | ty::Atom
             | ty::Bin
             | ty::Bits
@@ -882,6 +885,9 @@ where
             | ty::Adt(_, _)
             | ty::Str
             | ty::Term
+            | ty::Pid
+            | ty::Port
+            | ty::ErlRef
             | ty::Atom
             | ty::Bin
             | ty::Bits

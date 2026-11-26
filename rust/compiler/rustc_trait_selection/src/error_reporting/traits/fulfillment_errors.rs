@@ -1825,6 +1825,9 @@ impl<'a, 'tcx> TypeErrCtxt<'a, 'tcx> {
                 ty::Atom => Some(25),
                 ty::Bin => Some(26),
                 ty::Bits => Some(27),
+                ty::Pid => Some(28),
+                ty::Port => Some(29),
+                ty::ErlRef => Some(30),
                 ty::Placeholder(..) | ty::Bound(..) | ty::Infer(..) | ty::Error(_) => None,
             }
         }

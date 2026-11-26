@@ -1,0 +1,36 @@
+error[E0308]: mismatched types
+  --> tests/ui/src/primitives/errors/pid_port_ref_errors.pt:2:5
+   |
+LL | pub fn pid_as_ref(value: pid) -> ref {
+   |                                  --- expected `ref` because of return type
+LL |     value
+   |     ^^^^^ expected `ref`, found `pid`
+   |
+   = note: expected type `ref`
+              found type `pid`
+
+error[E0308]: mismatched types
+  --> tests/ui/src/primitives/errors/pid_port_ref_errors.pt:6:5
+   |
+LL | pub fn int_as_port() -> port {
+   |                         ---- expected `port` because of return type
+LL |     1
+   |     ^ expected `port`, found `int`
+   |
+   = note: expected type `port`
+              found type `int`
+
+error[E0308]: mismatched types
+  --> tests/ui/src/primitives/errors/pid_port_ref_errors.pt:10:5
+   |
+LL | pub fn term_as_pid(value: term) -> pid {
+   |                                    --- expected `pid` because of return type
+LL |     value
+   |     ^^^^^ expected `pid`, found `term`
+   |
+   = note: expected type `pid`
+              found type `term`
+
+error: aborting due to 3 previous errors
+
+For more information about this error, try `rustc --explain E0308`.

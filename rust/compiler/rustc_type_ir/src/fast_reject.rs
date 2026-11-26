@@ -29,6 +29,9 @@ pub enum SimplifiedType<DefId> {
     Foreign(DefId),
     Str,
     Term,
+    Pid,
+    Port,
+    ErlRef,
     Atom,
     Bin,
     Bits,
@@ -126,6 +129,9 @@ pub fn simplify_type<I: Interner>(
         ty::Adt(def, _) => Some(SimplifiedType::Adt(def.def_id().into())),
         ty::Str => Some(SimplifiedType::Str),
         ty::Term => Some(SimplifiedType::Term),
+        ty::Pid => Some(SimplifiedType::Pid),
+        ty::Port => Some(SimplifiedType::Port),
+        ty::ErlRef => Some(SimplifiedType::ErlRef),
         ty::Atom => Some(SimplifiedType::Atom),
         ty::Bin => Some(SimplifiedType::Bin),
         ty::Bits => Some(SimplifiedType::Bits),
@@ -299,6 +305,9 @@ impl<I: Interner, const INSTANTIATE_LHS_WITH_INFER: bool, const INSTANTIATE_RHS_
             | ty::Adt(..)
             | ty::Str
             | ty::Term
+            | ty::Pid
+            | ty::Port
+            | ty::ErlRef
             | ty::Atom
             | ty::Bin
             | ty::Bits
@@ -379,6 +388,9 @@ impl<I: Interner, const INSTANTIATE_LHS_WITH_INFER: bool, const INSTANTIATE_RHS_
             | ty::Float
             | ty::Str
             | ty::Term
+            | ty::Pid
+            | ty::Port
+            | ty::ErlRef
             | ty::Atom
             | ty::Bin
             | ty::Bits

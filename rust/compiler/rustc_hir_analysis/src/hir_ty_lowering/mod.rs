@@ -2476,6 +2476,9 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
                     hir::PrimTy::Float => Ty::new_float(tcx),
                     hir::PrimTy::Str => tcx.types.str_,
                     hir::PrimTy::Term => tcx.types.term,
+                    hir::PrimTy::Pid => tcx.types.pid,
+                    hir::PrimTy::Port => tcx.types.port,
+                    hir::PrimTy::Ref => tcx.types.erl_ref,
                     hir::PrimTy::Atom => tcx.types.atom,
                     hir::PrimTy::Bin => tcx.types.bin,
                     hir::PrimTy::Bits => tcx.types.bits,
@@ -3629,6 +3632,9 @@ impl<'tcx> dyn HirTyLowerer<'tcx> + '_ {
             | ty::Foreign(_)
             | ty::Str
             | ty::Term
+            | ty::Pid
+            | ty::Port
+            | ty::ErlRef
             | ty::Atom
             | ty::Bin
             | ty::Bits

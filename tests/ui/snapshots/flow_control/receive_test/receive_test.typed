@@ -42,8 +42,8 @@ fn echo() ({
     (receive {
         (a"ping", pid(from)) => {
             ((erlang::send as
-                    fn(term, term) -> term)((from as term), (a"pong" as atom))
-                as term);
+                    fn(term, term) -> term)((from as pid), (a"pong" as atom)) as
+                term);
         }
     } as ())
 } as ())

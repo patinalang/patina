@@ -162,16 +162,7 @@ impl<'cx, 'tcx> WritebackCx<'cx, 'tcx> {
                 let lhs_ty = self.typeck_results.node_type(lhs.hir_id);
                 let rhs_ty = self.typeck_results.node_type(rhs.hir_id);
 
-                let is_builtin = |ty: Ty<'tcx>| {
-                    ty.is_scalar()
-                        || ty.is_atom()
-                        || *ty.kind() == ty::Term
-                        || ty.kind().bitstring_rank().is_some()
-                };
-                let lhs_builtin = is_builtin(lhs_ty);
-                let rhs_builtin = is_builtin(rhs_ty);
-
-                if lhs_builtin && rhs_builtin {
+                if lhs_ty.is_scalar() && rhs_ty.is_scalar() {
                     self.typeck_results.type_dependent_defs_mut().remove(e.hir_id);
                     self.typeck_results.node_args_mut().remove(e.hir_id);
 

@@ -23,11 +23,11 @@ use crate::errors::{
     EnumPatternInsteadOfIdentifier, ExpectedBindingLeftOfAt, ExpectedCommaAfterPatternField,
     GenericArgsInPatRequireTurbofishSyntax, InclusiveRangeExtraEquals, InclusiveRangeMatchArrow,
     InclusiveRangeNoEnd, InvalidMutInPattern, ParenRangeSuggestion, PatternOnWrongSideOfAt,
-    RemoveLet, RepeatedMutInPattern, SwitchRefBoxOrder, TopLevelOrPatternNotAllowed,
-    TopLevelOrPatternNotAllowedSugg, TrailingVertNotAllowed, TrailingVertSuggestion,
-    UnexpectedExpressionInPattern, UnexpectedExpressionInPatternSugg, UnexpectedLifetimeInPattern,
-    UnexpectedParenInRangePat, UnexpectedParenInRangePatSugg,
-    UnexpectedVertVertBeforeFunctionParam, UnexpectedVertVertInPattern, WrapInParens,
+    RemoveLet, RepeatedMutInPattern, TopLevelOrPatternNotAllowed, TopLevelOrPatternNotAllowedSugg,
+    TrailingVertNotAllowed, TrailingVertSuggestion, UnexpectedExpressionInPattern,
+    UnexpectedExpressionInPatternSugg, UnexpectedLifetimeInPattern, UnexpectedParenInRangePat,
+    UnexpectedParenInRangePatSugg, UnexpectedVertVertBeforeFunctionParam,
+    UnexpectedVertVertInPattern, WrapInParens,
 };
 use crate::parser::expr::{DestructuredFloat, could_be_unclosed_char_literal};
 use crate::{exp, maybe_recover_from_interpolated_ty_qpath};
@@ -747,6 +747,10 @@ impl<'a> Parser<'a> {
             lo = self.token.span;
         }
 
+        if self.recover_ref_binding_mode() {
+            lo = self.token.span;
+        }
+
         let pat = if self.check(exp!(And)) || self.token == token::AndAnd {
             self.parse_pat_deref(expected)?
         } else if self.check(exp!(OpenParen)) {
@@ -806,19 +810,6 @@ impl<'a> Parser<'a> {
         {
             self.bump();
             self.parse_pat_term_class(class)?
-        } else if self.eat_keyword(exp!(Ref)) {
-            if self.check_keyword(exp!(Box)) {
-                // Suggest `box ref`.
-                let span = self.prev_token.span.to(self.token.span);
-                self.bump();
-                self.dcx().emit_err(SwitchRefBoxOrder { span });
-            }
-            // Parse ref ident @ pat / ref mut ident @ pat / ref pin const|mut ident @ pat
-            let (pinned, mutbl) = self.parse_pin_and_mut();
-            self.parse_pat_ident(
-                BindingMode(ByRef::Yes(pinned, mutbl), Mutability::Not),
-                syntax_loc,
-            )?
         } else if self.eat_keyword(exp!(Box)) {
             self.parse_pat_box()?
         } else if self.check_inline_const(0) {
@@ -1281,10 +1272,6 @@ impl<'a> Parser<'a> {
 
         self.recover_additional_muts();
 
-        let byref = self.parse_byref();
-
-        self.recover_additional_muts();
-
         // Make sure we don't allow e.g. `let mut $p;` where `$p:pat`.
         if let Some(MetaVarKind::Pat(_)) = self.token.is_metavar_seq() {
             self.expected_ident_found_err().emit();
@@ -1294,20 +1281,14 @@ impl<'a> Parser<'a> {
         let mut pat = self.parse_pat_no_top_alt(Some(Expected::Identifier), None)?;
 
         // If we don't have `mut $ident (@ pat)?`, error.
-        if let PatKind::Ident(BindingMode(br @ ByRef::No, m @ Mutability::Not), ..) = &mut pat.kind
-        {
+        if let PatKind::Ident(BindingMode(ByRef::No, m @ Mutability::Not), ..) = &mut pat.kind {
             // Don't recurse into the subpattern.
             // `mut` on the outer binding doesn't affect the inner bindings.
-            *br = byref;
             *m = Mutability::Mut;
         } else {
             // Add `mut` to any binding in the parsed pattern.
             let changed_any_binding = Self::make_all_value_bindings_mutable(&mut pat);
             self.ban_mut_general_pat(mut_span, &pat, changed_any_binding);
-        }
-
-        if matches!(pat.kind, PatKind::Ident(BindingMode(ByRef::Yes(..), Mutability::Mut), ..)) {
-            self.psess.gated_spans.gate(sym::mut_ref, pat.span);
         }
         Ok(pat.kind)
     }
@@ -2029,19 +2010,15 @@ impl<'a> Parser<'a> {
                 self.psess.gated_spans.gate(sym::box_patterns, self.prev_token.span);
             }
             let boxed_span = self.token.span;
-            let mutability = self.parse_mutability();
-            let by_ref = self.parse_byref();
+            let mut mutability = self.parse_mutability();
+            if self.recover_ref_binding_mode() && self.eat_keyword(exp!(Mut)) {
+                mutability = Mutability::Mut;
+            }
 
             let fieldname = self.parse_ident_common(false)?;
             hi = self.prev_token.span;
-            let ann = BindingMode(by_ref, mutability);
+            let ann = BindingMode(ByRef::No, mutability);
             let fieldpat = self.mk_pat_ident(boxed_span.to(hi), ann, fieldname);
-            if matches!(
-                fieldpat.kind,
-                PatKind::Ident(BindingMode(ByRef::Yes(..), Mutability::Mut), ..)
-            ) {
-                self.psess.gated_spans.gate(sym::mut_ref, fieldpat.span);
-            }
             let subpat = if is_box {
                 self.mk_pat(lo.to(hi), PatKind::Box(Box::new(fieldpat)))
             } else {

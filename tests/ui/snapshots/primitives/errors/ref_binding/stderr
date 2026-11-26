@@ -1,0 +1,67 @@
+error: `ref` is a type, not a binding mode
+  --> tests/ui/src/primitives/errors/ref_binding.pt:7:14
+   |
+LL |         Some(ref found) => found,
+   |              ^^^ `ref` names the BEAM reference type
+   |
+   = note: Patina has no Rust-style `ref` bindings; every binding already refers to its value
+help: remove `ref`
+   |
+LL -         Some(ref found) => found,
+LL +         Some(found) => found,
+   |
+
+error: `ref` is a type, not a binding mode
+  --> tests/ui/src/primitives/errors/ref_binding.pt:14:14
+   |
+LL |         Some(ref mut found) => found,
+   |              ^^^ `ref` names the BEAM reference type
+   |
+   = note: Patina has no Rust-style `ref` bindings; every binding already refers to its value
+help: remove `ref`
+   |
+LL -         Some(ref mut found) => found,
+LL +         Some(mut found) => found,
+   |
+
+error: `ref` is a type, not a binding mode
+  --> tests/ui/src/primitives/errors/ref_binding.pt:21:18
+   |
+LL |         Some(mut ref found) => found,
+   |                  ^^^ `ref` names the BEAM reference type
+   |
+   = note: Patina has no Rust-style `ref` bindings; every binding already refers to its value
+help: remove `ref`
+   |
+LL -         Some(mut ref found) => found,
+LL +         Some(mut found) => found,
+   |
+
+error: `ref` is a type, not a binding mode
+  --> tests/ui/src/primitives/errors/ref_binding.pt:27:19
+   |
+LL |     let Wrapper { ref value } = wrapper;
+   |                   ^^^ `ref` names the BEAM reference type
+   |
+   = note: Patina has no Rust-style `ref` bindings; every binding already refers to its value
+help: remove `ref`
+   |
+LL -     let Wrapper { ref value } = wrapper;
+LL +     let Wrapper { value } = wrapper;
+   |
+
+error: `ref` is a type, not a binding mode
+  --> tests/ui/src/primitives/errors/ref_binding.pt:32:19
+   |
+LL |     let Wrapper { ref mut value } = wrapper;
+   |                   ^^^ `ref` names the BEAM reference type
+   |
+   = note: Patina has no Rust-style `ref` bindings; every binding already refers to its value
+help: remove `ref`
+   |
+LL -     let Wrapper { ref mut value } = wrapper;
+LL +     let Wrapper { mut value } = wrapper;
+   |
+
+error: aborting due to 5 previous errors
+

@@ -1,0 +1,98 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern pkg core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use core::prelude::*;
+
+fn generic_equal<T>(left: T, right: T) -> bool where
+    T: PartialEq ({ ((left as T) == (right as T) as bool) } as bool)
+
+fn generic_less_than<T>(left: T, right: T) -> bool where
+    T: PartialOrd ({ ((left as T) < (right as T) as bool) } as bool)
+
+fn kind(value: term)
+    ->
+        atom ({
+    (match (value as term) {
+        pid(_) => (a"pid" as atom),
+        port(_) => (a"port" as atom),
+        ref(_) => (a"ref" as atom),
+        _ => (a"other" as atom),
+    } as atom)
+} as atom)
+
+fn pids_equal(left: pid, right: pid)
+    -> bool ({ ((left as pid) == (right as pid) as bool) } as bool)
+
+fn pids_less_than(left: pid, right: pid)
+    -> bool ({ ((left as pid) < (right as pid) as bool) } as bool)
+
+fn pids_less_than_equal(left: pid, right: pid)
+    -> bool ({ ((left as pid) <= (right as pid) as bool) } as bool)
+
+fn pids_equal_generic(left: pid, right: pid)
+    ->
+        bool ({
+    ((generic_equal as
+            fn(pid, pid) -> bool {generic_equal::<pid>})((left as pid),
+        (right as pid)) as bool)
+} as bool)
+
+fn pids_less_than_generic(left: pid, right: pid)
+    ->
+        bool ({
+    ((generic_less_than as
+            fn(pid, pid) -> bool {generic_less_than::<pid>})((left as pid),
+        (right as pid)) as bool)
+} as bool)
+
+fn ports_equal(left: port, right: port)
+    -> bool ({ ((left as port) == (right as port) as bool) } as bool)
+
+fn ports_less_than(left: port, right: port)
+    -> bool ({ ((left as port) < (right as port) as bool) } as bool)
+
+fn ports_equal_generic(left: port, right: port)
+    ->
+        bool ({
+    ((generic_equal as
+            fn(port, port) -> bool {generic_equal::<port>})((left as port),
+        (right as port)) as bool)
+} as bool)
+
+fn ports_less_than_generic(left: port, right: port)
+    ->
+        bool ({
+    ((generic_less_than as
+            fn(port, port) -> bool {generic_less_than::<port>})((left as
+            port), (right as port)) as bool)
+} as bool)
+
+fn refs_equal(left: ref, right: ref)
+    -> bool ({ ((left as ref) == (right as ref) as bool) } as bool)
+
+fn refs_less_than(left: ref, right: ref)
+    -> bool ({ ((left as ref) < (right as ref) as bool) } as bool)
+
+fn refs_equal_generic(left: ref, right: ref)
+    ->
+        bool ({
+    ((generic_equal as
+            fn(ref, ref) -> bool {generic_equal::<ref>})((left as ref),
+        (right as ref)) as bool)
+} as bool)
+
+fn refs_less_than_generic(left: ref, right: ref)
+    ->
+        bool ({
+    ((generic_less_than as
+            fn(ref, ref) -> bool {generic_less_than::<ref>})((left as ref),
+        (right as ref)) as bool)
+} as bool)

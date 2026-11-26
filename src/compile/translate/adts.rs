@@ -499,6 +499,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             ErlShape::Bitstring => bif(sym::is_bitstring, &[value]),
             ErlShape::List => bif(sym::is_list, &[value]),
             ErlShape::Fun => bif(sym::is_function, &[value]),
+            ErlShape::Pid => bif(sym::is_pid, &[value]),
+            ErlShape::Port => bif(sym::is_port, &[value]),
+            ErlShape::Ref => bif(sym::is_reference, &[value]),
             ErlShape::Tuple { arity, first } => {
                 let tuple = bif(sym::is_tuple, &[value]);
                 let size = eq(bif(sym::tuple_size, &[value]), afb.expr_int(span, *arity as u128));

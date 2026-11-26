@@ -1,0 +1,52 @@
+fn generic_equal<T: PartialEq>(left: T, right: T) -> bool { left == right }
+
+fn generic_less_than<T: PartialOrd>(left: T, right: T) -> bool {
+    left < right
+}
+
+pub fn kind(value: term) -> atom {
+    match value {
+        pid(_) => a"pid",
+        port(_) => a"port",
+        ref(_) => a"ref",
+        _ => a"other",
+    }
+}
+
+pub fn pids_equal(left: pid, right: pid) -> bool { left == right }
+
+pub fn pids_less_than(left: pid, right: pid) -> bool { left < right }
+
+pub fn pids_less_than_equal(left: pid, right: pid) -> bool { left <= right }
+
+pub fn pids_equal_generic(left: pid, right: pid) -> bool {
+    generic_equal(left, right)
+}
+
+pub fn pids_less_than_generic(left: pid, right: pid) -> bool {
+    generic_less_than(left, right)
+}
+
+pub fn ports_equal(left: port, right: port) -> bool { left == right }
+
+pub fn ports_less_than(left: port, right: port) -> bool { left < right }
+
+pub fn ports_equal_generic(left: port, right: port) -> bool {
+    generic_equal(left, right)
+}
+
+pub fn ports_less_than_generic(left: port, right: port) -> bool {
+    generic_less_than(left, right)
+}
+
+pub fn refs_equal(left: ref, right: ref) -> bool { left == right }
+
+pub fn refs_less_than(left: ref, right: ref) -> bool { left < right }
+
+pub fn refs_equal_generic(left: ref, right: ref) -> bool {
+    generic_equal(left, right)
+}
+
+pub fn refs_less_than_generic(left: ref, right: ref) -> bool {
+    generic_less_than(left, right)
+}

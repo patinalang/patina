@@ -236,16 +236,23 @@ pub(crate) enum InvalidVariableDeclarationSub {
 }
 
 #[derive(Diagnostic)]
-#[diag("switch the order of `ref` and `box`")]
-pub(crate) struct SwitchRefBoxOrder {
+#[diag("`ref` is a type, not a binding mode")]
+#[note("Patina has no Rust-style `ref` bindings; every binding already refers to its value")]
+pub(crate) struct RefBindingMode {
     #[primary_span]
-    #[suggestion(
-        "swap them",
-        applicability = "machine-applicable",
-        style = "verbose",
-        code = "box ref"
-    )]
+    #[label("`ref` names the BEAM reference type")]
     pub span: Span,
+    #[subdiagnostic]
+    pub suggestion: RefBindingModeSugg,
+}
+
+#[derive(Subdiagnostic)]
+#[suggestion("remove `ref`", code = "", style = "verbose")]
+pub(crate) struct RefBindingModeSugg {
+    #[primary_span]
+    pub span: Span,
+    #[applicability]
+    pub applicability: Applicability,
 }
 
 #[derive(Diagnostic)]

@@ -127,6 +127,9 @@ pub fn ty_dtor_span<'tcx>(tcx: TyCtxt<'tcx>, ty: Ty<'tcx>) -> Option<Span> {
         | ty::Error(_)
         | ty::Str
         | ty::Term
+        | ty::Pid
+        | ty::Port
+        | ty::ErlRef
         | ty::Atom
         | ty::Bin
         | ty::Bits
