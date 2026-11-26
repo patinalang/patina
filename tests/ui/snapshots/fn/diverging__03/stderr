@@ -1,5 +1,5 @@
 warning: unreachable statement
-  --> tests/ui/src/fn/diverging__03.pt:12:5
+  --> tests/ui/src/fn/diverging__03.pt:10:5
    |
 LL |     let _a = some_fn();
    |              --------- any code following this expression is unreachable

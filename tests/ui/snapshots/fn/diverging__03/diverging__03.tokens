@@ -2,15 +2,6 @@ LineComment { doc_style: None }
 Whitespace
 LineComment { doc_style: None }
 Whitespace
-Pound
-Bang
-OpenBracket
-Ident
-OpenParen
-Ident
-CloseParen
-CloseBracket
-Whitespace
 Ident
 Whitespace
 Ident

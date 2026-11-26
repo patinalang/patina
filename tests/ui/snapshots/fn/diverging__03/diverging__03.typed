@@ -1,6 +1,5 @@
 #![allow(internal_features)]
-#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0,
-never_type#0])]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
 #![attr = NoStd]
 #![attr = NoCore]
 
@@ -14,7 +13,6 @@ use core::prelude::*;
 
 // source: patina-by-example/src/fn/diverging.md
 // block: 3/4
-
 
 fn some_fn()
     ->

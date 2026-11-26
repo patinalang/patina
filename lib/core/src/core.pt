@@ -10,7 +10,6 @@
     intrinsics,
     macro_metavar_expr,
     min_specialization,
-    never_type,
     allow_internal_unstable
 )]
 #![no_std]
@@ -113,7 +112,6 @@ impl Panic {
 }
 
 #[macro_export]
-#[allow_internal_unstable(never_type)]
 macro_rules! panic {
     () => { $pkg::panic!(@raise "explicit panic") };
     ($msg:literal) => { $pkg::panic!(@raise $msg) };
