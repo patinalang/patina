@@ -1,6 +1,6 @@
 // snapshot: app
 use more_temperatures::{Kelvin, Rankine};
-use temperatures::{Celsius, From};
+use temperatures::Celsius;
 use traits::{Label, Loud, Show};
 
 // A local trait on a foreign type.

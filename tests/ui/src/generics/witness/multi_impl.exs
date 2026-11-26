@@ -16,11 +16,11 @@ defmodule MultiImplTest do
   end
 
   test "each impl has its own function" do
-    fahrenheit = Celsius."multi_impl::From<multi_impl::Fahrenheit>::$patina_witness"()
-    kelvin = Celsius."multi_impl::From<multi_impl::Kelvin>::$patina_witness"()
+    fahrenheit = Celsius."core::convert::From<multi_impl::Fahrenheit>::$patina_witness"()
+    kelvin = Celsius."core::convert::From<multi_impl::Kelvin>::$patina_witness"()
 
-    assert 100 == Celsius."multi_impl::From<multi_impl::Fahrenheit>::from"(fahrenheit, 212)
-    assert -61 == Celsius."multi_impl::From<multi_impl::Kelvin>::from"(kelvin, 212)
+    assert 100 == Celsius."core::convert::From<multi_impl::Fahrenheit>::from"(fahrenheit, 212)
+    assert -61 == Celsius."core::convert::From<multi_impl::Kelvin>::from"(kelvin, 212)
 
     {{from}, {}, {}} = fahrenheit
     assert 100 == from.(fahrenheit, 212)

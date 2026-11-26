@@ -1,4 +1,4 @@
--file("tests/ui/src/generics/witness/multi_impl.pt", 9).
+-file("tests/ui/src/generics/witness/multi_impl.pt", 5).
 
 -module('Elixir.Patina.MultiImpl.Kelvin').
 

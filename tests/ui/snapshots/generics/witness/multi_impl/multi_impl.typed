@@ -13,11 +13,6 @@ use core::prelude::*;
 
 // Two impls of one generic trait for one type each get their own functions and vtable.
 
-trait From<T> {
-    fn from(t: T)
-    -> Self;
-}
-
 struct Celsius(int);
 struct Fahrenheit(int);
 struct Kelvin(int);
@@ -46,8 +41,8 @@ impl From<Kelvin> for Celsius {
 fn to_celsius<T>(t: T) -> Celsius where
     Celsius: From<T> ({
     ((Celsius::from as
-            fn(T) -> Celsius {<Celsius as From<T>>::from})((t as T)) as
-        Celsius)
+            fn(T) -> Celsius {<Celsius as core::convert::From<T>>::from})((t
+            as T)) as Celsius)
 } as Celsius)
 
 fn from_fahrenheit(f: int)
@@ -72,7 +67,7 @@ fn from_kelvin_static(k: int)
     ->
         int ({
     (((Celsius::from as
-                fn(Kelvin) -> Celsius {<Celsius as From<Kelvin>>::from})(((Kelvin
+                fn(Kelvin) -> Celsius {<Celsius as core::convert::From<Kelvin>>::from})(((Kelvin
                     as fn(int) -> Kelvin {Kelvin})((k as int)) as Kelvin)) as
             Celsius).0 as int)
 } as int)

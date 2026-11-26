@@ -46,12 +46,6 @@ error[E0433]: cannot find type `Std` in this scope
 LL | type Result<T> = Std::Result::Result<T, DoubleError>;
    |                  ^^^ use of undeclared type `Std`
 
-error[E0405]: cannot find trait `From` in this scope
-  --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:47:6
-   |
-LL | impl From<ParseIntError> for DoubleError {
-   |      ^^^^ not found in this scope
-
 error[E0531]: cannot find tuple struct or tuple variant `Ok` in this scope
   --> tests/ui/src/error/multiple_error_types/wrap_error__01.pt:64:9
    |
@@ -70,7 +64,7 @@ error[E0425]: cannot find function, tuple struct or tuple variant `Ok` in this s
 LL |     Ok(2 * parsed)
    |     ^^ not found in this scope
 
-error: aborting due to 12 previous errors
+error: aborting due to 11 previous errors
 
-Some errors have detailed explanations: E0405, E0425, E0432, E0433, E0531.
-For more information about an error, try `rustc --explain E0405`.
+Some errors have detailed explanations: E0425, E0432, E0433, E0531.
+For more information about an error, try `rustc --explain E0425`.

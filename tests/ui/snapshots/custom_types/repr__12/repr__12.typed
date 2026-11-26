@@ -57,8 +57,8 @@ fn main() ({
                                     fn(term) -> term)(((((Result::<(), str>::Ok as
                                                 fn(()) -> Result<(), str> {Result::<(), str>::Ok})((() as
                                                 ())) as Result<(), str>).into::<Compat::BareOkResult>() as
-                                        {type error}) as term as {type error})) as term)] as
-                        [term])] as [[term]])) as term);
+                                        {type error}) as term as term)) as term)] as [term])] as
+                [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

@@ -18,12 +18,7 @@ Whitespace
 Ident
 Colon
 Colon
-OpenBrace
 Ident
-Comma
-Whitespace
-Ident
-CloseBrace
 Semi
 Whitespace
 Ident

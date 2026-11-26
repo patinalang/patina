@@ -1,9 +1,5 @@
 // Two impls of one generic trait for one type each get their own functions and vtable.
 
-trait From<T> {
-    fn from(t: T) -> Self;
-}
-
 struct Celsius(int);
 struct Fahrenheit(int);
 struct Kelvin(int);

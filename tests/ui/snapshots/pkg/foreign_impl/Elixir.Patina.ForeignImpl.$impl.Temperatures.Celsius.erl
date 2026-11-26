@@ -9,8 +9,8 @@
 -export_record([]).
 
 -export(['__info__'/1,
-         'temperatures::From<foreign_impl::LocalDegrees>::from'/2,
-         'temperatures::From<foreign_impl::LocalDegrees>::$patina_witness'/0]).
+         'core::convert::From<foreign_impl::LocalDegrees>::from'/2,
+         'core::convert::From<foreign_impl::LocalDegrees>::$patina_witness'/0]).
 
 '__info__'(functions) ->
     ordsets:subtract(lists:sort(module_info(exports)),
@@ -25,12 +25,12 @@
 '__info__'(deprecated) -> [];
 '__info__'(Key) -> module_info(Key).
 
-'temperatures::From<foreign_impl::LocalDegrees>::from'(_witness_From@0_0,
-                                                       _d@1_0) ->
+'core::convert::From<foreign_impl::LocalDegrees>::from'(_witness_From@0_0,
+                                                        _d@1_0) ->
     _0@2_0 = _d@1_0,
     _0@2_0.
 
-'temperatures::From<foreign_impl::LocalDegrees>::$patina_witness'() ->
-    {{fun 'Elixir.Patina.ForeignImpl.$impl.Temperatures.Celsius':'temperatures::From<foreign_impl::LocalDegrees>::from'/2},
+'core::convert::From<foreign_impl::LocalDegrees>::$patina_witness'() ->
+    {{fun 'Elixir.Patina.ForeignImpl.$impl.Temperatures.Celsius':'core::convert::From<foreign_impl::LocalDegrees>::from'/2},
      {},
      {}}.

@@ -1,11 +1,24 @@
-error[E0599]: no method named `into` found for enum `Result<T, E>` in the current scope
+error[E0107]: method takes 0 generic arguments but 1 generic argument was supplied
   --> tests/ui/src/custom_types/repr__12.pt:22:48
    |
-LL | pub enum Result<T, E> {
-   | --------------------- method `into` not found for this enum
-...
 LL |     println!("{:?}", Result::<(), str>::Ok(()).into::<Compat::BareOkResult>() as term);
-   |                                                ^^^^ method not found in `Result<(), str>`
+   |                                                ^^^^ expected 0 generic arguments
+   |
+note: method defined here, with 0 generic parameters
+  --> $PATINA_ROOT/patina_core/src/convert.pt:24:8
+   |
+LL |     fn into(self) -> T;
+   |        ^^^^
+help: consider moving this generic argument to the `Into` trait, which takes up to 1 argument
+   |
+LL -     println!("{:?}", Result::<(), str>::Ok(()).into::<Compat::BareOkResult>() as term);
+LL +     println!("{:?}", core::convert::Into::<Compat::BareOkResult>::into(Result::<(), str>::Ok(())) as term);
+   |
+help: remove the unnecessary generics
+   |
+LL -     println!("{:?}", Result::<(), str>::Ok(()).into::<Compat::BareOkResult>() as term);
+LL +     println!("{:?}", Result::<(), str>::Ok(()).into() as term);
+   |
 
 error[E0433]: cannot find type `Compat` in this scope
   --> tests/ui/src/custom_types/repr__12.pt:22:55
@@ -15,5 +28,5 @@ LL |     println!("{:?}", Result::<(), str>::Ok(()).into::<Compat::BareOkResult>
 
 error: aborting due to 2 previous errors
 
-Some errors have detailed explanations: E0433, E0599.
-For more information about an error, try `rustc --explain E0433`.
+Some errors have detailed explanations: E0107, E0433.
+For more information about an error, try `rustc --explain E0107`.

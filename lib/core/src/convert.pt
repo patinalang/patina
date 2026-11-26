@@ -1,0 +1,32 @@
+//! Traits for conversions between types.
+
+/// Conversion of a value into `Self`.
+///
+/// Implementing `From` also implements `Into` through a blanket impl.
+#[lang = "From"]
+#[rustc_diagnostic_item = "From"]
+pub trait From<T> {
+    fn from(value: T) -> Self;
+}
+
+impl<T> From<T> for T {
+    #[inline]
+    fn from(value: T) -> T {
+        value
+    }
+}
+
+/// Conversion of `self` into a value of type `T`; the reciprocal of `From`.
+///
+/// Implementing `From` also implements `Into` through a blanket impl.
+#[rustc_diagnostic_item = "Into"]
+pub trait Into<T> {
+    fn into(self) -> T;
+}
+
+impl<T, U: From<T>> Into<U> for T {
+    #[inline]
+    fn into(self) -> U {
+        U::from(self)
+    }
+}

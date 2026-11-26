@@ -21,6 +21,12 @@ error[E0599]: no associated function or constant named `from_str` found for type
    |
 LL |     let Ok(count) = int::from_str(count_str) else {
    |                          ^^^^^^^^ associated function or constant not found in `int`
+   |
+help: there is an associated function `from` with a similar name
+   |
+LL -     let Ok(count) = int::from_str(count_str) else {
+LL +     let Ok(count) = int::from(count_str) else {
+   |
 
 error: aborting due to 4 previous errors
 

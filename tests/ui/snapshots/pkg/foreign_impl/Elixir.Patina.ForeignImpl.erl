@@ -49,28 +49,28 @@ label_size() ->
 
 local_to_celsius(_n@0_0) ->
     _witness_From@1_0 =
-        'Elixir.Patina.ForeignImpl.$impl.Temperatures.Celsius':'temperatures::From<foreign_impl::LocalDegrees>::$patina_witness'(),
+        'Elixir.Patina.ForeignImpl.$impl.Temperatures.Celsius':'core::convert::From<foreign_impl::LocalDegrees>::$patina_witness'(),
     _witnesses_where_to_celsius@2_0 = {_witness_From@1_0},
     'Elixir.Patina.Temperatures':to_celsius(_witnesses_where_to_celsius@2_0,
                                             _n@0_0).
 
 fahrenheit_to_celsius(_f@0_0) ->
     _witness_From@1_0 =
-        'Elixir.Patina.Temperatures.Celsius':'temperatures::From<temperatures::Fahrenheit>::$patina_witness'(),
+        'Elixir.Patina.Temperatures.Celsius':'core::convert::From<temperatures::Fahrenheit>::$patina_witness'(),
     _witnesses_where_to_celsius@2_0 = {_witness_From@1_0},
     'Elixir.Patina.Temperatures':to_celsius(_witnesses_where_to_celsius@2_0,
                                             _f@0_0).
 
 kelvin_to_celsius(_k@0_0) ->
     _witness_From@1_0 =
-        'Elixir.Patina.MoreTemperatures.$impl.Temperatures.Celsius':'temperatures::From<more_temperatures::Kelvin>::$patina_witness'(),
+        'Elixir.Patina.MoreTemperatures.$impl.Temperatures.Celsius':'core::convert::From<more_temperatures::Kelvin>::$patina_witness'(),
     _witnesses_where_to_celsius@2_0 = {_witness_From@1_0},
     'Elixir.Patina.Temperatures':to_celsius(_witnesses_where_to_celsius@2_0,
                                             _k@0_0).
 
 rankine_to_celsius(_r@0_0) ->
     _witness_From@1_0 =
-        'Elixir.Patina.MoreTemperatures.$impl.Temperatures.Celsius':'temperatures::From<more_temperatures::Rankine>::$patina_witness'(),
+        'Elixir.Patina.MoreTemperatures.$impl.Temperatures.Celsius':'core::convert::From<more_temperatures::Rankine>::$patina_witness'(),
     _witnesses_where_to_celsius@2_0 = {_witness_From@1_0},
     'Elixir.Patina.Temperatures':to_celsius(_witnesses_where_to_celsius@2_0,
                                             _r@0_0).

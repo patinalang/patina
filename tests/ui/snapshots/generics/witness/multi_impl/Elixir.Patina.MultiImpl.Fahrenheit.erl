@@ -1,4 +1,4 @@
--file("tests/ui/src/generics/witness/multi_impl.pt", 8).
+-file("tests/ui/src/generics/witness/multi_impl.pt", 4).
 
 -module('Elixir.Patina.MultiImpl.Fahrenheit').
 

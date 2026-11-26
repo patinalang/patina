@@ -1,4 +1,4 @@
-use temperatures::{Celsius, From};
+use temperatures::Celsius;
 
 pub struct Kelvin(pub int);
 pub struct Rankine(pub int);
