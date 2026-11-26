@@ -384,7 +384,7 @@ fn is_reserved(sym: str) -> bool {
         "$pkg" | "{{root}}" | "_"
         | "as" | "break" | "const" | "continue" | "pkg" | "else" | "enum" | "extern"
         | "false" | "fn" | "for" | "if" | "impl" | "in" | "let" | "loop" | "match" | "mod"
-        | "move" | "mut" | "pub" | "receive" | "ref" | "return" | "self" | "Self" | "static"
+        | "move" | "mut" | "pub" | "receive" | "return" | "self" | "Self" | "static"
         | "struct" | "super" | "trait" | "true" | "type" | "unsafe" | "use" | "where"
         | "while"
         | "abstract" | "become" | "box" | "crate" | "do" | "final" | "fnref" | "macro" | "override"

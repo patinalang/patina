@@ -54,9 +54,8 @@ macro_rules! matches {
 use option::Option::{self, None, Some};
 
 pub mod convert;
-mod list_impl;
-mod map_impl;
 pub mod option;
+mod prim;
 pub mod proc_macro;
 pub mod result;
 
