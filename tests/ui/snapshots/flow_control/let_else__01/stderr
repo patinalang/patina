@@ -4,12 +4,6 @@ error[E0432]: unresolved import `str`
 LL | use str::FromStr;
    |     ^^^ `str` is a builtin type, not a module
 
-error[E0531]: cannot find tuple struct or tuple variant `Ok` in this scope
-  --> tests/ui/src/flow_control/let_else__01.pt:14:9
-   |
-LL |     let Ok(count) = int::from_str(count_str) else {
-   |         ^^ not found in this scope
-
 error[E0599]: no method named `split` found for type `str` in the current scope
   --> tests/ui/src/flow_control/let_else__01.pt:7:16
    |
@@ -28,7 +22,7 @@ LL -     let Ok(count) = int::from_str(count_str) else {
 LL +     let Ok(count) = int::from(count_str) else {
    |
 
-error: aborting due to 4 previous errors
+error: aborting due to 3 previous errors
 
-Some errors have detailed explanations: E0432, E0531, E0599.
+Some errors have detailed explanations: E0432, E0599.
 For more information about an error, try `rustc --explain E0432`.

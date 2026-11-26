@@ -27,24 +27,29 @@ fn multiply(first_number_str: str, second_number_str: str)
                 {
                 Ok(second_number) => {
                     ((Ok as
-                            {type error})(((first_number as {type error}) *
-                            (second_number as {type error}) as {type error})) as
-                        {type error})
+                            fn(int) -> core::result::Result<int, {type error}> {core::result::Result::<int, {type error}>::Ok})(((first_number
+                                as {type error}) * (second_number as {type error}) as int))
+                        as core::result::Result<int, {type error}>)
                 }
                 Err(e) =>
-                    ((Err as {type error})((e as {type error})) as
-                        {type error}),
+                    ((Err as
+                            fn({type error}) -> core::result::Result<{type error}, {type error}> {core::result::Result::<{type error}, {type error}>::Err})((e
+                            as {type error})) as
+                        core::result::Result<{type error}, {type error}>),
             } as {type error})
         }
         Err(e) =>
-            ((Err as {type error})((e as {type error})) as {type error}),
+            ((Err as
+                    fn({type error}) -> core::result::Result<{type error}, {type error}> {core::result::Result::<{type error}, {type error}>::Err})((e
+                    as {type error})) as
+                core::result::Result<{type error}, {type error}>),
     } as {type error})
 } as {type error})
 
 fn print(result:
         Result<int,
         ParseIntError>) ({
-    (match (result as {type error}) {
+    (match (result as core::result::Result<int, {type error}>) {
         Ok(n) =>
             // This still presents a reasonable answer.
 
@@ -53,8 +58,8 @@ fn print(result:
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("n is " as str),
                                 ((::core::patina_fmt::display as
-                                        fn(term) -> term)((n as {type error})) as term)] as [term])]
-                    as [[term]])) as term);
+                                        fn(term) -> term)((n as int)) as term)] as [term])] as
+                    [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
         }
         Err(e) => {
@@ -70,12 +75,18 @@ fn print(result:
 fn main() ({
     let twenty =
         ((multiply as
-                fn(str, str) -> {type error} {multiply})(("10" as str),
-            ("2" as str)) as {type error});
-    ((print as fn({type error}) {print})((twenty as {type error})) as ());
+                fn(str, str) -> core::result::Result<int, {type error}> {multiply})(("10"
+                as str), ("2" as str)) as
+            core::result::Result<int, {type error}>);
+    ((print as
+            fn(core::result::Result<int, {type error}>) {print})((twenty as
+            {type error})) as ());
     let tt =
         ((multiply as
-                fn(str, str) -> {type error} {multiply})(("t" as str),
-            ("2" as str)) as {type error});
-    ((print as fn({type error}) {print})((tt as {type error})) as ());
+                fn(str, str) -> core::result::Result<int, {type error}> {multiply})(("t"
+                as str), ("2" as str)) as
+            core::result::Result<int, {type error}>);
+    ((print as
+            fn(core::result::Result<int, {type error}>) {print})((tt as
+            {type error})) as ());
 } as ())

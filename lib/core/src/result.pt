@@ -1,0 +1,103 @@
+use pkg::convert::From;
+use pkg::option::Option::{self, None, Some};
+use pkg::{ControlFlow, FromResidual, Try};
+
+#[repr(tagged)]
+#[rustc_diagnostic_item = "Result"]
+pub enum Result<T, E> {
+    #[repr(tag = "ok")]
+    Ok(T),
+    #[repr(tag = "error")]
+    Err(E),
+}
+
+use Result::{Err, Ok};
+
+impl<T, E> Try for Result<T, E> {
+    type Output = T;
+    type Residual = Result<!, E>;
+
+    #[inline]
+    fn from_output(output: T) -> Result<T, E> {
+        Ok(output)
+    }
+
+    #[inline]
+    fn branch(self) -> ControlFlow<Result<!, E>, T> {
+        match self {
+            Ok(v) => ControlFlow::Continue(v),
+            Err(e) => ControlFlow::Break(Err(e)),
+        }
+    }
+}
+
+impl<T, E, F: From<E>> FromResidual<Result<!, E>> for Result<T, F> {
+    #[inline]
+    fn from_residual(residual: Result<!, E>) -> Result<T, F> {
+        let Err(e) = residual;
+        Err(F::from(e))
+    }
+}
+
+impl<T, E> Result<T, E> {
+    #[inline]
+    pub fn is_ok(self) -> bool {
+        match self {
+            Ok(_) => true,
+            Err(_) => false,
+        }
+    }
+
+    #[inline]
+    pub fn is_err(self) -> bool {
+        !self.is_ok()
+    }
+
+    #[inline]
+    pub fn ok(self) -> Option<T> {
+        match self {
+            Ok(v) => Some(v),
+            Err(_) => None,
+        }
+    }
+
+    #[inline]
+    pub fn map<U>(self, f: fn(T) -> U) -> Result<U, E> {
+        match self {
+            Ok(v) => Ok(f(v)),
+            Err(e) => Err(e),
+        }
+    }
+
+    #[inline]
+    pub fn map_err<F>(self, f: fn(E) -> F) -> Result<T, F> {
+        match self {
+            Ok(v) => Ok(v),
+            Err(e) => Err(f(e)),
+        }
+    }
+
+    #[inline]
+    pub fn and_then<U>(self, f: fn(T) -> Result<U, E>) -> Result<U, E> {
+        match self {
+            Ok(v) => f(v),
+            Err(e) => Err(e),
+        }
+    }
+
+    #[inline]
+    pub fn unwrap_or(self, default: T) -> T {
+        match self {
+            Ok(v) => v,
+            Err(_) => default,
+        }
+    }
+}
+
+impl<T> Result<T, !> {
+    #[inline]
+    pub fn into_ok(self) -> T {
+        let Ok(v) = self;
+        v
+    }
+}

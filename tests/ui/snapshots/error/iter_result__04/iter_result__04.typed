@@ -21,8 +21,10 @@ fn main() ({
                     core::ListIter<str>).map((|s|
                     ((s as {type error}).parse::<int>() as {type error}) as
                     {closure@tests/ui/src/error/iter_result__04.pt:8:14: 8:17}))
-                as {type error}).partition((Result::is_ok as {type error})) as
-            {type error});
+                as
+                {type error}).partition((Result::is_ok as
+                fn(core::result::Result<{type error}, {type error}>) -> bool {core::result::Result::<{type error}, {type error}>::is_ok}))
+            as {type error});
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("Numbers: " as str),

@@ -9,23 +9,23 @@ LL | |         .map(|s| s.parse::<int>())
    | |_________|
    |
 
-error[E0433]: cannot find type `Result` in this scope
-  --> tests/ui/src/error/iter_result__05.pt:9:20
-   |
-LL |         .partition(Result::is_ok);
-   |                    ^^^^^^ use of undeclared type `Result`
-
 error[E0599]: no method named `map` found for struct `core::ListIter<T>` in the current scope
   --> tests/ui/src/error/iter_result__05.pt:10:44
    |
 LL |     let numbers: [_] = numbers.into_iter().map(Result::unwrap).collect();
    |                                            ^^^ method not found in `core::ListIter<_>`
 
-error[E0433]: cannot find type `Result` in this scope
-  --> tests/ui/src/error/iter_result__05.pt:10:48
+error[E0599]: no variant, associated function, or constant named `unwrap` found for enum `core::result::Result<T, E>` in the current scope
+  --> tests/ui/src/error/iter_result__05.pt:10:56
    |
 LL |     let numbers: [_] = numbers.into_iter().map(Result::unwrap).collect();
-   |                                                ^^^^^^ use of undeclared type `Result`
+   |                                                        ^^^^^^ variant, associated function, or constant not found in `core::result::Result<_, _>`
+   |
+help: there is a method `unwrap_or` with a similar name
+  --> $PATINA_ROOT/patina_core/src/result.pt:89:5
+   |
+LL |     pub fn unwrap_or(self, default: T) -> T {
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error[E0599]: no method named `map` found for struct `core::ListIter<T>` in the current scope
   --> tests/ui/src/error/iter_result__05.pt:11:42
@@ -33,13 +33,18 @@ error[E0599]: no method named `map` found for struct `core::ListIter<T>` in the 
 LL |     let errors: [_] = errors.into_iter().map(Result::unwrap_err).collect();
    |                                          ^^^ method not found in `core::ListIter<_>`
 
-error[E0433]: cannot find type `Result` in this scope
-  --> tests/ui/src/error/iter_result__05.pt:11:46
+error[E0599]: no variant, associated function, or constant named `unwrap_err` found for enum `core::result::Result<T, E>` in the current scope
+  --> tests/ui/src/error/iter_result__05.pt:11:54
    |
 LL |     let errors: [_] = errors.into_iter().map(Result::unwrap_err).collect();
-   |                                              ^^^^^^ use of undeclared type `Result`
+   |                                                      ^^^^^^^^^^ variant, associated function, or constant not found in `core::result::Result<_, _>`
+   |
+help: there is a method `unwrap_or` with a similar name
+  --> $PATINA_ROOT/patina_core/src/result.pt:89:5
+   |
+LL |     pub fn unwrap_or(self, default: T) -> T {
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-error: aborting due to 6 previous errors
+error: aborting due to 5 previous errors
 
-Some errors have detailed explanations: E0433, E0599.
-For more information about an error, try `rustc --explain E0433`.
+For more information about this error, try `rustc --explain E0599`.

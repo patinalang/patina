@@ -58,7 +58,7 @@ fn get_count_item(s: str)
                     as term).cast_unchecked::<!>() as !)
         } as {type error});
     };
-    (((count as {type error}), (item as str)) as (int, str))
+    (((count as int), (item as str)) as (int, str))
 } as (int, str))
 fn main() ({
     (match ((((get_count_item as

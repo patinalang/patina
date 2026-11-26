@@ -23,6 +23,7 @@ mod list_impl;
 mod map_impl;
 pub mod option;
 pub mod proc_macro;
+pub mod result;
 
 pub extern mod erlang;
 pub extern mod io;
@@ -704,6 +705,7 @@ impl Timeout {
 /// Imported with `#[prelude_import]`.
 pub mod prelude {
     pub use pkg::option::Option::{self, None, Some};
+    pub use pkg::result::Result::{self, Ok, Err};
     pub use pkg::{
         Copy, Fn, FnOnce, IntoIterator, Iterator, NativeEq, PartialEq, PartialOrd, Timeout,
         convert::{From, Into},

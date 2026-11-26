@@ -16,37 +16,7 @@ error: cannot find derive macro `Debug` in this scope
 LL | #[derive(Debug)]
    |          ^^^^^
 
-error[E0425]: cannot find type `Result` in this scope
-  --> tests/ui/src/conversion/string__03.pt:14:28
-   |
-LL |     fn from_str(s: str) -> Result<Self, Self::Err> {
-   |                            ^^^^^^ not found in this scope
+error: aborting due to 3 previous errors
 
-error[E0531]: cannot find tuple struct or tuple variant `Ok` in this scope
-  --> tests/ui/src/conversion/string__03.pt:16:13
-   |
-LL |             Ok(num) => Ok(Circle{ radius: num }),
-   |             ^^ not found in this scope
-
-error[E0531]: cannot find tuple struct or tuple variant `Err` in this scope
-  --> tests/ui/src/conversion/string__03.pt:17:13
-   |
-LL |             Err(e) => Err(e),
-   |             ^^^ not found in this scope
-
-error[E0425]: cannot find function, tuple struct or tuple variant `Ok` in this scope
-  --> tests/ui/src/conversion/string__03.pt:16:24
-   |
-LL |             Ok(num) => Ok(Circle{ radius: num }),
-   |                        ^^ not found in this scope
-
-error[E0425]: cannot find function, tuple struct or tuple variant `Err` in this scope
-  --> tests/ui/src/conversion/string__03.pt:17:23
-   |
-LL |             Err(e) => Err(e),
-   |                       ^^^ not found in this scope
-
-error: aborting due to 8 previous errors
-
-Some errors have detailed explanations: E0425, E0432, E0433, E0531.
-For more information about an error, try `rustc --explain E0425`.
+Some errors have detailed explanations: E0432, E0433.
+For more information about an error, try `rustc --explain E0432`.

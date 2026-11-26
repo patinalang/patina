@@ -23,17 +23,21 @@ fn main()
     let number_str = ("10" as str);
     let number =
         (match ((number_str as str).parse::<int>() as {type error}) {
-            Ok(number) => (number as {type error}),
+            Ok(number) => (number as term),
             Err(e) =>
-                (return ((Err as {type error})((e as {type error})) as
-                        {type error}) as !),
-        } as {type error});
+                (return ((Err as
+                            fn({type error}) -> core::result::Result<{type error}, {type error}> {core::result::Result::<{type error}, {type error}>::Err})((e
+                            as {type error})) as
+                        core::result::Result<{type error}, {type error}>) as !),
+        } as term);
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([((::core::patina_fmt::display as
-                                    fn(term) -> term)((number as {type error})) as term)] as
-                        [term])] as [[term]])) as term);
+                                    fn(term) -> term)((number as term)) as term)] as [term])] as
+                [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
-    ((Ok as {type error})((() as ())) as {type error})
+    ((Ok as
+            fn(()) -> core::result::Result<(), {type error}> {core::result::Result::<(), {type error}>::Ok})((()
+            as ())) as core::result::Result<(), {type error}>)
 } as {type error})

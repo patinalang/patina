@@ -40,14 +40,14 @@ fn multiply(first_number_str: str, second_number_str: str)
 // Here, the alias again allows us to save some space.
 fn print(result:
         AliasedResult<int>) ({
-    (match (result as {type error}) {
+    (match (result as core::result::Result<int, {type error}>) {
         Ok(n) =>
             {
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("n is " as str),
                                 ((::core::patina_fmt::display as
-                                        fn(term) -> term)((n as {type error})) as term)] as [term])]
-                    as [[term]])) as term);
+                                        fn(term) -> term)((n as int)) as term)] as [term])] as
+                    [[term]])) as term);
             ((::core::io::nl as fn() -> term)() as term);
         }
         Err(e) => {
@@ -62,11 +62,13 @@ fn print(result:
 } as ())
 fn main() ({
     ((print as
-            fn({type error}) {print})(((multiply as
-                fn(str, str) -> {type error} {multiply})(("10" as str),
-            ("2" as str)) as {type error})) as ());
+            fn(core::result::Result<int, {type error}>) {print})(((multiply as
+                fn(str, str) -> core::result::Result<int, {type error}> {multiply})(("10"
+                as str), ("2" as str)) as
+            core::result::Result<int, {type error}>)) as ());
     ((print as
-            fn({type error}) {print})(((multiply as
-                fn(str, str) -> {type error} {multiply})(("t" as str),
-            ("2" as str)) as {type error})) as ());
+            fn(core::result::Result<int, {type error}>) {print})(((multiply as
+                fn(str, str) -> core::result::Result<int, {type error}> {multiply})(("t"
+                as str), ("2" as str)) as
+            core::result::Result<int, {type error}>)) as ());
 } as ())
