@@ -1,0 +1,113 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern pkg core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use core::prelude::*;
+
+// Arms and or-pattern alternatives that can't match any value are dropped.
+
+enum E { A(!, int), B(int), C, }
+
+fn option_none_first()
+    ->
+        int ({
+    let o: Option<!> = (None as core::option::Option<!>);
+    (match (o as core::option::Option<!>) {
+        None => (1 as int),
+        Some(x) => (match (x as !) { } as !),
+    } as int)
+} as int)
+
+fn option_some_first()
+    ->
+        int ({
+    let o: Option<!> = (None as core::option::Option<!>);
+    (match (o as core::option::Option<!>) {
+        Some(x) => (match (x as !) { } as !),
+        None => (1 as int),
+    } as int)
+} as int)
+
+fn e_value(e: E)
+    ->
+        int ({
+    (match (e as E) {
+        E::A(_, n) | E::B(n) => (n as int),
+        E::C => (0 as int),
+    } as int)
+} as int)
+
+fn or_pattern_b(n: int)
+    ->
+        int ({
+    ((e_value as
+            fn(E) -> int {e_value})(((E::B as fn(int) -> E {E::B})((n as int))
+            as E)) as int)
+} as int)
+
+fn or_pattern_c()
+    ->
+        int ({ ((e_value as fn(E) -> int {e_value})((E::C as E)) as int) } as
+    int)
+
+#[attr = Inline(Hint)]
+fn is_some<T>(o: Option<T>)
+    ->
+        bool ({
+    (match (o as core::option::Option<T>) {
+        Some(_) => (true as bool),
+        None => (false as bool),
+    } as bool)
+} as bool)
+
+fn inlined_none()
+    ->
+        bool ({
+    let o: Option<!> = (None as core::option::Option<!>);
+    ((is_some as
+            fn(core::option::Option<!>) -> bool {is_some::<!>})((o as
+            core::option::Option<!>)) as bool)
+} as bool)
+
+fn generic_some(n: int)
+    ->
+        bool ({
+    ((is_some as
+            fn(core::option::Option<int>) -> bool {is_some::<int>})(((Some as
+                fn(int) -> core::option::Option<int> {core::option::Option::<int>::Some})((n
+                as int)) as core::option::Option<int>)) as bool)
+} as bool)
+
+fn construct_some()
+    ->
+        Option<!> ({
+    ((Some as
+            fn(!) -> core::option::Option<!> {core::option::Option::<!>::Some})(
+
+        (unsafe {
+            (((::core::erlang::error as
+                        fn(term, term, term) -> term)(((::core::Panic::new as
+                            fn(str) -> core::Panic {core::Panic::new})(("boom" as str))
+                        as core::Panic), (a"none" as atom),
+                    ([(((a"error_info" as atom),
+                                (#{(a"module" as atom) =>
+                                        (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
+                                as (atom, #{atom => atom}))] as [(atom, #{atom => atom})]))
+                    as term).cast_unchecked::<!>() as !)
+        } as !)) as core::option::Option<!>)
+} as core::option::Option<!>)
+fn no_possible_arms(r: Result<!, !>)
+    ->
+        int ({
+    (match (r as core::result::Result<!, !>) {
+        Result::Ok(x) => (x as !),
+        Result::Err(e) => (e as !),
+    } as int)
+} as int)

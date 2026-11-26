@@ -154,6 +154,7 @@ impl<'tcx> TyCtxt<'tcx> {
             ty::FnDef(..) | ty::FnPtr(..) => ErlShape::Fun,
             ty::Adt(def, args) => self.erl_shape_of_adt(*def, args, visiting),
             ty::Term | ty::Param(_) | ty::Alias(..) | ty::Error(_) => ErlShape::Any,
+            ty::Never => ErlShape::Union(Box::new([])),
             _ => unreachable!("not a thing in Patina"),
         }
     }

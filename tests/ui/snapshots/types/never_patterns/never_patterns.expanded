@@ -1,0 +1,55 @@
+#![allow(internal_features)]
+#![feature(no_core, rustc_attrs, decl_macro, prelude_import)]
+#![no_std]
+#![no_core]
+
+#[allow(unused_imports)]
+#[macro_use]
+extern pkg core;
+
+#[allow(unused_imports)]
+#[prelude_import]
+use core::prelude::*;
+
+// Arms and or-pattern alternatives that can't match any value are dropped.
+
+enum E { A(!, int), B(int), C, }
+
+pub fn option_none_first() -> int {
+    let o: Option<!> = None;
+    match o { None => 1, Some(x) => match x {}, }
+}
+
+pub fn option_some_first() -> int {
+    let o: Option<!> = None;
+    match o { Some(x) => match x {}, None => 1, }
+}
+
+fn e_value(e: E) -> int { match e { E::A(_, n) | E::B(n) => n, E::C => 0, } }
+
+pub fn or_pattern_b(n: int) -> int { e_value(E::B(n)) }
+
+pub fn or_pattern_c() -> int { e_value(E::C) }
+
+#[inline]
+fn is_some<T>(o: Option<T>) -> bool {
+    match o { Some(_) => true, None => false, }
+}
+
+pub fn inlined_none() -> bool { let o: Option<!> = None; is_some(o) }
+
+pub fn generic_some(n: int) -> bool { is_some(Some(n)) }
+
+pub fn construct_some() -> Option<!> {
+    Some(
+
+        unsafe {
+            ::core::erlang::error(::core::Panic::new("boom"), a"none",
+                    [(a"error_info",
+                                #{a"module" =>
+                                        a"Elixir.Patina.Core.Panic"})]).cast_unchecked::<!>()
+        })
+}
+pub fn no_possible_arms(r: Result<!, !>) -> int {
+    match r { Result::Ok(x) => x, Result::Err(e) => e, }
+}

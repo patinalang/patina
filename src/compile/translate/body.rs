@@ -7,7 +7,7 @@ use rustc_middle::erl::etir::{
 };
 use rustc_middle::erl::{ErlCallKind, ErlModuleResolution};
 use rustc_middle::span_bug;
-use rustc_middle::ty::{Ty, TyCtxt};
+use rustc_middle::ty::{Ty, TyCtxt, TypingEnv};
 use rustc_span::{Span, Symbol, kw, sym};
 
 use crate::compile::translate::Translator;
@@ -75,6 +75,7 @@ pub(super) struct BodyCx<'a, 'tcx, 'arena> {
     pub owner: DefId,
     pub etir: &'tcx etir::Body<'tcx>,
     pub scopes: &'a mut Scopes,
+    pub typing_env: TypingEnv<'tcx>,
 }
 
 impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
@@ -84,7 +85,9 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         etir: &'tcx etir::Body<'tcx>,
         scopes: &'a mut Scopes,
     ) -> Self {
-        BodyCx { translator, owner, etir, scopes }
+        let tcx = translator.tcx;
+        let typing_env = TypingEnv::post_analysis(tcx, tcx.typeck_root_def_id(owner));
+        BodyCx { translator, owner, etir, scopes, typing_env }
     }
 
     pub(super) fn tcx(&self) -> TyCtxt<'tcx> {

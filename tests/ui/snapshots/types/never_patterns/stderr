@@ -1,0 +1,22 @@
+warning: unreachable call
+  --> tests/ui/src/types/never_patterns.pt:58:5
+   |
+LL |     Some(panic!("boom"))
+   |     ^^^^ -------------- any code following this expression is unreachable
+   |     |
+   |     unreachable call
+   |
+   = note: `#[warn(unreachable_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: variant `A` is never constructed
+  --> tests/ui/src/types/never_patterns.pt:4:5
+   |
+LL | enum E {
+   |      - variant in this enum
+LL |     A(!, int),
+   |     ^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: 2 warnings emitted
+

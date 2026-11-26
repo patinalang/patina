@@ -18,6 +18,19 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
     ) -> Patterns<'arena> {
         let afb = &self.translator.afb;
 
+        if adt
+            .fields
+            .iter()
+            .any(|field| field.ty.is_privately_uninhabited(self.tcx(), self.typing_env))
+        {
+            // An uninhibited variant (such as when matching `Option<!>`) can never match,
+            // so it's cleaner to never emit a match clause for it.
+            for field in &adt.fields {
+                self.translate_pattern(field.pattern);
+            }
+            return Patterns::new();
+        }
+
         match adt.repr {
             AdtRepr::Atom { tag } => afb.pat_atom(pat.span, tag).into(),
             AdtRepr::Tagged { tag } => self.translate_tagged_pattern(pat, adt, tag),
