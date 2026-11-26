@@ -55,6 +55,56 @@ error[E0425]: cannot find function `missing` in module `pkg::first`
 LL |     pkg::first::missing();
    |                 ^^^^^^^ not found in `pkg::first`
 
+error[E0603]: enum `Option` is private
+  --> tests/ui/src/mod/errors/pkg_keyword.pt:89:19
+   |
+LL |     let _: core2::Option<int> = core2::Option::Some(call_visible!());
+   |                   ^^^^^^ private enum
+   |
+note: the enum `Option` is defined here
+  --> $PATINA_ROOT/patina_core/src/core.pt:19:22
+   |
+LL | use option::Option::{self, None, Some};
+   |                      ^^^^
+help: consider importing one of these enums instead
+   |
+LL -     let _: core2::Option<int> = core2::Option::Some(call_visible!());
+LL +     let _: pkg::core2::prelude::Option<int> = core2::Option::Some(call_visible!());
+   |
+LL -     let _: core2::Option<int> = core2::Option::Some(call_visible!());
+LL +     let _: core::prelude::Option<int> = core2::Option::Some(call_visible!());
+   |
+help: import `Option` directly
+   |
+LL -     let _: core2::Option<int> = core2::Option::Some(call_visible!());
+LL +     let _: core::option::Option = core2::Option::Some(call_visible!());
+   |
+
+error[E0603]: enum `Option` is private
+  --> tests/ui/src/mod/errors/pkg_keyword.pt:89:40
+   |
+LL |     let _: core2::Option<int> = core2::Option::Some(call_visible!());
+   |                                        ^^^^^^ private enum
+   |
+note: the enum `Option` is defined here
+  --> $PATINA_ROOT/patina_core/src/core.pt:19:22
+   |
+LL | use option::Option::{self, None, Some};
+   |                      ^^^^
+help: consider importing one of these tuple variants instead
+   |
+LL -     let _: core2::Option<int> = core2::Option::Some(call_visible!());
+LL +     let _: core2::Option<int> = pkg::core2::prelude::Some(call_visible!());
+   |
+LL -     let _: core2::Option<int> = core2::Option::Some(call_visible!());
+LL +     let _: core2::Option<int> = core::prelude::Some(call_visible!());
+   |
+help: import `Option` directly
+   |
+LL -     let _: core2::Option<int> = core2::Option::Some(call_visible!());
+LL +     let _: core2::Option<int> = core::option::Option(call_visible!());
+   |
+
 warning: unused import: `pkg`
   --> tests/ui/src/mod/errors/pkg_keyword.pt:68:5
    |
@@ -116,7 +166,7 @@ LL | #[doc(pkg::alias)]
    |
    = note: `#[warn(invalid_doc_attributes)]` on by default
 
-error: aborting due to 8 previous errors; 2 warnings emitted
+error: aborting due to 10 previous errors; 2 warnings emitted
 
-Some errors have detailed explanations: E0308, E0425, E0433, E0539.
+Some errors have detailed explanations: E0308, E0425, E0433, E0539, E0603.
 For more information about an error, try `rustc --explain E0308`.

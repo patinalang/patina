@@ -22,23 +22,24 @@ fn next_birthday(current_age: Option<int>)
     // gets assigned to `next_age`
     let next_age: int =
         ((match ((branch as
-                        fn(core::Option<int>) -> core::ControlFlow<<core::Option<int> as core::Try>::Residual, <core::Option<int> as core::Try>::Output> {<core::Option<int> as core::Try>::branch})((current_age
-                        as core::Option<int>)) as
-                    core::ControlFlow<core::Option<!>, int>) {
+                        fn(core::option::Option<int>) -> core::ControlFlow<<core::option::Option<int> as core::Try>::Residual, <core::option::Option<int> as core::Try>::Output> {<core::option::Option<int> as core::Try>::branch})((current_age
+                        as core::option::Option<int>)) as
+                    core::ControlFlow<core::option::Option<!>, int>) {
                 Break {  0: residual } => #[allow(unreachable_code)]
                     (return ((from_residual as
-                                fn(core::Option<!>) -> core::Option<str> {<core::Option<str> as core::FromResidual<core::Option<!>>>::from_residual})((residual
-                                as core::Option<!>)) as core::Option<str>) as !),
+                                fn(core::option::Option<!>) -> core::option::Option<str> {<core::option::Option<str> as core::FromResidual<core::option::Option<!>>>::from_residual})((residual
+                                as core::option::Option<!>)) as core::option::Option<str>)
+                        as !),
                 Continue {  0: val } => #[allow(unreachable_code)]
                     (val as int),
             } as int) + (1 as int) as int);
     ((Some as
-            fn(str) -> core::Option<str> {core::Option::<str>::Some})((unsafe
+            fn(str) -> core::option::Option<str> {core::option::Option::<str>::Some})((unsafe
             {
             (((::core::unicode::characters_to_binary as
                         fn(term) -> term)(([("Next year I will be " as str),
                             ((::core::patina_fmt::display as
                                     fn(term) -> term)((next_age as int)) as term)] as [term]))
                     as term).cast_unchecked::<str>() as str)
-        } as str)) as core::Option<str>)
-} as core::Option<str>)
+        } as str)) as core::option::Option<str>)
+} as core::option::Option<str>)

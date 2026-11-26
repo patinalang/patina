@@ -4,21 +4,21 @@ error: cannot find derive macro `Debug` in this scope
 LL | #[derive(Debug)]
    |          ^^^^^
 
-error[E0599]: no method named `get_or_insert_with` found for enum `core::Option<T>` in the current scope
+error[E0599]: no method named `get_or_insert_with` found for enum `core::option::Option<T>` in the current scope
   --> tests/ui/src/error/option_unwrap/defaults__04.pt:14:10
    |
 LL |       let first_available_fruit = my_fruit
    |  _________________________________-
 LL | |         .get_or_insert_with(get_lemon_as_fallback);
-   | |         -^^^^^^^^^^^^^^^^^^ method not found in `core::Option<Fruit>`
+   | |         -^^^^^^^^^^^^^^^^^^ method not found in `core::option::Option<Fruit>`
    | |_________|
    |
 
-error[E0599]: no method named `get_or_insert_with` found for enum `core::Option<T>` in the current scope
+error[E0599]: no method named `get_or_insert_with` found for enum `core::option::Option<T>` in the current scope
   --> tests/ui/src/error/option_unwrap/defaults__04.pt:23:36
    |
 LL |     let should_be_apple = my_apple.get_or_insert_with(get_lemon_as_fallback);
-   |                                    ^^^^^^^^^^^^^^^^^^ method not found in `core::Option<Fruit>`
+   |                                    ^^^^^^^^^^^^^^^^^^ method not found in `core::option::Option<Fruit>`
 
 error: aborting due to 3 previous errors
 

@@ -28,9 +28,9 @@ fn main() ({
                 mut iter =>
                     (loop {
                         (match ((next as
-                                    fn(core::RangeInclusive<int>) -> core::Option<(<core::RangeInclusive<int> as core::Iterator>::Item, core::RangeInclusive<int>)> {<core::RangeInclusive<int> as core::Iterator>::next})((iter
+                                    fn(core::RangeInclusive<int>) -> core::option::Option<(<core::RangeInclusive<int> as core::Iterator>::Item, core::RangeInclusive<int>)> {<core::RangeInclusive<int> as core::Iterator>::next})((iter
                                     as core::RangeInclusive<int>)) as
-                                core::Option<(int, core::RangeInclusive<int>)>) {
+                                core::option::Option<(int, core::RangeInclusive<int>)>) {
                             None {} => (break as !),
                             Some {  0: (n, next) } => {
                                 (iter = (next as core::RangeInclusive<int>) as

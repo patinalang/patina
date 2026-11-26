@@ -18,14 +18,14 @@ fn main() ({
     // All have type `Option<int>`
     let number =
         ((Some as
-                fn(int) -> core::Option<int> {core::Option::<int>::Some})((7
-                as int)) as core::Option<int>);
-    let letter: Option<int> = (None as core::Option<int>);
-    let emoticon: Option<int> = (None as core::Option<int>);
+                fn(int) -> core::option::Option<int> {core::option::Option::<int>::Some})((7
+                as int)) as core::option::Option<int>);
+    let letter: Option<int> = (None as core::option::Option<int>);
+    let emoticon: Option<int> = (None as core::option::Option<int>);
 
     // The `if let` construct reads: "if `let` destructures `number` into
     // `Some(i)`, evaluate the block (`{}`).
-    (if (let Some(i) = (number as core::Option<int>) as bool) {
+    (if (let Some(i) = (number as core::option::Option<int>) as bool) {
 
         // If you need to specify a failure, use an else:
         // Destructure failed. Change to the failure case.
@@ -43,7 +43,7 @@ fn main() ({
             ((::core::io::nl as fn() -> term)() as term);
         } as ());
     } as ())
-    (if (let Some(i) = (letter as core::Option<int>) as bool) {
+    (if (let Some(i) = (letter as core::option::Option<int>) as bool) {
         ({
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("Matched " as str),
@@ -60,7 +60,7 @@ fn main() ({
         } as ());
     } as ())
     let i_like_letters = (false as bool);
-    (if (let Some(i) = (emoticon as core::Option<int>) as bool) {
+    (if (let Some(i) = (emoticon as core::option::Option<int>) as bool) {
         ({
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("Matched " as str),

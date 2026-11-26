@@ -17,11 +17,12 @@ use core::prelude::*;
 enum Fruit { Apple, Orange, Banana, Kiwi, Lemon, }
 
 fn main() ({
-    let mut my_fruit: Option<Fruit> = (None as core::Option<Fruit>);
+    let mut my_fruit: Option<Fruit> = (None as core::option::Option<Fruit>);
     let apple = (Fruit::Apple as Fruit);
     let first_available_fruit =
-        ((my_fruit as core::Option<Fruit>).get_or_insert((apple as Fruit)) as
-            {type error});
+        ((my_fruit as
+                core::option::Option<Fruit>).get_or_insert((apple as Fruit))
+            as {type error});
     // first_available_fruit is: Apple
     // my_fruit is: Some(Apple)
     //println!("Variable named `apple` is moved: {:?}", apple);
@@ -38,8 +39,8 @@ fn main() ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("my_fruit is: " as str),
                             ((::core::patina_fmt::debug as
-                                    fn(term) -> term)((my_fruit as core::Option<Fruit>)) as
-                                term)] as [term])] as [[term]])) as term);
+                                    fn(term) -> term)((my_fruit as core::option::Option<Fruit>))
+                                as term)] as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

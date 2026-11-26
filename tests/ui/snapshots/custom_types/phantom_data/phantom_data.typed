@@ -158,17 +158,17 @@ impl <K, V> MapIter<K, V> {
                             ((value as term).cast_unchecked() as V)) as (K, V))
                     } as (K, V));
                 ((Some as
-                        fn(((K, V), MapIter<K, V>)) -> core::Option<((K, V), MapIter<K, V>)> {core::Option::<((K, V), MapIter<K, V>)>::Some})((((entry
+                        fn(((K, V), MapIter<K, V>)) -> core::option::Option<((K, V), MapIter<K, V>)> {core::option::Option::<((K, V), MapIter<K, V>)>::Some})((((entry
                             as (K, V)),
                         ((MapIter as
                                 fn(term, core::PhantomData<(K, V)>) -> MapIter<K, V> {MapIter::<K, V>})((rest
                                 as term), (PhantomData as core::PhantomData<(K, V)>)) as
                             MapIter<K, V>)) as ((K, V), MapIter<K, V>))) as
-                    core::Option<((K, V), MapIter<K, V>)>)
+                    core::option::Option<((K, V), MapIter<K, V>)>)
             }
-            _ => (None as core::Option<((K, V), MapIter<K, V>)>),
-        } as core::Option<((K, V), MapIter<K, V>)>)
-    } as core::Option<((K, V), MapIter<K, V>)>)
+            _ => (None as core::option::Option<((K, V), MapIter<K, V>)>),
+        } as core::option::Option<((K, V), MapIter<K, V>)>)
+    } as core::option::Option<((K, V), MapIter<K, V>)>)
 }
 
 fn map_iter(map: #{str => int})
@@ -190,7 +190,7 @@ fn sum_values(map: #{str => int})
     let mut total = (0 as int);
     (loop {
         (match ((iter as MapIter<str, int>).next() as
-                core::Option<((str, int), MapIter<str, int>)>) {
+                core::option::Option<((str, int), MapIter<str, int>)>) {
             None => (break as !),
             Some(((_, value), rest)) => {
                 (iter = (rest as MapIter<str, int>) as MapIter<str, int>);
@@ -206,14 +206,14 @@ fn first_entry(iter: MapIter<str, int>)
         Option<(str,
         int)> ({
     (match ((iter as MapIter<str, int>).next() as
-            core::Option<((str, int), MapIter<str, int>)>) {
+            core::option::Option<((str, int), MapIter<str, int>)>) {
         Some((entry, _)) =>
             ((Some as
-                    fn((str, int)) -> core::Option<(str, int)> {core::Option::<(str, int)>::Some})((entry
-                    as (str, int))) as core::Option<(str, int)>),
-        None => (None as core::Option<(str, int)>),
-    } as core::Option<(str, int)>)
-} as core::Option<(str, int)>)
+                    fn((str, int)) -> core::option::Option<(str, int)> {core::option::Option::<(str, int)>::Some})((entry
+                    as (str, int))) as core::option::Option<(str, int)>),
+        None => (None as core::option::Option<(str, int)>),
+    } as core::option::Option<(str, int)>)
+} as core::option::Option<(str, int)>)
 
 // Several runtime fields: a native record without the phantom field.
 struct Record<T> {
@@ -354,15 +354,15 @@ fn materialized_marker()
     ->
         Option<PhantomData<int>> ({
     ((Some as
-            fn(core::PhantomData<int>) -> core::Option<core::PhantomData<int>> {core::Option::<core::PhantomData<int>>::Some})((PhantomData
+            fn(core::PhantomData<int>) -> core::option::Option<core::PhantomData<int>> {core::option::Option::<core::PhantomData<int>>::Some})((PhantomData
             as core::PhantomData<int>)) as
-        core::Option<core::PhantomData<int>>)
-} as core::Option<core::PhantomData<int>>)
+        core::option::Option<core::PhantomData<int>>)
+} as core::option::Option<core::PhantomData<int>>)
 
 fn is_some_marker(value: Option<PhantomData<int>>)
     ->
         bool ({
-    (match (value as core::Option<core::PhantomData<int>>) {
+    (match (value as core::option::Option<core::PhantomData<int>>) {
         Some(_) => (true as bool),
         None => (false as bool),
     } as bool)

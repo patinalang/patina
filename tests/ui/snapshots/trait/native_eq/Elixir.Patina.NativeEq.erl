@@ -142,19 +142,18 @@ eq_by_parity_maps_eq(_a@0_0, _b@1_0) ->
 eq_by_parity_options_eq(_a@0_0, _b@1_0) ->
     _witness_PartialEq@2_0 =
         'Elixir.Patina.NativeEq.EqByParity':'core::PartialEq::$patina_witness'(),
-    _witnesses_where_PartialEq@3_0 =
-        {_witness_PartialEq@2_0},
-    _witness_PartialEq@4_0 =
-        'Elixir.Patina.Core.Option':'core::PartialEq::$patina_witness'(_witnesses_where_PartialEq@3_0),
-    'Elixir.Patina.Core.Option':'core::PartialEq::eq'(_witness_PartialEq@4_0,
-                                                      begin
-                                                          _0@5_0 = _a@0_0,
-                                                          _0@5_0
-                                                      end,
-                                                      begin
-                                                          _0@6_0 = _b@1_0,
-                                                          _0@6_0
-                                                      end).
+    _self@4_0 = begin _0@3_0 = _a@0_0, _0@3_0 end,
+    _other@6_0 = begin _0@5_0 = _b@1_0, _0@5_0 end,
+    case {_self@4_0, _other@6_0} of
+        {_value@8_0 = _left@7_0, _value@10_0 = _right@9_0}
+            when erlang:is_integer(_value@8_0),
+                 erlang:is_integer(_value@10_0) ->
+            'Elixir.Patina.NativeEq.EqByParity':'core::PartialEq::eq'(_witness_PartialEq@2_0,
+                                                                      _left@7_0,
+                                                                      _right@9_0);
+        {nil, nil} -> true;
+        _ -> false
+    end.
 
 generic_eq(_witnesses_where_generic_eq@0_0, _a@1_0,
            _b@2_0) ->

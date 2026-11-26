@@ -19,18 +19,19 @@ enum Fruit { Apple, Orange, Banana, Kiwi, Lemon, }
 fn main() ({
     let apple =
         ((Some as
-                fn(Fruit) -> core::Option<Fruit> {core::Option::<Fruit>::Some})((Fruit::Apple
-                as Fruit)) as core::Option<Fruit>);
+                fn(Fruit) -> core::option::Option<Fruit> {core::option::Option::<Fruit>::Some})((Fruit::Apple
+                as Fruit)) as core::option::Option<Fruit>);
     let orange =
         ((Some as
-                fn(Fruit) -> core::Option<Fruit> {core::Option::<Fruit>::Some})((Fruit::Orange
-                as Fruit)) as core::Option<Fruit>);
-    let no_fruit: Option<Fruit> = (None as core::Option<Fruit>);
+                fn(Fruit) -> core::option::Option<Fruit> {core::option::Option::<Fruit>::Some})((Fruit::Orange
+                as Fruit)) as core::option::Option<Fruit>);
+    let no_fruit: Option<Fruit> = (None as core::option::Option<Fruit>);
 
     let first_available_fruit =
         (((no_fruit as
-                    core::Option<Fruit>).or((orange as core::Option<Fruit>)) as
-                {type error}).or((apple as core::Option<Fruit>)) as
+                    core::option::Option<Fruit>).or((orange as
+                    core::option::Option<Fruit>)) as
+                {type error}).or((apple as core::option::Option<Fruit>)) as
             {type error});
     // first_available_fruit: Some(Orange)
 

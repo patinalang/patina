@@ -38,27 +38,30 @@ impl Person {
         // It would take a lot more code - try writing it yourself and see which
         // is easier.
         ((match ((branch as
-                        fn(core::Option<PhoneNumber>) -> core::ControlFlow<<core::Option<PhoneNumber> as core::Try>::Residual, <core::Option<PhoneNumber> as core::Try>::Output> {<core::Option<PhoneNumber> as core::Try>::branch})(((match ((branch
+                        fn(core::option::Option<PhoneNumber>) -> core::ControlFlow<<core::option::Option<PhoneNumber> as core::Try>::Residual, <core::option::Option<PhoneNumber> as core::Try>::Output> {<core::option::Option<PhoneNumber> as core::Try>::branch})(((match ((branch
                                     as
-                                    fn(core::Option<Job>) -> core::ControlFlow<<core::Option<Job> as core::Try>::Residual, <core::Option<Job> as core::Try>::Output> {<core::Option<Job> as core::Try>::branch})(((self
-                                        as Person).job as core::Option<Job>)) as
-                                core::ControlFlow<core::Option<!>, Job>) {
+                                    fn(core::option::Option<Job>) -> core::ControlFlow<<core::option::Option<Job> as core::Try>::Residual, <core::option::Option<Job> as core::Try>::Output> {<core::option::Option<Job> as core::Try>::branch})(((self
+                                        as Person).job as core::option::Option<Job>)) as
+                                core::ControlFlow<core::option::Option<!>, Job>) {
                             Break {  0: residual } => #[allow(unreachable_code)]
                                 (return ((from_residual as
-                                            fn(core::Option<!>) -> core::Option<int> {<core::Option<int> as core::FromResidual<core::Option<!>>>::from_residual})((residual
-                                            as core::Option<!>)) as core::Option<int>) as !),
+                                            fn(core::option::Option<!>) -> core::option::Option<int> {<core::option::Option<int> as core::FromResidual<core::option::Option<!>>>::from_residual})((residual
+                                            as core::option::Option<!>)) as core::option::Option<int>)
+                                    as !),
                             Continue {  0: val } => #[allow(unreachable_code)]
                                 (val as Job),
-                        } as Job).phone_number as core::Option<PhoneNumber>)) as
-                    core::ControlFlow<core::Option<!>, PhoneNumber>) {
+                        } as Job).phone_number as
+                        core::option::Option<PhoneNumber>)) as
+                    core::ControlFlow<core::option::Option<!>, PhoneNumber>) {
                 Break {  0: residual } => #[allow(unreachable_code)]
                     (return ((from_residual as
-                                fn(core::Option<!>) -> core::Option<int> {<core::Option<int> as core::FromResidual<core::Option<!>>>::from_residual})((residual
-                                as core::Option<!>)) as core::Option<int>) as !),
+                                fn(core::option::Option<!>) -> core::option::Option<int> {<core::option::Option<int> as core::FromResidual<core::option::Option<!>>>::from_residual})((residual
+                                as core::option::Option<!>)) as core::option::Option<int>)
+                        as !),
                 Continue {  0: val } => #[allow(unreachable_code)]
                     (val as PhoneNumber),
-            } as PhoneNumber).area_code as core::Option<int>)
-    } as core::Option<int>)
+            } as PhoneNumber).area_code as core::option::Option<int>)
+    } as core::option::Option<int>)
 }
 
 fn main() ({
@@ -66,26 +69,28 @@ fn main() ({
         (Person {
             job:
                 ((Some as
-                        fn(Job) -> core::Option<Job> {core::Option::<Job>::Some})((Job {
+                        fn(Job) -> core::option::Option<Job> {core::option::Option::<Job>::Some})((Job {
                         phone_number:
                             ((Some as
-                                    fn(PhoneNumber) -> core::Option<PhoneNumber> {core::Option::<PhoneNumber>::Some})((PhoneNumber {
+                                    fn(PhoneNumber) -> core::option::Option<PhoneNumber> {core::option::Option::<PhoneNumber>::Some})((PhoneNumber {
                                     area_code:
                                         ((Some as
-                                                fn(int) -> core::Option<int> {core::Option::<int>::Some})((61
-                                                as int)) as core::Option<int>),
+                                                fn(int) -> core::option::Option<int> {core::option::Option::<int>::Some})((61
+                                                as int)) as core::option::Option<int>),
                                     number: (439222222 as int) } as PhoneNumber)) as
-                                core::Option<PhoneNumber>) } as Job)) as core::Option<Job>)
-            } as Person);
+                                core::option::Option<PhoneNumber>) } as Job)) as
+                    core::option::Option<Job>) } as Person);
 
-    (match ((((p as Person).work_phone_area_code() as core::Option<int>),
+    (match ((((p as Person).work_phone_area_code() as
+                core::option::Option<int>),
             ((Some as
-                    fn(int) -> core::Option<int> {core::Option::<int>::Some})((61
-                    as int)) as core::Option<int>)) as
-            (core::Option<int>, core::Option<int>)) {
+                    fn(int) -> core::option::Option<int> {core::option::Option::<int>::Some})((61
+                    as int)) as core::option::Option<int>)) as
+            (core::option::Option<int>, core::option::Option<int>)) {
         (left_val, right_val) => {
-            (if (!(((left_val as core::Option<int>) ==
-                        (right_val as core::Option<int>) as bool)) as bool) {
+            (if (!(((left_val as core::option::Option<int>) ==
+                        (right_val as core::option::Option<int>) as bool)) as bool)
+                {
                 (unsafe {
                     (((::core::erlang::error as
                                 fn(term, term, term) -> term)(((::core::Panic::new as
@@ -97,11 +102,12 @@ fn main() ({
                                                             fn(term) -> term)(("" as str)) as term),
                                                     ("\n  left: " as str),
                                                     ((::core::patina_fmt::debug as
-                                                            fn(term) -> term)((left_val as core::Option<int>)) as term),
-                                                    ("\n right: " as str),
+                                                            fn(term) -> term)((left_val as core::option::Option<int>))
+                                                        as term), ("\n right: " as str),
                                                     ((::core::patina_fmt::debug as
-                                                            fn(term) -> term)((right_val as core::Option<int>)) as
-                                                        term)] as [term])) as term).cast_unchecked::<str>() as str)
+                                                            fn(term) -> term)((right_val as core::option::Option<int>))
+                                                        as term)] as [term])) as term).cast_unchecked::<str>() as
+                                        str)
                                 } as str)) as core::Panic), (a"none" as atom),
                             ([(((a"error_info" as atom),
                                         (#{(a"module" as atom) =>

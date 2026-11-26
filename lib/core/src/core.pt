@@ -16,9 +16,12 @@
 #![no_core]
 #![rustc_coherence_is_core]
 
+use option::Option::{self, None, Some};
+
 pub mod convert;
 mod list_impl;
 mod map_impl;
+pub mod option;
 pub mod proc_macro;
 
 pub extern mod erlang;
@@ -537,61 +540,6 @@ partial_ord_impl! { bool int float str atom bin bits }
 #[lang = "structural_peq"]
 pub trait StructuralPartialEq {}
 
-#[lang = "Option"]
-#[repr(transparent)]
-pub enum Option<T> {
-    #[lang = "None"]
-    #[repr(atom, tag = "nil")]
-    None,
-    #[lang = "Some"]
-    #[repr(dynamic_wrap, tag = "some")]
-    Some(T),
-}
-
-impl<T: PartialEq> PartialEq for Option<T> {
-    default fn eq(self, other: Option<T>) -> bool {
-        match (self, other) {
-            (Some(left), Some(right)) => left == right,
-            (None, None) => true,
-            _ => false,
-        }
-    }
-}
-
-impl<T: NativeEq> NativeEq for Option<T> {}
-
-impl<T: NativeEq> PartialEq for Option<T> {
-    #[inline]
-    fn eq(self, other: Option<T>) -> bool {
-        self as term == other as term
-    }
-}
-
-impl<T> Try for Option<T> {
-    type Output = T;
-    type Residual = Option<!>;
-
-    #[inline]
-    fn from_output(output: T) -> Option<T> {
-        Some(output)
-    }
-
-    #[inline]
-    fn branch(self) -> ControlFlow<Option<!>, T> {
-        match self {
-            Some(value) => ControlFlow::Continue(value),
-            None => ControlFlow::Break(None),
-        }
-    }
-}
-
-impl<T> FromResidual<Option<!>> for Option<T> {
-    #[inline]
-    fn from_residual(_residual: Option<!>) -> Option<T> {
-        None
-    }
-}
-
 #[repr(tagged, tag_style = "snake_case")]
 pub enum ControlFlow<B, C = ()> {
     #[lang = "Continue"]
@@ -661,8 +609,6 @@ impl term {
     #[rustc_intrinsic]
     pub unsafe fn cast_unchecked<T>(self) -> T;
 }
-
-use pkg::Option::{None, Some};
 
 /// A lazy sequence of values.
 #[lang = "iterator"]
@@ -757,9 +703,9 @@ impl Timeout {
 
 /// Imported with `#[prelude_import]`.
 pub mod prelude {
-    pub use pkg::Option::{None, Some};
+    pub use pkg::option::Option::{self, None, Some};
     pub use pkg::{
-        Copy, Fn, FnOnce, IntoIterator, Iterator, NativeEq, Option, PartialEq, PartialOrd, Timeout,
+        Copy, Fn, FnOnce, IntoIterator, Iterator, NativeEq, PartialEq, PartialOrd, Timeout,
         convert::{From, Into},
         derive,
     };

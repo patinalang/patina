@@ -46,9 +46,9 @@ fn main() ({
                 fn(term) -> term)(([([("The first doubled is " as str),
                             ((::core::patina_fmt::debug as
                                     fn(term) -> term)(((double_first as
-                                        fn([str]) -> core::Option<{type error}> {double_first})((numbers
-                                        as [str])) as core::Option<{type error}>)) as term)] as
-                        [term])] as [[term]])) as term);
+                                        fn([str]) -> core::option::Option<{type error}> {double_first})((numbers
+                                        as [str])) as core::option::Option<{type error}>)) as term)]
+                        as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -56,9 +56,9 @@ fn main() ({
                 fn(term) -> term)(([([("The first doubled is " as str),
                             ((::core::patina_fmt::debug as
                                     fn(term) -> term)(((double_first as
-                                        fn([str]) -> core::Option<{type error}> {double_first})((empty
-                                        as [str])) as core::Option<{type error}>)) as term)] as
-                        [term])] as [[term]])) as term);
+                                        fn([str]) -> core::option::Option<{type error}> {double_first})((empty
+                                        as [str])) as core::option::Option<{type error}>)) as term)]
+                        as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({
@@ -66,9 +66,9 @@ fn main() ({
                 fn(term) -> term)(([([("The first doubled is " as str),
                             ((::core::patina_fmt::debug as
                                     fn(term) -> term)(((double_first as
-                                        fn([str]) -> core::Option<{type error}> {double_first})((strings
-                                        as [str])) as core::Option<{type error}>)) as term)] as
-                        [term])] as [[term]])) as term);
+                                        fn([str]) -> core::option::Option<{type error}> {double_first})((strings
+                                        as [str])) as core::option::Option<{type error}>)) as term)]
+                        as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

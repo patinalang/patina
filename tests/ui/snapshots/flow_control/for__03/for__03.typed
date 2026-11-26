@@ -27,9 +27,9 @@ fn main() ({
                 mut iter =>
                     (loop {
                         (match ((next as
-                                    fn(core::ListIter<str>) -> core::Option<(<core::ListIter<str> as core::Iterator>::Item, core::ListIter<str>)> {<core::ListIter<str> as core::Iterator>::next})((iter
+                                    fn(core::ListIter<str>) -> core::option::Option<(<core::ListIter<str> as core::Iterator>::Item, core::ListIter<str>)> {<core::ListIter<str> as core::Iterator>::next})((iter
                                     as core::ListIter<str>)) as
-                                core::Option<(str, core::ListIter<str>)>) {
+                                core::option::Option<(str, core::ListIter<str>)>) {
                             None {} => (break as !),
                             Some {  0: (name, next) } => {
                                 (iter = (next as core::ListIter<str>) as

@@ -15,7 +15,8 @@ use core::prelude::*;
 // block: 1/1
 
 fn main() ({
-    let v = ((Option::<int>::None as core::Option<int>) as term as term);
+    let v =
+        ((Option::<int>::None as core::option::Option<int>) as term as term);
 
     let safe_description =
         (match (v as term) {

@@ -22,7 +22,7 @@ fn main() ({
     // Indexing starts at 0.
     // `.get(n)` can be used to traverse to and return the nth element of the list
     // as an `Option`.
-    (match ((xs as [int]).get((0 as int)) as core::Option<int>) {
+    (match ((xs as [int]).get((0 as int)) as core::option::Option<int>) {
         Some(xval) =>
             // `len` returns the count of elements in the list.
             // Internally, it does that by traversing the list and counting all elements.
@@ -64,8 +64,8 @@ fn main() ({
                 fn(term) -> term)(([([("First element of the list: " as str),
                             ((::core::patina_fmt::display as
                                     fn(term) -> term)(((xs as [int]).head() as
-                                    core::Option<int>)) as term)] as [term])] as [[term]])) as
-            term);
+                                    core::option::Option<int>)) as term)] as [term])] as
+                [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({

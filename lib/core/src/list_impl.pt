@@ -1,5 +1,5 @@
-use pkg::{IntoIterator, Iterator, ListIter, NativeEq, Option, PartialEq, erlang};
-use pkg::Option::{None, Some};
+use pkg::option::Option::{self, None, Some};
+use pkg::{IntoIterator, Iterator, ListIter, NativeEq, PartialEq, erlang};
 
 extern mod lists;
 

@@ -18,10 +18,11 @@ fn top(n: int)
         Option<int> ({
     (if ((n as int) > (0 as int) as bool) {
         ((Some as
-                fn(int) -> core::Option<int> {core::Option::<int>::Some})((n
-                as int)) as core::Option<int>)
-    } else { (None as core::Option<int>) } as core::Option<int>)
-} as core::Option<int>)
+                fn(int) -> core::option::Option<int> {core::option::Option::<int>::Some})((n
+                as int)) as core::option::Option<int>)
+    } else { (None as core::option::Option<int>) } as
+        core::option::Option<int>)
+} as core::option::Option<int>)
 
 mod outer {
     fn outer(n: int)
@@ -29,16 +30,17 @@ mod outer {
             Option<int> ({
         (if ((n as int) > (0 as int) as bool) {
             ((Some as
-                    fn(int) -> core::Option<int> {core::Option::<int>::Some})((n
-                    as int)) as core::Option<int>)
-        } else { (None as core::Option<int>) } as core::Option<int>)
-    } as core::Option<int>)
+                    fn(int) -> core::option::Option<int> {core::option::Option::<int>::Some})((n
+                    as int)) as core::option::Option<int>)
+        } else { (None as core::option::Option<int>) } as
+            core::option::Option<int>)
+    } as core::option::Option<int>)
 
     mod inner {
         fn inner(value: Option<int>)
             ->
                 int ({
-            (match (value as core::Option<int>) {
+            (match (value as core::option::Option<int>) {
                 Some(n) => (n as int),
                 None => (0 as int),
             } as int)

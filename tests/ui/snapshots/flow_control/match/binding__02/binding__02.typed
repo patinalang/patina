@@ -18,13 +18,13 @@ fn some_number()
     ->
         Option<int> ({
     ((Some as
-            fn(int) -> core::Option<int> {core::Option::<int>::Some})((42 as
-            int)) as core::Option<int>)
-} as core::Option<int>)
+            fn(int) -> core::option::Option<int> {core::option::Option::<int>::Some})((42
+            as int)) as core::option::Option<int>)
+} as core::option::Option<int>)
 
 fn main() ({
-    (match ((some_number as fn() -> core::Option<int> {some_number})() as
-            core::Option<int>) {
+    (match ((some_number as fn() -> core::option::Option<int> {some_number})()
+            as core::option::Option<int>) {
 
             // Got `Some` variant, match if its value, bound to `n`,
             // is equal to 42.

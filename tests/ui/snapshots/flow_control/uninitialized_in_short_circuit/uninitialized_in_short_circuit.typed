@@ -29,18 +29,20 @@ fn opt(x: int)
         Option<int> ({
     (if ((x as int) >= (0 as int) as bool) {
         ((Some as
-                fn(int) -> core::Option<int> {core::Option::<int>::Some})((x
-                as int)) as core::Option<int>)
-    } else { (None as core::Option<int>) } as core::Option<int>)
-} as core::Option<int>)
+                fn(int) -> core::option::Option<int> {core::option::Option::<int>::Some})((x
+                as int)) as core::option::Option<int>)
+    } else { (None as core::option::Option<int>) } as
+        core::option::Option<int>)
+} as core::option::Option<int>)
 
 fn deferred_in_later_operand(a: int)
     ->
         int ({
     let mut x;
     (if ((let Some(v) =
-                ((opt as fn(int) -> core::Option<int> {opt})((a as int)) as
-                    core::Option<int>) as bool) &&
+                ((opt as
+                        fn(int) -> core::option::Option<int> {opt})((a as int)) as
+                    core::option::Option<int>) as bool) &&
             ({ (x = (v as int) as int); ((v as int) > (1 as int) as bool) } as
                 bool) as bool) {
         (x as int)

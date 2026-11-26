@@ -1,5 +1,5 @@
-use pkg::{IntoIterator, Iterator, NativeEq, MapIter, Option, PartialEq, PhantomData, erlang};
-use pkg::Option::{None, Some};
+use pkg::option::Option::{self, None, Some};
+use pkg::{IntoIterator, Iterator, NativeEq, MapIter, PartialEq, PhantomData, erlang};
 
 extern mod maps;
 

@@ -34,7 +34,7 @@ note: an implementation of `core::PartialOrd` might be missing for `Centimeters`
 LL | struct Centimeters(float);
    | ^^^^^^^^^^^^^^^^^^ must implement `core::PartialOrd`
 note: the trait `core::PartialOrd` must be implemented
-  --> $PATINA_ROOT/patina_core/src/core.pt:513:1
+  --> $PATINA_ROOT/patina_core/src/core.pt:516:1
    |
 LL | pub trait PartialOrd<Rhs = Self> {
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

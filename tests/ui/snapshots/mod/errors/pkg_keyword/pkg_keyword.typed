@@ -128,9 +128,9 @@ fn main() ({
     let _ = ((`pkg`::visible as fn() -> int {`pkg`::visible})() as int);
     let _: core2::Option<int> =
         ((core2::Option::Some as
-                fn(int) -> core::Option<int> {core::Option::<int>::Some})(((pkg::first::visible
+                fn(int) -> core::option::Option<int> {core::option::Option::<int>::Some})(((pkg::first::visible
                     as fn() -> int {first::visible})() as int)) as
-            core::Option<int>);
+            core::option::Option<int>);
     ((pkg::first::visible as fn() -> int {first::visible})() as int);
     ((second::call as fn() -> int {second::call})() as int);
     ((pkg::first::missing as {type error})() as {type error});

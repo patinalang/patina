@@ -1,0 +1,58 @@
+use Option::{None, Some};
+use pkg::{ControlFlow, FromResidual, NativeEq, PartialEq, Try};
+
+#[lang = "Option"]
+#[repr(transparent)]
+pub enum Option<T> {
+    #[lang = "None"]
+    #[repr(atom, tag = "nil")]
+    None,
+    #[lang = "Some"]
+    #[repr(dynamic_wrap, tag = "some")]
+    Some(T),
+}
+
+impl<T: PartialEq> PartialEq for Option<T> {
+    #[inline]
+    default fn eq(self, other: Option<T>) -> bool {
+        match (self, other) {
+            (Some(left), Some(right)) => left == right,
+            (None, None) => true,
+            _ => false,
+        }
+    }
+}
+
+impl<T: NativeEq> NativeEq for Option<T> {}
+
+impl<T: NativeEq> PartialEq for Option<T> {
+    #[inline]
+    fn eq(self, other: Option<T>) -> bool {
+        self as term == other as term
+    }
+}
+
+impl<T> Try for Option<T> {
+    type Output = T;
+    type Residual = Option<!>;
+
+    #[inline]
+    fn from_output(output: T) -> Option<T> {
+        Some(output)
+    }
+
+    #[inline]
+    fn branch(self) -> ControlFlow<Option<!>, T> {
+        match self {
+            Some(value) => ControlFlow::Continue(value),
+            None => ControlFlow::Break(None),
+        }
+    }
+}
+
+impl<T> FromResidual<Option<!>> for Option<T> {
+    #[inline]
+    fn from_residual(_residual: Option<!>) -> Option<T> {
+        None
+    }
+}

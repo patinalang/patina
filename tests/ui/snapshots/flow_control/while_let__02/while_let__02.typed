@@ -18,13 +18,13 @@ fn main() ({
     // Make `optional` of type `Option<int>`
     let mut optional =
         ((Some as
-                fn(int) -> core::Option<int> {core::Option::<int>::Some})((0
-                as int)) as core::Option<int>);
+                fn(int) -> core::option::Option<int> {core::option::Option::<int>::Some})((0
+                as int)) as core::option::Option<int>);
 
     // This reads: "while `let` destructures `optional` into
     // `Some(i)`, evaluate the block (`{}`). Else `break`.
     (loop {
-        (if (let Some(i) = (optional as core::Option<int>) as bool) {
+        (if (let Some(i) = (optional as core::option::Option<int>) as bool) {
             (if ((i as int) > (9 as int) as bool) {
                 // ^ Less rightward drift and doesn't require
                 // explicitly handling the failing case.
@@ -36,7 +36,8 @@ fn main() ({
                                     [str])] as [[str]])) as term);
                     ((::core::io::nl as fn() -> term)() as term);
                 } as ());
-                (optional = (None as core::Option<int>) as core::Option<int>);
+                (optional = (None as core::option::Option<int>) as
+                    core::option::Option<int>);
             } else {
                 ({
                     ((::core::io::put_chars as
@@ -48,9 +49,9 @@ fn main() ({
                 } as ());
                 (optional =
                     ((Some as
-                            fn(int) -> core::Option<int> {core::Option::<int>::Some})(((i
-                                as int) + (1 as int) as int)) as core::Option<int>) as
-                    core::Option<int>);
+                            fn(int) -> core::option::Option<int> {core::option::Option::<int>::Some})(((i
+                                as int) + (1 as int) as int)) as core::option::Option<int>)
+                    as core::option::Option<int>);
             } as ())
         } else { (break as !); } as ())
     } as ())

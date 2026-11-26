@@ -10,17 +10,17 @@ error: cannot find derive macro `Debug` in this scope
 LL | #[derive(Debug)] enum Day { Monday, Tuesday, Wednesday }
    |          ^^^^^
 
-error[E0599]: no method named `and_then` found for enum `core::Option<T>` in the current scope
+error[E0599]: no method named `and_then` found for enum `core::option::Option<T>` in the current scope
   --> tests/ui/src/error/option_unwrap/and_then__01.pt:36:23
    |
 LL |     have_recipe(food).and_then(have_ingredients)
-   |                       ^^^^^^^^ method not found in `core::Option<Food>`
+   |                       ^^^^^^^^ method not found in `core::option::Option<Food>`
 
-error[E0599]: no method named `map` found for enum `core::Option<T>` in the current scope
+error[E0599]: no method named `map` found for enum `core::option::Option<T>` in the current scope
   --> tests/ui/src/error/option_unwrap/and_then__01.pt:42:23
    |
 LL |     have_recipe(food).map(have_ingredients).flatten()
-   |                       ^^^ method not found in `core::Option<Food>`
+   |                       ^^^ method not found in `core::option::Option<Food>`
 
 error: aborting due to 4 previous errors
 

@@ -76,11 +76,11 @@ fn int_options_eq(a: int, b: int)
     ->
         bool ({
     (((Some as
-                fn(int) -> core::Option<int> {core::Option::<int>::Some})((a
-                as int)) as core::Option<int>) ==
+                fn(int) -> core::option::Option<int> {core::option::Option::<int>::Some})((a
+                as int)) as core::option::Option<int>) ==
         ((Some as
-                fn(int) -> core::Option<int> {core::Option::<int>::Some})((b
-                as int)) as core::Option<int>) as bool)
+                fn(int) -> core::option::Option<int> {core::option::Option::<int>::Some})((b
+                as int)) as core::option::Option<int>) as bool)
 } as bool)
 
 fn hand_written_native_eq_lists_eq(a: int, b: int)
@@ -131,13 +131,13 @@ fn eq_by_parity_options_eq(a: int, b: int)
     ->
         bool ({
     (((Some as
-                fn(EqByParity) -> core::Option<EqByParity> {core::Option::<EqByParity>::Some})(((EqByParity
+                fn(EqByParity) -> core::option::Option<EqByParity> {core::option::Option::<EqByParity>::Some})(((EqByParity
                     as fn(int) -> EqByParity {EqByParity})((a as int)) as
-                EqByParity)) as core::Option<EqByParity>) ==
+                EqByParity)) as core::option::Option<EqByParity>) ==
         ((Some as
-                fn(EqByParity) -> core::Option<EqByParity> {core::Option::<EqByParity>::Some})(((EqByParity
+                fn(EqByParity) -> core::option::Option<EqByParity> {core::option::Option::<EqByParity>::Some})(((EqByParity
                     as fn(int) -> EqByParity {EqByParity})((b as int)) as
-                EqByParity)) as core::Option<EqByParity>) as bool)
+                EqByParity)) as core::option::Option<EqByParity>) as bool)
 } as bool)
 
 fn generic_eq<T>(a: T, b: T) -> bool where

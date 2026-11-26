@@ -176,12 +176,12 @@ fn lookup_enum_key(map: #{Shape => int}, side: int)
 fn lookup_option_key(map: #{Option<int> => int})
     ->
         int ({
-    (match (map as #{core::Option<int> => int}) {
+    (match (map as #{core::option::Option<int> => int}) {
         #{((Some as
-                    fn(int) -> core::Option<int> {core::Option::<int>::Some})((1
-                    as int)) as core::Option<int>) => value, ..} =>
+                    fn(int) -> core::option::Option<int> {core::option::Option::<int>::Some})((1
+                    as int)) as core::option::Option<int>) => value, ..} =>
             (value as int),
-        #{(None as core::Option<int>) => value, ..} => (value as int),
+        #{(None as core::option::Option<int>) => value, ..} => (value as int),
         _ => (-(1 as int) as int),
     } as int)
 } as int)

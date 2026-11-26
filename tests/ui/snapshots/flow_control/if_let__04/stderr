@@ -12,7 +12,7 @@ note: an implementation of `core::PartialEq` might be missing for `Foo`
 LL | enum Foo {Bar}
    | ^^^^^^^^ must implement `core::PartialEq`
 note: the trait `core::PartialEq` must be implemented
-  --> $PATINA_ROOT/patina_core/src/core.pt:443:1
+  --> $PATINA_ROOT/patina_core/src/core.pt:446:1
    |
 LL | pub trait PartialEq<Rhs = Self> {
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

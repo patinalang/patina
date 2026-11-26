@@ -25,9 +25,9 @@ fn get_count_item(s: str)
     let (it, second) = ((it as {type error}).next() as {type error});
 
     let (Some(count_str), Some(item)) =
-        (((first as core::Option<{type error}>),
-            (second as core::Option<str>)) as
-            (core::Option<{type error}>, core::Option<str>)) else
+        (((first as core::option::Option<{type error}>),
+            (second as core::option::Option<str>)) as
+            (core::option::Option<{type error}>, core::option::Option<str>)) else
         {
 
         (unsafe {

@@ -20,7 +20,7 @@ fn give_adult(drink:
         Option<str>) ({
 
     // Specify a course of action for each case.
-    (match (drink as core::Option<str>) {
+    (match (drink as core::option::Option<str>) {
         Some("lemonade") =>
             // Others will `panic` before drinking sugary drinks.
             // All drinks are handled implicitly using `unwrap`.
@@ -53,7 +53,8 @@ fn give_adult(drink:
 } as ())
 fn drink(drink:
         Option<str>) ({
-    let inside = ((drink as core::Option<str>).unwrap() as {type error});
+    let inside =
+        ((drink as core::option::Option<str>).unwrap() as {type error});
     (if ((inside as {type error}) == ("lemonade" as str) as bool) {
         (unsafe {
             (((::core::erlang::error as
@@ -79,29 +80,31 @@ fn drink(drink:
 fn main() ({
     let water =
         ((Some as
-                fn(str) -> core::Option<str> {core::Option::<str>::Some})(("water"
-                as str)) as core::Option<str>);
+                fn(str) -> core::option::Option<str> {core::option::Option::<str>::Some})(("water"
+                as str)) as core::option::Option<str>);
     let lemonade =
         ((Some as
-                fn(str) -> core::Option<str> {core::Option::<str>::Some})(("lemonade"
-                as str)) as core::Option<str>);
-    let void = (None as core::Option<str>);
+                fn(str) -> core::option::Option<str> {core::option::Option::<str>::Some})(("lemonade"
+                as str)) as core::option::Option<str>);
+    let void = (None as core::option::Option<str>);
     ((give_adult as
-            fn(core::Option<str>) {give_adult})((water as core::Option<str>))
-        as ());
+            fn(core::option::Option<str>) {give_adult})((water as
+            core::option::Option<str>)) as ());
     ((give_adult as
-            fn(core::Option<str>) {give_adult})((lemonade as
-            core::Option<str>)) as ());
+            fn(core::option::Option<str>) {give_adult})((lemonade as
+            core::option::Option<str>)) as ());
     ((give_adult as
-            fn(core::Option<str>) {give_adult})((void as core::Option<str>))
-        as ());
+            fn(core::option::Option<str>) {give_adult})((void as
+            core::option::Option<str>)) as ());
     let coffee =
         ((Some as
-                fn(str) -> core::Option<str> {core::Option::<str>::Some})(("coffee"
-                as str)) as core::Option<str>);
-    let nothing = (None as core::Option<str>);
-    ((drink as fn(core::Option<str>) {drink})((coffee as core::Option<str>))
-        as ());
-    ((drink as fn(core::Option<str>) {drink})((nothing as core::Option<str>))
-        as ());
+                fn(str) -> core::option::Option<str> {core::option::Option::<str>::Some})(("coffee"
+                as str)) as core::option::Option<str>);
+    let nothing = (None as core::option::Option<str>);
+    ((drink as
+            fn(core::option::Option<str>) {drink})((coffee as
+            core::option::Option<str>)) as ());
+    ((drink as
+            fn(core::option::Option<str>) {drink})((nothing as
+            core::option::Option<str>)) as ());
 } as ())

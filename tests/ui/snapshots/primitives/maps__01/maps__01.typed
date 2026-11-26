@@ -36,7 +36,7 @@ fn main() ({
 
     // Returns Option<str>
     (match ((contacts as #{str => str}).get(("Daniel" as str)) as
-            core::Option<str>) {
+            core::option::Option<str>) {
         Some(number) =>
             // `.insert()` returns an updated map.
             // The value must be used, otherwise it will emit a compilation warning.
@@ -67,7 +67,7 @@ fn main() ({
                 #{str => str}).insert(("Daniel" as str), ("164-6743" as str))
             as #{str => str}) as #{str => str});
     (match ((contacts as #{str => str}).get(("Ashley" as str)) as
-            core::Option<str>) {
+            core::option::Option<str>) {
         Some(number) => {
             ((::core::io::put_chars as
                     fn(term) -> term)(([([("Calling Ashley: " as str),
@@ -99,9 +99,10 @@ fn main() ({
                 mut iter =>
                     (loop {
                         (match ((next as
-                                    fn(core::MapIter<str, str>) -> core::Option<(<core::MapIter<str, str> as core::Iterator>::Item, core::MapIter<str, str>)> {<core::MapIter<str, str> as core::Iterator>::next})((iter
+                                    fn(core::MapIter<str, str>) -> core::option::Option<(<core::MapIter<str, str> as core::Iterator>::Item, core::MapIter<str, str>)> {<core::MapIter<str, str> as core::Iterator>::next})((iter
                                     as core::MapIter<str, str>)) as
-                                core::Option<((str, str), core::MapIter<str, str>)>) {
+                                core::option::Option<((str, str), core::MapIter<str, str>)>)
+                            {
                             None {} => (break as !),
                             Some {  0: ((contact, number), next) } => {
                                 (iter = (next as core::MapIter<str, str>) as
