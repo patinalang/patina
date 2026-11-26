@@ -576,11 +576,22 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
         let afb = &self.translator.afb;
         let scrutinee = self.translate_expr(scrutinee);
 
-        let mut translated: Box<[TranslatedArm<'arena>]> =
+        let mut translated: Vec<TranslatedArm<'arena>> =
             arms.iter().map(|arm| self.translate_arm(arm)).collect();
 
         self.merge_branches(translated.iter_mut().map(|arm| &mut arm.branch));
-        afb.expr_case(span, scrutinee, self.arm_clauses(translated))
+        translated.retain(|arm| !arm.patterns.is_empty());
+
+        if let [TranslatedArm { patterns, guard: None, branch }] = translated.as_slice()
+            && let [GuardedPattern(pattern, _)] = patterns.as_slice()
+        {
+            // If there's only one pattern that can match, we can lower to `begin pat = scrutinee, body end`.
+            // We don't need matching, because typing ensures that only case is unrefutable.
+            let matched = afb.expr_match(span, *pattern, scrutinee);
+            afb.expr_block(span, [matched, branch.body])
+        } else {
+            afb.expr_case(span, scrutinee, self.arm_clauses(translated))
+        }
     }
 
     fn arm_clauses(

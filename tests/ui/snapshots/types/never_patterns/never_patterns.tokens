@@ -1,5 +1,3 @@
-LineComment { doc_style: None }
-Whitespace
 Ident
 Whitespace
 Ident

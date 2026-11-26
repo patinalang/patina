@@ -49,39 +49,36 @@ main() ->
                             end,
                  _job@5_0
              end,
-    case begin
-             _element@7_0 =
-                 'Elixir.Patina.QuestionMark02.Person':work_phone_area_code(_p@6_0),
-             _element@8_0 = 61,
-             {_element@7_0, _element@8_0}
-         end
+    {_left_val@9_0, _right_val@10_0} = begin
+                                           _element@7_0 =
+                                               'Elixir.Patina.QuestionMark02.Person':work_phone_area_code(_p@6_0),
+                                           _element@8_0 = 61,
+                                           {_element@7_0, _element@8_0}
+                                       end,
+    case not
+             begin
+                 _self@11_0 = _left_val@9_0,
+                 _other@12_0 = _right_val@10_0,
+                 _self@11_0 =:= _other@12_0
+             end
         of
-        {_left_val@9_0, _right_val@10_0} ->
-            case not
-                     begin
-                         _self@11_0 = _left_val@9_0,
-                         _other@12_0 = _right_val@10_0,
-                         _self@11_0 =:= _other@12_0
-                     end
-                of
-                true ->
-                    erlang:error('Elixir.Patina.Core.Panic':new(unicode:characters_to_binary(begin
-                                                                                                 _element@13_0 =
-                                                                                                     io_lib:format("~ktp",
-                                                                                                                   [_left_val@9_0]),
-                                                                                                 _element@14_0 =
-                                                                                                     io_lib:format("~ktp",
-                                                                                                                   [_right_val@10_0]),
-                                                                                                 [<<"assertion `left == right` failed"/utf8>>,
-                                                                                                  <<""/utf8>>,
-                                                                                                  <<"\n  left: "/utf8>>,
-                                                                                                  _element@13_0,
-                                                                                                  <<"\n right: "/utf8>>,
-                                                                                                  _element@14_0]
-                                                                                             end)),
-                                 none,
-                                 [{error_info,
-                                   #{module => 'Elixir.Patina.Core.Panic'}}]);
-                _ -> {}
-            end
+        true ->
+            erlang:error('Elixir.Patina.Core.Panic':new(unicode:characters_to_binary(begin
+                                                                                         _element@13_0 =
+                                                                                             io_lib:format("~ktp",
+                                                                                                           [_left_val@9_0]),
+                                                                                         _element@14_0 =
+                                                                                             io_lib:format("~ktp",
+                                                                                                           [_right_val@10_0]),
+                                                                                         [<<"assertion `left == right` failed"/utf8>>,
+                                                                                          <<""/utf8>>,
+                                                                                          <<"\n  left: "/utf8>>,
+                                                                                          _element@13_0,
+                                                                                          <<"\n right: "/utf8>>,
+                                                                                          _element@14_0]
+                                                                                     end)),
+                         none,
+                         [{error_info,
+                           #{module => 'Elixir.Patina.Core.Panic'}}]);
+        _ -> {}
     end.

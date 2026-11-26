@@ -73,65 +73,61 @@ fizzbuzz(_n@0_0) ->
     end.
 
 fizzbuzz_to(_n@0_0) ->
-    case begin
-             _self@1_0 = 'Elixir.Patina.Core.RangeInclusive':new(1,
-                                                                 _n@0_0),
-             _self@1_0
-         end
-        of
-        _iter@2_0 ->
-            _iter@2_1 = fun _$patina_loop(_iter@2_0) ->
-                                case [] of
-                                    {'$patina_label_0', _iter@2_2} -> _iter@2_2;
-                                    _ ->
-                                        case begin
-                                                 _self@3_0 = _iter@2_0,
-                                                 case
-                                                     _self@3_0#'Elixir.Patina.Core.RangeInclusive':'RangeInclusive'.start
-                                                         =<
-                                                         _self@3_0#'Elixir.Patina.Core.RangeInclusive':'RangeInclusive'.'end'
-                                                     of
-                                                     true ->
-                                                         _0@7_0 = begin
-                                                                      _element@4_0 =
-                                                                          _self@3_0#'Elixir.Patina.Core.RangeInclusive':'RangeInclusive'.start,
-                                                                      _element@6_0 =
-                                                                          begin
-                                                                              _start@5_0 =
-                                                                                  _self@3_0#'Elixir.Patina.Core.RangeInclusive':'RangeInclusive'.start
-                                                                                      +
-                                                                                      1,
-                                                                              _self@3_0#'Elixir.Patina.Core.RangeInclusive':'RangeInclusive'{start
-                                                                                                                                                 =
-                                                                                                                                                 _start@5_0}
-                                                                          end,
-                                                                      {_element@4_0,
-                                                                       _element@6_0}
+    _iter@2_0 = begin
+                    _self@1_0 = 'Elixir.Patina.Core.RangeInclusive':new(1,
+                                                                        _n@0_0),
+                    _self@1_0
+                end,
+    _iter@2_1 = fun _$patina_loop(_iter@2_0) ->
+                        case [] of
+                            {'$patina_label_0', _iter@2_2} -> _iter@2_2;
+                            _ ->
+                                case begin
+                                         _self@3_0 = _iter@2_0,
+                                         case
+                                             _self@3_0#'Elixir.Patina.Core.RangeInclusive':'RangeInclusive'.start
+                                                 =<
+                                                 _self@3_0#'Elixir.Patina.Core.RangeInclusive':'RangeInclusive'.'end'
+                                             of
+                                             true ->
+                                                 _0@7_0 = begin
+                                                              _element@4_0 =
+                                                                  _self@3_0#'Elixir.Patina.Core.RangeInclusive':'RangeInclusive'.start,
+                                                              _element@6_0 =
+                                                                  begin
+                                                                      _start@5_0 =
+                                                                          _self@3_0#'Elixir.Patina.Core.RangeInclusive':'RangeInclusive'.start
+                                                                              +
+                                                                              1,
+                                                                      _self@3_0#'Elixir.Patina.Core.RangeInclusive':'RangeInclusive'{start
+                                                                                                                                         =
+                                                                                                                                         _start@5_0}
                                                                   end,
-                                                         _0@7_0;
-                                                     _ -> nil
-                                                 end
-                                             end
-                                            of
-                                            nil ->
-                                                _branch_value@11_0 = begin
-                                                                         '$patina_marker':jump('$patina_label_0',
-                                                                                               _iter@2_0),
-                                                                         []
-                                                                     end,
-                                                _iter@2_1 = _iter@2_0,
-                                                _branch_value@11_0;
-                                            _value@10_0 = {_n@8_0, _next@9_0}
-                                                when
-                                                  erlang:is_tuple(_value@10_0)
-                                                      andalso
-                                                      erlang:tuple_size(_value@10_0)
-                                                          =:= 2 ->
-                                                _iter@2_1 = _next@9_0,
-                                                fizzbuzz(_n@8_0)
-                                        end,
-                                        _$patina_loop(_iter@2_1)
-                                end
-                        end(_iter@2_0),
-            {}
-    end.
+                                                              {_element@4_0,
+                                                               _element@6_0}
+                                                          end,
+                                                 _0@7_0;
+                                             _ -> nil
+                                         end
+                                     end
+                                    of
+                                    nil ->
+                                        _branch_value@11_0 = begin
+                                                                 '$patina_marker':jump('$patina_label_0',
+                                                                                       _iter@2_0),
+                                                                 []
+                                                             end,
+                                        _iter@2_1 = _iter@2_0,
+                                        _branch_value@11_0;
+                                    _value@10_0 = {_n@8_0, _next@9_0}
+                                        when erlang:is_tuple(_value@10_0)
+                                                 andalso
+                                                 erlang:tuple_size(_value@10_0)
+                                                     =:= 2 ->
+                                        _iter@2_1 = _next@9_0,
+                                        fizzbuzz(_n@8_0)
+                                end,
+                                _$patina_loop(_iter@2_1)
+                        end
+                end(_iter@2_0),
+    {}.

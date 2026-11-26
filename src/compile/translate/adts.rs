@@ -23,7 +23,7 @@ impl<'a, 'tcx: 'arena, 'arena> BodyCx<'a, 'tcx, 'arena> {
             .iter()
             .any(|field| field.ty.is_privately_uninhabited(self.tcx(), self.typing_env))
         {
-            // An uninhibited variant (such as when matching `Option<!>`) can never match,
+            // An uninhabited variant (such as when matching `Option<!>`) can never match,
             // so it's cleaner to never emit a match clause for it.
             for field in &adt.fields {
                 self.translate_pattern(field.pattern);

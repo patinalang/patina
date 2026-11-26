@@ -109,80 +109,74 @@ main() ->
                     end,
     _contacts@0_3 = _contacts@0_2#{<<"Laura"/utf8>> =>
                                        <<"132-8372"/utf8>>},
-    case begin
-             _self@20_0 = _contacts@0_3,
-             _self@21_0 = _self@20_0,
-             _0@22_0 = maps:iterator(_self@21_0),
-             _0@22_0
-         end
-        of
-        _iter@23_0 ->
-            _iter@23_1 = fun _$patina_loop(_iter@23_0) ->
-                                 case [] of
-                                     {'$patina_label_0', _iter@23_2} ->
-                                         _iter@23_2;
-                                     _ ->
-                                         case begin
-                                                  _self@24_0 = _iter@23_0,
-                                                  case maps:next(_self@24_0) of
-                                                      {_key@25_0,
-                                                       _value@26_0,
-                                                       _rest@27_0} ->
-                                                          _entry@30_0 = begin
-                                                                            _element@28_0 =
-                                                                                _key@25_0,
-                                                                            _element@29_0 =
-                                                                                _value@26_0,
-                                                                            {_element@28_0,
-                                                                             _element@29_0}
-                                                                        end,
-                                                          _0@32_0 = begin
-                                                                        _element@31_0 =
-                                                                            _rest@27_0,
-                                                                        {_entry@30_0,
-                                                                         _element@31_0}
-                                                                    end,
-                                                          _0@32_0;
-                                                      _ -> nil
-                                                  end
-                                              end
-                                             of
-                                             nil ->
-                                                 _branch_value@40_0 = begin
-                                                                          '$patina_marker':jump('$patina_label_0',
-                                                                                                _iter@23_0),
-                                                                          []
-                                                                      end,
-                                                 _iter@23_1 = _iter@23_0,
-                                                 _branch_value@40_0;
-                                             _value@36_0 = {{_contact@33_0,
-                                                             _number@34_0},
-                                                            _next@35_0}
-                                                 when
-                                                   erlang:is_tuple(_value@36_0)
-                                                       andalso
-                                                       erlang:tuple_size(_value@36_0)
-                                                           =:= 2 ->
-                                                 _iter@23_1 = _next@35_0,
-                                                 io:put_chars(begin
-                                                                  _element@39_0 =
-                                                                      begin
-                                                                          _element@37_0 =
-                                                                              _contact@33_0,
-                                                                          _element@38_0 =
-                                                                              call(_number@34_0),
-                                                                          [<<"Calling "/utf8>>,
-                                                                           _element@37_0,
-                                                                           <<": "/utf8>>,
-                                                                           _element@38_0]
-                                                                      end,
-                                                                  [_element@39_0]
-                                                              end),
-                                                 io:nl(),
-                                                 {}
-                                         end,
-                                         _$patina_loop(_iter@23_1)
-                                 end
-                         end(_iter@23_0),
-            {}
-    end.
+    _iter@23_0 = begin
+                     _self@20_0 = _contacts@0_3,
+                     _self@21_0 = _self@20_0,
+                     _0@22_0 = maps:iterator(_self@21_0),
+                     _0@22_0
+                 end,
+    _iter@23_1 = fun _$patina_loop(_iter@23_0) ->
+                         case [] of
+                             {'$patina_label_0', _iter@23_2} -> _iter@23_2;
+                             _ ->
+                                 case begin
+                                          _self@24_0 = _iter@23_0,
+                                          case maps:next(_self@24_0) of
+                                              {_key@25_0,
+                                               _value@26_0,
+                                               _rest@27_0} ->
+                                                  _entry@30_0 = begin
+                                                                    _element@28_0 =
+                                                                        _key@25_0,
+                                                                    _element@29_0 =
+                                                                        _value@26_0,
+                                                                    {_element@28_0,
+                                                                     _element@29_0}
+                                                                end,
+                                                  _0@32_0 = begin
+                                                                _element@31_0 =
+                                                                    _rest@27_0,
+                                                                {_entry@30_0,
+                                                                 _element@31_0}
+                                                            end,
+                                                  _0@32_0;
+                                              _ -> nil
+                                          end
+                                      end
+                                     of
+                                     nil ->
+                                         _branch_value@40_0 = begin
+                                                                  '$patina_marker':jump('$patina_label_0',
+                                                                                        _iter@23_0),
+                                                                  []
+                                                              end,
+                                         _iter@23_1 = _iter@23_0,
+                                         _branch_value@40_0;
+                                     _value@36_0 = {{_contact@33_0,
+                                                     _number@34_0},
+                                                    _next@35_0}
+                                         when erlang:is_tuple(_value@36_0)
+                                                  andalso
+                                                  erlang:tuple_size(_value@36_0)
+                                                      =:= 2 ->
+                                         _iter@23_1 = _next@35_0,
+                                         io:put_chars(begin
+                                                          _element@39_0 = begin
+                                                                              _element@37_0 =
+                                                                                  _contact@33_0,
+                                                                              _element@38_0 =
+                                                                                  call(_number@34_0),
+                                                                              [<<"Calling "/utf8>>,
+                                                                               _element@37_0,
+                                                                               <<": "/utf8>>,
+                                                                               _element@38_0]
+                                                                          end,
+                                                          [_element@39_0]
+                                                      end),
+                                         io:nl(),
+                                         {}
+                                 end,
+                                 _$patina_loop(_iter@23_1)
+                         end
+                 end(_iter@23_0),
+    {}.

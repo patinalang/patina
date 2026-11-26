@@ -1,4 +1,4 @@
--file("tests/ui/src/types/never_patterns.pt", 3).
+-file("tests/ui/src/types/never_patterns.pt", 1).
 
 -module('Elixir.Patina.NeverPatterns.E').
 

@@ -1,5 +1,3 @@
-// Arms and or-pattern alternatives that can't match any value are dropped.
-
 enum E { A(!, int), B(int), C, }
 
 pub fn option_none_first() -> int {

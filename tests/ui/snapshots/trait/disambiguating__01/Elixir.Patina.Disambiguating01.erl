@@ -34,54 +34,51 @@ main() ->
     _username@3_0 =
         'Elixir.Patina.Disambiguating01.Form':'disambiguating__01::UsernameWidget::get'(_witness_UsernameWidget@0_0,
                                                                                         _form@2_0),
-    case {<<"rustacean"/utf8>>, _username@3_0} of
-        {_left_val@4_0, _right_val@5_0} ->
-            case not (_left_val@4_0 =:= _right_val@5_0) of
-                true ->
-                    erlang:error('Elixir.Patina.Core.Panic':new(unicode:characters_to_binary(begin
-                                                                                                 _element@6_0 =
-                                                                                                     io_lib:format("~ktp",
-                                                                                                                   [_left_val@4_0]),
-                                                                                                 _element@7_0 =
-                                                                                                     io_lib:format("~ktp",
-                                                                                                                   [_right_val@5_0]),
-                                                                                                 [<<"assertion `left == right` failed"/utf8>>,
-                                                                                                  <<""/utf8>>,
-                                                                                                  <<"\n  left: "/utf8>>,
-                                                                                                  _element@6_0,
-                                                                                                  <<"\n right: "/utf8>>,
-                                                                                                  _element@7_0]
-                                                                                             end)),
-                                 none,
-                                 [{error_info,
-                                   #{module => 'Elixir.Patina.Core.Panic'}}]);
-                _ -> {}
-            end
+    {_left_val@4_0, _right_val@5_0} = {<<"rustacean"/utf8>>,
+                                       _username@3_0},
+    case not (_left_val@4_0 =:= _right_val@5_0) of
+        true ->
+            erlang:error('Elixir.Patina.Core.Panic':new(unicode:characters_to_binary(begin
+                                                                                         _element@6_0 =
+                                                                                             io_lib:format("~ktp",
+                                                                                                           [_left_val@4_0]),
+                                                                                         _element@7_0 =
+                                                                                             io_lib:format("~ktp",
+                                                                                                           [_right_val@5_0]),
+                                                                                         [<<"assertion `left == right` failed"/utf8>>,
+                                                                                          <<""/utf8>>,
+                                                                                          <<"\n  left: "/utf8>>,
+                                                                                          _element@6_0,
+                                                                                          <<"\n right: "/utf8>>,
+                                                                                          _element@7_0]
+                                                                                     end)),
+                         none,
+                         [{error_info,
+                           #{module => 'Elixir.Patina.Core.Panic'}}]);
+        _ -> {}
     end,
     _age@8_0 =
         'Elixir.Patina.Disambiguating01.Form':'disambiguating__01::AgeWidget::get'(_witness_AgeWidget@1_0,
                                                                                    _form@2_0),
-    case {28, _age@8_0} of
-        {_left_val@9_0, _right_val@10_0} ->
-            case not (_left_val@9_0 =:= _right_val@10_0) of
-                true ->
-                    erlang:error('Elixir.Patina.Core.Panic':new(unicode:characters_to_binary(begin
-                                                                                                 _element@11_0 =
-                                                                                                     io_lib:format("~ktp",
-                                                                                                                   [_left_val@9_0]),
-                                                                                                 _element@12_0 =
-                                                                                                     io_lib:format("~ktp",
-                                                                                                                   [_right_val@10_0]),
-                                                                                                 [<<"assertion `left == right` failed"/utf8>>,
-                                                                                                  <<""/utf8>>,
-                                                                                                  <<"\n  left: "/utf8>>,
-                                                                                                  _element@11_0,
-                                                                                                  <<"\n right: "/utf8>>,
-                                                                                                  _element@12_0]
-                                                                                             end)),
-                                 none,
-                                 [{error_info,
-                                   #{module => 'Elixir.Patina.Core.Panic'}}]);
-                _ -> {}
-            end
+    {_left_val@9_0, _right_val@10_0} = {28, _age@8_0},
+    case not (_left_val@9_0 =:= _right_val@10_0) of
+        true ->
+            erlang:error('Elixir.Patina.Core.Panic':new(unicode:characters_to_binary(begin
+                                                                                         _element@11_0 =
+                                                                                             io_lib:format("~ktp",
+                                                                                                           [_left_val@9_0]),
+                                                                                         _element@12_0 =
+                                                                                             io_lib:format("~ktp",
+                                                                                                           [_right_val@10_0]),
+                                                                                         [<<"assertion `left == right` failed"/utf8>>,
+                                                                                          <<""/utf8>>,
+                                                                                          <<"\n  left: "/utf8>>,
+                                                                                          _element@11_0,
+                                                                                          <<"\n right: "/utf8>>,
+                                                                                          _element@12_0]
+                                                                                     end)),
+                         none,
+                         [{error_info,
+                           #{module => 'Elixir.Patina.Core.Panic'}}]);
+        _ -> {}
     end.

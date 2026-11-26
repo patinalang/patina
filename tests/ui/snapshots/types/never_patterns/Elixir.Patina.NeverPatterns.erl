@@ -1,4 +1,4 @@
--file("tests/ui/src/types/never_patterns.pt", 3).
+-file("tests/ui/src/types/never_patterns.pt", 1).
 
 -module('Elixir.Patina.NeverPatterns').
 
@@ -33,11 +33,13 @@
 
 option_none_first() ->
     _o@0_0 = nil,
-    case _o@0_0 of nil -> 1 end.
+    nil = _o@0_0,
+    1.
 
 option_some_first() ->
     _o@0_0 = nil,
-    case _o@0_0 of nil -> 1 end.
+    nil = _o@0_0,
+    1.
 
 e_value(_e@0_0) ->
     case [] of
@@ -73,7 +75,8 @@ is_some(_o@0_0) ->
 inlined_none() ->
     _o@0_0 = nil,
     _o@1_0 = _o@0_0,
-    case _o@1_0 of nil -> false end.
+    nil = _o@1_0,
+    false.
 
 generic_some(_n@0_0) ->
     _o@1_0 = _n@0_0,

@@ -58,7 +58,9 @@ nested_lookup(_map@0_0) ->
         _ -> -1
     end.
 
-is_map(_map@0_0) -> case _map@0_0 of #{} -> true end.
+is_map(_map@0_0) ->
+    #{} = _map@0_0,
+    true.
 
 lookup_constant_key(_map@0_0) ->
     case _map@0_0 of

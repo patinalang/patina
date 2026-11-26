@@ -11,8 +11,6 @@ extern pkg core;
 #[attr = PreludeImport]
 use core::prelude::*;
 
-// Arms and or-pattern alternatives that can't match any value are dropped.
-
 enum E { A(!, int), B(int), C, }
 
 fn option_none_first()

@@ -491,7 +491,9 @@ literal_or_point(_value@0_0) ->
     end.
 
 raw_constructor(_value@0_0) ->
-    case _value@0_0 of _inner@1_0 -> _inner@1_0 end.
+    _inner@1_0 = _value@0_0,
+    _inner@1_0.
 
 qualified_constructor(_value@0_0) ->
-    case _value@0_0 of _inner@1_0 -> _inner@1_0 end.
+    _inner@1_0 = _value@0_0,
+    _inner@1_0.

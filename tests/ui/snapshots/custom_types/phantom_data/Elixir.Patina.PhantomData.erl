@@ -74,7 +74,8 @@ typed_binding(_value@0_0) ->
     id('Elixir.Patina.Core.PhantomData').
 
 typed_constant_pattern(_value@0_0) ->
-    case _value@0_0 of _n@1_0 -> _n@1_0 end.
+    _n@1_0 = _value@0_0,
+    _n@1_0.
 
 typed_or_pattern(_value@0_0) ->
     case [] of
@@ -226,10 +227,9 @@ pair(_a@0_0, _b@1_0) ->
      _b@1_0}.
 
 pair_second(_value@0_0) ->
-    case _value@0_0 of
-        {'Elixir.Patina.PhantomData.Shape.Pair', _, _b@1_0} ->
-            _b@1_0
-    end.
+    {'Elixir.Patina.PhantomData.Shape.Pair', _, _b@1_0} =
+        _value@0_0,
+    _b@1_0.
 
 tagged_pair(_a@0_0, _b@1_0) ->
     {'Elixir.Patina.PhantomData.TaggedPair',
