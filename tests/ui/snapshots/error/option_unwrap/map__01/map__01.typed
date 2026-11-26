@@ -61,8 +61,8 @@ fn cook(chopped: Option<Chopped>)
             ((Cooked as fn(Food) -> Cooked {Cooked})((food as Food)) as
                 Cooked) as
             {closure@tests/ui/src/error/option_unwrap/map__01.pt:32:17: 32:32}))
-        as {type error})
-} as {type error})
+        as core::option::Option<Cooked>)
+} as core::option::Option<Cooked>)
 
 // A function to peel, chop, and cook food all in sequence.
 // We chain multiple uses of `map()` to simplify the code.
@@ -75,17 +75,17 @@ fn process(food: Option<Food>)
                         Peeled) as
                     {closure@tests/ui/src/error/option_unwrap/map__01.pt:38:14: 38:17}))
                 as
-                {type error}).map((|Peeled(f)|
+                core::option::Option<Peeled>).map((|Peeled(f)|
                 ((Chopped as fn(Food) -> Chopped {Chopped})((f as Food)) as
                     Chopped) as
                 {closure@tests/ui/src/error/option_unwrap/map__01.pt:39:14: 39:25}))
             as
-            {type error}).map((|Chopped(f)|
+            core::option::Option<Chopped>).map((|Chopped(f)|
             ((Cooked as fn(Food) -> Cooked {Cooked})((f as Food)) as Cooked)
             as
             {closure@tests/ui/src/error/option_unwrap/map__01.pt:40:14: 40:26}))
-        as {type error})
-} as {type error})
+        as core::option::Option<Cooked>)
+} as core::option::Option<Cooked>)
 
 // Check whether there's food or not before trying to eat it!
 fn eat(food:

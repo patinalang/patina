@@ -55,15 +55,16 @@ fn main() ({
                     as
                     {closure@tests/ui/src/error/option_unwrap/defaults__02.pt:9:32: 9:34}))
                 as
-                {type error}).or_else((get_lemon_as_fallback as
+                core::option::Option<Fruit>).or_else((get_lemon_as_fallback as
                 {closure@tests/ui/src/error/option_unwrap/defaults__02.pt:13:33: 13:35}))
-            as {type error});
+            as core::option::Option<Fruit>);
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("first_available_fruit: " as str),
                             ((::core::patina_fmt::debug as
-                                    fn(term) -> term)((first_available_fruit as {type error}))
-                                as term)] as [term])] as [[term]])) as term);
+                                    fn(term) -> term)((first_available_fruit as
+                                    core::option::Option<Fruit>)) as term)] as [term])] as
+                [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

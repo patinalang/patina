@@ -70,8 +70,8 @@ fn cookable_v3(food: Food)
                 Food)) as
             core::option::Option<Food>).and_then((have_ingredients as
             fn(Food) -> core::option::Option<Food> {have_ingredients})) as
-        {type error})
-} as {type error})
+        core::option::Option<Food>)
+} as core::option::Option<Food>)
 
 // Otherwise we'd need to `flatten()` an `Option<Option<Food>>`
 // to get an `Option<Food>`:
@@ -83,8 +83,9 @@ fn cookable_v2(food: Food)
                     as Food)) as
                 core::option::Option<Food>).map((have_ingredients as
                 fn(Food) -> core::option::Option<Food> {have_ingredients})) as
-            {type error}).flatten() as {type error})
-} as {type error})
+            core::option::Option<core::option::Option<Food>>).flatten() as
+        core::option::Option<Food>)
+} as core::option::Option<Food>)
 
 fn eat(food: Food,
     day:

@@ -53,9 +53,8 @@ fn give_adult(drink:
 } as ())
 fn drink(drink:
         Option<str>) ({
-    let inside =
-        ((drink as core::option::Option<str>).unwrap() as {type error});
-    (if ((inside as {type error}) == ("lemonade" as str) as bool) {
+    let inside = ((drink as core::option::Option<str>).unwrap() as str);
+    (if ((inside as str) == ("lemonade" as str) as bool) {
         (unsafe {
             (((::core::erlang::error as
                         fn(term, term, term) -> term)(((::core::Panic::new as
@@ -66,13 +65,13 @@ fn drink(drink:
                                         (a"Elixir.Patina.Core.Panic" as atom)} as #{atom => atom}))
                                 as (atom, #{atom => atom}))] as [(atom, #{atom => atom})]))
                     as term).cast_unchecked::<!>() as !)
-        } as {type error});
+        } as !);
     } as ())
     ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("I love " as str),
                             ((::core::patina_fmt::display as
-                                    fn(term) -> term)((inside as {type error})) as term),
+                                    fn(term) -> term)((inside as str)) as term),
                             ("s!!!!!" as str)] as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());

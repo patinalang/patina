@@ -16,6 +16,41 @@
 #![no_core]
 #![rustc_coherence_is_core]
 
+#[macro_export]
+macro_rules! panic {
+    () => { $pkg::panic!(@raise "explicit panic") };
+    ($msg:literal) => { $pkg::panic!(@raise $msg) };
+    (@raise $msg:expr) => {
+        unsafe {
+            $pkg::erlang::error(
+                $pkg::Panic::new($msg),
+                a"none",
+                [(a"error_info", #{a"module" => a"Elixir.Patina.Core.Panic"})],
+            )
+            .cast_unchecked::<!>()
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! todo {
+    () => { $pkg::panic!(@raise "not yet implemented") };
+    ($msg:literal) => { $pkg::panic!(@raise $pkg::concat!("not yet implemented: ", $msg)) };
+}
+
+#[macro_export]
+#[rustc_diagnostic_item = "matches_macro"]
+#[allow_internal_unstable(non_exhaustive_omitted_patterns_lint, stmt_expr_attributes)]
+macro_rules! matches {
+    ($expression:expr, $pattern:pat $(if $guard:expr)? $(,)?) => {
+        #[allow(non_exhaustive_omitted_patterns)]
+        match $expression {
+            $pattern $(if $guard)? => true,
+            _ => false
+        }
+    };
+}
+
 use option::Option::{self, None, Some};
 
 pub mod convert;
@@ -114,28 +149,6 @@ impl Panic {
     pub fn format_error(reason: Panic, _stacktrace: term) -> #{atom => str} {
         #{a"reason" => "panic: " + reason.message()}
     }
-}
-
-#[macro_export]
-macro_rules! panic {
-    () => { $pkg::panic!(@raise "explicit panic") };
-    ($msg:literal) => { $pkg::panic!(@raise $msg) };
-    (@raise $msg:expr) => {
-        unsafe {
-            $pkg::erlang::error(
-                $pkg::Panic::new($msg),
-                a"none",
-                [(a"error_info", #{a"module" => a"Elixir.Patina.Core.Panic"})],
-            )
-            .cast_unchecked::<!>()
-        }
-    };
-}
-
-#[macro_export]
-macro_rules! todo {
-    () => { $pkg::panic!(@raise "not yet implemented") };
-    ($msg:literal) => { $pkg::panic!(@raise $pkg::concat!("not yet implemented: ", $msg)) };
 }
 
 #[lang = "pointee_sized"]

@@ -31,8 +31,8 @@ fn main() ({
         (((no_fruit as
                     core::option::Option<Fruit>).or((orange as
                     core::option::Option<Fruit>)) as
-                {type error}).or((apple as core::option::Option<Fruit>)) as
-            {type error});
+                core::option::Option<Fruit>).or((apple as
+                core::option::Option<Fruit>)) as core::option::Option<Fruit>);
     // first_available_fruit: Some(Orange)
 
     // `or` moves its argument.
@@ -44,8 +44,9 @@ fn main() ({
         ((::core::io::put_chars as
                 fn(term) -> term)(([([("first_available_fruit: " as str),
                             ((::core::patina_fmt::debug as
-                                    fn(term) -> term)((first_available_fruit as {type error}))
-                                as term)] as [term])] as [[term]])) as term);
+                                    fn(term) -> term)((first_available_fruit as
+                                    core::option::Option<Fruit>)) as term)] as [term])] as
+                [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
 } as ())

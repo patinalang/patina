@@ -1,9 +1,0 @@
-error[E0599]: no method named `unwrap` found for enum `core::option::Option<T>` in the current scope
-  --> tests/ui/src/error/option_unwrap__01.pt:19:24
-   |
-LL |     let inside = drink.unwrap();
-   |                        ^^^^^^ method not found in `core::option::Option<str>`
-
-error: aborting due to 1 previous error
-
-For more information about this error, try `rustc --explain E0599`.

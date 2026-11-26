@@ -4,12 +4,5 @@ error: cannot find derive macro `Debug` in this scope
 LL | #[derive(Debug)]
    |          ^^^^^
 
-error[E0599]: no method named `or` found for enum `core::option::Option<T>` in the current scope
-  --> tests/ui/src/error/option_unwrap/defaults__01.pt:12:42
-   |
-LL |     let first_available_fruit = no_fruit.or(orange).or(apple);
-   |                                          ^^ method not found in `core::option::Option<Fruit>`
+error: aborting due to 1 previous error
 
-error: aborting due to 2 previous errors
-
-For more information about this error, try `rustc --explain E0599`.

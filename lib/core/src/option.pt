@@ -1,4 +1,5 @@
 use Option::{None, Some};
+use pkg::result::Result::{self, Err, Ok};
 use pkg::{ControlFlow, FromResidual, NativeEq, PartialEq, Try};
 
 #[lang = "Option"]
@@ -10,6 +11,92 @@ pub enum Option<T> {
     #[lang = "Some"]
     #[repr(dynamic_wrap, tag = "some")]
     Some(T),
+}
+
+impl<T> Option<T> {
+    #[inline]
+    pub fn or(self, optb: Option<T>) -> Option<T> {
+        match self {
+            Some(_) => self,
+            None => optb,
+        }
+    }
+
+    #[inline]
+    pub fn or_else(self, optb: fn() -> Option<T>) -> Option<T> {
+        match self {
+            Some(_) => self,
+            None => optb(),
+        }
+    }
+
+    #[inline]
+    pub fn unwrap(self) -> T {
+        match self {
+            Some(v) => v,
+            None => panic!("called `Option::unwrap()` on a `None` value"),
+        }
+    }
+
+    #[inline]
+    pub fn unwrap_or(self, default: T) -> T {
+        match self {
+            Some(v) => v,
+            None => default,
+        }
+    }
+
+    #[inline]
+    pub fn unwrap_or_else(self, default: fn() -> T) -> T {
+        match self {
+            Some(v) => v,
+            None => default(),
+        }
+    }
+
+    #[inline]
+    pub fn map<U>(self, f: fn(T) -> U) -> Option<U> {
+        match self {
+            Some(v) => Some(f(v)),
+            None => None,
+        }
+    }
+
+    #[inline]
+    pub fn and_then<U>(self, f: fn(T) -> Option<U>) -> Option<U> {
+        match self {
+            Some(v) => f(v),
+            None => None,
+        }
+    }
+
+    #[inline]
+    pub fn ok_or<E>(self, err: E) -> Result<T, E> {
+        match self {
+            Some(v) => Ok(v),
+            None => Err(err),
+        }
+    }
+
+    #[inline]
+    pub fn is_some(self) -> bool {
+        matches!(self, Some(_))
+    }
+
+    #[inline]
+    pub fn is_none(self) -> bool {
+        !self.is_some()
+    }
+}
+
+impl<T> Option<Option<T>> {
+    #[inline]
+    pub fn flatten(self) -> Option<T> {
+        match self {
+            Some(v) => v,
+            None => None,
+        }
+    }
 }
 
 impl<T: PartialEq> PartialEq for Option<T> {
