@@ -20,8 +20,8 @@ fn get_count_item(s: str)
     ->
         (int,
         str) ({
-    let it = ((s as str).split((' ' as char)) as {type error});
-    let (it, first) = ((it as {type error}).next() as {type error});
+    let it = ((s as str).split((' ' as char)) as [str]);
+    let (it, first) = ((it as [str]).next() as {type error});
     let (it, second) = ((it as {type error}).next() as {type error});
 
     let (Some(count_str), Some(item)) =

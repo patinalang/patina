@@ -92,6 +92,12 @@ impl<T> [T] {
     pub fn concat(self, other: [T]) -> [T] {
         unsafe { lists::append(self, other).cast_unchecked() }
     }
+
+    /// Eagerly maps this list into another.
+    #[must_use]
+    pub fn map<U>(self, mapper: fn(T) -> U) -> [U] {
+        unsafe { lists::map(mapper, self).cast_unchecked() }
+    }
 }
 
 impl<T> Iterator for ListIter<T> {

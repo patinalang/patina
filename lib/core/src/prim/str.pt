@@ -1,0 +1,204 @@
+use pkg::convert::Into;
+use pkg::option::Option::{self, None, Some};
+use pkg::pattern::{Pattern, Replacement};
+use pkg::{IntoIterator, Iterator, Range, StrIter, erlang};
+
+extern mod binary;
+
+impl str {
+    /// Returns a lazy iterator over the characters of the string.
+    #[inline]
+    #[must_use]
+    pub fn iter(self) -> StrIter {
+        StrIter(self)
+    }
+
+    /// Returns the byte size of the string.
+    /// Allowed in guards.
+    #[rustc_intrinsic]
+    pub fn len(self) -> int;
+
+    /// Returns the byte range of the first match of `pattern` in `self`.
+    #[inline]
+    pub fn find<P: Into<Pattern>>(self, pattern: P) -> Option<Range<int>> {
+        let pattern: Pattern = pattern.into();
+        match binary::`match`(self, pattern) {
+            (int(pos), int(len)) => Some(Range{ start: pos, end: pos + len }),
+            _ => None,
+        }
+    }
+
+    /// As [`self.find`], but scopes the search to the given `scope`.
+    /// The `scope` is a range over byte offsets.
+    /// It's clamped to the `self`'s byte range before matching.
+    #[inline]
+    pub fn find_in<P: Into<Pattern>>(self, pattern: P, scope: Range<int>) -> Option<Range<int>> {
+        let pattern: Pattern = pattern.into();
+        match binary::`match`(self, pattern, [self.scope_opt(scope)]) {
+            (int(pos), int(len)) => Some(Range{ start: pos, end: pos + len }),
+            _ => None,
+        }
+    }
+
+    /// Returns the byte ranges of all matches of `pattern` in `self`.
+    #[inline]
+    pub fn matches<P: Into<Pattern>>(self, pattern: P) -> [Range<int>] {
+        let pattern: Pattern = pattern.into();
+        let matches = binary::matches(self, pattern);
+        unsafe { matches.cast_unchecked::<[(int, int)]>() }
+            .map(|(pos, len)| Range{ start: pos, end: pos + len })
+    }
+
+    /// As [`self.matches`], but scopes the search to the given `scope`.
+    /// The `scope` is a range over byte offsets.
+    /// It's clamped to the `self`'s byte range before matching.
+    #[inline]
+    pub fn matches_in<P: Into<Pattern>>(self, pattern: P, scope: Range<int>) -> [Range<int>] {
+        let pattern: Pattern = pattern.into();
+        let matches = binary::matches(self, pattern, [self.scope_opt(scope)]);
+        unsafe { matches.cast_unchecked::<[(int, int)]>() }
+            .map(|(pos, len)| Range{ start: pos, end: pos + len })
+    }
+
+    #[inline]
+    pub fn replace<P: Into<Pattern>, R: Into<Replacement>>(
+        self,
+        pattern: P,
+        replacement: R
+    ) -> str {
+        let pattern: Pattern = pattern.into();
+        let replacement: Replacement = replacement.into();
+        let r = binary::replace(self, pattern, replacement, [a"global"]);
+        unsafe { r.cast_unchecked() }
+    }
+
+    #[inline]
+    pub fn replace_in<P: Into<Pattern>, R: Into<Replacement>>(
+        self,
+        pattern: P,
+        replacement: R,
+        scope: Range<int>
+    ) -> str {
+        let pattern: Pattern = pattern.into();
+        let replacement: Replacement = replacement.into();
+        let r = binary::replace(
+            self,
+            pattern,
+            replacement,
+            [a"global" as term, self.scope_opt(scope)]);
+
+        unsafe { r.cast_unchecked() }
+    }
+
+    #[inline]
+    pub fn replace_once<P: Into<Pattern>, R: Into<Replacement>>(
+        self,
+        pattern: P,
+        replacement: R
+    ) -> str {
+        let pattern: Pattern = pattern.into();
+        let replacement: Replacement = replacement.into();
+        let r = binary::replace(self, pattern, replacement);
+        unsafe { r.cast_unchecked() }
+    }
+
+    #[inline]
+    pub fn replace_once_in<P: Into<Pattern>, R: Into<Replacement>>(
+        self,
+        pattern: P,
+        replacement: R,
+        scope: Range<int>
+    ) -> str {
+        let pattern: Pattern = pattern.into();
+        let replacement: Replacement = replacement.into();
+        let r = binary::replace(self, pattern, replacement, [self.scope_opt(scope)]);
+        unsafe { r.cast_unchecked() }
+    }
+
+    #[inline]
+    pub fn split<P: Into<Pattern>>(self, pattern: P) -> [str] {
+        let pattern: Pattern = pattern.into();
+        let r = binary::split(self, pattern, [a"global"]);
+        unsafe { r.cast_unchecked() }
+    }
+
+    #[inline]
+    pub fn split_in<P: Into<Pattern>>(self, pattern: P, scope: Range<int>) -> [str] {
+        let pattern: Pattern = pattern.into();
+        let r = binary::split(self, pattern, [a"global" as term, self.scope_opt(scope)]);
+        unsafe { r.cast_unchecked() }
+    }
+
+    #[inline]
+    pub fn split_trim<P: Into<Pattern>>(self, pattern: P) -> [str] {
+        let pattern: Pattern = pattern.into();
+        let r = binary::split(self, pattern, [a"global", a"trim_all"]);
+        unsafe { r.cast_unchecked() }
+    }
+
+    #[inline]
+    pub fn split_trim_in<P: Into<Pattern>>(self, pattern: P, scope: Range<int>) -> [str] {
+        let pattern: Pattern = pattern.into();
+        let r = binary::split(
+            self,
+            pattern,
+            [a"global" as term, a"trim_all" as term, self.scope_opt(scope)]);
+        unsafe { r.cast_unchecked() }
+    }
+
+    #[inline]
+    pub fn split_once<P: Into<Pattern>>(self, pattern: P) -> Option<(str, str)> {
+        let pattern: Pattern = pattern.into();
+        match binary::split(self, pattern) {
+            [a, b] => Some(unsafe { (a.cast_unchecked::<str>(), b.cast_unchecked::<str>()) }),
+            _ => None
+        }
+    }
+
+    #[inline]
+    pub fn split_once_in<P: Into<Pattern>>(self, pattern: P, scope: Range<int>) -> Option<(str, str)> {
+        let pattern: Pattern = pattern.into();
+        match binary::split(self, pattern, [self.scope_opt(scope)]) {
+            [a, b] => Some(unsafe { (a.cast_unchecked::<str>(), b.cast_unchecked::<str>()) }),
+            _ => None
+        }
+    }
+
+    #[inline]
+    fn scope_opt(self, scope: Range<int>) -> term {
+        let Range { start, end } = scope;
+        let start = match start {
+            _ if start < 0 => 0,
+            _ if start > self.len() => self.len(),
+            _ => start
+        };
+        let end = match end {
+            _ if end < 0 => 0,
+            _ if end > self.len() => self.len(),
+            _ => end
+        };
+        (a"scope", (start, end - start))
+    }
+}
+
+impl Iterator for StrIter {
+    type Item = char;
+
+    #[inline]
+    fn next(self) -> Option<(char, StrIter)> {
+        match self.0 {
+            <<c: char, rest @ ..>> => Some((c, StrIter(rest))),
+            _ => None,
+        }
+    }
+}
+
+impl IntoIterator for str {
+    type Item = char;
+    type IntoIter = StrIter;
+
+    #[inline]
+    fn into_iter(self) -> StrIter {
+        self.iter()
+    }
+}

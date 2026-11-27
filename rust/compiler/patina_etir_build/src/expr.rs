@@ -576,6 +576,13 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
                 };
                 self.cx.push_expr(kind, expr.ty, expr.span)
             }
+            (sym::len, &[value]) => {
+                let kind = etir::ExprKind::Call {
+                    callee: etir::Callee::Direct(sym::erlang, sym::byte_size),
+                    args: Box::new([self.lower_expr(value)]),
+                };
+                self.cx.push_expr(kind, expr.ty, expr.span)
+            }
             _ => not_implemented_kind(tcx, expr.span, "intrinsic", name),
         }
     }

@@ -1,0 +1,77 @@
+
+use pkg::convert::From;
+
+extern mod binary;
+
+#[repr(transparent)]
+pub enum Pattern {
+    Single(str),
+    Many([str]),
+    Compiled{ p: (term, term) },
+}
+
+// todo: tryfrom, because empty pattern fails
+impl From<char> for Pattern {
+    #[inline]
+    fn from(c: char) -> Pattern {
+        Pattern::Single(<<c>>)
+    }
+}
+
+impl From<str> for Pattern {
+    #[inline]
+    fn from(s: str) -> Pattern {
+        Pattern::Single(s)
+    }
+}
+
+impl From<[char]> for Pattern {
+    #[inline]
+    fn from(cs: [char]) -> Pattern {
+        Pattern::Many(cs.map(|c| <<c>>))
+    }
+}
+
+impl From<[str]> for Pattern {
+    #[inline]
+    fn from(strs: [str]) -> Pattern {
+        Pattern::Many(strs)
+    }
+}
+
+#[repr(transparent)]
+pub enum Replacement {
+    Static(str),
+    Dynamic(fn(str) -> str)
+}
+
+impl From<str> for Replacement {
+    #[inline]
+    fn from(s: str) -> Self {
+        Replacement::Static(s)
+    }
+}
+
+impl From<fn(str) -> str> for Replacement {
+    #[inline]
+    fn from(d: fn(str) -> str) -> Self {
+        Replacement::Dynamic(d)
+    }
+}
+
+impl Pattern {
+    #[inline]
+    pub fn compile(self) -> Pattern {
+        match self {
+            Pattern::Single(s) => {
+                let p = binary::compile_pattern(s);
+                Pattern::Compiled{ p: unsafe { p.cast_unchecked() }}
+            }
+            Pattern::Many(s) => {
+                let p = binary::compile_pattern(s);
+                Pattern::Compiled{ p: unsafe { p.cast_unchecked() }}
+            }
+            Pattern::Compiled{ .. } => self,
+        }
+    }
+}

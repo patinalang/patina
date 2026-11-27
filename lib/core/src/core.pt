@@ -55,6 +55,7 @@ use option::Option::{self, None, Some};
 
 pub mod convert;
 pub mod option;
+pub mod pattern;
 mod prim;
 pub mod proc_macro;
 pub mod result;
@@ -656,6 +657,9 @@ pub struct ListIter<T>([T]);
 
 #[repr(transparent)]
 pub struct MapIter<K, V>(term, PhantomData<(K, V)>);
+
+#[repr(transparent)]
+pub struct StrIter(str);
 
 impl Iterator for Range<int> {
     type Item = int;

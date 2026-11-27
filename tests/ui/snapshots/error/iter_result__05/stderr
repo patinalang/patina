@@ -2,7 +2,10 @@ error[E0599]: no method named `map` found for struct `core::ListIter<T>` in the 
   --> tests/ui/src/error/iter_result__05.pt:8:10
    |
 LL |       let (numbers, errors): ([_], [_]) = strings
-   |  _________________________________________-
+   |                                           -------
+   |                                           |
+   |  _________________________________________method `map` is available on `[str]`
+   | |
 LL | |         .into_iter()
 LL | |         .map(|s| s.parse::<int>())
    | |         -^^^ method not found in `core::ListIter<str>`
@@ -13,7 +16,9 @@ error[E0599]: no method named `map` found for struct `core::ListIter<T>` in the 
   --> tests/ui/src/error/iter_result__05.pt:10:44
    |
 LL |     let numbers: [_] = numbers.into_iter().map(Result::unwrap).collect();
-   |                                            ^^^ method not found in `core::ListIter<_>`
+   |                        -------             ^^^ method not found in `core::ListIter<_>`
+   |                        |
+   |                        method `map` is available on `[_]`
 
 error[E0599]: no variant, associated function, or constant named `unwrap` found for enum `core::result::Result<T, E>` in the current scope
   --> tests/ui/src/error/iter_result__05.pt:10:56
@@ -31,7 +36,9 @@ error[E0599]: no method named `map` found for struct `core::ListIter<T>` in the 
   --> tests/ui/src/error/iter_result__05.pt:11:42
    |
 LL |     let errors: [_] = errors.into_iter().map(Result::unwrap_err).collect();
-   |                                          ^^^ method not found in `core::ListIter<_>`
+   |                       ------             ^^^ method not found in `core::ListIter<_>`
+   |                       |
+   |                       method `map` is available on `[_]`
 
 error[E0599]: no variant, associated function, or constant named `unwrap_err` found for enum `core::result::Result<T, E>` in the current scope
   --> tests/ui/src/error/iter_result__05.pt:11:54

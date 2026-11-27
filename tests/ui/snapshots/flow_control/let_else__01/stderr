@@ -4,11 +4,17 @@ error[E0432]: unresolved import `str`
 LL | use str::FromStr;
    |     ^^^ `str` is a builtin type, not a module
 
-error[E0599]: no method named `split` found for type `str` in the current scope
-  --> tests/ui/src/flow_control/let_else__01.pt:7:16
+error[E0599]: no method named `next` found for slice `[str]` in the current scope
+  --> tests/ui/src/flow_control/let_else__01.pt:8:26
    |
-LL |     let it = s.split(' ');
-   |                ^^^^^ method not found in `str`
+LL |     let (it, first) = it.next();
+   |                          ^^^^
+   |
+help: there is a method `ne` with a similar name, but with different arguments
+  --> $PATINA_ROOT/patina_core/src/core.pt:466:5
+   |
+LL |     fn ne(self, other: Rhs) -> bool {
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error[E0599]: no associated function or constant named `from_str` found for type `int` in the current scope
   --> tests/ui/src/flow_control/let_else__01.pt:14:26
