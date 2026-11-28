@@ -1,7 +1,7 @@
 use pkg::convert::Into;
 use pkg::option::Option::{self, None, Some};
 use pkg::pattern::{Pattern, Replacement};
-use pkg::{IntoIterator, Iterator, Range, StrIter, erlang};
+use pkg::{IntoIterator, Iterator, Range, StrIter};
 
 extern mod binary;
 

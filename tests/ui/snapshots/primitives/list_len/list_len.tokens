@@ -1,0 +1,73 @@
+Ident
+Whitespace
+Ident
+Whitespace
+Ident
+OpenParen
+CloseParen
+Whitespace
+OpenBrace
+Whitespace
+Ident
+Whitespace
+Ident
+Colon
+Whitespace
+OpenBracket
+Ident
+CloseBracket
+Whitespace
+Eq
+Whitespace
+OpenBracket
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Comma
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Comma
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+CloseBracket
+Semi
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 4 }
+Comma
+Whitespace
+Ident
+Dot
+Ident
+OpenParen
+CloseParen
+CloseParen
+Semi
+Whitespace
+Ident
+Bang
+OpenParen
+Literal { kind: Str { terminated: true }, suffix_start: 4 }
+Comma
+Whitespace
+Lt
+OpenBracket
+Ident
+CloseBracket
+Gt
+Colon
+Colon
+Ident
+OpenParen
+OpenBracket
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+Comma
+Whitespace
+Literal { kind: Int { base: Decimal, empty_int: false }, suffix_start: 1 }
+CloseBracket
+CloseParen
+CloseParen
+Semi
+Whitespace
+CloseBrace
+Whitespace

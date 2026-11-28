@@ -1,5 +1,5 @@
 use pkg::option::Option::{self, None, Some};
-use pkg::{IntoIterator, Iterator, ListIter, NativeEq, PartialEq, erlang};
+use pkg::{IntoIterator, Iterator, ListIter, NativeEq, PartialEq};
 
 extern mod lists;
 
@@ -12,11 +12,10 @@ impl<T> [T] {
     }
 
     /// Returns the number of elements in the list by walking the whole list.
-    #[inline]
+    /// Allowed in guards.
+    #[rustc_intrinsic]
     #[must_use]
-    pub fn len(self) -> int {
-        unsafe { erlang::length(self).cast_unchecked() }
-    }
+    pub fn count(self) -> int;
 
     /// Returns `true` if the list has no elements.
     #[inline]

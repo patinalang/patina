@@ -1,0 +1,31 @@
+#![allow(internal_features)]
+#![attr = Feature([no_core#0, rustc_attrs#0, decl_macro#0, prelude_import#0])]
+#![attr = NoStd]
+#![attr = NoCore]
+
+#[allow(unused_imports)]
+#[attr = MacroUse {arguments: UseAll}]
+extern pkg core;
+
+#[allow(unused_imports)]
+#[attr = PreludeImport]
+use core::prelude::*;
+
+fn main() ({
+    let xs: [int] = ([(1 as int), (2 as int), (3 as int)] as [int]);
+    ({
+        ((::core::io::put_chars as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
+                                    fn(term) -> term)(((xs as [int]).len() as {type error})) as
+                                term)] as [term])] as [[term]])) as term);
+        ((::core::io::nl as fn() -> term)() as term);
+    } as ());
+    ({
+        ((::core::io::put_chars as
+                fn(term) -> term)(([([((::core::patina_fmt::display as
+                                    fn(term) -> term)(((<[int]>::len as
+                                        {type error})(([(1 as int), (2 as int)] as [int])) as
+                                    {type error})) as term)] as [term])] as [[term]])) as term);
+        ((::core::io::nl as fn() -> term)() as term);
+    } as ());
+} as ())

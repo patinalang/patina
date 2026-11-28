@@ -23,8 +23,9 @@ pub fn main() {
     // as an `Option`.
     match xs.get(0) {
         Some(xval) =>
-            // `len` returns the count of elements in the list.
-            // Internally, it does that by traversing the list and counting all elements.
+            // `count` returns the count of elements in the list.
+            // Internally, it does that by traversing the list and counting all elements,
+            // and this behaviour is why it has a different name than the usual `len()`.
 
             // The head and tail of a list can be retrieved with `head` and `tail`
             // `head` is an `Option`, and is None for empty lists; `tail` always succeeds.
@@ -46,7 +47,7 @@ pub fn main() {
     }
     {
         ::core::io::put_chars([["Number of elements in array: ",
-                            ::core::patina_fmt::display(xs.len())]]);
+                            ::core::patina_fmt::display(xs.count())]]);
         ::core::io::nl();
     };
     {

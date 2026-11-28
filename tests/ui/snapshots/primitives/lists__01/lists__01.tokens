@@ -95,6 +95,8 @@ LineComment { doc_style: None }
 Whitespace
 LineComment { doc_style: None }
 Whitespace
+LineComment { doc_style: None }
+Whitespace
 Ident
 Bang
 OpenParen

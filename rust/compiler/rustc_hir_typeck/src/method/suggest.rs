@@ -1296,6 +1296,9 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             unsatisfied_predicates,
         );
 
+        let suggested_list_count =
+            self.suggest_count_for_list_len(&mut err, rcvr_ty, item_ident, args);
+
         self.suggest_confusable_or_similarly_named_method(
             &mut err,
             item_ident.span,
@@ -1304,7 +1307,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
             mode,
             args,
             unsatisfied_predicates,
-            similar_candidate,
+            if suggested_list_count { None } else { similar_candidate },
         );
 
         self.suggest_method_not_found_because_of_unsatisfied_bounds(
@@ -3636,6 +3639,34 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
                 return;
             }
         }
+    }
+
+    /// Point users of `[T].len()` at `[T].count()`. Methods name differ to indicate semantics.
+    /// Returns `true` if the suggestion was added.
+    fn suggest_count_for_list_len(
+        &self,
+        err: &mut Diag<'_>,
+        rcvr_ty: Ty<'tcx>,
+        item_ident: Ident,
+        args: Option<&'tcx [hir::Expr<'tcx>]>,
+    ) -> bool {
+        if item_ident.name != sym::len || !rcvr_ty.peel_refs().is_slice() {
+            return false;
+        }
+
+        let applicability = if args.is_some_and(|args| args.is_empty()) {
+            Applicability::MachineApplicable
+        } else {
+            Applicability::MaybeIncorrect
+        };
+
+        err.span_suggestion_verbose(
+            item_ident.span,
+            "lists don't store their size; use `count` to walk the list and count its elements",
+            sym::count,
+            applicability,
+        );
+        true
     }
 
     fn suggest_bounds_for_range_to_method(

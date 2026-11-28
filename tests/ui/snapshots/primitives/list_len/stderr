@@ -1,0 +1,27 @@
+error[E0599]: no method named `len` found for slice `[int]` in the current scope
+  --> tests/ui/src/primitives/list_len.pt:3:23
+   |
+LL |     println!("{}", xs.len());
+   |                       ^^^ method not found in `[int]`
+   |
+help: lists don't store their size; use `count` to walk the list and count its elements
+   |
+LL -     println!("{}", xs.len());
+LL +     println!("{}", xs.count());
+   |
+
+error[E0599]: no associated function or constant named `len` found for slice `[int]` in the current scope
+  --> tests/ui/src/primitives/list_len.pt:4:29
+   |
+LL |     println!("{}", <[int]>::len([1, 2]));
+   |                             ^^^ associated function or constant not found in `[int]`
+   |
+help: lists don't store their size; use `count` to walk the list and count its elements
+   |
+LL -     println!("{}", <[int]>::len([1, 2]));
+LL +     println!("{}", <[int]>::count([1, 2]));
+   |
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0599`.

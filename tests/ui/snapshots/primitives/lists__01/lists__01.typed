@@ -24,8 +24,9 @@ fn main() ({
     // as an `Option`.
     (match ((xs as [int]).get((0 as int)) as core::option::Option<int>) {
         Some(xval) =>
-            // `len` returns the count of elements in the list.
-            // Internally, it does that by traversing the list and counting all elements.
+            // `count` returns the count of elements in the list.
+            // Internally, it does that by traversing the list and counting all elements,
+            // and this behaviour is why it has a different name than the usual `len()`.
 
             // The head and tail of a list can be retrieved with `head` and `tail`
             // `head` is an `Option`, and is None for empty lists; `tail` always succeeds.
@@ -55,8 +56,8 @@ fn main() ({
                 fn(term) -> term)(([([("Number of elements in array: " as
                                 str),
                             ((::core::patina_fmt::display as
-                                    fn(term) -> term)(((xs as [int]).len() as int)) as term)] as
-                        [term])] as [[term]])) as term);
+                                    fn(term) -> term)(((xs as [int]).count() as int)) as term)]
+                        as [term])] as [[term]])) as term);
         ((::core::io::nl as fn() -> term)() as term);
     } as ());
     ({

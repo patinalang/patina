@@ -9,7 +9,7 @@ use rustc_middle::middle::region;
 use rustc_middle::mir::{BinOp, UnOp};
 use rustc_middle::span_bug;
 use rustc_middle::thir::{self, AdtExprBase, LocalVarId};
-use rustc_middle::ty::{self, GenericArgsRef, Ty};
+use rustc_middle::ty::{self, GenericArgsRef, Ty, TyKind};
 use rustc_span::{Ident, Span, Symbol, sym};
 
 use super::{ExprBlock, ThirBodyCx, not_implemented, not_implemented_kind};
@@ -576,10 +576,24 @@ impl<'a, 'tcx> ThirBodyCx<'a, 'tcx> {
                 };
                 self.cx.push_expr(kind, expr.ty, expr.span)
             }
-            (sym::len, &[value]) => {
+            (sym::count, &[value]) => {
                 let kind = etir::ExprKind::Call {
-                    callee: etir::Callee::Direct(sym::erlang, sym::byte_size),
+                    callee: etir::Callee::Direct(sym::erlang, sym::length),
                     args: Box::new([self.lower_expr(value)]),
+                };
+                self.cx.push_expr(kind, expr.ty, expr.span)
+            }
+            (sym::len, &[value]) => {
+                let value = self.lower_expr(value);
+                let bif_name = match self.cx.body[value].ty.kind() {
+                    TyKind::Map(_, _) => sym::map_size,
+                    TyKind::Bin | TyKind::Bits | TyKind::Str => sym::byte_size,
+                    kind => not_implemented_kind(tcx, expr.span, "intrinsic len", kind),
+                };
+
+                let kind = etir::ExprKind::Call {
+                    callee: etir::Callee::Direct(sym::erlang, bif_name),
+                    args: Box::new([value]),
                 };
                 self.cx.push_expr(kind, expr.ty, expr.span)
             }
